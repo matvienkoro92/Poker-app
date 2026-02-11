@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Node / tooling
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+logs
+*.log
+log.txt
+

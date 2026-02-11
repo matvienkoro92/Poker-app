@@ -1,0 +1,10 @@
+{
+  "name": "poker21-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Приветственная страница покерного клуба Poker21 для Telegram Mini App.",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
+
