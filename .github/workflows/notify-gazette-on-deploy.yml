@@ -1,0 +1,37 @@
+# После пуша в main ждём деплой, затем вызываем deploy-hook:
+# он подтягивает с сайта версию газеты и первую новость и запускает рассылку подписчикам.
+name: Notify gazette after deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deploy
+        run: sleep 90
+
+      - name: Call deploy-hook (run gazette-notify if new news)
+        env:
+          # Задайте в Settings → Secrets and variables → Actions: CRON_SECRET (обязательно)
+          # Опционально: переменная APP_URL (иначе используется URL ниже)
+          APP_URL: ${{ vars.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          BASE="${APP_URL:-https://poker-app-ebon.vercel.app}"
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET not set in repo secrets — skipping deploy-hook."
+            exit 0
+          fi
+          res=$(curl -s -w "\n%{http_code}" -X POST "${BASE}/api/deploy-hook" \
+            -H "X-Cron-Secret: ${CRON_SECRET}")
+          code=$(echo "$res" | tail -n1)
+          body=$(echo "$res" | sed '$d')
+          echo "$body" | head -c 500
+          echo ""
+          if [ "$code" != "200" ]; then
+            echo "deploy-hook returned HTTP $code"
+            exit 1
+          fi
