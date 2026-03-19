@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-gidrograff-kriak.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=23" />
+    <link rel="stylesheet" href="./styles.css?v=25" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; }
@@ -2493,7 +2493,10 @@
           </div>
           <button type="button" class="visitors-admin-modal__show-btn primary-button" id="visitorsAdminShowListBtn">Посмотреть</button>
           <button type="button" class="visitors-admin-modal__broadcast-btn primary-button" id="visitorsAdminBroadcastBtn">Отправить рассылку</button>
-          <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminShareStatsBtn">Статистика кнопок</button>
+          <div class="visitors-admin-modal__admin-tools-row">
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminShareStatsBtn">Статистика кнопок</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminTrackingLinksBtn">Создать ссылку</button>
+          </div>
           <div class="visitors-admin-modal__list-wrap visitors-admin-modal__list-wrap--hidden" id="visitorsAdminListWrap">
             <div class="visitors-admin-modal__list" id="visitorsAdminList"></div>
           </div>
@@ -2534,6 +2537,68 @@
                 </tr>
               </thead>
               <tbody id="shareStatsAdminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Модалка: уникальные ссылки на главную (только админ) -->
+      <div class="share-stats-admin-modal" id="trackingLinksAdminModal" role="dialog" aria-modal="true" aria-label="Ссылки на главную" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="trackingLinksAdminModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
+          <button type="button" class="share-stats-admin-modal__close" id="trackingLinksAdminModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Ссылки на главную</h2>
+          <p class="share-stats-admin-modal__hint">Ссылка открывает приложение на главной. Учёт переходов по коду <code>ref_</code>. Параметры ниже — для ваших пометок в админке (кампания, источник).</p>
+          <div class="tracking-links-admin__form">
+            <label class="visitors-admin-modal__broadcast-label">
+              <span class="visitors-admin-modal__broadcast-label-text">Название (необязательно)</span>
+              <input type="text" id="trackingLinksLabelInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Например: Stories Instagram" />
+            </label>
+            <label class="visitors-admin-modal__broadcast-label">
+              <span class="visitors-admin-modal__broadcast-label-text">Параметры (JSON-объект)</span>
+              <textarea id="trackingLinksParamsInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder='{"utm_source":"instagram","campaign":"july"}'></textarea>
+            </label>
+            <button type="button" class="visitors-admin-modal__show-btn primary-button" id="trackingLinksCreateBtn">Создать ссылку</button>
+            <p class="tracking-links-admin__create-msg" id="trackingLinksCreateMsg" aria-live="polite"></p>
+            <div class="tracking-links-admin__new-url-wrap tracking-links-admin__new-url-wrap--hidden" id="trackingLinksNewUrlWrap">
+              <p class="tracking-links-admin__new-url-label">Ссылка для Mini App:</p>
+              <div class="tracking-links-admin__new-url-row">
+                <input type="text" id="trackingLinksNewUrlInput" class="visitors-admin-modal__broadcast-input" readonly />
+                <button type="button" class="visitors-admin-modal__show-btn primary-button tracking-links-admin__copy-btn" id="trackingLinksCopyUrlBtn">Копировать</button>
+              </div>
+            </div>
+          </div>
+          <h3 class="tracking-links-admin__list-title">Ваши ссылки</h3>
+          <div class="tracking-links-admin__table-wrap">
+            <table class="share-stats-admin-modal__table tracking-links-admin__table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Переходы</th>
+                  <th>Уник.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="trackingLinksAdminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="share-stats-admin-modal" id="trackingLinksVisitorsModal" role="dialog" aria-modal="true" aria-label="Кто перешёл по ссылке" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="trackingLinksVisitorsModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
+          <button type="button" class="share-stats-admin-modal__close" id="trackingLinksVisitorsModalClose" aria-label="Закрыть">×</button>
+          <button type="button" class="tracking-links-admin__back-btn" id="trackingLinksVisitorsBackBtn">← К списку ссылок</button>
+          <h2 class="share-stats-admin-modal__title" id="trackingLinksVisitorsTitle">Переходы</h2>
+          <div class="tracking-links-admin__table-wrap tracking-links-admin__table-wrap--tall">
+            <table class="share-stats-admin-modal__table">
+              <thead>
+                <tr>
+                  <th>Время (UTC)</th>
+                  <th>Посетитель</th>
+                  <th>Имя / @</th>
+                </tr>
+              </thead>
+              <tbody id="trackingLinksVisitorsTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -3348,7 +3413,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=34"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=38"></script>
+    <script src="./app.js?v=39"></script>
   </body>
 </html>
 
