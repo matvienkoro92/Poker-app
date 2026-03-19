@@ -14506,6 +14506,11 @@ updateVisitorCounter();
     if (!sel) return;
     var d = new Date();
     sel.innerHTML = "";
+    // За всё время для рассылок по уникальным посетителям.
+    var allOpt = document.createElement("option");
+    allOpt.value = "all";
+    allOpt.textContent = "За всё время";
+    sel.appendChild(allOpt);
     for (var i = 0; i < 12; i++) {
       var value = getMonthValue(d);
       var label = MONTH_NAMES[d.getMonth()] + " " + d.getFullYear();
