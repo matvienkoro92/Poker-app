@@ -7295,8 +7295,9 @@ function initStreams() {
 
   // Делаем стартер “смотреть” по комнате без зависимости от click-обработчика,
   // чтобы deep-link работал стабильно.
-  function startStreamsWatchByRoomId(roomId) {
+  function startStreamsWatchByRoomId(roomId, attempt) {
     if (!roomId) return;
+    attempt = attempt || 0;
     if (!watchBtn || !roomInput || !remoteWrap || !remoteVideo) return;
     if (streamsWatchPeer) return;
 
@@ -7305,6 +7306,12 @@ function initStreams() {
 
     var PeerJs = typeof Peer !== "undefined" ? Peer : null;
     if (!PeerJs) {
+      if (attempt < 12) {
+        // PeerJS может подгружаться после инициализации экрана.
+        // Ждем пару сотен мс и пробуем снова.
+        setTimeout(function () { startStreamsWatchByRoomId(roomId, attempt + 1); }, 300);
+        return;
+      }
       streamsShowAlert("Библиотека PeerJS не загружена.");
       watchBtn.disabled = false;
       return;
