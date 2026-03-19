@@ -14506,11 +14506,6 @@ updateVisitorCounter();
     if (!sel) return;
     var d = new Date();
     sel.innerHTML = "";
-    // За всё время для рассылок по уникальным посетителям.
-    var allOpt = document.createElement("option");
-    allOpt.value = "all";
-    allOpt.textContent = "За всё время";
-    sel.appendChild(allOpt);
     for (var i = 0; i < 12; i++) {
       var value = getMonthValue(d);
       var label = MONTH_NAMES[d.getMonth()] + " " + d.getFullYear();
@@ -14629,7 +14624,8 @@ updateVisitorCounter();
     var base = getApiBase();
     var initData = tg && tg.initData ? tg.initData : "";
     var monthSelect = document.getElementById("visitorsAdminMonthFilter");
-    var month = monthSelect ? monthSelect.value : null;
+    var allTimeCheckbox = document.getElementById("visitorsAdminAllTimeFilter");
+    var month = allTimeCheckbox && allTimeCheckbox.checked ? "all" : monthSelect ? monthSelect.value : null;
     if (!base || !initData) return;
     if (sendBtn) sendBtn.disabled = true;
 
@@ -14786,6 +14782,17 @@ updateVisitorCounter();
     if (monthFilter) monthFilter.addEventListener("change", function () {
       fetchVisitorsAdminStats(monthFilter.value || null);
     });
+    var allTimeCb = document.getElementById("visitorsAdminAllTimeFilter");
+    if (allTimeCb) {
+      allTimeCb.addEventListener("change", function () {
+        if (monthFilter) monthFilter.disabled = !!this.checked;
+        if (!this.checked) fetchVisitorsAdminStats(monthFilter.value || null);
+        else {
+          var elUnique = document.getElementById("visitorsAdminUnique");
+          if (elUnique) elUnique.textContent = "—";
+        }
+      });
+    }
     if (broadcastBtn) broadcastBtn.addEventListener("click", openBroadcastModal);
     if (broadcastModalClose) broadcastModalClose.addEventListener("click", closeBroadcastModal);
     if (broadcastModalBackdrop) broadcastModalBackdrop.addEventListener("click", closeBroadcastModal);
