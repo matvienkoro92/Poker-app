@@ -2561,6 +2561,9 @@ function setView(viewName) {
   }
   if (viewName === "streams") {
     initStreams();
+    // После initStreams: и при первом полном init, и при раннем return (__streamsInitAttached)
+    // нужно съесть __pendingStreamsRoomId (deep link из Telegram / ?startapp=streams_…).
+    if (typeof consumePendingStreamsWatchRoom === "function") consumePendingStreamsWatchRoom();
   } else {
     if (typeof streamsCleanup === "function") streamsCleanup();
   }
@@ -7238,11 +7241,27 @@ function streamsCleanup() {
   if (remoteVideo) remoteVideo.srcObject = null;
 }
 
+/** Старт просмотра по deep link: вызывать после initStreams (в т.ч. когда initStreams вышел раньше из‑за __streamsInitAttached). */
+function consumePendingStreamsWatchRoom() {
+  try {
+    if (!window.__pendingStreamsRoomId) return;
+    if (typeof window.startStreamsWatchByRoomId !== "function") return;
+    var pendingRoomId = window.__pendingStreamsRoomId;
+    window.__pendingStreamsRoomId = null;
+    setTimeout(function () {
+      window.startStreamsWatchByRoomId(pendingRoomId);
+    }, 0);
+  } catch (e) {}
+}
+
 function initStreams() {
   // setView("streams") вызывает initStreams при каждом заходе — без guard на кнопке
   // копятся несколько обработчиков; второй getDisplayMedia в том же клике даёт
   // «getDisplayMedia must be called from a user gesture handler».
-  if (window.__streamsInitAttached) return;
+  if (window.__streamsInitAttached) {
+    consumePendingStreamsWatchRoom();
+    return;
+  }
   var startBtn = document.getElementById("streamsStartBtn");
   var stopBtn = document.getElementById("streamsStopBtn");
   var previewWrap = document.getElementById("streamsPreviewWrap");
@@ -7325,16 +7344,6 @@ function initStreams() {
 
   // Даем возможность deep-link вызывать просмотр напрямую.
   window.startStreamsWatchByRoomId = startStreamsWatchByRoomId;
-
-  // Deep-link автозапуск просмотра (без программных click),
-  // чтобы не зависеть от тайминга и не триггерить broadcast.
-  try {
-    if (window.__pendingStreamsRoomId) {
-      var pendingRoomId = window.__pendingStreamsRoomId;
-      window.__pendingStreamsRoomId = null;
-      setTimeout(function () { startStreamsWatchByRoomId(pendingRoomId); }, 0);
-    }
-  } catch (e) {}
 
   if (openBrowserBtn) {
     openBrowserBtn.addEventListener("click", function () {
