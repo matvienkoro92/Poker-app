@@ -12268,21 +12268,6 @@ function initChat() {
     if (voicePrevP) voicePrevP.classList.remove("chat-voice-preview--visible");
     if (listView) listView.classList.add("chat-list-view--hidden");
     if (convView) convView.classList.remove("chat-conv-view--hidden");
-    if (convTitle) convTitle.textContent = userName || userId;
-    var titleRoleEl = document.getElementById("chatConvTitleRole");
-    if (titleRoleEl) {
-      if (CHAT_ADMIN_IDS && CHAT_ADMIN_IDS.indexOf(String(userId)) !== -1) titleRoleEl.textContent = "Админ";
-      else titleRoleEl.textContent = "";
-    }
-    if (convTitleTgIdWrap && convTitleTgId) {
-      convTitleTgIdWrap.classList.remove("chat-conv-title__tg-id--hidden");
-      convTitleTgId.textContent = String(userId).replace(/^tg_/, "");
-    }
-    if (convTitleIdWrap && convTitleId) {
-      convTitleIdWrap.classList.remove("chat-conv-title__id-wrap--hidden");
-      var displayId = (dtIdFromContact && String(dtIdFromContact).trim()) || "—";
-      convTitleId.textContent = displayId;
-    }
     updateChatHeaderStats();
     scrollPersonalToBottomOnNextRender = true;
     if (messagesEl) {

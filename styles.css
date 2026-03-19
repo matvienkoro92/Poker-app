@@ -4179,6 +4179,13 @@ img.chat-contact__avatar {
   line-height: 1;
   white-space: nowrap;
 }
+
+/* Убираем данные собеседника (tg login и разные ID) рядом с кнопкой «Назад» */
+.chat-conv-top .chat-conv-title__tg-id,
+.chat-conv-top .chat-conv-title__id-wrap,
+.chat-conv-top .chat-conv-title__role {
+  display: none !important;
+}
 .chat-conv-top .chat-conv-header .chat-title--small {
   display: block;
   font-size: 15px;
