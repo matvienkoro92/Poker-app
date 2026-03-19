@@ -2258,6 +2258,9 @@
               <div class="streams-block streams-block--broadcast">
                 <h2 class="streams-block__title">Начать трансляцию</h2>
                 <p class="streams-block__hint">Экран и микрофон будут видны и слышны зрителям.</p>
+                <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
+                  <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" placeholder="Код комнаты (латиница+цифры, 4–10)" aria-label="Код комнаты для трансляции" maxlength="10" />
+                </div>
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
                 <div class="streams-preview-wrap streams-preview-wrap--hidden" id="streamsPreviewWrap">
                   <video id="streamsPreviewVideo" class="streams-preview-video" autoplay muted playsinline aria-label="Превью трансляции"></video>
