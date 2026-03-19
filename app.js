@@ -7400,6 +7400,8 @@ function initStreams() {
           window.__streamsWatchWatchdogTimer = null;
         }
         remoteVideo.srcObject = stream;
+        remoteVideo.muted = true;
+        try { remoteVideo.play(); } catch (e) {}
         remoteWrap.classList.remove("streams-remote-wrap--hidden");
         watchBtn.disabled = false;
       });
