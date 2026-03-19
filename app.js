@@ -1412,8 +1412,21 @@ function runGazetteAndTasksInit() {
   }
   try {
     var urlStart = typeof location !== "undefined" && location.search ? new URLSearchParams(location.search).get("startapp") : null;
-    if (urlStart === "stream") {
-      setTimeout(function () { if (typeof setView === "function") setView("home"); }, 0);
+    if (urlStart && urlStart.indexOf("streams_") === 0) {
+      // Поддержка ссылок вида: startapp=streams_<ROOM_ID> в query.
+      var streamsRoomIdFromQuery = urlStart.replace("streams_", "");
+      setTimeout(function () {
+        if (typeof setView === "function") setView("streams");
+        setTimeout(function () {
+          var roomInput = document.getElementById("streamsRoomInput");
+          if (roomInput && streamsRoomIdFromQuery) roomInput.value = streamsRoomIdFromQuery;
+          var watchBtn = document.getElementById("streamsWatchBtn");
+          if (watchBtn) watchBtn.click();
+        }, 300);
+      }, 0);
+    } else if (urlStart === "stream") {
+      // Legacy: startapp=stream
+      setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
     }
   } catch (e) {}
   if (startParam && startParam.indexOf("poker_task_") === 0) {
