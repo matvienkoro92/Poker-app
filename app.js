@@ -7219,6 +7219,8 @@ var streamsBroadcastPeer = null;
 var streamsBroadcastStream = null;
 var streamsWatchPeer = null;
 var streamsWatchCall = null;
+var streamsBroadcastStartedAt = null;
+var streamsBroadcastTimerInterval = null;
 
 function randomStreamRoomId() {
   return Math.random().toString(36).slice(2, 8);
@@ -7231,6 +7233,12 @@ function getStreamsAppUrl() {
 }
 
 function streamsCleanup() {
+  if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+  streamsBroadcastTimerInterval = null;
+  streamsBroadcastStartedAt = null;
+  var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
+  if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "";
+
   if (streamsBroadcastStream) {
     streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
     streamsBroadcastStream = null;
@@ -7294,6 +7302,7 @@ function initStreams() {
   var stopWatchBtn = document.getElementById("streamsStopWatchBtn");
   var remoteWrap = document.getElementById("streamsRemoteWrap");
   var remoteVideo = document.getElementById("streamsRemoteVideo");
+  var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
   if (!startBtn || !previewWrap || !previewVideo) return;
@@ -7309,6 +7318,24 @@ function initStreams() {
   function streamsShowAlert(msg) {
     if (tg && tg.showAlert) tg.showAlert(msg);
     else if (typeof alert === "function") alert(msg);
+  }
+
+  function pad2(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function updateBroadcastTimerText() {
+    if (!streamsBroadcastTimerEl) return;
+    if (!streamsBroadcastStartedAt) {
+      streamsBroadcastTimerEl.textContent = "";
+      return;
+    }
+    var elapsedSec = Math.floor((Date.now() - streamsBroadcastStartedAt) / 1000);
+    var h = Math.floor(elapsedSec / 3600);
+    var m = Math.floor((elapsedSec % 3600) / 60);
+    var s = elapsedSec % 60;
+    var t = h > 0 ? h + ":" + pad2(m) + ":" + pad2(s) : pad2(m) + ":" + pad2(s);
+    streamsBroadcastTimerEl.textContent = "Трансляция запущена: " + t;
   }
 
   // Делаем стартер “смотреть” по комнате без зависимости от click-обработчика,
@@ -7526,6 +7553,10 @@ function initStreams() {
           if (roomInput) roomInput.placeholder = roomId;
           previewVideo.srcObject = streamsBroadcastStream;
           previewWrap.classList.remove("streams-preview-wrap--hidden");
+          streamsBroadcastStartedAt = Date.now();
+          if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+          updateBroadcastTimerText();
+          streamsBroadcastTimerInterval = setInterval(updateBroadcastTimerText, 1000);
           startBtn.disabled = false;
           startBtn.textContent = btnText;
         });
@@ -7541,6 +7572,10 @@ function initStreams() {
             streamsBroadcastStream = null;
           }
           streamsBroadcastPeer = null;
+          if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+          streamsBroadcastTimerInterval = null;
+          streamsBroadcastStartedAt = null;
+          if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "";
           previewWrap.classList.add("streams-preview-wrap--hidden");
           previewVideo.srcObject = null;
         });
@@ -7569,6 +7604,10 @@ function initStreams() {
         try { streamsBroadcastPeer.destroy(); } catch (e) {}
         streamsBroadcastPeer = null;
       }
+      if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+      streamsBroadcastTimerInterval = null;
+      streamsBroadcastStartedAt = null;
+      if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "Трансляция остановлена";
       previewWrap.classList.add("streams-preview-wrap--hidden");
       previewVideo.srcObject = null;
     });
