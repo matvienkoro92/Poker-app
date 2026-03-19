@@ -1418,6 +1418,13 @@ function runGazetteAndTasksInit() {
       setTimeout(function () {
         if (typeof setView === "function") setView("streams");
         setTimeout(function () {
+          try {
+            if (typeof window.startStreamsWatchByRoomId === "function") {
+              window.startStreamsWatchByRoomId(streamsRoomIdFromQuery);
+              return;
+            }
+          } catch (e) {}
+          // Fallback: если deep-link вызвали раньше, чем initStreams повесил обработчики.
           var roomInput = document.getElementById("streamsRoomInput");
           if (roomInput && streamsRoomIdFromQuery) roomInput.value = streamsRoomIdFromQuery;
           var watchBtn = document.getElementById("streamsWatchBtn");
@@ -7272,6 +7279,64 @@ function initStreams() {
 
   var directAppUrl = window.location.origin + window.location.pathname + (window.location.search || "") + "#streams";
   if (browserLinkInput) browserLinkInput.value = directAppUrl;
+
+  function streamsShowAlert(msg) {
+    if (tg && tg.showAlert) tg.showAlert(msg);
+    else if (typeof alert === "function") alert(msg);
+  }
+
+  // Делаем стартер “смотреть” по комнате без зависимости от click-обработчика,
+  // чтобы deep-link работал стабильно.
+  function startStreamsWatchByRoomId(roomId) {
+    if (!roomId) return;
+    if (!watchBtn || !roomInput || !remoteWrap || !remoteVideo) return;
+    if (streamsWatchPeer) return;
+
+    roomInput.value = roomId;
+    watchBtn.disabled = true;
+
+    var PeerJs = typeof Peer !== "undefined" ? Peer : null;
+    if (!PeerJs) {
+      streamsShowAlert("Библиотека PeerJS не загружена.");
+      watchBtn.disabled = false;
+      return;
+    }
+
+    var peer = new PeerJs({ debug: 0 });
+    streamsWatchPeer = peer;
+    peer.on("open", function () {
+      var call = peer.call(roomId, new MediaStream());
+      streamsWatchCall = call;
+      call.on("stream", function (stream) {
+        remoteVideo.srcObject = stream;
+        remoteWrap.classList.remove("streams-remote-wrap--hidden");
+        watchBtn.disabled = false;
+      });
+      call.on("close", function () {
+        remoteWrap.classList.add("streams-remote-wrap--hidden");
+        remoteVideo.srcObject = null;
+        streamsWatchCall = null;
+        watchBtn.disabled = false;
+      });
+      call.on("error", function () {
+        remoteWrap.classList.add("streams-remote-wrap--hidden");
+        watchBtn.disabled = false;
+        streamsWatchCall = null;
+      });
+    });
+    peer.on("error", function (err) {
+      remoteWrap.classList.add("streams-remote-wrap--hidden");
+      watchBtn.disabled = false;
+      streamsWatchCall = null;
+      if (err && (err.type === "peer-unavailable" || err.type === "network")) streamsShowAlert("Трансляция недоступна. Проверьте код комнаты.");
+      else streamsShowAlert("Ошибка: " + (err && (err.message || err.type)) || "сеть");
+      streamsWatchPeer = null;
+    });
+  }
+
+  // Даем возможность deep-link вызывать просмотр напрямую.
+  window.startStreamsWatchByRoomId = startStreamsWatchByRoomId;
+
   if (openBrowserBtn) {
     openBrowserBtn.addEventListener("click", function () {
       if (tg && tg.openLink) {
@@ -7431,41 +7496,7 @@ function initStreams() {
         showAlert("Введите код комнаты или ссылку от ведущего.");
         return;
       }
-      if (streamsWatchPeer) return;
-      var PeerJs = typeof Peer !== "undefined" ? Peer : null;
-      if (!PeerJs) {
-        showAlert("Библиотека PeerJS не загружена.");
-        return;
-      }
-      watchBtn.disabled = true;
-      var peer = new PeerJs({ debug: 0 });
-      streamsWatchPeer = peer;
-      peer.on("open", function () {
-        var call = peer.call(roomId, new MediaStream());
-        streamsWatchCall = call;
-        call.on("stream", function (stream) {
-          remoteVideo.srcObject = stream;
-          remoteWrap.classList.remove("streams-remote-wrap--hidden");
-          watchBtn.disabled = false;
-        });
-        call.on("close", function () {
-          remoteWrap.classList.add("streams-remote-wrap--hidden");
-          remoteVideo.srcObject = null;
-          streamsWatchCall = null;
-          watchBtn.disabled = false;
-        });
-        call.on("error", function () {
-          remoteWrap.classList.add("streams-remote-wrap--hidden");
-          watchBtn.disabled = false;
-          streamsWatchCall = null;
-        });
-      });
-      peer.on("error", function (err) {
-        if (err.type === "peer-unavailable" || err.type === "network") showAlert("Трансляция недоступна. Проверьте код комнаты.");
-        else showAlert("Ошибка: " + (err.message || err.type || "сеть"));
-        watchBtn.disabled = false;
-        streamsWatchPeer = null;
-      });
+      startStreamsWatchByRoomId(roomId);
     });
 
     if (stopWatchBtn) {
