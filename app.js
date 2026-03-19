@@ -1390,10 +1390,26 @@ function runGazetteAndTasksInit() {
     // Чтобы пользователь попадал в нужный экран, отправляем в `streams`.
     setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
   }
-  if (startParam && startParam.indexOf("streams_") === 0) {
-    var streamsRoomId = startParam.replace("streams_", "");
+  function parseStreamsRoomIdFromStartParam(val) {
+    if (!val) return null;
+    val = String(val).trim();
+    if (!val) return null;
+    // Telegram может передавать start_param в разных форматах, например:
+    //  - "streams_abc123"
+    //  - "startapp=streams_abc123"
+    var m =
+      val.match(/(?:^|.*)streams_([a-z0-9]+)/i) ||
+      val.match(/startapp=streams_([a-z0-9]+)/i);
+    if (m && m[1]) return m[1];
+    // На всякий случай поддержим прямой код комнаты без префикса.
+    if (/^[a-z0-9]{4,10}$/i.test(val)) return val;
+    return null;
+  }
+
+  var streamsRoomIdFromStartParam = parseStreamsRoomIdFromStartParam(startParam);
+  if (streamsRoomIdFromStartParam) {
     // Сохраняем комнату для автозапуска просмотра после загрузки экрана `streams`.
-    window.__pendingStreamsRoomId = streamsRoomId;
+    window.__pendingStreamsRoomId = streamsRoomIdFromStartParam;
     setTimeout(function () {
       if (typeof setView === "function") setView("streams");
     }, 0);
@@ -1408,9 +1424,9 @@ function runGazetteAndTasksInit() {
   }
   try {
     var urlStart = typeof location !== "undefined" && location.search ? new URLSearchParams(location.search).get("startapp") : null;
-    if (urlStart && urlStart.indexOf("streams_") === 0) {
+    var streamsRoomIdFromQuery = parseStreamsRoomIdFromStartParam(urlStart);
+    if (streamsRoomIdFromQuery) {
       // Поддержка ссылок вида: startapp=streams_<ROOM_ID> в query.
-      var streamsRoomIdFromQuery = urlStart.replace("streams_", "");
       window.__pendingStreamsRoomId = streamsRoomIdFromQuery;
       setTimeout(function () {
         if (typeof setView === "function") setView("streams");
