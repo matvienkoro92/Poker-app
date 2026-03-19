@@ -7346,6 +7346,17 @@ function initStreams() {
 
     var peer = new PeerJs({ debug: 0 });
     streamsWatchPeer = peer;
+    peer.on("error", function (err) {
+      // Ошибки на уровне PeerJS (сигналинг/сервер) раньше не обрабатывались,
+      // из-за чего кнопка могла оставаться выключенной.
+      try { streamsWatchCall && streamsWatchCall.close && streamsWatchCall.close(); } catch (e) {}
+      streamsWatchCall = null;
+      streamsWatchPeer = null;
+      if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
+      if (remoteVideo) remoteVideo.srcObject = null;
+      watchBtn.disabled = false;
+      streamsShowAlert("PeerJS ошибка: " + (err && (err.message || err.type)) || "сеть");
+    });
     peer.on("open", function () {
       var call = peer.call(roomId, new MediaStream());
       streamsWatchCall = call;
