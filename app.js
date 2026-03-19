@@ -7329,6 +7329,10 @@ function initStreams() {
     }
     if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
     if (remoteVideo) remoteVideo.srcObject = null;
+    if (window.__streamsWatchWatchdogTimer) {
+      clearTimeout(window.__streamsWatchWatchdogTimer);
+      window.__streamsWatchWatchdogTimer = null;
+    }
 
     roomInput.value = roomId;
     watchBtn.disabled = true;
@@ -7349,6 +7353,10 @@ function initStreams() {
     var peer = new PeerJs({ debug: 0 });
     streamsWatchPeer = peer;
     peer.on("error", function (err) {
+      if (window.__streamsWatchWatchdogTimer) {
+        clearTimeout(window.__streamsWatchWatchdogTimer);
+        window.__streamsWatchWatchdogTimer = null;
+      }
       // Ошибки на уровне PeerJS (сигналинг/сервер) раньше не обрабатывались,
       // из-за чего кнопка могла оставаться выключенной.
       try { streamsWatchCall && streamsWatchCall.close && streamsWatchCall.close(); } catch (e) {}
@@ -7364,6 +7372,10 @@ function initStreams() {
       streamsWatchCall = call;
       call.on("error", function (err) {
         // Если call не смог поднять поток, нужно вернуть управление пользователю.
+        if (window.__streamsWatchWatchdogTimer) {
+          clearTimeout(window.__streamsWatchWatchdogTimer);
+          window.__streamsWatchWatchdogTimer = null;
+        }
         remoteWrap.classList.add("streams-remote-wrap--hidden");
         if (remoteVideo) remoteVideo.srcObject = null;
         streamsWatchCall = null;
@@ -7371,21 +7383,44 @@ function initStreams() {
         streamsShowAlert("Не удалось подключиться к комнате. " + (err && (err.message || err.type)) || "");
       });
       call.on("stream", function (stream) {
+        if (window.__streamsWatchWatchdogTimer) {
+          clearTimeout(window.__streamsWatchWatchdogTimer);
+          window.__streamsWatchWatchdogTimer = null;
+        }
         remoteVideo.srcObject = stream;
         remoteWrap.classList.remove("streams-remote-wrap--hidden");
         watchBtn.disabled = false;
       });
       call.on("close", function () {
+        if (window.__streamsWatchWatchdogTimer) {
+          clearTimeout(window.__streamsWatchWatchdogTimer);
+          window.__streamsWatchWatchdogTimer = null;
+        }
         remoteWrap.classList.add("streams-remote-wrap--hidden");
         remoteVideo.srcObject = null;
         streamsWatchCall = null;
         watchBtn.disabled = false;
       });
       call.on("error", function () {
+        if (window.__streamsWatchWatchdogTimer) {
+          clearTimeout(window.__streamsWatchWatchdogTimer);
+          window.__streamsWatchWatchdogTimer = null;
+        }
         remoteWrap.classList.add("streams-remote-wrap--hidden");
         watchBtn.disabled = false;
         streamsWatchCall = null;
       });
+
+      // Watchdog: если соединение зависнет (без stream/error/close),
+      // вернем пользователю управление.
+      window.__streamsWatchWatchdogTimer = setTimeout(function () {
+        if (!watchBtn) return;
+        if (!watchBtn.disabled) return;
+        watchBtn.disabled = false;
+        if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
+        if (remoteVideo) remoteVideo.srcObject = null;
+        streamsShowAlert("Трансляция не отвечает. Попробуйте ещё раз через 5–10 секунд.");
+      }, 14000);
     });
     peer.on("error", function (err) {
       remoteWrap.classList.add("streams-remote-wrap--hidden");
