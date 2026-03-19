@@ -740,10 +740,21 @@ function runGazetteAndTasksInit() {
       var appEl = document.getElementById("app");
       var base = (appEl && appEl.getAttribute("data-api-base")) || (typeof location !== "undefined" && location.origin) || "";
       var apiUrl = (base ? base.replace(/\/$/, "") : "") + "/api/gazette-subscribe";
-      if (subscribeBtn) subscribeBtn.disabled = true;
-      if (subscribeBtnNews) subscribeBtnNews.disabled = true;
+      if (subscribeBtn) {
+        subscribeBtn.disabled = true;
+        subscribeBtn.textContent = "Подписываем…";
+      }
+      if (subscribeBtnNews) {
+        subscribeBtnNews.disabled = true;
+        subscribeBtnNews.textContent = "Подписываем…";
+      }
       var allArticleBtns = modal && modal.querySelectorAll(".gazette-modal__subscribe-in-article-btn");
-      if (allArticleBtns) for (var j = 0; j < allArticleBtns.length; j++) allArticleBtns[j].disabled = true;
+      if (allArticleBtns) {
+        for (var j = 0; j < allArticleBtns.length; j++) {
+          allArticleBtns[j].disabled = true;
+          allArticleBtns[j].textContent = "Подписываем…";
+        }
+      }
       fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -773,7 +784,7 @@ function runGazetteAndTasksInit() {
         })
         .catch(function () {
           var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Сервис временно недоступен. Попробуйте позже."); else alert("Сервис временно недоступен.");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); else alert(POKER_NET_ERR);
           setSubscribeButtonState(subscribed);
         });
     }
@@ -1258,7 +1269,10 @@ function runGazetteAndTasksInit() {
           var appEl = document.getElementById("app");
           var base = (appEl && appEl.getAttribute("data-api-base")) || (typeof location !== "undefined" && location.origin) || "";
           var apiUrl = (base ? base.replace(/\/$/, "") : "") + "/api/rating-subscribe";
-          ratingSubscribeBtns.forEach(function (b) { b.disabled = true; });
+          ratingSubscribeBtns.forEach(function (b) {
+            b.disabled = true;
+            b.innerHTML = "<span>Подписываем…</span>" + ratingInDevHtml;
+          });
           fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1286,7 +1300,7 @@ function runGazetteAndTasksInit() {
             })
             .catch(function () {
               var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-              if (tg && tg.showAlert) tg.showAlert("Сервис временно недоступен. Попробуйте позже."); else alert("Сервис временно недоступен.");
+              if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); else alert(POKER_NET_ERR);
               setRatingSubscribeButtonState(subscribed);
             })
             .finally(function () {
@@ -8971,6 +8985,7 @@ function initRaffles() {
       }
       var subscribed = rafflesSubscribeBtn.dataset.subscribed === "1";
       rafflesSubscribeBtn.disabled = true;
+      rafflesSubscribeBtn.textContent = "Подписываем…";
       fetch(baseUrl.replace(/\/$/, "") + "/api/raffle-subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -9007,11 +9022,8 @@ function initRaffles() {
         })
         .catch(function () {
           var tgNow3 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tgNow3 && tgNow3.showAlert) {
-            tgNow3.showAlert("Сервис временно недоступен. Попробуйте позже.");
-          } else {
-            alert("Сервис временно недоступен.");
-          }
+          if (tgNow3 && tgNow3.showAlert) tgNow3.showAlert(POKER_NET_ERR);
+          else alert(POKER_NET_ERR);
           setRaffleSubscribeState(subscribed);
         })
         .finally(function () {
@@ -10874,6 +10886,29 @@ function initChat() {
     generalSendBtn.disabled = !!busy;
     generalSendBtn.classList.toggle("chat-send-btn--waiting", !!busy);
     generalSendBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    if (busy) {
+      generalSendBtn.textContent = "\u2026";
+      generalSendBtn.title = "Отправка…";
+      generalSendBtn.setAttribute("aria-label", "Отправка…");
+      generalSendBtn.classList.remove("chat-send-btn--mic");
+    } else {
+      updateGeneralSendBtnIcon();
+    }
+  }
+
+  function setPersonalSendBusy(busy) {
+    if (!sendBtn) return;
+    sendBtn.disabled = !!busy;
+    sendBtn.classList.toggle("chat-send-btn--waiting", !!busy);
+    sendBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    if (busy) {
+      sendBtn.textContent = "\u2026";
+      sendBtn.title = "Отправка…";
+      sendBtn.setAttribute("aria-label", "Отправка…");
+      sendBtn.classList.remove("chat-send-btn--mic");
+    } else {
+      updatePersonalSendBtnIcon();
+    }
   }
 
   var base = getApiBase();
@@ -12958,14 +12993,14 @@ function initChat() {
         return;
       }
       sendingPrivate = true;
-      if (sendBtn) sendBtn.disabled = true;
+      setPersonalSendBusy(true);
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: initData, action: "edit", messageId: chatEditMessageId, text: text, with: chatWithUserId }),
       }).then(function (r) { return r.json(); }).then(function (d) {
         sendingPrivate = false;
-        if (sendBtn) sendBtn.disabled = false;
+        setPersonalSendBusy(false);
         if (d && d.ok) {
           applyEditedMessageToDom(chatEditMessageId, text, "personal");
           clearChatEditUI();
@@ -12975,7 +13010,7 @@ function initChat() {
         }
       }).catch(function () {
         sendingPrivate = false;
-        if (sendBtn) sendBtn.disabled = false;
+        setPersonalSendBusy(false);
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       });
       return;
@@ -12994,7 +13029,7 @@ function initChat() {
       return;
     }
     sendingPrivate = true;
-    if (sendBtn) sendBtn.disabled = true;
+    setPersonalSendBusy(true);
     var body = { initData: initData, with: chatWithUserId, text: text };
     if (personalImage) body.image = personalImage;
     if (personalVoice) body.voice = personalVoice;
@@ -13036,8 +13071,6 @@ function initChat() {
     try {
       appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
     } catch (err) {}
-    if (sendBtn) sendBtn.disabled = false;
-    if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
     var hasUpload = !!(body.document || body.image || body.voice);
     var progressWrap = document.getElementById("chatPersonalUploadProgress");
     var progressFill = document.getElementById("chatPersonalUploadProgressFill");
@@ -13051,6 +13084,7 @@ function initChat() {
     }
     function handleResponse(data) {
       sendingPrivate = false;
+      setPersonalSendBusy(false);
       hideProgress();
       if (data && data.ok) {
         var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
@@ -13072,6 +13106,7 @@ function initChat() {
     }
     function handleError() {
       sendingPrivate = false;
+      setPersonalSendBusy(false);
       hideProgress();
       var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
       if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
@@ -13829,6 +13864,7 @@ function initChat() {
     }
     function updateGeneralSendBtnIcon() {
       if (!generalSendBtn) return;
+      if (sendingGeneral) return;
       var hasContent = (generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument;
       generalSendBtn.textContent = hasContent ? "\u2191" : "\uD83C\uDFA4";
       generalSendBtn.title = hasContent ? "Отправить" : "Голосовое сообщение";
@@ -13837,6 +13873,7 @@ function initChat() {
     }
     function updatePersonalSendBtnIcon() {
       if (!sendBtn) return;
+      if (sendingPrivate) return;
       var hasContent = (inputEl && inputEl.value.trim()) || personalImage || personalVoice || personalDocument;
       sendBtn.textContent = hasContent ? "\u2191" : "\uD83C\uDFA4";
       sendBtn.title = hasContent ? "Отправить" : "Голосовое сообщение";
