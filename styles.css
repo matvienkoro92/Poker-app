@@ -13388,6 +13388,41 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   flex-shrink: 0;
   white-space: nowrap;
 }
+.tracking-links-admin__th-hint {
+  display: block;
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: normal;
+  max-width: 140px;
+  line-height: 1.2;
+}
+.tracking-links-admin__url-copy-btn {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--accent, #f97316);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.35;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.tracking-links-admin__url-copy-btn:hover {
+  background: rgba(148, 163, 184, 0.2);
+}
+.tracking-links-admin__url-copy-btn:active {
+  opacity: 0.9;
+}
 .tracking-links-admin__list-title {
   margin: 16px 0 8px;
   font-size: 15px;

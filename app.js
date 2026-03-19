@@ -15098,6 +15098,49 @@ updateVisitorCounter();
       .replace(/"/g, "&quot;");
   }
 
+  function escAttr(s) {
+    if (s == null) return "";
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/\r|\n/g, " ");
+  }
+
+  function copyUrlWithFeedback(text) {
+    if (!text) return;
+    function done(ok) {
+      var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgLocal && tgLocal.showAlert) tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
+      else if (!ok) alert("Не удалось скопировать");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(function () {
+          done(true);
+        })
+        .catch(function () {
+          done(false);
+        });
+    } else {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        done(true);
+      } catch (e) {
+        done(false);
+      }
+    }
+  }
+
   function buildStartUrl(startParam) {
     var appEl = document.getElementById("app");
     var u = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
@@ -15134,12 +15177,12 @@ updateVisitorCounter();
   }
 
   function loadLinks() {
-    tbody.innerHTML = "<tr><td colspan=\"4\">Загрузка…</td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"5\">Загрузка…</td></tr>";
     var base = getApiBase();
     var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
     if (!base || !initData) {
-      tbody.innerHTML = "<tr><td colspan=\"4\">Нет initData. Откройте в Telegram.</td></tr>";
+      tbody.innerHTML = "<tr><td colspan=\"5\">Нет initData. Откройте в Telegram.</td></tr>";
       return;
     }
     fetch(base + "/api/tracking-links?initData=" + encodeURIComponent(initData))
@@ -15148,11 +15191,11 @@ updateVisitorCounter();
       })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.links)) {
-          tbody.innerHTML = "<tr><td colspan=\"4\">Нет данных</td></tr>";
+          tbody.innerHTML = "<tr><td colspan=\"5\">Нет данных</td></tr>";
           return;
         }
         if (data.links.length === 0) {
-          tbody.innerHTML = "<tr><td colspan=\"4\">Пока нет ссылок — создайте первую.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan=\"5\">Пока нет ссылок — создайте первую.</td></tr>";
           return;
         }
         tbody.innerHTML = data.links
@@ -15162,6 +15205,10 @@ updateVisitorCounter();
             var paramLine = pj.length > 56 ? pj.slice(0, 56) + "…" : pj;
             var total = link.totalClicks != null ? link.totalClicks : 0;
             var uniq = link.uniqueClicks != null ? link.uniqueClicks : 0;
+            var startParam = "ref_" + link.id;
+            var fullUrl = buildStartUrl(startParam);
+            var copyText = fullUrl || startParam;
+            var displayText = fullUrl || startParam + " — укажите data-telegram-app-url в index.html";
             return (
               "<tr data-tracking-id=\"" +
               esc(link.id) +
@@ -15175,6 +15222,12 @@ updateVisitorCounter();
                 ? "<span class=\"tracking-links-admin__cell-sub\">" + esc(paramLine) + "</span>"
                 : "") +
               "</td>" +
+              "<td class=\"tracking-links-admin__cell-url\">" +
+              "<button type=\"button\" class=\"tracking-links-admin__url-copy-btn\" data-url=\"" +
+              escAttr(copyText) +
+              "\" title=\"Нажмите, чтобы скопировать\">" +
+              esc(displayText) +
+              "</button></td>" +
               "<td>" +
               total +
               "</td>" +
@@ -15190,7 +15243,7 @@ updateVisitorCounter();
           .join("");
       })
       .catch(function () {
-        tbody.innerHTML = "<tr><td colspan=\"4\">Ошибка загрузки</td></tr>";
+        tbody.innerHTML = "<tr><td colspan=\"5\">Ошибка загрузки</td></tr>";
       });
   }
 
@@ -15263,6 +15316,12 @@ updateVisitorCounter();
   tbody.addEventListener("click", function (ev) {
     var t = ev.target;
     if (!t || !t.getAttribute) return;
+    var urlBtn = t.closest && t.closest(".tracking-links-admin__url-copy-btn");
+    if (urlBtn) {
+      var urlToCopy = urlBtn.getAttribute("data-url");
+      if (urlToCopy) copyUrlWithFeedback(urlToCopy);
+      return;
+    }
     var btn = t.closest && t.closest("[data-tracking-who]");
     if (!btn) return;
     var id = btn.getAttribute("data-tracking-who");
@@ -15350,22 +15409,7 @@ updateVisitorCounter();
     copyBtn.addEventListener("click", function () {
       var text = newUrlInput.value;
       if (!text) return;
-      function done(ok) {
-        var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tgLocal && tgLocal.showAlert) tgLocal.showAlert(ok ? "Скопировано" : "Не удалось скопировать");
-        else if (!ok) alert("Не удалось скопировать");
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () { done(false); });
-      } else {
-        try {
-          newUrlInput.select();
-          document.execCommand("copy");
-          done(true);
-        } catch (e) {
-          done(false);
-        }
-      }
+      copyUrlWithFeedback(text);
     });
   }
 })();
