@@ -10553,10 +10553,18 @@ function initChat() {
   var chatGeneralBackBtn = document.getElementById("chatGeneralBackBtn");
   var chatDialogClub = document.getElementById("chatDialogClub");
   var convTitle = document.getElementById("chatConvTitle");
+  var convTitleTgIdWrap = document.getElementById("chatConvTitleTgIdWrap");
+  var convTitleTgId = document.getElementById("chatConvTitleTgId");
   var convTitleIdWrap = document.getElementById("chatConvTitleIdWrap");
   var convTitleId = document.getElementById("chatConvTitleId");
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087", "tg_roman"];
   var messagesEl = document.getElementById("chatMessages");
+  var personalConvHeaderEl = convTitle ? convTitle.closest(".chat-conv-header") : null;
+  function updatePersonalConvHeaderVisibility() {
+    if (!personalConvHeaderEl || !messagesEl || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
+    var hasMessages = messagesEl.querySelector(".chat-msg") !== null;
+    personalConvHeaderEl.classList.toggle("chat-conv-header--over-messages", hasMessages);
+  }
   var inputEl = document.getElementById("chatInput");
   var sendBtn = document.getElementById("chatSendBtn");
   var switcherBtn = document.getElementById("chatSwitcherBtn");
@@ -12270,6 +12278,10 @@ function initChat() {
       if (CHAT_ADMIN_IDS && CHAT_ADMIN_IDS.indexOf(String(userId)) !== -1) titleRoleEl.textContent = "Админ";
       else titleRoleEl.textContent = "";
     }
+    if (convTitleTgIdWrap && convTitleTgId) {
+      convTitleTgIdWrap.classList.remove("chat-conv-title__tg-id--hidden");
+      convTitleTgId.textContent = String(userId).replace(/^tg_/, "");
+    }
     if (convTitleIdWrap && convTitleId) {
       convTitleIdWrap.classList.remove("chat-conv-title__id-wrap--hidden");
       var displayId = (dtIdFromContact && String(dtIdFromContact).trim()) || "—";
@@ -12277,6 +12289,7 @@ function initChat() {
     }
     updateChatHeaderStats();
     scrollPersonalToBottomOnNextRender = true;
+    requestAnimationFrame(updatePersonalConvHeaderVisibility);
     if (messagesEl) {
       var cached = userId && personalMessagesCache[userId];
       if (Array.isArray(cached) && cached.length) {
@@ -12436,6 +12449,7 @@ function initChat() {
     if (!messagesEl) return;
     if (!messages || messages.length === 0) {
       messagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
+      requestAnimationFrame(updatePersonalConvHeaderVisibility);
       return;
     }
     function personalReceiptHtml(m, isOwn) {
@@ -12558,6 +12572,7 @@ function initChat() {
       });
     });
     attachContextMenuForOthers(messagesEl, "personal");
+    requestAnimationFrame(updatePersonalConvHeaderVisibility);
   }
 
   function loadMessages() {
@@ -12982,6 +12997,7 @@ function initChat() {
       e.stopPropagation();
       showDialogs();
     });
+    if (messagesEl) messagesEl.addEventListener("scroll", updatePersonalConvHeaderVisibility);
     if (findByIdBtn && findByIdInput) {
       function findByIdAndOpen() {
         var raw = (findByIdInput.value || "").trim();
@@ -13503,6 +13519,28 @@ function initChat() {
         }
       });
     })();
+
+    // На мобильных: отправка должна происходить с первого тапа по кнопке.
+    // Добавляем touchend, который при наличии текста/вложений сразу шлёт сообщение
+    // и предотвращает последующий click (чтобы не было двойной отправки).
+    if (generalSendBtn && generalInput) {
+      generalSendBtn.addEventListener("touchend", function (e) {
+        var hasContent = (generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument;
+        if (!hasContent) return; // если нет текста/вложений, пусть работает логика микрофона
+        e.preventDefault();
+        e.stopPropagation();
+        sendGeneral();
+      }, { passive: false });
+    }
+    if (sendBtn && inputEl) {
+      sendBtn.addEventListener("touchend", function (e) {
+        var hasContentP = (inputEl && inputEl.value.trim()) || personalImage || personalVoice || personalDocument;
+        if (!hasContentP) return;
+        e.preventDefault();
+        e.stopPropagation();
+        sendMessage();
+      }, { passive: false });
+    }
     function updateGeneralSendBtnIcon() {
       if (!generalSendBtn) return;
       var hasContent = (generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument;

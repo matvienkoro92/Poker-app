@@ -4113,6 +4113,21 @@ img.chat-contact__avatar {
 .chat-conv-top .chat-back-btn {
   margin-bottom: 0;
   flex-shrink: 0;
+  /* Как кнопка «К чатам» в общем чате */
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 0 12px 0 10px;
+  font-size: 14px;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-conv-top .chat-back-btn:hover {
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
 }
 .chat-conv-top .chat-conv-header {
   flex: 1 1 auto;
@@ -4122,6 +4137,52 @@ img.chat-contact__avatar {
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
+}
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0 3px;
+  text-align: left;
+  overflow: hidden;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+}
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line.chat-conv-header--over-messages {
+  opacity: 0;
+  pointer-events: none;
+}
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-conv-title__name,
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-title--small {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-conv-title__tg-id,
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-conv-title__id-wrap {
+  flex: 0 0 auto;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-conv-title__role {
+  flex: 0 0 auto;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
 }
 .chat-conv-top .chat-conv-header .chat-title--small {
   display: block;
@@ -4151,6 +4212,8 @@ img.chat-contact__avatar {
   margin-top: 0;
   white-space: nowrap;
 }
+.chat-conv-title__tg-id--hidden { display: none !important; }
+.chat-conv-title__tg-id { font-family: ui-monospace, monospace; font-size: 12px; color: var(--text-muted); }
 .chat-conv-title__copy--icon {
   padding: 4px 8px;
   font-size: 14px;
@@ -4365,7 +4428,8 @@ img.chat-contact__avatar {
   gap: 10px 14px;
   margin-bottom: 0;
 }
-.chat-conv-header .chat-title--small { margin-bottom: 0; }
+.chat-conv-header .chat-title--small,
+.chat-conv-header .chat-conv-title__name { margin-bottom: 0; }
 .chat-conv-title__id-wrap {
   display: inline-flex;
   align-items: center;
