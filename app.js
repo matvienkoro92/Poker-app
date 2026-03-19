@@ -7275,8 +7275,10 @@ function initStreams() {
   // копятся несколько обработчиков; второй getDisplayMedia в том же клике даёт
   // «getDisplayMedia must be called from a user gesture handler».
   if (window.__streamsInitAttached) {
+    // При повторном заходе в view нужно:
+    // 1) съесть pending deep-link
+    // 2) но не навешивать дублей start/watch handlers (см. флаги ниже)
     consumePendingStreamsWatchRoom();
-    return;
   }
   var startBtn = document.getElementById("streamsStartBtn");
   var stopBtn = document.getElementById("streamsStopBtn");
@@ -7423,7 +7425,9 @@ function initStreams() {
     });
   }
 
-  startBtn.addEventListener("click", function () {
+  if (!startBtn.__streamsStartHandlerAttached) {
+    startBtn.__streamsStartHandlerAttached = true;
+    startBtn.addEventListener("click", function () {
     if (streamsBroadcastPeer || streamsBroadcastStream) return;
     if (!navigator.mediaDevices) {
       showAlert("Трансляция недоступна: нет доступа к медиа-устройствам.");
@@ -7505,7 +7509,8 @@ function initStreams() {
         }
         showAlert(msg);
       });
-  });
+    });
+  }
 
   if (stopBtn) {
     stopBtn.addEventListener("click", function () {
@@ -7544,16 +7549,20 @@ function initStreams() {
   }
 
   if (watchBtn && roomInput && remoteWrap && remoteVideo) {
-    watchBtn.addEventListener("click", function () {
-      var roomId = parseRoomIdFromInput(roomInput.value);
-      if (!roomId) {
-        showAlert("Введите код комнаты или ссылку от ведущего.");
-        return;
-      }
-      startStreamsWatchByRoomId(roomId);
-    });
+    if (!watchBtn.__streamsWatchHandlerAttached) {
+      watchBtn.__streamsWatchHandlerAttached = true;
+      watchBtn.addEventListener("click", function () {
+        var roomId = parseRoomIdFromInput(roomInput.value);
+        if (!roomId) {
+          showAlert("Введите код комнаты или ссылку от ведущего.");
+          return;
+        }
+        startStreamsWatchByRoomId(roomId);
+      });
+    }
 
-    if (stopWatchBtn) {
+    if (stopWatchBtn && !stopWatchBtn.__streamsStopWatchHandlerAttached) {
+      stopWatchBtn.__streamsStopWatchHandlerAttached = true;
       stopWatchBtn.addEventListener("click", function () {
         if (streamsWatchCall) {
           try { streamsWatchCall.close(); } catch (e) {}
