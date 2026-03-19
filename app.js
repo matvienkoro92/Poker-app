@@ -14601,10 +14601,49 @@ updateVisitorCounter();
     var textEl = document.getElementById("visitorsBroadcastText");
     var fileEl = document.getElementById("visitorsBroadcastImageFile");
     var fileNameEl = document.getElementById("visitorsBroadcastFileName");
-    if (hint) hint.textContent = "Выбрано групп: " + selectedBroadcastGroups.length;
+    if (hint)
+      hint.textContent =
+        "Выбрано групп: " +
+        selectedBroadcastGroups.length +
+        ", получателей: —, подписаны на бота: —, подписаны на канал: —";
     if (textEl) textEl.value = "";
     if (fileEl) { fileEl.value = ""; if (fileNameEl) fileNameEl.textContent = ""; }
     if (modal) modal.setAttribute("aria-hidden", "false");
+
+    // Подсчитываем точное количество получателей через dryRun.
+    try {
+      var base = getApiBase();
+      var initData = tg && tg.initData ? tg.initData : "";
+      if (!base || !initData || !hint) return;
+      var groupsForPayload = selectedBroadcastGroups;
+      var month = groupsForPayload && groupsForPayload.indexOf("visitors") >= 0 ? "all" : undefined;
+      fetch(base + "/api/send-bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          initData: initData,
+          groups: groupsForPayload,
+          month: month,
+          dryRun: true,
+        }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || !data.ok || data.total == null) return;
+          var botSubscribers = data.botSubscribers != null ? data.botSubscribers : data.total;
+          var channelSubscribers = data.channelSubscribers != null ? data.channelSubscribers : "—";
+          hint.textContent =
+            "Выбрано групп: " +
+            groupsForPayload.length +
+            ", получателей: " +
+            data.total +
+            ", подписаны на бота: " +
+            botSubscribers +
+            ", подписаны на канал: " +
+            channelSubscribers;
+        })
+        .catch(function () {});
+    } catch (e) {}
   }
   function closeBroadcastModal() {
     var modal = document.getElementById("visitorsBroadcastModal");
@@ -14647,7 +14686,11 @@ updateVisitorCounter();
         if (sendBtn) sendBtn.disabled = false;
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (data && data.ok) {
-          var msg = "Отправлено: " + (data.sent || 0) + ", ошибок: " + (data.failed || 0) + (data.total != null ? " из " + data.total : "");
+          var msg =
+            "Получателей: " + (data.total != null ? data.total : 0) +
+            ". Отправлено: " + (data.sent || 0) +
+            ", ошибок: " + (data.failed || 0) +
+            (data.total != null ? " из " + data.total : "");
           if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
           closeBroadcastModal();
         } else {
