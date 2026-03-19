@@ -14706,17 +14706,26 @@ updateVisitorCounter();
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (!data || !data.ok || data.total == null) return;
-          var botSubscribers = data.botSubscribers != null ? data.botSubscribers : data.total;
-          var channelSubscribers = data.channelSubscribers != null ? data.channelSubscribers : "—";
+          // Цифры «на бота / на канал» осмыслены только для одной группы «Посетители»
+          // (считаются по tg_ + visitor_dt_ids). Для газеты/рейтинга/розыгрыша и смесей — «—».
+          var visitorsOnly =
+            groupsForPayload.length === 1 && groupsForPayload.indexOf("visitors") >= 0;
+          var botStr = "—";
+          var channelStr = "—";
+          if (visitorsOnly && data.total > 0) {
+            botStr = String(data.botSubscribers != null ? data.botSubscribers : data.total);
+            channelStr =
+              data.channelSubscribers != null ? String(data.channelSubscribers) : "—";
+          }
           hint.textContent =
             "Выбрано групп: " +
             groupsForPayload.length +
             ", получателей: " +
             data.total +
             ", подписаны на бота: " +
-            botSubscribers +
+            botStr +
             ", подписаны на канал: " +
-            channelSubscribers;
+            channelStr;
         })
         .catch(function () {});
     } catch (e) {}
