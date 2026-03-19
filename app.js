@@ -7374,23 +7374,16 @@ function initStreams() {
     startBtn.disabled = true;
     var btnText = startBtn.textContent;
     startBtn.textContent = "Запрос доступа к экрану…";
-    var combinedStream = new MediaStream();
+    // getDisplayMedia должен вызываться только синхронно из этого клика (или в первом .then от него).
+    // Второй вызов после getUserMedia в .catch ломает требование «user gesture» в Chrome.
     getDisplayMedia.call(navigator.mediaDevices, { video: true, audio: false })
       .then(function (screenStream) {
+        var combinedStream = new MediaStream();
         screenStream.getVideoTracks().forEach(function (t) { combinedStream.addTrack(t); });
         return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (micStream) {
           micStream.getAudioTracks().forEach(function (t) { combinedStream.addTrack(t); });
           return combinedStream;
         }).catch(function () { return combinedStream; });
-      })
-      .catch(function () {
-        return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (micStream) {
-          micStream.getAudioTracks().forEach(function (t) { combinedStream.addTrack(t); });
-          return getDisplayMedia.call(navigator.mediaDevices, { video: true }).then(function (screenStream) {
-            screenStream.getVideoTracks().forEach(function (t) { combinedStream.addTrack(t); });
-            return combinedStream;
-          });
-        });
       })
       .then(function (stream) {
         streamsBroadcastStream = stream;
