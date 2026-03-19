@@ -1447,7 +1447,8 @@ var WINTER_RATING_IMAGES = {
   "28.02.2026": ["rating-28-02-2026.png", "rating-28-02-2026-2.png", "rating-28-02-2026-3.png", "rating-28-02-2026-4.png", "rating-28-02-2026-5.png", "rating-28-02-2026-6.png", "rating-28-02-2026-7.png", "rating-28-02-2026-8.png", "rating-28-02-2026-9.png"],
   "15.02.2026": ["rating-15-02-2026.png", "rating-15-02-2026-2.png", "rating-15-02-2026-3.png", "rating-15-02-2026-4.png"],
   "16.02.2026": ["rating-16-02-2026.png", "rating-16-02-2026-2.png", "rating-16-02-2026-3.png"],
-  "13.02.2026": ["rating-13-02-2026.png", "rating-13-02-2026-2.png", "rating-13-02-2026-3.png"],
+  // 13.02: порядок под WINTER_RATING_TOURNAMENTS_BY_DATE (15:00, 17:00, 23:00)
+  "13.02.2026": ["rating-13-02-2026-2.png", "rating-13-02-2026.png", "rating-13-02-2026-3.png"],
   "14.02.2026": ["rating-14-02-2026.png", "rating-14-02-2026-2.png", "rating-14-02-2026-3.png", "rating-14-02-2026-4.png"],
   "12.02.2026": ["rating-12-02-2026.png", "rating-12-02-2026-2.png", "rating-12-02-2026-3.png", "rating-12-02-2026-4.png", "rating-12-02-2026-5.png"],
   "11.02.2026": ["rating-11-02-2026.png", "rating-11-02-2026-2.png", "rating-11-02-2026-3.png", "rating-11-02-2026-4.png", "rating-11-02-2026-5.png", "rating-11-02-2026-6.png"],
@@ -1461,7 +1462,8 @@ var WINTER_RATING_IMAGES = {
   "03.02.2026": ["rating-03-02-2026.png", "rating-03-02-2026-2.png"],
   "02.02.2026": ["rating-02-02-2026.png", "rating-02-02-2026-2.png", "rating-02-02-2026-3.png"],
   "01.02.2026": ["rating-01-02-2026.png", "rating-01-02-2026-2.png", "rating-01-02-2026-3.png", "rating-01-02-2026-4.png", "rating-01-02-2026-5.png", "rating-01-02-2026-6.png", "rating-01-02-2026-7.png"],
-  "31.01.2026": ["rating-31-01-2026.png", "rating-31-01-2026-2.png", "rating-31-01-2026-3.png"],
+  // 31.01: 4 турнира; -4.png — плейсхолдер для 00:00 (замените скрином ночного турнира)
+  "31.01.2026": ["rating-31-01-2026.png", "rating-31-01-2026-2.png", "rating-31-01-2026-3.png", "rating-31-01-2026-4.png"],
   "30.01.2026": ["rating-30-01-2026.png", "rating-30-01-2026-2.png", "rating-30-01-2026-3.png", "rating-30-01-2026-4.png"],
   "29.01.2026": ["rating-29-01-2026.png", "rating-29-01-2026-2.png", "rating-29-01-2026-3.png", "rating-29-01-2026-4.png"],
   "28.01.2026": ["rating-28-01-2026.png"],
@@ -1481,11 +1483,13 @@ var WINTER_RATING_IMAGES = {
   "14.01.2026": ["rating-14-01-2026.png", "rating-14-01-2026-2.png", "rating-14-01-2026-3.png"],
   "13.01.2026": ["rating-13-01-2026.png", "rating-13-01-2026-2.png", "rating-13-01-2026-3.png", "rating-13-01-2026-4.png", "rating-13-01-2026-5.png", "rating-13-01-2026-6.png"],
   "12.01.2026": ["rating-12-01-2026.png", "rating-12-01-2026-2.png", "rating-12-01-2026-3.png", "rating-12-01-2026-4.png", "rating-12-01-2026-5.png"],
-  "11.01.2026": ["rating-11-01-2026.png", "rating-11-01-2026-2.png", "rating-11-01-2026-3.png", "rating-11-01-2026-4.png"],
-  "10.01.2026": ["rating-10-01-2026.png", "rating-10-01-2026-2.png", "rating-10-01-2026-3.png", "rating-10-01-2026-4.png", "rating-10-01-2026-5.png", "rating-10-01-2026-6.png", "rating-10-01-2026-7.png"],
+  // 11–10.01: имена -N.png не по времени; массив переупорядочен под WINTER_RATING_TOURNAMENTS_BY_DATE
+  "11.01.2026": ["rating-11-01-2026-3.png", "rating-11-01-2026-4.png", "rating-11-01-2026-2.png", "rating-11-01-2026.png"],
+  "10.01.2026": ["rating-10-01-2026-3.png", "rating-10-01-2026-2.png", "rating-10-01-2026-7.png", "rating-10-01-2026-6.png", "rating-10-01-2026.png", "rating-10-01-2026-5.png", "rating-10-01-2026-4.png"],
   "09.01.2026": ["rating-09-01-2026.png", "rating-09-01-2026-2.png", "rating-09-01-2026-3.png", "rating-09-01-2026-4.png", "rating-09-01-2026-5.png"],
   "08.01.2026": ["rating-08-01-2026.png", "rating-08-01-2026-2.png", "rating-08-01-2026-3.png"],
-  "07.01.2026": ["rating-07-01-2026.png", "rating-07-01-2026-2.png", "rating-07-01-2026-3.png", "rating-07-01-2026-4.png", "rating-07-01-2026-5.png"],
+  // 07.01: порядок под WINTER_RATING_TOURNAMENTS_BY_DATE (15:00, 00:00, 18:00, 20:00, 17:00)
+  "07.01.2026": ["rating-07-01-2026-3.png", "rating-07-01-2026-4.png", "rating-07-01-2026-5.png", "rating-07-01-2026.png", "rating-07-01-2026-2.png"],
   "06.01.2026": ["rating-06-01-2026.png", "rating-06-01-2026-2.png", "rating-06-01-2026-3.png"],
   "05.01.2026": ["rating-05-01-2026.png", "rating-05-01-2026-2.png", "rating-05-01-2026-3.png", "rating-05-01-2026-4.png"],
   "04.01.2026": ["rating-04-01-2026.png", "rating-04-01-2026-2.png", "rating-04-01-2026-3.png", "rating-04-01-2026-4.png", "rating-04-01-2026-5.png"],
@@ -1627,19 +1631,19 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "12:00", players: [{ nick: "hakasik", place: 2, points: 110, reward: 14000 }, { nick: "ПокерМанки", place: 3, points: 90, reward: 9300 }, { nick: "<Amaliya>", place: 5, points: 0, reward: 0 }, { nick: "Waaar", place: 6, points: 0, reward: 0 }, { nick: "DIVGO", place: 11, points: 0, reward: 0 }] },
   ],
   "11.01.2026": [
-    { time: "10:00", name: "CRAZY MAIN EVENT", players: [{ nick: "Waaar", place: 1, points: 90, reward: 414575 }] },
     { time: "00:00", players: [{ nick: "Феникс", place: 2, points: 110, reward: 18495 }, { nick: "ArsenalFan", place: 4, points: 70, reward: 12731 }, { nick: "cap888881", place: 39, points: 0, reward: 1425 }, { nick: "Mike Tyson", place: 15, points: 0, reward: 858 }, { nick: "Co4Hblu", place: 0, points: 0, reward: 0 }] },
+    { time: "10:00", name: "CRAZY MAIN EVENT", players: [{ nick: "Waaar", place: 1, points: 90, reward: 414575 }] },
     { time: "15:00", players: [{ nick: "Em13!!", place: 5, points: 60, reward: 2343 }, { nick: "Зараза", place: 8, points: 0, reward: 0 }, { nick: "kriaks", place: 14, points: 0, reward: 0 }, { nick: "Mike Tyson", place: 18, points: 0, reward: 0 }, { nick: "NINT3NDO", place: 0, points: 0, reward: 0 }] },
     { time: "20:00", players: [{ nick: "ПокерМанки", place: 2, points: 110, reward: 20525 }, { nick: "WiNifly", place: 4, points: 70, reward: 10313 }, { nick: "Coo1er91", place: 6, points: 50, reward: 1800 }, { nick: "Baldendi", place: 8, points: 0, reward: 0 }, { nick: "<Amaliya>", place: 11, points: 0, reward: 900 }] },
   ],
   "10.01.2026": [
-    { time: "19:00", players: [{ nick: "Sarmat1305", place: 3, points: 90, reward: 491248 }, { nick: "Simba33", place: 0, points: 0, reward: 0 }, { nick: "cap888881", place: 0, points: 0, reward: 0 }, { nick: "Mike Tyson", place: 0, points: 0, reward: 0 }] },
+    { time: "12:00", players: [{ nick: "Waaar", place: 1, points: 135, reward: 15000 }, { nick: "Rom4ik", place: 3, points: 90, reward: 6000 }, { nick: "king00001", place: 4, points: 0, reward: 0 }, { nick: "ПокерМанки", place: 5, points: 0, reward: 0 }, { nick: "hakasik", place: 6, points: 0, reward: 0 }] },
+    { time: "17:00", players: [{ nick: "vnukshtukatura", place: 2, points: 110, reward: 18780 }, { nick: "Rom4ik", place: 3, points: 90, reward: 11200 }, { nick: "Coo1er91", place: 9, points: 0, reward: 0 }, { nick: "DIVGO", place: 10, points: 0, reward: 0 }, { nick: "ПокерМанки", place: 15, points: 0, reward: 0 }] },
     { time: "18:00", players: [{ nick: "vnukshtukatura", place: 4, points: 70, reward: 64538 }, { nick: "siropchik", place: 0, points: 0, reward: 0 }, { nick: "Art555", place: 0, points: 0, reward: 0 }, { nick: "NINT3NDO", place: 0, points: 0, reward: 0 }, { nick: "outsider", place: 0, points: 0, reward: 0 }] },
+    { time: "19:00", players: [{ nick: "Sarmat1305", place: 3, points: 90, reward: 491248 }, { nick: "Simba33", place: 0, points: 0, reward: 0 }, { nick: "cap888881", place: 0, points: 0, reward: 0 }, { nick: "Mike Tyson", place: 0, points: 0, reward: 0 }] },
+    { time: "20:00", players: [{ nick: "Coo1er91", place: 1, points: 135, reward: 64346 }, { nick: "Prushnik", place: 6, points: 50, reward: 9590 }, { nick: "Pentagrammall", place: 10, points: 0, reward: 844 }, { nick: "nerrielle", place: 11, points: 0, reward: 2700 }, { nick: "Salamandr", place: 13, points: 0, reward: 1181 }] },
     { time: "21:00", players: [{ nick: "Co4Hblu", place: 2, points: 110, reward: 23960 }, { nick: "Зараза", place: 3, points: 90, reward: 19211 }, { nick: "Em13!!", place: 4, points: 70, reward: 16698 }, { nick: "Mike Tyson", place: 24, points: 0, reward: 1418 }, { nick: "kriaks", place: 61, points: 0, reward: 0 }] },
     { time: "23:00", players: [{ nick: "Фокс", place: 1, points: 135, reward: 48276 }, { nick: "Mike Tyson", place: 8, points: 0, reward: 1895 }, { nick: "vnukshtukatura", place: 0, points: 0, reward: 0 }, { nick: "Феникс", place: 0, points: 0, reward: 0 }] },
-    { time: "20:00", players: [{ nick: "Coo1er91", place: 1, points: 135, reward: 64346 }, { nick: "Prushnik", place: 6, points: 50, reward: 9590 }, { nick: "Pentagrammall", place: 10, points: 0, reward: 844 }, { nick: "nerrielle", place: 11, points: 0, reward: 2700 }, { nick: "Salamandr", place: 13, points: 0, reward: 1181 }] },
-    { time: "17:00", players: [{ nick: "vnukshtukatura", place: 2, points: 110, reward: 18780 }, { nick: "Rom4ik", place: 3, points: 90, reward: 11200 }, { nick: "Coo1er91", place: 9, points: 0, reward: 0 }, { nick: "DIVGO", place: 10, points: 0, reward: 0 }, { nick: "ПокерМанки", place: 15, points: 0, reward: 0 }] },
-    { time: "12:00", players: [{ nick: "Waaar", place: 1, points: 135, reward: 15000 }, { nick: "Rom4ik", place: 3, points: 90, reward: 6000 }, { nick: "king00001", place: 4, points: 0, reward: 0 }, { nick: "ПокерМанки", place: 5, points: 0, reward: 0 }, { nick: "hakasik", place: 6, points: 0, reward: 0 }] },
   ],
   "09.01.2026": [
     { time: "00:00", players: [{ nick: "vnukshtukatura", place: 1, points: 135, reward: 67560 }, { nick: "Em13!!", place: 0, points: 0, reward: 0 }, { nick: "Переездыч", place: 0, points: 0, reward: 0 }, { nick: "Бабник", place: 0, points: 0, reward: 0 }, { nick: "n1kk1ex", place: 0, points: 0, reward: 0 }] },
@@ -2038,6 +2042,24 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "IMG_7809-954411fb-fd01-484c-8f4a-5615c7a20b1b.png",
     "IMG_7808-6673993a-3e38-41a2-9785-1bf683611fae.png",
     "IMG_7807-1ff34e0d-24a7-405c-9ba6-21cfd9ea2883.png"
+  ],
+  "18.03.2026": [
+    "IMG_7871-77d662ce-5536-41b7-9acc-8c4a9e0fef0c.png",
+    "IMG_7869-7defa8f5-c24f-4b92-b90c-9f46b1f29c1e.png",
+    "IMG_7864-91a41ed8-6107-4574-a376-f0be012ecefb.png",
+    "IMG_7868-09f652d0-ea87-46e5-ab3a-5d1824184662.png",
+    "IMG_7862-3fb88667-00f5-4704-bc98-3a9324a6c4d7.png",
+    "IMG_7867-2c792a41-844e-491f-a55a-ae7d06d3146d.png",
+    "IMG_7860-4b343450-bf87-4c72-95fd-3264646c4579.png",
+    "IMG_7866-005d7c49-4f56-41cc-a92e-65739f200b9d.png"
+  ],
+  "19.03.2026": [
+    "IMG_7878-314ec50e-ea77-471f-b3a7-89f04b69fa81.png",
+    "IMG_7877-d72519a5-d3e8-41b6-85e4-797e0a0fc8a4.png",
+    "IMG_7874-3003bf77-ed25-4624-ad7a-e93dd46ec643.png",
+    "IMG_7873-4c8637bb-6a78-4e45-8c9d-5f5c282487fc.png",
+    "IMG_7876-202ff629-c83b-4c6a-aeda-04478ab7ae54.png",
+    "IMG_7872-bee2000c-88b5-4a48-931f-df60cb7d1bea.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2070,9 +2092,18 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "IMG_7805-69b2c55f-0045-4627-9a6d-5e2cdffefd45.png",
     "IMG_7812-5579eb6a-6531-4c28-bd65-12e8c03509cd.png",
     "IMG_7805-4aadc6ad-fb75-4dc1-85df-80d52482be74.png"
+  ],
+  "18.03.2026": [
+    "IMG_7870-129e47f5-c24c-4e52-85d9-bb5d2bb97c18.png",
+    "IMG_7863-3a0fb1eb-a07b-47d3-af8b-8e7d3c39c121.png",
+    "IMG_7861-f93e1a2a-86cb-43a1-9839-125dbdb374ae.png",
+    "IMG_7859-ab07511d-ac65-40e2-9dc5-35e1f3fbec69.png"
+  ],
+  "19.03.2026": [
+    "IMG_7875-b5d82878-69b9-40b4-8b65-afc03915b672.png"
   ]
 };
-var SPRING_RATING_UPDATED = "17.03.2026";
+var SPRING_RATING_UPDATED = "19.03.2026";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
@@ -2518,6 +2549,131 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "20:00", name: "HR 5000 250K", buyin: 5000, league: 1, players: [
       { nick: "comotd", place: 5, reward: 32957 },
       { nick: "NINT3NDO", place: 9, reward: 8889 }
+    ] }
+  ],
+  "18.03.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 150k", buyin: 20000, league: 1, players: [
+      { nick: "Рыбнадзор", place: 7, reward: 7037 },
+      { nick: "Em13!!", place: 10, reward: 3212 },
+      { nick: "DashMilash", place: 15, reward: 300 },
+      { nick: "nikola233", place: 25, reward: 300 },
+      { nick: "AndrushaMorf", place: 0, reward: 0 }
+    ] },
+    { time: "02:00", name: "Deep Night 20k", buyin: 10000, league: 2, players: [
+      { nick: "Ярый", place: 4, reward: 2215 },
+      { nick: "XP3904233", place: 12, reward: 0 },
+      { nick: "Жуля", place: 0, reward: 0 }
+    ] },
+    { time: "10:00", name: "DV Turbo 500 90K", buyin: 500, league: 1, players: [
+      { nick: "Фокс", place: 6, reward: 6004 },
+      { nick: "chazyiool", place: 0, reward: 0 },
+      { nick: "asianflushie", place: 42, reward: 0 },
+      { nick: "AndrushaMorf", place: 52, reward: 0 },
+      { nick: "comotd", place: 25, reward: 0 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 17600, league: 1, players: [
+      { nick: "Рамиль01", place: 1, reward: 22000 },
+      { nick: "BOTEZGAMBIT", place: 4, reward: 0 },
+      { nick: "Waaar", place: 6, reward: 0 },
+      { nick: "MilkyWay77", place: 7, reward: 0 },
+      { nick: "FrankL", place: 13, reward: 0 }
+    ] },
+    { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
+      { nick: "хер вам)))))", place: 1, reward: 19223 },
+      { nick: "siropchik", place: 4, reward: 3926 },
+      { nick: "nikola233", place: 0, reward: 0 },
+      { nick: "Рыбнадзор", place: 8, reward: 0 },
+      { nick: "Lesnov", place: 18, reward: 0 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 13600, league: 1, players: [
+      { nick: "FrankL", place: 3, reward: 12000 },
+      { nick: "ПокерМанки", place: 4, reward: 0 },
+      { nick: "king00001", place: 6, reward: 0 },
+      { nick: "Waaar", place: 8, reward: 0 },
+      { nick: "Рамиль01", place: 18, reward: 0 }
+    ] },
+    { time: "18:00", name: "Freeroll 1 MLN", buyin: 1000000, league: 1, players: [
+      { nick: "Дикий", place: 2, reward: 144305 },
+      { nick: "XP3864042", place: 8, reward: 20615 },
+      { nick: "H744HH", place: 18, reward: 8761 },
+      { nick: "36myxa36", place: 62, reward: 1958 },
+      { nick: "DashMilash", place: 64, reward: 1958 }
+    ] },
+    { time: "20:00", name: "HOK", buyin: 41000, league: 1, players: [
+      { nick: "WiNifly", place: 4, reward: 4300 },
+      { nick: "Rifa", place: 7, reward: 675 },
+      { nick: "Waaar", place: 11, reward: 0 },
+      { nick: "Аспирин", place: 12, reward: 1012.5 },
+      { nick: "ПокерМанки", place: 16, reward: 0 }
+    ] },
+    { time: "23:00", name: "Night magic 100K", buyin: 100000, league: 1, players: [
+      { nick: "Бабник", place: 3, reward: 6100 },
+      { nick: "Рыбнадзор", place: 7, reward: 3050 },
+      { nick: "Em13!!", place: 18, reward: 0 },
+      { nick: "Чеб43", place: 31, reward: 0 },
+      { nick: "Фокс", place: 34, reward: 0 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 2800, league: 2, players: [
+      { nick: "Чеб43", place: 1, reward: 2890 },
+      { nick: "tatarin_1", place: 5, reward: 0 },
+      { nick: "Tanechka", place: 6, reward: 0 },
+      { nick: "Аспирин", place: 7, reward: 0 },
+      { nick: "XORTYRETSKOGO", place: 10, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Среды", buyin: 33000, league: 2, players: [
+      { nick: "n1kk1ex", place: 5, reward: 3520 },
+      { nick: "RnD-BuB", place: 10, reward: 840 },
+      { nick: "Tanechka", place: 11, reward: 780 },
+      { nick: "AliPetuhov", place: 17, reward: 730 },
+      { nick: "ЧУРменя", place: 20, reward: 730 }
+    ] },
+    { time: "21:00", name: "MKO 7MAX", buyin: 9900, league: 2, players: [
+      { nick: "WiNifly", place: 1, reward: 9415 },
+      { nick: "TonniHalf", place: 2, reward: 3855 },
+      { nick: "SantaClauS", place: 3, reward: 1730 },
+      { nick: "МОРПЕН", place: 4, reward: 0 },
+      { nick: "Евгений.А", place: 5, reward: 0 }
+    ] }
+  ],
+  "19.03.2026": [
+    { time: "06:00", name: "Tai 7 1/2 KO 20k", buyin: 20000, league: 1, players: [
+      { nick: "shockin", place: 1, reward: 3066 },
+      { nick: "хер вам)))))", place: 2, reward: 4326 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 4700, league: 2, players: [
+      { nick: "mr.Fox", place: 1, reward: 3970 },
+      { nick: "zagrebnagreb", place: 2, reward: 2370 },
+      { nick: "Банк_Псб", place: 4, reward: 0 },
+      { nick: "AlenaSt", place: 5, reward: 0 },
+      { nick: "Чеб43", place: 6, reward: 0 }
+    ] },
+    { time: "16:00", name: "HOLDEM 6+ GTD 40K", buyin: 10000, league: 1, players: [
+      { nick: "comotd", place: 3, reward: 6000 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 28800, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 23000 },
+      { nick: "MilkyWay77", place: 4, reward: 7400 },
+      { nick: "WiNifly", place: 5, reward: 6800 },
+      { nick: "Milan", place: 8, reward: 0 },
+      { nick: "Рамиль01", place: 13, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Четверга", buyin: 95000, league: 1, players: [
+      { nick: "Coo1er91", place: 1, reward: 95100 },
+      { nick: "GetHigh", place: 10, reward: 7600 },
+      { nick: "kriak", place: 6, reward: 5300 },
+      { nick: "Waaar", place: 7, reward: 4200 },
+      { nick: "WiNifly", place: 9, reward: 2500 }
+    ] },
+    { time: "18:00", name: "SHR 175$ - 2/3 PKO", buyin: 17500, league: 1, players: [
+      { nick: "Фокс", place: 8, reward: 27283 },
+      { nick: "NINT3NDO", place: 0, reward: 0 }
+    ] },
+    { time: "20:00", name: "HOK", buyin: 43000, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 31096.89 },
+      { nick: "ПокерМанки", place: 3, reward: 7209.37 },
+      { nick: "Ферапонт", place: 5, reward: 7212.5 },
+      { nick: "МОРПЕН", place: 6, reward: 2053.12 },
+      { nick: "WiNifly", place: 10, reward: 0 }
     ] }
   ]
 };
