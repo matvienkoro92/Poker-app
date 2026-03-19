@@ -1392,14 +1392,10 @@ function runGazetteAndTasksInit() {
   }
   if (startParam && startParam.indexOf("streams_") === 0) {
     var streamsRoomId = startParam.replace("streams_", "");
+    // Сохраняем комнату для автозапуска просмотра после загрузки экрана `streams`.
+    window.__pendingStreamsRoomId = streamsRoomId;
     setTimeout(function () {
       if (typeof setView === "function") setView("streams");
-      setTimeout(function () {
-        var roomInput = document.getElementById("streamsRoomInput");
-        if (roomInput && streamsRoomId) roomInput.value = streamsRoomId;
-        var watchBtn = document.getElementById("streamsWatchBtn");
-        if (watchBtn) watchBtn.click();
-      }, 300);
     }, 0);
   }
   if (window.location.hash === "#streams") {
@@ -1415,21 +1411,9 @@ function runGazetteAndTasksInit() {
     if (urlStart && urlStart.indexOf("streams_") === 0) {
       // Поддержка ссылок вида: startapp=streams_<ROOM_ID> в query.
       var streamsRoomIdFromQuery = urlStart.replace("streams_", "");
+      window.__pendingStreamsRoomId = streamsRoomIdFromQuery;
       setTimeout(function () {
         if (typeof setView === "function") setView("streams");
-        setTimeout(function () {
-          try {
-            if (typeof window.startStreamsWatchByRoomId === "function") {
-              window.startStreamsWatchByRoomId(streamsRoomIdFromQuery);
-              return;
-            }
-          } catch (e) {}
-          // Fallback: если deep-link вызвали раньше, чем initStreams повесил обработчики.
-          var roomInput = document.getElementById("streamsRoomInput");
-          if (roomInput && streamsRoomIdFromQuery) roomInput.value = streamsRoomIdFromQuery;
-          var watchBtn = document.getElementById("streamsWatchBtn");
-          if (watchBtn) watchBtn.click();
-        }, 300);
       }, 0);
     } else if (urlStart === "stream") {
       // Legacy: startapp=stream
@@ -7336,6 +7320,16 @@ function initStreams() {
 
   // Даем возможность deep-link вызывать просмотр напрямую.
   window.startStreamsWatchByRoomId = startStreamsWatchByRoomId;
+
+  // Deep-link автозапуск просмотра (без программных click),
+  // чтобы не зависеть от тайминга и не триггерить broadcast.
+  try {
+    if (window.__pendingStreamsRoomId) {
+      var pendingRoomId = window.__pendingStreamsRoomId;
+      window.__pendingStreamsRoomId = null;
+      setTimeout(function () { startStreamsWatchByRoomId(pendingRoomId); }, 0);
+    }
+  } catch (e) {}
 
   if (openBrowserBtn) {
     openBrowserBtn.addEventListener("click", function () {
