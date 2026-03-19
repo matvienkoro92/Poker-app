@@ -1386,7 +1386,9 @@ function runGazetteAndTasksInit() {
     setTimeout(function () { if (typeof setView === "function") setView("raffles"); }, 0);
   }
   if (startParam === "stream") {
-    setTimeout(function () { if (typeof setView === "function") setView("home"); }, 0);
+    // Legacy deep link: некоторые ссылки/приглашения могут приходить как `startapp=stream`.
+    // Чтобы пользователь попадал в нужный экран, отправляем в `streams`.
+    setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
   }
   if (startParam && startParam.indexOf("streams_") === 0) {
     var streamsRoomId = startParam.replace("streams_", "");
@@ -1406,7 +1408,7 @@ function runGazetteAndTasksInit() {
     }, 0);
   }
   if (window.location.hash === "#stream") {
-    setTimeout(function () { if (typeof setView === "function") setView("home"); }, 0);
+    setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
   }
   try {
     var urlStart = typeof location !== "undefined" && location.search ? new URLSearchParams(location.search).get("startapp") : null;
