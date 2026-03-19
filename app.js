@@ -14519,6 +14519,7 @@ updateVisitorCounter();
   }
   function fetchVisitorsAdminStats(monthValue) {
     var elUnique = document.getElementById("visitorsAdminUnique");
+    var elTotal = document.getElementById("visitorsAdminTotal");
     var elGazette = document.getElementById("visitorsAdminGazette");
     var elRating = document.getElementById("visitorsAdminRating");
     var elRaffle = document.getElementById("visitorsAdminRaffle");
@@ -14526,13 +14527,13 @@ updateVisitorCounter();
     var initData = tg && tg.initData ? tg.initData : "";
     if (!base || !initData) return;
     var url = base + "/api/visitors-list?initData=" + encodeURIComponent(initData);
-    if (monthValue) url += "&month=" + encodeURIComponent(monthValue);
     fetch(url)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok || !data.isAdmin) return;
         visitorsAdminData = data;
-        if (elUnique) elUnique.textContent = String(data.uniqueInSelectedMonth != null ? data.uniqueInSelectedMonth : data.uniqueThisMonth != null ? data.uniqueThisMonth : "—");
+        if (elUnique) elUnique.textContent = String(data.unique != null ? data.unique : data.uniqueThisMonth != null ? data.uniqueThisMonth : "—");
+        if (elTotal) elTotal.textContent = String(data.total != null ? data.total : "—");
         if (elGazette) elGazette.textContent = String(data.gazetteSubscribers != null ? data.gazetteSubscribers : "—");
         if (elRating) elRating.textContent = String(data.ratingSubscribers != null ? data.ratingSubscribers : "—");
         if (elRaffle) elRaffle.textContent = String(data.raffleSubscribers != null ? data.raffleSubscribers : "—");
@@ -14544,19 +14545,19 @@ updateVisitorCounter();
     var listWrap = document.getElementById("visitorsAdminListWrap");
     var listEl = document.getElementById("visitorsAdminList");
     var elUnique = document.getElementById("visitorsAdminUnique");
+    var elTotal = document.getElementById("visitorsAdminTotal");
     var elGazette = document.getElementById("visitorsAdminGazette");
     var elRating = document.getElementById("visitorsAdminRating");
     var elRaffle = document.getElementById("visitorsAdminRaffle");
-    var monthSelect = document.getElementById("visitorsAdminMonthFilter");
     if (!modal || !listWrap || !listEl) return;
     listWrap.classList.add("visitors-admin-modal__list-wrap--hidden");
     listEl.innerHTML = "";
     if (elUnique) elUnique.textContent = "—";
+    if (elTotal) elTotal.textContent = "—";
     if (elGazette) elGazette.textContent = "—";
     if (elRating) elRating.textContent = "—";
     if (elRaffle) elRaffle.textContent = "—";
     visitorsAdminData = null;
-    fillMonthFilterSelect();
     ["Visitors", "Gazette", "Rating", "Raffle"].forEach(function (name) {
       var btn = document.getElementById("visitorsAdminGroup" + name);
       updateGroupBtnState(btn, false);
@@ -14565,8 +14566,7 @@ updateVisitorCounter();
     var base = getApiBase();
     var initData = tg && tg.initData ? tg.initData : "";
     if (!base || !initData) return;
-    var monthValue = monthSelect ? monthSelect.value : null;
-    fetchVisitorsAdminStats(monthValue);
+    fetchVisitorsAdminStats(null);
   }
 
   function closeVisitorsModal() {
@@ -14623,17 +14623,16 @@ updateVisitorCounter();
     }
     var base = getApiBase();
     var initData = tg && tg.initData ? tg.initData : "";
-    var monthSelect = document.getElementById("visitorsAdminMonthFilter");
-    var allTimeCheckbox = document.getElementById("visitorsAdminAllTimeFilter");
-    var month = allTimeCheckbox && allTimeCheckbox.checked ? "all" : monthSelect ? monthSelect.value : null;
+    var groupsForPayload = getSelectedBroadcastGroups();
+    var month = groupsForPayload && groupsForPayload.indexOf("visitors") >= 0 ? "all" : undefined;
     if (!base || !initData) return;
     if (sendBtn) sendBtn.disabled = true;
 
     function doSend(imageBase64, imageMimeType) {
       var payload = {
         initData: initData,
-        groups: getSelectedBroadcastGroups(),
-        month: month || undefined,
+        groups: groupsForPayload,
+        month: month,
         text: text,
       };
       if (imageBase64) payload.imageBase64 = imageBase64;
@@ -14770,7 +14769,6 @@ updateVisitorCounter();
     var showListBtn = document.getElementById("visitorsAdminShowListBtn");
     var closeBtn = document.getElementById("visitorsAdminModalClose");
     var backdrop = document.getElementById("visitorsAdminModalBackdrop");
-    var monthFilter = document.getElementById("visitorsAdminMonthFilter");
     var broadcastBtn = document.getElementById("visitorsAdminBroadcastBtn");
     var broadcastModalClose = document.getElementById("visitorsBroadcastModalClose");
     var broadcastModalBackdrop = document.getElementById("visitorsBroadcastModalBackdrop");
@@ -14779,20 +14777,6 @@ updateVisitorCounter();
     if (showListBtn) showListBtn.addEventListener("click", renderVisitorsList);
     if (closeBtn) closeBtn.addEventListener("click", closeVisitorsModal);
     if (backdrop) backdrop.addEventListener("click", closeVisitorsModal);
-    if (monthFilter) monthFilter.addEventListener("change", function () {
-      fetchVisitorsAdminStats(monthFilter.value || null);
-    });
-    var allTimeCb = document.getElementById("visitorsAdminAllTimeFilter");
-    if (allTimeCb) {
-      allTimeCb.addEventListener("change", function () {
-        if (monthFilter) monthFilter.disabled = !!this.checked;
-        if (!this.checked) fetchVisitorsAdminStats(monthFilter.value || null);
-        else {
-          var elUnique = document.getElementById("visitorsAdminUnique");
-          if (elUnique) elUnique.textContent = "—";
-        }
-      });
-    }
     if (broadcastBtn) broadcastBtn.addEventListener("click", openBroadcastModal);
     if (broadcastModalClose) broadcastModalClose.addEventListener("click", closeBroadcastModal);
     if (broadcastModalBackdrop) broadcastModalBackdrop.addEventListener("click", closeBroadcastModal);
