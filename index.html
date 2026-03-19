@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-gidrograff-kriak.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=20" />
+    <link rel="stylesheet" href="./styles.css?v=21" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; }
@@ -88,6 +88,14 @@
     />
   </head>
   <body data-view="home">
+    <!-- Экран загрузки до готовности страницы (UX) -->
+    <div id="appBootOverlay" class="app-boot-overlay" role="status" aria-live="polite" aria-busy="true">
+      <div class="app-boot-overlay__panel">
+        <div class="app-boot-overlay__title">Poker21</div>
+        <div class="app-boot-overlay__spinner" aria-hidden="true"></div>
+        <p class="app-boot-overlay__text">Загрузка…</p>
+      </div>
+    </div>
     <!-- Радио: чил, американские 90‑е или Радио 7 (переключение одной кнопкой) -->
     <audio id="chillRadio" preload="metadata" loop crossorigin="anonymous" aria-hidden="true"></audio>
     <div id="app" class="app app--view-home" data-telegram-app-url="https://t.me/Poker_dvatuza_bot/DvaTuza" data-api-base="https://poker-app-ebon.vercel.app">
@@ -3336,7 +3344,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=34"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=34"></script>
+    <script src="./app.js?v=35"></script>
   </body>
 </html>
 

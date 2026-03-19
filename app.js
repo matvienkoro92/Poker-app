@@ -2209,6 +2209,32 @@ if (tg) {
   showUnauthorized();
 })();
 
+// Скрыть экран загрузки после готовности страницы (не белый экран при открытии)
+(function initAppBootOverlay() {
+  function hideBootOverlay() {
+    var el = document.getElementById("appBootOverlay");
+    if (!el || el.classList.contains("app-boot-overlay--hidden")) return;
+    el.classList.add("app-boot-overlay--hidden");
+    el.setAttribute("aria-hidden", "true");
+    el.setAttribute("aria-busy", "false");
+    setTimeout(function () {
+      try {
+        el.remove();
+      } catch (e) {}
+    }, 480);
+  }
+  function schedule() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        setTimeout(hideBootOverlay, 40);
+      });
+    });
+  }
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule);
+  setTimeout(hideBootOverlay, 5000);
+})();
+
 updateProfileUserName();
 
 // Логика кнопки "Начать игру"
@@ -14653,6 +14679,7 @@ updateVisitorCounter();
     var textEl = document.getElementById("visitorsBroadcastText");
     var fileEl = document.getElementById("visitorsBroadcastImageFile");
     var sendBtn = document.getElementById("visitorsBroadcastSendBtn");
+    var sendBtnLabel = sendBtn && sendBtn.textContent ? sendBtn.textContent.trim() : "Отправить";
     var text = (textEl && textEl.value || "").trim();
     var file = fileEl && fileEl.files && fileEl.files[0];
     if (!text && !file) {
@@ -14665,7 +14692,17 @@ updateVisitorCounter();
     var groupsForPayload = getSelectedBroadcastGroups();
     var month = groupsForPayload && groupsForPayload.indexOf("visitors") >= 0 ? "all" : undefined;
     if (!base || !initData) return;
-    if (sendBtn) sendBtn.disabled = true;
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Отправляем…";
+    }
+
+    function restoreSendBtn() {
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = sendBtnLabel;
+      }
+    }
 
     function doSend(imageBase64, imageMimeType) {
       var payload = {
@@ -14683,7 +14720,7 @@ updateVisitorCounter();
       })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (sendBtn) sendBtn.disabled = false;
+        restoreSendBtn();
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (data && data.ok) {
           var msg =
@@ -14698,9 +14735,10 @@ updateVisitorCounter();
         }
       })
       .catch(function () {
-        if (sendBtn) sendBtn.disabled = false;
+        restoreSendBtn();
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ошибка сети"); else alert("Ошибка сети");
+        var netMsg = "Нет связи с сервером. Проверьте интернет и попробуйте снова.";
+        if (tg && tg.showAlert) tg.showAlert(netMsg); else alert(netMsg);
       });
     }
     if (file) {
@@ -14713,7 +14751,7 @@ updateVisitorCounter();
         doSend(base64, mime);
       };
       reader.onerror = function () {
-        if (sendBtn) sendBtn.disabled = false;
+        restoreSendBtn();
         var t = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (t && t.showAlert) t.showAlert("Не удалось прочитать файл"); else alert("Не удалось прочитать файл");
       };
