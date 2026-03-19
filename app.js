@@ -10559,12 +10559,6 @@ function initChat() {
   var convTitleId = document.getElementById("chatConvTitleId");
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087", "tg_roman"];
   var messagesEl = document.getElementById("chatMessages");
-  var personalConvHeaderEl = convTitle ? convTitle.closest(".chat-conv-header") : null;
-  function updatePersonalConvHeaderVisibility() {
-    if (!personalConvHeaderEl || !messagesEl || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
-    var hasMessages = messagesEl.querySelector(".chat-msg") !== null;
-    personalConvHeaderEl.classList.toggle("chat-conv-header--over-messages", hasMessages);
-  }
   var inputEl = document.getElementById("chatInput");
   var sendBtn = document.getElementById("chatSendBtn");
   var switcherBtn = document.getElementById("chatSwitcherBtn");
@@ -12108,7 +12102,9 @@ function initChat() {
     else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
     else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
     else if (text) textContent = linkUrls(linkAppIds(linkTgUsernames(escapeHtml(text).replace(/\n/g, "<br>"))));
-    var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myChatName) + '</span></div><div class="chat-msg__p21-line">P21_ID: —</div><div class="chat-msg__rank-line">Ранг: <span class="chat-msg__rank-card">2♣</span></div>';
+    var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myChatName) + '</span>' +
+      '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
+      '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
     var optBodyClass = "chat-msg__body" + (text && !image && !voice && !document ? " chat-msg__body--has-text" : "");
     var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + time + '</span></div></div></div></div>';
     var wrap = document.createElement("div");
@@ -12289,7 +12285,6 @@ function initChat() {
     }
     updateChatHeaderStats();
     scrollPersonalToBottomOnNextRender = true;
-    requestAnimationFrame(updatePersonalConvHeaderVisibility);
     if (messagesEl) {
       var cached = userId && personalMessagesCache[userId];
       if (Array.isArray(cached) && cached.length) {
@@ -12449,7 +12444,6 @@ function initChat() {
     if (!messagesEl) return;
     if (!messages || messages.length === 0) {
       messagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
-      requestAnimationFrame(updatePersonalConvHeaderVisibility);
       return;
     }
     function personalReceiptHtml(m, isOwn) {
@@ -12509,10 +12503,10 @@ function initChat() {
       var nameStrP = escapeHtml(m.fromName || "Игрок");
       var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
       var rankCardP = m.fromStatus != null ? (levelToStatusCard(m.fromStatus) || String(m.fromStatus)) : "2\u2663";
-      var rankRowP = '<div class="chat-msg__rank-line">Ранг: <span class="chat-msg__rank-card">' + escapeHtml(rankCardP) + '</span></div>';
-      var p21RowP = '<div class="chat-msg__p21-line">P21_ID: ' + p21StrP + "</div>";
-      var nameRowP = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + nameStrP + "</span></div>";
-      var metaBlockP = nameRowP + p21RowP + rankRowP;
+      var nameRowP = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + nameStrP + "</span>" +
+        '<span class="chat-msg__p21-inline">P21_ID: ' + p21StrP + "</span>" +
+        '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">' + escapeHtml(rankCardP) + "</span></span></div>";
+      var metaBlockP = nameRowP;
       var nameElP = isOwn ? metaBlockP : '<span class="chat-msg__name-block">' + metaBlockP + "</span>";
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtmlP = "";
@@ -12572,7 +12566,6 @@ function initChat() {
       });
     });
     attachContextMenuForOthers(messagesEl, "personal");
-    requestAnimationFrame(updatePersonalConvHeaderVisibility);
   }
 
   function loadMessages() {
@@ -12646,7 +12639,9 @@ function initChat() {
       else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
       else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
       else if (text) textContent = linkUrls(linkAppIds(linkTgUsernames(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
-      var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(nameStr) + '</span></div><div class="chat-msg__p21-line">P21_ID: —</div><div class="chat-msg__rank-line">Ранг: <span class="chat-msg__rank-card">2♣</span></div>';
+      var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(nameStr) + '</span>' +
+        '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
+        '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
       var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !document ? " chat-msg__body--has-text" : "");
       var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
       var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + time + '</span>' + ticks + '</div></div></div></div>';
@@ -12997,7 +12992,6 @@ function initChat() {
       e.stopPropagation();
       showDialogs();
     });
-    if (messagesEl) messagesEl.addEventListener("scroll", updatePersonalConvHeaderVisibility);
     if (findByIdBtn && findByIdInput) {
       function findByIdAndOpen() {
         var raw = (findByIdInput.value || "").trim();

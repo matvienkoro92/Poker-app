@@ -4146,11 +4146,6 @@ img.chat-contact__avatar {
   text-align: left;
   overflow: hidden;
   line-height: 1;
-  transition: opacity 0.2s ease;
-}
-.chat-conv-top .chat-conv-header.chat-conv-header--one-line.chat-conv-header--over-messages {
-  opacity: 0;
-  pointer-events: none;
 }
 .chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-conv-title__name,
 .chat-conv-top .chat-conv-header.chat-conv-header--one-line .chat-title--small {
