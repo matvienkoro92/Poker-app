@@ -7303,6 +7303,8 @@ function initStreams() {
   var remoteWrap = document.getElementById("streamsRemoteWrap");
   var remoteVideo = document.getElementById("streamsRemoteVideo");
   var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
+  var previewFullscreenBtn = document.getElementById("streamsPreviewFullscreenBtn");
+  var remoteFullscreenBtn = document.getElementById("streamsRemoteFullscreenBtn");
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
   if (!startBtn || !previewWrap || !previewVideo) return;
@@ -7318,6 +7320,34 @@ function initStreams() {
   function streamsShowAlert(msg) {
     if (tg && tg.showAlert) tg.showAlert(msg);
     else if (typeof alert === "function") alert(msg);
+  }
+
+  function requestFullscreen(el) {
+    if (!el) return;
+    // iOS Safari
+    if (el.webkitEnterFullscreen) return el.webkitEnterFullscreen();
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    // Standard
+    if (el.requestFullscreen) return el.requestFullscreen();
+  }
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+  }
+
+  function isFullscreenEl(el) {
+    try {
+      return document.fullscreenElement === el || document.webkitFullscreenElement === el;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function toggleFullscreen(el) {
+    if (!el) return;
+    if (isFullscreenEl(el)) exitFullscreen();
+    else requestFullscreen(el);
   }
 
   function pad2(n) {
@@ -7662,6 +7692,28 @@ function initStreams() {
         }
         remoteVideo.srcObject = null;
         remoteWrap.classList.add("streams-remote-wrap--hidden");
+      });
+    }
+  }
+
+  // Fullscreen для превью и remote-видео
+  if (previewFullscreenBtn && previewVideo) {
+    if (!previewFullscreenBtn.__streamsFullscreenHandlerAttached) {
+      previewFullscreenBtn.__streamsFullscreenHandlerAttached = true;
+      previewFullscreenBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFullscreen(previewVideo);
+      });
+    }
+  }
+  if (remoteFullscreenBtn && remoteVideo) {
+    if (!remoteFullscreenBtn.__streamsFullscreenHandlerAttached) {
+      remoteFullscreenBtn.__streamsFullscreenHandlerAttached = true;
+      remoteFullscreenBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFullscreen(remoteVideo);
       });
     }
   }
