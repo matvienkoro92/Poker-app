@@ -15707,3 +15707,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   pointer-events: none;
 }
 
+/* Чат: кнопка отправки/микрофона во время запроса */
+.chat-send-btn.chat-send-btn--waiting {
+  opacity: 0.55;
+  pointer-events: none;
+}
+

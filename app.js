@@ -29,6 +29,10 @@
   }
 })();
 
+/** Единый текст при проблемах с сетью (показываем пользователю) */
+var POKER_NET_ERR =
+  "Нет связи с сервером. Проверьте интернет и попробуйте снова.";
+
 (function initRadioToggle() {
   var radio = document.getElementById("chillRadio");
   var btn = document.getElementById("radioToggle");
@@ -570,10 +574,7 @@ function runGazetteAndTasksInit() {
           }
         })
         .catch(function () {
-          if (gazetteNotifySubsHint) {
-            gazetteNotifySubsHint.textContent =
-              "Ошибка сети при отправке рассылки.";
-          }
+          if (gazetteNotifySubsHint) gazetteNotifySubsHint.textContent = POKER_NET_ERR;
         })
         .finally(function () {
           btn.disabled = false;
@@ -6878,7 +6879,7 @@ function initProfileP21Id() {
       })
       .catch(function () {
         if (feedback) {
-          feedback.textContent = "Ошибка сети";
+          feedback.textContent = POKER_NET_ERR;
           feedback.classList.add("profile-save-feedback--visible");
           setTimeout(function () {
             feedback.textContent = "";
@@ -6959,7 +6960,9 @@ function initProfilePersonal() {
       if (feedback) { feedback.textContent = "Откройте в Telegram"; feedback.classList.add("profile-personal__feedback--visible"); setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500); }
       return;
     }
+    var personalSaveLabel = saveBtn.textContent ? saveBtn.textContent.trim() : "Сохранить";
     saveBtn.disabled = true;
+    saveBtn.textContent = "Сохраняем…";
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -6968,6 +6971,7 @@ function initProfilePersonal() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         saveBtn.disabled = false;
+        saveBtn.textContent = personalSaveLabel;
         if (feedback) {
           feedback.textContent = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
           feedback.classList.add("profile-personal__feedback--visible");
@@ -6976,7 +6980,8 @@ function initProfilePersonal() {
       })
       .catch(function () {
         saveBtn.disabled = false;
-        if (feedback) { feedback.textContent = "Ошибка сети"; feedback.classList.add("profile-personal__feedback--visible"); setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500); }
+        saveBtn.textContent = personalSaveLabel;
+        if (feedback) { feedback.textContent = POKER_NET_ERR; feedback.classList.add("profile-personal__feedback--visible"); setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500); }
       });
   }
   saveBtn.addEventListener("click", savePersonal);
@@ -7068,7 +7073,7 @@ function initProfileFriends() {
         });
       })
       .catch(function () {
-        listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Ошибка сети</p>";
+        listEl.innerHTML = "<p class=\"friends-list-modal__empty\">" + POKER_NET_ERR + "</p>";
       });
   });
 }
@@ -7199,7 +7204,9 @@ function initProfileAvatar() {
       if (tg && tg.showAlert) tg.showAlert("Файл не более 5 МБ.");
       return;
     }
+    var avatarBtnLabel = btnEl.textContent ? btnEl.textContent.trim() : "Загрузить аватар";
     btnEl.disabled = true;
+    btnEl.textContent = "Загрузка…";
     resizeImage(file, 200, 200, 0.8, function (dataUrl) {
       var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
       if (base64.length > 100000) {
@@ -7220,6 +7227,7 @@ function initProfileAvatar() {
         .then(function (r) { return r.json(); })
         .then(function (data) {
           btnEl.disabled = false;
+          btnEl.textContent = avatarBtnLabel;
           inputEl.value = "";
           if (data && data.ok && data.avatar) {
             avatarEl.src = data.avatar;
@@ -7231,8 +7239,9 @@ function initProfileAvatar() {
         })
         .catch(function () {
           btnEl.disabled = false;
+          btnEl.textContent = avatarBtnLabel;
           inputEl.value = "";
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     }
   });
@@ -9554,10 +9563,7 @@ function initRaffles() {
           }
         })
         .catch(function () {
-          if (rafflesNotifySubsHint) {
-            rafflesNotifySubsHint.textContent =
-              "Ошибка сети при отправке рассылки.";
-          }
+          if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = POKER_NET_ERR;
         })
         .finally(function () {
           btn.disabled = false;
@@ -9943,7 +9949,7 @@ function initRaffles() {
           })
           .catch(function () {
             raffleCompleteBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert("Ошибка сети при завершении розыгрыша");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
       if (tg && tg.showConfirm) {
@@ -9989,7 +9995,7 @@ function initRaffles() {
           })
           .catch(function () {
             raffleCancelBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert("Ошибка сети при отмене розыгрыша");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
       if (tg && tg.showConfirm) {
@@ -10042,7 +10048,7 @@ function initRaffles() {
         })
         .catch(function () {
           raffleUpdateEndBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети при обновлении времени");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     });
   }
@@ -10079,7 +10085,7 @@ function initRaffles() {
           })
           .catch(function () {
             raffleDeleteBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert("Ошибка сети при удалении розыгрыша");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
       if (tg && tg.showConfirm) {
@@ -10134,7 +10140,7 @@ function initRaffles() {
           })
           .catch(function () {
             btn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert("Ошибка сети при удалении розыгрыша");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
       if (tg && tg.showConfirm) {
@@ -10190,7 +10196,7 @@ function initRaffles() {
         })
         .catch(function () {
           raffleJoinBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети. Проверьте интернет и попробуйте снова.");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     });
   }
@@ -10218,7 +10224,7 @@ function initRaffles() {
         })
         .catch(function () {
           raffleLeaveBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети.");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     });
   }
@@ -10862,6 +10868,13 @@ function initChat() {
   var templatesHintGeneral = document.getElementById("chatTemplatesHintGeneral");
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
+
+  function setGeneralSendBusy(busy) {
+    if (!generalSendBtn) return;
+    generalSendBtn.disabled = !!busy;
+    generalSendBtn.classList.toggle("chat-send-btn--waiting", !!busy);
+    generalSendBtn.setAttribute("aria-busy", busy ? "true" : "false");
+  }
 
   var base = getApiBase();
   var initData = tg && tg.initData ? tg.initData : "";
@@ -11661,7 +11674,7 @@ function initChat() {
         }
       })
       .catch(function () {
-        if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       });
   });
 
@@ -11711,7 +11724,7 @@ function initChat() {
       } else if (chatActiveTab === "general" && generalMessages) {
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
       }
-    }).catch(function () { if (chatActiveTab === "general" && generalMessages) generalMessages.innerHTML = "<p class=\"chat-empty\">Ошибка сети</p>"; });
+    }).catch(function () { if (chatActiveTab === "general" && generalMessages) generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>"; });
   }
 
   var generalReplyTo = null;
@@ -12417,14 +12430,14 @@ function initChat() {
         return;
       }
       sendingGeneral = true;
-      if (generalSendBtn) generalSendBtn.disabled = true;
+      setGeneralSendBusy(true);
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: initData, action: "edit", messageId: chatEditMessageId, text: text }),
       }).then(function (r) { return r.json(); }).then(function (d) {
         sendingGeneral = false;
-        if (generalSendBtn) generalSendBtn.disabled = false;
+        setGeneralSendBusy(false);
         if (d && d.ok) {
           applyEditedMessageToDom(chatEditMessageId, text, "general");
           clearChatEditUI();
@@ -12434,8 +12447,8 @@ function initChat() {
         }
       }).catch(function () {
         sendingGeneral = false;
-        if (generalSendBtn) generalSendBtn.disabled = false;
-        if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+        setGeneralSendBusy(false);
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       });
       return;
     }
@@ -12446,7 +12459,7 @@ function initChat() {
       return;
     }
     sendingGeneral = true;
-    if (generalSendBtn) generalSendBtn.disabled = true;
+    setGeneralSendBusy(true);
     try {
       var body = { initData: initData, text: text };
       if (generalImage) body.image = generalImage;
@@ -12497,7 +12510,7 @@ function initChat() {
         body: JSON.stringify(body),
       }).then(function (r) { return r.json(); }).then(function (data) {
         sendingGeneral = false;
-        if (generalSendBtn) generalSendBtn.disabled = false;
+        setGeneralSendBusy(false);
         if (data && data.ok) {
           var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
@@ -12525,15 +12538,15 @@ function initChat() {
         }
       }).catch(function () {
         sendingGeneral = false;
-        if (generalSendBtn) generalSendBtn.disabled = false;
+        setGeneralSendBusy(false);
         var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
         if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-        if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
-        else if (typeof alert === "function") alert("Ошибка сети при отправке сообщения");
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        else if (typeof alert === "function") alert(POKER_NET_ERR);
       });
     } catch (err) {
       sendingGeneral = false;
-      if (generalSendBtn) generalSendBtn.disabled = false;
+      setGeneralSendBusy(false);
       if (typeof console !== "undefined" && console.error) console.error("sendGeneral failed", err);
       if (tg && tg.showAlert) tg.showAlert("Не удалось отправить сообщение");
       else if (typeof alert === "function") alert("Не удалось отправить сообщение");
@@ -12963,7 +12976,7 @@ function initChat() {
       }).catch(function () {
         sendingPrivate = false;
         if (sendBtn) sendBtn.disabled = false;
-        if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       });
       return;
     }
@@ -13064,7 +13077,7 @@ function initChat() {
       if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
       if (inputEl) inputEl.value = optText;
       if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-      if (tg && tg.showAlert) tg.showAlert("Ошибка сети или файл слишком большой");
+      if (tg && tg.showAlert) tg.showAlert("Не удалось отправить. Проверьте интернет или уменьшите файл (до 8 МБ).");
     }
     if (hasUpload && progressWrap && progressFill && typeof XMLHttpRequest !== "undefined") {
       if (progressLabel) progressLabel.textContent = "Отправка…";
@@ -13260,7 +13273,7 @@ function initChat() {
               if (data && data.ok && data.userId) doShow(data.userId);
               else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
             })
-            .catch(function () { if (tg && tg.showAlert) tg.showAlert("Ошибка сети"); });
+            .catch(function () { if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); });
         } else {
           doShow("tg_" + raw);
         }
@@ -13307,7 +13320,7 @@ function initChat() {
           })
           .catch(function () {
             findByIdBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       }
       findByIdBtn.addEventListener("click", findByIdAndOpen);
@@ -14129,7 +14142,7 @@ function initChat() {
           if (data && data.ok && data.userId) doShow(data.userId);
           else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
         })
-        .catch(function () { if (tg && tg.showAlert) tg.showAlert("Ошибка сети"); });
+        .catch(function () { if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); });
       return;
     } else if (/^ID\d{6}$/.test(raw.toUpperCase())) {
       var id = raw.toUpperCase();
@@ -14139,7 +14152,7 @@ function initChat() {
           if (data && data.ok && data.userId) doShow(data.userId);
           else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
         })
-        .catch(function () { if (tg && tg.showAlert) tg.showAlert("Ошибка сети"); });
+        .catch(function () { if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); });
     } else {
       doShow("tg_" + raw);
     }
@@ -14309,7 +14322,7 @@ function initChat() {
           else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
         })
         .catch(function () {
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     }
     findByIdInputDialogs.addEventListener("keydown", function (e) {
@@ -14818,7 +14831,9 @@ updateVisitorCounter();
         var input = listEl.querySelector(".visitors-admin-item__input[data-user-id=\"" + uid + "\"]");
         var text = (input && input.value || "").trim();
         if (!text || !base || !initData) return;
+        if (!btn.__visitorsSendLabel) btn.__visitorsSendLabel = btn.textContent || "Отправить";
         btn.disabled = true;
+        btn.textContent = "Отправляем…";
         fetch(base + "/api/send-to-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -14827,13 +14842,22 @@ updateVisitorCounter();
           .then(function (r) { return r.json(); })
           .then(function (d) {
             btn.disabled = false;
+            btn.textContent = btn.__visitorsSendLabel || "Отправить";
+            var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             if (d && d.ok) {
               if (input) input.value = "";
             } else {
-              alert(d && d.error ? d.error : "Ошибка отправки");
+              if (tgw && tgw.showAlert) tgw.showAlert(d && d.error ? d.error : "Ошибка отправки");
+              else alert(d && d.error ? d.error : "Ошибка отправки");
             }
           })
-          .catch(function () { btn.disabled = false; alert("Ошибка сети"); });
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = btn.__visitorsSendLabel || "Отправить";
+            var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            if (tgw && tgw.showAlert) tgw.showAlert(POKER_NET_ERR);
+            else alert(POKER_NET_ERR);
+          });
       });
     });
     var modalBox = listWrap.closest(".visitors-admin-modal__box");
@@ -15143,7 +15167,7 @@ updateVisitorCounter();
                   else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
                 })
                 .catch(function () {
-                  if (tg && tg.showAlert) tg.showAlert("Ошибка сети.");
+                  if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
                 });
             }
             if (tg && tg.showConfirm) {
@@ -15385,7 +15409,7 @@ updateVisitorCounter();
         })
         .catch(function () {
           submitBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert("Ошибка сети. Попробуйте позже.");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     });
   }
