@@ -21,6 +21,8 @@
   --btn-on-accent: #0b1120;
   --nav-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.9));
   --nav-item-bg: linear-gradient(180deg, #1e293b, #0f172a);
+  /* Минимальный зазор от края экрана (вместе с safe-area) */
+  --app-gutter: 14px;
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -304,10 +306,13 @@ body {
 /* Отступ сверху: safe-area + высота шапки Telegram («Закрыть»), карточка и меню всегда колонкой */
 .app {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
   padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + 52px));
   padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -382,25 +387,6 @@ body {
   min-height: 0;
 }
 
-/* Горизонтальные отступы зависят от ширины экрана */
-@media (max-width: 480px) {
-  .card {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-}
-@media (max-width: 380px) {
-  .card {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-}
-@media (max-width: 320px) {
-  .card {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
 .card:has(.view--active[data-view="home"]) {
   background: linear-gradient(135deg, #0f172a 0%, #0f172a 100%);
   border: none;
@@ -544,11 +530,11 @@ html.app-view-home .home-welcome-outline {
   position: relative;
   z-index: 2;
   margin-top: -2mm;
-  margin-left: -5mm;
-  margin-right: -5mm;
-  width: calc(100% + 10mm);
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
   box-sizing: border-box;
-  padding: 2mm 5mm 0;
+  padding: 2mm 0 0;
 }
 .app.app--view-home .home-welcome-outline::before,
 html.app-view-home .home-welcome-outline::before {
@@ -902,11 +888,11 @@ html.app-view-home .home-welcome-outline::before {
 .card:has(.view--active[data-view="home"]) .card__content {
   min-width: 0;
   overflow: visible;
-  padding-left: 5mm;
-  padding-right: 5mm;
-  margin-left: -20px;
-  margin-right: -20px;
-  width: calc(100% + 40px);
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
   box-sizing: border-box;
 }
 .card:has(.view--active[data-view="home"]) .card__content > .view {
@@ -914,11 +900,11 @@ html.app-view-home .home-welcome-outline::before {
 }
 /* fallback для главной без :has() */
 html.app-view-home .card .card__content {
-  padding-left: 5mm;
-  padding-right: 5mm;
-  margin-left: -20px;
-  margin-right: -20px;
-  width: calc(100% + 40px);
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
   box-sizing: border-box;
 }
 .card__content:has(.view--active[data-view="chat"]) {
@@ -5379,8 +5365,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 .features-section-title--games {
   margin: 24px 0 8px;
-  padding: 0 5mm 0 0;
-  margin-left: -3mm;
+  padding: 0;
+  margin-left: 0;
   text-align: left;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
   font-size: 19px;
@@ -5409,9 +5395,9 @@ html.app-view-home .feature--rating-spring-promo:hover,
 
 .tournament-day-home-wrap {
   margin-top: 14px;
-  margin-left: -5mm;
-  margin-right: -5mm;
-  width: calc(100% + 10mm);
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
   box-sizing: border-box;
 }
 .tournament-day-home-wrap .tournament-day-block--home {
@@ -5556,9 +5542,9 @@ html.app-view-home .feature--rating-spring-promo:hover,
 
 .games-apps-block {
   margin-top: 18px;
-  margin-left: -5mm;
-  margin-right: -5mm;
-  width: calc(100% + 10mm);
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
   box-sizing: border-box;
   padding: 14px 12px 12px;
   border: 1px solid var(--card-border);
@@ -7297,7 +7283,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   gap: 6px;
   flex-shrink: 0;
   margin-left: auto;
-  margin-right: -5mm;
+  margin-right: 0;
 }
 .home-mini-icon-item {
   display: flex;
@@ -15443,7 +15429,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 8px 12px max(10px, env(safe-area-inset-bottom, 0px));
+  padding: 8px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
+    max(10px, env(safe-area-inset-bottom, 0px)) max(12px, var(--app-gutter), env(safe-area-inset-left, 0px));
   min-height: 56px;
   background: var(--nav-bg);
   backdrop-filter: blur(18px);
@@ -15613,14 +15600,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 
 @media (max-width: 480px) {
   .card {
-    padding: 18px 16px 14px;
+    padding: 18px 20px 14px;
     border-radius: 20px;
-  }
-  .card:has(.view--active[data-view="home"]) .card__content,
-  html.app-view-home .card .card__content {
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
   }
   .logo__mark {
     width: 38px;

@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-gidrograff-kriak.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=22" />
+    <link rel="stylesheet" href="./styles.css?v=23" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; }
@@ -38,11 +38,11 @@
         position: relative;
         z-index: 2;
         margin-top: -2mm;
-        margin-left: -5mm;
-        margin-right: -5mm;
-        width: calc(100% + 10mm);
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
         box-sizing: border-box;
-        padding: 2mm 5mm 0;
+        padding: 2mm 0 0;
       }
       .app.app--view-home .home-welcome-outline::before {
         content: "";
@@ -61,7 +61,11 @@
         border-color: rgba(251, 146, 60, 0.4);
       }
       .app.app--view-home .card .card__content {
-        padding-left: 5mm !important; padding-right: 5mm !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
       }
       .app.app--view-home .feature.feature--link.feature--rating-promo {
         border: 1px solid rgba(186, 230, 253, 0.6) !important;
