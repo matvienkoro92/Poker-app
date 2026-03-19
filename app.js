@@ -7349,6 +7349,14 @@ function initStreams() {
     peer.on("open", function () {
       var call = peer.call(roomId, new MediaStream());
       streamsWatchCall = call;
+      call.on("error", function (err) {
+        // Если call не смог поднять поток, нужно вернуть управление пользователю.
+        remoteWrap.classList.add("streams-remote-wrap--hidden");
+        if (remoteVideo) remoteVideo.srcObject = null;
+        streamsWatchCall = null;
+        watchBtn.disabled = false;
+        streamsShowAlert("Не удалось подключиться к комнате. " + (err && (err.message || err.type)) || "");
+      });
       call.on("stream", function (stream) {
         remoteVideo.srcObject = stream;
         remoteWrap.classList.remove("streams-remote-wrap--hidden");
