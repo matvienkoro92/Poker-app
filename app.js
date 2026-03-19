@@ -7239,6 +7239,10 @@ function streamsCleanup() {
 }
 
 function initStreams() {
+  // setView("streams") вызывает initStreams при каждом заходе — без guard на кнопке
+  // копятся несколько обработчиков; второй getDisplayMedia в том же клике даёт
+  // «getDisplayMedia must be called from a user gesture handler».
+  if (window.__streamsInitAttached) return;
   var startBtn = document.getElementById("streamsStartBtn");
   var stopBtn = document.getElementById("streamsStopBtn");
   var previewWrap = document.getElementById("streamsPreviewWrap");
@@ -7256,6 +7260,7 @@ function initStreams() {
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
   if (!startBtn || !previewWrap || !previewVideo) return;
+  window.__streamsInitAttached = true;
 
   function showAlert(msg) {
     if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
