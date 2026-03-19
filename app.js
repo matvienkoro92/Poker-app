@@ -7352,6 +7352,18 @@ function initStreams() {
 
     var peer = new PeerJs({ debug: 0 });
     streamsWatchPeer = peer;
+    function createDummyMediaStream() {
+      try {
+        // WebRTC через PeerJS иногда не отдаёт remote stream,
+        // если caller передал пустой MediaStream без треков.
+        // Canvas captureStream создаёт трек без разрешений пользователя.
+        var canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        if (canvas.captureStream) return canvas.captureStream(1);
+      } catch (e) {}
+      return new MediaStream();
+    }
     peer.on("error", function (err) {
       if (window.__streamsWatchWatchdogTimer) {
         clearTimeout(window.__streamsWatchWatchdogTimer);
@@ -7368,7 +7380,7 @@ function initStreams() {
       streamsShowAlert("PeerJS ошибка: " + (err && (err.message || err.type)) || "сеть");
     });
     peer.on("open", function () {
-      var call = peer.call(roomId, new MediaStream());
+      var call = peer.call(roomId, createDummyMediaStream());
       streamsWatchCall = call;
       call.on("error", function (err) {
         // Если call не смог поднять поток, нужно вернуть управление пользователю.
