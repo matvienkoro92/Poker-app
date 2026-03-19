@@ -2701,6 +2701,9 @@ function setView(viewName) {
   }
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
+  try {
+    if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
+  } catch (eTrackView) {}
 }
 function updateChatNavDot() {
   var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
@@ -14459,6 +14462,55 @@ function recordTrackingLinkHit(ref) {
   } catch (e3) {}
 }
 
+var pokerTrackingEventThrottle = {};
+/** События после перехода по ref_-ссылке (см. sessionStorage poker_session_tracking_ref). */
+function trackLinkSessionEvent(action, detail) {
+  if (!action) return;
+  try {
+    var ref = sessionStorage.getItem("poker_session_tracking_ref");
+    if (!ref) return;
+    var throttleKey = action + "|" + String(detail || "");
+    var now = Date.now();
+    if (pokerTrackingEventThrottle[throttleKey] && now - pokerTrackingEventThrottle[throttleKey] < 1200) return;
+    pokerTrackingEventThrottle[throttleKey] = now;
+    var base = getApiBase();
+    if (!base) return;
+    var visitorId = getVisitorId();
+    var tgEv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    var initDataEv = tgEv && tgEv.initData ? tgEv.initData : "";
+    fetch(base + "/api/tracking-link-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ref: ref,
+        visitor_id: visitorId,
+        action: action,
+        detail: detail ? String(detail).slice(0, 200) : undefined,
+        initData: initDataEv || undefined,
+      }),
+    }).catch(function () {});
+  } catch (e) {}
+}
+
+(function initTrackingLinkActivityCapture() {
+  if (typeof document === "undefined" || !document.addEventListener) return;
+  document.addEventListener(
+    "click",
+    function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      if (t.closest("#trackingLinksAdminModal") || t.closest("#trackingLinksVisitorsModal")) return;
+      var el = t.closest("[data-view-target]");
+      if (!el) return;
+      var tgt = el.getAttribute("data-view-target");
+      if (!tgt) return;
+      var hint = el.getAttribute("aria-label") || el.getAttribute("title") || "";
+      if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("open:" + tgt, hint);
+    },
+    true
+  );
+})();
+
 function recordShareButtonClick(buttonId) {
   var base = getApiBase();
   if (!base) return;
@@ -14498,7 +14550,12 @@ function updateVisitorCounter() {
   const visitorId = getVisitorId();
   (function tryTrackRef() {
     var ref = getPokerTrackingRefFromEnv();
-    if (ref) recordTrackingLinkHit(ref);
+    if (ref) {
+      try {
+        sessionStorage.setItem("poker_session_tracking_ref", ref);
+      } catch (eRef) {}
+      recordTrackingLinkHit(ref);
+    }
   })();
   const apiUrl = base + "/api/visit?visitor_id=" + encodeURIComponent(visitorId);
   const initData = tg && tg.initData ? tg.initData : null;
@@ -15107,6 +15164,57 @@ updateVisitorCounter();
       .replace(/\r|\n/g, " ");
   }
 
+  var TRACKING_ACTION_LABELS = {
+    "view:home": "Экран: главная",
+    "view:chat": "Экран: чат",
+    "view:download": "Экран: скачать",
+    "view:cashout": "Экран: касса",
+    "view:profile": "Экран: профиль",
+    "view:spring-rating": "Экран: рейтинг весны",
+    "view:winter-rating": "Экран: рейтинг зимы",
+    "view:schedule": "Экран: расписание",
+    "view:raffles": "Экран: розыгрыши",
+    "view:streams": "Экран: стримы",
+    "view:equilator": "Экран: эквилятор",
+    "view:video-lessons": "Экран: видеоуроки",
+    "view:poker-tasks": "Экран: задачи",
+    "view:bonus-game": "Экран: бонус-игра",
+    "view:plasterer-game": "Экран: штукатур",
+    "view:cooler-game": "Экран: кулер",
+    "view:learn-play-hub": "Экран: научиться играть",
+    "view:news": "Экран: новости",
+    "view:hall": "Экран: зал славы",
+    "view:tasks": "Экран: задания",
+    "view:downloads": "Экран: загрузки",
+  };
+
+  function formatActivityCell(activity) {
+    if (!activity || typeof activity.total !== "number" || activity.total < 1 || !activity.counts) {
+      return "<span class=\"tracking-links-admin__no-activity\">нет действий</span>";
+    }
+    var keys = Object.keys(activity.counts).sort(function (a, b) {
+      return (activity.counts[b] || 0) - (activity.counts[a] || 0);
+    });
+    var lines = keys.map(function (k) {
+      var n = activity.counts[k];
+      var lab = TRACKING_ACTION_LABELS[k];
+      if (!lab) {
+        if (k.indexOf("open:") === 0) lab = "Клик → " + k.slice(5); else lab = k;
+      }
+      return esc(lab) + " <strong>×" + n + "</strong>";
+    });
+    return (
+      "<div class=\"tracking-links-admin__act-block\"><div class=\"tracking-links-admin__act-total\">всего <strong>" +
+      activity.total +
+      "</strong></div>" +
+      lines.join("<br>") +
+      (activity.lastAt
+        ? "<div class=\"tracking-links-admin__act-last\">посл. " + esc(activity.lastAt) + "</div>"
+        : "") +
+      "</div>"
+    );
+  }
+
   function copyUrlWithFeedback(text) {
     if (!text) return;
     function done(ok) {
@@ -15177,12 +15285,12 @@ updateVisitorCounter();
   }
 
   function loadLinks() {
-    tbody.innerHTML = "<tr><td colspan=\"5\">Загрузка…</td></tr>";
+    tbody.innerHTML = "<tr><td colspan=\"7\">Загрузка…</td></tr>";
     var base = getApiBase();
     var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
     if (!base || !initData) {
-      tbody.innerHTML = "<tr><td colspan=\"5\">Нет initData. Откройте в Telegram.</td></tr>";
+      tbody.innerHTML = "<tr><td colspan=\"7\">Нет initData. Откройте в Telegram.</td></tr>";
       return;
     }
     fetch(base + "/api/tracking-links?initData=" + encodeURIComponent(initData))
@@ -15191,11 +15299,11 @@ updateVisitorCounter();
       })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.links)) {
-          tbody.innerHTML = "<tr><td colspan=\"5\">Нет данных</td></tr>";
+          tbody.innerHTML = "<tr><td colspan=\"7\">Нет данных</td></tr>";
           return;
         }
         if (data.links.length === 0) {
-          tbody.innerHTML = "<tr><td colspan=\"5\">Пока нет ссылок — создайте первую.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan=\"7\">Пока нет ссылок — создайте первую.</td></tr>";
           return;
         }
         tbody.innerHTML = data.links
@@ -15205,6 +15313,8 @@ updateVisitorCounter();
             var paramLine = pj.length > 56 ? pj.slice(0, 56) + "…" : pj;
             var total = link.totalClicks != null ? link.totalClicks : 0;
             var uniq = link.uniqueClicks != null ? link.uniqueClicks : 0;
+            var activeV = link.activeVisitors != null ? link.activeVisitors : 0;
+            var evN = link.actionEvents != null ? link.actionEvents : 0;
             var startParam = "ref_" + link.id;
             var fullUrl = buildStartUrl(startParam);
             var copyText = fullUrl || startParam;
@@ -15234,6 +15344,12 @@ updateVisitorCounter();
               "<td>" +
               uniq +
               "</td>" +
+              "<td title=\"Уникальные посетители с хотя бы одним действием после перехода\">" +
+              activeV +
+              "</td>" +
+              "<td title=\"Сумма событий (переходы по экранам и клики)\">" +
+              evN +
+              "</td>" +
               "<td><button type=\"button\" class=\"visitors-admin-modal__show-btn primary-button tracking-links-admin__who-btn\" data-tracking-who=\"" +
               esc(link.id) +
               "\">Кто перешёл</button></td>" +
@@ -15243,20 +15359,20 @@ updateVisitorCounter();
           .join("");
       })
       .catch(function () {
-        tbody.innerHTML = "<tr><td colspan=\"5\">Ошибка загрузки</td></tr>";
+        tbody.innerHTML = "<tr><td colspan=\"7\">Ошибка загрузки</td></tr>";
       });
   }
 
   function openVisitorsForId(slug, labelText) {
     if (!visModal || !visTbody) return;
-    visTbody.innerHTML = "<tr><td colspan=\"3\">Загрузка…</td></tr>";
+    visTbody.innerHTML = "<tr><td colspan=\"4\">Загрузка…</td></tr>";
     if (visTitle) visTitle.textContent = labelText ? "Переходы: " + labelText : "Переходы";
     visModal.setAttribute("aria-hidden", "false");
     var base = getApiBase();
     var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
     if (!base || !initData) {
-      visTbody.innerHTML = "<tr><td colspan=\"3\">Нет initData</td></tr>";
+      visTbody.innerHTML = "<tr><td colspan=\"4\">Нет initData</td></tr>";
       return;
     }
     fetch(
@@ -15272,11 +15388,11 @@ updateVisitorCounter();
       })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.visitors)) {
-          visTbody.innerHTML = "<tr><td colspan=\"3\">Нет данных</td></tr>";
+          visTbody.innerHTML = "<tr><td colspan=\"4\">Нет данных</td></tr>";
           return;
         }
         if (data.visitors.length === 0) {
-          visTbody.innerHTML = "<tr><td colspan=\"3\">Пока никто не переходил</td></tr>";
+          visTbody.innerHTML = "<tr><td colspan=\"4\">Пока никто не переходил</td></tr>";
           return;
         }
         visTbody.innerHTML = data.visitors
@@ -15285,6 +15401,7 @@ updateVisitorCounter();
             if (v.firstName) parts.push(v.firstName);
             if (v.username) parts.push("@" + v.username);
             var nameCol = parts.length ? parts.join(" · ") : "—";
+            var act = formatActivityCell(v.activity);
             return (
               "<tr><td>" +
               esc(v.t || "") +
@@ -15292,13 +15409,15 @@ updateVisitorCounter();
               esc(v.visitorId || "") +
               "</td><td>" +
               esc(nameCol) +
+              "</td><td class=\"tracking-links-admin__cell-activity\">" +
+              act +
               "</td></tr>"
             );
           })
           .join("");
       })
       .catch(function () {
-        visTbody.innerHTML = "<tr><td colspan=\"3\">Ошибка загрузки</td></tr>";
+        visTbody.innerHTML = "<tr><td colspan=\"4\">Ошибка загрузки</td></tr>";
       });
   }
 

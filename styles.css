@@ -13423,6 +13423,29 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .tracking-links-admin__url-copy-btn:active {
   opacity: 0.9;
 }
+.tracking-links-admin__cell-activity {
+  white-space: normal;
+  max-width: 220px;
+  vertical-align: top;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.tracking-links-admin__no-activity {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.tracking-links-admin__act-block {
+  text-align: left;
+}
+.tracking-links-admin__act-total {
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.tracking-links-admin__act-last {
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
 .tracking-links-admin__list-title {
   margin: 16px 0 8px;
   font-size: 15px;
