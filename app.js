@@ -7315,7 +7315,18 @@ function initStreams() {
     if (!roomId) return;
     attempt = attempt || 0;
     if (!watchBtn || !roomInput || !remoteWrap || !remoteVideo) return;
-    if (streamsWatchPeer) return;
+    // Если пользователь/глубокая ссылка уже пытались смотреть и peer/call "завис",
+    // старый объект может помешать повторному старту. Сбрасываем перед новой попыткой.
+    if (streamsWatchCall) {
+      try { streamsWatchCall.close(); } catch (e) {}
+      streamsWatchCall = null;
+    }
+    if (streamsWatchPeer) {
+      try { streamsWatchPeer.destroy(); } catch (e) {}
+      streamsWatchPeer = null;
+    }
+    if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
+    if (remoteVideo) remoteVideo.srcObject = null;
 
     roomInput.value = roomId;
     watchBtn.disabled = true;
