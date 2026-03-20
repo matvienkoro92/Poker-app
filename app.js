@@ -1421,15 +1421,14 @@ function runGazetteAndTasksInit() {
     if (!val) return null;
     val = String(val).trim();
     if (!val) return null;
-    // Telegram может передавать start_param в разных форматах, например:
-    //  - "streams_abc123"
-    //  - "startapp=streams_abc123"
+    // Код комнаты стрима — только 6 цифр. Примеры start_param:
+    //  - "streams_123456"
+    //  - "startapp=streams_123456"
     var m =
-      val.match(/(?:^|.*)streams_([a-z0-9]+)/i) ||
-      val.match(/startapp=streams_([a-z0-9]+)/i);
-    if (m && m[1]) return m[1].toLowerCase();
-    // На всякий случай поддержим прямой код комнаты без префикса.
-    if (/^[a-z0-9]{4,10}$/i.test(val)) return val.toLowerCase();
+      val.match(/^streams_(\d{6})$/) ||
+      val.match(/startapp=streams_(\d{6})/i);
+    if (m && m[1]) return m[1];
+    if (/^\d{6}$/.test(val)) return val;
     return null;
   }
 
@@ -7677,7 +7676,8 @@ var streamsBroadcastStartedAt = null;
 var streamsBroadcastTimerInterval = null;
 
 function randomStreamRoomId() {
-  return Math.random().toString(36).slice(2, 8);
+  // Ровно 6 цифр (100000–999999), PeerJS id только из цифр.
+  return String(100000 + Math.floor(Math.random() * 900000));
 }
 
 function getStreamsAppUrl() {
@@ -8032,7 +8032,7 @@ function initStreams() {
         var userRoomCode = broadcastRoomInput ? broadcastRoomInput.value.trim() : "";
         var roomId = null;
         if (userRoomCode) {
-          if (!/^[a-z0-9]{4,10}$/i.test(userRoomCode)) {
+          if (!/^\d{6}$/.test(userRoomCode)) {
             // Код неверный: останавливаем захват, чтобы не оставлять активный stream.
             try {
               if (streamsBroadcastStream) streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
@@ -8040,10 +8040,10 @@ function initStreams() {
             streamsBroadcastStream = null;
             startBtn.disabled = false;
             startBtn.textContent = btnText;
-            showAlert("Некорректный код комнаты. Нужны латиница+цифры длиной 4–10.");
+            showAlert("Некорректный код комнаты. Нужны ровно 6 цифр.");
             return;
           }
-          roomId = userRoomCode.toLowerCase();
+          roomId = userRoomCode;
         } else {
           roomId = randomStreamRoomId();
           if (broadcastRoomInput) broadcastRoomInput.value = roomId;
@@ -8143,9 +8143,12 @@ function initStreams() {
   function parseRoomIdFromInput(val) {
     if (!val || !val.trim()) return null;
     val = val.trim();
-    var m = val.match(/startapp=streams_([a-z0-9]+)/i) || val.match(/[?&]room=([a-z0-9]+)/i) || val.match(/#([a-z0-9]+)$/);
-    if (m) return m[1].toLowerCase();
-    if (/^[a-z0-9]{4,10}$/i.test(val)) return val.toLowerCase();
+    var m =
+      val.match(/startapp=streams_(\d{6})/i) ||
+      val.match(/[?&]room=(\d{6})(?:&|#|$)/i) ||
+      val.match(/#(\d{6})$/);
+    if (m) return m[1];
+    if (/^\d{6}$/.test(val)) return val;
     return null;
   }
 

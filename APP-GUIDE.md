@@ -160,7 +160,7 @@ function setView(viewName) {
 | winter_rating | Зимний рейтинг |
 | spring_rating | Весенний рейтинг |
 | raffles | Розыгрыши |
-| streams_ROOMID | Стримы, комната |
+| streams_123456 | Стримы, комната (ROOMID — ровно 6 цифр) |
 | poker_task_* | MTT задачи (старт челленджа) |
 | rating_top_* | Топ рейтинга |
 | blog_top15, hall_top15 | Зал славы, скролл к блоку «Топ выигрышей за один турнир» (топ‑15) |

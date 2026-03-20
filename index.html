@@ -2290,7 +2290,7 @@
                 <h2 class="streams-block__title">Начать трансляцию</h2>
                 <p class="streams-block__hint">Экран и микрофон будут видны и слышны зрителям.</p>
                 <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
-                  <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" placeholder="Код комнаты (латиница+цифры, 4–10)" aria-label="Код комнаты для трансляции" maxlength="10" />
+                  <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
                 </div>
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
                 <div class="streams-preview-wrap streams-preview-wrap--hidden" id="streamsPreviewWrap">
@@ -2309,7 +2309,7 @@
                 <h2 class="streams-block__title">Смотреть трансляцию</h2>
                 <p class="streams-block__hint">Вставьте ссылку или код комнаты от ведущего.</p>
                 <div class="streams-watch-row">
-                  <input type="text" id="streamsRoomInput" class="streams-room-input" placeholder="Код комнаты или ссылка" aria-label="Код комнаты" />
+                  <input type="text" id="streamsRoomInput" class="streams-room-input" inputmode="numeric" placeholder="6 цифр или ссылка с streams_" aria-label="Код комнаты" maxlength="256" />
                   <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Смотреть</button>
                 </div>
                 <div class="streams-remote-wrap streams-remote-wrap--hidden" id="streamsRemoteWrap">
@@ -3475,7 +3475,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=97"></script>
+    <script src="./app.js?v=99"></script>
   </body>
 </html>
 
