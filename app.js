@@ -1548,6 +1548,66 @@ setTimeout(function () {
   if (typeof fetchRaffleBadge === "function") fetchRaffleBadge();
 }, 300);
 
+/**
+ * Привязка лайтбокса к паре ник + сумма (после normalizeWinterNick для nick).
+ * Порядок важен: первое совпадение выигрывает.
+ */
+var SINGLE_TOP_PREMIUM_LIGHTBOX_OVERRIDES = [
+  { nick: "Sarmat1305", reward: 491248, png: "rating-single-top-1-sarmat.png" },
+  { nickLower: true, nick: "botezgambit", reward: 270000, png: "rating-single-top-3-botezgambit.png" },
+  { nick: "Дикий", reward: 144305, png: "rating-single-top-8-dikiy.png" },
+  { nick: "Фокс", reward: 182268, png: "rating-single-top-6-fox.png" },
+  { nick: "Фокс", reward: 182142, png: "rating-single-top-9-fox.png" },
+  { nick: "Фокс", reward: 130072, png: "rating-single-top-11-fox.png" },
+  { nick: "Waaar", reward: 105559, png: "rating-single-top-13-waaar.png" },
+  { nick: "FrankL", reward: 110300, png: "rating-single-top-11-frankl.png" }
+];
+
+/**
+ * @param {function(string): string} esc — экранирование для HTML (escapePreview из замыкания)
+ */
+function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
+  var i;
+  var o;
+  var nMatch;
+  for (i = 0; i < SINGLE_TOP_PREMIUM_LIGHTBOX_OVERRIDES.length; i++) {
+    o = SINGLE_TOP_PREMIUM_LIGHTBOX_OVERRIDES[i];
+    if (o.nickLower) {
+      nMatch = String(nickN || "").toLowerCase() === String(o.nick || "").toLowerCase();
+    } else {
+      nMatch = nickN === o.nick;
+    }
+    if (nMatch && Number(rewN) === Number(o.reward)) {
+      return {
+        open:
+          '<button type="button" class="winter-rating__single-top-link" data-lightbox-override="' +
+          o.png +
+          '" aria-label="Скрин турнира: ' +
+          nickEscaped +
+          '">',
+        close: "</button>"
+      };
+    }
+  }
+  var lbIdx = r.lightboxIndex != null ? r.lightboxIndex : 0;
+  var lbLeague = r.lightboxLeague === 1 || r.lightboxLeague === 2 ? ' data-lightbox-league="' + r.lightboxLeague + '"' : "";
+  var lbWinter = r.winterImages ? ' data-lightbox-winter="1"' : "";
+  return {
+    open:
+      '<button type="button" class="winter-rating__single-top-link" data-lightbox-date="' +
+      esc(r.date) +
+      '" data-lightbox-index="' +
+      lbIdx +
+      '"' +
+      lbLeague +
+      lbWinter +
+      ' aria-label="Скрин турнира: ' +
+      nickEscaped +
+      '">',
+    close: "</button>"
+  };
+}
+
 // Рейтинг: кнопки «Топы прошлой недели» и «Топы текущей недели» (в кнопке — топ-3, по клику — модалка с полным списком)
 (function initWinterRatingWeekTops() {
   var pastBtn = document.getElementById("winterRatingTopPastWeekBtn");
@@ -1692,6 +1752,22 @@ setTimeout(function () {
     var lim = limit != null ? limit : 15;
     return wins.slice(0, lim);
   }
+  function buildSimpleSingleTopListHtml(wins) {
+    if (!wins || !wins.length) return "";
+    return wins
+      .map(function (r, indexZeroBased) {
+        var place = indexZeroBased + 1;
+        var sum = formatRewardRound(r.reward);
+        var nickN = normalizeWinterNick(r.nick);
+        var rewN = r.reward != null ? Number(r.reward) : 0;
+        if (rewN !== rewN) rewN = 0;
+        var nickEscaped = escapePreview(r.nick);
+        var tags = singleTopResolveLightboxControlTags(escapePreview, r, nickN, rewN, nickEscaped);
+        var line = place + ". " + nickEscaped + " — " + sum + " ₽";
+        return '<li class="winter-rating__single-top-item">' + tags.open + line + tags.close + "</li>";
+      })
+      .join("");
+  }
   function updateButtonPreviews() {
     var pastTop = getTopByDates(GAZETTE_DATES);
     var currentTop = getTopByDates(CURRENT_WEEK_DATES);
@@ -1706,152 +1782,14 @@ setTimeout(function () {
     var hasHallSingleTop = hallFameSingleTopSummary && hallFameSingleTopList;
     if (hasMainSingleTop || hasHallSingleTop) {
       var fullSingleTop = getSingleTopWins(null, 15);
-      var singleTopTitle = "Топ выигрышей за один турнир (2026)";
-      function singleTopRowHtml(r, indexZeroBased) {
-        var sum = formatRewardRound(r.reward);
-        var place = indexZeroBased + 1;
-        var lineText = place + ". " + escapePreview(r.nick) + " — " + sum + " ₽";
-        var isFox = normalizeWinterNick(r.nick) === "Фокс";
-        var rewN = r.reward != null ? Number(r.reward) : 0;
-        if (rewN !== rewN) rewN = 0;
-        // Сармат, 1-я строка топа (занос 491248): скрин по клику
-        if (normalizeWinterNick(r.nick) === "Sarmat1305" && rewN === 491248) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-1-sarmat.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        // Фокс: фиксированные скрины по сумме заноса (место в списке после правок данных может меняться)
-        if (isFox && rewN === 182142) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-9-fox.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        if (isFox && rewN === 130072) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-11-fox.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        var nickNorm = String(normalizeWinterNick(r.nick) || "").toLowerCase();
-        if (indexZeroBased === 2 && nickNorm === "botezgambit") {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-3-botezgambit.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        if (indexZeroBased === 7 && nickNorm === "дикий") {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-8-dikiy.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        if (indexZeroBased === 5 && isFox) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-6-fox.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        if (indexZeroBased === 12 && normalizeWinterNick(r.nick) === "Waaar") {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-13-waaar.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        if (
-          indexZeroBased === 10 &&
-          normalizeWinterNick(r.nick) === "FrankL" &&
-          rewN === 110300
-        ) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-11-frankl.png\" aria-label=\"Скрин турнира: " +
-            escapePreview(r.nick) +
-            "\">" +
-            lineText +
-            "</button></li>"
-          );
-        }
-        // 3 (не BOTEZGAMBIT), 6 (не Фокс), 7 (не Дикий), 8, 9, 11 (не Фокс 130072, не FrankL 110300), 13 (не Waaar): без скрина по клику
-        if (
-          indexZeroBased === 2 ||
-          indexZeroBased === 5 ||
-          indexZeroBased === 6 ||
-          indexZeroBased === 7 ||
-          indexZeroBased === 8 ||
-          indexZeroBased === 10 ||
-          indexZeroBased === 12
-        ) {
-          return (
-            "<li class=\"winter-rating__single-top-item\">" +
-            "<span class=\"winter-rating__single-top-static\" aria-label=\"" +
-            escapePreview(r.nick) +
-            " — " +
-            sum +
-            " ₽\">" +
-            lineText +
-            "</span></li>"
-          );
-        }
-        var lbIdx = r.lightboxIndex != null ? r.lightboxIndex : 0;
-        var lbLeague = r.lightboxLeague === 1 || r.lightboxLeague === 2 ? " data-lightbox-league=\"" + r.lightboxLeague + "\"" : "";
-        var lbWinter = r.winterImages ? " data-lightbox-winter=\"1\"" : "";
-        return (
-          "<li class=\"winter-rating__single-top-item\">" +
-          "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-date=\"" +
-          escapePreview(r.date) +
-          "\" data-lightbox-index=\"" +
-          lbIdx +
-          "\"" +
-          lbLeague +
-          lbWinter +
-          " aria-label=\"Скрин турнира: " +
-          escapePreview(r.nick) +
-          "\">" +
-          lineText +
-          "</button></li>"
-        );
-      }
-      var listHtml = fullSingleTop.length
-        ? fullSingleTop.map(function (r, i) {
-            return singleTopRowHtml(r, i);
-          }).join("")
-        : "";
+      var singleTopTitleText = "Топ выигрышей за один турнир (2026)";
+      var listHtml = buildSimpleSingleTopListHtml(fullSingleTop);
       if (hasMainSingleTop) {
-        singleTopSummary.textContent = singleTopTitle;
+        singleTopSummary.textContent = singleTopTitleText;
         singleTopList.innerHTML = listHtml;
       }
       if (hasHallSingleTop) {
-        hallFameSingleTopSummary.textContent = singleTopTitle;
+        hallFameSingleTopSummary.textContent = singleTopTitleText;
         hallFameSingleTopList.innerHTML = listHtml;
       }
     }
@@ -2116,7 +2054,7 @@ setTimeout(function () {
       var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : undefined;
       var winter = link.getAttribute("data-lightbox-winter") === "1";
       if (typeof openWinterRatingLightbox === "function") {
-        openWinterRatingLightbox(dateStr, idx, leagueNum, { winterImages: winter });
+        openWinterRatingLightbox(dateStr, idx, leagueNum, { winterImages: winter, singleImageOnly: true });
       }
     });
   })();
@@ -2851,6 +2789,19 @@ function tryChillRadioPlay() {
 }
 
 function setView(viewName) {
+  var prevView = "";
+  try {
+    if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
+  } catch (ePrev) {}
+  // Главная скрывается через display:none — высота документа падает, браузер обнуляет scroll.
+  // Сохраняем Y при уходе с home и восстанавливаем при возврате (эквилятор, «Назад» и т.д.).
+  if (prevView === "home" && viewName !== "home") {
+    try {
+      var seSave = document.scrollingElement || document.documentElement;
+      var ySave = (seSave && seSave.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      window.__savedHomeScrollY = Math.max(0, ySave);
+    } catch (eSaveHome) {}
+  }
   if (document.body) {
     document.body.style.overflow = "";
     document.body.style.position = "";
@@ -3035,10 +2986,147 @@ function setView(viewName) {
   }
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
+  if (viewName === "home" && prevView !== "home" && typeof window.__savedHomeScrollY === "number") {
+    var restoreHomeY = window.__savedHomeScrollY;
+    function applyHomeScroll() {
+      try {
+        window.scrollTo(0, restoreHomeY);
+        var se = document.scrollingElement || document.documentElement;
+        if (se) se.scrollTop = restoreHomeY;
+        if (document.documentElement) document.documentElement.scrollTop = restoreHomeY;
+        if (document.body) document.body.scrollTop = restoreHomeY;
+      } catch (eHomeScroll) {}
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        applyHomeScroll();
+        setTimeout(applyHomeScroll, 0);
+        setTimeout(applyHomeScroll, 50);
+      });
+    });
+  }
+  if (viewName === "hall-of-fame") {
+    var rafH = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    rafH(function () {
+      rafH(function () {
+        if (typeof syncHallOfFameSubtabFromScroll === "function") syncHallOfFameSubtabFromScroll();
+      });
+    });
+  }
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
 }
+
+/** Якоря подменю зала славы: Топ2026 / Кубки / Легенды */
+function getHallOfFameSectionAnchorEl(section) {
+  if (section === "top2026") return document.getElementById("hallFameSectionTop2026");
+  if (section === "cups") return document.getElementById("hallCupsTitle");
+  if (section === "legends") return document.getElementById("hallLegendsTitle");
+  return null;
+}
+
+function setHallOfFameSubtabActive(section) {
+  var view = document.getElementById("hallOfFameView") || document.querySelector('[data-view="hall-of-fame"]');
+  if (!view) return;
+  var tabs = view.querySelectorAll(".hall-of-fame__subtab[data-hall-section]");
+  tabs.forEach(function (btn) {
+    var on = btn.getAttribute("data-hall-section") === section;
+    btn.classList.toggle("hall-of-fame__subtab--active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  });
+}
+
+/** Скролл окна (не scrollIntoView): внутри transform/perspective scrollIntoView ломает обратный скролл в Telegram WebView. */
+function hallOfFameGetWindowScrollY() {
+  if (typeof window.pageYOffset === "number") return window.pageYOffset;
+  var se = document.scrollingElement || document.documentElement;
+  if (se && typeof se.scrollTop === "number") return se.scrollTop;
+  if (document.body && typeof document.body.scrollTop === "number") return document.body.scrollTop;
+  return 0;
+}
+
+function hallOfFameGetMaxScrollY() {
+  var se = document.scrollingElement || document.documentElement;
+  var h = Math.max(
+    se ? se.scrollHeight : 0,
+    document.documentElement ? document.documentElement.scrollHeight : 0,
+    document.body ? document.body.scrollHeight : 0
+  );
+  return Math.max(0, Math.floor(h - window.innerHeight));
+}
+
+function hallOfFameScrollWindowTo(y, smooth) {
+  var maxY = hallOfFameGetMaxScrollY();
+  var top = Math.max(0, Math.min(y, maxY));
+  if (smooth) {
+    try {
+      window.scrollTo({ left: 0, top: top, behavior: "smooth" });
+    } catch (eSmooth) {
+      window.scrollTo(0, top);
+    }
+  } else {
+    window.scrollTo(0, top);
+    try {
+      var se = document.scrollingElement || document.documentElement;
+      if (se) se.scrollTop = top;
+      if (document.body) document.body.scrollTop = top;
+    } catch (eSync) {}
+  }
+}
+
+function scrollHallOfFameElementIntoWindow(el, smooth, padTop) {
+  if (!el || typeof el.getBoundingClientRect !== "function") return;
+  padTop = padTop != null ? padTop : 10;
+  var y0 = hallOfFameGetWindowScrollY();
+  var rect = el.getBoundingClientRect();
+  var targetY = y0 + rect.top - padTop;
+  hallOfFameScrollWindowTo(targetY, !!smooth);
+}
+
+function scrollHallOfFameToSection(section, smooth) {
+  var el = getHallOfFameSectionAnchorEl(section);
+  scrollHallOfFameElementIntoWindow(el, smooth, 10);
+}
+
+function syncHallOfFameSubtabFromScroll() {
+  var view = document.querySelector('.view--active[data-view="hall-of-fame"]');
+  if (!view) return;
+  var scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  var focusLine = scrollY + 96;
+  var order = [
+    { id: "top2026", el: document.getElementById("hallFameSectionTop2026") },
+    { id: "cups", el: document.getElementById("hallCupsTitle") },
+    { id: "legends", el: document.getElementById("hallLegendsTitle") }
+  ];
+  var active = "top2026";
+  for (var i = 0; i < order.length; i++) {
+    var el = order[i].el;
+    if (!el) continue;
+    var rect = el.getBoundingClientRect();
+    var top = rect.top + scrollY;
+    if (top <= focusLine) active = order[i].id;
+  }
+  setHallOfFameSubtabActive(active);
+}
+
+window.syncHallOfFameSubtabFromScroll = syncHallOfFameSubtabFromScroll;
+
+(function initHallOfFameScrollSpy() {
+  var ticking = false;
+  function onScroll() {
+    if (!document.querySelector('.view--active[data-view="hall-of-fame"]')) return;
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      syncHallOfFameSubtabFromScroll();
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+})();
 
 /**
  * Зал славы → блок «Топ выигрышей за один турнир» (топ‑15).
@@ -3053,9 +3141,8 @@ function navigateToHallFameBlogTop15() {
       }
     } catch (ePrev) {}
     var el = document.getElementById("hallFameSingleTopWrap");
-    if (el && typeof el.scrollIntoView === "function") {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (el) scrollHallOfFameElementIntoWindow(el, true, 10);
+    setHallOfFameSubtabActive("top2026");
   }, 480);
 }
 
@@ -5663,12 +5750,18 @@ function getSpringRatingRowsForDateLeague(dateStr, leagueNum) {
   }
   return Object.keys(byNick).map(function (n) { return byNick[n]; });
 }
+function syncWinterRatingLightboxSingleClass(box) {
+  if (!box) return;
+  var single = !!(box.dataset.lightboxOverrideFile || box.dataset.lightboxSingleOnly === "1");
+  box.classList.toggle("winter-rating-lightbox--single", single);
+}
 function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   opts = opts || {};
   var box = document.getElementById("winterRatingLightbox");
   var img = box && box.querySelector(".winter-rating-lightbox__img");
   if (!box || !img) return;
   if (opts.overrideFile) {
+    delete box.dataset.lightboxSingleOnly;
     box.dataset.lightboxOverrideFile = opts.overrideFile;
     box.dataset.lightboxDate = dateStr || "";
     box.dataset.lightboxIndex = "0";
@@ -5678,6 +5771,7 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
     img.alt = "Скрин турнира";
     box.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    syncWinterRatingLightboxSingleClass(box);
     updateWinterRatingLightboxArrows();
     return;
   }
@@ -5699,10 +5793,13 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   box.dataset.lightboxIndex = String(index);
   box.dataset.lightboxLeague = leagueNum != null ? String(leagueNum) : "";
   box.dataset.lightboxWinterImages = opts.winterImages ? "1" : "";
+  if (opts.singleImageOnly) box.dataset.lightboxSingleOnly = "1";
+  else delete box.dataset.lightboxSingleOnly;
   img.src = getAssetUrl(files[index]) + "?v=18";
   img.alt = "Скрин рейтинга " + dateStr + " (" + (index + 1) + ")";
   box.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+  syncWinterRatingLightboxSingleClass(box);
   updateWinterRatingLightboxArrows();
 }
 
@@ -5713,25 +5810,39 @@ function getWinterRatingLightboxFiles(box) {
   }
   if (!box.dataset.lightboxDate) return null;
   var dateStr = box.dataset.lightboxDate;
+  var full;
   if (box.dataset.lightboxWinterImages === "1" && typeof WINTER_RATING_IMAGES !== "undefined") {
-    return WINTER_RATING_IMAGES[dateStr] || [];
+    full = WINTER_RATING_IMAGES[dateStr] || [];
+  } else {
+    var leagueStr = box.dataset.lightboxLeague;
+    var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : null;
+    if (leagueNum === 1 || leagueNum === 2) {
+      full = getSpringRatingImagesByLeague(leagueNum)[dateStr] || [];
+    } else {
+      full = getRatingImages()[dateStr] || [];
+    }
   }
-  var leagueStr = box.dataset.lightboxLeague;
-  var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : null;
-  if (leagueNum === 1 || leagueNum === 2) {
-    return getSpringRatingImagesByLeague(leagueNum)[dateStr] || [];
+  if (box.dataset.lightboxSingleOnly === "1") {
+    var idx = parseInt(box.dataset.lightboxIndex, 10) || 0;
+    if (idx < 0 || idx >= full.length) return full.length ? [full[0]] : [];
+    return [full[idx]];
   }
-  return getRatingImages()[dateStr] || [];
+  return full;
 }
 function updateWinterRatingLightboxArrows() {
   var box = document.getElementById("winterRatingLightbox");
   if (!box || box.getAttribute("aria-hidden") === "true") return;
-  var dateStr = box.dataset.lightboxDate;
-  var index = parseInt(box.dataset.lightboxIndex, 10) || 0;
-  var files = getWinterRatingLightboxFiles(box);
   var prevBtn = box.querySelector(".winter-rating-lightbox__prev");
   var nextBtn = box.querySelector(".winter-rating-lightbox__next");
   var counter = box.querySelector(".winter-rating-lightbox__counter");
+  if (box.dataset.lightboxSingleOnly === "1") {
+    if (prevBtn) prevBtn.style.display = "none";
+    if (nextBtn) nextBtn.style.display = "none";
+    if (counter) counter.textContent = "";
+    return;
+  }
+  var index = parseInt(box.dataset.lightboxIndex, 10) || 0;
+  var files = getWinterRatingLightboxFiles(box);
   if (prevBtn) prevBtn.style.display = files && index > 0 ? "" : "none";
   if (nextBtn) nextBtn.style.display = files && index < files.length - 1 ? "" : "none";
   if (counter && files) counter.textContent = (index + 1) + " / " + files.length;
@@ -5741,6 +5852,8 @@ function closeWinterRatingLightbox() {
   var box = document.getElementById("winterRatingLightbox");
   if (box) {
     box.setAttribute("aria-hidden", "true");
+    delete box.dataset.lightboxSingleOnly;
+    box.classList.remove("winter-rating-lightbox--single");
     document.body.style.overflow = "";
   }
 }
@@ -5769,6 +5882,7 @@ function initWinterRatingLightbox() {
   }
   if (prevBtn) prevBtn.addEventListener("click", function (e) {
     e.stopPropagation();
+    if (box.dataset.lightboxSingleOnly === "1") return;
     var dateStr = box.dataset.lightboxDate;
     var index = parseInt(box.dataset.lightboxIndex, 10) || 0;
     var leagueStr = box.dataset.lightboxLeague;
@@ -5778,6 +5892,7 @@ function initWinterRatingLightbox() {
   });
   if (nextBtn) nextBtn.addEventListener("click", function (e) {
     e.stopPropagation();
+    if (box.dataset.lightboxSingleOnly === "1") return;
     var dateStr = box.dataset.lightboxDate;
     var index = parseInt(box.dataset.lightboxIndex, 10) || 0;
     var leagueStr = box.dataset.lightboxLeague;
@@ -5796,6 +5911,7 @@ function initWinterRatingLightbox() {
     if (box.getAttribute("aria-hidden") !== "false") return;
     if (e.key === "Escape") closeWinterRatingLightbox();
     else if (e.key === "ArrowLeft") {
+      if (box.dataset.lightboxSingleOnly === "1") return;
       var dateStr = box.dataset.lightboxDate;
       var idx = parseInt(box.dataset.lightboxIndex, 10) || 0;
       var leagueStr = box.dataset.lightboxLeague;
@@ -5803,6 +5919,7 @@ function initWinterRatingLightbox() {
       var kbOpts = { winterImages: box.dataset.lightboxWinterImages === "1" };
       if (idx > 0) openWinterRatingLightbox(dateStr, idx - 1, leagueNum, kbOpts);
     } else if (e.key === "ArrowRight") {
+      if (box.dataset.lightboxSingleOnly === "1") return;
       var dateStr = box.dataset.lightboxDate;
       var idx = parseInt(box.dataset.lightboxIndex, 10) || 0;
       var leagueStr = box.dataset.lightboxLeague;
@@ -5976,8 +6093,9 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var monthSelect = document.getElementById("winterRatingPlayerModalMonth");
   var sortByBtn = document.getElementById("winterRatingPlayerModalSortBy");
   var sortDirBtn = document.getElementById("winterRatingPlayerModalSortDir");
-  if (!fullSummary || !tableWrap) return;
   var monthVal = monthSelect && monthSelect.value ? monthSelect.value : "all";
+  modal.classList.toggle("winter-rating-player-modal--all-time", monthVal === "all");
+  if (!fullSummary || !tableWrap) return;
   var leagueSelect = document.getElementById("winterRatingPlayerModalLeague");
   var leagueVal = leagueSelect && leagueSelect.value ? leagueSelect.value : "all";
   var sortBy = (sortByBtn && sortByBtn.textContent.indexOf("выигрыш") !== -1) ? "reward" : "date";
@@ -8318,6 +8436,20 @@ function handleViewLinkClick(e) {
   if (viewHandledInTouchend) {
     viewHandledInTouchend = false;
     e.preventDefault();
+    return;
+  }
+  var hallSubEarly = e.target.closest(".hall-of-fame__subtab[data-hall-section]");
+  if (hallSubEarly) {
+    e.preventDefault();
+    e.stopPropagation();
+    var secEarly = hallSubEarly.getAttribute("data-hall-section");
+    if (secEarly) {
+      scrollHallOfFameToSection(secEarly, true);
+      setHallOfFameSubtabActive(secEarly);
+      try {
+        if (typeof hallSubEarly.blur === "function") hallSubEarly.blur();
+      } catch (eBlur) {}
+    }
     return;
   }
   if (window.__touchWasScroll && window.__touchWasScroll()) {
@@ -12014,8 +12146,8 @@ function initChat() {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
         genHeader.style.top = "48px";
-        genHeader.style.left = "12px";
-        genHeader.style.right = "12px";
+        genHeader.style.left = "var(--card-padding-x)";
+        genHeader.style.right = "var(--card-padding-x)";
         genHeader.style.transform = "none";
         genHeader.style.width = "auto";
         genHeader.style.maxWidth = "none";
@@ -12049,8 +12181,8 @@ function initChat() {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
         genHeader.style.top = "48px";
-        genHeader.style.left = "12px";
-        genHeader.style.right = "12px";
+        genHeader.style.left = "var(--card-padding-x)";
+        genHeader.style.right = "var(--card-padding-x)";
         genHeader.style.transform = "none";
         genHeader.style.width = "auto";
         genHeader.style.maxWidth = "none";
@@ -13989,11 +14121,13 @@ function initChat() {
           if (active !== generalInput && active !== inputEl) {
             var el = getVisibleMessagesEl();
             var savedScroll = el ? el.scrollTop : 0;
-            var inFullscreenChat = !!(generalView && !generalView.classList.contains("chat-general-view--hidden")) || !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-            if (!inFullscreenChat) scrollDocumentToZero();
+            // Если контейнер сообщений видим, НЕ сбрасываем прокрутку страницы наверх.
+            // Прыжок вверх чаще всего происходит именно из-за scrollDocumentToZero() на blur.
+            var inChat = !!el;
+            if (!inChat) scrollDocumentToZero();
             document.documentElement.classList.remove("chat-keyboard-open");
             document.body.classList.remove("chat-keyboard-open");
-            if (!inFullscreenChat) scrollDocumentToZero();
+            if (!inChat) scrollDocumentToZero();
             if (el && savedScroll > 0) {
               requestAnimationFrame(function () {
                 el.scrollTop = savedScroll;
@@ -16872,7 +17006,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Rebuy", buyin: "100₽", guarantee: "50 000₽" },
   { name: "Нокаут Мистери", buyin: "1 000₽", guarantee: "150 000₽" },
   { name: "Нокаут Прогрессив", buyin: "500₽", guarantee: "100 000₽" },
-  { name: "Фриролл", buyin: "Бесплатно", guarantee: "150 000₽" }
+  { name: "Фриролл", buyin: "Бесплатно · R:250₽ / A:500₽", guarantee: "100 000₽" }
 ];
 
 function updateTournamentDayBlock() {
