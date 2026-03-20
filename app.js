@@ -5669,9 +5669,23 @@ function initWinterRatingLightbox() {
   if (!box || box.getAttribute("data-inited") === "1") return;
   box.setAttribute("data-inited", "1");
   var closeBtn = box.querySelector(".winter-rating-lightbox__close");
+  var backBtn = box.querySelector(".winter-rating-lightbox__back");
   var prevBtn = box.querySelector(".winter-rating-lightbox__prev");
   var nextBtn = box.querySelector(".winter-rating-lightbox__next");
-  if (closeBtn) closeBtn.addEventListener("click", closeWinterRatingLightbox);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeWinterRatingLightbox();
+    });
+  }
+  if (backBtn) {
+    backBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeWinterRatingLightbox();
+    });
+  }
   if (prevBtn) prevBtn.addEventListener("click", function (e) {
     e.stopPropagation();
     var dateStr = box.dataset.lightboxDate;
@@ -5692,7 +5706,10 @@ function initWinterRatingLightbox() {
     if (files && index < files.length - 1) openWinterRatingLightbox(dateStr, index + 1, leagueNum, lbOpts);
   });
   box.addEventListener("click", function (e) {
-    if (e.target === box) closeWinterRatingLightbox();
+    var t = e.target;
+    if (t === box || (t && t.classList && t.classList.contains("winter-rating-lightbox__img"))) {
+      closeWinterRatingLightbox();
+    }
   });
   document.addEventListener("keydown", function (e) {
     if (box.getAttribute("aria-hidden") !== "false") return;
