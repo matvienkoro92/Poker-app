@@ -10018,7 +10018,7 @@ function initRaffles() {
                 sent +
                 " из " +
                 total +
-                (data && data.retry ? " (повтор неудачным)." : " подписчиков розыгрыша.") +
+                (data && data.retry ? " (досылка тем, кому не дошло)." : " подписчиков розыгрыша.") +
                 (failN
                   ? " Не доставлено (ошибка Telegram): " + failN + ". Подробности — «Отчёт последней рассылки»."
                   : "") +
@@ -10080,11 +10080,17 @@ function initRaffles() {
       if (last.failuresTruncated)
         lines.push("… в отчёте обрезано ещё ошибок: " + last.failuresTruncated);
       lines.push("");
+      if (Array.isArray(last.successfulChatIds)) {
+        lines.push(
+          "В отчёте сохранены успешные chat_id — досылка идёт всем текущим подписчикам, кроме них (заблокировавших бота не беспокоим)."
+        );
+      } else {
+        lines.push(
+          "Старый отчёт: успешные id не сохранены — досылка только по списку ошибок (кроме user_blocked)."
+        );
+      }
       lines.push(
-        "Успешные chat_id в базе не хранятся — только счётчик и сбойные id."
-      );
-      lines.push(
-        "Кнопка «Дослать неудачным» отправит снова только chat_id из списка ошибок (тот же текст, что сохранён в отчёте)."
+        "Сбойные id см. выше. Текст рассылки берётся из последнего отчёта."
       );
       return lines.join("\n");
     }
@@ -10180,7 +10186,7 @@ function initRaffles() {
                   ? " " + data.warning
                   : "";
               rafflesNotifySubsHint.textContent =
-                "Повтор неудачным: отправлено " +
+                "Досылка (кому не дошло): отправлено " +
                 sent +
                 " из " +
                 total +
@@ -10206,7 +10212,7 @@ function initRaffles() {
     }
     rafflesRetryFailedBroadcastBtn.addEventListener("click", function () {
       var msg =
-        "Дослать тем же текстом только адресам с ошибкой из последнего отчёта? Тем, кто заблокировал бота, снова не дойдёт.";
+        "Дослать тем же текстом всем из списка подписчиков, кому в прошлый раз не было успешной доставки (в т.ч. если оборвалось по таймауту)? Заблокировавших бота пропускаем.";
       if (tg && typeof tg.showConfirm === "function") {
         tg.showConfirm(msg, function (ok) {
           if (ok) runRetryFailedBroadcast();
