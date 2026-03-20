@@ -12701,6 +12701,35 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   width: 100%;
   max-width: none;
 }
+.hall-of-fame__blog-top15-copy-wrap {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.hall-of-fame__blog-top15-copy-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hall-of-fame__blog-top15-copy-btn:active {
+  opacity: 0.9;
+}
+.hall-of-fame__blog-top15-copy-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 100%;
+}
 .hall-of-fame__section-title--cups-above-rating {
   margin: 8px auto 12px;
   max-width: 92%;

@@ -2978,6 +2978,68 @@ function navigateToHallFameBlogTop15() {
   }, 480);
 }
 
+/** Ссылка на мини‑апп сразу на топ‑15 в зале славы (startapp=blog_top15) */
+function getHallFameBlogTop15ShareUrl() {
+  var appEl = document.getElementById("app");
+  var u = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
+  u = String(u).replace(/\/$/, "");
+  if (!u) return "";
+  var sep = u.indexOf("?") >= 0 ? "&" : "?";
+  return u + sep + "startapp=" + encodeURIComponent("blog_top15");
+}
+
+(function initHallFameBlogTop15CopyBtn() {
+  var btn = document.getElementById("hallFameBlogTop15CopyBtn");
+  if (!btn) return;
+  function copyDone(ok) {
+    var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tgLocal && tgLocal.showAlert) {
+      tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
+    } else if (ok) {
+      alert("Ссылка скопирована");
+    } else {
+      alert("Не удалось скопировать");
+    }
+  }
+  btn.addEventListener("click", function () {
+    var url = getHallFameBlogTop15ShareUrl();
+    if (!url) {
+      var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg0 && tg0.showAlert) {
+        tg0.showAlert("Задайте в index.html атрибут data-telegram-app-url у #app.");
+      } else {
+        alert("Не задан URL мини‑приложения (data-telegram-app-url).");
+      }
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(function () {
+          copyDone(true);
+        })
+        .catch(function () {
+          copyDone(false);
+        });
+    } else {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = url;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        copyDone(true);
+      } catch (e) {
+        copyDone(false);
+      }
+    }
+  });
+})();
+
 function updateChatNavDot() {
   var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
   // Если какие-то непрочитанные помечены флагами, но счётчик не пришёл — показываем хотя бы 1.
