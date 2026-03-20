@@ -321,12 +321,7 @@ body {
   justify-content: flex-start;
   overflow: hidden;
 }
-/* Главная: уже боковые отступы (внешний зазор + padding карточки), остальные разделы без изменений */
-.app:has(.view--active[data-view="home"]),
-html.app-view-home .app {
-  --app-gutter: clamp(6px, 2.4vw, 9px);
-}
-
+/* Боковые отступы как в разделе «Скачать» и остальных экранах: единый --screen-gutter-x */
 .bg-gradient {
   position: absolute;
   inset: -40%;
@@ -391,11 +386,6 @@ html.app-view-home .app {
   flex-direction: column;
   gap: 16px;
   min-height: 0;
-}
-
-.card:has(.view--active[data-view="home"]),
-html.app-view-home .card {
-  --card-padding-x: clamp(6px, 2.4vw, 9px);
 }
 
 .card:has(.view--active[data-view="home"]) {
@@ -3665,17 +3655,6 @@ img.chat-contact__avatar {
   padding: 0 12px 12px;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
-}
-.chat-dialogs-menu-title {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 10px 4px 6px;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text);
-  text-align: center;
-  line-height: 1.2;
 }
 .chat-dialog-item,
 .chat-contact {
