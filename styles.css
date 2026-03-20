@@ -13064,12 +13064,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   flex: 1;
   min-width: 0;
   margin: 0;
-  padding: 6px 6px;
+  padding: 6px 4px;
   box-sizing: border-box;
   border: none;
   border-radius: 0;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.15;
@@ -13130,10 +13130,29 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   background: rgba(251, 146, 60, 0.26);
 }
 .hall-of-fame__main-title {
-  margin: 4px 0 16px;
+  margin: 4px 0 10px;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+.hall-of-fame__main-title--top {
+  margin: 0 0 10px;
+  text-align: center;
+  width: 100%;
+}
+.hall-of-fame__panels {
+  margin-top: 4px;
+  min-height: 120px;
+}
+.hall-of-fame__panel[hidden] {
+  display: none !important;
+}
+.hall-of-fame__panel--active {
+  display: block;
+}
+.hall-of-fame__block--nested {
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 /* Топ-15 заносов за один турнир — под заголовком зала славы */
 .hall-of-fame__single-top-outer {

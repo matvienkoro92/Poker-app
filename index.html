@@ -24,7 +24,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=76" />
+    <link rel="stylesheet" href="./styles.css?v=79" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -2105,65 +2105,76 @@
 
           <!-- Зал славы -->
           <div class="view" data-view="hall-of-fame" id="hallOfFameView">
+            <h1 class="hall-of-fame__main-title hall-of-fame__main-title--top">Зал славы</h1>
             <div class="hall-of-fame__toolbar" role="navigation" aria-label="Разделы зала славы">
               <button type="button" class="bonus-game-back hall-of-fame__toolbar-back" data-view-target="home" aria-label="На главную">← Назад</button>
-              <div class="hall-of-fame__subtabs" role="tablist" aria-label="Меню зала славы">
+              <div class="hall-of-fame__subtabs" role="tablist" aria-label="Разделы зала славы">
                 <button type="button" class="hall-of-fame__subtab hall-of-fame__subtab--active" role="tab" aria-selected="true" data-hall-section="top2026">Топ2026</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="cups">Кубки</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="legends">Легенды</button>
+                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="photos">Фото</button>
               </div>
             </div>
-            <h1 class="hall-of-fame__main-title">Зал славы</h1>
-            <div class="hall-of-fame__single-top-outer winter-rating__single-top-row" id="hallFameSectionTop2026">
-              <div class="winter-rating__single-top-wrap hall-of-fame__single-top-wrap" id="hallFameSingleTopWrap">
-                <h4 class="winter-rating__single-top winter-rating__single-top--title" id="hallFameSingleTopSummary">Топ выигрышей за один турнир (2026)</h4>
-                <ul class="winter-rating__single-top-list" id="hallFameSingleTopList"></ul>
-                <div class="hall-of-fame__blog-top15-copy-wrap">
-                  <button type="button" class="hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn">
-                    Скопировать ссылку
-                  </button>
-                  <p class="hall-of-fame__blog-top15-copy-hint">
-                    Отдельная ссылка открывает сразу этот топ‑15 в приложении
-                  </p>
-                </div>
-              </div>
-            </div>
-            <h2 class="hall-of-fame__section-title hall-of-fame__section-title--cups-above-rating" id="hallCupsTitle">Кубки два туза</h2>
-            <div class="hall-of-fame__rating-card-wrap">
-              <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-full hall-of-fame__winter-rating-card" data-view-target="winter-rating" aria-label="Рейтинг турнирщиков зима 2025-2026 на 250 000р">
-                <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                <div class="feature__body">
-                  <div class="feature__title feature__title--center feature__title--uppercase">
-                    <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                    <span class="feature__title-prize">НА 250 000р</span>
-                    <span class="feature__title-line3"><span class="feature__title-snowflake" aria-hidden="true">❄</span> Зима 2025-2026</span>
-                    <span class="hall-of-fame__winter-winner">Победитель Waaar</span>
+            <div class="hall-of-fame__panels">
+              <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelTop2026" data-hall-panel="top2026" role="tabpanel" aria-labelledby="hallFameSingleTopSummary">
+                <div class="hall-of-fame__single-top-outer winter-rating__single-top-row">
+                  <div class="winter-rating__single-top-wrap hall-of-fame__single-top-wrap" id="hallFameSingleTopWrap">
+                    <h2 class="winter-rating__single-top winter-rating__single-top--title" id="hallFameSingleTopSummary">Топ выигрышей за один турнир (2026)</h2>
+                    <ul class="winter-rating__single-top-list" id="hallFameSingleTopList"></ul>
+                    <div class="hall-of-fame__blog-top15-copy-wrap">
+                      <button type="button" class="hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn">Скопировать ссылку</button>
+                      <p class="hall-of-fame__blog-top15-copy-hint">Отдельная ссылка открывает сразу этот топ‑15 в приложении</p>
+                    </div>
                   </div>
                 </div>
-                <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-              </a>
-            </div>
-            <section class="hall-of-fame__block" aria-labelledby="hallPrivateTitle">
-              <h2 class="hall-of-fame__section-title" id="hallPrivateTitle">Приватные турниры</h2>
-              <p class="hall-of-fame__placeholder">Скоро здесь появятся данные.</p>
-            </section>
-            <section class="hall-of-fame__block" aria-labelledby="hallLegendsTitle">
-              <h2 class="hall-of-fame__section-title" id="hallLegendsTitle">Легенды клуба</h2>
-              <div class="hall-of-fame__legends-list" role="list">
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Waaarr" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Waaarr</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Coo1er91" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Coo1er91</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Emil13" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Emil13</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Рыбнадзор" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Рыбнадзор</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="AndrushaMorf" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">AndrushaMorf</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Shummmx" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shummmx</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="WhiskeyClub" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">WhiskeyClub</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Пряник" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Пряник</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Siropchik" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Siropchik</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Хулинадо" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Хулинадо</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="Shockin" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shockin</span></button>
-                <button type="button" class="hall-of-fame__legend-link" data-nick="qoqoEpta" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">qoqoEpta</span></button>
               </div>
-            </section>
+              <div class="hall-of-fame__panel" id="hallFamePanelCups" data-hall-panel="cups" role="tabpanel" hidden>
+                <h2 class="hall-of-fame__section-title hall-of-fame__section-title--cups-above-rating" id="hallCupsTitle">Кубки два туза</h2>
+                <div class="hall-of-fame__rating-card-wrap">
+                  <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-full hall-of-fame__winter-rating-card" data-view-target="winter-rating" aria-label="Рейтинг турнирщиков зима 2025-2026 на 250 000р">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize">НА 250 000р</span>
+                        <span class="feature__title-line3"><span class="feature__title-snowflake" aria-hidden="true">❄</span> Зима 2025-2026</span>
+                        <span class="hall-of-fame__winter-winner">Победитель Waaar</span>
+                      </div>
+                    </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </a>
+                </div>
+                <section class="hall-of-fame__block hall-of-fame__block--nested" aria-labelledby="hallPrivateTitle">
+                  <h2 class="hall-of-fame__section-title" id="hallPrivateTitle">Приватные турниры</h2>
+                  <p class="hall-of-fame__placeholder">Скоро здесь появятся данные.</p>
+                </section>
+              </div>
+              <div class="hall-of-fame__panel" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" hidden>
+                <section class="hall-of-fame__block" aria-labelledby="hallLegendsTitle">
+                  <h2 class="hall-of-fame__section-title" id="hallLegendsTitle">Легенды клуба</h2>
+                  <div class="hall-of-fame__legends-list" role="list">
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Waaarr" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Waaarr</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Coo1er91" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Coo1er91</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Emil13" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Emil13</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Рыбнадзор" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Рыбнадзор</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="AndrushaMorf" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">AndrushaMorf</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Shummmx" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shummmx</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="WhiskeyClub" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">WhiskeyClub</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Пряник" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Пряник</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Siropchik" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Siropchik</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Хулинадо" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Хулинадо</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="Shockin" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shockin</span></button>
+                    <button type="button" class="hall-of-fame__legend-link" data-nick="qoqoEpta" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">qoqoEpta</span></button>
+                  </div>
+                </section>
+              </div>
+              <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
+                <section class="hall-of-fame__block" aria-labelledby="hallPhotosTitle">
+                  <h2 class="hall-of-fame__section-title" id="hallPhotosTitle">Фото</h2>
+                  <p class="hall-of-fame__placeholder">Скоро здесь появится фотогалерея клуба.</p>
+                </section>
+              </div>
+            </div>
           </div>
 
           <!-- Депозит / кэшаут -->
@@ -3313,6 +3324,7 @@
           <div class="winter-rating-date-modal__body" id="winterRatingDateModalBody"></div>
         </div>
       </div>
+
       <div class="chat-user-modal" id="chatUserModal" aria-hidden="true" role="dialog" aria-labelledby="chatUserModalTitle" aria-label="Карточка пользователя">
         <div class="chat-user-modal__backdrop"></div>
         <div class="chat-user-modal__inner">
@@ -3533,7 +3545,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=121"></script>
+    <script src="./app.js?v=124"></script>
   </body>
 </html>
 

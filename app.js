@@ -3006,26 +3006,18 @@ function setView(viewName) {
     });
   }
   if (viewName === "hall-of-fame") {
-    var rafH = window.requestAnimationFrame || function (fn) {
+    var rafHall = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
     };
-    rafH(function () {
-      rafH(function () {
-        if (typeof syncHallOfFameSubtabFromScroll === "function") syncHallOfFameSubtabFromScroll();
+    rafHall(function () {
+      rafHall(function () {
+        if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("top2026");
       });
     });
   }
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
-}
-
-/** Якоря подменю зала славы: Топ2026 / Кубки / Легенды */
-function getHallOfFameSectionAnchorEl(section) {
-  if (section === "top2026") return document.getElementById("hallFameSectionTop2026");
-  if (section === "cups") return document.getElementById("hallCupsTitle");
-  if (section === "legends") return document.getElementById("hallLegendsTitle");
-  return null;
 }
 
 function setHallOfFameSubtabActive(section) {
@@ -3039,94 +3031,21 @@ function setHallOfFameSubtabActive(section) {
   });
 }
 
-/** Скролл окна (не scrollIntoView): внутри transform/perspective scrollIntoView ломает обратный скролл в Telegram WebView. */
-function hallOfFameGetWindowScrollY() {
-  if (typeof window.pageYOffset === "number") return window.pageYOffset;
-  var se = document.scrollingElement || document.documentElement;
-  if (se && typeof se.scrollTop === "number") return se.scrollTop;
-  if (document.body && typeof document.body.scrollTop === "number") return document.body.scrollTop;
-  return 0;
-}
-
-function hallOfFameGetMaxScrollY() {
-  var se = document.scrollingElement || document.documentElement;
-  var h = Math.max(
-    se ? se.scrollHeight : 0,
-    document.documentElement ? document.documentElement.scrollHeight : 0,
-    document.body ? document.body.scrollHeight : 0
-  );
-  return Math.max(0, Math.floor(h - window.innerHeight));
-}
-
-function hallOfFameScrollWindowTo(y, smooth) {
-  var maxY = hallOfFameGetMaxScrollY();
-  var top = Math.max(0, Math.min(y, maxY));
-  if (smooth) {
-    try {
-      window.scrollTo({ left: 0, top: top, behavior: "smooth" });
-    } catch (eSmooth) {
-      window.scrollTo(0, top);
-    }
-  } else {
-    window.scrollTo(0, top);
-    try {
-      var se = document.scrollingElement || document.documentElement;
-      if (se) se.scrollTop = top;
-      if (document.body) document.body.scrollTop = top;
-    } catch (eSync) {}
-  }
-}
-
-function scrollHallOfFameElementIntoWindow(el, smooth, padTop) {
-  if (!el || typeof el.getBoundingClientRect !== "function") return;
-  padTop = padTop != null ? padTop : 10;
-  var y0 = hallOfFameGetWindowScrollY();
-  var rect = el.getBoundingClientRect();
-  var targetY = y0 + rect.top - padTop;
-  hallOfFameScrollWindowTo(targetY, !!smooth);
-}
-
-function scrollHallOfFameToSection(section, smooth) {
-  var el = getHallOfFameSectionAnchorEl(section);
-  scrollHallOfFameElementIntoWindow(el, smooth, 10);
-}
-
-function syncHallOfFameSubtabFromScroll() {
-  var view = document.querySelector('.view--active[data-view="hall-of-fame"]');
+/** Переключение разделов зала славы в одном экране (как лиги в рейтинге), без модалок */
+function showHallOfFamePanel(section) {
+  var view = document.getElementById("hallOfFameView");
   if (!view) return;
-  var scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-  var focusLine = scrollY + 96;
-  var order = [
-    { id: "top2026", el: document.getElementById("hallFameSectionTop2026") },
-    { id: "cups", el: document.getElementById("hallCupsTitle") },
-    { id: "legends", el: document.getElementById("hallLegendsTitle") }
-  ];
-  var active = "top2026";
-  for (var i = 0; i < order.length; i++) {
-    var el = order[i].el;
-    if (!el) continue;
-    var rect = el.getBoundingClientRect();
-    var top = rect.top + scrollY;
-    if (top <= focusLine) active = order[i].id;
-  }
-  setHallOfFameSubtabActive(active);
+  view.querySelectorAll(".hall-of-fame__panel[data-hall-panel]").forEach(function (panel) {
+    var on = panel.getAttribute("data-hall-panel") === section;
+    panel.classList.toggle("hall-of-fame__panel--active", on);
+    if (on) panel.removeAttribute("hidden");
+    else panel.setAttribute("hidden", "");
+  });
+  setHallOfFameSubtabActive(section);
 }
 
-window.syncHallOfFameSubtabFromScroll = syncHallOfFameSubtabFromScroll;
-
-(function initHallOfFameScrollSpy() {
-  var ticking = false;
-  function onScroll() {
-    if (!document.querySelector('.view--active[data-view="hall-of-fame"]')) return;
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function () {
-      ticking = false;
-      syncHallOfFameSubtabFromScroll();
-    });
-  }
-  window.addEventListener("scroll", onScroll, { passive: true });
-})();
+window.showHallOfFamePanel = showHallOfFamePanel;
+window.openHallOfFameSectionModal = showHallOfFamePanel;
 
 /**
  * Зал славы → блок «Топ выигрышей за один турнир» (топ‑15).
@@ -3140,9 +3059,7 @@ function navigateToHallFameBlogTop15() {
         window.updateWinterRatingWeekTopPreviews();
       }
     } catch (ePrev) {}
-    var el = document.getElementById("hallFameSingleTopWrap");
-    if (el) scrollHallOfFameElementIntoWindow(el, true, 10);
-    setHallOfFameSubtabActive("top2026");
+    if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("top2026");
   }, 480);
 }
 
@@ -8443,9 +8360,8 @@ function handleViewLinkClick(e) {
     e.preventDefault();
     e.stopPropagation();
     var secEarly = hallSubEarly.getAttribute("data-hall-section");
-    if (secEarly) {
-      scrollHallOfFameToSection(secEarly, true);
-      setHallOfFameSubtabActive(secEarly);
+    if (secEarly && typeof showHallOfFamePanel === "function") {
+      showHallOfFamePanel(secEarly);
       try {
         if (typeof hallSubEarly.blur === "function") hallSubEarly.blur();
       } catch (eBlur) {}
