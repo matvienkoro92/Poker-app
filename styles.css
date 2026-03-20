@@ -693,16 +693,6 @@ html.app-view-home .home-welcome-outline::before {
   text-overflow: ellipsis;
   max-width: 140px;
 }
-.header-user-id {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 1px;
-}
-.header-user-id #headerUserId {
-  font-family: monospace;
-  font-weight: 600;
-  color: var(--text);
-}
 .header-actions .auth-user {
   display: none;
 }

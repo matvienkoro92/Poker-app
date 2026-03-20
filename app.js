@@ -2453,11 +2453,6 @@ if (tg) {
       var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
       el.textContent = u && u.first_name ? "Привет, " + u.first_name + "!" : "Привет, Роман";
     }
-    var idEl = document.getElementById("headerUserId");
-    if (idEl) {
-      var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
-      idEl.textContent = cached || "\u2014";
-    }
   }
 
   // Нет Telegram — показываем баннер «Откройте в Telegram»
@@ -7173,8 +7168,6 @@ function updateProfileDtId() {
         sessionStorage.setItem("poker_dt_id", data.dtId);
         if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
         el.textContent = data.dtId;
-        var headerIdEl = document.getElementById("headerUserId");
-        if (headerIdEl) headerIdEl.textContent = data.dtId;
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
       } else {
         el.textContent = cached || "\u2014";
