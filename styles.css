@@ -141,17 +141,17 @@ body::-webkit-scrollbar,
   border-color: rgba(249, 115, 22, 0.4);
   box-shadow: 0 8px 24px rgba(249, 115, 22, 0.12);
 }
-[data-theme="light"] .bonus-game-back {
-  color: #ea580c;
-}
-[data-theme="light"] .bonus-game-back:hover {
-  color: #c2410c;
-}
+[data-theme="light"] .bonus-game-back,
 [data-theme="light"] .download-back {
-  color: #ea580c;
+  background: var(--block-bg-solid);
+  color: var(--text);
+  border-color: rgba(234, 88, 12, 0.65);
 }
+[data-theme="light"] .bonus-game-back:hover,
 [data-theme="light"] .download-back:hover {
-  color: #c2410c;
+  border-color: rgba(234, 88, 12, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 [data-theme="light"] .app-store-btn {
   background: linear-gradient(145deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
@@ -1369,9 +1369,6 @@ body.chat-keyboard-open .app {
 }
 .gazette-modal__pick-back-bar .gazette-modal__back--to-home {
   margin: 0;
-  padding: 0;
-  font-size: 17px;
-  color: #5c4033;
 }
 
 /* Первая полоса газеты (фронт) */
@@ -1788,10 +1785,7 @@ body.chat-keyboard-open .app {
 }
 .gazette-modal__content--news .gazette-modal__back {
   margin-top: 0;
-  margin-bottom: 5px;
-  padding-left: 5px;
-  color: #5c4033;
-  font-size: 17px;
+  margin-bottom: 8px;
 }
 .gazette-modal__article-back {
   margin: 0 0 8px;
@@ -1819,21 +1813,32 @@ body.chat-keyboard-open .app {
   padding-top: 20px;
   border-top: none;
 }
+/* Как кнопки «Назад» в чате: плашка с оранжевой обводкой */
 .gazette-modal__back {
-  margin: 0 0 21px;
-  padding: 8px 0;
-  background: none;
-  border: none;
-  font-size: 19px;
-  font-weight: 600;
-  color: #5c4033;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin: 0 0 12px;
+  padding: 0 12px 0 10px;
+  min-height: 40px;
+  box-sizing: border-box;
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
   cursor: pointer;
   font-family: inherit;
-  text-decoration: underline;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
 }
 .gazette-modal__back:hover {
-  color: #2c1810;
-  text-decoration: underline;
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 .gazette-modal__header {
   text-align: center;
@@ -3399,20 +3404,35 @@ img.chat-contact__avatar {
   z-index: 2;
   flex-shrink: 0;
   margin: 8px 12px;
-  padding: 10px 16px;
+  padding: 0 12px 0 10px;
+  min-height: 40px;
+  box-sizing: border-box;
   align-self: flex-start;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(249, 115, 22, 0.7);
   border-radius: 20px;
-  background: var(--block-bg);
+  background: var(--block-bg-solid);
   color: var(--text);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
 }
 .pdf-viewer__close:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
+}
+[data-theme="light"] .pdf-viewer__close {
+  border-color: rgba(234, 88, 12, 0.65);
+}
+[data-theme="light"] .pdf-viewer__close:hover {
+  border-color: rgba(234, 88, 12, 0.9);
 }
 .pdf-viewer__iframe {
   flex: 1;
@@ -4248,8 +4268,13 @@ img.chat-contact__avatar {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
+/* Личные сообщения: лента под плавающей шапкой (top 48px + ряд ~52px) + доп. зазор */
+.chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(48px + 52px + 14px);
+  box-sizing: border-box;
+}
 .chat-conv-view .chat-messages > .chat-msg:first-child {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 .chat-container .chat-input-area {
   flex-shrink: 0;
@@ -6265,18 +6290,29 @@ html.app-view-home .feature--rating-spring-promo:hover,
   top: 12px;
   left: 12px;
   z-index: 2;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(192, 132, 252, 0.15);
-  color: #e9d5ff;
-  font-size: 20px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  background: var(--block-bg-solid);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
   line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  -webkit-tap-highlight-color: transparent;
 }
 .poker-streak-screen__back:hover {
-  background: rgba(192, 132, 252, 0.25);
+  border-color: rgba(249, 115, 22, 0.9);
+  background: var(--block-bg-solid);
+  color: var(--text);
 }
 .poker-streak-header {
   display: flex;
@@ -7328,7 +7364,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   gap: 6px;
   flex-shrink: 0;
   margin-left: auto;
-  margin-right: 0;
+  /* Зазор от правой обводки блока приветствия (Чат / Канал / Предсказание / Розыгрыши) */
+  margin-right: 5px;
 }
 .home-mini-icon-item {
   display: flex;
@@ -7888,20 +7925,33 @@ a.home-mini-icon-item {
 }
 
 .download-back {
-  margin: 0 0 16px;
-  padding: 11px 16px;
-  border: none;
-  background: none;
-  color: #f97316;
-  font-size: 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin: 0 0 14px;
+  padding: 0 12px 0 10px;
+  min-height: 40px;
+  box-sizing: border-box;
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
 }
 .download-back:hover {
-  color: #ea580c;
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 .download-back:active {
-  opacity: 0.85;
+  opacity: 0.92;
 }
 
 .poker21-intro {
@@ -9263,28 +9313,40 @@ a.home-mini-icon-item {
   background: rgba(212, 175, 55, 0.2);
 }
 .winter-rating-player-modal__back {
-  display: inline-block;
-  margin: 0 0 19px;
-  padding: 5px 0;
-  background: none;
-  border: none;
-  color: #d4af37;
-  font-size: 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 14px;
+  padding: 0 12px 0 10px;
+  min-height: 40px;
+  box-sizing: border-box;
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  transition: color 0.2s ease;
-  text-decoration: underline;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
 }
 .winter-rating-player-modal__back:hover {
-  color: #e5c548;
-  text-decoration: underline;
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 [data-theme="light"] .winter-rating-player-modal__back {
-  color: #ea580c;
+  border-color: rgba(234, 88, 12, 0.65);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 [data-theme="light"] .winter-rating-player-modal__back:hover {
-  color: #c2410c;
-  text-decoration: underline;
+  border-color: rgba(234, 88, 12, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 [data-theme="light"] .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
   color: #0f172a;
@@ -9601,11 +9663,14 @@ a.home-mini-icon-item {
   background: rgba(139, 90, 43, 0.25);
 }
 .winter-rating-player-modal--gazette .winter-rating-player-modal__back {
-  color: #5c4033;
+  color: var(--text);
+  background: var(--block-bg-solid);
+  border-color: rgba(249, 115, 22, 0.7);
 }
 .winter-rating-player-modal--gazette .winter-rating-player-modal__back:hover {
-  color: #2c1810;
-  text-decoration: underline;
+  color: var(--text);
+  border-color: rgba(249, 115, 22, 0.9);
+  background: var(--block-bg-solid);
 }
 .winter-rating-player-modal--gazette .winter-rating-player-modal__title {
   color: #2c1810;
@@ -11610,8 +11675,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 .view--active[data-view="winter-rating"] .bonus-game-back {
   margin: 0 0 5px;
-  padding: 5px 0;
-  font-size: 17px;
+  min-height: 38px;
+  font-size: 14px;
 }
 /* Рейтинг весны: убираем отступ между кнопкой «Назад» и листочками */
 .view--active[data-view="spring-rating"] .bonus-game-back {
@@ -12714,21 +12779,34 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* Кнопка «Назад» на экранах (зал славы, мини-игры, рейтинг и т.д.) */
+/* «Назад» / «На главную» — тот же стиль, что у кнопок в шапке чата (.chat-general-header .chat-back-btn) */
 .bonus-game-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
   margin: 0 0 11px;
-  padding: 8px 0;
-  background: none;
-  border: none;
-  color: #f97316;
-  font-size: 19px;
+  padding: 0 12px 0 10px;
+  min-height: 40px;
+  box-sizing: border-box;
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  text-align: left;
-  text-decoration: underline;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bonus-game-back:hover {
-  color: #ea580c;
+  border-color: rgba(249, 115, 22, 0.9);
+  color: var(--text);
+  background: var(--block-bg-solid);
 }
 
 /* Зал славы — экран */
@@ -12780,10 +12858,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   margin: 8px auto 12px;
   max-width: 100%;
   text-align: center;
-}
-.hall-of-fame__cups-placeholder {
-  margin: 0 auto 24px;
-  max-width: 100%;
 }
 .hall-of-fame__rating-card-wrap {
   margin: 0 auto 10px;
