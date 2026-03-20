@@ -4329,6 +4329,7 @@ img.chat-contact__avatar {
   max-width: none;
   z-index: 2;
   --chat-general-header-btn-height: 40px;
+  overflow: hidden; /* чтобы кнопки не вылезали за правый край на узких экранах */
   /* Важно: заголовок перекрывает часть сообщений, поэтому отключаем захват кликов контейнером.
      Клики будут проходить к сообщениям, а сами кнопки вернём обратно через pointer-events:auto. */
   pointer-events: none;
@@ -4399,10 +4400,12 @@ img.chat-contact__avatar {
   flex: 1 1 auto;
   display: inline-flex;
   justify-content: center;
-  padding: 0 12px;
+  padding: 0 10px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 0; /* важно для flex-сжатия на узких экранах */
+  overflow: hidden;
 }
 .chat-general-admins-btn {
   padding: 7px 12px;
@@ -4428,6 +4431,10 @@ img.chat-contact__avatar {
   font-size: 14px;
   font-weight: 500;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .chat-general-admins-btn__bottom {
