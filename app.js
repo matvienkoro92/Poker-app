@@ -7686,6 +7686,16 @@ function getStreamsAppUrl() {
   return window.location.origin + window.location.pathname;
 }
 
+/** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
+function buildMiniAppStartLink(startParam) {
+  var appEl = document.getElementById("app");
+  var appUrl =
+    (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
+  appUrl = String(appUrl).replace(/\/$/, "");
+  var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
+  return appUrl + sep + "startapp=" + encodeURIComponent(String(startParam));
+}
+
 function streamsCleanup() {
   if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
   streamsBroadcastTimerInterval = null;
@@ -10404,43 +10414,6 @@ function initRaffles() {
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
 
-  var rafflesCopyLinkBtn = document.getElementById("rafflesCopyLinkBtn");
-  if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
-    rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
-    rafflesCopyLinkBtn.addEventListener("click", function () {
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
-      var link = appUrl + "?startapp=raffles";
-      var msg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
-    });
-  }
-  var rafflesInviteFriendBtn = document.getElementById("rafflesInviteFriendBtn");
-  if (rafflesInviteFriendBtn) {
-    rafflesInviteFriendBtn.addEventListener("click", function () {
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
-      var link = appUrl + "?startapp=raffles";
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent("Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link);
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl); else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
-    });
-  }
-
   if (raffleInviteFriendInlineBtn) {
     raffleInviteFriendInlineBtn.addEventListener("click", function () {
       if (!currentRaffleData) return;
@@ -10449,10 +10422,7 @@ function initRaffles() {
       var total = raffle.totalWinners || 0;
       var totalPrize = getRaffleTotalPrize(raffle);
       var tournamentName = raffleDisplayPrizeText((raffle.title || (groups[0] && groups[0].prize) || "").trim()) || "турнир клуба";
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
-      var link = appUrl + "?startapp=raffles";
+      var link = buildMiniAppStartLink("raffles");
       var text =
         "Разыгрываем " +
         (total || 0) +
@@ -10902,6 +10872,49 @@ function initRaffles() {
 
   loadRaffles();
 }
+
+// Кнопки шаринга в шапке розыгрышей: один раз при загрузке (не внутри initRaffles — иначе при каждом заходе дублируются обработчики).
+(function initRafflesHeroShare() {
+  function rafflesDeepLink() {
+    return buildMiniAppStartLink("raffles");
+  }
+  var rafflesCopyLinkBtn = document.getElementById("rafflesCopyLinkBtn");
+  if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
+    rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
+    rafflesCopyLinkBtn.addEventListener("click", function () {
+      var link = rafflesDeepLink();
+      var msg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
+      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
+        }).catch(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
+        });
+      } else {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
+      }
+    });
+  }
+  var rafflesInviteFriendBtn = document.getElementById("rafflesInviteFriendBtn");
+  if (rafflesInviteFriendBtn && rafflesInviteFriendBtn.getAttribute("data-share-bound") !== "1") {
+    rafflesInviteFriendBtn.setAttribute("data-share-bound", "1");
+    rafflesInviteFriendBtn.addEventListener("click", function () {
+      var link = rafflesDeepLink();
+      var shareUrl =
+        "https://t.me/share/url?url=&text=" +
+        encodeURIComponent(
+          "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link
+        );
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+    });
+  }
+})();
 
 // Счётчик уникальных и повторных посетителей (стабильный ID: Telegram → localStorage → sessionStorage)
 function getVisitorId() {
