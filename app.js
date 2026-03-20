@@ -2414,6 +2414,18 @@ if (tg) {
   if (el) el.textContent = Math.floor(Math.random() * (15 - 7 + 1)) + 7;
 })();
 
+/** Имя для приветствия из Telegram User: сначала имя, иначе фамилия, иначе @username без @ */
+function telegramUserDisplayName(u) {
+  if (!u || typeof u !== "object") return "";
+  var fn = u.first_name != null ? String(u.first_name).trim() : "";
+  if (fn) return fn;
+  var ln = u.last_name != null ? String(u.last_name).trim() : "";
+  if (ln) return ln;
+  var un = u.username != null ? String(u.username).trim() : "";
+  if (un) return un.replace(/^@+/, "");
+  return "";
+}
+
 // Авторизация через Telegram: проверка initData на сервере
 (function initTelegramAuth() {
   const banner = document.getElementById("authBanner");
@@ -2435,7 +2447,10 @@ if (tg) {
   function showAuthorized(user) {
     if (userEl) {
       var textEl = userEl.querySelector("#authUserText");
-      if (textEl) textEl.textContent = user.first_name ? "Привет, " + user.first_name + "!" : "Вы вошли";
+      if (textEl) {
+        var dn = telegramUserDisplayName(user);
+        textEl.textContent = dn ? "Привет, " + dn + "!" : "Вы вошли";
+      }
       userEl.classList.remove("auth-user--hidden");
       loadHeaderAvatar();
     }
@@ -2451,7 +2466,9 @@ if (tg) {
     var el = document.getElementById("headerGreeting");
     if (el) {
       var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-      el.textContent = u && u.first_name ? "Привет, " + u.first_name + "!" : "Привет, Роман";
+      var dn = telegramUserDisplayName(u);
+      /* Раньше при пустом first_name показывали «Роман» — у игроков с только username (Alex) это ломалось */
+      el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
     }
   }
 
