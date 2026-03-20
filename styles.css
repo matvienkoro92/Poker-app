@@ -4193,6 +4193,11 @@ img.chat-contact__avatar {
 .chat-conv-top .chat-conv-title__role {
   display: none !important;
 }
+
+/* Личные сообщения: рядом с «Назад» не показываем имя — только кнопка */
+.chat-conv-view .chat-conv-top .chat-conv-header {
+  display: none !important;
+}
 .chat-conv-top .chat-conv-header .chat-title--small {
   display: block;
   font-size: 15px;

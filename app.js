@@ -11998,6 +11998,7 @@ function initChat() {
   function showDialogs() {
     chatWithUserId = null;
     chatWithUserName = null;
+    if (convTitle) convTitle.textContent = "";
     if (dialogsView) dialogsView.classList.remove("chat-dialogs-view--hidden");
     if (generalView) generalView.classList.add("chat-general-view--hidden");
     if (personalView) personalView.classList.add("chat-personal-view--hidden");
@@ -13330,6 +13331,7 @@ function initChat() {
 
   function showList() {
     chatWithUserId = null;
+    if (convTitle) convTitle.textContent = "";
     if (listView) listView.classList.remove("chat-list-view--hidden");
     if (convView) convView.classList.add("chat-conv-view--hidden");
     updateChatHeaderStats();
@@ -13339,6 +13341,10 @@ function initChat() {
   function showConv(userId, userName, dtIdFromContact) {
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    if (convTitle) {
+      var nm = (userName && String(userName).trim()) ? String(userName).trim() : (userId ? String(userId) : "");
+      convTitle.textContent = nm;
+    }
     personalReplyTo = null;
     personalImage = null;
     personalVoice = null;
