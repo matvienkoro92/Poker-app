@@ -163,6 +163,9 @@ function setView(viewName) {
 | streams_ROOMID | Стримы, комната |
 | poker_task_* | MTT задачи (старт челленджа) |
 | rating_top_* | Топ рейтинга |
+| blog_top15, hall_top15 | Зал славы, скролл к блоку «Топ выигрышей за один турнир» (топ‑15) |
+
+Прямая ссылка (Mini App): `https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=blog_top15`
 
 ---
 

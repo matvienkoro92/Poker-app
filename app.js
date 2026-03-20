@@ -245,6 +245,13 @@ function getAssetUrl(relativePath) {
         setView("raffles");
         return;
       }
+      if (
+        (startApp === "blog_top15" || startApp === "hall_top15") &&
+        typeof navigateToHallFameBlogTop15 === "function"
+      ) {
+        navigateToHallFameBlogTop15();
+        return;
+      }
       if (startApp && (startApp === "news" || startApp.indexOf("news_") === 0) && typeof openGazette === "function") {
         var articleNum = startApp === "news" ? undefined : parseInt(startApp.replace("news_", ""), 10);
         if (startApp !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;
@@ -1397,6 +1404,11 @@ function runGazetteAndTasksInit() {
       }, 400);
     }, 0);
   }
+  if (startParam === "blog_top15" || startParam === "hall_top15") {
+    setTimeout(function () {
+      if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+    }, 0);
+  }
   if (startParam === "raffles") {
     setTimeout(function () { if (typeof setView === "function") setView("raffles"); }, 0);
   }
@@ -1449,6 +1461,10 @@ function runGazetteAndTasksInit() {
     } else if (urlStart === "stream") {
       // Legacy: startapp=stream
       setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
+    } else if (urlStart === "blog_top15" || urlStart === "hall_top15") {
+      setTimeout(function () {
+        if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+      }, 0);
     }
   } catch (e) {}
   if (startParam && startParam.indexOf("poker_task_") === 0) {
@@ -1494,6 +1510,8 @@ setTimeout(function () {
   var febPreview = document.getElementById("winterRatingTopFebruaryPreview");
   var singleTopSummary = document.getElementById("winterRatingSingleTopSummary");
   var singleTopList = document.getElementById("winterRatingSingleTopList");
+  var hallFameSingleTopSummary = document.getElementById("hallFameSingleTopSummary");
+  var hallFameSingleTopList = document.getElementById("hallFameSingleTopList");
   var modal = document.getElementById("winterRatingWeekTopModal");
   var modalTitle = document.getElementById("winterRatingWeekTopModalTitle");
   var listEl = document.getElementById("winterRatingWeekTopList");
@@ -1636,9 +1654,11 @@ setTimeout(function () {
     if (febPreview) {
       febPreview.innerHTML = febTop.length ? previewHtml(febTop, 3) : "";
     }
-    if (singleTopSummary && singleTopList) {
+    var hasMainSingleTop = singleTopSummary && singleTopList;
+    var hasHallSingleTop = hallFameSingleTopSummary && hallFameSingleTopList;
+    if (hasMainSingleTop || hasHallSingleTop) {
       var fullSingleTop = getSingleTopWins(null, 15);
-      singleTopSummary.textContent = "Топ выигрышей за один турнир (2026)";
+      var singleTopTitle = "Топ выигрышей за один турнир (2026)";
       function singleTopRowHtml(r, indexZeroBased) {
         var sum = formatRewardRound(r.reward);
         var place = indexZeroBased + 1;
@@ -1773,12 +1793,18 @@ setTimeout(function () {
           "</button></li>"
         );
       }
-      if (fullSingleTop.length) {
-        singleTopList.innerHTML = fullSingleTop.map(function (r, i) {
-          return singleTopRowHtml(r, i);
-        }).join("");
-      } else {
-        singleTopList.innerHTML = "";
+      var listHtml = fullSingleTop.length
+        ? fullSingleTop.map(function (r, i) {
+            return singleTopRowHtml(r, i);
+          }).join("")
+        : "";
+      if (hasMainSingleTop) {
+        singleTopSummary.textContent = singleTopTitle;
+        singleTopList.innerHTML = listHtml;
+      }
+      if (hasHallSingleTop) {
+        hallFameSingleTopSummary.textContent = singleTopTitle;
+        hallFameSingleTopList.innerHTML = listHtml;
       }
     }
     var marchWrap = document.getElementById("winterRatingMarchWinsWrap");
@@ -2021,7 +2047,10 @@ setTimeout(function () {
       var link = t.closest(".winter-rating__single-top-link");
       if (!link) return;
       var block = document.getElementById("winterRatingSingleTopWrap");
-      if (!block || !block.contains(link)) return;
+      var hallBlock = document.getElementById("hallFameSingleTopWrap");
+      var inSingleTop =
+        (block && block.contains(link)) || (hallBlock && hallBlock.contains(link));
+      if (!inSingleTop) return;
       var overrideFile = link.getAttribute("data-lightbox-override");
       if (overrideFile) {
         e.preventDefault();
@@ -2929,6 +2958,26 @@ function setView(viewName) {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
 }
+
+/**
+ * Зал славы → блок «Топ выигрышей за один турнир» (топ‑15).
+ * Ссылка в Telegram: …/DvaTuza?startapp=blog_top15 (или hall_top15).
+ */
+function navigateToHallFameBlogTop15() {
+  if (typeof setView === "function") setView("hall-of-fame");
+  setTimeout(function () {
+    try {
+      if (typeof window.updateWinterRatingWeekTopPreviews === "function") {
+        window.updateWinterRatingWeekTopPreviews();
+      }
+    } catch (ePrev) {}
+    var el = document.getElementById("hallFameSingleTopWrap");
+    if (el && typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, 480);
+}
+
 function updateChatNavDot() {
   var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
   // Если какие-то непрочитанные помечены флагами, но счётчик не пришёл — показываем хотя бы 1.
@@ -8092,6 +8141,13 @@ var viewHandledInTouchend = false;
 
 function handleViewLinkClick(e) {
   if (e.target && e.target.closest && e.target.closest("#chatDialogsView")) return;
+  var hallTop15Link = e.target.closest("a[data-hall-top15]");
+  if (hallTop15Link) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+    return;
+  }
   if (viewHandledInTouchend) {
     viewHandledInTouchend = false;
     e.preventDefault();
@@ -8126,6 +8182,14 @@ function handleViewLinkClick(e) {
 document.addEventListener("click", handleViewLinkClick);
 
 document.addEventListener("touchend", function (e) {
+  var top15 = e.target.closest("a[data-hall-top15]");
+  if (top15) {
+    if (window.__touchWasScroll && window.__touchWasScroll()) return;
+    e.preventDefault();
+    viewHandledInTouchend = true;
+    if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+    return;
+  }
   var link = e.target.closest("a[data-view-target]");
   if (!link || link.getAttribute("data-download-page")) return;
   if (window.__touchWasScroll && window.__touchWasScroll()) return;
@@ -9207,6 +9271,12 @@ function initRaffles() {
   var raffleInviteFriendInlineBtn = document.getElementById("raffleInviteFriendInlineBtn");
   var rafflesNotifySubsBtn = document.getElementById("rafflesNotifySubsBtn");
   var rafflesNotifySubsHint = document.getElementById("rafflesNotifySubsHint");
+  var rafflesLastBroadcastReportBtn = document.getElementById(
+    "rafflesLastBroadcastReportBtn"
+  );
+  var rafflesRetryFailedBroadcastBtn = document.getElementById(
+    "rafflesRetryFailedBroadcastBtn"
+  );
   var currentRaffleId = null;
   var currentRaffleEndDate = null;
   var currentRaffleData = null;
@@ -9733,6 +9803,73 @@ function initRaffles() {
         }
   }
 
+  /** Разбор JSON от raffle-manual-subscribers; при HTML/таймауте — понятная ошибка */
+  function raffleManualSubscribersParseResponse(r) {
+    return r.text().then(function (t) {
+      try {
+        return JSON.parse(t);
+      } catch (e) {
+        return {
+          ok: false,
+          error:
+            "Ответ не JSON" +
+            (!r.ok ? " (HTTP " + r.status + ")" : "") +
+            ". Часто это таймаут — рассылка могла выполниться частично. Нажмите «Отчёт последней рассылки»." +
+            (t ? " Фрагмент: " + String(t).slice(0, 100) : ""),
+        };
+      }
+    });
+  }
+
+  /** Поля для POST raffle-manual-subscribers (текущий активный розыгрыш в форме) */
+  function raffleManualBroadcastBodyFromCurrentRaffle() {
+    var endDate =
+      currentRaffleData && currentRaffleData.endDate
+        ? currentRaffleData.endDate
+        : undefined;
+    function pluralizeTickets(n) {
+      var v = Math.abs(n) % 100;
+      var d = v % 10;
+      if (v >= 11 && v <= 19) return "билетов";
+      if (d === 1) return "билет";
+      if (d >= 2 && d <= 4) return "билета";
+      return "билетов";
+    }
+    var ticketCount = 0;
+    var ticketNominal = 0;
+    try {
+      var groups =
+        currentRaffleData && Array.isArray(currentRaffleData.groups)
+          ? currentRaffleData.groups
+          : [];
+      for (var gi = 0; gi < groups.length; gi++) {
+        ticketCount += Math.max(0, parseInt(groups[gi].count, 10) || 0);
+        if (!ticketNominal) {
+          var n = parsePrizeValue(groups[gi].prize);
+          if (n > 0) ticketNominal = n;
+        }
+      }
+    } catch (e) {}
+    var ticketNominalText = ticketNominal > 0 ? formatRaffleSum(ticketNominal) : "";
+    var broadcastText = "";
+    if (ticketCount > 0 && ticketNominalText) {
+      broadcastText =
+        "Разыгрывается " +
+        ticketCount +
+        " " +
+        pluralizeTickets(ticketCount) +
+        " за " +
+        ticketNominalText +
+        ".";
+    }
+    return {
+      endDate: endDate,
+      message: broadcastText || undefined,
+      ticketsCount: ticketCount || undefined,
+      ticketPrice: ticketNominal || undefined,
+    };
+  }
+
   // Админская рассылка подписчикам розыгрышей
   window.updateRaffleSubsCount = function () {
     if (!rafflesNotifySubsBtn) return;
@@ -9770,46 +9907,17 @@ function initRaffles() {
       btn.disabled = true;
       btn.textContent = "Рассылаем…";
       if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = "";
-      var endDate = currentRaffleData && currentRaffleData.endDate ? currentRaffleData.endDate : undefined;
-      // Текст рассылки: "разыгрывается *количество* билетов за *сумма билета*"
-      function pluralizeTickets(n) {
-        var v = Math.abs(n) % 100;
-        var d = v % 10;
-        if (v >= 11 && v <= 19) return "билетов";
-        if (d === 1) return "билет";
-        if (d >= 2 && d <= 4) return "билета";
-        return "билетов";
-      }
-      var ticketCount = 0;
-      var ticketNominal = 0;
-      try {
-        var groups = (currentRaffleData && Array.isArray(currentRaffleData.groups)) ? currentRaffleData.groups : [];
-        for (var gi = 0; gi < groups.length; gi++) {
-          ticketCount += Math.max(0, parseInt(groups[gi].count, 10) || 0);
-          if (!ticketNominal) {
-            var n = parsePrizeValue(groups[gi].prize);
-            if (n > 0) ticketNominal = n;
-          }
-        }
-      } catch (e) {}
-      var ticketNominalText = ticketNominal > 0 ? formatRaffleSum(ticketNominal) : "";
-      var broadcastText = "";
-      if (ticketCount > 0 && ticketNominalText) {
-        broadcastText = "Разыгрывается " + ticketCount + " " + pluralizeTickets(ticketCount) + " за " + ticketNominalText + ".";
-      }
+      var extra = raffleManualBroadcastBodyFromCurrentRaffle();
       fetch(base + "/api/raffle-manual-subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, endDate: endDate, message: broadcastText || undefined, ticketsCount: ticketCount || undefined, ticketPrice: ticketNominal || undefined }),
+        body: JSON.stringify(Object.assign({ initData: initData }, extra)),
       })
-        .then(function (r) {
-          return r
-            .json()
-            .catch(function () {
-              return { ok: false, error: "Ошибка ответа сервера" };
-            });
-        })
+        .then(raffleManualSubscribersParseResponse)
         .then(function (data) {
+          if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+          }
           if (data && data.ok) {
             var sent =
               data && typeof data.sent === "number" && data.sent >= 0 ? data.sent : 0;
@@ -9817,18 +9925,31 @@ function initRaffles() {
               data && typeof data.total === "number" && data.total >= 0
                 ? data.total
                 : 0;
+            var failN =
+              data && typeof data.failuresTotal === "number" && data.failuresTotal > 0
+                ? data.failuresTotal
+                : 0;
             if (rafflesNotifySubsHint) {
+              var warn =
+                data && data.warning
+                  ? " " + data.warning
+                  : "";
               rafflesNotifySubsHint.textContent =
                 "Личные сообщения отправлены: " +
                 sent +
                 " из " +
                 total +
-                " подписчиков розыгрыша.";
+                (data && data.retry ? " (повтор неудачным)." : " подписчиков розыгрыша.") +
+                (failN
+                  ? " Не доставлено (ошибка Telegram): " + failN + ". Подробности — «Отчёт последней рассылки»."
+                  : "") +
+                warn;
             }
           } else if (rafflesNotifySubsHint) {
             rafflesNotifySubsHint.textContent =
               "Ошибка рассылки: " +
-              (data && data.error ? data.error : "не удалось отправить");
+              (data && data.error ? data.error : "не удалось отправить") +
+              " Если был таймаут — откройте «Отчёт последней рассылки».";
           }
         })
         .catch(function () {
@@ -9838,6 +9959,182 @@ function initRaffles() {
           btn.disabled = false;
           btn.textContent = originalText;
         });
+    });
+  })();
+
+  (function initRafflesLastBroadcastReport() {
+    if (!rafflesLastBroadcastReportBtn) return;
+    function formatLastBroadcastReport(last) {
+      if (!last)
+        return (
+          "Нет сохранённого отчёта. Он появится после рассылки на сервере с поддержкой отчётов (или Redis недоступен)."
+        );
+      var lines = [];
+      lines.push("Время старта рассылки (UTC): " + (last.at || "—"));
+      if (last.inProgress) {
+        lines.push(
+          "⚠ Неполный отчёт (обрыв по таймауту или рассылка ещё шла): обработано " +
+            (last.processed != null ? last.processed : "—") +
+            " из " +
+            (last.total != null ? last.total : "—")
+        );
+      }
+      lines.push(
+        "Успешных отправок (ответ Telegram ok): " +
+          (last.sent != null ? last.sent : "—") +
+          " из " +
+          (last.total != null ? last.total : "—")
+      );
+      var fails = last.failures || [];
+      if (fails.length) {
+        lines.push("Chat ID — причина (не доставлено):");
+        for (var fi = 0; fi < fails.length; fi++) {
+          lines.push(
+            "  " + fails[fi].chatId + " — " + (fails[fi].hint || "")
+          );
+        }
+      } else {
+        lines.push(
+          "Список сбоев пуст (всем ответил ok или подписчиков не было)."
+        );
+      }
+      if (last.failuresTruncated)
+        lines.push("… в отчёте обрезано ещё ошибок: " + last.failuresTruncated);
+      lines.push("");
+      lines.push(
+        "Успешные chat_id в базе не хранятся — только счётчик и сбойные id."
+      );
+      lines.push(
+        "Кнопка «Дослать неудачным» отправит снова только chat_id из списка ошибок (тот же текст, что сохранён в отчёте)."
+      );
+      return lines.join("\n");
+    }
+    rafflesLastBroadcastReportBtn.addEventListener("click", function () {
+      if (!base || !initData) {
+        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+        return;
+      }
+      var btn = rafflesLastBroadcastReportBtn;
+      btn.disabled = true;
+      if (rafflesNotifySubsHint) {
+        rafflesNotifySubsHint.textContent = "Загружаем отчёт…";
+        rafflesNotifySubsHint.classList.add("raffles-admin-hint--pre");
+      }
+      fetch(
+        base +
+          "/api/raffle-manual-subscribers?lastLog=1&initData=" +
+          encodeURIComponent(initData)
+      )
+        .then(raffleManualSubscribersParseResponse)
+        .then(function (data) {
+          if (!data || !data.ok) {
+            if (rafflesNotifySubsHint) {
+              rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+              rafflesNotifySubsHint.textContent =
+                "Не удалось загрузить отчёт: " +
+                (data && data.error ? data.error : "ошибка");
+            }
+            return;
+          }
+          var text = formatLastBroadcastReport(data.last);
+          if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.textContent = text;
+            rafflesNotifySubsHint.classList.add("raffles-admin-hint--pre");
+          }
+        })
+        .catch(function () {
+          if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+            rafflesNotifySubsHint.textContent = POKER_NET_ERR;
+          }
+        })
+        .finally(function () {
+          btn.disabled = false;
+        });
+    });
+  })();
+
+  (function initRafflesRetryFailedBroadcast() {
+    if (!rafflesRetryFailedBroadcastBtn) return;
+    function runRetryFailedBroadcast() {
+      if (!base || !initData) {
+        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+        return;
+      }
+      var btn = rafflesRetryFailedBroadcastBtn;
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Шлём повтор…";
+      if (rafflesNotifySubsHint) {
+        rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+        rafflesNotifySubsHint.textContent = "";
+      }
+      var extra = raffleManualBroadcastBodyFromCurrentRaffle();
+      var payload = Object.assign(
+        { initData: initData, retryFailedOnly: true },
+        extra
+      );
+      fetch(base + "/api/raffle-manual-subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(raffleManualSubscribersParseResponse)
+        .then(function (data) {
+          if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+          }
+          if (data && data.ok) {
+            var sent =
+              data && typeof data.sent === "number" && data.sent >= 0 ? data.sent : 0;
+            var total =
+              data && typeof data.total === "number" && data.total >= 0
+                ? data.total
+                : 0;
+            var failN =
+              data && typeof data.failuresTotal === "number" && data.failuresTotal > 0
+                ? data.failuresTotal
+                : 0;
+            if (rafflesNotifySubsHint) {
+              var warn =
+                data && data.warning
+                  ? " " + data.warning
+                  : "";
+              rafflesNotifySubsHint.textContent =
+                "Повтор неудачным: отправлено " +
+                sent +
+                " из " +
+                total +
+                "." +
+                (failN
+                  ? " Снова не доставлено: " + failN + ". Смотрите «Отчёт последней рассылки»."
+                  : "") +
+                warn;
+            }
+          } else if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.textContent =
+              "Повтор не выполнен: " +
+              (data && data.error ? data.error : "ошибка");
+          }
+        })
+        .catch(function () {
+          if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = POKER_NET_ERR;
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        });
+    }
+    rafflesRetryFailedBroadcastBtn.addEventListener("click", function () {
+      var msg =
+        "Дослать тем же текстом только адресам с ошибкой из последнего отчёта? Тем, кто заблокировал бота, снова не дойдёт.";
+      if (tg && typeof tg.showConfirm === "function") {
+        tg.showConfirm(msg, function (ok) {
+          if (ok) runRetryFailedBroadcast();
+        });
+      } else if (window.confirm(msg)) {
+        runRetryFailedBroadcast();
+      }
     });
   })();
 

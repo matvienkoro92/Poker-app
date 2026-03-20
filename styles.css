@@ -6884,6 +6884,12 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex-direction: column;
   gap: 4px;
 }
+.raffles-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
 .raffles-admin-btn {
   padding: 10px 14px;
   border-radius: 10px;
@@ -6898,10 +6904,20 @@ html.app-view-home .feature--rating-spring-promo:hover,
   opacity: 0.7;
   cursor: default;
 }
+.raffles-admin-btn--ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--muted);
+  font-weight: 500;
+}
 .raffles-admin-hint {
   margin: 0;
   font-size: 12px;
   color: var(--muted);
+}
+.raffles-admin-hint--pre {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .raffle-create-form__type-label { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--text); }
 .raffle-create-form__type-row { display: flex; flex-direction: column; gap: 8px; }
@@ -12676,8 +12692,26 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   font-weight: 700;
   letter-spacing: 0.02em;
 }
-.hall-of-fame__rating-card-wrap {
+/* Топ-15 заносов за один турнир — под заголовком зала славы */
+.hall-of-fame__single-top-outer {
+  margin: 0 auto 20px;
+  max-width: 92%;
+}
+.view[data-view="hall-of-fame"] .hall-of-fame__single-top-wrap {
+  width: 100%;
+  max-width: none;
+}
+.hall-of-fame__section-title--cups-above-rating {
+  margin: 8px auto 12px;
+  max-width: 92%;
+  text-align: center;
+}
+.hall-of-fame__cups-placeholder {
   margin: 0 auto 24px;
+  max-width: 92%;
+}
+.hall-of-fame__rating-card-wrap {
+  margin: 0 auto 10px;
   max-width: 92%;
 }
 /* Карточка «Зимний рейтинг» в Зале славы — тот же вид, что на главной */
@@ -12735,26 +12769,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-of-fame__block {
   margin-bottom: 24px;
 }
-.hall-of-fame__block--bigwin {
-  margin-bottom: 28px;
-}
 .hall-of-fame__section-title {
   margin: 0 0 10px;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text);
-}
-.hall-of-fame__bigwin-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.hall-of-fame__bigwin-line {
-  margin: 0;
-  font-size: 15px;
-  color: var(--text-muted);
-  line-height: 1.4;
 }
 .hall-of-fame__placeholder {
   margin: 0;
