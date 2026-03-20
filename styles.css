@@ -10825,6 +10825,25 @@ a.home-mini-icon-item {
   border-color: rgba(251, 191, 36, 0.45);
   outline: none;
 }
+/* Топ заносов: места без привязанного скрина — тот же вид, без клика */
+.winter-rating__single-top-static {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 8px;
+  cursor: default;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
+}
 .winter-rating__single-top-expand {
   margin-top: 8px;
   padding: 8px 12px;
