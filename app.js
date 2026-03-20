@@ -149,6 +149,7 @@ var POKER_NET_ERR =
     navigator.serviceWorker.register("./sw.js").catch(function () {});
   }
   btn.addEventListener("click", function () {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     function doShareAndCopy() {
       return copyShareLink().then(function () { return nativeShare(); });
     }
@@ -248,6 +249,7 @@ function getAssetUrl(relativePath) {
       if (startApp === "club_chat" && typeof setView === "function") {
         window.__pendingOpenClubChatGeneral = true;
         setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
         return;
       }
       if (
@@ -275,8 +277,10 @@ function getAssetUrl(relativePath) {
 
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (link.classList && link.classList.contains("chat-msg__tg-link") && tg && tg.openTelegramLink) {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       tg.openTelegramLink(link.href);
     } else if (tg && tg.openLink) {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       tg.openLink(link.href);
     } else {
       window.open(link.href, "_blank", "noopener,noreferrer");
@@ -668,6 +672,7 @@ function runGazetteAndTasksInit() {
     var shareBtn = e.target && e.target.closest ? e.target.closest(".gazette-modal__share-btn") : null;
     if (shareBtn && shareBtn.dataset.gazetteShare !== undefined) {
       e.preventDefault();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var idx = shareBtn.dataset.gazetteShare;
       var link = idx !== undefined && idx !== "" ? appUrl + "?startapp=news_" + idx : appUrl + "?startapp=news";
       var isTelegramShare = shareBtn.classList && shareBtn.classList.contains("gazette-modal__share-telegram");
@@ -873,7 +878,10 @@ function runGazetteAndTasksInit() {
       if (link && link.href) {
         e.preventDefault();
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.openTelegramLink) tg.openTelegramLink(link.href); else window.open(link.href, "_blank");
+        if (tg && tg.openTelegramLink) {
+          if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+          tg.openTelegramLink(link.href);
+        } else window.open(link.href, "_blank");
       }
     });
   })();
@@ -1419,7 +1427,10 @@ function runGazetteAndTasksInit() {
   }
   if (startParam === "club_chat") {
     window.__pendingOpenClubChatGeneral = true;
-    setTimeout(function () { if (typeof setView === "function") setView("chat"); }, 0);
+    setTimeout(function () {
+      if (typeof setView === "function") setView("chat");
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    }, 0);
   }
   if (startParam === "stream") {
     // Legacy deep link: некоторые ссылки/приглашения могут приходить как `startapp=stream`.
@@ -1475,7 +1486,10 @@ function runGazetteAndTasksInit() {
       }, 0);
     } else if (urlStart === "club_chat") {
       window.__pendingOpenClubChatGeneral = true;
-      setTimeout(function () { if (typeof setView === "function") setView("chat"); }, 0);
+      setTimeout(function () {
+        if (typeof setView === "function") setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      }, 0);
     }
   } catch (e) {}
   if (startParam && startParam.indexOf("poker_task_") === 0) {
@@ -2283,6 +2297,7 @@ setTimeout(function () {
   }
   if (shareBtn) {
     shareBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var appEl = document.getElementById("app");
       var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
       appUrl = appUrl.replace(/\/$/, "");
@@ -2327,6 +2342,7 @@ setTimeout(function () {
   }
   currentBtn.addEventListener("click", function () {
     if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var sep = SPRING_TOP_LINK_BASE.indexOf("?") >= 0 ? "&" : "?";
       var link = SPRING_TOP_LINK_BASE + sep + "Mart_week_1=1";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -2342,6 +2358,7 @@ setTimeout(function () {
   if (febBtn) {
     febBtn.addEventListener("click", function () {
       if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
         var sep = SPRING_TOP_LINK_BASE.indexOf("?") >= 0 ? "&" : "?";
         var link = SPRING_TOP_LINK_BASE + sep + "mart=1";
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -2418,6 +2435,17 @@ if (tg) {
     );
   }
   // Не перенаправляем в чат бота при открытии — приложение должно запускаться с первого нажатия
+  window.tryTelegramWebAppExpand = tryExpand;
+  window.tryTelegramWebAppExpandBurst = function () {
+    tryExpand();
+    setTimeout(tryExpand, 100);
+    setTimeout(tryExpand, 400);
+    setTimeout(tryExpand, 800);
+    setTimeout(tryExpand, 1500);
+  };
+} else {
+  window.tryTelegramWebAppExpand = function () {};
+  window.tryTelegramWebAppExpandBurst = function () {};
 }
 
 (function setRandomListenersCount() {
@@ -2850,6 +2878,7 @@ function setView(viewName) {
     }
   }
   if (viewName === "chat") {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idleChat(function () { initChat(); });
@@ -2928,7 +2957,10 @@ function setView(viewName) {
   }
   if (viewName === "cooler-game") initCoolerGame();
   if (viewName === "plasterer-game") initPlastererGame();
-  if (viewName === "raffles") initRaffles();
+  if (viewName === "raffles") {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    initRaffles();
+  }
   if (viewName === "equilator") initEquilator();
   if (viewName === "video-lessons") initVideoLessons();
   if (viewName === "poker-tasks") {
@@ -3040,6 +3072,7 @@ function getHallFameBlogTop15ShareUrl() {
     }
   }
   btn.addEventListener("click", function () {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var url = getHallFameBlogTop15ShareUrl();
     if (!url) {
       var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -6208,6 +6241,7 @@ function initWinterRatingPlayerModal() {
   var shareBtn = document.getElementById("winterRatingPlayerModalShareBtn");
   if (shareBtn) {
     shareBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
@@ -6234,6 +6268,7 @@ function initWinterRatingPlayerModal() {
   var shareTelegramBtn = document.getElementById("winterRatingPlayerModalShareTelegramBtn");
   if (shareTelegramBtn) {
     shareTelegramBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
@@ -6508,6 +6543,7 @@ function initWinterRating() {
       if (!dateStr) return;
       e.preventDefault();
       e.stopPropagation();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var appEl = document.getElementById("app");
       var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
       appUrl = appUrl.replace(/\/$/, "");
@@ -6533,6 +6569,7 @@ function initWinterRating() {
       var shareBtn = e.target && e.target.closest ? e.target.closest(".winter-rating__spring-league-share") : null;
       if (!shareBtn || !shareBtn.dataset.springLeague) return;
       e.preventDefault();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var appEl = document.getElementById("app");
       var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
       appUrl = appUrl.replace(/\/$/, "");
@@ -7990,6 +8027,7 @@ function initStreams() {
 
   if (openBrowserBtn) {
     openBrowserBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       if (tg && tg.openLink) {
         tg.openLink(directAppUrl);
       } else {
@@ -7999,6 +8037,7 @@ function initStreams() {
   }
   if (copyBrowserLinkBtn && browserLinkInput) {
     copyBrowserLinkBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       browserLinkInput.select();
       try {
         document.execCommand("copy");
@@ -8145,6 +8184,7 @@ function initStreams() {
 
   if (copyLinkBtn && shareLinkInput) {
     copyLinkBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       shareLinkInput.select();
       try {
         document.execCommand("copy");
@@ -8360,6 +8400,7 @@ document.addEventListener("click", function (e) {
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (href && tg && tg.openLink) {
       e.preventDefault();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       tg.openLink(href);
     }
   }
@@ -8385,6 +8426,7 @@ document.addEventListener("click", function (e) {
     if (href && href.indexOf("t.me") !== -1) {
       e.preventDefault();
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       if (tg && tg.openTelegramLink) tg.openTelegramLink(href);
       else if (tg && tg.openLink) tg.openLink(href);
       else window.open(href, "_blank", "noopener,noreferrer");
@@ -8398,6 +8440,7 @@ document.addEventListener("click", function (e) {
       e.preventDefault();
       var url = href.indexOf("http") === 0 ? href : (function () { try { return new URL(href, window.location.href).href; } catch (err) { return href; } })();
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       if (tg && tg.openLink) tg.openLink(url);
       else window.open(url, "_blank", "noopener,noreferrer");
     }
@@ -8485,6 +8528,7 @@ function closeDailyPredictionModal() {
   if (shareBtn && !shareBtn._bound) {
     shareBtn._bound = true;
     shareBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var predictionTextEl = document.getElementById("dailyPredictionText");
       var prediction = predictionTextEl ? predictionTextEl.textContent.trim() : "";
       var appEl = document.getElementById("app");
@@ -10436,6 +10480,7 @@ function initRaffles() {
 
   if (raffleInviteFriendInlineBtn) {
     raffleInviteFriendInlineBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       if (!currentRaffleData) return;
       var raffle = currentRaffleData;
       var groups = raffle.groups || [];
@@ -10849,7 +10894,10 @@ function initRaffles() {
               if (typeof setView === "function") setView("profile");
             } else if (data && data.code === "CHANNEL_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert(err);
-              if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/dva_tuza_club");
+              if (tg && tg.openTelegramLink) {
+                if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+                tg.openTelegramLink("https://t.me/dva_tuza_club");
+              }
             } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
               if (tg && tg.showAlert) tg.showAlert(err);
             } else if (tg && tg.showAlert) tg.showAlert(err);
@@ -10902,6 +10950,7 @@ function initRaffles() {
   if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
     rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
     rafflesCopyLinkBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
       var msg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
@@ -10922,6 +10971,7 @@ function initRaffles() {
   if (rafflesInviteFriendBtn && rafflesInviteFriendBtn.getAttribute("data-share-bound") !== "1") {
     rafflesInviteFriendBtn.setAttribute("data-share-bound", "1");
     rafflesInviteFriendBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
       var shareUrl =
         "https://t.me/share/url?url=&text=" +
@@ -13072,6 +13122,7 @@ function initChat() {
           }
           hideMenu();
         } else if (action === "copy") {
+          if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
           if (msg.text && navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(msg.text).then(function () {
               if (tg && tg.showAlert) tg.showAlert("Скопировано");
@@ -13975,6 +14026,7 @@ function initChat() {
         var href = link.getAttribute("href");
         if (href && href.startsWith("tg://") && tg && tg.openTelegramLink) {
           e.preventDefault();
+          if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
           tg.openTelegramLink(href);
         }
       });
@@ -14838,6 +14890,7 @@ function initChat() {
     copyBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
       if (!link) return;
@@ -15983,6 +16036,7 @@ updateVisitorCounter();
 
   function copyUrlWithFeedback(text) {
     if (!text) return;
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     function done(ok) {
       var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       if (tgLocal && tgLocal.showAlert) tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
@@ -16981,6 +17035,7 @@ if (document.readyState === "loading") {
 
 // Поделиться турниром дня с другом (кнопка под блоком «Турнир дня» на главной и на экране расписания)
 function handleTournamentDayShare() {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var share = window._tournamentDayShare || {};
     var name = (share.name || "").trim() || "турнир клуба";
     var guarantee = (share.guarantee || "").trim();
