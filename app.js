@@ -245,6 +245,11 @@ function getAssetUrl(relativePath) {
         setView("raffles");
         return;
       }
+      if (startApp === "club_chat" && typeof setView === "function") {
+        window.__pendingOpenClubChatGeneral = true;
+        setView("chat");
+        return;
+      }
       if (
         (startApp === "blog_top15" || startApp === "hall_top15") &&
         typeof navigateToHallFameBlogTop15 === "function"
@@ -1412,6 +1417,10 @@ function runGazetteAndTasksInit() {
   if (startParam === "raffles") {
     setTimeout(function () { if (typeof setView === "function") setView("raffles"); }, 0);
   }
+  if (startParam === "club_chat") {
+    window.__pendingOpenClubChatGeneral = true;
+    setTimeout(function () { if (typeof setView === "function") setView("chat"); }, 0);
+  }
   if (startParam === "stream") {
     // Legacy deep link: некоторые ссылки/приглашения могут приходить как `startapp=stream`.
     // Чтобы пользователь попадал в нужный экран, отправляем в `streams`.
@@ -1464,6 +1473,9 @@ function runGazetteAndTasksInit() {
       setTimeout(function () {
         if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
       }, 0);
+    } else if (urlStart === "club_chat") {
+      window.__pendingOpenClubChatGeneral = true;
+      setTimeout(function () { if (typeof setView === "function") setView("chat"); }, 0);
     }
   } catch (e) {}
   if (startParam && startParam.indexOf("poker_task_") === 0) {
@@ -2841,8 +2853,13 @@ function setView(viewName) {
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idleChat(function () { initChat(); });
-    } else if (window.chatListenersAttached && typeof window.chatShowDialogs === "function") {
-      window.chatShowDialogs();
+    } else if (window.chatListenersAttached) {
+      if (window.__pendingOpenClubChatGeneral) {
+        window.__pendingOpenClubChatGeneral = false;
+        if (typeof window.openClubChat === "function") window.openClubChat();
+      } else if (typeof window.chatShowDialogs === "function") {
+        window.chatShowDialogs();
+      }
     }
   }
   if (viewName === "winter-rating") {
@@ -12019,6 +12036,7 @@ function initChat() {
   window.chatSetTab = setTab;
   window.chatShowDialogs = showDialogs;
   window.chatOpenConvFromDialogs = openConvFromDialogs;
+  window.openClubChat = openClubChat;
 
   // Шаблоны сообщений (локально в браузере, вызываются через "/").
   // Формат: [{ title: string, text: string }]. Старый формат ({ text }) мигрируем на лету.
@@ -14722,7 +14740,12 @@ function initChat() {
     });
   }
 
-  showDialogs();
+  if (window.__pendingOpenClubChatGeneral) {
+    window.__pendingOpenClubChatGeneral = false;
+    openClubChat();
+  } else {
+    showDialogs();
+  }
 
   if (dialogsView) {
     var assetPath = (window.location.pathname || "").replace(/\/[^/]*$/, "") || "/";
@@ -14807,6 +14830,36 @@ function initChat() {
     var page = chatGeneralDownloadBtn.getAttribute("data-download-page") || "main";
     if (typeof setDownloadPage === "function") setDownloadPage(page);
   });
+
+  (function initChatGeneralCopyLinkBtn() {
+    var copyBtn = document.getElementById("chatGeneralCopyLinkBtn");
+    if (!copyBtn || copyBtn.getAttribute("data-copy-bound") === "1") return;
+    copyBtn.setAttribute("data-copy-bound", "1");
+    copyBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var link =
+        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
+      if (!link) return;
+      var msg = "Ссылка на общий чат скопирована. Отправь другу — откроется этот чат в приложении.";
+      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert(msg);
+          else alert("Ссылка скопирована.");
+        }).catch(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+          else alert("Ссылка: " + link);
+        });
+      } else {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+        else alert("Ссылка: " + link);
+      }
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_copy_link");
+    });
+  })();
 
   (function initChatSwipeBack() {
     var SWIPE_MIN = 60;

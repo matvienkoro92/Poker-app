@@ -160,6 +160,7 @@ function setView(viewName) {
 | winter_rating | Зимний рейтинг |
 | spring_rating | Весенний рейтинг |
 | raffles | Розыгрыши |
+| club_chat | Чат: экран общего чата клуба |
 | streams_123456 | Стримы, комната (ROOMID — ровно 6 цифр) |
 | poker_task_* | MTT задачи (старт челленджа) |
 | rating_top_* | Топ рейтинга |
