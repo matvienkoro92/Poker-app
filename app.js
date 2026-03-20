@@ -14944,19 +14944,60 @@ function initChat() {
       }
     }
     var dialogsSelector = ".chat-dialog-item--club, .chat-dialog-item--find-user, .chat-dialog-item[data-chat-user-id], .chat-contact";
+    /** Порог в px: если палец сдвинулся больше — считаем жест скроллом, не открываем диалог. */
+    var CHAT_DIALOG_TAP_MOVE_THRESHOLD = 18;
     function attachChatDialogButton(btn) {
       if (btn._chatDialogAttached) return;
       btn._chatDialogAttached = true;
-      btn.addEventListener("pointerdown", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        openDialogsViewItem(btn);
-      }, { passive: false, capture: true });
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        openDialogsViewItem(btn);
-      }, { capture: true });
+      function detachMoveListeners() {
+        document.removeEventListener("pointermove", onDocMove, true);
+        document.removeEventListener("pointerup", onDocUp, true);
+        document.removeEventListener("pointercancel", onDocUp, true);
+      }
+      function onDocMove(e) {
+        if (!btn._chatTapTracking || e.pointerId !== btn._chatTapPtrId) return;
+        if (
+          Math.abs(e.clientX - btn._chatTapStartX) > CHAT_DIALOG_TAP_MOVE_THRESHOLD ||
+          Math.abs(e.clientY - btn._chatTapStartY) > CHAT_DIALOG_TAP_MOVE_THRESHOLD
+        ) {
+          btn._chatTapWasScroll = true;
+        }
+      }
+      function onDocUp(e) {
+        if (e.pointerId !== btn._chatTapPtrId) return;
+        btn._chatTapTracking = false;
+        detachMoveListeners();
+      }
+      btn.addEventListener(
+        "pointerdown",
+        function (e) {
+          if (e.button != null && e.button !== 0) return;
+          btn._chatTapWasScroll = false;
+          btn._chatTapTracking = true;
+          btn._chatTapPtrId = e.pointerId;
+          btn._chatTapStartX = e.clientX;
+          btn._chatTapStartY = e.clientY;
+          document.addEventListener("pointermove", onDocMove, true);
+          document.addEventListener("pointerup", onDocUp, true);
+          document.addEventListener("pointercancel", onDocUp, true);
+        },
+        { passive: true }
+      );
+      btn.addEventListener(
+        "click",
+        function (e) {
+          if (btn._chatTapWasScroll) {
+            e.preventDefault();
+            e.stopPropagation();
+            btn._chatTapWasScroll = false;
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          openDialogsViewItem(btn);
+        },
+        { capture: true }
+      );
     }
     function attachAllChatDialogButtons() {
       if (!dialogsView) return;

@@ -22,7 +22,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=45" />
+    <link rel="stylesheet" href="./styles.css?v=46" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; }
@@ -1158,9 +1158,10 @@
             <div id="springRatingSectionPlaceholder"></div>
           </div>
 
-          <!-- Чат: поиск → Чаты → клубный чат → Админы → Игроки -->
+          <!-- Чат: поиск → Главный чат (меню) → клубный чат → Админы → Игроки -->
           <div class="view" data-view="chat">
             <div class="chat-dialogs-view" id="chatDialogsView">
+              <h2 class="chat-dialogs-menu-title">Главный чат</h2>
               <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--top">
                 <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
                   <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
@@ -1231,7 +1232,7 @@
             </div>
             <div class="chat-general-view chat-general-view--hidden" id="chatGeneralView">
               <div class="chat-general-header">
-                <button type="button" class="chat-back-btn" id="chatGeneralBackBtn">← К чатам</button>
+                <button type="button" class="chat-back-btn" id="chatGeneralBackBtn" aria-label="Назад к главному чату">← Главный чат</button>
                 <button type="button" class="chat-general-admins-btn" id="chatGeneralAdminsBtn" title="Написать админам">
                   <span class="chat-general-admins-btn__top">Написать админам</span>
                   <span class="chat-general-admins-btn__bottom" id="chatGeneralAdminsBtnOnline">Админ онлайн</span>
@@ -2453,12 +2454,12 @@
           <span class="bottom-nav__label">Главная</span>
         </button>
         <div class="bottom-nav__chat-wrap">
-          <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn">
+          <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn" aria-label="Главный чат">
             <span class="bottom-nav__icon-wrap">
               <span class="bottom-nav__icon">💬</span>
               <span class="bottom-nav__badge" id="chatNavBadge" aria-live="polite" aria-label="Непрочитанных сообщений">0</span>
             </span>
-            <span class="bottom-nav__label" id="chatNavLabel">Чаты</span>
+            <span class="bottom-nav__label" id="chatNavLabel">Главный чат</span>
           </button>
         </div>
         <button type="button" class="bottom-nav__item" data-view-target="download">
@@ -3482,7 +3483,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=101"></script>
+    <script src="./app.js?v=102"></script>
   </body>
 </html>
 
