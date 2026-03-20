@@ -33,6 +33,22 @@
 var POKER_NET_ERR =
   "Нет связи с сервером. Проверьте интернет и попробуйте снова.";
 
+function isTelegramWebApp() {
+  return !!(window.Telegram && window.Telegram.WebApp);
+}
+
+/**
+ * Базовый URL для ссылок "в это же приложение" (startapp=...).
+ * - В Telegram Mini App используем `data-telegram-app-url` (t.me).
+ * - В PWA (без Telegram WebApp) используем текущий сайт (origin+pathname).
+ */
+function getAppBaseUrlForLinks() {
+  var appEl = document.getElementById("app");
+  var telegramAppUrl = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
+  if (isTelegramWebApp() && telegramAppUrl) return String(telegramAppUrl).replace(/\/$/, "");
+  return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
+}
+
 (function initRadioToggle() {
   var radio = document.getElementById("chillRadio");
   var btn = document.getElementById("radioToggle");
@@ -114,8 +130,7 @@ var POKER_NET_ERR =
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
   function getAppUrl() {
-    var appEl = document.getElementById("app");
-    return ((appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza").replace(/\/$/, "");
+    return getAppBaseUrlForLinks();
   }
   function copyShareLink() {
     var link = getAppUrl();
@@ -640,9 +655,7 @@ function runGazetteAndTasksInit() {
   if (closeBtn) closeBtn.addEventListener("click", closeGazette);
   if (backdrop) backdrop.addEventListener("click", closeGazette);
 
-  var appEl = document.getElementById("app");
-  var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-  appUrl = appUrl.replace(/\/$/, "");
+  var appUrl = getAppBaseUrlForLinks();
   modal.addEventListener("click", function (e) {
     var ratingLink = e.target && e.target.closest ? e.target.closest("a[data-close-gazette][data-view-target]") : null;
     if (ratingLink) {
@@ -2298,9 +2311,7 @@ setTimeout(function () {
   if (shareBtn) {
     shareBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var type = currentModalLinkType === "current"
         ? "rating_top_current"
         : currentModalLinkType === "mar"
@@ -3050,8 +3061,7 @@ function navigateToHallFameBlogTop15() {
 
 /** Ссылка на мини‑апп сразу на топ‑15 в зале славы (startapp=blog_top15) */
 function getHallFameBlogTop15ShareUrl() {
-  var appEl = document.getElementById("app");
-  var u = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
+  var u = getAppBaseUrlForLinks();
   u = String(u).replace(/\/$/, "");
   if (!u) return "";
   var sep = u.indexOf("?") >= 0 ? "&" : "?";
@@ -6245,9 +6255,7 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
       var link = appUrl + "?startapp=" + startApp + encodeURIComponent(nick);
@@ -6272,9 +6280,7 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
       var link = appUrl + "?startapp=" + startApp + encodeURIComponent(nick);
@@ -6544,9 +6550,7 @@ function initWinterRating() {
       e.preventDefault();
       e.stopPropagation();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_date_" + String(dateStr).replace(/\./g, "_") : "rating_" + String(dateStr).replace(/\./g, "_");
       var link = appUrl + "?startapp=" + startApp;
@@ -6570,9 +6574,7 @@ function initWinterRating() {
       if (!shareBtn || !shareBtn.dataset.springLeague) return;
       e.preventDefault();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var link = appUrl + "?startapp=spring_rating_league_" + shareBtn.dataset.springLeague;
       var msg = shareBtn.dataset.springLeague === "1" ? "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 1." : "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 2.";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
@@ -7735,16 +7737,12 @@ function randomStreamRoomId() {
 }
 
 function getStreamsAppUrl() {
-  var app = document.getElementById("app");
-  if (app && app.getAttribute("data-telegram-app-url")) return app.getAttribute("data-telegram-app-url");
-  return window.location.origin + window.location.pathname;
+  return getAppBaseUrlForLinks();
 }
 
 /** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
 function buildMiniAppStartLink(startParam) {
-  var appEl = document.getElementById("app");
-  var appUrl =
-    (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
+  var appUrl = getAppBaseUrlForLinks();
   appUrl = String(appUrl).replace(/\/$/, "");
   var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
   return appUrl + sep + "startapp=" + encodeURIComponent(String(startParam));
@@ -8531,9 +8529,7 @@ function closeDailyPredictionModal() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var predictionTextEl = document.getElementById("dailyPredictionText");
       var prediction = predictionTextEl ? predictionTextEl.textContent.trim() : "";
-      var appEl = document.getElementById("app");
-      var appUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "https://t.me/Poker_dvatuza_bot/DvaTuza";
-      appUrl = appUrl.replace(/\/$/, "");
+      var appUrl = getAppBaseUrlForLinks();
       var link = appUrl + "?startapp=daily_prediction";
       var shortText = "Моё покерное предсказание на сегодня:";
       if (prediction) shortText += "\n\n" + prediction;
@@ -16070,10 +16066,8 @@ updateVisitorCounter();
   }
 
   function buildStartUrl(startParam) {
-    var appEl = document.getElementById("app");
-    var u = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
+    var u = getAppBaseUrlForLinks();
     u = String(u).replace(/\/$/, "");
-    if (!u) return "";
     var sep = u.indexOf("?") >= 0 ? "&" : "?";
     return u + sep + "startapp=" + encodeURIComponent(startParam);
   }
@@ -17040,11 +17034,7 @@ function handleTournamentDayShare() {
     var name = (share.name || "").trim() || "турнир клуба";
     var guarantee = (share.guarantee || "").trim();
     var time = (share.time || "18:00").trim();
-    var appEl = document.getElementById("app");
-    var appUrl =
-      (appEl && appEl.getAttribute("data-telegram-app-url")) ||
-      "https://t.me/Poker_dvatuza_bot/DvaTuza";
-    appUrl = appUrl.replace(/\/$/, "");
+    var appUrl = getAppBaseUrlForLinks();
     var link = appUrl + "?startapp=schedule";
     var text;
     if (name === "Фриролл" && guarantee) {
