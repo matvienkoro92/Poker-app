@@ -661,7 +661,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "АршакМкртчян", points: 0, reward: 0 },
   ],
   "21.12.2025": [
-    { nick: "hhohoo", points: 135, reward: 334518 },
     { nick: "FrankL", points: 110, reward: 12100 },
     { nick: "AliPetuhov", points: 110, reward: 20826 },
     { nick: "Waaar", points: 90, reward: 12225 },
@@ -1159,7 +1158,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Rom4ik", points: 0, reward: 3940 },
     { nick: "Че643", points: 0, reward: 3300 },
     { nick: "ЧУРменя", points: 0, reward: 2520 },
-    { nick: "Psyho44", points: 0, reward: 7430 },
     { nick: "ПаПа_Мо}|{еТ", points: 0, reward: 0 },
     { nick: "XORTYRETSKOGO", points: 0, reward: 0 },
     { nick: "DemonDen", points: 0, reward: 0 },
@@ -1189,7 +1187,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Рыбнадзор", points: 50, reward: 8249 },
     { nick: "PapaRabotayet", points: 50, reward: 8620 },
     { nick: "Фокс", points: 110, reward: 24526 },
-    { nick: "Psyho44", points: 0, reward: 217000 },
     { nick: "frukt58", points: 0, reward: 20080 },
   ],
   "27.02.2026": [
@@ -1218,7 +1215,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Em13!!", points: 0, reward: 120000 },
     { nick: "WildBoar", points: 0, reward: 2200 },
     { nick: "MiracleDivice", points: 0, reward: 1250 },
-    { nick: "Psyho44", points: 0, reward: 1340 },
     { nick: "Surgut", points: 0, reward: 1406 },
     { nick: "PapaRabotaet", points: 0, reward: 4655 },
     { nick: "m014yH", points: 0, reward: 980 },
@@ -1747,7 +1743,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
   ],
   "21.12.2025": [
     { time: "12:00", players: [{ nick: "FrankL", place: 2, points: 110, reward: 12100 }, { nick: "TiltlProof", place: 5, points: 0, reward: 0 }, { nick: "Waaar", place: 10, points: 0, reward: 0 }, { nick: "king00001", place: 11, points: 0, reward: 0 }, { nick: "Player", place: 13, points: 0, reward: 0 }] },
-    { time: "18:00", players: [{ nick: "hhohoo", place: 1, points: 135, reward: 334518 }, { nick: "bymep7", place: 94, points: 0, reward: 0 }, { nick: "Baruum", place: 308, points: 0, reward: 0 }, { nick: "baldand", place: 0, points: 0, reward: 0 }, { nick: "siropchik", place: 0, points: 0, reward: 0 }] },
+    { time: "18:00", players: [{ nick: "bymep7", place: 94, points: 0, reward: 0 }, { nick: "Baruum", place: 308, points: 0, reward: 0 }, { nick: "baldand", place: 0, points: 0, reward: 0 }, { nick: "siropchik", place: 0, points: 0, reward: 0 }] },
     { time: "20:00", players: [{ nick: "AliPetuhov", place: 2, points: 110, reward: 20826 }, { nick: "Waaar", place: 3, points: 90, reward: 12225 }, { nick: "vnukshtukatura", place: 7, points: 0, reward: 4887 }, { nick: "VICTORINOX", place: 8, points: 0, reward: 5819 }, { nick: "MilkyWay77", place: 9, points: 0, reward: 1575 }] },
   ],
   "23.12.2025": [
@@ -1922,7 +1918,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "18:00", name: "Турнир Месяца", players: [{ nick: "ПокерМанки", place: 1, points: 135, reward: 267750 }, { nick: "Waaar", place: 2, points: 0, reward: 0 }, { nick: "FishKopcheny", place: 3, points: 0, reward: 0 }, { nick: "Mr.V", place: 4, points: 0, reward: 0 }, { nick: "Rifa", place: 5, points: 0, reward: 0 }] },
     { time: "18:00", name: "Турнир Четверга", players: [{ nick: "<Amaliya>", place: 1, points: 135, reward: 70400 }, { nick: "Аспирин", place: 2, points: 110, reward: 30300 }, { nick: "Player1BD20C", place: 3, points: 90, reward: 8600 }, { nick: "ЧУРменя", place: 4, points: 70, reward: 2520 }, { nick: "GetHigh", place: 5, points: 60, reward: 2200 }] },
     { time: "21:00", name: "NLH KNOCKOUT 250k", players: [{ nick: "PapaRabotayet", place: 6, points: 50, reward: 8620 }, { nick: "Рыбнадзор", place: 7, points: 0, reward: 2294 }] },
-    { time: "21:00", name: "MOK 7MAX", players: [{ nick: "Psyho44", place: 1, points: 0, reward: 217000 }, { nick: "JinDaniels", place: 2, points: 0, reward: 0 }, { nick: "WiNifly", place: 3, points: 0, reward: 0 }, { nick: "TonniHalf", place: 4, points: 0, reward: 0 }, { nick: "cadillac", place: 5, points: 0, reward: 0 }] },
+    { time: "21:00", name: "MOK 7MAX", players: [{ nick: "JinDaniels", place: 2, points: 0, reward: 0 }, { nick: "WiNifly", place: 3, points: 0, reward: 0 }, { nick: "TonniHalf", place: 4, points: 0, reward: 0 }, { nick: "cadillac", place: 5, points: 0, reward: 0 }] },
     { time: "23:00", name: "Night magic 100K", players: [{ nick: "Фокс", place: 2, points: 110, reward: 24526 }, { nick: "Рыбнадзор", place: 6, points: 50, reward: 3069 }] },
   ],
   "27.02.2026": [
@@ -1940,7 +1936,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "18:00", name: "Субботний Прогрессив", players: [{ nick: "Waaar", place: 1, points: 0, reward: 105559 }, { nick: "ПокерМанки", place: 11, points: 0, reward: 0 }, { nick: "|---777---|", place: 16, points: 0, reward: 0 }] },
     { time: "18:00", name: "Субботний Фриролл", players: [{ nick: "Резвый", place: 4, points: 0, reward: 7000 }, { nick: "Borsoi", place: 5, points: 0, reward: 6000 }, { nick: "konfesta", place: 7, points: 0, reward: 3200 }, { nick: "WildBoar", place: 8, points: 0, reward: 2200 }, { nick: "MiracleDivice", place: 10, points: 0, reward: 1250 }] },
     { time: "20:00", name: "HOK", players: [{ nick: "<Amaliya>", place: 2, points: 0, reward: 7100 }, { nick: "WiNifly", place: 4, points: 0, reward: 5312 }, { nick: "shockin", place: 8, points: 0, reward: 225 }, { nick: "Surgut", place: 9, points: 0, reward: 1406 }, { nick: "Malek3084", place: 12, points: 0, reward: 225 }] },
-    { time: "21:00", name: "MOK", players: [{ nick: "Psyho44", place: 3, points: 0, reward: 1340 }, { nick: "m014yH", place: 5, points: 0, reward: 980 }, { nick: "Malek3084", place: 6, points: 0, reward: 0 }, { nick: "WiNifly", place: 12, points: 0, reward: 0 }, { nick: "Ronn", place: 13, points: 0, reward: 0 }] },
+    { time: "21:00", name: "MOK", players: [{ nick: "m014yH", place: 5, points: 0, reward: 980 }, { nick: "Malek3084", place: 6, points: 0, reward: 0 }, { nick: "WiNifly", place: 12, points: 0, reward: 0 }, { nick: "Ronn", place: 13, points: 0, reward: 0 }] },
   ],
   "15.02.2026": [
     { time: "12:00", players: [{ nick: "ПокерМанки", place: 1, points: 135, reward: 15800 }, { nick: "Malek3084", place: 4, points: 70, reward: 5000 }, { nick: "FrankL", place: 5, points: 60, reward: 4600 }, { nick: "Waaar", place: 7, points: 0, reward: 0 }, { nick: "MilkyWay77", place: 9, points: 0, reward: 0 }] },
@@ -2161,7 +2157,7 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "17:00", name: "Rebuy", buyin: 36800, players: [{ nick: "WiNifly", place: 2, reward: 16300 }, { nick: "king00001", place: 4, reward: 7700 }, { nick: "ПокерМанки", place: 8, reward: 0 }, { nick: "Waaar", place: 9, reward: 0 }, { nick: "Nuts", place: 10, reward: 0 }] },
     { time: "20:00", name: "HOK", buyin: 71000, players: [{ nick: "TATAPUH058", place: 1, reward: 44359 }, { nick: "Rifa", place: 3, reward: 9088 }, { nick: "ПокерМанки", place: 4, reward: 9247 }, { nick: "|---777---|", place: 8, reward: 4444 }, { nick: "Waaar", place: 11, reward: 0 }] },
     { time: "18:00", name: "Freeroll 1 MLN", buyin: 1000000, players: [{ nick: "DzhalaLove", place: 18, reward: 7603 }, { nick: "Бабник", place: 20, reward: 6103 }, { nick: "Максим", place: 35, reward: 3650 }, { nick: "GalaKola", place: 48, reward: 3137 }, { nick: "pryanik2la", place: 65, reward: 923 }] },
-    { time: "18:00", name: "Турнир Среды", buyin: 31600, league: 2, players: [{ nick: "Sergo$", place: 1, reward: 14680 }, { nick: "FishKopcheny", place: 3, reward: 4900 }, { nick: "TTK)", place: 4, reward: 3810 }, { nick: "zagrebnagreb", place: 5, reward: 3270 }, { nick: "Psyho44", place: 6, reward: 2720 }, { nick: "Mr.V", place: 8, reward: 1310 }, { nick: "kriak", place: 9, reward: 930 }, { nick: "Аспирин", place: 11, reward: 650 }, { nick: "TonniHalf", place: 15, reward: 650 }, { nick: "SanDiego66", place: 16, reward: 570 }] },
+    { time: "18:00", name: "Турнир Среды", buyin: 31600, league: 2, players: [{ nick: "Sergo$", place: 1, reward: 14680 }, { nick: "FishKopcheny", place: 3, reward: 4900 }, { nick: "TTK)", place: 4, reward: 3810 }, { nick: "zagrebnagreb", place: 5, reward: 3270 }, { nick: "Mr.V", place: 8, reward: 1310 }, { nick: "kriak", place: 9, reward: 930 }, { nick: "Аспирин", place: 11, reward: 650 }, { nick: "TonniHalf", place: 15, reward: 650 }, { nick: "SanDiego66", place: 16, reward: 570 }] },
     { time: "19:00", name: "WPLO5 300 MW", buyin: 300, league: 2, players: [{ nick: "Виктор", place: 4, reward: 2200 }, { nick: "adum777", place: 0, reward: 0 }, { nick: "undertaker", place: 0, reward: 0 }, { nick: "Sarmat1305", place: 8, reward: 0 }] },
     { time: "23:00", name: "Night magic 100K", buyin: 100000, players: [{ nick: "Фокс", place: 3, reward: 25267 }, { nick: "AndrushaMorf", place: 2, reward: 8743 }, { nick: "siropchik", place: 6, reward: 2442 }, { nick: "Рыбнадзор", place: 30, reward: 0 }, { nick: "Em13!!", place: 0, reward: 0 }] }
   ],

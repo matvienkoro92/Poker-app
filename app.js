@@ -1624,43 +1624,7 @@ setTimeout(function () {
       return String(a.date).localeCompare(String(b.date));
     });
     var lim = limit != null ? limit : 15;
-    var out = wins.slice(0, lim);
-    // hhohoo: занос 21.12.2025 (334518) не входит в фильтр .2026 — показываем на 3-й строке топа, остальные сдвигаются.
-    var winterDec = getRatingTournamentsByDate();
-    var dec21 = winterDec && winterDec["21.12.2025"];
-    if (Array.isArray(dec21) && lim >= 3) {
-      var hhRow = null;
-      for (var hi = 0; hi < dec21.length; hi++) {
-        var tH = dec21[hi];
-        var lbH = tH.lightboxImageIndex != null && !isNaN(Number(tH.lightboxImageIndex)) ? Number(tH.lightboxImageIndex) : hi;
-        var plH = tH.players || [];
-        for (var pi = 0; pi < plH.length; pi++) {
-          var pH = plH[pi];
-          var rewH = pH.reward != null ? Number(pH.reward) : 0;
-          if (rewH > 0 && normalizeWinterNick(pH.nick) === "hhohoo") {
-            hhRow = {
-              nick: "hhohoo",
-              reward: rewH,
-              date: "21.12.2025",
-              tournament: tH.name || tH.time || "",
-              lightboxIndex: lbH,
-              lightboxLeague: undefined,
-              winterImages: true
-            };
-            break;
-          }
-        }
-        if (hhRow) break;
-      }
-      if (hhRow) {
-        out = out.filter(function (r) {
-          return !(normalizeWinterNick(r.nick) === "hhohoo" && String(r.date) === "21.12.2025");
-        });
-        out.splice(2, 0, hhRow);
-        out = out.slice(0, lim);
-      }
-    }
-    return out;
+    return wins.slice(0, lim);
   }
   function updateButtonPreviews() {
     var pastTop = getTopByDates(GAZETTE_DATES);
@@ -1674,14 +1638,105 @@ setTimeout(function () {
     }
     if (singleTopSummary && singleTopList) {
       var fullSingleTop = getSingleTopWins(null, 15);
-      singleTopSummary.textContent = "Топ выигрышей за один турнир (2026 + занос hhohoo 21.12.2025)";
+      singleTopSummary.textContent = "Топ выигрышей за один турнир (2026)";
       function singleTopRowHtml(r, indexZeroBased) {
         var sum = formatRewardRound(r.reward);
         var place = indexZeroBased + 1;
         var lineText = place + ". " + escapePreview(r.nick) + " — " + sum + " ₽";
-        // 3, 7, 8, 9, 11, 13 места: строка без скрина по клику
+        var isFox = normalizeWinterNick(r.nick) === "Фокс";
+        var rewN = r.reward != null ? Number(r.reward) : 0;
+        if (rewN !== rewN) rewN = 0;
+        // Сармат, 1-я строка топа (занос 491248): скрин по клику
+        if (normalizeWinterNick(r.nick) === "Sarmat1305" && rewN === 491248) {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-1-sarmat.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        // Фокс: фиксированные скрины по сумме заноса (место в списке после правок данных может меняться)
+        if (isFox && rewN === 182142) {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-9-fox.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        if (isFox && rewN === 130072) {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-11-fox.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        var nickNorm = String(normalizeWinterNick(r.nick) || "").toLowerCase();
+        if (indexZeroBased === 2 && nickNorm === "botezgambit") {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-3-botezgambit.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        if (indexZeroBased === 7 && nickNorm === "дикий") {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-8-dikiy.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        if (indexZeroBased === 5 && isFox) {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-6-fox.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        if (indexZeroBased === 12 && normalizeWinterNick(r.nick) === "Waaar") {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-13-waaar.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        if (
+          indexZeroBased === 10 &&
+          normalizeWinterNick(r.nick) === "FrankL" &&
+          rewN === 110300
+        ) {
+          return (
+            "<li class=\"winter-rating__single-top-item\">" +
+            "<button type=\"button\" class=\"winter-rating__single-top-link\" data-lightbox-override=\"rating-single-top-11-frankl.png\" aria-label=\"Скрин турнира: " +
+            escapePreview(r.nick) +
+            "\">" +
+            lineText +
+            "</button></li>"
+          );
+        }
+        // 3 (не BOTEZGAMBIT), 6 (не Фокс), 7 (не Дикий), 8, 9, 11 (не Фокс 130072, не FrankL 110300), 13 (не Waaar): без скрина по клику
         if (
           indexZeroBased === 2 ||
+          indexZeroBased === 5 ||
           indexZeroBased === 6 ||
           indexZeroBased === 7 ||
           indexZeroBased === 8 ||
@@ -1964,9 +2019,18 @@ setTimeout(function () {
       var t = e.target;
       if (!t || !t.closest) return;
       var link = t.closest(".winter-rating__single-top-link");
-      if (!link || !link.getAttribute("data-lightbox-date")) return;
+      if (!link) return;
       var block = document.getElementById("winterRatingSingleTopWrap");
       if (!block || !block.contains(link)) return;
+      var overrideFile = link.getAttribute("data-lightbox-override");
+      if (overrideFile) {
+        e.preventDefault();
+        if (typeof openWinterRatingLightbox === "function") {
+          openWinterRatingLightbox("", 0, undefined, { overrideFile: overrideFile });
+        }
+        return;
+      }
+      if (!link.getAttribute("data-lightbox-date")) return;
       e.preventDefault();
       var dateStr = link.getAttribute("data-lightbox-date");
       var idx = parseInt(link.getAttribute("data-lightbox-index"), 10);
@@ -3788,7 +3852,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "АршакМкртчян", points: 0, reward: 0 },
   ],
   "21.12.2025": [
-    { nick: "hhohoo", points: 135, reward: 334518 },
     { nick: "FrankL", points: 110, reward: 12100 },
     { nick: "AliPetuhov", points: 110, reward: 20826 },
     { nick: "Waaar", points: 90, reward: 12225 },
@@ -4287,7 +4350,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Rom4ik", points: 0, reward: 3940 },
     { nick: "Че643", points: 0, reward: 3300 },
     { nick: "ЧУРменя", points: 0, reward: 2520 },
-    { nick: "Psyho44", points: 0, reward: 7430 },
     { nick: "ПаПа_Мо}|{еТ", points: 0, reward: 0 },
     { nick: "XORTYRETSKOGO", points: 0, reward: 0 },
     { nick: "DemonDen", points: 0, reward: 0 },
@@ -4317,7 +4379,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Рыбнадзор", points: 50, reward: 8249 },
     { nick: "PapaRabotayet", points: 50, reward: 8620 },
     { nick: "Фокс", points: 110, reward: 24526 },
-    { nick: "Psyho44", points: 0, reward: 217000 },
     { nick: "frukt58", points: 0, reward: 20080 },
   ],
   "27.02.2026": [
@@ -4346,7 +4407,6 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Em13!!", points: 0, reward: 120000 },
     { nick: "WildBoar", points: 0, reward: 2200 },
     { nick: "MiracleDivice", points: 0, reward: 1250 },
-    { nick: "Psyho44", points: 0, reward: 1340 },
     { nick: "Surgut", points: 0, reward: 1406 },
     { nick: "PapaRabotaet", points: 0, reward: 4655 },
     { nick: "m014yH", points: 0, reward: 980 },
@@ -4886,7 +4946,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
   ],
   "21.12.2025": [
     { time: "12:00", players: [{ nick: "FrankL", place: 2, points: 110, reward: 12100 }, { nick: "TiltlProof", place: 5, points: 0, reward: 0 }, { nick: "Waaar", place: 10, points: 0, reward: 0 }, { nick: "king00001", place: 11, points: 0, reward: 0 }, { nick: "Player", place: 13, points: 0, reward: 0 }] },
-    { time: "18:00", players: [{ nick: "hhohoo", place: 1, points: 135, reward: 334518 }, { nick: "bymep7", place: 94, points: 0, reward: 0 }, { nick: "Baruum", place: 308, points: 0, reward: 0 }, { nick: "baldand", place: 0, points: 0, reward: 0 }, { nick: "siropchik", place: 0, points: 0, reward: 0 }] },
+    { time: "18:00", players: [{ nick: "bymep7", place: 94, points: 0, reward: 0 }, { nick: "Baruum", place: 308, points: 0, reward: 0 }, { nick: "baldand", place: 0, points: 0, reward: 0 }, { nick: "siropchik", place: 0, points: 0, reward: 0 }] },
     { time: "20:00", players: [{ nick: "AliPetuhov", place: 2, points: 110, reward: 20826 }, { nick: "Waaar", place: 3, points: 90, reward: 12225 }, { nick: "vnukshtukatura", place: 7, points: 0, reward: 4887 }, { nick: "VICTORINOX", place: 8, points: 0, reward: 5819 }, { nick: "MilkyWay77", place: 9, points: 0, reward: 1575 }] },
   ],
   "23.12.2025": [
@@ -5059,7 +5119,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "16:00", name: "Magic Chest", players: [{ nick: "Prushnik", place: 1, points: 0, reward: 1780 }, { nick: "Player2EBBB6", place: 4, points: 0, reward: 195 }, { nick: "Boba7575", place: 5, points: 0, reward: 159 }, { nick: "cadillac", place: 6, points: 0, reward: 142 }, { nick: "Azza43ru", place: 10, points: 0, reward: 0 }] },
     { time: "18:00", name: "Freeroll 1 MLN", players: [{ nick: "АршакМкртчян", place: 12, points: 0, reward: 11438 }, { nick: "Superden", place: 113, points: 0, reward: 0 }, { nick: "Xpoper", place: 237, points: 0, reward: 0 }, { nick: "НиLLIтяк", place: 280, points: 0, reward: 0 }] },
     { time: "18:00", name: "Турнир Среды", players: [{ nick: "AliPetuhov", place: 2, points: 0, reward: 10330 }, { nick: "TonniHalf", place: 3, points: 0, reward: 5880 }, { nick: "Rom4ik", place: 5, points: 0, reward: 3940 }, { nick: "Че643", place: 6, points: 0, reward: 3300 }, { nick: "ЧУРменя", place: 7, points: 0, reward: 2520 }] },
-    { time: "21:00", name: "MOK MKO 7MAX MTT-NLH", players: [{ nick: "Psyho44", place: 1, points: 0, reward: 7430 }, { nick: "ПаПа_Мо}|{еТ", place: 8, points: 0, reward: 0 }, { nick: "XORTYRETSKOGO", place: 9, points: 0, reward: 0 }, { nick: "DemonDen", place: 10, points: 0, reward: 0 }, { nick: "WiNifly", place: 11, points: 0, reward: 0 }] },
+    { time: "21:00", name: "MOK MKO 7MAX MTT-NLH", players: [{ nick: "ПаПа_Мо}|{еТ", place: 8, points: 0, reward: 0 }, { nick: "XORTYRETSKOGO", place: 9, points: 0, reward: 0 }, { nick: "DemonDen", place: 10, points: 0, reward: 0 }, { nick: "WiNifly", place: 11, points: 0, reward: 0 }] },
     { time: "22:00", name: "Energetik Tournament", players: [{ nick: "cadillac", place: 3, points: 0, reward: 2660 }, { nick: "Baal", place: 5, points: 0, reward: 0 }, { nick: "tatarin_1", place: 6, points: 0, reward: 0 }, { nick: "Ksuha", place: 7, points: 0, reward: 0 }, { nick: "Tanechka", place: 8, points: 0, reward: 0 }] },
     { time: "22:00", name: "Magic 500 * 150K", players: [{ nick: "pryanik2la", place: 3, points: 0, reward: 8408 }, { nick: "K-700", place: 39, points: 0, reward: 0 }, { nick: "Рыбнадзор", place: 0, points: 0, reward: 0 }, { nick: "Olegggaaa", place: 0, points: 0, reward: 0 }, { nick: "Malek3084", place: 52, points: 0, reward: 0 }] },
   ],
@@ -5071,7 +5131,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "18:00", name: "Турнир Месяца", players: [{ nick: "ПокерМанки", place: 1, points: 135, reward: 267750 }, { nick: "Waaar", place: 2, points: 0, reward: 0 }, { nick: "FishKopcheny", place: 3, points: 0, reward: 0 }, { nick: "Mr.V", place: 4, points: 0, reward: 0 }, { nick: "Rifa", place: 5, points: 0, reward: 0 }] },
     { time: "18:00", name: "Турнир Четверга", players: [{ nick: "<Amaliya>", place: 1, points: 135, reward: 70400 }, { nick: "Аспирин", place: 2, points: 110, reward: 30300 }, { nick: "Player1BD20C", place: 3, points: 90, reward: 8600 }, { nick: "ЧУРменя", place: 4, points: 70, reward: 2520 }, { nick: "GetHigh", place: 5, points: 60, reward: 2200 }] },
     { time: "21:00", name: "NLH KNOCKOUT 250k", players: [{ nick: "PapaRabotayet", place: 6, points: 50, reward: 8620 }, { nick: "Рыбнадзор", place: 7, points: 0, reward: 2294 }] },
-    { time: "21:00", name: "MOK 7MAX", players: [{ nick: "Psyho44", place: 1, points: 0, reward: 217000 }, { nick: "JinDaniels", place: 2, points: 0, reward: 0 }, { nick: "WiNifly", place: 3, points: 0, reward: 0 }, { nick: "TonniHalf", place: 4, points: 0, reward: 0 }, { nick: "cadillac", place: 5, points: 0, reward: 0 }] },
+    { time: "21:00", name: "MOK 7MAX", players: [{ nick: "JinDaniels", place: 2, points: 0, reward: 0 }, { nick: "WiNifly", place: 3, points: 0, reward: 0 }, { nick: "TonniHalf", place: 4, points: 0, reward: 0 }, { nick: "cadillac", place: 5, points: 0, reward: 0 }] },
     { time: "23:00", name: "Night magic 100K", players: [{ nick: "Фокс", place: 2, points: 110, reward: 24526 }, { nick: "Рыбнадзор", place: 6, points: 50, reward: 3069 }] },
   ],
   "27.02.2026": [
@@ -5089,7 +5149,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "18:00", name: "Субботний Прогрессив", players: [{ nick: "Waaar", place: 1, points: 0, reward: 105559 }, { nick: "ПокерМанки", place: 11, points: 0, reward: 0 }, { nick: "|---777---|", place: 16, points: 0, reward: 0 }] },
     { time: "18:00", name: "Субботний Фриролл", players: [{ nick: "Резвый", place: 4, points: 0, reward: 7000 }, { nick: "Borsoi", place: 5, points: 0, reward: 6000 }, { nick: "konfesta", place: 7, points: 0, reward: 3200 }, { nick: "WildBoar", place: 8, points: 0, reward: 2200 }, { nick: "MiracleDivice", place: 10, points: 0, reward: 1250 }] },
     { time: "20:00", name: "HOK", players: [{ nick: "<Amaliya>", place: 2, points: 0, reward: 7100 }, { nick: "WiNifly", place: 4, points: 0, reward: 5312 }, { nick: "shockin", place: 8, points: 0, reward: 225 }, { nick: "Surgut", place: 9, points: 0, reward: 1406 }, { nick: "Malek3084", place: 12, points: 0, reward: 225 }] },
-    { time: "21:00", name: "MOK", players: [{ nick: "Psyho44", place: 3, points: 0, reward: 1340 }, { nick: "m014yH", place: 5, points: 0, reward: 980 }, { nick: "Malek3084", place: 6, points: 0, reward: 0 }, { nick: "WiNifly", place: 12, points: 0, reward: 0 }, { nick: "Ronn", place: 13, points: 0, reward: 0 }] },
+    { time: "21:00", name: "MOK", players: [{ nick: "m014yH", place: 5, points: 0, reward: 980 }, { nick: "Malek3084", place: 6, points: 0, reward: 0 }, { nick: "WiNifly", place: 12, points: 0, reward: 0 }, { nick: "Ronn", place: 13, points: 0, reward: 0 }] },
   ],
   "24.02.2026": [
     { time: "12:00", name: "DV Rebuy", players: [{ nick: "Mr.V", place: 2, points: 110, reward: 12700 }, { nick: "Waaar", place: 4, points: 70, reward: 6000 }, { nick: "MilkyWay77", place: 12, points: 0, reward: 0 }, { nick: "king00001", place: 13, points: 0, reward: 0 }, { nick: "|---777---|", place: 17, points: 0, reward: 0 }] },
@@ -5416,6 +5476,20 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   var box = document.getElementById("winterRatingLightbox");
   var img = box && box.querySelector(".winter-rating-lightbox__img");
   if (!box || !img) return;
+  if (opts.overrideFile) {
+    box.dataset.lightboxOverrideFile = opts.overrideFile;
+    box.dataset.lightboxDate = dateStr || "";
+    box.dataset.lightboxIndex = "0";
+    box.dataset.lightboxLeague = "";
+    box.dataset.lightboxWinterImages = "";
+    img.src = getAssetUrl(opts.overrideFile) + "?v=18";
+    img.alt = "Скрин турнира";
+    box.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    updateWinterRatingLightboxArrows();
+    return;
+  }
+  delete box.dataset.lightboxOverrideFile;
   var files;
   if (opts.winterImages === true && typeof WINTER_RATING_IMAGES !== "undefined") {
     files = (WINTER_RATING_IMAGES[dateStr] || []);
@@ -5433,7 +5507,7 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   box.dataset.lightboxIndex = String(index);
   box.dataset.lightboxLeague = leagueNum != null ? String(leagueNum) : "";
   box.dataset.lightboxWinterImages = opts.winterImages ? "1" : "";
-  img.src = getAssetUrl(files[index]) + "?v=8";
+  img.src = getAssetUrl(files[index]) + "?v=18";
   img.alt = "Скрин рейтинга " + dateStr + " (" + (index + 1) + ")";
   box.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -5441,7 +5515,11 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
 }
 
 function getWinterRatingLightboxFiles(box) {
-  if (!box || !box.dataset.lightboxDate) return null;
+  if (!box) return null;
+  if (box.dataset.lightboxOverrideFile) {
+    return [box.dataset.lightboxOverrideFile];
+  }
+  if (!box.dataset.lightboxDate) return null;
   var dateStr = box.dataset.lightboxDate;
   if (box.dataset.lightboxWinterImages === "1" && typeof WINTER_RATING_IMAGES !== "undefined") {
     return WINTER_RATING_IMAGES[dateStr] || [];
@@ -6665,7 +6743,7 @@ function initWinterRating() {
           ? (getSpringRatingImagesByLeague(leagueNum)[dStr] || [])
           : (getRatingImages()[dStr] || []);
         if (!files || !files.length) return;
-        var cacheV = "v=8";
+        var cacheV = "v=18";
         container.innerHTML = files.map(function (f, i) {
           return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
         }).join("");
@@ -16216,6 +16294,11 @@ setInterval(updateCashoutManager, 60000);
 if (typeof initChat === "function") initChat();
 if (typeof initPokerShowsPlayer === "function") initPokerShowsPlayer();
 
+/** Кастомный кубок «Турнир дня» на дату по МСК (ключ YYYY-MM-DD) — файл в assets/ */
+var TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE = {
+  "2026-03-20": "tournament-day-championship-500.png"
+};
+
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Турнир Недели Нокаут Меджик", buyin: "2 000₽", guarantee: "250 000₽" },
   { name: "Magic MKO", buyin: "500₽", guarantee: "100 000₽" },
@@ -16247,6 +16330,15 @@ function updateTournamentDayBlock() {
     var s = new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" });
     var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
     return map[s] !== undefined ? map[s] : new Date().getDay();
+  }
+  /** Календарная дата МСК, к которой относится показываемый «турнир дня» (после конца рег — уже завтра). */
+  function getDisplayedTournamentMskParts(now) {
+    var p = getMskDateParts();
+    var endRegToday = new Date(Date.UTC(p.y, p.m, p.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    if (now < endRegToday) return p;
+    var nextUtc = new Date(Date.UTC(p.y, p.m, p.d, 12, 0, 0, 0));
+    nextUtc.setUTCDate(nextUtc.getUTCDate() + 1);
+    return { y: nextUtc.getUTCFullYear(), m: nextUtc.getUTCMonth(), d: nextUtc.getUTCDate() };
   }
   function getTournamentDayState(now) {
     var p = getMskDateParts();
@@ -16297,8 +16389,25 @@ function updateTournamentDayBlock() {
     var trophyImg = document.getElementById("tournamentDayTrophyImg");
     var scheduleTrophyImg = document.getElementById("scheduleTournamentDayTrophyImg");
     var weekday = state.weekday;
+    var pToday = getDisplayedTournamentMskParts(n);
+    var moNum = pToday.m + 1;
+    var daNum = pToday.d;
+    var mskDateKey =
+      pToday.y +
+      "-" +
+      (moNum < 10 ? "0" : "") +
+      moNum +
+      "-" +
+      (daNum < 10 ? "0" : "") +
+      daNum;
+    var dayImageOverride =
+      typeof TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE !== "undefined"
+        ? TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE[mskDateKey]
+        : null;
     var trophyFile;
-    if (nameStr === "Фриролл") {
+    if (dayImageOverride) {
+      trophyFile = dayImageOverride;
+    } else if (nameStr === "Фриролл") {
       trophyFile = "tournament-day-trophy.png";
     } else if (weekday === 0) {
       // Воскресный турнир недели
@@ -16319,6 +16428,30 @@ function updateTournamentDayBlock() {
       trophyImg.classList.remove("tournament-day-block__trophy-img--hidden");
     }
     if (scheduleTrophyImg && trophySrc) scheduleTrophyImg.src = trophySrc;
+    var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
+    if (schedTbody) {
+      var schedRows = schedTbody.querySelectorAll("tr");
+      var trophyRowIdx = (state.weekday + 6) % 7;
+      for (var ri = 0; ri < schedRows.length; ri++) {
+        var tr = schedRows[ri];
+        var nameCell = tr.querySelector("td:nth-child(2)");
+        if (!nameCell) continue;
+        var inlineTrophy = nameCell.querySelector(".schedule-tournament-day-trophy-inline");
+        if (ri === trophyRowIdx && dayImageOverride && trophySrc) {
+          if (!inlineTrophy) {
+            inlineTrophy = document.createElement("img");
+            inlineTrophy.className = "schedule-tournament-day-trophy-inline";
+            inlineTrophy.alt = "";
+            inlineTrophy.width = 56;
+            inlineTrophy.height = 56;
+            nameCell.insertBefore(inlineTrophy, nameCell.firstChild);
+          }
+          inlineTrophy.src = trophySrc;
+        } else if (inlineTrophy) {
+          inlineTrophy.remove();
+        }
+      }
+    }
   }
   formatTimer();
   if (window._tournamentDayTimer) clearInterval(window._tournamentDayTimer);
