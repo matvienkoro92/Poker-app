@@ -321,7 +321,11 @@ body {
   justify-content: flex-start;
   overflow: hidden;
 }
-/* Главная: скролл как в остальных разделах — прокручивается вся страница, меню внизу фиксировано как везде */
+/* Главная: уже боковые отступы (внешний зазор + padding карточки), остальные разделы без изменений */
+.app:has(.view--active[data-view="home"]),
+html.app-view-home .app {
+  --app-gutter: clamp(6px, 2.4vw, 9px);
+}
 
 .bg-gradient {
   position: absolute;
@@ -387,6 +391,11 @@ body {
   flex-direction: column;
   gap: 16px;
   min-height: 0;
+}
+
+.card:has(.view--active[data-view="home"]),
+html.app-view-home .card {
+  --card-padding-x: clamp(6px, 2.4vw, 9px);
 }
 
 .card:has(.view--active[data-view="home"]) {
@@ -11798,16 +11807,16 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 /* Лайтбокс: увеличение скрина по клику — на весь экран без обрезки низа */
 /* Отступ сверху как у .app: под шапку Telegram Mini App + safe-area, иначе ×/«Назад» не нажимаются */
 .winter-rating-lightbox {
-  --winter-lb-top-clear: calc(env(safe-area-inset-top, 0px) + 52px);
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 100000;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.85);
   padding: 0;
-  padding-top: var(--winter-lb-top-clear);
+  /* Одно calc без вложенности — надёжнее в старых WebView */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
   padding-right: env(safe-area-inset-right, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: env(safe-area-inset-left, 0px);
@@ -11826,9 +11835,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 
 .winter-rating-lightbox__close {
   position: absolute;
-  top: calc(var(--winter-lb-top-clear) + 8px);
+  top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
   right: max(12px, env(safe-area-inset-right, 0px));
-  z-index: 10;
+  z-index: 20;
   width: 44px;
   height: 44px;
   border: none;
@@ -11842,6 +11851,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   align-items: center;
   justify-content: center;
   padding: 0;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .winter-rating-lightbox__close:hover {
@@ -11851,14 +11863,17 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 /* «Назад» как в чате — читаемость на тёмном оверлее лайтбокса */
 .winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn {
   position: absolute;
-  top: calc(var(--winter-lb-top-clear) + 8px);
+  top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
   left: max(12px, env(safe-area-inset-left, 0px));
-  z-index: 10;
+  z-index: 20;
   margin-bottom: 0;
   background: rgba(30, 41, 59, 0.92);
   border-color: rgba(148, 163, 184, 0.45);
   color: rgba(255, 255, 255, 0.92);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn:hover {
   background: rgba(51, 65, 85, 0.95);
@@ -11878,6 +11893,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   /* Нужны клики: повторное нажатие по скрину закрывает лайтбокс (см. initWinterRatingLightbox) */
   pointer-events: auto;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .winter-rating-lightbox__prev,
@@ -11885,7 +11901,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 20;
   width: 48px;
   height: 48px;
   border: none;
@@ -11900,6 +11916,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   justify-content: center;
   padding: 0;
   transition: background 0.2s;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .winter-rating-lightbox__prev:hover,
@@ -11920,7 +11939,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   bottom: max(16px, env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 20;
+  pointer-events: none;
   color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
 }

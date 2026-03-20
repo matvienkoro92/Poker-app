@@ -1486,14 +1486,24 @@ function runGazetteAndTasksInit() {
 })();
 }
 
+/** Лайтбокс скринов топ‑15: слушатели ×/«Назад» должны быть до первого открытия из зала славы (раньше они вешались только из initWinterRating при заходе в рейтинг зимы/весны). */
+function tryInitWinterRatingLightboxEarly() {
+  try {
+    if (typeof initWinterRatingLightbox === "function") initWinterRatingLightbox();
+  } catch (e) {
+    if (typeof console !== "undefined" && console.warn) console.warn("initWinterRatingLightbox early", e);
+  }
+}
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
     runGazetteAndTasksInit();
     updateSpringRatingPromoDateFromVar();
+    tryInitWinterRatingLightboxEarly();
   });
 } else {
   runGazetteAndTasksInit();
   updateSpringRatingPromoDateFromVar();
+  tryInitWinterRatingLightboxEarly();
 }
 
 setTimeout(function () {
