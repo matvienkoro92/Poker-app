@@ -2862,7 +2862,8 @@ function setView(viewName) {
     } else if (window.chatListenersAttached) {
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
-        if (typeof window.openClubChat === "function") window.openClubChat();
+        if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
+        else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -11652,6 +11653,9 @@ var chatWithUserName = null;
 /* "dialogs" = список чатов; иначе loadGeneral() перерисовывал скрытый общий чат и сбрасывал scroll */
 var chatActiveTab = "dialogs";
 var chatIsAdmin = false;
+/** Доступ к главному чату: open | member | pending | need_apply (с сервера) */
+var clubChatAccess = "open";
+var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
 function initChat() {
@@ -12099,6 +12103,9 @@ function initChat() {
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
   function openClubChat() {
+    try {
+      updateGeneralInputLocked(false);
+    } catch (eOpenG) {}
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (generalView) {
@@ -12154,6 +12161,193 @@ function initChat() {
   window.chatShowDialogs = showDialogs;
   window.chatOpenConvFromDialogs = openConvFromDialogs;
   window.openClubChat = openClubChat;
+
+  function tryOpenClubChatFromDialogs() {
+    if (chatIsAdmin || clubChatAccess === "open" || clubChatAccess === "member") {
+      openClubChat();
+      return;
+    }
+    if (clubChatAccess === "pending") {
+      if (tg && tg.showAlert) tg.showAlert("Заявка на рассмотрении. Ожидайте решения администратора.");
+      else if (typeof alert === "function") alert("Заявка на рассмотрении.");
+      return;
+    }
+    if (clubChatAccess === "need_apply") {
+      if (tg && tg.showConfirm) {
+        tg.showConfirm("Подать заявку на доступ к главному чату клуба?", function (ok) {
+          if (ok) submitClubChatApplication();
+        });
+      } else if (typeof confirm === "function" && confirm("Подать заявку на доступ к главному чату?")) {
+        submitClubChatApplication();
+      }
+      return;
+    }
+    openClubChat();
+  }
+  window.tryOpenClubChatFromDialogs = tryOpenClubChatFromDialogs;
+
+  function submitClubChatApplication() {
+    if (!initData) {
+      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      return;
+    }
+    fetch(base + "/api/chat", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: initData, action: "clubChatApply" }),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (d && d.ok) {
+          clubChatAccess = d.clubChatAccess || "pending";
+          if (tg && tg.showAlert) tg.showAlert("Заявка отправлена. После одобрения администратором чат откроется.");
+          else if (typeof alert === "function") alert("Заявка отправлена.");
+          loadContacts();
+          if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
+        } else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+        else if (typeof alert === "function") alert((d && d.error) || "Ошибка");
+      })
+      .catch(function () {
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        else if (typeof alert === "function") alert(POKER_NET_ERR);
+      });
+  }
+
+  function updateGeneralInputLocked(locked) {
+    var area = document.getElementById("chatGeneralInputArea");
+    if (area) area.classList.toggle("chat-input-area--locked", !!locked);
+    var inp = document.getElementById("chatGeneralInput");
+    if (inp) inp.disabled = !!locked;
+    var ab = document.getElementById("chatGeneralAttachBtn");
+    if (ab) ab.disabled = !!locked;
+    var eb = document.getElementById("chatGeneralEmojiBtn");
+    if (eb) eb.disabled = !!locked;
+    var sb = document.getElementById("chatGeneralSendBtn");
+    if (sb) sb.disabled = !!locked;
+  }
+
+  function renderGeneralAccessGate(state) {
+    if (!generalMessages) return;
+    var msg =
+      state === "pending"
+        ? "Заявка на рассмотрении. После одобрения администратором здесь появятся сообщения."
+        : "Главный чат доступен по заявке. Вернитесь к списку чатов, нажмите «Главный чат» и подайте заявку.";
+    generalMessages.innerHTML =
+      '<div class="chat-general-gate"><p class="chat-empty">' + escapeHtml(msg) + "</p></div>";
+  }
+
+  function closeChatClubAccessModal() {
+    var modal = document.getElementById("chatClubAccessModal");
+    if (modal) {
+      modal.classList.add("chat-club-access-modal--hidden");
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openChatClubAccessModal() {
+    var modal = document.getElementById("chatClubAccessModal");
+    var pendingEl = document.getElementById("chatClubAdminPendingList");
+    var membersEl = document.getElementById("chatClubAdminMembersList");
+    var hintEl = document.getElementById("chatClubAdminModalHint");
+    if (!modal || !initData) return;
+    if (pendingEl) pendingEl.innerHTML = "<p class=\"chat-empty\">Загрузка…</p>";
+    if (membersEl) membersEl.innerHTML = "";
+    if (hintEl) hintEl.textContent = "";
+    modal.classList.remove("chat-club-access-modal--hidden");
+    modal.setAttribute("aria-hidden", "false");
+    fetch(base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=clubChatManage")
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (!d || !d.ok) {
+          if (hintEl) hintEl.textContent = (d && d.error) || "Ошибка загрузки";
+          return;
+        }
+        function rowHtml(u, type) {
+          var id = escapeHtml(u.userId || "");
+          var nm = escapeHtml(u.name || u.userId || "");
+          var btns = "";
+          if (type === "pending") {
+            btns =
+              '<button type="button" class="chat-club-access-modal__btn" data-club-act="approve" data-club-uid="' +
+              id +
+              '">Принять</button>' +
+              '<button type="button" class="chat-club-access-modal__btn chat-club-access-modal__btn--danger" data-club-act="reject" data-club-uid="' +
+              id +
+              '">Отклонить</button>';
+          } else {
+            btns =
+              '<button type="button" class="chat-club-access-modal__btn chat-club-access-modal__btn--danger" data-club-act="revoke" data-club-uid="' +
+              id +
+              '">Убрать из чата</button>';
+          }
+          return (
+            '<div class="chat-club-access-modal__row"><span class="chat-club-access-modal__name">' +
+            nm +
+            '</span><span class="chat-club-access-modal__actions">' +
+            btns +
+            "</span></div>"
+          );
+        }
+        var pend = Array.isArray(d.pending) ? d.pending : [];
+        var mem = Array.isArray(d.members) ? d.members : [];
+        if (pendingEl) {
+          pendingEl.innerHTML = pend.length ? pend.map(function (u) { return rowHtml(u, "pending"); }).join("") : '<p class="chat-empty">Нет заявок</p>';
+        }
+        if (membersEl) {
+          membersEl.innerHTML = mem.length ? mem.map(function (u) { return rowHtml(u, "member"); }).join("") : '<p class="chat-empty">Пока никого</p>';
+        }
+        if (hintEl) {
+          hintEl.textContent = d.gateEnabled
+            ? "Долгое нажатие на «Главный чат» в списке открывает это окно."
+            : "Режим заявок выключен на сервере (CLUB_CHAT_REQUIRE_APPLICATION=0).";
+        }
+      })
+      .catch(function () {
+        if (hintEl) hintEl.textContent = POKER_NET_ERR;
+      });
+  }
+
+  function clubAdminPatchAction(action, userId) {
+    if (!initData || !userId) return;
+    fetch(base + "/api/chat", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: initData, action: action, userId: userId }),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (d && d.ok) openChatClubAccessModal();
+        else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+      })
+      .catch(function () {
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+      });
+  }
+
+  (function initChatClubAccessModalDelegation() {
+    var modal = document.getElementById("chatClubAccessModal");
+    if (!modal || modal.getAttribute("data-delegation-bound") === "1") return;
+    modal.setAttribute("data-delegation-bound", "1");
+    modal.addEventListener("click", function (e) {
+      if (e.target && e.target.getAttribute && e.target.getAttribute("data-chat-club-modal-close")) {
+        closeChatClubAccessModal();
+        return;
+      }
+      var btn = e.target && e.target.closest ? e.target.closest("[data-club-act]") : null;
+      if (!btn) return;
+      var act = btn.getAttribute("data-club-act");
+      var uid = btn.getAttribute("data-club-uid");
+      if (act === "approve") clubAdminPatchAction("clubChatApprove", uid);
+      else if (act === "reject") clubAdminPatchAction("clubChatReject", uid);
+      else if (act === "revoke") clubAdminPatchAction("clubChatRevoke", uid);
+    });
+  })();
 
   // Шаблоны сообщений (локально в браузере, вызываются через "/").
   // Формат: [{ title: string, text: string }]. Старый формат ({ text }) мигрируем на лету.
@@ -12528,7 +12722,13 @@ function initChat() {
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
+        if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
+        var access = data.clubChatAccess != null ? data.clubChatAccess : "open";
+        var noGeneralAccess = !chatIsAdmin && (access === "need_apply" || access === "pending");
         var messages = data.messages || [];
+        if (noGeneralAccess) {
+          messages = [];
+        }
         var pending = window._pendingGeneralMessage;
         if (pending && pending.id && !messages.some(function (m) { return m.id === pending.id; })) {
           messages = messages.concat([pending]);
@@ -12558,11 +12758,20 @@ function initChat() {
         updateChatHeaderStats();
         /* Не трогаем DOM общего чата, пока экран скрыт — иначе scrollTop обнуляется и при входе лента «сверху». */
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible && !chatIsEditingMessage) {
-          var sig = generalMessagesSignature(messages);
-          if (scrollGeneralToBottomOnNextRender || sig !== lastGeneralMessagesSig) {
-            if (sig !== lastGeneralMessagesSig) lastGeneralMessagesSig = sig;
-            renderGeneralMessages(messages);
+          if (noGeneralAccess) {
+            lastGeneralMessagesSig = "";
+            renderGeneralAccessGate(access);
+            updateGeneralInputLocked(true);
+          } else {
+            updateGeneralInputLocked(false);
+            var sig = generalMessagesSignature(messages);
+            if (scrollGeneralToBottomOnNextRender || sig !== lastGeneralMessagesSig) {
+              if (sig !== lastGeneralMessagesSig) lastGeneralMessagesSig = sig;
+              renderGeneralMessages(messages);
+            }
           }
+        } else if (!noGeneralAccess) {
+          updateGeneralInputLocked(false);
         }
         updateUnreadDots();
         if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
@@ -13317,6 +13526,11 @@ function initChat() {
       return;
     }
     if ((!text && !generalImage && !generalVoice && !generalDocument) || sendingGeneral) return;
+    var genArea = document.getElementById("chatGeneralInputArea");
+    if (genArea && genArea.classList.contains("chat-input-area--locked")) {
+      if (tg && tg.showAlert) tg.showAlert("Нет доступа к общему чату.");
+      return;
+    }
     if (!initData) {
       if (tg && tg.showAlert) tg.showAlert("Откройте в Telegram.");
       else if (typeof alert === "function") alert("Откройте приложение в Telegram, чтобы отправлять сообщения в общий чат.");
@@ -13480,6 +13694,14 @@ function initChat() {
   function updateClubChatPreview(messages) {
     var el = document.getElementById("chatDialogClubPreview");
     if (!el) return;
+    if (clubChatAccess === "need_apply") {
+      el.textContent = "Нажмите, чтобы подать заявку";
+      return;
+    }
+    if (clubChatAccess === "pending") {
+      el.textContent = "Заявка на рассмотрении…";
+      return;
+    }
     if (!messages || messages.length === 0) {
       el.textContent = "Нет сообщений";
       return;
@@ -13505,8 +13727,18 @@ function initChat() {
     } catch (e) {}
     var url = base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=contacts" + lastViewedParam;
     fetch(url).then(function (r) { return r.json(); }).then(function (data) {
-      if (data && data.ok && Array.isArray(data.contacts)) {
+      if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
+        if (data.clubChatAccess) clubChatAccess = data.clubChatAccess;
+        if (window.__openClubChatAfterNextContacts) {
+          window.__openClubChatAfterNextContacts = false;
+          setTimeout(function () {
+            if (typeof tryOpenClubChatFromDialogs === "function") tryOpenClubChatFromDialogs();
+            else if (typeof openClubChat === "function") openClubChat();
+          }, 0);
+        }
+      }
+      if (data && data.ok && Array.isArray(data.contacts)) {
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
         // Если ещё ни разу не фиксировали момент просмотра общего чата в этом браузере,
@@ -13580,7 +13812,16 @@ function initChat() {
           if (typeof window.chatAttachDialogButtons === "function") window.chatAttachDialogButtons();
         }
       }
-    }).catch(function () { contactsEl.innerHTML = "<p class=\"chat-empty\">Ошибка</p>"; });
+    }).catch(function () {
+      contactsEl.innerHTML = "<p class=\"chat-empty\">Ошибка</p>";
+      if (window.__openClubChatAfterNextContacts) {
+        window.__openClubChatAfterNextContacts = false;
+        setTimeout(function () {
+          if (typeof tryOpenClubChatFromDialogs === "function") tryOpenClubChatFromDialogs();
+          else if (typeof openClubChat === "function") openClubChat();
+        }, 0);
+      }
+    });
   }
 
 
@@ -14893,10 +15134,9 @@ function initChat() {
 
   if (window.__pendingOpenClubChatGeneral) {
     window.__pendingOpenClubChatGeneral = false;
-    openClubChat();
-  } else {
-    showDialogs();
+    window.__openClubChatAfterNextContacts = true;
   }
+  showDialogs();
 
   if (dialogsView) {
     var assetPath = (window.location.pathname || "").replace(/\/[^/]*$/, "") || "/";
@@ -15084,7 +15324,11 @@ function initChat() {
         return;
       }
       if (el.classList && el.classList.contains("chat-dialog-item--club")) {
-        openClubChat();
+        if (el._clubLongPressHandled) {
+          el._clubLongPressHandled = false;
+          return;
+        }
+        tryOpenClubChatFromDialogs();
         return;
       }
       if (el.classList && el.classList.contains("chat-contact") && el.dataset.chatId) {
@@ -15157,6 +15401,34 @@ function initChat() {
     }
     attachAllChatDialogButtons();
     window.chatAttachDialogButtons = attachAllChatDialogButtons;
+
+    (function bindClubChatAdminLongPress() {
+      var btn = document.getElementById("chatDialogClub");
+      if (!btn || btn._clubAdminLpBound) return;
+      btn._clubAdminLpBound = true;
+      function clearT() {
+        if (chatClubAdminLongPressTimer) {
+          clearTimeout(chatClubAdminLongPressTimer);
+          chatClubAdminLongPressTimer = null;
+        }
+      }
+      function startPress() {
+        clearT();
+        chatClubAdminLongPressTimer = setTimeout(function () {
+          chatClubAdminLongPressTimer = null;
+          if (!chatIsAdmin) return;
+          btn._clubLongPressHandled = true;
+          if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("medium");
+          openChatClubAccessModal();
+        }, 650);
+      }
+      btn.addEventListener("touchstart", startPress, { passive: true });
+      btn.addEventListener("touchend", clearT);
+      btn.addEventListener("touchcancel", clearT);
+      btn.addEventListener("mousedown", startPress);
+      btn.addEventListener("mouseup", clearT);
+      btn.addEventListener("mouseleave", clearT);
+    })();
   }
   if (findByIdInputDialogs) {
     var suggestEl = document.getElementById("chatFindSuggest");

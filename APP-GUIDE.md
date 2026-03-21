@@ -111,6 +111,8 @@ function setView(viewName) {
 - `/api/raffles`, `/api/respect`, `/api/friends`, `/api/pikhanina`, и т.д.
 - `/api/twitch-viewers` — счётчик зрителей Twitch (нужны `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` в env)
 
+**Главный чат по заявке** (`lib/api-handlers/chat.js`): Redis `poker_app:club_chat_pending`, `poker_app:club_chat_members`. Включено по умолчанию; отключить старый «открытый» режим: `CLUB_CHAT_REQUIRE_APPLICATION=0` в env. Админ: долгое нажатие на «Главный чат» в списке → заявки и участники.
+
 ### Внешние сервисы
 - Telegram Bot API — sendMessage, getChatMember
 - Poker21 pipeline — данные пользователей
