@@ -1,13 +1,24 @@
 // Темы: тёмная / светлая
 (function initTheme() {
-  var LIGHT_OUTER_BG = "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%)";
-  var DARK_BG = "radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%)";
+  /** Сплошной слой под градиентом: при верхнем/нижнем overscroll WebView рисует именно его, не белый */
+  var LIGHT_OVERSCROLL = "#fff7ed";
+  var DARK_OVERSCROLL = "#0f172a";
+  var LIGHT_GRAD =
+    "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%)";
+  var DARK_GRAD = "radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%)";
   function applyBg() {
     var isLight = document.documentElement.getAttribute("data-theme") === "light";
-    document.documentElement.style.background = isLight ? LIGHT_OUTER_BG : DARK_BG;
-    document.body.style.background = isLight ? LIGHT_OUTER_BG : DARK_BG;
-    var app = document.getElementById("app");
-    if (app) app.style.background = isLight ? LIGHT_OUTER_BG : DARK_BG;
+    var canvas = isLight ? LIGHT_OVERSCROLL : DARK_OVERSCROLL;
+    var grad = isLight ? LIGHT_GRAD : DARK_GRAD;
+    function paintRoot(el) {
+      if (!el) return;
+      el.style.background = "";
+      el.style.backgroundColor = canvas;
+      el.style.backgroundImage = grad;
+    }
+    paintRoot(document.documentElement);
+    paintRoot(document.body);
+    paintRoot(document.getElementById("app"));
   }
   var stored = localStorage.getItem("poker_theme");
   var theme = stored === "light" ? "light" : "dark";
@@ -15,7 +26,7 @@
   applyBg();
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg && tg.setBackgroundColor) {
-    tg.setBackgroundColor(theme === "light" ? "#ffedd5" : "#0f172a");
+    tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : DARK_OVERSCROLL);
   }
   var btn = document.getElementById("themeToggle");
   if (btn) {
@@ -24,7 +35,7 @@
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("poker_theme", theme);
       applyBg();
-      if (tg && tg.setBackgroundColor) tg.setBackgroundColor(theme === "light" ? "#ffedd5" : "#0f172a");
+      if (tg && tg.setBackgroundColor) tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : DARK_OVERSCROLL);
     });
   }
 })();
@@ -2345,7 +2356,8 @@ if (tg) {
   if (tg.expand) tg.expand();
   if (typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes();
   var isLight = document.documentElement.getAttribute("data-theme") === "light";
-  if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#ffedd5" : "#0f172a");
+  /* Совпадает с --overscroll-canvas / initTheme (резинка сверху не белая) */
+  if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : "#0f172a");
   // По ссылке t.me/Poker_dvatuza_bot/DvaTuza всегда открываем в полный экран.
   // Повторные вызовы expand() с задержкой и при событиях помогают развернуть на части устройств.
   function tryExpand() {
@@ -2414,15 +2426,19 @@ function telegramUserDisplayName(u) {
   return "";
 }
 
-// Авторизация через Telegram: проверка initData на сервере
+// Авторизация через Telegram: обязательная проверка подписи initData на сервере (/api/auth-telegram)
 (function initTelegramAuth() {
-  const banner = document.getElementById("authBanner");
-  const bannerLink = document.getElementById("authBannerLink");
-  const userEl = document.getElementById("authUser");
-  const appEl = document.getElementById("app");
-  const telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
+  window.__pokerTelegramAuth = { status: "unknown", user: null, error: null };
 
-  const hintEl = document.getElementById("authBannerHint");
+  var banner = document.getElementById("authBanner");
+  var bannerLink = document.getElementById("authBannerLink");
+  var bannerText = document.getElementById("authBannerText");
+  var bannerRetry = document.getElementById("authBannerRetry");
+  var userEl = document.getElementById("authUser");
+  var appEl = document.getElementById("app");
+  var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
+  var hintEl = document.getElementById("authBannerHint");
+
   if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
     bannerLink.href = telegramAppUrl;
     bannerLink.style.display = "";
@@ -2430,6 +2446,29 @@ function telegramUserDisplayName(u) {
   } else {
     if (bannerLink) bannerLink.style.display = "none";
     if (hintEl) hintEl.style.display = "block";
+  }
+
+  function getTelegramAuthApiBase() {
+    var el = document.getElementById("app");
+    var dataBase = el && el.getAttribute("data-api-base");
+    if (dataBase && String(dataBase).trim()) return String(dataBase).trim().replace(/\/$/, "");
+    if (typeof window !== "undefined" && window.location && window.location.origin) return window.location.origin;
+    return "";
+  }
+
+  function normalizeVerifiedUser(serverUser, fallbackUnsafe) {
+    if (serverUser && serverUser.id != null) {
+      return {
+        id: serverUser.id,
+        first_name: serverUser.first_name != null ? serverUser.first_name : "",
+        last_name: serverUser.last_name != null ? serverUser.last_name : "",
+        username: serverUser.username != null ? serverUser.username : "",
+        photo_url: serverUser.photo_url || (fallbackUnsafe && fallbackUnsafe.photo_url) || "",
+        language_code: serverUser.language_code || "",
+        is_premium: !!serverUser.is_premium,
+      };
+    }
+    return fallbackUnsafe || null;
   }
 
   function showAuthorized(user) {
@@ -2442,7 +2481,11 @@ function telegramUserDisplayName(u) {
       userEl.classList.remove("auth-user--hidden");
       loadHeaderAvatar();
     }
-    if (banner) banner.classList.add("auth-banner--hidden");
+    if (banner) {
+      banner.classList.add("auth-banner--hidden");
+      banner.classList.remove("auth-banner--verifying");
+    }
+    if (bannerRetry) bannerRetry.hidden = true;
   }
 
   function showUnauthorized() {
@@ -2452,39 +2495,197 @@ function telegramUserDisplayName(u) {
 
   function updateHeaderGreeting() {
     var el = document.getElementById("headerGreeting");
-    if (el) {
-      var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-      var dn = telegramUserDisplayName(u);
-      /* Раньше при пустом first_name показывали «Роман» — у игроков с только username (Alex) это ломалось */
-      el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
+    if (!el) return;
+    var u = null;
+    var auth = window.__pokerTelegramAuth;
+    if (auth && (auth.status === "invalid" || auth.status === "network")) {
+      u = null;
+    } else if (auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip")) {
+      u = auth.user;
+    } else if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      u = tg.initDataUnsafe.user;
+    }
+    var dn = telegramUserDisplayName(u);
+    el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
+  }
+
+  function setBannerVerifying() {
+    if (bannerText) bannerText.textContent = "Проверяем вход через Telegram…";
+    if (bannerLink) bannerLink.style.display = "none";
+    if (hintEl) hintEl.style.display = "none";
+    if (bannerRetry) bannerRetry.hidden = true;
+    if (banner) {
+      banner.classList.remove("auth-banner--hidden");
+      banner.classList.add("auth-banner--verifying");
     }
   }
 
-  // Нет Telegram — показываем баннер «Откройте в Telegram»
+  function setBannerFailure(message, showRetry) {
+    if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
+    if (banner) {
+      banner.classList.remove("auth-banner--verifying");
+      banner.classList.remove("auth-banner--hidden");
+    }
+    if (bannerRetry) bannerRetry.hidden = !showRetry;
+    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
+      bannerLink.style.display = "";
+    }
+  }
+
+  function resetBannerForOutsideTelegram() {
+    if (bannerText) bannerText.textContent = "Откройте приложение в Telegram, чтобы войти.";
+    if (banner) banner.classList.remove("auth-banner--verifying");
+    if (bannerRetry) bannerRetry.hidden = true;
+    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
+      bannerLink.href = telegramAppUrl;
+      bannerLink.style.display = "";
+      if (hintEl) hintEl.style.display = "none";
+    } else {
+      if (bannerLink) bannerLink.style.display = "none";
+      if (hintEl) hintEl.style.display = "block";
+    }
+  }
+
+  function postAuthTelegram(initData) {
+    var base = getTelegramAuthApiBase();
+    if (!base) return Promise.reject(new Error("no_base"));
+    return fetch(base + "/api/auth-telegram", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: initData }),
+    }).then(function (res) {
+      return res
+        .json()
+        .catch(function () {
+          return {};
+        })
+        .then(function (data) {
+          return { res: res, data: data || {} };
+        });
+    });
+  }
+
+  function runVerifyFlow() {
+    var initData = tg && tg.initData ? String(tg.initData) : "";
+    var userUnsafe = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+
+    if (!tg) {
+      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+      updateHeaderGreeting();
+      showUnauthorized();
+      resetBannerForOutsideTelegram();
+      return;
+    }
+
+    if (!initData) {
+      window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
+      updateHeaderGreeting();
+      showUnauthorized();
+      if (userUnsafe) {
+        setBannerFailure("Нет подписанной сессии Telegram. Закройте Mini App и откройте снова из бота.", false);
+      } else {
+        resetBannerForOutsideTelegram();
+      }
+      return;
+    }
+
+    window.__pokerTelegramAuth = { status: "verifying", user: null, error: null };
+    setBannerVerifying();
+    showUnauthorized();
+    updateHeaderGreeting();
+
+    var attempts = 0;
+    function tryOnce() {
+      attempts += 1;
+      postAuthTelegram(initData)
+        .then(function (pack) {
+          var res = pack.res;
+          var data = pack.data || {};
+          if (res.ok && data.ok && data.user) {
+            var u = normalizeVerifiedUser(data.user, userUnsafe);
+            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            updateHeaderGreeting();
+            showAuthorized(u);
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u } }));
+            } catch (e1) {}
+            return;
+          }
+          if (res.status === 401 || (data && String(data.error || "").indexOf("Invalid") !== -1)) {
+            window.__pokerTelegramAuth = { status: "invalid", user: null, error: data.error || "invalid" };
+            updateHeaderGreeting();
+            showUnauthorized();
+            setBannerFailure("Вход не подтверждён. Откройте приложение через официального бота в Telegram.", false);
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "invalid" } }));
+            } catch (e2) {}
+            return;
+          }
+          if (res.status === 500 && data && data.error === "Server config") {
+            var uDev = normalizeVerifiedUser(null, userUnsafe);
+            window.__pokerTelegramAuth = { status: "dev_skip", user: uDev, error: "server_config" };
+            if (uDev) {
+              updateHeaderGreeting();
+              showAuthorized(uDev);
+              if (typeof console !== "undefined" && console.warn) {
+                console.warn("[poker] auth-telegram: на сервере не задан TELEGRAM_BOT_TOKEN — вход без криптопроверки (только для разработки).");
+              }
+              try {
+                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uDev, dev: true } }));
+              } catch (e3) {}
+            } else {
+              showUnauthorized();
+              setBannerFailure("Не удалось подтвердить профиль.", true);
+            }
+            return;
+          }
+          if (attempts < 3) {
+            setTimeout(tryOnce, 800);
+            return;
+          }
+          window.__pokerTelegramAuth = { status: "network", user: null, error: "bad_response" };
+          updateHeaderGreeting();
+          showUnauthorized();
+          setBannerFailure("Не удалось связаться с сервером. Проверьте интернет и нажмите «Повторить проверку».", true);
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
+          } catch (e4) {}
+        })
+        .catch(function () {
+          if (attempts < 3) {
+            setTimeout(tryOnce, 800);
+            return;
+          }
+          window.__pokerTelegramAuth = { status: "network", user: null, error: "fetch" };
+          updateHeaderGreeting();
+          showUnauthorized();
+          setBannerFailure("Не удалось связаться с сервером. Проверьте интернет и нажмите «Повторить проверку».", true);
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
+          } catch (e5) {}
+        });
+    }
+    tryOnce();
+  }
+
+  if (bannerRetry) {
+    bannerRetry.addEventListener("click", function () {
+      if (!tg || !tg.initData) {
+        resetBannerForOutsideTelegram();
+        return;
+      }
+      runVerifyFlow();
+    });
+  }
+
   if (!tg) {
     updateHeaderGreeting();
     showUnauthorized();
+    resetBannerForOutsideTelegram();
     return;
   }
 
-  // Открыто из Telegram: сразу показываем пользователя авторизованным по данным от Telegram
-  var userFromTelegram = tg.initDataUnsafe && tg.initDataUnsafe.user;
-  updateHeaderGreeting();
-  if (userFromTelegram) {
-    showAuthorized(userFromTelegram);
-    // Проверку на сервере можно вызывать в фоне для логирования/аналитики (не блокируем интерфейс)
-    var base = typeof window !== "undefined" && window.location.origin ? window.location.origin : "";
-    if (base && tg.initData) {
-      fetch(base + "/api/auth-telegram", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg.initData }),
-      }).catch(function () {});
-    }
-    return;
-  }
-
-  showUnauthorized();
+  runVerifyFlow();
 })();
 
 // Скрыть экран загрузки после готовности страницы (не белый экран при открытии)
@@ -2788,7 +2989,62 @@ function tryChillRadioPlay() {
   if (p && typeof p.then === "function") p.catch(function () {});
 }
 
+/** Состояние верификации Telegram для доступа к чату (см. __pokerTelegramAuth в initTelegramAuth) */
+function getPokerChatTelegramAuthState() {
+  try {
+    var a = window.__pokerTelegramAuth;
+    if (!a || !a.status) return "pending";
+    if (a.status === "verified" || a.status === "dev_skip") {
+      return a.user != null && a.user.id != null ? "ok" : "blocked";
+    }
+    if (a.status === "verifying" || a.status === "unknown") return "pending";
+    return "blocked";
+  } catch (e) {
+    return "pending";
+  }
+}
+
+function pokerNotifyChatVerificationRequired() {
+  var msg =
+    "Чтобы общаться в чате, верифицируйтесь в приложении: дождитесь проверки входа через Telegram или откройте Mini App из бота заново.";
+  var w = window.Telegram && window.Telegram.WebApp;
+  if (w && w.showAlert) w.showAlert(msg);
+  else if (typeof alert === "function") alert(msg);
+}
+
+function pokerNotifyChatAuthPending() {
+  var msg = "Выполняется проверка входа через Telegram… Повторите через несколько секунд.";
+  var w = window.Telegram && window.Telegram.WebApp;
+  if (w && w.showAlert) w.showAlert(msg);
+  else if (typeof alert === "function") alert(msg);
+}
+
+/** false — прервать действие в чате (показано уведомление) */
+function pokerEnsureChatTelegramVerified() {
+  var st = getPokerChatTelegramAuthState();
+  if (st === "pending") {
+    pokerNotifyChatAuthPending();
+    return false;
+  }
+  if (st !== "ok") {
+    pokerNotifyChatVerificationRequired();
+    return false;
+  }
+  return true;
+}
+
 function setView(viewName) {
+  if (viewName === "chat") {
+    var st = getPokerChatTelegramAuthState();
+    if (st === "pending") {
+      pokerNotifyChatAuthPending();
+      return;
+    }
+    if (st !== "ok") {
+      pokerNotifyChatVerificationRequired();
+      return;
+    }
+  }
   var prevView = "";
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
@@ -12105,6 +12361,7 @@ function initChat() {
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
   function openClubChat() {
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     try {
       updateGeneralInputLocked(false);
     } catch (eOpenG) {}
@@ -12189,6 +12446,7 @@ function initChat() {
   window.tryOpenClubChatFromDialogs = tryOpenClubChatFromDialogs;
 
   function submitClubChatApplication() {
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     if (!initData) {
       if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
       return;
@@ -12664,6 +12922,7 @@ function initChat() {
   var currentReactionPickerClose = null;
   function sendReaction(msgId, emoji, source, withId) {
     if (!msgId || !emoji || !initData) return;
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var body = { initData: initData, action: "reaction", messageId: msgId, emoji: emoji };
     if (source === "personal" && withId) body.with = withId;
     fetch(base + "/api/chat", {
@@ -13583,6 +13842,7 @@ function initChat() {
     generalMessages.scrollTop = generalMessages.scrollHeight;
   }
   function sendGeneral(overrideText) {
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var text = (generalInput && generalInput.value || "").trim();
     // Сообщение из chat-шаблона: подставляем текст напрямую,
     // чтобы не зависеть от того, успело ли обновиться нужное поле.
@@ -13731,6 +13991,7 @@ function initChat() {
   }
 
   function showConv(userId, userName, dtIdFromContact) {
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
     if (convTitle) {
@@ -14181,6 +14442,7 @@ function initChat() {
     }
   }
   function sendMessage(overrideText) {
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var text = (inputEl && inputEl.value || "").trim();
     // Сообщение из chat-шаблона: подставляем текст напрямую.
     if (typeof overrideText === "string") text = overrideText.trim();
