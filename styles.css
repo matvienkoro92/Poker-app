@@ -60,7 +60,8 @@ body::-webkit-scrollbar,
 [data-theme="light"] .bg-blur {
   background: linear-gradient(145deg, rgba(241, 245, 249, 0.95), rgba(248, 250, 252, 0.95)) !important;
 }
-[data-theme="light"] .app:has(.view--active[data-view="home"]) .bg-blur {
+[data-theme="light"] .app:has(.view--active[data-view="home"]) .bg-blur,
+[data-theme="light"] .app:has(.view--active[data-view="chat"]) .bg-blur {
   background: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
 }
 [data-theme="light"] {
@@ -440,16 +441,16 @@ body {
   position: relative;
   z-index: 2;
 }
-/* Фон за пределами приложения в разделе чат — того же цвета, что и блок чата */
+/* Чаты: тот же фон подложки, что и на главной (переменные темы + applyBg на #app) */
 html.app-view-chat,
 body.app-view-chat {
-  background: #0f172a !important;
-  background-color: #0f172a !important;
+  background-color: var(--overscroll-canvas) !important;
+  background-image: var(--body-bg);
 }
 [data-theme="light"] html.app-view-chat,
 [data-theme="light"] body.app-view-chat {
-  background: #f8fafc !important;
-  background-color: #f8fafc !important;
+  background-image: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
+  background-color: var(--overscroll-canvas) !important;
 }
 body:has(.view--active[data-view="chat"]) {
   overflow: hidden;
@@ -487,7 +488,7 @@ html.app-view-home {
   background-image: var(--body-bg);
 }
 
-/* !important: перебивает inline-фон из applyBg() на #app и [data-theme="light"] .app */
+/* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
 .app:has(.view--active[data-view="chat"]) {
   height: 100dvh;
   min-height: 100dvh;
@@ -495,20 +496,6 @@ html.app-view-home {
   align-items: center;
   padding-bottom: 0;
   overflow: hidden;
-  background-color: #0f172a !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='10' y='32' font-size='28' fill='%239ca3af' fill-opacity='0.18' font-family='serif'%3E♠%3C/text%3E%3Ctext x='45' y='65' font-size='24' fill='%239ca3af' fill-opacity='0.15'%3E♥%3C/text%3E%3Ctext x='78' y='28' font-size='28' fill='%239ca3af' fill-opacity='0.15'%3E♦%3C/text%3E%3Ctext x='105' y='72' font-size='24' fill='%239ca3af' fill-opacity='0.18'%3E♣%3C/text%3E%3Ctext x='12' y='115' font-size='14' fill='%239ca3af' fill-opacity='0.2' font-weight='500'%3E%D0%94%D0%B2%D0%B0%20%D1%82%D1%83%D0%B7%D0%B0%3C/text%3E%3Ctext x='75' y='135' font-size='16' fill='%239ca3af' fill-opacity='0.22' font-weight='600'%3EPoker21%3C/text%3E%3C/svg%3E") !important;
-  background-repeat: repeat !important;
-  background-size: 140px 140px !important;
-}
-[data-theme="light"] .app:has(.view--active[data-view="chat"]) {
-  background-color: #f8fafc !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='10' y='32' font-size='28' fill='%2364748b' fill-opacity='0.22' font-family='serif'%3E♠%3C/text%3E%3Ctext x='45' y='65' font-size='24' fill='%2364748b' fill-opacity='0.18'%3E♥%3C/text%3E%3Ctext x='78' y='28' font-size='28' fill='%2364748b' fill-opacity='0.18'%3E♦%3C/text%3E%3Ctext x='105' y='72' font-size='24' fill='%2364748b' fill-opacity='0.22'%3E♣%3C/text%3E%3Ctext x='12' y='115' font-size='14' fill='%2364748b' fill-opacity='0.28' font-weight='500'%3E%D0%94%D0%B2%D0%B0%20%D1%82%D1%83%D0%B7%D0%B0%3C/text%3E%3Ctext x='75' y='135' font-size='16' fill='%2364748b' fill-opacity='0.3' font-weight='600'%3EPoker21%3C/text%3E%3C/svg%3E") !important;
-  background-repeat: repeat !important;
-  background-size: 140px 140px !important;
-}
-.app:has(.view--active[data-view="chat"]) .bg-gradient,
-.app:has(.view--active[data-view="chat"]) .bg-blur {
-  display: none;
 }
 .card:has(.view--active[data-view="chat"]) {
   max-height: none;
@@ -647,6 +634,18 @@ html.app-view-home .home-welcome-outline::before {
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--text);
+}
+.auth-banner__login-mount {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.auth-banner__login-mount:empty {
+  display: none;
 }
 .auth-banner__link {
   display: inline-block;

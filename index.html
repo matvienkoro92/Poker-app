@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=105" />
+    <link rel="stylesheet" href="./styles.css?v=107" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -132,6 +132,7 @@
           <p class="auth-banner__text" id="authBannerText">Откройте приложение в Telegram, чтобы войти.</p>
           <button type="button" class="auth-banner__retry" id="authBannerRetry" hidden>Повторить проверку</button>
           <a href="#" class="auth-banner__link" id="authBannerLink" style="display: none;">Открыть в Telegram</a>
+          <div class="auth-banner__login-mount" id="authBannerLoginMount" aria-live="polite"></div>
           <p class="auth-banner__hint" id="authBannerHint" style="display: none;">В index.html у тега с id="app" задайте атрибут data-telegram-app-url="https://t.me/имя_вашего_бота"</p>
         </div>
         <header class="card__header">
@@ -3581,7 +3582,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=145"></script>
+    <script src="./app.js?v=146"></script>
   </body>
 </html>
 

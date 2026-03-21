@@ -12,6 +12,7 @@ const path = require("path");
 const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
   "auth-telegram": () => require(path.join(handlersDir, "auth-telegram.js")),
+  "auth-telegram-login": () => require(path.join(handlersDir, "auth-telegram-login.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),
   visit: () => require(path.join(handlersDir, "visit.js")),

@@ -60,6 +60,56 @@ function getAppBaseUrlForLinks() {
   return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
 }
 
+/** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
+var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
+
+function pokerReadPwaTgSessionToken() {
+  try {
+    var raw = localStorage.getItem(POKER_PWA_TG_SESSION_KEY);
+    if (!raw) return "";
+    var o = JSON.parse(raw);
+    return o && o.token ? String(o.token) : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function pokerSavePwaTgSession(token, userObj) {
+  try {
+    localStorage.setItem(POKER_PWA_TG_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
+  } catch (e) {}
+}
+
+/** Для запросов к API: Mini App передаёт initData, PWA — pwaSession */
+function pokerApiAuthQuery(lead) {
+  var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg0 && tg0.initData) return lead + "initData=" + encodeURIComponent(tg0.initData);
+  var tok = pokerReadPwaTgSessionToken();
+  if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
+  return lead + "initData=";
+}
+
+function pokerApiAuthJsonBody(extra) {
+  var o = Object.assign({}, extra || {});
+  var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg0 && tg0.initData) {
+    o.initData = tg0.initData;
+    delete o.pwaSession;
+  } else {
+    var tok = pokerReadPwaTgSessionToken();
+    if (tok) {
+      o.pwaSession = tok;
+      delete o.initData;
+    }
+  }
+  return o;
+}
+
+function pokerApiHasCredential() {
+  var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken();
+}
+
 (function initRadioToggle() {
   var radio = document.getElementById("chillRadio");
   var btn = document.getElementById("radioToggle");
@@ -2439,7 +2489,10 @@ function telegramUserDisplayName(u) {
   var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
   var hintEl = document.getElementById("authBannerHint");
 
-  if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
+  if (!isTelegramWebApp()) {
+    if (bannerLink) bannerLink.style.display = "none";
+    if (hintEl) hintEl.style.display = "none";
+  } else if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
     bannerLink.href = telegramAppUrl;
     bannerLink.style.display = "";
     if (hintEl) hintEl.style.display = "none";
@@ -2527,8 +2580,110 @@ function telegramUserDisplayName(u) {
       banner.classList.remove("auth-banner--hidden");
     }
     if (bannerRetry) bannerRetry.hidden = !showRetry;
-    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
+    if (bannerLink && tg && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
       bannerLink.style.display = "";
+    } else if (bannerLink) {
+      bannerLink.style.display = "none";
+    }
+  }
+
+  function resetBannerForPwaLogin() {
+    if (bannerText) {
+      bannerText.textContent =
+        "Войдите через Telegram — откроется подтверждение, после чего вы снова окажетесь в этом приложении (PWA или браузер).";
+    }
+    if (banner) banner.classList.remove("auth-banner--verifying");
+    if (bannerRetry) bannerRetry.hidden = true;
+    if (bannerLink) bannerLink.style.display = "none";
+    if (hintEl) hintEl.style.display = "none";
+  }
+
+  function mountTelegramLoginWidgetForPwa() {
+    var mount = document.getElementById("authBannerLoginMount");
+    if (!mount || mount.getAttribute("data-pwa-widget-mounted") === "1") return;
+    var bot = "";
+    try {
+      var m = String(telegramAppUrl || "").match(/t\.me\/([^\/\?#]+)/i);
+      if (m) bot = m[1];
+    } catch (e1) {}
+    if (!bot) return;
+    mount.innerHTML = "";
+    var authCallback = window.location.origin + window.location.pathname;
+    var script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.async = true;
+    script.setAttribute("data-telegram-login", bot);
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "14");
+    script.setAttribute("data-userpic", "true");
+    script.setAttribute("data-auth-url", authCallback);
+    script.setAttribute("data-request-access", "write");
+    mount.appendChild(script);
+    mount.setAttribute("data-pwa-widget-mounted", "1");
+  }
+
+  function tryFinishTelegramLoginRedirect() {
+    try {
+      var sp = new URLSearchParams(window.location.search || "");
+      if (!sp.get("hash") || !sp.get("id") || !sp.get("auth_date")) return false;
+      var payload = {};
+      sp.forEach(function (v, k) {
+        payload[k] = v;
+      });
+      var base = getTelegramAuthApiBase();
+      if (!base) return false;
+      setBannerVerifying();
+      showUnauthorized();
+      fetch(base + "/api/auth-telegram-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) {
+          return res
+            .json()
+            .catch(function () {
+              return {};
+            })
+            .then(function (data) {
+              return { res: res, data: data || {} };
+            });
+        })
+        .then(function (pack) {
+          var res = pack.res;
+          var data = pack.data || {};
+          if (res.ok && data.ok && data.user && data.pwaSession) {
+            var u = normalizeVerifiedUser(data.user, null);
+            pokerSavePwaTgSession(data.pwaSession, data.user);
+            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            updateHeaderGreeting();
+            showAuthorized(u);
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
+            } catch (e2) {}
+            var uUrl = new URL(window.location.href);
+            ["id", "first_name", "last_name", "username", "photo_url", "auth_date", "hash"].forEach(function (k) {
+              uUrl.searchParams.delete(k);
+            });
+            window.history.replaceState({}, "", uUrl.pathname + uUrl.search + uUrl.hash);
+            return;
+          }
+          updateHeaderGreeting();
+          showUnauthorized();
+          setBannerFailure(data && data.error ? String(data.error) : "Не удалось подтвердить вход через Telegram.", false);
+          resetBannerForPwaLogin();
+          mountTelegramLoginWidgetForPwa();
+        })
+        .catch(function () {
+          updateHeaderGreeting();
+          showUnauthorized();
+          setBannerFailure("Ошибка сети при входе через Telegram.", false);
+          resetBannerForPwaLogin();
+          mountTelegramLoginWidgetForPwa();
+        });
+      return true;
+    } catch (e3) {
+      return false;
     }
   }
 
@@ -2570,10 +2725,30 @@ function telegramUserDisplayName(u) {
     var userUnsafe = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
 
     if (!tg) {
+      if (tryFinishTelegramLoginRedirect()) {
+        return;
+      }
       window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
       updateHeaderGreeting();
+      try {
+        var rawPwa = localStorage.getItem(POKER_PWA_TG_SESSION_KEY);
+        if (rawPwa) {
+          var so = JSON.parse(rawPwa);
+          if (so && so.user && so.user.id != null && so.token) {
+            var uP = normalizeVerifiedUser(so.user, null);
+            window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
+            updateHeaderGreeting();
+            showAuthorized(uP);
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
+            } catch (eP) {}
+            return;
+          }
+        }
+      } catch (eLs) {}
       showUnauthorized();
-      resetBannerForOutsideTelegram();
+      resetBannerForPwaLogin();
+      mountTelegramLoginWidgetForPwa();
       return;
     }
 
@@ -2671,7 +2846,11 @@ function telegramUserDisplayName(u) {
   if (bannerRetry) {
     bannerRetry.addEventListener("click", function () {
       if (!tg || !tg.initData) {
-        resetBannerForOutsideTelegram();
+        if (!isTelegramWebApp() && typeof window.location !== "undefined" && window.location.reload) {
+          window.location.reload();
+        } else {
+          resetBannerForOutsideTelegram();
+        }
         return;
       }
       runVerifyFlow();
@@ -2679,16 +2858,14 @@ function telegramUserDisplayName(u) {
   }
 
   window.pokerRetryTelegramAuthVerification = function () {
-    if (!tg || !tg.initData) return;
-    runVerifyFlow();
+    if (tg && tg.initData) {
+      runVerifyFlow();
+      return;
+    }
+    if (!isTelegramWebApp() && typeof window.location !== "undefined" && window.location.reload) {
+      window.location.reload();
+    }
   };
-
-  if (!tg) {
-    updateHeaderGreeting();
-    showUnauthorized();
-    resetBannerForOutsideTelegram();
-    return;
-  }
 
   runVerifyFlow();
 })();
@@ -3010,7 +3187,9 @@ function getPokerChatTelegramAuthState() {
 }
 
 function pokerNotifyChatVerificationRequired() {
-  var msg = "Чтобы общаться в чате, откройте Mini App из бота Telegram.";
+  var msg = isTelegramWebApp()
+    ? "Чтобы общаться в чате, откройте Mini App из бота Telegram."
+    : "Чтобы общаться в чате, войдите через Telegram: на главной вверху нажмите «Log in with Telegram» / «Войти через Telegram».";
   var w = window.Telegram && window.Telegram.WebApp;
   if (w && w.showAlert) w.showAlert(msg);
   else if (typeof alert === "function") alert(msg);
@@ -11975,7 +12154,7 @@ function initChat() {
   }
 
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
+  /* учётные данные чата: pokerApiAuth* (Mini App initData или PWA pwaSession) */
 
   var chatUserModalEl = document.getElementById("chatUserModal");
   var chatUserModalUserId = null;
@@ -12058,7 +12237,7 @@ function initChat() {
       chatUserModalEl.setAttribute("aria-hidden", "false");
       chatUserModalEl.classList.add("chat-user-modal--open");
       if (modalPersonalBlock) modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
-      fetch(base + "/api/users?userId=" + encodeURIComponent(id))
+      fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (modalP21) modalP21.textContent = (data && data.p21Id) ? "P21 ID: " + data.p21Id : "";
@@ -12075,7 +12254,7 @@ function initChat() {
         .catch(function () {
           if (modalPersonal) modalPersonal.textContent = "—";
         });
-      fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + "&initData=" + encodeURIComponent(initData))
+      fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data && data.ok && typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(data.myVote || null);
@@ -12102,13 +12281,13 @@ function initChat() {
     }
     if (modalRespectUp) {
       modalRespectUp.addEventListener("click", function () {
-        if (!chatUserModalUserId || !base || !initData) return;
+        if (!chatUserModalUserId || !base || !pokerApiHasCredential()) return;
         if (modalRespectUp.disabled) return;
         modalRespectUp.disabled = true;
         fetch(base + "/api/respect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, targetUserId: chatUserModalUserId, action: "up" }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, action: "up" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) {
             updateChatUserModalRespectButtons("up");
@@ -12125,13 +12304,13 @@ function initChat() {
     }
     if (modalRespectDown) {
       modalRespectDown.addEventListener("click", function () {
-        if (!chatUserModalUserId || !base || !initData) return;
+        if (!chatUserModalUserId || !base || !pokerApiHasCredential()) return;
         if (modalRespectDown.disabled) return;
         modalRespectDown.disabled = true;
         fetch(base + "/api/respect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, targetUserId: chatUserModalUserId, action: "down" }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, action: "down" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) {
             updateChatUserModalRespectButtons("down");
@@ -12148,12 +12327,12 @@ function initChat() {
     }
     if (modalAddFriend) {
       modalAddFriend.addEventListener("click", function () {
-        if (!chatUserModalUserId || !base || !initData || modalAddFriend.disabled) return;
+        if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalAddFriend.disabled) return;
         modalAddFriend.disabled = true;
         fetch(base + "/api/friends", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, targetUserId: chatUserModalUserId }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) updateChatUserModalFriendState(true, chatUserModalUserName);
           else {
@@ -12176,10 +12355,10 @@ function initChat() {
       respectVotersModalEl.setAttribute("aria-hidden", "true");
     }
     function loadRespectVotersList(userId) {
-      if (!userId || !rvUpEl || !rvDownEl || !base || !initData) return;
+      if (!userId || !rvUpEl || !rvDownEl || !base || !pokerApiHasCredential()) return;
       rvUpEl.textContent = "";
       rvDownEl.textContent = "Загрузка…";
-      fetch(base + "/api/respect?userId=" + encodeURIComponent(userId) + "&initData=" + encodeURIComponent(initData) + "&list=1")
+      fetch(base + "/api/respect?userId=" + encodeURIComponent(userId) + pokerApiAuthQuery("&") + "&list=1")
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data && data.ok) {
@@ -12205,12 +12384,12 @@ function initChat() {
     if (rvBtnUp) {
       rvBtnUp.addEventListener("click", function () {
         var targetId = respectVotersModalEl.dataset.targetUserId;
-        if (!targetId || !base || !initData || rvBtnUp.disabled) return;
+        if (!targetId || !base || !pokerApiHasCredential() || rvBtnUp.disabled) return;
         rvBtnUp.disabled = true;
         fetch(base + "/api/respect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, targetUserId: targetId, action: "up" }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "up" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           rvBtnUp.disabled = false;
           if (d && d.ok) loadRespectVotersList(targetId);
@@ -12221,12 +12400,12 @@ function initChat() {
     if (rvBtnDown) {
       rvBtnDown.addEventListener("click", function () {
         var targetId = respectVotersModalEl.dataset.targetUserId;
-        if (!targetId || !base || !initData || rvBtnDown.disabled) return;
+        if (!targetId || !base || !pokerApiHasCredential() || rvBtnDown.disabled) return;
         rvBtnDown.disabled = true;
         fetch(base + "/api/respect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, targetUserId: targetId, action: "down" }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "down" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           rvBtnDown.disabled = false;
           if (d && d.ok) loadRespectVotersList(targetId);
@@ -12241,8 +12420,20 @@ function initChat() {
     return;
   }
 
-  var myId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? "tg_" + tg.initDataUnsafe.user.id : null;
-  var myChatName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && (tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || "Вы")) || "Вы";
+  var myId = null;
+  var myChatName = "Вы";
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    myId = "tg_" + tg.initDataUnsafe.user.id;
+    myChatName = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || "Вы";
+  } else {
+    try {
+      var _auth = window.__pokerTelegramAuth;
+      if (_auth && _auth.user && _auth.user.id != null) {
+        myId = "tg_" + _auth.user.id;
+        myChatName = typeof telegramUserDisplayName === "function" ? telegramUserDisplayName(_auth.user) || "Вы" : "Вы";
+      }
+    } catch (eMy) {}
+  }
 
   function escapeHtml(s) {
     if (!s) return "";
@@ -12441,14 +12632,15 @@ function initChat() {
 
   function submitClubChatApplication() {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    if (!initData) {
+    if (!pokerApiHasCredential()) {
       if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      else if (typeof alert === "function") alert("Войдите через Telegram, чтобы подать заявку.");
       return;
     }
     fetch(base + "/api/chat", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, action: "clubChatApply" }),
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: "clubChatApply" })),
     })
       .then(function (r) {
         return r.json();
@@ -12507,7 +12699,7 @@ function initChat() {
     var pendingSub = document.getElementById("chatClubAdminPendingSubtitle");
     var membersSub = document.getElementById("chatClubAdminMembersSubtitle");
     var hintEl = document.getElementById("chatClubAdminModalHint");
-    if (!modal || !initData) return;
+    if (!modal || !pokerApiHasCredential()) return;
     if (pendingSub) pendingSub.textContent = "Заявки";
     if (membersSub) membersSub.textContent = "В чате";
     if (pendingEl) pendingEl.innerHTML = "<p class=\"chat-empty\">Загрузка…</p>";
@@ -12515,7 +12707,7 @@ function initChat() {
     if (hintEl) hintEl.textContent = "";
     modal.classList.remove("chat-club-access-modal--hidden");
     modal.setAttribute("aria-hidden", "false");
-    fetch(base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=clubChatManage")
+    fetch(base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=clubChatManage")
       .then(function (r) {
         return r.json();
       })
@@ -12590,11 +12782,11 @@ function initChat() {
   }
 
   function clubAdminPatchAction(action, userId) {
-    if (!initData || !userId) return;
+    if (!pokerApiHasCredential() || !userId) return;
     fetch(base + "/api/chat", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, action: action, userId: userId }),
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: action, userId: userId })),
     })
       .then(function (r) {
         return r.json();
@@ -12915,9 +13107,9 @@ function initChat() {
   var reactionPickerEl = document.getElementById("chatReactionPicker");
   var currentReactionPickerClose = null;
   function sendReaction(msgId, emoji, source, withId) {
-    if (!msgId || !emoji || !initData) return;
+    if (!msgId || !emoji || !pokerApiHasCredential()) return;
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var body = { initData: initData, action: "reaction", messageId: msgId, emoji: emoji };
+    var body = pokerApiAuthJsonBody({ action: "reaction", messageId: msgId, emoji: emoji });
     if (source === "personal" && withId) body.with = withId;
     fetch(base + "/api/chat", {
       method: "PATCH",
@@ -12992,7 +13184,7 @@ function initChat() {
     e.stopPropagation();
     var id = idLink.dataset.appId;
     if (!id || !/^ID\d{6}$/.test(id)) return;
-    fetch(base + "/api/users?id=" + encodeURIComponent(id) + "&initData=" + encodeURIComponent(initData))
+    fetch(base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.userId) {
@@ -13008,7 +13200,7 @@ function initChat() {
   });
 
   function loadGeneral() {
-    var url = base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=general";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general";
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
@@ -13509,7 +13701,7 @@ function initChat() {
     generalMessages.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
       row.addEventListener("click", function () {
         var id = row.dataset.userId;
-        if (!id || !initData || !base) return;
+        if (!id || !pokerApiHasCredential() || !base) return;
         var modal = document.getElementById("respectVotersModal");
         if (!modal) return;
         modal.dataset.targetUserId = id;
@@ -13526,7 +13718,7 @@ function initChat() {
         fetch(base + "/api/chat", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, messageId: id }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ messageId: id })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) loadGeneral();
         });
@@ -13778,7 +13970,7 @@ function initChat() {
             hideMenu();
             return;
           }
-          var delBody = { initData: initData, messageId: msg.id };
+          var delBody = pokerApiAuthJsonBody({ messageId: msg.id });
           if (src === "personal" && chatWithUserId) delBody.with = chatWithUserId;
           fetch(base + "/api/chat", {
             method: "DELETE",
@@ -13844,9 +14036,9 @@ function initChat() {
     // Редактирование сообщения: отправляем PATCH, а не POST нового.
     if (chatEditMode && chatEditSource === "general" && chatEditMessageId) {
       if (!text || sendingGeneral) return;
-      if (!initData) {
+      if (!pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте в Telegram.");
-        else if (typeof alert === "function") alert("Откройте приложение в Telegram, чтобы отправлять сообщения в общий чат.");
+        else if (typeof alert === "function") alert("Войдите через Telegram, чтобы отправлять сообщения в общий чат.");
         return;
       }
       sendingGeneral = true;
@@ -13854,7 +14046,7 @@ function initChat() {
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "edit", messageId: chatEditMessageId, text: text }),
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: "edit", messageId: chatEditMessageId, text: text })),
       }).then(function (r) { return r.json(); }).then(function (d) {
         sendingGeneral = false;
         setGeneralSendBusy(false);
@@ -13878,15 +14070,15 @@ function initChat() {
       if (tg && tg.showAlert) tg.showAlert("Нет доступа к общему чату.");
       return;
     }
-    if (!initData) {
+    if (!pokerApiHasCredential()) {
       if (tg && tg.showAlert) tg.showAlert("Откройте в Telegram.");
-      else if (typeof alert === "function") alert("Откройте приложение в Telegram, чтобы отправлять сообщения в общий чат.");
+      else if (typeof alert === "function") alert("Войдите через Telegram, чтобы отправлять сообщения в общий чат.");
       return;
     }
     sendingGeneral = true;
     setGeneralSendBusy(true);
     try {
-      var body = { initData: initData, text: text };
+      var body = pokerApiAuthJsonBody({ text: text });
       if (generalImage) body.image = generalImage;
       if (generalVoice) body.voice = generalVoice;
       if (generalDocument) { body.document = generalDocument.dataUrl; body.documentName = generalDocument.fileName; }
@@ -14092,7 +14284,7 @@ function initChat() {
       if (lastViewedGeneral != null) lv.general = lastViewedGeneral;
       lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
     } catch (e) {}
-    var url = base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=contacts" + lastViewedParam;
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam;
     fetch(url).then(function (r) { return r.json(); }).then(function (data) {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
@@ -14198,8 +14390,8 @@ function initChat() {
 
 
   function loadAdminsOnline() {
-    if (!adminsView || !initData) return;
-    var url = base + "/api/chat?initData=" + encodeURIComponent(initData) + "&mode=adminOnline";
+    if (!adminsView || !pokerApiHasCredential()) return;
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=adminOnline";
     fetch(url).then(function (r) { return r.json(); }).then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.onlineAdminIds)) return;
       var onlineSet = new Set(data.onlineAdminIds);
@@ -14329,7 +14521,7 @@ function initChat() {
         fetch(base + "/api/chat", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, messageId: id, with: chatWithUserId }),
+          body: JSON.stringify(pokerApiAuthJsonBody({ messageId: id, with: chatWithUserId })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) loadMessages();
         });
@@ -14349,7 +14541,7 @@ function initChat() {
 
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
-    var url = base + "/api/chat?initData=" + encodeURIComponent(initData) + "&with=" + encodeURIComponent(chatWithUserId);
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(chatWithUserId);
     fetch(url).then(function (r) { return r.json(); }).then(function (data) {
       if (data && data.ok) {
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
@@ -14443,7 +14635,7 @@ function initChat() {
     // Редактирование сообщения: отправляем PATCH, а не новое сообщение.
     if (chatEditMode && chatEditSource === "personal" && chatEditMessageId) {
       if (!text || sendingPrivate) return;
-      if (!chatWithUserId || !initData) {
+      if (!chatWithUserId || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте чат и убедитесь, что всё загружено");
         return;
       }
@@ -14452,7 +14644,7 @@ function initChat() {
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "edit", messageId: chatEditMessageId, text: text, with: chatWithUserId }),
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: "edit", messageId: chatEditMessageId, text: text, with: chatWithUserId })),
       }).then(function (r) { return r.json(); }).then(function (d) {
         sendingPrivate = false;
         setPersonalSendBusy(false);
@@ -14470,12 +14662,13 @@ function initChat() {
       });
       return;
     }
-    if ((!text && !personalImage && !personalVoice && !personalDocument) || !chatWithUserId || !initData || sendingPrivate) {
+    if ((!text && !personalImage && !personalVoice && !personalDocument) || !chatWithUserId || !pokerApiHasCredential() || sendingPrivate) {
       if (!chatWithUserId && (text || personalImage || personalVoice || personalDocument)) {
         if (tg && tg.showAlert) tg.showAlert("Выберите собеседника"); else alert("Выберите собеседника");
       }
-      if (!initData && (text || personalImage || personalVoice || personalDocument)) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram"); else alert("Откройте приложение в Telegram");
+      if (!pokerApiHasCredential() && (text || personalImage || personalVoice || personalDocument)) {
+        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram");
+        else if (typeof alert === "function") alert("Войдите через Telegram (кнопка на главной вверху), чтобы писать в чат.");
       }
       return;
     }
@@ -14485,7 +14678,7 @@ function initChat() {
     }
     sendingPrivate = true;
     setPersonalSendBusy(true);
-    var body = { initData: initData, with: chatWithUserId, text: text };
+    var body = pokerApiAuthJsonBody({ with: chatWithUserId, text: text });
     if (personalImage) body.image = personalImage;
     if (personalVoice) body.voice = personalVoice;
     if (personalDocument) { body.document = personalDocument.dataUrl; body.documentName = personalDocument.fileName; }
@@ -14764,7 +14957,7 @@ function initChat() {
           doShow(raw);
         } else if (/^ID\d{6}$/.test(raw.toUpperCase())) {
           var id = raw.toUpperCase();
-          fetch(base + "/api/users?id=" + encodeURIComponent(id) + "&initData=" + encodeURIComponent(initData))
+          fetch(base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data && data.ok && data.userId) doShow(data.userId);
@@ -14794,14 +14987,14 @@ function initChat() {
         var url;
         if (byId) {
           var id = idPart.startsWith("ID") ? idPart : "ID" + idPart;
-          url = base + "/api/users?id=" + encodeURIComponent(id) + "&initData=" + encodeURIComponent(initData);
+          url = base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&");
         } else {
           var nick = raw.replace(/^@/, "").trim();
           if (!nick) {
             if (tg && tg.showAlert) tg.showAlert("Введите ID (ID123456) или ник (@username)");
             return;
           }
-          url = base + "/api/users?username=" + encodeURIComponent(nick) + "&initData=" + encodeURIComponent(initData);
+          url = base + "/api/users?username=" + encodeURIComponent(nick) + pokerApiAuthQuery("&");
         }
         findByIdBtn.disabled = true;
         fetch(url)
@@ -15670,7 +15863,7 @@ function initChat() {
       doShow(raw);
     } else if (raw === "tg_roman") {
       var romanUsername = "roman1787443";
-      fetch(base + "/api/users?username=" + encodeURIComponent(romanUsername) + "&initData=" + encodeURIComponent(initData))
+      fetch(base + "/api/users?username=" + encodeURIComponent(romanUsername) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data && data.ok && data.userId) doShow(data.userId);
@@ -15680,7 +15873,7 @@ function initChat() {
       return;
     } else if (/^ID\d{6}$/.test(raw.toUpperCase())) {
       var id = raw.toUpperCase();
-      fetch(base + "/api/users?id=" + encodeURIComponent(id) + "&initData=" + encodeURIComponent(initData))
+      fetch(base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data && data.ok && data.userId) doShow(data.userId);
@@ -15903,7 +16096,7 @@ function initChat() {
       if (raw.length < 1) { hideSuggest(); return; }
       var byId = /^\d{6}$/.test(raw) || /^ID\d{6}$/i.test(raw);
       if (byId) { hideSuggest(); return; }
-      var url = base + "/api/users?username=" + encodeURIComponent(raw) + "&suggest=1&initData=" + encodeURIComponent(initData);
+      var url = base + "/api/users?username=" + encodeURIComponent(raw) + "&suggest=1" + pokerApiAuthQuery("&");
       fetch(url).then(function (r) { return r.json(); }).then(function (data) {
         if (data && data.ok && Array.isArray(data.suggestions)) showSuggest(data.suggestions);
         else hideSuggest();
