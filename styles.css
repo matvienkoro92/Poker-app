@@ -647,6 +647,32 @@ html.app-view-home .home-welcome-outline::before {
 .auth-banner__login-mount:empty {
   display: none;
 }
+.auth-banner__local-login-msg {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted, var(--muted));
+  text-align: center;
+  max-width: 28em;
+  margin-left: auto;
+  margin-right: auto;
+}
+.auth-banner__local-login-link {
+  display: inline-block;
+  margin: 0 auto;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  color: var(--btn-on-accent, #fff);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  text-align: center;
+}
+.auth-banner__local-login-link:hover {
+  color: var(--btn-on-accent, #fff);
+  opacity: 0.95;
+}
 .auth-banner__link {
   display: inline-block;
   padding: 8px 16px;
@@ -13161,6 +13187,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-of-fame__subtab:last-child {
   border-right: none;
 }
+@media (max-width: 400px) {
+  .hall-of-fame__subtab {
+    font-size: 9px;
+    padding: 6px 2px;
+  }
+}
 .hall-of-fame__subtab:hover {
   color: var(--text);
   background: rgba(249, 115, 22, 0.08);
@@ -13265,6 +13297,517 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   color: var(--muted);
   max-width: 100%;
 }
+
+/* Фотоальбом — развороты книги (корешок + страницы) */
+.hall-photo-album--book {
+  position: relative;
+  padding: 18px 12px 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(165deg, rgba(30, 58, 42, 0.35) 0%, rgba(15, 23, 42, 0.72) 50%, rgba(15, 23, 42, 0.85) 100%),
+    radial-gradient(ellipse 100% 70% at 50% 0%, rgba(251, 146, 60, 0.1), transparent 55%);
+  border: 1px solid rgba(251, 146, 60, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.hall-photo-album--book::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-7deg, transparent, transparent 14px, rgba(0, 0, 0, 0.025) 14px, rgba(0, 0, 0, 0.025) 15px);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.hall-photo-album__ribbon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+.hall-photo-album__suit--spade,
+.hall-photo-album__suit--club {
+  color: #e2e8f0;
+}
+.hall-photo-album__suit--heart,
+.hall-photo-album__suit--diamond {
+  color: #fb7185;
+}
+.hall-photo-album__title {
+  position: relative;
+  z-index: 1;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.hall-photo-album__lead {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(226, 232, 240, 0.9);
+  text-align: center;
+  max-width: 32em;
+  margin-left: auto;
+  margin-right: auto;
+  font-style: italic;
+}
+[data-theme="light"] .hall-photo-album--book {
+  background: linear-gradient(170deg, rgba(214, 232, 212, 0.55) 0%, rgba(255, 252, 245, 0.98) 45%, rgba(254, 236, 214, 0.45) 100%),
+    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(251, 146, 60, 0.12), transparent 50%);
+  border-color: rgba(234, 88, 12, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 28px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] .hall-photo-album__suit--spade,
+[data-theme="light"] .hall-photo-album__suit--club {
+  color: #0f172a;
+}
+[data-theme="light"] .hall-photo-album__suit--heart,
+[data-theme="light"] .hall-photo-album__suit--diamond {
+  color: #dc2626;
+}
+[data-theme="light"] .hall-photo-album__lead {
+  color: #475569;
+}
+
+.hall-photo-album__book-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  max-width: 640px;
+  margin: 0 auto;
+  border-radius: 6px 14px 14px 6px;
+  overflow: hidden;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 4px 0 rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(90deg, #4a3428 0%, #3d2a1f 8%, #2c1f18 100%);
+  border: 1px solid rgba(0, 0, 0, 0.35);
+}
+[data-theme="light"] .hall-photo-album__book-body {
+  box-shadow: 0 14px 36px rgba(62, 39, 35, 0.25), 0 2px 0 rgba(255, 255, 255, 0.5) inset;
+  background: linear-gradient(90deg, #6d4c41 0%, #5d4037 12%, #4e342e 100%);
+  border-color: rgba(62, 39, 35, 0.4);
+}
+
+.hall-photo-album__spine {
+  flex: 0 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.25), transparent),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 3px);
+  border-right: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: inset -3px 0 8px rgba(0, 0, 0, 0.35);
+}
+.hall-photo-album__spine-hole {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #6b5344, #1a120e 70%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.hall-photo-album__spine-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(253, 230, 138, 0.75);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+.hall-photo-album__book-inner {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 12px 16px;
+  background: linear-gradient(180deg, #c9c4b8 0%, #b8b3a8 40%, #a8a39a 100%);
+  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.15);
+}
+[data-theme="dark"] .hall-photo-album__book-inner {
+  background: linear-gradient(180deg, #57534e 0%, #44403c 50%, #3d3935 100%);
+}
+
+.hall-photo-album__spreads {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hall-photo-album__spread {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-bottom: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.hall-photo-album__spread:last-child {
+  margin-bottom: 0;
+}
+
+.hall-photo-album__page {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding: 12px 10px 14px;
+  background: linear-gradient(145deg, #fdfcfa 0%, #f0ebe3 55%, #e8e2d8 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 2px 2px 8px rgba(255, 255, 255, 0.4);
+}
+[data-theme="dark"] .hall-photo-album__page {
+  background: linear-gradient(145deg, #44403c 0%, #3a3632 50%, #2f2b28 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+.hall-photo-album__page--left {
+  border-radius: 3px 0 0 3px;
+}
+.hall-photo-album__page--right {
+  border-radius: 0 3px 3px 0;
+}
+.hall-photo-album__page-num {
+  position: absolute;
+  top: 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(100, 90, 80, 0.35);
+}
+.hall-photo-album__page--left .hall-photo-album__page-num {
+  left: 10px;
+}
+.hall-photo-album__page--right .hall-photo-album__page-num {
+  right: 10px;
+}
+[data-theme="dark"] .hall-photo-album__page-num {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.hall-photo-album__gutter {
+  flex: 0 0 5px;
+  align-self: stretch;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.14),
+    rgba(255, 255, 255, 0.25) 45%,
+    rgba(255, 255, 255, 0.15) 55%,
+    rgba(0, 0, 0, 0.12)
+  );
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.12);
+}
+
+.hall-photo-album__snap {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 8px 6px 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  transition: opacity 0.2s ease;
+}
+.hall-photo-album__page:hover .hall-photo-album__snap,
+.hall-photo-album__page:focus-within .hall-photo-album__snap {
+  opacity: 1;
+}
+
+.hall-photo-album__btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #1c1917;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hall-photo-album__btn:hover,
+.hall-photo-album__btn:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(251, 146, 60, 0.45);
+}
+.hall-photo-album__btn:active .hall-photo-album__img {
+  transform: scale(0.99);
+}
+.hall-photo-album__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(200px, 42vh);
+  object-fit: cover;
+  object-position: center;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+@media (min-width: 480px) {
+  .hall-photo-album__img {
+    max-height: min(240px, 46vh);
+  }
+}
+.hall-photo-album__page:hover .hall-photo-album__img {
+  transform: scale(1.03);
+}
+
+.hall-photo-album__caption {
+  display: block;
+  margin-top: 8px;
+  padding: 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #3d3830;
+  text-align: center;
+  line-height: 1.35;
+}
+[data-theme="dark"] .hall-photo-album__caption {
+  color: rgba(250, 250, 249, 0.9);
+}
+.hall-photo-album__caption--long {
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.hall-photo-album__page--blank {
+  min-height: 80px;
+}
+
+@media (max-width: 520px) {
+  .hall-photo-album__book-body {
+    flex-direction: column;
+    border-radius: 10px;
+    max-width: 100%;
+  }
+  .hall-photo-album__spine {
+    flex: 0 0 auto;
+    flex-direction: row;
+    width: 100%;
+    padding: 8px 16px;
+    gap: 14px;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .hall-photo-album__spine-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    letter-spacing: 0.2em;
+    margin-top: 0;
+    margin-left: auto;
+  }
+  .hall-photo-album__spread {
+    flex-direction: column;
+  }
+  .hall-photo-album__gutter {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.12),
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(0, 0, 0, 0.1)
+    );
+  }
+  .hall-photo-album__spread .hall-photo-album__page--left {
+    border-radius: 3px 3px 0 0;
+  }
+  .hall-photo-album__spread .hall-photo-album__page--right {
+    border-radius: 0 0 3px 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hall-photo-album__img,
+  .hall-photo-album__btn {
+    transition: none;
+  }
+  .hall-photo-album__page:hover .hall-photo-album__img {
+    transform: none;
+  }
+}
+
+/* Доска позора — вкладка справа от «Фото» */
+.hall-shame-board__title {
+  position: relative;
+}
+.hall-shame-board__title::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(100, 116, 139, 0.4), rgba(71, 85, 105, 0.9), rgba(100, 116, 139, 0.4));
+}
+.hall-shame-board__lead {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted, var(--muted));
+  text-align: center;
+  max-width: 34em;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hall-shame-board__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hall-shame-board__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.75));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+.hall-shame-board__item--muted {
+  opacity: 0.92;
+  border-style: dashed;
+  border-color: rgba(100, 116, 139, 0.35);
+}
+.hall-shame-board__item--featured {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  border-color: rgba(148, 163, 184, 0.55);
+  background: linear-gradient(145deg, rgba(51, 65, 85, 0.65), rgba(15, 23, 42, 0.88));
+}
+@media (min-width: 480px) {
+  .hall-shame-board__item--featured {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+.hall-shame-board__featured-media {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+}
+@media (min-width: 480px) {
+  .hall-shame-board__featured-media {
+    align-self: flex-start;
+  }
+}
+.hall-shame-board__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #64748b, #334155);
+  border-radius: 999px;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.hall-shame-board__thumb-btn {
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  max-width: 200px;
+  margin: 0 auto;
+}
+.hall-shame-board__thumb-btn:hover,
+.hall-shame-board__thumb-btn:focus-visible {
+  transform: scale(1.02);
+  outline: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(251, 146, 60, 0.45);
+}
+.hall-shame-board__avatar {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  vertical-align: middle;
+}
+.hall-shame-board__tag {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.95);
+  background: rgba(120, 53, 15, 0.35);
+  border-radius: 8px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+[data-theme="light"] .hall-shame-board__item--featured {
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.95));
+  border-color: rgba(100, 116, 139, 0.4);
+}
+[data-theme="light"] .hall-shame-board__tag {
+  color: #92400e;
+  background: rgba(254, 243, 199, 0.9);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+.hall-shame-board__emoji {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hall-shame-board__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.hall-shame-board__nomination {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.hall-shame-board__desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted, var(--muted));
+}
+[data-theme="light"] .hall-shame-board__item {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
+  border-color: rgba(100, 116, 139, 0.35);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+[data-theme="light"] .hall-shame-board__item--muted {
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
 .hall-of-fame__section-title--cups-above-rating {
   margin: 8px auto 12px;
   max-width: 100%;

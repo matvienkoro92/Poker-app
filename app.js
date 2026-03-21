@@ -291,6 +291,24 @@ function getAssetUrl(relativePath) {
   if (closeBtn) closeBtn.addEventListener("click", close);
   document.body.addEventListener("click", function (e) {
     var t = e.target;
+    var hallAlb = t.closest && t.closest(".hall-photo-album__btn");
+    if (hallAlb) {
+      var himg = hallAlb.querySelector("img");
+      if (himg && himg.src) {
+        e.preventDefault();
+        open(himg.src);
+      }
+      return;
+    }
+    var shameTh = t.closest && t.closest(".hall-shame-board__thumb-btn");
+    if (shameTh) {
+      var sImg = shameTh.querySelector("img");
+      if (sImg && sImg.src) {
+        e.preventDefault();
+        open(sImg.src);
+      }
+      return;
+    }
     if (t.classList && t.classList.contains("chat-msg__image") && t.src) {
       e.preventDefault();
       open(t.src);
@@ -2510,6 +2528,21 @@ function telegramUserDisplayName(u) {
     return "";
   }
 
+  /** localhost / file / IP — виджет Login даёт «Bot domain invalid», домен должен совпадать с BotFather */
+  function isPwaAuthLocalHost() {
+    try {
+      var p = window.location.protocol || "";
+      var h = (window.location.hostname || "").toLowerCase();
+      if (p === "file:") return true;
+      if (!h) return true;
+      if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0") return true;
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return true;
+      return false;
+    } catch (eLoc) {
+      return true;
+    }
+  }
+
   /**
    * URL, на который Telegram вернёт пользователя после «Войти через Telegram» (query с hash/id/…).
    * Должен быть на том же хосте, что указан в @BotFather для Login Widget (в поле — только домен, без https://).
@@ -2616,32 +2649,130 @@ function telegramUserDisplayName(u) {
       dom = new URL(cb).hostname;
     } catch (eDom) {}
     if (bannerText) {
-      bannerText.textContent =
-        "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram, вас вернёт обратно сюда. Это не SMS: смотрите уведомления и чат «Telegram» / Service notifications.";
+      bannerText.textContent = isPwaAuthLocalHost()
+        ? "Локальный запуск: кнопка «Войти через Telegram» здесь не работает — в BotFather привязан боевой домен. Используйте ссылку ниже или откройте Mini App в Telegram."
+        : "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram, вас вернёт обратно сюда. Это не SMS: смотрите уведомления и чат «Telegram» / Service notifications.";
     }
     if (banner) banner.classList.remove("auth-banner--verifying");
     if (bannerRetry) bannerRetry.hidden = true;
-    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
-      bannerLink.href = telegramAppUrl;
-      bannerLink.textContent = "Запасной вариант: открыть в Telegram (Mini App)";
-      bannerLink.style.display = "inline-block";
-    } else if (bannerLink) {
-      bannerLink.style.display = "none";
-    }
+    if (bannerLink) bannerLink.style.display = "none";
     if (hintEl) {
-      hintEl.textContent =
-        "Если запрос в Telegram не приходит: в @BotFather → ваш бот → Bot Settings → Login (виджет входа) поле домена должно быть только hostname, например " +
-        (dom || "example.com") +
-        " — без https://, без пути и без слэша в конце. Колбэк виджета на этом сайте: " +
-        cb +
-        " (должен быть на том же домене). Виджет привязан к тому же боту, для которого задан домен.";
+      if (isPwaAuthLocalHost()) {
+        var elApp = document.getElementById("app");
+        var prodBase = elApp && elApp.getAttribute("data-api-base");
+        prodBase = prodBase ? String(prodBase).trim().replace(/\/$/, "") : "";
+        hintEl.textContent =
+          "Сообщение «Bot domain invalid» на localhost — нормально. Вход через виджет только на развёрнутом сайте (тот же домен, что в @BotFather)." +
+          (prodBase ? " Боевой URL: " + prodBase : "");
+      } else {
+        hintEl.textContent =
+          "Виджет работает в режиме callback: после «Войти» данные приходят на страницу без редиректа. Домен в @BotFather (/setdomain) — только hostname, например " +
+          (dom || "example.com") +
+          ", без https://. Если раньше был редирект на " +
+          cb +
+          " — он по-прежнему обрабатывается. Убран запрос «разрешить боту писать» (частая причина зависания).";
+      }
       hintEl.style.display = "block";
     }
   }
 
+  /** Отправка данных виджета на сервер (и редирект с ?hash=… в URL, и callback data-onauth). */
+  function deliverTelegramLoginWidgetPayload(payload, stripUrlParams) {
+    var base = getTelegramAuthApiBase();
+    if (!base) return;
+    setBannerVerifying();
+    showUnauthorized();
+    fetch(base + "/api/auth-telegram-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) {
+        return res
+          .json()
+          .catch(function () {
+            return {};
+          })
+          .then(function (data) {
+            return { res: res, data: data || {} };
+          });
+      })
+      .then(function (pack) {
+        var res = pack.res;
+        var data = pack.data || {};
+        if (res.ok && data.ok && data.user && data.pwaSession) {
+          var u = normalizeVerifiedUser(data.user, null);
+          pokerSavePwaTgSession(data.pwaSession, data.user);
+          window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+          updateHeaderGreeting();
+          showAuthorized(u);
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
+          } catch (e2) {}
+          if (stripUrlParams) {
+            try {
+              var uUrl = new URL(window.location.href);
+              ["id", "first_name", "last_name", "username", "photo_url", "auth_date", "hash"].forEach(function (k) {
+                uUrl.searchParams.delete(k);
+              });
+              window.history.replaceState({}, "", uUrl.pathname + uUrl.search + uUrl.hash);
+            } catch (eU) {}
+          }
+          return;
+        }
+        updateHeaderGreeting();
+        showUnauthorized();
+        setBannerFailure(data && data.error ? String(data.error) : "Не удалось подтвердить вход через Telegram.", false);
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      })
+      .catch(function () {
+        updateHeaderGreeting();
+        showUnauthorized();
+        setBannerFailure("Ошибка сети при входе через Telegram.", false);
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      });
+  }
+
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
-    if (!mount || mount.getAttribute("data-pwa-widget-mounted") === "1") return;
+    /* v2: callback (data-onauth) + без request_access — иначе часто «код не приходит» / лишний шаг с ботом */
+    var WIDGET_MOUNT_VER = "2";
+    var LOCAL_MOUNT_MARK = "local";
+    if (!mount) return;
+    if (isPwaAuthLocalHost()) {
+      if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) return;
+      mount.innerHTML = "";
+      var elApp2 = document.getElementById("app");
+      var prodUrl = elApp2 && elApp2.getAttribute("data-api-base");
+      prodUrl = prodUrl ? String(prodUrl).trim().replace(/\/$/, "") : "";
+      var msg = document.createElement("p");
+      msg.className = "auth-banner__local-login-msg";
+      msg.textContent =
+        "Виджет Telegram на localhost не показываем — будет «Bot domain invalid». Войдите на боевом сайте или через Mini App.";
+      mount.appendChild(msg);
+      if (prodUrl && /^https:\/\//i.test(prodUrl)) {
+        var a = document.createElement("a");
+        a.href = prodUrl + "/";
+        a.className = "auth-banner__local-login-link";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        try {
+          a.textContent = "Открыть " + new URL(prodUrl).hostname;
+        } catch (eA) {
+          a.textContent = "Открыть боевой сайт";
+        }
+        mount.appendChild(a);
+      }
+      mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
+      return;
+    }
+    if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) {
+      mount.removeAttribute("data-pwa-widget-mounted");
+      mount.innerHTML = "";
+    }
+    if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) return;
     var bot = "";
     try {
       var m = String(telegramAppUrl || "").match(/t\.me\/([^\/\?#]+)/i);
@@ -2649,8 +2780,12 @@ function telegramUserDisplayName(u) {
     } catch (e1) {}
     if (!bot) return;
     mount.innerHTML = "";
-    var authCallback = getTelegramWidgetAuthCallbackUrl();
-    if (!authCallback) return;
+    window.pokerOnTelegramLoginWidget = function (user) {
+      try {
+        if (!user || user.hash == null || String(user.hash) === "") return;
+        deliverTelegramLoginWidgetPayload(user, false);
+      } catch (eCb) {}
+    };
     var script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.async = true;
@@ -2658,10 +2793,9 @@ function telegramUserDisplayName(u) {
     script.setAttribute("data-size", "large");
     script.setAttribute("data-radius", "14");
     script.setAttribute("data-userpic", "true");
-    script.setAttribute("data-auth-url", authCallback);
-    script.setAttribute("data-request-access", "write");
+    script.setAttribute("data-onauth", "pokerOnTelegramLoginWidget(user)");
     mount.appendChild(script);
-    mount.setAttribute("data-pwa-widget-mounted", "1");
+    mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
   }
 
   function tryFinishTelegramLoginRedirect() {
@@ -2672,57 +2806,7 @@ function telegramUserDisplayName(u) {
       sp.forEach(function (v, k) {
         payload[k] = v;
       });
-      var base = getTelegramAuthApiBase();
-      if (!base) return false;
-      setBannerVerifying();
-      showUnauthorized();
-      fetch(base + "/api/auth-telegram-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then(function (res) {
-          return res
-            .json()
-            .catch(function () {
-              return {};
-            })
-            .then(function (data) {
-              return { res: res, data: data || {} };
-            });
-        })
-        .then(function (pack) {
-          var res = pack.res;
-          var data = pack.data || {};
-          if (res.ok && data.ok && data.user && data.pwaSession) {
-            var u = normalizeVerifiedUser(data.user, null);
-            pokerSavePwaTgSession(data.pwaSession, data.user);
-            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-            updateHeaderGreeting();
-            showAuthorized(u);
-            try {
-              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
-            } catch (e2) {}
-            var uUrl = new URL(window.location.href);
-            ["id", "first_name", "last_name", "username", "photo_url", "auth_date", "hash"].forEach(function (k) {
-              uUrl.searchParams.delete(k);
-            });
-            window.history.replaceState({}, "", uUrl.pathname + uUrl.search + uUrl.hash);
-            return;
-          }
-          updateHeaderGreeting();
-          showUnauthorized();
-          setBannerFailure(data && data.error ? String(data.error) : "Не удалось подтвердить вход через Telegram.", false);
-          resetBannerForPwaLogin();
-          mountTelegramLoginWidgetForPwa();
-        })
-        .catch(function () {
-          updateHeaderGreeting();
-          showUnauthorized();
-          setBannerFailure("Ошибка сети при входе через Telegram.", false);
-          resetBannerForPwaLogin();
-          mountTelegramLoginWidgetForPwa();
-        });
+      deliverTelegramLoginWidgetPayload(payload, true);
       return true;
     } catch (e3) {
       return false;

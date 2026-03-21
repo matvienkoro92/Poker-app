@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=107" />
+    <link rel="stylesheet" href="./styles.css?v=114" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -2133,6 +2133,7 @@
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="cups">Кубки</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="top2026">Топ2026</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="photos">Фото</button>
+                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="shame">Доска позора</button>
               </div>
             </div>
             <div class="hall-of-fame__panels">
@@ -2189,9 +2190,161 @@
                 </div>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
-                <section class="hall-of-fame__block" aria-labelledby="hallPhotosTitle">
-                  <h2 class="hall-of-fame__section-title" id="hallPhotosTitle">Фото</h2>
-                  <p class="hall-of-fame__placeholder">Скоро здесь появится фотогалерея клуба.</p>
+                <section class="hall-of-fame__block hall-photo-album hall-photo-album--book" aria-labelledby="hallPhotosTitle">
+                  <div class="hall-photo-album__ribbon" aria-hidden="true">
+                    <span class="hall-photo-album__suit hall-photo-album__suit--spade">♠</span>
+                    <span class="hall-photo-album__suit hall-photo-album__suit--heart">♥</span>
+                    <span class="hall-photo-album__suit hall-photo-album__suit--club">♣</span>
+                    <span class="hall-photo-album__suit hall-photo-album__suit--diamond">♦</span>
+                  </div>
+                  <h2 class="hall-of-fame__section-title hall-photo-album__title" id="hallPhotosTitle">Фотоальбом</h2>
+                  <p class="hall-photo-album__lead">Развороты клубного альбома «Два туза» — две страницы на разворот, как в настоящей книге.</p>
+                  <div class="hall-photo-album__book-body">
+                    <div class="hall-photo-album__spine" aria-hidden="true">
+                      <span class="hall-photo-album__spine-hole"></span>
+                      <span class="hall-photo-album__spine-hole"></span>
+                      <span class="hall-photo-album__spine-hole"></span>
+                      <span class="hall-photo-album__spine-hole"></span>
+                      <span class="hall-photo-album__spine-label">2 туза</span>
+                    </div>
+                    <div class="hall-photo-album__book-inner">
+                  <ul class="hall-photo-album__spreads" role="list">
+                    <li class="hall-photo-album__spread" role="listitem">
+                      <div class="hall-photo-album__page hall-photo-album__page--left">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">1</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-1.png"
+                              alt="Рома Venius в гостях у Кулера, покерный стол с фишками"
+                              loading="lazy"
+                              width="720"
+                              height="960"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера</span>
+                        </div>
+                      </div>
+                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
+                      <div class="hall-photo-album__page hall-photo-album__page--right">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">2</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-2.png"
+                              alt="Кулер и Вениус, в руках тройка и семёрка пик"
+                              loading="lazy"
+                              width="720"
+                              height="960"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption">Кулер и Вениус</span>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__spread" role="listitem">
+                      <div class="hall-photo-album__page hall-photo-album__page--left">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">3</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-3.png"
+                              alt="Вениус и Гика на набережной ночью, на фоне подсвеченный мост"
+                              loading="lazy"
+                              width="720"
+                              height="960"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption">Вениус и Гика</span>
+                        </div>
+                      </div>
+                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
+                      <div class="hall-photo-album__page hall-photo-album__page--right">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">4</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Роман, финальный стол ноября 2023">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-roman-nov2023.png"
+                              alt="Групповое фото участников у баннера турнира, финальный стол"
+                              loading="lazy"
+                              width="960"
+                              height="720"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Роман, ноябрь 2023&nbsp;г., финальный стол Ко за 1000&nbsp;₽ — 6е место и чистый выигрыш 100&nbsp;000&nbsp;₽</span>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__spread" role="listitem">
+                      <div class="hall-photo-album__page hall-photo-album__page--left">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">5</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: топ-реги в баре, октябрь 2025">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-bar-oct2025.png"
+                              alt="Селфи в баре: Никола, Оутсайдер, Виски, Рыбнадзор и Эмиль"
+                              loading="lazy"
+                              width="768"
+                              height="1024"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption hall-photo-album__caption--long">В октябре 2025&nbsp;г. наши топ-реги — три легенды: Эмиль, Рыбнадзор и Виски — вместе с Николой и Оутсайдером встретились в одном, так скажем, баре 😀 Один из них (Виски) занял 4‑е место в барных соревнованиях. На фото слева направо — Никола, Оутсайдер, Виски, Рыбнадзор, Эмиль.</span>
+                        </div>
+                      </div>
+                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
+                      <div class="hall-photo-album__page hall-photo-album__page--right hall-photo-album__page--blank">
+                        <span class="hall-photo-album__page-num" aria-hidden="true">6</span>
+                      </div>
+                    </li>
+                  </ul>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <div class="hall-of-fame__panel" id="hallFamePanelShame" data-hall-panel="shame" role="tabpanel" hidden>
+                <section class="hall-of-fame__block hall-shame-board" aria-labelledby="hallShameTitle">
+                  <h2 class="hall-of-fame__section-title hall-shame-board__title" id="hallShameTitle">Доска позора</h2>
+                  <p class="hall-shame-board__lead">
+                    Антизал славы: курьёзные фолды, тильты и вечера, о которых шепчутся за бортом. Всё в шутку — без злобы, только покерный юмор.
+                  </p>
+                  <ul class="hall-shame-board__list" role="list">
+                    <li class="hall-shame-board__item hall-shame-board__item--featured" role="listitem">
+                      <div class="hall-shame-board__featured-media">
+                        <span class="hall-shame-board__badge" aria-hidden="true">№1</span>
+                        <button
+                          type="button"
+                          class="hall-shame-board__thumb-btn"
+                          aria-label="Увеличить скриншот из чата"
+                        >
+                          <img
+                            class="hall-shame-board__avatar"
+                            src="./assets/hall-shame-dmitry-corgi.png"
+                            alt="Скриншот переписки: ッDmitryッ в костюме-корги"
+                            loading="lazy"
+                            width="200"
+                            height="200"
+                          />
+                        </button>
+                      </div>
+                      <div class="hall-shame-board__body">
+                        <span class="hall-shame-board__tag">Первый позорник клуба</span>
+                        <span class="hall-shame-board__nomination">Доктор Дмитрий Корги</span>
+                        <span class="hall-shame-board__desc">Качал с другого игрока якобы проспоренные <strong>1000&nbsp;₽</strong>, которые тот «не отдал». При этом сам занял у <strong>Кулера 2000&nbsp;₽</strong> и около <strong>двух месяцев</strong> кормил завтраками — в итоге <strong>загасился</strong>. История зафиксирована чатом; ирония оценена по достоинству.</span>
+                      </div>
+                    </li>
+                    <li class="hall-shame-board__item hall-shame-board__item--muted" role="listitem">
+                      <span class="hall-shame-board__emoji" aria-hidden="true">🃏</span>
+                      <div class="hall-shame-board__body">
+                        <span class="hall-shame-board__nomination">Следующий номинант</span>
+                        <span class="hall-shame-board__desc">Место свободно — надеемся, надолго.</span>
+                      </div>
+                    </li>
+                  </ul>
                 </section>
               </div>
             </div>
@@ -3582,7 +3735,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=150"></script>
+    <script src="./app.js?v=155"></script>
   </body>
 </html>
 
