@@ -12090,10 +12090,10 @@ function initChat() {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
         genHeader.style.top = "48px";
-        genHeader.style.left = "var(--card-padding-x)";
-        genHeader.style.right = "var(--card-padding-x)";
+        genHeader.style.left = "0";
+        genHeader.style.right = "0";
         genHeader.style.transform = "none";
-        genHeader.style.width = "auto";
+        genHeader.style.width = "100%";
         genHeader.style.maxWidth = "none";
       }
     } catch (err) {}
@@ -12128,10 +12128,10 @@ function initChat() {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
         genHeader.style.top = "48px";
-        genHeader.style.left = "var(--card-padding-x)";
-        genHeader.style.right = "var(--card-padding-x)";
+        genHeader.style.left = "0";
+        genHeader.style.right = "0";
         genHeader.style.transform = "none";
-        genHeader.style.width = "auto";
+        genHeader.style.width = "100%";
         genHeader.style.maxWidth = "none";
       }
     } catch (err) {}
