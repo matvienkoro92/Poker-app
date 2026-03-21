@@ -146,16 +146,28 @@ body::-webkit-scrollbar,
   box-shadow: 0 8px 24px rgba(249, 115, 22, 0.12);
 }
 [data-theme="light"] .bonus-game-back,
-[data-theme="light"] .download-back {
-  background: var(--block-bg-solid);
-  color: var(--text);
-  border-color: rgba(234, 88, 12, 0.65);
+[data-theme="light"] .download-back,
+[data-theme="light"] .gazette-modal__back,
+[data-theme="light"] .pdf-viewer__close,
+[data-theme="light"] .winter-rating-player-modal__back,
+[data-theme="light"] .poker-streak-screen__back,
+[data-theme="light"] .tracking-links-admin__back-btn,
+[data-theme="light"] .chat-back-btn {
+  background: #000;
+  color: var(--accent);
+  border-color: var(--accent);
 }
 [data-theme="light"] .bonus-game-back:hover,
-[data-theme="light"] .download-back:hover {
-  border-color: rgba(234, 88, 12, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
+[data-theme="light"] .download-back:hover,
+[data-theme="light"] .gazette-modal__back:hover,
+[data-theme="light"] .pdf-viewer__close:hover,
+[data-theme="light"] .winter-rating-player-modal__back:hover,
+[data-theme="light"] .poker-streak-screen__back:hover,
+[data-theme="light"] .tracking-links-admin__back-btn:hover,
+[data-theme="light"] .chat-back-btn:hover {
+  background: #141414;
+  color: #fb923c;
+  border-color: #fb923c;
 }
 [data-theme="light"] .app-store-btn {
   background: linear-gradient(145deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
@@ -1837,32 +1849,9 @@ body.chat-keyboard-open .app {
   padding-top: 20px;
   border-top: none;
 }
-/* Как кнопки «Назад» в чате: плашка с оранжевой обводкой */
+/* .gazette-modal__back — базовый вид в блоке «Единый стиль … как в общем чате» */
 .gazette-modal__back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  margin: 0 0 12px;
-  padding: 0 12px 0 10px;
-  min-height: 40px;
-  box-sizing: border-box;
-  background: var(--block-bg-solid);
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  font-family: inherit;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -webkit-tap-highlight-color: transparent;
-}
-.gazette-modal__back:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
+  margin-bottom: 12px;
 }
 .gazette-modal__header {
   text-align: center;
@@ -3521,35 +3510,7 @@ img.chat-contact__avatar {
   z-index: 2;
   flex-shrink: 0;
   margin: 8px 12px;
-  padding: 0 12px 0 10px;
-  min-height: 40px;
-  box-sizing: border-box;
   align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  background: var(--block-bg-solid);
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -webkit-tap-highlight-color: transparent;
-}
-.pdf-viewer__close:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
-}
-[data-theme="light"] .pdf-viewer__close {
-  border-color: rgba(234, 88, 12, 0.65);
-}
-[data-theme="light"] .pdf-viewer__close:hover {
-  border-color: rgba(234, 88, 12, 0.9);
 }
 .pdf-viewer__iframe {
   flex: 1;
@@ -3997,6 +3958,39 @@ img.chat-contact__avatar {
   align-items: flex-start;
   gap: 4px;
 }
+.chat-dialog-item__title-row {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+.chat-dialog-item__title-row .chat-dialog-item__label {
+  flex: 0 1 auto;
+}
+/* Админ: число необработанных заявок в главный чат */
+.chat-dialog-item__pending-review-badge {
+  display: none;
+  min-width: 20px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.chat-dialog-item__pending-review-badge.chat-dialog-item__pending-review-badge--visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .chat-dialog-item--club .chat-dialog-item__main-label {
   color: var(--accent, #a855f7);
   font-weight: 500;
@@ -4261,34 +4255,9 @@ img.chat-contact__avatar {
 .chat-conv-top .chat-back-btn {
   margin-bottom: 0;
   flex-shrink: 0;
-  /* Как кнопка «К чатам» в общем чате — чёрный фон, оранжевый текст как депозит/кассаут */
-  height: 40px;
-  min-height: 40px;
-  box-sizing: border-box;
-  padding: 0 12px 0 10px;
-  font-size: 14px;
-  background: #000;
-  border: 1px solid var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.chat-conv-top .chat-back-btn:hover {
-  border-color: #fb923c;
-  background: #141414;
-  color: #fb923c;
-}
-[data-theme="light"] .chat-conv-top .chat-back-btn {
-  background: #000;
-  color: var(--accent);
-  border-color: var(--accent);
-}
-[data-theme="light"] .chat-conv-top .chat-back-btn:hover {
-  background: #141414;
-  color: #fb923c;
-  border-color: #fb923c;
+  align-self: center;
+  min-height: var(--chat-general-header-strip-min-height, 48px);
+  height: auto;
 }
 .chat-conv-top .chat-conv-header {
   flex: 1 1 auto;
@@ -4451,25 +4420,50 @@ img.chat-contact__avatar {
   cursor: pointer;
 }
 .chat-msg__block:hover { background: rgba(239, 68, 68, 0.5); color: #fecaca; }
+/* Единый стиль «Назад» / «На главную» — как кнопка «← Чаты» в общем чате */
+.bonus-game-back,
+.download-back,
+.gazette-modal__back,
+.pdf-viewer__close,
+.winter-rating-player-modal__back,
+.poker-streak-screen__back,
+.tracking-links-admin__back-btn,
 .chat-back-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   align-self: flex-start;
-  margin-bottom: 11px;
-  padding: 6px 10px 6px 8px;
-  background: var(--block-bg-solid);
-  border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  color: var(--text-muted);
-  font-size: 13px;
+  margin: 0 0 11px;
+  padding: 0 12px 0 10px;
+  min-height: 48px;
+  box-sizing: border-box;
+  font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
+  line-height: 1.2;
   cursor: pointer;
+  text-align: center;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 20px;
+  background: #000;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
+.bonus-game-back:hover,
+.download-back:hover,
+.gazette-modal__back:hover,
+.pdf-viewer__close:hover,
+.winter-rating-player-modal__back:hover,
+.poker-streak-screen__back:hover,
+.tracking-links-admin__back-btn:hover,
 .chat-back-btn:hover {
-  background: var(--block-bg-solid);
-  color: var(--text);
+  border-color: #fb923c;
+  background: #141414;
+  color: #fb923c;
 }
 /* Общий чат: как зал славы — «Назад» отдельно, остальное одной полосой с разделителями */
 .chat-general-header {
@@ -4505,26 +4499,10 @@ img.chat-contact__avatar {
 }
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   align-self: stretch;
   min-height: var(--chat-general-header-strip-min-height);
   height: auto;
-  padding: 0 12px 0 10px;
-  font-size: 14px;
-  font-weight: 500;
-  background: #000;
-  border: 1px solid var(--accent);
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  box-sizing: border-box;
-  color: var(--accent);
-}
-.chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  border-color: #fb923c;
-  background: #141414;
-  color: #fb923c;
+  margin: 0 !important;
 }
 /* Одна обводка вокруг полосы, ячейки с вертикальными разделителями */
 .chat-general-header__segments {
@@ -4737,16 +4715,6 @@ img.chat-contact__avatar {
 }
 [data-theme="light"] .chat-conv-top-inner {
   background: rgba(255, 255, 255, 0.26);
-}
-[data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
-  background: #000;
-  color: var(--accent);
-  border-color: var(--accent);
-}
-[data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  background: #141414;
-  color: #fb923c;
-  border-color: #fb923c;
 }
 [data-theme="light"] .chat-general-header__segment {
   border-right-color: rgba(234, 88, 12, 0.4);
@@ -6645,29 +6613,11 @@ html.app-view-home .feature--rating-spring-promo:hover,
   top: 12px;
   left: 12px;
   z-index: 2;
-  min-width: 40px;
-  min-height: 40px;
-  padding: 0 10px;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  background: var(--block-bg-solid);
-  color: var(--text);
+  margin: 0;
+  min-width: 48px;
+  padding: 0 12px 0 10px;
   font-size: 18px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
   line-height: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  -webkit-tap-highlight-color: transparent;
-}
-.poker-streak-screen__back:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  background: var(--block-bg-solid);
-  color: var(--text);
 }
 .poker-streak-header {
   display: flex;
@@ -8279,32 +8229,6 @@ a.home-mini-icon-item {
   display: block;
 }
 
-.download-back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  margin: 0 0 14px;
-  padding: 0 12px 0 10px;
-  min-height: 40px;
-  box-sizing: border-box;
-  background: var(--block-bg-solid);
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -webkit-tap-highlight-color: transparent;
-}
-.download-back:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
-}
 .download-back:active {
   opacity: 0.92;
 }
@@ -9668,40 +9592,8 @@ a.home-mini-icon-item {
   background: rgba(212, 175, 55, 0.2);
 }
 .winter-rating-player-modal__back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 0 14px;
-  padding: 0 12px 0 10px;
-  min-height: 40px;
-  box-sizing: border-box;
-  background: var(--block-bg-solid);
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -webkit-tap-highlight-color: transparent;
-}
-.winter-rating-player-modal__back:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
-}
-[data-theme="light"] .winter-rating-player-modal__back {
-  border-color: rgba(234, 88, 12, 0.65);
-  color: var(--text);
-  background: var(--block-bg-solid);
-}
-[data-theme="light"] .winter-rating-player-modal__back:hover {
-  border-color: rgba(234, 88, 12, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 [data-theme="light"] .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
   color: #0f172a;
@@ -10039,16 +9931,6 @@ a.home-mini-icon-item {
 }
 .winter-rating-player-modal--gazette .winter-rating-player-modal__close:hover {
   background: rgba(139, 90, 43, 0.25);
-}
-.winter-rating-player-modal--gazette .winter-rating-player-modal__back {
-  color: var(--text);
-  background: var(--block-bg-solid);
-  border-color: rgba(249, 115, 22, 0.7);
-}
-.winter-rating-player-modal--gazette .winter-rating-player-modal__back:hover {
-  color: var(--text);
-  border-color: rgba(249, 115, 22, 0.9);
-  background: var(--block-bg-solid);
 }
 .winter-rating-player-modal--gazette .winter-rating-player-modal__title {
   color: #2c1810;
@@ -10534,7 +10416,7 @@ a.home-mini-icon-item {
 .chat-user-modal {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10060;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12072,8 +11954,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 .view--active[data-view="winter-rating"] .bonus-game-back {
   margin: 0 0 5px;
-  min-height: 38px;
-  font-size: 14px;
 }
 /* Рейтинг весны: убираем отступ между кнопкой «Назад» и листочками */
 .view--active[data-view="spring-rating"] .bonus-game-back {
@@ -12330,25 +12210,16 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* «Назад» как в чате — читаемость на тёмном оверлее лайтбокса */
+/* «Назад» — тот же чёрный/оранжевый стиль, что в общем чате */
 .winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
   left: max(12px, env(safe-area-inset-left, 0px));
   z-index: 20;
-  margin-bottom: 0;
-  background: rgba(30, 41, 59, 0.92);
-  border-color: rgba(148, 163, 184, 0.45);
-  color: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  margin: 0;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-.winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn:hover {
-  background: rgba(51, 65, 85, 0.95);
-  color: #fff;
-  border-color: rgba(186, 230, 253, 0.4);
 }
 
 .winter-rating-lightbox__img {
@@ -13182,36 +13053,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .poker-table__detail {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.9);
-}
-
-/* «Назад» / «На главную» — тот же стиль, что у кнопок в шапке чата (.chat-general-header .chat-back-btn) */
-.bonus-game-back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  margin: 0 0 11px;
-  padding: 0 12px 0 10px;
-  min-height: 40px;
-  box-sizing: border-box;
-  background: var(--block-bg-solid);
-  border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 20px;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.bonus-game-back:hover {
-  border-color: rgba(249, 115, 22, 0.9);
-  color: var(--text);
-  background: var(--block-bg-solid);
 }
 
 /* Зал славы — экран */
@@ -14267,18 +14108,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   white-space: nowrap;
 }
 .tracking-links-admin__back-btn {
-  display: block;
   margin: 0 0 12px;
-  padding: 6px 0;
-  border: none;
-  background: none;
-  color: var(--accent, #f97316);
-  font-size: 14px;
-  cursor: pointer;
-  text-align: left;
-}
-.tracking-links-admin__back-btn:hover {
-  text-decoration: underline;
+  align-self: flex-start;
 }
 .share-stats-admin-modal__table-wrap {
   overflow-x: auto;
@@ -16786,6 +16617,44 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   font-size: 14px;
   color: var(--text);
   word-break: break-all;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+}
+.chat-club-access-modal__profile-btn {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  word-break: break-all;
+}
+.chat-club-access-modal__profile-btn:active {
+  opacity: 0.85;
+}
+.chat-club-access-modal__badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--accent);
+  vertical-align: middle;
+}
+[data-theme="light"] .chat-club-access-modal__badge {
+  background: rgba(234, 88, 12, 0.18);
 }
 .chat-club-access-modal__actions {
   display: flex;

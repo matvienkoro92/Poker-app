@@ -11655,6 +11655,8 @@ var chatActiveTab = "dialogs";
 var chatIsAdmin = false;
 /** Доступ к главному чату: open | member | pending | need_apply (с сервера) */
 var clubChatAccess = "open";
+/** Для админа: сколько заявок в очереди (бейдж у «Главный чат») */
+window.chatClubPendingReviewCount = 0;
 var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
@@ -12250,8 +12252,12 @@ function initChat() {
     var modal = document.getElementById("chatClubAccessModal");
     var pendingEl = document.getElementById("chatClubAdminPendingList");
     var membersEl = document.getElementById("chatClubAdminMembersList");
+    var pendingSub = document.getElementById("chatClubAdminPendingSubtitle");
+    var membersSub = document.getElementById("chatClubAdminMembersSubtitle");
     var hintEl = document.getElementById("chatClubAdminModalHint");
     if (!modal || !initData) return;
+    if (pendingSub) pendingSub.textContent = "Заявки";
+    if (membersSub) membersSub.textContent = "В чате";
     if (pendingEl) pendingEl.innerHTML = "<p class=\"chat-empty\">Загрузка…</p>";
     if (membersEl) membersEl.innerHTML = "";
     if (hintEl) hintEl.textContent = "";
@@ -12269,6 +12275,8 @@ function initChat() {
         function rowHtml(u, type) {
           var id = escapeHtml(u.userId || "");
           var nm = escapeHtml(u.name || u.userId || "");
+          var unameAttr = escapeHtml(String(u.name || u.userId || "").trim());
+          var adminBadge = u.isAdmin ? '<span class="chat-club-access-modal__badge">админ</span>' : "";
           var btns = "";
           if (type === "pending") {
             btns =
@@ -12278,33 +12286,51 @@ function initChat() {
               '<button type="button" class="chat-club-access-modal__btn chat-club-access-modal__btn--danger" data-club-act="reject" data-club-uid="' +
               id +
               '">Отклонить</button>';
-          } else {
+          } else if (type === "inChat" && !u.isAdmin) {
             btns =
               '<button type="button" class="chat-club-access-modal__btn chat-club-access-modal__btn--danger" data-club-act="revoke" data-club-uid="' +
               id +
               '">Убрать из чата</button>';
           }
+          var nameBlock =
+            type === "inChat" && id
+              ? '<button type="button" class="chat-club-access-modal__profile-btn" data-club-profile="1" data-club-uid="' +
+                id +
+                '" data-club-uname="' +
+                unameAttr +
+                '" title="Профиль">' +
+                nm +
+                "</button>"
+              : nm;
           return (
             '<div class="chat-club-access-modal__row"><span class="chat-club-access-modal__name">' +
-            nm +
+            nameBlock +
+            adminBadge +
             '</span><span class="chat-club-access-modal__actions">' +
             btns +
             "</span></div>"
           );
         }
         var pend = Array.isArray(d.pending) ? d.pending : [];
-        var mem = Array.isArray(d.members) ? d.members : [];
+        var inChat = Array.isArray(d.inChat) ? d.inChat : [];
+        var cnt = typeof d.inChatCount === "number" ? d.inChatCount : inChat.length;
+        if (pendingSub) pendingSub.textContent = "Заявки (" + pend.length + ")";
+        if (membersSub) membersSub.textContent = "В чате (" + cnt + ")";
         if (pendingEl) {
           pendingEl.innerHTML = pend.length ? pend.map(function (u) { return rowHtml(u, "pending"); }).join("") : '<p class="chat-empty">Нет заявок</p>';
         }
         if (membersEl) {
-          membersEl.innerHTML = mem.length ? mem.map(function (u) { return rowHtml(u, "member"); }).join("") : '<p class="chat-empty">Пока никого</p>';
+          membersEl.innerHTML = inChat.length ? inChat.map(function (u) { return rowHtml(u, "inChat"); }).join("") : '<p class="chat-empty">Пока никого</p>';
         }
         if (hintEl) {
           hintEl.textContent = d.gateEnabled
-            ? "Долгое нажатие на «Главный чат» в списке открывает это окно."
+            ? "Долгое нажатие на «Главный чат» в списке открывает это окно. В счёт «В чате» входят админы и игроки с одобренным доступом."
             : "Режим заявок выключен на сервере (CLUB_CHAT_REQUIRE_APPLICATION=0).";
         }
+        if (typeof d.pendingCount === "number") {
+          window.chatClubPendingReviewCount = Math.max(0, d.pendingCount);
+        }
+        updateClubChatPendingBadge();
       })
       .catch(function () {
         if (hintEl) hintEl.textContent = POKER_NET_ERR;
@@ -12335,6 +12361,17 @@ function initChat() {
     if (!modal || modal.getAttribute("data-delegation-bound") === "1") return;
     modal.setAttribute("data-delegation-bound", "1");
     modal.addEventListener("click", function (e) {
+      var profBtn = e.target && e.target.closest ? e.target.closest("[data-club-profile]") : null;
+      if (profBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        var puid = profBtn.getAttribute("data-club-uid");
+        var puname = profBtn.getAttribute("data-club-uname") || "";
+        if (puid && typeof window.openChatUserModalById === "function") {
+          window.openChatUserModalById(puid, puname);
+        }
+        return;
+      }
       if (e.target && e.target.getAttribute && e.target.getAttribute("data-chat-club-modal-close")) {
         closeChatClubAccessModal();
         return;
@@ -12723,6 +12760,11 @@ function initChat() {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
+        if (data.clubChatPendingReviewCount != null) {
+          window.chatClubPendingReviewCount = Math.max(0, parseInt(data.clubChatPendingReviewCount, 10) || 0);
+        } else if (!data.isAdmin) {
+          window.chatClubPendingReviewCount = 0;
+        }
         var access = data.clubChatAccess != null ? data.clubChatAccess : "open";
         var noGeneralAccess = !chatIsAdmin && (access === "need_apply" || access === "pending");
         var messages = data.messages || [];
@@ -13016,6 +13058,53 @@ function initChat() {
     var suitSym = n <= 13 ? "\u2663" : n <= 26 ? "\u2666" : n <= 39 ? "\u2665" : "\u2660";
     return cardChar + suitSym;
   }
+  /** Удерживаем низ ленты: после lazy-картинок / перерасчёта вёрстки scrollTop иначе «отстаёт» и лента прыгает вверх. */
+  function pinChatMessagesToBottom(el, aggressive) {
+    if (!el) return;
+    function snap() {
+      try {
+        el.scrollTop = el.scrollHeight;
+      } catch (eSnap) {}
+    }
+    snap();
+    requestAnimationFrame(function () {
+      snap();
+      requestAnimationFrame(snap);
+    });
+    var imgs = el.querySelectorAll("img.chat-msg__image");
+    for (var ii = 0; ii < imgs.length; ii++) {
+      (function (im) {
+        if (im.complete && im.naturalHeight) return;
+        function onImg() {
+          im.removeEventListener("load", onImg);
+          im.removeEventListener("error", onImg);
+          snap();
+          requestAnimationFrame(function () {
+            snap();
+            requestAnimationFrame(snap);
+          });
+        }
+        im.addEventListener("load", onImg);
+        im.addEventListener("error", onImg);
+      })(imgs[ii]);
+    }
+    if (aggressive) {
+      setTimeout(snap, 60);
+      setTimeout(snap, 200);
+      setTimeout(snap, 500);
+      if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
+        var vvPin = function () {
+          snap();
+        };
+        window.visualViewport.addEventListener("resize", vvPin);
+        setTimeout(function () {
+          try {
+            window.visualViewport.removeEventListener("resize", vvPin);
+          } catch (eVv) {}
+        }, 1200);
+      }
+    }
+  }
   function renderGeneralMessages(messages) {
     if (!messages || messages.length === 0) {
       generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
@@ -13041,7 +13130,7 @@ function initChat() {
       }
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = linkUrls(linkAppIds(linkTgUsernames((m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;"))));
-      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="lazy" />' : "";
+      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
       var cornerDelBtn = "";
@@ -13086,15 +13175,16 @@ function initChat() {
       var bodyClass = "chat-msg__body" + (text && text.trim() ? " chat-msg__body--has-text" : "");
       return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + textBlock + '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + '</div>' + reactionsRow + '</div></div></div>';
     }).join("");
+    var openingForceBottomG = scrollGeneralToBottomOnNextRender;
     var prevScrollTop = generalMessages.scrollTop;
     var prevScrollHeight = generalMessages.scrollHeight;
     var wasNearBottom = prevScrollHeight - prevScrollTop - generalMessages.clientHeight < 80;
     generalMessages.innerHTML = html;
     function restoreScroll(clearScrollFlag) {
       var maxScroll = generalMessages.scrollHeight - generalMessages.clientHeight;
-      if (scrollGeneralToBottomOnNextRender || wasNearBottom || maxScroll <= 0) {
+      if (openingForceBottomG || wasNearBottom || maxScroll <= 0) {
         generalMessages.scrollTop = generalMessages.scrollHeight;
-        if (clearScrollFlag && scrollGeneralToBottomOnNextRender) scrollGeneralToBottomOnNextRender = false;
+        if (clearScrollFlag && openingForceBottomG) scrollGeneralToBottomOnNextRender = false;
       } else {
         generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
       }
@@ -13103,6 +13193,9 @@ function initChat() {
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         restoreScroll(true);
+        if (openingForceBottomG || wasNearBottom) {
+          pinChatMessagesToBottom(generalMessages, !!openingForceBottomG);
+        }
       });
     });
     generalMessages.querySelectorAll(".chat-msg__name-btn").forEach(function (btn) {
@@ -13669,6 +13762,24 @@ function initChat() {
     loadMessages();
   }
 
+  function updateClubChatPendingBadge() {
+    var badge = document.getElementById("chatDialogClubPendingBadge");
+    if (!badge) return;
+    var n = window.chatClubPendingReviewCount || 0;
+    if (!chatIsAdmin || n <= 0) {
+      badge.textContent = "";
+      badge.classList.remove("chat-dialog-item__pending-review-badge--visible");
+      badge.setAttribute("aria-hidden", "true");
+      badge.setAttribute("aria-label", "");
+      return;
+    }
+    var txt = n > 99 ? "99+" : String(n);
+    badge.textContent = txt;
+    badge.classList.add("chat-dialog-item__pending-review-badge--visible");
+    badge.setAttribute("aria-hidden", "false");
+    badge.setAttribute("aria-label", "Заявок на рассмотрение: " + txt);
+  }
+
   function updateDialogUnreadBadges() {
     var clubEl = document.getElementById("chatDialogClubUnread");
     if (clubEl) {
@@ -13689,6 +13800,7 @@ function initChat() {
       el.setAttribute("aria-hidden", n > 0 ? "false" : "true");
       el.setAttribute("aria-label", n > 0 ? "Непрочитанных: " + txt : "");
     });
+    updateClubChatPendingBadge();
   }
 
   function updateClubChatPreview(messages) {
@@ -13730,6 +13842,11 @@ function initChat() {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess) clubChatAccess = data.clubChatAccess;
+        if (data.clubChatPendingReviewCount != null) {
+          window.chatClubPendingReviewCount = Math.max(0, parseInt(data.clubChatPendingReviewCount, 10) || 0);
+        } else if (!data.isAdmin) {
+          window.chatClubPendingReviewCount = 0;
+        }
         if (window.__openClubChatAfterNextContacts) {
           window.__openClubChatAfterNextContacts = false;
           setTimeout(function () {
@@ -13888,7 +14005,7 @@ function initChat() {
       }
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = linkUrls(linkAppIds(linkTgUsernames((m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;"))));
-      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="lazy" />' : "";
+      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
       var cornerDelBtnP = "";
@@ -13926,15 +14043,16 @@ function initChat() {
       var ticks = personalReceiptHtml(m, isOwn);
       return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + textBlock + '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticks + '</div>' + reactionsRowP + '</div></div></div>';
     }).join("");
+    var openingForceBottomP = scrollPersonalToBottomOnNextRender;
     var prevScrollTopP = messagesEl.scrollTop;
     var prevScrollHeightP = messagesEl.scrollHeight;
     var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
     messagesEl.innerHTML = html;
     function restoreScrollP(clearScrollFlag) {
       var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
-      if (scrollPersonalToBottomOnNextRender || wasNearBottomP || maxScrollP <= 0) {
+      if (openingForceBottomP || wasNearBottomP || maxScrollP <= 0) {
         messagesEl.scrollTop = messagesEl.scrollHeight;
-        if (clearScrollFlag && scrollPersonalToBottomOnNextRender) scrollPersonalToBottomOnNextRender = false;
+        if (clearScrollFlag && openingForceBottomP) scrollPersonalToBottomOnNextRender = false;
       } else {
         messagesEl.scrollTop = Math.min(prevScrollTopP, Math.max(0, maxScrollP));
       }
@@ -13943,6 +14061,9 @@ function initChat() {
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         restoreScrollP(true);
+        if (openingForceBottomP || wasNearBottomP) {
+          pinChatMessagesToBottom(messagesEl, !!openingForceBottomP);
+        }
       });
     });
     messagesEl.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
