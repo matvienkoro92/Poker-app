@@ -15178,6 +15178,61 @@ function initChat() {
       findByIdInputDialogs.value = "";
       hideSuggest();
     }
+    /** Как у .chat-dialog-item: если палец сдвинулся — скролл, не открываем диалог по pointerdown. */
+    var CHAT_SUGGEST_TAP_MOVE_THRESHOLD = 18;
+    function attachSuggestItemButton(btn) {
+      if (!btn || btn._chatSuggestAttached) return;
+      btn._chatSuggestAttached = true;
+      function detachMoveListeners() {
+        document.removeEventListener("pointermove", onDocMove, true);
+        document.removeEventListener("pointerup", onDocUp, true);
+        document.removeEventListener("pointercancel", onDocUp, true);
+      }
+      function onDocMove(e) {
+        if (!btn._chatSuggestTapTracking || e.pointerId !== btn._chatSuggestPtrId) return;
+        if (
+          Math.abs(e.clientX - btn._chatSuggestStartX) > CHAT_SUGGEST_TAP_MOVE_THRESHOLD ||
+          Math.abs(e.clientY - btn._chatSuggestStartY) > CHAT_SUGGEST_TAP_MOVE_THRESHOLD
+        ) {
+          btn._chatSuggestTapWasScroll = true;
+        }
+      }
+      function onDocUp(e) {
+        if (e.pointerId !== btn._chatSuggestPtrId) return;
+        btn._chatSuggestTapTracking = false;
+        detachMoveListeners();
+      }
+      btn.addEventListener(
+        "pointerdown",
+        function (e) {
+          if (e.button != null && e.button !== 0) return;
+          btn._chatSuggestTapWasScroll = false;
+          btn._chatSuggestTapTracking = true;
+          btn._chatSuggestPtrId = e.pointerId;
+          btn._chatSuggestStartX = e.clientX;
+          btn._chatSuggestStartY = e.clientY;
+          document.addEventListener("pointermove", onDocMove, true);
+          document.addEventListener("pointerup", onDocUp, true);
+          document.addEventListener("pointercancel", onDocUp, true);
+        },
+        { passive: true }
+      );
+      btn.addEventListener(
+        "click",
+        function (e) {
+          if (btn._chatSuggestTapWasScroll) {
+            e.preventDefault();
+            e.stopPropagation();
+            btn._chatSuggestTapWasScroll = false;
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          openFromSuggestItem(btn);
+        },
+        { capture: true }
+      );
+    }
     function showSuggest(items) {
       lastSuggestions = items || [];
       if (!suggestListEl || !suggestEl) return;
@@ -15189,6 +15244,7 @@ function initChat() {
         var name = (s.userName || s.userId || "").replace(/^@/, "");
         return '<button type="button" class="chat-find-suggest__item" data-user-id="' + escapeHtml(s.userId) + '" data-user-name="' + escapeHtml(s.userName || s.userId) + '">' + escapeHtml(s.userName || s.userId) + '</button>';
       }).join("");
+      suggestListEl.querySelectorAll(".chat-find-suggest__item").forEach(attachSuggestItemButton);
       suggestEl.classList.remove("chat-find-suggest--hidden");
       suggestEl.setAttribute("aria-hidden", "false");
       if (findByIdInputDialogs) findByIdInputDialogs.setAttribute("aria-expanded", "true");
@@ -15226,32 +15282,15 @@ function initChat() {
         hideSuggest();
       }, 380);
     });
-    if (suggestListEl) {
-      suggestListEl.addEventListener("pointerdown", function (e) {
-        var btn = e.target && e.target.closest && e.target.closest(".chat-find-suggest__item");
-        if (btn) {
-          e.preventDefault();
-          e.stopPropagation();
-          openFromSuggestItem(btn);
-        }
-      }, { passive: false, capture: true });
-      suggestListEl.addEventListener("click", function (e) {
-        var btn = e.target && e.target.closest && e.target.closest(".chat-find-suggest__item");
-        if (btn) {
-          e.preventDefault();
-          e.stopPropagation();
-          openFromSuggestItem(btn);
-        }
-      }, { capture: true });
-    }
     if (suggestEl) {
       suggestEl.addEventListener("mousedown", function (e) {
         if (e.target && e.target.closest && e.target.closest(".chat-find-suggest__item")) return;
         e.preventDefault();
       });
+      /* Только мышь: на таче не preventDefault — иначе не скроллится выпадающий список */
       suggestEl.addEventListener("pointerdown", function (e) {
         if (e.target && e.target.closest && e.target.closest(".chat-find-suggest__item")) return;
-        e.preventDefault();
+        if (e.pointerType === "mouse") e.preventDefault();
       }, { passive: false });
     }
 
