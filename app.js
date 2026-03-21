@@ -3011,7 +3011,7 @@ function setView(viewName) {
     };
     rafHall(function () {
       rafHall(function () {
-        if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("top2026");
+        if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("legends");
       });
     });
   }
@@ -12354,9 +12354,9 @@ function initChat() {
         closeTemplatesModal();
         try {
           if (targetInput && targetInput.id === "chatGeneralInput") {
-            sendGeneral();
+            sendGeneral(t.text);
           } else if (targetInput && targetInput.id === "chatInput") {
-            sendMessage();
+            sendMessage(t.text);
           } else {
             // fallback: если не смогли определить чат, просто оставим текст в поле
             if (targetInput) targetInput.focus();
@@ -13243,8 +13243,11 @@ function initChat() {
     generalMessages.appendChild(wrap.firstElementChild);
     generalMessages.scrollTop = generalMessages.scrollHeight;
   }
-  function sendGeneral() {
+  function sendGeneral(overrideText) {
     var text = (generalInput && generalInput.value || "").trim();
+    // Сообщение из chat-шаблона: подставляем текст напрямую,
+    // чтобы не зависеть от того, успело ли обновиться нужное поле.
+    if (typeof overrideText === "string") text = overrideText.trim();
     // Редактирование сообщения: отправляем PATCH, а не POST нового.
     if (chatEditMode && chatEditSource === "general" && chatEditMessageId) {
       if (!text || sendingGeneral) return;
@@ -13777,8 +13780,10 @@ function initChat() {
       return false;
     }
   }
-  function sendMessage() {
+  function sendMessage(overrideText) {
     var text = (inputEl && inputEl.value || "").trim();
+    // Сообщение из chat-шаблона: подставляем текст напрямую.
+    if (typeof overrideText === "string") text = overrideText.trim();
     // Редактирование сообщения: отправляем PATCH, а не новое сообщение.
     if (chatEditMode && chatEditSource === "personal" && chatEditMessageId) {
       if (!text || sendingPrivate) return;

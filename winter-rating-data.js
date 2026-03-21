@@ -2062,6 +2062,14 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "IMG_7873-4c8637bb-6a78-4e45-8c9d-5f5c282487fc.png",
     "IMG_7876-202ff629-c83b-4c6a-aeda-04478ab7ae54.png",
     "IMG_7872-bee2000c-88b5-4a48-931f-df60cb7d1bea.png"
+  ],
+  "20.03.2026": [
+    "rating-20-03-2026-league1-1-sbounty.png",
+    "rating-20-03-2026-league1-2-dvplo5.png",
+    "rating-20-03-2026-league1-3-dvbounty150k.png",
+    "rating-20-03-2026-league1-4-hotpko.png",
+    "rating-20-03-2026-league1-5-rebuy.png",
+    "rating-20-03-2026-league1-6-friday-progressive.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2103,9 +2111,13 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "19.03.2026": [
     "IMG_7875-b5d82878-69b9-40b4-8b65-afc03915b672.png"
+  ],
+  "20.03.2026": [
+    "rating-20-03-2026-league2-1-magic-bounty-60k.png",
+    "rating-20-03-2026-league2-2-mko-7max-20h.png"
   ]
 };
-var SPRING_RATING_UPDATED = "19.03.2026";
+var SPRING_RATING_UPDATED = "20.03.2026";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
@@ -2676,6 +2688,61 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Ферапонт", place: 5, reward: 7212.5 },
       { nick: "МОРПЕН", place: 6, reward: 2053.12 },
       { nick: "WiNifly", place: 10, reward: 0 }
+    ] }
+  ],
+  "20.03.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 150k", buyin: 20000, league: 1, players: [
+      { nick: "Proxor", place: 8, points: 50, reward: 30.06 },
+      { nick: "Em13!!", place: 20, points: 0, reward: 0 },
+      { nick: "Olegggaaa", place: 0, points: 0, reward: 0 },
+      { nick: "Бабник", place: 0, points: 0, reward: 0 }
+    ] },
+    { time: "11:00", name: "Magic Bounty 60k", buyin: 10000, league: 2, players: [
+      { nick: "Рыбнадзор", place: 3, points: 90, reward: 39.51 },
+      { nick: "Malek3084", place: 13, points: 0, reward: 6.74 },
+      { nick: "К–700", place: 34, points: 0, reward: 0 },
+      { nick: "augustrdgr", place: 57, points: 0, reward: 0 },
+      { nick: "бугимен", place: 60, points: 0, reward: 0 }
+    ] },
+    { time: "12:00", name: "DV PLO5 30k", buyin: 20000, league: 1, players: [
+      { nick: "kriaks", place: 3, points: 90, reward: 34.76 },
+      { nick: "Sarmat1305", place: 0, points: 0, reward: 0 },
+      { nick: "AndrushaMorf", place: 0, points: 0, reward: 0 },
+      { nick: "хер вам)))))", place: 0, points: 0, reward: 0 }
+    ] },
+    { time: "13:00", name: "DV Bounty 150k", buyin: 10000, league: 1, players: [
+      { nick: "AndrushaMorf", place: 4, points: 70, reward: 82.86 },
+      { nick: "nikola233", place: 21, points: 0, reward: 0 },
+      { nick: "Malek3084", place: 0, points: 0, reward: 0 },
+      { nick: "pryanik2la", place: 0, points: 0, reward: 0 },
+      { nick: "бугимен", place: 0, points: 0, reward: 0 }
+    ] },
+    { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
+      { nick: "nikola233", place: 2, points: 110, reward: 50.65 },
+      { nick: "pryanik2la", place: 10, points: 0, reward: 0 },
+      { nick: "kriaks", place: 15, points: 0, reward: 0 },
+      { nick: "Em13!!", place: 0, points: 0, reward: 0 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 20800, league: 1, players: [
+      { nick: "Monfokon", place: 1, points: 135, reward: 23800 },
+      { nick: "MilkyWay77", place: 9, points: 0, reward: 0 },
+      { nick: "WiNifly", place: 11, points: 0, reward: 0 },
+      { nick: "Waaar", place: 12, points: 0, reward: 0 },
+      { nick: "Банк_Псб", place: 14, points: 0, reward: 0 }
+    ] },
+    { time: "18:00", name: "Пятница Прогрессив", buyin: 77000, league: 1, players: [
+      { nick: "kriak", place: 2, points: 110, reward: 14624.84 },
+      { nick: "Waaar", place: 3, points: 90, reward: 7721.25 },
+      { nick: "yxo174", place: 4, points: 70, reward: 6847.18 },
+      { nick: "FrankL", place: 5, points: 60, reward: 4833.13 },
+      { nick: "Poker_poher", place: 8, points: 50, reward: 6934.05 }
+    ] },
+    { time: "20:00", name: "MKO 7MAX MTT-NLH", buyin: 13200, league: 2, players: [
+      { nick: "Akich10", place: 2, points: 110, reward: 6710 },
+      { nick: "Tanechka", place: 4, points: 70, reward: 1290 },
+      { nick: "XORTYRETSKOGO", place: 7, points: 0, reward: 0 },
+      { nick: "ZVIGENI", place: 8, points: 0, reward: 0 },
+      { nick: "tatarin_1", place: 9, points: 0, reward: 0 }
     ] }
   ]
 };
