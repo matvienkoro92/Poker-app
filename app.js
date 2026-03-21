@@ -2494,7 +2494,8 @@ function telegramUserDisplayName(u) {
     if (hintEl) hintEl.style.display = "none";
   } else if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
     bannerLink.href = telegramAppUrl;
-    bannerLink.style.display = "";
+    /* Не показываем «Открыть в Telegram»: во встроенном браузере TG часто есть WebApp, но без initData — нужен Login Widget */
+    bannerLink.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
   } else {
     if (bannerLink) bannerLink.style.display = "none";
@@ -2580,11 +2581,7 @@ function telegramUserDisplayName(u) {
       banner.classList.remove("auth-banner--hidden");
     }
     if (bannerRetry) bannerRetry.hidden = !showRetry;
-    if (bannerLink && tg && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
-      bannerLink.style.display = "";
-    } else if (bannerLink) {
-      bannerLink.style.display = "none";
-    }
+    if (bannerLink) bannerLink.style.display = "none";
   }
 
   function resetBannerForPwaLogin() {
@@ -2688,17 +2685,9 @@ function telegramUserDisplayName(u) {
   }
 
   function resetBannerForOutsideTelegram() {
-    if (bannerText) bannerText.textContent = "Откройте приложение в Telegram, чтобы войти.";
-    if (banner) banner.classList.remove("auth-banner--verifying");
-    if (bannerRetry) bannerRetry.hidden = true;
-    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
-      bannerLink.href = telegramAppUrl;
-      bannerLink.style.display = "";
-      if (hintEl) hintEl.style.display = "none";
-    } else {
-      if (bannerLink) bannerLink.style.display = "none";
-      if (hintEl) hintEl.style.display = "block";
-    }
+    /* Раньше здесь была ссылка «Открыть в Telegram»; в WebView TG без initData это ломало ожидания — тот же сценарий, что и PWA */
+    resetBannerForPwaLogin();
+    mountTelegramLoginWidgetForPwa();
   }
 
   function postAuthTelegram(initData) {
@@ -2759,7 +2748,8 @@ function telegramUserDisplayName(u) {
       if (userUnsafe) {
         setBannerFailure("Нет подписанной сессии Telegram. Закройте Mini App и откройте снова из бота.", false);
       } else {
-        resetBannerForOutsideTelegram();
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
       }
       return;
     }
@@ -2849,7 +2839,8 @@ function telegramUserDisplayName(u) {
         if (!isTelegramWebApp() && typeof window.location !== "undefined" && window.location.reload) {
           window.location.reload();
         } else {
-          resetBannerForOutsideTelegram();
+          resetBannerForPwaLogin();
+          mountTelegramLoginWidgetForPwa();
         }
         return;
       }
@@ -3188,8 +3179,8 @@ function getPokerChatTelegramAuthState() {
 
 function pokerNotifyChatVerificationRequired() {
   var msg = isTelegramWebApp()
-    ? "Чтобы общаться в чате, откройте Mini App из бота Telegram."
-    : "Чтобы общаться в чате, войдите через Telegram: на главной вверху нажмите «Log in with Telegram» / «Войти через Telegram».";
+    ? "Чтобы общаться в чатах, сначала войдите: откройте Mini App из бота Telegram."
+    : "Чтобы общаться в чатах, сначала войдите через Telegram — на главной нажмите «Войти через Telegram».";
   var w = window.Telegram && window.Telegram.WebApp;
   if (w && w.showAlert) w.showAlert(msg);
   else if (typeof alert === "function") alert(msg);
@@ -12546,37 +12537,65 @@ function initChat() {
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
   function openClubChat() {
-    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    try {
-      updateGeneralInputLocked(false);
-    } catch (eOpenG) {}
-    if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
-    if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-    if (generalView) {
-      generalView.classList.remove("chat-general-view--hidden");
-      generalView.style.display = "";
+    function applyClubGeneralHeaderLayout() {
+      try {
+        var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
+        if (genHeader) {
+          genHeader.style.top = "48px";
+          genHeader.style.left = "0";
+          genHeader.style.right = "0";
+          genHeader.style.transform = "none";
+          genHeader.style.width = "100%";
+          genHeader.style.maxWidth = "none";
+        }
+      } catch (err) {}
     }
-    if (personalView) personalView.classList.add("chat-personal-view--hidden");
-    window.chatGeneralUnread = false;
-    chatActiveTab = "general";
-    scrollGeneralToBottomOnNextRender = true;
-    if (generalMessages) {
-      generalMessages.scrollTop = generalMessages.scrollHeight;
-      requestAnimationFrame(function () { generalMessages.scrollTop = generalMessages.scrollHeight; });
-    }
-    loadGeneral();
-    updateChatHeaderStats();
-    try {
-      var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
-      if (genHeader) {
-        genHeader.style.top = "48px";
-        genHeader.style.left = "0";
-        genHeader.style.right = "0";
-        genHeader.style.transform = "none";
-        genHeader.style.width = "100%";
-        genHeader.style.maxWidth = "none";
+    function openClubChatShell() {
+      try {
+        updateGeneralInputLocked(false);
+      } catch (eOpenG) {}
+      if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+      if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
+      if (generalView) {
+        generalView.classList.remove("chat-general-view--hidden");
+        generalView.style.display = "";
       }
-    } catch (err) {}
+      if (personalView) personalView.classList.add("chat-personal-view--hidden");
+      window.chatGeneralUnread = false;
+      chatActiveTab = "general";
+      scrollGeneralToBottomOnNextRender = true;
+      if (generalMessages) {
+        generalMessages.scrollTop = generalMessages.scrollHeight;
+        requestAnimationFrame(function () {
+          generalMessages.scrollTop = generalMessages.scrollHeight;
+        });
+      }
+      updateChatHeaderStats();
+      applyClubGeneralHeaderLayout();
+    }
+
+    var st = typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState() : "ok";
+    if (st !== "ok") {
+      openClubChatShell();
+      updateGeneralInputLocked(true);
+      var gateMsg =
+        st === "pending"
+          ? "Выполняется проверка входа через Telegram. Подождите несколько секунд и снова откройте «Главный чат» или вернитесь на главную."
+          : "Чтобы общаться в чатах, нужно сначала войти: на главной нажмите «Войти через Telegram» или откройте приложение из бота.";
+      if (generalMessages) {
+        generalMessages.innerHTML =
+          '<div class="chat-general-gate chat-general-gate--need-login"><p class="chat-empty">' + escapeHtml(gateMsg) + "</p></div>";
+      }
+      if (st === "pending") {
+        if (typeof pokerNotifyChatAuthPending === "function") pokerNotifyChatAuthPending();
+      } else if (typeof pokerNotifyChatVerificationRequired === "function") {
+        pokerNotifyChatVerificationRequired();
+      }
+      return;
+    }
+
+    openClubChatShell();
+    loadGeneral();
   }
   function openConvFromDialogs(userId, userName, dtId) {
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
@@ -13200,6 +13219,13 @@ function initChat() {
   });
 
   function loadGeneral() {
+    var genVisEarly = generalView && !generalView.classList.contains("chat-general-view--hidden");
+    if (typeof getPokerChatTelegramAuthState === "function" && chatActiveTab === "general" && genVisEarly) {
+      if (getPokerChatTelegramAuthState() !== "ok") {
+        /* Экран «нужно войти»: не дергать API и не затирать текст подсказки опросом */
+        return;
+      }
+    }
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general";
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (data && data.ok) {
