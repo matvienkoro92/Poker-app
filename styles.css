@@ -3751,7 +3751,7 @@ img.chat-contact__avatar {
   max-height: 100%;
   overflow: hidden;
   /* Единые боковые отступы: строки админов и игроков визуально совпадают с остальными экранами. */
-  padding: 0 var(--screen-gutter-x) 12px;
+  padding: 0 var(--screen-gutter-x) 0;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
@@ -3783,13 +3783,18 @@ img.chat-contact__avatar {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  /* auto: нижний/верхний «резиновый» оверскролл в WebView; padding снизу — запас над нижним меню */
+  overscroll-behavior-y: auto;
   touch-action: pan-y;
   display: flex;
   flex-direction: column;
   gap: 0;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  /* Нижний оверскролл: место под фиксированное меню + комфортный зазор для дотягивания списка */
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 28px);
+  box-sizing: border-box;
+  scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 12px);
 }
 .chat-dialogs-block {
   background: var(--block-bg);
@@ -4114,6 +4119,8 @@ img.chat-contact__avatar {
   min-height: 0;
   overflow: hidden;
   width: 100%;
+  /* Высота плавающей полосы кнопок (общий чат), для padding ленты; запас на 2 строки «Написать админам» */
+  --chat-general-floating-toolbar-h: 56px;
 }
 .chat-general-view--hidden { display: none !important; }
 .chat-general-view .chat-messages-wrap {
@@ -4139,8 +4146,8 @@ img.chat-contact__avatar {
   touch-action: pan-y;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
-  /* Как в личном чате: лента начинается под плавающей шапкой, боковые поля те же */
-  padding-top: calc(48px + 68px + 14px);
+  /* Лента под плавающей шапкой чата (компактная полоса кнопок) */
+  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 8px);
   padding-left: max(8px, var(--screen-gutter-x));
   padding-right: max(8px, var(--screen-gutter-x));
   box-sizing: border-box;
@@ -4469,16 +4476,16 @@ img.chat-contact__avatar {
 .chat-general-header {
   display: flex;
   align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 0;
   flex-wrap: nowrap;
-  padding: 10px 12px;
+  padding: 6px 8px;
   /* Размытие вокруг кнопок без внешней рамки; обводка только у кнопки «Назад» и полосы сегментов */
   background: rgba(15, 23, 42, 0.16);
   backdrop-filter: saturate(1.15) blur(26px);
   -webkit-backdrop-filter: saturate(1.15) blur(26px);
   border: none;
-  border-radius: 22px;
+  border-radius: 14px;
   box-shadow: none;
   position: absolute;
   top: 48px;
@@ -4488,7 +4495,7 @@ img.chat-contact__avatar {
   width: auto;
   max-width: none;
   z-index: 2;
-  --chat-general-header-strip-min-height: 48px;
+  --chat-general-header-strip-min-height: 32px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -4503,6 +4510,10 @@ img.chat-contact__avatar {
   min-height: var(--chat-general-header-strip-min-height);
   height: auto;
   margin: 0 !important;
+  padding: 0 8px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
 }
 /* Одна обводка вокруг полосы, ячейки с вертикальными разделителями */
 .chat-general-header__segments {
@@ -4517,7 +4528,7 @@ img.chat-contact__avatar {
   min-height: var(--chat-general-header-strip-min-height);
   background: #000;
   border: 1px solid var(--accent);
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   pointer-events: auto;
 }
@@ -4530,7 +4541,7 @@ img.chat-contact__avatar {
   border: none;
   border-radius: 0;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--accent);
   background: transparent;
@@ -4554,16 +4565,16 @@ img.chat-contact__avatar {
 .chat-general-header__segment--grow {
   flex: 1 1 0;
   min-width: 0;
-  padding: 4px 8px;
+  padding: 2px 4px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   white-space: normal;
 }
 .chat-general-header__segment--icon {
-  flex: 0 0 44px;
-  width: 44px;
-  min-width: 44px;
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
   padding: 0;
   color: var(--accent);
 }
@@ -4598,19 +4609,20 @@ img.chat-contact__avatar {
   display: block;
 }
 .chat-general-admins-btn {
-  padding: 7px 12px;
-  font-size: 14px;
+  padding: 4px 6px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text);
   background: var(--block-bg-solid);
   border: 1px solid rgba(249, 115, 22, 0.7);
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
   font-family: inherit;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1.05;
+  justify-content: center;
+  line-height: 1.15;
 }
 .chat-general-admins-btn:hover {
   border-color: rgba(249, 115, 22, 0.9);
@@ -4628,21 +4640,28 @@ img.chat-contact__avatar {
 }
 .chat-general-admins-btn__top {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-align: center;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.2;
   max-width: 100%;
 }
 .chat-general-admins-btn__bottom {
   display: block;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   color: rgba(249, 115, 22, 0.95);
-  margin-top: 0;
-  white-space: nowrap;
+  margin-top: 1px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+  word-break: break-word;
+  max-width: 100%;
 }
 .chat-general-download-btn {
   display: inline-flex;
@@ -4665,11 +4684,11 @@ img.chat-contact__avatar {
 .chat-general-header .chat-general-download-btn.chat-general-header__segment {
   height: auto;
   min-height: 0;
-  padding: 0 10px;
-  font-size: 12px;
+  padding: 0 5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1.15;
+  line-height: 1.1;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -4677,20 +4696,25 @@ img.chat-contact__avatar {
   align-items: center;
   justify-content: center;
   color: var(--accent);
+  flex-shrink: 0;
 }
 .chat-general-header .chat-general-download-btn.chat-general-header__segment:hover {
   border: none;
   color: #fb923c;
 }
 .chat-general-header .chat-general-copy-link-btn.chat-general-header__segment {
-  width: 44px;
-  min-width: 44px;
+  width: 34px;
+  min-width: 34px;
   height: auto;
   min-height: 0;
   border: none;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+.chat-general-header .chat-general-copy-link-btn__icon svg {
+  width: 15px;
+  height: 15px;
 }
 .chat-general-header .chat-general-copy-link-btn.chat-general-header__segment:hover {
   border: none;
