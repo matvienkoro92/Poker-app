@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=114" />
+    <link rel="stylesheet" href="./styles.css?v=131" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1180,17 +1180,17 @@
           <!-- Чат: поиск → Чаты (меню) → общий чат → Админы → Игроки -->
           <div class="view" data-view="chat">
             <div class="chat-dialogs-view" id="chatDialogsView">
-              <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--top">
-                <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
-                  <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
-                  <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
-                  <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
-                    <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>
-                  </div>
-                </div>
-              </div>
               <div class="chat-dialogs-list-wrap">
               <div class="chat-dialogs-list">
+                <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--in-dialogs-scroll">
+                  <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
+                    <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
+                    <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
+                    <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
+                      <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>
+                    </div>
+                  </div>
+                </div>
                 <div class="chat-dialogs-block">
                 <button type="button" class="chat-dialog-item chat-dialog-item--club" data-chat-type="club" id="chatDialogClub" tabindex="-1">
                   <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" />
@@ -2171,6 +2171,54 @@
                     </div>
                     <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
                   </a>
+                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__autumn-rating-card" id="autumnRating2025InfoBtn" aria-label="Рейтинг МТТ осени 2025, победитель Эмиль">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize hall-of-fame__autumn-rating-card__prize">МТТ осени 2025</span>
+                        <span class="feature__title-line3 hall-of-fame__autumn-rating-card__season"><span class="hall-of-fame__autumn-leaf" aria-hidden="true">🍂</span> Осенний зачёт</span>
+                        <span class="hall-of-fame__autumn-winner">Победитель Эмиль (Em13)</span>
+                      </div>
+                    </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </button>
+                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card" id="summerRating2025InfoBtn" aria-label="Кубок лета 2025, победитель Sarmat">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize hall-of-fame__summer-rating-card__prize">МТТ лета 2025</span>
+                        <span class="feature__title-line3 hall-of-fame__summer-rating-card__season"><span class="hall-of-fame__summer-sun" aria-hidden="true">☀️</span> Летний зачёт</span>
+                        <span class="hall-of-fame__summer-winner">Победитель Sarmat</span>
+                      </div>
+                    </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </button>
+                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card" id="summerRating2024InfoBtn" aria-label="Кубок лета 2024, победитель Пряник">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize hall-of-fame__summer-rating-card__prize">МТТ лета 2024</span>
+                        <span class="feature__title-line3 hall-of-fame__summer-rating-card__season"><span class="hall-of-fame__summer-sun" aria-hidden="true">☀️</span> Летний зачёт</span>
+                        <span class="hall-of-fame__summer-winner">Победитель Пряник</span>
+                      </div>
+                    </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </button>
+                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__spring-2024-rating-card" id="springRating2024InfoBtn" aria-label="Турнирщик весны 2024, победитель Рыбнадзор">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize hall-of-fame__spring-2024-rating-card__prize">Весна 2024</span>
+                        <span class="feature__title-line3 hall-of-fame__spring-2024-rating-card__season"><span aria-hidden="true">🌸</span> Турнирщик весны</span>
+                        <span class="hall-of-fame__spring-2024-winner">Победитель Рыбнадзор</span>
+                      </div>
+                    </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </button>
                 </div>
                 <section class="hall-of-fame__block hall-of-fame__block--nested" aria-labelledby="hallPrivateTitle">
                   <h2 class="hall-of-fame__section-title" id="hallPrivateTitle">Приватные турниры</h2>
@@ -2213,34 +2261,34 @@
                       <div class="hall-photo-album__page hall-photo-album__page--left">
                         <span class="hall-photo-album__page-num" aria-hidden="true">1</span>
                         <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера, март 2026">
                             <img
                               class="hall-photo-album__img"
                               src="./assets/hall-photo-album-1.png"
-                              alt="Рома Venius в гостях у Кулера, покерный стол с фишками"
+                              alt="Рома Venius в гостях у Кулера, март 2026, покерный стол с фишками"
                               loading="lazy"
                               width="720"
                               height="960"
                             />
                           </button>
-                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера</span>
+                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера — Март 2026</span>
                         </div>
                       </div>
                       <div class="hall-photo-album__gutter" aria-hidden="true"></div>
                       <div class="hall-photo-album__page hall-photo-album__page--right">
                         <span class="hall-photo-album__page-num" aria-hidden="true">2</span>
                         <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус, март 2026">
                             <img
                               class="hall-photo-album__img"
                               src="./assets/hall-photo-album-2.png"
-                              alt="Кулер и Вениус, в руках тройка и семёрка пик"
+                              alt="Кулер и Вениус, март 2026, в руках тройка и семёрка пик"
                               loading="lazy"
                               width="720"
                               height="960"
                             />
                           </button>
-                          <span class="hall-photo-album__caption">Кулер и Вениус</span>
+                          <span class="hall-photo-album__caption">Кулер и Вениус — Март 2026</span>
                         </div>
                       </div>
                     </li>
@@ -2248,17 +2296,17 @@
                       <div class="hall-photo-album__page hall-photo-album__page--left">
                         <span class="hall-photo-album__page-num" aria-hidden="true">3</span>
                         <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика, март 2026">
                             <img
                               class="hall-photo-album__img"
                               src="./assets/hall-photo-album-3.png"
-                              alt="Вениус и Гика на набережной ночью, на фоне подсвеченный мост"
+                              alt="Вениус и Гика, март 2026, на набережной ночью, на фоне подсвеченный мост"
                               loading="lazy"
                               width="720"
                               height="960"
                             />
                           </button>
-                          <span class="hall-photo-album__caption">Вениус и Гика</span>
+                          <span class="hall-photo-album__caption">Вениус и Гика — Март 2026</span>
                         </div>
                       </div>
                       <div class="hall-photo-album__gutter" aria-hidden="true"></div>
@@ -2297,8 +2345,21 @@
                         </div>
                       </div>
                       <div class="hall-photo-album__gutter" aria-hidden="true"></div>
-                      <div class="hall-photo-album__page hall-photo-album__page--right hall-photo-album__page--blank">
+                      <div class="hall-photo-album__page hall-photo-album__page--right">
                         <span class="hall-photo-album__page-num" aria-hidden="true">6</span>
+                        <div class="hall-photo-album__snap">
+                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки с Пряником">
+                            <img
+                              class="hall-photo-album__img"
+                              src="./assets/hall-photo-album-pokermanki-pryanik.png"
+                              alt="Покерманки и Пряник в костюме пряника, вечерняя улица с гирляндами"
+                              loading="lazy"
+                              width="820"
+                              height="1024"
+                            />
+                          </button>
+                          <span class="hall-photo-album__caption">Покерманки с Пряником</span>
+                        </div>
                       </div>
                     </li>
                   </ul>
@@ -2316,24 +2377,55 @@
                     <li class="hall-shame-board__item hall-shame-board__item--featured" role="listitem">
                       <div class="hall-shame-board__featured-media">
                         <span class="hall-shame-board__badge" aria-hidden="true">№1</span>
-                        <button
-                          type="button"
-                          class="hall-shame-board__thumb-btn"
-                          aria-label="Увеличить скриншот из чата"
-                        >
-                          <img
-                            class="hall-shame-board__avatar"
-                            src="./assets/hall-shame-dmitry-corgi.png"
-                            alt="Скриншот переписки: ッDmitryッ в костюме-корги"
-                            loading="lazy"
-                            width="200"
-                            height="200"
-                          />
-                        </button>
+                        <p class="hall-shame-board__corgi-gallery-title">Скрины переписки</p>
+                        <div class="hall-shame-board__corgi-gallery" role="group" aria-label="Скриншоты Telegram: Корги в деловом костюме">
+                          <button
+                            type="button"
+                            class="hall-shame-board__thumb-btn"
+                            aria-label="Увеличить: аватар «Корги в деловом костюме» и фрагмент чата"
+                          >
+                            <img
+                              class="hall-shame-board__avatar"
+                              src="./assets/hall-shame-dmitry-corgi.png"
+                              alt="Скриншот переписки: Корги в деловом костюме (аватар в Telegram)"
+                              loading="lazy"
+                              width="200"
+                              height="200"
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            class="hall-shame-board__thumb-btn hall-shame-board__thumb-btn--chat"
+                            aria-label="Увеличить: переписка с Корги в деловом костюме, февраль 2025"
+                          >
+                            <img
+                              class="hall-shame-board__chat-thumb"
+                              src="./assets/hall-shame-dmitry-corgi-chat-1.png"
+                              alt="Telegram: переписка про долг и зарплату, февраль"
+                              loading="lazy"
+                              width="472"
+                              height="1024"
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            class="hall-shame-board__thumb-btn hall-shame-board__thumb-btn--chat"
+                            aria-label="Увеличить: переписка с Корги в деловом костюме, продолжение, март 2025"
+                          >
+                            <img
+                              class="hall-shame-board__chat-thumb"
+                              src="./assets/hall-shame-dmitry-corgi-chat-2.png"
+                              alt="Telegram: переписка про возврат и обещания, март"
+                              loading="lazy"
+                              width="472"
+                              height="1024"
+                            />
+                          </button>
+                        </div>
                       </div>
                       <div class="hall-shame-board__body">
                         <span class="hall-shame-board__tag">Первый позорник клуба</span>
-                        <span class="hall-shame-board__nomination">Доктор Дмитрий Корги</span>
+                        <span class="hall-shame-board__nomination">Корги в деловом костюме</span>
                         <span class="hall-shame-board__desc">Качал с другого игрока якобы проспоренные <strong>1000&nbsp;₽</strong>, которые тот «не отдал». При этом сам занял у <strong>Кулера 2000&nbsp;₽</strong> и около <strong>двух месяцев</strong> кормил завтраками — в итоге <strong>загасился</strong>. История зафиксирована чатом; ирония оценена по достоинству.</span>
                       </div>
                     </li>
@@ -3016,75 +3108,54 @@
                   <div class="gazette-front__headline-sub">Горячие новости недели</div>
                 </div>
                 <div class="gazette-front__grid">
-                  <div class="gazette-front__main">
-                    <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="16">
-                      <div class="gazette-front__section">Зал славы · сказка</div>
+                  <div class="gazette-front__main gazette-front__main--lead">
+                    <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="17">
+                      <div class="gazette-front__section">Доска позора · последний номер</div>
+                      <p class="gazette-front__posted-date">Размещено: 22 марта 2026&nbsp;г.</p>
                       <h3 class="gazette-front__title">
-                        Злой Ривер и пятнадцать героев: кто в 2026-м не дал последней карте испортить праздник
+                        Корги в галстуке против календаря: февраль ждёт зп, март — «где возврат?»
                       </h3>
                       <div class="gazette-front__thumb">
-                        <img src="./assets/hall-of-fame-hero.png" alt="Зал славы: топ выигрышей за один турнир" />
+                        <img
+                          src="./assets/hall-shame-dmitry-corgi-chat-1.png"
+                          alt="Скрин Telegram: переписка с корги в костюме"
+                          loading="lazy"
+                        />
                       </div>
                       <p class="gazette-front__lead">
-                        Сармат, Waaar, Фокс, Эмиль, Дикий, Кулер и АндоюшиМорф — хроника заносов в волшебном тоне: от Magic High Roller до фриролла без ребаев.
+                        Личка как сериал: обещания после зарплаты, философия про переводы и мартовская эскалация — в материалах «Вестника».
                       </p>
                       <span class="gazette-front__read-more">Читать в номере →</span>
                     </a>
                   </div>
-                  <div class="gazette-front__side">
+                  <div class="gazette-front__side gazette-front__side--prev">
+                    <article class="gazette-front__col gazette-front__col--first">
+                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="16">
+                        <div class="gazette-front__section">Зал славы · сказка</div>
+                        <p class="gazette-front__posted-date">Размещено: 21 марта 2026&nbsp;г.</p>
+                        <h4 class="gazette-front__title-small">
+                          Злой Ривер и пятнадцать героев: кто в 2026-м не дал последней карте испортить праздник
+                        </h4>
+                        <div class="gazette-front__thumb-small">
+                          <img src="./assets/hall-of-fame-hero.png" alt="Зал славы: топ выигрышей за один турнир" loading="lazy" />
+                        </div>
+                        <p class="gazette-front__lead-small">
+                          Сармат, Waaar, Фокс, Эмиль, Дикий, Кулер и АндоюшиМорф — хроника заносов в волшебном тоне.
+                        </p>
+                      </a>
+                    </article>
                     <article class="gazette-front__col">
                       <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="15">
                         <div class="gazette-front__section">Турнир четверга</div>
+                        <p class="gazette-front__posted-date">Размещено: 19 марта 2026&nbsp;г.</p>
                         <h4 class="gazette-front__title-small">
                           Кулер и 95 тысяч: Вселенная наняла победителя без собеседования
                         </h4>
                         <div class="gazette-front__thumb-small">
-                          <img src="./assets/gazette-culer-thursday-95100-march19.png" alt="Турнир Четверга: Coo1er91 — 95 100₽" />
+                          <img src="./assets/gazette-culer-thursday-95100-march19.png" alt="Турнир Четверга: Coo1er91 — 95 100₽" loading="lazy" />
                         </div>
                         <p class="gazette-front__lead-small">
                           19 марта, 18:00 — мир снова щедр к тем, кому везёт чемоданом.
-                        </p>
-                      </a>
-                    </article>
-                    <article class="gazette-front__col">
-                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="14">
-                        <div class="gazette-front__section">Фриролл 150&nbsp;000₽</div>
-                        <h4 class="gazette-front__title-small">
-                          Герой МамаЛена против всего мира: кто купил финалку донатом, а кого сразил Putri
-                        </h4>
-                        <div class="gazette-front__thumb-small">
-                          <img src="./assets/gazette-freeroll-mamalena-putri.png" alt="Субботний Фриролл: МамаЛена 2-е место, Putri победил" />
-                        </div>
-                        <p class="gazette-front__lead-small">
-                          Остросюжетная история вчерашнего фриролла: 622 игрока, семь на финалке — пятеро без ребаев и аддонов.
-                        </p>
-                      </a>
-                    </article>
-                    <article class="gazette-front__col">
-                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="13">
-                        <div class="gazette-front__section">Очко · 21</div>
-                        <h4 class="gazette-front__title-small">
-                          Кулер вернулся в большую игру и сразу попал в очко
-                        </h4>
-                        <div class="gazette-front__thumb-small">
-                          <img src="./assets/gazette-culer-21-poydu-proebu.png" alt="Кулер: скрин из чата про игру 21" />
-                        </div>
-                        <p class="gazette-front__lead-small">
-                          Легенда клуба зарекалась больше не заходить в 21, но устроила новое падение из тридцати минусовых столов подряд.
-                        </p>
-                      </a>
-                    </article>
-                    <article class="gazette-front__col">
-                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="10">
-                        <div class="gazette-front__section">Криминальная сводка</div>
-                        <h4 class="gazette-front__title-small">
-                          АндрюшаМорф выносит кассу двух турниров за вечер
-                        </h4>
-                          <div class="gazette-front__thumb-small">
-                            <img src="./assets/gazette-march-5-thursday.png" alt="Криминальная сводка: турнир четверга" />
-                          </div>
-                        <p class="gazette-front__lead-small">
-                          Два чемодана денег, 85&nbsp;000₽ за одну ночь и легенда, которая снова напомнила, кто здесь хозяин стола.
                         </p>
                       </a>
                     </article>
@@ -3112,9 +3183,89 @@
             <button type="button" class="gazette-modal__back" id="gazetteModalBackNews" aria-label="Назад к выбору страницы">← К газете</button>
             <div class="gazette-modal__content-masthead">Горячие новости недели</div>
             <div class="gazette-modal__content-rule"></div>
+            <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="17">
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__content-date">Размещено: 22 марта 2026&nbsp;г.</p>
+              <p class="gazette-modal__headline-cont">Доска позора · репортаж</p>
+              <h3 class="gazette-modal__headline gazette-modal__headline--main">
+                КОРГИ В ГАЛСТУКЕ ПРОТИВ КАЛЕНДАРЯ: ФЕВРАЛЬ ОБЕЩАЕТ ЗП, МАРТ СПРАШИВАЕТ «ГДЕ ВОЗВРАТ?». ЛИЧКА TELEGRAM КАК СЕРИАЛ БЕЗ ФИНАЛА
+              </h3>
+              <div class="gazette-modal__photo-wrap">
+                <img
+                  src="./assets/hall-shame-dmitry-corgi-chat-1.png"
+                  alt="Скрин Telegram: переписка с ツDmitryツ, февраль — обещания после зарплаты и ответы про финансовые трудности"
+                  class="gazette-modal__photo"
+                  loading="lazy"
+                  width="472"
+                  height="1024"
+                />
+                <p class="gazette-modal__photo-caption">
+                  Февральская серия: «жду зп и кидаю сразу», вопрос «не пришла пока?», монолог кредитора — «мне деньги похуй, мне обидно, что наебали» и попытка понять, куда девается зарплата, если перевод так и не улетает адресату.
+                </p>
+              </div>
+              <div class="gazette-modal__body">
+                <p>
+                  <strong>Репортаж из зоны личных сообщений.</strong> В
+                  <a
+                    href="#"
+                    class="gazette-modal__rating-link"
+                    data-view-target="hall-of-fame"
+                    data-close-gazette="1"
+                    data-hall-shame="1"
+                    >Зале славы</a>
+                  на вкладке «Доска позора» уже числится персона с аватаром <strong>корги в деловом костюме</strong> — там же, где хранится краткая выжимка про долги и «завтраки». Редакция «Вестника» решила не останавливаться на тезисах и разложить драму по кадрам, как криминальную сводку — только вместо пистолетов у нас скриншоты, а вместо ограбления банка — ожидание перевода после зарплаты.
+                </p>
+                <p>
+                  По материалам чата завязка классическая: одна сторона чувствует себя обманутой («<em>опять наебали, каждый раз верю</em>»), другая ссылается на жизненный кризис («<em>есть проблемы большие с финансами, пропал</em>») и обещает закрыть вопрос сразу после зарплаты. Между строк читается вечный сюжет покерного клуба: не борд, не эквити, а <strong>доверие</strong> — та самая раздача, где банк не измеряется фишками.
+                </p>
+                <p>
+                  Середина февраля добавляет философии: «<em>Ну тебе приходит зп. Что ты делаешь с ней, если обещаешь отправить — и не отправляешь?</em>» Вопрос звучит как заголовок для экономической колонки, но это всё ещё личка, и ответа по-взрослому так и не видно — зато видно, как диалог упирается в одни и те же даты и ожидания.
+                </p>
+              </div>
+              <div class="gazette-modal__photo-wrap">
+                <img
+                  src="./assets/hall-shame-dmitry-corgi-chat-2.png"
+                  alt="Скрин Telegram: март — требование возврата, ответы собеседника и просьба перевести деньги без пустых разговоров"
+                  class="gazette-modal__photo"
+                  loading="lazy"
+                  width="472"
+                  height="1024"
+                />
+                <p class="gazette-modal__photo-caption">
+                  Март: эскалация — «где возврат?», реплики про «брокера» и «сливы», уклончивые ответы и финальное требование перевести «как мужик», без воды.
+                </p>
+              </div>
+              <div class="gazette-modal__body">
+                <p>
+                  Когда календарь переворачивает на март, тон становится резче: в кадре появляются слова про <strong>возврат</strong>, про посредника и про то, что пустые разговоры уже не котируются. Собеседник отвечает загадками вроде «где твои сливы» — и зритель чата невольно ловит себя на мысли: это уже не переписка, а <strong>хедз-ап без шоудауна</strong>, где один просит конкретики, а второй уходит в метафоры. Видимо, он любитель ягоды — а в переписке охотнее всего демонстрирует вкус именно к <strong>сливам</strong>.
+                </p>
+                <p>
+                  Мораль для читателя газеты та же, что и для любого, кто когда-нибудь одалживал за столом или в жизни: обещание без даты — это блеф без таймбанка. А корги в галстуке на аватарке, увы, не гарантия институциональной надёжности — максимум милого брендинга. Полные скрины и контекст — на «Доске позора»; там же можно увеличить кадры и перечитать историю без нашего пересказа.
+                </p>
+                <p>
+                  <em>По материалам переписки в Telegram. Цитаты и смыслы сохранены; ники приведены как в скринах.</em>
+                </p>
+                <p>
+                  <a
+                    href="#"
+                    class="gazette-modal__rating-link"
+                    data-view-target="hall-of-fame"
+                    data-close-gazette="1"
+                    data-hall-shame="1"
+                    >Открыть Зал славы → Доска позора</a>
+                </p>
+              </div>
+              <p class="gazette-modal__share-row">
+                <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="17" aria-label="Переслать новость">Переслать</button>
+                <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="17" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
+              </p>
+              <p class="gazette-modal__subscribe-in-article">
+                <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
+              </p>
+            </article>
             <article class="gazette-modal__lead gazette-modal__lead--top gazette-modal__lead--fairytale" data-gazette-article="16">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">21 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 21 марта 2026&nbsp;г.</p>
               <p class="gazette-fairytale__kicker">Сказка редакции · Зал славы</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main gazette-modal__headline--fairytale">КОГДА ЗЛОЙ РИВЕР ЗАХОТЕЛ ПОГУБИТЬ РАЗДАЧИ, А ПЯТНАДЦАТЬ ГЕРОЕВ СКАЗАЛИ ЕМУ: «НЕ СЕГОДНЯ»</h3>
               <div class="gazette-modal__body gazette-modal__body--fairytale">
@@ -3141,7 +3292,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="15">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">19 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 19 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР, 95&nbsp;100₽ И НЕСПРАВЕДЛИВЫЙ МИР: ПОЧЕМУ УДАЧА НАНИМАЕТ НА РАБОТУ БЕЗ СОБЕСЕДОВАНИЯ</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-culer-thursday-95100-march19.png" alt="Статистика рук: Турнир Четверга 19 марта 18:00 — Coo1er91 1-е место, 95 100₽" class="gazette-modal__photo" />
@@ -3163,7 +3314,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="14">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">14 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 14 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ФРИРОЛЛ НА 150 000₽: ГЕРОЙ МАМАЛЕНА ПРОТИВ ВСЕГО МИРА. Один против зла и нечести, семь на финалке — пятеро честных, один «за донат», и Putri, выигравший пять оллинов подряд</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-freeroll-mamalena-putri.png" alt="Статистика рук: Субботний Фриролл 14 марта 18:00 — mamalena 2-е место, techno 3-е, ПокерМанки 5-е" class="gazette-modal__photo" />
@@ -3185,7 +3336,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="13">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">13 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 13 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР ВЕРНУЛСЯ В БОЛЬШУЮ ИГРУ И СРАЗУ ПОПАЛ В ОЧКО. Легенда зарекалась — и превзошла себя: тридцать столов подряд в минусе. Каламбур судьбы и стихи на злобу дня!</h3>
               <div class="gazette-modal__body">
                 <p>Когда Легенда клуба объявила, что возвращается в большую игру, чат замер. Не прошло и суток — и судьба, эта старая карга с колодой в руках, подсунула ей не просто карту, а целую игру. Игру, что зовётся в народе «двадцать одно», а в сердцах — просто <strong>очко</strong>.</p>
@@ -3222,7 +3373,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="12">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">8 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 8 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АНДРЮШАМОРФ (FRANKL) ЖЁСТКО ПОДЖИМАЕТ ВАААРА В ЛИГЕ 1. ВСЕГО 60 БАЛЛОВ РАЗРЫВА — КТО УДЕРЖИТ КОРОНУ?</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-frankl-vaaar-march8.png" alt="Лига 1: Waaar — 1080 баллов, FrankL — 1020. Разрыв 60 очков." class="gazette-modal__photo" />
@@ -3243,7 +3394,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="11">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">6 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 6 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ПЯТНИЦА ПРОГРЕССИВ: 57 ИГРОКОВ, 9 В ПРИЗАХ. WITCH — БРОНЗА И 15 000₽. АСПИРИН, MANIAKK, KRIAK И ALENAST В ТОП-9</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/rating-06-03-2026-1.png" alt="Статистика рук: Пятница Прогрессив, 6 марта 18:00" class="gazette-modal__photo" />
@@ -3263,7 +3414,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="10">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">5 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 5 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КРИМИНАЛЬНАЯ СВОДКА КЛУБА ЗА 5Е МАРТА. НАЖИВА 370 000₽. АНДРЮШАМОРФ НАНОСИТ ДВОЙНОЙ УДАР. РЫБНАДЗОР СНОВА НАД РЫБАМИ. ПРЯНИК ПОТЕРЯЛ СОЗНАНИЕ!</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-march-5-thursday.png" alt="Турнир Четверга 5 марта: FrankL — 1-е место, 48 100₽" class="gazette-modal__photo" />
@@ -3292,7 +3443,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="9">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">1 марта</p>
+              <p class="gazette-modal__content-date">Размещено: 1 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">РАЗОРВАЛИ ФЕВРАЛЬ В ПОСЛЕДНЮЮ НОЧЬ: 225 ТЫСЯЧ ЗА ВЕЧЕР — ЭМИЛЬ И ВАААР ДОБИЛИ РЕЙТИНГ. Кто отобрался с 300₽ на путевку за 120 000₽, а кто вынес нокаут за 5000₽? Цифры, от которых стынет кровь!</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-emil-vaaar-feb.png" alt="Субботний Прогрессив: Вааар — 1-е место, 105 559₽" class="gazette-modal__photo" />
@@ -3317,7 +3468,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="8">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">26 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АМАЛИЯ И АСПИРИН: ХЕДЗ-АП ЗА 100К, ГДЕ РЕШАЛОСЬ, КТО ЗДЕСЬ ДОМИНАНТ</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-amaliya-aspirin-hu.png" alt="Статистика рук: Турнир Четверга за 1000₽, Амалия и Аспирин делят 100 000₽ в хедз-апе" class="gazette-modal__photo" />
@@ -3339,7 +3490,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="7">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">26 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СЕНСАЦИЯ! ПОКЕРМАНКИ ВЫЖИМАЕТ 900 000₽ И ТРИЖДЫ В ХУ РАЗНОСИТ ВАААРА — «ДО ЛЯМА РУКОЙ ПОДАТЬ!»</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-pokermanki-vaaar.png" alt="Информация о членстве: ПокерМанки, выигрыши и прибыль MTT" class="gazette-modal__photo" />
@@ -3360,7 +3511,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="6">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">24 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ТУРНИР ЗА 300₽ СОБРАЛ 108 ТЫСЯЧ ПРИЗОВЫХ: АМАЛИЯ И АСПИРИН — ЛУЧШИЕ ДРУЗЬЯ ИЛИ ХОЛОДНОКРОВНЫЕ ОДИНОЧКИ-ИСКАТЕЛИ БОГАТСТВА?</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-amaliya-tuesday.png" alt="Статистика рук: Турнир Вторника, Амалия и Аспирин в топе" class="gazette-modal__photo" />
@@ -3379,7 +3530,7 @@
             </article>
             <article class="gazette-modal__lead" data-gazette-article="5">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">25 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 25 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ЛЮБОВЬ ПОКЕРА И ВАРКРАФТА: была ли интимная связь? Откуда взялись два новых смайла — эксклюзив!</h3>
               <div class="gazette-modal__photo-wrap gazette-modal__photo-wrap--warm">
                 <img src="./assets/gazette-poker21-warcraft.png" alt="Poker 21 Plus и дух Варкрафта: золото и тузы" class="gazette-modal__photo" />
@@ -3399,7 +3550,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="4">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">24 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КОНЕЦ РОЗЫГРЫША! Клуб в трауре: владельца обвиняют в предательстве, игроки в депрессии — эксклюзивное интервью с пострадавшим!</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-raffle-chat.png" alt="Переписка в чате: «Так, ну розыгрыш то где?» — «а вот решил не делать сегодня», реакции" class="gazette-modal__photo" />
@@ -3420,7 +3571,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="3">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">24 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ШОК! Кряк задушил Гидрографа в прямом эфире — 30 тысяч в карман, жертва в слёзах!</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-gidrograff-kriak.png" alt="MTT Ranking: Кряк и Гидрограф в топе" class="gazette-modal__photo" />
@@ -3439,7 +3590,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="2">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">24 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АндрюшаМорф РВЁТ банк: почти четверть миллиона за воскресенье — «Легенда не сдаётся!»</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-andrusha-morf.png" alt="Игровые данные: АндрюшаМорф, 3-е место в MAIN 2,5M GTD" class="gazette-modal__photo" />
@@ -3455,7 +3606,7 @@
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="1">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
-              <p class="gazette-modal__content-date">23 февраля</p>
+              <p class="gazette-modal__content-date">Размещено: 23 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СКАНДАЛ НА СТОЛЕ: Кулер пушит мусор и выбивает АК — стол в ярости, игроки требуют извинений!</h3>
               <div class="gazette-modal__photo-wrap">
                 <img src="./assets/gazette-front-photo.png" alt="Стол турнира: Кулер и ШЛЯПАУ в хенде" class="gazette-modal__photo" />
@@ -3657,6 +3808,218 @@
         </div>
       </div>
 
+      <div class="spring-rating-2024-modal" id="springRating2024Modal" aria-hidden="true" role="dialog" aria-labelledby="springRating2024ModalTitle" aria-label="Весна 2024, Рыбнадзор">
+        <div class="spring-rating-2024-modal__backdrop"></div>
+        <div class="spring-rating-2024-modal__inner">
+          <button type="button" class="spring-rating-2024-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="spring-rating-2024-modal__title" id="springRating2024ModalTitle">Весна 2024</h3>
+          <p class="spring-rating-2024-modal__subtitle">Победитель — <strong>Рыбнадзор</strong></p>
+          <figure class="spring-rating-2024-modal__figure">
+            <img
+              class="spring-rating-2024-modal__photo"
+              src="./assets/hall-rating-spring-2024-rybnadzor-cup.png"
+              alt="Кубок турнирщика весны: Рыбнадзор, март–май 2024, клуб Два туза"
+              width="575"
+              height="660"
+              loading="lazy"
+            />
+            <figcaption class="spring-rating-2024-modal__figcaption">Гравировка: турнирщик весны (март, апрель, май) 2024</figcaption>
+          </figure>
+          <div class="spring-rating-2024-modal__prose">
+            <p>🏆 Заслуженный кубок турнирщика для братишки Кирилла Рыбнадзора</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="summer-rating-2024-modal" id="summerRating2024Modal" aria-hidden="true" role="dialog" aria-labelledby="summerRating2024ModalTitle" aria-label="Кубок лета 2024">
+        <div class="summer-rating-2024-modal__backdrop"></div>
+        <div class="summer-rating-2024-modal__inner">
+          <button type="button" class="summer-rating-2024-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="summer-rating-2024-modal__title" id="summerRating2024ModalTitle">Кубок лета 2024</h3>
+          <p class="summer-rating-2024-modal__subtitle">Победитель — <strong>Пряник</strong></p>
+          <div class="summer-rating-2024-modal__empty" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="summer-rating-2025-modal" id="summerRating2025Modal" aria-hidden="true" role="dialog" aria-labelledby="summerRating2025ModalTitle" aria-label="Кубок лета 2025">
+        <div class="summer-rating-2025-modal__backdrop"></div>
+        <div class="summer-rating-2025-modal__inner">
+          <button type="button" class="summer-rating-2025-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="summer-rating-2025-modal__title" id="summerRating2025ModalTitle">Кубок лета 2025</h3>
+          <p class="summer-rating-2025-modal__subtitle">Победитель — <strong>Sarmat</strong></p>
+          <figure class="summer-rating-2025-modal__figure">
+            <img
+              class="summer-rating-2025-modal__photo"
+              src="./assets/hall-rating-summer-2025-sarmat-cup.png"
+              alt="Кубок чемпиона МТТ-рейтинга лета 2025, Sarmat, клуб Два туза"
+              width="758"
+              height="1024"
+              loading="lazy"
+            />
+            <figcaption class="summer-rating-2025-modal__figcaption">Кубок с гравировкой: чемпион МТТ-рейтинга лета 2025</figcaption>
+          </figure>
+          <div class="summer-rating-2025-modal__prose">
+            <p>Завершился кубок лета 2025 для игроков только нашего клуба: чтобы получить баллы, нужно было попасть в топ‑8 любого турнира с бай-ином от 500&nbsp;₽. Таких у нас набралось <strong>205</strong> человек ❗️ 205 человек, кто хотя бы раз дошёл до топ‑8, а тех, кто в целом участвовали в турнирах, я уже считать не буду 😀</p>
+            <p>❗️ Этот рейтинг из‑за недорогих турниров с бай-ином 500&nbsp;₽ получился не столько на количество призовых, сколько на дисциплину и частую регулярную игру на протяжении <strong>двух месяцев</strong> — что тоже входит в обязательный набор качеств плюсового игрока в покер. Выиграл тот, кто играл больше турниров и чаще проходил в призы!</p>
+            <p>⭐️ Рейтинг осени проведём немного в другом формате и добавим к призам ещё 50&nbsp;000&nbsp;₽ — значит, призовой фонд рейтинга осени будет <strong>150&nbsp;000&nbsp;₽</strong>. Сезон начинается, а значит пора включаться в игру и показать своё место в рейтинге!</p>
+            <p>А пока поздравляем победителей — на данный момент это актуальный рейтинг наших турнирщиков.</p>
+          </div>
+          <h4 class="summer-rating-2025-modal__totals-heading">Итого баллов</h4>
+          <div class="summer-rating-2025-modal__podium">
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--1">
+              <p class="summer-rating-2025-modal__place-line">🥇 <strong>Sarmat</strong> — 3&nbsp;569 баллов — 70&nbsp;000&nbsp;₽</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Кубок чемпиона с именной гравировкой</li>
+                <li>🌟 Уважение в чате от всех без исключений, неприкосновенность и авторитет</li>
+                <li>🌟 Звание в чате «Каталкин лета 2025»</li>
+                <li>🌟 Символические никому неинтересные 70&nbsp;000&nbsp;₽ на карту (можно даже не быть меркантильным и отказаться от этой шляпы)</li>
+              </ul>
+            </div>
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--2">
+              <p class="summer-rating-2025-modal__place-line">🥈 <strong>Малек</strong> — 2&nbsp;720 баллов</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Уважение в чате</li>
+                <li>🌟 Звание в чате «Вице-Каталкин лета 2025»</li>
+                <li>🌟 20&nbsp;000&nbsp;₽ на карту</li>
+              </ul>
+            </div>
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--3">
+              <p class="summer-rating-2025-modal__place-line">🥉 <strong>Рыбнадзор</strong> — 2&nbsp;546 баллов</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Клубный бокс до адреса</li>
+                <li>🌟 Уважение в чате</li>
+                <li>🌟 Звание в чате «Вице-Вице-Вице»</li>
+                <li>🌟 10&nbsp;000&nbsp;₽ на карту</li>
+              </ul>
+            </div>
+          </div>
+          <div class="summer-rating-2025-modal__rest-wrap">
+            <p class="summer-rating-2025-modal__rest-title">Топ‑10</p>
+            <ol class="summer-rating-2025-modal__rest-list" start="4">
+              <li><strong>Кряк</strong> — 2&nbsp;330</li>
+              <li><strong>Waaarr</strong> — 2&nbsp;198</li>
+              <li><strong>Эмиль</strong> — 2&nbsp;083</li>
+              <li><strong>FishKopcheny</strong> — 1&nbsp;542</li>
+              <li><strong>Пряник</strong> — 1&nbsp;460</li>
+              <li><strong>Фокс</strong> — 1&nbsp;306</li>
+              <li><strong>Гика</strong> — 1&nbsp;205</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="autumn-rating-2025-modal" id="autumnRating2025Modal" aria-hidden="true" role="dialog" aria-labelledby="autumnRating2025ModalTitle" aria-label="Рейтинг МТТ осени 2025">
+        <div class="autumn-rating-2025-modal__backdrop"></div>
+        <div class="autumn-rating-2025-modal__inner">
+          <button type="button" class="autumn-rating-2025-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="autumn-rating-2025-modal__title" id="autumnRating2025ModalTitle">Рейтинг МТТ осени 2025</h3>
+          <p class="autumn-rating-2025-modal__subtitle">Победитель — <strong>Эмиль</strong> (Em13)</p>
+          <figure class="autumn-rating-2025-modal__figure">
+            <img
+              class="autumn-rating-2025-modal__photo"
+              src="./assets/hall-rating-autumn-2025-emil-cup.png"
+              alt="Кубок чемпиона МТТ-рейтинга осени 2025, Em13, клуб Два туза"
+              width="768"
+              height="1024"
+              loading="lazy"
+            />
+            <figcaption class="autumn-rating-2025-modal__figcaption">Кубок на гравировке: чемпион МТТ-рейтинга осени 2025</figcaption>
+          </figure>
+          <div class="autumn-rating-2025-modal__prose">
+            <p>Эмиль захватил лидерство примерно к концу первого месяца и удерживал его весь лидерборд, выиграв под «лям» за это время, а то и больше, если посчитать турниры дешевле 800&nbsp;₽, которые не пошли в учёт рейтинга. Вычтем ребаи и аддоны — и получится чистыми вполне приличная сумма! И прибавка <strong>70&nbsp;000&nbsp;₽</strong> за этот лидерборд.</p>
+            <p>Никто случайно не оказался в топ‑10: сильный состав, и чем выше, тем сильнее 😂 Очень рад находиться в составе таких игроков и вообще рад, что мы сделали такую движуху, в которой шли бок о бок и из недели в неделю двигали друг друга в жёсткой плотной борьбе! Что мотивировало играть, думать, анализировать и развиваться.</p>
+            <p>Итого в рейтинг попало <strong>142</strong> человека — всем огромное спасибо за участие!</p>
+          </div>
+          <h4 class="autumn-rating-2025-modal__top-heading">Топ‑10 по итогам</h4>
+          <p class="autumn-rating-2025-modal__top-hint">Ник, выигрыш в турнирах, баллы, приз</p>
+          <div class="autumn-rating-2025-modal__table-wrap">
+            <table class="autumn-rating-2025-modal__table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Ник</th>
+                  <th scope="col">Выигрыш</th>
+                  <th scope="col">Баллы</th>
+                  <th scope="col">Приз</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Em13</td>
+                  <td>928&nbsp;132&nbsp;₽</td>
+                  <td>3&nbsp;732</td>
+                  <td>70&nbsp;000&nbsp;₽ + кубок</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>ПокерМанки</td>
+                  <td>756&nbsp;861&nbsp;₽</td>
+                  <td>3&nbsp;421</td>
+                  <td>40&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Андрюморф</td>
+                  <td>818&nbsp;498&nbsp;₽</td>
+                  <td>3&nbsp;023</td>
+                  <td>25&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Waaarr</td>
+                  <td>545&nbsp;419&nbsp;₽</td>
+                  <td>2&nbsp;936</td>
+                  <td>15&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Cooler91</td>
+                  <td>567&nbsp;625&nbsp;₽</td>
+                  <td>2&nbsp;710</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Штукатур</td>
+                  <td>418&nbsp;048&nbsp;₽</td>
+                  <td>2&nbsp;461</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>Пупсик</td>
+                  <td>580&nbsp;157&nbsp;₽</td>
+                  <td>2&nbsp;307</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>Фишкапченый</td>
+                  <td>328&nbsp;034&nbsp;₽</td>
+                  <td>2&nbsp;055</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Сармат</td>
+                  <td>167&nbsp;675&nbsp;₽</td>
+                  <td>1&nbsp;469</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>Winifly</td>
+                  <td>441&nbsp;915&nbsp;₽</td>
+                  <td>1&nbsp;348</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="spring-rating-info-modal" id="springRatingInfoModal" aria-hidden="true" role="dialog" aria-labelledby="springRatingInfoModalTitle" aria-label="Рейтинг турнирщиков весны">
         <div class="spring-rating-info-modal__backdrop"></div>
         <div class="spring-rating-info-modal__inner">
@@ -3735,7 +4098,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=155"></script>
+    <script src="./app.js?v=158"></script>
   </body>
 </html>
 

@@ -1504,29 +1504,45 @@ body.chat-keyboard-open .app {
   grid-template-columns: 1.4fr 1fr;
   gap: 10px;
   margin-top: 10px;
+  align-items: start;
 }
 @media (max-width: 380px) {
   .gazette-front__grid {
     grid-template-columns: 1fr;
   }
 }
-.gazette-front__main {
+/* Слева шире — последняя новость; справа уже — две предыдущие */
+.gazette-front__main--lead {
   border-right: 1px solid rgba(44, 24, 16, 0.35);
   padding-right: 8px;
+  min-width: 0;
+}
+.gazette-front__side--prev {
+  min-width: 0;
+}
+.gazette-front__main {
+  min-width: 0;
 }
 @media (max-width: 380px) {
-  .gazette-front__main {
+  .gazette-front__main--lead {
     border-right: none;
     padding-right: 0;
     border-bottom: 1px solid rgba(44, 24, 16, 0.35);
     padding-bottom: 8px;
     margin-bottom: 8px;
   }
+  .gazette-front__side--prev {
+    padding-left: 0;
+  }
 }
 .gazette-front__side {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.gazette-front__col--first {
+  border-top: none;
+  padding-top: 0;
 }
 .gazette-front__section {
   font-size: 9px;
@@ -1535,6 +1551,17 @@ body.chat-keyboard-open .app {
   letter-spacing: 0.12em;
   color: rgba(139, 90, 43, 0.9);
   margin-bottom: 4px;
+}
+.gazette-front__posted-date {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(92, 64, 51, 0.88);
+  line-height: 1.3;
+}
+[data-theme="dark"] .gazette-front__posted-date {
+  color: rgba(214, 211, 209, 0.85);
 }
 .gazette-front__teaser-link {
   display: block;
@@ -2201,6 +2228,27 @@ body.chat-keyboard-open .app {
 }
 .gazette-modal__lead--top {
   margin-top: 24px;
+}
+/* Черновики газеты: скрыты в общей ленте, видны по прямой ссылке ?startapp=news_N */
+#gazetteModalNews .gazette-modal__lead[data-gazette-draft="1"] {
+  display: none !important;
+}
+.gazette-modal__draft-banner {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 700;
+  text-align: center;
+  color: #7c2d12;
+  background: linear-gradient(135deg, rgba(254, 215, 170, 0.95), rgba(251, 191, 36, 0.35));
+  border: 1px dashed rgba(154, 52, 18, 0.55);
+  border-radius: 10px;
+}
+[data-theme="dark"] .gazette-modal__draft-banner {
+  color: #fed7aa;
+  background: linear-gradient(135deg, rgba(124, 45, 18, 0.45), rgba(30, 20, 15, 0.9));
+  border-color: rgba(251, 191, 36, 0.35);
 }
 .gazette-modal__headline--continuation {
   margin: 0 0 12px;
@@ -3827,7 +3875,7 @@ img.chat-contact__avatar {
   min-height: 0;
   position: relative;
   overflow: hidden;
-  margin-top: 8px;
+  margin-top: 0;
 }
 .chat-dialogs-list {
   position: absolute;
@@ -4089,6 +4137,14 @@ img.chat-contact__avatar {
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+}
+/* Поиск внутри прокручиваемого списка диалогов — уезжает вместе со скроллом, не «виcит» отдельно */
+.chat-find-by-id--in-dialogs-scroll {
+  margin-top: 4px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+  position: relative;
+  z-index: 2;
 }
 .chat-find-input-wrap {
   flex: 1;
@@ -10487,6 +10543,608 @@ a.home-mini-icon-item {
   color: #92400e;
 }
 
+/* Модалка «Рейтинг МТТ осени 2025» — осенняя палитра */
+.autumn-rating-2025-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.autumn-rating-2025-modal.autumn-rating-2025-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.autumn-rating-2025-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 15, 8, 0.88);
+  cursor: pointer;
+}
+.autumn-rating-2025-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(41, 37, 36, 0.98) 0%, rgba(28, 25, 23, 0.99) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(251, 146, 60, 0.45);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.15), 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 24px rgba(234, 88, 12, 0.15);
+}
+.autumn-rating-2025-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fde68a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.autumn-rating-2025-modal__close:hover {
+  background: rgba(251, 146, 60, 0.25);
+  color: #fff;
+}
+.autumn-rating-2025-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fed7aa;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.autumn-rating-2025-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #fdba74;
+  text-align: center;
+  line-height: 1.4;
+}
+.autumn-rating-2025-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.autumn-rating-2025-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+.autumn-rating-2025-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #a8a29e;
+  line-height: 1.35;
+}
+.autumn-rating-2025-modal__prose {
+  margin-bottom: 16px;
+}
+.autumn-rating-2025-modal__prose p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e7e5e4;
+}
+.autumn-rating-2025-modal__prose p:last-child {
+  margin-bottom: 0;
+}
+.autumn-rating-2025-modal__top-heading {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fdba74;
+  text-align: center;
+}
+.autumn-rating-2025-modal__top-hint {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: #a8a29e;
+  text-align: center;
+}
+.autumn-rating-2025-modal__table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+.autumn-rating-2025-modal__table {
+  width: 100%;
+  min-width: 300px;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #f5f5f4;
+}
+.autumn-rating-2025-modal__table th,
+.autumn-rating-2025-modal__table td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(120, 113, 108, 0.35);
+  vertical-align: top;
+}
+.autumn-rating-2025-modal__table th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fdba74;
+  background: rgba(154, 52, 18, 0.25);
+}
+.autumn-rating-2025-modal__table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+.autumn-rating-2025-modal__table tbody tr:first-child td {
+  font-weight: 700;
+  color: #fde68a;
+}
+.autumn-rating-2025-modal__table td:first-child {
+  font-weight: 700;
+  color: #fdba74;
+  width: 1.75em;
+}
+[data-theme="light"] .autumn-rating-2025-modal__backdrop {
+  background: rgba(67, 20, 7, 0.45);
+}
+[data-theme="light"] .autumn-rating-2025-modal__inner {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffedd5 40%, #fed7aa 100%);
+  border-color: rgba(234, 88, 12, 0.4);
+  box-shadow: 0 8px 32px rgba(154, 52, 18, 0.2);
+}
+[data-theme="light"] .autumn-rating-2025-modal__close {
+  background: rgba(255, 255, 255, 0.85);
+  color: #9a3412;
+}
+[data-theme="light"] .autumn-rating-2025-modal__title {
+  color: #9a3412;
+}
+[data-theme="light"] .autumn-rating-2025-modal__subtitle {
+  color: #c2410c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__figcaption {
+  color: #78716c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__prose p {
+  color: #44403c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__top-heading {
+  color: #c2410c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__top-hint {
+  color: #78716c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__table-wrap {
+  border-color: rgba(234, 88, 12, 0.25);
+  background: rgba(255, 255, 255, 0.6);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table {
+  color: #292524;
+}
+[data-theme="light"] .autumn-rating-2025-modal__table th,
+[data-theme="light"] .autumn-rating-2025-modal__table td {
+  border-bottom-color: rgba(251, 146, 60, 0.25);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table th {
+  color: #9a3412;
+  background: rgba(254, 215, 170, 0.6);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table tbody tr:nth-child(even) {
+  background: rgba(255, 247, 237, 0.5);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table tbody tr:first-child td {
+  color: #b45309;
+}
+
+/* Модалки «Кубок лета 2024/2025» — оболочка: небо, солнце, бирюза */
+.summer-rating-2024-modal,
+.summer-rating-2025-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.summer-rating-2024-modal.summer-rating-2024-modal--open,
+.summer-rating-2025-modal.summer-rating-2025-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.summer-rating-2024-modal__backdrop,
+.summer-rating-2025-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 44, 62, 0.88);
+  cursor: pointer;
+}
+.summer-rating-2024-modal__inner,
+.summer-rating-2025-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(21, 94, 117, 0.97) 0%, rgba(15, 23, 42, 0.98) 55%, rgba(30, 41, 59, 0.99) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.12), 0 12px 40px rgba(0, 0, 0, 0.45), 0 4px 28px rgba(34, 211, 238, 0.12);
+}
+.summer-rating-2024-modal__close,
+.summer-rating-2025-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fef08a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.summer-rating-2024-modal__close:hover,
+.summer-rating-2025-modal__close:hover {
+  background: rgba(34, 211, 238, 0.25);
+  color: #fff;
+}
+.summer-rating-2024-modal__title,
+.summer-rating-2025-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.summer-rating-2024-modal__subtitle,
+.summer-rating-2025-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #a5f3fc;
+  text-align: center;
+  line-height: 1.4;
+}
+/* Лето 2024: окно без текста под заголовком */
+.summer-rating-2024-modal__inner {
+  max-height: min(50vh, 360px);
+}
+.summer-rating-2024-modal__empty {
+  min-height: 48px;
+  margin: 0;
+}
+.summer-rating-2025-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.summer-rating-2025-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(253, 224, 71, 0.25);
+}
+.summer-rating-2025-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.summer-rating-2025-modal__prose {
+  margin-bottom: 18px;
+}
+.summer-rating-2025-modal__prose p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.summer-rating-2025-modal__prose p:last-child {
+  margin-bottom: 0;
+}
+.summer-rating-2025-modal__totals-heading {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fef08a;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.summer-rating-2025-modal__podium {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.summer-rating-2025-modal__place {
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  background: rgba(0, 0, 0, 0.18);
+}
+.summer-rating-2025-modal__place--1 {
+  border-color: rgba(253, 224, 71, 0.45);
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.35), rgba(15, 23, 42, 0.5));
+}
+.summer-rating-2025-modal__place--2 {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+.summer-rating-2025-modal__place--3 {
+  border-color: rgba(180, 83, 9, 0.35);
+}
+.summer-rating-2025-modal__place-line {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #f8fafc;
+}
+.summer-rating-2025-modal__bullets {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+.summer-rating-2025-modal__bullets li {
+  margin-bottom: 4px;
+}
+.summer-rating-2025-modal__rest-wrap {
+  border-radius: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px 14px;
+}
+.summer-rating-2025-modal__rest-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a5f3fc;
+  text-align: center;
+}
+.summer-rating-2025-modal__rest-list {
+  margin: 0;
+  padding-left: 1.35em;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.summer-rating-2025-modal__rest-list li {
+  margin-bottom: 4px;
+}
+[data-theme="light"] .summer-rating-2024-modal__backdrop,
+[data-theme="light"] .summer-rating-2025-modal__backdrop {
+  background: rgba(14, 116, 144, 0.35);
+}
+[data-theme="light"] .summer-rating-2024-modal__inner,
+[data-theme="light"] .summer-rating-2025-modal__inner {
+  background: linear-gradient(180deg, #f0fdfa 0%, #ccfbf1 40%, #99f6e4 100%);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 8px 32px rgba(14, 116, 144, 0.15);
+}
+[data-theme="light"] .summer-rating-2024-modal__close,
+[data-theme="light"] .summer-rating-2025-modal__close {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2024-modal__title,
+[data-theme="light"] .summer-rating-2025-modal__title {
+  color: #b45309;
+}
+[data-theme="light"] .summer-rating-2024-modal__subtitle,
+[data-theme="light"] .summer-rating-2025-modal__subtitle {
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2025-modal__figcaption {
+  color: #64748b;
+}
+[data-theme="light"] .summer-rating-2025-modal__prose p {
+  color: #334155;
+}
+[data-theme="light"] .summer-rating-2025-modal__totals-heading {
+  color: #c2410c;
+}
+[data-theme="light"] .summer-rating-2025-modal__place {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+[data-theme="light"] .summer-rating-2025-modal__place--1 {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.9), rgba(255, 255, 255, 0.85));
+  border-color: rgba(245, 158, 11, 0.4);
+}
+[data-theme="light"] .summer-rating-2025-modal__place-line {
+  color: #0f172a;
+}
+[data-theme="light"] .summer-rating-2025-modal__bullets {
+  color: #475569;
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-wrap {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(6, 182, 212, 0.28);
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-title {
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-list {
+  color: #334155;
+}
+
+/* Модалка «Весна 2024» — Рыбнадзор, кубок турнирщика весны */
+.spring-rating-2024-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.spring-rating-2024-modal.spring-rating-2024-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.spring-rating-2024-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 40, 28, 0.88);
+  cursor: pointer;
+}
+.spring-rating-2024-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(6, 78, 59, 0.97) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  box-shadow: 0 0 0 1px rgba(167, 243, 208, 0.12), 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.spring-rating-2024-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: #a7f3d0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.spring-rating-2024-modal__close:hover {
+  background: rgba(52, 211, 153, 0.25);
+  color: #fff;
+}
+.spring-rating-2024-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #a7f3d0;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.spring-rating-2024-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #6ee7b7;
+  text-align: center;
+  line-height: 1.4;
+}
+.spring-rating-2024-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.spring-rating-2024-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(52, 211, 153, 0.25);
+}
+.spring-rating-2024-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.spring-rating-2024-modal__prose {
+  margin: 0;
+}
+.spring-rating-2024-modal__prose p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #ecfdf5;
+  text-align: center;
+}
+[data-theme="light"] .spring-rating-2024-modal__backdrop {
+  background: rgba(6, 95, 70, 0.35);
+}
+[data-theme="light"] .spring-rating-2024-modal__inner {
+  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  border-color: rgba(5, 150, 105, 0.4);
+}
+[data-theme="light"] .spring-rating-2024-modal__close {
+  background: rgba(255, 255, 255, 0.9);
+  color: #047857;
+}
+[data-theme="light"] .spring-rating-2024-modal__title {
+  color: #065f46;
+}
+[data-theme="light"] .spring-rating-2024-modal__subtitle {
+  color: #047857;
+}
+[data-theme="light"] .spring-rating-2024-modal__figcaption {
+  color: #64748b;
+}
+[data-theme="light"] .spring-rating-2024-modal__prose p {
+  color: #14532d;
+}
+
 /* Модалка карточки пользователя в чате */
 .chat-user-modal {
   position: fixed;
@@ -13143,7 +13801,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   flex-shrink: 0;
   align-self: stretch;
 }
-/* Одна сплошная полоса с общей обводкой (как у «Назад») на всю оставшуюся ширину */
+/* Одна сплошная полоса с общей обводкой на всю оставшуюся ширину */
 .hall-of-fame__subtabs {
   display: flex;
   align-items: stretch;
@@ -13304,6 +13962,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   padding: 18px 12px 22px;
   border-radius: 22px;
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(165deg, rgba(30, 58, 42, 0.35) 0%, rgba(15, 23, 42, 0.72) 50%, rgba(15, 23, 42, 0.85) 100%),
     radial-gradient(ellipse 100% 70% at 50% 0%, rgba(251, 146, 60, 0.1), transparent 55%);
   border: 1px solid rgba(251, 146, 60, 0.32);
@@ -13342,6 +14003,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   z-index: 1;
   margin-top: 0 !important;
   margin-bottom: 8px !important;
+  text-align: center;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 .hall-photo-album__lead {
@@ -13453,6 +14115,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
+/* Две страницы разворота — поровну (без 50%+50%+корешок: переполнение) */
+.hall-photo-album__spread > .hall-photo-album__page {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .hall-photo-album__spread:last-child {
   margin-bottom: 0;
 }
@@ -13462,6 +14129,10 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   min-width: 0;
   position: relative;
   padding: 12px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
   background: linear-gradient(145deg, #fdfcfa 0%, #f0ebe3 55%, #e8e2d8 100%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 2px 2px 8px rgba(255, 255, 255, 0.4);
 }
@@ -13507,10 +14178,16 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 
 .hall-photo-album__snap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   width: 100%;
   max-width: none;
+  min-height: 0;
   margin: 0;
-  padding: 8px 6px 0;
+  padding: 22px 8px 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
@@ -13525,15 +14202,21 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-photo-album__btn {
   display: block;
   width: 100%;
+  flex-shrink: 0;
   padding: 0;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
   background: #1c1917;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  /* Единое «окно» под фото на развороте — ровная сетка; кадр кропается по центру */
+  aspect-ratio: 4 / 5;
+  max-height: min(220px, 38vh);
+  margin: 0 auto;
+  max-width: 100%;
 }
 .hall-photo-album__btn:hover,
 .hall-photo-album__btn:focus-visible {
@@ -13546,16 +14229,21 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-photo-album__img {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: min(200px, 42vh);
+  height: 100%;
+  max-height: none;
   object-fit: cover;
   object-position: center;
   vertical-align: middle;
   transition: transform 0.3s ease;
 }
 @media (min-width: 480px) {
-  .hall-photo-album__img {
-    max-height: min(240px, 46vh);
+  .hall-photo-album__btn {
+    max-height: min(260px, 42vh);
+  }
+}
+@media (min-width: 560px) {
+  .hall-photo-album__btn {
+    max-height: min(280px, 44vh);
   }
 }
 .hall-photo-album__page:hover .hall-photo-album__img {
@@ -13564,25 +14252,37 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 
 .hall-photo-album__caption {
   display: block;
-  margin-top: 8px;
-  padding: 0 2px;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 10px 6px 2px;
   font-size: 11px;
   font-weight: 700;
   font-family: Georgia, "Times New Roman", serif;
   color: #3d3830;
   text-align: center;
-  line-height: 1.35;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 [data-theme="dark"] .hall-photo-album__caption {
   color: rgba(250, 250, 249, 0.9);
 }
 .hall-photo-album__caption--long {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .hall-photo-album__page--blank {
-  min-height: 80px;
+  min-height: 120px;
+}
+.hall-photo-album__page--blank .hall-photo-album__snap {
+  flex: 1;
+  min-height: 0;
 }
 
 @media (max-width: 520px) {
@@ -13610,6 +14310,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   }
   .hall-photo-album__spread {
     flex-direction: column;
+  }
+  .hall-photo-album__spread > .hall-photo-album__page {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
   }
   .hall-photo-album__gutter {
     flex: 0 0 auto;
@@ -13641,6 +14346,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 
 /* Доска позора — вкладка справа от «Фото» */
+.hall-shame-board {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .hall-shame-board__title {
   position: relative;
 }
@@ -13692,22 +14402,116 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   gap: 14px;
   border-color: rgba(148, 163, 184, 0.55);
   background: linear-gradient(145deg, rgba(51, 65, 85, 0.65), rgba(15, 23, 42, 0.88));
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-@media (min-width: 480px) {
+/* Ряд «скрины | текст» только когда хватает ширины; иначе снова узкий текст и вылет галереи за колонку */
+@media (min-width: 640px) {
   .hall-shame-board__item--featured {
     flex-direction: row;
     align-items: flex-start;
+    gap: 16px;
   }
 }
 .hall-shame-board__featured-media {
   position: relative;
   flex-shrink: 0;
   align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+  box-sizing: border-box;
 }
-@media (min-width: 480px) {
+@media (min-width: 640px) {
   .hall-shame-board__featured-media {
     align-self: flex-start;
+    flex: 0 0 200px;
+    width: 200px;
+    max-width: 200px;
   }
+}
+.hall-shame-board__item--featured .hall-shame-board__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+@media (min-width: 640px) {
+  /* Не flex-basis в %: 55% + колонка 200px даёт переполнение узкой карточки — текст «уезжает» вправо */
+  .hall-shame-board__item--featured .hall-shame-board__body {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+.hall-shame-board__corgi-gallery-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.95);
+  text-align: center;
+}
+[data-theme="light"] .hall-shame-board__corgi-gallery-title {
+  color: rgba(71, 85, 105, 0.88);
+}
+.hall-shame-board__corgi-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Три превью в колонку — ширина как у одного старого скрина, без наезда на текст */
+.hall-shame-board__item--featured .hall-shame-board__corgi-gallery {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 10px;
+}
+.hall-shame-board__corgi-gallery .hall-shame-board__thumb-btn {
+  margin: 0;
+  max-width: 100%;
+  width: 100%;
+}
+.hall-shame-board__item--featured .hall-shame-board__thumb-btn {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 200px;
+}
+.hall-shame-board__thumb-btn--chat {
+  max-width: 132px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.hall-shame-board__item--featured .hall-shame-board__thumb-btn--chat {
+  max-width: 200px;
+  width: 100%;
+}
+.hall-shame-board__chat-thumb {
+  display: block;
+  width: 100%;
+  max-width: 132px;
+  height: auto;
+  max-height: 260px;
+  object-fit: cover;
+  object-position: top center;
+  vertical-align: middle;
+}
+.hall-shame-board__item--featured .hall-shame-board__chat-thumb {
+  max-width: 200px;
+  margin: 0 auto;
+  max-height: 200px;
 }
 .hall-shame-board__badge {
   position: absolute;
@@ -13793,11 +14597,23 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.02em;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 .hall-shame-board__desc {
   font-size: 12px;
   line-height: 1.4;
   color: var(--text-muted, var(--muted));
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.hall-shame-board__item--featured .hall-shame-board__tag {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 [data-theme="light"] .hall-shame-board__item {
   background: linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
@@ -13816,6 +14632,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-of-fame__rating-card-wrap {
   margin: 0 auto 10px;
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 /* Карточка «Зимний рейтинг» в Зале славы — тот же вид, что на главной */
 .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card,
@@ -13869,6 +14688,223 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 [data-theme="light"] .hall-of-fame__winter-winner {
   color: #0284c7;
 }
+
+/* Карточка «Рейтинг осени 2025» — тёплая осенняя палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg, rgba(154, 52, 18, 0.42) 0%, rgba(67, 20, 7, 0.92) 45%, rgba(28, 25, 23, 0.98) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.22),
+              0 4px 22px rgba(234, 88, 12, 0.2),
+              inset 0 1px 0 rgba(255, 237, 213, 0.12) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
+              0 6px 26px rgba(234, 88, 12, 0.28),
+              inset 0 1px 0 rgba(255, 247, 237, 0.16) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize {
+  color: #fdba74 !important;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season {
+  color: #fed7aa !important;
+}
+.hall-of-fame__autumn-leaf {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+.hall-of-fame__autumn-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fde68a;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card {
+  border: 1px solid rgba(234, 88, 12, 0.45) !important;
+  background: linear-gradient(165deg, #fff7ed 0%, #ffedd5 35%, #fdba74 100%) !important;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.2),
+              0 4px 18px rgba(234, 88, 12, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.35),
+              0 6px 22px rgba(234, 88, 12, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize {
+  color: #c2410c !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season {
+  color: #9a3412 !important;
+}
+[data-theme="light"] .hall-of-fame__autumn-winner {
+  color: #b45309;
+}
+
+/* Карточка «Кубок лета 2025» — солнечная палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(250, 204, 21, 0.55) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(160deg, rgba(14, 116, 144, 0.55) 0%, rgba(21, 94, 117, 0.75) 28%, rgba(30, 58, 95, 0.92) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.2),
+              0 4px 22px rgba(34, 211, 238, 0.18),
+              inset 0 1px 0 rgba(254, 249, 195, 0.14) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.4),
+              0 6px 28px rgba(34, 211, 238, 0.25),
+              inset 0 1px 0 rgba(255, 251, 235, 0.2) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize {
+  color: #fef08a !important;
+  text-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season {
+  color: #a5f3fc !important;
+}
+.hall-of-fame__summer-sun {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+.hall-of-fame__summer-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fef9c3;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card {
+  border: 1px solid rgba(14, 165, 233, 0.45) !important;
+  background: linear-gradient(165deg, #ecfeff 0%, #cffafe 35%, #a5f3fc 100%) !important;
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.2),
+              0 4px 20px rgba(14, 165, 233, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.35),
+              0 6px 24px rgba(14, 165, 233, 0.22),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize {
+  color: #0369a1 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season {
+  color: #0e7490 !important;
+}
+[data-theme="light"] .hall-of-fame__summer-winner {
+  color: #0c4a6e;
+}
+
+/* Карточка «Весна 2024» — свежая весенняя палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(167, 243, 208, 0.55) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg, rgba(6, 95, 70, 0.5) 0%, rgba(20, 83, 45, 0.82) 45%, rgba(15, 23, 42, 0.95) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22),
+              0 4px 22px rgba(16, 185, 129, 0.2),
+              inset 0 1px 0 rgba(236, 253, 245, 0.1) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(110, 231, 183, 0.4),
+              0 6px 26px rgba(16, 185, 129, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize {
+  color: #a7f3d0 !important;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season {
+  color: #d1fae5 !important;
+}
+.hall-of-fame__spring-2024-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #ecfdf5;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card {
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  background: linear-gradient(165deg, #ecfdf5 0%, #d1fae5 40%, #a7f3d0 100%) !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2),
+              0 4px 18px rgba(5, 150, 105, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.35),
+              0 6px 22px rgba(16, 185, 129, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize {
+  color: #047857 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season {
+  color: #065f46 !important;
+}
+[data-theme="light"] .hall-of-fame__spring-2024-winner {
+  color: #064e3b;
+}
+
 .hall-of-fame__block {
   margin-bottom: 24px;
 }

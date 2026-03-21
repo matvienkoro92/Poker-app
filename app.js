@@ -562,6 +562,7 @@ function runGazetteAndTasksInit() {
     var articles = document.querySelectorAll("[data-gazette-article]");
     var max = 0;
     for (var i = 0; i < articles.length; i++) {
+      if (articles[i].getAttribute("data-gazette-draft") === "1") continue;
       var n = parseInt(articles[i].getAttribute("data-gazette-article"), 10);
       if (!isNaN(n) && n > max) max = n;
     }
@@ -618,6 +619,7 @@ function runGazetteAndTasksInit() {
   function showGazetteView(view) {
     pickEl.hidden = view !== "pick";
     newsEl.hidden = view !== "news";
+    if (view === "pick" && newsEl) newsEl.removeAttribute("data-reveal-draft");
     if (paperEl) paperEl.scrollTop = 0;
   }
 
@@ -638,7 +640,9 @@ function runGazetteAndTasksInit() {
       if (gazetteNotifySubsHint) gazetteNotifySubsHint.textContent = "";
       var payload = { initData: initData };
       if (newsEl) {
-        var firstArticle = newsEl.querySelector(".gazette-modal__lead[data-gazette-article]");
+        var firstArticle = newsEl.querySelector(
+          ".gazette-modal__lead[data-gazette-article]:not([data-gazette-draft='1'])"
+        );
         var headlineEl = firstArticle && firstArticle.querySelector(".gazette-modal__headline");
         if (headlineEl) {
           var headlineText = headlineEl.textContent.trim();
@@ -694,6 +698,17 @@ function runGazetteAndTasksInit() {
   })();
   function openGazette(goToNews, articleIndex) {
     if (goToNews === "news") {
+      if (newsEl) {
+        newsEl.removeAttribute("data-reveal-draft");
+        if (typeof articleIndex === "number" && articleIndex >= 0) {
+          var draftCheck = newsEl.querySelector(
+            '.gazette-modal__lead[data-gazette-article="' + articleIndex + '"]'
+          );
+          if (draftCheck && draftCheck.getAttribute("data-gazette-draft") === "1") {
+            newsEl.setAttribute("data-reveal-draft", String(articleIndex));
+          }
+        }
+      }
       showGazetteView("news");
       if (typeof articleIndex === "number" && articleIndex >= 0 && newsEl) {
         var article = newsEl.querySelector('.gazette-modal__lead[data-gazette-article="' + articleIndex + '"]');
@@ -717,6 +732,7 @@ function runGazetteAndTasksInit() {
     var card = e.target && e.target.closest ? e.target.closest(".gazette-modal__page-card") : null;
     if (card && card.dataset.gazettePage === "news") {
       e.preventDefault();
+      if (newsEl) newsEl.removeAttribute("data-reveal-draft");
       showGazetteView("news");
       return;
     }
@@ -743,14 +759,27 @@ function runGazetteAndTasksInit() {
       closeGazette();
       var view = ratingLink.getAttribute("data-view-target");
       if (view && typeof setView === "function") setView(view);
+      if (ratingLink.getAttribute("data-hall-shame") === "1" && typeof showHallOfFamePanel === "function") {
+        setTimeout(function () {
+          showHallOfFamePanel("shame");
+        }, 520);
+      }
       return;
     }
     var articleLink = e.target && e.target.closest ? e.target.closest("a[data-gazette-article-link]") : null;
     if (articleLink) {
       e.preventDefault();
-      showGazetteView("news");
       var idxStr = articleLink.getAttribute("data-gazette-article-link");
-      var idxNum = Number(idxStr);
+      if (newsEl) {
+        newsEl.removeAttribute("data-reveal-draft");
+        if (idxStr) {
+          var draftTgt = newsEl.querySelector('.gazette-modal__lead[data-gazette-article="' + idxStr + '"]');
+          if (draftTgt && draftTgt.getAttribute("data-gazette-draft") === "1") {
+            newsEl.setAttribute("data-reveal-draft", idxStr);
+          }
+        }
+      }
+      showGazetteView("news");
       if (idxStr && newsEl) {
         var target = newsEl.querySelector('.gazette-modal__lead[data-gazette-article="' + idxStr + '"]');
         if (target) {
@@ -3605,6 +3634,25 @@ function setHallOfFameSubtabActive(section) {
 function showHallOfFamePanel(section) {
   var view = document.getElementById("hallOfFameView");
   if (!view) return;
+  function hallFameGetScrollY() {
+    try {
+      var se = document.scrollingElement || document.documentElement;
+      return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    } catch (eY) {
+      return 0;
+    }
+  }
+  function hallFameSetScrollY(y) {
+    try {
+      y = Math.max(0, y);
+      if (typeof window.scrollTo === "function") window.scrollTo(0, y);
+      var se = document.scrollingElement || document.documentElement;
+      if (se) se.scrollTop = y;
+      if (document.documentElement) document.documentElement.scrollTop = y;
+      if (document.body) document.body.scrollTop = y;
+    } catch (eS) {}
+  }
+  var scrollYKeep = hallFameGetScrollY();
   view.querySelectorAll(".hall-of-fame__panel[data-hall-panel]").forEach(function (panel) {
     var on = panel.getAttribute("data-hall-panel") === section;
     panel.classList.toggle("hall-of-fame__panel--active", on);
@@ -3612,6 +3660,23 @@ function showHallOfFamePanel(section) {
     else panel.setAttribute("hidden", "");
   });
   setHallOfFameSubtabActive(section);
+  /* Клик по вкладке даёт фокус кнопке — WebKit/Telegram WebView прокручивают окно вверх к табам. Возвращаем прежний scroll. */
+  hallFameSetScrollY(scrollYKeep);
+  var rafH = window.requestAnimationFrame || function (fn) {
+    setTimeout(fn, 16);
+  };
+  rafH(function () {
+    hallFameSetScrollY(scrollYKeep);
+    rafH(function () {
+      hallFameSetScrollY(scrollYKeep);
+    });
+  });
+  setTimeout(function () {
+    hallFameSetScrollY(scrollYKeep);
+  }, 0);
+  setTimeout(function () {
+    hallFameSetScrollY(scrollYKeep);
+  }, 64);
 }
 
 window.showHallOfFamePanel = showHallOfFamePanel;
@@ -6783,6 +6848,126 @@ function closeSpringRatingInfoModal() {
   document.body.style.overflow = "";
 }
 
+function openAutumnRating2025Modal() {
+  var modal = document.getElementById("autumnRating2025Modal");
+  if (!modal) return;
+  initAutumnRating2025Modal();
+  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("autumn-rating-2025-modal--open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAutumnRating2025Modal() {
+  var modal = document.getElementById("autumnRating2025Modal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("autumn-rating-2025-modal--open");
+  document.body.style.overflow = "";
+}
+
+function initAutumnRating2025Modal() {
+  var modal = document.getElementById("autumnRating2025Modal");
+  if (!modal || modal.getAttribute("data-inited") === "1") return;
+  modal.setAttribute("data-inited", "1");
+  var closeBtn = modal.querySelector(".autumn-rating-2025-modal__close");
+  var backdrop = modal.querySelector(".autumn-rating-2025-modal__backdrop");
+  if (closeBtn) closeBtn.addEventListener("click", closeAutumnRating2025Modal);
+  if (backdrop) backdrop.addEventListener("click", closeAutumnRating2025Modal);
+  document.addEventListener("keydown", function autumn2025Esc(e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeAutumnRating2025Modal();
+  });
+}
+
+function openSpringRating2024Modal() {
+  var modal = document.getElementById("springRating2024Modal");
+  if (!modal) return;
+  initSpringRating2024Modal();
+  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("spring-rating-2024-modal--open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSpringRating2024Modal() {
+  var modal = document.getElementById("springRating2024Modal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("spring-rating-2024-modal--open");
+  document.body.style.overflow = "";
+}
+
+function initSpringRating2024Modal() {
+  var modal = document.getElementById("springRating2024Modal");
+  if (!modal || modal.getAttribute("data-inited") === "1") return;
+  modal.setAttribute("data-inited", "1");
+  var closeBtn = modal.querySelector(".spring-rating-2024-modal__close");
+  var backdrop = modal.querySelector(".spring-rating-2024-modal__backdrop");
+  if (closeBtn) closeBtn.addEventListener("click", closeSpringRating2024Modal);
+  if (backdrop) backdrop.addEventListener("click", closeSpringRating2024Modal);
+  document.addEventListener("keydown", function spring2024Esc(e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeSpringRating2024Modal();
+  });
+}
+
+function openSummerRating2024Modal() {
+  var modal = document.getElementById("summerRating2024Modal");
+  if (!modal) return;
+  initSummerRating2024Modal();
+  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("summer-rating-2024-modal--open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSummerRating2024Modal() {
+  var modal = document.getElementById("summerRating2024Modal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("summer-rating-2024-modal--open");
+  document.body.style.overflow = "";
+}
+
+function initSummerRating2024Modal() {
+  var modal = document.getElementById("summerRating2024Modal");
+  if (!modal || modal.getAttribute("data-inited") === "1") return;
+  modal.setAttribute("data-inited", "1");
+  var closeBtn = modal.querySelector(".summer-rating-2024-modal__close");
+  var backdrop = modal.querySelector(".summer-rating-2024-modal__backdrop");
+  if (closeBtn) closeBtn.addEventListener("click", closeSummerRating2024Modal);
+  if (backdrop) backdrop.addEventListener("click", closeSummerRating2024Modal);
+  document.addEventListener("keydown", function summer2024Esc(e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeSummerRating2024Modal();
+  });
+}
+
+function openSummerRating2025Modal() {
+  var modal = document.getElementById("summerRating2025Modal");
+  if (!modal) return;
+  initSummerRating2025Modal();
+  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("summer-rating-2025-modal--open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSummerRating2025Modal() {
+  var modal = document.getElementById("summerRating2025Modal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden", "true");
+  modal.classList.remove("summer-rating-2025-modal--open");
+  document.body.style.overflow = "";
+}
+
+function initSummerRating2025Modal() {
+  var modal = document.getElementById("summerRating2025Modal");
+  if (!modal || modal.getAttribute("data-inited") === "1") return;
+  modal.setAttribute("data-inited", "1");
+  var closeBtn = modal.querySelector(".summer-rating-2025-modal__close");
+  var backdrop = modal.querySelector(".summer-rating-2025-modal__backdrop");
+  if (closeBtn) closeBtn.addEventListener("click", closeSummerRating2025Modal);
+  if (backdrop) backdrop.addEventListener("click", closeSummerRating2025Modal);
+  document.addEventListener("keydown", function summer2025Esc(e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeSummerRating2025Modal();
+  });
+}
+
 function initSpringRatingInfoModal() {
   var modal = document.getElementById("springRatingInfoModal");
   if (!modal || modal.getAttribute("data-inited") === "1") return;
@@ -8942,6 +9127,34 @@ function handleViewLinkClick(e) {
     e.preventDefault();
     return;
   }
+  var spring2024Btn = e.target.closest("#springRating2024InfoBtn");
+  if (spring2024Btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    openSpringRating2024Modal();
+    return;
+  }
+  var summer2024Btn = e.target.closest("#summerRating2024InfoBtn");
+  if (summer2024Btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    openSummerRating2024Modal();
+    return;
+  }
+  var summer2025Btn = e.target.closest("#summerRating2025InfoBtn");
+  if (summer2025Btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    openSummerRating2025Modal();
+    return;
+  }
+  var autumn2025Btn = e.target.closest("#autumnRating2025InfoBtn");
+  if (autumn2025Btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    openAutumnRating2025Modal();
+    return;
+  }
   var springBtn = e.target.closest("#springRatingInfoBtn");
   if (springBtn) {
     e.preventDefault();
@@ -8965,6 +9178,13 @@ function handleViewLinkClick(e) {
 }
 
 document.addEventListener("click", handleViewLinkClick);
+
+/* Зал славы: mousedown по подвкладке без preventDefault даёт фокус кнопке → WebKit скроллит к табам. */
+document.addEventListener("mousedown", function (e) {
+  var sub = e.target && e.target.closest && e.target.closest(".hall-of-fame__subtab[data-hall-section]");
+  if (!sub || e.button !== 0) return;
+  e.preventDefault();
+}, true);
 
 document.addEventListener("touchend", function (e) {
   var top15 = e.target.closest("a[data-hall-top15]");
