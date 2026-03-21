@@ -2678,6 +2678,11 @@ function telegramUserDisplayName(u) {
     });
   }
 
+  window.pokerRetryTelegramAuthVerification = function () {
+    if (!tg || !tg.initData) return;
+    runVerifyFlow();
+  };
+
   if (!tg) {
     updateHeaderGreeting();
     showUnauthorized();
@@ -3005,8 +3010,7 @@ function getPokerChatTelegramAuthState() {
 }
 
 function pokerNotifyChatVerificationRequired() {
-  var msg =
-    "Чтобы общаться в чате, верифицируйтесь в приложении: дождитесь проверки входа через Telegram или откройте Mini App из бота заново.";
+  var msg = "Чтобы общаться в чате, откройте Mini App из бота Telegram.";
   var w = window.Telegram && window.Telegram.WebApp;
   if (w && w.showAlert) w.showAlert(msg);
   else if (typeof alert === "function") alert(msg);
@@ -3034,17 +3038,7 @@ function pokerEnsureChatTelegramVerified() {
 }
 
 function setView(viewName) {
-  if (viewName === "chat") {
-    var st = getPokerChatTelegramAuthState();
-    if (st === "pending") {
-      pokerNotifyChatAuthPending();
-      return;
-    }
-    if (st !== "ok") {
-      pokerNotifyChatVerificationRequired();
-      return;
-    }
-  }
+  /* Чаты всегда открываются (нижнее меню). Верификация — pokerEnsure на диалогах/отправке. */
   var prevView = "";
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
