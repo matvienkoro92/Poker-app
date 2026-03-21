@@ -2814,6 +2814,21 @@ function setView(viewName) {
       view.classList.remove("view--active");
     }
   });
+  // Мгновенный финальный вид нижней навигации при возврате на главную (без 250ms «доезда» поверх контента).
+  if (viewName === "home" && prevView !== "home") {
+    try {
+      var bnavNt = document.querySelector(".bottom-nav");
+      if (bnavNt) {
+        bnavNt.classList.add("bottom-nav--no-transition");
+        var rafNavNt = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+        rafNavNt(function () {
+          rafNavNt(function () {
+            bnavNt.classList.remove("bottom-nav--no-transition");
+          });
+        });
+      }
+    } catch (eNavNt) {}
+  }
   navItems.forEach(function (item) {
     if (item.dataset.viewTarget === viewName) {
       item.classList.add("bottom-nav__item--active");
@@ -2986,23 +3001,28 @@ function setView(viewName) {
   }
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
+  // Восстановление скролла главной: сразу после смены view, без нескольких отложенных
+  // вызовов — иначе сначала рисуется верх страницы, потом скачок (мерцание в TG/WebKit).
   if (viewName === "home" && prevView !== "home" && typeof window.__savedHomeScrollY === "number") {
     var restoreHomeY = window.__savedHomeScrollY;
     function applyHomeScroll() {
       try {
-        window.scrollTo(0, restoreHomeY);
+        var y = restoreHomeY;
+        if (typeof window.scrollTo === "function") {
+          window.scrollTo({ top: y, left: 0, behavior: "auto" });
+        } else {
+          window.scrollTo(0, y);
+        }
         var se = document.scrollingElement || document.documentElement;
-        if (se) se.scrollTop = restoreHomeY;
-        if (document.documentElement) document.documentElement.scrollTop = restoreHomeY;
-        if (document.body) document.body.scrollTop = restoreHomeY;
+        if (se) se.scrollTop = y;
+        if (document.documentElement) document.documentElement.scrollTop = y;
+        if (document.body) document.body.scrollTop = y;
       } catch (eHomeScroll) {}
     }
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        applyHomeScroll();
-        setTimeout(applyHomeScroll, 0);
-        setTimeout(applyHomeScroll, 50);
-      });
+    applyHomeScroll();
+    var rafH = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+    rafH(function () {
+      applyHomeScroll();
     });
   }
   if (viewName === "hall-of-fame") {
@@ -11629,7 +11649,8 @@ window.chatPersonalUnread = false;
 var chatWithUserId = null;
 var personalMessagesCache = {};
 var chatWithUserName = null;
-var chatActiveTab = "general";
+/* "dialogs" = список чатов; иначе loadGeneral() перерисовывал скрытый общий чат и сбрасывал scroll */
+var chatActiveTab = "dialogs";
 var chatIsAdmin = false;
 var chatListenersAttached = false;
 
@@ -12044,6 +12065,7 @@ function initChat() {
     updateUnreadDots();
   }
   function showDialogs() {
+    chatActiveTab = "dialogs";
     chatWithUserId = null;
     chatWithUserName = null;
     if (convTitle) convTitle.textContent = "";
@@ -12534,7 +12556,8 @@ function initChat() {
         var online = data.onlineCount != null ? data.onlineCount : "—";
         window.lastGeneralStats = total + " уч · " + online + " онл";
         updateChatHeaderStats();
-        if (isChatViewActive && chatActiveTab === "general" && !chatIsEditingMessage) {
+        /* Не трогаем DOM общего чата, пока экран скрыт — иначе scrollTop обнуляется и при входе лента «сверху». */
+        if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible && !chatIsEditingMessage) {
           var sig = generalMessagesSignature(messages);
           if (scrollGeneralToBottomOnNextRender || sig !== lastGeneralMessagesSig) {
             if (sig !== lastGeneralMessagesSig) lastGeneralMessagesSig = sig;
@@ -12544,10 +12567,24 @@ function initChat() {
         updateUnreadDots();
         if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
         if (typeof updateClubChatPreview === "function") updateClubChatPreview(messages);
-      } else if (chatActiveTab === "general" && generalMessages) {
+      } else if (
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        generalMessages
+      ) {
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
       }
-    }).catch(function () { if (chatActiveTab === "general" && generalMessages) generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>"; });
+    }).catch(function () {
+      if (
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        generalMessages
+      ) {
+        generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>";
+      }
+    });
   }
 
   var generalReplyTo = null;
@@ -13302,12 +13339,6 @@ function initChat() {
       var optDocument = generalDocument ? { dataUrl: generalDocument.dataUrl, fileName: generalDocument.fileName } : null;
       var optReply = generalReplyTo ? { fromName: generalReplyTo.fromName || "Игрок", text: generalReplyTo.text || "" } : null;
       if (generalInput) {
-    generalInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && generalInput.value.trim().charAt(0) === "/" && !e.shiftKey) {
-        e.preventDefault();
-        showTemplatesMenu(generalInput);
-      }
-    });
         generalInput.value = "";
         // Возвращаем поле ввода к исходной высоте
         try { resizeChatTextarea(generalInput); } catch (e) {}
@@ -13339,6 +13370,9 @@ function initChat() {
         sendingGeneral = false;
         setGeneralSendBusy(false);
         if (data && data.ok) {
+          // После removeChild(optimistic) браузер часто сбрасывает scrollTop — без флага
+          // renderGeneralMessages думает, что мы не у низа, и оставляет прокрутку 0 (прыжок наверх).
+          scrollGeneralToBottomOnNextRender = true;
           var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
           var msg = data.message;
@@ -13655,17 +13689,21 @@ function initChat() {
     var prevScrollHeightP = messagesEl.scrollHeight;
     var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
     messagesEl.innerHTML = html;
-    function restoreScrollP() {
+    function restoreScrollP(clearScrollFlag) {
       var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
       if (scrollPersonalToBottomOnNextRender || wasNearBottomP || maxScrollP <= 0) {
-        if (scrollPersonalToBottomOnNextRender) scrollPersonalToBottomOnNextRender = false;
         messagesEl.scrollTop = messagesEl.scrollHeight;
+        if (clearScrollFlag && scrollPersonalToBottomOnNextRender) scrollPersonalToBottomOnNextRender = false;
       } else {
         messagesEl.scrollTop = Math.min(prevScrollTopP, Math.max(0, maxScrollP));
       }
     }
-    restoreScrollP();
-    requestAnimationFrame(function () { requestAnimationFrame(restoreScrollP); });
+    restoreScrollP(false);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        restoreScrollP(true);
+      });
+    });
     messagesEl.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var id = btn.dataset.msgId;
@@ -13843,12 +13881,6 @@ function initChat() {
     var optDocument = personalDocument ? { dataUrl: personalDocument.dataUrl, fileName: personalDocument.fileName } : null;
     var optReply = personalReplyTo ? { fromName: personalReplyTo.fromName || "Игрок", text: personalReplyTo.text || "" } : null;
     if (inputEl) {
-    inputEl.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && inputEl.value.trim().charAt(0) === "/" && !e.shiftKey) {
-        e.preventDefault();
-        showTemplatesMenu(inputEl);
-      }
-    });
       inputEl.value = "";
       // Возвращаем поле ввода к исходной высоте
       try { resizeChatTextarea(inputEl); } catch (e) {}
@@ -13886,6 +13918,8 @@ function initChat() {
       setPersonalSendBusy(false);
       hideProgress();
       if (data && data.ok) {
+        // См. общий чат: removeChild(optimistic) сбрасывает scrollTop → без флага оказываемся наверху.
+        scrollPersonalToBottomOnNextRender = true;
         var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
         if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
         var msg = data.message;
@@ -14067,7 +14101,15 @@ function initChat() {
       }
     })();
     window.chatRefresh = function () {
-      if (chatActiveTab === "general" && generalMessages && window._chatGeneralCache && window._chatGeneralCache.messages && window._chatGeneralCache.messages.length) {
+      var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
+      if (
+        chatActiveTab === "general" &&
+        genVis &&
+        generalMessages &&
+        window._chatGeneralCache &&
+        window._chatGeneralCache.messages &&
+        window._chatGeneralCache.messages.length
+      ) {
         renderGeneralMessages(window._chatGeneralCache.messages);
         if (window._chatGeneralCache.participantsCount != null || window._chatGeneralCache.onlineCount != null) {
           window.lastGeneralStats = (window._chatGeneralCache.participantsCount != null ? window._chatGeneralCache.participantsCount : "—") + " уч · " + (window._chatGeneralCache.onlineCount != null ? window._chatGeneralCache.onlineCount : "—") + " онл";

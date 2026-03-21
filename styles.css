@@ -1029,7 +1029,8 @@ html.app-view-home .card .card__content {
   border: none;
 }
 .view--active[data-view="chat"] .chat-input-area {
-  padding-left: 0;
+  padding-left: max(8px, var(--screen-gutter-x));
+  padding-right: max(8px, var(--screen-gutter-x));
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
 }
 /* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
@@ -3230,7 +3231,7 @@ body.chat-keyboard-open .app {
   display: block;
   margin-top: 4px;
   cursor: pointer;
-  max-width: min(320px, 80vw);
+  max-width: min(260px, 70vw);
   width: 100%;
   height: auto;
   border-radius: 10px;
@@ -3788,9 +3789,8 @@ img.chat-contact__avatar {
   min-height: 0;
   max-height: 100%;
   overflow: hidden;
-  /* Без горизонтального padding: в чате у .card нет боковых отступов,
-     рамка списка диалогов совпадает по ширине с home-welcome-outline на главной. */
-  padding: 0 0 12px;
+  /* Единые боковые отступы: строки админов и игроков визуально совпадают с остальными экранами. */
+  padding: 0 var(--screen-gutter-x) 12px;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
@@ -4141,6 +4141,11 @@ img.chat-contact__avatar {
   touch-action: pan-y;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  /* Как в личном чате: лента начинается под плавающей шапкой, боковые поля те же */
+  padding-top: calc(48px + 52px + 14px);
+  padding-left: max(8px, var(--screen-gutter-x));
+  padding-right: max(8px, var(--screen-gutter-x));
+  box-sizing: border-box;
 }
 .chat-general-view .chat-input-area {
   flex-shrink: 0;
@@ -4394,6 +4399,8 @@ img.chat-contact__avatar {
 /* Личные сообщения: лента под плавающей шапкой (top 48px + ряд ~52px) + доп. зазор */
 .chat-conv-view .chat-container .chat-messages {
   padding-top: calc(48px + 52px + 14px);
+  padding-left: max(8px, var(--screen-gutter-x));
+  padding-right: max(8px, var(--screen-gutter-x));
   box-sizing: border-box;
 }
 .chat-conv-view .chat-messages > .chat-msg:first-child {
@@ -4443,15 +4450,14 @@ img.chat-contact__avatar {
   background: var(--block-bg-solid);
   color: var(--text);
 }
+/* Общий чат: как зал славы — «Назад» отдельно, остальное одной полосой с разделителями */
 .chat-general-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
+  align-items: stretch;
+  gap: 8px;
   margin-bottom: 0;
   flex-wrap: nowrap;
-  padding: 6px 6px;
-  border-radius: 20px;
+  padding: 0;
   background: transparent;
   position: absolute;
   top: 48px;
@@ -4461,44 +4467,103 @@ img.chat-contact__avatar {
   width: auto;
   max-width: none;
   z-index: 2;
-  --chat-general-header-btn-height: 40px;
-  overflow: hidden; /* чтобы кнопки не вылезали за правый край на узких экранах */
-  /* Важно: заголовок перекрывает часть сообщений, поэтому отключаем захват кликов контейнером.
-     Клики будут проходить к сообщениям, а сами кнопки вернём обратно через pointer-events:auto. */
+  --chat-general-header-strip-min-height: 48px;
+  overflow: hidden;
   pointer-events: none;
 }
-.chat-general-header .chat-back-btn,
-.chat-general-header .chat-general-admins-btn,
-.chat-general-header .chat-general-download-btn,
-.chat-general-header .chat-general-copy-link-btn {
+.chat-general-header__toolbar-back {
+  margin: 0 !important;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+.chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   pointer-events: auto;
-  white-space: nowrap;
-  height: var(--chat-general-header-btn-height);
-  min-height: var(--chat-general-header-btn-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: var(--chat-general-header-strip-min-height);
+  height: auto;
+  padding: 0 12px 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
 }
-.chat-general-header .chat-general-header__trailing {
+.chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
+  border-color: rgba(249, 115, 22, 0.9);
+}
+/* Одна обводка, ячейки с вертикальными разделителями (как .hall-of-fame__subtabs) */
+.chat-general-header__segments {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: var(--chat-general-header-strip-min-height);
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   pointer-events: auto;
 }
-.chat-general-header .chat-back-btn { margin-bottom: 0; }
-.chat-general-header .chat-back-btn,
-.chat-general-header .chat-general-header__trailing {
-  flex: 0 0 auto;
-}
-.chat-general-header__trailing {
+.chat-general-header__segment {
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
+  justify-content: center;
+  margin: 0;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s;
+  text-align: center;
+  text-decoration: none;
+  border-right: 1px solid rgba(249, 115, 22, 0.28);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.chat-general-header__segment:last-child {
+  border-right: none;
+}
+.chat-general-header__segment:hover {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.08);
+}
+.chat-general-header__segment--grow {
+  flex: 1 1 0;
   min-width: 0;
+  padding: 4px 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+}
+.chat-general-header__segment--icon {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  color: var(--text);
 }
 .chat-general-copy-link-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--chat-general-header-btn-height);
-  min-width: var(--chat-general-header-btn-height);
+  width: 44px;
+  min-width: 44px;
   padding: 0;
   margin: 0;
   color: var(--text);
@@ -4523,23 +4588,6 @@ img.chat-contact__avatar {
 .chat-general-copy-link-btn__icon svg {
   display: block;
 }
-.chat-general-header .chat-back-btn {
-  padding: 0 12px 0 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.chat-general-header .chat-general-admins-btn {
-  flex: 1 1 auto;
-  display: inline-flex;
-  justify-content: center;
-  padding: 0 10px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 0; /* важно для flex-сжатия на узких экранах */
-  overflow: hidden;
-}
 .chat-general-admins-btn {
   padding: 7px 12px;
   font-size: 14px;
@@ -4558,22 +4606,31 @@ img.chat-contact__avatar {
 .chat-general-admins-btn:hover {
   border-color: rgba(249, 115, 22, 0.9);
 }
-
+.chat-general-header .chat-general-admins-btn.chat-general-header__segment {
+  height: auto;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.chat-general-header .chat-general-admins-btn.chat-general-header__segment:hover {
+  border: none;
+}
 .chat-general-admins-btn__top {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
-
 .chat-general-admins-btn__bottom {
   display: block;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 600;
   color: rgba(249, 115, 22, 0.95);
   margin-top: 0;
   white-space: nowrap;
@@ -4585,6 +4642,7 @@ img.chat-contact__avatar {
   padding: 5px 10px;
   font-size: 12px;
   font-weight: 500;
+  line-height: 1;
   color: var(--text);
   background: var(--block-bg-solid);
   border: 1px solid rgba(148, 163, 184, 0.5);
@@ -4592,24 +4650,66 @@ img.chat-contact__avatar {
   cursor: pointer;
   font-family: inherit;
   text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
-
-.chat-general-header .chat-back-btn {
-  padding: 0 12px 0 10px;
-  font-size: 14px;
-  border: 1px solid rgba(249, 115, 22, 0.7);
+.chat-general-header .chat-general-download-btn.chat-general-header__segment {
+  height: auto;
+  min-height: 0;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
 }
-.chat-general-header .chat-back-btn:hover {
-  border-color: rgba(249, 115, 22, 0.9);
+.chat-general-header .chat-general-download-btn.chat-general-header__segment:hover {
+  border: none;
+  color: var(--text);
 }
-
-.chat-general-header .chat-general-download-btn {
-  padding: 0 12px;
-  font-size: 14px;
-  border: 1px solid rgba(249, 115, 22, 0.7);
+.chat-general-header .chat-general-copy-link-btn.chat-general-header__segment {
+  width: 44px;
+  min-width: 44px;
+  height: auto;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.chat-general-header .chat-general-download-btn:hover {
-  border-color: rgba(249, 115, 22, 0.9);
+.chat-general-header .chat-general-copy-link-btn.chat-general-header__segment:hover {
+  border: none;
+}
+[data-theme="dark"] .chat-general-header__segments {
+  border-color: rgba(251, 146, 60, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] .chat-general-header__segment {
+  border-right-color: rgba(251, 146, 60, 0.28);
+}
+[data-theme="dark"] .chat-general-header__segment:hover {
+  color: #f1f5f9;
+  background: rgba(249, 115, 22, 0.12);
+}
+[data-theme="light"] .chat-general-header__segments {
+  border-color: rgba(234, 88, 12, 0.65);
+}
+[data-theme="light"] .chat-general-header__segment {
+  border-right-color: rgba(234, 88, 12, 0.28);
+  color: #64748b;
+}
+[data-theme="light"] .chat-general-header__segment:hover {
+  color: #0f172a;
+  background: rgba(251, 146, 60, 0.12);
+}
+[data-theme="light"] .chat-general-header .chat-general-download-btn.chat-general-header__segment {
+  color: #64748b;
 }
 .chat-general-download-btn:hover {
   background: rgba(168, 85, 247, 0.12);
@@ -16229,6 +16329,10 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 
 /* z-index выше подложек/оверлеев, чтобы нижнее меню никогда не перекрывалось */
+.bottom-nav.bottom-nav--no-transition {
+  transition: none !important;
+}
+
 .bottom-nav {
   position: fixed;
   left: 0;
