@@ -2510,6 +2510,31 @@ function telegramUserDisplayName(u) {
     return "";
   }
 
+  /**
+   * URL, на который Telegram вернёт пользователя после «Войти через Telegram» (query с hash/id/…).
+   * Должен быть на том же хосте, что указан в @BotFather для Login Widget (в поле — только домен, без https://).
+   * Если задан data-api-base и его hostname = текущей странице, колбэк = origin из data-api-base + «/» (канонический продакшен).
+   */
+  function getTelegramWidgetAuthCallbackUrl() {
+    try {
+      var el = document.getElementById("app");
+      var raw = el && el.getAttribute("data-api-base");
+      raw = raw ? String(raw).trim().replace(/\/$/, "") : "";
+      var locHost = typeof window.location !== "undefined" && window.location.hostname ? String(window.location.hostname) : "";
+      if (raw && /^https:\/\//i.test(raw) && locHost) {
+        var bu = new URL(raw);
+        if (bu.hostname === locHost) {
+          return bu.origin + "/";
+        }
+      }
+    } catch (e0) {}
+    try {
+      return window.location.origin.replace(/\/$/, "") + "/";
+    } catch (e1) {
+      return "";
+    }
+  }
+
   function normalizeVerifiedUser(serverUser, fallbackUnsafe) {
     if (serverUser && serverUser.id != null) {
       return {
@@ -2585,16 +2610,31 @@ function telegramUserDisplayName(u) {
   }
 
   function resetBannerForPwaLogin() {
+    var cb = getTelegramWidgetAuthCallbackUrl();
+    var dom = "";
+    try {
+      dom = new URL(cb).hostname;
+    } catch (eDom) {}
     if (bannerText) {
       bannerText.textContent =
-        "Войдите через Telegram: после нажатия кнопки Telegram покажет подтверждение входа (часто это уведомление или сообщение в чате «Telegram», не SMS).";
+        "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram, вас вернёт обратно сюда. Это не SMS: смотрите уведомления и чат «Telegram» / Service notifications.";
     }
     if (banner) banner.classList.remove("auth-banner--verifying");
     if (bannerRetry) bannerRetry.hidden = true;
-    if (bannerLink) bannerLink.style.display = "none";
+    if (bannerLink && telegramAppUrl && telegramAppUrl.indexOf("t.me") !== -1 && telegramAppUrl.indexOf("YourBotName") === -1) {
+      bannerLink.href = telegramAppUrl;
+      bannerLink.textContent = "Запасной вариант: открыть в Telegram (Mini App)";
+      bannerLink.style.display = "inline-block";
+    } else if (bannerLink) {
+      bannerLink.style.display = "none";
+    }
     if (hintEl) {
       hintEl.textContent =
-        "Ничего не пришло? Откройте приложение Telegram с тем же аккаунтом, проверьте уведомления и чат «Telegram» / «Service notifications». Напишите боту клуба в личку команду /start — без диалога с ботом подтверждение может не дойти. Домен сайта в адресной строке должен совпадать с доменом, указанным у бота для входа через сайт (BotFather → Domain).";
+        "Если запрос в Telegram не приходит: в @BotFather → ваш бот → Bot Settings → Login (виджет входа) поле домена должно быть только hostname, например " +
+        (dom || "example.com") +
+        " — без https://, без пути и без слэша в конце. Колбэк виджета на этом сайте: " +
+        cb +
+        " (должен быть на том же домене). Виджет привязан к тому же боту, для которого задан домен.";
       hintEl.style.display = "block";
     }
   }
@@ -2609,7 +2649,8 @@ function telegramUserDisplayName(u) {
     } catch (e1) {}
     if (!bot) return;
     mount.innerHTML = "";
-    var authCallback = window.location.origin + window.location.pathname;
+    var authCallback = getTelegramWidgetAuthCallbackUrl();
+    if (!authCallback) return;
     var script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.async = true;
