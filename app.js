@@ -2587,12 +2587,16 @@ function telegramUserDisplayName(u) {
   function resetBannerForPwaLogin() {
     if (bannerText) {
       bannerText.textContent =
-        "Войдите через Telegram — откроется подтверждение, после чего вы снова окажетесь в этом приложении (PWA или браузер).";
+        "Войдите через Telegram: после нажатия кнопки Telegram покажет подтверждение входа (часто это уведомление или сообщение в чате «Telegram», не SMS).";
     }
     if (banner) banner.classList.remove("auth-banner--verifying");
     if (bannerRetry) bannerRetry.hidden = true;
     if (bannerLink) bannerLink.style.display = "none";
-    if (hintEl) hintEl.style.display = "none";
+    if (hintEl) {
+      hintEl.textContent =
+        "Ничего не пришло? Откройте приложение Telegram с тем же аккаунтом, проверьте уведомления и чат «Telegram» / «Service notifications». Напишите боту клуба в личку команду /start — без диалога с ботом подтверждение может не дойти. Домен сайта в адресной строке должен совпадать с доменом, указанным у бота для входа через сайт (BotFather → Domain).";
+      hintEl.style.display = "block";
+    }
   }
 
   function mountTelegramLoginWidgetForPwa() {
