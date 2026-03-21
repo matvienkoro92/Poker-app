@@ -27,6 +27,8 @@
   --screen-gutter-x: clamp(10px, 3.5vw, 14px);
   --app-gutter: var(--screen-gutter-x);
   --card-padding-x: var(--screen-gutter-x);
+  /* Единая высота кнопок «Назад» / «На главную» и строки с «← Чаты» в чате */
+  --app-back-btn-min-height: 40px;
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -151,6 +153,7 @@ body::-webkit-scrollbar,
 [data-theme="light"] .pdf-viewer__close,
 [data-theme="light"] .winter-rating-player-modal__back,
 [data-theme="light"] .poker-streak-screen__back,
+[data-theme="light"] .poker-task-screen__back,
 [data-theme="light"] .tracking-links-admin__back-btn,
 [data-theme="light"] .chat-back-btn {
   background: #000;
@@ -163,6 +166,7 @@ body::-webkit-scrollbar,
 [data-theme="light"] .pdf-viewer__close:hover,
 [data-theme="light"] .winter-rating-player-modal__back:hover,
 [data-theme="light"] .poker-streak-screen__back:hover,
+[data-theme="light"] .poker-task-screen__back:hover,
 [data-theme="light"] .tracking-links-admin__back-btn:hover,
 [data-theme="light"] .chat-back-btn:hover {
   background: #141414;
@@ -4246,7 +4250,7 @@ img.chat-contact__avatar {
   box-sizing: border-box;
   z-index: 2;
   pointer-events: none;
-  --chat-general-header-strip-min-height: 40px;
+  --chat-general-header-strip-min-height: var(--app-back-btn-min-height);
 }
 .chat-conv-top-inner {
   display: flex;
@@ -4267,7 +4271,7 @@ img.chat-contact__avatar {
   margin-bottom: 0;
   flex-shrink: 0;
   align-self: center;
-  min-height: var(--chat-general-header-strip-min-height, 48px);
+  min-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   height: auto;
 }
 .chat-conv-top .chat-conv-header {
@@ -4438,6 +4442,7 @@ img.chat-contact__avatar {
 .pdf-viewer__close,
 .winter-rating-player-modal__back,
 .poker-streak-screen__back,
+.poker-task-screen__back,
 .tracking-links-admin__back-btn,
 .chat-back-btn {
   display: inline-flex;
@@ -4446,7 +4451,7 @@ img.chat-contact__avatar {
   align-self: flex-start;
   margin: 0 0 11px;
   padding: 0 12px 0 10px;
-  min-height: 48px;
+  min-height: var(--app-back-btn-min-height);
   box-sizing: border-box;
   font-size: 14px;
   font-weight: 500;
@@ -4470,6 +4475,7 @@ img.chat-contact__avatar {
 .pdf-viewer__close:hover,
 .winter-rating-player-modal__back:hover,
 .poker-streak-screen__back:hover,
+.poker-task-screen__back:hover,
 .tracking-links-admin__back-btn:hover,
 .chat-back-btn:hover {
   border-color: #fb923c;
@@ -4500,7 +4506,7 @@ img.chat-contact__avatar {
   max-width: none;
   box-sizing: border-box;
   z-index: 2;
-  --chat-general-header-strip-min-height: 40px;
+  --chat-general-header-strip-min-height: var(--app-back-btn-min-height);
   overflow: hidden;
   pointer-events: none;
 }
@@ -6642,8 +6648,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   top: 12px;
   left: 12px;
   z-index: 2;
-  margin: 0;
-  min-width: 48px;
+  margin: 0 !important;
   padding: 0 12px 0 10px;
   font-size: 18px;
   line-height: 1;
@@ -6818,23 +6823,13 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .poker-task-screen--hidden {
   display: none;
 }
+/* Позиция; вид — общий блок «Назад» (чёрный / оранжевая обводка) */
 .poker-task-screen__back {
   position: absolute;
   top: 12px;
   left: 12px;
   z-index: 2;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(192, 132, 252, 0.15);
-  color: #e9d5ff;
-  font-size: 20px;
-  cursor: pointer;
-  line-height: 1;
-}
-.poker-task-screen__back:hover {
-  background: rgba(192, 132, 252, 0.25);
+  margin: 0 !important;
 }
 .poker-task-screen__nav {
   display: flex;
@@ -13107,7 +13102,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   padding: 0;
   overflow: hidden;
   box-sizing: border-box;
-  min-height: 40px;
+  min-height: var(--app-back-btn-min-height);
   background: var(--block-bg-solid);
   border: 1px solid rgba(249, 115, 22, 0.7);
   border-radius: 20px;
@@ -14287,7 +14282,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   flex-wrap: wrap;
 }
 .admin-report-preview-back-btn {
-  padding: 8px 14px;
+  min-height: var(--app-back-btn-min-height);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
   background: transparent;
