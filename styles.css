@@ -6754,6 +6754,403 @@ html.app-view-home .feature--rating-spring-promo:hover,
   text-align: center;
   border-top: 1px solid var(--border-subtle);
 }
+.video-lessons__hero-coach-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 0.12em;
+  vertical-align: baseline;
+}
+.video-lessons__hero-coach-surname {
+  white-space: nowrap;
+}
+.video-lessons__hero-coach-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 0 1 auto;
+  max-width: 100%;
+  vertical-align: middle;
+}
+/* «?» — те же классы, что у «Отправить другу», компактный квадрат под строку заголовка */
+.video-lessons__hero-title .video-lessons__hero-coach-hint.raffles-hero__share-btn {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  border-radius: 12px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 359px) {
+  .video-lessons__hero-title .video-lessons__hero-coach-hint.raffles-hero__share-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+}
+.video-lessons__hero-title .video-lessons__hero-coach-hint.raffles-hero__share-btn:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.9);
+  outline-offset: 2px;
+}
+.video-lessons__hero-title .video-lessons__hero-review-btn.raffles-hero__share-btn {
+  flex: 0 1 auto;
+  margin: 0;
+  padding: 0 10px;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  border-radius: 12px;
+  white-space: nowrap;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 359px) {
+  .video-lessons__hero-title .video-lessons__hero-review-btn.raffles-hero__share-btn {
+    height: 32px;
+    min-height: 32px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+}
+.video-lessons__hero-title .video-lessons__hero-review-btn.raffles-hero__share-btn:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.9);
+  outline-offset: 2px;
+}
+.video-lessons__reviews-modal.video-lessons__coach-modal {
+  z-index: 1001;
+}
+.video-lessons__reviews-modal-body {
+  margin-top: 2px;
+}
+.video-lessons__reviews-modal-lead {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.video-lessons__reviews-modal-tg.learn-play-hub__training-btn {
+  margin-bottom: 18px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+}
+.video-lessons__reviews-modal-subtitle {
+  margin-top: 4px;
+}
+.video-lessons__coach-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.video-lessons__coach-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.video-lessons__coach-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+.video-lessons__coach-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow: auto;
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  padding: 20px 18px 18px;
+  border: 1px solid var(--border-subtle);
+}
+.video-lessons__coach-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.video-lessons__coach-modal-close:hover,
+.video-lessons__coach-modal-close:focus-visible {
+  color: var(--text);
+  background: var(--bg-elevated);
+  outline: none;
+}
+.video-lessons__coach-modal-title {
+  margin: 0 36px 10px 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.video-lessons__coach-modal-body {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.video-lessons__coach-modal-body > .video-lessons__coach-modal-lead {
+  margin: 0 0 16px;
+}
+.video-lessons__coach-modal-subtitle {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+/* Заголовок вкладки «Остальные отзывы» */
+.video-lessons__coach-more-reviews-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.video-lessons__coach-more-reviews-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+/* Скриншоты отзывов: 4 столбца × 3 ряда */
+.video-lessons__coach-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+.video-lessons__coach-reviews-grid img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+@media (max-width: 360px) {
+  .video-lessons__coach-reviews-grid {
+    gap: 6px;
+  }
+}
+/* Вкладки учеников — визуал как у зала славы (.hall-of-fame__subtabs) */
+.video-lessons__coach-students-toolbar {
+  margin: 0 0 14px;
+  min-width: 0;
+}
+.video-lessons__coach-students-subtabs {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 40px;
+  background: var(--block-bg-solid, var(--block-bg));
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.video-lessons__coach-student-tab {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid rgba(249, 115, 22, 0.28);
+}
+.video-lessons__coach-student-tab:last-child {
+  border-right: none;
+}
+/* 3–4 вкладки в узкой модалке — плотнее типографика */
+.video-lessons__coach-students-subtabs:has(.video-lessons__coach-student-tab:nth-child(3)) .video-lessons__coach-student-tab {
+  font-size: 10px;
+  padding: 7px 5px;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+.video-lessons__coach-students-subtabs:has(.video-lessons__coach-student-tab:nth-child(4)) .video-lessons__coach-student-tab {
+  font-size: 9px;
+  padding: 6px 3px;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+.video-lessons__coach-students-subtabs:has(.video-lessons__coach-student-tab:nth-child(5)) .video-lessons__coach-student-tab {
+  font-size: 8px;
+  padding: 6px 2px;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+.video-lessons__coach-student-tab:hover {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.08);
+}
+.video-lessons__coach-student-tab--active {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.2);
+}
+[data-theme="dark"] .video-lessons__coach-students-subtabs {
+  border-color: rgba(251, 146, 60, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab {
+  color: rgba(226, 232, 240, 0.72);
+  border-right-color: rgba(251, 146, 60, 0.28);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab:hover {
+  color: #f1f5f9;
+  background: rgba(249, 115, 22, 0.12);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab--active {
+  color: #fff7ed;
+  background: rgba(249, 115, 22, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .video-lessons__coach-students-subtabs {
+  border-color: rgba(234, 88, 12, 0.65);
+}
+[data-theme="light"] .video-lessons__coach-student-tab {
+  color: #64748b;
+  border-right-color: rgba(234, 88, 12, 0.28);
+}
+[data-theme="light"] .video-lessons__coach-student-tab:hover {
+  color: #0f172a;
+  background: rgba(251, 146, 60, 0.12);
+}
+[data-theme="light"] .video-lessons__coach-student-tab--active {
+  color: #9a3412;
+  background: rgba(251, 146, 60, 0.26);
+}
+.video-lessons__coach-student-panels {
+  min-width: 0;
+}
+.video-lessons__coach-student-panel {
+  display: none;
+}
+.video-lessons__coach-student-panel--active {
+  display: block;
+}
+.video-lessons__coach-student-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+/* Две фотографии — в один ряд, два столбца */
+.video-lessons__coach-student-gallery:has(img:nth-child(2)) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.video-lessons__coach-student-gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+.video-lessons__coach-student-text p {
+  margin: 0 0 0.75em;
+}
+.video-lessons__coach-student-text p:last-child {
+  margin-bottom: 0;
+}
+.video-lessons__coach-student-lead {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+.video-lessons__coach-student-lead strong {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.video-lessons__coach-student-quote {
+  margin: 14px 0 0;
+  padding: 12px 12px 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--vl-free-border, rgba(249, 115, 22, 0.45));
+  background: var(--vl-free-bg-soft, rgba(249, 115, 22, 0.09));
+}
+.video-lessons__coach-student-quote-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vl-free-open, #fb923c);
+}
+.video-lessons__coach-student-quote p:not(.video-lessons__coach-student-quote-label) {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+[data-theme="light"] .video-lessons__coach-student-quote {
+  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(251, 146, 60, 0.1);
+}
+[data-theme="light"] .video-lessons__coach-student-quote-label {
+  color: var(--vl-free-open, #ea580c);
+}
 /* Видеоуроки: обводки и акценты в чёрно-оранжевом стиле приложения */
 .view[data-view="video-lessons"] {
   --vl-free-border: rgba(249, 115, 22, 0.5);
@@ -6787,6 +7184,12 @@ html.app-view-home .feature--rating-spring-promo:hover,
   border-radius: 0;
   border-bottom: 1px solid var(--vl-free-border);
   background: var(--vl-free-bg-soft);
+}
+.video-lessons__list > .video-lessons__free-cta {
+  flex-shrink: 0;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  border-bottom: 1px solid var(--vl-free-border);
 }
 .video-lessons__free-cta-text {
   font-size: 16px;
@@ -7059,10 +7462,10 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 10px;
   align-items: stretch;
   overflow-anchor: none;
-  padding-bottom: 0;
+  padding: 10px 10px 12px;
   border: 1px solid var(--vl-free-border);
   border-radius: 14px;
   overflow: hidden;
@@ -7070,9 +7473,6 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 .video-lessons__list > .video-lessons__group-head {
   margin: 0;
-  border-radius: 0;
-  border-left: none;
-  border-right: none;
 }
 .video-lessons__card {
   flex-shrink: 0;
@@ -7083,42 +7483,57 @@ html.app-view-home .feature--rating-spring-promo:hover,
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .video-lessons__list > .video-lessons__card {
-  border: none;
-  border-radius: 0;
-  border-bottom: 1px solid var(--vl-free-border);
-  box-shadow: none;
-}
-.video-lessons__list > .video-lessons__card:last-child {
-  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--block-bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
 }
 .video-lessons__card:hover {
   border-color: var(--vl-free-open);
   box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
 }
 .video-lessons__list > .video-lessons__card:hover {
-  border-bottom-color: var(--vl-free-open);
-  box-shadow: none;
-  background: rgba(249, 115, 22, 0.07);
+  border-color: var(--vl-free-open);
+  box-shadow: 0 2px 14px rgba(249, 115, 22, 0.18);
+  background: rgba(249, 115, 22, 0.05);
 }
 .video-lessons__card.video-lessons__card--open {
   border-color: var(--vl-free-open);
   box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.22);
 }
 .video-lessons__list > .video-lessons__card.video-lessons__card--open {
-  border-bottom-color: var(--vl-free-open);
-  box-shadow: none;
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.28), 0 4px 16px rgba(249, 115, 22, 0.12);
   background: rgba(249, 115, 22, 0.06);
 }
 .video-lessons__list > .video-lessons__card.video-lessons__card--bonus {
-  border-bottom-color: var(--vl-free-border);
+  border-color: var(--vl-free-border);
 }
 .video-lessons__list > .video-lessons__card.video-lessons__card--bonus:hover {
-  border-bottom-color: var(--vl-free-open);
-  box-shadow: none;
+  border-color: var(--vl-free-open);
+  box-shadow: 0 2px 14px rgba(249, 115, 22, 0.16);
 }
 .video-lessons__list > .video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
-  border-bottom-color: var(--vl-free-open);
-  box-shadow: none;
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25), 0 4px 16px rgba(249, 115, 22, 0.1);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+/* Заголовок урока — отдельная полоса «спойлера»; под ним только после раскрытия */
+.video-lessons__list > .video-lessons__card > .video-lessons__item {
+  background: var(--vl-free-bg-soft);
+  border-bottom: 1px solid transparent;
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--open > .video-lessons__item {
+  border-bottom-color: rgba(249, 115, 22, 0.35);
+}
+[data-theme="light"] .video-lessons__list > .video-lessons__card > .video-lessons__item {
+  background: rgba(251, 146, 60, 0.14);
 }
 .video-lessons__desc {
   margin: 0 0 10px;
@@ -7169,6 +7584,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   align-items: center;
   gap: 10px;
   width: 100%;
+  flex-shrink: 0;
   padding: 14px 16px;
   text-align: left;
   font-size: 15px;
@@ -7224,23 +7640,19 @@ html.app-view-home .feature--rating-spring-promo:hover,
 [data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
   color: rgba(194, 65, 12, 0.65);
 }
-/* Раскрытие через grid 0fr/1fr — без max-height в px/vh (в части WebView обрезали хвост страницы ~высотой «9 карточек») */
+/* Закрытый урок: контент полностью убран из вёрстки (display:none) — в части WebView grid 0fr «протекал», текст с ✅ оказывался виден под заголовком */
 .video-lessons__player-wrap {
-  display: grid;
-  grid-template-rows: 0fr;
   overflow: hidden;
-  transition: grid-template-rows 0.35s ease-out;
+  min-height: 0;
 }
-.video-lessons__player-wrap.video-lessons__player-wrap--hidden {
-  grid-template-rows: 0fr;
-}
-.video-lessons__player-wrap:not(.video-lessons__player-wrap--hidden) {
-  grid-template-rows: 1fr;
+.video-lessons__player-wrap.video-lessons__player-wrap--hidden .video-lessons__player-inner {
+  display: none;
 }
 .video-lessons__player-inner {
   min-height: 0;
+  padding: 12px 12px 14px;
+  display: block;
   overflow: visible;
-  padding: 10px 12px 14px;
 }
 .video-lessons__video-error {
   margin: 0 0 10px;
