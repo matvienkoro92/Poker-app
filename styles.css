@@ -517,7 +517,8 @@ html.app-view-long-scroll {
   -webkit-overflow-scrolling: touch;
   height: auto;
   min-height: 100%;
-  overscroll-behavior-y: auto;
+  /* Перебиваем html { overscroll-behavior-y: contain } — плавнее скролл длинных экранов в WebView */
+  overscroll-behavior-y: auto !important;
   scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 body.app-view-long-scroll {
@@ -528,7 +529,7 @@ body.app-view-long-scroll {
   /* Не даём flex-stretch ужать .app до высоты вьюпорта — иначе контент обрезается (~9 карточек) */
   align-items: flex-start;
   justify-content: center;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: auto !important;
   scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 html.app-view-long-scroll .app {
@@ -2197,9 +2198,13 @@ body.chat-keyboard-open .app {
   padding: 12px 16px 0;
   border-top: 1px solid rgba(139, 90, 43, 0.25);
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 10px;
-  align-items: center;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 /* Современная иконка «поделиться» для кнопок Отправить другу / Поделиться */
 .gazette-modal__share-btn,
@@ -2229,11 +2234,13 @@ body.chat-keyboard-open .app {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  flex: 1 1 calc(50% - 5px);
+  min-width: 0;
+  max-width: 100%;
   width: auto;
-  flex: 1 1 0;
   box-sizing: border-box;
   min-height: 44px;
-  padding: 12px 20px;
+  padding: 12px 12px;
   border-radius: 14px;
   border: 1px solid rgba(139, 90, 43, 0.45);
   background: linear-gradient(180deg, rgba(255, 251, 247, 0.98) 0%, rgba(254, 243, 229, 0.95) 100%);
@@ -2243,12 +2250,16 @@ body.chat-keyboard-open .app {
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
   box-shadow: 0 2px 8px rgba(92, 64, 51, 0.1);
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  word-break: break-word;
 }
 .gazette-modal__share-btn.gazette-modal__share-copy {
-  flex: 0 0 auto;
+  flex: 1 1 calc(50% - 5px);
   font-size: 12px;
-  min-height: 36px;
-  padding: 8px 14px;
+  min-height: 40px;
+  padding: 8px 10px;
 }
 .gazette-modal__share-btn.gazette-modal__share-telegram {
   background: linear-gradient(180deg, #15803d 0%, #166534 100%);
@@ -6003,15 +6014,16 @@ html.app-view-home .feature--rating-spring-promo:hover,
   border-color: rgba(251, 146, 60, 0.65);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(0, 0, 0, 0.25), 0 0 12px rgba(251, 146, 60, 0.25) !important;
 }
-/* Картинка: половина ширины и половина высоты кнопки (внутри паддингов), по центру по вертикали слева */
+/* Картинка: половина ширины, по высоте на всю карточку (внутри паддингов) — больше видно сверху и снизу */
 .tournament-day-home-wrap .tournament-day-block--home .feature__icon--tournament-day-home {
   position: absolute;
   left: 16px;
-  top: calc(14px + (100% - 28px) * 0.25);
+  top: 0;
+  bottom: 0;
   width: calc((100% - 32px) * 0.5);
-  height: calc((100% - 28px) * 0.5);
+  height: auto;
   min-width: 72px;
-  min-height: 72px;
+  min-height: 0;
   overflow: hidden;
   margin: 0;
   border-radius: 12px;
@@ -6499,6 +6511,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   --vl-free-open: #22d3ee;
   --vl-free-num-fg: #67e8f9;
   --vl-free-num-bg: rgba(34, 211, 238, 0.18);
+  touch-action: pan-y;
 }
 [data-theme="light"] .view[data-view="video-lessons"] {
   --vl-free-border: rgba(2, 132, 199, 0.38);
@@ -6554,12 +6567,13 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 .video-lessons__mtt-paid {
   margin-top: 8px;
-  padding: 22px 0 max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  /* Нижний safe-area даёт только .app — иначе «пропасть» под контентом */
+  padding: 18px 0 10px;
   border-top: none;
 }
 /* Платный курс МТТ — заметный золотой блок */
 .video-lessons__mtt-spoiler.video-lessons__mtt-paid {
-  padding: 16px 10px max(22px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  padding: 14px 10px 12px;
   margin-top: 6px;
   border-radius: 16px;
   border: 1px solid rgba(251, 191, 36, 0.45);
@@ -6837,8 +6851,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
-  /* Запас снизу до платного блока / конца экрана */
-  padding-bottom: max(24px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: 10px;
 }
 .video-lessons__card {
   flex-shrink: 0;
@@ -6969,8 +6982,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   max-height: 0;
 }
 .video-lessons__player-wrap:not(.video-lessons__player-wrap--hidden) {
-  /* Текст + PDF + кнопка + плеер — нужен большой потолок, иначе обрез при раскрытии */
-  max-height: min(320vh, 4200px);
+  /* Текст + PDF + кнопка + плеер — потолок для transition; без лишних сотен vh (ломает скролл в части WebView) */
+  max-height: min(160vh, 3200px);
 }
 .video-lessons__player-inner {
   padding: 10px 12px 14px;
@@ -13286,6 +13299,10 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .app:has(.view--active[data-view="equilator"]),
 .app:has(.view--active[data-view="winter-rating"]) {
   padding-bottom: max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+}
+/* Видеоуроки: один отступ снизу + safe-area (не суммировать с padding в списке/МТТ) */
+.app:has(.view--active[data-view="video-lessons"]) {
+  padding-bottom: max(12px, calc(6px + env(safe-area-inset-bottom, 0px)));
 }
 
 .winter-rating__date-item {
