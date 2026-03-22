@@ -3141,31 +3141,7 @@ function getPokerResolvedTelegramUser() {
   }
 })();
 
-// Скрыть экран загрузки после готовности страницы (не белый экран при открытии)
-(function initAppBootOverlay() {
-  function hideBootOverlay() {
-    var el = document.getElementById("appBootOverlay");
-    if (!el || el.classList.contains("app-boot-overlay--hidden")) return;
-    el.classList.add("app-boot-overlay--hidden");
-    el.setAttribute("aria-hidden", "true");
-    el.setAttribute("aria-busy", "false");
-    setTimeout(function () {
-      try {
-        el.remove();
-      } catch (e) {}
-    }, 480);
-  }
-  function schedule() {
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        setTimeout(hideBootOverlay, 40);
-      });
-    });
-  }
-  if (document.readyState === "complete") schedule();
-  else window.addEventListener("load", schedule);
-  setTimeout(hideBootOverlay, 5000);
-})();
+// Оверлей загрузки: ранний inline-скрипт в index.html (до app.js), см. __pokerHideBootOverlay
 
 updateProfileUserName();
 
@@ -12629,6 +12605,7 @@ function syncVideoLessonsModalScrollLock() {
   var lastFocus = null;
   var VL_REVIEWS_COACH_SLUG = "nikolay_fishkopcheny";
   var LOCAL_REVIEWS_KEY = "poker_app_video_lesson_reviews_local_v1_" + VL_REVIEWS_COACH_SLUG;
+  var reviewsFeedIsAdmin = false;
   function isOpen() {
     return modal.getAttribute("aria-hidden") === "false";
   }
@@ -12692,13 +12669,14 @@ function syncVideoLessonsModalScrollLock() {
     });
     return out;
   }
-  function renderReviews(items) {
+  function renderReviews(items, canDeleteServer) {
     if (!feed) return;
     if (!items.length) {
       feed.innerHTML =
         '<p class="video-lessons__reviews-feed-empty">Пока нет отзывов — напишите первым.</p>';
       return;
     }
+    var allowDel = !!canDeleteServer;
     feed.innerHTML = items
       .map(function (r) {
         var text = escapeHtml(r.text || "");
@@ -12707,11 +12685,21 @@ function syncVideoLessonsModalScrollLock() {
         var meta = dateStr
           ? '<time class="video-lessons__reviews-feed-time">' + escapeHtml(dateStr) + "</time>"
           : "";
+        var rid = r.id != null ? String(r.id) : "";
+        var showDel = allowDel && rid && rid.indexOf("l_") !== 0;
+        var delBtn = showDel
+          ? '<button type="button" class="video-lessons__reviews-feed-delete" data-vl-review-delete="' +
+            escapeHtml(rid) +
+            '" title="Удалить отзыв" aria-label="Удалить отзыв">Удалить</button>'
+          : "";
         return (
-          '<article class="video-lessons__reviews-feed-item"><header class="video-lessons__reviews-feed-item-head"><span class="video-lessons__reviews-feed-author">' +
+          '<article class="video-lessons__reviews-feed-item" data-vl-review-id="' +
+          escapeHtml(rid || "") +
+          '"><header class="video-lessons__reviews-feed-item-head"><span class="video-lessons__reviews-feed-author">' +
           author +
           "</span>" +
           meta +
+          delBtn +
           '</header><p class="video-lessons__reviews-feed-text">' +
           text +
           "</p></article>"
@@ -12726,10 +12714,15 @@ function syncVideoLessonsModalScrollLock() {
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     var local = loadLocalReviews();
     if (!base) {
-      renderReviews(local);
+      reviewsFeedIsAdmin = false;
+      renderReviews(local, false);
       return;
     }
-    fetch(base + "/api/video-lesson-reviews?coach=" + encodeURIComponent(VL_REVIEWS_COACH_SLUG))
+    var q =
+      "?coach=" +
+      encodeURIComponent(VL_REVIEWS_COACH_SLUG) +
+      (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "");
+    fetch(base + "/api/video-lesson-reviews" + q)
       .then(function (r) {
         return r.json().then(function (data) {
           return { ok: r.ok, data: data };
@@ -12737,14 +12730,68 @@ function syncVideoLessonsModalScrollLock() {
       })
       .then(function (res) {
         if (res.ok && res.data && res.data.ok && Array.isArray(res.data.reviews)) {
-          renderReviews(mergeReviews(res.data.reviews, local));
+          reviewsFeedIsAdmin = !!res.data.isAdmin;
+          renderReviews(mergeReviews(res.data.reviews, local), reviewsFeedIsAdmin);
         } else {
-          renderReviews(local);
+          reviewsFeedIsAdmin = false;
+          renderReviews(local, false);
         }
       })
       .catch(function () {
-        renderReviews(local);
+        reviewsFeedIsAdmin = false;
+        renderReviews(local, false);
       });
+  }
+  if (feed && feed.getAttribute("data-vl-review-delete-bound") !== "1") {
+    feed.setAttribute("data-vl-review-delete-bound", "1");
+    feed.addEventListener("click", function (ev) {
+      var delEl = ev.target && ev.target.closest && ev.target.closest("[data-vl-review-delete]");
+      if (!delEl || !feed.contains(delEl)) return;
+      ev.preventDefault();
+      var rid = delEl.getAttribute("data-vl-review-delete");
+      if (!rid) return;
+      if (!confirm("Удалить этот отзыв? Действие необратимо.")) return;
+      var baseDel = typeof getApiBase === "function" ? getApiBase() : "";
+      if (!baseDel || typeof pokerApiAuthJsonBody !== "function") return;
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+      delEl.disabled = true;
+      var payload = Object.assign(
+        { action: "delete", reviewId: rid, coach: VL_REVIEWS_COACH_SLUG },
+        pokerApiAuthJsonBody({})
+      );
+      fetch(baseDel + "/api/video-lesson-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, status: r.status, data: data };
+          });
+        })
+        .then(function (res) {
+          delEl.disabled = false;
+          if (res.ok && res.data && res.data.ok) {
+            refreshReviews();
+            return;
+          }
+          var msg =
+            res.data && res.data.error
+              ? String(res.data.error)
+              : res.status === 403
+                ? "Нет прав"
+                : "Не удалось удалить";
+          var tgA = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgA && tgA.showAlert) tgA.showAlert(msg);
+          else alert(msg);
+        })
+        .catch(function () {
+          delEl.disabled = false;
+          var tgB = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgB && tgB.showAlert) tgB.showAlert("Сеть недоступна");
+          else alert("Сеть недоступна");
+        });
+    });
   }
   function closeCoachIfOpen() {
     if (!coachModal || coachModal.getAttribute("aria-hidden") !== "false") return;

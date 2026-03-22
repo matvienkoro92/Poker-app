@@ -7026,9 +7026,34 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__reviews-feed-item-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 6px 10px;
   margin-bottom: 8px;
+}
+.video-lessons__reviews-feed-delete {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.video-lessons__reviews-feed-delete:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.2);
+}
+.video-lessons__reviews-feed-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+[data-theme="light"] .video-lessons__reviews-feed-delete {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.3);
 }
 .video-lessons__reviews-feed-author {
   font-size: 13px;
