@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=173" />
+    <link rel="stylesheet" href="./styles.css?v=174" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -3026,8 +3026,12 @@
             </section>
             <div class="profile-visible-to-others">
               <p class="profile-visible-to-others__intro">Эта информация видна другим пользователям</p>
+              <p class="profile-visible-to-others__p21-hint">
+                Введите сюда айди из Poker21, чтобы участвовать в розыгрышах
+                <span class="profile-visible-to-others__p21-hint-arrow" aria-hidden="true">↓</span>
+              </p>
               <div class="profile-visible-to-others__p21-row">
-                <input type="text" id="profileP21IdInput" class="profile-visible-to-others__p21-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="P21_ID" aria-label="P21_ID (6 цифр)" autocomplete="off" />
+                <input type="text" id="profileP21IdInput" class="profile-visible-to-others__p21-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="______" aria-label="ID Poker21, 6 цифр" autocomplete="off" />
                 <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
                 <span class="profile-visible-to-others__p21-feedback" id="profileSaveFeedback" aria-live="polite"></span>
               </div>

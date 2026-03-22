@@ -17044,6 +17044,35 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   color: var(--text-muted);
   text-align: center;
 }
+.profile-visible-to-others__p21-hint {
+  margin: 0 0 10px;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+.profile-visible-to-others__p21-hint-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-weight: 800;
+  color: var(--accent-2, #38bdf8);
+  animation: profile-p21-hint-arrow-bounce 1.35s ease-in-out infinite;
+  vertical-align: middle;
+}
+@keyframes profile-p21-hint-arrow-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+[data-theme="light"] .profile-visible-to-others__p21-hint-arrow {
+  color: #0284c7;
+}
 .profile-visible-to-others__p21-row {
   display: flex;
   flex-wrap: wrap;
@@ -17053,10 +17082,13 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   margin-bottom: 16px;
 }
 .profile-visible-to-others__p21-input {
-  width: 88px;
+  width: 7.25rem;
+  min-width: 6.5rem;
+  max-width: 100%;
   padding: 8px 10px;
-  font-size: 14px;
-  font-family: monospace;
+  font-size: 15px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.06em;
   text-align: center;
   color: var(--text);
   background: var(--block-bg-solid);
@@ -17066,6 +17098,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 .profile-visible-to-others__p21-input::placeholder {
   color: var(--text-muted);
+  opacity: 0.85;
+  letter-spacing: 0.06em;
 }
 .profile-visible-to-others__p21-save {
   padding: 8px 14px;

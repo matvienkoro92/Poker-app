@@ -3189,6 +3189,33 @@ function scrollMainDocumentToTop() {
   } catch (e) {}
 }
 
+function getMainDocumentScrollY() {
+  try {
+    var se = document.scrollingElement || document.documentElement;
+    return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  } catch (eY) {
+    return 0;
+  }
+}
+
+function setMainDocumentScrollY(y) {
+  try {
+    y = Math.max(0, y);
+    if (typeof window.scrollTo === "function") {
+      window.scrollTo({ top: y, left: 0, behavior: "auto" });
+    } else {
+      window.scrollTo(0, y);
+    }
+    var se = document.scrollingElement || document.documentElement;
+    if (se) se.scrollTop = y;
+    if (document.documentElement) document.documentElement.scrollTop = y;
+    if (document.body) document.body.scrollTop = y;
+  } catch (e2) {}
+}
+
+/** Запоминание scrollY по имени экрана; восстановление только при setView(..., { fromBack: true }) */
+var viewScrollMemory = Object.create(null);
+
 function scrollHomeToTop() {
   if (!document.body || (document.body.getAttribute && document.body.getAttribute("data-view") !== "home")) return;
   scrollMainDocumentToTop();
@@ -3445,12 +3472,17 @@ function pokerEnsureChatTelegramVerified() {
   return true;
 }
 
-function setView(viewName) {
+function setView(viewName, navOpts) {
+  navOpts = navOpts || {};
+  var restoreScrollOnEnter = navOpts.fromBack === true;
   /* Чаты всегда открываются (нижнее меню). Верификация — pokerEnsure на диалогах/отправке. */
   var prevView = "";
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
+  if (prevView && prevView !== viewName) {
+    viewScrollMemory[prevView] = getMainDocumentScrollY();
+  }
   if (document.body) {
     document.body.style.overflow = "";
     document.body.style.position = "";
@@ -3675,17 +3707,36 @@ function setView(viewName) {
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
-  /* С верха только при смене экрана — иначе лишние вызовы setView ломают прокрутку / держат страницу наверху. */
+  /* С верха при обычной навигации; по «Назад» — восстанавливаем сохранённый Y (после смены классов на html/body). */
   if (viewName !== prevView) {
-    scrollMainDocumentToTop();
-    var rafTop = window.requestAnimationFrame || function (fn) {
+    var rafScroll = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
     };
-    rafTop(function () {
+    if (restoreScrollOnEnter && Object.prototype.hasOwnProperty.call(viewScrollMemory, viewName)) {
+      var yBack = viewScrollMemory[viewName];
+      rafScroll(function () {
+        setMainDocumentScrollY(yBack);
+        rafScroll(function () {
+          setMainDocumentScrollY(yBack);
+        });
+      });
+      setTimeout(function () {
+        setMainDocumentScrollY(yBack);
+      }, 0);
+      setTimeout(function () {
+        setMainDocumentScrollY(yBack);
+      }, 50);
+      setTimeout(function () {
+        setMainDocumentScrollY(yBack);
+      }, 120);
+    } else {
       scrollMainDocumentToTop();
-    });
-    setTimeout(scrollMainDocumentToTop, 0);
-    setTimeout(scrollMainDocumentToTop, 50);
+      rafScroll(function () {
+        scrollMainDocumentToTop();
+      });
+      setTimeout(scrollMainDocumentToTop, 0);
+      setTimeout(scrollMainDocumentToTop, 50);
+    }
   }
 }
 
@@ -9357,7 +9408,7 @@ function handleViewLinkClick(e) {
     e.preventDefault();
     e.stopPropagation();
     var target = backBtn.getAttribute("data-view-target");
-    if (target) setView(target);
+    if (target) setView(target, { fromBack: true });
     return;
   }
   var link = e.target.closest("a[data-view-target]");
