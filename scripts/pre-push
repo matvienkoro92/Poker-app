@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
-# Git hook: создаёт резервную копию перед каждым push
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-"$REPO_ROOT/scripts/backup.sh" || true
+# Git hook: автобэкап перед push отключён (см. npm run backup — вручную при необходимости)
 exit 0

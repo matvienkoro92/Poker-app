@@ -62,6 +62,8 @@ function getAppBaseUrlForLinks() {
 
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
+/** PWA: сессия после OAuth ВКонтакте */
+var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
 
 function pokerReadPwaTgSessionToken() {
   try {
@@ -74,18 +76,39 @@ function pokerReadPwaTgSessionToken() {
   }
 }
 
+function pokerReadPwaVkSessionToken() {
+  try {
+    var raw = localStorage.getItem(POKER_PWA_VK_SESSION_KEY);
+    if (!raw) return "";
+    var o = JSON.parse(raw);
+    return o && o.token ? String(o.token) : "";
+  } catch (e) {
+    return "";
+  }
+}
+
 function pokerSavePwaTgSession(token, userObj) {
   try {
+    localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
     localStorage.setItem(POKER_PWA_TG_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
   } catch (e) {}
 }
 
-/** Для запросов к API: Mini App передаёт initData, PWA — pwaSession */
+function pokerSavePwaVkSession(token, userObj) {
+  try {
+    localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
+    localStorage.setItem(POKER_PWA_VK_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
+  } catch (e) {}
+}
+
+/** Для запросов к API: Mini App — initData; PWA — pwaSession (Telegram) или pwaVkSession (ВКонтакте) */
 function pokerApiAuthQuery(lead) {
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg0 && tg0.initData) return lead + "initData=" + encodeURIComponent(tg0.initData);
   var tok = pokerReadPwaTgSessionToken();
   if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
+  var vkt = pokerReadPwaVkSessionToken();
+  if (vkt) return lead + "pwaVkSession=" + encodeURIComponent(vkt);
   return lead + "initData=";
 }
 
@@ -95,11 +118,23 @@ function pokerApiAuthJsonBody(extra) {
   if (tg0 && tg0.initData) {
     o.initData = tg0.initData;
     delete o.pwaSession;
+    delete o.pwaVkSession;
   } else {
     var tok = pokerReadPwaTgSessionToken();
     if (tok) {
       o.pwaSession = tok;
       delete o.initData;
+      delete o.pwaVkSession;
+    } else {
+      var vkt = pokerReadPwaVkSessionToken();
+      if (vkt) {
+        o.pwaVkSession = vkt;
+        delete o.initData;
+        delete o.pwaSession;
+      } else {
+        delete o.pwaSession;
+        delete o.pwaVkSession;
+      }
     }
   }
   return o;
@@ -107,7 +142,7 @@ function pokerApiAuthJsonBody(extra) {
 
 function pokerApiHasCredential() {
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken();
+  return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
 }
 
 (function initRadioToggle() {
@@ -2784,9 +2819,109 @@ function getPokerResolvedTelegramUser() {
         photo_url: serverUser.photo_url || (fallbackUnsafe && fallbackUnsafe.photo_url) || "",
         language_code: serverUser.language_code || "",
         is_premium: !!serverUser.is_premium,
+        is_vk: !!serverUser.vk,
       };
     }
     return fallbackUnsafe || null;
+  }
+
+  function getVkAppIdForPwa() {
+    var el = document.getElementById("app");
+    var id = el && el.getAttribute("data-vk-app-id");
+    id = id != null ? String(id).trim() : "";
+    return /^\d+$/.test(id) ? id : "";
+  }
+
+  function deliverVkOAuthCode(code, redirectUri) {
+    var base = getTelegramAuthApiBase();
+    if (!base) return;
+    setBannerVerifying();
+    showUnauthorized();
+    fetch(base + "/api/auth-vk-pwa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: code, redirect_uri: redirectUri }),
+    })
+      .then(function (res) {
+        return res
+          .json()
+          .catch(function () {
+            return {};
+          })
+          .then(function (data) {
+            return { res: res, data: data || {} };
+          });
+      })
+      .then(function (pack) {
+        var res = pack.res;
+        var data = pack.data || {};
+        if (res.ok && data.ok && data.user && data.pwaVkSession) {
+          var u = normalizeVerifiedUser(data.user, null);
+          pokerSavePwaVkSession(data.pwaVkSession, data.user);
+          window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+          updateHeaderGreeting();
+          showAuthorized(u);
+          loadHeaderAvatar();
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, vk: true } }));
+          } catch (eVk) {}
+          try {
+            var uUrl = new URL(window.location.href);
+            uUrl.searchParams.delete("code");
+            uUrl.searchParams.delete("state");
+            window.history.replaceState({}, "", uUrl.pathname + uUrl.search + uUrl.hash);
+          } catch (eU) {}
+          return;
+        }
+        updateHeaderGreeting();
+        showUnauthorized();
+        setBannerFailure(data && data.error ? String(data.error) : "Не удалось войти через ВКонтакте.", false);
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      })
+      .catch(function () {
+        updateHeaderGreeting();
+        showUnauthorized();
+        setBannerFailure("Ошибка сети при входе через ВКонтакте.", false);
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      });
+  }
+
+  function tryFinishVkOAuth() {
+    try {
+      var sp = new URLSearchParams(window.location.search || "");
+      var code = sp.get("code");
+      var state = sp.get("state") || "";
+      if (!code || state !== "vk_pwa") return false;
+      var redirect = window.location.origin + "/";
+      deliverVkOAuthCode(code, redirect);
+      return true;
+    } catch (eVk2) {
+      return false;
+    }
+  }
+
+  function mountVkLoginForPwa(mount) {
+    if (!mount || isPwaAuthLocalHost()) return;
+    var appId = getVkAppIdForPwa();
+    if (!appId) return;
+    if (mount.querySelector(".auth-banner__vk-login-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "auth-banner__vk-login-btn";
+    btn.textContent = "Войти через ВКонтакте";
+    btn.addEventListener("click", function () {
+      var redirect = window.location.origin + "/";
+      var authUrl =
+        "https://oauth.vk.com/authorize?client_id=" +
+        encodeURIComponent(appId) +
+        "&display=page&redirect_uri=" +
+        encodeURIComponent(redirect) +
+        "&response_type=code&state=vk_pwa&v=5.131";
+      window.location.href = authUrl;
+    });
+    mount.appendChild(btn);
   }
 
   function showAuthorized(user) {
@@ -2912,6 +3047,7 @@ function getPokerResolvedTelegramUser() {
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           updateHeaderGreeting();
           showAuthorized(u);
+          loadHeaderAvatar();
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
           } catch (e2) {}
@@ -2943,8 +3079,8 @@ function getPokerResolvedTelegramUser() {
 
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
-    /* v2: callback (data-onauth) + без request_access — иначе часто «код не приходит» / лишний шаг с ботом */
-    var WIDGET_MOUNT_VER = "2";
+    /* v3: редирект (data-auth-url), без data-onauth — в PWA/WebView TG callback часто не вызывается («код/данные не приходят»). Без request_access. */
+    var WIDGET_MOUNT_VER = "3";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
     if (isPwaAuthLocalHost()) {
@@ -2978,30 +3114,39 @@ function getPokerResolvedTelegramUser() {
       mount.removeAttribute("data-pwa-widget-mounted");
       mount.innerHTML = "";
     }
-    if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) return;
+    if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
+      mountVkLoginForPwa(mount);
+      return;
+    }
     var bot = "";
     try {
       var m = String(telegramAppUrl || "").match(/t\.me\/([^\/\?#]+)/i);
       if (m) bot = m[1];
     } catch (e1) {}
-    if (!bot) return;
     mount.innerHTML = "";
-    window.pokerOnTelegramLoginWidget = function (user) {
-      try {
-        if (!user || user.hash == null || String(user.hash) === "") return;
-        deliverTelegramLoginWidgetPayload(user, false);
-      } catch (eCb) {}
-    };
-    var script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.async = true;
-    script.setAttribute("data-telegram-login", bot);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "14");
-    script.setAttribute("data-userpic", "true");
-    script.setAttribute("data-onauth", "pokerOnTelegramLoginWidget(user)");
-    mount.appendChild(script);
+    if (bot) {
+      var authReturnUrl = getTelegramWidgetAuthCallbackUrl();
+      if (!authReturnUrl) {
+        try {
+          authReturnUrl = window.location.origin.replace(/\/$/, "") + "/";
+        } catch (eU0) {
+          authReturnUrl = "";
+        }
+      }
+      var script = document.createElement("script");
+      script.src = "https://telegram.org/js/telegram-widget.js?22";
+      script.async = true;
+      script.setAttribute("data-telegram-login", bot);
+      script.setAttribute("data-size", "large");
+      script.setAttribute("data-radius", "14");
+      script.setAttribute("data-userpic", "true");
+      if (authReturnUrl) {
+        script.setAttribute("data-auth-url", authReturnUrl);
+      }
+      mount.appendChild(script);
+    }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
+    mountVkLoginForPwa(mount);
   }
 
   function tryFinishTelegramLoginRedirect() {
@@ -3051,6 +3196,9 @@ function getPokerResolvedTelegramUser() {
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
     if (!wtg) {
+      if (tryFinishVkOAuth()) {
+        return;
+      }
       if (tryFinishTelegramLoginRedirect()) {
         return;
       }
@@ -3065,6 +3213,7 @@ function getPokerResolvedTelegramUser() {
             window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
             updateHeaderGreeting();
             showAuthorized(uP);
+            loadHeaderAvatar();
             try {
               window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
             } catch (eP) {}
@@ -3072,6 +3221,23 @@ function getPokerResolvedTelegramUser() {
           }
         }
       } catch (eLs) {}
+      try {
+        var rawVk = localStorage.getItem(POKER_PWA_VK_SESSION_KEY);
+        if (rawVk) {
+          var soV = JSON.parse(rawVk);
+          if (soV && soV.user && soV.user.id != null && soV.token) {
+            var uVk = normalizeVerifiedUser(soV.user, null);
+            window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
+            updateHeaderGreeting();
+            showAuthorized(uVk);
+            loadHeaderAvatar();
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
+            } catch (eVkLs) {}
+            return;
+          }
+        }
+      } catch (eLsVk) {}
       showUnauthorized();
       resetBannerForPwaLogin();
       mountTelegramLoginWidgetForPwa();
@@ -8813,6 +8979,15 @@ function initPokerShowsPlayer() {
 function loadHeaderAvatar() {
   var avatarEl = document.getElementById("authUserAvatar");
   if (!avatarEl) return;
+  try {
+    var au = window.__pokerTelegramAuth;
+    if (au && au.user && au.user.photo_url && String(au.user.photo_url).indexOf("http") === 0) {
+      avatarEl.src = au.user.photo_url;
+      avatarEl.alt = "Аватар";
+      avatarEl.style.display = "";
+      return;
+    }
+  } catch (eA) {}
   var base = getApiBase();
   var initData = tg && tg.initData ? tg.initData : "";
   if (!base || !initData) {

@@ -920,6 +920,36 @@ html.app-view-home .home-welcome-outline::before {
 .auth-banner__login-mount:empty {
   display: none;
 }
+.auth-banner__vk-login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(180deg, #5181b8, #4073a6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s, transform 0.12s;
+}
+.auth-banner__vk-login-btn:hover {
+  opacity: 0.95;
+}
+.auth-banner__vk-login-btn:active {
+  transform: scale(0.98);
+}
+[data-theme="light"] .auth-banner__vk-login-btn {
+  color: #fff;
+  border-color: rgba(37, 99, 235, 0.35);
+}
 .auth-banner__local-login-msg {
   margin: 0 0 10px;
   font-size: 12px;
@@ -15839,10 +15869,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   width: 100%;
 }
 /* Ссылка на вкладку: Поделиться / Скопировать (уникальный startapp на раздел) */
+/* Ряд «Поделиться / копировать»: отступы зала славы + разметка как .raffles-hero__share-row */
 .hall-of-fame__panel-share-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin: 0 0 12px;
   width: 100%;
@@ -15850,85 +15882,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 .hall-of-fame__panel-share-row--in-card {
   margin-top: 0;
-}
-.hall-of-fame__panel-share-btn {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 14px;
-  min-height: var(--app-back-btn-min-height, 44px);
-  box-sizing: border-box;
-  border-radius: 16px;
-  border: 1px solid rgba(249, 115, 22, 0.65);
-  background: var(--block-bg-solid);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
-}
-.hall-of-fame__panel-share-btn:hover {
-  background: rgba(249, 115, 22, 0.1);
-  border-color: rgba(249, 115, 22, 0.85);
-  color: var(--text);
-}
-/* «Поделиться» — чуть насыщеннее, в тон полосе вкладок */
-.hall-of-fame__panel-share-btn--tg {
-  background: rgba(249, 115, 22, 0.2);
-  border-color: rgba(249, 115, 22, 0.78);
-  color: #fff7ed;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-.hall-of-fame__panel-share-btn--tg:hover {
-  background: rgba(249, 115, 22, 0.3);
-  border-color: rgba(251, 146, 60, 0.9);
-  color: #fff;
-}
-[data-theme="light"] .hall-of-fame__panel-share-btn {
-  color: #0f172a;
-  border-color: rgba(234, 88, 12, 0.55);
-  background: rgba(255, 253, 251, 0.95);
-}
-[data-theme="light"] .hall-of-fame__panel-share-btn:hover {
-  background: rgba(251, 146, 60, 0.14);
-  border-color: rgba(234, 88, 12, 0.7);
-}
-[data-theme="light"] .hall-of-fame__panel-share-btn--tg {
-  color: #9a3412;
-  background: rgba(251, 146, 60, 0.28);
-  border-color: rgba(234, 88, 12, 0.72);
-  box-shadow: none;
-}
-[data-theme="light"] .hall-of-fame__panel-share-btn--tg:hover {
-  background: rgba(251, 146, 60, 0.38);
-  color: #7c2d12;
-}
-.hall-of-fame__panel-share-btn--copy-icon {
-  flex: 0 0 auto;
-  width: var(--app-back-btn-min-height, 44px);
-  min-width: var(--app-back-btn-min-height, 44px);
-  padding: 0;
-  color: #fb923c;
-}
-[data-theme="light"] .hall-of-fame__panel-share-btn--copy-icon {
-  color: #ea580c;
-}
-.hall-of-fame__panel-share-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 0;
-  pointer-events: none;
-}
-.hall-of-fame__panel-share-icon svg {
-  display: block;
-  width: 20px;
-  height: 20px;
-}
-.hall-of-fame__panel-share-btn:active {
-  opacity: 0.92;
 }
 .hall-of-fame__startapp-code {
   font-size: 0.9em;
@@ -15973,7 +15926,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   align-items: flex-start;
   gap: 6px;
 }
-/* Визуал кнопки — у .hall-of-fame__panel-share-btn--copy-icon */
+/* Визуал кнопки — как .raffles-hero__share-btn--copy-icon */
 .hall-of-fame__blog-top15-copy-btn {
   cursor: pointer;
 }
