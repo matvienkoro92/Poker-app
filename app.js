@@ -269,27 +269,126 @@ function getAssetUrl(relativePath) {
   }
 }
 
-// Лайтбокс: увеличение картинок и аватарок по клику
+// Лайтбокс: одиночные фото + галереи (МТТ 6 скринов, ученики тренера, сетка отзывов) со стрелками и ←/→
 (function initImageLightbox() {
   var lightbox = document.getElementById("imageLightbox");
   var lightboxImg = lightbox ? lightbox.querySelector(".image-lightbox__img") : null;
   var backdrop = lightbox ? lightbox.querySelector(".image-lightbox__backdrop") : null;
   var closeBtn = lightbox ? lightbox.querySelector(".image-lightbox__close") : null;
+  var prevBtn = lightbox ? lightbox.querySelector(".image-lightbox__prev") : null;
+  var nextBtn = lightbox ? lightbox.querySelector(".image-lightbox__next") : null;
+  var counterEl = lightbox ? lightbox.querySelector(".image-lightbox__counter") : null;
   if (!lightbox || !lightboxImg) return;
-  function open(src, alt) {
+
+  var galleryList = null;
+  var galleryIndex = 0;
+
+  function syncGalleryNav() {
+    var multi = galleryList && galleryList.length > 1;
+    if (prevBtn) {
+      prevBtn.hidden = !multi;
+      prevBtn.disabled = !multi || galleryIndex <= 0;
+    }
+    if (nextBtn) {
+      nextBtn.hidden = !multi;
+      nextBtn.disabled = !multi || galleryIndex >= (galleryList ? galleryList.length - 1 : 0);
+    }
+    if (counterEl) counterEl.textContent = multi ? galleryIndex + 1 + " / " + galleryList.length : "";
+  }
+
+  function showGallerySlide() {
+    if (!galleryList || !galleryList.length) return;
+    var item = galleryList[galleryIndex];
+    lightboxImg.src = item.src;
+    lightboxImg.alt = item.alt ? item.alt : "Фото";
+    syncGalleryNav();
+  }
+
+  function openSingle(src, alt) {
+    galleryList = null;
+    galleryIndex = 0;
     lightboxImg.src = src;
     var a = alt != null ? String(alt).trim() : "";
     lightboxImg.alt = a ? a : "Увеличено";
+    syncGalleryNav();
     lightbox.classList.add("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "false");
   }
-  function close() {
+
+  function openGallery(items, startIndex) {
+    var arr = (items || []).filter(function (x) {
+      return x && x.src;
+    });
+    if (!arr.length) return;
+    galleryList = arr;
+    var si = startIndex == null || isNaN(Number(startIndex)) ? 0 : Number(startIndex);
+    galleryIndex = Math.max(0, Math.min(si, arr.length - 1));
+    showGallerySlide();
+    lightbox.classList.add("image-lightbox--open");
+    lightbox.setAttribute("aria-hidden", "false");
+  }
+
+  function openGalleryFromNodeList(imgs, clicked) {
+    var arr = [];
+    var idx = 0;
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      if (!im || !im.src) continue;
+      if (clicked && im === clicked) idx = arr.length;
+      arr.push({ src: im.src, alt: im.alt ? String(im.alt).trim() : "" });
+    }
+    openGallery(arr, idx);
+  }
+
+  function closeLightbox() {
+    galleryList = null;
+    galleryIndex = 0;
     lightbox.classList.remove("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "true");
     lightboxImg.removeAttribute("src");
+    syncGalleryNav();
   }
-  if (backdrop) backdrop.addEventListener("click", close);
-  if (closeBtn) closeBtn.addEventListener("click", close);
+
+  function stepGallery(delta) {
+    if (!galleryList || galleryList.length < 2) return;
+    var n = galleryIndex + delta;
+    if (n < 0 || n >= galleryList.length) return;
+    galleryIndex = n;
+    showGallerySlide();
+  }
+
+  if (backdrop) backdrop.addEventListener("click", closeLightbox);
+  if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
+  if (prevBtn) {
+    prevBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      stepGallery(-1);
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      stepGallery(1);
+    });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (!lightbox.classList.contains("image-lightbox--open")) return;
+    if (e.key === "Escape") {
+      closeLightbox();
+      return;
+    }
+    if (!galleryList || galleryList.length < 2) return;
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      stepGallery(-1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      stepGallery(1);
+    }
+  });
+
   document.body.addEventListener("click", function (e) {
     var t = e.target;
     var hallAlb = t.closest && t.closest(".hall-photo-album__btn");
@@ -297,7 +396,7 @@ function getAssetUrl(relativePath) {
       var himg = hallAlb.querySelector("img");
       if (himg && himg.src) {
         e.preventDefault();
-        open(himg.src);
+        openSingle(himg.src);
       }
       return;
     }
@@ -306,34 +405,42 @@ function getAssetUrl(relativePath) {
       var sImg = shameTh.querySelector("img");
       if (sImg && sImg.src) {
         e.preventDefault();
-        open(sImg.src);
+        openSingle(sImg.src);
       }
       return;
     }
-    if (t.nodeName === "IMG" && t.closest && t.closest(".video-lessons__coach-reviews-grid") && t.src) {
+    var mttGrid = t.closest && t.closest(".video-lessons__mtt-grid");
+    if (t.nodeName === "IMG" && mttGrid && t.src) {
       e.preventDefault();
-      open(t.src, t.alt);
+      openGalleryFromNodeList(mttGrid.querySelectorAll("img"), t);
       return;
     }
-    if (t.nodeName === "IMG" && t.closest && t.closest(".video-lessons__coach-student-gallery") && t.src) {
+    var coachGal = t.closest && t.closest(".video-lessons__coach-student-gallery");
+    if (t.nodeName === "IMG" && coachGal && t.src) {
       e.preventDefault();
-      open(t.src, t.alt);
+      openGalleryFromNodeList(coachGal.querySelectorAll("img"), t);
+      return;
+    }
+    var revGrid = t.closest && t.closest(".video-lessons__coach-reviews-grid");
+    if (t.nodeName === "IMG" && revGrid && t.src) {
+      e.preventDefault();
+      openGalleryFromNodeList(revGrid.querySelectorAll("img"), t);
       return;
     }
     if (t.classList && t.classList.contains("chat-msg__image") && t.src) {
       e.preventDefault();
-      open(t.src);
+      openSingle(t.src);
       return;
     }
     if (t.classList && t.classList.contains("chat-msg__avatar") && t.src) {
       e.preventDefault();
-      open(t.src);
+      openSingle(t.src);
       return;
     }
     if (t.classList && t.classList.contains("chat-contact__avatar") && t.src && !(t.closest && t.closest(".chat-contact"))) {
       e.preventDefault();
       e.stopPropagation();
-      open(t.src);
+      openSingle(t.src);
     }
   });
   document.body.addEventListener("click", function (e) {
@@ -9653,11 +9760,6 @@ document.addEventListener("click", function (e) {
   var card = item.closest(".video-lessons__card");
   var playerWrap = card ? card.querySelector(".video-lessons__player-wrap") : null;
   if (!card || !playerWrap) return;
-  /* Позиция шапки урока до перестройки: после закрытия соседних блоков страница «подпрыгивает» вверх — компенсируем scroll */
-  var topBefore = 0;
-  try {
-    topBefore = card.getBoundingClientRect().top;
-  } catch (eTop) {}
   var isOpen = !playerWrap.classList.contains("video-lessons__player-wrap--hidden");
   document.querySelectorAll(".video-lessons__video").forEach(function (v) {
     try {
@@ -9681,41 +9783,18 @@ document.addEventListener("click", function (e) {
     card.classList.add("video-lessons__card--open");
     var url = item.getAttribute("data-video-url");
     if (url && url !== "#") {
-      var nativeVideo = playerWrap.querySelector(".video-lessons__video[data-disk-public]");
-      if (nativeVideo && typeof window.loadVideoLessonNative === "function") {
-        window.loadVideoLessonNative(nativeVideo, playerWrap);
-      } else {
-        var iframe = playerWrap.querySelector(".video-lessons__iframe[data-video-src]");
-        if (iframe && !iframe.src) iframe.src = iframe.getAttribute("data-video-src") || url;
-      }
+      /* Сначала кадр с раскрытым блоком (стабильная высота под aspect-ratio), затем сеть/видео — меньше мерцания */
+      requestAnimationFrame(function () {
+        var nativeVideo = playerWrap.querySelector(".video-lessons__video[data-disk-public]");
+        if (nativeVideo && typeof window.loadVideoLessonNative === "function") {
+          window.loadVideoLessonNative(nativeVideo, playerWrap);
+        } else {
+          var iframe = playerWrap.querySelector(".video-lessons__iframe[data-video-src]");
+          if (iframe && !iframe.src) iframe.src = iframe.getAttribute("data-video-src") || url;
+        }
+      });
     }
   }
-  function videoLessonsFixScrollAfterToggle() {
-    if (!card) return;
-    var topAfter = 0;
-    try {
-      topAfter = card.getBoundingClientRect().top;
-    } catch (e2) {
-      return;
-    }
-    var dy = topAfter - topBefore;
-    if (Math.abs(dy) < 0.5) return;
-    try {
-      if (typeof window.scrollBy === "function") {
-        window.scrollBy({ top: dy, left: 0, behavior: "auto" });
-      } else {
-        window.scrollBy(0, dy);
-      }
-    } catch (eScroll) {
-      try {
-        var se = document.scrollingElement || document.documentElement;
-        if (se && typeof se.scrollTop === "number") se.scrollTop += dy;
-      } catch (eSe) {}
-    }
-  }
-  requestAnimationFrame(function () {
-    requestAnimationFrame(videoLessonsFixScrollAfterToggle);
-  });
 });
 
 /* WebKit/Telegram: фокус по клику на кнопку урока дёргает scrollIntoView — шапка уезжает вверх */
@@ -9747,20 +9826,24 @@ function initVideoLessons() {
   scrollTopNow();
   requestAnimationFrame(scrollTopNow);
   setTimeout(scrollTopNow, 0);
-  /* Первый урок по умолчанию развёрнут — подтягиваем поток с Я.Диска, как при клике */
-  try {
-    var list = document.getElementById("videoLessonsList");
-    var firstCard = list && list.querySelector(".video-lessons__card");
-    if (firstCard && firstCard.classList.contains("video-lessons__card--open")) {
-      var pw = firstCard.querySelector(".video-lessons__player-wrap");
-      if (pw && !pw.classList.contains("video-lessons__player-wrap--hidden")) {
-        var nv = pw.querySelector(".video-lessons__video[data-disk-public]");
-        if (nv && !nv.src && typeof window.loadVideoLessonNative === "function") {
-          window.loadVideoLessonNative(nv, pw);
+  /* Первый урок: после стабилизации скролла/вёрстки — иначе fetch+src и scrollTop конкурируют и экран «мерцает» */
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      try {
+        var list = document.getElementById("videoLessonsList");
+        var firstCard = list && list.querySelector(".video-lessons__card");
+        if (firstCard && firstCard.classList.contains("video-lessons__card--open")) {
+          var pw = firstCard.querySelector(".video-lessons__player-wrap");
+          if (pw && !pw.classList.contains("video-lessons__player-wrap--hidden")) {
+            var nv = pw.querySelector(".video-lessons__video[data-disk-public]");
+            if (nv && !nv.src && typeof window.loadVideoLessonNative === "function") {
+              window.loadVideoLessonNative(nv, pw);
+            }
+          }
         }
-      }
-    }
-  } catch (eFirstLesson) {}
+      } catch (eFirstLesson) {}
+    });
+  });
 }
 
 /**

@@ -79,10 +79,12 @@
         }
       }
       .app-boot-overlay__text {
-        margin: 0;
+        margin: 0 auto;
+        max-width: 280px;
         font-size: 14px;
         color: #94a3b8;
         line-height: 1.35;
+        white-space: pre-line;
       }
       html[data-theme="light"] .app-boot-overlay__text {
         color: #64748b;
@@ -112,7 +114,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=201" />
+    <link rel="stylesheet" href="./styles.css?v=208" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -223,7 +225,9 @@
           var el = document.getElementById("appBootOverlay");
           if (!el || el.classList.contains("app-boot-overlay--hidden")) return;
           var p = el.querySelector(".app-boot-overlay__text");
-          if (p) p.textContent = "Загрузка… Дольше обычного — проверьте сеть.";
+          if (p)
+            p.textContent =
+              "Загрузка… Дольше обычного — проверьте сеть.\nПопробуйте БЕЗ VPN/PROXY.";
         }, 14000);
         window.__pokerHideBootOverlay = hideBootOverlay;
       })();
@@ -470,7 +474,7 @@
 
           <!-- Рейтинг Турнирщиков зимы: даты и итоговая таблица внутри -->
           <div class="view" data-view="winter-rating">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <section class="winter-rating" id="winterRatingSection" aria-labelledby="winterRatingTitle">
               <div class="winter-rating__winter-decor" aria-hidden="true"><span class="winter-rating__suit">♠</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♥</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♦</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♣</span></div>
               <h2 class="winter-rating__title" id="winterRatingTitle">
@@ -1290,7 +1294,7 @@
 
           <!-- Рейтинг Весны: тот же контент, переносится из winter-rating при открытии -->
           <div class="view" data-view="spring-rating" id="springRatingView">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <div id="springRatingSectionPlaceholder"></div>
           </div>
 
@@ -1370,7 +1374,7 @@
             </div>
             <div class="chat-general-view chat-general-view--hidden" id="chatGeneralView">
               <div class="chat-general-header">
-                <button type="button" class="chat-back-btn chat-general-header__toolbar-back" id="chatGeneralBackBtn" aria-label="Назад к чатам">← Чаты</button>
+                <button type="button" class="chat-back-btn chat-general-header__toolbar-back" id="chatGeneralBackBtn" aria-label="Назад к чатам">←</button>
                 <div class="chat-general-header__segments" role="toolbar" aria-label="Действия в общем чате">
                   <button type="button" class="chat-general-admins-btn chat-general-header__segment chat-general-header__segment--grow" id="chatGeneralAdminsBtn" title="Написать админам">
                     <span class="chat-general-admins-btn__top">Написать&#8203; админам</span>
@@ -1424,7 +1428,7 @@
               <div class="chat-conv-view chat-conv-view--hidden" id="chatConvView">
                 <div class="chat-conv-top">
                   <div class="chat-conv-top-inner">
-                    <button type="button" class="chat-back-btn" id="chatBackBtn">← Назад</button>
+                    <button type="button" class="chat-back-btn" id="chatBackBtn" aria-label="Назад">←</button>
                     <div class="chat-conv-header chat-conv-header--one-line">
                       <span class="chat-conv-title__name" id="chatConvTitle">Чат</span>
                       <span class="chat-conv-title__tg-id chat-conv-title__tg-id--hidden" id="chatConvTitleTgIdWrap"><span id="chatConvTitleTgId"></span></span>
@@ -1535,9 +1539,7 @@
 
             <!-- Страница Poker21 -->
             <div class="download-page" data-download-page="poker21">
-              <button type="button" class="download-back" data-download-back aria-label="Назад">
-                ← Назад
-              </button>
+              <button type="button" class="download-back" data-download-back aria-label="Назад">←</button>
               <h1 class="title download-title">Poker21</h1>
 
               <p class="poker21-intro">
@@ -1594,7 +1596,7 @@
 
             <!-- Страница Xpoker -->
             <div class="download-page" data-download-page="xpoker">
-              <button type="button" class="download-back" data-download-back aria-label="Назад">← Назад</button>
+              <button type="button" class="download-back" data-download-back aria-label="Назад">←</button>
               <h1 class="title download-title">Xpoker</h1>
               <p class="poker21-intro">Качайте приложение и вступайте в клуб по ID.</p>
 
@@ -1645,7 +1647,7 @@
 
             <!-- Страница PPPoker -->
             <div class="download-page" data-download-page="pppoker">
-              <button type="button" class="download-back" data-download-back aria-label="Назад">← Назад</button>
+              <button type="button" class="download-back" data-download-back aria-label="Назад">←</button>
               <h1 class="title download-title">PPPoker</h1>
               <p class="poker21-intro">Качайте приложение и вступайте в клуб по ID.</p>
 
@@ -1695,7 +1697,7 @@
 
             <!-- Страница Supremapoker -->
             <div class="download-page" data-download-page="supremapoker">
-              <button type="button" class="download-back" data-download-back aria-label="Назад">← Назад</button>
+              <button type="button" class="download-back" data-download-back aria-label="Назад">←</button>
               <h1 class="title download-title">Supremapoker</h1>
               <p class="poker21-intro">Качайте приложение и вступайте в клуб по ID.</p>
 
@@ -1739,7 +1741,7 @@
 
           <!-- Мини-игра: Найди туза -->
           <div class="view" data-view="bonus-game">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Найди Пиханину</h1>
             <p class="bonus-game-desc">Пиханина опять выиграл переездом снизу и спрятался в бубновую колоду, а может и в пиковую. 15 призов по 200р. У вас 5 попыток, чтобы найти его и выбить 1 приз 200р. Промокод для получения приза напишите в чат игроков.</p>
             <p class="bonus-game-desc">Перед вами колода буби (13 карт от двойки до туза), колода пики (13 карт) и 27-я карта — джокер Пиханина.</p>
@@ -1758,7 +1760,7 @@
 
           <!-- Мини-игра: Слезы Кулера (пока скрыта) -->
           <div class="view is-hidden" data-view="cooler-game">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Слезы Кулера</h1>
             <p class="bonus-game-desc">Платок Кулера для вытирания слёз улетел в колоду. Помогите ему найти платок, потому что он снова плачет из-за переезда. Он будет вам благодарен и выдаст билет на турнир.</p>
             <p class="bonus-game-desc">Перед вами колода буби (13 карт), колода пики (13 карт) и 27-я карта — платок. Выберите одну из карт.</p>
@@ -1770,7 +1772,7 @@
 
           <!-- Игра: Переедь Штукатура -->
           <div class="view" data-view="plasterer-game">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Переедь Штукатура</h1>
             <p class="plasterer-desc">Мы остались в ХУ против Штукатура, но у него как обычно всегда 2 туза на руках. Обыграйте его. Попытки безлимитные.</p>
             <div class="plasterer-table">
@@ -1808,7 +1810,7 @@
 
           <!-- Розыгрыши -->
           <div class="view" data-view="raffles">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <p class="raffles-tagline">Розыгрыши беккинг-билетов на турниры клуба</p>
             <header class="raffles-hero" aria-hidden="true">
               <img src="./assets/raffles-hero.png" alt="" class="raffles-hero__img" width="720" height="288" />
@@ -1992,7 +1994,7 @@
 
           <!-- Научиться играть — хаб: видео-уроки -->
           <div class="view" data-view="learn-play-hub">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Научиться играть</h1>
             <p class="learn-play-hub__desc">Бесплатные видео-уроки по темам от тренера клуба.</p>
             <div class="learn-play-hub__buttons">
@@ -2009,7 +2011,7 @@
           <!-- Научиться играть — Tournament Pro Challenge (Задачи) -->
           <div class="view" data-view="poker-tasks">
             <div class="poker-tasks__start" id="pokerTasksStartScreen">
-              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">← Назад</button>
+              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">←</button>
               <h1 class="title">Tournament Pro Challenge</h1>
               <p class="poker-tasks__desc">80 уровней, 500+ MTT задач с прогрессивной сложностью. 5 задач в день. Таймер от нуля, бонусы за скорость и стрик.</p>
               <div class="poker-tasks__mtt-stats" id="pokerTasksMttStats">
@@ -2063,7 +2065,7 @@
               </div>
             </div>
             <div class="poker-streak-result-screen poker-streak-result-screen--hidden" id="pokerStreakResultScreen">
-              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">← Назад</button>
+              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">←</button>
               <h2 class="title">Итоги сессии</h2>
               <div class="poker-streak-result-stats" id="pokerStreakResultStats"></div>
               <button type="button" class="primary-button" id="pokerStreakPlayAgainBtn">Ещё задачи</button>
@@ -2073,7 +2075,7 @@
           <!-- Видео-уроки (15 уроков по темам) -->
           <div class="view" data-view="video-lessons">
             <div class="video-lessons__top-bar" role="toolbar" aria-label="Навигация и ссылка на раздел">
-              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад">← Назад</button>
+              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад">←</button>
               <div class="video-lessons__share-row-wrap">
                 <div class="raffles-hero__share-row video-lessons__share-row">
                   <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="videoLessonsInviteFriendBtn" aria-label="Отправить другу ссылку на видеоуроки">Отправить другу</button>
@@ -3016,7 +3018,7 @@
           <div class="view" data-view="hall-of-fame" id="hallOfFameView">
             <h1 class="hall-of-fame__main-title hall-of-fame__main-title--top">Зал славы</h1>
             <div class="hall-of-fame__toolbar" role="navigation" aria-label="Разделы зала славы">
-              <button type="button" class="bonus-game-back hall-of-fame__toolbar-back" data-view-target="home" aria-label="На главную">← Назад</button>
+              <button type="button" class="bonus-game-back hall-of-fame__toolbar-back" data-view-target="home" aria-label="На главную">←</button>
               <div class="hall-of-fame__subtabs" role="tablist" aria-label="Разделы зала славы">
                 <button type="button" class="hall-of-fame__subtab hall-of-fame__subtab--active" role="tab" aria-selected="true" data-hall-section="legends">Легенды</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="cups">Кубки</button>
@@ -3029,7 +3031,7 @@
               <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" aria-labelledby="hallLegendsTitle">
                 <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Легенды»">
                   <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="legends" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="legends" data-hall-fame-action="copy">Скопировать ссылку</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--copy-icon" data-hall-fame-share="legends" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Легенды»"><span class="hall-of-fame__panel-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                 </div>
                 <section class="hall-of-fame__block" aria-labelledby="hallLegendsTitle">
                   <h2 class="hall-of-fame__section-title" id="hallLegendsTitle">Легенды клуба</h2>
@@ -3052,7 +3054,7 @@
               <div class="hall-of-fame__panel" id="hallFamePanelCups" data-hall-panel="cups" role="tabpanel" hidden>
                 <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Кубки»">
                   <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="cups" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="cups" data-hall-fame-action="copy">Скопировать ссылку</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--copy-icon" data-hall-fame-share="cups" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Кубки»"><span class="hall-of-fame__panel-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                 </div>
                 <h2 class="hall-of-fame__section-title hall-of-fame__section-title--cups-above-rating" id="hallCupsTitle">Кубки два туза</h2>
                 <div class="hall-of-fame__rating-card-wrap">
@@ -3139,7 +3141,7 @@
                     <div class="hall-of-fame__blog-top15-copy-wrap">
                       <div class="hall-of-fame__panel-share-row hall-of-fame__panel-share-row--in-card" role="group" aria-label="Ссылка на раздел «Топ 2026»">
                         <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="top2026" data-hall-fame-action="share">Поделиться</button>
-                        <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn" data-hall-fame-share="top2026" data-hall-fame-action="copy">Скопировать ссылку</button>
+                        <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--copy-icon hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn" data-hall-fame-share="top2026" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Топ 2026»"><span class="hall-of-fame__panel-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                       </div>
                       <p class="hall-of-fame__blog-top15-copy-hint">Ссылка с <code class="hall-of-fame__startapp-code">hall_fame_top2026</code> открывает этот раздел. Раньше использовали <code class="hall-of-fame__startapp-code">blog_top15</code> / <code class="hall-of-fame__startapp-code">hall_top15</code> — они по‑прежнему работают.</p>
                     </div>
@@ -3149,7 +3151,7 @@
               <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
                 <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Фото»">
                   <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="photos" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="photos" data-hall-fame-action="copy">Скопировать ссылку</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--copy-icon" data-hall-fame-share="photos" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Фото»"><span class="hall-of-fame__panel-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                 </div>
                 <section class="hall-of-fame__block hall-photo-album hall-photo-album--feed" aria-labelledby="hallPhotosTitle">
                   <div class="hall-photo-album__ribbon" aria-hidden="true">
@@ -3346,7 +3348,7 @@
               <div class="hall-of-fame__panel" id="hallFamePanelShame" data-hall-panel="shame" role="tabpanel" hidden>
                 <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Доска позора»">
                   <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="shame" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="shame" data-hall-fame-action="copy">Скопировать ссылку</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--copy-icon" data-hall-fame-share="shame" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Доска позора»"><span class="hall-of-fame__panel-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                 </div>
                 <section class="hall-of-fame__block hall-shame-board" aria-labelledby="hallShameTitle">
                   <h2 class="hall-of-fame__section-title hall-shame-board__title" id="hallShameTitle">Доска позора</h2>
@@ -3551,7 +3553,7 @@
 
           <!-- Стримы (с главной: Игры и приложения) -->
           <div class="view" data-view="streams">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title streams-title">Стримы</h1>
             <p class="streams-intro">Трансляция экрана и голоса в реальном времени. Задержка 2 минуты потребует отдельного стрим-сервера — пока доступна только прямая трансляция.</p>
             <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
@@ -3600,7 +3602,7 @@
 
           <!-- Расписание турниров -->
           <div class="view" data-view="schedule">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title schedule-title">Расписание турниров на неделю</h1>
             <p class="schedule-subtitle">Poker 21+</p>
 
@@ -3660,7 +3662,7 @@
 
           <!-- Эквилятор: расчёт эквити -->
           <div class="view" data-view="equilator">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">← Назад</button>
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Эквилятор</h1>
             <p class="equilator-intro">Выберите ваши карты и все 5 карт борда (флоп, терн, ривер). Эквити считается методом Монте-Карло.</p>
             <div class="equilator-form">
@@ -3745,17 +3747,20 @@
         </button>
       </nav>
 
-      <div class="image-lightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-label="Увеличить изображение" aria-hidden="true">
+      <div class="image-lightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-label="Просмотр изображения" aria-hidden="true">
         <button type="button" class="image-lightbox__backdrop" aria-label="Закрыть"></button>
         <div class="image-lightbox__content">
+          <button type="button" class="image-lightbox__prev" hidden aria-label="Предыдущее фото">‹</button>
           <img class="image-lightbox__img" src="" alt="" />
+          <button type="button" class="image-lightbox__next" hidden aria-label="Следующее фото">›</button>
+          <span class="image-lightbox__counter" aria-live="polite"></span>
           <button type="button" class="image-lightbox__close" aria-label="Закрыть">✕</button>
         </div>
       </div>
       <div class="pdf-viewer" id="pdfViewer" role="dialog" aria-modal="true" aria-label="Просмотр PDF" aria-hidden="true">
         <button type="button" class="pdf-viewer__backdrop" aria-label="Закрыть"></button>
         <div class="pdf-viewer__content">
-          <button type="button" class="pdf-viewer__close" aria-label="Назад">← Назад</button>
+          <button type="button" class="pdf-viewer__close" aria-label="Назад">←</button>
           <iframe class="pdf-viewer__iframe" id="pdfViewerIframe" title="PDF"></iframe>
         </div>
       </div>
@@ -3886,7 +3891,7 @@
         <div class="share-stats-admin-modal__backdrop" id="trackingLinksVisitorsModalBackdrop"></div>
         <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
           <button type="button" class="share-stats-admin-modal__close" id="trackingLinksVisitorsModalClose" aria-label="Закрыть">×</button>
-          <button type="button" class="tracking-links-admin__back-btn" id="trackingLinksVisitorsBackBtn">← К списку ссылок</button>
+          <button type="button" class="tracking-links-admin__back-btn" id="trackingLinksVisitorsBackBtn" aria-label="К списку ссылок">←</button>
           <h2 class="share-stats-admin-modal__title" id="trackingLinksVisitorsTitle">Переходы</h2>
           <div class="tracking-links-admin__table-wrap tracking-links-admin__table-wrap--tall">
             <table class="share-stats-admin-modal__table">
@@ -4079,7 +4084,7 @@
               <div class="gazette-modal__rule"></div>
             </header>
             <div class="gazette-modal__pick-back-bar">
-              <button type="button" class="gazette-modal__back gazette-modal__back--to-home" id="gazetteModalBackToHome" aria-label="На главную">← На главную</button>
+              <button type="button" class="gazette-modal__back gazette-modal__back--to-home" id="gazetteModalBackToHome" aria-label="На главную">←</button>
             </div>
             <div class="gazette-modal__pages">
               <div class="gazette-front">
@@ -4164,11 +4169,11 @@
           </div>
           <!-- Страница: Горячие новости -->
           <div class="gazette-modal__content gazette-modal__content--news" id="gazetteModalNews" hidden>
-            <button type="button" class="gazette-modal__back" id="gazetteModalBackNews" aria-label="Назад к выбору страницы">← К газете</button>
+            <button type="button" class="gazette-modal__back" id="gazetteModalBackNews" aria-label="Назад к выбору страницы">←</button>
             <div class="gazette-modal__content-masthead">Горячие новости недели</div>
             <div class="gazette-modal__content-rule"></div>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="17">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 22 марта 2026&nbsp;г.</p>
               <p class="gazette-modal__headline-cont">Доска позора · репортаж</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">
@@ -4248,7 +4253,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top gazette-modal__lead--fairytale" data-gazette-article="16">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 21 марта 2026&nbsp;г.</p>
               <p class="gazette-fairytale__kicker">Сказка редакции · Зал славы</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main gazette-modal__headline--fairytale">КОГДА ЗЛОЙ РИВЕР ЗАХОТЕЛ ПОГУБИТЬ РАЗДАЧИ, А ПЯТНАДЦАТЬ ГЕРОЕВ СКАЗАЛИ ЕМУ: «НЕ СЕГОДНЯ»</h3>
@@ -4275,7 +4280,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="15">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 19 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР, 95&nbsp;100₽ И НЕСПРАВЕДЛИВЫЙ МИР: ПОЧЕМУ УДАЧА НАНИМАЕТ НА РАБОТУ БЕЗ СОБЕСЕДОВАНИЯ</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4297,7 +4302,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="14">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 14 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ФРИРОЛЛ НА 150 000₽: ГЕРОЙ МАМАЛЕНА ПРОТИВ ВСЕГО МИРА. Один против зла и нечести, семь на финалке — пятеро честных, один «за донат», и Putri, выигравший пять оллинов подряд</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4319,7 +4324,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="13">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 13 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР ВЕРНУЛСЯ В БОЛЬШУЮ ИГРУ И СРАЗУ ПОПАЛ В ОЧКО. Легенда зарекалась — и превзошла себя: тридцать столов подряд в минусе. Каламбур судьбы и стихи на злобу дня!</h3>
               <div class="gazette-modal__body">
@@ -4356,7 +4361,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="12">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 8 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АНДРЮШАМОРФ (FRANKL) ЖЁСТКО ПОДЖИМАЕТ ВАААРА В ЛИГЕ 1. ВСЕГО 60 БАЛЛОВ РАЗРЫВА — КТО УДЕРЖИТ КОРОНУ?</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4377,7 +4382,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="11">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 6 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ПЯТНИЦА ПРОГРЕССИВ: 57 ИГРОКОВ, 9 В ПРИЗАХ. WITCH — БРОНЗА И 15 000₽. АСПИРИН, MANIAKK, KRIAK И ALENAST В ТОП-9</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4397,7 +4402,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="10">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 5 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КРИМИНАЛЬНАЯ СВОДКА КЛУБА ЗА 5Е МАРТА. НАЖИВА 370 000₽. АНДРЮШАМОРФ НАНОСИТ ДВОЙНОЙ УДАР. РЫБНАДЗОР СНОВА НАД РЫБАМИ. ПРЯНИК ПОТЕРЯЛ СОЗНАНИЕ!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4426,7 +4431,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="9">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 1 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">РАЗОРВАЛИ ФЕВРАЛЬ В ПОСЛЕДНЮЮ НОЧЬ: 225 ТЫСЯЧ ЗА ВЕЧЕР — ЭМИЛЬ И ВАААР ДОБИЛИ РЕЙТИНГ. Кто отобрался с 300₽ на путевку за 120 000₽, а кто вынес нокаут за 5000₽? Цифры, от которых стынет кровь!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4451,7 +4456,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="8">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АМАЛИЯ И АСПИРИН: ХЕДЗ-АП ЗА 100К, ГДЕ РЕШАЛОСЬ, КТО ЗДЕСЬ ДОМИНАНТ</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4473,7 +4478,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="7">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СЕНСАЦИЯ! ПОКЕРМАНКИ ВЫЖИМАЕТ 900 000₽ И ТРИЖДЫ В ХУ РАЗНОСИТ ВАААРА — «ДО ЛЯМА РУКОЙ ПОДАТЬ!»</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4494,7 +4499,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="6">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ТУРНИР ЗА 300₽ СОБРАЛ 108 ТЫСЯЧ ПРИЗОВЫХ: АМАЛИЯ И АСПИРИН — ЛУЧШИЕ ДРУЗЬЯ ИЛИ ХОЛОДНОКРОВНЫЕ ОДИНОЧКИ-ИСКАТЕЛИ БОГАТСТВА?</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4513,7 +4518,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead" data-gazette-article="5">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 25 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ЛЮБОВЬ ПОКЕРА И ВАРКРАФТА: была ли интимная связь? Откуда взялись два новых смайла — эксклюзив!</h3>
               <div class="gazette-modal__photo-wrap gazette-modal__photo-wrap--warm">
@@ -4533,7 +4538,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="4">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КОНЕЦ РОЗЫГРЫША! Клуб в трауре: владельца обвиняют в предательстве, игроки в депрессии — эксклюзивное интервью с пострадавшим!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4554,7 +4559,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="3">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ШОК! Кряк задушил Гидрографа в прямом эфире — 30 тысяч в карман, жертва в слёзах!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4573,7 +4578,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="2">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АндрюшаМорф РВЁТ банк: почти четверть миллиона за воскресенье — «Легенда не сдаётся!»</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4589,7 +4594,7 @@
               </p>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="1">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">← К газете</button></p>
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 23 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СКАНДАЛ НА СТОЛЕ: Кулер пушит мусор и выбивает АК — стол в ярости, игроки требуют извинений!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4744,7 +4749,7 @@
       <div class="winter-rating-player-modal" id="winterRatingPlayerModal" aria-hidden="true" role="dialog" aria-labelledby="winterRatingPlayerModalTitle" aria-label="Сводка по игроку">
         <div class="winter-rating-player-modal__inner">
           <button type="button" class="winter-rating-player-modal__close" aria-label="Закрыть">×</button>
-          <button type="button" class="winter-rating-player-modal__back" id="winterRatingPlayerModalBack">← Назад</button>
+          <button type="button" class="winter-rating-player-modal__back" id="winterRatingPlayerModalBack" aria-label="Назад">←</button>
           <div class="winter-rating-player-modal__header-row">
             <h3 class="winter-rating-player-modal__title" id="winterRatingPlayerModalTitle"></h3>
             <div class="winter-rating-player-modal__share-wrap" id="winterRatingPlayerModalShareWrap">
@@ -5064,7 +5069,7 @@
     <div class="winter-rating-lightbox" id="winterRatingLightbox" aria-hidden="true" role="dialog" aria-label="Увеличенный скрин">
       <img class="winter-rating-lightbox__img" src="" alt="" />
       <button type="button" class="winter-rating-lightbox__close" aria-label="Закрыть">×</button>
-      <button type="button" class="chat-back-btn winter-rating-lightbox__back" id="winterRatingLightboxBackBtn" aria-label="Закрыть просмотр">← Назад</button>
+      <button type="button" class="chat-back-btn winter-rating-lightbox__back" id="winterRatingLightboxBackBtn" aria-label="Закрыть просмотр">←</button>
       <button type="button" class="winter-rating-lightbox__prev" aria-label="Предыдущий скрин">‹</button>
       <button type="button" class="winter-rating-lightbox__next" aria-label="Следующий скрин">›</button>
       <span class="winter-rating-lightbox__counter" aria-live="polite"></span>
@@ -5092,7 +5097,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=184"></script>
+    <script src="./app.js?v=187"></script>
   </body>
 </html>
 
