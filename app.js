@@ -2915,6 +2915,39 @@ function getPokerResolvedTelegramUser() {
     }
   }
 
+  /** В WebView Mini App редирект после Login Widget часто ломается — выход в системный браузер. */
+  function mountTelegramExternalBrowserEscapeBtn(mount) {
+    if (!mount || isPwaAuthLocalHost() || !isTelegramWebApp()) return;
+    if (mount.querySelector(".auth-banner__external-browser-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "auth-banner__external-browser-btn";
+    btn.textContent = "Открыть в браузере для входа";
+    btn.addEventListener("click", function () {
+      var wtg = getTelegramWebAppNow();
+      var u = getTelegramWidgetAuthCallbackUrl();
+      if (!u || !/^https:\/\//i.test(u)) {
+        try {
+          u = (getTelegramAuthApiBase() || window.location.origin).replace(/\/$/, "") + "/";
+        } catch (eO) {
+          u = "";
+        }
+      }
+      if (wtg && typeof wtg.openLink === "function") {
+        try {
+          wtg.openLink(u, { try_instant_view: false });
+        } catch (eL) {
+          try {
+            wtg.openLink(u);
+          } catch (eL2) {}
+        }
+      } else if (u) {
+        window.open(u, "_blank", "noopener,noreferrer");
+      }
+    });
+    mount.appendChild(btn);
+  }
+
   function mountVkLoginForPwa(mount) {
     if (!mount || isPwaAuthLocalHost()) return;
     var appId = getVkAppIdForPwa();
@@ -3003,9 +3036,16 @@ function getPokerResolvedTelegramUser() {
       dom = new URL(cb).hostname;
     } catch (eDom) {}
     if (bannerText) {
-      bannerText.textContent = isPwaAuthLocalHost()
-        ? "Локальный запуск: кнопка «Войти через Telegram» здесь не работает — в BotFather привязан боевой домен. Используйте ссылку ниже или откройте Mini App в Telegram."
-        : "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram, вас вернёт обратно сюда. Это не SMS: смотрите уведомления и чат «Telegram» / Service notifications.";
+      if (isPwaAuthLocalHost()) {
+        bannerText.textContent =
+          "Локальный запуск: кнопка «Войти через Telegram» здесь не работает — в BotFather привязан боевой домен. Используйте ссылку ниже или откройте Mini App в Telegram.";
+      } else if (isTelegramWebApp()) {
+        bannerText.textContent =
+          "Войдите кнопкой «Log in / Войти через Telegram» ниже (подтверждение в приложении Telegram) или нажмите «Открыть в браузере», если во встроенном окне вход не срабатывает. SMS с кодом не отправляется — это нормально.";
+      } else {
+        bannerText.textContent =
+          "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram. SMS с кодом не приходит: используется вход через аккаунт Telegram, не по номеру телефона.";
+      }
     }
     if (banner) banner.classList.remove("auth-banner--verifying");
     if (bannerRetry) bannerRetry.hidden = true;
@@ -3018,13 +3058,20 @@ function getPokerResolvedTelegramUser() {
         hintEl.textContent =
           "Сообщение «Bot domain invalid» на localhost — нормально. Вход через виджет только на развёрнутом сайте (тот же домен, что в @BotFather)." +
           (prodBase ? " Боевой URL: " + prodBase : "");
+      } else if (isTelegramWebApp()) {
+        hintEl.textContent =
+          "В Mini App не ждите SMS: подтвердите вход во всплывающем окне Telegram. Если после этого страница «зависла», откройте сайт в Safari/Chrome кнопкой ниже. Домен в @BotFather (/setdomain): " +
+          (dom || "example.com") +
+          " (без https://). Адрес для возврата: " +
+          cb +
+          ".";
       } else {
         hintEl.textContent =
-          "Вход через Telegram — это не SMS-код: подтверждение в приложении Telegram, затем возврат на сайт с параметрами в адресе. Домен в @BotFather (/setdomain) — только hostname, например " +
+          "Подтверждение — в приложении Telegram; в адресе страницы могут появиться параметры id и hash (это не SMS-код). Домен в @BotFather (/setdomain) — hostname, например " +
           (dom || "example.com") +
-          ", без https://. Страница входа: " +
+          ", без https://. Страница: " +
           cb +
-          ". Если не пускает — откройте сайт во внешнем браузере (не только внутри Telegram).";
+          ".";
       }
       hintEl.style.display = "block";
     }
@@ -3097,8 +3144,11 @@ function getPokerResolvedTelegramUser() {
 
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
-    /* v3: редирект (data-auth-url), без data-onauth — в PWA/WebView TG callback часто не вызывается («код/данные не приходят»). Без request_access. */
-    var WIDGET_MOUNT_VER = "3";
+    /*
+     * v4: data-onauth — данные приходят через postMessage из iframe oauth.telegram.org без редиректа родительской
+     * страницы (в WebView Mini App редирект часто «теряется»). Редирект ?hash=… и #tgAuthResult обрабатываем в tryFinishTelegramLoginRedirect.
+     */
+    var WIDGET_MOUNT_VER = "4";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
     if (isPwaAuthLocalHost()) {
@@ -3134,6 +3184,7 @@ function getPokerResolvedTelegramUser() {
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
       mountVkLoginForPwa(mount);
+      mountTelegramExternalBrowserEscapeBtn(mount);
       return;
     }
     var bot = "";
@@ -3142,15 +3193,13 @@ function getPokerResolvedTelegramUser() {
       if (m) bot = m[1];
     } catch (e1) {}
     mount.innerHTML = "";
+    window.__pokerTelegramWidgetAuth = function (user) {
+      try {
+        if (!user || user.hash == null || user.id == null || user.auth_date == null) return;
+        deliverTelegramLoginWidgetPayload(user, false);
+      } catch (eCb) {}
+    };
     if (bot) {
-      var authReturnUrl = getTelegramWidgetAuthCallbackUrl();
-      if (!authReturnUrl) {
-        try {
-          authReturnUrl = window.location.origin.replace(/\/$/, "") + "/";
-        } catch (eU0) {
-          authReturnUrl = "";
-        }
-      }
       var script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.async = true;
@@ -3158,13 +3207,12 @@ function getPokerResolvedTelegramUser() {
       script.setAttribute("data-size", "large");
       script.setAttribute("data-radius", "14");
       script.setAttribute("data-userpic", "true");
-      if (authReturnUrl) {
-        script.setAttribute("data-auth-url", authReturnUrl);
-      }
+      script.setAttribute("data-onauth", "window.__pokerTelegramWidgetAuth(user)");
       mount.appendChild(script);
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
     mountVkLoginForPwa(mount);
+    mountTelegramExternalBrowserEscapeBtn(mount);
   }
 
   function tryFinishTelegramLoginRedirect() {
