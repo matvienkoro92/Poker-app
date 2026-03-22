@@ -42,7 +42,7 @@
 
 /** Единый текст при проблемах с сетью (показываем пользователю) */
 var POKER_NET_ERR =
-  "Нет связи с сервером. Проверьте интернет и попробуйте снова.";
+  "Нет связи с сервером. Проверьте интернет и попробуйте снова или перезайдите в приложение.";
 
 function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
@@ -3137,7 +3137,7 @@ function getPokerResolvedTelegramUser() {
           updateHeaderGreeting();
           showUnauthorized();
           setBannerFailure(
-            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку».",
+            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
             true
           );
           try {
@@ -3153,7 +3153,7 @@ function getPokerResolvedTelegramUser() {
           updateHeaderGreeting();
           showUnauthorized();
           setBannerFailure(
-            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку».",
+            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
             true
           );
           try {
@@ -6453,6 +6453,25 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
 function isSpringRatingMode() {
   return document.body && document.body.getAttribute("data-view") === "spring-rating";
 }
+function pluralRuDays(n) {
+  var abs = Math.abs(n) % 100;
+  var d = abs % 10;
+  if (abs >= 11 && abs <= 14) return "дней";
+  if (d === 1) return "день";
+  if (d >= 2 && d <= 4) return "дня";
+  return "дней";
+}
+/** Счётчик дней до финала весеннего рейтинга (31 мая, конец дня по локальному времени). */
+function updateSpringRatingFinalCountdown() {
+  var els = document.querySelectorAll(".spring-rating-final-countdown__days");
+  if (!els.length) return;
+  var end = new Date(2026, 4, 31, 23, 59, 59, 999);
+  var now = new Date();
+  var diffMs = end.getTime() - now.getTime();
+  var days = diffMs <= 0 ? 0 : Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+  var text = days <= 0 ? "сезон завершён" : days + " " + pluralRuDays(days);
+  for (var i = 0; i < els.length; i++) els[i].textContent = text;
+}
 function getRatingByDate() {
   if (isSpringRatingMode() && typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" && SPRING_RATING_TOURNAMENTS_BY_DATE && Object.keys(SPRING_RATING_TOURNAMENTS_BY_DATE).length) {
     var byDate = {};
@@ -7702,6 +7721,11 @@ function initWinterRating() {
     if (winterSearchWrap) winterSearchWrap.style.display = "none";
     if (springLeaguesEl) { springLeaguesEl.removeAttribute("hidden"); springLeaguesEl.style.display = ""; }
     if (springMainTabsEl) { springMainTabsEl.removeAttribute("hidden"); springMainTabsEl.style.display = ""; }
+    try {
+      updateSpringRatingFinalCountdown();
+    } catch (eCount) {
+      if (typeof console !== "undefined" && console.warn) console.warn("updateSpringRatingFinalCountdown", eCount);
+    }
   } else {
     if (tableCaptionRow) tableCaptionRow.style.display = "";
     if (document.getElementById("winterRatingTableWrap")) document.getElementById("winterRatingTableWrap").style.display = "";
@@ -8386,6 +8410,13 @@ function fetchRaffleBadge() {
     .catch(function () {});
 }
 
+/** Не показываем логин Telegram у админа Романа (@Roman1787443) в профиле и списках. */
+function pokerHideRomanTelegramUsername(username) {
+  if (username == null || username === "") return false;
+  var u = String(username).replace(/^@+/, "").trim().toLowerCase();
+  return u === "roman1787443";
+}
+
 function updateProfileUserName() {
   var el = document.getElementById("profileUserName");
   if (!el) return;
@@ -8403,7 +8434,7 @@ function updateProfileUserMeta() {
   if (dtId) parts.push("ID: " + dtId);
   var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
   var username = user && user.username ? user.username : "";
-  if (username) parts.push("@" + username);
+  if (username && !pokerHideRomanTelegramUsername(username)) parts.push("@" + String(username).replace(/^@+/, ""));
   if (parts.length) metaEl.textContent = " (" + parts.join(", ") + ")";
   else metaEl.textContent = "";
 }
@@ -11240,7 +11271,7 @@ function initRaffles() {
     }
     function showRafflesError() {
       if (raffleEmpty) {
-        raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть.";
+        raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть или перезайдите.";
         raffleEmpty.classList.remove("raffle-empty--hidden");
       }
       if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
@@ -14016,8 +14047,12 @@ function initChat() {
   var myId = null;
   var myChatName = "Вы";
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    myId = "tg_" + tg.initDataUnsafe.user.id;
-    myChatName = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || "Вы";
+    var uChat = tg.initDataUnsafe.user;
+    myId = "tg_" + uChat.id;
+    myChatName =
+      uChat.first_name ||
+      (uChat.username && !pokerHideRomanTelegramUsername(uChat.username) ? uChat.username : "") ||
+      "Вы";
   } else {
     try {
       var _auth = window.__pokerTelegramAuth;
@@ -14051,6 +14086,33 @@ function initChat() {
       var idUp = id.toUpperCase();
       return '<button type="button" class="chat-msg__id-link" data-app-id="' + escapeHtml(idUp) + '">' + escapeHtml(idUp) + '</button>';
     });
+  }
+  /** Системное «принят в чат»: явная кликабельная ссылка на TG, без голого t.me в тексте. */
+  function chatMessageBodyHtml(m) {
+    var raw = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
+    if (m && m.clubAdmissionNotice) {
+      var un = String(m.clubAdmissionTargetUsername != null ? m.clubAdmissionTargetUsername : "").replace(/^@+/, "").trim();
+      var tgId = String(m.clubAdmissionTargetTgId != null ? m.clubAdmissionTargetTgId : "").replace(/^tg_/, "").trim();
+      if (un && /^[a-zA-Z0-9_]{5,32}$/.test(un)) {
+        return (
+          "✅ В чат принят игрок. Логин: " +
+          '<a href="https://t.me/' +
+          un +
+          '" class="chat-msg__tg-link" target="_blank" rel="noopener noreferrer">@' +
+          escapeHtml(un) +
+          "</a>"
+        );
+      }
+      if (tgId && /^\d+$/.test(tgId)) {
+        return (
+          "✅ В чат принят игрок. Логин: " +
+          '<a href="tg://user?id=' +
+          escapeHtml(tgId) +
+          '" class="chat-msg__tg-link">написать в Telegram</a> <span class="chat-msg__admit-nick-missing">(ник не указан)</span>'
+        );
+      }
+    }
+    return linkTgUsernames(linkAppIds(linkUrls(raw)));
   }
 
   window.lastGeneralStats = "";
@@ -15012,7 +15074,7 @@ function initChat() {
     if (!msgEl) return;
     var textEl = msgEl.querySelector(".chat-msg__text");
     if (textEl) {
-      var safeHtml = linkUrls(linkAppIds(linkTgUsernames(escapeHtml(String(newText)).replace(/\n/g, "<br>"))));
+      var safeHtml = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(newText)).replace(/\n/g, "<br>"))));
       textEl.innerHTML = safeHtml;
     }
     var footer = msgEl.querySelector(".chat-msg__footer");
@@ -15202,7 +15264,7 @@ function initChat() {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
-      var text = linkUrls(linkAppIds(linkTgUsernames((m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;"))));
+      var text = chatMessageBodyHtml(m);
       var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
@@ -15644,7 +15706,7 @@ function initChat() {
     if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(image) + '" alt="Картинка" />';
     else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
     else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
-    else if (text) textContent = linkUrls(linkAppIds(linkTgUsernames(escapeHtml(text).replace(/\n/g, "<br>"))));
+    else if (text) textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
     var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myChatName) + '</span>' +
       '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
       '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
@@ -16079,7 +16141,7 @@ function initChat() {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
-      var text = linkUrls(linkAppIds(linkTgUsernames((m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;"))));
+      var text = chatMessageBodyHtml(m);
       var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
@@ -16237,7 +16299,7 @@ function initChat() {
       if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(String(image)) + '" alt="Картинка" />';
       else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
       else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
-      else if (text) textContent = linkUrls(linkAppIds(linkTgUsernames(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
+      else if (text) textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
       var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(nameStr) + '</span>' +
         '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
         '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
@@ -17420,6 +17482,26 @@ function initChat() {
     if (typeof setDownloadPage === "function") setDownloadPage(page);
   });
 
+  (function initChatGeneralInviteFriendBtn() {
+    var inviteBtn = document.getElementById("chatGeneralInviteFriendBtn");
+    if (!inviteBtn || inviteBtn.getAttribute("data-invite-bound") === "1") return;
+    inviteBtn.setAttribute("data-invite-bound", "1");
+    inviteBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
+      if (!link) return;
+      var text = "Заходи в общий чат клуба «Два туза» в приложении:\n" + link;
+      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+      var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgw && tgw.openTelegramLink) tgw.openTelegramLink(shareUrl);
+      else if (tgw && tgw.openLink) tgw.openLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
+    });
+  })();
+
   (function initChatGeneralCopyLinkBtn() {
     var copyBtn = document.getElementById("chatGeneralCopyLinkBtn");
     if (!copyBtn || copyBtn.getAttribute("data-copy-bound") === "1") return;
@@ -18366,8 +18448,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       .catch(function () {
         restoreSendBtn();
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        var netMsg = "Нет связи с сервером. Проверьте интернет и попробуйте снова.";
-        if (tg && tg.showAlert) tg.showAlert(netMsg); else alert(netMsg);
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); else alert(POKER_NET_ERR);
       });
     }
     if (file) {
@@ -18416,7 +18497,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         "<div class=\"visitors-admin-item\" data-user-id=\"" + esc(v.id) + "\">" +
         "<div class=\"visitors-admin-item__row\">" +
         "<span class=\"visitors-admin-item__id\">" + esc(v.id) + "</span> " +
-        (v.username ? "<span class=\"visitors-admin-item__meta\">@" + esc(v.username) + "</span>" : "") + " " +
+        (v.username && !pokerHideRomanTelegramUsername(v.username) ? "<span class=\"visitors-admin-item__meta\">@" + esc(v.username) + "</span>" : "") + " " +
         (v.dtId ? "<span class=\"visitors-admin-item__badge\">" + esc(v.dtId) + "</span>" : "") + " " +
         "<span class=\"visitors-admin-item__meta\">визитов: " + esc(v.count) + "</span>" +
         "</div>" +
@@ -18856,7 +18937,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           .map(function (v) {
             var parts = [];
             if (v.firstName) parts.push(v.firstName);
-            if (v.username) parts.push("@" + v.username);
+            if (v.username && !pokerHideRomanTelegramUsername(v.username)) parts.push("@" + v.username);
             var nameCol = parts.length ? parts.join(" · ") : "—";
             var act = formatActivityCell(v.activity);
             return (

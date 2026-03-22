@@ -114,7 +114,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=208" />
+    <link rel="stylesheet" href="./styles.css?v=210" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -227,7 +227,7 @@
           var p = el.querySelector(".app-boot-overlay__text");
           if (p)
             p.textContent =
-              "Загрузка… Дольше обычного — проверьте сеть.\nПопробуйте БЕЗ VPN/PROXY.";
+              "Загрузка… Дольше обычного — проверьте сеть или перезайдите.\nПопробуйте БЕЗ VPN/PROXY.";
         }, 14000);
         window.__pokerHideBootOverlay = hideBootOverlay;
       })();
@@ -513,6 +513,10 @@
                 <div class="winter-rating__spring-league winter-rating__spring-league--main" data-spring-league="1">
                   <h3 class="winter-rating__spring-league-caption">Лига 1. Турниры от 500₽</h3>
                   <div class="spring-rating-top3 spring-rating-top3--league" id="springRatingTop3PodiumLeague1" aria-label="Топ-3 Лига 1" hidden></div>
+                  <p class="spring-rating-final-countdown" aria-live="polite">
+                    <span class="spring-rating-final-countdown__line">Итоги 31-го мая</span>
+                    <span class="spring-rating-final-countdown__line">До итогов: <span class="spring-rating-final-countdown__days">—</span></span>
+                  </p>
                   <div class="winter-rating__table-wrap winter-rating__table-wrap--league winter-rating__table-wrap--league1">
                     <table class="winter-rating__table winter-rating__table--league1-prizes">
                       <thead>
@@ -553,6 +557,10 @@
                 <div class="winter-rating__spring-league winter-rating__spring-league--main" data-spring-league="2" style="display:none">
                   <h3 class="winter-rating__spring-league-caption">Лига 2. Турниры от 100₽ до 500₽</h3>
                   <div class="spring-rating-top3 spring-rating-top3--league" id="springRatingTop3PodiumLeague2" aria-label="Топ-3 Лига 2" hidden></div>
+                  <p class="spring-rating-final-countdown" aria-live="polite">
+                    <span class="spring-rating-final-countdown__line">Итоги 31-го мая</span>
+                    <span class="spring-rating-final-countdown__line">До итогов: <span class="spring-rating-final-countdown__days">—</span></span>
+                  </p>
                   <div class="winter-rating__table-wrap winter-rating__table-wrap--league winter-rating__table-wrap--league1">
                     <table class="winter-rating__table winter-rating__table--league1-prizes">
                       <thead>
@@ -1381,6 +1389,10 @@
                     <span class="chat-general-admins-btn__bottom" id="chatGeneralAdminsBtnOnline">Админ онлайн</span>
                   </button>
                   <a href="#" class="chat-general-download-btn chat-general-header__segment" data-view-target="download" data-download-page="main" aria-label="Скачать">Скачать</a>
+                  <button type="button" class="chat-general-invite-friend-btn chat-general-header__segment" id="chatGeneralInviteFriendBtn" title="Позвать друга в общий чат" aria-label="Позвать друга в общий чат">
+                    <span class="chat-general-invite-friend-btn__line1">Позвать</span>
+                    <span class="chat-general-invite-friend-btn__line2">друга</span>
+                  </button>
                   <button type="button" class="chat-general-copy-link-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralCopyLinkBtn" title="Скопировать ссылку на общий чат" aria-label="Скопировать ссылку на общий чат">
                     <span class="chat-general-copy-link-btn__icon" aria-hidden="true">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -3161,7 +3173,7 @@
                     <span class="hall-photo-album__suit hall-photo-album__suit--diamond">♦</span>
                   </div>
                   <h2 class="hall-of-fame__section-title hall-photo-album__title" id="hallPhotosTitle">Фотоальбом</h2>
-                  <p class="hall-photo-album__lead">Кадры клуба «Два туза» — лента карточек без «книжного» корешка. Нажми на фото, чтобы открыть крупно.</p>
+                  <p class="hall-photo-album__lead">Кадры клуба «Два туза» — сетка превью. Нажми на фото, чтобы открыть крупно.</p>
                   <ul class="hall-photo-album__grid" role="list">
                     <li class="hall-photo-album__card" role="listitem">
                       <div class="hall-photo-album__card-body">
@@ -3360,7 +3372,7 @@
                       <div class="hall-shame-board__featured-media">
                         <span class="hall-shame-board__badge" aria-hidden="true">№1</span>
                         <p class="hall-shame-board__corgi-gallery-title">Скрины переписки</p>
-                        <div class="hall-shame-board__corgi-gallery" role="group" aria-label="Скриншоты Telegram: Корги в деловом костюме">
+                        <div class="hall-shame-board__corgi-gallery hall-shame-board__corgi-gallery--mosaic" role="group" aria-label="Скриншоты Telegram: Корги в деловом костюме">
                           <button
                             type="button"
                             class="hall-shame-board__thumb-btn"
