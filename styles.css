@@ -5455,6 +5455,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
 .chat-general-header .chat-general-admins-btn.chat-general-header__segment {
   height: auto;
   min-height: 0;
+  margin-right: 4px;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -5509,8 +5510,8 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
 .chat-general-header .chat-general-download-btn.chat-general-header__segment {
   height: auto;
   min-height: 0;
-  /* Уже справа — «Скачать» визуально левее, у «Позвать друга» чуть больше места */
-  padding: 0 2px 0 4px;
+  /* справа +3px к зазору до «Позвать друга» */
+  padding: 0 11px 0 8px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
