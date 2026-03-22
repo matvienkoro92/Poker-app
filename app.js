@@ -2785,27 +2785,40 @@ function getPokerResolvedTelegramUser() {
   }
 
   /**
-   * URL, на который Telegram вернёт пользователя после «Войти через Telegram» (query с hash/id/…).
-   * Должен быть на том же хосте, что указан в @BotFather для Login Widget (в поле — только домен, без https://).
-   * Если задан data-api-base и его hostname = текущей странице, колбэк = origin из data-api-base + «/» (канонический продакшен).
+   * URL для data-auth-url: текущая страница без ?query и #hash (как в telegram-widget.js для return_to).
+   * После входа Telegram дописывает либо ?id=&hash=&auth_date=…, либо кладёт payload в #tgAuthResult=…
    */
   function getTelegramWidgetAuthCallbackUrl() {
     try {
-      var el = document.getElementById("app");
-      var raw = el && el.getAttribute("data-api-base");
-      raw = raw ? String(raw).trim().replace(/\/$/, "") : "";
-      var locHost = typeof window.location !== "undefined" && window.location.hostname ? String(window.location.hostname) : "";
-      if (raw && /^https:\/\//i.test(raw) && locHost) {
-        var bu = new URL(raw);
-        if (bu.hostname === locHost) {
-          return bu.origin + "/";
-        }
+      var page = new URL(window.location.href);
+      page.search = "";
+      page.hash = "";
+      return page.toString();
+    } catch (e0) {
+      try {
+        return window.location.origin.replace(/\/$/, "") + "/";
+      } catch (e1) {
+        return "";
       }
-    } catch (e0) {}
+    }
+  }
+
+  /** То же, что haveTgAuthResult() в telegram-widget.js — данные после OAuth в hash. */
+  function parseTelegramWidgetTgAuthResultFromHash() {
     try {
-      return window.location.origin.replace(/\/$/, "") + "/";
-    } catch (e1) {
-      return "";
+      var locationHash = String(window.location.hash || "");
+      var re = /[#?&]tgAuthResult=([A-Za-z0-9\-_=]*)$/;
+      var match = locationHash.match(re);
+      if (!match) return null;
+      var data = match[1] || "";
+      data = data.replace(/-/g, "+").replace(/_/g, "/");
+      var pad = data.length % 4;
+      if (pad > 1) {
+        data += new Array(5 - pad).join("=");
+      }
+      return JSON.parse(window.atob(data));
+    } catch (eH) {
+      return null;
     }
   }
 
@@ -3007,11 +3020,11 @@ function getPokerResolvedTelegramUser() {
           (prodBase ? " Боевой URL: " + prodBase : "");
       } else {
         hintEl.textContent =
-          "Виджет работает в режиме callback: после «Войти» данные приходят на страницу без редиректа. Домен в @BotFather (/setdomain) — только hostname, например " +
+          "Вход через Telegram — это не SMS-код: подтверждение в приложении Telegram, затем возврат на сайт с параметрами в адресе. Домен в @BotFather (/setdomain) — только hostname, например " +
           (dom || "example.com") +
-          ", без https://. Если раньше был редирект на " +
+          ", без https://. Страница входа: " +
           cb +
-          " — он по-прежнему обрабатывается. Убран запрос «разрешить боту писать» (частая причина зависания).";
+          ". Если не пускает — откройте сайт во внешнем браузере (не только внутри Telegram).";
       }
       hintEl.style.display = "block";
     }
@@ -3057,6 +3070,11 @@ function getPokerResolvedTelegramUser() {
               ["id", "first_name", "last_name", "username", "photo_url", "auth_date", "hash"].forEach(function (k) {
                 uUrl.searchParams.delete(k);
               });
+              var lh = String(uUrl.hash || "");
+              if (lh) {
+                var stripped = lh.replace(/[#?&]tgAuthResult=[A-Za-z0-9\-_=]*/, "");
+                uUrl.hash = stripped === "#" || stripped === "" ? "" : stripped;
+              }
               window.history.replaceState({}, "", uUrl.pathname + uUrl.search + uUrl.hash);
             } catch (eU) {}
           }
@@ -3152,16 +3170,23 @@ function getPokerResolvedTelegramUser() {
   function tryFinishTelegramLoginRedirect() {
     try {
       var sp = new URLSearchParams(window.location.search || "");
-      if (!sp.get("hash") || !sp.get("id") || !sp.get("auth_date")) return false;
-      var payload = {};
-      sp.forEach(function (v, k) {
-        payload[k] = v;
-      });
-      deliverTelegramLoginWidgetPayload(payload, true);
-      return true;
-    } catch (e3) {
-      return false;
-    }
+      if (sp.get("hash") && sp.get("id") && sp.get("auth_date")) {
+        var payloadQ = {};
+        sp.forEach(function (v, k) {
+          payloadQ[k] = v;
+        });
+        deliverTelegramLoginWidgetPayload(payloadQ, true);
+        return true;
+      }
+    } catch (e3) {}
+    try {
+      var authObj = parseTelegramWidgetTgAuthResultFromHash();
+      if (authObj && authObj.hash && authObj.id != null && authObj.auth_date != null) {
+        deliverTelegramLoginWidgetPayload(authObj, true);
+        return true;
+      }
+    } catch (e4) {}
+    return false;
   }
 
   function resetBannerForOutsideTelegram() {
@@ -16420,7 +16445,9 @@ function initChat() {
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(chatWithUserId);
-    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+    fetch(url)
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
+      .then(function (data) {
       if (data && data.ok) {
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
         var messages = data.messages || [];
@@ -16466,8 +16493,15 @@ function initChat() {
           }
         }
         updateUnreadDots();
+      } else if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
+        messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
       }
-    });
+    })
+      .catch(function () {
+        if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
+          messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
+        }
+      });
   }
 
   var sendingPrivate = false;
@@ -19883,18 +19917,29 @@ function updateTournamentDayBlock() {
     } else if (weekday === 0) {
       // Воскресный турнир недели
       trophyFile = "tournament-day-sunday.png";
-    } else if (weekday === 3) {
-      // Среда — специальный кубок Moscow Poker Open 100 рублей
-      trophyFile = "tournament-day-moscow-open-100.png";
+    } else if (weekday === 1) {
+      // Понедельник — Magic MKO 500₽ (кастом: кубок с шаром и «500»)
+      trophyFile = "tournament-day-monday-magic-500.png";
     } else if (weekday === 2) {
-      // Турнир дня вторника — трактор
+      // Вторник — трактор
       trophyFile = "tournament-day-tuesday.png";
+    } else if (weekday === 3) {
+      // Среда — Moscow Poker Open 100₽
+      trophyFile = "tournament-day-moscow-open-100.png";
+    } else if (weekday === 5) {
+      // Пятница — Нокаут Прогрессив 500₽
+      trophyFile = "tournament-day-championship-500.png";
     } else {
-      // По умолчанию — классический кубок клуба
+      // Чт, сб (не фриролл) — классический кубок клуба
       trophyFile = "tournament-day-two-aces.png";
     }
     var trophySrc = typeof getAssetUrl === "function" ? getAssetUrl(trophyFile) : "";
     if (scheduleTrophyImg && trophySrc) scheduleTrophyImg.src = trophySrc;
+    var homeTrophyImg = document.getElementById("tournamentDayHomeTrophyImg");
+    if (homeTrophyImg && trophySrc) {
+      homeTrophyImg.src = trophySrc;
+      homeTrophyImg.alt = nameStr ? "Турнир дня: " + nameStr : "";
+    }
     var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
     if (schedTbody) {
       var schedRows = schedTbody.querySelectorAll("tr");
