@@ -2070,6 +2070,22 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-20-03-2026-league1-4-hotpko.png",
     "rating-20-03-2026-league1-5-rebuy.png",
     "rating-20-03-2026-league1-6-friday-progressive.png"
+  ],
+  "21.03.2026": [
+    "rating-21-03-2026-league1-dv-rebuy-12h.png",
+    "rating-21-03-2026-league1-rebuy-17h.png",
+    "rating-21-03-2026-league1-hok-magic-20h.png",
+    "rating-21-03-2026-league1-magic-mko-22h.png"
+  ],
+  "22.03.2026": [
+    "rating-22-03-2026-league1-dv-turbo-10h.png",
+    "rating-22-03-2026-league1-dv-rebuy-12h.png",
+    "rating-22-03-2026-league1-dv-main-13h.png",
+    "rating-22-03-2026-league1-frankl-dva-tuza-fast-pko.png",
+    "rating-22-03-2026-league1-frankl-dva-tuza-daily-pko.png",
+    "rating-22-03-2026-league1-frankl-wow-mystery.png",
+    "rating-22-03-2026-league1-rebuy-17h.png",
+    "rating-22-03-2026-league1-sunday-18h.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2115,9 +2131,16 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   "20.03.2026": [
     "rating-20-03-2026-league2-1-magic-bounty-60k.png",
     "rating-20-03-2026-league2-2-mko-7max-20h.png"
+  ],
+  "21.03.2026": [
+    "rating-21-03-2026-league2-bali-yana-30k-08h.png"
+  ],
+  "22.03.2026": [
+    "rating-22-03-2026-league2-magic-bounty-60k-11h.png",
+    "rating-22-03-2026-league2-mok-21h.png"
   ]
 };
-var SPRING_RATING_UPDATED = "20.03.2026";
+var SPRING_RATING_UPDATED = "22.03.2026";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
@@ -2743,6 +2766,97 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "XORTYRETSKOGO", place: 7, points: 0, reward: 0 },
       { nick: "ZVIGENI", place: 8, points: 0, reward: 0 },
       { nick: "tatarin_1", place: 9, points: 0, reward: 0 }
+    ] }
+  ],
+  "21.03.2026": [
+    { time: "08:00", name: "Bali Yana 30k", buyin: 100, league: 2, players: [
+      { nick: "Olegan393", place: 2, reward: 7463 },
+      { nick: "nikola233", place: 0, reward: 0 },
+      { nick: "comotd", place: 5, reward: 0 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 16800, league: 1, players: [
+      { nick: "MilkyWay77", place: 1, reward: 15880 },
+      { nick: "FrankL", place: 2, reward: 9500 },
+      { nick: "nikola233", place: 3, reward: 6300 },
+      { nick: "Akich10", place: 5, reward: 0 },
+      { nick: "Waaar", place: 6, reward: 0 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 13600, league: 1, players: [
+      { nick: "FrankL", place: 1, reward: 30000 },
+      { nick: "king00001", place: 2, reward: 18000 },
+      { nick: "Рамиль01", place: 4, reward: 0 },
+      { nick: "Waaar", place: 10, reward: 0 },
+      { nick: "MilkyWay77", place: 12, reward: 0 }
+    ] },
+    { time: "20:00", name: "HOK Magic", buyin: 46000, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 41700 },
+      { nick: "FrankL", place: 2, reward: 21200 },
+      { nick: "Venius", place: 4, reward: 4400 },
+      { nick: "Monfokon", place: 6, reward: 3200 },
+      { nick: "ZVIGENI", place: 7, reward: 0 }
+    ] },
+    { time: "22:00", name: "Magic MKO 150K", buyin: 10000, league: 1, players: [
+      { nick: "Тряпа", place: 4, reward: 14737 },
+      { nick: "Фокс", place: 31, reward: 0 },
+      { nick: "Malek3084", place: 72, reward: 0 },
+      { nick: "Em13!!", place: 53, reward: 0 }
+    ] }
+  ],
+  "22.03.2026": [
+    { time: "10:00", name: "DV Turbo 500 90K", buyin: 10000, league: 1, players: [
+      { nick: "Откотика_Я", place: 5, reward: 6692 },
+      { nick: "AndrushaMorf", place: 46, reward: 0 },
+      { nick: "xx🎰xx", place: 48, reward: 0 }
+    ] },
+    { time: "11:00", name: "Magic Bounty 60k", buyin: 10000, league: 2, players: [
+      { nick: "YuraK700", place: 2, reward: 13999 },
+      { nick: "Фокс", place: 0, reward: 0 },
+      { nick: "xx🍰xx", place: 0, reward: 0 },
+      { nick: "хер вам)))))", place: 44, reward: 0 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 16800, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 17300 },
+      { nick: "Банк_Псб", place: 4, reward: 0 },
+      { nick: "Borsoi", place: 7, reward: 0 },
+      { nick: "Пряник", place: 8, reward: 0 },
+      { nick: "FrankL", place: 9, reward: 0 }
+    ] },
+    { time: "13:00", name: "DV MAIN 1MLN", buyin: 20000, league: 1, players: [
+      { nick: "potpor", place: 1, reward: 215486 },
+      { nick: "Рыбнадзор", place: 15, reward: 8678 },
+      { nick: "kabanchik", place: 0, reward: 0 },
+      { nick: "хер вам)))))", place: 0, reward: 0 },
+      { nick: "Чеб43", place: 0, reward: 0 }
+    ] },
+    { time: "14:00", name: "Два туза.Доллары MTT FAST PKO", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 4, reward: 6210 }
+    ] },
+    { time: "15:00", name: "Два туза.Доллары MTT DAILY PKO", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 1, reward: 16445 }
+    ] },
+    { time: "16:00", name: "Два туза.Доллары MTT WOW MYSTERY", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 6, reward: 5175 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 25600, league: 1, players: [
+      { nick: "ДжекиЧан", place: 1, reward: 22200 },
+      { nick: "WiNifly", place: 2, reward: 15000 },
+      { nick: "XORTYRETSKOGO", place: 4, reward: 7200 },
+      { nick: "Пряник", place: 5, reward: 6600 },
+      { nick: "ПокерМанки", place: 6, reward: 0 }
+    ] },
+    { time: "18:00", name: "Воскресный турнир MKO 7MAX", buyin: 128000, league: 1, players: [
+      { nick: "Рамиль01", place: 2, reward: 41831.25 },
+      { nick: "ПокерМанки", place: 3, reward: 18418.75 },
+      { nick: "Бабник", place: 5, reward: 19175 },
+      { nick: "WiNifly", place: 8, reward: 6775 },
+      { nick: "Milan", place: 9, reward: 7900 }
+    ] },
+    { time: "21:00", name: "MOK", buyin: 13200, league: 2, players: [
+      { nick: "XORTYRETSKOGO", place: 1, reward: 10975 },
+      { nick: "WiNifly", place: 2, reward: 2200 },
+      { nick: "Tanechka", place: 3, reward: 1315 },
+      { nick: "SantaClauS", place: 5, reward: 960 },
+      { nick: "MORPEH", place: 6, reward: 0 }
     ] }
   ]
 };
