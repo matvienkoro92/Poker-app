@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=131" />
+    <link rel="stylesheet" href="./styles.css?v=143" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1875,8 +1875,8 @@
               <a href="#" class="feature feature--link feature--app learn-play-hub__btn" data-view-target="video-lessons">
                 <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🎬</span></div>
                 <div class="feature__body">
-                  <div class="feature__title">Видео-уроки</div>
-                  <div class="feature__desc">15 уроков по темам покера</div>
+                  <div class="feature__title">Бесплатные Видео-уроки</div>
+                  <div class="feature__desc">15 уроков + бонусы, тренер Николай FishKopcheny</div>
                 </div>
               </a>
               <a href="#" class="feature feature--link feature--app learn-play-hub__btn" data-view-target="poker-tasks">
@@ -1957,8 +1957,25 @@
           <!-- Видео-уроки (15 уроков по темам) -->
           <div class="view" data-view="video-lessons">
             <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад">← Назад</button>
-            <h1 class="title">Видео-уроки</h1>
-            <p class="video-lessons__intro">Нажмите на урок — откроется плеер с видео.</p>
+            <div class="video-lessons__share-row-wrap">
+              <div class="raffles-hero__share-row video-lessons__share-row">
+                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="videoLessonsInviteFriendBtn" aria-label="Отправить другу ссылку на видеоуроки">Отправить другу</button>
+                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="videoLessonsCopyLinkBtn" aria-label="Скопировать ссылку на видеоуроки"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+              </div>
+            </div>
+            <div class="video-lessons__hero">
+              <img
+                class="video-lessons__hero-img"
+                src="./assets/video-lessons-coach-nikolay.png"
+                width="800"
+                height="800"
+                alt="Николай FishKopcheny за покерным столом, Russian Poker Cup"
+                fetchpriority="high"
+                decoding="async"
+              />
+              <h1 class="title video-lessons__hero-title">15 бесплатных видеоуроков от практикующего игрока и тренера Николая FishKopcheny</h1>
+            </div>
+            <p class="video-lessons__intro">Нажмите на урок — видео воспроизводится в приложении (iPhone, Android, Telegram). Если не загрузилось, откройте ссылку на Яндекс.Диск под плеером. <strong>Прокрутите список вниз</strong> — все темы ниже; в конце — дополнительные бонусные уроки.</p>
             <div class="video-lessons__list" id="videoLessonsList">
               <div class="video-lessons__card">
                 <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/zP4fadqf3vHPEA" data-lesson-num="1" aria-expanded="false">
@@ -1973,151 +1990,488 @@
                   ✅ Для чего ставим
                 </p>
                 <a href="./assets/prilozhenie-k-obucheniyu.pdf" target="_blank" rel="noopener noreferrer" class="video-lessons__attachment" download="Приложение к обучению.pdf">Приложение к обучению (PDF)</a>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer1">
                   <div class="video-lessons__player-inner">
-                    <iframe class="video-lessons__iframe" title="Урок 1 — Префлоп-диапазоны" src="" data-video-src="https://disk.yandex.ru/i/zP4fadqf3vHPEA"></iframe>
-                    <a href="https://disk.yandex.ru/i/zP4fadqf3vHPEA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть видео в браузере</a>
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 1 — Префлоп-диапазоны"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/zP4fadqf3vHPEA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/zP4fadqf3vHPEA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
                   </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="2" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/TurgMWNdlC_UVQ" data-lesson-num="2" aria-expanded="false">
                   <span class="video-lessons__num">2</span>
-                  <span class="video-lessons__title">Урок 2</span>
+                  <span class="video-lessons__title">Префлоп-выставления</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Когда забираем стек префлопом и когда уступаем<br>
+                  ✅ Диапазоны на пуш, колл и рестил<br>
+                  ✅ Короткий стек: давление и типичные ошибки
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer2">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 2 — Префлоп-выставления"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/TurgMWNdlC_UVQ"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/TurgMWNdlC_UVQ" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="3" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/D01KoNyWLSktNw" data-lesson-num="3" aria-expanded="false">
                   <span class="video-lessons__num">3</span>
-                  <span class="video-lessons__title">Урок 3</span>
+                  <span class="video-lessons__title">Практика префлопа</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Разборы раздач: открытие, защита блайндов, 3-бет<br>
+                  ✅ Закрепляем диапазоны и размеры ставок<br>
+                  ✅ От теории урока 1–2 к решениям за столом
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer3">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 3 — Практика префлопа"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/D01KoNyWLSktNw"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/D01KoNyWLSktNw" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="4" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/W98502-sTwSFEA" data-lesson-num="4" aria-expanded="false">
                   <span class="video-lessons__num">4</span>
-                  <span class="video-lessons__title">Урок 4</span>
+                  <span class="video-lessons__title">Контбеты на флопе</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Что такое контбет (continuation bet) и когда он оправдан<br>
+                  ✅ Частоты и размеры ставки после префлоп-агрессии<br>
+                  ✅ Текстуры борда и типичные ошибки на флопе
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer4">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 4 — Контбеты на флопе"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/W98502-sTwSFEA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/W98502-sTwSFEA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="5" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/RnRTBzuL53MNeQ" data-lesson-num="5" aria-expanded="false">
                   <span class="video-lessons__num">5</span>
-                  <span class="video-lessons__title">Урок 5</span>
+                  <span class="video-lessons__title">Математика покера</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Шансы банка, эквити и матожидание решений<br>
+                  ✅ Когда математика оправдывает колл или фолд<br>
+                  ✅ База для оценки спотов на постфлопе
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer5">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 5 — Математика покера"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/RnRTBzuL53MNeQ"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/RnRTBzuL53MNeQ" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="6" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/QMsbD0BTf7LF2A" data-lesson-num="6" aria-expanded="false">
                   <span class="video-lessons__num">6</span>
-                  <span class="video-lessons__title">Урок 6</span>
+                  <span class="video-lessons__title">Розыгрыш средних рук на флопе</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Средние по силе руки: план на тёрн и ривер<br>
+                  ✅ Сайзинг и частоты на сухих и динамичных бордах<br>
+                  ✅ Когда добирать велью и когда сбрасывать шоудаун
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer6">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 6 — Розыгрыш средних рук на флопе"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/QMsbD0BTf7LF2A"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/QMsbD0BTf7LF2A" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="7" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/00CDFAqFwc-URA" data-lesson-num="7" aria-expanded="false">
                   <span class="video-lessons__num">7</span>
-                  <span class="video-lessons__title">Урок 7</span>
+                  <span class="video-lessons__title">Практика флопа</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Разборы раздач на флопе<br>
+                  ✅ Закрепление линий чек/бет<br>
+                  ✅ Переход от теории к столу
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer7">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 7 — Практика флопа"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/00CDFAqFwc-URA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/00CDFAqFwc-URA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="8" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/plNlLdTd-BH9sw" data-lesson-num="8" aria-expanded="false">
                   <span class="video-lessons__num">8</span>
-                  <span class="video-lessons__title">Урок 8</span>
+                  <span class="video-lessons__title">Игра на тёрне</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Ужесточение и ослабление диапазонов<br>
+                  ✅ Двойные бочки, блеф-кэтчи<br>
+                  ✅ План на ривер после тёрна
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer8">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 8 — Игра на тёрне"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/plNlLdTd-BH9sw"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/plNlLdTd-BH9sw" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="9" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/JMke_A00_A7qGA" data-lesson-num="9" aria-expanded="false">
                   <span class="video-lessons__num">9</span>
-                  <span class="video-lessons__title">Урок 9</span>
+                  <span class="video-lessons__title">Практика тёрна</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Примеры линий на четвёртой карте<br>
+                  ✅ Когда давить, когда контролировать банк<br>
+                  ✅ Типичные ошибки на тёрне
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer9">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 9 — Практика тёрна"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/JMke_A00_A7qGA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/JMke_A00_A7qGA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="10" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/OlVyOoTjrlHWpQ" data-lesson-num="10" aria-expanded="false">
                   <span class="video-lessons__num">10</span>
-                  <span class="video-lessons__title">Урок 10</span>
+                  <span class="video-lessons__title">Игра на ривере</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Тонкие велью и блефы на последней улице<br>
+                  ✅ Размер ставки и индукция<br>
+                  ✅ Геро-коллы и геро-фолды
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer10">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 10 — Игра на ривере"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/OlVyOoTjrlHWpQ"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/OlVyOoTjrlHWpQ" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="11" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/3vkmNfyz9-rseA" data-lesson-num="11" aria-expanded="false">
                   <span class="video-lessons__num">11</span>
-                  <span class="video-lessons__title">Урок 11</span>
+                  <span class="video-lessons__title">Розыгрыш премиумных рук</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Максимизация велью с сильными руками<br>
+                  ✅ Медленная игра vs агрессия<br>
+                  ✅ Защита от аутов и неочевидные линии
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer11">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 11 — Розыгрыш премиумных рук"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/3vkmNfyz9-rseA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/3vkmNfyz9-rseA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="12" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/mm8YvgRGyEsRCg" data-lesson-num="12" aria-expanded="false">
                   <span class="video-lessons__num">12</span>
-                  <span class="video-lessons__title">Урок 12</span>
+                  <span class="video-lessons__title">Практика: ривер и ранние/средние</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Сводная практика по риверу<br>
+                  ✅ Связка с ранней и средней стадией раздачи<br>
+                  ✅ Разборы сложных рун-аутов
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer12">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 12 — Практика: ривер и ранние/средние"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/mm8YvgRGyEsRCg"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/mm8YvgRGyEsRCg" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="13" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/VL_EMriPKGKajQ" data-lesson-num="13" aria-expanded="false">
                   <span class="video-lessons__num">13</span>
-                  <span class="video-lessons__title">Урок 13</span>
+                  <span class="video-lessons__title">Ранняя и средняя стадии турнира</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ ICM и давление стеков на старте и в середине<br>
+                  ✅ Работа с анте и ростом блайндов<br>
+                  ✅ Переход к финальной стадии
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer13">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 13 — Ранняя и средняя стадии турнира"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/VL_EMriPKGKajQ"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/VL_EMriPKGKajQ" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="14" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/GwxB4iibOxWlKA" data-lesson-num="14" aria-expanded="false">
                   <span class="video-lessons__num">14</span>
-                  <span class="video-lessons__title">Урок 14</span>
+                  <span class="video-lessons__title">Поздняя стадия турнира</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Баббл, финальный стол, короткие стеки<br>
+                  ✅ Пуш/фолд и эксплойты оппонентов<br>
+                  ✅ Психология и темп на поздней стадии
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer14">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 14 — Поздняя стадия турнира"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/GwxB4iibOxWlKA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/GwxB4iibOxWlKA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
               <div class="video-lessons__card">
-                <button type="button" class="video-lessons__item" data-video-url="#" data-lesson-num="15" aria-expanded="false">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/8WyHiEJDTlHCug" data-lesson-num="15" aria-expanded="false">
                   <span class="video-lessons__num">15</span>
-                  <span class="video-lessons__title">Урок 15</span>
+                  <span class="video-lessons__title">Практика: поздняя стадия и финалка</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <p class="video-lessons__desc">
+                  ✅ Разборы спотов финального стола<br>
+                  ✅ Закрепление тем уроков 13–14<br>
+                  ✅ Готовность к реальным турнирам
+                </p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer15">
-                  <div class="video-lessons__player-inner"><p class="video-lessons__no-video">Ссылка на видео будет добавлена позже.</p></div>
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Урок 15 — Практика: поздняя стадия и финалка"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/8WyHiEJDTlHCug"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/8WyHiEJDTlHCug" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
+                </div>
+              </div>
+              <div class="video-lessons__group-head" role="presentation">
+                <p class="video-lessons__group-head-text">Общие бонусные уроки — дополнительная практика</p>
+              </div>
+              <div class="video-lessons__card video-lessons__card--bonus">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/tVoJ8UV0cWx6Ag" data-lesson-num="bonus1" aria-expanded="false">
+                  <span class="video-lessons__num video-lessons__num--bonus">Б1</span>
+                  <span class="video-lessons__title">Бонус: практика №1</span>
+                  <span class="video-lessons__chevron" aria-hidden="true">▼</span>
+                </button>
+                <p class="video-lessons__desc">✅ Дополнительный бонусный материал по курсу<br>✅ Общая практика, не привязана к номеру урока</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus1">
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Бонус — практика №1"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/tVoJ8UV0cWx6Ag"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/tVoJ8UV0cWx6Ag" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
+                </div>
+              </div>
+              <div class="video-lessons__card video-lessons__card--bonus">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/VnZzgEqGqdjIfA" data-lesson-num="bonus2" aria-expanded="false">
+                  <span class="video-lessons__num video-lessons__num--bonus">Б2</span>
+                  <span class="video-lessons__title">Бонус: практика №2</span>
+                  <span class="video-lessons__chevron" aria-hidden="true">▼</span>
+                </button>
+                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus2">
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Бонус — практика №2"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/VnZzgEqGqdjIfA"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/VnZzgEqGqdjIfA" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
+                </div>
+              </div>
+              <div class="video-lessons__card video-lessons__card--bonus">
+                <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/cgE2rPfydTDMng" data-lesson-num="bonus3" aria-expanded="false">
+                  <span class="video-lessons__num video-lessons__num--bonus">Б3</span>
+                  <span class="video-lessons__title">Бонус: практика №3</span>
+                  <span class="video-lessons__chevron" aria-hidden="true">▼</span>
+                </button>
+                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus3">
+                  <div class="video-lessons__player-inner">
+                    <p class="video-lessons__video-error" hidden></p>
+                    <video
+                      class="video-lessons__video"
+                      title="Бонус — практика №3"
+                      playsinline
+                      webkit-playsinline
+                      preload="metadata"
+                      controls
+                      data-disk-public="https://disk.yandex.ru/i/cgE2rPfydTDMng"
+                    ></video>
+                    <a href="https://disk.yandex.ru/i/cgE2rPfydTDMng" target="_blank" rel="noopener noreferrer" class="video-lessons__open-external">Открыть на Яндекс.Диске</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2238,7 +2592,7 @@
                 </div>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
-                <section class="hall-of-fame__block hall-photo-album hall-photo-album--book" aria-labelledby="hallPhotosTitle">
+                <section class="hall-of-fame__block hall-photo-album hall-photo-album--feed" aria-labelledby="hallPhotosTitle">
                   <div class="hall-photo-album__ribbon" aria-hidden="true">
                     <span class="hall-photo-album__suit hall-photo-album__suit--spade">♠</span>
                     <span class="hall-photo-album__suit hall-photo-album__suit--heart">♥</span>
@@ -2246,125 +2600,188 @@
                     <span class="hall-photo-album__suit hall-photo-album__suit--diamond">♦</span>
                   </div>
                   <h2 class="hall-of-fame__section-title hall-photo-album__title" id="hallPhotosTitle">Фотоальбом</h2>
-                  <p class="hall-photo-album__lead">Развороты клубного альбома «Два туза» — две страницы на разворот, как в настоящей книге.</p>
-                  <div class="hall-photo-album__book-body">
-                    <div class="hall-photo-album__spine" aria-hidden="true">
-                      <span class="hall-photo-album__spine-hole"></span>
-                      <span class="hall-photo-album__spine-hole"></span>
-                      <span class="hall-photo-album__spine-hole"></span>
-                      <span class="hall-photo-album__spine-hole"></span>
-                      <span class="hall-photo-album__spine-label">2 туза</span>
-                    </div>
-                    <div class="hall-photo-album__book-inner">
-                  <ul class="hall-photo-album__spreads" role="list">
-                    <li class="hall-photo-album__spread" role="listitem">
-                      <div class="hall-photo-album__page hall-photo-album__page--left">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">1</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера, март 2026">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-1.png"
-                              alt="Рома Venius в гостях у Кулера, март 2026, покерный стол с фишками"
-                              loading="lazy"
-                              width="720"
-                              height="960"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера — Март 2026</span>
-                        </div>
-                      </div>
-                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
-                      <div class="hall-photo-album__page hall-photo-album__page--right">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">2</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус, март 2026">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-2.png"
-                              alt="Кулер и Вениус, март 2026, в руках тройка и семёрка пик"
-                              loading="lazy"
-                              width="720"
-                              height="960"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption">Кулер и Вениус — Март 2026</span>
-                        </div>
+                  <p class="hall-photo-album__lead">Кадры клуба «Два туза» — лента карточек без «книжного» корешка. Нажми на фото, чтобы открыть крупно.</p>
+                  <ul class="hall-photo-album__grid" role="list">
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">1</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера, март 2026">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-1.png"
+                            alt="Рома Venius в гостях у Кулера, март 2026, покерный стол с фишками"
+                            loading="lazy"
+                            width="720"
+                            height="960"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера — Март 2026</span>
                       </div>
                     </li>
-                    <li class="hall-photo-album__spread" role="listitem">
-                      <div class="hall-photo-album__page hall-photo-album__page--left">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">3</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика, март 2026">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-3.png"
-                              alt="Вениус и Гика, март 2026, на набережной ночью, на фоне подсвеченный мост"
-                              loading="lazy"
-                              width="720"
-                              height="960"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption">Вениус и Гика — Март 2026</span>
-                        </div>
-                      </div>
-                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
-                      <div class="hall-photo-album__page hall-photo-album__page--right">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">4</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Роман, финальный стол ноября 2023">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-roman-nov2023.png"
-                              alt="Групповое фото участников у баннера турнира, финальный стол"
-                              loading="lazy"
-                              width="960"
-                              height="720"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption hall-photo-album__caption--long">Роман, ноябрь 2023&nbsp;г., финальный стол Ко за 1000&nbsp;₽ — 6е место и чистый выигрыш 100&nbsp;000&nbsp;₽</span>
-                        </div>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">2</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус, март 2026">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-2.png"
+                            alt="Кулер и Вениус, март 2026, в руках тройка и семёрка пик"
+                            loading="lazy"
+                            width="720"
+                            height="960"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Кулер и Вениус — Март 2026</span>
                       </div>
                     </li>
-                    <li class="hall-photo-album__spread" role="listitem">
-                      <div class="hall-photo-album__page hall-photo-album__page--left">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">5</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: топ-реги в баре, октябрь 2025">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-bar-oct2025.png"
-                              alt="Селфи в баре: Никола, Оутсайдер, Виски, Рыбнадзор и Эмиль"
-                              loading="lazy"
-                              width="768"
-                              height="1024"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption hall-photo-album__caption--long">В октябре 2025&nbsp;г. наши топ-реги — три легенды: Эмиль, Рыбнадзор и Виски — вместе с Николой и Оутсайдером встретились в одном, так скажем, баре 😀 Один из них (Виски) занял 4‑е место в барных соревнованиях. На фото слева направо — Никола, Оутсайдер, Виски, Рыбнадзор, Эмиль.</span>
-                        </div>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">3</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика, март 2026">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-3.png"
+                            alt="Вениус и Гика, март 2026, на набережной ночью, на фоне подсвеченный мост"
+                            loading="lazy"
+                            width="720"
+                            height="960"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Вениус и Гика — Март 2026</span>
                       </div>
-                      <div class="hall-photo-album__gutter" aria-hidden="true"></div>
-                      <div class="hall-photo-album__page hall-photo-album__page--right">
-                        <span class="hall-photo-album__page-num" aria-hidden="true">6</span>
-                        <div class="hall-photo-album__snap">
-                          <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки с Пряником">
-                            <img
-                              class="hall-photo-album__img"
-                              src="./assets/hall-photo-album-pokermanki-pryanik.png"
-                              alt="Покерманки и Пряник в костюме пряника, вечерняя улица с гирляндами"
-                              loading="lazy"
-                              width="820"
-                              height="1024"
-                            />
-                          </button>
-                          <span class="hall-photo-album__caption">Покерманки с Пряником</span>
-                        </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">4</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Роман (ПокерМанки), финальный стол ноября 2023">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-roman-nov2023.png"
+                            alt="Групповое фото участников у баннера турнира, финальный стол"
+                            loading="lazy"
+                            width="960"
+                            height="720"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption hall-photo-album__caption--long">Роман (ПокерМанки), ноябрь 2023&nbsp;г., финальный стол Ко за 10&nbsp;000&nbsp;₽ — 6е место и чистый выигрыш 100&nbsp;000&nbsp;₽</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">5</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: топ-реги в баре, октябрь 2025">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-bar-oct2025.png"
+                            alt="Селфи в баре: Никола, Оутсайдер, Виски, Рыбнадзор и Эмиль"
+                            loading="lazy"
+                            width="768"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption hall-photo-album__caption--long">В октябре 2025&nbsp;г. наши топ-реги — три легенды: Эмиль, Рыбнадзор и Виски — вместе с Николой и Оутсайдером встретились в одном, так скажем, баре 😀 Один из них (Виски) занял 4‑е место в барных соревнованиях. На фото слева направо — Никола, Оутсайдер, Виски, Рыбнадзор, Эмиль.</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">6</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки с Пряником">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-album-pokermanki-pryanik.png"
+                            alt="Покерманки и Пряник в костюме пряника, вечерняя улица с гирляндами"
+                            loading="lazy"
+                            width="820"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Покерманки с Пряником</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__group-head" role="listitem">
+                      <p class="hall-photo-album__group-head-text">Покерманки Беларусь Покер Тур · Январь 2026</p>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">7</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок за столом в куртке Real Madrid">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-bpt-jan2026-01.png"
+                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок за покерным столом в куртке Real Madrid"
+                            loading="lazy"
+                            width="680"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">8</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в чёрной футболке за столом">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-bpt-jan2026-02.png"
+                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в чёрной футболке за покерным столом"
+                            loading="lazy"
+                            width="998"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">9</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в худи у стола">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-bpt-jan2026-03.png"
+                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в бежевом худи за покерным столом"
+                            loading="lazy"
+                            width="680"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">10</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в худи за столом Belarus Poker Tour">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-bpt-jan2026-04.png"
+                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в худи за столом с брендингом турнира"
+                            loading="lazy"
+                            width="681"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
+                      </div>
+                    </li>
+                    <li class="hall-photo-album__card" role="listitem">
+                      <div class="hall-photo-album__card-body">
+                        <span class="hall-photo-album__idx" aria-hidden="true">11</span>
+                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: игрок Котик, Belarus Poker Tour 2026">
+                          <img
+                            class="hall-photo-album__img"
+                            src="./assets/hall-photo-bpt-kotik-2026.png"
+                            alt="Игрок Котик за покерным столом на Belarus Poker Tour 2026"
+                            loading="lazy"
+                            width="795"
+                            height="1024"
+                          />
+                        </button>
+                        <span class="hall-photo-album__caption">игрок Котик БПТ 2026</span>
                       </div>
                     </li>
                   </ul>
-                    </div>
-                  </div>
                 </section>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelShame" data-hall-panel="shame" role="tabpanel" hidden>

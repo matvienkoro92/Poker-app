@@ -473,11 +473,32 @@ body[data-view="raffles"],
 body[data-view="news"],
 body[data-view="tasks"],
 body[data-view="hall"],
-body[data-view="downloads"] {
+body[data-view="downloads"],
+body[data-view="learn-play-hub"],
+body[data-view="video-lessons"],
+body[data-view="poker-tasks"],
+body[data-view="hall-of-fame"],
+body[data-view="bonus-game"],
+body[data-view="cooler-game"],
+body[data-view="plasterer-game"],
+body[data-view="cashout"],
+body[data-view="profile"],
+body[data-view="streams"],
+body[data-view="equilator"],
+body[data-view="winter-rating"],
+body[data-view="spring-rating"] {
   position: static;
   overflow-y: auto;
   overflow-x: hidden;
   width: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Часть WebView (в т.ч. Telegram) скроллит documentElement, а не body — длинные экраны «Научиться» / видеоуроки */
+html:has(.view--active[data-view="learn-play-hub"]),
+html:has(.view--active[data-view="video-lessons"]),
+html:has(.view--active[data-view="poker-tasks"]),
+html:has(.view--active[data-view="hall-of-fame"]) {
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 /* Redmi и др.: часть WebView скроллит html — даём явный скролл (класс вешается при загрузке главной) */
@@ -486,6 +507,18 @@ html.app-view-home {
   -webkit-overflow-scrolling: touch;
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--body-bg);
+}
+/* Видеоуроки / хаб «Научиться» / зал славы: класс вешает setView (без :has() — старый WebView TG) */
+html.app-view-long-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto;
+  min-height: 100%;
+}
+html.app-view-long-scroll .app {
+  overflow: visible;
+  min-height: 100vh;
 }
 
 /* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
@@ -1002,6 +1035,13 @@ html.app-view-home .home-welcome-outline::before {
 }
 .card:has(.view--active[data-view="home"]) .card__content > .view {
   min-width: 0;
+}
+/* Длинные списки (видеоуроки, задачи): карточка растёт по контенту, не обрезается flex-родителем .app */
+.card:has(.view--active[data-view="learn-play-hub"]) .card__content,
+.card:has(.view--active[data-view="video-lessons"]) .card__content,
+.card:has(.view--active[data-view="poker-tasks"]) .card__content {
+  min-width: 0;
+  overflow: visible;
 }
 /* fallback для главной без :has() */
 html.app-view-home .card .card__content {
@@ -6394,17 +6434,91 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 
 /* Видео-уроки */
+.video-lessons__share-row-wrap {
+  margin: 4px 0 14px;
+}
+.video-lessons__hero {
+  margin: 4px 0 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--block-bg);
+}
+.video-lessons__hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  object-position: center 25%;
+}
+.video-lessons__hero-title {
+  margin: 0;
+  padding: 14px 16px 16px;
+  font-size: clamp(16px, 4.2vw, 20px);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  text-align: center;
+  border-top: 1px solid var(--border-subtle);
+}
 .video-lessons__intro {
   margin: 8px 0 20px;
   font-size: 14px;
   color: var(--text-muted);
 }
+.video-lessons__group-head {
+  flex-shrink: 0;
+  margin: 8px 0 4px;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px dashed rgba(168, 85, 247, 0.45);
+  box-sizing: border-box;
+}
+.video-lessons__group-head-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: #c4b5fd;
+}
+[data-theme="light"] .video-lessons__group-head {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(109, 40, 217, 0.35);
+}
+[data-theme="light"] .video-lessons__group-head-text {
+  color: #5b21b6;
+}
+.video-lessons__card--bonus {
+  border-color: rgba(168, 85, 247, 0.35);
+}
+.video-lessons__card--bonus:hover {
+  border-color: rgba(168, 85, 247, 0.55);
+}
+.video-lessons__num--bonus {
+  min-width: 34px;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: #c4b5fd;
+  background: rgba(168, 85, 247, 0.2);
+}
+[data-theme="light"] .video-lessons__num--bonus {
+  color: #5b21b6;
+  background: rgba(139, 92, 246, 0.15);
+}
+/* Скролл страницы — html.app-view-long-scroll + body; не задаём max-height на список: иначе flex сжимает карточки (flex-shrink: 1) и «ломает» кнопки */
 .video-lessons__list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  align-items: stretch;
+  padding-bottom: 16px;
 }
 .video-lessons__card {
+  flex-shrink: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   overflow: hidden;
@@ -6445,6 +6559,15 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__attachment::before {
   content: "📎";
   font-size: 1em;
+}
+/* Кнопка «Записаться на личную тренировку» внутри карточки урока */
+.video-lessons__card .learn-play-hub__training-btn.video-lessons__training-link {
+  margin: 0 16px 12px;
+  width: calc(100% - 32px);
+  max-width: none;
+  padding: 12px 14px;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 .video-lessons__item {
   display: flex;
@@ -6498,10 +6621,39 @@ html.app-view-home .feature--rating-spring-promo:hover,
   max-height: 0;
 }
 .video-lessons__player-wrap:not(.video-lessons__player-wrap--hidden) {
-  max-height: 420px;
+  max-height: min(72vh, 580px);
 }
 .video-lessons__player-inner {
   padding: 0 12px 12px;
+}
+.video-lessons__video-error {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.4);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+}
+.video-lessons__video-error[hidden] {
+  display: none !important;
+}
+[data-theme="light"] .video-lessons__video-error {
+  color: #7f1d1d;
+  background: rgba(254, 226, 226, 0.95);
+  border-color: rgba(185, 28, 28, 0.25);
+}
+.video-lessons__video {
+  display: block;
+  width: 100%;
+  max-height: min(68vh, 520px);
+  height: auto;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+  object-fit: contain;
+  vertical-align: top;
 }
 .video-lessons__iframe {
   display: block;
@@ -13956,10 +14108,10 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   max-width: 100%;
 }
 
-/* Фотоальбом — развороты книги (корешок + страницы) */
-.hall-photo-album--book {
+/* Фотоальбом — лента карточек (без «книги» и лишних полей вокруг кадра) */
+.hall-photo-album--feed {
   position: relative;
-  padding: 18px 12px 22px;
+  padding: 16px 10px 22px;
   border-radius: 22px;
   overflow: hidden;
   min-width: 0;
@@ -13970,7 +14122,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   border: 1px solid rgba(251, 146, 60, 0.32);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.35);
 }
-.hall-photo-album--book::before {
+.hall-photo-album--feed::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -14019,7 +14171,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   margin-right: auto;
   font-style: italic;
 }
-[data-theme="light"] .hall-photo-album--book {
+[data-theme="light"] .hall-photo-album--feed {
   background: linear-gradient(170deg, rgba(214, 232, 212, 0.55) 0%, rgba(255, 252, 245, 0.98) 45%, rgba(254, 236, 214, 0.45) 100%),
     radial-gradient(ellipse 90% 50% at 50% 0%, rgba(251, 146, 60, 0.12), transparent 50%);
   border-color: rgba(234, 88, 12, 0.3);
@@ -14037,311 +14189,158 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   color: #475569;
 }
 
-.hall-photo-album__book-body {
+.hall-photo-album__grid {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  max-width: 640px;
-  margin: 0 auto;
-  border-radius: 6px 14px 14px 6px;
-  overflow: hidden;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 4px 0 rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  background: linear-gradient(90deg, #4a3428 0%, #3d2a1f 8%, #2c1f18 100%);
-  border: 1px solid rgba(0, 0, 0, 0.35);
-}
-[data-theme="light"] .hall-photo-album__book-body {
-  box-shadow: 0 14px 36px rgba(62, 39, 35, 0.25), 0 2px 0 rgba(255, 255, 255, 0.5) inset;
-  background: linear-gradient(90deg, #6d4c41 0%, #5d4037 12%, #4e342e 100%);
-  border-color: rgba(62, 39, 35, 0.4);
-}
-
-.hall-photo-album__spine {
-  flex: 0 0 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.25), transparent),
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 3px);
-  border-right: 1px solid rgba(0, 0, 0, 0.35);
-  box-shadow: inset -3px 0 8px rgba(0, 0, 0, 0.35);
-}
-.hall-photo-album__spine-hole {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #6b5344, #1a120e 70%);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-.hall-photo-album__spine-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: rgba(253, 230, 138, 0.75);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  white-space: nowrap;
-  margin-top: 4px;
-}
-
-.hall-photo-album__book-inner {
-  flex: 1;
-  min-width: 0;
-  padding: 14px 12px 16px;
-  background: linear-gradient(180deg, #c9c4b8 0%, #b8b3a8 40%, #a8a39a 100%);
-  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.15);
-}
-[data-theme="dark"] .hall-photo-album__book-inner {
-  background: linear-gradient(180deg, #57534e 0%, #44403c 50%, #3d3935 100%);
-}
-
-.hall-photo-album__spreads {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.hall-photo-album__spread {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  margin-bottom: 18px;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
-}
-/* Две страницы разворота — поровну (без 50%+50%+корешок: переполнение) */
-.hall-photo-album__spread > .hall-photo-album__page {
-  flex: 1 1 0;
-  min-width: 0;
-}
-.hall-photo-album__spread:last-child {
-  margin-bottom: 0;
-}
-
-.hall-photo-album__page {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  padding: 12px 10px 14px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  gap: 14px;
+  max-width: min(100%, 440px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Подзаголовок серии в ленте (одна колонка) */
+.hall-photo-album__group-head {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 10px 8px 4px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px dashed rgba(251, 146, 60, 0.35);
   box-sizing: border-box;
-  background: linear-gradient(145deg, #fdfcfa 0%, #f0ebe3 55%, #e8e2d8 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 2px 2px 8px rgba(255, 255, 255, 0.4);
 }
-[data-theme="dark"] .hall-photo-album__page {
-  background: linear-gradient(145deg, #44403c 0%, #3a3632 50%, #2f2b28 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 0 20px rgba(0, 0, 0, 0.2);
+.hall-photo-album__group-head-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: rgba(253, 230, 138, 0.95);
 }
-.hall-photo-album__page--left {
-  border-radius: 3px 0 0 3px;
+[data-theme="light"] .hall-photo-album__group-head {
+  background: rgba(251, 146, 60, 0.12);
+  border-color: rgba(234, 88, 12, 0.35);
 }
-.hall-photo-album__page--right {
-  border-radius: 0 3px 3px 0;
-}
-.hall-photo-album__page-num {
-  position: absolute;
-  top: 8px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(100, 90, 80, 0.35);
-}
-.hall-photo-album__page--left .hall-photo-album__page-num {
-  left: 10px;
-}
-.hall-photo-album__page--right .hall-photo-album__page-num {
-  right: 10px;
-}
-[data-theme="dark"] .hall-photo-album__page-num {
-  color: rgba(255, 255, 255, 0.2);
+[data-theme="light"] .hall-photo-album__group-head-text {
+  color: #9a3412;
 }
 
-.hall-photo-album__gutter {
-  flex: 0 0 5px;
-  align-self: stretch;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.14),
-    rgba(255, 255, 255, 0.25) 45%,
-    rgba(255, 255, 255, 0.15) 55%,
-    rgba(0, 0, 0, 0.12)
-  );
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.12);
+.hall-photo-album__card {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(251, 146, 60, 0.22);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+[data-theme="light"] .hall-photo-album__card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(234, 88, 12, 0.2);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
 }
 
-.hall-photo-album__snap {
-  flex: 1 1 auto;
+.hall-photo-album__card-body {
+  padding: 12px 12px 14px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-start;
-  width: 100%;
-  max-width: none;
-  min-height: 0;
-  margin: 0;
-  padding: 22px 8px 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  transform: none;
-  transition: opacity 0.2s ease;
-}
-.hall-photo-album__page:hover .hall-photo-album__snap,
-.hall-photo-album__page:focus-within .hall-photo-album__snap {
-  opacity: 1;
+  min-width: 0;
 }
 
-.hall-photo-album__btn {
+.hall-photo-album__idx {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(251, 191, 36, 0.95);
+  background: rgba(0, 0, 0, 0.25);
+}
+[data-theme="light"] .hall-photo-album__idx {
+  color: #b45309;
+  background: rgba(251, 146, 60, 0.15);
+}
+
+.hall-photo-album--feed .hall-photo-album__btn {
   display: block;
   width: 100%;
-  flex-shrink: 0;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  background: #1c1917;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  background: #0c0a09;
+  line-height: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
-  /* Единое «окно» под фото на развороте — ровная сетка; кадр кропается по центру */
-  aspect-ratio: 4 / 5;
-  max-height: min(220px, 38vh);
-  margin: 0 auto;
-  max-width: 100%;
+  margin: 0;
 }
-.hall-photo-album__btn:hover,
-.hall-photo-album__btn:focus-visible {
+.hall-photo-album--feed .hall-photo-album__btn:hover,
+.hall-photo-album--feed .hall-photo-album__btn:focus-visible {
   outline: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(251, 146, 60, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 0 2px rgba(251, 146, 60, 0.45);
 }
-.hall-photo-album__btn:active .hall-photo-album__img {
-  transform: scale(0.99);
-}
-.hall-photo-album__img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: cover;
-  object-position: center;
-  vertical-align: middle;
-  transition: transform 0.3s ease;
-}
-@media (min-width: 480px) {
-  .hall-photo-album__btn {
-    max-height: min(260px, 42vh);
-  }
-}
-@media (min-width: 560px) {
-  .hall-photo-album__btn {
-    max-height: min(280px, 44vh);
-  }
-}
-.hall-photo-album__page:hover .hall-photo-album__img {
-  transform: scale(1.03);
+.hall-photo-album--feed .hall-photo-album__btn:active .hall-photo-album__img {
+  transform: scale(0.995);
 }
 
-.hall-photo-album__caption {
+.hall-photo-album--feed .hall-photo-album__img {
   display: block;
-  flex-shrink: 0;
-  margin-top: auto;
-  padding: 10px 6px 2px;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: Georgia, "Times New Roman", serif;
-  color: #3d3830;
+  width: 100%;
+  height: auto;
+  max-height: min(70vh, 520px);
+  object-fit: contain;
+  object-position: center;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+  background: #1c1917;
+}
+
+.hall-photo-album--feed .hall-photo-album__caption {
+  display: block;
+  margin: 12px 0 0;
+  padding: 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
   text-align: center;
-  line-height: 1.4;
-  max-width: 100%;
+  line-height: 1.45;
+  color: rgba(250, 250, 249, 0.92);
   overflow-wrap: break-word;
   word-wrap: break-word;
   hyphens: auto;
   -webkit-hyphens: auto;
 }
-[data-theme="dark"] .hall-photo-album__caption {
-  color: rgba(250, 250, 249, 0.9);
+[data-theme="light"] .hall-photo-album--feed .hall-photo-album__caption {
+  color: #334155;
 }
-.hall-photo-album__caption--long {
-  font-size: 10px;
-  line-height: 1.45;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.hall-photo-album__page--blank {
-  min-height: 120px;
-}
-.hall-photo-album__page--blank .hall-photo-album__snap {
-  flex: 1;
-  min-height: 0;
+.hall-photo-album--feed .hall-photo-album__caption--long {
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
-@media (max-width: 520px) {
-  .hall-photo-album__book-body {
-    flex-direction: column;
-    border-radius: 10px;
-    max-width: 100%;
-  }
-  .hall-photo-album__spine {
-    flex: 0 0 auto;
-    flex-direction: row;
-    width: 100%;
-    padding: 8px 16px;
-    gap: 14px;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.35);
-    box-shadow: inset 0 -2px 8px rgba(0, 0, 0, 0.2);
-  }
-  .hall-photo-album__spine-label {
-    writing-mode: horizontal-tb;
-    transform: none;
-    letter-spacing: 0.2em;
-    margin-top: 0;
-    margin-left: auto;
-  }
-  .hall-photo-album__spread {
-    flex-direction: column;
-  }
-  .hall-photo-album__spread > .hall-photo-album__page {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: 100%;
-  }
-  .hall-photo-album__gutter {
-    flex: 0 0 auto;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.12),
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(0, 0, 0, 0.1)
-    );
-  }
-  .hall-photo-album__spread .hall-photo-album__page--left {
-    border-radius: 3px 3px 0 0;
-  }
-  .hall-photo-album__spread .hall-photo-album__page--right {
-    border-radius: 0 0 3px 3px;
+@media (min-width: 560px) {
+  .hall-photo-album--feed .hall-photo-album__img {
+    max-height: min(72vh, 560px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hall-photo-album__img,
-  .hall-photo-album__btn {
+  .hall-photo-album--feed .hall-photo-album__img,
+  .hall-photo-album--feed .hall-photo-album__btn {
     transition: none;
-  }
-  .hall-photo-album__page:hover .hall-photo-album__img {
-    transform: none;
   }
 }
 

@@ -46,6 +46,7 @@ const handlers = {
   "tracking-links": () => require(path.join(handlersDir, "tracking-links.js")),
   "tracking-link-hit": () => require(path.join(handlersDir, "tracking-link-hit.js")),
   "tracking-link-event": () => require(path.join(handlersDir, "tracking-link-event.js")),
+  "yandex-disk-play": () => require(path.join(handlersDir, "yandex-disk-play.js")),
 };
 
 module.exports = async function handler(req, res) {

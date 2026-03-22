@@ -340,6 +340,10 @@ function getAssetUrl(relativePath) {
         setView("raffles");
         return;
       }
+      if (startApp === "video_lessons" && typeof setView === "function") {
+        setView("video-lessons");
+        return;
+      }
       if (startApp === "club_chat" && typeof setView === "function") {
         window.__pendingOpenClubChatGeneral = true;
         setView("chat");
@@ -1546,6 +1550,9 @@ function runGazetteAndTasksInit() {
   if (startParam === "raffles") {
     setTimeout(function () { if (typeof setView === "function") setView("raffles"); }, 0);
   }
+  if (startParam === "video_lessons") {
+    setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
+  }
   if (startParam === "club_chat") {
     window.__pendingOpenClubChatGeneral = true;
     setTimeout(function () {
@@ -1611,6 +1618,8 @@ function runGazetteAndTasksInit() {
         if (typeof setView === "function") setView("chat");
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       }, 0);
+    } else if (urlStart === "video_lessons") {
+      setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
     }
   } catch (e) {}
   if (startParam && startParam.indexOf("poker_task_") === 0) {
@@ -3578,6 +3587,14 @@ function setView(viewName) {
       winterView.appendChild(ratingSection);
     }
   }
+  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу, только <html> с классом как на главной */
+  document.documentElement.classList.toggle(
+    "app-view-long-scroll",
+    viewName === "video-lessons" ||
+      viewName === "learn-play-hub" ||
+      viewName === "poker-tasks" ||
+      viewName === "hall-of-fame"
+  );
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   // Восстановление скролла главной: сразу после смены view, без нескольких отложенных
@@ -9255,8 +9272,71 @@ document.addEventListener("click", function (e) {
   }
 }, true);
 
+/** Видео с Яндекс.Диска: прямая ссылка через /api/yandex-disk-play + нативный video (playsinline для iOS / Telegram). */
+window.loadVideoLessonNative = function loadVideoLessonNative(videoEl, playerWrap) {
+  var publicUrl = videoEl.getAttribute("data-disk-public");
+  if (!publicUrl) return;
+  var errP = playerWrap.querySelector(".video-lessons__video-error");
+  function setErr(msg) {
+    if (!errP) return;
+    if (msg) {
+      errP.textContent = msg;
+      errP.removeAttribute("hidden");
+    } else {
+      errP.setAttribute("hidden", "");
+      errP.textContent = "";
+    }
+  }
+  setErr("");
+  try {
+    videoEl.pause();
+    videoEl.removeAttribute("src");
+    videoEl.load();
+  } catch (err) {}
+
+  var apiPath = "/api/yandex-disk-play?public_key=" + encodeURIComponent(publicUrl);
+
+  function applyHref(href) {
+    if (href) videoEl.src = href;
+  }
+
+  fetch(apiPath)
+    .then(function (res) {
+      return res.json().then(function (body) {
+        return { ok: res.ok, body: body };
+      });
+    })
+    .then(function (r) {
+      if (!r.ok || !r.body || !r.body.ok || !r.body.href) {
+        throw new Error((r.body && r.body.error) || "fail");
+      }
+      applyHref(r.body.href);
+    })
+    .catch(function () {
+      setErr("Не удалось загрузить видео в приложении. Откройте ссылку на Яндекс.Диск ниже.");
+    });
+
+  videoEl.addEventListener(
+    "error",
+    function onVideoErr() {
+      videoEl.removeEventListener("error", onVideoErr);
+      fetch(apiPath)
+        .then(function (res) {
+          return res.json().then(function (body) {
+            return { ok: res.ok, body: body };
+          });
+        })
+        .then(function (r) {
+          if (r.ok && r.body && r.body.ok && r.body.href) applyHref(r.body.href);
+        })
+        .catch(function () {});
+    },
+    { once: true }
+  );
+};
+
 document.addEventListener("click", function (e) {
-  var trainingBtn = e.target && e.target.closest ? e.target.closest(".learn-play-hub__training-btn") : null;
+  var trainingBtn = e.target && e.target.closest ? e.target.closest(".learn-play-hub__training-btn, .video-lessons__training-link") : null;
   if (trainingBtn) {
     var href = trainingBtn.getAttribute("href");
     if (href && href.indexOf("t.me") !== -1) {
@@ -9282,6 +9362,18 @@ document.addEventListener("click", function (e) {
     }
     return;
   }
+  var openExt = e.target && e.target.closest ? e.target.closest(".video-lessons__open-external") : null;
+  if (openExt) {
+    var extHref = openExt.getAttribute("href");
+    if (extHref && extHref.indexOf("http") === 0) {
+      e.preventDefault();
+      var tgEx = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      if (tgEx && tgEx.openLink) tgEx.openLink(extHref);
+      else window.open(extHref, "_blank", "noopener,noreferrer");
+    }
+    return;
+  }
   var item = e.target && e.target.closest ? e.target.closest(".video-lessons__item") : null;
   if (!item) return;
   e.preventDefault();
@@ -9289,6 +9381,13 @@ document.addEventListener("click", function (e) {
   var playerWrap = card ? card.querySelector(".video-lessons__player-wrap") : null;
   if (!card || !playerWrap) return;
   var isOpen = !playerWrap.classList.contains("video-lessons__player-wrap--hidden");
+  document.querySelectorAll(".video-lessons__video").forEach(function (v) {
+    try {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    } catch (err) {}
+  });
   document.querySelectorAll(".video-lessons__player-wrap").forEach(function (w) {
     w.classList.add("video-lessons__player-wrap--hidden");
   });
@@ -9304,13 +9403,36 @@ document.addEventListener("click", function (e) {
     card.classList.add("video-lessons__card--open");
     var url = item.getAttribute("data-video-url");
     if (url && url !== "#") {
-      var iframe = playerWrap.querySelector(".video-lessons__iframe[data-video-src]");
-      if (iframe && !iframe.src) iframe.src = iframe.getAttribute("data-video-src") || url;
+      var nativeVideo = playerWrap.querySelector(".video-lessons__video[data-disk-public]");
+      if (nativeVideo && typeof window.loadVideoLessonNative === "function") {
+        window.loadVideoLessonNative(nativeVideo, playerWrap);
+      } else {
+        var iframe = playerWrap.querySelector(".video-lessons__iframe[data-video-src]");
+        if (iframe && !iframe.src) iframe.src = iframe.getAttribute("data-video-src") || url;
+      }
     }
   }
 });
 
-function initVideoLessons() {}
+function initVideoLessons() {
+  /* Длинный экран: при входе показываем шапку с фото и заголовком, а не середину списка */
+  function scrollTopNow() {
+    try {
+      if (typeof window.scrollTo === "function") {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      } else {
+        window.scrollTo(0, 0);
+      }
+      var se = document.scrollingElement;
+      if (se) se.scrollTop = 0;
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    } catch (err) {}
+  }
+  scrollTopNow();
+  requestAnimationFrame(scrollTopNow);
+  setTimeout(scrollTopNow, 0);
+}
 
 (function initChillRadio() {
   var radio = document.getElementById("chillRadio");
@@ -17251,7 +17373,8 @@ updateVisitorCounter();
     winter_rating_player_share: "Рейтинг — карточка игрока",
     winter_rating_date: "Рейтинг — дата",
     raffle_hero: "Розыгрыши — пригласить друга",
-    raffle_card: "Розыгрыш — карточка (пригласить)"
+    raffle_card: "Розыгрыш — карточка (пригласить)",
+    video_lessons_hero: "Видеоуроки — отправить другу"
   };
   var btn = document.getElementById("adminShareStatsBtn");
   var modal = document.getElementById("shareStatsAdminModal");
@@ -17350,7 +17473,7 @@ updateVisitorCounter();
     "view:raffles": "Экран: розыгрыши",
     "view:streams": "Экран: стримы",
     "view:equilator": "Экран: эквилятор",
-    "view:video-lessons": "Экран: видеоуроки",
+    "view:video-lessons": "Экран: 15 бесплатных видеоуроков (тренер Николай FishKopcheny)",
     "view:poker-tasks": "Экран: задачи",
     "view:bonus-game": "Экран: бонус-игра",
     "view:plasterer-game": "Экран: штукатур",
