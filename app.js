@@ -2748,6 +2748,28 @@ function getPokerResolvedTelegramUser() {
   var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
   var hintEl = document.getElementById("authBannerHint");
 
+  /* Резерв к data-onauth: иногда eval/callback виджета не срабатывает, а postMessage от oauth.telegram.org всё равно приходит. */
+  if (!window.__pokerTelegramOauthMessageBridge) {
+    window.__pokerTelegramOauthMessageBridge = true;
+    window.addEventListener(
+      "message",
+      function (ev) {
+        try {
+          if (!ev || String(ev.origin) !== "https://oauth.telegram.org") return;
+          var raw = ev.data;
+          var data = typeof raw === "string" ? JSON.parse(raw) : raw;
+          if (!data || data.event !== "auth_user" || data.init) return;
+          var auth = data.auth_data;
+          if (!auth || auth.hash == null || auth.id == null || auth.auth_date == null) return;
+          if (typeof window.__pokerTelegramWidgetAuth === "function") {
+            window.__pokerTelegramWidgetAuth(auth);
+          }
+        } catch (eBr) {}
+      },
+      false
+    );
+  }
+
   if (!isTelegramWebApp()) {
     if (bannerLink) bannerLink.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
@@ -3041,7 +3063,7 @@ function getPokerResolvedTelegramUser() {
           "Локальный запуск: кнопка «Войти через Telegram» здесь не работает — в BotFather привязан боевой домен. Используйте ссылку ниже или откройте Mini App в Telegram.";
       } else if (isTelegramWebApp()) {
         bannerText.textContent =
-          "Войдите кнопкой «Log in / Войти через Telegram» ниже (подтверждение в приложении Telegram) или нажмите «Открыть в браузере», если во встроенном окне вход не срабатывает. SMS с кодом не отправляется — это нормально.";
+          "После «подтвердите в Telegram» переключитесь в приложение Telegram (свайп снизу / кнопка «Домой») и нажмите «Принять» / «Разрешить» в диалоге — нового сообщения в списке чатов может не быть. Затем вернитесь в Mini App. Не помогает — «Открыть в браузере для входа».";
       } else {
         bannerText.textContent =
           "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram. SMS с кодом не приходит: используется вход через аккаунт Telegram, не по номеру телефона.";
@@ -3060,9 +3082,9 @@ function getPokerResolvedTelegramUser() {
           (prodBase ? " Боевой URL: " + prodBase : "");
       } else if (isTelegramWebApp()) {
         hintEl.textContent =
-          "В Mini App не ждите SMS: подтвердите вход во всплывающем окне Telegram. Если после этого страница «зависла», откройте сайт в Safari/Chrome кнопкой ниже. Домен в @BotFather (/setdomain): " +
+          "Текст «сообщение отправлено в Telegram» — это не обязательно новый чат: чаще нужно открыть само приложение Telegram и подтвердить запрос там. Уведомление может быть в шторке, а не в списке диалогов. После подтверждения вернитесь в Mini App — страница должна обновить вход. Домен в @BotFather: " +
           (dom || "example.com") +
-          " (без https://). Адрес для возврата: " +
+          ". URL возврата: " +
           cb +
           ".";
       } else {
@@ -3081,6 +3103,14 @@ function getPokerResolvedTelegramUser() {
   function deliverTelegramLoginWidgetPayload(payload, stripUrlParams) {
     var base = getTelegramAuthApiBase();
     if (!base) return;
+    var sig =
+      payload && payload.hash != null && payload.id != null && payload.auth_date != null
+        ? "tglog:" + String(payload.hash) + ":" + String(payload.id) + ":" + String(payload.auth_date)
+        : "";
+    if (sig) {
+      if (window.__pokerTgLoginInflightSig === sig) return;
+      window.__pokerTgLoginInflightSig = sig;
+    }
     setBannerVerifying();
     showUnauthorized();
     fetch(base + "/api/auth-telegram-login", {
@@ -3127,6 +3157,11 @@ function getPokerResolvedTelegramUser() {
           }
           return;
         }
+        if (sig) {
+          try {
+            window.__pokerTgLoginInflightSig = "";
+          } catch (eSig) {}
+        }
         updateHeaderGreeting();
         showUnauthorized();
         setBannerFailure(data && data.error ? String(data.error) : "Не удалось подтвердить вход через Telegram.", false);
@@ -3134,6 +3169,11 @@ function getPokerResolvedTelegramUser() {
         mountTelegramLoginWidgetForPwa();
       })
       .catch(function () {
+        if (sig) {
+          try {
+            window.__pokerTgLoginInflightSig = "";
+          } catch (eSig2) {}
+        }
         updateHeaderGreeting();
         showUnauthorized();
         setBannerFailure("Ошибка сети при входе через Telegram.", false);
@@ -3145,10 +3185,10 @@ function getPokerResolvedTelegramUser() {
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
     /*
-     * v4: data-onauth — данные приходят через postMessage из iframe oauth.telegram.org без редиректа родительской
-     * страницы (в WebView Mini App редирект часто «теряется»). Редирект ?hash=… и #tgAuthResult обрабатываем в tryFinishTelegramLoginRedirect.
+     * v5: data-onauth + глобальный слушатель postMessage (oauth.telegram.org), см. __pokerTelegramOauthMessageBridge.
+     * Редирект ?hash=… / #tgAuthResult — tryFinishTelegramLoginRedirect (+ pageshow / visibilitychange).
      */
-    var WIDGET_MOUNT_VER = "4";
+    var WIDGET_MOUNT_VER = "5";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
     if (isPwaAuthLocalHost()) {
@@ -3489,8 +3529,18 @@ function getPokerResolvedTelegramUser() {
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") {
       setTimeout(maybeRetryAuthWhenNetworkBack, 400);
+      setTimeout(function () {
+        tryFinishTelegramLoginRedirect();
+      }, 380);
     }
   });
+  window.addEventListener(
+    "pageshow",
+    function () {
+      tryFinishTelegramLoginRedirect();
+    },
+    false
+  );
 
   var wtgBoot = getTelegramWebAppNow();
   if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
