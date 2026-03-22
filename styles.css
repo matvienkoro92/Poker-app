@@ -6539,6 +6539,52 @@ html.app-view-home .feature--rating-spring-promo:hover,
   padding: 22px 0 max(40px, calc(20px + env(safe-area-inset-bottom, 0px)));
   border-top: 1px solid var(--border-subtle);
 }
+.video-lessons__mtt-spoiler.video-lessons__mtt-paid {
+  padding-bottom: max(24px, calc(12px + env(safe-area-inset-bottom, 0px)));
+}
+.video-lessons__mtt-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 14px;
+  margin: 0;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--block-bg);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.video-lessons__mtt-summary::-webkit-details-marker,
+.video-lessons__mtt-summary::marker {
+  display: none;
+  content: "";
+}
+.video-lessons__mtt-summary:hover {
+  border-color: rgba(251, 146, 60, 0.35);
+  background: rgba(251, 146, 60, 0.05);
+}
+.video-lessons__mtt-spoiler[open] > .video-lessons__mtt-summary {
+  margin-bottom: 16px;
+  border-color: rgba(251, 146, 60, 0.4);
+}
+.video-lessons__mtt-spoiler-chevron {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--accent);
+  transition: transform 0.25s ease;
+}
+.video-lessons__mtt-spoiler[open] .video-lessons__mtt-spoiler-chevron {
+  transform: rotate(-180deg);
+}
+.video-lessons__mtt-spoiler-inner {
+  padding: 0 2px 4px;
+}
 .video-lessons__mtt-title {
   margin: 0 0 14px;
   font-size: clamp(17px, 4.5vw, 20px);
@@ -6547,6 +6593,12 @@ html.app-view-home .feature--rating-spring-promo:hover,
   letter-spacing: -0.02em;
   text-align: center;
   color: var(--text);
+}
+.video-lessons__mtt-summary .video-lessons__mtt-title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
 }
 .video-lessons__mtt-subtitle {
   margin: 18px 0 10px;

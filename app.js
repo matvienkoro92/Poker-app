@@ -9452,6 +9452,73 @@ function initVideoLessons() {
   setTimeout(scrollTopNow, 0);
 }
 
+/**
+ * Спойлер «Платный курс МТТ»: фокус на <summary> в Telegram/WebKit прокручивает страницу вверх — возвращаем scroll.
+ * (Тот же класс багов, что и hallFameSetScrollY в showHallOfFamePanel.)
+ */
+(function initVideoLessonsMttSpoilerScrollFix() {
+  var SEL = ".video-lessons__mtt-spoiler";
+  var pendingY = null;
+  function getScrollY() {
+    try {
+      var se = document.scrollingElement || document.documentElement;
+      return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+  function setScrollY(y) {
+    try {
+      y = Math.max(0, y);
+      if (typeof window.scrollTo === "function") window.scrollTo(0, y);
+      var se = document.scrollingElement || document.documentElement;
+      if (se) se.scrollTop = y;
+      if (document.documentElement) document.documentElement.scrollTop = y;
+      if (document.body) document.body.scrollTop = y;
+    } catch (e2) {}
+  }
+  document.addEventListener(
+    "click",
+    function (e) {
+      var summary = e.target && e.target.closest ? e.target.closest(".video-lessons__mtt-summary") : null;
+      if (!summary) return;
+      var det = summary.closest(SEL);
+      if (!det) return;
+      if (det.open) {
+        pendingY = null;
+        return;
+      }
+      pendingY = getScrollY();
+    },
+    true
+  );
+  function bind(det) {
+    if (!det || det._pokerMttSpoilerScrollFix) return;
+    det._pokerMttSpoilerScrollFix = true;
+    det.addEventListener("toggle", function () {
+      if (!this.open || pendingY == null) return;
+      var y = pendingY;
+      pendingY = null;
+      var raf = window.requestAnimationFrame || function (fn) {
+        setTimeout(fn, 16);
+      };
+      raf(function () {
+        setScrollY(y);
+        raf(function () {
+          setScrollY(y);
+        });
+      });
+      setTimeout(function () {
+        setScrollY(y);
+      }, 0);
+      setTimeout(function () {
+        setScrollY(y);
+      }, 64);
+    });
+  }
+  bind(document.querySelector(SEL));
+})();
+
 (function initChillRadio() {
   var radio = document.getElementById("chillRadio");
   if (!radio) return;
