@@ -3104,15 +3104,24 @@ const footer = document.querySelector(".card__footer");
   }
 })();
 
+/** Сброс прокрутки окна (html/body) — при смене экрана иначе остаётся Y с предыдущей страницы. */
+function scrollMainDocumentToTop() {
+  try {
+    if (typeof window.scrollTo === "function") {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } else {
+      window.scrollTo(0, 0);
+    }
+    var se = document.scrollingElement || document.documentElement;
+    if (se) se.scrollTop = 0;
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  } catch (e) {}
+}
+
 function scrollHomeToTop() {
   if (!document.body || (document.body.getAttribute && document.body.getAttribute("data-view") !== "home")) return;
-  try {
-    window.scrollTo(0, 0);
-    if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
-    if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
-    var el = document.scrollingElement;
-    if (el && el.scrollTop !== 0) el.scrollTop = 0;
-  } catch (e) {}
+  scrollMainDocumentToTop();
 }
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
@@ -3288,31 +3297,6 @@ function stopDailyPredictionTimer() {
   }
 }
 
-function scrollHomeToTop() {
-  if (!document.body || (document.body.getAttribute && document.body.getAttribute("data-view") !== "home")) return;
-  try {
-    window.scrollTo(0, 0);
-    if (document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
-    if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
-    var el = document.scrollingElement;
-    if (el && el.scrollTop !== 0) el.scrollTop = 0;
-  } catch (e) {}
-}
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", function () {
-    scrollHomeToTop();
-    setTimeout(scrollHomeToTop, 50);
-    setTimeout(scrollHomeToTop, 300);
-  });
-} else {
-  scrollHomeToTop();
-  setTimeout(scrollHomeToTop, 50);
-  setTimeout(scrollHomeToTop, 300);
-}
-window.addEventListener("pageshow", function (e) {
-  if (e.persisted) scrollHomeToTop();
-});
-
 function playClickSound() {
   try {
     var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -3397,15 +3381,6 @@ function setView(viewName) {
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
-  // Главная скрывается через display:none — высота документа падает, браузер обнуляет scroll.
-  // Сохраняем Y при уходе с home и восстанавливаем при возврате (эквилятор, «Назад» и т.д.).
-  if (prevView === "home" && viewName !== "home") {
-    try {
-      var seSave = document.scrollingElement || document.documentElement;
-      var ySave = (seSave && seSave.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      window.__savedHomeScrollY = Math.max(0, ySave);
-    } catch (eSaveHome) {}
-  }
   if (document.body) {
     document.body.style.overflow = "";
     document.body.style.position = "";
@@ -3614,30 +3589,6 @@ function setView(viewName) {
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
-  // Восстановление скролла главной: сразу после смены view, без нескольких отложенных
-  // вызовов — иначе сначала рисуется верх страницы, потом скачок (мерцание в TG/WebKit).
-  if (viewName === "home" && prevView !== "home" && typeof window.__savedHomeScrollY === "number") {
-    var restoreHomeY = window.__savedHomeScrollY;
-    function applyHomeScroll() {
-      try {
-        var y = restoreHomeY;
-        if (typeof window.scrollTo === "function") {
-          window.scrollTo({ top: y, left: 0, behavior: "auto" });
-        } else {
-          window.scrollTo(0, y);
-        }
-        var se = document.scrollingElement || document.documentElement;
-        if (se) se.scrollTop = y;
-        if (document.documentElement) document.documentElement.scrollTop = y;
-        if (document.body) document.body.scrollTop = y;
-      } catch (eHomeScroll) {}
-    }
-    applyHomeScroll();
-    var rafH = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-    rafH(function () {
-      applyHomeScroll();
-    });
-  }
   if (viewName === "hall-of-fame") {
     var rafHall = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
@@ -3651,6 +3602,16 @@ function setView(viewName) {
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
+  /* Любой экран — с верха: иначе после длинной главной открывается середина/низ следующего раздела. */
+  scrollMainDocumentToTop();
+  var rafTop = window.requestAnimationFrame || function (fn) {
+    setTimeout(fn, 16);
+  };
+  rafTop(function () {
+    scrollMainDocumentToTop();
+  });
+  setTimeout(scrollMainDocumentToTop, 0);
+  setTimeout(scrollMainDocumentToTop, 50);
 }
 
 function setHallOfFameSubtabActive(section) {
@@ -9450,6 +9411,20 @@ function initVideoLessons() {
   scrollTopNow();
   requestAnimationFrame(scrollTopNow);
   setTimeout(scrollTopNow, 0);
+  /* Первый урок по умолчанию развёрнут — подтягиваем поток с Я.Диска, как при клике */
+  try {
+    var list = document.getElementById("videoLessonsList");
+    var firstCard = list && list.querySelector(".video-lessons__card");
+    if (firstCard && firstCard.classList.contains("video-lessons__card--open")) {
+      var pw = firstCard.querySelector(".video-lessons__player-wrap");
+      if (pw && !pw.classList.contains("video-lessons__player-wrap--hidden")) {
+        var nv = pw.querySelector(".video-lessons__video[data-disk-public]");
+        if (nv && !nv.src && typeof window.loadVideoLessonNative === "function") {
+          window.loadVideoLessonNative(nv, pw);
+        }
+      }
+    }
+  } catch (eFirstLesson) {}
 }
 
 /**
@@ -18676,7 +18651,6 @@ function updateTournamentDayBlock() {
       return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
     })();
     timerEls.forEach(function (el) { el.textContent = timerStr; });
-    var trophyImg = document.getElementById("tournamentDayTrophyImg");
     var scheduleTrophyImg = document.getElementById("scheduleTournamentDayTrophyImg");
     var weekday = state.weekday;
     var pToday = getDisplayedTournamentMskParts(n);
@@ -18713,10 +18687,6 @@ function updateTournamentDayBlock() {
       trophyFile = "tournament-day-two-aces.png";
     }
     var trophySrc = typeof getAssetUrl === "function" ? getAssetUrl(trophyFile) : "";
-    if (trophyImg && trophySrc) {
-      trophyImg.src = trophySrc;
-      trophyImg.classList.remove("tournament-day-block__trophy-img--hidden");
-    }
     if (scheduleTrophyImg && trophySrc) scheduleTrophyImg.src = trophySrc;
     var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
     if (schedTbody) {

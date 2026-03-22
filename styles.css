@@ -307,8 +307,8 @@ html {
   overflow-x: hidden;
   min-height: 100%;
   min-height: -webkit-fill-available;
-  /* Чуть приглушаем «резинку», но не ломаем скролл на Android */
-  overscroll-behavior-y: contain;
+  /* Меньше «резинового» оверскролла внизу/вверху в WebView (Telegram / iOS) */
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   /* Два слоя: градиент + сплошная подложка — при «резинке» не белый фон */
   background-color: var(--overscroll-canvas) !important;
@@ -331,6 +331,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
 }
 
 /* Отступ сверху: safe-area + высота шапки Telegram («Закрыть»), карточка и меню всегда колонкой */
@@ -340,7 +341,8 @@ body {
   width: 100%;
   min-height: 100vh;
   padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + 52px));
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  /* Запас под фиксированное меню без лишнего «хвоста» при оверскролле */
+  padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
   display: flex;
@@ -515,8 +517,8 @@ html.app-view-long-scroll {
   -webkit-overflow-scrolling: touch;
   height: auto;
   min-height: 100%;
-  /* «Резинка» снизу/сверху как в нативном скролле (contain на html режет ощущение оверскролла) */
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
+  scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 body.app-view-long-scroll {
   overflow-y: auto !important;
@@ -526,7 +528,8 @@ body.app-view-long-scroll {
   /* Не даём flex-stretch ужать .app до высоты вьюпорта — иначе контент обрезается (~9 карточек) */
   align-items: flex-start;
   justify-content: center;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
+  scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 html.app-view-long-scroll .app {
   overflow: visible !important;
@@ -1136,7 +1139,7 @@ html.app-view-home .card .card__content {
   transition: none;
 }
 .view--active[data-view="home"] {
-  padding-bottom: 16px;
+  padding-bottom: 8px;
 }
 
 .view--active[data-view="chat"] {
@@ -3950,18 +3953,16 @@ img.chat-contact__avatar {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  /* auto: нижний/верхний «резиновый» оверскролл в WebView; padding снизу — запас над нижним меню */
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
   touch-action: pan-y;
   display: flex;
   flex-direction: column;
   gap: 0;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
-  /* Нижний оверскролл: место под фиксированное меню + комфортный зазор для дотягивания списка */
-  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 28px);
+  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 10px);
   box-sizing: border-box;
-  scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 12px);
+  scroll-padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 4px);
 }
 .chat-dialogs-block {
   background: var(--block-bg);
@@ -5985,13 +5986,14 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 .tournament-day-home-wrap .tournament-day-block--home {
   display: flex;
-  align-items: stretch;
-  gap: 10px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   position: static;
   top: auto;
-  padding: 12px 14px;
-  min-height: 72px;
+  padding: 14px 16px;
+  min-height: 0;
   background: #000 !important;
   border: 1px solid rgba(251, 146, 60, 0.5);
   border-radius: 16px 16px 0 0;
@@ -6003,35 +6005,27 @@ html.app-view-home .feature--rating-spring-promo:hover,
   border-color: rgba(251, 146, 60, 0.65);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(0, 0, 0, 0.25), 0 0 12px rgba(251, 146, 60, 0.25) !important;
 }
-.tournament-day-home-wrap .tournament-day-block--home .feature__icon {
-  flex-shrink: 0;
-  align-self: stretch;
-  width: 50%;
-  min-width: 120px;
-  max-width: 180px;
+.tournament-day-home-wrap .tournament-day-block--home .feature__icon--tournament-day-home {
+  flex: 0 0 auto;
+  width: clamp(80px, 28vw, 132px);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  align-self: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(251, 146, 60, 0.35);
 }
-.tournament-day-home-wrap .feature__icon--trophy-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  box-sizing: border-box;
-}
-.tournament-day-home-wrap .tournament-day-block__trophy-img {
+.tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__trophy-img--home-promo {
   display: block;
-  height: 100%;
   width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
-}
-.tournament-day-home-wrap .tournament-day-block__trophy-img--hidden {
-  visibility: hidden;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__body {
   flex: 1;
   min-width: 0;
+  width: auto;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__badge {
   font-size: 12px;
@@ -6486,6 +6480,23 @@ html.app-view-home .feature--rating-spring-promo:hover,
   text-align: center;
   border-top: 1px solid var(--border-subtle);
 }
+/* Бесплатные уроки: бирюза/небо. Платный МТТ ниже — только золото (не смешивать с оранжем акцента приложения). */
+.view[data-view="video-lessons"] {
+  --vl-free-border: rgba(56, 189, 248, 0.42);
+  --vl-free-border-dashed: rgba(34, 211, 238, 0.55);
+  --vl-free-bg-soft: rgba(56, 189, 248, 0.1);
+  --vl-free-open: #22d3ee;
+  --vl-free-num-fg: #67e8f9;
+  --vl-free-num-bg: rgba(34, 211, 238, 0.18);
+}
+[data-theme="light"] .view[data-view="video-lessons"] {
+  --vl-free-border: rgba(2, 132, 199, 0.38);
+  --vl-free-border-dashed: rgba(14, 165, 233, 0.5);
+  --vl-free-bg-soft: rgba(14, 165, 233, 0.1);
+  --vl-free-open: #0284c7;
+  --vl-free-num-fg: #0369a1;
+  --vl-free-num-bg: rgba(14, 165, 233, 0.16);
+}
 .video-lessons__intro {
   margin: 8px 0 20px;
   font-size: 14px;
@@ -6501,19 +6512,19 @@ html.app-view-home .feature--rating-spring-promo:hover,
   padding: 12px 14px;
   text-align: center;
   border-radius: 14px;
-  border: 1px dashed rgba(251, 146, 60, 0.45);
-  background: rgba(251, 146, 60, 0.08);
+  border: 1px dashed var(--vl-free-border-dashed, rgba(34, 211, 238, 0.55));
+  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.1));
 }
 .video-lessons__free-cta-text {
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: var(--accent);
+  color: var(--vl-free-num-fg, #67e8f9);
 }
 .video-lessons__free-cta-arrow {
   font-size: 22px;
   line-height: 1;
-  color: var(--accent);
+  color: var(--vl-free-open, #22d3ee);
   animation: video-lessons-free-bounce 1.4s ease-in-out infinite;
 }
 @keyframes video-lessons-free-bounce {
@@ -6530,34 +6541,76 @@ html.app-view-home .feature--rating-spring-promo:hover,
     animation: none;
   }
 }
-[data-theme="light"] .video-lessons__free-cta {
-  border-color: rgba(234, 88, 12, 0.4);
-  background: rgba(251, 146, 60, 0.06);
-}
 .video-lessons__mtt-paid {
   margin-top: 8px;
-  padding: 22px 0 max(40px, calc(20px + env(safe-area-inset-bottom, 0px)));
-  border-top: 1px solid var(--border-subtle);
+  padding: 22px 0 max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  border-top: none;
 }
+/* Платный курс МТТ — заметный золотой блок */
 .video-lessons__mtt-spoiler.video-lessons__mtt-paid {
-  padding-bottom: max(24px, calc(12px + env(safe-area-inset-bottom, 0px)));
+  padding: 16px 10px max(22px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  margin-top: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(251, 191, 36, 0.14) 0%,
+    rgba(245, 158, 11, 0.08) 42%,
+    rgba(15, 23, 42, 0.35) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(251, 146, 60, 0.12),
+    0 10px 36px -12px rgba(245, 158, 11, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .video-lessons__mtt-spoiler.video-lessons__mtt-paid {
+  background: linear-gradient(
+    165deg,
+    rgba(251, 191, 36, 0.22) 0%,
+    rgba(254, 243, 199, 0.55) 38%,
+    rgba(255, 251, 235, 0.95) 100%
+  );
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(251, 146, 60, 0.2),
+    0 10px 32px -10px rgba(245, 158, 11, 0.35);
 }
 .video-lessons__mtt-summary {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 14px;
+  padding: 16px 14px;
   margin: 0;
   list-style: none;
   cursor: pointer;
   border-radius: 14px;
-  border: 1px solid var(--border-subtle);
-  background: var(--block-bg);
+  border: 2px solid rgba(251, 191, 36, 0.65);
+  background: linear-gradient(
+    145deg,
+    rgba(251, 191, 36, 0.28) 0%,
+    rgba(245, 158, 11, 0.18) 45%,
+    rgba(180, 83, 9, 0.2) 100%
+  );
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, filter 0.2s;
+  box-shadow:
+    0 4px 18px rgba(245, 158, 11, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+[data-theme="light"] .video-lessons__mtt-summary {
+  border-color: rgba(217, 119, 6, 0.55);
+  background: linear-gradient(
+    145deg,
+    rgba(253, 230, 138, 0.85) 0%,
+    rgba(254, 215, 170, 0.75) 50%,
+    rgba(251, 191, 36, 0.35) 100%
+  );
+  box-shadow:
+    0 4px 16px rgba(245, 158, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 .video-lessons__mtt-summary::-webkit-details-marker,
 .video-lessons__mtt-summary::marker {
@@ -6565,19 +6618,30 @@ html.app-view-home .feature--rating-spring-promo:hover,
   content: "";
 }
 .video-lessons__mtt-summary:hover {
-  border-color: rgba(251, 146, 60, 0.35);
-  background: rgba(251, 146, 60, 0.05);
+  border-color: rgba(252, 211, 77, 0.9);
+  filter: brightness(1.06);
+  box-shadow:
+    0 6px 22px rgba(245, 158, 11, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 .video-lessons__mtt-spoiler[open] > .video-lessons__mtt-summary {
   margin-bottom: 16px;
-  border-color: rgba(251, 146, 60, 0.4);
+  border-color: rgba(252, 211, 77, 0.85);
+  box-shadow:
+    0 4px 20px rgba(245, 158, 11, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .video-lessons__mtt-spoiler-chevron {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
-  color: var(--accent);
+  color: #fde68a;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.65));
   transition: transform 0.25s ease;
+}
+[data-theme="light"] .video-lessons__mtt-spoiler-chevron {
+  color: #b45309;
+  filter: none;
 }
 .video-lessons__mtt-spoiler[open] .video-lessons__mtt-spoiler-chevron {
   transform: rotate(-180deg);
@@ -6599,12 +6663,22 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex: 1;
   min-width: 0;
   text-align: center;
+  color: #fffbeb;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 20px rgba(251, 191, 36, 0.35);
+}
+[data-theme="light"] .video-lessons__mtt-summary .video-lessons__mtt-title {
+  color: #92400e;
+  text-shadow: none;
 }
 .video-lessons__mtt-subtitle {
   margin: 18px 0 10px;
   font-size: 15px;
   font-weight: 800;
-  color: var(--text);
+  color: #fcd34d;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .video-lessons__mtt-subtitle {
+  color: #b45309;
 }
 .video-lessons__mtt-grid {
   display: grid;
@@ -6619,12 +6693,14 @@ html.app-view-home .feature--rating-spring-promo:hover,
   height: auto;
   object-fit: contain;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(251, 191, 36, 0.35);
   box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 [data-theme="light"] .video-lessons__mtt-thumb {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(255, 251, 235, 0.9);
+  border-color: rgba(217, 119, 6, 0.3);
 }
 .video-lessons__mtt-desc {
   font-size: 14px;
@@ -6661,6 +6737,40 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-weight: 700;
   text-align: center;
   box-sizing: border-box;
+  border-width: 2px;
+  border-color: rgba(252, 211, 77, 0.85) !important;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
+}
+[data-theme="light"] .video-lessons__mtt-paid .learn-play-hub__training-btn.video-lessons__mtt-cta {
+  border-color: rgba(217, 119, 6, 0.65) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+/* Кнопка внизу экрана видеоуроков (вне спойлера МТТ) */
+.video-lessons__footer-cta {
+  margin-top: 22px;
+  padding-top: 4px;
+}
+.video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  box-sizing: border-box;
+  border: 2px solid var(--vl-free-open, #22d3ee);
+  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.12));
+  color: var(--vl-free-open, #22d3ee);
+  box-shadow: 0 2px 14px rgba(34, 211, 238, 0.15);
+}
+.video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn:hover {
+  filter: brightness(1.08);
+}
+[data-theme="light"] .video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn {
+  border-color: var(--vl-free-open, #0284c7);
+  color: var(--vl-free-open, #0369a1);
+  background: rgba(14, 165, 233, 0.1);
 }
 .video-lessons__group-head {
   flex-shrink: 0;
@@ -6687,11 +6797,17 @@ html.app-view-home .feature--rating-spring-promo:hover,
 [data-theme="light"] .video-lessons__group-head-text {
   color: #5b21b6;
 }
-.video-lessons__card--bonus {
+.video-lessons__card.video-lessons__card--bonus {
   border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: none;
 }
-.video-lessons__card--bonus:hover {
+.video-lessons__card.video-lessons__card--bonus:hover {
   border-color: rgba(168, 85, 247, 0.55);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.12);
+}
+.video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
+  border-color: rgba(192, 132, 252, 0.75);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2);
 }
 .video-lessons__num--bonus {
   min-width: 34px;
@@ -6710,22 +6826,24 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
-  /* Запас снизу: последние уроки не под «обрез», плюс место под оверскролл / жест */
-  padding-bottom: max(48px, calc(24px + env(safe-area-inset-bottom, 0px)));
+  /* Запас снизу до платного блока / конца экрана */
+  padding-bottom: max(24px, calc(16px + env(safe-area-inset-bottom, 0px)));
 }
 .video-lessons__card {
   flex-shrink: 0;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--vl-free-border, rgba(56, 189, 248, 0.42));
   border-radius: 14px;
   overflow: hidden;
   background: var(--block-bg);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 .video-lessons__card:hover {
-  border-color: rgba(251, 146, 60, 0.4);
+  border-color: var(--vl-free-open, #22d3ee);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12);
 }
 .video-lessons__card.video-lessons__card--open {
-  border-color: var(--accent);
+  border-color: var(--vl-free-open, #22d3ee);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.22);
 }
 .video-lessons__desc {
   margin: 0 0 10px;
@@ -6746,16 +6864,16 @@ html.app-view-home .feature--rating-spring-promo:hover,
   margin: 0 0 12px;
   padding: 10px 14px;
   font-size: 14px;
-  color: var(--accent);
+  color: var(--vl-free-open, #22d3ee);
   text-decoration: none;
-  border: 1px solid rgba(251, 146, 60, 0.4);
+  border: 1px solid var(--vl-free-border, rgba(56, 189, 248, 0.42));
   border-radius: 10px;
-  background: rgba(251, 146, 60, 0.08);
+  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.1));
   transition: background 0.2s, border-color 0.2s;
 }
 .video-lessons__attachment:hover {
-  background: rgba(251, 146, 60, 0.15);
-  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.14);
+  border-color: var(--vl-free-open, #22d3ee);
 }
 .video-lessons__attachment::before {
   content: "📎";
@@ -6787,7 +6905,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   transition: background 0.2s;
 }
 .video-lessons__item:hover {
-  background: rgba(251, 146, 60, 0.06);
+  background: rgba(56, 189, 248, 0.07);
 }
 .video-lessons__item[aria-expanded="true"] .video-lessons__chevron {
   transform: rotate(180deg);
@@ -6801,8 +6919,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   justify-content: center;
   font-weight: 700;
   font-size: 13px;
-  color: var(--accent);
-  background: rgba(251, 146, 60, 0.15);
+  color: var(--vl-free-num-fg, #67e8f9);
+  background: var(--vl-free-num-bg, rgba(34, 211, 238, 0.18));
   border-radius: 8px;
 }
 .video-lessons__title {
@@ -6819,8 +6937,17 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__chevron {
   flex-shrink: 0;
   font-size: 12px;
-  color: var(--text-muted);
+  color: rgba(103, 232, 249, 0.75);
   transition: transform 0.25s ease;
+}
+[data-theme="light"] .video-lessons__chevron {
+  color: rgba(2, 132, 199, 0.65);
+}
+.video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(196, 181, 253, 0.85);
+}
+[data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(91, 33, 182, 0.55);
 }
 .video-lessons__player-wrap {
   max-height: 0;
@@ -13116,6 +13243,23 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   visibility: hidden;
   transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
 }
+
+/* Нижнее меню скрыто — без полных 72px под таб-бар, но оставляем запас, чтобы докрутить контент до конца + safe-area */
+.app:has(.view--active[data-view="spring-rating"]),
+.app:has(.view--active[data-view="hall-of-fame"]),
+.app:has(.view--active[data-view="schedule"]),
+.app:has(.view--active[data-view="bonus-game"]),
+.app:has(.view--active[data-view="plasterer-game"]),
+.app:has(.view--active[data-view="raffles"]),
+.app:has(.view--active[data-view="learn-play-hub"]),
+.app:has(.view--active[data-view="poker-tasks"]),
+.app:has(.view--active[data-view="video-lessons"]),
+.app:has(.view--active[data-view="streams"]),
+.app:has(.view--active[data-view="equilator"]),
+.app:has(.view--active[data-view="winter-rating"]) {
+  padding-bottom: max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+}
+
 .winter-rating__date-item {
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
