@@ -2970,6 +2970,117 @@ function getPokerResolvedTelegramUser() {
     mount.appendChild(btn);
   }
 
+  /** Опционально в #app: data-telegram-bot-id="123456789" — иначе id подтягивается с GET /api/telegram-bot-info */
+  function getTelegramBotIdFromAppAttr() {
+    var el = document.getElementById("app");
+    var raw = el && el.getAttribute("data-telegram-bot-id");
+    raw = raw != null ? String(raw).trim() : "";
+    if (!/^\d+$/.test(raw)) return 0;
+    var n = parseInt(raw, 10);
+    return n > 0 ? n : 0;
+  }
+
+  function whenTelegramWidgetJsReady(cb) {
+    if (typeof cb !== "function") return;
+    if (window.Telegram && window.Telegram.Login && typeof window.Telegram.Login.auth === "function") {
+      cb();
+      return;
+    }
+    var n = 0;
+    var t = setInterval(function () {
+      n += 1;
+      if (window.Telegram && window.Telegram.Login && typeof window.Telegram.Login.auth === "function") {
+        clearInterval(t);
+        cb();
+        return;
+      }
+      if (n >= 60) {
+        clearInterval(t);
+      }
+    }, 100);
+  }
+
+  /**
+   * Запасной вход: официальный popup oauth.telegram.org (не iframe на странице).
+   * Помогает, когда postMessage из встроенного виджета не доходит до родителя.
+   */
+  function mountTelegramLoginPopupButton(mount) {
+    if (!mount || isPwaAuthLocalHost()) return;
+    if (mount.querySelector(".auth-banner__tg-popup-login-btn")) return;
+    function addBtn(botIdNum) {
+      if (!botIdNum || botIdNum < 1) return;
+      if (mount.querySelector(".auth-banner__tg-popup-login-btn")) return;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "auth-banner__tg-popup-login-btn";
+      btn.textContent = "Войти через Telegram (отдельное окно)";
+      btn.addEventListener("click", function () {
+        if (!window.Telegram || !window.Telegram.Login || typeof window.Telegram.Login.auth !== "function") {
+          if (hintEl) {
+            hintEl.textContent = "Подождите загрузки страницы или обновите её, затем нажмите снова.";
+            hintEl.style.display = "block";
+          }
+          return;
+        }
+        try {
+          window.Telegram.Login.auth({ bot_id: botIdNum }, function (user) {
+            if (user && typeof window.__pokerTelegramWidgetAuth === "function") {
+              window.__pokerTelegramWidgetAuth(user);
+            }
+          });
+        } catch (ePop) {
+          setBannerFailure(
+            "Не удалось открыть окно входа. Разрешите всплывающие окна для сайта или откройте страницу в обычном браузере.",
+            false
+          );
+        }
+      });
+      mount.appendChild(btn);
+    }
+    var botIdAttr = getTelegramBotIdFromAppAttr();
+    if (botIdAttr > 0) {
+      whenTelegramWidgetJsReady(function () {
+        addBtn(botIdAttr);
+      });
+      return;
+    }
+    if (mount.getAttribute("data-tg-popup-fetch-started") === "1") return;
+    mount.setAttribute("data-tg-popup-fetch-started", "1");
+    var base = getTelegramAuthApiBase();
+    if (!base) return;
+    fetch(base + "/api/telegram-bot-info", { method: "GET", cache: "no-store" })
+      .then(function (res) {
+        return res
+          .json()
+          .catch(function () {
+            return {};
+          })
+          .then(function (data) {
+            return { res: res, data: data || {} };
+          });
+      })
+      .then(function (pack) {
+        var d = pack.data || {};
+        if (pack.res.ok && d.ok && d.botId != null) {
+          var id = parseInt(d.botId, 10);
+          if (id > 0) {
+            whenTelegramWidgetJsReady(function () {
+              addBtn(id);
+            });
+            return;
+          }
+        }
+        try {
+          mount.removeAttribute("data-tg-popup-fetch-started");
+        } catch (eR) {}
+      })
+      .catch(function () {
+        try {
+          mount.removeAttribute("data-tg-popup-fetch-started");
+        } catch (eR2) {}
+      });
+  }
+
   function mountVkLoginForPwa(mount) {
     if (!mount || isPwaAuthLocalHost()) return;
     var appId = getVkAppIdForPwa();
@@ -3164,7 +3275,17 @@ function getPokerResolvedTelegramUser() {
         }
         updateHeaderGreeting();
         showUnauthorized();
-        setBannerFailure(data && data.error ? String(data.error) : "Не удалось подтвердить вход через Telegram.", false);
+        var errMsg = "Не удалось подтвердить вход через Telegram.";
+        if (data && data.error) {
+          errMsg = String(data.error);
+          if (res.status === 401 || errMsg.indexOf("Invalid") !== -1) {
+            errMsg +=
+              " Проверьте TELEGRAM_BOT_TOKEN на сервере (тот же бот, что в t.me/…) и домен в @BotFather — он должен совпадать с hostname в адресной строке.";
+          }
+        } else if (!res.ok) {
+          errMsg = "Сервер ответил HTTP " + res.status + ". Проверьте деплой и переменные окружения (TELEGRAM_BOT_TOKEN).";
+        }
+        setBannerFailure(errMsg, false);
         resetBannerForPwaLogin();
         mountTelegramLoginWidgetForPwa();
       })
@@ -3176,7 +3297,7 @@ function getPokerResolvedTelegramUser() {
         }
         updateHeaderGreeting();
         showUnauthorized();
-        setBannerFailure("Ошибка сети при входе через Telegram.", false);
+        setBannerFailure("Сеть: не удалось вызвать /api/auth-telegram-login. Проверьте интернет, блокировщики и что data-api-base указывает на живой API.", false);
         resetBannerForPwaLogin();
         mountTelegramLoginWidgetForPwa();
       });
@@ -3185,10 +3306,10 @@ function getPokerResolvedTelegramUser() {
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
     /*
-     * v5: data-onauth + глобальный слушатель postMessage (oauth.telegram.org), см. __pokerTelegramOauthMessageBridge.
-     * Редирект ?hash=… / #tgAuthResult — tryFinishTelegramLoginRedirect (+ pageshow / visibilitychange).
+     * v6: + кнопка popup Telegram.Login.auth (обход сломанного iframe), GET /api/telegram-bot-info.
+     * data-onauth + __pokerTelegramOauthMessageBridge; редирект — tryFinishTelegramLoginRedirect.
      */
-    var WIDGET_MOUNT_VER = "5";
+    var WIDGET_MOUNT_VER = "6";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
     if (isPwaAuthLocalHost()) {
@@ -3225,6 +3346,7 @@ function getPokerResolvedTelegramUser() {
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
       mountVkLoginForPwa(mount);
       mountTelegramExternalBrowserEscapeBtn(mount);
+      mountTelegramLoginPopupButton(mount);
       return;
     }
     var bot = "";
@@ -3233,6 +3355,9 @@ function getPokerResolvedTelegramUser() {
       if (m) bot = m[1];
     } catch (e1) {}
     mount.innerHTML = "";
+    try {
+      mount.removeAttribute("data-tg-popup-fetch-started");
+    } catch (eRm) {}
     window.__pokerTelegramWidgetAuth = function (user) {
       try {
         if (!user || user.hash == null || user.id == null || user.auth_date == null) return;
@@ -3253,6 +3378,7 @@ function getPokerResolvedTelegramUser() {
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
     mountVkLoginForPwa(mount);
     mountTelegramExternalBrowserEscapeBtn(mount);
+    mountTelegramLoginPopupButton(mount);
   }
 
   function tryFinishTelegramLoginRedirect() {
@@ -3361,12 +3487,12 @@ function getPokerResolvedTelegramUser() {
       window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
       updateHeaderGreeting();
       showUnauthorized();
-      if (userUnsafe) {
-        setBannerFailure("Нет подписанной сессии Telegram. Закройте Mini App и откройте снова из бота.", false);
-      } else {
-        resetBannerForPwaLogin();
-        mountTelegramLoginWidgetForPwa();
+      resetBannerForPwaLogin();
+      if (userUnsafe && bannerText) {
+        bannerText.textContent =
+          "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
       }
+      mountTelegramLoginWidgetForPwa();
       return;
     }
 
@@ -3532,6 +3658,15 @@ function getPokerResolvedTelegramUser() {
       setTimeout(function () {
         tryFinishTelegramLoginRedirect();
       }, 380);
+      setTimeout(function () {
+        try {
+          var w = getTelegramWebAppNow();
+          var a = window.__pokerTelegramAuth;
+          if (w && w.initData && a && a.status === "no_init_data") {
+            runVerifyFlow();
+          }
+        } catch (eVis) {}
+      }, 520);
     }
   });
   window.addEventListener(
@@ -3544,7 +3679,7 @@ function getPokerResolvedTelegramUser() {
 
   var wtgBoot = getTelegramWebAppNow();
   if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
-    waitForInitDataThenVerify(12000, 350);
+    waitForInitDataThenVerify(25000, 300);
   } else {
     runVerifyFlow();
   }
