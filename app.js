@@ -276,9 +276,10 @@ function getAssetUrl(relativePath) {
   var backdrop = lightbox ? lightbox.querySelector(".image-lightbox__backdrop") : null;
   var closeBtn = lightbox ? lightbox.querySelector(".image-lightbox__close") : null;
   if (!lightbox || !lightboxImg) return;
-  function open(src) {
+  function open(src, alt) {
     lightboxImg.src = src;
-    lightboxImg.alt = "Увеличено";
+    var a = alt != null ? String(alt).trim() : "";
+    lightboxImg.alt = a ? a : "Увеличено";
     lightbox.classList.add("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "false");
   }
@@ -307,6 +308,16 @@ function getAssetUrl(relativePath) {
         e.preventDefault();
         open(sImg.src);
       }
+      return;
+    }
+    if (t.nodeName === "IMG" && t.closest && t.closest(".video-lessons__coach-reviews-grid") && t.src) {
+      e.preventDefault();
+      open(t.src, t.alt);
+      return;
+    }
+    if (t.nodeName === "IMG" && t.closest && t.closest(".video-lessons__coach-student-gallery") && t.src) {
+      e.preventDefault();
+      open(t.src, t.alt);
       return;
     }
     if (t.classList && t.classList.contains("chat-msg__image") && t.src) {
@@ -341,6 +352,14 @@ function getAssetUrl(relativePath) {
         return;
       }
       if (startApp === "video_lessons" && typeof setView === "function") {
+        setView("video-lessons");
+        return;
+      }
+      if (
+        (startApp === "vl_reviews_nikolay" || startApp === "video_lessons_reviews_nikolay") &&
+        typeof setView === "function"
+      ) {
+        window.__pendingVideoLessonsOpenReviews = true;
         setView("video-lessons");
         return;
       }
@@ -1552,6 +1571,10 @@ function runGazetteAndTasksInit() {
   if (startParam === "video_lessons") {
     setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
   }
+  if (startParam === "vl_reviews_nikolay" || startParam === "video_lessons_reviews_nikolay") {
+    window.__pendingVideoLessonsOpenReviews = true;
+    setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
+  }
   if (startParam === "club_chat") {
     window.__pendingOpenClubChatGeneral = true;
     setTimeout(function () {
@@ -1619,6 +1642,9 @@ function runGazetteAndTasksInit() {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       }, 0);
     } else if (urlStart === "video_lessons") {
+      setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
+    } else if (urlStart === "vl_reviews_nikolay" || urlStart === "video_lessons_reviews_nikolay") {
+      window.__pendingVideoLessonsOpenReviews = true;
       setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
     }
   } catch (e) {}
@@ -3640,7 +3666,24 @@ function setView(viewName, navOpts) {
     initRaffles();
   }
   if (viewName === "equilator") initEquilator();
-  if (viewName === "video-lessons") initVideoLessons();
+  if (viewName === "video-lessons") {
+    initVideoLessons();
+    if (window.__pendingVideoLessonsOpenReviews) {
+      window.__pendingVideoLessonsOpenReviews = false;
+      try {
+        if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("deep:vl_reviews_nikolay", "");
+      } catch (eVlDeep) {}
+      var rafVlReviews = window.requestAnimationFrame || function (cb) {
+        setTimeout(cb, 16);
+      };
+      rafVlReviews(function () {
+        rafVlReviews(function () {
+          var revOpenBtn = document.getElementById("videoLessonsReviewsOpenBtn");
+          if (revOpenBtn && typeof revOpenBtn.click === "function") revOpenBtn.click();
+        });
+      });
+    }
+  }
   if (viewName === "poker-tasks") {
     var startScreen = document.getElementById("pokerTasksStartScreen");
     var streakScreen = document.getElementById("pokerStreakScreen");
@@ -12444,6 +12487,38 @@ function initRaffles() {
   }
 })();
 
+/** Пока открыта модалка «О тренере» или «Отзывы» на видеоуроках — блокируем скролл фона (scrollport на &lt;html&gt;). */
+function syncVideoLessonsModalScrollLock() {
+  var coach = document.getElementById("videoLessonsCoachModal");
+  var rev = document.getElementById("videoLessonsReviewsModal");
+  var anyOpen =
+    (coach && coach.getAttribute("aria-hidden") === "false") ||
+    (rev && rev.getAttribute("aria-hidden") === "false");
+  var root = document.documentElement;
+  if (anyOpen) {
+    if (!root.classList.contains("vl-modal-scroll-lock")) {
+      var y = root.scrollTop;
+      if (y == null || isNaN(y)) y = 0;
+      root.setAttribute("data-vl-scroll-lock-top", String(y));
+      root.classList.add("vl-modal-scroll-lock");
+    }
+  } else if (root.classList.contains("vl-modal-scroll-lock")) {
+    var saved = parseInt(root.getAttribute("data-vl-scroll-lock-top"), 10);
+    if (isNaN(saved)) saved = 0;
+    root.classList.remove("vl-modal-scroll-lock");
+    root.removeAttribute("data-vl-scroll-lock-top");
+    var raf = window.requestAnimationFrame || function (cb) {
+      setTimeout(cb, 16);
+    };
+    raf(function () {
+      root.scrollTop = saved;
+      raf(function () {
+        root.scrollTop = saved;
+      });
+    });
+  }
+}
+
 (function initVideoLessonsCoachModal() {
   var modal = document.getElementById("videoLessonsCoachModal");
   var btn = document.getElementById("videoLessonsCoachHintBtn");
@@ -12464,6 +12539,7 @@ function initRaffles() {
     lastFocus = document.activeElement;
     modal.setAttribute("aria-hidden", "false");
     btn.setAttribute("aria-expanded", "true");
+    syncVideoLessonsModalScrollLock();
     var closeBtn = modal.querySelector(".video-lessons__coach-modal-close");
     if (closeBtn && typeof closeBtn.focus === "function") {
       try {
@@ -12474,6 +12550,7 @@ function initRaffles() {
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     btn.setAttribute("aria-expanded", "false");
+    syncVideoLessonsModalScrollLock();
     if (lastFocus && typeof lastFocus.focus === "function") {
       try {
         lastFocus.focus();
@@ -12540,12 +12617,134 @@ function initRaffles() {
   var btn = document.getElementById("videoLessonsReviewsOpenBtn");
   var coachModal = document.getElementById("videoLessonsCoachModal");
   var coachBtn = document.getElementById("videoLessonsCoachHintBtn");
+  var form = document.getElementById("videoLessonsReviewForm");
+  var textarea = document.getElementById("videoLessonsReviewText");
+  var submitBtn = document.getElementById("videoLessonsReviewSubmitBtn");
+  var statusEl = document.getElementById("videoLessonsReviewFormStatus");
+  var feed = document.getElementById("videoLessonsReviewsFeed");
+  var reviewsCopyHint = document.getElementById("videoLessonsReviewsCopyHint");
   if (!modal || !btn || btn.getAttribute("data-reviews-modal-bound") === "1") return;
   btn.setAttribute("data-reviews-modal-bound", "1");
   var closeNodes = modal.querySelectorAll("[data-video-lessons-reviews-close]");
   var lastFocus = null;
+  var VL_REVIEWS_COACH_SLUG = "nikolay_fishkopcheny";
+  var LOCAL_REVIEWS_KEY = "poker_app_video_lesson_reviews_local_v1_" + VL_REVIEWS_COACH_SLUG;
   function isOpen() {
     return modal.getAttribute("aria-hidden") === "false";
+  }
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function formatReviewDate(at) {
+    try {
+      var d = new Date(at);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleString("ru-RU", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (eFmt) {
+      return "";
+    }
+  }
+  function loadLocalReviews() {
+    try {
+      var raw = localStorage.getItem(LOCAL_REVIEWS_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (eLoc) {
+      return [];
+    }
+  }
+  function saveLocalReview(text) {
+    var list = loadLocalReviews();
+    list.unshift({
+      id: "l_" + Date.now(),
+      text: text,
+      at: Date.now(),
+      author: "Вы",
+    });
+    try {
+      localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(list.slice(0, 50)));
+    } catch (eSave) {}
+  }
+  function mergeReviews(server, local) {
+    var seen = {};
+    var out = [];
+    function add(r) {
+      if (!r || typeof r !== "object") return;
+      var k = r.id || String(r.at || 0) + "_" + String(r.text || "").slice(0, 48);
+      if (seen[k]) return;
+      seen[k] = true;
+      out.push(r);
+    }
+    (server || []).forEach(add);
+    (local || []).forEach(add);
+    out.sort(function (a, b) {
+      return (b.at || 0) - (a.at || 0);
+    });
+    return out;
+  }
+  function renderReviews(items) {
+    if (!feed) return;
+    if (!items.length) {
+      feed.innerHTML =
+        '<p class="video-lessons__reviews-feed-empty">Пока нет отзывов — напишите первым.</p>';
+      return;
+    }
+    feed.innerHTML = items
+      .map(function (r) {
+        var text = escapeHtml(r.text || "");
+        var author = escapeHtml(r.author || "Ученик");
+        var dateStr = formatReviewDate(r.at);
+        var meta = dateStr
+          ? '<time class="video-lessons__reviews-feed-time">' + escapeHtml(dateStr) + "</time>"
+          : "";
+        return (
+          '<article class="video-lessons__reviews-feed-item"><header class="video-lessons__reviews-feed-item-head"><span class="video-lessons__reviews-feed-author">' +
+          author +
+          "</span>" +
+          meta +
+          '</header><p class="video-lessons__reviews-feed-text">' +
+          text +
+          "</p></article>"
+        );
+      })
+      .join("");
+  }
+  function refreshReviews() {
+    if (feed) {
+      feed.innerHTML = '<p class="video-lessons__reviews-feed-loading">Загрузка…</p>';
+    }
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var local = loadLocalReviews();
+    if (!base) {
+      renderReviews(local);
+      return;
+    }
+    fetch(base + "/api/video-lesson-reviews?coach=" + encodeURIComponent(VL_REVIEWS_COACH_SLUG))
+      .then(function (r) {
+        return r.json().then(function (data) {
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function (res) {
+        if (res.ok && res.data && res.data.ok && Array.isArray(res.data.reviews)) {
+          renderReviews(mergeReviews(res.data.reviews, local));
+        } else {
+          renderReviews(local);
+        }
+      })
+      .catch(function () {
+        renderReviews(local);
+      });
   }
   function closeCoachIfOpen() {
     if (!coachModal || coachModal.getAttribute("aria-hidden") !== "false") return;
@@ -12557,6 +12756,10 @@ function initRaffles() {
     lastFocus = document.activeElement;
     modal.setAttribute("aria-hidden", "false");
     btn.setAttribute("aria-expanded", "true");
+    if (statusEl) statusEl.textContent = "";
+    if (reviewsCopyHint) reviewsCopyHint.textContent = "";
+    refreshReviews();
+    syncVideoLessonsModalScrollLock();
     var closeBtn = modal.querySelector(".video-lessons__coach-modal-close");
     if (closeBtn && typeof closeBtn.focus === "function") {
       try {
@@ -12567,6 +12770,7 @@ function initRaffles() {
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     btn.setAttribute("aria-expanded", "false");
+    syncVideoLessonsModalScrollLock();
     if (lastFocus && typeof lastFocus.focus === "function") {
       try {
         lastFocus.focus();
@@ -12589,6 +12793,144 @@ function initRaffles() {
     ev.preventDefault();
     closeModal();
   });
+  if (form) {
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (statusEl) statusEl.textContent = "";
+      var text = textarea && textarea.value ? textarea.value.trim() : "";
+      if (!text) {
+        if (statusEl) statusEl.textContent = "Введите текст отзыва.";
+        return;
+      }
+      var tgW = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      var initData = tgW && tgW.initData ? tgW.initData : "";
+      var base = typeof getApiBase === "function" ? getApiBase() : "";
+      if (submitBtn) submitBtn.disabled = true;
+      function doneSubmitting() {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+      if (initData && base) {
+        fetch(base + "/api/video-lesson-reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: text,
+            initData: initData,
+            coach: VL_REVIEWS_COACH_SLUG,
+          }),
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              return { ok: r.ok, status: r.status, data: data };
+            });
+          })
+          .then(function (res) {
+            doneSubmitting();
+            if (res.ok && res.data && res.data.ok) {
+              if (textarea) textarea.value = "";
+              if (statusEl) statusEl.textContent = "Спасибо! Отзыв сохранён.";
+              refreshReviews();
+              return;
+            }
+            if (res.data && res.data.error) {
+              if (statusEl) statusEl.textContent = String(res.data.error);
+            }
+            if (res.status === 401 || res.status === 400) {
+              return;
+            }
+            saveLocalReview(text);
+            if (textarea) textarea.value = "";
+            if (statusEl) {
+              statusEl.textContent =
+                res.status === 503
+                  ? "Сервер временно недоступен — отзыв сохранён на этом устройстве."
+                  : "Отзыв сохранён на этом устройстве.";
+            }
+            refreshReviews();
+          })
+          .catch(function () {
+            doneSubmitting();
+            saveLocalReview(text);
+            if (textarea) textarea.value = "";
+            if (statusEl) statusEl.textContent = "Сеть недоступна — отзыв сохранён локально.";
+            refreshReviews();
+          });
+      } else {
+        saveLocalReview(text);
+        if (textarea) textarea.value = "";
+        if (statusEl) {
+          statusEl.textContent = initData
+            ? "Отзыв сохранён на этом устройстве."
+            : "Отзыв сохранён на этом устройстве. Откройте в Telegram, чтобы поделиться им с другими учениками.";
+        }
+        doneSubmitting();
+        refreshReviews();
+      }
+    });
+  }
+  var reviewsInviteBtn = document.getElementById("videoLessonsReviewsInviteBtn");
+  var reviewsCopyBtn = document.getElementById("videoLessonsReviewsCopyLinkBtn");
+  var coachReviewsShareText =
+    "Отзывы учеников о тренере Николае FishKopcheny (клуб «Два туза»). Написать отзыв или почитать другие — в мини-приложении:";
+  function coachReviewsDeepLink() {
+    return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("vl_reviews_nikolay") : "";
+  }
+  var reviewsCopyHintTimer = null;
+  function showReviewsCopyHint(text) {
+    if (reviewsCopyHint) reviewsCopyHint.textContent = text || "";
+    if (reviewsCopyHintTimer) clearTimeout(reviewsCopyHintTimer);
+    if (text && reviewsCopyHint) {
+      reviewsCopyHintTimer = setTimeout(function () {
+        if (reviewsCopyHint) reviewsCopyHint.textContent = "";
+        reviewsCopyHintTimer = null;
+      }, 6000);
+    }
+  }
+  if (reviewsCopyBtn && reviewsCopyBtn.getAttribute("data-share-bound") !== "1") {
+    reviewsCopyBtn.setAttribute("data-share-bound", "1");
+    reviewsCopyBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var linkCr = coachReviewsDeepLink();
+      if (!linkCr) {
+        showReviewsCopyHint("Не удалось сформировать ссылку.");
+        return;
+      }
+      function afterCopyOk() {
+        showReviewsCopyHint("Скопировано. Вставьте ссылку в любой чат: " + linkCr);
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews_copy");
+      }
+      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(linkCr).then(function () {
+          afterCopyOk();
+        }).catch(function () {
+          showReviewsCopyHint("Ссылка (скопируйте вручную): " + linkCr);
+          var tgCr2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgCr2 && tgCr2.showAlert) tgCr2.showAlert("Ссылка: " + linkCr);
+          else alert("Ссылка: " + linkCr);
+        });
+      } else {
+        showReviewsCopyHint("Ссылка (скопируйте вручную): " + linkCr);
+        var tgCr3 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgCr3 && tgCr3.showAlert) tgCr3.showAlert("Ссылка: " + linkCr);
+        else alert("Ссылка: " + linkCr);
+      }
+    });
+  }
+  if (reviewsInviteBtn && reviewsInviteBtn.getAttribute("data-share-bound") !== "1") {
+    reviewsInviteBtn.setAttribute("data-share-bound", "1");
+    reviewsInviteBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var linkInv = coachReviewsDeepLink();
+      if (!linkInv) return;
+      var shareUrlInv =
+        "https://t.me/share/url?url=&text=" +
+        encodeURIComponent(coachReviewsShareText + "\n" + linkInv);
+      var tgInv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgInv && tgInv.openTelegramLink) tgInv.openTelegramLink(shareUrlInv);
+      else window.open(shareUrlInv, "_blank");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews");
+    });
+  }
 })();
 
 // Счётчик уникальных и повторных посетителей (стабильный ID: Telegram → localStorage → sessionStorage)
@@ -18061,7 +18403,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     winter_rating_date: "Рейтинг — дата",
     raffle_hero: "Розыгрыши — пригласить друга",
     raffle_card: "Розыгрыш — карточка (пригласить)",
-    video_lessons_hero: "Видеоуроки — отправить другу"
+    video_lessons_hero: "Видеоуроки — отправить другу",
+    video_lessons_coach_reviews: "Видеоуроки — ссылка на отзывы о тренере",
+    video_lessons_coach_reviews_copy: "Видеоуроки — копирование ссылки на отзывы"
   };
   var btn = document.getElementById("adminShareStatsBtn");
   var modal = document.getElementById("shareStatsAdminModal");
@@ -18161,6 +18505,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     "view:streams": "Экран: стримы",
     "view:equilator": "Экран: эквилятор",
     "view:video-lessons": "Экран: 15 бесплатных видеоуроков (тренер Николай FishKopcheny)",
+    "deep:vl_reviews_nikolay": "Deep link: отзывы о тренере Николае FishKopcheny",
     "view:poker-tasks": "Экран: задачи",
     "view:bonus-game": "Экран: бонус-игра",
     "view:plasterer-game": "Экран: штукатур",
