@@ -409,6 +409,18 @@ function getAssetUrl(relativePath) {
       }
       return;
     }
+    var gazetteArticleOut = t.closest && t.closest("a[data-gazette-article-link]");
+    if (
+      gazetteArticleOut &&
+      !gazetteArticleOut.closest("#gazetteModal") &&
+      typeof window.openGazette === "function"
+    ) {
+      e.preventDefault();
+      var gIdx = gazetteArticleOut.getAttribute("data-gazette-article-link");
+      var gNum = gIdx ? parseInt(gIdx, 10) : NaN;
+      window.openGazette("news", isNaN(gNum) ? undefined : gNum);
+      return;
+    }
     var mttGrid = t.closest && t.closest(".video-lessons__mtt-grid");
     if (t.nodeName === "IMG" && mttGrid && t.src) {
       e.preventDefault();
@@ -852,6 +864,7 @@ function runGazetteAndTasksInit() {
     modal.setAttribute("aria-hidden", "false");
     markGazetteRead();
   }
+  window.openGazette = openGazette;
   function closeGazette() {
     modal.setAttribute("aria-hidden", "true");
     showGazetteView("pick");

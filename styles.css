@@ -16324,11 +16324,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
     width: 200px;
     max-width: 200px;
   }
-  /* Мозаика 2+1: колонка шире, чтобы поместились два превью */
+  /* Мозаика 2+1: узкая колонка картинок — больше места под текст */
   .hall-shame-board__item--featured .hall-shame-board__featured-media:has(.hall-shame-board__corgi-gallery--mosaic) {
-    flex: 0 0 min(300px, 46vw);
-    width: min(300px, 46vw);
-    max-width: min(300px, 46vw);
+    flex: 0 0 min(220px, 34%);
+    width: min(220px, 34%);
+    max-width: min(220px, 34%);
   }
 }
 .hall-shame-board__item--featured .hall-shame-board__body {
@@ -16406,12 +16406,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .hall-shame-board__corgi-gallery--mosaic .hall-shame-board__chat-thumb {
   max-width: none;
   width: 100%;
-  max-height: min(42vw, 200px);
+  max-height: min(22vw, 130px);
   object-fit: cover;
   object-position: top center;
 }
 .hall-shame-board__corgi-gallery--mosaic > .hall-shame-board__thumb-btn:nth-child(3) .hall-shame-board__chat-thumb {
-  max-height: min(52vh, 340px);
+  max-height: min(36vh, 200px);
 }
 .hall-shame-board__corgi-gallery .hall-shame-board__thumb-btn {
   margin: 0;
@@ -16548,6 +16548,32 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   box-sizing: border-box;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+.hall-shame-board__gazette-teaser {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+}
+.hall-shame-board__gazette-link {
+  color: #fb923c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.hall-shame-board__gazette-link:hover,
+.hall-shame-board__gazette-link:focus-visible {
+  color: #fdba74;
+}
+[data-theme="light"] .hall-shame-board__gazette-teaser {
+  color: #334155;
+}
+[data-theme="light"] .hall-shame-board__gazette-link {
+  color: #c2410c;
+}
+[data-theme="light"] .hall-shame-board__gazette-link:hover,
+[data-theme="light"] .hall-shame-board__gazette-link:focus-visible {
+  color: #9a3412;
 }
 [data-theme="light"] .hall-shame-board__item {
   background: linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
