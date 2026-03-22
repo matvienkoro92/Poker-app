@@ -2532,6 +2532,23 @@ function telegramUserDisplayName(u) {
   return "";
 }
 
+/**
+ * Пользователь Telegram для UI: сначала initDataUnsafe, затем серверно подтверждённый профиль.
+ * Нужен, когда initData ещё пуст (гонка клиента) или профиль обновился после /api/auth-telegram.
+ */
+function getPokerResolvedTelegramUser() {
+  var w = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  var u = w && w.initDataUnsafe && w.initDataUnsafe.user;
+  if (u && u.id != null) return u;
+  try {
+    var _auth = window.__pokerTelegramAuth;
+    if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
+      return _auth.user;
+    }
+  } catch (eA) {}
+  return null;
+}
+
 // Авторизация через Telegram: обязательная проверка подписи initData на сервере (/api/auth-telegram)
 (function initTelegramAuth() {
   window.__pokerTelegramAuth = { status: "unknown", user: null, error: null };
@@ -3588,13 +3605,13 @@ function setView(viewName) {
     }
   }
   /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу, только <html> с классом как на главной */
-  document.documentElement.classList.toggle(
-    "app-view-long-scroll",
+  var longScroll =
     viewName === "video-lessons" ||
-      viewName === "learn-play-hub" ||
-      viewName === "poker-tasks" ||
-      viewName === "hall-of-fame"
-  );
+    viewName === "learn-play-hub" ||
+    viewName === "poker-tasks" ||
+    viewName === "hall-of-fame";
+  document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
+  if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   // Восстановление скролла главной: сразу после смены view, без нескольких отложенных
@@ -8007,8 +8024,9 @@ function fetchRaffleBadge() {
 function updateProfileUserName() {
   var el = document.getElementById("profileUserName");
   if (!el) return;
-  var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-  el.textContent = user && user.first_name ? user.first_name : "гость";
+  var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+  var dn = user && typeof telegramUserDisplayName === "function" ? telegramUserDisplayName(user) : "";
+  el.textContent = dn || "гость";
   updateProfileUserMeta();
 }
 
@@ -8018,7 +8036,7 @@ function updateProfileUserMeta() {
   var parts = [];
   var dtId = (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_dt_id")) || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) || "";
   if (dtId) parts.push("ID: " + dtId);
-  var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+  var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
   var username = user && user.username ? user.username : "";
   if (username) parts.push("@" + username);
   if (parts.length) metaEl.textContent = " (" + parts.join(", ") + ")";
@@ -9313,7 +9331,7 @@ window.loadVideoLessonNative = function loadVideoLessonNative(videoEl, playerWra
       applyHref(r.body.href);
     })
     .catch(function () {
-      setErr("Не удалось загрузить видео в приложении. Откройте ссылку на Яндекс.Диск ниже.");
+      setErr("Если не удалось загрузить видео в приложении. Откройте ссылку на Яндекс.Диск ниже.");
     });
 
   videoEl.addEventListener(
@@ -10406,6 +10424,7 @@ function initRaffles() {
   var rafflesRetryFailedBroadcastBtn = document.getElementById(
     "rafflesRetryFailedBroadcastBtn"
   );
+  var rafflesPurgeBlockedSubsBtn = document.getElementById("rafflesPurgeBlockedSubsBtn");
   var currentRaffleId = null;
   var currentRaffleEndDate = null;
   var currentRaffleData = null;
@@ -11273,6 +11292,80 @@ function initRaffles() {
     });
   })();
 
+  (function initRafflesPurgeBlockedSubscribers() {
+    if (!rafflesPurgeBlockedSubsBtn) return;
+    function runPurge() {
+      if (!base || !initData) {
+        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+        return;
+      }
+      var btn = rafflesPurgeBlockedSubsBtn;
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Проверяем…";
+      if (rafflesNotifySubsHint) {
+        rafflesNotifySubsHint.classList.remove("raffles-admin-hint--pre");
+        rafflesNotifySubsHint.textContent = "";
+      }
+      fetch(base + "/api/raffle-manual-subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: initData, purgeBlockedSubscribers: true }),
+      })
+        .then(raffleManualSubscribersParseResponse)
+        .then(function (data) {
+          if (data && data.ok && data.purgeBlocked) {
+            var rem = typeof data.remaining === "number" ? data.remaining : "—";
+            var rm = typeof data.removed === "number" ? data.removed : "—";
+            var chk = typeof data.checked === "number" ? data.checked : "—";
+            if (rafflesNotifySubsHint) {
+              rafflesNotifySubsHint.textContent =
+                "Проверено записей: " +
+                chk +
+                ". Удалено из подписчиков (бот заблокирован / чат недоступен): " +
+                rm +
+                ". Осталось в списке: " +
+                rem +
+                ".";
+              if (data.rateLimitedHint) {
+                rafflesNotifySubsHint.textContent += " " + data.rateLimitedHint;
+              }
+            }
+            if (typeof window.updateRaffleSubsCount === "function") {
+              window.updateRaffleSubsCount();
+            }
+            if (tg && tg.showAlert) {
+              tg.showAlert(
+                "Готово. Удалено: " + rm + ". Сейчас подписчиков в базе: " + rem + "."
+              );
+            }
+          } else if (rafflesNotifySubsHint) {
+            rafflesNotifySubsHint.textContent =
+              "Очистка не выполнена: " +
+              (data && data.error ? data.error : "ошибка");
+          }
+        })
+        .catch(function () {
+          if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = POKER_NET_ERR;
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        });
+    }
+    rafflesPurgeBlockedSubsBtn.addEventListener("click", function () {
+      var msg =
+        "Проверить всех подписчиков розыгрышей через Telegram и удалить из списка тех, кто заблокировал бота или недоступен? Счётчик «Разослать подписчикам (N)» обновится.";
+      if (tg && typeof tg.showConfirm === "function") {
+        tg.showConfirm(msg, function (ok) {
+          if (ok) runPurge();
+        });
+      } else if (window.confirm(msg)) {
+        runPurge();
+      }
+    });
+  })();
+
   function getRaffleCreateType() {
     return raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other";
   }
@@ -11942,6 +12035,56 @@ function initRaffles() {
   }
 })();
 
+// Видеоуроки: уникальная ссылка на раздел = мини‑апп с ?startapp=video_lessons
+(function initVideoLessonsHeroShare() {
+  function videoLessonsSectionLink() {
+    return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("video_lessons") : "";
+  }
+  var shareInviteText =
+    "Привет, 15 бесплатных видео-уроков от тренера клуба Два туза по этой ссылке";
+  var copyBtn = document.getElementById("videoLessonsCopyLinkBtn");
+  if (copyBtn && copyBtn.getAttribute("data-share-bound") !== "1") {
+    copyBtn.setAttribute("data-share-bound", "1");
+    copyBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var link = videoLessonsSectionLink();
+      if (!link) return;
+      var msg = "Скопирована ссылка на раздел с видеоуроками. Отправьте её другу.";
+      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert(msg);
+          else alert("Ссылка скопирована.");
+        }).catch(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+          else alert("Ссылка: " + link);
+        });
+      } else {
+        var tg2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg2 && tg2.showAlert) tg2.showAlert("Ссылка: " + link);
+        else alert("Ссылка: " + link);
+      }
+    });
+  }
+  var inviteBtn = document.getElementById("videoLessonsInviteFriendBtn");
+  if (inviteBtn && inviteBtn.getAttribute("data-share-bound") !== "1") {
+    inviteBtn.setAttribute("data-share-bound", "1");
+    inviteBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var link = videoLessonsSectionLink();
+      if (!link) return;
+      var shareUrl =
+        "https://t.me/share/url?url=&text=" +
+        encodeURIComponent(shareInviteText + "\n" + link);
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+    });
+  }
+})();
+
 // Счётчик уникальных и повторных посетителей (стабильный ID: Telegram → localStorage → sessionStorage)
 function getVisitorId() {
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -11955,6 +12098,16 @@ function getVisitorId() {
       } catch (e) {}
     }
   }
+  /* Часть клиентов TG отдаёт user в initDataUnsafe раньше или без подписанной строки initData */
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id != null) {
+    return "tg_" + tg.initDataUnsafe.user.id;
+  }
+  try {
+    var _auth = window.__pokerTelegramAuth;
+    if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
+      return "tg_" + _auth.user.id;
+    }
+  } catch (eAuth) {}
   try {
     let id = localStorage.getItem("poker_visitor_id");
     if (id) return id;
@@ -16934,7 +17087,35 @@ function fetchVisitorStatsOnly() {
     });
 }
 
-updateVisitorCounter();
+(function pokerTrackVisitorOnceWithTelegramIdFix() {
+  var v0 = typeof getVisitorId === "function" ? getVisitorId() : "";
+  updateVisitorCounter();
+  if (typeof isTelegramWebApp !== "function" || !isTelegramWebApp()) return;
+  if (v0 && String(v0).indexOf("tg_") === 0) return;
+  var start = Date.now();
+  var upgraded = false;
+  function tick() {
+    if (upgraded) return;
+    var v1 = typeof getVisitorId === "function" ? getVisitorId() : "";
+    if (v1 && v1 !== v0 && String(v1).indexOf("tg_") === 0) {
+      upgraded = true;
+      updateVisitorCounter();
+      return;
+    }
+    if (Date.now() - start < 3200) setTimeout(tick, 220);
+  }
+  setTimeout(tick, 200);
+})();
+
+window.addEventListener("poker-telegram-auth", function (ev) {
+  try {
+    var d = ev && ev.detail;
+    if (!d || !d.verified) return;
+    if (typeof updateProfileUserName === "function") updateProfileUserName();
+    if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
+    if (typeof updateProfileDtId === "function") updateProfileDtId();
+  } catch (eVis) {}
+});
 
 // Посетители (админ): кнопка в футере, модалка со списком, отправка сообщения
 (function () {

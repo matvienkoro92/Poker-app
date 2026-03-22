@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=143" />
+    <link rel="stylesheet" href="./styles.css?v=146" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -308,7 +308,7 @@
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">📚</span></div>
                   <div class="feature__body">
                     <div class="feature__title">Научиться играть</div>
-                    <div class="feature__desc">Задачи и видео-уроки</div>
+                    <div class="feature__desc">Бесплатные уроки</div>
                   </div>
                 </a>
                 <a href="#" class="feature feature--link feature--app" data-view-target="streams" aria-label="Стримы">
@@ -1808,6 +1808,13 @@
                   >
                     Дослать кому не дошло
                   </button>
+                  <button
+                    type="button"
+                    class="raffles-admin-btn raffles-admin-btn--ghost"
+                    id="rafflesPurgeBlockedSubsBtn"
+                  >
+                    Удалить отписавшихся / заблокировавших бота
+                  </button>
                 </div>
                 <p class="raffles-admin-hint" id="rafflesNotifySubsHint"></p>
               </div>
@@ -1976,6 +1983,10 @@
               <h1 class="title video-lessons__hero-title">15 бесплатных видеоуроков от практикующего игрока и тренера Николая FishKopcheny</h1>
             </div>
             <p class="video-lessons__intro">Нажмите на урок — видео воспроизводится в приложении (iPhone, Android, Telegram). Если не загрузилось, откройте ссылку на Яндекс.Диск под плеером. <strong>Прокрутите список вниз</strong> — все темы ниже; в конце — дополнительные бонусные уроки.</p>
+            <div class="video-lessons__free-cta" role="note">
+              <span class="video-lessons__free-cta-text">Смотрите Бесплатно</span>
+              <span class="video-lessons__free-cta-arrow" aria-hidden="true">↓</span>
+            </div>
             <div class="video-lessons__list" id="videoLessonsList">
               <div class="video-lessons__card">
                 <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/zP4fadqf3vHPEA" data-lesson-num="1" aria-expanded="false">
@@ -1983,6 +1994,8 @@
                   <span class="video-lessons__title">Префлоп-диапазоны</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer1">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Какие карты разыгрываем<br>
                   ✅ Как разыгрываем эти карты<br>
@@ -1991,8 +2004,6 @@
                 </p>
                 <a href="./assets/prilozhenie-k-obucheniyu.pdf" target="_blank" rel="noopener noreferrer" class="video-lessons__attachment" download="Приложение к обучению.pdf">Приложение к обучению (PDF)</a>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer1">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2013,14 +2024,14 @@
                   <span class="video-lessons__title">Префлоп-выставления</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer2">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Когда забираем стек префлопом и когда уступаем<br>
                   ✅ Диапазоны на пуш, колл и рестил<br>
                   ✅ Короткий стек: давление и типичные ошибки
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer2">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2041,14 +2052,14 @@
                   <span class="video-lessons__title">Практика префлопа</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer3">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Разборы раздач: открытие, защита блайндов, 3-бет<br>
                   ✅ Закрепляем диапазоны и размеры ставок<br>
                   ✅ От теории урока 1–2 к решениям за столом
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer3">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2069,14 +2080,14 @@
                   <span class="video-lessons__title">Контбеты на флопе</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer4">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Что такое контбет (continuation bet) и когда он оправдан<br>
                   ✅ Частоты и размеры ставки после префлоп-агрессии<br>
                   ✅ Текстуры борда и типичные ошибки на флопе
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer4">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2097,14 +2108,14 @@
                   <span class="video-lessons__title">Математика покера</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer5">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Шансы банка, эквити и матожидание решений<br>
                   ✅ Когда математика оправдывает колл или фолд<br>
                   ✅ База для оценки спотов на постфлопе
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer5">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2125,14 +2136,14 @@
                   <span class="video-lessons__title">Розыгрыш средних рук на флопе</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer6">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Средние по силе руки: план на тёрн и ривер<br>
                   ✅ Сайзинг и частоты на сухих и динамичных бордах<br>
                   ✅ Когда добирать велью и когда сбрасывать шоудаун
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer6">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2153,14 +2164,14 @@
                   <span class="video-lessons__title">Практика флопа</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer7">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Разборы раздач на флопе<br>
                   ✅ Закрепление линий чек/бет<br>
                   ✅ Переход от теории к столу
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer7">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2181,14 +2192,14 @@
                   <span class="video-lessons__title">Игра на тёрне</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer8">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Ужесточение и ослабление диапазонов<br>
                   ✅ Двойные бочки, блеф-кэтчи<br>
                   ✅ План на ривер после тёрна
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer8">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2209,14 +2220,14 @@
                   <span class="video-lessons__title">Практика тёрна</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer9">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Примеры линий на четвёртой карте<br>
                   ✅ Когда давить, когда контролировать банк<br>
                   ✅ Типичные ошибки на тёрне
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer9">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2237,14 +2248,14 @@
                   <span class="video-lessons__title">Игра на ривере</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer10">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Тонкие велью и блефы на последней улице<br>
                   ✅ Размер ставки и индукция<br>
                   ✅ Геро-коллы и геро-фолды
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer10">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2265,14 +2276,14 @@
                   <span class="video-lessons__title">Розыгрыш премиумных рук</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer11">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Максимизация велью с сильными руками<br>
                   ✅ Медленная игра vs агрессия<br>
                   ✅ Защита от аутов и неочевидные линии
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer11">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2293,14 +2304,14 @@
                   <span class="video-lessons__title">Практика: ривер и ранние/средние</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer12">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Сводная практика по риверу<br>
                   ✅ Связка с ранней и средней стадией раздачи<br>
                   ✅ Разборы сложных рун-аутов
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer12">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2321,14 +2332,14 @@
                   <span class="video-lessons__title">Ранняя и средняя стадии турнира</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer13">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ ICM и давление стеков на старте и в середине<br>
                   ✅ Работа с анте и ростом блайндов<br>
                   ✅ Переход к финальной стадии
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer13">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2349,14 +2360,14 @@
                   <span class="video-lessons__title">Поздняя стадия турнира</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer14">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Баббл, финальный стол, короткие стеки<br>
                   ✅ Пуш/фолд и эксплойты оппонентов<br>
                   ✅ Психология и темп на поздней стадии
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer14">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2377,14 +2388,14 @@
                   <span class="video-lessons__title">Практика: поздняя стадия и финалка</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
+                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer15">
+                  <div class="video-lessons__player-inner">
                 <p class="video-lessons__desc">
                   ✅ Разборы спотов финального стола<br>
                   ✅ Закрепление тем уроков 13–14<br>
                   ✅ Готовность к реальным турнирам
                 </p>
                 <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
-                <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonPlayer15">
-                  <div class="video-lessons__player-inner">
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2408,10 +2419,10 @@
                   <span class="video-lessons__title">Бонус: практика №1</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
-                <p class="video-lessons__desc">✅ Дополнительный бонусный материал по курсу<br>✅ Общая практика, не привязана к номеру урока</p>
-                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus1">
                   <div class="video-lessons__player-inner">
+                <p class="video-lessons__desc">✅ Дополнительный бонусный материал по курсу<br>✅ Общая практика, не привязана к номеру урока</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2432,10 +2443,10 @@
                   <span class="video-lessons__title">Бонус: практика №2</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
-                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
-                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus2">
                   <div class="video-lessons__player-inner">
+                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2456,10 +2467,10 @@
                   <span class="video-lessons__title">Бонус: практика №3</span>
                   <span class="video-lessons__chevron" aria-hidden="true">▼</span>
                 </button>
-                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
-                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                 <div class="video-lessons__player-wrap video-lessons__player-wrap--hidden" id="videoLessonBonus3">
                   <div class="video-lessons__player-inner">
+                <p class="video-lessons__desc">✅ Общий бонусный урок — практика<br>✅ Дополняет курс в целом</p>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20записаться%20на%20личную%20тренировку" class="learn-play-hub__training-btn video-lessons__training-link" target="_blank" rel="noopener noreferrer" aria-label="Записаться на личную тренировку в Telegram">Записаться на личную тренировку</a>
                     <p class="video-lessons__video-error" hidden></p>
                     <video
                       class="video-lessons__video"
@@ -2475,6 +2486,58 @@
                 </div>
               </div>
             </div>
+
+            <section class="video-lessons__mtt-paid" aria-labelledby="videoLessonsMttTitle">
+              <h2 class="video-lessons__mtt-title" id="videoLessonsMttTitle">Платный курс МТТ из 20 личных тренировок</h2>
+              <div class="video-lessons__mtt-grid" role="group" aria-label="Этапы курса МТТ, 6 карточек">
+                <img src="./assets/mtt-course-stage-1.png" alt="Этап 1: префлоп, 3 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+                <img src="./assets/mtt-course-stage-2.png" alt="Этап 2: флопы, 4 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+                <img src="./assets/mtt-course-stage-3.png" alt="Этап 3: тёрн, 2 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+                <img src="./assets/mtt-course-stage-4.png" alt="Этап 4: ривер и сильные руки, 3 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+                <img src="./assets/mtt-course-stage-5.png" alt="Этап 5: турнирные стадии и хедз-ап, 4 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+                <img src="./assets/mtt-course-stage-6.png" alt="Этап 6: психология игры, 2 тренировки" width="400" height="600" loading="lazy" decoding="async" class="video-lessons__mtt-thumb" />
+              </div>
+
+              <h3 class="video-lessons__mtt-subtitle" id="videoLessonsMttDesc">Описание</h3>
+              <section class="video-lessons__mtt-desc" aria-labelledby="videoLessonsMttDesc">
+                <p>Обучаю только по МТТ, обучение проходит в 3-х разных форматах:</p>
+                <p>♦️ <strong>Курс МТТ</strong> (охватывает полностью всё, чем я сам пользуюсь и что на сегодняшний день актуально в игре, 20 тренировок).</p>
+                <p>♣️ <strong>Индивидуальная программа</strong> (5–8 тренировок с точечной проработкой логики в игровых решениях).<br />Составляем тренировки под запрос, всё, что было бы интересно разобрать и где есть вопросы в игровых ситуациях.</p>
+                <p>♥️ <strong>Тренировки-практики или разборы раздач</strong> (совместно катаем, где я в режиме онлайн могу сразу корректировать по стратегии, либо разбираем пачками сохранённые раздачи, в которых возникают вопросы).<br />Такие тренировки также включены в курс МТТ.</p>
+                <p><strong>Теперь раскрою подробнее информацию про курс МТТ:</strong></p>
+                <p>В курсе 20 тренировок, которые рекомендую проводить 2 раза в неделю, и тогда обучение займёт 3 месяца.<br />Можно и 1 раз в неделю, но обучение займёт 5 месяцев. 👌</p>
+                <p><strong>Что входит в курс и как вообще проходят тренировки</strong> (в том числе и других форматов):</p>
+                <ol class="video-lessons__mtt-ol">
+                  <li>Каждая тренировка длится 2 часа;</li>
+                  <li>Тренировки проходят созвоном в Zoom с демонстрацией моего экрана. Запись каждой проведённой тренировки также остаётся у ученика, чтобы была возможность вернуться к ней в любое время;</li>
+                  <li>В курсе будут смешанные форматы, это и чисто теория + закрепление материала на визуальных раздачах, и практики, где мы совместно поиграем и укрепим логику принятия решений в моменте раздачи.<br />Каждая практика будет после пройденного смыслового блока (Префлоп — практика, Флопы — практика, Тёрны — практика, Риверы — практика);</li>
+                  <li>Весь курс поделён на смысловые блоки информации с более глубокой проработкой всех деталей:
+                    <ul class="video-lessons__mtt-ul">
+                      <li>🔸 Префлоп-решения (3 тренировки);</li>
+                      <li>🔸 Решения на Флопах (4 тренировки);</li>
+                      <li>🔸 Игра на Тёрне (2 тренировки);</li>
+                      <li>🔸 Игра на Ривере (2 тренировки);</li>
+                      <li>🔸 Игра нестандартными решениями с топ-руками (АА–ТТ и АК–AJ) и ситуации, где необходимо уже отказываться от руки, чтобы не отдать весь стек (1 тренировка);</li>
+                      <li>🔸 Турнирные подстройки и задачи в разных стадиях турнира (6 тренировок);</li>
+                      <li>🔸 Психология игры (2 тренировки).</li>
+                    </ul>
+                  </li>
+                </ol>
+                <p><strong>Способы оплаты:</strong></p>
+                <p>🔹 Стоимость курса <strong>160&nbsp;000&nbsp;₽</strong> за 20 тренировок.<br />При разовой оплате всего курса делаю скидку −20&nbsp;000&nbsp;₽, и тогда стоимость курса составляет <strong>140&nbsp;000&nbsp;₽</strong>.</p>
+                <p>🔹 Можно разделить оплату на два платежа: 50% стоимости за первые 10 тренировок в начале обучения, и 50% за оставшиеся 10 тренировок после прохождения половины курса (<strong>80&nbsp;000&nbsp;₽ / 80&nbsp;000&nbsp;₽</strong>).</p>
+                <p>🔹 Можно платить разово за каждую тренировку по <strong>8&nbsp;000&nbsp;₽</strong> за день до тренировки.</p>
+                <p>По оплате договариваемся так, как будет удобно ученику 🤝</p>
+              </section>
+              <a
+                href="https://t.me/Roman1787443?text=Здравствуйте%21%20Хочу%20узнать%20про%20%D0%BF%D0%BB%D0%B0%D1%82%D0%BD%D1%8B%D0%B9%20%D0%BA%D1%83%D1%80%D1%81%20%D0%9C%D0%A2%D0%A2%20%2820%20%D1%82%D1%80%D0%B5%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%BE%D0%BA%29."
+                class="learn-play-hub__training-btn video-lessons__training-link video-lessons__mtt-cta"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Связаться в Telegram по поводу платного курса МТТ"
+                >Связаться по поводу курса</a
+              >
+            </section>
           </div>
 
           <!-- Зал славы -->
@@ -4515,7 +4578,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=158"></script>
+    <script src="./app.js?v=159"></script>
   </body>
 </html>
 

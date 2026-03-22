@@ -515,10 +515,34 @@ html.app-view-long-scroll {
   -webkit-overflow-scrolling: touch;
   height: auto;
   min-height: 100%;
+  /* «Резинка» снизу/сверху как в нативном скролле (contain на html режет ощущение оверскролла) */
+  overscroll-behavior-y: auto;
+}
+body.app-view-long-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-height: 100%;
+  /* Не даём flex-stretch ужать .app до высоты вьюпорта — иначе контент обрезается (~9 карточек) */
+  align-items: flex-start;
+  justify-content: center;
+  overscroll-behavior-y: auto;
 }
 html.app-view-long-scroll .app {
-  overflow: visible;
+  overflow: visible !important;
   min-height: 100vh;
+  min-height: 100dvh;
+  flex-shrink: 0;
+}
+/* Карточка не сжимается ниже высоты контента (min-height:0 ломает длинные списки в колонке .app) */
+html.app-view-long-scroll .card,
+body.app-view-long-scroll .card {
+  min-height: min-content;
+  flex-shrink: 0;
+}
+html.app-view-long-scroll .card .card__content,
+body.app-view-long-scroll .card .card__content {
+  overflow: visible !important;
 }
 
 /* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
@@ -6467,6 +6491,125 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-size: 14px;
   color: var(--text-muted);
 }
+.video-lessons__free-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  text-align: center;
+  border-radius: 14px;
+  border: 1px dashed rgba(251, 146, 60, 0.45);
+  background: rgba(251, 146, 60, 0.08);
+}
+.video-lessons__free-cta-text {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+.video-lessons__free-cta-arrow {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--accent);
+  animation: video-lessons-free-bounce 1.4s ease-in-out infinite;
+}
+@keyframes video-lessons-free-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-lessons__free-cta-arrow {
+    animation: none;
+  }
+}
+[data-theme="light"] .video-lessons__free-cta {
+  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(251, 146, 60, 0.06);
+}
+.video-lessons__mtt-paid {
+  margin-top: 8px;
+  padding: 22px 0 max(40px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  border-top: 1px solid var(--border-subtle);
+}
+.video-lessons__mtt-title {
+  margin: 0 0 14px;
+  font-size: clamp(17px, 4.5vw, 20px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text);
+}
+.video-lessons__mtt-subtitle {
+  margin: 18px 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+.video-lessons__mtt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 4px;
+}
+.video-lessons__mtt-thumb {
+  display: block;
+  width: 100%;
+  max-height: 118px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+}
+[data-theme="light"] .video-lessons__mtt-thumb {
+  background: rgba(0, 0, 0, 0.04);
+}
+.video-lessons__mtt-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.video-lessons__mtt-desc p {
+  margin: 0 0 12px;
+}
+.video-lessons__mtt-desc strong {
+  color: var(--text);
+}
+.video-lessons__mtt-ol {
+  margin: 0 0 12px;
+  padding-left: 1.25rem;
+}
+.video-lessons__mtt-ol > li {
+  margin-bottom: 10px;
+}
+.video-lessons__mtt-ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.video-lessons__mtt-ul li {
+  margin-bottom: 6px;
+}
+.video-lessons__mtt-paid .learn-play-hub__training-btn.video-lessons__mtt-cta {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  box-sizing: border-box;
+}
 .video-lessons__group-head {
   flex-shrink: 0;
   margin: 8px 0 4px;
@@ -6515,7 +6658,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
-  padding-bottom: 16px;
+  /* Запас снизу: последние уроки не под «обрез», плюс место под оверскролл / жест */
+  padding-bottom: max(48px, calc(24px + env(safe-area-inset-bottom, 0px)));
 }
 .video-lessons__card {
   flex-shrink: 0;
@@ -6532,17 +6676,22 @@ html.app-view-home .feature--rating-spring-promo:hover,
   border-color: var(--accent);
 }
 .video-lessons__desc {
-  margin: 0 0 8px;
-  padding: 0 16px 0 16px;
+  margin: 0 0 10px;
+  padding: 0;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-muted);
+}
+/* Описание внутри раскрытого блока (не в строке заголовка) */
+.video-lessons__player-inner .video-lessons__desc {
+  margin: 0 0 12px;
+  padding: 0 4px;
 }
 .video-lessons__attachment {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 0 16px 12px;
+  margin: 0 0 12px;
   padding: 10px 14px;
   font-size: 14px;
   color: var(--accent);
@@ -6560,10 +6709,11 @@ html.app-view-home .feature--rating-spring-promo:hover,
   content: "📎";
   font-size: 1em;
 }
-/* Кнопка «Записаться на личную тренировку» внутри карточки урока */
-.video-lessons__card .learn-play-hub__training-btn.video-lessons__training-link {
-  margin: 0 16px 12px;
-  width: calc(100% - 32px);
+/* Кнопка «Записаться…» внутри раскрытого блока */
+.video-lessons__player-inner .learn-play-hub__training-btn.video-lessons__training-link {
+  display: block;
+  margin: 0 0 14px;
+  width: 100%;
   max-width: none;
   padding: 12px 14px;
   font-size: 14px;
@@ -6572,7 +6722,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   padding: 14px 16px;
   text-align: left;
@@ -6605,6 +6755,14 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 .video-lessons__title {
   flex: 1;
+  min-width: 0;
+  font-size: clamp(15px, 4.1vw, 17px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .video-lessons__chevron {
   flex-shrink: 0;
@@ -6621,10 +6779,11 @@ html.app-view-home .feature--rating-spring-promo:hover,
   max-height: 0;
 }
 .video-lessons__player-wrap:not(.video-lessons__player-wrap--hidden) {
-  max-height: min(72vh, 580px);
+  /* Текст + PDF + кнопка + плеер — нужен большой потолок, иначе обрез при раскрытии */
+  max-height: min(320vh, 4200px);
 }
 .video-lessons__player-inner {
-  padding: 0 12px 12px;
+  padding: 10px 12px 14px;
 }
 .video-lessons__video-error {
   margin: 0 0 10px;
