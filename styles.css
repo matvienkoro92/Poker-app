@@ -616,6 +616,10 @@ body[data-view="video-lessons"] .app > .bg-gradient {
 html.app-view-vl-html-scroll .app > .bg-gradient {
   inset: 0;
 }
+/* Зал славы, хаб, задачи, «Скачать»: тот же long-scroll — без обрезки градиент снова раздувает прокрутку */
+html.app-view-long-scroll .app > .bg-gradient {
+  inset: 0;
+}
 body[data-view="video-lessons"] .card {
   flex-shrink: 0;
   min-height: min-content;
@@ -629,6 +633,37 @@ body[data-view="video-lessons"] .card .card__content {
   overflow: visible !important;
 }
 body[data-view="video-lessons"] .view.view--active[data-view="video-lessons"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Зал славы: fallback без :has() (старые WebView) + стабильная высота цепочки .app/.card */
+body[data-view="hall-of-fame"] {
+  display: block !important;
+}
+body[data-view="hall-of-fame"] .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
+}
+body[data-view="hall-of-fame"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="hall-of-fame"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible;
+}
+body[data-view="hall-of-fame"] .card .card__content {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible !important;
+}
+body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
   flex-shrink: 0;
   min-height: min-content;
   overflow: visible;
@@ -674,6 +709,51 @@ html.app-view-vl-html-scroll .card {
   overflow: visible;
 }
 html.app-view-vl-html-scroll .card .card__content {
+  overflow: visible !important;
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
+}
+
+/*
+ * Зал славы: единый scrollport на <html> (тот же класс багов, что app-view-vl-html-scroll).
+ * Иначе при html.app-view-long-scroll + overflow:visible на html часть WebView не крутит body.
+ */
+html.app-view-hall-html-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto !important;
+  min-height: 100%;
+  max-height: none !important;
+  overscroll-behavior-y: auto !important;
+  overflow-anchor: none;
+  scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+}
+html.app-view-hall-html-scroll body,
+html.app-view-hall-html-scroll body.app-view-long-scroll {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  min-height: 0 !important;
+  overscroll-behavior-y: auto;
+}
+html.app-view-hall-html-scroll .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  flex-shrink: 0;
+}
+html.app-view-hall-html-scroll .card {
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
+  overflow: visible;
+}
+html.app-view-hall-html-scroll .card .card__content {
   overflow: visible !important;
   min-height: min-content;
   flex-shrink: 0;
@@ -6606,8 +6686,48 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 
 /* Видео-уроки */
-.video-lessons__share-row-wrap {
-  margin: 4px 0 14px;
+.video-lessons__top-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 10px;
+  margin: 0 0 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.video-lessons__top-bar .bonus-game-back {
+  margin-bottom: 0;
+  align-self: center;
+  flex-shrink: 0;
+}
+.video-lessons__top-bar .video-lessons__share-row-wrap {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.video-lessons__top-bar .video-lessons__share-row {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  width: auto;
+  max-width: 100%;
+}
+.video-lessons__top-bar .raffles-hero__share-btn--primary {
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+@media (min-width: 360px) {
+  .video-lessons__top-bar .raffles-hero__share-btn--primary {
+    padding-left: 18px;
+    padding-right: 18px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
 }
 .video-lessons__hero {
   margin: 4px 0 16px;
@@ -6634,22 +6754,20 @@ html.app-view-home .feature--rating-spring-promo:hover,
   text-align: center;
   border-top: 1px solid var(--border-subtle);
 }
-/* Бесплатные уроки: бирюза/небо. Платный МТТ ниже — только золото (не смешивать с оранжем акцента приложения). */
+/* Видеоуроки: обводки и акценты в чёрно-оранжевом стиле приложения */
 .view[data-view="video-lessons"] {
-  --vl-free-border: rgba(56, 189, 248, 0.42);
-  --vl-free-border-dashed: rgba(34, 211, 238, 0.55);
-  --vl-free-bg-soft: rgba(56, 189, 248, 0.1);
-  --vl-free-open: #22d3ee;
-  --vl-free-num-fg: #67e8f9;
-  --vl-free-num-bg: rgba(34, 211, 238, 0.18);
+  --vl-free-border: rgba(249, 115, 22, 0.5);
+  --vl-free-bg-soft: rgba(249, 115, 22, 0.11);
+  --vl-free-open: #fb923c;
+  --vl-free-num-fg: #fdba74;
+  --vl-free-num-bg: rgba(249, 115, 22, 0.24);
 }
 [data-theme="light"] .view[data-view="video-lessons"] {
-  --vl-free-border: rgba(2, 132, 199, 0.38);
-  --vl-free-border-dashed: rgba(14, 165, 233, 0.5);
-  --vl-free-bg-soft: rgba(14, 165, 233, 0.1);
-  --vl-free-open: #0284c7;
-  --vl-free-num-fg: #0369a1;
-  --vl-free-num-bg: rgba(14, 165, 233, 0.16);
+  --vl-free-border: rgba(234, 88, 12, 0.42);
+  --vl-free-bg-soft: rgba(251, 146, 60, 0.12);
+  --vl-free-open: #ea580c;
+  --vl-free-num-fg: #c2410c;
+  --vl-free-num-bg: rgba(251, 146, 60, 0.2);
 }
 .video-lessons__intro {
   margin: 8px 0 20px;
@@ -6662,23 +6780,24 @@ html.app-view-home .feature--rating-spring-promo:hover,
   align-items: center;
   justify-content: center;
   gap: 2px;
-  margin: 0 0 16px;
+  margin: 0;
   padding: 12px 14px;
   text-align: center;
-  border-radius: 14px;
-  border: 1px dashed var(--vl-free-border-dashed, rgba(34, 211, 238, 0.55));
-  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.1));
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--vl-free-border);
+  background: var(--vl-free-bg-soft);
 }
 .video-lessons__free-cta-text {
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: var(--vl-free-num-fg, #67e8f9);
+  color: var(--vl-free-num-fg);
 }
 .video-lessons__free-cta-arrow {
   font-size: 22px;
   line-height: 1;
-  color: var(--vl-free-open, #22d3ee);
+  color: var(--vl-free-open);
   animation: video-lessons-free-bounce 1.4s ease-in-out infinite;
 }
 @keyframes video-lessons-free-bounce {
@@ -6695,40 +6814,34 @@ html.app-view-home .feature--rating-spring-promo:hover,
     animation: none;
   }
 }
+/* Платный МТТ + запись на тренировку — общая обводка: .video-lessons__paid-wrap */
+.video-lessons__paid-wrap {
+  margin-top: 18px;
+  padding: 14px 12px 16px;
+  border: 1px solid rgba(24, 22, 20, 0.75);
+  border-radius: 14px;
+  background: var(--block-bg);
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+}
+[data-theme="light"] .video-lessons__paid-wrap {
+  border-color: rgba(41, 37, 36, 0.22);
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.35);
+}
 .video-lessons__mtt-paid {
-  margin-top: 8px;
-  /* Нижний safe-area даёт только .app — иначе «пропасть» под контентом */
-  padding: 18px 0 10px;
+  margin-top: 0;
+  padding: 0;
   border-top: none;
 }
-/* Платный курс МТТ — заметный золотой блок */
 .video-lessons__mtt-spoiler.video-lessons__mtt-paid {
-  padding: 14px 10px 12px;
-  margin-top: 6px;
-  border-radius: 16px;
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  background: linear-gradient(
-    165deg,
-    rgba(251, 191, 36, 0.14) 0%,
-    rgba(245, 158, 11, 0.08) 42%,
-    rgba(15, 23, 42, 0.35) 100%
-  );
-  box-shadow:
-    0 0 0 1px rgba(251, 146, 60, 0.12),
-    0 10px 36px -12px rgba(245, 158, 11, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-[data-theme="light"] .video-lessons__mtt-spoiler.video-lessons__mtt-paid {
-  background: linear-gradient(
-    165deg,
-    rgba(251, 191, 36, 0.22) 0%,
-    rgba(254, 243, 199, 0.55) 38%,
-    rgba(255, 251, 235, 0.95) 100%
-  );
-  border-color: rgba(217, 119, 6, 0.4);
-  box-shadow:
-    0 0 0 1px rgba(251, 146, 60, 0.2),
-    0 10px 32px -10px rgba(245, 158, 11, 0.35);
+  padding: 0 2px 4px;
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .video-lessons__mtt-summary {
   display: flex;
@@ -6740,32 +6853,23 @@ html.app-view-home .feature--rating-spring-promo:hover,
   list-style: none;
   cursor: pointer;
   border-radius: 14px;
-  border: 2px solid rgba(251, 191, 36, 0.65);
-  background: linear-gradient(
-    145deg,
-    rgba(251, 191, 36, 0.28) 0%,
-    rgba(245, 158, 11, 0.18) 45%,
-    rgba(180, 83, 9, 0.2) 100%
-  );
+  border: 1px solid rgba(249, 115, 22, 0.55);
+  background: linear-gradient(145deg, rgba(35, 32, 30, 0.98), rgba(20, 18, 17, 0.99));
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   transition: border-color 0.2s, box-shadow 0.2s, filter 0.2s;
   box-shadow:
-    0 4px 18px rgba(245, 158, 11, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 2px 14px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(249, 115, 22, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 [data-theme="light"] .video-lessons__mtt-summary {
-  border-color: rgba(217, 119, 6, 0.55);
-  background: linear-gradient(
-    145deg,
-    rgba(253, 230, 138, 0.85) 0%,
-    rgba(254, 215, 170, 0.75) 50%,
-    rgba(251, 191, 36, 0.35) 100%
-  );
+  border-color: rgba(234, 88, 12, 0.45);
+  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 55%, #fed7aa 100%);
   box-shadow:
-    0 4px 16px rgba(245, 158, 11, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    0 2px 12px rgba(234, 88, 12, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .video-lessons__mtt-summary::-webkit-details-marker,
 .video-lessons__mtt-summary::marker {
@@ -6773,29 +6877,29 @@ html.app-view-home .feature--rating-spring-promo:hover,
   content: "";
 }
 .video-lessons__mtt-summary:hover {
-  border-color: rgba(252, 211, 77, 0.9);
-  filter: brightness(1.06);
+  border-color: rgba(251, 146, 60, 0.85);
+  filter: brightness(1.05);
   box-shadow:
-    0 6px 22px rgba(245, 158, 11, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 4px 18px rgba(249, 115, 22, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .video-lessons__mtt-spoiler[open] > .video-lessons__mtt-summary {
   margin-bottom: 16px;
-  border-color: rgba(252, 211, 77, 0.85);
+  border-color: rgba(251, 146, 60, 0.75);
   box-shadow:
-    0 4px 20px rgba(245, 158, 11, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 2px 16px rgba(249, 115, 22, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .video-lessons__mtt-spoiler-chevron {
   flex-shrink: 0;
   font-size: 12px;
   line-height: 1;
-  color: #fde68a;
-  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.65));
+  color: #fb923c;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.45));
   transition: transform 0.25s ease;
 }
 [data-theme="light"] .video-lessons__mtt-spoiler-chevron {
-  color: #b45309;
+  color: #ea580c;
   filter: none;
 }
 .video-lessons__mtt-spoiler[open] .video-lessons__mtt-spoiler-chevron {
@@ -6818,22 +6922,22 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex: 1;
   min-width: 0;
   text-align: center;
-  color: #fffbeb;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 20px rgba(251, 191, 36, 0.35);
+  color: #ffedd5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 18px rgba(249, 115, 22, 0.25);
 }
 [data-theme="light"] .video-lessons__mtt-summary .video-lessons__mtt-title {
-  color: #92400e;
+  color: #9a3412;
   text-shadow: none;
 }
 .video-lessons__mtt-subtitle {
   margin: 18px 0 10px;
   font-size: 15px;
   font-weight: 800;
-  color: #fcd34d;
+  color: #fb923c;
   letter-spacing: 0.02em;
 }
 [data-theme="light"] .video-lessons__mtt-subtitle {
-  color: #b45309;
+  color: #c2410c;
 }
 .video-lessons__mtt-grid {
   display: grid;
@@ -6849,13 +6953,13 @@ html.app-view-home .feature--rating-spring-promo:hover,
   object-fit: contain;
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  border: 1px solid rgba(249, 115, 22, 0.4);
   box-sizing: border-box;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 [data-theme="light"] .video-lessons__mtt-thumb {
-  background: rgba(255, 251, 235, 0.9);
-  border-color: rgba(217, 119, 6, 0.3);
+  background: rgba(255, 247, 237, 0.95);
+  border-color: rgba(234, 88, 12, 0.32);
 }
 .video-lessons__mtt-desc {
   font-size: 14px;
@@ -6887,45 +6991,21 @@ html.app-view-home .feature--rating-spring-promo:hover,
   display: block;
   width: 100%;
   margin-top: 18px;
-  padding: 14px 16px;
-  font-size: 15px;
-  font-weight: 700;
-  text-align: center;
-  box-sizing: border-box;
-  border-width: 2px;
-  border-color: rgba(252, 211, 77, 0.85) !important;
-  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
 }
-[data-theme="light"] .video-lessons__mtt-paid .learn-play-hub__training-btn.video-lessons__mtt-cta {
-  border-color: rgba(217, 119, 6, 0.65) !important;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
-}
-/* Кнопка внизу экрана видеоуроков (вне спойлера МТТ) */
 .video-lessons__footer-cta {
-  margin-top: 22px;
-  padding-top: 4px;
+  margin-top: 0;
+  padding-top: 14px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(249, 115, 22, 0.28);
+  box-sizing: border-box;
 }
-.video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn {
+[data-theme="light"] .video-lessons__footer-cta {
+  border-top-color: rgba(234, 88, 12, 0.22);
+}
+.video-lessons__footer-cta .learn-play-hub__training-btn {
   display: block;
   width: 100%;
   margin: 0;
-  padding: 14px 16px;
-  font-size: 15px;
-  font-weight: 700;
-  text-align: center;
-  box-sizing: border-box;
-  border: 2px solid var(--vl-free-open, #22d3ee);
-  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.12));
-  color: var(--vl-free-open, #22d3ee);
-  box-shadow: 0 2px 14px rgba(34, 211, 238, 0.15);
-}
-.video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn:hover {
-  filter: brightness(1.08);
-}
-[data-theme="light"] .video-lessons__footer-cta .learn-play-hub__training-btn.video-lessons__footer-training-btn {
-  border-color: var(--vl-free-open, #0284c7);
-  color: var(--vl-free-open, #0369a1);
-  background: rgba(14, 165, 233, 0.1);
 }
 .video-lessons__group-head {
   flex-shrink: 0;
@@ -6933,8 +7013,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   padding: 10px 8px;
   text-align: center;
   border-radius: 12px;
-  background: rgba(168, 85, 247, 0.12);
-  border: 1px dashed rgba(168, 85, 247, 0.45);
+  background: var(--vl-free-bg-soft);
+  border: 1px dashed rgba(249, 115, 22, 0.45);
   box-sizing: border-box;
 }
 .video-lessons__group-head-text {
@@ -6943,62 +7023,102 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-weight: 800;
   line-height: 1.4;
   letter-spacing: 0.02em;
-  color: #c4b5fd;
+  color: var(--vl-free-num-fg);
 }
 [data-theme="light"] .video-lessons__group-head {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(109, 40, 217, 0.35);
+  background: var(--vl-free-bg-soft);
+  border-color: rgba(234, 88, 12, 0.38);
 }
 [data-theme="light"] .video-lessons__group-head-text {
-  color: #5b21b6;
+  color: var(--vl-free-num-fg);
 }
 .video-lessons__card.video-lessons__card--bonus {
-  border-color: rgba(168, 85, 247, 0.35);
+  border-color: var(--vl-free-border);
   box-shadow: none;
 }
 .video-lessons__card.video-lessons__card--bonus:hover {
-  border-color: rgba(168, 85, 247, 0.55);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.12);
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.12);
 }
 .video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
-  border-color: rgba(192, 132, 252, 0.75);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2);
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.18);
 }
 .video-lessons__num--bonus {
   min-width: 34px;
   font-size: 11px;
   letter-spacing: 0;
-  color: #c4b5fd;
-  background: rgba(168, 85, 247, 0.2);
+  color: var(--vl-free-num-fg);
+  background: var(--vl-free-num-bg);
 }
 [data-theme="light"] .video-lessons__num--bonus {
-  color: #5b21b6;
-  background: rgba(139, 92, 246, 0.15);
+  color: var(--vl-free-num-fg);
+  background: var(--vl-free-num-bg);
 }
 /* Скролл страницы — html.app-view-long-scroll + body; не задаём max-height на список: иначе flex сжимает карточки (flex-shrink: 1) и «ломает» кнопки */
 .video-lessons__list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   align-items: stretch;
   overflow-anchor: none;
-  padding-bottom: 12px;
-}
-.video-lessons__card {
-  flex-shrink: 0;
-  border: 1px solid var(--vl-free-border, rgba(56, 189, 248, 0.42));
+  padding-bottom: 0;
+  border: 1px solid var(--vl-free-border);
   border-radius: 14px;
   overflow: hidden;
   background: var(--block-bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.video-lessons__list > .video-lessons__group-head {
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+.video-lessons__card {
+  flex-shrink: 0;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--block-bg);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.video-lessons__list > .video-lessons__card {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--vl-free-border);
+  box-shadow: none;
+}
+.video-lessons__list > .video-lessons__card:last-child {
+  border-bottom: none;
 }
 .video-lessons__card:hover {
-  border-color: var(--vl-free-open, #22d3ee);
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12);
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
+}
+.video-lessons__list > .video-lessons__card:hover {
+  border-bottom-color: var(--vl-free-open);
+  box-shadow: none;
+  background: rgba(249, 115, 22, 0.07);
 }
 .video-lessons__card.video-lessons__card--open {
-  border-color: var(--vl-free-open, #22d3ee);
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.22);
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.22);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--open {
+  border-bottom-color: var(--vl-free-open);
+  box-shadow: none;
+  background: rgba(249, 115, 22, 0.06);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus {
+  border-bottom-color: var(--vl-free-border);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus:hover {
+  border-bottom-color: var(--vl-free-open);
+  box-shadow: none;
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
+  border-bottom-color: var(--vl-free-open);
+  box-shadow: none;
 }
 .video-lessons__desc {
   margin: 0 0 10px;
@@ -7019,16 +7139,16 @@ html.app-view-home .feature--rating-spring-promo:hover,
   margin: 0 0 12px;
   padding: 10px 14px;
   font-size: 14px;
-  color: var(--vl-free-open, #22d3ee);
+  color: var(--vl-free-open);
   text-decoration: none;
-  border: 1px solid var(--vl-free-border, rgba(56, 189, 248, 0.42));
+  border: 1px solid var(--vl-free-border);
   border-radius: 10px;
-  background: var(--vl-free-bg-soft, rgba(56, 189, 248, 0.1));
+  background: var(--vl-free-bg-soft);
   transition: background 0.2s, border-color 0.2s;
 }
 .video-lessons__attachment:hover {
-  background: rgba(34, 211, 238, 0.14);
-  border-color: var(--vl-free-open, #22d3ee);
+  background: rgba(249, 115, 22, 0.16);
+  border-color: var(--vl-free-open);
 }
 .video-lessons__attachment::before {
   content: "📎";
@@ -7037,7 +7157,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
 /* Кнопка «Записаться…» внутри раскрытого блока */
 .video-lessons__player-inner .learn-play-hub__training-btn.video-lessons__training-link {
   display: block;
-  margin: 0 0 14px;
+  margin: 14px 0 0;
   width: 100%;
   max-width: none;
   padding: 12px 14px;
@@ -7060,7 +7180,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   transition: background 0.2s;
 }
 .video-lessons__item:hover {
-  background: rgba(56, 189, 248, 0.07);
+  background: rgba(249, 115, 22, 0.08);
 }
 .video-lessons__item[aria-expanded="true"] .video-lessons__chevron {
   transform: rotate(180deg);
@@ -7092,17 +7212,17 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .video-lessons__chevron {
   flex-shrink: 0;
   font-size: 12px;
-  color: rgba(103, 232, 249, 0.75);
+  color: rgba(251, 146, 60, 0.85);
   transition: transform 0.25s ease;
 }
 [data-theme="light"] .video-lessons__chevron {
-  color: rgba(2, 132, 199, 0.65);
+  color: rgba(234, 88, 12, 0.7);
 }
 .video-lessons__card--bonus .video-lessons__chevron {
-  color: rgba(196, 181, 253, 0.85);
+  color: rgba(251, 146, 60, 0.8);
 }
 [data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
-  color: rgba(91, 33, 182, 0.55);
+  color: rgba(194, 65, 12, 0.65);
 }
 /* Раскрытие через grid 0fr/1fr — без max-height в px/vh (в части WebView обрезали хвост страницы ~высотой «9 карточек») */
 .video-lessons__player-wrap {
@@ -15516,7 +15636,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 
 .hall-of-fame__block {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 .hall-of-fame__section-title {
   margin: 0 0 10px;

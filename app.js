@@ -3213,8 +3213,27 @@ function setMainDocumentScrollY(y) {
   } catch (e2) {}
 }
 
+function clampMainDocumentScrollY(y) {
+  try {
+    y = Math.max(0, Number(y) || 0);
+    var h = Math.max(
+      document.documentElement.scrollHeight || 0,
+      document.body.scrollHeight || 0
+    );
+    var se = document.scrollingElement;
+    if (se && se.scrollHeight) h = Math.max(h, se.scrollHeight);
+    var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+    var maxY = Math.max(0, h - vh);
+    return Math.min(y, maxY);
+  } catch (eClamp) {
+    return Math.max(0, y);
+  }
+}
+
 /** Запоминание scrollY по имени экрана; восстановление только при setView(..., { fromBack: true }) */
 var viewScrollMemory = Object.create(null);
+/** Прокрутка окна отдельно по каждой вкладке зала славы */
+var hallFamePanelScrollMemory = Object.create(null);
 
 function scrollHomeToTop() {
   if (!document.body || (document.body.getAttribute && document.body.getAttribute("data-view") !== "home")) return;
@@ -3692,6 +3711,8 @@ function setView(viewName, navOpts) {
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   /* Видеоуроки: в iOS/Telegram WebView крутится чаще <html> (scrollingElement); overflow:visible на html обрезает «хвост» списка */
   document.documentElement.classList.toggle("app-view-vl-html-scroll", viewName === "video-lessons");
+  /* Зал славы: в TG/iOS часто крутится <html>, как у видеоуроков — иначе после inset:0 у градиента пропадает прокрутка */
+  document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
@@ -3751,29 +3772,25 @@ function setHallOfFameSubtabActive(section) {
   });
 }
 
-/** Переключение разделов зала славы в одном экране (как лиги в рейтинге), без модалок */
-function showHallOfFamePanel(section) {
+/**
+ * Переключение разделов зала славы в одном экране (как лиги в рейтинге), без модалок.
+ * @param {string} section
+ * @param {{ activeSubtabBtn?: HTMLElement }} [opts] — кнопка вкладки для focus({ preventScroll }) после смены панели
+ */
+function showHallOfFamePanel(section, opts) {
+  opts = opts || {};
   var view = document.getElementById("hallOfFameView");
   if (!view) return;
-  function hallFameGetScrollY() {
-    try {
-      var se = document.scrollingElement || document.documentElement;
-      return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
-    } catch (eY) {
-      return 0;
-    }
+  var yBefore = getMainDocumentScrollY();
+  var activePanel = view.querySelector(".hall-of-fame__panel.hall-of-fame__panel--active[data-hall-panel]");
+  var prevSection = activePanel ? activePanel.getAttribute("data-hall-panel") : null;
+  if (prevSection && prevSection !== section) {
+    hallFamePanelScrollMemory[prevSection] = yBefore;
   }
-  function hallFameSetScrollY(y) {
-    try {
-      y = Math.max(0, y);
-      if (typeof window.scrollTo === "function") window.scrollTo(0, y);
-      var se = document.scrollingElement || document.documentElement;
-      if (se) se.scrollTop = y;
-      if (document.documentElement) document.documentElement.scrollTop = y;
-      if (document.body) document.body.scrollTop = y;
-    } catch (eS) {}
-  }
-  var scrollYKeep = hallFameGetScrollY();
+  var restoreY = Object.prototype.hasOwnProperty.call(hallFamePanelScrollMemory, section)
+    ? hallFamePanelScrollMemory[section]
+    : yBefore;
+
   view.querySelectorAll(".hall-of-fame__panel[data-hall-panel]").forEach(function (panel) {
     var on = panel.getAttribute("data-hall-panel") === section;
     panel.classList.toggle("hall-of-fame__panel--active", on);
@@ -3781,23 +3798,39 @@ function showHallOfFamePanel(section) {
     else panel.setAttribute("hidden", "");
   });
   setHallOfFameSubtabActive(section);
-  /* Клик по вкладке даёт фокус кнопке — WebKit/Telegram WebView прокручивают окно вверх к табам. Возвращаем прежний scroll. */
-  hallFameSetScrollY(scrollYKeep);
+
+  function applyHallFameScroll() {
+    setMainDocumentScrollY(clampMainDocumentScrollY(restoreY));
+  }
+  applyHallFameScroll();
   var rafH = window.requestAnimationFrame || function (fn) {
     setTimeout(fn, 16);
   };
   rafH(function () {
-    hallFameSetScrollY(scrollYKeep);
+    applyHallFameScroll();
     rafH(function () {
-      hallFameSetScrollY(scrollYKeep);
+      applyHallFameScroll();
+      rafH(applyHallFameScroll);
     });
   });
-  setTimeout(function () {
-    hallFameSetScrollY(scrollYKeep);
-  }, 0);
-  setTimeout(function () {
-    hallFameSetScrollY(scrollYKeep);
-  }, 64);
+  [0, 48, 120, 220].forEach(function (ms) {
+    setTimeout(applyHallFameScroll, ms);
+  });
+
+  var subBtn = opts.activeSubtabBtn;
+  if (subBtn && typeof subBtn.focus === "function") {
+    setTimeout(function () {
+      try {
+        subBtn.focus({ preventScroll: true });
+      } catch (eFocus) {
+        try {
+          subBtn.focus();
+        } catch (eFocus2) {}
+      }
+      applyHallFameScroll();
+    }, 0);
+    setTimeout(applyHallFameScroll, 32);
+  }
 }
 
 window.showHallOfFamePanel = showHallOfFamePanel;
@@ -9357,10 +9390,7 @@ function handleViewLinkClick(e) {
     e.stopPropagation();
     var secEarly = hallSubEarly.getAttribute("data-hall-section");
     if (secEarly && typeof showHallOfFamePanel === "function") {
-      showHallOfFamePanel(secEarly);
-      try {
-        if (typeof hallSubEarly.blur === "function") hallSubEarly.blur();
-      } catch (eBlur) {}
+      showHallOfFamePanel(secEarly, { activeSubtabBtn: hallSubEarly });
     }
     return;
   }
@@ -9537,7 +9567,7 @@ window.loadVideoLessonNative = function loadVideoLessonNative(videoEl, playerWra
       applyHref(r.body.href);
     })
     .catch(function () {
-      setErr("Если не удалось загрузить видео в приложении. Откройте ссылку на Яндекс.Диск ниже.");
+      setErr("");
     });
 
   videoEl.addEventListener(
