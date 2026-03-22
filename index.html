@@ -39,7 +39,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=155" />
+    <link rel="stylesheet" href="./styles.css?v=161" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -2577,6 +2577,10 @@
             </div>
             <div class="hall-of-fame__panels">
               <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" aria-labelledby="hallLegendsTitle">
+                <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Легенды»">
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="legends" data-hall-fame-action="share">Поделиться</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="legends" data-hall-fame-action="copy">Скопировать ссылку</button>
+                </div>
                 <section class="hall-of-fame__block" aria-labelledby="hallLegendsTitle">
                   <h2 class="hall-of-fame__section-title" id="hallLegendsTitle">Легенды клуба</h2>
                   <div class="hall-of-fame__legends-list" role="list">
@@ -2596,6 +2600,10 @@
                 </section>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelCups" data-hall-panel="cups" role="tabpanel" hidden>
+                <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Кубки»">
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="cups" data-hall-fame-action="share">Поделиться</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="cups" data-hall-fame-action="copy">Скопировать ссылку</button>
+                </div>
                 <h2 class="hall-of-fame__section-title hall-of-fame__section-title--cups-above-rating" id="hallCupsTitle">Кубки два туза</h2>
                 <div class="hall-of-fame__rating-card-wrap">
                   <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-full hall-of-fame__winter-rating-card" data-view-target="winter-rating" aria-label="Рейтинг турнирщиков зима 2025-2026 на 250 000р">
@@ -2634,8 +2642,17 @@
                     </div>
                     <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
                   </button>
-                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card" id="summerRating2024InfoBtn" aria-label="Кубок лета 2024, победитель Пряник">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card hall-of-fame__summer-rating-card--cup-thumb" id="summerRating2024InfoBtn" aria-label="Кубок лета 2024, победитель Пряник">
+                    <span class="feature__cup feature__cup--left feature__cup--photo hall-of-fame__summer-2024-cup" aria-hidden="true">
+                      <img
+                        class="hall-of-fame__cup-thumb"
+                        src="./assets/hall-fame-cup-summer-2024-pryanik.png"
+                        alt=""
+                        width="64"
+                        height="64"
+                        decoding="async"
+                      />
+                    </span>
                     <div class="feature__body">
                       <div class="feature__title feature__title--center feature__title--uppercase">
                         <span class="feature__title-line1">Рейтинг турнирщиков</span>
@@ -2670,13 +2687,20 @@
                     <h2 class="winter-rating__single-top winter-rating__single-top--title" id="hallFameSingleTopSummary">Топ выигрышей за один турнир (2026)</h2>
                     <ul class="winter-rating__single-top-list" id="hallFameSingleTopList"></ul>
                     <div class="hall-of-fame__blog-top15-copy-wrap">
-                      <button type="button" class="hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn">Скопировать ссылку</button>
-                      <p class="hall-of-fame__blog-top15-copy-hint">Отдельная ссылка открывает сразу этот топ‑15 в приложении</p>
+                      <div class="hall-of-fame__panel-share-row hall-of-fame__panel-share-row--in-card" role="group" aria-label="Ссылка на раздел «Топ 2026»">
+                        <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="top2026" data-hall-fame-action="share">Поделиться</button>
+                        <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn" data-hall-fame-share="top2026" data-hall-fame-action="copy">Скопировать ссылку</button>
+                      </div>
+                      <p class="hall-of-fame__blog-top15-copy-hint">Ссылка с <code class="hall-of-fame__startapp-code">hall_fame_top2026</code> открывает этот раздел. Раньше использовали <code class="hall-of-fame__startapp-code">blog_top15</code> / <code class="hall-of-fame__startapp-code">hall_top15</code> — они по‑прежнему работают.</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
+                <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Фото»">
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="photos" data-hall-fame-action="share">Поделиться</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="photos" data-hall-fame-action="copy">Скопировать ссылку</button>
+                </div>
                 <section class="hall-of-fame__block hall-photo-album hall-photo-album--feed" aria-labelledby="hallPhotosTitle">
                   <div class="hall-photo-album__ribbon" aria-hidden="true">
                     <span class="hall-photo-album__suit hall-photo-album__suit--spade">♠</span>
@@ -2870,6 +2894,10 @@
                 </section>
               </div>
               <div class="hall-of-fame__panel" id="hallFamePanelShame" data-hall-panel="shame" role="tabpanel" hidden>
+                <div class="hall-of-fame__panel-share-row" role="group" aria-label="Ссылка на раздел «Доска позора»">
+                  <button type="button" class="hall-of-fame__panel-share-btn hall-of-fame__panel-share-btn--tg" data-hall-fame-share="shame" data-hall-fame-action="share">Поделиться</button>
+                  <button type="button" class="hall-of-fame__panel-share-btn" data-hall-fame-share="shame" data-hall-fame-action="copy">Скопировать ссылку</button>
+                </div>
                 <section class="hall-of-fame__block hall-shame-board" aria-labelledby="hallShameTitle">
                   <h2 class="hall-of-fame__section-title hall-shame-board__title" id="hallShameTitle">Доска позора</h2>
                   <p class="hall-shame-board__lead">
@@ -4339,7 +4367,17 @@
           <button type="button" class="summer-rating-2024-modal__close" aria-label="Закрыть">×</button>
           <h3 class="summer-rating-2024-modal__title" id="summerRating2024ModalTitle">Кубок лета 2024</h3>
           <p class="summer-rating-2024-modal__subtitle">Победитель — <strong>Пряник</strong></p>
-          <div class="summer-rating-2024-modal__empty" aria-hidden="true"></div>
+          <figure class="summer-rating-2024-modal__figure">
+            <img
+              class="summer-rating-2024-modal__photo"
+              src="./assets/hall-fame-cup-summer-2024-pryanik.png"
+              alt="Кубок игрока лета 2024 — Пряник, гравировка на подставке, клуб Два туза"
+              width="720"
+              height="960"
+              loading="lazy"
+            />
+            <figcaption class="summer-rating-2024-modal__figcaption">Кубок с гравировкой: Пряник — игрок лета 2024</figcaption>
+          </figure>
         </div>
       </div>
 
@@ -4600,7 +4638,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=60"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=163"></script>
+    <script src="./app.js?v=166"></script>
   </body>
 </html>
 

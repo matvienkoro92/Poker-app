@@ -307,8 +307,8 @@ html {
   overflow-x: hidden;
   min-height: 100%;
   min-height: -webkit-fill-available;
-  /* Меньше «резинового» оверскролла внизу/вверху в WebView (Telegram / iOS) */
-  overscroll-behavior-y: none;
+  /* contain: без «none» на корне — в части WebView TG/iOS ломается обычный скролл */
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* Два слоя: градиент + сплошная подложка — при «резинке» не белый фон */
   background-color: var(--overscroll-canvas) !important;
@@ -331,7 +331,6 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
 }
 
 /* Отступ сверху: safe-area + высота шапки Telegram («Закрыть»), карточка и меню всегда колонкой */
@@ -475,7 +474,7 @@ body[data-view="raffles"],
 body[data-view="news"],
 body[data-view="tasks"],
 body[data-view="hall"],
-body[data-view="downloads"],
+body[data-view="download"],
 body[data-view="learn-play-hub"],
 body[data-view="video-lessons"],
 body[data-view="poker-tasks"],
@@ -499,7 +498,8 @@ body[data-view="spring-rating"] {
 html:has(.view--active[data-view="learn-play-hub"]),
 html:has(.view--active[data-view="video-lessons"]),
 html:has(.view--active[data-view="poker-tasks"]),
-html:has(.view--active[data-view="hall-of-fame"]) {
+html:has(.view--active[data-view="hall-of-fame"]),
+html:has(.view--active[data-view="download"]) {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -517,7 +517,7 @@ html.app-view-long-scroll {
   -webkit-overflow-scrolling: touch;
   height: auto;
   min-height: 100%;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 body.app-view-long-scroll {
@@ -528,7 +528,7 @@ body.app-view-long-scroll {
   /* Не даём flex-stretch ужать .app до высоты вьюпорта — иначе контент обрезается (~9 карточек) */
   align-items: flex-start;
   justify-content: center;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
 }
 html.app-view-long-scroll .app {
@@ -3953,7 +3953,7 @@ img.chat-contact__avatar {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   touch-action: pan-y;
   display: flex;
   flex-direction: column;
@@ -5985,15 +5985,13 @@ html.app-view-home .feature--rating-spring-promo:hover,
   box-sizing: border-box;
 }
 .tournament-day-home-wrap .tournament-day-block--home {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
+  display: block;
+  position: relative;
   width: 100%;
-  position: static;
   top: auto;
   padding: 14px 16px;
   min-height: 0;
+  overflow: hidden;
   background: #000 !important;
   border: 1px solid rgba(251, 146, 60, 0.5);
   border-radius: 16px 16px 0 0;
@@ -6005,17 +6003,25 @@ html.app-view-home .feature--rating-spring-promo:hover,
   border-color: rgba(251, 146, 60, 0.65);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(0, 0, 0, 0.25), 0 0 12px rgba(251, 146, 60, 0.25) !important;
 }
+/* Картинка: половина ширины и половина высоты кнопки (внутри паддингов), по центру по вертикали слева */
 .tournament-day-home-wrap .tournament-day-block--home .feature__icon--tournament-day-home {
-  flex: 0 0 auto;
-  width: clamp(80px, 28vw, 132px);
-  aspect-ratio: 1;
-  border-radius: 12px;
+  position: absolute;
+  left: 16px;
+  top: calc(14px + (100% - 28px) * 0.25);
+  width: calc((100% - 32px) * 0.5);
+  height: calc((100% - 28px) * 0.5);
+  min-width: 72px;
+  min-height: 72px;
   overflow: hidden;
-  align-self: center;
+  margin: 0;
+  border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(251, 146, 60, 0.35);
+  box-sizing: border-box;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__trophy-img--home-promo {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -6023,9 +6029,14 @@ html.app-view-home .feature--rating-spring-promo:hover,
   object-position: center;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__body {
-  flex: 1;
+  margin-left: calc(50% + 8px);
+  width: calc(50% - 24px);
+  max-width: calc(50% - 24px);
   min-width: 0;
-  width: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__badge {
   font-size: 12px;
@@ -11335,13 +11346,29 @@ a.home-mini-icon-item {
   text-align: center;
   line-height: 1.4;
 }
-/* Лето 2024: окно без текста под заголовком */
+/* Лето 2024: модалка с фото кубка */
 .summer-rating-2024-modal__inner {
-  max-height: min(50vh, 360px);
+  max-height: min(90vh, 760px);
 }
-.summer-rating-2024-modal__empty {
-  min-height: 48px;
-  margin: 0;
+.summer-rating-2024-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.summer-rating-2024-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(253, 224, 71, 0.25);
+}
+.summer-rating-2024-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
 }
 .summer-rating-2025-modal__figure {
   margin: 0 0 16px;
@@ -11468,6 +11495,7 @@ a.home-mini-icon-item {
 [data-theme="light"] .summer-rating-2025-modal__subtitle {
   color: #0e7490;
 }
+[data-theme="light"] .summer-rating-2024-modal__figcaption,
 [data-theme="light"] .summer-rating-2025-modal__figcaption {
   color: #64748b;
 }
@@ -14410,6 +14438,56 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   text-align: center;
   width: 100%;
 }
+/* Ссылка на вкладку: Поделиться / Скопировать (уникальный startapp на раздел) */
+.hall-of-fame__panel-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.hall-of-fame__panel-share-row--in-card {
+  margin-top: 0;
+}
+.hall-of-fame__panel-share-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s, background 0.15s;
+}
+.hall-of-fame__panel-share-btn--tg {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.12));
+  border-color: rgba(56, 189, 248, 0.55);
+  color: var(--text);
+}
+[data-theme="light"] .hall-of-fame__panel-share-btn--tg {
+  color: #0f172a;
+}
+.hall-of-fame__panel-share-btn:active {
+  opacity: 0.92;
+}
+.hall-of-fame__startapp-code {
+  font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  word-break: break-all;
+}
+[data-theme="light"] .hall-of-fame__startapp-code {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 .hall-of-fame__panels {
   margin-top: 4px;
   min-height: 120px;
@@ -15187,6 +15265,33 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 [data-theme="light"] .hall-of-fame__summer-winner {
   color: #0c4a6e;
+}
+
+/* Кубок лета 2024 — миниатюра на кнопке в зале славы */
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .feature__cup--photo.hall-of-fame__summer-2024-cup {
+  font-size: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .hall-of-fame__cup-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(253, 224, 71, 0.3);
+}
+@media (max-width: 400px) {
+  .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .feature__cup--photo.hall-of-fame__summer-2024-cup {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 /* Карточка «Весна 2024» — свежая весенняя палитра */

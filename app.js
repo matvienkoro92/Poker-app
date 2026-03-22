@@ -350,11 +350,9 @@ function getAssetUrl(relativePath) {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
         return;
       }
-      if (
-        (startApp === "blog_top15" || startApp === "hall_top15") &&
-        typeof navigateToHallFameBlogTop15 === "function"
-      ) {
-        navigateToHallFameBlogTop15();
+      var hallFromLink = resolveHallFameSectionFromStartParam(startApp);
+      if (hallFromLink && typeof navigateToHallFameSection === "function") {
+        navigateToHallFameSection(hallFromLink);
         return;
       }
       if (startApp && (startApp === "news" || startApp.indexOf("news_") === 0) && typeof openGazette === "function") {
@@ -1542,9 +1540,10 @@ function runGazetteAndTasksInit() {
       }, 400);
     }, 0);
   }
-  if (startParam === "blog_top15" || startParam === "hall_top15") {
+  var hallSecStart = resolveHallFameSectionFromStartParam(startParam);
+  if (hallSecStart) {
     setTimeout(function () {
-      if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+      navigateToHallFameSection(hallSecStart);
     }, 0);
   }
   if (startParam === "raffles") {
@@ -1608,9 +1607,10 @@ function runGazetteAndTasksInit() {
     } else if (urlStart === "stream") {
       // Legacy: startapp=stream
       setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
-    } else if (urlStart === "blog_top15" || urlStart === "hall_top15") {
+    } else if (resolveHallFameSectionFromStartParam(urlStart)) {
+      var hallFromQuery = resolveHallFameSectionFromStartParam(urlStart);
       setTimeout(function () {
-        if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
+        navigateToHallFameSection(hallFromQuery);
       }, 0);
     } else if (urlStart === "club_chat") {
       window.__pendingOpenClubChatGeneral = true;
@@ -2553,6 +2553,11 @@ function getPokerResolvedTelegramUser() {
 (function initTelegramAuth() {
   window.__pokerTelegramAuth = { status: "unknown", user: null, error: null };
 
+  /** Актуальный WebApp (не замыкание на старый объект — иногда initData появляется с задержкой). */
+  function getTelegramWebAppNow() {
+    return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  }
+
   var banner = document.getElementById("authBanner");
   var bannerLink = document.getElementById("authBannerLink");
   var bannerText = document.getElementById("authBannerText");
@@ -2881,6 +2886,7 @@ function getPokerResolvedTelegramUser() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ initData: initData }),
+      cache: "no-store",
     }).then(function (res) {
       return res
         .json()
@@ -2894,10 +2900,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   function runVerifyFlow() {
-    var initData = tg && tg.initData ? String(tg.initData) : "";
-    var userUnsafe = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    var wtg = getTelegramWebAppNow();
+    var initData = wtg && wtg.initData ? String(wtg.initData) : "";
+    var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
-    if (!tg) {
+    if (!wtg) {
       if (tryFinishTelegramLoginRedirect()) {
         return;
       }
@@ -2943,6 +2950,7 @@ function getPokerResolvedTelegramUser() {
     showUnauthorized();
     updateHeaderGreeting();
 
+    var maxAuthAttempts = 8;
     var attempts = 0;
     function tryOnce() {
       attempts += 1;
@@ -2988,27 +2996,33 @@ function getPokerResolvedTelegramUser() {
             }
             return;
           }
-          if (attempts < 3) {
-            setTimeout(tryOnce, 800);
+          if (attempts < maxAuthAttempts) {
+            setTimeout(tryOnce, authRetryDelayMs(attempts));
             return;
           }
           window.__pokerTelegramAuth = { status: "network", user: null, error: "bad_response" };
           updateHeaderGreeting();
           showUnauthorized();
-          setBannerFailure("Не удалось связаться с сервером. Проверьте интернет и нажмите «Повторить проверку».", true);
+          setBannerFailure(
+            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку».",
+            true
+          );
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e4) {}
         })
         .catch(function () {
-          if (attempts < 3) {
-            setTimeout(tryOnce, 800);
+          if (attempts < maxAuthAttempts) {
+            setTimeout(tryOnce, authRetryDelayMs(attempts));
             return;
           }
           window.__pokerTelegramAuth = { status: "network", user: null, error: "fetch" };
           updateHeaderGreeting();
           showUnauthorized();
-          setBannerFailure("Не удалось связаться с сервером. Проверьте интернет и нажмите «Повторить проверку».", true);
+          setBannerFailure(
+            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку».",
+            true
+          );
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e5) {}
@@ -3017,9 +3031,52 @@ function getPokerResolvedTelegramUser() {
     tryOnce();
   }
 
+  /** Пауза между попытками /api/auth-telegram (VPN и прокси часто дают таймауты на первых запросах). */
+  function authRetryDelayMs(attemptSoFar) {
+    var n = Math.max(0, attemptSoFar - 1);
+    return Math.min(450 + n * 550 + n * n * 220, 9000);
+  }
+
+  /** В Mini App initData иногда заполняется не с первого кадра — ждём перед отказом. */
+  function waitForInitDataThenVerify(maxWaitMs, intervalMs) {
+    var wtg = getTelegramWebAppNow();
+    if (!wtg || wtg.initData) {
+      runVerifyFlow();
+      return;
+    }
+    var start = Date.now();
+    var t = setInterval(function () {
+      var w = getTelegramWebAppNow();
+      if (w && w.initData) {
+        clearInterval(t);
+        runVerifyFlow();
+        return;
+      }
+      if (Date.now() - start >= maxWaitMs) {
+        clearInterval(t);
+        runVerifyFlow();
+      }
+    }, intervalMs);
+  }
+
+  var lastAuthAutoRetryTs = 0;
+  function maybeRetryAuthWhenNetworkBack() {
+    var now = Date.now();
+    if (now - lastAuthAutoRetryTs < 2500) return;
+    try {
+      var a = window.__pokerTelegramAuth;
+      if (!a || a.status !== "network") return;
+      var w = getTelegramWebAppNow();
+      if (!w || !w.initData) return;
+      lastAuthAutoRetryTs = now;
+      runVerifyFlow();
+    } catch (eNet) {}
+  }
+
   if (bannerRetry) {
     bannerRetry.addEventListener("click", function () {
-      if (!tg || !tg.initData) {
+      var wtg = getTelegramWebAppNow();
+      if (!wtg || !wtg.initData) {
         if (!isTelegramWebApp() && typeof window.location !== "undefined" && window.location.reload) {
           window.location.reload();
         } else {
@@ -3033,7 +3090,8 @@ function getPokerResolvedTelegramUser() {
   }
 
   window.pokerRetryTelegramAuthVerification = function () {
-    if (tg && tg.initData) {
+    var wtgR = getTelegramWebAppNow();
+    if (wtgR && wtgR.initData) {
       runVerifyFlow();
       return;
     }
@@ -3042,7 +3100,19 @@ function getPokerResolvedTelegramUser() {
     }
   };
 
-  runVerifyFlow();
+  window.addEventListener("online", maybeRetryAuthWhenNetworkBack);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      setTimeout(maybeRetryAuthWhenNetworkBack, 400);
+    }
+  });
+
+  var wtgBoot = getTelegramWebAppNow();
+  if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
+    waitForInitDataThenVerify(12000, 350);
+  } else {
+    runVerifyFlow();
+  }
 })();
 
 // Скрыть экран загрузки после готовности страницы (не белый экран при открытии)
@@ -3602,16 +3672,18 @@ function setView(viewName) {
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
-  /* Любой экран — с верха: иначе после длинной главной открывается середина/низ следующего раздела. */
-  scrollMainDocumentToTop();
-  var rafTop = window.requestAnimationFrame || function (fn) {
-    setTimeout(fn, 16);
-  };
-  rafTop(function () {
+  /* С верха только при смене экрана — иначе лишние вызовы setView ломают прокрутку / держат страницу наверху. */
+  if (viewName !== prevView) {
     scrollMainDocumentToTop();
-  });
-  setTimeout(scrollMainDocumentToTop, 0);
-  setTimeout(scrollMainDocumentToTop, 50);
+    var rafTop = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    rafTop(function () {
+      scrollMainDocumentToTop();
+    });
+    setTimeout(scrollMainDocumentToTop, 0);
+    setTimeout(scrollMainDocumentToTop, 50);
+  }
 }
 
 function setHallOfFameSubtabActive(section) {
@@ -3677,83 +3749,171 @@ function showHallOfFamePanel(section) {
 window.showHallOfFamePanel = showHallOfFamePanel;
 window.openHallOfFameSectionModal = showHallOfFamePanel;
 
+/** Уникальный startapp для каждой вкладки зала славы (плюс legacy для топ‑15). */
+var HALL_FAME_SECTION_STARTAPP = {
+  legends: "hall_fame_legends",
+  cups: "hall_fame_cups",
+  top2026: "hall_fame_top2026",
+  photos: "hall_fame_photos",
+  shame: "hall_fame_shame"
+};
+
+var HALL_FAME_SHARE_INTRO = {
+  legends: "Зал славы — Легенды клуба «Два туза»",
+  cups: "Зал славы — Кубки",
+  top2026: "Зал славы — Топ выигрышей за один турнир (2026)",
+  photos: "Зал славы — Фотоальбом",
+  shame: "Зал славы — Доска позора"
+};
+
+function getHallFameSectionStartParam(section) {
+  return HALL_FAME_SECTION_STARTAPP[section] || null;
+}
+
+/** Прямая ссылка в мини‑апп на вкладку зала славы */
+function getHallFameSectionShareUrl(section) {
+  var p = getHallFameSectionStartParam(section);
+  if (!p || typeof buildMiniAppStartLink !== "function") return "";
+  return buildMiniAppStartLink(p);
+}
+
+function resolveHallFameSectionFromStartParam(startParam) {
+  if (!startParam) return null;
+  var p = String(startParam).trim();
+  /* Литералы: эта функция вызывается из раннего runGazetteAndTasksInit до присвоения HALL_FAME_SECTION_STARTAPP */
+  if (p === "blog_top15" || p === "hall_top15" || p === "hall_fame_top2026") return "top2026";
+  if (p === "hall_fame_legends") return "legends";
+  if (p === "hall_fame_cups") return "cups";
+  if (p === "hall_fame_photos") return "photos";
+  if (p === "hall_fame_shame") return "shame";
+  return null;
+}
+
 /**
- * Зал славы → блок «Топ выигрышей за один турнир» (топ‑15).
- * Ссылка в Telegram: …/DvaTuza?startapp=blog_top15 (или hall_top15).
+ * Открыть зал славы на нужной вкладке (deep link + кнопки «Поделиться»).
  */
-function navigateToHallFameBlogTop15() {
+function navigateToHallFameSection(section) {
   if (typeof setView === "function") setView("hall-of-fame");
   setTimeout(function () {
-    try {
-      if (typeof window.updateWinterRatingWeekTopPreviews === "function") {
-        window.updateWinterRatingWeekTopPreviews();
-      }
-    } catch (ePrev) {}
-    if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("top2026");
+    if (section === "top2026") {
+      try {
+        if (typeof window.updateWinterRatingWeekTopPreviews === "function") {
+          window.updateWinterRatingWeekTopPreviews();
+        }
+      } catch (ePrev) {}
+    }
+    if (typeof showHallOfFamePanel === "function") showHallOfFamePanel(section || "legends");
   }, 480);
 }
 
-/** Ссылка на мини‑апп сразу на топ‑15 в зале славы (startapp=blog_top15) */
-function getHallFameBlogTop15ShareUrl() {
-  var u = getAppBaseUrlForLinks();
-  u = String(u).replace(/\/$/, "");
-  if (!u) return "";
-  var sep = u.indexOf("?") >= 0 ? "&" : "?";
-  return u + sep + "startapp=" + encodeURIComponent("blog_top15");
+/**
+ * Зал славы → блок «Топ выигрышей за один турнир» (топ‑15).
+ * Legacy: …?startapp=blog_top15 | hall_top15; новая ссылка: hall_fame_top2026
+ */
+function navigateToHallFameBlogTop15() {
+  navigateToHallFameSection("top2026");
 }
 
-(function initHallFameBlogTop15CopyBtn() {
-  var btn = document.getElementById("hallFameBlogTop15CopyBtn");
-  if (!btn) return;
-  function copyDone(ok) {
-    var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if (tgLocal && tgLocal.showAlert) {
-      tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
-    } else if (ok) {
-      alert("Ссылка скопирована");
-    } else {
-      alert("Не удалось скопировать");
+/** Обратная совместимость: теперь отдаём каноническую ссылку hall_fame_top2026 */
+function getHallFameBlogTop15ShareUrl() {
+  return getHallFameSectionShareUrl("top2026");
+}
+
+function hallFameCopyDone(ok) {
+  var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tgLocal && tgLocal.showAlert) {
+    tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
+  } else if (ok) {
+    alert("Ссылка скопирована");
+  } else {
+    alert("Не удалось скопировать");
+  }
+}
+
+function hallFameCopyUrlToClipboard(url) {
+  if (!url) {
+    hallFameCopyDone(false);
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard
+      .writeText(url)
+      .then(function () {
+        hallFameCopyDone(true);
+      })
+      .catch(function () {
+        hallFameCopyDone(false);
+      });
+  } else {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = url;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      hallFameCopyDone(true);
+    } catch (e) {
+      hallFameCopyDone(false);
     }
   }
-  btn.addEventListener("click", function () {
-    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-    var url = getHallFameBlogTop15ShareUrl();
-    if (!url) {
-      var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg0 && tg0.showAlert) {
-        tg0.showAlert("Задайте в index.html атрибут data-telegram-app-url у #app.");
-      } else {
-        alert("Не задан URL мини‑приложения (data-telegram-app-url).");
-      }
-      return;
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard
-        .writeText(url)
-        .then(function () {
-          copyDone(true);
-        })
-        .catch(function () {
-          copyDone(false);
-        });
+}
+
+function hallFameOpenTelegramShareForSection(section) {
+  var url = getHallFameSectionShareUrl(section);
+  if (!url) {
+    var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg0 && tg0.showAlert) {
+      tg0.showAlert("Задайте в index.html атрибут data-telegram-app-url у #app.");
     } else {
-      try {
-        var ta = document.createElement("textarea");
-        ta.value = url;
-        ta.setAttribute("readonly", "");
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        copyDone(true);
-      } catch (e) {
-        copyDone(false);
+      alert("Не задан URL мини‑приложения (data-telegram-app-url).");
+    }
+    return;
+  }
+  var intro = HALL_FAME_SHARE_INTRO[section] || "Зал славы «Два туза»";
+  var text = intro + "\n\n" + url;
+  var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+  var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+  else if (tg && tg.openLink) tg.openLink(shareUrl);
+  else window.open(shareUrl, "_blank", "noopener,noreferrer");
+}
+
+(function initHallOfFamePanelShareButtons() {
+  var root = document.getElementById("hallOfFameView");
+  if (!root) return;
+  root.addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest("[data-hall-fame-share][data-hall-fame-action]") : null;
+    if (!btn) return;
+    var section = btn.getAttribute("data-hall-fame-share");
+    var action = btn.getAttribute("data-hall-fame-action");
+    if (!section || (action !== "copy" && action !== "share")) return;
+    e.preventDefault();
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    if (action === "share") {
+      hallFameOpenTelegramShareForSection(section);
+    } else {
+      var url = getHallFameSectionShareUrl(section);
+      if (!url) {
+        var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg0 && tg0.showAlert) {
+          tg0.showAlert("Задайте в index.html атрибут data-telegram-app-url у #app.");
+        } else {
+          alert("Не задан URL мини‑приложения (data-telegram-app-url).");
+        }
+        return;
       }
+      hallFameCopyUrlToClipboard(url);
     }
   });
 })();
+
+window.navigateToHallFameSection = navigateToHallFameSection;
+window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;
 
 function updateChatNavDot() {
   var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
@@ -17705,7 +17865,6 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     "view:news": "Экран: новости",
     "view:hall": "Экран: зал славы",
     "view:tasks": "Экран: задания",
-    "view:downloads": "Экран: загрузки",
   };
 
   function formatActivityCell(activity) {
