@@ -340,8 +340,8 @@ body {
   width: 100%;
   min-height: 100vh;
   padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + 52px));
-  /* Запас под фиксированное меню без лишнего «хвоста» при оверскролле */
-  padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  /* Запас под фиксированное таб-меню (~56px + паддинги); без лишнего «хвоста» при нижней резинке */
+  padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
   display: flex;
@@ -494,14 +494,29 @@ body[data-view="spring-rating"] {
   width: auto;
   -webkit-overflow-scrolling: touch;
 }
-/* Часть WebView (в т.ч. Telegram) скроллит documentElement, а не body — длинные экраны «Научиться» / видеоуроки */
+/* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
 html:has(.view--active[data-view="video-lessons"]),
 html:has(.view--active[data-view="poker-tasks"]),
 html:has(.view--active[data-view="hall-of-fame"]),
 html:has(.view--active[data-view="download"]) {
-  overflow-y: auto;
+  overflow-y: visible !important;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+}
+html:has(.view--active[data-view="learn-play-hub"]) body,
+html:has(.view--active[data-view="video-lessons"]) body,
+html:has(.view--active[data-view="poker-tasks"]) body,
+html:has(.view--active[data-view="hall-of-fame"]) body,
+html:has(.view--active[data-view="download"]) body {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* TG/WebKit: body по умолчанию row-flex + align-stretch — высота #app = viewport и обрез списка; block убирает flex-растяжение */
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
 }
 /* Redmi и др.: часть WebView скроллит html — даём явный скролл (класс вешается при загрузке главной) */
 html.app-view-home {
@@ -510,32 +525,39 @@ html.app-view-home {
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--body-bg);
 }
-/* Видеоуроки / хаб «Научиться» / зал славы: класс вешает setView (без :has() — старый WebView TG) */
+/* Иначе одновременно крутятся html и body — залипание скролла на главной */
+html.app-view-home body {
+  overflow-y: visible !important;
+}
+/* Видеоуроки / хаб: класс с setView. Скролл на body — см. комментарий к :has() выше (обрез после ~9 блоков при scroll на html). */
 html.app-view-long-scroll {
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  height: auto;
+  height: auto !important;
   min-height: 100%;
-  /* Перебиваем html { overscroll-behavior-y: contain } — плавнее скролл длинных экранов в WebView */
-  overscroll-behavior-y: auto !important;
-  scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
+  overscroll-behavior-y: contain;
+  scroll-padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
 }
 body.app-view-long-scroll {
   overflow-y: auto !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   min-height: 100%;
-  /* Не даём flex-stretch ужать .app до высоты вьюпорта — иначе контент обрезается (~9 карточек) */
-  align-items: flex-start;
-  justify-content: center;
-  overscroll-behavior-y: auto !important;
-  scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
+  /* Не flex: иначе в части WebView cross-stretch снова даёт #app ≈ viewport и обрез длинных списков */
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  overscroll-behavior-y: contain;
+  scroll-padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
 }
 html.app-view-long-scroll .app {
   overflow: visible !important;
   min-height: 100vh;
   min-height: 100dvh;
+  height: auto !important;
+  max-height: none !important;
   flex-shrink: 0;
 }
 /* Карточка не сжимается ниже высоты контента (min-height:0 ломает длинные списки в колонке .app) */
@@ -547,6 +569,115 @@ body.app-view-long-scroll .card {
 html.app-view-long-scroll .card .card__content,
 body.app-view-long-scroll .card .card__content {
   overflow: visible !important;
+}
+
+/* Видеоуроки: дублируем без единственной зависимости от app-view-long-scroll (старые WebView / порядок классов) */
+.card:has(.view--active[data-view="video-lessons"]) {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible;
+}
+.card:has(.view--active[data-view="video-lessons"]) .card__content {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible !important;
+}
+.view.view--active[data-view="video-lessons"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/*
+ * Видеоуроки: fallback без :has() (часть WebView Telegram/Android не применяет .card:has(...)).
+ * Иначе .card остаётся с min-height: 0 и overflow у .app обрезает список (~видны уроки до 10–11).
+ */
+body[data-view="video-lessons"] {
+  display: block !important;
+}
+body[data-view="video-lessons"] .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  /* Без :has() таб-бар скрыт, а padding-bottom .app остаётся «под навигацию» — убираем */
+  padding-bottom: max(8px, calc(4px + env(safe-area-inset-bottom, 0px))) !important;
+}
+/*
+ * «Чёрная дыра» под контентом: .bg-gradient с inset:-40% абсолютно позиционирован в #app.
+ * При overflow:visible на .app вылет за padding-box попадает в scrollable overflow <html> —
+ * scrollHeight ≈ высота контента + сотни/тысячи px снизу (процент от высоты #app).
+ * Обрезка только для этого экрана; фон карточки и .bg-blur (inset:0) не страдают.
+ */
+body[data-view="video-lessons"] .app > .bg-gradient {
+  inset: 0;
+}
+html.app-view-vl-html-scroll .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="video-lessons"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible;
+}
+body[data-view="video-lessons"] .card .card__content {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible !important;
+}
+body[data-view="video-lessons"] .view.view--active[data-view="video-lessons"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/*
+ * Видеоуроки: единый scrollport на <html> (класс вешает setView).
+ * Без лишних min-height на html/.app — иначе в iOS/TG раздувается scrollHeight («пустой хвост») и скролл залипает ~на 9-й карточке.
+ */
+html.app-view-vl-html-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto !important;
+  min-height: 100%;
+  max-height: none !important;
+  overscroll-behavior-y: auto !important;
+  overflow-anchor: none;
+  scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+}
+html.app-view-vl-html-scroll body,
+html.app-view-vl-html-scroll body.app-view-long-scroll {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  min-height: 0 !important;
+  overscroll-behavior-y: auto;
+}
+/* Запас под контент без «двойного вьюпорта»: не дублируем 100dvh поверх базового .app */
+html.app-view-vl-html-scroll .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  flex-shrink: 0;
+}
+html.app-view-vl-html-scroll .card {
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
+  overflow: visible;
+}
+html.app-view-vl-html-scroll .card .card__content {
+  overflow: visible !important;
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
 }
 
 /* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
@@ -6511,7 +6642,6 @@ html.app-view-home .feature--rating-spring-promo:hover,
   --vl-free-open: #22d3ee;
   --vl-free-num-fg: #67e8f9;
   --vl-free-num-bg: rgba(34, 211, 238, 0.18);
-  touch-action: pan-y;
 }
 [data-theme="light"] .view[data-view="video-lessons"] {
   --vl-free-border: rgba(2, 132, 199, 0.38);
@@ -6851,7 +6981,8 @@ html.app-view-home .feature--rating-spring-promo:hover,
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
-  padding-bottom: 10px;
+  overflow-anchor: none;
+  padding-bottom: 12px;
 }
 .video-lessons__card {
   flex-shrink: 0;
@@ -6973,19 +7104,22 @@ html.app-view-home .feature--rating-spring-promo:hover,
 [data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
   color: rgba(91, 33, 182, 0.55);
 }
+/* Раскрытие через grid 0fr/1fr — без max-height в px/vh (в части WebView обрезали хвост страницы ~высотой «9 карточек») */
 .video-lessons__player-wrap {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
   overflow: hidden;
-  transition: max-height 0.35s ease-out;
+  transition: grid-template-rows 0.35s ease-out;
 }
 .video-lessons__player-wrap.video-lessons__player-wrap--hidden {
-  max-height: 0;
+  grid-template-rows: 0fr;
 }
 .video-lessons__player-wrap:not(.video-lessons__player-wrap--hidden) {
-  /* Текст + PDF + кнопка + плеер — потолок для transition; без лишних сотен vh (ломает скролл в части WebView) */
-  max-height: min(160vh, 3200px);
+  grid-template-rows: 1fr;
 }
 .video-lessons__player-inner {
+  min-height: 0;
+  overflow: visible;
   padding: 10px 12px 14px;
 }
 .video-lessons__video-error {
@@ -13285,7 +13419,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
 }
 
-/* Нижнее меню скрыто — без полных 72px под таб-бар, но оставляем запас, чтобы докрутить контент до конца + safe-area */
+/* Нижнее меню скрыто — компактный запас + safe-area (меньше «пустой» нижней резинки) */
 .app:has(.view--active[data-view="spring-rating"]),
 .app:has(.view--active[data-view="hall-of-fame"]),
 .app:has(.view--active[data-view="schedule"]),
@@ -13298,11 +13432,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .app:has(.view--active[data-view="streams"]),
 .app:has(.view--active[data-view="equilator"]),
 .app:has(.view--active[data-view="winter-rating"]) {
-  padding-bottom: max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px)));
 }
-/* Видеоуроки: один отступ снизу + safe-area (не суммировать с padding в списке/МТТ) */
+/* Видеоуроки: ещё компактнее — safe-area достаточно с края экрана */
 .app:has(.view--active[data-view="video-lessons"]) {
-  padding-bottom: max(12px, calc(6px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
 }
 
 .winter-rating__date-item {

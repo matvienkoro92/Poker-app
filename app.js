@@ -3654,9 +3654,12 @@ function setView(viewName) {
     viewName === "video-lessons" ||
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame";
+    viewName === "hall-of-fame" ||
+    viewName === "download";
   document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
+  /* Видеоуроки: в iOS/Telegram WebView крутится чаще <html> (scrollingElement); overflow:visible на html обрезает «хвост» списка */
+  document.documentElement.classList.toggle("app-view-vl-html-scroll", viewName === "video-lessons");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
@@ -3954,7 +3957,10 @@ function updateRaffleBadge(hasActive) {
 
 var MAIN_VIEW_ORDER = ["home", "chat", "download", "cashout", "profile"];
 var SWIPE_MIN_DIST = 60;
-var SWIPE_MAX_VERTICAL_RATIO = 0.6;
+/* Выше порог — меньше ложных «горизонтальных» свайпов при вертикальном скролле длинных табов */
+var SWIPE_MAX_VERTICAL_RATIO = 1.05;
+/* Если уже тянем таб, но жест стал в основном вертикальным — отпускаем, иначе preventDefault ломает скролл */
+var SWIPE_CANCEL_VERTICAL_RATIO = 1.12;
 
 function setViewAnimated(viewName, direction) {
   var current = document.querySelector(".view--active[data-view]");
@@ -4008,6 +4014,37 @@ function setViewAnimated(viewName, direction) {
   // с горизонтальным свайп-навигационным обработчиком, отключаем свайп, если
   // жест начался внутри скроллящихся областей чата.
   var swipeDisabled = false;
+  function clearSwipeNavInteractionState() {
+    try {
+      var content = document.querySelector(".card__content");
+      if (content) content.classList.remove("card__content--swipe-animating");
+      if (currentViewEl) {
+        currentViewEl.style.transition = "";
+        currentViewEl.style.transform = "";
+        currentViewEl.classList.remove(
+          "view--swipe-current",
+          "view--swipe-drag",
+          "view--swipe-out-left",
+          "view--swipe-out-right"
+        );
+      }
+      if (nextViewEl) {
+        nextViewEl.style.transition = "";
+        nextViewEl.style.transform = "";
+        nextViewEl.classList.remove(
+          "view--swipe-next",
+          "view--swipe-drag",
+          "view--swipe-in-from-right",
+          "view--swipe-in-from-left",
+          "view--swipe-in-start"
+        );
+      }
+    } catch (err) {}
+    dragging = false;
+    currentViewEl = null;
+    nextViewEl = null;
+    dragDirection = 0;
+  }
   function getCurrentView() {
     var active = document.querySelector(".view--active[data-view]");
     return active ? active.getAttribute("data-view") : null;
@@ -4049,10 +4086,14 @@ function setViewAnimated(viewName, direction) {
     // то полностью игнорируем окончание касания и не навигируем между экранами.
     if (swipeDisabled) {
       swipeDisabled = false;
+      clearSwipeNavInteractionState();
       return;
     }
     var current = getCurrentView();
-    if (MAIN_VIEW_ORDER.indexOf(current) < 0) return;
+    if (MAIN_VIEW_ORDER.indexOf(current) < 0) {
+      clearSwipeNavInteractionState();
+      return;
+    }
     var endX = e.changedTouches[0].clientX;
     var endY = e.changedTouches[0].clientY;
     var dx = endX - startX;
@@ -4064,29 +4105,10 @@ function setViewAnimated(viewName, direction) {
       var totalWidth = currentViewEl.offsetWidth || window.innerWidth;
       var progress = Math.min(1, Math.max(0, absDx / (totalWidth * 0.3)));
       var shouldNavigate = progress > 0.4;
-
-      // Убираем "drag" классы и inline-трансформации, чтобы следующий
-      // `setViewAnimated()` не получил конфликтующие transition: none.
-      try {
-        var content = document.querySelector(".card__content");
-        if (content) content.classList.remove("card__content--swipe-animating");
-        currentViewEl.style.transition = "";
-        nextViewEl.style.transition = "";
-        currentViewEl.style.transform = "";
-        nextViewEl.style.transform = "";
-        currentViewEl.classList.remove("view--swipe-drag");
-        nextViewEl.classList.remove("view--swipe-drag");
-        currentViewEl.classList.remove("view--swipe-current");
-        nextViewEl.classList.remove("view--swipe-next");
-        currentViewEl.classList.remove("view--swipe-out-left", "view--swipe-out-right");
-        nextViewEl.classList.remove("view--swipe-in-from-right", "view--swipe-in-from-left", "view--swipe-in-start");
-      } catch (err) {}
-
-      dragging = false;
+      var dirNav = dragDirection;
+      clearSwipeNavInteractionState();
       if (!shouldNavigate) return;
-
-      // Навигация между экранами: направление уже посчитано в onTouchMove().
-      goToAdjacent(dragDirection);
+      goToAdjacent(dirNav);
       return;
     }
     if (absDx < SWIPE_MIN_DIST) return;
@@ -4124,6 +4146,10 @@ function setViewAnimated(viewName, direction) {
       dragging = true;
     }
     if (!dragging || !currentViewEl || !nextViewEl) return;
+    if (absDy > absDx * SWIPE_CANCEL_VERTICAL_RATIO) {
+      clearSwipeNavInteractionState();
+      return;
+    }
     e.preventDefault();
     var width = currentViewEl.offsetWidth || window.innerWidth;
     var progress = Math.max(-1, Math.min(1, dx / width));
@@ -4135,6 +4161,14 @@ function setViewAnimated(viewName, direction) {
     card.addEventListener("touchstart", onTouchStart, { passive: true });
     card.addEventListener("touchmove", onTouchMove, { passive: false });
     card.addEventListener("touchend", onTouchEnd, { passive: false });
+    card.addEventListener(
+      "touchcancel",
+      function () {
+        swipeDisabled = false;
+        clearSwipeNavInteractionState();
+      },
+      { passive: true }
+    );
   }
 })();
 
