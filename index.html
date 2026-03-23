@@ -220,7 +220,14 @@
           });
         }
         if (document.readyState === "complete") scheduleHide();
-        else window.addEventListener("load", scheduleHide);
+        else {
+          // Быстрый UX: скрываем оверлей по готовности DOM, а не дожидаемся "load",
+          // который может задерживаться медленными ресурсами (изображения/шрифты).
+          document.addEventListener("DOMContentLoaded", scheduleHide, { once: true });
+          window.addEventListener("load", scheduleHide, { once: true });
+          // Фолбэк на случай нестандартных сред: гарантируем скрытие через короткое время.
+          setTimeout(scheduleHide, 4000);
+        }
         stallTimer = setTimeout(function () {
           var el = document.getElementById("appBootOverlay");
           if (!el || el.classList.contains("app-boot-overlay--hidden")) return;

@@ -19885,6 +19885,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
               '<div class="admin-report-sent-item admin-report-sent-item--week">' +
                 '<div class="admin-report-sent-item__head" role="button" tabindex="0" aria-expanded="false" aria-controls="' + weekId + '-detail">' +
                   '<span class="admin-report-sent-item__date">Итого за неделю ' + escapeReportHtml(label) + "</span>" +
+                  '<button type="button" class="admin-report-week-copy-btn" data-week-id="' + escapeReportHtml(weekId) + '" title="Скопировать итог за неделю">⧉</button>' +
                   '<span class="admin-report-sent-item__toggle" aria-hidden="true">▼</span>' +
                 "</div>" +
                 '<div class="admin-report-sent-detail" id="' + weekId + '-detail" hidden>' +
@@ -19913,11 +19914,6 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         }
 
         var html = [];
-        html.push(
-          '<div class="admin-report-sent-actions">' +
-            '<button type="button" class="admin-report-copy-summary-btn" id="adminReportCopyAllSentBtn" title="Скопировать в буфер обмена">Скопировать весь отчёт</button>' +
-          "</div>"
-        );
         html.push('<div class="admin-report-sent-current">');
         if (currentItems.length === 0) {
           html.push('<p class="admin-report-sent-period-hint">За текущую неделю (' + escapeReportHtml(CURRENT_WEEK_LABEL) + ') отчётов пока нет.</p>');
@@ -19940,189 +19936,82 @@ window.addEventListener("poker-telegram-auth", function (ev) {
 
         sentList.innerHTML = html.join("");
 
-        var copyBtn = sentList.querySelector("#adminReportCopyAllSentBtn");
-        if (copyBtn) {
-          copyBtn.addEventListener("click", function () {
-            function copyTextToClipboard(text) {
-              if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-              var ta = document.createElement("textarea");
-              ta.value = text;
-              ta.setAttribute("readonly", "true");
-              ta.style.position = "fixed";
-              ta.style.top = "-1000px";
-              ta.style.left = "-1000px";
-              document.body.appendChild(ta);
-              ta.select();
-              try {
-                document.execCommand("copy");
-              } catch (e) {}
-              try {
-                document.body.removeChild(ta);
-              } catch (e2) {}
-            }
+        var reportById = {};
+        items.forEach(function (r) { reportById[r.id] = r; });
+        var weekTotalsById = {
+          "ar-week-current": { totals: curTotals, label: CURRENT_WEEK_LABEL },
+          "ar-week-prev": prevTotals ? { totals: prevTotals, label: PREV_WEEK_LABEL } : null,
+        };
+        var weekLabels = {
+          deposit: "Депозит",
+          cashout: "Выводы",
+          prodamus: "Продамус",
+          robokassa: "Робокасса",
+          romaCrypto: "Рома крипта",
+          botCryptoDep: "Бот крипта деп",
+          botExchipDep: "Бот эксчип деп",
+          botExchipCashout: "Бот эксчип вывод",
+          bonuses: "Бонусы",
+          transfers: "Переводы",
+          ret: "Возврат",
+          sergeyMarina: "Сергей/Марина",
+          rakeback: "Рейкбек",
+        };
+        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "transfers", "ret", "sergeyMarina", "rakeback"];
 
-            var labels = {
-              deposit: "Депозит",
-              cashout: "Выводы",
-              prodamus: "Продамус",
-              robokassa: "Робокасса",
-              romaCrypto: "Рома крипта",
-              botCryptoDep: "Бот крипта деп",
-              botExchipDep: "Бот эксчип деп",
-              botExchipCashout: "Бот эксчип вывод",
-              bonuses: "Бонусы",
-              transfers: "Переводы",
-              ret: "Возврат",
-              sergeyMarina: "Сергей/Марина",
-              rakeback: "Рейкбек",
-            };
-            var keys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "transfers", "ret", "sergeyMarina", "rakeback"];
+        function copyTextToClipboard(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "true");
+          ta.style.position = "fixed";
+          ta.style.top = "-1000px";
+          ta.style.left = "-1000px";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand("copy");
+          } catch (e) {}
+          try {
+            document.body.removeChild(ta);
+          } catch (e2) {}
+        }
 
-            function reportNumericFieldsText(r) {
-              var lines = [];
-              keys.forEach(function (k) {
-                var v = r && r[k];
-                if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(labels[k] + ": " + String(v));
-              });
-              return lines;
-            }
+        function weekTotalsToText(totals, label) {
+          var lines = [];
+          if (!totals) return "";
+          lines.push("Итого за неделю " + label);
+          weekKeys.forEach(function (k) {
+            var v = totals[k];
+            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + String(v));
+          });
+          if (totals.extraFields && totals.extraFields.length) {
+            totals.extraFields.forEach(function (f) {
+              if (!f) return;
+              var name = f.name != null ? String(f.name).trim() : "";
+              if (!name) name = "Доп.";
+              var a = f.amount != null ? f.amount : "";
+              if (a === "" || a === "—") return;
+              lines.push(name + ": " + String(a));
+            });
+          }
+          return lines.join("\n");
+        }
 
-            function reportExtrasFieldsText(r) {
-              var lines = [];
-              if (r && Array.isArray(r.extraFields) && r.extraFields.length) {
-                r.extraFields.forEach(function (f) {
-                  if (!f) return;
-                  var n = f.name != null ? String(f.name).trim() : "";
-                  if (!n) n = "Доп.";
-                  var a = f.amount != null ? f.amount : "";
-                  if (a === "" || a === "—") return;
-                  // для extraFields в итогах уже отфильтрованы нули, но подстрахуемся
-                  var num = typeof a === "number" ? a : parseFloat(String(a).replace(",", "."));
-                  if (!isNaN(num) && num === 0) return;
-                  lines.push(n + ": " + String(a));
-                });
-                return lines;
-              }
-              if (r && (r.extraName || r.extraAmount != null)) {
-                var legName = r.extraName ? String(r.extraName).trim() : "";
-                if (!legName) legName = "Доп.";
-                lines.push(legName + ": " + String(r.extraAmount != null ? r.extraAmount : ""));
-              }
-              return lines;
-            }
-
-            function reportCommentText(r) {
-              if (!r || !r.comment) return [];
-              return ["Комментарий: " + String(r.comment)];
-            }
-
-            function reportToTextLines(r) {
-              var lines = [];
-              lines.push("- " + (r.date != null && r.date ? r.date : "") + " · " + (r.authorName || "Админ"));
-              var numericLines = reportNumericFieldsText(r);
-              var extraLines = reportExtrasFieldsText(r);
-              var commentLines = reportCommentText(r);
-              if (numericLines.length) numericLines.forEach(function (x) { lines.push("  " + x); });
-              if (extraLines.length) extraLines.forEach(function (x) { lines.push("  " + x); });
-              if (commentLines.length) commentLines.forEach(function (x) { lines.push("  " + x); });
-              return lines;
-            }
-
-            function weekTotalsToTextLines(totals, label) {
-              var lines = [];
-              var hasNumeric = keys.some(function (k) {
-                return typeof totals[k] === "number" && totals[k] !== 0;
-              });
-              var hasExtra = totals.extraFields && totals.extraFields.length > 0;
-              if (!hasNumeric && !hasExtra) return [];
-
-              lines.push("Итого за неделю " + label);
-              keys.forEach(function (k) {
-                var v = totals[k];
-                if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(labels[k] + ": " + String(v));
-              });
-              if (hasExtra) {
-                totals.extraFields.forEach(function (f) {
-                  if (!f) return;
-                  var n = f.name != null ? String(f.name).trim() : "";
-                  if (!n) n = "Доп.";
-                  var a = f.amount != null ? f.amount : "";
-                  if (a === "" || a === "—") return;
-                  lines.push(n + ": " + String(a));
-                });
-              }
-              return lines;
-            }
-
-            function buildDaysText(list) {
-              var byDay = {};
-              list.forEach(function (r) {
-                var effMs = reportEffectiveTimestampMs(r);
-                var meta = formatRuWeekdayDateFromTs(effMs);
-                var d = (meta.weekday || "").trim() || "—";
-                if (!byDay[d]) byDay[d] = [];
-                byDay[d].push(r);
-              });
-              var daysToRender = weekdayOrder.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
-              Object.keys(byDay).forEach(function (d) {
-                if (weekdayOrder.indexOf(d) === -1 && byDay[d] && byDay[d].length > 0) daysToRender.push(d);
-              });
-
-              var lines = [];
-              daysToRender.forEach(function (day) {
-                lines.push(day);
-                var listDay = byDay[day];
-                if (!listDay) return;
-                listDay.sort(function (a, b) {
-                  var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                  var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                  return tb - ta;
-                });
-                listDay.forEach(function (r) {
-                  var effMs = reportEffectiveTimestampMs(r);
-                  var dispDate = formatRuWeekdayDateFromTs(effMs).date || r.date || "";
-                  var headLine = "- " + dispDate + " · " + (r.authorName || "Админ");
-                  lines.push(headLine);
-                  reportNumericFieldsText(r).forEach(function (x) { lines.push("  " + x); });
-                  reportExtrasFieldsText(r).forEach(function (x) { lines.push("  " + x); });
-                  reportCommentText(r).forEach(function (x) { lines.push("  " + x); });
-                });
-                lines.push("");
-              });
-              return lines.join("\n").trim();
-            }
-
-            var lines = [];
-            lines.push("Отправленные отчёты");
-            lines.push("Текущая неделя: " + CURRENT_WEEK_LABEL);
-            if (currentItems.length === 0) {
-              lines.push("— отчётов пока нет —");
-            } else {
-              lines.push(buildDaysText(currentItems));
-            }
-            if (curTotals) {
-              var curTotalLines = weekTotalsToTextLines(curTotals, CURRENT_WEEK_LABEL);
-              if (curTotalLines.length) lines = lines.concat(curTotalLines);
-            }
-            if (archiveItems.length > 0) {
-              lines.push("");
-              lines.push("Прошлая неделя и ранее (до 22 марта): " + PREV_WEEK_LABEL);
-              lines.push(buildDaysText(archiveItems));
-              if (prevTotals) {
-                var prevTotalLines = weekTotalsToTextLines(prevTotals, PREV_WEEK_LABEL);
-                if (prevTotalLines.length) lines = lines.concat(prevTotalLines);
-              }
-            }
-
-            var text = lines.join("\n").replace(/\n{3,}/g, "\n\n");
+        sentList.querySelectorAll(".admin-report-week-copy-btn").forEach(function (btn) {
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var weekId = btn.getAttribute("data-week-id") || "";
+            var info = weekTotalsById[weekId];
+            if (!info || !info.totals) return;
+            var text = weekTotalsToText(info.totals, info.label);
             copyTextToClipboard(text);
             var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             if (tg && tg.showAlert) tg.showAlert("Скопировано");
           });
-        }
+        });
 
-        var reportById = {};
-        items.forEach(function (r) { reportById[r.id] = r; });
         sentList.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
           head.addEventListener("click", function (e) {
             if (e.target.closest(".admin-report-sent-edit-btn") || e.target.closest(".admin-report-sent-delete-btn")) return;
