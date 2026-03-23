@@ -1056,6 +1056,40 @@ html.app-view-home .home-welcome-outline::before {
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+.auth-identifying-mini {
+  margin: 0 0 8px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auth-identifying-mini--hidden {
+  display: none;
+}
+.auth-identifying-mini__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--text-muted);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: auth-identifying-spin 0.75s linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes auth-identifying-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.auth-identifying-mini__text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 .auth-banner--verifying {
   border-color: rgba(56, 189, 248, 0.45);
 }

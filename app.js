@@ -2747,6 +2747,19 @@ function getPokerResolvedTelegramUser() {
   var appEl = document.getElementById("app");
   var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
   var hintEl = document.getElementById("authBannerHint");
+  var identifyingMiniEl = document.getElementById("authIdentifyingMini");
+
+  function showIdentifyingMini() {
+    if (!identifyingMiniEl) return;
+    identifyingMiniEl.classList.remove("auth-identifying-mini--hidden");
+    identifyingMiniEl.setAttribute("aria-busy", "true");
+  }
+
+  function hideIdentifyingMini() {
+    if (!identifyingMiniEl) return;
+    identifyingMiniEl.classList.add("auth-identifying-mini--hidden");
+    identifyingMiniEl.setAttribute("aria-busy", "false");
+  }
 
   /* Резерв к data-onauth: иногда eval/callback виджета не срабатывает, а postMessage от oauth.telegram.org всё равно приходит. */
   if (!window.__pokerTelegramOauthMessageBridge) {
@@ -3117,6 +3130,7 @@ function getPokerResolvedTelegramUser() {
       banner.classList.add("auth-banner--hidden");
       banner.classList.remove("auth-banner--verifying");
     }
+    hideIdentifyingMini();
     if (bannerRetry) bannerRetry.hidden = true;
   }
 
@@ -3142,7 +3156,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function setBannerVerifying() {
-    if (bannerText) bannerText.textContent = "Проверяем вход через Telegram…";
+    if (bannerText) bannerText.textContent = "Профиль прогружается…";
     if (bannerLink) bannerLink.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
     if (bannerRetry) bannerRetry.hidden = true;
@@ -3150,6 +3164,7 @@ function getPokerResolvedTelegramUser() {
       banner.classList.remove("auth-banner--hidden");
       banner.classList.add("auth-banner--verifying");
     }
+    showIdentifyingMini();
   }
 
   function setBannerFailure(message, showRetry) {
@@ -3158,6 +3173,7 @@ function getPokerResolvedTelegramUser() {
       banner.classList.remove("auth-banner--verifying");
       banner.classList.remove("auth-banner--hidden");
     }
+    hideIdentifyingMini();
     if (bannerRetry) bannerRetry.hidden = !showRetry;
     if (bannerLink) bannerLink.style.display = "none";
   }
@@ -3177,12 +3193,13 @@ function getPokerResolvedTelegramUser() {
           "После «подтвердите в Telegram» переключитесь в приложение Telegram (свайп снизу / кнопка «Домой») и нажмите «Принять» / «Разрешить» в диалоге — нового сообщения в списке чатов может не быть. Затем вернитесь в Mini App. Не помогает — «Открыть в браузере для входа».";
       } else {
         bannerText.textContent =
-          "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram. SMS с кодом не приходит: используется вход через аккаунт Telegram, не по номеру телефона.";
+          "Вход с сайта: нажмите «Log in / Войти через Telegram» — подтвердите в приложении Telegram. Telegram сам решает, нужен ли номер или подтверждение по аккаунту. Если код/подтверждение не приходит — проверьте «Избранное / Saved Messages» и чат с ботом и попробуйте «Войти через Telegram (отдельное окно)».";
       }
     }
     if (banner) banner.classList.remove("auth-banner--verifying");
     if (bannerRetry) bannerRetry.hidden = true;
     if (bannerLink) bannerLink.style.display = "none";
+    hideIdentifyingMini();
     if (hintEl) {
       if (isPwaAuthLocalHost()) {
         var elApp = document.getElementById("app");
@@ -3200,7 +3217,7 @@ function getPokerResolvedTelegramUser() {
           ".";
       } else {
         hintEl.textContent =
-          "Подтверждение — в приложении Telegram; в адресе страницы могут появиться параметры id и hash (это не SMS-код). Домен в @BotFather (/setdomain) — hostname, например " +
+          "Подтверждение — в приложении Telegram; в адресе страницы могут появиться параметры id и hash (это не SMS-код). Если вы не получили код/подтверждение, откройте «Избранное / Saved Messages» и чат с ботом (или попробуйте вход через «отдельное окно»). Домен в @BotFather (/setdomain) — hostname, например " +
           (dom || "example.com") +
           ", без https://. Страница: " +
           cb +
@@ -3681,6 +3698,7 @@ function getPokerResolvedTelegramUser() {
   if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
     // initData иногда появляется с задержкой даже при открытии кнопкой бота.
     // Не блокируем первый рендер на 25с: ждём немного и пускаем verify/виджет.
+    showIdentifyingMini();
     waitForInitDataThenVerify(5000, 300);
   } else {
     runVerifyFlow();
@@ -18959,40 +18977,94 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     }
 
     function doSend(imageBase64, imageMimeType) {
-      var payload = {
-        initData: initData,
-        groups: groupsForPayload,
-        month: month,
-        text: text,
-      };
-      if (imageBase64) payload.imageBase64 = imageBase64;
-      if (imageMimeType) payload.imageMimeType = imageMimeType;
-      fetch(base + "/api/send-bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        restoreSendBtn();
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (data && data.ok) {
+      var BATCH_SIZE = 100;
+      var sentAll = 0;
+      var failedAll = 0;
+      var total = 0;
+
+      function copyTg() {
+        return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      }
+
+      function fetchTotalDryRun() {
+        return fetch(base + "/api/send-bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            initData: initData,
+            groups: groupsForPayload,
+            month: month,
+            dryRun: true,
+          }),
+        }).then(function (r) { return r.json(); });
+      }
+
+      function sendBatch(offset) {
+        if (offset >= total) return Promise.resolve({ done: true });
+        if (sendBtn) {
+          var to = Math.min(offset + BATCH_SIZE, total);
+          sendBtn.textContent = "Отправляем… " + to + " / " + total;
+        }
+        var payload = {
+          initData: initData,
+          groups: groupsForPayload,
+          month: month,
+          text: text,
+          offset: offset,
+          limit: BATCH_SIZE,
+        };
+        if (imageBase64) payload.imageBase64 = imageBase64;
+        if (imageMimeType) payload.imageMimeType = imageMimeType;
+        return fetch(base + "/api/send-bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка рассылки");
+            sentAll += data.sent || 0;
+            failedAll += data.failed || 0;
+            return { done: false, offset: offset + BATCH_SIZE };
+          });
+      }
+
+      fetchTotalDryRun()
+        .then(function (dryData) {
+          var tg = copyTg();
+          total = dryData && dryData.ok ? dryData.total || 0 : 0;
+          if (!total) {
+            restoreSendBtn();
+            var msg0 = "Нет получателей в выбранных группах";
+            if (tg && tg.showAlert) tg.showAlert(msg0); else alert(msg0);
+            closeBroadcastModal();
+            return;
+          }
+          function loop(offset) {
+            return sendBatch(offset).then(function (res) {
+              if (res && res.done) return res;
+              return loop(res.offset);
+            });
+          }
+          return loop(0);
+        })
+        .then(function () {
+          restoreSendBtn();
+          var tg = copyTg();
           var msg =
-            "Получателей: " + (data.total != null ? data.total : 0) +
-            ". Отправлено: " + (data.sent || 0) +
-            ", ошибок: " + (data.failed || 0) +
-            (data.total != null ? " из " + data.total : "");
+            "Получателей: " + total +
+            ". Отправлено: " + sentAll +
+            ", ошибок: " + failedAll +
+            " (пакетами по " + BATCH_SIZE + ")";
           if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
           closeBroadcastModal();
-        } else {
-          if (tg && tg.showAlert) tg.showAlert(data && data.error ? data.error : "Ошибка рассылки"); else alert(data && data.error || "Ошибка рассылки");
-        }
-      })
-      .catch(function () {
-        restoreSendBtn();
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); else alert(POKER_NET_ERR);
-      });
+        })
+        .catch(function (e) {
+          restoreSendBtn();
+          var tg = copyTg();
+          var msgErr = e && e.message ? e.message : "Ошибка рассылки";
+          if (tg && tg.showAlert) tg.showAlert(msgErr); else alert(msgErr);
+        });
     }
     if (file) {
       var reader = new FileReader();
