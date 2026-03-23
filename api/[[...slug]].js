@@ -18,6 +18,7 @@ const handlers = {
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),
   visit: () => require(path.join(handlersDir, "visit.js")),
+  "section-views": () => require(path.join(handlersDir, "section-views.js")),
   users: () => require(path.join(handlersDir, "users.js")),
   pikhanina: () => require(path.join(handlersDir, "pikhanina.js")),
   "visitors-list": () => require(path.join(handlersDir, "visitors-list.js")),

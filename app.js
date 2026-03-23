@@ -4291,6 +4291,12 @@ function setView(viewName, navOpts) {
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
+  if (viewName && viewName !== prevView) {
+    try {
+      if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen(viewName);
+      if (typeof window.pokerAdminRefreshSectionViewsDebounced === "function") window.pokerAdminRefreshSectionViewsDebounced();
+    } catch (eSecView) {}
+  }
   /* С верха при обычной навигации; по «Назад» — восстанавливаем сохранённый Y (после смены классов на html/body). */
   if (viewName !== prevView) {
     var rafScroll = window.requestAnimationFrame || function (fn) {
@@ -18632,6 +18638,85 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   } catch (eVis) {}
 });
 
+// Просмотры разделов (админ): счётчик в Redis, полоска внизу каждого экрана
+(function pokerAdminSectionViews() {
+  var debounceTimer = null;
+  function apiBase() {
+    return typeof getApiBase === "function" ? getApiBase() : "";
+  }
+  function ensureBars() {
+    if (window.__pokerSectionViewBarsDone) return;
+    window.__pokerSectionViewBarsDone = true;
+    document.querySelectorAll(".view[data-view]").forEach(function (view) {
+      var name = view.getAttribute("data-view");
+      if (!name || view.querySelector(".admin-section-views")) return;
+      var bar = document.createElement("div");
+      bar.className = "admin-section-views admin-section-views--hidden";
+      bar.setAttribute("data-admin-section", name);
+      bar.setAttribute("aria-hidden", "true");
+      var inner = document.createElement("span");
+      inner.className = "admin-section-views__text";
+      inner.innerHTML = "Просмотры: <strong class=\"admin-section-views__count\">—</strong>";
+      bar.appendChild(inner);
+      view.appendChild(bar);
+    });
+  }
+  function applyCounts(counts) {
+    counts = counts || {};
+    document.querySelectorAll(".admin-section-views[data-admin-section]").forEach(function (bar) {
+      var name = bar.getAttribute("data-admin-section");
+      var strong = bar.querySelector(".admin-section-views__count");
+      if (!strong || !name) return;
+      var n = counts[name] != null ? Number(counts[name]) : 0;
+      strong.textContent = String(n === n ? n : 0);
+    });
+  }
+  function fetchCounts() {
+    if (!window.__pokerShowAdminSectionViews) return;
+    var base = apiBase();
+    var initData = typeof tg !== "undefined" && tg && tg.initData ? tg.initData : "";
+    if (!base || !initData) return;
+    fetch(base + "/api/section-views?initData=" + encodeURIComponent(initData))
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || !data.ok || !data.counts) return;
+        applyCounts(data.counts);
+      })
+      .catch(function () {});
+  }
+  window.pokerAdminRefreshSectionViewsDebounced = function () {
+    if (!window.__pokerShowAdminSectionViews) return;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(fetchCounts, 400);
+  };
+  window.pokerRecordSectionViewOpen = function (section) {
+    var base = apiBase();
+    if (!base || !section) return;
+    try {
+      if (typeof isLocalEnv === "function" && isLocalEnv() && !(document.getElementById("app") && document.getElementById("app").getAttribute("data-api-base"))) return;
+    } catch (eL) {}
+    try {
+      var initD = typeof tg !== "undefined" && tg && tg.initData ? tg.initData : "";
+      fetch(base + "/api/section-views", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section: section, initData: initD }),
+      }).catch(function () {});
+    } catch (ePost) {}
+  };
+  window.pokerInitAdminSectionViewsUi = function () {
+    window.__pokerShowAdminSectionViews = true;
+    ensureBars();
+    document.querySelectorAll(".admin-section-views").forEach(function (el) {
+      el.classList.remove("admin-section-views--hidden");
+      el.setAttribute("aria-hidden", "false");
+    });
+    fetchCounts();
+  };
+})();
+
 // Посетители (админ): кнопка в футере, модалка со списком, отправка сообщения
 (function () {
   var visitorsAdminData = null;
@@ -18658,6 +18743,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
+      if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
     }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
@@ -19541,11 +19627,79 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   var editingReport = null;
   if (!btn || !modal) return;
 
+  var VIKA_AUTHOR_ID = "tg_1897001087";
+  var VIKA_TELEGRAM_NUM = 1897001087;
+
+  function moscowPartsFromTs(ts) {
+    var d = new Date(ts);
+    var f = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Moscow",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hour12: false,
+    });
+    var parts = f.formatToParts(d);
+    var o = {};
+    parts.forEach(function (p) {
+      if (p.type !== "literal") o[p.type] = p.value;
+    });
+    return { y: o.year, m: o.month, d: o.day, h: parseInt(o.hour, 10) || 0 };
+  }
+
+  function prevMoscowCalendarDay(y, m, dayStr) {
+    var dt = new Date(Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(dayStr, 10)));
+    dt.setUTCDate(dt.getUTCDate() - 1);
+    return {
+      y: dt.getUTCFullYear(),
+      m: String(dt.getUTCMonth() + 1).padStart(2, "0"),
+      d: String(dt.getUTCDate()).padStart(2, "0"),
+    };
+  }
+
+  /** Отчёты Вики: 00:00–02:59 МСК → дата смены = предыдущий календарный день (до 03:00). */
+  function reportEffectiveTimestampMs(r) {
+    var raw = r && r.createdAt ? new Date(r.createdAt).getTime() : NaN;
+    if (!r || !r.createdAt || raw !== raw) return raw;
+    if (String(r.authorId || "") !== VIKA_AUTHOR_ID) return raw;
+    var p = moscowPartsFromTs(raw);
+    if (p.h >= 3) return raw;
+    var pd = prevMoscowCalendarDay(String(p.y), p.m, p.d);
+    return new Date(pd.y + "-" + pd.m + "-" + pd.d + "T12:00:00+03:00").getTime();
+  }
+
+  function formatRuWeekdayDateFromTs(ts) {
+    if (ts !== ts) return { weekday: "", date: "" };
+    var cap = function (s) {
+      if (!s) return "";
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+    var wd = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "long" }).format(new Date(ts));
+    var dd = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(ts));
+    return { weekday: cap(wd), date: dd };
+  }
+
   function getTodayInfo() {
     var now = new Date();
     var weekday = now.toLocaleDateString("ru-RU", { weekday: "long" });
     var date = now.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
     return { label: weekday.charAt(0).toUpperCase() + weekday.slice(1) + ", " + date, weekday: weekday, date: date, iso: now.toISOString() };
+  }
+
+  /** Дата/день недели для новой формы: у Вики ночью (до 03:00 МСК) — «вчера». */
+  function getShiftReportDateInfo() {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    var uid = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+    if (uid !== VIKA_TELEGRAM_NUM) return getTodayInfo();
+    var now = Date.now();
+    var p = moscowPartsFromTs(now);
+    if (p.h >= 3) return getTodayInfo();
+    var pd = prevMoscowCalendarDay(String(p.y), p.m, p.d);
+    var effTs = new Date(pd.y + "-" + pd.m + "-" + pd.d + "T12:00:00+03:00").getTime();
+    var meta = formatRuWeekdayDateFromTs(effTs);
+    var wdl = meta.weekday.toLowerCase();
+    return { label: meta.weekday + ", " + meta.date, weekday: wdl, date: meta.date, iso: new Date(effTs).toISOString() };
   }
 
   function setActiveTab(name) {
@@ -19616,7 +19770,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0
         };
         items.forEach(function (r) {
-          var t = r.createdAt ? new Date(r.createdAt).getTime() : NaN;
+          var t = reportEffectiveTimestampMs(r);
           if (!t || t < weekFrom || t > weekTo) return;
           Object.keys(weekTotals).forEach(function (k) {
             var v = r[k];
@@ -19625,7 +19779,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         });
         var byDay = {};
         items.forEach(function (r) {
-          var d = (r.weekday || "").trim() || "—";
+          var eff = reportEffectiveTimestampMs(r);
+          var meta = formatRuWeekdayDateFromTs(eff);
+          var d = (meta.weekday || "").trim() || "—";
           if (!byDay[d]) byDay[d] = [];
           byDay[d].push(r);
         });
@@ -19649,8 +19805,10 @@ window.addEventListener("poker-telegram-auth", function (ev) {
             var id = "ar-sent-" + (it.id || day + "-" + idx);
             var detailHtml = buildReportDetailHtml(it);
             var reportId = (it.id || "").toString();
+            var effMs = reportEffectiveTimestampMs(it);
+            var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
             // Убираем "Итого" из шапки отправленного отчёта: показываем только дату и кто смену вёл.
-            html.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(it.date || "") + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
+            html.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
           });
           html.push("</div>");
         });
@@ -19705,7 +19863,11 @@ window.addEventListener("poker-telegram-auth", function (ev) {
             fillReportForm(report);
             if (submitBtn) submitBtn.textContent = "Сохранить";
             setActiveTab("form");
-            if (dateEl) dateEl.textContent = (report.weekday || "") + ", " + (report.date || "");
+            if (dateEl) {
+              var effEd = reportEffectiveTimestampMs(report);
+              var metaEd = formatRuWeekdayDateFromTs(effEd);
+              dateEl.textContent = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
+            }
           });
         });
         sentList.querySelectorAll(".admin-report-sent-delete-btn").forEach(function (delBtn) {
@@ -19755,7 +19917,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     editingReportId = null;
     editingReport = null;
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
-    var info = getTodayInfo();
+    var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = info.label;
     setActiveTab("form");
     fillReportForm(null);
@@ -19805,7 +19967,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     });
   }
   function buildPayload() {
-    var d = getTodayInfo();
+    var d = getShiftReportDateInfo();
     var getVal = function (id) {
       var el = document.getElementById(id);
       if (!el) return 0;

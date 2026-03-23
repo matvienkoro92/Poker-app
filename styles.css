@@ -17497,6 +17497,25 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   background: var(--bg-elevated);
 }
 
+/* Админ: просмотры раздела (внизу каждого .view) */
+.admin-section-views {
+  margin-top: 12px;
+  padding: 8px 12px 10px;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.12));
+}
+.admin-section-views--hidden {
+  display: none !important;
+}
+.admin-section-views__text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 /* Модалка «Посетители» (админ) */
 .visitors-admin-modal {
   position: fixed;
