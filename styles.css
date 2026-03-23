@@ -17928,6 +17928,37 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   max-height: 60vh;
   overflow-y: auto;
 }
+.admin-report-sent-current {
+  margin-bottom: 4px;
+}
+.admin-report-sent-period-hint {
+  margin: 0 0 12px;
+  padding: 8px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.admin-report-sent-archive {
+  margin-top: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+.admin-report-sent-archive__summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  list-style: none;
+}
+.admin-report-sent-archive__summary::-webkit-details-marker {
+  display: none;
+}
+.admin-report-sent-archive__inner {
+  padding: 12px 12px 4px;
+  border-top: 1px solid var(--border-subtle);
+}
 .admin-report-sent-empty {
   margin: 0;
   padding: 12px 0;
