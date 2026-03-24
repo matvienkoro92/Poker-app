@@ -4167,6 +4167,9 @@ img.chat-contact__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .chat-emoji-btn:hover {
   background: rgba(148, 163, 184, 0.15);
@@ -4835,8 +4838,8 @@ img.chat-contact__avatar {
   padding: 8px 0;
   border-radius: 0;
   background: rgba(15, 23, 42, 0.16);
-  backdrop-filter: saturate(1.15) blur(26px);
-  -webkit-backdrop-filter: saturate(1.15) blur(26px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: none;
   box-shadow: none;
   pointer-events: auto;
@@ -5428,8 +5431,8 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   padding: 8px 0;
   /* Размытие вокруг кнопок без внешней рамки; обводка только у кнопки «Назад» и полосы сегментов */
   background: rgba(15, 23, 42, 0.16);
-  backdrop-filter: saturate(1.15) blur(26px);
-  -webkit-backdrop-filter: saturate(1.15) blur(26px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: none;
   border-radius: 0;
   box-shadow: none;

@@ -15158,6 +15158,7 @@ function initChat() {
       } else {
         upsertTemplate(title, text);
       }
+      renderTemplatesList();
       templatesShowForm(false);
       templatesResetForm();
       setTemplatesHint("Сохранено.");
@@ -17337,16 +17338,16 @@ function initChat() {
         chatEmojiPickerGrid.appendChild(btn);
       });
     }
-    // Одиночный клик/тап по смайлу — открыть пикер, двойной клик/тап — открыть шаблоны.
+    // Одиночный клик/тап по смайлу — открыть пикер, долгое нажатие — открыть шаблоны.
     function bindEmojiButton(btn, targetInput) {
       if (!btn || !chatEmojiPicker || !targetInput) return;
-      var singleTapTimer = null;
-      var suppressNextClick = false;
-      var DOUBLE_TAP_MS = 280;
-      function clearSingleTapTimer() {
-        if (singleTapTimer) {
-          clearTimeout(singleTapTimer);
-          singleTapTimer = null;
+      var longPressTimer = null;
+      var longPressTriggered = false;
+      var LONG_PRESS_MS = 550;
+      function clearLongPressTimer() {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
         }
       }
       function toggleEmojiPicker() {
@@ -17367,25 +17368,36 @@ function initChat() {
           hideChatEmojiPicker();
         }
       }
-      btn.addEventListener("dblclick", function (e) {
+      function startLongPress() {
+        clearLongPressTimer();
+        longPressTriggered = false;
+        longPressTimer = setTimeout(function () {
+          longPressTimer = null;
+          longPressTriggered = true;
+          hideChatEmojiPicker();
+          if (typeof tg !== "undefined" && tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+            try { tg.HapticFeedback.impactOccurred("light"); } catch (eH) {}
+          }
+          showTemplatesMenu(targetInput);
+        }, LONG_PRESS_MS);
+      }
+      btn.addEventListener("touchstart", function () { startLongPress(); }, { passive: true });
+      btn.addEventListener("touchend", function () { clearLongPressTimer(); }, { passive: true });
+      btn.addEventListener("touchcancel", function () { clearLongPressTimer(); }, { passive: true });
+      btn.addEventListener("mousedown", function () { startLongPress(); });
+      btn.addEventListener("mouseup", function () { clearLongPressTimer(); });
+      btn.addEventListener("mouseleave", function () { clearLongPressTimer(); });
+      btn.addEventListener("contextmenu", function (e) {
         e.preventDefault();
-        e.stopPropagation();
-        clearSingleTapTimer();
-        suppressNextClick = true;
-        showTemplatesMenu(targetInput);
       });
       btn.addEventListener("click", function (e) {
-        if (suppressNextClick) {
-          suppressNextClick = false;
+        if (longPressTriggered) {
+          longPressTriggered = false;
           e.preventDefault();
           return;
         }
         e.stopPropagation();
-        clearSingleTapTimer();
-        singleTapTimer = setTimeout(function () {
-          singleTapTimer = null;
-          toggleEmojiPicker();
-        }, DOUBLE_TAP_MS);
+        toggleEmojiPicker();
       });
     }
     bindEmojiButton(chatGeneralEmojiBtn, generalInput);
