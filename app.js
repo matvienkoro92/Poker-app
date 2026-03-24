@@ -3220,6 +3220,34 @@ function getPokerResolvedTelegramUser() {
         h.classList.remove("auth-banner__code-hint--error");
       }
     } catch (eR) {}
+    try {
+      if (ob && !ob.hidden && ob.focus) ob.focus();
+    } catch (eF) {}
+  }
+
+  function ensurePwaCodeLoginBackButton(wrap) {
+    if (!wrap || wrap.querySelector("#pwaAuthBackFromTgFormBtn")) return;
+    var row = document.createElement("div");
+    row.className = "auth-banner__code-row auth-banner__code-row--back";
+    var bb = document.createElement("button");
+    bb.type = "button";
+    bb.className = "pwa-auth-code-back-btn";
+    bb.id = "pwaAuthBackFromTgFormBtn";
+    bb.setAttribute("aria-label", "Назад к выбору входа");
+    bb.textContent = "← Назад";
+    row.appendChild(bb);
+    wrap.insertBefore(row, wrap.firstChild);
+  }
+
+  function bindPwaTelegramBackButton(wrap) {
+    if (!isPwaStandaloneAuth() || !wrap) return;
+    if (wrap.getAttribute("data-pwa-back-bound") === "1") return;
+    var bb = wrap.querySelector("#pwaAuthBackFromTgFormBtn");
+    if (!bb) return;
+    bb.addEventListener("click", function () {
+      resetPwaAuthLoginGate();
+    });
+    wrap.setAttribute("data-pwa-back-bound", "1");
   }
 
   function mountPwaUsernameCodeLogin(mount) {
@@ -3237,6 +3265,9 @@ function getPokerResolvedTelegramUser() {
         wrap.id = "pwaAuthCodeLoginBlock";
       }
       wrap.innerHTML =
+        '<div class="auth-banner__code-row auth-banner__code-row--back">' +
+          '<button type="button" class="pwa-auth-code-back-btn" id="pwaAuthBackFromTgFormBtn" aria-label="Назад к выбору входа">← Назад</button>' +
+        "</div>" +
         '<div class="auth-banner__code-row">' +
           '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
         "</div>" +
@@ -3250,6 +3281,9 @@ function getPokerResolvedTelegramUser() {
       mount.appendChild(wrap);
     } else if (isPwaStandaloneAuth() && !wrap.id) {
       wrap.id = "pwaAuthCodeLoginBlock";
+    }
+    if (isPwaStandaloneAuth()) {
+      ensurePwaCodeLoginBackButton(wrap);
     }
     if (!wrap.querySelector("#authPwaCodeHint")) {
       var hintElPre = document.createElement("p");
@@ -3360,6 +3394,7 @@ function getPokerResolvedTelegramUser() {
       });
     }
     bindPwaTelegramRevealForm(mount, wrap);
+    bindPwaTelegramBackButton(wrap);
     mount.setAttribute("data-pwa-code-bound", "1");
   }
 
