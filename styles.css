@@ -1170,42 +1170,44 @@ html.app-view-home .home-welcome-outline::before {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: radial-gradient(1200px 700px at 50% -10%, rgba(14, 165, 233, 0.2), transparent 55%),
-    linear-gradient(180deg, #020617 0%, #0b1120 100%);
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .pwa-auth-screen--hidden {
   display: none !important;
 }
 .pwa-auth-screen__inner {
   width: 100%;
-  max-width: 420px;
+  max-width: 430px;
+  padding: 18px 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(10, 17, 32, 0.95));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   text-align: center;
 }
 .pwa-auth-screen__logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 22px;
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
   object-fit: cover;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
 }
 .pwa-auth-screen__title {
-  margin: 14px 0 6px;
-  font-size: 38px;
-  font-weight: 900;
+  margin: 10px 0 4px;
+  font-size: 26px;
+  font-weight: 800;
   letter-spacing: 0.02em;
   color: #f8fafc;
 }
 .pwa-auth-screen__subtitle {
-  margin: 0 0 12px;
-  color: #93c5fd;
-  font-size: 15px;
+  margin: 0;
+  color: #bfdbfe;
+  font-size: 13px;
 }
 .pwa-auth-screen__mount {
-  margin-top: 12px;
-}
-body.pwa-auth-gated #app {
-  visibility: hidden;
-  pointer-events: none;
+  margin-top: 10px;
 }
 
 .auth-identifying-mini {

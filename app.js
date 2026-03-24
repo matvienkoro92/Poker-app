@@ -2751,8 +2751,24 @@ function getPokerResolvedTelegramUser() {
   var hintEl = document.getElementById("authBannerHint");
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
 
+  function isPwaStandaloneMode() {
+    try {
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if (window.navigator && window.navigator.standalone) return true;
+    } catch (e) {}
+    return false;
+  }
+  function isTelegramMiniAppRuntime() {
+    try {
+      var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (!wtg) return false;
+      if (wtg.initDataUnsafe && wtg.initDataUnsafe.user && wtg.initDataUnsafe.user.id != null) return true;
+      if (wtg.initData && String(wtg.initData).trim()) return true;
+    } catch (e) {}
+    return false;
+  }
   function isPwaStandaloneAuth() {
-    return !isTelegramWebApp();
+    return isPwaStandaloneMode() && !isTelegramMiniAppRuntime();
   }
   function showPwaAuthScreen() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
@@ -3258,10 +3274,14 @@ function getPokerResolvedTelegramUser() {
     if (!mount) return null;
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
+      var title = isPwaStandaloneAuth() ? "Идентификация" : "Верификация для входа в PWA";
+      var subtitle = isPwaStandaloneAuth()
+        ? ""
+        : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram. Доступ только для участников клуба TWO ACES.</p>';
       mount.innerHTML =
         '<div class="auth-banner__verify-form">' +
-          '<p class="auth-banner__verify-title">Верификация для входа в PWA</p>' +
-          '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram. Доступ только для участников клуба TWO ACES.</p>' +
+          '<p class="auth-banner__verify-title">' + title + "</p>" +
+          subtitle +
           '<div class="auth-banner__verify-actions"></div>' +
         "</div>";
       form = mount.querySelector(".auth-banner__verify-form");
@@ -3338,6 +3358,18 @@ function getPokerResolvedTelegramUser() {
   }
 
   function resetBannerForPwaLogin() {
+    if (isPwaStandaloneAuth()) {
+      if (bannerText) bannerText.textContent = "";
+      if (banner) banner.classList.add("auth-banner--hidden");
+      if (bannerRetry) bannerRetry.hidden = true;
+      if (bannerLink) bannerLink.style.display = "none";
+      if (hintEl) {
+        hintEl.textContent = "";
+        hintEl.style.display = "none";
+      }
+      hideIdentifyingMini();
+      return;
+    }
     var cb = getTelegramWidgetAuthCallbackUrl();
     var dom = "";
     try {
@@ -3488,6 +3520,10 @@ function getPokerResolvedTelegramUser() {
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
+    if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
+      mount.removeAttribute("data-pwa-widget-mounted");
+      mount.innerHTML = "";
+    }
     if (isPwaAuthLocalHost()) {
       if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) return;
       mount.innerHTML = "";
