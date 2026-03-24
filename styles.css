@@ -1162,6 +1162,52 @@ html.app-view-home .home-welcome-outline::before {
   line-height: 1.4;
 }
 
+.pwa-auth-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(14, 165, 233, 0.2), transparent 55%),
+    linear-gradient(180deg, #020617 0%, #0b1120 100%);
+}
+.pwa-auth-screen--hidden {
+  display: none !important;
+}
+.pwa-auth-screen__inner {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+.pwa-auth-screen__logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.pwa-auth-screen__title {
+  margin: 14px 0 6px;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #f8fafc;
+}
+.pwa-auth-screen__subtitle {
+  margin: 0 0 12px;
+  color: #93c5fd;
+  font-size: 15px;
+}
+.pwa-auth-screen__mount {
+  margin-top: 12px;
+}
+body.pwa-auth-gated #app {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .auth-identifying-mini {
   margin: 0 0 8px;
   padding: 6px 12px;

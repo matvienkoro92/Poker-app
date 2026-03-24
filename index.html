@@ -239,6 +239,14 @@
         window.__pokerHideBootOverlay = hideBootOverlay;
       })();
     </script>
+    <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
+      <div class="pwa-auth-screen__inner">
+        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
+        <h1 class="pwa-auth-screen__title">TWO ACES</h1>
+        <p class="pwa-auth-screen__subtitle">Вход для участников клуба</p>
+        <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
+      </div>
+    </div>
     <!-- Радио: чил, американские 90‑е или Радио 7 (переключение одной кнопкой) -->
     <audio id="chillRadio" preload="metadata" loop crossorigin="anonymous" aria-hidden="true"></audio>
     <!-- Опционально на #app: data-telegram-bot-id="123456789" — иначе id берётся с GET /api/telegram-bot-info -->

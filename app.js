@@ -2745,9 +2745,27 @@ function getPokerResolvedTelegramUser() {
   var bannerRetry = document.getElementById("authBannerRetry");
   var userEl = document.getElementById("authUser");
   var appEl = document.getElementById("app");
+  var pwaAuthScreenEl = document.getElementById("pwaAuthScreen");
+  var pwaAuthLoginMountEl = document.getElementById("pwaAuthLoginMount");
   var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
   var hintEl = document.getElementById("authBannerHint");
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
+
+  function isPwaStandaloneAuth() {
+    return !isTelegramWebApp();
+  }
+  function showPwaAuthScreen() {
+    if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
+    pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
+    pwaAuthScreenEl.setAttribute("aria-hidden", "false");
+    try { document.body.classList.add("pwa-auth-gated"); } catch (e) {}
+  }
+  function hidePwaAuthScreen() {
+    if (!pwaAuthScreenEl) return;
+    pwaAuthScreenEl.classList.add("pwa-auth-screen--hidden");
+    pwaAuthScreenEl.setAttribute("aria-hidden", "true");
+    try { document.body.classList.remove("pwa-auth-gated"); } catch (e) {}
+  }
 
   function showIdentifyingMini() {
     if (!identifyingMiniEl) return;
@@ -3131,8 +3149,7 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-row auth-banner__code-row--verify">' +
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="Код из Telegram" inputmode="numeric" autocomplete="one-time-code" />' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Войти</button>' +
-      "</div>" +
-      '<p class="auth-banner__code-hint" id="authPwaCodeHint">Введите Telegram username и получите код в Telegram.</p>';
+      "</div>";
     mount.appendChild(wrap);
 
     var userInput = wrap.querySelector("#authPwaUsernameInput");
@@ -3144,7 +3161,12 @@ function getPokerResolvedTelegramUser() {
     if (!base) return;
 
     function setHint(text, isError) {
-      if (!hint) return;
+      if (!hint) {
+        if (isError && text && isPwaStandaloneAuth()) {
+          try { alert(text); } catch (eA) {}
+        }
+        return;
+      }
       hint.textContent = text || "";
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
     }
@@ -3261,13 +3283,19 @@ function getPokerResolvedTelegramUser() {
       banner.classList.add("auth-banner--hidden");
       banner.classList.remove("auth-banner--verifying");
     }
+    hidePwaAuthScreen();
     hideIdentifyingMini();
     if (bannerRetry) bannerRetry.hidden = true;
   }
 
   function showUnauthorized() {
     if (userEl) userEl.classList.add("auth-user--hidden");
-    if (banner) banner.classList.remove("auth-banner--hidden");
+    if (isPwaStandaloneAuth()) {
+      if (banner) banner.classList.add("auth-banner--hidden");
+      showPwaAuthScreen();
+    } else {
+      if (banner) banner.classList.remove("auth-banner--hidden");
+    }
   }
 
   function updateHeaderGreeting() {
@@ -3452,7 +3480,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function mountTelegramLoginWidgetForPwa() {
-    var mount = document.getElementById("authBannerLoginMount");
+    var mount = isPwaStandaloneAuth() && pwaAuthLoginMountEl ? pwaAuthLoginMountEl : document.getElementById("authBannerLoginMount");
     /*
      * v7: отдельная форма верификации в баннере + кнопка popup Telegram.Login.auth.
      * data-onauth + __pokerTelegramOauthMessageBridge; редирект — tryFinishTelegramLoginRedirect.
@@ -3464,6 +3492,11 @@ function getPokerResolvedTelegramUser() {
       if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) return;
       mount.innerHTML = "";
       var localActions = ensurePwaVerificationForm(mount) || mount;
+      if (isPwaStandaloneAuth()) {
+        mountPwaUsernameCodeLogin(localActions);
+        mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
+        return;
+      }
       var elApp2 = document.getElementById("app");
       var prodUrl = elApp2 && elApp2.getAttribute("data-api-base");
       prodUrl = prodUrl ? String(prodUrl).trim().replace(/\/$/, "") : "";
@@ -3495,9 +3528,11 @@ function getPokerResolvedTelegramUser() {
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
       var mountedActions = ensurePwaVerificationForm(mount) || mount;
       mountPwaUsernameCodeLogin(mountedActions);
-      mountVkLoginForPwa(mountedActions);
-      mountTelegramExternalBrowserEscapeBtn(mountedActions);
-      mountTelegramLoginPopupButton(mountedActions);
+      if (!isPwaStandaloneAuth()) {
+        mountVkLoginForPwa(mountedActions);
+        mountTelegramExternalBrowserEscapeBtn(mountedActions);
+        mountTelegramLoginPopupButton(mountedActions);
+      }
       return;
     }
     var bot = "";
@@ -3516,7 +3551,7 @@ function getPokerResolvedTelegramUser() {
         deliverTelegramLoginWidgetPayload(user, false);
       } catch (eCb) {}
     };
-    if (bot) {
+    if (bot && !isPwaStandaloneAuth()) {
       var script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.async = true;
@@ -3529,9 +3564,11 @@ function getPokerResolvedTelegramUser() {
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
     mountPwaUsernameCodeLogin(actionsMount);
-    mountVkLoginForPwa(actionsMount);
-    mountTelegramExternalBrowserEscapeBtn(actionsMount);
-    mountTelegramLoginPopupButton(actionsMount);
+    if (!isPwaStandaloneAuth()) {
+      mountVkLoginForPwa(actionsMount);
+      mountTelegramExternalBrowserEscapeBtn(actionsMount);
+      mountTelegramLoginPopupButton(actionsMount);
+    }
   }
 
   function tryFinishTelegramLoginRedirect() {
