@@ -3116,6 +3116,21 @@ function getPokerResolvedTelegramUser() {
     mount.appendChild(btn);
   }
 
+  function ensurePwaVerificationForm(mount) {
+    if (!mount) return null;
+    var form = mount.querySelector(".auth-banner__verify-form");
+    if (!form) {
+      mount.innerHTML =
+        '<div class="auth-banner__verify-form">' +
+          '<p class="auth-banner__verify-title">Верификация для входа в PWA</p>' +
+          '<p class="auth-banner__verify-subtitle">Для доступа к чату и функциям профиля подтвердите аккаунт через Telegram или ВКонтакте.</p>' +
+          '<div class="auth-banner__verify-actions"></div>' +
+        "</div>";
+      form = mount.querySelector(".auth-banner__verify-form");
+    }
+    return form ? form.querySelector(".auth-banner__verify-actions") : null;
+  }
+
   function showAuthorized(user) {
     if (userEl) {
       var textEl = userEl.querySelector("#authUserText");
@@ -3323,15 +3338,16 @@ function getPokerResolvedTelegramUser() {
   function mountTelegramLoginWidgetForPwa() {
     var mount = document.getElementById("authBannerLoginMount");
     /*
-     * v6: + кнопка popup Telegram.Login.auth (обход сломанного iframe), GET /api/telegram-bot-info.
+     * v7: отдельная форма верификации в баннере + кнопка popup Telegram.Login.auth.
      * data-onauth + __pokerTelegramOauthMessageBridge; редирект — tryFinishTelegramLoginRedirect.
      */
-    var WIDGET_MOUNT_VER = "6";
+    var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
     if (isPwaAuthLocalHost()) {
       if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) return;
       mount.innerHTML = "";
+      var localActions = ensurePwaVerificationForm(mount) || mount;
       var elApp2 = document.getElementById("app");
       var prodUrl = elApp2 && elApp2.getAttribute("data-api-base");
       prodUrl = prodUrl ? String(prodUrl).trim().replace(/\/$/, "") : "";
@@ -3339,7 +3355,7 @@ function getPokerResolvedTelegramUser() {
       msg.className = "auth-banner__local-login-msg";
       msg.textContent =
         "Виджет Telegram на localhost не показываем — будет «Bot domain invalid». Войдите на боевом сайте или через Mini App.";
-      mount.appendChild(msg);
+      localActions.appendChild(msg);
       if (prodUrl && /^https:\/\//i.test(prodUrl)) {
         var a = document.createElement("a");
         a.href = prodUrl + "/";
@@ -3351,7 +3367,7 @@ function getPokerResolvedTelegramUser() {
         } catch (eA) {
           a.textContent = "Открыть боевой сайт";
         }
-        mount.appendChild(a);
+        localActions.appendChild(a);
       }
       mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
       return;
@@ -3361,9 +3377,10 @@ function getPokerResolvedTelegramUser() {
       mount.innerHTML = "";
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
-      mountVkLoginForPwa(mount);
-      mountTelegramExternalBrowserEscapeBtn(mount);
-      mountTelegramLoginPopupButton(mount);
+      var mountedActions = ensurePwaVerificationForm(mount) || mount;
+      mountVkLoginForPwa(mountedActions);
+      mountTelegramExternalBrowserEscapeBtn(mountedActions);
+      mountTelegramLoginPopupButton(mountedActions);
       return;
     }
     var bot = "";
@@ -3372,8 +3389,9 @@ function getPokerResolvedTelegramUser() {
       if (m) bot = m[1];
     } catch (e1) {}
     mount.innerHTML = "";
+    var actionsMount = ensurePwaVerificationForm(mount) || mount;
     try {
-      mount.removeAttribute("data-tg-popup-fetch-started");
+      actionsMount.removeAttribute("data-tg-popup-fetch-started");
     } catch (eRm) {}
     window.__pokerTelegramWidgetAuth = function (user) {
       try {
@@ -3390,12 +3408,12 @@ function getPokerResolvedTelegramUser() {
       script.setAttribute("data-radius", "14");
       script.setAttribute("data-userpic", "true");
       script.setAttribute("data-onauth", "window.__pokerTelegramWidgetAuth(user)");
-      mount.appendChild(script);
+      actionsMount.appendChild(script);
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
-    mountVkLoginForPwa(mount);
-    mountTelegramExternalBrowserEscapeBtn(mount);
-    mountTelegramLoginPopupButton(mount);
+    mountVkLoginForPwa(actionsMount);
+    mountTelegramExternalBrowserEscapeBtn(actionsMount);
+    mountTelegramLoginPopupButton(actionsMount);
   }
 
   function tryFinishTelegramLoginRedirect() {
@@ -12873,6 +12891,24 @@ function initRaffles() {
     });
   }
 
+  function parseRaffleApiResponse(r) {
+    return r
+      .json()
+      .then(function (data) {
+        if (data && typeof data === "object") return data;
+        return { ok: false, error: "Пустой ответ сервера", code: "EMPTY_RESPONSE" };
+      })
+      .catch(function () {
+        return {
+          ok: false,
+          error:
+            "Сервер вернул некорректный ответ" +
+            (r && r.status ? " (HTTP " + r.status + "). Перезайдите в мини-приложение и попробуйте снова через 10–30 секунд." : ". Перезайдите в мини-приложение и попробуйте снова через 10–30 секунд."),
+          code: "INVALID_SERVER_RESPONSE",
+        };
+      });
+  }
+
   if (raffleJoinBtn) {
     raffleJoinBtn.addEventListener("click", function () {
       if (!currentRaffleId) {
@@ -12889,9 +12925,7 @@ function initRaffles() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: initData, action: "join", raffleId: currentRaffleId, deviceId: getRaffleDeviceId() }),
       })
-        .then(function (r) {
-          return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
-        })
+        .then(parseRaffleApiResponse)
         .then(function (data) {
           raffleJoinBtn.disabled = false;
           if (data && data.ok) {
@@ -12903,22 +12937,26 @@ function initRaffles() {
           } else {
             var err = (data && data.error) || "Ошибка";
             if (data && data.code === "P21_REQUIRED") {
-              if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш!");
+              if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш. После сохранения вернитесь в «Розыгрыши» и нажмите «Участвовать» снова.");
               if (typeof setView === "function") setView("profile");
             } else if (data && data.code === "CHANNEL_REQUIRED") {
-              if (tg && tg.showAlert) tg.showAlert(err);
+              if (tg && tg.showAlert) tg.showAlert(err + " После подписки вернитесь в мини-приложение и нажмите «Участвовать» снова.");
               if (tg && tg.openTelegramLink) {
                 if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
                 tg.openTelegramLink("https://t.me/dva_tuza_club");
               }
             } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
-              if (tg && tg.showAlert) tg.showAlert(err);
-            } else if (tg && tg.showAlert) tg.showAlert(err);
+              if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
+            } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
+              if (tg && tg.showAlert) tg.showAlert(err + " Если повторяется — напишите администратору.");
+            } else if (tg && tg.showAlert) {
+              tg.showAlert(err + " Попробуйте снова через 10–30 секунд. Если не поможет — перезайдите в мини-приложение.");
+            }
           }
         })
         .catch(function () {
           raffleJoinBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR + " Перезайдите в мини-приложение и попробуйте снова.");
         });
     });
   }
@@ -12932,9 +12970,7 @@ function initRaffles() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: initData, action: "leave", raffleId: currentRaffleId }),
       })
-        .then(function (r) {
-          return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
-        })
+        .then(parseRaffleApiResponse)
         .then(function (data) {
           raffleLeaveBtn.disabled = false;
           if (data && data.ok) {
