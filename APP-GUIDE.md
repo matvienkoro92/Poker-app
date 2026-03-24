@@ -116,10 +116,8 @@ function setView(viewName) {
 ### Внешние сервисы
 - Telegram Bot API — sendMessage, getChatMember
 - Poker21 pipeline — данные пользователей
-- QStash — планировщик напоминаний
 
 ### Cron (vercel.json)
-- `/api/cron-reminder-10min` — воскресенье 21:21
 - `/api/deploy-hook` — ежедневно 12:00
 
 ---
