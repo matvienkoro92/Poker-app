@@ -15876,6 +15876,7 @@ function initChat() {
       btn.addEventListener("click", function () {
         var id = btn.dataset.msgId;
         if (!id) return;
+        prepareChatDeleteConfirm();
         if (!confirm("Удалить сообщение?")) return;
         fetch(base + "/api/chat", {
           method: "DELETE",
@@ -16128,6 +16129,7 @@ function initChat() {
           startChatEdit(src, msgId, oldTextRaw, fromName);
           hideMenu();
         } else if (action === "delete" && (msg.own || chatIsAdmin)) {
+          prepareChatDeleteConfirm();
           if (!confirm("Удалить сообщение?")) {
             hideMenu();
             return;
@@ -16565,6 +16567,17 @@ function initChat() {
     }).catch(function () {});
   }
 
+  function prepareChatDeleteConfirm() {
+    try {
+      var active = document.activeElement;
+      if (active && (active === generalInput || active === inputEl) && typeof active.blur === "function") {
+        active.blur();
+      }
+    } catch (e) {}
+    document.documentElement.classList.remove("chat-keyboard-open");
+    document.body.classList.remove("chat-keyboard-open");
+  }
+
   function renderMessages(messages) {
     if (!messagesEl) return;
     if (!messages || messages.length === 0) {
@@ -16679,6 +16692,7 @@ function initChat() {
       btn.addEventListener("click", function () {
         var id = btn.dataset.msgId;
         if (!id) return;
+        prepareChatDeleteConfirm();
         if (!confirm("Удалить сообщение?")) return;
         fetch(base + "/api/chat", {
           method: "DELETE",
@@ -17323,56 +17337,19 @@ function initChat() {
         chatEmojiPickerGrid.appendChild(btn);
       });
     }
-    // Обычный тап по смайлу — открыть пикер, долгое нажатие — добавить/выбрать шаблон.
+    // Одиночный клик/тап по смайлу — открыть пикер, двойной клик/тап — открыть шаблоны.
     function bindEmojiButton(btn, targetInput) {
       if (!btn || !chatEmojiPicker || !targetInput) return;
-      var longTimer = null;
-      var longFired = false;
-      function clearLong() {
-        if (longTimer) {
-          clearTimeout(longTimer);
-          longTimer = null;
+      var singleTapTimer = null;
+      var suppressNextClick = false;
+      var DOUBLE_TAP_MS = 280;
+      function clearSingleTapTimer() {
+        if (singleTapTimer) {
+          clearTimeout(singleTapTimer);
+          singleTapTimer = null;
         }
       }
-      btn.addEventListener("touchstart", function () {
-        longFired = false;
-        clearLong();
-        longTimer = setTimeout(function () {
-          longTimer = null;
-          longFired = true;
-          showTemplatesMenu(targetInput);
-        }, 600);
-      }, { passive: true });
-      btn.addEventListener("touchend", function (e) {
-        clearLong();
-        if (longFired) {
-          e.preventDefault();
-          return;
-        }
-      });
-      btn.addEventListener("touchcancel", clearLong);
-      btn.addEventListener("mousedown", function () {
-        longFired = false;
-        clearLong();
-        longTimer = setTimeout(function () {
-          longTimer = null;
-          longFired = true;
-          showTemplatesMenu(targetInput);
-        }, 600);
-      });
-      btn.addEventListener("mouseup", function (e) {
-        clearLong();
-        if (longFired) {
-          e.preventDefault();
-          return;
-        }
-      });
-      btn.addEventListener("click", function (e) {
-        if (longFired) {
-          e.preventDefault();
-          return;
-        }
-        e.stopPropagation();
+      function toggleEmojiPicker() {
         if (chatEmojiPicker.classList.contains("chat-emoji-picker--hidden")) {
           chatEmojiPickerTargetInput = targetInput;
           var rect = btn.getBoundingClientRect();
@@ -17389,6 +17366,26 @@ function initChat() {
         } else if (chatEmojiPickerTargetInput === targetInput) {
           hideChatEmojiPicker();
         }
+      }
+      btn.addEventListener("dblclick", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearSingleTapTimer();
+        suppressNextClick = true;
+        showTemplatesMenu(targetInput);
+      });
+      btn.addEventListener("click", function (e) {
+        if (suppressNextClick) {
+          suppressNextClick = false;
+          e.preventDefault();
+          return;
+        }
+        e.stopPropagation();
+        clearSingleTapTimer();
+        singleTapTimer = setTimeout(function () {
+          singleTapTimer = null;
+          toggleEmojiPicker();
+        }, DOUBLE_TAP_MS);
       });
     }
     bindEmojiButton(chatGeneralEmojiBtn, generalInput);
@@ -18976,11 +18973,66 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       }
     }
 
+    var BROADCAST_RESUME_KEY = "poker_club_broadcast_resume_v1";
+    function broadcastCampaignFingerprint(groups, monthVal, textVal, imageB64, imageMime) {
+      var g = (groups || []).slice().sort().join(",");
+      var imgSig =
+        imageB64 && String(imageB64).length
+          ? String(imageMime || "") + ":" + String(imageB64).length
+          : "";
+      return { groups: g, month: String(monthVal || ""), text: String(textVal || ""), imageSig: imgSig };
+    }
+    function broadcastFingerprintMatch(stored, fp) {
+      return (
+        stored &&
+        fp &&
+        stored.groups === fp.groups &&
+        stored.month === fp.month &&
+        stored.text === fp.text &&
+        stored.imageSig === fp.imageSig
+      );
+    }
+    function readBroadcastResume() {
+      try {
+        var raw = sessionStorage.getItem(BROADCAST_RESUME_KEY);
+        if (!raw) return null;
+        var o = JSON.parse(raw);
+        if (!o || o.v !== 1 || typeof o.nextOffset !== "number" || typeof o.total !== "number") return null;
+        return o;
+      } catch (err) {
+        return null;
+      }
+    }
+    function writeBroadcastResume(fp, nextOff, tot, sentCum, failedCum) {
+      try {
+        sessionStorage.setItem(
+          BROADCAST_RESUME_KEY,
+          JSON.stringify({
+            v: 1,
+            groups: fp.groups,
+            month: fp.month,
+            text: fp.text,
+            imageSig: fp.imageSig,
+            nextOffset: nextOff,
+            total: tot,
+            sentSoFar: sentCum != null ? sentCum : 0,
+            failedSoFar: failedCum != null ? failedCum : 0,
+          })
+        );
+      } catch (err) {}
+    }
+    function clearBroadcastResume() {
+      try {
+        sessionStorage.removeItem(BROADCAST_RESUME_KEY);
+      } catch (err) {}
+    }
+
     function doSend(imageBase64, imageMimeType) {
-      var BATCH_SIZE = 100;
+      var BATCH_SIZE = 50;
       var sentAll = 0;
       var failedAll = 0;
       var total = 0;
+      var fp = broadcastCampaignFingerprint(groupsForPayload, month, text, imageBase64, imageMimeType);
 
       function copyTg() {
         return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -18999,12 +19051,23 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         }).then(function (r) { return r.json(); });
       }
 
+      function setBroadcastProgressBtn(to) {
+        if (!sendBtn) return;
+        sendBtn.textContent =
+          "Отправляем… " +
+          to +
+          "/" +
+          total +
+          " (успешно: " +
+          sentAll +
+          ", ошибок: " +
+          failedAll +
+          ")";
+      }
+
       function sendBatch(offset) {
         if (offset >= total) return Promise.resolve({ done: true });
-        if (sendBtn) {
-          var to = Math.min(offset + BATCH_SIZE, total);
-          sendBtn.textContent = "Отправляем… " + to + " / " + total;
-        }
+        setBroadcastProgressBtn(Math.min(offset + BATCH_SIZE, total));
         var payload = {
           initData: initData,
           groups: groupsForPayload,
@@ -19025,6 +19088,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
             if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка рассылки");
             sentAll += data.sent || 0;
             failedAll += data.failed || 0;
+            writeBroadcastResume(fp, offset + BATCH_SIZE, total, sentAll, failedAll);
+            setBroadcastProgressBtn(Math.min(offset + BATCH_SIZE, total));
             return { done: false, offset: offset + BATCH_SIZE };
           });
       }
@@ -19040,15 +19105,30 @@ window.addEventListener("poker-telegram-auth", function (ev) {
             closeBroadcastModal();
             return;
           }
+          var startOffset = 0;
+          var stored = readBroadcastResume();
+          if (stored && broadcastFingerprintMatch(stored, fp)) {
+            if (stored.total !== total) {
+              clearBroadcastResume();
+            } else if (stored.nextOffset >= total) {
+              clearBroadcastResume();
+            } else if (stored.nextOffset > 0) {
+              startOffset = stored.nextOffset;
+              sentAll = typeof stored.sentSoFar === "number" ? stored.sentSoFar : 0;
+              failedAll = typeof stored.failedSoFar === "number" ? stored.failedSoFar : 0;
+            }
+          }
           function loop(offset) {
             return sendBatch(offset).then(function (res) {
               if (res && res.done) return res;
               return loop(res.offset);
             });
           }
-          return loop(0);
+          return loop(startOffset);
         })
         .then(function () {
+          if (!total) return;
+          clearBroadcastResume();
           restoreSendBtn();
           var tg = copyTg();
           var msg =
@@ -19062,7 +19142,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         .catch(function (e) {
           restoreSendBtn();
           var tg = copyTg();
-          var msgErr = e && e.message ? e.message : "Ошибка рассылки";
+          var msgErr = (e && e.message ? e.message : "Ошибка рассылки") +
+            " Прогресс сохранён: при том же тексте и группах следующая отправка продолжит с места остановки.";
           if (tg && tg.showAlert) tg.showAlert(msgErr); else alert(msgErr);
         });
     }
