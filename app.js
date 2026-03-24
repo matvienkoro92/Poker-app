@@ -3314,7 +3314,7 @@ function getPokerResolvedTelegramUser() {
       if (banner) banner.classList.add("auth-banner--hidden");
       showPwaAuthScreen();
     } else {
-      if (banner) banner.classList.remove("auth-banner--hidden");
+      if (banner) banner.classList.add("auth-banner--hidden");
     }
   }
 
@@ -3335,6 +3335,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   function setBannerVerifying() {
+    if (!isPwaStandaloneAuth()) {
+      if (banner) banner.classList.add("auth-banner--hidden");
+      hideIdentifyingMini();
+      return;
+    }
     if (bannerText) bannerText.textContent = "Профиль прогружается…";
     if (bannerLink) bannerLink.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
@@ -3347,6 +3352,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   function setBannerFailure(message, showRetry) {
+    if (!isPwaStandaloneAuth()) {
+      if (banner) banner.classList.add("auth-banner--hidden");
+      hideIdentifyingMini();
+      return;
+    }
     if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
     if (banner) {
       banner.classList.remove("auth-banner--verifying");
@@ -3358,18 +3368,16 @@ function getPokerResolvedTelegramUser() {
   }
 
   function resetBannerForPwaLogin() {
-    if (isPwaStandaloneAuth()) {
-      if (bannerText) bannerText.textContent = "";
-      if (banner) banner.classList.add("auth-banner--hidden");
-      if (bannerRetry) bannerRetry.hidden = true;
-      if (bannerLink) bannerLink.style.display = "none";
-      if (hintEl) {
-        hintEl.textContent = "";
-        hintEl.style.display = "none";
-      }
-      hideIdentifyingMini();
-      return;
+    if (bannerText) bannerText.textContent = "";
+    if (banner) banner.classList.add("auth-banner--hidden");
+    if (bannerRetry) bannerRetry.hidden = true;
+    if (bannerLink) bannerLink.style.display = "none";
+    if (hintEl) {
+      hintEl.textContent = "";
+      hintEl.style.display = "none";
     }
+    hideIdentifyingMini();
+    if (!isPwaStandaloneAuth()) return;
     var cb = getTelegramWidgetAuthCallbackUrl();
     var dom = "";
     try {

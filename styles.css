@@ -1170,9 +1170,8 @@ html.app-view-home .home-welcome-outline::before {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(2, 6, 23, 0.62);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(14, 165, 233, 0.2), transparent 55%),
+    linear-gradient(180deg, #020617 0%, #0b1120 100%);
 }
 .pwa-auth-screen--hidden {
   display: none !important;
@@ -1208,6 +1207,10 @@ html.app-view-home .home-welcome-outline::before {
 }
 .pwa-auth-screen__mount {
   margin-top: 10px;
+}
+body.pwa-auth-gated #app {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .auth-identifying-mini {
