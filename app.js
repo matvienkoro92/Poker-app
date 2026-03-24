@@ -2751,6 +2751,18 @@ function getPokerResolvedTelegramUser() {
   var hintEl = document.getElementById("authBannerHint");
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
 
+  function disableLegacyAuthBannerForMiniApp() {
+    if (!isTelegramWebApp()) return;
+    if (banner && banner.parentNode) {
+      try { banner.parentNode.removeChild(banner); } catch (eRm) {}
+    }
+    banner = null;
+    bannerLink = null;
+    bannerText = null;
+    bannerRetry = null;
+    hintEl = null;
+  }
+
   function isPwaStandaloneMode() {
     try {
       if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
@@ -2770,17 +2782,24 @@ function getPokerResolvedTelegramUser() {
   function isPwaStandaloneAuth() {
     return isPwaStandaloneMode() && !isTelegramMiniAppRuntime();
   }
+  disableLegacyAuthBannerForMiniApp();
   function showPwaAuthScreen() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "false");
-    try { document.body.classList.add("pwa-auth-gated"); } catch (e) {}
+    try {
+      document.body.classList.add("pwa-auth-gated");
+      document.body.classList.add("pwa-auth-preinit");
+    } catch (e) {}
   }
   function hidePwaAuthScreen() {
     if (!pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.add("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "true");
-    try { document.body.classList.remove("pwa-auth-gated"); } catch (e) {}
+    try {
+      document.body.classList.remove("pwa-auth-gated");
+      document.body.classList.remove("pwa-auth-preinit");
+    } catch (e) {}
   }
 
   function showIdentifyingMini() {
