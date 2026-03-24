@@ -13,6 +13,7 @@ const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
   "auth-telegram": () => require(path.join(handlersDir, "auth-telegram.js")),
   "auth-telegram-login": () => require(path.join(handlersDir, "auth-telegram-login.js")),
+  "auth-pwa-code": () => require(path.join(handlersDir, "auth-pwa-code.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
