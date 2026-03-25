@@ -3392,24 +3392,10 @@ html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="
   max-width: 300px;
   padding-bottom: 0;
 }
-.chat-guest-cta__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 168px;
-  min-height: 44px;
-  padding: 10px 22px;
-  border-radius: 14px;
-  border: 1px solid rgba(251, 146, 60, 0.35);
-  background: linear-gradient(to top, #ea580c, #fb923c);
-  color: var(--btn-on-accent, #0b1120);
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  font-family: inherit;
-}
-.chat-guest-cta__btn:active {
-  transform: scale(0.98);
+/* Кнопка входа в чатах для гостя — те же стили, что «Войти в аккаунт» в профиле */
+.chat-guest-cta .profile-exit-btn {
+  margin-left: 0;
+  flex-shrink: 0;
 }
 .chat-msg {
   -webkit-user-select: none;

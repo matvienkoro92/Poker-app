@@ -111,6 +111,11 @@ function pokerSavePwaTgSession(token, userObj) {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
     localStorage.setItem(POKER_PWA_TG_SESSION_KEY, payload);
     ok = !!pokerReadPwaTgSessionToken();
+    if (ok) {
+      try {
+        sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
+      } catch (eCl) {}
+    }
   } catch (e) {}
   if (!ok) {
     try {
@@ -129,6 +134,11 @@ function pokerSavePwaVkSession(token, userObj) {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
     localStorage.setItem(POKER_PWA_VK_SESSION_KEY, payload);
     ok = !!pokerReadPwaVkSessionToken();
+    if (ok) {
+      try {
+        sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
+      } catch (eCl2) {}
+    }
   } catch (e) {}
   if (!ok) {
     try {
@@ -138,6 +148,44 @@ function pokerSavePwaVkSession(token, userObj) {
     } catch (e2) {}
   }
   return ok;
+}
+
+/** Полная запись сессии TG для восстановления при старте (localStorage и, при откате save, sessionStorage). */
+function pokerReadPwaTgSessionRecord() {
+  function parseRaw(raw) {
+    if (!raw) return null;
+    try {
+      var o = JSON.parse(raw);
+      if (o && o.token && o.user && o.user.id != null) return o;
+    } catch (eP) {}
+    return null;
+  }
+  try {
+    var oL = parseRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY));
+    if (oL) return oL;
+  } catch (e1) {}
+  try {
+    return parseRaw(sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY));
+  } catch (e2) {}
+  return null;
+}
+function pokerReadPwaVkSessionRecord() {
+  function parseRaw(raw) {
+    if (!raw) return null;
+    try {
+      var o = JSON.parse(raw);
+      if (o && o.token && o.user && o.user.id != null) return o;
+    } catch (eP) {}
+    return null;
+  }
+  try {
+    var oL = parseRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY));
+    if (oL) return oL;
+  } catch (e1) {}
+  try {
+    return parseRaw(sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY));
+  } catch (e2) {}
+  return null;
 }
 
 function pwaSessionPersistenceWarning() {
@@ -3969,39 +4017,33 @@ function getPokerResolvedTelegramUser() {
       window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
       updateHeaderGreeting();
       try {
-        var rawPwa = localStorage.getItem(POKER_PWA_TG_SESSION_KEY);
-        if (rawPwa) {
-          var so = JSON.parse(rawPwa);
-          if (so && so.user && so.user.id != null && so.token) {
-            var uP = normalizeVerifiedUser(so.user, null);
-            window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
-            updateHeaderGreeting();
-            showAuthorized(uP);
-            loadHeaderAvatar();
-            hideBootOverlay();
-            try {
-              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
-            } catch (eP) {}
-            return;
-          }
+        var so = pokerReadPwaTgSessionRecord();
+        if (so && so.user && so.user.id != null && so.token) {
+          var uP = normalizeVerifiedUser(so.user, null);
+          window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
+          updateHeaderGreeting();
+          showAuthorized(uP);
+          loadHeaderAvatar();
+          hideBootOverlay();
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
+          } catch (eP) {}
+          return;
         }
       } catch (eLs) {}
       try {
-        var rawVk = localStorage.getItem(POKER_PWA_VK_SESSION_KEY);
-        if (rawVk) {
-          var soV = JSON.parse(rawVk);
-          if (soV && soV.user && soV.user.id != null && soV.token) {
-            var uVk = normalizeVerifiedUser(soV.user, null);
-            window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
-            updateHeaderGreeting();
-            showAuthorized(uVk);
-            loadHeaderAvatar();
-            hideBootOverlay();
-            try {
-              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
-            } catch (eVkLs) {}
-            return;
-          }
+        var soV = pokerReadPwaVkSessionRecord();
+        if (soV && soV.user && soV.user.id != null && soV.token) {
+          var uVk = normalizeVerifiedUser(soV.user, null);
+          window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
+          updateHeaderGreeting();
+          showAuthorized(uVk);
+          loadHeaderAvatar();
+          hideBootOverlay();
+          try {
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
+          } catch (eVkLs) {}
+          return;
         }
       } catch (eLsVk) {}
       showUnauthorized();
@@ -4036,14 +4078,14 @@ function getPokerResolvedTelegramUser() {
     var attempts = 0;
     function tryOnce() {
       attempts += 1;
-      postAuthTelegram(initData, isPwaStandaloneMode())
+      postAuthTelegram(initData, true)
         .then(function (pack) {
           var res = pack.res;
           var data = pack.data || {};
           if (res.ok && data.ok && data.user) {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
             window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-            if (data.pwaSession && isPwaStandaloneMode()) {
+            if (data.pwaSession && data.user) {
               if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
               pokerSavePwaGuestMode(false);
             }
@@ -9500,6 +9542,8 @@ function initProfileExitBtn() {
   btn.addEventListener("click", function () {
     try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
     try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
+    try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}
+    try { sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (eS2) {}
     try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
     try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
     try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
@@ -17144,7 +17188,7 @@ function initChat() {
         contactsEl.innerHTML =
           '<div class="chat-guest-cta">' +
           '<p class="chat-empty chat-empty--guest-msg">Чтобы писать в чате, войдите в свой аккаунт</p>' +
-          '<button type="button" class="chat-guest-cta__btn" id="chatGuestLoginBtn">Войти</button>' +
+          '<button type="button" class="profile-exit-btn" id="chatGuestLoginBtn">Войти в аккаунт</button>' +
           "</div>";
         var gBtn = document.getElementById("chatGuestLoginBtn");
         if (gBtn) {
@@ -17778,7 +17822,16 @@ function initChat() {
           return;
         }
         var vv = window.visualViewport;
-        var inset = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+        var ot = Number(vv.offsetTop) || 0;
+        var vvh = Number(vv.height) || 0;
+        var ih = window.innerHeight;
+        var ch = doc.clientHeight ? doc.clientHeight : ih;
+        var deltaIH = Math.max(0, Math.round(ih - vvh - ot));
+        var deltaCH = Math.max(0, Math.round(ch - vvh - ot));
+        /* iOS PWA: innerHeight и clientHeight по-разному отражают клавиатуру; min убирает завышенный delta и «улет» поля ввода */
+        var delta = deltaIH > 0 && deltaCH > 0 ? Math.min(deltaIH, deltaCH) : Math.max(deltaIH, deltaCH);
+        var cap = Math.min(420, Math.round(Math.max(ih, ch) * 0.45));
+        var inset = Math.max(0, Math.min(delta, cap));
         doc.style.setProperty("--pwa-chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;
