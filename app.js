@@ -176,18 +176,20 @@ function pwaSessionPersistenceWarning() {
   } catch (e2) {}
 }
 
+/** Режим гостя только на время сессии вкладки (без записи в storage). */
 function pokerReadPwaGuestMode() {
   try {
-    return localStorage.getItem(POKER_PWA_GUEST_KEY) === "1";
+    var auth = window.__pokerTelegramAuth;
+    return !!(auth && auth.status === "guest");
   } catch (e) {
     return false;
   }
 }
 
+/** false — сбросить устаревший флаг в localStorage (раньше гость сохранялся там). */
 function pokerSavePwaGuestMode(v) {
   try {
-    if (v) localStorage.setItem(POKER_PWA_GUEST_KEY, "1");
-    else localStorage.removeItem(POKER_PWA_GUEST_KEY);
+    if (!v) localStorage.removeItem(POKER_PWA_GUEST_KEY);
   } catch (e) {}
 }
 
@@ -2824,6 +2826,9 @@ function getPokerResolvedTelegramUser() {
 // Авторизация через Telegram: обязательная проверка подписи initData на сервере (/api/auth-telegram)
 (function initTelegramAuth() {
   window.__pokerTelegramAuth = { status: "unknown", user: null, error: null };
+  try {
+    localStorage.removeItem(POKER_PWA_GUEST_KEY);
+  } catch (eLegacyGuest) {}
 
   /** Актуальный WebApp (не замыкание на старый объект — иногда initData появляется с задержкой). */
   function getTelegramWebAppNow() {
@@ -3672,9 +3677,10 @@ function getPokerResolvedTelegramUser() {
         mountPwaUsernameCodeLogin(actionsMount);
       });
       guestBtn.addEventListener("click", function () {
-        pokerSavePwaGuestMode(true);
+        pokerSavePwaGuestMode(false);
         try { window.__pokerTelegramAuth = { status: "guest", user: null, error: null }; } catch (eAuth) {}
         updateHeaderGreeting();
+        updateProfileExitBtnVisibility();
         hidePwaAuthScreen();
         hideIdentifyingMini();
         try { if (banner) { banner.classList.add("auth-banner--hidden"); banner.classList.remove("auth-banner--verifying"); } } catch (eB) {}
@@ -9343,8 +9349,15 @@ function updateProfileDtId() {
 function updateProfileExitBtnVisibility() {
   var btn = document.getElementById("profileExitBtn");
   if (!btn) return;
-  var show = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+  var isGuest = false;
+  try {
+    var a = window.__pokerTelegramAuth;
+    isGuest = !!(a && a.status === "guest");
+  } catch (e) {}
+  var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+  var show = !!(hasSession || isGuest);
   btn.classList.toggle("profile-exit-btn--hidden", !show);
+  btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
 }
 
 function initProfileExitBtn() {
