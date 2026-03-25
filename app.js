@@ -3295,7 +3295,7 @@ function getPokerResolvedTelegramUser() {
           botUser +
           "</a>"
         : "бота клуба") +
-      ". Укажите ниже ваш <strong>@username</strong>. Если вы ещё не писали боту, сначала откройте этот чат, отправьте <strong>/start</strong>, затем нажмите «Получить код» и введите полученный код здесь." +
+      ". Укажите ниже ваш <strong>@username</strong>. Если вы ещё не писали боту, сначала откройте этот чат, отправьте <strong>/start</strong>, затем нажмите «Получить код» и только потом отправляйте полученный код в поле ниже." +
       "</p>";
     wrap.innerHTML =
       backRow +
@@ -3345,7 +3345,7 @@ function getPokerResolvedTelegramUser() {
         if (isPwaStandaloneAuth()) {
           try {
             alert(
-              "Код отправлен в бота. Если вы ещё не подписаны, сначала отправьте боту /start, затем введите код ниже." +
+              "Код отправлен в бота. Если вы ещё не подписаны, сначала отправьте боту /start, и только потом отправляйте код ниже." +
                 (botUrl ? " Чат: " + botUrl : "")
             );
           } catch (eAl) {}
@@ -3362,10 +3362,10 @@ function getPokerResolvedTelegramUser() {
           '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' +
           botUser +
           "</a>. " +
-          "Если вы ещё не подписаны на бота, сначала отправьте в этот чат <strong>/start</strong>, и только потом введите полученный код в поле ниже.";
+          "Если вы ещё не подписаны на бота, сначала отправьте в этот чат <strong>/start</strong>, и только потом отправляйте код в поле ниже.";
       } else {
         hint.innerHTML =
-          "Код отправлен в бота. Откройте чат с ботом клуба в Telegram. Если вы ещё не подписаны, сначала отправьте <strong>/start</strong>, и только потом введите код в поле ниже.";
+          "Код отправлен в бота. Откройте чат с ботом клуба в Telegram. Если вы ещё не подписаны, сначала отправьте <strong>/start</strong>, и только потом отправляйте код в поле ниже.";
       }
     }
     function normalizeUsernameInput() {
@@ -17252,6 +17252,8 @@ function initChat() {
     } catch (e) {}
     document.documentElement.classList.remove("chat-keyboard-open");
     document.body.classList.remove("chat-keyboard-open");
+    document.documentElement.classList.remove("pwa-chat-vv-lift");
+    document.documentElement.style.removeProperty("--pwa-chat-vv-inset");
   }
 
   function renderMessages(messages) {
@@ -17718,11 +17720,34 @@ function initChat() {
           });
         }
       }
+      function pokerPwaStandaloneForKeyboardInset() {
+        return (
+          !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          !!(window.navigator && window.navigator.standalone)
+        );
+      }
+      function syncPwaChatVisualViewportInset() {
+        var doc = document.documentElement;
+        if (!window.visualViewport) {
+          doc.style.removeProperty("--pwa-chat-vv-inset");
+          return;
+        }
+        if (!document.body.classList.contains("chat-keyboard-open") || !pokerPwaStandaloneForKeyboardInset()) {
+          doc.style.removeProperty("--pwa-chat-vv-inset");
+          return;
+        }
+        var vv = window.visualViewport;
+        var inset = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+        doc.style.setProperty("--pwa-chat-vv-inset", inset + "px");
+      }
       var viewportResizeScrollHandler = null;
       function onChatInputFocus() {
         var el = getVisibleMessagesEl();
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
+        if (pokerPwaStandaloneForKeyboardInset()) {
+          document.documentElement.classList.add("pwa-chat-vv-lift");
+        }
         function scrollMessagesToBottom() {
           var se = document.scrollingElement;
           if (se && se.scrollTop !== 0) se.scrollTop = 0;
@@ -17732,25 +17757,51 @@ function initChat() {
           if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
         }
         requestAnimationFrame(function () {
+          syncPwaChatVisualViewportInset();
           scrollMessagesToBottom();
-          requestAnimationFrame(scrollMessagesToBottom);
+          requestAnimationFrame(function () {
+            syncPwaChatVisualViewportInset();
+            scrollMessagesToBottom();
+          });
         });
-        setTimeout(scrollMessagesToBottom, 50);
-        setTimeout(scrollMessagesToBottom, 150);
-        setTimeout(scrollMessagesToBottom, 400);
-        setTimeout(scrollMessagesToBottom, 600);
-        setTimeout(scrollMessagesToBottom, 1000);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 50);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 150);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 400);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 600);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 1000);
+        syncPwaChatVisualViewportInset();
         if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
-          if (viewportResizeScrollHandler) window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
+          if (viewportResizeScrollHandler) {
+            window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
+            window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
+          }
           viewportResizeScrollHandler = function () {
+            syncPwaChatVisualViewportInset();
             if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
           };
           window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
+          window.visualViewport.addEventListener("scroll", viewportResizeScrollHandler);
         }
       }
       function onChatInputBlur() {
         if (viewportResizeScrollHandler && typeof window.visualViewport !== "undefined" && window.visualViewport.removeEventListener) {
           window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
+          window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           viewportResizeScrollHandler = null;
         }
         setTimeout(function () {
@@ -17764,6 +17815,8 @@ function initChat() {
             if (!inChat) scrollDocumentToZero();
             document.documentElement.classList.remove("chat-keyboard-open");
             document.body.classList.remove("chat-keyboard-open");
+            document.documentElement.classList.remove("pwa-chat-vv-lift");
+            syncPwaChatVisualViewportInset();
             if (!inChat) scrollDocumentToZero();
             if (el && savedScroll > 0) {
               requestAnimationFrame(function () {

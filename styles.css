@@ -29,6 +29,8 @@
   --card-padding-x: var(--screen-gutter-x);
   /* Единая высота кнопок «Назад» / «На главную» и строки с «← Чаты» в чате */
   --app-back-btn-min-height: 40px;
+  /* PWA iOS: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
+  --pwa-chat-vv-inset: 0px;
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -343,6 +345,12 @@ body {
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
+}
+@media (display-mode: standalone) {
+  /* +6px к запасу под нижнее меню — совпадает с усиленным padding-bottom у .bottom-nav в PWA */
+  .app {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
 }
 /* Боковые отступы как в разделе «Скачать» и остальных экранах: единый --screen-gutter-x */
 .bg-gradient {
@@ -1881,6 +1889,11 @@ body.chat-keyboard-open .card__header {
 }
 body.chat-keyboard-open .app {
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+/* PWA: layout viewport не совпадает с видимой областью при открытой клавиатуре — сдвигаем блок ввода */
+html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
+html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
+  transform: translate3d(0, calc(-1 * var(--pwa-chat-vv-inset, 0px)), 0);
 }
 .chat-switcher-row {
   display: flex;
@@ -20429,10 +20442,14 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100%;
   padding: 8px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
     max(10px, env(safe-area-inset-bottom, 0px)) max(12px, var(--app-gutter), env(safe-area-inset-left, 0px));
   min-height: 56px;
-  background: var(--nav-bg);
+  /* Непрозрачная база + градиент: иначе под backdrop-filter на iOS при скролле/PWA «просвечивает» лента */
+  background-color: var(--overscroll-canvas);
+  background-image: var(--nav-bg);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-top: 1px solid rgba(148, 163, 184, 0.4);
   display: flex;
@@ -20442,9 +20459,19 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   z-index: 1001;
   pointer-events: auto;
   box-sizing: border-box;
-  max-width: 100vw;
   overflow: visible;
+  /* Стабилизация слоя position:fixed в WKWebView (меньше субпиксельных зазоров при резинке) */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+/* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
+@media (display-mode: standalone) {
+  .bottom-nav {
+    padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px));
+  }
 }
 .bottom-nav__item {
   flex: 1;
