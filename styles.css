@@ -18586,6 +18586,22 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .profile-header-row .title {
   margin: 0;
 }
+
+.profile-exit-btn {
+  margin-left: auto;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--block-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.profile-exit-btn:hover {
+  opacity: 0.9;
+}
+.profile-exit-btn--hidden { display: none; }
 .profile-header-id {
   font-size: 14px;
   color: var(--text-muted);

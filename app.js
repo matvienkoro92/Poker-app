@@ -3663,13 +3663,13 @@ function getPokerResolvedTelegramUser() {
     mountTelegramLoginWidgetForPwa();
   }
 
-  function postAuthTelegram(initData) {
+  function postAuthTelegram(initData, wantPwaSession) {
     var base = getTelegramAuthApiBase();
     if (!base) return Promise.reject(new Error("no_base"));
     return fetch(base + "/api/auth-telegram", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData }),
+      body: JSON.stringify({ initData: initData, wantPwaSession: !!wantPwaSession }),
       cache: "no-store",
     }).then(function (res) {
       return res
@@ -3759,13 +3759,14 @@ function getPokerResolvedTelegramUser() {
     var attempts = 0;
     function tryOnce() {
       attempts += 1;
-      postAuthTelegram(initData)
+      postAuthTelegram(initData, isPwaStandaloneMode())
         .then(function (pack) {
           var res = pack.res;
           var data = pack.data || {};
           if (res.ok && data.ok && data.user) {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
             window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            if (data.pwaSession && isPwaStandaloneMode()) pokerSavePwaTgSession(data.pwaSession, data.user);
             updateHeaderGreeting();
             showAuthorized(u);
             try {
@@ -4406,6 +4407,7 @@ function setView(viewName, navOpts) {
   }
   if (viewName === "profile") {
     updateProfileUserName();
+    updateProfileExitBtnVisibility();
     updateProfileDtId();
     initProfileP21Id();
     initProfilePersonal();
@@ -4413,6 +4415,7 @@ function setView(viewName, navOpts) {
     syncProfileStatusVisual();
     loadProfileRespect();
     initProfileFriends();
+    initProfileExitBtn();
   }
   if (viewName === "cashout") {
     initCashoutDepositForm();
@@ -9180,6 +9183,30 @@ function updateProfileDtId() {
     .catch(function () {
       el.textContent = cached || "\u2014";
     });
+}
+
+function updateProfileExitBtnVisibility() {
+  var btn = document.getElementById("profileExitBtn");
+  if (!btn) return;
+  var show = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+  btn.classList.toggle("profile-exit-btn--hidden", !show);
+}
+
+function initProfileExitBtn() {
+  var btn = document.getElementById("profileExitBtn");
+  if (!btn) return;
+  if (btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", function () {
+    try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
+    try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
+    try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
+    try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
+    try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
+    try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
+    try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
+    window.location.reload();
+  });
 }
 
 function initProfileP21Id() {
