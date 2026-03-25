@@ -5272,9 +5272,16 @@ function updateChatNavDot() {
   var badge = document.getElementById("chatNavBadge");
   if (badge) {
     var display = count > 99 ? "99+" : (count > 0 ? String(count) : "0");
-    badge.textContent = display;
-    badge.classList.toggle("bottom-nav__badge--on", count > 0);
-    badge.setAttribute("aria-label", count > 0 ? "Непрочитанных: " + count : "Нет непрочитанных");
+    var on = count > 0;
+    /* Частые перерисовки одним и тем же числом (опрос loadGeneral/loadContacts) дёргали DOM и aria-live */
+    if (badge.getAttribute("data-poker-unread-display") !== display) {
+      badge.setAttribute("data-poker-unread-display", display);
+      badge.textContent = display;
+    }
+    if (badge.classList.contains("bottom-nav__badge--on") !== on) {
+      badge.classList.toggle("bottom-nav__badge--on", on);
+    }
+    badge.setAttribute("aria-label", on ? "Непрочитанных: " + count : "Нет непрочитанных");
   }
 }
 
@@ -16383,12 +16390,17 @@ function initChat() {
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
         var lastView = lastViewedGeneral != null ? lastViewedGeneral : "";
         var myMemberIdForUnread = resolveMyChatMemberId();
-        var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; }).length;
+        /* Пока ни разу не открывали общий чат (lastViewedGeneral == null), не считаем старую ленту
+           непрочитанной — как в loadContacts, иначе счётчик дергается между 0 и числом с сервера. */
+        var unreadCount =
+          lastViewedGeneral != null
+            ? messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; }).length
+            : 0;
         // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
         // (в Telegram Mini App не включаем, чтобы не конфликтовать с Telegram поведением)
         if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
           var isOnGeneral = !!(isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible);
-          if (!isOnGeneral && unreadCount > 0) {
+          if (!isOnGeneral && lastViewedGeneral != null && unreadCount > 0) {
             var lastUnread = null;
             try {
               var unreadMsgs = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; });
@@ -16408,9 +16420,9 @@ function initChat() {
           saveChatLastViewed();
           window.chatGeneralUnread = false;
           window.chatGeneralUnreadCount = 0;
-        } else if (latest && (lastViewedGeneral == null || latest > lastViewedGeneral)) {
+        } else if (lastViewedGeneral != null && unreadCount > 0) {
           window.chatGeneralUnread = true;
-          window.chatGeneralUnreadCount = unreadCount > 0 ? unreadCount : 1;
+          window.chatGeneralUnreadCount = unreadCount;
         } else {
           window.chatGeneralUnread = false;
           window.chatGeneralUnreadCount = 0;
@@ -17539,6 +17551,8 @@ function initChat() {
         updateChatHeaderStats();
         if (data.contacts.length === 0) {
           contactsEl.innerHTML = '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>';
+          updateDialogUnreadBadges();
+          updateChatNavDot();
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
           var existing = block ? block.querySelectorAll(".chat-contact") : [];
@@ -17568,6 +17582,7 @@ function initChat() {
               }
             });
             updateDialogUnreadBadges();
+            updateChatNavDot();
             return;
           }
           var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
@@ -17597,6 +17612,7 @@ function initChat() {
             };
           });
           if (typeof window.chatAttachDialogButtons === "function") window.chatAttachDialogButtons();
+          updateChatNavDot();
         }
       }
     }).catch(function () {
@@ -17802,11 +17818,14 @@ function initChat() {
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var lastView = (chatWithUserId && lastViewedPersonal[chatWithUserId] != null) ? lastViewedPersonal[chatWithUserId] : "";
-        var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; }).length;
+        var personalLastSet = chatWithUserId && lastViewedPersonal[chatWithUserId] != null;
+        var unreadCount = personalLastSet
+          ? messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; }).length
+          : 0;
         // PWA: звуковое уведомление — только когда пользователь не смотрит личный диалог.
         if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
           var isOnPersonal = !!(isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden"));
-          if (!isOnPersonal && unreadCount > 0) {
+          if (!isOnPersonal && personalLastSet && unreadCount > 0) {
             var lastUnreadP = null;
             try {
               var unreadMsgsP = messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; });
@@ -17827,9 +17846,9 @@ function initChat() {
           saveChatLastViewed();
           window.chatPersonalUnread = false;
           window.chatPersonalUnreadCount = 0;
-        } else if (latest && chatWithUserId && (lastViewedPersonal[chatWithUserId] == null || latest > lastViewedPersonal[chatWithUserId])) {
+        } else if (chatWithUserId && personalLastSet && unreadCount > 0) {
           window.chatPersonalUnread = true;
-          window.chatPersonalUnreadCount = unreadCount > 0 ? unreadCount : 1;
+          window.chatPersonalUnreadCount = unreadCount;
         } else {
           window.chatPersonalUnread = false;
           window.chatPersonalUnreadCount = 0;
@@ -18160,8 +18179,10 @@ function initChat() {
         if (overlap < 8 && vvh + 24 < ih) {
           overlap = Math.max(overlap, Math.round(ih - vvh));
         }
-        var cap = Math.min(480, Math.round(ih * 0.52));
+        var cap = Math.min(420, Math.round(ih * 0.48));
         var inset = Math.max(0, Math.min(overlap, cap));
+        /* innerHeight − visualViewport часто даёт завышенное перекрытие в iOS PWA → поле «верхом» над клавиатурой */
+        inset = Math.max(0, Math.round(inset * 0.56 - 10));
         doc.style.setProperty("--chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;

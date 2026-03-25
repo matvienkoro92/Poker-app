@@ -1983,6 +1983,13 @@ html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat
 html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
   transform: translate3d(0, calc(-1 * var(--chat-vv-inset, 0px)), 0);
 }
+/* Клавиатура открыта: без полноширинной подложки и без отступа «под таббар» — иначе в PWA полоса и зазор над клавиатурой */
+html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
+html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  background: transparent;
+  box-shadow: none;
+}
 .chat-switcher-row {
   display: flex;
   justify-content: center;
@@ -5226,8 +5233,6 @@ img.chat-contact__avatar {
   position: relative;
   z-index: 5;
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
-  background-color: var(--block-bg-solid);
-  box-shadow: 0 -1px 0 var(--border-subtle);
 }
 .chat-personal-view {
   display: flex;
@@ -5485,8 +5490,6 @@ img.chat-contact__avatar {
   position: relative;
   z-index: 5;
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
-  background-color: var(--block-bg-solid);
-  box-shadow: 0 -1px 0 var(--border-subtle);
 }
 .chat-msg__delete {
   padding: 4px 8px;
