@@ -3313,7 +3313,7 @@ function getPokerResolvedTelegramUser() {
     if (!mount) return null;
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
-      var title = isPwaStandaloneAuth() ? "Идентификация" : "Верификация для входа в PWA";
+      var title = isPwaStandaloneAuth() ? "ВОЙТИ" : "Верификация для входа в PWA";
       var subtitle = isPwaStandaloneAuth()
         ? ""
         : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram. Доступ только для участников клуба TWO ACES.</p>';
