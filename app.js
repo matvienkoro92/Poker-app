@@ -655,7 +655,8 @@ var CURRENT_WEEK_DATES = ["23.02.2026", "24.02.2026", "25.02.2026", "26.02.2026"
 /** Рейтинг весны: даты прошлой недели по марту (2–8 марта) */
 var MARCH_PAST_WEEK_DATES = ["02.03.2026", "03.03.2026", "04.03.2026", "05.03.2026", "06.03.2026", "07.03.2026", "08.03.2026"];
 /** Рейтинг весны: даты текущей недели по марту (9–15 марта) */
-var MARCH_CURRENT_WEEK_DATES = ["09.03.2026", "10.03.2026", "11.03.2026", "12.03.2026", "13.03.2026", "14.03.2026", "15.03.2026"];
+/** Рейтинг весны: даты текущей недели по марту (23–29 марта) */
+var MARCH_CURRENT_WEEK_DATES = ["23.03.2026", "24.03.2026", "25.03.2026", "26.03.2026", "27.03.2026", "28.03.2026", "29.03.2026"];
 /** Рейтинг весны: даты следующей недели по марту (16–22 марта) */
 var MARCH_NEXT_WEEK_DATES = ["16.03.2026", "17.03.2026", "18.03.2026", "19.03.2026", "20.03.2026", "21.03.2026", "22.03.2026"];
 
@@ -2229,19 +2230,20 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
         nextWeekWrap.style.display = "none";
       }
     }
-    // Сворачиваем/разворачиваем недели марта: верхняя (16–22) открыта, остальные закрыты
+    // Сворачиваем/разворачиваем недели марта: текущая (23–29) открыта, 16–22 (предыдущая) закрыта
     var nextBody = document.getElementById("winterRatingNextWeekBody");
     var currentBody = document.getElementById("winterRatingCurrentWeekBody");
     var pastBody = document.getElementById("winterRatingPastWeekBody");
     var nextSection = document.getElementById("winterRatingNextWeekSection");
     var currentSection = document.getElementById("winterRatingCurrentWeekSection");
     var pastSection = document.getElementById("winterRatingPastWeekSection");
-    if (nextSection && !nextSection.classList.contains("winter-rating-week--collapsed")) {
-      if (nextBody) nextBody.hidden = false;
+    if (nextSection) {
+      nextSection.classList.add("winter-rating-week--collapsed");
+      if (nextBody) nextBody.hidden = true;
     }
     if (currentSection) {
-      currentSection.classList.add("winter-rating-week--collapsed");
-      if (currentBody) currentBody.hidden = true;
+      currentSection.classList.remove("winter-rating-week--collapsed");
+      if (currentBody) currentBody.hidden = false;
     }
     if (pastSection) {
       pastSection.classList.add("winter-rating-week--collapsed");

@@ -2081,6 +2081,8 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-22-03-2026-league1-dv-turbo-10h.png",
     "rating-22-03-2026-league1-dv-rebuy-12h.png",
     "rating-22-03-2026-league1-dv-main-13h.png",
+    "rating-22-03-2026-league1-frankl-dva-tuza-fast-deep-rank2.png",
+    "rating-22-03-2026-league1-frankl-dva-tuza-fast-deep-rank1.png",
     "rating-22-03-2026-league1-frankl-dva-tuza-fast-pko.png",
     "rating-22-03-2026-league1-frankl-dva-tuza-daily-pko.png",
     "rating-22-03-2026-league1-frankl-wow-mystery.png",
@@ -2089,6 +2091,7 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
   ],
   "23.03.2026": [
     "rating-23-03-2026-league1-tai7-ko-06h.png",
+    "rating-23-03-2026-league1-frankl-dva-tuza-fast-deep-rank3.png",
     "rating-23-03-2026-league1-bali-yana-08h.png",
     "rating-23-03-2026-league1-dv-rebuy-12h.png",
     "rating-23-03-2026-league1-dv-bounty-150k-13h.png",
@@ -2832,6 +2835,12 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "22.03.2026": [
+    { time: "06:00", name: "Два туза.Доллары MTT FAST DEEP", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 2, points: 135, reward: 29440 }
+    ] },
+    { time: "06:00", name: "Два туза.Доллары MTT FAST DEEP", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 1, points: 110, reward: 54050 }
+    ] },
     { time: "10:00", name: "DV Turbo 500 90K", buyin: 10000, league: 1, players: [
       { nick: "Откотика_Я", place: 5, reward: 6692 },
       { nick: "AndrushaMorf", place: 46, reward: 0 },
@@ -2895,6 +2904,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "nikola233", place: 0, reward: 0 },
       { nick: "Егор", place: 0, reward: 0 },
       { nick: "хер вам)))))", place: 8, reward: 0 }
+    ] },
+    { time: "06:00", name: "Два туза.Доллары MTT FAST DEEP", buyin: 0, league: 1, players: [
+      { nick: "FrankL", place: 3, points: 90, reward: 17940 }
     ] },
     { time: "08:00", name: "Bali Yana 30k", buyin: 30000, league: 1, players: [
       { nick: "ABevege", place: 1, reward: 14645 },

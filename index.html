@@ -680,6 +680,25 @@
                   <span class="winter-rating__week-top-btn-preview" id="winterRatingTopFebruaryPreview"></span>
                 </button>
               </div>
+              <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingCurrentWeekSection" hidden>
+                <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="current">
+                  <span>23–29 марта</span>
+                  <span class="winter-rating-week__summary" id="winterRatingCurrentWeekSummary"></span>
+                </button>
+                <div class="winter-rating-week__body" id="winterRatingCurrentWeekBody" hidden>
+                  <div class="winter-rating__past-week-row">
+                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekSumWrap" hidden>
+                      <h4 class="winter-rating__past-week-title">Топ суммарный выигрыш за неделю</h4>
+                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekSumList"></ul>
+                    </div>
+                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekWrap" hidden>
+                      <h4 class="winter-rating__past-week-title">Топ занос за 1 турнир</h4>
+                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekList"></ul>
+                    </div>
+                  </div>
+                  <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingCurrentWeekTotalBelow"></p>
+                </div>
+              </div>
               <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingNextWeekSection" hidden>
                 <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="next">
                   <span>16–22 марта</span>
@@ -697,25 +716,6 @@
                     </div>
                   </div>
                   <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingNextWeekTotalBelow"></p>
-                </div>
-              </div>
-              <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingCurrentWeekSection" hidden>
-                <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="current">
-                  <span>9–15 марта</span>
-                  <span class="winter-rating-week__summary" id="winterRatingCurrentWeekSummary"></span>
-                </button>
-                <div class="winter-rating-week__body" id="winterRatingCurrentWeekBody" hidden>
-                  <div class="winter-rating__past-week-row">
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekSumWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ суммарный выигрыш за неделю</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekSumList"></ul>
-                    </div>
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ занос за 1 турнир</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekList"></ul>
-                    </div>
-                  </div>
-                  <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingCurrentWeekTotalBelow"></p>
                 </div>
               </div>
               <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingPastWeekSection" hidden>
@@ -5160,9 +5160,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="./updates-data.js"></script>
-    <script src="./winter-rating-data.js?v=64"></script>
+    <script src="./winter-rating-data.js?v=65"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=191"></script>
+    <script src="./app.js?v=192"></script>
   </body>
 </html>
 
