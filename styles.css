@@ -961,6 +961,16 @@ html.app-view-home .home-welcome-outline::before {
 .pwa-auth-screen .auth-banner__code-intro-link:visited {
   color: #fdba74;
 }
+.pwa-auth-screen .auth-banner__code-hint {
+  color: rgba(226, 232, 240, 0.92);
+  text-align: left;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.pwa-auth-screen .auth-banner__code-hint strong {
+  color: #f8fafc;
+  font-weight: 700;
+}
 .pwa-auth-screen .auth-banner__code-row--back {
   margin-top: 0;
   margin-bottom: 4px;
@@ -1081,6 +1091,9 @@ html.app-view-home .home-welcome-outline::before {
 }
 .auth-banner__code-hint--error {
   color: #fca5a5;
+}
+.auth-banner__code-hint--hidden {
+  display: none !important;
 }
 [data-theme="light"] .auth-banner__verify-form {
   background: rgba(248, 250, 252, 0.9);

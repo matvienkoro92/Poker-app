@@ -3287,7 +3287,7 @@ function getPokerResolvedTelegramUser() {
     var botUrl = botUser ? "https://t.me/" + botUser : "";
     var introHtml =
       '<p class="auth-banner__code-intro" role="note">' +
-      "Код подтверждения для вашего <strong>@username</strong> (укажите ниже) придёт в Telegram от " +
+      "Код подтверждения придёт в Telegram от " +
       (botUrl
         ? 'бота: <a href="' +
           botUrl +
@@ -3295,7 +3295,7 @@ function getPokerResolvedTelegramUser() {
           botUser +
           "</a>"
         : "бота клуба") +
-      ". Если вы ещё не писали боту, сначала откройте этот чат, отправьте <strong>/start</strong>, затем нажмите «Получить код» и введите полученный код здесь." +
+      ". Укажите ниже ваш <strong>@username</strong>. Если вы ещё не писали боту, сначала откройте этот чат, отправьте <strong>/start</strong>, затем нажмите «Получить код» и введите полученный код здесь." +
       "</p>";
     wrap.innerHTML =
       backRow +
@@ -3306,6 +3306,7 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-row">' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaCodeSendBtn">Получить код</button>' +
       "</div>" +
+      '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaCodeHint" role="status" aria-live="polite"></div>' +
       '<div class="auth-banner__code-row auth-banner__code-row--verify">' +
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="Код из Telegram" inputmode="numeric" autocomplete="one-time-code" />' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Готово</button>' +
@@ -3334,8 +3335,38 @@ function getPokerResolvedTelegramUser() {
         }
         return;
       }
+      hint.innerHTML = "";
       hint.textContent = text || "";
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
+      hint.classList.toggle("auth-banner__code-hint--hidden", !text);
+    }
+    function showCodeSentToBotHint() {
+      if (!hint) {
+        if (isPwaStandaloneAuth()) {
+          try {
+            alert(
+              "Код отправлен в бота. Если вы ещё не подписаны, сначала отправьте боту /start, затем введите код ниже." +
+                (botUrl ? " Чат: " + botUrl : "")
+            );
+          } catch (eAl) {}
+        }
+        return;
+      }
+      hint.classList.remove("auth-banner__code-hint--hidden");
+      hint.classList.remove("auth-banner__code-hint--error");
+      if (botUrl && botUser) {
+        hint.innerHTML =
+          "Код отправлен в бота. Чат с ботом: " +
+          '<a href="' +
+          botUrl +
+          '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' +
+          botUser +
+          "</a>. " +
+          "Если вы ещё не подписаны на бота, сначала отправьте в этот чат <strong>/start</strong>, и только потом введите полученный код в поле ниже.";
+      } else {
+        hint.innerHTML =
+          "Код отправлен в бота. Откройте чат с ботом клуба в Telegram. Если вы ещё не подписаны, сначала отправьте <strong>/start</strong>, и только потом введите код в поле ниже.";
+      }
     }
     function normalizeUsernameInput() {
       var raw = userInput && userInput.value ? userInput.value : "";
@@ -3351,6 +3382,11 @@ function getPokerResolvedTelegramUser() {
         }
         sendBtn.disabled = true;
         sendBtn.textContent = "Отправляем…";
+        if (hint) {
+          hint.innerHTML = "";
+          hint.classList.add("auth-banner__code-hint--hidden");
+          hint.classList.remove("auth-banner__code-hint--error");
+        }
         fetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -3359,7 +3395,7 @@ function getPokerResolvedTelegramUser() {
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
           .then(function (data) {
             if (data && data.ok) {
-              setHint("Код отправлен в Telegram. Введите его ниже.", false);
+              showCodeSentToBotHint();
               if (codeInput && codeInput.focus) codeInput.focus();
             } else {
               setHint((data && data.error) || "Не удалось отправить код.", true);
