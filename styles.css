@@ -1278,10 +1278,10 @@ html.app-view-home .home-welcome-outline::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  /* Симметричные отступы с safe area — блок визуально по центру экрана */
-  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px))
-    max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  justify-content: flex-start;
+  /* Симметричные отступы с safe area; контент по центру в .pwa-auth-screen__inner, версия внизу */
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 0
+    max(20px, env(safe-area-inset-left, 0px));
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   /* Тот же оттенок, что у html/body и theme-color (#0f172a), чтобы под статус-баром iOS не было «шва» */
@@ -1295,13 +1295,32 @@ html.app-view-home .home-welcome-outline::before {
 .pwa-auth-screen__inner {
   width: 100%;
   max-width: 430px;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
   padding: 18px 14px 14px;
   border-radius: 0;
   border: none;
   background: transparent;
   box-shadow: none;
   text-align: center;
+}
+.pwa-auth-screen__version {
+  flex-shrink: 0;
+  width: 100%;
+  margin: 0;
+  padding: 6px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(148, 163, 184, 0.72);
+  user-select: none;
+}
+[data-theme="light"] .pwa-auth-screen__version {
+  color: rgba(100, 116, 139, 0.85);
 }
 .pwa-auth-screen__logo {
   width: 62px;

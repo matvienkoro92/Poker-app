@@ -124,7 +124,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=229" />
+    <link rel="stylesheet" href="./styles.css?v=230" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -289,11 +289,13 @@
       })();
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
+      <!-- Версия экрана входа PWA: при каждом пуше увеличивать на 0.001 (1.000 → 1.001 → …) -->
       <div class="pwa-auth-screen__inner">
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
       </div>
+      <p class="pwa-auth-screen__version" id="pwaLoginScreenVersion">Version 1.001</p>
     </div>
     <!-- Радио: чил, американские 90‑е или Радио 7 (переключение одной кнопкой) -->
     <audio id="chillRadio" preload="metadata" loop crossorigin="anonymous" aria-hidden="true"></audio>
