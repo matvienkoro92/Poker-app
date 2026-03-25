@@ -1298,6 +1298,7 @@ html.app-view-home .home-welcome-outline::before {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   min-height: 0;
   padding: 18px 14px 14px;
@@ -1342,7 +1343,10 @@ html.app-view-home .home-welcome-outline::before {
   font-size: 13px;
 }
 .pwa-auth-screen__mount {
+  width: 100%;
+  max-width: 100%;
   margin-top: 20px;
+  align-self: stretch;
 }
 .pwa-auth-screen__notice {
   margin: 12px 0 0;
@@ -1385,6 +1389,32 @@ html.app-view-home .home-welcome-outline::before {
   background: transparent;
   color: var(--accent, #ea580c);
   border: 1px solid rgba(234, 88, 12, 0.55);
+}
+.pwa-auth-screen__enter-btn--guest-stack {
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: auto;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+}
+.pwa-auth-screen__enter-btn-label {
+  line-height: 1.2;
+}
+.pwa-auth-screen__enter-btn-note {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  max-width: 22rem;
+  opacity: 0.82;
+}
+.pwa-auth-screen__enter-btn--secondary .pwa-auth-screen__enter-btn-note {
+  color: var(--accent, #ea580c);
+}
+[data-theme="light"] .pwa-auth-screen__enter-btn--secondary .pwa-auth-screen__enter-btn-note {
+  color: rgba(194, 65, 12, 0.92);
 }
 .pwa-auth-screen__back-icon-btn {
   display: inline-flex;
@@ -1888,8 +1918,8 @@ body.chat-keyboard-open .card__header {
 .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .card__header {
   display: none !important;
 }
-.app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .bottom-nav,
-.app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .bottom-nav {
+#app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) ~ .bottom-nav,
+#app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) ~ .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
@@ -2164,7 +2194,7 @@ html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="
   background: rgba(139, 90, 43, 0.25);
 }
 /* Когда газета открыта: скрываем нижнее меню и верхнюю шапку приложения */
-.app:has(#gazetteModal[aria-hidden="false"]) .bottom-nav {
+#app:has(#gazetteModal[aria-hidden="false"]) ~ .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
@@ -8380,6 +8410,42 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-size: 14px;
   color: var(--text-muted);
 }
+.video-lessons__guest-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 16px 14px;
+  text-align: center;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  background: var(--vl-free-bg-soft);
+  box-sizing: border-box;
+}
+.video-lessons__guest-gate--hidden {
+  display: none !important;
+}
+.video-lessons__guest-gate-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 320px;
+}
+.video-lessons__guest-gate .profile-exit-btn {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+.video-lessons--guest-lock .video-lessons__video,
+.video-lessons--guest-lock .video-lessons__iframe {
+  display: none !important;
+}
+.video-lessons--guest-lock .video-lessons__open-external,
+.video-lessons--guest-lock .video-lessons__attachment,
+.video-lessons--guest-lock .video-lessons__training-link {
+  display: none !important;
+}
 .video-lessons__free-cta {
   display: flex;
   flex-direction: column;
@@ -9990,6 +10056,33 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .raffle-complete-btn:hover { background: rgba(34, 197, 94, 0.25); color: #bbf7d0; border-color: rgba(34, 197, 94, 0.5); }
 .raffle-joined-msg--hidden { display: none; }
 .raffle-joined-msg { margin: 0 0 12px; font-weight: 600; color: var(--accent-2); }
+.raffle-guest-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 12px;
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--block-bg);
+  box-sizing: border-box;
+}
+.raffle-guest-gate--hidden {
+  display: none !important;
+}
+.raffle-guest-gate__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 320px;
+}
+.raffle-guest-gate .profile-exit-btn {
+  margin-left: 0;
+  flex-shrink: 0;
+}
 .raffle-participants-note { margin: 0 0 12px; font-size: 13px; color: var(--text-muted); line-height: 1.4; }
 .raffle-participants-note__highlight { font-weight: 700; text-decoration: underline; }
 .raffle-participants-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); }
@@ -15131,7 +15224,7 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .card:has(.view--active[data-view="spring-rating"]) .card__header {
   display: none !important;
 }
-.app:has(.view--active[data-view="spring-rating"]) .bottom-nav {
+#app:has(.view--active[data-view="spring-rating"]) ~ .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
@@ -15143,8 +15236,8 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .card:has(.view--active[data-view="schedule"]) .card__header {
   display: none !important;
 }
-.app:has(.view--active[data-view="hall-of-fame"]) .bottom-nav,
-.app:has(.view--active[data-view="schedule"]) .bottom-nav {
+#app:has(.view--active[data-view="hall-of-fame"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="schedule"]) ~ .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
@@ -15169,15 +15262,15 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 .card:has(.view--active[data-view="profile"]) .card__header {
   display: none !important;
 }
-.app:has(.view--active[data-view="bonus-game"]) .bottom-nav,
-.app:has(.view--active[data-view="plasterer-game"]) .bottom-nav,
-.app:has(.view--active[data-view="raffles"]) .bottom-nav,
-.app:has(.view--active[data-view="learn-play-hub"]) .bottom-nav,
-.app:has(.view--active[data-view="poker-tasks"]) .bottom-nav,
-.app:has(.view--active[data-view="video-lessons"]) .bottom-nav,
-.app:has(.view--active[data-view="streams"]) .bottom-nav,
-.app:has(.view--active[data-view="equilator"]) .bottom-nav,
-.app:has(.view--active[data-view="winter-rating"]) .bottom-nav {
+#app:has(.view--active[data-view="bonus-game"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="plasterer-game"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="raffles"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="learn-play-hub"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="poker-tasks"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="video-lessons"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="streams"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="equilator"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="winter-rating"]) ~ .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;

@@ -124,7 +124,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=230" />
+    <link rel="stylesheet" href="./styles.css?v=232" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -289,7 +289,7 @@
       })();
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
-      <!-- Версия экрана входа PWA: при каждом пуше увеличивать на 0.001 (1.000 → 1.001 → …) -->
+      <!-- Версия PWA: +0.001 на каждый git push (scripts/pre-push после npm run install-hooks). Вручную: npm run bump:pwa-version -->
       <div class="pwa-auth-screen__inner">
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
@@ -2056,6 +2056,10 @@
                     <button type="button" class="raffle-cancel-btn" id="raffleDeleteBtn">Удалить розыгрыш (админ)</button>
                   </div>
                   <p class="raffle-joined-msg raffle-joined-msg--hidden" id="raffleJoinedMsg">Вы участвуете</p>
+                  <div id="raffleGuestGate" class="raffle-guest-gate raffle-guest-gate--hidden" hidden>
+                    <p class="raffle-guest-gate__text">Чтобы участвовать в розыгрышах, войдите в аккаунт.</p>
+                    <button type="button" class="profile-exit-btn" id="raffleGuestLoginBtn">Войти в аккаунт</button>
+                  </div>
                   <p class="raffle-channel-note">Участвуют только подписчики канала <a href="https://t.me/dva_tuza_club" target="_blank" rel="noopener">клуба Два туза</a>.</p>
                   <h3 class="raffle-participants-title">Участники <span class="raffle-participants-count" id="raffleParticipantsCount">(0)</span></h3>
                   <p class="raffle-participants-chance" id="raffleParticipantsChance"></p>
@@ -3804,34 +3808,6 @@
 
       </main>
 
-      <nav class="bottom-nav" role="navigation">
-        <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
-          <span class="bottom-nav__icon">🏠</span>
-          <span class="bottom-nav__label">Главная</span>
-        </button>
-        <div class="bottom-nav__chat-wrap">
-          <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn" aria-label="Чаты">
-            <span class="bottom-nav__icon-wrap">
-              <span class="bottom-nav__icon">💬</span>
-              <span class="bottom-nav__badge" id="chatNavBadge" aria-live="polite" aria-label="Непрочитанных сообщений">0</span>
-            </span>
-            <span class="bottom-nav__label" id="chatNavLabel">Чаты</span>
-          </button>
-        </div>
-        <button type="button" class="bottom-nav__item" data-view-target="download">
-          <span class="bottom-nav__icon">📥</span>
-          <span class="bottom-nav__label">Скачать</span>
-        </button>
-        <button type="button" class="bottom-nav__item" data-view-target="cashout">
-          <span class="bottom-nav__icon">💳</span>
-          <span class="bottom-nav__label">Депозит</span>
-        </button>
-        <button type="button" class="bottom-nav__item" data-view-target="profile">
-          <span class="bottom-nav__icon">👤</span>
-          <span class="bottom-nav__label">Профиль</span>
-        </button>
-      </nav>
-
       <div class="image-lightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-label="Просмотр изображения" aria-hidden="true">
         <button type="button" class="image-lightbox__backdrop" aria-label="Закрыть"></button>
         <div class="image-lightbox__content">
@@ -5151,6 +5127,35 @@
       </div>
     </div>
 
+    <!-- Вне #app: таб-бар position:fixed — иначе в PWA/iOS при скролле html он «ездит» до resize (см. overflow:hidden у #app) -->
+    <nav class="bottom-nav" role="navigation">
+      <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
+        <span class="bottom-nav__icon">🏠</span>
+        <span class="bottom-nav__label">Главная</span>
+      </button>
+      <div class="bottom-nav__chat-wrap">
+        <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn" aria-label="Чаты">
+          <span class="bottom-nav__icon-wrap">
+            <span class="bottom-nav__icon">💬</span>
+            <span class="bottom-nav__badge" id="chatNavBadge" aria-live="polite" aria-label="Непрочитанных сообщений">0</span>
+          </span>
+          <span class="bottom-nav__label" id="chatNavLabel">Чаты</span>
+        </button>
+      </div>
+      <button type="button" class="bottom-nav__item" data-view-target="download">
+        <span class="bottom-nav__icon">📥</span>
+        <span class="bottom-nav__label">Скачать</span>
+      </button>
+      <button type="button" class="bottom-nav__item" data-view-target="cashout">
+        <span class="bottom-nav__icon">💳</span>
+        <span class="bottom-nav__label">Депозит</span>
+      </button>
+      <button type="button" class="bottom-nav__item" data-view-target="profile">
+        <span class="bottom-nav__icon">👤</span>
+        <span class="bottom-nav__label">Профиль</span>
+      </button>
+    </nav>
+
     <!-- Вне #app: fixed-оверлей не режется overflow и кнопки всегда получают клики -->
     <div class="winter-rating-lightbox" id="winterRatingLightbox" aria-hidden="true" role="dialog" aria-label="Увеличенный скрин">
       <img class="winter-rating-lightbox__img" src="" alt="" />
@@ -5183,7 +5188,7 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=69"></script>
     <script src="./poker-tasks-data.js"></script>
-    <script src="./app.js?v=203"></script>
+    <script src="./app.js?v=204"></script>
   </body>
 </html>
 

@@ -280,6 +280,55 @@ function pokerApiAuthJsonBody(extra) {
   return o;
 }
 
+/** Тот же salt, что lib/guest-member-id.js */
+var POKER_GUEST_DEVICE_SALT = "poker_guest_device:";
+function pokerGetRaffleStableDeviceId() {
+  try {
+    var key = "poker_raffle_device_id";
+    var id = typeof localStorage !== "undefined" && localStorage.getItem(key);
+    if (!id) {
+      id = "dev_" + Date.now() + "_" + Math.random().toString(36).slice(2, 14);
+      if (typeof localStorage !== "undefined") localStorage.setItem(key, id);
+    }
+    return id;
+  } catch (e) {
+    return "";
+  }
+}
+function pokerComputeGuestMemberId(deviceId) {
+  if (!deviceId || String(deviceId).length < 8) return Promise.resolve(null);
+  if (typeof crypto === "undefined" || !crypto.subtle || !crypto.subtle.digest) return Promise.resolve(null);
+  var enc = new TextEncoder();
+  return crypto.subtle.digest("SHA-256", enc.encode(POKER_GUEST_DEVICE_SALT + String(deviceId))).then(function (buf) {
+    var hex = Array.from(new Uint8Array(buf))
+      .map(function (b) {
+        return ("0" + b.toString(16)).slice(-2);
+      })
+      .join("");
+    return "guest_" + hex.slice(0, 20);
+  });
+}
+/** Query для API: auth (initData / pwaSession / pwaVkSession) + guestDeviceId как запасной ключ на сервере, если подпись initData не прошла */
+function pokerRafflesApiQueryLeading() {
+  var q = pokerApiAuthQuery("?");
+  var dev = pokerGetRaffleStableDeviceId();
+  if (dev && dev.length >= 8) {
+    if (q === "?") return "?guestDeviceId=" + encodeURIComponent(dev);
+    return q + "&guestDeviceId=" + encodeURIComponent(dev);
+  }
+  return q;
+}
+function pokerGuestOrAuthedPostBody(extra) {
+  var o = pokerApiAuthJsonBody(extra || {});
+  var dev = pokerGetRaffleStableDeviceId();
+  if (dev && dev.length >= 8) o.guestDeviceId = dev;
+  return o;
+}
+function pokerCanSyncGuestProfileToServer() {
+  var dev = pokerGetRaffleStableDeviceId();
+  return !!(dev && dev.length >= 8);
+}
+
 function pokerApiHasCredential() {
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
@@ -3564,7 +3613,10 @@ function getPokerResolvedTelegramUser() {
     m.innerHTML =
       '<div class="pwa-auth-screen__enter-actions">' +
         '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary pwa-auth-screen__enter-btn--guest-stack" id="pwaAuthEnterGuestBtn">' +
+        '<span class="pwa-auth-screen__enter-btn-label">Войти, как гость</span>' +
+        '<span class="pwa-auth-screen__enter-btn-note">Гость не может участвовать в розыгрышах и общаться в чате</span>' +
+        "</button>" +
       "</div>";
     var btn = document.getElementById("pwaAuthEnterTelegramBtn");
     var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
@@ -3997,6 +4049,47 @@ function getPokerResolvedTelegramUser() {
     });
   }
 
+  /**
+   * PWA / браузер без Telegram WebApp: OAuth VK, редирект виджета, сессия из storage.
+   * Вынесено в одну функцию — для standalone PWA обязательно вызывать и при наличии объекта WebApp без initData
+   * (в index.html всегда подключается telegram-web-app.js).
+   */
+  function attemptPwaSideAuthRestore(hideBootOverlay) {
+    if (tryFinishVkOAuth()) return true;
+    if (tryFinishTelegramLoginRedirect()) return true;
+    try {
+      var so = pokerReadPwaTgSessionRecord();
+      if (so && so.user && so.user.id != null && so.token) {
+        var uP = normalizeVerifiedUser(so.user, null);
+        window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
+        updateHeaderGreeting();
+        showAuthorized(uP);
+        loadHeaderAvatar();
+        if (typeof hideBootOverlay === "function") hideBootOverlay();
+        try {
+          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
+        } catch (eP) {}
+        return true;
+      }
+    } catch (eLs) {}
+    try {
+      var soV = pokerReadPwaVkSessionRecord();
+      if (soV && soV.user && soV.user.id != null && soV.token) {
+        var uVk = normalizeVerifiedUser(soV.user, null);
+        window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
+        updateHeaderGreeting();
+        showAuthorized(uVk);
+        loadHeaderAvatar();
+        if (typeof hideBootOverlay === "function") hideBootOverlay();
+        try {
+          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
+        } catch (eVkLs) {}
+        return true;
+      }
+    } catch (eLsVk) {}
+    return false;
+  }
+
   function runVerifyFlow() {
     function hideBootOverlay() {
       try {
@@ -4007,45 +4100,21 @@ function getPokerResolvedTelegramUser() {
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
-    if (!wtg) {
-      if (tryFinishVkOAuth()) {
-        return;
-      }
-      if (tryFinishTelegramLoginRedirect()) {
-        return;
-      }
+    if (!initData && isPwaStandaloneAuth()) {
+      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
       window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
       updateHeaderGreeting();
-      try {
-        var so = pokerReadPwaTgSessionRecord();
-        if (so && so.user && so.user.id != null && so.token) {
-          var uP = normalizeVerifiedUser(so.user, null);
-          window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
-          updateHeaderGreeting();
-          showAuthorized(uP);
-          loadHeaderAvatar();
-          hideBootOverlay();
-          try {
-            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
-          } catch (eP) {}
-          return;
-        }
-      } catch (eLs) {}
-      try {
-        var soV = pokerReadPwaVkSessionRecord();
-        if (soV && soV.user && soV.user.id != null && soV.token) {
-          var uVk = normalizeVerifiedUser(soV.user, null);
-          window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
-          updateHeaderGreeting();
-          showAuthorized(uVk);
-          loadHeaderAvatar();
-          hideBootOverlay();
-          try {
-            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
-          } catch (eVkLs) {}
-          return;
-        }
-      } catch (eLsVk) {}
+      showUnauthorized();
+      resetBannerForPwaLogin();
+      mountTelegramLoginWidgetForPwa();
+      setTimeout(hideBootOverlay, 120);
+      return;
+    }
+
+    if (!wtg) {
+      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
+      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+      updateHeaderGreeting();
       showUnauthorized();
       resetBannerForPwaLogin();
       mountTelegramLoginWidgetForPwa();
@@ -9435,9 +9504,10 @@ function initWinterRating() {
 
 function fetchRaffleBadge() {
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
-  if (!base || !initData) return;
-  fetch(base + "/api/raffles?initData=" + encodeURIComponent(initData))
+  if (!base) return;
+  var q = pokerRafflesApiQueryLeading();
+  if (q === "?initData=" && !pokerCanSyncGuestProfileToServer()) return;
+  fetch(base + "/api/raffles" + q + "&_t=" + Date.now())
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok) {
@@ -9572,9 +9642,9 @@ function initProfileP21Id() {
   if (saved) input.value = saved.replace(/\D/g, "").slice(0, 6);
   else input.value = "";
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
-  if (base && initData) {
-    fetch(base + "/api/users?initData=" + encodeURIComponent(initData))
+  var canServer = base && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer());
+  if (canServer) {
+    fetch(base + "/api/users" + pokerRafflesApiQueryLeading())
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok) return;
@@ -9588,7 +9658,7 @@ function initProfileP21Id() {
           fetch(base + "/api/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ initData: initData, p21Id: localP21 }),
+            body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: localP21 })),
           }).then(function (r) { return r.json(); }).catch(function () {});
         }
       })
@@ -9610,10 +9680,9 @@ function initProfileP21Id() {
     }
     setStoredP21(val);
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) {
+    if (!base || (!pokerApiHasCredential() && !pokerCanSyncGuestProfileToServer())) {
       if (feedback) {
-        feedback.textContent = "Сохранено локально. Откройте в Telegram, чтобы привязать к аккаунту.";
+        feedback.textContent = "Сохранено локально. Войдите в аккаунт или откройте в Telegram, чтобы синхронизировать.";
         feedback.classList.add("profile-save-feedback--visible");
         setTimeout(function () {
           feedback.textContent = "";
@@ -9622,20 +9691,19 @@ function initProfileP21Id() {
       }
       return;
     }
-    var url = base + "/api/users?initData=" + encodeURIComponent(initData);
-    fetch(url, {
+    fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, p21Id: val || "" }),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: val || "" })),
     })
       .then(function (r) {
         return r.json().catch(function () { return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status }; });
       })
-      .then(function (data) {
+        .then(function (data) {
         if (feedback) {
           var msg = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
           var m = String(msg).toLowerCase();
-          if (/telegram|телеграм|откройте/.test(m)) msg = "Откройте приложение в Telegram";
+          if (/telegram|телеграм|откройте/.test(m) && pokerApiHasCredential()) msg = "Откройте приложение в Telegram";
           feedback.textContent = msg;
           feedback.classList.add("profile-save-feedback--visible");
           setTimeout(function () {
@@ -10829,6 +10897,11 @@ window.loadVideoLessonNative = function loadVideoLessonNative(videoEl, playerWra
 
 document.addEventListener("click", function (e) {
   var trainingBtn = e.target && e.target.closest ? e.target.closest(".learn-play-hub__training-btn, .video-lessons__training-link") : null;
+  if (trainingBtn && trainingBtn.closest(".video-lessons--guest-lock")) {
+    e.preventDefault();
+    if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+    return;
+  }
   if (trainingBtn) {
     var href = trainingBtn.getAttribute("href");
     if (href && href.indexOf("t.me") !== -1) {
@@ -10842,6 +10915,11 @@ document.addEventListener("click", function (e) {
     return;
   }
   var attachment = e.target && e.target.closest ? e.target.closest(".video-lessons__attachment") : null;
+  if (attachment && attachment.closest(".video-lessons--guest-lock")) {
+    e.preventDefault();
+    if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+    return;
+  }
   if (attachment) {
     var href = attachment.getAttribute("href");
     if (href) {
@@ -10855,6 +10933,11 @@ document.addEventListener("click", function (e) {
     return;
   }
   var openExt = e.target && e.target.closest ? e.target.closest(".video-lessons__open-external") : null;
+  if (openExt && openExt.closest(".video-lessons--guest-lock")) {
+    e.preventDefault();
+    if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+    return;
+  }
   if (openExt) {
     var extHref = openExt.getAttribute("href");
     if (extHref && extHref.indexOf("http") === 0) {
@@ -10894,7 +10977,9 @@ document.addEventListener("click", function (e) {
     item.setAttribute("aria-expanded", "true");
     card.classList.add("video-lessons__card--open");
     var url = item.getAttribute("data-video-url");
-    if (url && url !== "#") {
+    var vlViewForLock = item.closest('[data-view="video-lessons"]');
+    var guestLessonsLocked = vlViewForLock && vlViewForLock.classList.contains("video-lessons--guest-lock");
+    if (url && url !== "#" && !guestLessonsLocked) {
       /* Сначала кадр с раскрытым блоком (стабильная высота под aspect-ratio), затем сеть/видео — меньше мерцания */
       requestAnimationFrame(function () {
         var nativeVideo = playerWrap.querySelector(".video-lessons__video[data-disk-public]");
@@ -10921,6 +11006,95 @@ document.addEventListener(
 );
 
 function initVideoLessons() {
+  var vlView = document.querySelector('[data-view="video-lessons"]');
+  var guestLessonsLocked = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+  if (vlView) vlView.classList.toggle("video-lessons--guest-lock", !!guestLessonsLocked);
+
+  var intro = vlView && vlView.querySelector(".video-lessons__intro");
+  var gate = document.getElementById("videoLessonsGuestGate");
+  if (guestLessonsLocked && intro) {
+    if (!gate) {
+      gate = document.createElement("div");
+      gate.id = "videoLessonsGuestGate";
+      gate.className = "video-lessons__guest-gate";
+      gate.innerHTML =
+        '<p class="video-lessons__guest-gate-text">Чтобы посмотреть видео бесплатно, войдите в\u00a0аккаунт.</p>' +
+        '<button type="button" class="profile-exit-btn" id="videoLessonsGuestLoginBtn">Войти в аккаунт</button>';
+      intro.parentNode.insertBefore(gate, intro.nextSibling);
+    }
+    gate.hidden = false;
+    gate.classList.remove("video-lessons__guest-gate--hidden");
+    var gBtn = document.getElementById("videoLessonsGuestLoginBtn");
+    if (gBtn && gBtn.dataset.vlGateBound !== "1") {
+      gBtn.dataset.vlGateBound = "1";
+      gBtn.addEventListener("click", function () {
+        if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+      });
+    }
+  } else if (gate) {
+    gate.hidden = true;
+    gate.classList.add("video-lessons__guest-gate--hidden");
+  }
+
+  var list = document.getElementById("videoLessonsList");
+  if (list) {
+    if (guestLessonsLocked) {
+      list.querySelectorAll(".video-lessons__video").forEach(function (v) {
+        try {
+          v.pause();
+          v.removeAttribute("src");
+          v.load();
+        } catch (errV) {}
+        var disk = v.getAttribute("data-disk-public");
+        if (disk) {
+          v.setAttribute("data-vl-saved-disk", disk);
+          v.removeAttribute("data-disk-public");
+        }
+      });
+      list.querySelectorAll(".video-lessons__iframe").forEach(function (f) {
+        if (f.src) {
+          f.setAttribute("data-vl-saved-iframe-src", f.src);
+          f.removeAttribute("src");
+        }
+      });
+      list.querySelectorAll("a.video-lessons__open-external, a.video-lessons__attachment, a.video-lessons__training-link").forEach(function (a) {
+        var h = a.getAttribute("href");
+        if (h && h !== "#") {
+          a.setAttribute("data-vl-saved-href", h);
+          a.setAttribute("href", "#");
+        }
+      });
+      list.querySelectorAll(".video-lessons__player-wrap").forEach(function (w) {
+        w.classList.add("video-lessons__player-wrap--hidden");
+      });
+      list.querySelectorAll(".video-lessons__item").forEach(function (btn) {
+        btn.setAttribute("aria-expanded", "false");
+      });
+      list.querySelectorAll(".video-lessons__card--open").forEach(function (c) {
+        c.classList.remove("video-lessons__card--open");
+      });
+    } else {
+      list.querySelectorAll(".video-lessons__video").forEach(function (v) {
+        var d = v.getAttribute("data-vl-saved-disk");
+        if (d) {
+          v.setAttribute("data-disk-public", d);
+          v.removeAttribute("data-vl-saved-disk");
+        }
+      });
+      list.querySelectorAll(".video-lessons__iframe").forEach(function (f) {
+        var s = f.getAttribute("data-vl-saved-iframe-src");
+        if (s) {
+          f.src = s;
+          f.removeAttribute("data-vl-saved-iframe-src");
+        }
+      });
+      list.querySelectorAll("a[data-vl-saved-href]").forEach(function (a) {
+        a.setAttribute("href", a.getAttribute("data-vl-saved-href"));
+        a.removeAttribute("data-vl-saved-href");
+      });
+    }
+  }
+
   /* Длинный экран: при входе показываем шапку с фото и заголовком, а не середину списка */
   function scrollTopNow() {
     try {
@@ -10941,9 +11115,10 @@ function initVideoLessons() {
   /* Первый урок: после стабилизации скролла/вёрстки — иначе fetch+src и scrollTop конкурируют и экран «мерцает» */
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
+      if (guestLessonsLocked) return;
       try {
-        var list = document.getElementById("videoLessonsList");
-        var firstCard = list && list.querySelector(".video-lessons__card");
+        var listL = document.getElementById("videoLessonsList");
+        var firstCard = listL && listL.querySelector(".video-lessons__card");
         if (firstCard && firstCard.classList.contains("video-lessons__card--open")) {
           var pw = firstCard.querySelector(".video-lessons__player-wrap");
           if (pw && !pw.classList.contains("video-lessons__player-wrap--hidden")) {
@@ -11983,6 +12158,8 @@ function initRaffles() {
   var raffleJoinBtn = document.getElementById("raffleJoinBtn");
   var raffleLeaveBtn = document.getElementById("raffleLeaveBtn");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
+  var raffleGuestGate = document.getElementById("raffleGuestGate");
+  var raffleGuestLoginBtn = document.getElementById("raffleGuestLoginBtn");
   var raffleParticipantsCount = document.getElementById("raffleParticipantsCount");
   var raffleParticipantsChance = document.getElementById("raffleParticipantsChance");
   var raffleParticipants = document.getElementById("raffleParticipants");
@@ -12160,7 +12337,7 @@ function initRaffles() {
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, action: "setWinnerStatus", raffleId: rid, winnerUserId: wid, status: newStatus }),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerStatus", raffleId: rid, winnerUserId: wid, status: newStatus })),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -12173,7 +12350,7 @@ function initRaffles() {
   }
 
   function bindRaffleWinnerStatusButtons(container, raffleId) {
-    if (!container || !rafflesIsAdmin || !base || !initData) return;
+    if (!container || !rafflesIsAdmin || !base) return;
     container.querySelectorAll(".raffle-winner-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var rid = this.getAttribute("data-raffle-id");
@@ -12211,11 +12388,22 @@ function initRaffles() {
 
   function getMyUserId() {
     if (myRaffleUserId) return myRaffleUserId;
+    try {
+      var uRes = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (uRes && uRes.id != null) {
+        myRaffleUserId = "tg_" + uRes.id;
+        return myRaffleUserId;
+      }
+    } catch (eUid) {}
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
       myRaffleUserId = "tg_" + tg.initDataUnsafe.user.id;
       return myRaffleUserId;
     }
     return null;
+  }
+
+  function rafflesViewerApiReady() {
+    return !!(base && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer()));
   }
 
   function parseMoscowDateTimeLocal(value) {
@@ -12288,8 +12476,15 @@ function initRaffles() {
     rafflePrizes.innerHTML = prizesHtml || "<p class=\"raffle-no-prizes\">Призы не указаны</p>";
     var me = getMyUserId();
     var iAmIn = me && raffle.participants && raffle.participants.some(function (p) { return p.userId === me; });
+    var guestRaffleBlock = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    var showRaffleGuestGate = !!(guestRaffleBlock && isActive && !iAmIn);
+    if (raffleGuestGate) {
+      raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
+      raffleGuestGate.hidden = !showRaffleGuestGate;
+    }
     if (raffleJoinBtn) {
-      raffleJoinBtn.classList.toggle("raffle-join-btn--hidden", !!iAmIn || raffle.status !== "active");
+      var hideJoin = !!iAmIn || raffle.status !== "active" || showRaffleGuestGate;
+      raffleJoinBtn.classList.toggle("raffle-join-btn--hidden", hideJoin);
       raffleJoinBtn.disabled = raffle.status !== "active" || (endDate && endDate <= new Date());
     }
     if (raffleLeaveBtn) {
@@ -12336,15 +12531,7 @@ function initRaffles() {
   }
 
   function getRaffleDeviceId() {
-    try {
-      var key = "poker_raffle_device_id";
-      var id = typeof localStorage !== "undefined" && localStorage.getItem(key);
-      if (!id) {
-        id = "dev_" + Date.now() + "_" + Math.random().toString(36).slice(2, 14);
-        if (typeof localStorage !== "undefined") localStorage.setItem(key, id);
-      }
-      return id;
-    } catch (e) { return ""; }
+    return pokerGetRaffleStableDeviceId();
   }
 
   function loadRaffles(switchToCompleted) {
@@ -12352,8 +12539,8 @@ function initRaffles() {
     var hostname = typeof window !== "undefined" && window.location && window.location.hostname ? window.location.hostname : "";
     var baseStr = (base || "").toString();
     var isLocal = /localhost|127\.0\.0\.1/i.test(hostname) || /localhost|127\.0\.0\.1/i.test(baseStr);
-    var init = initData || (isLocal ? "local" : "");
-    if (!init && !isLocal) return;
+    var qLead = pokerRafflesApiQueryLeading();
+    if (!isLocal && qLead === "?initData=" && !pokerCanSyncGuestProfileToServer()) return;
 
     function showRafflesLoading() {
       if (raffleEmpty) {
@@ -12375,24 +12562,33 @@ function initRaffles() {
     var cache = typeof window !== "undefined" && window._rafflesCache;
     var cacheAge = cache && cache.time ? Date.now() - cache.time : 0;
     if (cache && cache.data && cacheAge < 60000) {
-      // Важно: при кэш-хите применяем данные не сразу в том же тике,
-      // чтобы успел отрисоваться индикатор загрузки.
       var apply = function () { applyRafflesData(cache.data, switchToCompleted); };
       if (typeof requestAnimationFrame === "function") requestAnimationFrame(apply);
       else setTimeout(apply, 0);
     }
 
-    var url = base + "/api/raffles?initData=" + encodeURIComponent(init) + "&_t=" + Date.now() + (isLocal ? "&demo=1" : "");
-    fetch(url)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (!data || !data.ok) return;
-        if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
-        applyRafflesData(data, switchToCompleted);
-      })
-      .catch(function () {
-        showRafflesError();
+    function startFetch() {
+      var url = base + "/api/raffles" + qLead + "&_t=" + Date.now() + (isLocal ? "&demo=1" : "");
+      fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || !data.ok) return;
+          if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
+          applyRafflesData(data, switchToCompleted);
+        })
+        .catch(function () {
+          showRafflesError();
+        });
+    }
+
+    if (qLead.indexOf("guestDeviceId=") !== -1) {
+      pokerComputeGuestMemberId(pokerGetRaffleStableDeviceId()).then(function (gid) {
+        if (gid) myRaffleUserId = gid;
+        startFetch();
       });
+    } else {
+      startFetch();
+    }
   }
 
   function applyRafflesData(data, switchToCompleted) {
@@ -12484,6 +12680,11 @@ function initRaffles() {
           if (raffleEmpty) {
             raffleEmpty.textContent = "Нет активных розыгрышей.";
             raffleEmpty.classList.remove("raffle-empty--hidden");
+          }
+          var rgGate = document.getElementById("raffleGuestGate");
+          if (rgGate) {
+            rgGate.classList.add("raffle-guest-gate--hidden");
+            rgGate.hidden = true;
           }
           currentRaffleId = null;
           currentRaffleEndDate = null;
@@ -12644,12 +12845,8 @@ function initRaffles() {
   // Админская рассылка подписчикам розыгрышей
   window.updateRaffleSubsCount = function () {
     if (!rafflesNotifySubsBtn) return;
-    if (!base || !initData) return;
-    fetch(
-      base +
-        "/api/raffle-manual-subscribers?stats=1&initData=" +
-        encodeURIComponent(initData)
-    )
+    if (!base || !pokerApiHasCredential()) return;
+    fetch(base + "/api/raffle-manual-subscribers?stats=1" + pokerRafflesApiQueryLeading().replace("?", "&"))
       .then(function (r) {
         if (!r.ok) return Promise.reject(new Error("http " + r.status));
         return r.json();
@@ -12669,7 +12866,7 @@ function initRaffles() {
   (function initRafflesSubscribersAdminNotify() {
     if (!rafflesNotifySubsBtn) return;
     rafflesNotifySubsBtn.addEventListener("click", function () {
-      if (!base || !initData) {
+      if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
@@ -12682,7 +12879,7 @@ function initRaffles() {
       fetch(base + "/api/raffle-manual-subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.assign({ initData: initData }, extra)),
+        body: JSON.stringify(Object.assign(pokerGuestOrAuthedPostBody({}), extra)),
       })
         .then(raffleManualSubscribersParseResponse)
         .then(function (data) {
@@ -13280,7 +13477,15 @@ function initRaffles() {
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "create", totalWinners: totalWinners, groups: groups, endDate: endDate.toISOString(), title: title || undefined }),
+        body: JSON.stringify(
+          pokerGuestOrAuthedPostBody({
+            action: "create",
+            totalWinners: totalWinners,
+            groups: groups,
+            endDate: endDate.toISOString(),
+            title: title || undefined,
+          })
+        ),
       })
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -13302,7 +13507,7 @@ function initRaffles() {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
       }
-      if (!base || !initData) {
+      if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
@@ -13311,7 +13516,7 @@ function initRaffles() {
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, action: "complete", raffleId: currentRaffleId }),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "complete", raffleId: currentRaffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -13348,7 +13553,7 @@ function initRaffles() {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
       }
-      if (!base || !initData) {
+      if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
@@ -13357,7 +13562,7 @@ function initRaffles() {
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, action: "cancel", raffleId: currentRaffleId }),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "cancel", raffleId: currentRaffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -13394,7 +13599,7 @@ function initRaffles() {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
       }
-      if (!base || !initData) {
+      if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
@@ -13412,7 +13617,9 @@ function initRaffles() {
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "updateEndDate", raffleId: currentRaffleId, endDate: dt.toISOString() }),
+        body: JSON.stringify(
+          pokerGuestOrAuthedPostBody({ action: "updateEndDate", raffleId: currentRaffleId, endDate: dt.toISOString() })
+        ),
       })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; }); })
         .then(function (data) {
@@ -13438,7 +13645,7 @@ function initRaffles() {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
       }
-      if (!base || !initData) {
+      if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
@@ -13447,7 +13654,7 @@ function initRaffles() {
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, action: "delete", raffleId: currentRaffleId }),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: currentRaffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -13477,7 +13684,7 @@ function initRaffles() {
     });
   }
 
-  if (rafflesCompleted && base && initData) {
+  if (rafflesCompleted && base && pokerApiHasCredential()) {
     rafflesCompleted.addEventListener("click", function (e) {
       var winnerBtn = e.target.closest(".raffle-winner-btn");
       if (winnerBtn && rafflesIsAdmin) {
@@ -13502,7 +13709,7 @@ function initRaffles() {
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, action: "delete", raffleId: raffleId }),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: raffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -13550,22 +13757,46 @@ function initRaffles() {
       });
   }
 
+  if (raffleGuestLoginBtn && raffleGuestLoginBtn.dataset.bound !== "1") {
+    raffleGuestLoginBtn.dataset.bound = "1";
+    raffleGuestLoginBtn.addEventListener("click", function () {
+      if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+    });
+  }
+
   if (raffleJoinBtn) {
     raffleJoinBtn.addEventListener("click", function () {
       if (!currentRaffleId) {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
       }
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+        if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+        else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+        return;
+      }
+      if (!rafflesViewerApiReady()) {
+        if (tg && tg.showAlert) tg.showAlert("Нет доступа к серверу. Проверьте сеть.");
+        else if (typeof alert === "function") alert("Нет доступа к серверу. Проверьте сеть.");
         return;
       }
       raffleJoinBtn.disabled = true;
       showRaffleActionLoading();
+      var joinBody = {
+        action: "join",
+        raffleId: currentRaffleId,
+        deviceId: getRaffleDeviceId(),
+      };
+      try {
+        var p21Join = ((typeof localStorage !== "undefined" && localStorage.getItem("poker_p21_id")) || "")
+          .replace(/\D/g, "")
+          .slice(0, 6);
+        if (p21Join.length === 6) joinBody.p21Id = p21Join;
+      } catch (eJ) {}
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "join", raffleId: currentRaffleId, deviceId: getRaffleDeviceId() }),
+        body: JSON.stringify(pokerGuestOrAuthedPostBody(joinBody)),
       })
         .then(parseRaffleApiResponse)
         .then(function (data) {
@@ -13588,6 +13819,9 @@ function initRaffles() {
                 if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
                 tg.openTelegramLink("https://t.me/dva_tuza_club");
               }
+            } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
+              if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+              else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
             } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
               if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
             } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
@@ -13607,13 +13841,13 @@ function initRaffles() {
 
   if (raffleLeaveBtn) {
     raffleLeaveBtn.addEventListener("click", function () {
-      if (!currentRaffleId || !base || !initData) return;
+      if (!currentRaffleId || !base || !rafflesViewerApiReady()) return;
       raffleLeaveBtn.disabled = true;
       showRaffleActionLoading();
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, action: "leave", raffleId: currentRaffleId }),
+        body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "leave", raffleId: currentRaffleId })),
       })
         .then(parseRaffleApiResponse)
         .then(function (data) {
