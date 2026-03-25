@@ -15155,23 +15155,57 @@ function initChat() {
     return;
   }
 
-  var myId = null;
-  var myChatName = "Вы";
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    var uChat = tg.initDataUnsafe.user;
-    myId = "tg_" + uChat.id;
-    myChatName =
-      uChat.first_name ||
-      (uChat.username && !pokerHideRomanTelegramUsername(uChat.username) ? uChat.username : "") ||
-      "Вы";
-  } else {
+  /** Id участника чата (tg_… / vk_…), как на сервере в поле from — пересчитываем при каждом рендере: в PWA initChat часто раньше, чем завершился вход. */
+  function resolveMyChatMemberId() {
     try {
       var _auth = window.__pokerTelegramAuth;
-      if (_auth && _auth.user && _auth.user.id != null) {
-        myId = "tg_" + _auth.user.id;
-        myChatName = typeof telegramUserDisplayName === "function" ? telegramUserDisplayName(_auth.user) || "Вы" : "Вы";
+      if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
+        var u = _auth.user;
+        var raw = String(u.id);
+        if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) return raw;
+        if (u.is_vk || u.vk) return "vk_" + raw;
+        return "tg_" + raw;
       }
-    } catch (eMy) {}
+    } catch (eA) {}
+    try {
+      var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user && wtg.initData && String(wtg.initData).trim()) {
+        var u0 = wtg.initDataUnsafe.user;
+        if (u0 && u0.id != null) return "tg_" + String(u0.id);
+      }
+    } catch (eT) {}
+    return null;
+  }
+  function resolveMyChatDisplayName() {
+    try {
+      var _auth2 = window.__pokerTelegramAuth;
+      if (_auth2 && _auth2.user && (_auth2.status === "verified" || _auth2.status === "dev_skip")) {
+        if (typeof telegramUserDisplayName === "function") {
+          var nm = telegramUserDisplayName(_auth2.user);
+          if (nm) return nm;
+        }
+        var u2 = _auth2.user;
+        if (u2.first_name) return String(u2.first_name);
+        if (u2.username && typeof pokerHideRomanTelegramUsername === "function" && !pokerHideRomanTelegramUsername(u2.username)) {
+          return String(u2.username);
+        }
+        if (u2.username) return String(u2.username);
+      }
+    } catch (eN) {}
+    try {
+      var wtgN = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (wtgN && wtgN.initDataUnsafe && wtgN.initDataUnsafe.user) {
+        var uCh = wtgN.initDataUnsafe.user;
+        return (
+          uCh.first_name ||
+          (uCh.username && typeof pokerHideRomanTelegramUsername === "function" && !pokerHideRomanTelegramUsername(uCh.username)
+            ? uCh.username
+            : "") ||
+          "Вы"
+        );
+      }
+    } catch (eTN) {}
+    return "Вы";
   }
 
   function escapeHtml(s) {
@@ -16028,7 +16062,8 @@ function initChat() {
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
         var lastView = lastViewedGeneral != null ? lastViewedGeneral : "";
-        var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myId; }).length;
+        var myMemberIdForUnread = resolveMyChatMemberId();
+        var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; }).length;
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible) {
           lastViewedGeneral = latest;
           saveChatLastViewed();
@@ -16357,6 +16392,7 @@ function initChat() {
       generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
       return;
     }
+    var myIdRender = resolveMyChatMemberId();
     var html = messages.map(function (m, i) {
       var prev = i > 0 ? messages[i - 1] : null;
       var next = i < messages.length - 1 ? messages[i + 1] : null;
@@ -16366,7 +16402,7 @@ function initChat() {
       };
       var isFirstInGroup = !prev || !sameUser(prev, m);
       var isLastInGroup = !next || !sameUser(next, m);
-      var isOwn = myId && String(m.from) === String(myId);
+      var isOwn = myIdRender && String(m.from) === String(myIdRender);
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
       if (isOwn && m.id) {
@@ -16411,7 +16447,7 @@ function initChat() {
         for (var em in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, em) && Array.isArray(m.reactions[em]) && m.reactions[em].length > 0) {
             var count = m.reactions[em].length;
-            var iReacted = myId && m.reactions[em].indexOf(myId) >= 0;
+            var iReacted = myIdRender && m.reactions[em].indexOf(myIdRender) >= 0;
             pills.push('<button type="button" class="chat-msg__reaction ' + (iReacted ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(em) + '" data-source="general">' + escapeHtml(em) + ' <span class="chat-msg__reaction-count">' + count + '</span></button>');
           }
         }
@@ -16533,7 +16569,7 @@ function initChat() {
         var msgId = btn.dataset.msgId;
         var oldText = (btn.dataset.msgText || "").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         if (!msgId) return;
-        startChatEdit("general", msgId, oldText, myChatName || "Игрок");
+        startChatEdit("general", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
       });
     });
     attachContextMenuForOthers(generalMessages, "general");
@@ -16831,7 +16867,8 @@ function initChat() {
     if (emptyEl) generalMessages.innerHTML = "";
     var authAvatarEl = document.getElementById("authUserAvatar");
     var myAvatarUrl = (authAvatarEl && authAvatarEl.src && authAvatarEl.src.indexOf("data:") !== 0 && authAvatarEl.src.indexOf("http") === 0) ? authAvatarEl.src : "";
-    var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + (myChatName[0] || "Я") + '</span>';
+    var myNmOpt = resolveMyChatDisplayName();
+    var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml((myNmOpt && myNmOpt[0]) || "Я") + '</span>';
     var time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
     var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(replyTo.fromName || "Игрок") + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
     var textContent = "";
@@ -16839,7 +16876,7 @@ function initChat() {
     else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
     else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
     else if (text) textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
-    var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myChatName) + '</span>' +
+    var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myNmOpt) + '</span>' +
       '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
       '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
     var optBodyClass = "chat-msg__body" + (text && !image && !voice && !document ? " chat-msg__body--has-text" : "");
@@ -17285,6 +17322,7 @@ function initChat() {
       var cls = "chat-msg__ticks" + (delivered ? " chat-msg__ticks--delivered" : " chat-msg__ticks--sent") + (read ? " chat-msg__ticks--read" : "");
       return '<div class="' + cls + '" aria-hidden="true">' + text + "</div>";
     }
+    var myIdRenderP = resolveMyChatMemberId();
     var html = messages.map(function (m, i) {
       var prev = i > 0 ? messages[i - 1] : null;
       var next = i < messages.length - 1 ? messages[i + 1] : null;
@@ -17294,7 +17332,7 @@ function initChat() {
       };
       var isFirstInGroup = !prev || !sameUser(prev, m);
       var isLastInGroup = !next || !sameUser(next, m);
-      var isOwn = myId && String(m.from) === String(myId);
+      var isOwn = myIdRenderP && String(m.from) === String(myIdRenderP);
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
       if (isOwn && m.id) {
@@ -17331,7 +17369,7 @@ function initChat() {
         for (var emp in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, emp) && Array.isArray(m.reactions[emp]) && m.reactions[emp].length > 0) {
             var countP = m.reactions[emp].length;
-            var iReactedP = myId && m.reactions[emp].indexOf(myId) >= 0;
+            var iReactedP = myIdRenderP && m.reactions[emp].indexOf(myIdRenderP) >= 0;
             pillsP.push('<button type="button" class="chat-msg__reaction ' + (iReactedP ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(emp) + '" data-source="personal" data-with="' + escapeHtml(chatWithUserId || "") + '">' + escapeHtml(emp) + ' <span class="chat-msg__reaction-count">' + countP + '</span></button>');
           }
         }
@@ -17387,7 +17425,7 @@ function initChat() {
         var msgId = btn.dataset.msgId;
         var oldText = (btn.dataset.msgText || "").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         if (!msgId) return;
-        startChatEdit("personal", msgId, oldText, myChatName || "Игрок");
+        startChatEdit("personal", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
       });
     });
     attachContextMenuForOthers(messagesEl, "personal");
@@ -17463,7 +17501,10 @@ function initChat() {
       if (emptyEl) messagesEl.innerHTML = "";
       var authAvatarEl = document.getElementById("authUserAvatar");
       var myAvatarUrl = (authAvatarEl && authAvatarEl.src && authAvatarEl.src.indexOf("data:") !== 0 && authAvatarEl.src.indexOf("http") === 0) ? authAvatarEl.src : "";
-      var nameStr = (myChatName != null && myChatName !== "") ? String(myChatName) : "Вы";
+      var nameStr = (function () {
+        var nm = resolveMyChatDisplayName();
+        return nm != null && nm !== "" ? String(nm) : "Вы";
+      })();
       var initial = nameStr[0] || "Я";
       var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(initial) + '</span>';
       var time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
