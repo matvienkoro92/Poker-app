@@ -3548,6 +3548,24 @@ function getPokerResolvedTelegramUser() {
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
+
+    function mountPwaStandaloneEnterButton() {
+      if (!isPwaStandaloneAuth()) return false;
+      if (mount.getAttribute("data-pwa-enter-mounted") === "1") return true;
+      mount.setAttribute("data-pwa-enter-mounted", "1");
+      mount.innerHTML =
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>';
+      var btn = document.getElementById("pwaAuthEnterTelegramBtn");
+      if (!btn) return true;
+      btn.addEventListener("click", function () {
+        try { mount.removeAttribute("data-pwa-enter-mounted"); } catch (e) {}
+        mount.innerHTML = "";
+        var actionsMount = ensurePwaVerificationForm(mount) || mount;
+        mountPwaUsernameCodeLogin(actionsMount);
+      });
+      return true;
+    }
+
     if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
       mount.removeAttribute("data-pwa-widget-mounted");
       mount.innerHTML = "";
@@ -3627,7 +3645,7 @@ function getPokerResolvedTelegramUser() {
       actionsMount.appendChild(script);
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
-    mountPwaUsernameCodeLogin(actionsMount);
+    if (!mountPwaStandaloneEnterButton()) mountPwaUsernameCodeLogin(actionsMount);
     if (!isPwaStandaloneAuth()) {
       mountVkLoginForPwa(actionsMount);
       mountTelegramExternalBrowserEscapeBtn(actionsMount);
