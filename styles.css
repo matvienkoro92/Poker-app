@@ -963,7 +963,8 @@ html.app-view-home .home-welcome-outline::before {
 }
 .pwa-auth-screen .auth-banner__code-row--back {
   margin-top: 0;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  justify-content: flex-start;
 }
 .pwa-auth-screen .auth-banner__code-input {
   background: rgba(15, 23, 42, 0.72);
@@ -1252,14 +1253,20 @@ html.app-view-home .home-welcome-outline::before {
   position: fixed;
   inset: 0;
   z-index: 99990;
+  box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  padding-top: max(20px, env(safe-area-inset-top, 0px));
-  /* Оранжевое свечение выше, у верхнего края экрана */
-  background: radial-gradient(880px 480px at 50% -42%, rgba(249, 115, 22, 0.28), transparent 52%),
-    linear-gradient(180deg, #020617 0%, #0b1120 100%);
+  /* Симметричные отступы с safe area — блок визуально по центру экрана */
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px))
+    max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  /* Тот же оттенок, что у html/body и theme-color (#0f172a), чтобы под статус-баром iOS не было «шва» */
+  background-color: #0f172a;
+  background-image: radial-gradient(880px 480px at 50% -42%, rgba(249, 115, 22, 0.28), transparent 52%),
+    linear-gradient(180deg, #0f172a 0%, #020617 42%, #0b1120 100%);
 }
 .pwa-auth-screen--hidden {
   display: none !important;
@@ -1267,6 +1274,7 @@ html.app-view-home .home-welcome-outline::before {
 .pwa-auth-screen__inner {
   width: 100%;
   max-width: 430px;
+  flex: 0 0 auto;
   padding: 18px 14px 14px;
   border-radius: 0;
   border: none;
@@ -1338,24 +1346,31 @@ html.app-view-home .home-welcome-outline::before {
   color: var(--accent, #ea580c);
   border: 1px solid rgba(234, 88, 12, 0.55);
 }
-.pwa-auth-screen__back-btn {
+.pwa-auth-screen__back-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(234, 88, 12, 0.55);
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0 0 2px -6px;
+  border: none;
+  border-radius: 12px;
   background: transparent;
-  color: var(--accent, #ea580c);
-  font-weight: 600;
-  font-size: 14px;
+  color: #fb923c;
   cursor: pointer;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
-.pwa-auth-screen__back-btn:active {
-  transform: scale(0.99);
+.pwa-auth-screen__back-icon-btn:active {
+  opacity: 0.85;
+  transform: scale(0.96);
+}
+.pwa-auth-screen__back-icon {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
 }
 body.pwa-auth-gated #app {
   visibility: hidden;
@@ -3335,6 +3350,40 @@ body.chat-keyboard-open .app {
   font-size: 14px;
   padding: 12px;
   text-align: center;
+}
+.chat-guest-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 12px 24px;
+  text-align: center;
+}
+.chat-empty.chat-empty--guest-msg {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 300px;
+  padding-bottom: 0;
+}
+.chat-guest-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 168px;
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  color: var(--btn-on-accent, #0b1120);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chat-guest-cta__btn:active {
+  transform: scale(0.98);
 }
 .chat-msg {
   -webkit-user-select: none;

@@ -3274,7 +3274,9 @@ function getPokerResolvedTelegramUser() {
     var backRow =
       isPwaStandaloneAuth() && !isPwaAuthLocalHost()
         ? '<div class="auth-banner__code-row auth-banner__code-row--back">' +
-          '<button type="button" class="pwa-auth-screen__back-btn" id="authPwaCodeBackBtn" aria-label="Назад к выбору входа">Назад</button>' +
+          '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaCodeBackBtn" aria-label="Назад к выбору входа">' +
+          '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
+          "</button>" +
           "</div>"
         : "";
     var botUser = "";
@@ -3306,7 +3308,7 @@ function getPokerResolvedTelegramUser() {
       "</div>" +
       '<div class="auth-banner__code-row auth-banner__code-row--verify">' +
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="Код из Telegram" inputmode="numeric" autocomplete="one-time-code" />' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Войти</button>' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Готово</button>' +
       "</div>";
     mount.appendChild(wrap);
 
@@ -3373,49 +3375,78 @@ function getPokerResolvedTelegramUser() {
       });
     }
 
-    if (verifyBtn) {
-      verifyBtn.addEventListener("click", function () {
-        var username = normalizeUsernameInput();
-        var code = codeInput && codeInput.value ? String(codeInput.value).trim() : "";
-        if (!/^[a-z0-9_]{5,32}$/.test(username)) {
-          setHint("Сначала укажите корректный username.", true);
-          return;
-        }
-        if (!/^\d{6}$/.test(code)) {
-          setHint("Введите 6-значный код из Telegram.", true);
-          return;
-        }
+    var verifyInflight = false;
+    function tryVerifyCode(opts) {
+      opts = opts || {};
+      var fromButton = !!opts.fromButton;
+      if (verifyInflight || !codeInput) return;
+      var username = normalizeUsernameInput();
+      var code = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+      if (codeInput.value !== code) codeInput.value = code;
+      if (!/^[a-z0-9_]{5,32}$/.test(username)) {
+        if (code.length >= 6 || fromButton) setHint("Сначала укажите корректный username.", true);
+        return;
+      }
+      if (!/^\d{6}$/.test(code)) {
+        if (fromButton) setHint("Введите 6-значный код из Telegram.", true);
+        return;
+      }
+      verifyInflight = true;
+      codeInput.disabled = true;
+      if (verifyBtn) {
         verifyBtn.disabled = true;
         verifyBtn.textContent = "Проверяем…";
-        fetch(base + "/api/auth-pwa-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "verify", username: username, code: code }),
+      }
+      fetch(base + "/api/auth-pwa-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", username: username, code: code }),
+      })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
+        .then(function (data) {
+          if (data && data.ok && data.user && data.pwaSession) {
+            var u = normalizeVerifiedUser(data.user, null);
+            if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
+            pokerSavePwaGuestMode(false);
+            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            updateHeaderGreeting();
+            showAuthorized(u);
+            loadHeaderAvatar();
+            try {
+              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
+            } catch (e1) {}
+            return;
+          }
+          setHint((data && data.error) || "Код не подтверждён.", true);
         })
-          .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
-          .then(function (data) {
-            if (data && data.ok && data.user && data.pwaSession) {
-              var u = normalizeVerifiedUser(data.user, null);
-              if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
-              pokerSavePwaGuestMode(false);
-              window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-              updateHeaderGreeting();
-              showAuthorized(u);
-              loadHeaderAvatar();
-              try {
-                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
-              } catch (e1) {}
-              return;
-            }
-            setHint((data && data.error) || "Код не подтверждён.", true);
-          })
-          .catch(function () {
-            setHint("Сеть недоступна. Попробуйте снова.", true);
-          })
-          .finally(function () {
+        .catch(function () {
+          setHint("Сеть недоступна. Попробуйте снова.", true);
+        })
+        .finally(function () {
+          verifyInflight = false;
+          if (codeInput) codeInput.disabled = false;
+          if (verifyBtn) {
             verifyBtn.disabled = false;
-            verifyBtn.textContent = "Войти";
-          });
+            verifyBtn.textContent = "Готово";
+          }
+        });
+    }
+    if (verifyBtn) {
+      verifyBtn.addEventListener("click", function () {
+        tryVerifyCode({ fromButton: true });
+      });
+    }
+    if (codeInput) {
+      codeInput.addEventListener("input", function () {
+        var d = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+        if (codeInput.value !== d) codeInput.value = d;
+        if (d.length === 6) tryVerifyCode();
+      });
+      codeInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          tryVerifyCode({ fromButton: true });
+        }
       });
     }
   }
@@ -3424,13 +3455,14 @@ function getPokerResolvedTelegramUser() {
     if (!mount) return null;
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
-      var title = isPwaStandaloneAuth() ? "ВОЙТИ" : "Верификация для входа в PWA";
+      var title = isPwaStandaloneAuth() ? "" : "Верификация для входа в PWA";
       var subtitle = isPwaStandaloneAuth()
         ? ""
         : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram.</p>';
+      var titleBlock = title ? '<p class="auth-banner__verify-title">' + title + "</p>" : "";
       mount.innerHTML =
         '<div class="auth-banner__verify-form">' +
-          '<p class="auth-banner__verify-title">' + title + "</p>" +
+          titleBlock +
           subtitle +
           '<div class="auth-banner__verify-actions"></div>' +
         "</div>";
@@ -4159,6 +4191,13 @@ function getPokerResolvedTelegramUser() {
   } else {
     runVerifyFlow();
   }
+
+  window.__pokerOpenPwaLoginScreen = function () {
+    try {
+      showPwaAuthScreen();
+      mountTelegramLoginWidgetForPwa();
+    } catch (ePwaOpen) {}
+  };
 })();
 
 // Оверлей загрузки: ранний inline-скрипт в index.html (до app.js), см. __pokerHideBootOverlay
@@ -17025,6 +17064,24 @@ function initChat() {
 
   function loadContacts() {
     if (!contactsEl) return;
+    if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+      var clubPrevG = document.getElementById("chatDialogClubPreview");
+      if (clubPrevG) clubPrevG.textContent = "Войдите в аккаунт";
+      if (!contactsEl.querySelector(".chat-guest-cta")) {
+        contactsEl.innerHTML =
+          '<div class="chat-guest-cta">' +
+          '<p class="chat-empty chat-empty--guest-msg">Чтобы писать в чате, войдите в свой аккаунт</p>' +
+          '<button type="button" class="chat-guest-cta__btn" id="chatGuestLoginBtn">Войти</button>' +
+          "</div>";
+        var gBtn = document.getElementById("chatGuestLoginBtn");
+        if (gBtn) {
+          gBtn.addEventListener("click", function () {
+            if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+          });
+        }
+      }
+      return;
+    }
     var lastViewedParam = "";
     try {
       var lv = Object.assign({}, lastViewedPersonal || {});
@@ -19256,6 +19313,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (typeof updateProfileUserName === "function") updateProfileUserName();
     if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
     if (typeof updateProfileDtId === "function") updateProfileDtId();
+    if (typeof window.chatRefresh === "function") window.chatRefresh();
   } catch (eVis) {}
 });
 
