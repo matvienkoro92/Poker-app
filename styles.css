@@ -20602,7 +20602,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  /* На iOS фиксированный элемент иногда "подпрыгивает" при изменении layout viewport.
+     Убираем transition для transform, чтобы не было визуального «подъёма» при свайпах. */
+  transition: opacity 0.25s ease-out;
 }
 /* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
 @media (display-mode: standalone) {

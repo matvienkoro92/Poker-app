@@ -4634,6 +4634,43 @@ function playClickSound() {
   } catch (err) {}
 }
 
+// PWA: короткий звук при новых сообщениях в чате.
+function pokerReadChatMessageSoundEnabled() {
+  try {
+    var v = localStorage.getItem("poker_chat_msg_sound");
+    if (v === null) return true;
+    return v === "1" || String(v).toLowerCase() === "true" || String(v).toLowerCase() === "on";
+  } catch (e) {
+    // В приватных режимах/ограничениях localStorage может падать — тогда считаем, что звук включен.
+    return true;
+  }
+}
+function pokerPlayChatMessageNotificationSound() {
+  try {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    var ctx = window.__msgAudioCtx;
+    if (!ctx) ctx = window.__msgAudioCtx = new Ctx();
+    if (ctx.state === "suspended") ctx.resume();
+    var now = ctx.currentTime;
+    // Два быстрых тона: коротко и заметно, но без долгого "пищания".
+    var mkTone = function (freq, t0, dur, g0) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(g0, t0);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      osc.start(t0);
+      osc.stop(t0 + dur);
+    };
+    mkTone(740, now, 0.06, 0.05);
+    mkTone(520, now + 0.08, 0.07, 0.04);
+  } catch (err) {}
+}
+
 function tryChillRadioPlay() {
   var mode = localStorage.getItem("chill_radio_mode") || "";
   if (mode !== "chill" && mode !== "lounge" && mode !== "90s" && mode !== "radio7") return;
@@ -9595,23 +9632,28 @@ function updateProfileExitBtnVisibility() {
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
 }
 
+function pokerClearSessionsAndReloadForLogin() {
+  try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
+  try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
+  try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}
+  try { sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (eS2) {}
+  try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
+  try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
+  try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
+  try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
+  try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
+  try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
+  window.location.reload();
+}
+window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+
 function initProfileExitBtn() {
   var btn = document.getElementById("profileExitBtn");
   if (!btn) return;
   if (btn.dataset.bound === "1") return;
   btn.dataset.bound = "1";
   btn.addEventListener("click", function () {
-    try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
-    try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
-    try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}
-    try { sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (eS2) {}
-    try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
-    try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
-    try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
-    try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
-    try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
-    try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
-    window.location.reload();
+    if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
   });
 }
 
@@ -11019,7 +11061,7 @@ function initVideoLessons() {
     if (gBtn && gBtn.dataset.vlGateBound !== "1") {
       gBtn.dataset.vlGateBound = "1";
       gBtn.addEventListener("click", function () {
-        if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+        if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
       });
     }
   } else if (gate) {
@@ -13748,7 +13790,7 @@ function initRaffles() {
   if (raffleGuestLoginBtn && raffleGuestLoginBtn.dataset.bound !== "1") {
     raffleGuestLoginBtn.dataset.bound = "1";
     raffleGuestLoginBtn.addEventListener("click", function () {
-      if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+      if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
     });
   }
 
@@ -15442,6 +15484,18 @@ function initChat() {
     } catch (eT) {}
     return null;
   }
+  /** Как на сервере normalizePeerChatUserId — для сравнения peer id и защиты от «чата с собой». */
+  function normalizePeerIdForChat(raw) {
+    var s = String(raw || "").trim();
+    if (!s) return "";
+    if (s.indexOf("tg_") === 0 || s.indexOf("vk_") === 0 || s.indexOf("guest_") === 0) return s;
+    if (/^\d+$/.test(s)) return "tg_" + s;
+    return "tg_" + s;
+  }
+  function peerChatIdsEqual(a, b) {
+    if (!a || !b) return false;
+    return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
+  }
   function resolveMyChatDisplayName() {
     try {
       var _auth2 = window.__pokerTelegramAuth;
@@ -16330,6 +16384,25 @@ function initChat() {
         var lastView = lastViewedGeneral != null ? lastViewedGeneral : "";
         var myMemberIdForUnread = resolveMyChatMemberId();
         var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; }).length;
+        // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
+        // (в Telegram Mini App не включаем, чтобы не конфликтовать с Telegram поведением)
+        if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
+          var isOnGeneral = !!(isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible);
+          if (!isOnGeneral && unreadCount > 0) {
+            var lastUnread = null;
+            try {
+              var unreadMsgs = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; });
+              lastUnread = unreadMsgs.length ? unreadMsgs[unreadMsgs.length - 1] : null;
+            } catch (eUnread) {}
+            if (lastUnread) {
+              var key = String(lastUnread.id || "") + "|" + String(lastUnread.time || "");
+              if (key && window.__pokerChatSoundedGeneralKey !== key) {
+                window.__pokerChatSoundedGeneralKey = key;
+                pokerPlayChatMessageNotificationSound();
+              }
+            }
+          }
+        }
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible) {
           lastViewedGeneral = latest;
           saveChatLastViewed();
@@ -16664,11 +16737,11 @@ function initChat() {
       var next = i < messages.length - 1 ? messages[i + 1] : null;
       var sameUser = function (a, b) {
         if (!a || !b || a.from == null || a.from === "" || b.from == null || b.from === "") return false;
-        return String(a.from) === String(b.from);
+        return peerChatIdsEqual(a.from, b.from);
       };
       var isFirstInGroup = !prev || !sameUser(prev, m);
       var isLastInGroup = !next || !sameUser(next, m);
-      var isOwn = myIdRender && String(m.from) === String(myIdRender);
+      var isOwn = !!(myIdRender && peerChatIdsEqual(m.from, myIdRender));
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
       if (isOwn && m.id) {
@@ -17303,6 +17376,14 @@ function initChat() {
 
   function showConv(userId, userName, dtIdFromContact) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+    var myOpen = resolveMyChatMemberId();
+    if (myOpen && userId && peerChatIdsEqual(userId, myOpen)) {
+      var selfMsg =
+        "Это личный чат с самим собой — входящие от игроков здесь не отображаются. Откройте диалог с игроком из списка контактов ниже или найдите человека по ID / нику.";
+      if (tg && tg.showAlert) tg.showAlert(selfMsg);
+      else if (typeof alert === "function") alert(selfMsg);
+      return;
+    }
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
     if (convTitle) {
@@ -17415,7 +17496,7 @@ function initChat() {
         var gBtn = document.getElementById("chatGuestLoginBtn");
         if (gBtn) {
           gBtn.addEventListener("click", function () {
-            if (typeof window.__pokerOpenPwaLoginScreen === "function") window.__pokerOpenPwaLoginScreen();
+            if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
           });
         }
       }
@@ -17594,11 +17675,11 @@ function initChat() {
       var next = i < messages.length - 1 ? messages[i + 1] : null;
       var sameUser = function (a, b) {
         if (!a || !b || a.from == null || a.from === "" || b.from == null || b.from === "") return false;
-        return String(a.from) === String(b.from);
+        return peerChatIdsEqual(a.from, b.from);
       };
       var isFirstInGroup = !prev || !sameUser(prev, m);
       var isLastInGroup = !next || !sameUser(next, m);
-      var isOwn = myIdRenderP && String(m.from) === String(myIdRenderP);
+      var isOwn = !!(myIdRenderP && peerChatIdsEqual(m.from, myIdRenderP));
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
       if (isOwn && m.id) {
@@ -17723,6 +17804,25 @@ function initChat() {
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var lastView = (chatWithUserId && lastViewedPersonal[chatWithUserId] != null) ? lastViewedPersonal[chatWithUserId] : "";
         var unreadCount = messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; }).length;
+        // PWA: звуковое уведомление — только когда пользователь не смотрит личный диалог.
+        if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
+          var isOnPersonal = !!(isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden"));
+          if (!isOnPersonal && unreadCount > 0) {
+            var lastUnreadP = null;
+            try {
+              var unreadMsgsP = messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; });
+              lastUnreadP = unreadMsgsP.length ? unreadMsgsP[unreadMsgsP.length - 1] : null;
+            } catch (eUnreadP) {}
+            if (lastUnreadP) {
+              var keyP = String(lastUnreadP.id || "") + "|" + String(lastUnreadP.time || "");
+              var map = window.__pokerChatSoundedPersonalByWith || (window.__pokerChatSoundedPersonalByWith = {});
+              if (keyP && map[String(chatWithUserId)] !== keyP) {
+                map[String(chatWithUserId)] = keyP;
+                pokerPlayChatMessageNotificationSound();
+              }
+            }
+          }
+        }
         if (isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
           lastViewedPersonal[chatWithUserId] = latest;
           saveChatLastViewed();
@@ -18044,16 +18144,21 @@ function initChat() {
           return;
         }
         var vv = window.visualViewport;
-        var ot = Number(vv.offsetTop) || 0;
         var vvh = Number(vv.height) || 0;
         var ih = window.innerHeight;
         var ch = doc.clientHeight ? doc.clientHeight : ih;
-        var deltaIH = Math.max(0, Math.round(ih - vvh - ot));
-        var deltaCH = Math.max(0, Math.round(ch - vvh - ot));
-        /* iOS PWA: innerHeight и clientHeight по-разному отражают клавиатуру; min убирает завышенный delta и «улет» поля ввода */
+        // На iOS/встроенном WebView `offsetTop` иногда даёт отрицательные/нестабильные значения,
+        // из-за чего inset становится завышенным и поле ввода поднимается выше клавиатуры.
+        // Поэтому считаем перекрытие клавиатурой только по высоте visualViewport.
+        var deltaIH = Math.max(0, Math.round(ih - vvh));
+        var deltaCH = Math.max(0, Math.round(ch - vvh));
+        /* iOS PWA: innerHeight и clientHeight по-разному отражают клавиатуру; min убирает завышенный delta */
         var delta = deltaIH > 0 && deltaCH > 0 ? Math.min(deltaIH, deltaCH) : Math.max(deltaIH, deltaCH);
         var cap = Math.min(420, Math.round(Math.max(ih, ch) * 0.45));
         var inset = Math.max(0, Math.min(delta, cap));
+        // Небольшой "запас" убираем коэффициентом: пользователю нужно, чтобы поле было ближе к клавиатуре,
+        // а не максимально высоко над ней.
+        inset = Math.round(inset * 0.85);
         doc.style.setProperty("--pwa-chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;
