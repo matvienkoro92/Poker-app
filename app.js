@@ -12185,37 +12185,71 @@ function initRaffles() {
       return "билетов";
     }
     var ticketCount = 0;
-    var ticketNominal = 0;
+    // Разбивка по номиналам (например: 3 за 1000 и 12 за 300)
+    var nominalToCount = {};
     try {
       var groups =
         currentRaffleData && Array.isArray(currentRaffleData.groups)
           ? currentRaffleData.groups
           : [];
       for (var gi = 0; gi < groups.length; gi++) {
-        ticketCount += Math.max(0, parseInt(groups[gi].count, 10) || 0);
-        if (!ticketNominal) {
-          var n = parsePrizeValue(groups[gi].prize);
-          if (n > 0) ticketNominal = n;
+        var c = Math.max(0, parseInt(groups[gi].count, 10) || 0);
+        ticketCount += c;
+        var n = parsePrizeValue(groups[gi].prize);
+        if (n > 0 && c > 0) {
+          nominalToCount[n] = (nominalToCount[n] || 0) + c;
         }
       }
     } catch (e) {}
-    var ticketNominalText = ticketNominal > 0 ? formatRaffleSum(ticketNominal) : "";
     var broadcastText = "";
-    if (ticketCount > 0 && ticketNominalText) {
-      broadcastText =
-        "Разыгрывается " +
-        ticketCount +
-        " " +
-        pluralizeTickets(ticketCount) +
-        " за " +
-        ticketNominalText +
-        ".";
+    var nominalKeys = Object.keys(nominalToCount);
+    if (ticketCount > 0 && nominalKeys.length) {
+      // Для одного номинала оставляем старый формат
+      if (nominalKeys.length === 1) {
+        var nominalOnly = Number(nominalKeys[0]) || 0;
+        var ticketNominalText = nominalOnly > 0 ? formatRaffleSum(nominalOnly) : "";
+        if (ticketNominalText) {
+          broadcastText =
+            "Разыгрывается " + ticketCount + " " + pluralizeTickets(ticketCount) + " за " + ticketNominalText + ".";
+        }
+      } else {
+        // Составляем breakdown в порядке убывания номинала (обычно 1000, потом 300)
+        nominalKeys
+          .map(function (k) { return Number(k) || 0; })
+          .filter(function (n) { return n > 0; })
+          .sort(function (a, b) { return b - a; });
+        var parts = nominalKeys
+          .map(function (k) {
+            var nominal = Number(k) || 0;
+            return nominal > 0
+              ? { nominal: nominal, count: nominalToCount[nominal] || 0 }
+              : null;
+          })
+          .filter(function (x) { return x && x.count > 0; })
+          .sort(function (a, b) { return b.nominal - a.nominal; })
+          .map(function (p) {
+            return p.count + " за " + formatRaffleSum(p.nominal);
+          });
+        if (parts.length) {
+          var breakdownText = parts.length === 2 ? parts[0] + " и " + parts[1] : parts.slice(0, -1).join(", ") + " и " + parts[parts.length - 1];
+          broadcastText =
+            "Разыгрывается " +
+            ticketCount +
+            " " +
+            pluralizeTickets(ticketCount) +
+            ": " +
+            breakdownText +
+            ".";
+        }
+      }
     }
     return {
       endDate: endDate,
       message: broadcastText || undefined,
       ticketsCount: ticketCount || undefined,
-      ticketPrice: ticketNominal || undefined,
+      // ticketPrice может не использоваться на сервере, но оставляем для совместимости: первый номинал
+      ticketPrice:
+        nominalKeys && nominalKeys.length ? Number(nominalKeys[0]) || undefined : undefined,
     };
   }
 
@@ -16358,7 +16392,17 @@ function initChat() {
               prev.querySelector(".chat-reply-preview__text").textContent = "Ответ на " + (msg.fromName || "Игрок") + ": " + quotePreviewText;
               prev.classList.add("chat-reply-preview--visible");
             }
-            if (generalInput) generalInput.focus();
+            // Фокус на input в Telegram/WebView часто дёргает скролл чата вверх.
+            // Сохраняем scrollTop и возвращаем после фокуса.
+            var prevScrollTopG = generalMessages ? generalMessages.scrollTop : null;
+            if (generalInput && generalInput.focus) {
+              try { generalInput.focus({ preventScroll: true }); } catch (e1) { try { generalInput.focus(); } catch (e2) {} }
+              if (generalMessages && prevScrollTopG != null) {
+                requestAnimationFrame(function () {
+                  try { generalMessages.scrollTop = prevScrollTopG; } catch (e3) {}
+                });
+              }
+            }
           } else {
             personalReplyTo = msg;
             var prevP = document.getElementById("chatPersonalReplyPreview");
@@ -16366,7 +16410,15 @@ function initChat() {
               prevP.querySelector(".chat-reply-preview__text").textContent = "Ответ на " + (msg.fromName || "Игрок") + ": " + quotePreviewText;
               prevP.classList.add("chat-reply-preview--visible");
             }
-            if (inputEl) inputEl.focus();
+            var prevScrollTopP = messagesEl ? messagesEl.scrollTop : null;
+            if (inputEl && inputEl.focus) {
+              try { inputEl.focus({ preventScroll: true }); } catch (e1) { try { inputEl.focus(); } catch (e2) {} }
+              if (messagesEl && prevScrollTopP != null) {
+                requestAnimationFrame(function () {
+                  try { messagesEl.scrollTop = prevScrollTopP; } catch (e3) {}
+                });
+              }
+            }
           }
           hideMenu();
         } else if (action === "copy") {
