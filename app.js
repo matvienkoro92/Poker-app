@@ -957,14 +957,9 @@ function runGazetteAndTasksInit() {
   window.updateGazetteSubsCount = function () {
     if (!gazetteNotifySubsBtn) return;
     var base = getApiBase && getApiBase();
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
-    fetch(
-      base +
-        "/api/gazette-manual-subscribers?stats=1&initData=" +
-        encodeURIComponent(initData)
-    )
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/gazette-manual-subscribers?stats=1" + q.replace("?", "&"))
       .then(function (r) {
         if (!r.ok) return Promise.reject(new Error("http " + r.status));
         return r.json();
@@ -992,9 +987,8 @@ function runGazetteAndTasksInit() {
     gazetteNotifySubsBtn.addEventListener("click", function () {
       var base = getApiBase && getApiBase();
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      var initData = tg && tg.initData ? tg.initData : "";
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
         return;
       }
       var btn = gazetteNotifySubsBtn;
@@ -1002,7 +996,7 @@ function runGazetteAndTasksInit() {
       btn.disabled = true;
       btn.textContent = "Рассылаем…";
       if (gazetteNotifySubsHint) gazetteNotifySubsHint.textContent = "";
-      var payload = { initData: initData };
+      var payload = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
       if (newsEl) {
         var firstArticle = newsEl.querySelector(
           ".gazette-modal__lead[data-gazette-article]:not([data-gazette-draft='1'])"
@@ -2572,19 +2566,20 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     }
     function sendRequest(button, url, body, pendingText, successText, errorPrefix, onSuccess) {
       var base = getApiBase();
-      var initData = tg && tg.initData ? tg.initData : "";
-      if (!base || !initData) {
-        if (hint) hint.textContent = "Нет соединения с сервером или Telegram initData.";
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (hint) hint.textContent = "Нет соединения с сервером или сессии (войдите в Telegram / PWA).";
         return;
       }
       var originalText = button.textContent;
       button.disabled = true;
       button.textContent = pendingText;
       if (hint) hint.textContent = "";
+      var extra = typeof body === "object" && body ? body : {};
+      var payload = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra) : Object.assign({}, extra);
       fetch(base + url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.assign({}, body, { initData: initData })),
+        body: JSON.stringify(payload),
       })
         .then(function (r) {
           return r.json();
@@ -2616,13 +2611,9 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     window.updateRatingSubsCount = function () {
       if (!subsBtn) return;
       var base = getApiBase();
-      var initData = tg && tg.initData ? tg.initData : "";
-      if (!base || !initData) return;
-      fetch(
-        base +
-          "/api/rating-manual-subscribers?stats=1&initData=" +
-          encodeURIComponent(initData)
-      )
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+      var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+      fetch(base + "/api/rating-manual-subscribers?stats=1" + q.replace("?", "&"))
         .then(function (r) {
           if (!r.ok) return Promise.reject(new Error("http " + r.status));
           return r.json();
@@ -3613,10 +3604,10 @@ function getPokerResolvedTelegramUser() {
     m.innerHTML =
       '<div class="pwa-auth-screen__enter-actions">' +
         '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary pwa-auth-screen__enter-btn--guest-stack" id="pwaAuthEnterGuestBtn">' +
-        '<span class="pwa-auth-screen__enter-btn-label">Войти, как гость</span>' +
-        '<span class="pwa-auth-screen__enter-btn-note">Гость не может участвовать в розыгрышах и общаться в чате</span>' +
-        "</button>" +
+        '<div class="pwa-auth-screen__guest-block">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
+        '<p class="pwa-auth-screen__guest-note">Гость не может участвовать в розыгрышах и общаться в чате</p>' +
+        "</div>" +
       "</div>";
     var btn = document.getElementById("pwaAuthEnterTelegramBtn");
     var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
@@ -12867,7 +12858,7 @@ function initRaffles() {
     if (!rafflesNotifySubsBtn) return;
     rafflesNotifySubsBtn.addEventListener("click", function () {
       if (!base || !pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
         return;
       }
       var btn = rafflesNotifySubsBtn;
@@ -12984,8 +12975,8 @@ function initRaffles() {
       return lines.join("\n");
     }
     rafflesLastBroadcastReportBtn.addEventListener("click", function () {
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
         return;
       }
       var btn = rafflesLastBroadcastReportBtn;
@@ -12994,11 +12985,8 @@ function initRaffles() {
         rafflesNotifySubsHint.textContent = "Загружаем отчёт…";
         rafflesNotifySubsHint.classList.add("raffles-admin-hint--pre");
       }
-      fetch(
-        base +
-          "/api/raffle-manual-subscribers?lastLog=1&initData=" +
-          encodeURIComponent(initData)
-      )
+      var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+      fetch(base + "/api/raffle-manual-subscribers?lastLog=1" + q.replace("?", "&"))
         .then(raffleManualSubscribersParseResponse)
         .then(function (data) {
           if (!data || !data.ok) {
@@ -19731,6 +19719,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
     if (typeof updateProfileDtId === "function") updateProfileDtId();
     if (typeof window.chatRefresh === "function") window.chatRefresh();
+    if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
   } catch (eVis) {}
 });
 
@@ -19770,9 +19759,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   function fetchCounts() {
     if (!window.__pokerShowAdminSectionViews) return;
     var base = apiBase();
-    var initData = typeof tg !== "undefined" && tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
-    fetch(base + "/api/section-views?initData=" + encodeURIComponent(initData))
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/section-views" + q)
       .then(function (r) {
         return r.json();
       })
@@ -19794,11 +19783,15 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       if (typeof isLocalEnv === "function" && isLocalEnv() && !(document.getElementById("app") && document.getElementById("app").getAttribute("data-api-base"))) return;
     } catch (eL) {}
     try {
-      var initD = typeof tg !== "undefined" && tg && tg.initData ? tg.initData : "";
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+      var body =
+        typeof pokerGuestOrAuthedPostBody === "function"
+          ? pokerGuestOrAuthedPostBody({ section: section })
+          : { section: section };
       fetch(base + "/api/section-views", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section: section, initData: initD }),
+        body: JSON.stringify(body),
       }).catch(function () {});
     } catch (ePost) {}
   };
@@ -19850,9 +19843,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       }
     } catch (e) {}
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
-    fetch(base + "/api/visitors-list?initData=" + encodeURIComponent(initData))
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/visitors-list" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.isAdmin) showAdminUi();
@@ -19889,9 +19882,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     var elRating = document.getElementById("visitorsAdminRating");
     var elRaffle = document.getElementById("visitorsAdminRaffle");
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
-    var url = base + "/api/visitors-list?initData=" + encodeURIComponent(initData);
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var url = base + "/api/visitors-list" + (typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=");
     fetch(url)
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -19929,8 +19921,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     });
     modal.setAttribute("aria-hidden", "false");
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     fetchVisitorsAdminStats(null);
   }
 
@@ -19978,19 +19969,17 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     // Подсчитываем точное количество получателей через dryRun.
     try {
       var base = getApiBase();
-      var initData = tg && tg.initData ? tg.initData : "";
-      if (!base || !initData || !hint) return;
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential() || !hint) return;
       var groupsForPayload = selectedBroadcastGroups;
       var month = groupsForPayload && groupsForPayload.indexOf("visitors") >= 0 ? "all" : undefined;
+      var dryPayload =
+        typeof pokerGuestOrAuthedPostBody === "function"
+          ? pokerGuestOrAuthedPostBody({ groups: groupsForPayload, month: month, dryRun: true })
+          : { groups: groupsForPayload, month: month, dryRun: true };
       fetch(base + "/api/send-bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          initData: initData,
-          groups: groupsForPayload,
-          month: month,
-          dryRun: true,
-        }),
+        body: JSON.stringify(dryPayload),
       })
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -20036,10 +20025,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       return;
     }
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
     var groupsForPayload = getSelectedBroadcastGroups();
     var month = groupsForPayload && groupsForPayload.indexOf("visitors") >= 0 ? "all" : undefined;
-    if (!base || !initData) return;
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     if (sendBtn) {
       sendBtn.disabled = true;
       sendBtn.textContent = "Отправляем…";
@@ -20118,15 +20106,14 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       }
 
       function fetchTotalDryRun() {
+        var dryBody =
+          typeof pokerGuestOrAuthedPostBody === "function"
+            ? pokerGuestOrAuthedPostBody({ groups: groupsForPayload, month: month, dryRun: true })
+            : { groups: groupsForPayload, month: month, dryRun: true };
         return fetch(base + "/api/send-bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            initData: initData,
-            groups: groupsForPayload,
-            month: month,
-            dryRun: true,
-          }),
+          body: JSON.stringify(dryBody),
         }).then(function (r) { return r.json(); });
       }
 
@@ -20147,16 +20134,19 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       function sendBatch(offset) {
         if (offset >= total) return Promise.resolve({ done: true });
         setBroadcastProgressBtn(Math.min(offset + BATCH_SIZE, total));
-        var payload = {
-          initData: initData,
+        var batchExtra = {
           groups: groupsForPayload,
           month: month,
           text: text,
           offset: offset,
           limit: BATCH_SIZE,
         };
-        if (imageBase64) payload.imageBase64 = imageBase64;
-        if (imageMimeType) payload.imageMimeType = imageMimeType;
+        if (imageBase64) batchExtra.imageBase64 = imageBase64;
+        if (imageMimeType) batchExtra.imageMimeType = imageMimeType;
+        var payload =
+          typeof pokerGuestOrAuthedPostBody === "function"
+            ? pokerGuestOrAuthedPostBody(batchExtra)
+            : batchExtra;
         return fetch(base + "/api/send-bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -20251,7 +20241,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     var listEl = document.getElementById("visitorsAdminList");
     if (!listWrap || !listEl || !visitorsAdminData || !visitorsAdminData.visitors) return;
     listWrap.classList.remove("visitors-admin-modal__list-wrap--hidden");
-    var initData = tg && tg.initData ? tg.initData : "";
+    var authQ = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    var hasAuth = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     var base = getApiBase();
     var visitors = visitorsAdminData.visitors;
     listEl.innerHTML = "";
@@ -20281,11 +20272,11 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         "</div>";
       listEl.insertAdjacentHTML("beforeend", row);
     });
-    if (base && initData) {
+    if (base && hasAuth) {
       listEl.querySelectorAll(".visitors-admin-item__channel[data-user-id]").forEach(function (el) {
         var uid = el.getAttribute("data-user-id");
         if (!uid) return;
-        fetch(base + "/api/visitor-telegram-status?initData=" + encodeURIComponent(initData) + "&userId=" + encodeURIComponent(uid))
+        fetch(base + "/api/visitor-telegram-status" + authQ + "&userId=" + encodeURIComponent(uid))
           .then(function (r) { return r.json(); })
           .then(function (d) {
             if (d && d.ok) {
@@ -20302,14 +20293,18 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         var uid = btn.getAttribute("data-user-id");
         var input = listEl.querySelector(".visitors-admin-item__input[data-user-id=\"" + uid + "\"]");
         var text = (input && input.value || "").trim();
-        if (!text || !base || !initData) return;
+        if (!text || !base || !hasAuth) return;
         if (!btn.__visitorsSendLabel) btn.__visitorsSendLabel = btn.textContent || "Отправить";
         btn.disabled = true;
         btn.textContent = "Отправляем…";
+        var sendBody =
+          typeof pokerGuestOrAuthedPostBody === "function"
+            ? pokerGuestOrAuthedPostBody({ user_id: uid, text: text })
+            : { user_id: uid, text: text };
         fetch(base + "/api/send-to-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: initData, user_id: uid, text: text }),
+          body: JSON.stringify(sendBody),
         })
           .then(function (r) { return r.json(); })
           .then(function (d) {
@@ -20358,6 +20353,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (broadcastModalClose) broadcastModalClose.addEventListener("click", closeBroadcastModal);
     if (broadcastModalBackdrop) broadcastModalBackdrop.addEventListener("click", closeBroadcastModal);
     if (broadcastSendBtn) broadcastSendBtn.addEventListener("click", sendBroadcast);
+    try {
+      window.pokerRecheckAdminFooter = checkAdminAndShowVisitorsButton;
+    } catch (eExp) {}
     var broadcastFileEl = document.getElementById("visitorsBroadcastImageFile");
     var broadcastFileNameEl = document.getElementById("visitorsBroadcastFileName");
     if (broadcastFileEl && broadcastFileNameEl) {
@@ -20408,13 +20406,12 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (document.body) document.body.style.overflow = "hidden";
     tbody.innerHTML = "<tr><td colspan=\"2\">Загрузка…</td></tr>";
     var base = getApiBase();
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) {
-      tbody.innerHTML = "<tr><td colspan=\"2\">Нет initData. Откройте в Telegram.</td></tr>";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      tbody.innerHTML = "<tr><td colspan=\"2\">Нет сессии. Войдите в Telegram или PWA.</td></tr>";
       return;
     }
-    fetch(base + "/api/share-button-stats?initData=" + encodeURIComponent(initData))
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/share-button-stats" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok || !data.stats) {
@@ -20600,13 +20597,12 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   function loadLinks() {
     tbody.innerHTML = "<tr><td colspan=\"7\">Загрузка…</td></tr>";
     var base = getApiBase();
-    var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
-    if (!base || !initData) {
-      tbody.innerHTML = "<tr><td colspan=\"7\">Нет initData. Откройте в Telegram.</td></tr>";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      tbody.innerHTML = "<tr><td colspan=\"7\">Нет сессии. Войдите в Telegram или PWA.</td></tr>";
       return;
     }
-    fetch(base + "/api/tracking-links?initData=" + encodeURIComponent(initData))
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/tracking-links" + q)
       .then(function (r) {
         return r.json();
       })
@@ -20682,20 +20678,12 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (visTitle) visTitle.textContent = labelText ? "Переходы: " + labelText : "Переходы";
     visModal.setAttribute("aria-hidden", "false");
     var base = getApiBase();
-    var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
-    if (!base || !initData) {
-      visTbody.innerHTML = "<tr><td colspan=\"4\">Нет initData</td></tr>";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      visTbody.innerHTML = "<tr><td colspan=\"4\">Нет сессии</td></tr>";
       return;
     }
-    fetch(
-      base +
-        "/api/tracking-links?initData=" +
-        encodeURIComponent(initData) +
-        "&id=" +
-        encodeURIComponent(slug) +
-        "&visitors=1"
-    )
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/tracking-links" + q + "&id=" + encodeURIComponent(slug) + "&visitors=1")
       .then(function (r) {
         return r.json();
       })
@@ -20771,11 +20759,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         createMsg.classList.remove("tracking-links-admin__create-msg--err");
       }
       var base = getApiBase();
-      var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      var initData = tgLocal && tgLocal.initData ? tgLocal.initData : "";
-      if (!base || !initData) {
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
         if (createMsg) {
-          createMsg.textContent = "Нет initData. Откройте в Telegram.";
+          createMsg.textContent = "Нет сессии. Войдите в Telegram или PWA.";
           createMsg.classList.add("tracking-links-admin__create-msg--err");
         }
         return;
@@ -20798,14 +20784,14 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         }
       }
       createBtn.disabled = true;
+      var createBody =
+        typeof pokerGuestOrAuthedPostBody === "function"
+          ? pokerGuestOrAuthedPostBody({ label: label, params: paramsPayload })
+          : { label: label, params: paramsPayload };
       fetch(base + "/api/tracking-links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          initData: initData,
-          label: label,
-          params: paramsPayload,
-        }),
+        body: JSON.stringify(createBody),
       })
         .then(function (r) {
           return r.json();
@@ -20949,8 +20935,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
 
   /** Дата/день недели для новой формы: у Вики ночью (до 03:00 МСК) — «вчера». */
   function getShiftReportDateInfo() {
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var uid = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+    var resolved =
+      typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+    var uid = resolved && resolved.id != null ? resolved.id : null;
     if (uid !== VIKA_TELEGRAM_NUM) return getTodayInfo();
     var now = Date.now();
     var p = moscowPartsFromTs(now);
@@ -21006,14 +20993,13 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   function loadSentReports() {
     if (!sentList) return;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) {
-      sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (откройте в Telegram).</p>';
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
       return;
     }
     sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts?initData=" + encodeURIComponent(initData))
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!sentList) return;
@@ -21284,12 +21270,15 @@ window.addEventListener("poker-telegram-auth", function (ev) {
             var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             function doDelete(reportId) {
               var base = typeof getApiBase === "function" ? getApiBase() : "";
-              var initData = tg && tg.initData ? tg.initData : "";
-              if (!base || !initData) return;
+              if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+              var delBody =
+                typeof pokerGuestOrAuthedPostBody === "function"
+                  ? pokerGuestOrAuthedPostBody({ id: reportId })
+                  : { id: reportId };
               fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ initData: initData, id: reportId })
+                body: JSON.stringify(delBody)
               })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -21397,10 +21386,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         extraTotal += amount;
       }
     });
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var initData = tg && tg.initData ? tg.initData : "";
-    var payload = {
-      initData: initData,
+    var corePayload = {
       iso: d.iso,
       date: d.date,
       weekday: d.weekday.charAt(0).toUpperCase() + d.weekday.slice(1),
@@ -21419,6 +21405,10 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       rakeback: getVal("adminReportRakeback"),
       extraFields: extraFields
     };
+    var payload =
+      typeof pokerGuestOrAuthedPostBody === "function"
+        ? pokerGuestOrAuthedPostBody(corePayload)
+        : corePayload;
     var total = payload.deposit - payload.cashout + payload.prodamus + payload.robokassa + payload.romaCrypto + payload.botCryptoDep + payload.botExchipDep - payload.botExchipCashout - payload.bonuses + payload.transfers + payload.ret + payload.sergeyMarina + payload.rakeback + extraTotal;
     payload.total = total;
     payload.extraName = extraFields[0] ? extraFields[0].name : "";
@@ -21508,9 +21498,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     submitBtn.addEventListener("click", function () {
       var base = typeof getApiBase === "function" ? getApiBase() : "";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      var initData = tg && tg.initData ? tg.initData : "";
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram, чтобы отправить отчёт.");
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы отправить отчёт.");
         return;
       }
       var payload = buildPayload();
