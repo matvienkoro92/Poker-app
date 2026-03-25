@@ -1208,6 +1208,11 @@ html.app-view-home .home-welcome-outline::before {
 .pwa-auth-screen__mount {
   margin-top: 10px;
 }
+.pwa-auth-screen__enter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .pwa-auth-screen__enter-btn {
   display: inline-flex;
   align-items: center;
@@ -1224,6 +1229,11 @@ html.app-view-home .home-welcome-outline::before {
   cursor: pointer;
 }
 .pwa-auth-screen__enter-btn:active { transform: scale(0.99); }
+.pwa-auth-screen__enter-btn--secondary {
+  background: transparent;
+  color: var(--accent, #ea580c);
+  border: 1px solid rgba(234, 88, 12, 0.55);
+}
 body.pwa-auth-gated #app {
   visibility: hidden;
   pointer-events: none;

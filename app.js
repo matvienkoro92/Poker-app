@@ -64,6 +64,8 @@ function getAppBaseUrlForLinks() {
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 /** PWA: сессия после OAuth ВКонтакте */
 var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
+/** PWA: режим «гость» (без авторизации, но можно смотреть). */
+var POKER_PWA_GUEST_KEY = "poker_pwa_guest";
 
 function pokerReadPwaTgSessionToken() {
   try {
@@ -98,6 +100,21 @@ function pokerSavePwaVkSession(token, userObj) {
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
     localStorage.setItem(POKER_PWA_VK_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
+  } catch (e) {}
+}
+
+function pokerReadPwaGuestMode() {
+  try {
+    return localStorage.getItem(POKER_PWA_GUEST_KEY) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function pokerSavePwaGuestMode(v) {
+  try {
+    if (v) localStorage.setItem(POKER_PWA_GUEST_KEY, "1");
+    else localStorage.removeItem(POKER_PWA_GUEST_KEY);
   } catch (e) {}
 }
 
@@ -2960,6 +2977,7 @@ function getPokerResolvedTelegramUser() {
         if (res.ok && data.ok && data.user && data.pwaVkSession) {
           var u = normalizeVerifiedUser(data.user, null);
           pokerSavePwaVkSession(data.pwaVkSession, data.user);
+          pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           updateHeaderGreeting();
           showAuthorized(u);
@@ -3268,6 +3286,7 @@ function getPokerResolvedTelegramUser() {
             if (data && data.ok && data.user && data.pwaSession) {
               var u = normalizeVerifiedUser(data.user, null);
               pokerSavePwaTgSession(data.pwaSession, data.user);
+              pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
               updateHeaderGreeting();
               showAuthorized(u);
@@ -3331,6 +3350,16 @@ function getPokerResolvedTelegramUser() {
   function showUnauthorized() {
     if (userEl) userEl.classList.add("auth-user--hidden");
     if (isPwaStandaloneAuth()) {
+      if (pokerReadPwaGuestMode()) {
+        try {
+          window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+        } catch (eGuest) {}
+        updateHeaderGreeting();
+        hidePwaAuthScreen();
+        hideIdentifyingMini();
+        if (banner) banner.classList.add("auth-banner--hidden");
+        return;
+      }
       if (banner) banner.classList.add("auth-banner--hidden");
       showPwaAuthScreen();
     } else {
@@ -3481,6 +3510,7 @@ function getPokerResolvedTelegramUser() {
         if (res.ok && data.ok && data.user && data.pwaSession) {
           var u = normalizeVerifiedUser(data.user, null);
           pokerSavePwaTgSession(data.pwaSession, data.user);
+          pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           updateHeaderGreeting();
           showAuthorized(u);
@@ -3554,14 +3584,28 @@ function getPokerResolvedTelegramUser() {
       if (mount.getAttribute("data-pwa-enter-mounted") === "1") return true;
       mount.setAttribute("data-pwa-enter-mounted", "1");
       mount.innerHTML =
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>';
+        '<div class="pwa-auth-screen__enter-actions">' +
+          '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
+          '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
+        '</div>';
       var btn = document.getElementById("pwaAuthEnterTelegramBtn");
-      if (!btn) return true;
+      var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
+      if (!btn || !guestBtn) return true;
       btn.addEventListener("click", function () {
+        pokerSavePwaGuestMode(false);
         try { mount.removeAttribute("data-pwa-enter-mounted"); } catch (e) {}
         mount.innerHTML = "";
         var actionsMount = ensurePwaVerificationForm(mount) || mount;
         mountPwaUsernameCodeLogin(actionsMount);
+      });
+      guestBtn.addEventListener("click", function () {
+        pokerSavePwaGuestMode(true);
+        try { window.__pokerTelegramAuth = { status: "guest", user: null, error: null }; } catch (eAuth) {}
+        updateHeaderGreeting();
+        hidePwaAuthScreen();
+        hideIdentifyingMini();
+        try { if (banner) { banner.classList.add("auth-banner--hidden"); banner.classList.remove("auth-banner--verifying"); } } catch (eB) {}
+        try { mount.innerHTML = ""; } catch (eM) {}
       });
       return true;
     }
@@ -3784,7 +3828,10 @@ function getPokerResolvedTelegramUser() {
           if (res.ok && data.ok && data.user) {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
             window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-            if (data.pwaSession && isPwaStandaloneMode()) pokerSavePwaTgSession(data.pwaSession, data.user);
+            if (data.pwaSession && isPwaStandaloneMode()) {
+              pokerSavePwaTgSession(data.pwaSession, data.user);
+              pokerSavePwaGuestMode(false);
+            }
             updateHeaderGreeting();
             showAuthorized(u);
             try {
@@ -9218,6 +9265,7 @@ function initProfileExitBtn() {
   btn.addEventListener("click", function () {
     try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
     try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
+    try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
     try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
     try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
     try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
@@ -17227,8 +17275,18 @@ function initChat() {
         if (tg && tg.showAlert) tg.showAlert("Выберите собеседника"); else alert("Выберите собеседника");
       }
       if (!pokerApiHasCredential() && (text || personalImage || personalVoice || personalDocument)) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram");
-        else if (typeof alert === "function") alert("Войдите через Telegram (кнопка на главной вверху), чтобы писать в чат.");
+        var isStandalone =
+          !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          !!(window.navigator && window.navigator.standalone);
+        var isGuest = isStandalone && pokerReadPwaGuestMode();
+        var guestMsg = "Войдите в свой аккаунт, чтобы написать сообщение";
+        if (isGuest) {
+          if (tg && tg.showAlert) tg.showAlert(guestMsg);
+          else if (typeof alert === "function") alert(guestMsg);
+        } else {
+          if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram");
+          else if (typeof alert === "function") alert("Войдите через Telegram (кнопка на главной вверху), чтобы писать в чат.");
+        }
       }
       return;
     }
