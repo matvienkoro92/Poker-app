@@ -11633,6 +11633,18 @@ function initRaffles() {
   var rafflesIsAdmin = false;
   var myRaffleUserId = null;
 
+  function showRaffleActionLoading() {
+    if (!raffleEmpty) return;
+    raffleEmpty.innerHTML =
+      '<span class="raffle-loading__spinner" aria-hidden="true"></span><span class="raffle-loading__text">Подождите, Розыгрыш загружается</span>';
+    raffleEmpty.classList.remove("raffle-empty--hidden");
+  }
+
+  function hideRaffleActionLoading() {
+    if (!raffleEmpty) return;
+    raffleEmpty.classList.add("raffle-empty--hidden");
+  }
+
   // Подписка на уведомления о новых розыгрышах
   (function initRafflesSubscribe() {
     if (!rafflesSubscribeBtn) return;
@@ -13173,6 +13185,7 @@ function initRaffles() {
         return;
       }
       raffleJoinBtn.disabled = true;
+      showRaffleActionLoading();
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -13181,6 +13194,7 @@ function initRaffles() {
         .then(parseRaffleApiResponse)
         .then(function (data) {
           raffleJoinBtn.disabled = false;
+          hideRaffleActionLoading();
           if (data && data.ok) {
             if (data.raffle) renderRaffle(data.raffle);
             if (tg && tg.showAlert) {
@@ -13209,6 +13223,7 @@ function initRaffles() {
         })
         .catch(function () {
           raffleJoinBtn.disabled = false;
+          hideRaffleActionLoading();
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR + " Перезайдите в мини-приложение и попробуйте снова.");
         });
     });
@@ -13218,6 +13233,7 @@ function initRaffles() {
     raffleLeaveBtn.addEventListener("click", function () {
       if (!currentRaffleId || !base || !initData) return;
       raffleLeaveBtn.disabled = true;
+      showRaffleActionLoading();
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -13226,6 +13242,7 @@ function initRaffles() {
         .then(parseRaffleApiResponse)
         .then(function (data) {
           raffleLeaveBtn.disabled = false;
+          hideRaffleActionLoading();
           if (data && data.ok) {
             if (data.raffle) renderRaffle(data.raffle);
             if (tg && tg.showAlert) tg.showAlert(data.alreadyLeft ? "Вы не были в розыгрыше" : "Участие отменено");
@@ -13235,6 +13252,7 @@ function initRaffles() {
         })
         .catch(function () {
           raffleLeaveBtn.disabled = false;
+          hideRaffleActionLoading();
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     });
