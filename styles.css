@@ -896,7 +896,7 @@ html.app-view-home .home-welcome-outline::before {
   margin: 0 0 12px;
   padding: 12px 14px;
   background: var(--block-bg-gradient);
-  border: 1px solid rgba(248, 113, 22, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 14px;
   text-align: center;
 }
@@ -1076,21 +1076,40 @@ html.app-view-home .home-welcome-outline::before {
   letter-spacing: 0.02em;
   color: var(--text);
   background: transparent;
-  border: 1px solid rgba(248, 113, 22, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 12px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: opacity 0.15s, transform 0.12s, background 0.15s;
 }
 .auth-banner__external-browser-btn:hover {
-  background: rgba(248, 113, 22, 0.12);
+  background: rgba(148, 163, 184, 0.12);
   opacity: 1;
 }
 .auth-banner__external-browser-btn:active {
   transform: scale(0.98);
 }
 [data-theme="light"] .auth-banner__external-browser-btn {
-  border-color: rgba(234, 88, 12, 0.45);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+/* Убираем оранжевую обводку/outline на фокусе (особенно iOS/Safari) для экрана входа */
+.auth-banner__vk-login-btn:focus,
+.auth-banner__vk-login-btn:focus-visible,
+.auth-banner__tg-popup-login-btn:focus,
+.auth-banner__tg-popup-login-btn:focus-visible,
+.auth-banner__external-browser-btn:focus,
+.auth-banner__external-browser-btn:focus-visible,
+.auth-banner__code-btn:focus,
+.auth-banner__code-btn:focus-visible,
+.auth-banner__local-login-link:focus,
+.auth-banner__local-login-link:focus-visible,
+.auth-banner__link:focus,
+.auth-banner__link:focus-visible,
+.auth-banner__code-input:focus,
+.auth-banner__code-input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 .auth-banner__tg-popup-login-btn {
   display: inline-flex;
@@ -1214,6 +1233,22 @@ html.app-view-home .home-welcome-outline::before {
 }
 .pwa-auth-screen__mount {
   margin-top: 20px;
+}
+.pwa-auth-screen__notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+}
+[data-theme="light"] .pwa-auth-screen__notice {
+  background: rgba(248, 250, 252, 0.92);
+  color: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.45);
 }
 .pwa-auth-screen__enter-actions {
   display: flex;

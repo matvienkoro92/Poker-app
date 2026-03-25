@@ -74,7 +74,15 @@ function pokerReadPwaTgSessionToken() {
     var o = JSON.parse(raw);
     return o && o.token ? String(o.token) : "";
   } catch (e) {
-    return "";
+    // Падение localStorage (например, приватный режим / запрет хранения).
+    try {
+      var rawS = sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY);
+      if (!rawS) return "";
+      var oS = JSON.parse(rawS);
+      return oS && oS.token ? String(oS.token) : "";
+    } catch (e2) {
+      return "";
+    }
   }
 }
 
@@ -85,22 +93,87 @@ function pokerReadPwaVkSessionToken() {
     var o = JSON.parse(raw);
     return o && o.token ? String(o.token) : "";
   } catch (e) {
-    return "";
+    try {
+      var rawS = sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY);
+      if (!rawS) return "";
+      var oS = JSON.parse(rawS);
+      return oS && oS.token ? String(oS.token) : "";
+    } catch (e2) {
+      return "";
+    }
   }
 }
 
 function pokerSavePwaTgSession(token, userObj) {
+  var payload = JSON.stringify({ token: token, user: userObj });
+  var ok = false;
   try {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
-    localStorage.setItem(POKER_PWA_TG_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
+    localStorage.setItem(POKER_PWA_TG_SESSION_KEY, payload);
+    ok = !!pokerReadPwaTgSessionToken();
   } catch (e) {}
+  if (!ok) {
+    try {
+      sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
+      sessionStorage.setItem(POKER_PWA_TG_SESSION_KEY, payload);
+      ok = !!pokerReadPwaTgSessionToken();
+    } catch (e2) {}
+  }
+  return ok;
 }
 
 function pokerSavePwaVkSession(token, userObj) {
+  var payload = JSON.stringify({ token: token, user: userObj });
+  var ok = false;
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
-    localStorage.setItem(POKER_PWA_VK_SESSION_KEY, JSON.stringify({ token: token, user: userObj }));
+    localStorage.setItem(POKER_PWA_VK_SESSION_KEY, payload);
+    ok = !!pokerReadPwaVkSessionToken();
   } catch (e) {}
+  if (!ok) {
+    try {
+      sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
+      sessionStorage.setItem(POKER_PWA_VK_SESSION_KEY, payload);
+      ok = !!pokerReadPwaVkSessionToken();
+    } catch (e2) {}
+  }
+  return ok;
+}
+
+function pwaSessionPersistenceWarning() {
+  // Аккуратный баннер вместо alert: не блокирует интерфейс и не раздражает.
+  var msg =
+    "Не удалось сохранить вход на устройстве. " +
+    "Обычно браузер запрещает хранение данных (приватный режим / ограничения Safari). " +
+    "Вход будет действовать только до закрытия приложения.";
+  try {
+    // В PWA standalone показываем внутри экрана входа.
+    if (typeof isPwaStandaloneAuth === "function" && isPwaStandaloneAuth()) {
+      var screen = document.getElementById("pwaAuthScreen");
+      var inner = screen ? screen.querySelector(".pwa-auth-screen__inner") : null;
+      if (inner) {
+        var el = inner.querySelector(".pwa-auth-screen__notice");
+        if (!el) {
+          el = document.createElement("div");
+          el.className = "pwa-auth-screen__notice";
+          el.setAttribute("role", "status");
+          el.setAttribute("aria-live", "polite");
+          inner.appendChild(el);
+        }
+        el.textContent = msg;
+        return;
+      }
+    }
+  } catch (e1) {}
+  try {
+    // В обычном режиме используем существующий hint в auth banner.
+    var hintEl = document.getElementById("authBannerHint");
+    if (hintEl) {
+      hintEl.textContent = msg;
+      hintEl.style.display = "block";
+      return;
+    }
+  } catch (e2) {}
 }
 
 function pokerReadPwaGuestMode() {
@@ -2976,7 +3049,7 @@ function getPokerResolvedTelegramUser() {
         var data = pack.data || {};
         if (res.ok && data.ok && data.user && data.pwaVkSession) {
           var u = normalizeVerifiedUser(data.user, null);
-          pokerSavePwaVkSession(data.pwaVkSession, data.user);
+          if (!pokerSavePwaVkSession(data.pwaVkSession, data.user)) pwaSessionPersistenceWarning();
           pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           updateHeaderGreeting();
@@ -3285,7 +3358,7 @@ function getPokerResolvedTelegramUser() {
           .then(function (data) {
             if (data && data.ok && data.user && data.pwaSession) {
               var u = normalizeVerifiedUser(data.user, null);
-              pokerSavePwaTgSession(data.pwaSession, data.user);
+              if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
               pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
               updateHeaderGreeting();
@@ -3316,7 +3389,7 @@ function getPokerResolvedTelegramUser() {
       var title = isPwaStandaloneAuth() ? "ВОЙТИ" : "Верификация для входа в PWA";
       var subtitle = isPwaStandaloneAuth()
         ? ""
-        : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram. Доступ только для участников клуба TWO ACES.</p>';
+        : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram.</p>';
       mount.innerHTML =
         '<div class="auth-banner__verify-form">' +
           '<p class="auth-banner__verify-title">' + title + "</p>" +
@@ -3509,7 +3582,7 @@ function getPokerResolvedTelegramUser() {
         var data = pack.data || {};
         if (res.ok && data.ok && data.user && data.pwaSession) {
           var u = normalizeVerifiedUser(data.user, null);
-          pokerSavePwaTgSession(data.pwaSession, data.user);
+          if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
           pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           updateHeaderGreeting();
@@ -3746,6 +3819,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   function runVerifyFlow() {
+    function hideBootOverlay() {
+      try {
+        if (typeof window.__pokerHideBootOverlay === "function") window.__pokerHideBootOverlay();
+      } catch (eHide) {}
+    }
     var wtg = getTelegramWebAppNow();
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
@@ -3769,6 +3847,7 @@ function getPokerResolvedTelegramUser() {
             updateHeaderGreeting();
             showAuthorized(uP);
             loadHeaderAvatar();
+            hideBootOverlay();
             try {
               window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
             } catch (eP) {}
@@ -3786,6 +3865,7 @@ function getPokerResolvedTelegramUser() {
             updateHeaderGreeting();
             showAuthorized(uVk);
             loadHeaderAvatar();
+            hideBootOverlay();
             try {
               window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
             } catch (eVkLs) {}
@@ -3796,6 +3876,7 @@ function getPokerResolvedTelegramUser() {
       showUnauthorized();
       resetBannerForPwaLogin();
       mountTelegramLoginWidgetForPwa();
+      setTimeout(hideBootOverlay, 120);
       return;
     }
 
@@ -3809,6 +3890,7 @@ function getPokerResolvedTelegramUser() {
           "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
       }
       mountTelegramLoginWidgetForPwa();
+      setTimeout(hideBootOverlay, 120);
       return;
     }
 
@@ -3816,6 +3898,8 @@ function getPokerResolvedTelegramUser() {
     setBannerVerifying();
     showUnauthorized();
     updateHeaderGreeting();
+    // В PWA держим загрузочный оверлей чуть дольше, чтобы не мигал экран входа.
+    setTimeout(hideBootOverlay, isPwaStandaloneMode() ? 1600 : 200);
 
     var maxAuthAttempts = 8;
     var attempts = 0;
@@ -3829,11 +3913,12 @@ function getPokerResolvedTelegramUser() {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
             window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
             if (data.pwaSession && isPwaStandaloneMode()) {
-              pokerSavePwaTgSession(data.pwaSession, data.user);
+              if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
               pokerSavePwaGuestMode(false);
             }
             updateHeaderGreeting();
             showAuthorized(u);
+            hideBootOverlay();
             try {
               window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u } }));
             } catch (e1) {}
@@ -3844,6 +3929,7 @@ function getPokerResolvedTelegramUser() {
             updateHeaderGreeting();
             showUnauthorized();
             setBannerFailure("Вход не подтверждён. Откройте приложение через официального бота в Telegram.", false);
+            hideBootOverlay();
             try {
               window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "invalid" } }));
             } catch (e2) {}
@@ -3855,6 +3941,7 @@ function getPokerResolvedTelegramUser() {
             if (uDev) {
               updateHeaderGreeting();
               showAuthorized(uDev);
+              hideBootOverlay();
               if (typeof console !== "undefined" && console.warn) {
                 console.warn("[poker] auth-telegram: на сервере не задан TELEGRAM_BOT_TOKEN — вход без криптопроверки (только для разработки).");
               }
@@ -3864,6 +3951,7 @@ function getPokerResolvedTelegramUser() {
             } else {
               showUnauthorized();
               setBannerFailure("Не удалось подтвердить профиль.", true);
+              hideBootOverlay();
             }
             return;
           }
@@ -3878,6 +3966,7 @@ function getPokerResolvedTelegramUser() {
             "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
             true
           );
+          hideBootOverlay();
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e4) {}
@@ -3894,6 +3983,7 @@ function getPokerResolvedTelegramUser() {
             "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
             true
           );
+          hideBootOverlay();
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e5) {}

@@ -221,12 +221,15 @@
       <div class="app-boot-overlay__panel">
         <div class="app-boot-overlay__title">Two Aces</div>
         <div class="app-boot-overlay__spinner" aria-hidden="true"></div>
-        <p class="app-boot-overlay__text">Загрузка…</p>
+        <p class="app-boot-overlay__text">Загружаем приложение…</p>
       </div>
     </div>
     <script>
       (function () {
         var stallTimer;
+        var isStandalone =
+          (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          window.navigator.standalone === true;
         function hideBootOverlay() {
           var el = document.getElementById("appBootOverlay");
           if (!el || el.classList.contains("app-boot-overlay--hidden")) return;
@@ -242,21 +245,28 @@
             } catch (e2) {}
           }, 480);
         }
-        function scheduleHide() {
+        function scheduleHideSoon() {
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
               setTimeout(hideBootOverlay, 40);
             });
           });
         }
-        if (document.readyState === "complete") scheduleHide();
-        else {
-          // Быстрый UX: скрываем оверлей по готовности DOM, а не дожидаемся "load",
-          // который может задерживаться медленными ресурсами (изображения/шрифты).
-          document.addEventListener("DOMContentLoaded", scheduleHide, { once: true });
-          window.addEventListener("load", scheduleHide, { once: true });
-          // Фолбэк на случай нестандартных сред: гарантируем скрытие через короткое время.
-          setTimeout(scheduleHide, 4000);
+        // В PWA-standalone оставляем оверлей подольше, чтобы не "мигало" окно входа,
+        // а прячем его из app.js по готовности (window.__pokerHideBootOverlay()).
+        if (!isStandalone) {
+          if (document.readyState === "complete") scheduleHideSoon();
+          else {
+            // Быстрый UX: скрываем оверлей по готовности DOM, а не дожидаемся "load",
+            // который может задерживаться медленными ресурсами (изображения/шрифты).
+            document.addEventListener("DOMContentLoaded", scheduleHideSoon, { once: true });
+            window.addEventListener("load", scheduleHideSoon, { once: true });
+            // Фолбэк на случай нестандартных сред: гарантируем скрытие через короткое время.
+            setTimeout(scheduleHideSoon, 4000);
+          }
+        } else {
+          // Фолбэк: даже если app.js не вызвал hide, всё равно уберём через время.
+          setTimeout(scheduleHideSoon, 12000);
         }
         stallTimer = setTimeout(function () {
           var el = document.getElementById("appBootOverlay");
@@ -264,7 +274,7 @@
           var p = el.querySelector(".app-boot-overlay__text");
           if (p)
             p.textContent =
-              "Загрузка… Дольше обычного — проверьте сеть или перезайдите.\nПопробуйте БЕЗ VPN/PROXY.";
+              "Загружаем приложение… Дольше обычного — проверьте сеть или перезайдите.\nПопробуйте БЕЗ VPN/PROXY.";
         }, 14000);
         window.__pokerHideBootOverlay = hideBootOverlay;
       })();
