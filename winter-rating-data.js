@@ -2169,6 +2169,7 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "24.03.2026": [
     "rating-24-03-2026-league2-kg-plo6-09h.png",
+    "rating-24-03-2026-league2-kg-plo6-09h.png",
     "rating-24-03-2026-league2-tournir-vtornika-18h.png"
   ]
 };
@@ -2990,7 +2991,13 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "AndrushaMorf", place: 0, reward: 0 }
     ] },
     { time: "09:00", name: "KG PLO6 / 2$", buyin: 200, league: 2, players: [
-      { nick: "Sarmat1305", place: 5, reward: 508 },
+      { nick: "Sarmat1305", place: 3, points: 90, reward: 1580 },
+      { nick: "shockin", place: 0, reward: 0 },
+      { nick: "asianflushie", place: 0, reward: 0 },
+      { nick: "⚡72⚡", place: 0, reward: 0 }
+    ] },
+    { time: "09:00", name: "KG PLO6 / 2$", buyin: 200, league: 2, players: [
+      { nick: "Sarmat1305", place: 3, points: 90, reward: 500 },
       { nick: "shockin", place: 0, reward: 0 },
       { nick: "asianflushie", place: 0, reward: 0 },
       { nick: "⚡72⚡", place: 0, reward: 0 }

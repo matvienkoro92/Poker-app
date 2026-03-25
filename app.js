@@ -652,9 +652,8 @@ function getAssetUrl(relativePath) {
 // Топы по выигрышу за набор дат (прошлая/текущая неделя)
 var GAZETTE_DATES = ["15.02.2026", "16.02.2026", "17.02.2026", "18.02.2026", "19.02.2026", "20.02.2026", "21.02.2026", "22.02.2026"];
 var CURRENT_WEEK_DATES = ["23.02.2026", "24.02.2026", "25.02.2026", "26.02.2026", "27.02.2026", "28.02.2026", "29.02.2026"];
-/** Рейтинг весны: даты прошлой недели по марту (2–8 марта) */
-var MARCH_PAST_WEEK_DATES = ["02.03.2026", "03.03.2026", "04.03.2026", "05.03.2026", "06.03.2026", "07.03.2026", "08.03.2026"];
-/** Рейтинг весны: даты текущей недели по марту (9–15 марта) */
+/** Рейтинг весны: даты прошлой недели по марту (9–15 марта) */
+var MARCH_PAST_WEEK_DATES = ["09.03.2026", "10.03.2026", "11.03.2026", "12.03.2026", "13.03.2026", "14.03.2026", "15.03.2026"];
 /** Рейтинг весны: даты текущей недели по марту (23–29 марта) */
 var MARCH_CURRENT_WEEK_DATES = ["23.03.2026", "24.03.2026", "25.03.2026", "26.03.2026", "27.03.2026", "28.03.2026", "29.03.2026"];
 /** Рейтинг весны: даты следующей недели по марту (16–22 марта) */
@@ -7438,7 +7437,7 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
     box.dataset.lightboxIndex = "0";
     box.dataset.lightboxLeague = "";
     box.dataset.lightboxWinterImages = "";
-    img.src = getAssetUrl(opts.overrideFile) + "?v=18";
+    img.src = getAssetUrl(opts.overrideFile) + "?v=19";
     img.alt = "Скрин турнира";
     box.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
@@ -7466,7 +7465,7 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   box.dataset.lightboxWinterImages = opts.winterImages ? "1" : "";
   if (opts.singleImageOnly) box.dataset.lightboxSingleOnly = "1";
   else delete box.dataset.lightboxSingleOnly;
-  img.src = getAssetUrl(files[index]) + "?v=18";
+  img.src = getAssetUrl(files[index]) + "?v=19";
   img.alt = "Скрин рейтинга " + dateStr + " (" + (index + 1) + ")";
   box.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
