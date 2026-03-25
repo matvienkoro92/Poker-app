@@ -29,8 +29,8 @@
   --card-padding-x: var(--screen-gutter-x);
   /* Единая высота кнопок «Назад» / «На главную» и строки с «← Чаты» в чате */
   --app-back-btn-min-height: 40px;
-  /* PWA iOS: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
-  --pwa-chat-vv-inset: 0px;
+  /* iOS / PWA: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
+  --chat-vv-inset: 0px;
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -1978,10 +1978,10 @@ body.chat-keyboard-open .card__header {
 body.chat-keyboard-open .app {
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
-/* PWA: layout viewport не совпадает с видимой областью при открытой клавиатуре — сдвигаем блок ввода */
-html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
-html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
-  transform: translate3d(0, calc(-1 * var(--pwa-chat-vv-inset, 0px)), 0);
+/* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода к низу видимой области */
+html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
+html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
+  transform: translate3d(0, calc(-1 * var(--chat-vv-inset, 0px)), 0);
 }
 .chat-switcher-row {
   display: flex;
@@ -4137,6 +4137,15 @@ html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="
   cursor: pointer;
 }
 .chat-attach-btn:hover { background: rgba(168, 85, 247, 0.25); }
+/* Кнопки в строке ввода: непрозрачный фон в одном стиле с полем */
+.chat-input-area .chat-attach-btn {
+  background: var(--block-bg-solid);
+  border-color: rgba(168, 85, 247, 0.45);
+}
+.chat-input-area .chat-attach-btn:hover {
+  background: var(--block-bg-solid);
+  filter: brightness(1.12);
+}
 .chat-attach-wrap { position: relative; flex-shrink: 0; }
 .chat-attach-dropdown {
   position: absolute;
@@ -4293,6 +4302,26 @@ html.pwa-chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="
   background: rgba(239, 68, 68, 0.4);
   color: #fca5a5;
   animation: chat-voice-pulse 1s ease-in-out infinite;
+}
+.chat-input-area .chat-voice-btn {
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(168, 85, 247, 0.42);
+  color: #c4b5fd;
+}
+.chat-input-area .chat-voice-btn:hover {
+  background: var(--block-bg-solid);
+  filter: brightness(1.1);
+}
+.chat-input-area .chat-voice-btn--recording {
+  background: #7f1d1d;
+  border-color: rgba(239, 68, 68, 0.65);
+  color: #fecaca;
+  filter: none;
+}
+[data-theme="light"] .chat-input-area .chat-voice-btn--recording {
+  background: #fecaca;
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #991b1b;
 }
 @keyframes chat-voice-pulse {
   50% { opacity: 0.85; }
@@ -4558,6 +4587,11 @@ img.chat-contact__avatar {
   font-size: 14px;
   font-family: inherit;
   box-sizing: border-box;
+}
+/* Поле сообщения в чате: сплошная подложка, иначе на iOS сквозь полупрозрачный --block-bg видна лента */
+.view--active[data-view="chat"] .chat-input--textarea,
+.view--active[data-view="chat"] input.chat-input:not(.chat-find-input) {
+  background: var(--block-bg-solid);
 }
 .chat-input::placeholder { color: var(--text-muted); }
 .chat-input--textarea {
@@ -5189,7 +5223,11 @@ img.chat-contact__avatar {
 }
 .chat-general-view .chat-input-area {
   flex-shrink: 0;
+  position: relative;
+  z-index: 5;
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  background-color: var(--block-bg-solid);
+  box-shadow: 0 -1px 0 var(--border-subtle);
 }
 .chat-personal-view {
   display: flex;
@@ -5444,7 +5482,11 @@ img.chat-contact__avatar {
 }
 .chat-container .chat-input-area {
   flex-shrink: 0;
+  position: relative;
+  z-index: 5;
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  background-color: var(--block-bg-solid);
+  box-shadow: 0 -1px 0 var(--border-subtle);
 }
 .chat-msg__delete {
   padding: 4px 8px;

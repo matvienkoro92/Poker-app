@@ -16939,7 +16939,8 @@ function initChat() {
         ctxBackdrop.setAttribute("aria-hidden", "false");
       }
       el.classList.add("chat-msg--ctx-highlight");
-      if (el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "auto" });
+      /* Не вызывать scrollIntoView: на iOS/WebKit прокручивается вся цепочка предков (включая
+         document), из‑за чего «улетает» лента, строка ввода и ломается обратная прокрутка. */
       var GAP = 10;
       var menuWidth = 280;
       var bottomNavHeight = 96;
@@ -16951,33 +16952,31 @@ function initChat() {
       ctxMenu.classList.add("chat-ctx-menu--visible");
       ctxMenu.setAttribute("aria-hidden", "false");
       menuOpenedAt = Date.now();
-      requestAnimationFrame(function () {
+      function computeCtxMenuLayout() {
         var menuHeight = ctxMenu.offsetHeight;
         var rect = el.getBoundingClientRect();
-        // Координаты долгого нажатия (палец/мышь). Если их нет, берём центр сообщения.
         var anchorX = coords && typeof coords.x === "number" ? coords.x : rect.left + rect.width / 2;
         var anchorY = coords && typeof coords.y === "number" ? coords.y : rect.bottom;
         var menuTop = anchorY + GAP;
         if (menuTop + menuHeight > maxBottom) menuTop = anchorY - GAP - menuHeight;
-        if (menuTop < 12 && el.scrollIntoView) {
-          el.scrollIntoView({ block: "center", behavior: "auto" });
-          requestAnimationFrame(function () {
-            var r2 = el.getBoundingClientRect();
-            var ax2 = coords && typeof coords.x === "number" ? coords.x : r2.left + r2.width / 2;
-            var ay2 = coords && typeof coords.y === "number" ? coords.y : r2.bottom;
-            var top2 = ay2 + GAP;
-            if (top2 + menuHeight > maxBottom) top2 = ay2 - GAP - menuHeight;
-            top2 = Math.max(12, Math.min(top2, maxBottom - menuHeight));
-            var left2 = Math.max(12, Math.min(Math.round(ax2 - menuWidth / 2), window.innerWidth - menuWidth - 12));
-            ctxMenu.style.top = top2 + "px";
-            ctxMenu.style.left = left2 + "px";
-          });
-        } else {
-          menuTop = Math.max(12, Math.min(menuTop, maxBottom - menuHeight));
-          var menuLeft = Math.max(12, Math.min(Math.round(anchorX - menuWidth / 2), window.innerWidth - menuWidth - 12));
-          ctxMenu.style.top = menuTop + "px";
-          ctxMenu.style.left = menuLeft + "px";
+        return { menuHeight: menuHeight, anchorX: anchorX, anchorY: anchorY, menuTop: menuTop };
+      }
+      function applyCtxMenuLayout(layout) {
+        var menuTop = Math.max(12, Math.min(layout.menuTop, maxBottom - layout.menuHeight));
+        var menuLeft = Math.max(12, Math.min(Math.round(layout.anchorX - menuWidth / 2), window.innerWidth - menuWidth - 12));
+        ctxMenu.style.top = menuTop + "px";
+        ctxMenu.style.left = menuLeft + "px";
+      }
+      requestAnimationFrame(function () {
+        var layout = computeCtxMenuLayout();
+        /* Меню обрезается сверху — чуть сдвигаем только scrollTop ленты чата, не трогая document */
+        if (layout.menuTop < 12 && container) {
+          container.scrollTop = Math.max(0, container.scrollTop - (12 - layout.menuTop));
         }
+        requestAnimationFrame(function () {
+          layout = computeCtxMenuLayout();
+          applyCtxMenuLayout(layout);
+        });
       });
     }
     function hideMenu() {
@@ -17636,8 +17635,8 @@ function initChat() {
     } catch (e) {}
     document.documentElement.classList.remove("chat-keyboard-open");
     document.body.classList.remove("chat-keyboard-open");
-    document.documentElement.classList.remove("pwa-chat-vv-lift");
-    document.documentElement.style.removeProperty("--pwa-chat-vv-inset");
+    document.documentElement.classList.remove("chat-vv-lift");
+    document.documentElement.style.removeProperty("--chat-vv-inset");
   }
 
   function renderMessages(messages) {
@@ -18133,41 +18132,45 @@ function initChat() {
           !!(window.navigator && window.navigator.standalone)
         );
       }
+      function isIosLikeForChatViewport() {
+        return (
+          /iPad|iPhone|iPod/.test(navigator.userAgent || "") ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+        );
+      }
+      function shouldUseChatVisualViewportLift() {
+        return !!(window.visualViewport && (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()));
+      }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!window.visualViewport) {
-          doc.style.removeProperty("--pwa-chat-vv-inset");
+          doc.style.removeProperty("--chat-vv-inset");
           return;
         }
-        if (!document.body.classList.contains("chat-keyboard-open") || !pokerPwaStandaloneForKeyboardInset()) {
-          doc.style.removeProperty("--pwa-chat-vv-inset");
+        if (!document.body.classList.contains("chat-keyboard-open") || !shouldUseChatVisualViewportLift()) {
+          doc.style.removeProperty("--chat-vv-inset");
           return;
         }
         var vv = window.visualViewport;
         var vvh = Number(vv.height) || 0;
         var ih = window.innerHeight;
-        var ch = doc.clientHeight ? doc.clientHeight : ih;
-        // На iOS/встроенном WebView `offsetTop` иногда даёт отрицательные/нестабильные значения,
-        // из-за чего inset становится завышенным и поле ввода поднимается выше клавиатуры.
-        // Поэтому считаем перекрытие клавиатурой только по высоте visualViewport.
-        var deltaIH = Math.max(0, Math.round(ih - vvh));
-        var deltaCH = Math.max(0, Math.round(ch - vvh));
-        /* iOS PWA: innerHeight и clientHeight по-разному отражают клавиатуру; min убирает завышенный delta */
-        var delta = deltaIH > 0 && deltaCH > 0 ? Math.min(deltaIH, deltaCH) : Math.max(deltaIH, deltaCH);
-        var cap = Math.min(420, Math.round(Math.max(ih, ch) * 0.45));
-        var inset = Math.max(0, Math.min(delta, cap));
-        // Небольшой "запас" убираем коэффициентом: пользователю нужно, чтобы поле было ближе к клавиатуре,
-        // а не максимально высоко над ней.
-        inset = Math.round(inset * 0.85);
-        doc.style.setProperty("--pwa-chat-vv-inset", inset + "px");
+        var offsetTop = Number(vv.offsetTop) || 0;
+        /* Перекрытие снизу: расстояние от низа layout viewport до низа visualViewport (клавиши / панель Safari) */
+        var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
+        if (overlap < 8 && vvh + 24 < ih) {
+          overlap = Math.max(overlap, Math.round(ih - vvh));
+        }
+        var cap = Math.min(480, Math.round(ih * 0.52));
+        var inset = Math.max(0, Math.min(overlap, cap));
+        doc.style.setProperty("--chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;
       function onChatInputFocus() {
         var el = getVisibleMessagesEl();
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
-        if (pokerPwaStandaloneForKeyboardInset()) {
-          document.documentElement.classList.add("pwa-chat-vv-lift");
+        if (shouldUseChatVisualViewportLift()) {
+          document.documentElement.classList.add("chat-vv-lift");
         }
         function scrollMessagesToBottom() {
           var se = document.scrollingElement;
@@ -18236,7 +18239,7 @@ function initChat() {
             if (!inChat) scrollDocumentToZero();
             document.documentElement.classList.remove("chat-keyboard-open");
             document.body.classList.remove("chat-keyboard-open");
-            document.documentElement.classList.remove("pwa-chat-vv-lift");
+            document.documentElement.classList.remove("chat-vv-lift");
             syncPwaChatVisualViewportInset();
             if (!inChat) scrollDocumentToZero();
             if (el && savedScroll > 0) {
