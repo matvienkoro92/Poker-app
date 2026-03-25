@@ -12003,7 +12003,11 @@ function initRaffles() {
     var cache = typeof window !== "undefined" && window._rafflesCache;
     var cacheAge = cache && cache.time ? Date.now() - cache.time : 0;
     if (cache && cache.data && cacheAge < 60000) {
-      applyRafflesData(cache.data, switchToCompleted);
+      // Важно: при кэш-хите применяем данные не сразу в том же тике,
+      // чтобы успел отрисоваться индикатор загрузки.
+      var apply = function () { applyRafflesData(cache.data, switchToCompleted); };
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(apply);
+      else setTimeout(apply, 0);
     }
 
     var url = base + "/api/raffles?initData=" + encodeURIComponent(init) + "&_t=" + Date.now() + (isLocal ? "&demo=1" : "");
