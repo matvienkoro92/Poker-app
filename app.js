@@ -3271,7 +3271,33 @@ function getPokerResolvedTelegramUser() {
     if (mount.querySelector(".auth-banner__code-login")) return;
     var wrap = document.createElement("div");
     wrap.className = "auth-banner__code-login";
+    var backRow =
+      isPwaStandaloneAuth() && !isPwaAuthLocalHost()
+        ? '<div class="auth-banner__code-row auth-banner__code-row--back">' +
+          '<button type="button" class="pwa-auth-screen__back-btn" id="authPwaCodeBackBtn" aria-label="Назад к выбору входа">Назад</button>' +
+          "</div>"
+        : "";
+    var botUser = "";
+    try {
+      var mx = String(telegramAppUrl || "").match(/t\.me\/([a-zA-Z0-9_]+)/i);
+      if (mx) botUser = mx[1];
+    } catch (eBot) {}
+    var botUrl = botUser ? "https://t.me/" + botUser : "";
+    var introHtml =
+      '<p class="auth-banner__code-intro" role="note">' +
+      "Код подтверждения для вашего <strong>@username</strong> (укажите ниже) придёт в Telegram от " +
+      (botUrl
+        ? 'бота: <a href="' +
+          botUrl +
+          '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' +
+          botUser +
+          "</a>"
+        : "бота клуба") +
+      ". Если вы ещё не писали боту, сначала откройте этот чат, отправьте <strong>/start</strong>, затем нажмите «Получить код» и введите полученный код здесь." +
+      "</p>";
     wrap.innerHTML =
+      backRow +
+      introHtml +
       '<div class="auth-banner__code-row">' +
         '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
       "</div>" +
@@ -3283,6 +3309,13 @@ function getPokerResolvedTelegramUser() {
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Войти</button>' +
       "</div>";
     mount.appendChild(wrap);
+
+    var backBtn = wrap.querySelector("#authPwaCodeBackBtn");
+    if (backBtn) {
+      backBtn.addEventListener("click", function () {
+        remountPwaStandaloneEnterScreen();
+      });
+    }
 
     var userInput = wrap.querySelector("#authPwaUsernameInput");
     var codeInput = wrap.querySelector("#authPwaCodeInput");
@@ -3404,6 +3437,62 @@ function getPokerResolvedTelegramUser() {
       form = mount.querySelector(".auth-banner__verify-form");
     }
     return form ? form.querySelector(".auth-banner__verify-actions") : null;
+  }
+
+  function mountPwaStandaloneEnterButton() {
+    if (!isPwaStandaloneAuth()) return false;
+    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!m) return false;
+    if (m.getAttribute("data-pwa-enter-mounted") === "1") return true;
+    m.setAttribute("data-pwa-enter-mounted", "1");
+    m.innerHTML =
+      '<div class="pwa-auth-screen__enter-actions">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
+      "</div>";
+    var btn = document.getElementById("pwaAuthEnterTelegramBtn");
+    var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
+    if (!btn || !guestBtn) return true;
+    btn.addEventListener("click", function () {
+      pokerSavePwaGuestMode(false);
+      try {
+        m.removeAttribute("data-pwa-enter-mounted");
+      } catch (e) {}
+      m.innerHTML = "";
+      var actionsMount = ensurePwaVerificationForm(m) || m;
+      mountPwaUsernameCodeLogin(actionsMount);
+    });
+    guestBtn.addEventListener("click", function () {
+      pokerSavePwaGuestMode(false);
+      try {
+        window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+      } catch (eAuth) {}
+      updateHeaderGreeting();
+      updateProfileExitBtnVisibility();
+      hidePwaAuthScreen();
+      hideIdentifyingMini();
+      try {
+        if (banner) {
+          banner.classList.add("auth-banner--hidden");
+          banner.classList.remove("auth-banner--verifying");
+        }
+      } catch (eB) {}
+      try {
+        m.innerHTML = "";
+      } catch (eM) {}
+    });
+    return true;
+  }
+
+  function remountPwaStandaloneEnterScreen() {
+    if (!isPwaStandaloneAuth()) return;
+    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!m) return;
+    m.innerHTML = "";
+    try {
+      m.removeAttribute("data-pwa-enter-mounted");
+    } catch (eRm) {}
+    mountPwaStandaloneEnterButton();
   }
 
   function showAuthorized(user) {
@@ -3656,38 +3745,6 @@ function getPokerResolvedTelegramUser() {
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
-
-    function mountPwaStandaloneEnterButton() {
-      if (!isPwaStandaloneAuth()) return false;
-      if (mount.getAttribute("data-pwa-enter-mounted") === "1") return true;
-      mount.setAttribute("data-pwa-enter-mounted", "1");
-      mount.innerHTML =
-        '<div class="pwa-auth-screen__enter-actions">' +
-          '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
-          '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
-        '</div>';
-      var btn = document.getElementById("pwaAuthEnterTelegramBtn");
-      var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
-      if (!btn || !guestBtn) return true;
-      btn.addEventListener("click", function () {
-        pokerSavePwaGuestMode(false);
-        try { mount.removeAttribute("data-pwa-enter-mounted"); } catch (e) {}
-        mount.innerHTML = "";
-        var actionsMount = ensurePwaVerificationForm(mount) || mount;
-        mountPwaUsernameCodeLogin(actionsMount);
-      });
-      guestBtn.addEventListener("click", function () {
-        pokerSavePwaGuestMode(false);
-        try { window.__pokerTelegramAuth = { status: "guest", user: null, error: null }; } catch (eAuth) {}
-        updateHeaderGreeting();
-        updateProfileExitBtnVisibility();
-        hidePwaAuthScreen();
-        hideIdentifyingMini();
-        try { if (banner) { banner.classList.add("auth-banner--hidden"); banner.classList.remove("auth-banner--verifying"); } } catch (eB) {}
-        try { mount.innerHTML = ""; } catch (eM) {}
-      });
-      return true;
-    }
 
     if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
       mount.removeAttribute("data-pwa-widget-mounted");
