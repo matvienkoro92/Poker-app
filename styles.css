@@ -1170,7 +1170,7 @@ html.app-view-home .home-welcome-outline::before {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: radial-gradient(1200px 700px at 50% -10%, rgba(14, 165, 233, 0.2), transparent 55%),
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(249, 115, 22, 0.22), transparent 55%),
     linear-gradient(180deg, #020617 0%, #0b1120 100%);
 }
 .pwa-auth-screen--hidden {
@@ -1181,7 +1181,7 @@ html.app-view-home .home-welcome-outline::before {
   max-width: 430px;
   padding: 18px 14px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  border: 1px solid rgba(249, 115, 22, 0.45);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(10, 17, 32, 0.95));
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   text-align: center;
@@ -1191,7 +1191,7 @@ html.app-view-home .home-welcome-outline::before {
   height: 62px;
   border-radius: 14px;
   object-fit: cover;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(249, 115, 22, 0.12);
 }
 .pwa-auth-screen__title {
   margin: 10px 0 4px;
@@ -1202,7 +1202,7 @@ html.app-view-home .home-welcome-outline::before {
 }
 .pwa-auth-screen__subtitle {
   margin: 0;
-  color: #bfdbfe;
+  color: #fb923c;
   font-size: 13px;
 }
 .pwa-auth-screen__mount {
