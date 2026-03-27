@@ -1908,6 +1908,31 @@ html.app-view-home .card .card__content {
   display: block;
 }
 
+/* Чат: один textarea переносится между общим и личным — без второго поля в DOM для iOS */
+.chat-composer-mount {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+}
+.chat-composer-mount .chat-input--textarea {
+  width: 100%;
+}
+.chat-composer-pool {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
 /* Плавное перелистывание при свайпе: две страницы видны, текущая уезжает, новая въезжает */
 .card__content--swipe-animating {
   overflow: hidden !important;
@@ -2032,6 +2057,11 @@ body.chat-keyboard-open .app {
 html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
 html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
   transform: translate3d(0, calc(-1 * var(--chat-vv-inset, 0px)), 0);
+}
+/* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю */
+body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
+body:not(.chat-keyboard-open) .chat-container .chat-input-area {
+  transform: translate3d(0, 0, 0);
 }
 /* Клавиатура открыта: без полноширинной подложки и без отступа «под таббар» — иначе в PWA полоса и зазор над клавиатурой */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,

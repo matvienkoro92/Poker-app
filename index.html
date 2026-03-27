@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.009">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.011">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -1418,6 +1418,10 @@
 
           <!-- Чат: поиск → Чаты (меню) → общий чат → Админы → Игроки -->
           <div class="view" data-view="chat">
+            <!-- Один textarea для общего и личного чата: иначе iOS показывает панель «< > Готово» над клавиатурой -->
+            <div id="chatComposerPool" class="chat-composer-pool" aria-hidden="true">
+              <textarea class="chat-input chat-input--textarea" id="chatSharedComposer" maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
+            </div>
             <div class="chat-dialogs-view" id="chatDialogsView">
               <div class="chat-dialogs-list-wrap">
               <div class="chat-dialogs-list">
@@ -1537,7 +1541,7 @@
                       <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
                     </div>
                   </div>
-                  <textarea class="chat-input chat-input--textarea" id="chatGeneralInput" placeholder="Сообщение в общий чат..." maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
+                  <div class="chat-composer-mount" id="chatGeneralComposerMount"></div>
                   <button type="button" class="chat-emoji-btn" id="chatGeneralEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
                   <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatGeneralSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
                 </div>
@@ -1593,7 +1597,7 @@
                           <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
                         </div>
                       </div>
-                      <textarea class="chat-input chat-input--textarea" id="chatInput" placeholder="Сообщение..." maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
+                      <div class="chat-composer-mount" id="chatPersonalComposerMount"></div>
                       <button type="button" class="chat-emoji-btn" id="chatPersonalEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
                       <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
                     </div>

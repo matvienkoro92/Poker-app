@@ -4401,6 +4401,20 @@ const views = document.querySelectorAll("[data-view]");
 const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-back)");
 const footer = document.querySelector(".card__footer");
 
+(function pokerInitInactiveViewsInert() {
+  function apply() {
+    try {
+      if (typeof HTMLElement === "undefined" || !("inert" in HTMLElement.prototype)) return;
+      views.forEach(function (view) {
+        if (view.classList.contains("view--active")) view.removeAttribute("inert");
+        else view.setAttribute("inert", "");
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", apply);
+  else apply();
+})();
+
 // На главной при загрузке — класс для layout без :has() (устройства без поддержки, убирает отступ внизу)
 (function () {
   var initialView = document.querySelector(".view--active[data-view]");
@@ -4787,6 +4801,14 @@ function setView(viewName, navOpts) {
       view.classList.remove("view--active");
     }
   });
+  try {
+    if (typeof HTMLElement !== "undefined" && "inert" in HTMLElement.prototype) {
+      views.forEach(function (view) {
+        if (view.classList.contains("view--active")) view.removeAttribute("inert");
+        else view.setAttribute("inert", "");
+      });
+    }
+  } catch (eInactiveViewsInert) {}
   // Мгновенный финальный вид нижней навигации при возврате на главную (без 250ms «доезда» поверх контента).
   if (viewName === "home" && prevView !== "home") {
     try {
@@ -15210,7 +15232,12 @@ function initChat() {
   var personalView = document.getElementById("chatPersonalView");
   var adminsView = document.getElementById("chatAdminsView");
   var generalMessages = document.getElementById("chatGeneralMessages");
-  var generalInput = document.getElementById("chatGeneralInput");
+  var chatComposerEl = document.getElementById("chatSharedComposer");
+  var chatGeneralComposerMount = document.getElementById("chatGeneralComposerMount");
+  var chatPersonalComposerMount = document.getElementById("chatPersonalComposerMount");
+  var chatComposerPool = document.getElementById("chatComposerPool");
+  var chatComposerDrafts = { general: "", personal: "" };
+  var chatComposerMounted = "detached";
   var generalSendBtn = document.getElementById("chatGeneralSendBtn");
   var listView = document.getElementById("chatListView");
   var convView = document.getElementById("chatConvView");
@@ -15228,7 +15255,6 @@ function initChat() {
   var convTitleId = document.getElementById("chatConvTitleId");
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087", "tg_roman"];
   var messagesEl = document.getElementById("chatMessages");
-  var inputEl = document.getElementById("chatInput");
   var sendBtn = document.getElementById("chatSendBtn");
   var switcherBtn = document.getElementById("chatSwitcherBtn");
   var switcherDropdown = document.getElementById("chatSwitcherDropdown");
@@ -15237,6 +15263,81 @@ function initChat() {
   var templatesHintGeneral = document.getElementById("chatTemplatesHintGeneral");
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
+  if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
+
+  function flushChatComposerToDrafts() {
+    if (!chatComposerEl) return;
+    if (chatComposerMounted === "general") chatComposerDrafts.general = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+    else if (chatComposerMounted === "personal") chatComposerDrafts.personal = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+  }
+  function getChatGeneralText() {
+    if (chatComposerMounted === "general" && chatComposerEl) return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+    return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
+  }
+  function getChatPersonalText() {
+    if (chatComposerMounted === "personal" && chatComposerEl) return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+    return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
+  }
+  function mountChatComposer(mode) {
+    if (!chatComposerEl || !chatComposerPool) return;
+    mode = mode || "detached";
+    var nextMounted = mode === "general" || mode === "personal" ? mode : "detached";
+    var contained =
+      nextMounted === "detached"
+        ? chatComposerPool.contains(chatComposerEl)
+        : nextMounted === "general"
+          ? chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)
+          : chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl);
+    var same = nextMounted === chatComposerMounted && contained;
+    if (!same) {
+      flushChatComposerToDrafts();
+      chatComposerMounted = nextMounted;
+      if (nextMounted === "general" && chatGeneralComposerMount) {
+        chatGeneralComposerMount.appendChild(chatComposerEl);
+        chatComposerEl.placeholder = "Сообщение в общий чат...";
+        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
+        chatComposerEl.value = chatComposerDrafts.general || "";
+        chatComposerEl.disabled = false;
+        chatComposerEl.removeAttribute("tabindex");
+      } else if (nextMounted === "personal" && chatPersonalComposerMount) {
+        chatPersonalComposerMount.appendChild(chatComposerEl);
+        chatComposerEl.placeholder = "Сообщение...";
+        chatComposerEl.removeAttribute("aria-label");
+        chatComposerEl.value = chatComposerDrafts.personal || "";
+        chatComposerEl.disabled = false;
+        chatComposerEl.removeAttribute("tabindex");
+      } else {
+        chatComposerMounted = "detached";
+        chatComposerPool.appendChild(chatComposerEl);
+        chatComposerEl.value = "";
+        chatComposerEl.placeholder = "";
+        chatComposerEl.blur();
+        chatComposerEl.disabled = false;
+        chatComposerEl.setAttribute("tabindex", "-1");
+      }
+    } else {
+      if (nextMounted === "general") {
+        chatComposerEl.placeholder = "Сообщение в общий чат...";
+        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
+        chatComposerEl.removeAttribute("tabindex");
+      } else if (nextMounted === "personal") {
+        chatComposerEl.placeholder = "Сообщение...";
+        chatComposerEl.removeAttribute("aria-label");
+        chatComposerEl.removeAttribute("tabindex");
+      } else {
+        chatComposerEl.setAttribute("tabindex", "-1");
+      }
+    }
+    try {
+      if (typeof resizeChatTextarea === "function") resizeChatTextarea(chatComposerEl);
+    } catch (eR) {}
+    try {
+      if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+    } catch (eG) {}
+    try {
+      if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+    } catch (eP) {}
+  }
 
   function setGeneralSendBusy(busy) {
     if (!generalSendBtn) return;
@@ -15668,7 +15769,7 @@ function initChat() {
     if (el.textContent !== txt) el.textContent = txt;
   }
   function closeSwitcherDropdown() {}
-  /** iOS WKWebView: чёрная панель со стрелками/«готово» над клавиатурой — навигация между полями. В DOM одновременно два textarea (общий + личный), второй скрыт display:none, но всё равно участвует в цепочке. inert убирает лишнее поддерево из фокуса. */
+  /** iOS WKWebView: навигация между полями над клавиатурой. Один textarea переносится mountChatComposer; inert на поддеревьях чата при списке диалогов / общем / переписке. */
   function syncChatInertForIosAccessory() {
     try {
       var dlg = document.getElementById("chatDialogsView");
@@ -15698,8 +15799,12 @@ function initChat() {
           per.setAttribute("inert", "");
         }
       } else {
-        if (generalInput) generalInput.tabIndex = generalShown && !dialogsShown ? 0 : -1;
-        if (inputEl) inputEl.tabIndex = convShown && !dialogsShown ? 0 : -1;
+        if (chatComposerEl) {
+          var composerFocus =
+            !dialogsShown &&
+            ((generalShown && chatComposerMounted === "general") || (convShown && chatComposerMounted === "personal"));
+          chatComposerEl.tabIndex = composerFocus ? 0 : -1;
+        }
       }
     } catch (eInert) {}
   }
@@ -15737,6 +15842,14 @@ function initChat() {
       loadAdminsOnline();
     }
     if (tab === "personal") window.chatPersonalUnread = false;
+    if (tab === "general") {
+      mountChatComposer("general");
+    } else if (tab === "admins") {
+      mountChatComposer("detached");
+    } else if (tab === "personal" && chatWithUserId) {
+      if (convView && !convView.classList.contains("chat-conv-view--hidden")) mountChatComposer("personal");
+      else mountChatComposer("detached");
+    }
     updateChatHeaderStats();
     updateUnreadDots();
     syncChatInertForIosAccessory();
@@ -15745,24 +15858,23 @@ function initChat() {
     /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
        таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
     try {
-      if (generalInput && typeof generalInput.blur === "function") generalInput.blur();
-      if (inputEl && typeof inputEl.blur === "function") inputEl.blur();
+      if (chatComposerEl && typeof chatComposerEl.blur === "function") chatComposerEl.blur();
       var findDlgBlur = document.getElementById("chatFindByIdInputDialogs");
       if (findDlgBlur && typeof findDlgBlur.blur === "function") findDlgBlur.blur();
     } catch (eDlgBlur) {}
     try {
-      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-      document.body.classList.remove("chat-keyboard-open");
-      document.documentElement.style.removeProperty("--chat-vv-inset");
-    } catch (eDlgKb) {}
-    try {
-      if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
-        window.__pokerChatDetachVisualViewportListeners();
+      if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+        window.__pokerFinalizeChatKeyboardDismiss();
+      } else {
+        document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+        document.body.classList.remove("chat-keyboard-open");
+        document.documentElement.style.removeProperty("--chat-vv-inset");
+        if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+          window.__pokerChatDetachVisualViewportListeners();
+        }
+        if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
       }
-    } catch (eDlgVv) {}
-    try {
-      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
-    } catch (eDlgPad) {}
+    } catch (eDlgKb) {}
     try {
       var bnavDlg = document.querySelector(".bottom-nav");
       if (bnavDlg) {
@@ -15807,6 +15919,7 @@ function initChat() {
     updateAdminShiftOnline();
     updateChatHeaderStats();
     updateUnreadDots();
+    mountChatComposer("detached");
     syncChatInertForIosAccessory();
   }
   var scrollGeneralToBottomOnNextRender = false;
@@ -15847,6 +15960,7 @@ function initChat() {
       }
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
+      mountChatComposer("general");
       syncChatInertForIosAccessory();
     }
 
@@ -15888,12 +16002,13 @@ function initChat() {
     chatWithUserName = userName || userId;
     setTab("personal");
     showConv(userId, userName || userId, dtId);
-    if (window.__pendingDepositMessage) {
-      var inp = document.getElementById("chatInput");
-      if (inp) {
-        inp.value = window.__pendingDepositMessage;
-        window.__pendingDepositMessage = null;
-      }
+    if (window.__pendingDepositMessage && chatComposerEl) {
+      chatComposerDrafts.personal = String(window.__pendingDepositMessage);
+      chatComposerEl.value = chatComposerDrafts.personal;
+      try {
+        if (typeof resizeChatTextarea === "function") resizeChatTextarea(chatComposerEl);
+      } catch (eDep) {}
+      window.__pendingDepositMessage = null;
     }
   }
   window.chatSetTab = setTab;
@@ -15959,8 +16074,7 @@ function initChat() {
   function updateGeneralInputLocked(locked) {
     var area = document.getElementById("chatGeneralInputArea");
     if (area) area.classList.toggle("chat-input-area--locked", !!locked);
-    var inp = document.getElementById("chatGeneralInput");
-    if (inp) inp.disabled = !!locked;
+    if (chatComposerEl && chatComposerMounted === "general") chatComposerEl.disabled = !!locked;
     var ab = document.getElementById("chatGeneralAttachBtn");
     if (ab) ab.disabled = !!locked;
     var eb = document.getElementById("chatGeneralEmojiBtn");
@@ -16191,7 +16305,7 @@ function initChat() {
   var chatTemplatesModalCancelBtn = document.getElementById("chatTemplatesModalCancelBtn");
   var chatTemplatesModalSaveBtn = document.getElementById("chatTemplatesModalSaveBtn");
   var chatTemplatesModalHint = document.getElementById("chatTemplatesModalHint");
-  var chatTemplatesTargetInput = null;
+  var chatTemplatesTargetChannel = null;
   var chatTemplatesEditingIndex = -1;
 
   function setTemplatesHint(text) {
@@ -16251,9 +16365,10 @@ function initChat() {
       "</div>";
     }).join("");
   }
-  function openTemplatesModal(targetInput) {
-    if (!targetInput || !chatTemplatesModal) return;
-    chatTemplatesTargetInput = targetInput;
+  function openTemplatesModal(targetChannel) {
+    if (!chatTemplatesModal) return;
+    if (targetChannel !== "general" && targetChannel !== "personal") return;
+    chatTemplatesTargetChannel = targetChannel;
     // базовый пример, чтобы было что выбрать
     chatTemplates = loadTemplates();
     if (!chatTemplates || chatTemplates.length === 0) {
@@ -16269,7 +16384,7 @@ function initChat() {
     if (!chatTemplatesModal) return;
     chatTemplatesModal.classList.remove("chat-templates-modal--open");
     chatTemplatesModal.setAttribute("aria-hidden", "true");
-    chatTemplatesTargetInput = null;
+    chatTemplatesTargetChannel = null;
     templatesShowForm(false);
     templatesResetForm();
   }
@@ -16338,24 +16453,20 @@ function initChat() {
         chatTemplates = loadTemplates();
         var t = chatTemplates[idx];
         if (!t || !t.text) return;
-        // По выбору шаблона — сразу отправляем сообщение в нужный чат
-        var targetInput = chatTemplatesTargetInput;
-        if (targetInput) {
-          targetInput.value = t.text;
-          if (typeof resizeChatTextarea === "function") resizeChatTextarea(targetInput);
+        var ch = chatTemplatesTargetChannel;
+        if (chatComposerEl && (ch === "general" || ch === "personal")) {
+          if (ch === "general") chatComposerDrafts.general = t.text;
+          else chatComposerDrafts.personal = t.text;
+          chatComposerEl.value = t.text;
+          if (typeof resizeChatTextarea === "function") resizeChatTextarea(chatComposerEl);
         }
         closeTemplatesModal();
         try {
-          if (targetInput && targetInput.id === "chatGeneralInput") {
-            sendGeneral(t.text);
-          } else if (targetInput && targetInput.id === "chatInput") {
-            sendMessage(t.text);
-          } else {
-            // fallback: если не смогли определить чат, просто оставим текст в поле
-            if (targetInput) targetInput.focus();
-          }
+          if (ch === "general") sendGeneral(t.text);
+          else if (ch === "personal") sendMessage(t.text);
+          else if (chatComposerEl) chatComposerEl.focus();
         } catch (e) {
-          if (targetInput) targetInput.focus();
+          if (chatComposerEl) chatComposerEl.focus();
         }
       }
     });
@@ -16365,8 +16476,8 @@ function initChat() {
     });
   }
 
-  function showTemplatesMenu(targetInput) {
-    openTemplatesModal(targetInput);
+  function showTemplatesMenu(channel) {
+    openTemplatesModal(channel);
   }
 
   var CHAT_LAST_VIEWED_KEY = "chat_last_viewed";
@@ -16652,17 +16763,13 @@ function initChat() {
     personalReplyTo = null;
 
     try {
-      if (generalInput) {
-        generalInput.value = "";
-        try { resizeChatTextarea(generalInput); } catch (eResizeG) {}
+      chatComposerDrafts.general = "";
+      chatComposerDrafts.personal = "";
+      if (chatComposerEl) {
+        chatComposerEl.value = "";
+        try { resizeChatTextarea(chatComposerEl); } catch (eResizeG) {}
       }
     } catch (e) {}
-    try {
-      if (inputEl) {
-        inputEl.value = "";
-        try { resizeChatTextarea(inputEl); } catch (eResizeP) {}
-      }
-    } catch (e2) {}
 
     var prevG = document.getElementById("chatGeneralReplyPreview");
     if (prevG) {
@@ -16740,10 +16847,12 @@ function initChat() {
     personalReplyTo = null;
 
     if (src === "general") {
-      if (generalInput) {
-        generalInput.value = String(oldText == null ? "" : oldText);
-        try { resizeChatTextarea(generalInput); } catch (e) {}
-        if (generalInput.focus) generalInput.focus();
+      mountChatComposer("general");
+      if (chatComposerEl) {
+        chatComposerDrafts.general = String(oldText == null ? "" : oldText);
+        chatComposerEl.value = chatComposerDrafts.general;
+        try { resizeChatTextarea(chatComposerEl); } catch (e) {}
+        if (chatComposerEl.focus) chatComposerEl.focus();
       }
       var prevG = document.getElementById("chatGeneralReplyPreview");
       if (prevG) {
@@ -16758,10 +16867,12 @@ function initChat() {
       var voicePrevG2 = document.getElementById("chatGeneralVoicePreview");
       if (voicePrevG2) voicePrevG2.classList.add("chat-voice-preview--hidden");
     } else {
-      if (inputEl) {
-        inputEl.value = String(oldText == null ? "" : oldText);
-        try { resizeChatTextarea(inputEl); } catch (e2) {}
-        if (inputEl.focus) inputEl.focus();
+      mountChatComposer("personal");
+      if (chatComposerEl) {
+        chatComposerDrafts.personal = String(oldText == null ? "" : oldText);
+        chatComposerEl.value = chatComposerDrafts.personal;
+        try { resizeChatTextarea(chatComposerEl); } catch (e2) {}
+        if (chatComposerEl.focus) chatComposerEl.focus();
       }
       var prevP = document.getElementById("chatPersonalReplyPreview");
       if (prevP) {
@@ -17271,8 +17382,8 @@ function initChat() {
             // Фокус на input в Telegram/WebView часто дёргает скролл чата вверх.
             // Сохраняем scrollTop и возвращаем после фокуса.
             var prevScrollTopG = generalMessages ? generalMessages.scrollTop : null;
-            if (generalInput && generalInput.focus) {
-              try { generalInput.focus({ preventScroll: true }); } catch (e1) { try { generalInput.focus(); } catch (e2) {} }
+            if (chatComposerEl && chatComposerEl.focus) {
+              try { chatComposerEl.focus({ preventScroll: true }); } catch (e1) { try { chatComposerEl.focus(); } catch (e2) {} }
               if (generalMessages && prevScrollTopG != null) {
                 requestAnimationFrame(function () {
                   try { generalMessages.scrollTop = prevScrollTopG; } catch (e3) {}
@@ -17287,8 +17398,8 @@ function initChat() {
               prevP.classList.add("chat-reply-preview--visible");
             }
             var prevScrollTopP = messagesEl ? messagesEl.scrollTop : null;
-            if (inputEl && inputEl.focus) {
-              try { inputEl.focus({ preventScroll: true }); } catch (e1) { try { inputEl.focus(); } catch (e2) {} }
+            if (chatComposerEl && chatComposerEl.focus) {
+              try { chatComposerEl.focus({ preventScroll: true }); } catch (e1) { try { chatComposerEl.focus(); } catch (e2) {} }
               if (messagesEl && prevScrollTopP != null) {
                 requestAnimationFrame(function () {
                   try { messagesEl.scrollTop = prevScrollTopP; } catch (e3) {}
@@ -17378,7 +17489,7 @@ function initChat() {
   }
   function sendGeneral(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var text = (generalInput && generalInput.value || "").trim();
+    var text = getChatGeneralText().trim();
     // Сообщение из chat-шаблона: подставляем текст напрямую,
     // чтобы не зависеть от того, успело ли обновиться нужное поле.
     if (typeof overrideText === "string") text = overrideText.trim();
@@ -17440,13 +17551,13 @@ function initChat() {
       var optVoice = generalVoice || null;
       var optDocument = generalDocument ? { dataUrl: generalDocument.dataUrl, fileName: generalDocument.fileName } : null;
       var optReply = generalReplyTo ? { fromName: generalReplyTo.fromName || "Игрок", text: generalReplyTo.text || "" } : null;
-      if (generalInput) {
-        generalInput.value = "";
-        // Возвращаем поле ввода к исходной высоте
-        try { resizeChatTextarea(generalInput); } catch (e) {}
+      chatComposerDrafts.general = "";
+      if (chatComposerMounted === "general" && chatComposerEl) {
+        chatComposerEl.value = "";
+        try { resizeChatTextarea(chatComposerEl); } catch (e) {}
         try { updateGeneralSendBtnIcon(); } catch (e) {}
         setTimeout(function () {
-          try { generalInput.blur(); } catch (e) {}
+          try { chatComposerEl.blur(); } catch (e) {}
         }, 50);
       }
       generalReplyTo = null;
@@ -17564,6 +17675,7 @@ function initChat() {
       }
     }
     loadMessages();
+    mountChatComposer("personal");
     syncChatInertForIosAccessory();
   }
 
@@ -17830,14 +17942,18 @@ function initChat() {
   function prepareChatDeleteConfirm() {
     try {
       var active = document.activeElement;
-      if (active && (active === generalInput || active === inputEl) && typeof active.blur === "function") {
+      if (active && active === chatComposerEl && typeof active.blur === "function") {
         active.blur();
       }
     } catch (e) {}
-    document.documentElement.classList.remove("chat-keyboard-open");
-    document.body.classList.remove("chat-keyboard-open");
-    document.documentElement.classList.remove("chat-vv-lift");
-    document.documentElement.style.removeProperty("--chat-vv-inset");
+    if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+      window.__pokerFinalizeChatKeyboardDismiss();
+    } else {
+      document.documentElement.classList.remove("chat-keyboard-open");
+      document.body.classList.remove("chat-keyboard-open");
+      document.documentElement.classList.remove("chat-vv-lift");
+      document.documentElement.style.removeProperty("--chat-vv-inset");
+    }
   }
 
   function renderMessages(messages) {
@@ -18103,7 +18219,7 @@ function initChat() {
   }
   function sendMessage(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var text = (inputEl && inputEl.value || "").trim();
+    var text = getChatPersonalText().trim();
     // Сообщение из chat-шаблона: подставляем текст напрямую.
     if (typeof overrideText === "string") text = overrideText.trim();
     // Редактирование сообщения: отправляем PATCH, а не новое сообщение.
@@ -18175,13 +18291,13 @@ function initChat() {
     var optVoice = personalVoice || null;
     var optDocument = personalDocument ? { dataUrl: personalDocument.dataUrl, fileName: personalDocument.fileName } : null;
     var optReply = personalReplyTo ? { fromName: personalReplyTo.fromName || "Игрок", text: personalReplyTo.text || "" } : null;
-    if (inputEl) {
-      inputEl.value = "";
-      // Возвращаем поле ввода к исходной высоте
-      try { resizeChatTextarea(inputEl); } catch (e) {}
+    chatComposerDrafts.personal = "";
+    if (chatComposerMounted === "personal" && chatComposerEl) {
+      chatComposerEl.value = "";
+      try { resizeChatTextarea(chatComposerEl); } catch (e) {}
       try { updatePersonalSendBtnIcon(); } catch (e) {}
       setTimeout(function () {
-        try { inputEl.blur(); } catch (e) {}
+        try { chatComposerEl.blur(); } catch (e) {}
       }, 50);
     }
     personalReplyTo = null;
@@ -18227,7 +18343,8 @@ function initChat() {
       } else {
         var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
         if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-        if (inputEl) inputEl.value = optText;
+        chatComposerDrafts.personal = optText;
+        if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
         if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
         if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
       }
@@ -18238,7 +18355,8 @@ function initChat() {
       hideProgress();
       var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
       if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-      if (inputEl) inputEl.value = optText;
+      chatComposerDrafts.personal = optText;
+      if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
       if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
       if (tg && tg.showAlert) tg.showAlert("Не удалось отправить. Проверьте интернет или уменьшите файл (до 8 МБ).");
     }
@@ -18349,6 +18467,36 @@ function initChat() {
         /* Android Chrome / PWA: без подъёма по visualViewport поле иногда остаётся под клавиатурой */
         return !!(/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0);
       }
+      function finalizeChatKeyboardDismiss() {
+        try {
+          if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+            window.__pokerChatDetachVisualViewportListeners();
+          }
+        } catch (eDet) {}
+        try {
+          document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+          document.body.classList.remove("chat-keyboard-open");
+          document.documentElement.style.removeProperty("--chat-vv-inset");
+        } catch (eCls) {}
+        try {
+          syncPwaChatVisualViewportInset();
+        } catch (eSync) {}
+        try {
+          if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
+          var se = document.scrollingElement;
+          if (se) se.scrollTop = 0;
+          if (document.documentElement) document.documentElement.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+        } catch (eScr) {}
+        try {
+          if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
+        } catch (eRe) {}
+        try {
+          if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+        } catch (ePad) {}
+      }
+      window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
+
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!window.visualViewport) {
@@ -18465,35 +18613,33 @@ function initChat() {
           window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           viewportResizeScrollHandler = null;
         }
-        setTimeout(function () {
+        function runBlurCleanup() {
           var active = document.activeElement;
-          if (active !== generalInput && active !== inputEl) {
-            var el = getVisibleMessagesEl();
-            var savedScroll = el ? el.scrollTop : 0;
-            // Если контейнер сообщений видим, НЕ сбрасываем прокрутку страницы наверх.
-            // Прыжок вверх чаще всего происходит именно из-за scrollDocumentToZero() на blur.
-            var inChat = !!el;
-            if (!inChat) scrollDocumentToZero();
-            document.documentElement.classList.remove("chat-keyboard-open");
-            document.body.classList.remove("chat-keyboard-open");
-            document.documentElement.classList.remove("chat-vv-lift");
-            syncPwaChatVisualViewportInset();
-            if (!inChat) scrollDocumentToZero();
-            if (el && savedScroll > 0) {
-              requestAnimationFrame(function () {
-                el.scrollTop = savedScroll;
-              });
-            }
+          if (active === chatComposerEl) return;
+          var el = getVisibleMessagesEl();
+          var savedScroll = el ? el.scrollTop : 0;
+          var inChat = !!el;
+          if (!inChat) scrollDocumentToZero();
+          finalizeChatKeyboardDismiss();
+          if (!inChat) scrollDocumentToZero();
+          if (el && savedScroll > 0) {
+            requestAnimationFrame(function () {
+              try { el.scrollTop = savedScroll; } catch (e3) {}
+            });
           }
-        }, 0);
+        }
+        setTimeout(runBlurCleanup, 0);
+        /* iOS: blur и visualViewport обновляются не синхронно — повторяем сброс, иначе поле ввода «остаётся выше». */
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 90);
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 280);
       }
-      if (generalInput) {
-        generalInput.addEventListener("focus", onChatInputFocus);
-        generalInput.addEventListener("blur", onChatInputBlur);
-      }
-      if (inputEl) {
-        inputEl.addEventListener("focus", onChatInputFocus);
-        inputEl.addEventListener("blur", onChatInputBlur);
+      if (chatComposerEl) {
+        chatComposerEl.addEventListener("focus", onChatInputFocus);
+        chatComposerEl.addEventListener("blur", onChatInputBlur);
       }
     })();
     window.chatRefresh = function () {
@@ -18698,6 +18844,7 @@ function initChat() {
     var chatGeneralEmojiBtn = document.getElementById("chatGeneralEmojiBtn");
     var chatPersonalEmojiBtn = document.getElementById("chatPersonalEmojiBtn");
     var chatEmojiPickerTargetInput = null;
+    var chatEmojiPickerOpenedVia = null;
     var chatEmojiPickerClose = null;
     function insertEmojiAtCursor(ta, emoji) {
       if (!ta) return;
@@ -18711,12 +18858,14 @@ function initChat() {
       ta.selectionStart = ta.selectionEnd = Math.min(start + emoji.length, newText.length);
       ta.focus();
       if (typeof resizeChatTextarea === "function") resizeChatTextarea(ta);
+      if (ta === chatComposerEl) flushChatComposerToDrafts();
     }
     function hideChatEmojiPicker() {
       if (!chatEmojiPicker) return;
       chatEmojiPicker.classList.add("chat-emoji-picker--hidden");
       chatEmojiPicker.setAttribute("aria-hidden", "true");
       chatEmojiPickerTargetInput = null;
+      chatEmojiPickerOpenedVia = null;
       if (chatEmojiPickerClose) {
         document.removeEventListener("click", chatEmojiPickerClose);
         chatEmojiPickerClose = null;
@@ -18738,8 +18887,9 @@ function initChat() {
       });
     }
     // Одиночный клик/тап по смайлу — открыть пикер, долгое нажатие — открыть шаблоны.
-    function bindEmojiButton(btn, targetInput) {
-      if (!btn || !chatEmojiPicker || !targetInput) return;
+    function bindEmojiButton(btn, templatesChannel) {
+      if (!btn || !chatEmojiPicker || !chatComposerEl) return;
+      if (templatesChannel !== "general" && templatesChannel !== "personal") return;
       var longPressTimer = null;
       var longPressTriggered = false;
       var LONG_PRESS_MS = 550;
@@ -18751,7 +18901,8 @@ function initChat() {
       }
       function toggleEmojiPicker() {
         if (chatEmojiPicker.classList.contains("chat-emoji-picker--hidden")) {
-          chatEmojiPickerTargetInput = targetInput;
+          chatEmojiPickerTargetInput = chatComposerEl;
+          chatEmojiPickerOpenedVia = btn;
           var rect = btn.getBoundingClientRect();
           chatEmojiPicker.style.left = Math.max(8, Math.min(rect.right - 160, window.innerWidth - 268)) + "px";
           chatEmojiPicker.style.top = (rect.top - 206) + "px";
@@ -18763,7 +18914,7 @@ function initChat() {
             }
           };
           setTimeout(function () { document.addEventListener("click", chatEmojiPickerClose); }, 0);
-        } else if (chatEmojiPickerTargetInput === targetInput) {
+        } else if (chatEmojiPickerOpenedVia === btn) {
           hideChatEmojiPicker();
         }
       }
@@ -18777,7 +18928,7 @@ function initChat() {
           if (typeof tg !== "undefined" && tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
             try { tg.HapticFeedback.impactOccurred("light"); } catch (eH) {}
           }
-          showTemplatesMenu(targetInput);
+          showTemplatesMenu(templatesChannel);
         }, LONG_PRESS_MS);
       }
       btn.addEventListener("touchstart", function () { startLongPress(); }, { passive: true });
@@ -18799,8 +18950,8 @@ function initChat() {
         toggleEmojiPicker();
       });
     }
-    bindEmojiButton(chatGeneralEmojiBtn, generalInput);
-    bindEmojiButton(chatPersonalEmojiBtn, inputEl);
+    bindEmojiButton(chatGeneralEmojiBtn, "general");
+    bindEmojiButton(chatPersonalEmojiBtn, "personal");
     var generalVoiceBtn = document.getElementById("chatGeneralVoiceBtn");
     var generalVoiceRemove = document.getElementById("chatGeneralVoiceRemove");
     var generalVoicePreviewEl = document.getElementById("chatGeneralVoicePreview");
@@ -18971,7 +19122,7 @@ function initChat() {
             var pvPrev = document.getElementById("chatPersonalVoicePreview");
             if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
             startRecording("general");
-          } else if ((generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument) {
+          } else if (getChatGeneralText().trim() || generalImage || generalVoice || generalDocument) {
             sendGeneral();
           } else {
             startRecording("general");
@@ -19028,7 +19179,7 @@ function initChat() {
           if (generalBtn) generalBtn.classList.remove("chat-voice-btn--recording");
           if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
           startRecording("personal");
-        } else if ((inputEl && inputEl.value.trim()) || personalImage || personalVoice || personalDocument) {
+        } else if (getChatPersonalText().trim() || personalImage || personalVoice || personalDocument) {
           sendMessage();
         } else {
           startRecording("personal");
@@ -19078,18 +19229,18 @@ function initChat() {
     // На мобильных: отправка должна происходить с первого тапа по кнопке.
     // Добавляем touchend, который при наличии текста/вложений сразу шлёт сообщение
     // и предотвращает последующий click (чтобы не было двойной отправки).
-    if (generalSendBtn && generalInput) {
+    if (generalSendBtn && chatComposerEl) {
       generalSendBtn.addEventListener("touchend", function (e) {
-        var hasContent = (generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument;
+        var hasContent = getChatGeneralText().trim() || generalImage || generalVoice || generalDocument;
         if (!hasContent) return; // если нет текста/вложений, пусть работает логика микрофона
         e.preventDefault();
         e.stopPropagation();
         sendGeneral();
       }, { passive: false });
     }
-    if (sendBtn && inputEl) {
+    if (sendBtn && chatComposerEl) {
       sendBtn.addEventListener("touchend", function (e) {
-        var hasContentP = (inputEl && inputEl.value.trim()) || personalImage || personalVoice || personalDocument;
+        var hasContentP = getChatPersonalText().trim() || personalImage || personalVoice || personalDocument;
         if (!hasContentP) return;
         e.preventDefault();
         e.stopPropagation();
@@ -19099,7 +19250,7 @@ function initChat() {
     function updateGeneralSendBtnIcon() {
       if (!generalSendBtn) return;
       if (sendingGeneral) return;
-      var hasContent = (generalInput && generalInput.value.trim()) || generalImage || generalVoice || generalDocument;
+      var hasContent = getChatGeneralText().trim() || generalImage || generalVoice || generalDocument;
       generalSendBtn.textContent = hasContent ? "\u2191" : "\uD83C\uDFA4";
       generalSendBtn.title = hasContent ? "Отправить" : "Голосовое сообщение";
       generalSendBtn.setAttribute("aria-label", hasContent ? "Отправить" : "Записать голосовое");
@@ -19108,7 +19259,7 @@ function initChat() {
     function updatePersonalSendBtnIcon() {
       if (!sendBtn) return;
       if (sendingPrivate) return;
-      var hasContent = (inputEl && inputEl.value.trim()) || personalImage || personalVoice || personalDocument;
+      var hasContent = getChatPersonalText().trim() || personalImage || personalVoice || personalDocument;
       sendBtn.textContent = hasContent ? "\u2191" : "\uD83C\uDFA4";
       sendBtn.title = hasContent ? "Отправить" : "Голосовое сообщение";
       sendBtn.setAttribute("aria-label", hasContent ? "Отправить" : "Записать голосовое");
@@ -19121,27 +19272,40 @@ function initChat() {
       var h = Math.min(ta.scrollHeight, max);
       ta.style.height = h + "px";
     }
-    if (generalInput) {
-    generalInput.addEventListener("input", function (e) {
-      resizeChatTextarea(generalInput);
-      updateGeneralSendBtnIcon();
-      // Быстрый вызов шаблонов: достаточно ввести "/" первым символом.
-      // Открываем меню сразу (без Enter) и очищаем слэш из поля ввода.
-      try {
-        var rawV = (generalInput.value || "");
-        var trimmedV = rawV.trim();
-        var modalOpen = chatTemplatesModal && chatTemplatesModal.getAttribute("aria-hidden") === "false";
-        if (!modalOpen && trimmedV === "/") {
-          generalInput.value = "";
-          updateGeneralSendBtnIcon();
-          resizeChatTextarea(generalInput);
-          showTemplatesMenu(generalInput);
+    if (chatComposerEl) {
+      chatComposerEl.addEventListener("input", function () {
+        flushChatComposerToDrafts();
+        resizeChatTextarea(chatComposerEl);
+        updateGeneralSendBtnIcon();
+        updatePersonalSendBtnIcon();
+        try {
+          var rawV = chatComposerEl.value || "";
+          var trimmedV = rawV.trim();
+          var modalOpen = chatTemplatesModal && chatTemplatesModal.getAttribute("aria-hidden") === "false";
+          if (!modalOpen && trimmedV === "/") {
+            chatComposerEl.value = "";
+            flushChatComposerToDrafts();
+            updateGeneralSendBtnIcon();
+            updatePersonalSendBtnIcon();
+            resizeChatTextarea(chatComposerEl);
+            if (chatComposerMounted === "general") showTemplatesMenu("general");
+            else if (chatComposerMounted === "personal") showTemplatesMenu("personal");
+          }
+        } catch (err) {}
+      });
+      chatComposerEl.addEventListener("focus", function () { resizeChatTextarea(chatComposerEl); });
+      chatComposerEl.addEventListener("change", function () {
+        flushChatComposerToDrafts();
+        updateGeneralSendBtnIcon();
+        updatePersonalSendBtnIcon();
+      });
+      chatComposerEl.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey && chatComposerMounted === "personal") {
+          e.preventDefault();
+          sendMessage();
         }
-      } catch (err) {}
-    });
-      generalInput.addEventListener("focus", function () { resizeChatTextarea(generalInput); });
-      generalInput.addEventListener("change", updateGeneralSendBtnIcon);
-      resizeChatTextarea(generalInput);
+      });
+      resizeChatTextarea(chatComposerEl);
     }
     updateGeneralSendBtnIcon();
     var generalReplyCancel = document.querySelector("#chatGeneralReplyPreview .chat-reply-preview__cancel");
@@ -19239,34 +19403,6 @@ function initChat() {
           personalPdfInput.value = "";
         });
       }
-    }
-    if (inputEl) {
-    inputEl.addEventListener("input", function () {
-      resizeChatTextarea(inputEl);
-      updatePersonalSendBtnIcon();
-      // Быстрый вызов шаблонов: достаточно ввести "/" первым символом.
-      // Открываем меню сразу (без Enter) и очищаем слэш из поля ввода.
-      try {
-        var rawV = (inputEl.value || "");
-        var trimmedV = rawV.trim();
-        var modalOpen = chatTemplatesModal && chatTemplatesModal.getAttribute("aria-hidden") === "false";
-        if (!modalOpen && trimmedV === "/") {
-          inputEl.value = "";
-          updatePersonalSendBtnIcon();
-          resizeChatTextarea(inputEl);
-          showTemplatesMenu(inputEl);
-        }
-      } catch (err) {}
-    });
-      inputEl.addEventListener("focus", function () { resizeChatTextarea(inputEl); });
-      inputEl.addEventListener("change", updatePersonalSendBtnIcon);
-      inputEl.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-      resizeChatTextarea(inputEl);
     }
     updatePersonalSendBtnIcon();
     var personalReplyCancel = document.querySelector("#chatPersonalReplyPreview .chat-reply-preview__cancel");
@@ -19714,8 +19850,9 @@ function initChat() {
       if (lastSuggestions.length) showSuggest(lastSuggestions);
     });
     findByIdInputDialogs.addEventListener("blur", function (e) {
-      document.documentElement.classList.remove("chat-keyboard-open");
+      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
       document.body.classList.remove("chat-keyboard-open");
+      document.documentElement.style.removeProperty("--chat-vv-inset");
       var relatedTarget = e.relatedTarget;
       setTimeout(function () {
         if (document.activeElement && suggestEl && suggestEl.contains(document.activeElement)) return;
