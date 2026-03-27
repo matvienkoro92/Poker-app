@@ -31,6 +31,8 @@
   --app-back-btn-min-height: 40px;
   /* iOS / PWA: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
   --chat-vv-inset: 0px;
+  /* Запас под шапку Telegram Mini App (до contentSafeAreaInset из JS); в обычном браузере подменяется на меньший */
+  --app-extra-top-for-ui: 52px;
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -329,13 +331,13 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Отступ сверху: safe-area + высота шапки Telegram («Закрыть»), карточка и меню всегда колонкой */
+/* Отступ сверху: safe-area + зазор под шапку (в TG задаётся JS по contentSafeAreaInset, см. .app--tg-content-inset) */
 .app {
   position: relative;
   box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
-  padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + 52px));
+  padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + var(--app-extra-top-for-ui)));
   /* Запас под фиксированное таб-меню (~56px + паддинги); без лишнего «хвоста» при нижней резинке */
   padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
@@ -346,10 +348,16 @@ body {
   justify-content: flex-start;
   overflow: hidden;
 }
+/* Telegram 7.10+: верх из WebApp.contentSafeAreaInset (--app-top-from-tg из JS), плюс safe-area как нижняя граница */
+html.app--tg-content-inset .app {
+  padding-top: max(10px, env(safe-area-inset-top, 0px), var(--app-top-from-tg, 48px));
+}
 @media (display-mode: standalone), (display-mode: fullscreen) {
   /* +6px к запасу под нижнее меню — совпадает с усиленным padding-bottom у .bottom-nav в PWA */
   .app {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    /* Нет шапки Telegram Mini App (~52px «Закрыть») — базовый padding-top даёт лишний зазор на главной */
+    padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 10px));
   }
   /* В установленном приложении кнопка справа от темы («на экран / поделиться») не нужна */
   #pwaInstallBtn,
@@ -465,10 +473,25 @@ body:has(.view--active[data-view="chat"]) {
   position: fixed;
   width: 100%;
   height: 100%;
-  max-height: 100dvh;
   inset: 0;
 }
 html:has(.view--active[data-view="chat"]) {
+  height: 100%;
+  overflow: hidden;
+}
+/* Fallback / PWA: без привязки только к :has() — иначе на части WebView body/#app и 100dvh расходятся,
+   снизу появляется полоса, а fixed таббар визуально «поднимается» над краем */
+html.app-view-chat {
+  height: 100%;
+  overflow: hidden;
+}
+body[data-view="chat"] {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
   height: 100%;
   overflow: hidden;
 }
@@ -775,12 +798,13 @@ html.app-view-hall-html-scroll .card .card__content {
 }
 
 /* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
-.app:has(.view--active[data-view="chat"]) {
-  height: 100dvh;
-  min-height: 100dvh;
-  max-height: 100dvh;
+.app:has(.view--active[data-view="chat"]),
+html.app-view-chat #app.app {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
   align-items: center;
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
   overflow: hidden;
 }
 .card:has(.view--active[data-view="chat"]) {
@@ -18071,6 +18095,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   color: var(--text);
 }
 
+.footer-visitors__version {
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
 .footer-note {
   margin: 0;
   font-size: 10px;
@@ -20658,8 +20687,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     transform: translate3d(0, 0, 0);
-    will-change: transform;
-    contain: paint;
     padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px));
   }
 }

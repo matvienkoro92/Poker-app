@@ -2816,6 +2816,38 @@ window.addEventListener("popstate", function () {
   }
 });
 
+/** Верхний отступ #app: PWA — только CSS; в Telegram — contentSafeAreaInset; в обычном браузере — без лишних +52px под шапку TG */
+function pokerApplyAppTopPadding() {
+  var root = document.documentElement;
+  var standalone =
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+    (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
+    !!(window.navigator && window.navigator.standalone);
+  if (standalone) {
+    root.classList.remove("app--tg-content-inset");
+    root.style.removeProperty("--app-top-from-tg");
+    root.style.removeProperty("--app-extra-top-for-ui");
+    return;
+  }
+  var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (
+    tw &&
+    tw.contentSafeAreaInset != null &&
+    typeof tw.contentSafeAreaInset.top === "number" &&
+    tw.contentSafeAreaInset.top > 0
+  ) {
+    root.classList.add("app--tg-content-inset");
+    var px = Math.max(12, Math.round(tw.contentSafeAreaInset.top + 8));
+    root.style.setProperty("--app-top-from-tg", px + "px");
+    root.style.removeProperty("--app-extra-top-for-ui");
+    return;
+  }
+  root.classList.remove("app--tg-content-inset");
+  root.style.removeProperty("--app-top-from-tg");
+  if (tw) return;
+  root.style.setProperty("--app-extra-top-for-ui", "12px");
+}
+
 // Инициализация Telegram WebApp (если открыто внутри Telegram)
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -2837,6 +2869,7 @@ if (tg) {
   setTimeout(tryExpand, 1500);
   if (tg.onEvent && typeof tg.onEvent === "function") {
     tg.onEvent("viewportChanged", function (e) {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
       if (e && e.isStateStable) tryExpand();
     });
   }
@@ -2876,6 +2909,10 @@ if (tg) {
   window.tryTelegramWebAppExpand = function () {};
   window.tryTelegramWebAppExpandBurst = function () {};
 }
+
+pokerApplyAppTopPadding();
+setTimeout(pokerApplyAppTopPadding, 250);
+setTimeout(pokerApplyAppTopPadding, 700);
 
 (function setRandomListenersCount() {
   var el = document.getElementById("headerRadioListenersCount");
