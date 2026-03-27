@@ -4828,6 +4828,11 @@ function setView(viewName, navOpts) {
     }
   }
   if (viewName === "chat") {
+    try {
+      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+      document.body.classList.remove("chat-keyboard-open");
+      document.documentElement.style.removeProperty("--chat-vv-inset");
+    } catch (eChatKbCls) {}
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };

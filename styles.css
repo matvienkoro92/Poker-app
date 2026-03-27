@@ -1965,8 +1965,8 @@ html.chat-keyboard-open {
 html.chat-keyboard-open body {
   overflow: hidden !important;
 }
-/* Плавно скрываем нижнее меню */
-body.chat-keyboard-open .bottom-nav {
+/* Плавно скрываем нижнее меню только внутри активного раздела «Чат» и не в списке диалогов (поиск сверху) */
+body.chat-keyboard-open:has(.view--active[data-view="chat"]):not(:has(#chatDialogsView:not(.chat-dialogs-view--hidden))) .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
