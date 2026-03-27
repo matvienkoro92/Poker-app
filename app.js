@@ -15668,6 +15668,41 @@ function initChat() {
     if (el.textContent !== txt) el.textContent = txt;
   }
   function closeSwitcherDropdown() {}
+  /** iOS WKWebView: чёрная панель со стрелками/«готово» над клавиатурой — навигация между полями. В DOM одновременно два textarea (общий + личный), второй скрыт display:none, но всё равно участвует в цепочке. inert убирает лишнее поддерево из фокуса. */
+  function syncChatInertForIosAccessory() {
+    try {
+      var dlg = document.getElementById("chatDialogsView");
+      var gen = document.getElementById("chatGeneralView");
+      var per = document.getElementById("chatPersonalView");
+      if (!dlg || !gen || !per) return;
+      var dialogsShown = !dlg.classList.contains("chat-dialogs-view--hidden");
+      var generalShown = !gen.classList.contains("chat-general-view--hidden");
+      var convShown = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+      var supportsInert = typeof HTMLElement !== "undefined" && "inert" in HTMLElement.prototype;
+      if (supportsInert) {
+        if (dialogsShown) {
+          dlg.removeAttribute("inert");
+          gen.setAttribute("inert", "");
+          per.setAttribute("inert", "");
+        } else if (generalShown) {
+          dlg.setAttribute("inert", "");
+          gen.removeAttribute("inert");
+          per.setAttribute("inert", "");
+        } else if (convShown) {
+          dlg.setAttribute("inert", "");
+          gen.setAttribute("inert", "");
+          per.removeAttribute("inert");
+        } else {
+          dlg.setAttribute("inert", "");
+          gen.setAttribute("inert", "");
+          per.setAttribute("inert", "");
+        }
+      } else {
+        if (generalInput) generalInput.tabIndex = generalShown && !dialogsShown ? 0 : -1;
+        if (inputEl) inputEl.tabIndex = convShown && !dialogsShown ? 0 : -1;
+      }
+    } catch (eInert) {}
+  }
   function setTab(tab) {
     chatActiveTab = tab;
     closeSwitcherDropdown();
@@ -15704,8 +15739,44 @@ function initChat() {
     if (tab === "personal") window.chatPersonalUnread = false;
     updateChatHeaderStats();
     updateUnreadDots();
+    syncChatInertForIosAccessory();
   }
   function showDialogs() {
+    /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
+       таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
+    try {
+      if (generalInput && typeof generalInput.blur === "function") generalInput.blur();
+      if (inputEl && typeof inputEl.blur === "function") inputEl.blur();
+      var findDlgBlur = document.getElementById("chatFindByIdInputDialogs");
+      if (findDlgBlur && typeof findDlgBlur.blur === "function") findDlgBlur.blur();
+    } catch (eDlgBlur) {}
+    try {
+      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+      document.body.classList.remove("chat-keyboard-open");
+      document.documentElement.style.removeProperty("--chat-vv-inset");
+    } catch (eDlgKb) {}
+    try {
+      if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+        window.__pokerChatDetachVisualViewportListeners();
+      }
+    } catch (eDlgVv) {}
+    try {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+    } catch (eDlgPad) {}
+    try {
+      var bnavDlg = document.querySelector(".bottom-nav");
+      if (bnavDlg) {
+        bnavDlg.classList.add("bottom-nav--no-transition");
+        var rafD = window.requestAnimationFrame || function (fn) {
+          setTimeout(fn, 16);
+        };
+        rafD(function () {
+          rafD(function () {
+            bnavDlg.classList.remove("bottom-nav--no-transition");
+          });
+        });
+      }
+    } catch (eNavDlg) {}
     chatActiveTab = "dialogs";
     chatWithUserId = null;
     chatWithUserName = null;
@@ -15736,6 +15807,7 @@ function initChat() {
     updateAdminShiftOnline();
     updateChatHeaderStats();
     updateUnreadDots();
+    syncChatInertForIosAccessory();
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
@@ -15775,6 +15847,7 @@ function initChat() {
       }
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
+      syncChatInertForIosAccessory();
     }
 
     var st = typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState() : "ok";
@@ -17491,6 +17564,7 @@ function initChat() {
       }
     }
     loadMessages();
+    syncChatInertForIosAccessory();
   }
 
   function updateClubChatPendingBadge() {
@@ -18311,6 +18385,19 @@ function initChat() {
         doc.style.setProperty("--chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;
+      window.__pokerChatDetachVisualViewportListeners = function () {
+        if (
+          viewportResizeScrollHandler &&
+          typeof window.visualViewport !== "undefined" &&
+          window.visualViewport.removeEventListener
+        ) {
+          try {
+            window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
+            window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
+          } catch (eVvDet) {}
+          viewportResizeScrollHandler = null;
+        }
+      };
       function onChatInputFocus() {
         var el = getVisibleMessagesEl();
         document.documentElement.classList.add("chat-keyboard-open");

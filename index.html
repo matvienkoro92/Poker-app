@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.008">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.009">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -1529,15 +1529,15 @@
                 </div>
                 <div class="chat-input-wrap">
                   <div class="chat-attach-wrap">
-                    <input type="file" class="chat-input-file" id="chatGeneralFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
-                    <input type="file" class="chat-input-file" id="chatGeneralPdfInput" accept="application/pdf" style="display:none" aria-hidden="true" />
+                    <input type="file" class="chat-input-file" id="chatGeneralFileInput" tabindex="-1" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
+                    <input type="file" class="chat-input-file" id="chatGeneralPdfInput" tabindex="-1" accept="application/pdf" style="display:none" aria-hidden="true" />
                     <button type="button" class="chat-attach-btn" id="chatGeneralAttachBtn" title="Прикрепить" aria-haspopup="true" aria-expanded="false" aria-controls="chatGeneralAttachDropdown">📎</button>
                     <div class="chat-attach-dropdown chat-attach-dropdown--hidden" id="chatGeneralAttachDropdown" role="menu" aria-hidden="true">
                       <button type="button" class="chat-attach-dropdown__item" data-action="photo" role="menuitem">Фото</button>
                       <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
                     </div>
                   </div>
-                  <textarea class="chat-input chat-input--textarea" id="chatGeneralInput" placeholder="Сообщение в общий чат..." maxlength="1000" rows="1" autocomplete="off"></textarea>
+                  <textarea class="chat-input chat-input--textarea" id="chatGeneralInput" placeholder="Сообщение в общий чат..." maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
                   <button type="button" class="chat-emoji-btn" id="chatGeneralEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
                   <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatGeneralSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
                 </div>
@@ -1585,15 +1585,15 @@
                     </div>
                     <div class="chat-input-wrap">
                       <div class="chat-attach-wrap">
-                        <input type="file" class="chat-input-file" id="chatPersonalFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
-                        <input type="file" class="chat-input-file" id="chatPersonalPdfInput" accept="application/pdf" style="display:none" aria-hidden="true" />
+                        <input type="file" class="chat-input-file" id="chatPersonalFileInput" tabindex="-1" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
+                        <input type="file" class="chat-input-file" id="chatPersonalPdfInput" tabindex="-1" accept="application/pdf" style="display:none" aria-hidden="true" />
                         <button type="button" class="chat-attach-btn" id="chatPersonalAttachBtn" title="Прикрепить" aria-haspopup="true" aria-expanded="false" aria-controls="chatPersonalAttachDropdown">📎</button>
                         <div class="chat-attach-dropdown chat-attach-dropdown--hidden" id="chatPersonalAttachDropdown" role="menu" aria-hidden="true">
                           <button type="button" class="chat-attach-dropdown__item" data-action="photo" role="menuitem">Фото</button>
                           <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
                         </div>
                       </div>
-                      <textarea class="chat-input chat-input--textarea" id="chatInput" placeholder="Сообщение..." maxlength="1000" rows="1" autocomplete="off"></textarea>
+                      <textarea class="chat-input chat-input--textarea" id="chatInput" placeholder="Сообщение..." maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
                       <button type="button" class="chat-emoji-btn" id="chatPersonalEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
                       <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
                     </div>
