@@ -4833,7 +4833,26 @@ function setView(viewName, navOpts) {
       document.body.classList.remove("chat-keyboard-open");
       document.documentElement.style.removeProperty("--chat-vv-inset");
     } catch (eChatKbCls) {}
-    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    /* Один expand вместо burst: повторы дергали viewportChanged/padding и таббар подпрыгивал */
+    if (prevView !== "chat" && typeof window.tryTelegramWebAppExpand === "function") {
+      window.tryTelegramWebAppExpand();
+    }
+    try {
+      if (prevView !== "chat") {
+        var bnavChat = document.querySelector(".bottom-nav");
+        if (bnavChat) {
+          bnavChat.classList.add("bottom-nav--no-transition");
+          var rafNavChat = window.requestAnimationFrame || function (fn) {
+            setTimeout(fn, 16);
+          };
+          rafNavChat(function () {
+            rafNavChat(function () {
+              bnavChat.classList.remove("bottom-nav--no-transition");
+            });
+          });
+        }
+      }
+    } catch (eNavChat) {}
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idleChat(function () { initChat(); });
