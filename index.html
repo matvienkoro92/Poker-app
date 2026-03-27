@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.006">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -57,10 +57,21 @@
         display: block;
         width: 52px;
         height: 52px;
-        margin: 0 auto 10px;
+        margin: 0 auto 8px;
         border-radius: 12px;
         object-fit: cover;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(249, 115, 22, 0.12);
+      }
+      .app-boot-overlay__brand {
+        margin: 0 auto 14px;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        line-height: 1.15;
+        color: #f8fafc;
+      }
+      html[data-theme="light"] .app-boot-overlay__brand {
+        color: #0f172a;
       }
       .app-boot-overlay__spinner {
         width: 36px;
@@ -90,6 +101,16 @@
       }
       html[data-theme="light"] .app-boot-overlay__text {
         color: #64748b;
+      }
+      .app-boot-overlay__version {
+        margin: 10px 0 0;
+        font-size: 11px;
+        line-height: 1.3;
+        letter-spacing: 0.04em;
+        color: #64748b;
+      }
+      html[data-theme="light"] .app-boot-overlay__version {
+        color: #94a3b8;
       }
       .app-boot-overlay.app-boot-overlay--hidden {
         opacity: 0;
@@ -229,8 +250,17 @@
           height="52"
           decoding="async"
         />
+        <p class="app-boot-overlay__brand">TWO ACES</p>
         <div class="app-boot-overlay__spinner" aria-hidden="true"></div>
         <p class="app-boot-overlay__text">Загружаем приложение…</p>
+        <p class="app-boot-overlay__version" id="appBootOverlayVersion"></p>
+        <script>
+          (function () {
+            var v = document.documentElement.getAttribute("data-app-version");
+            var el = document.getElementById("appBootOverlayVersion");
+            if (el && v) el.textContent = "Version " + v;
+          })();
+        </script>
       </div>
     </div>
     <script>
@@ -289,13 +319,13 @@
       })();
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
-      <!-- Версия PWA: +0.001 на каждый git push (scripts/pre-push после npm run install-hooks). Вручную: npm run bump:pwa-version -->
+      <!-- Версия: атрибут data-app-version на <html> — оверлей загрузки, экран входа PWA и футер главной. +0.001 на push / npm run bump:pwa-version -->
       <div class="pwa-auth-screen__inner">
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
       </div>
-      <p class="pwa-auth-screen__version" id="pwaLoginScreenVersion">Version 1.005</p>
+      <p class="pwa-auth-screen__version" id="pwaLoginScreenVersion"></p>
     </div>
     <!-- Радио: чил, американские 90‑е или Радио 7 (переключение одной кнопкой) -->
     <audio id="chillRadio" preload="metadata" loop crossorigin="anonymous" aria-hidden="true"></audio>
@@ -539,7 +569,7 @@
                 <span class="footer-visitors__total">Визитов: <strong id="visitorTotal">—</strong></span>
                 <span class="footer-visitors__unique">Уник.: <strong id="visitorUnique">—</strong></span>
                 <span class="footer-visitors__returning">Повтор.: <strong id="visitorReturning">—</strong></span>
-                <span class="footer-visitors__version" id="homeFooterAppVersion">Version 1.005</span>
+                <span class="footer-visitors__version" id="homeFooterAppVersion"></span>
               </p>
               <p class="footer-note">
                 Клуб «Два туза». Играйте ответственно. 18+
@@ -5197,6 +5227,17 @@
     <script src="./updates-data.js"></script>
     <script src="./winter-rating-data.js?v=69"></script>
     <script src="./poker-tasks-data.js"></script>
+    <script>
+      (function () {
+        var v = document.documentElement.getAttribute("data-app-version");
+        if (!v) return;
+        var label = "Version " + v;
+        var pwa = document.getElementById("pwaLoginScreenVersion");
+        if (pwa) pwa.textContent = label;
+        var home = document.getElementById("homeFooterAppVersion");
+        if (home) home.textContent = label;
+      })();
+    </script>
     <script src="./app.js?v=204"></script>
   </body>
 </html>
