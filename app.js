@@ -18158,7 +18158,10 @@ function initChat() {
         );
       }
       function shouldUseChatVisualViewportLift() {
-        return !!(window.visualViewport && (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()));
+        if (!window.visualViewport) return false;
+        if (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()) return true;
+        /* Android Chrome / PWA: без подъёма по visualViewport поле иногда остаётся под клавиатурой */
+        return !!(/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0);
       }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
@@ -18172,17 +18175,27 @@ function initChat() {
         }
         var vv = window.visualViewport;
         var vvh = Number(vv.height) || 0;
-        var ih = window.innerHeight;
+        var ih = window.innerHeight || 0;
+        if (!ih) return;
         var offsetTop = Number(vv.offsetTop) || 0;
-        /* Перекрытие снизу: расстояние от низа layout viewport до низа visualViewport (клавиши / панель Safari) */
+        /* Перекрытие снизу: расстояние от низа layout viewport до низа visualViewport (клавиши / панель) */
+        var heightLoss = Math.max(0, Math.round(ih - vvh));
         var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
-        if (overlap < 8 && vvh + 24 < ih) {
-          overlap = Math.max(overlap, Math.round(ih - vvh));
+        /* Первые кадры анимации клавиатуры offsetTop/height иногда не согласованы — не занижаем overlap */
+        if (overlap < 20 && heightLoss > overlap + 6) {
+          overlap = Math.max(overlap, Math.round(heightLoss - Math.max(0, offsetTop)));
         }
-        var cap = Math.min(420, Math.round(ih * 0.48));
-        var inset = Math.max(0, Math.min(overlap, cap));
-        /* innerHeight − visualViewport часто даёт завышенное перекрытие в iOS PWA → поле «верхом» над клавиатурой */
-        inset = Math.max(0, Math.round(inset * 0.56 - 10));
+        if (overlap < 8 && vvh + 24 < ih) {
+          overlap = Math.max(overlap, heightLoss);
+        }
+        var cap = Math.min(460, Math.round(ih * 0.55));
+        var rawInset = Math.max(0, Math.min(overlap, cap));
+        /* Было inset*0.56-10 — часто давало 0 и поле оставалось под клавиатурой. Слегка уменьшаем «сырой» inset, с нижней границей по heightLoss */
+        var inset = Math.max(0, Math.round(rawInset * 0.66 - 4));
+        var vvRatio = vvh / ih;
+        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 40) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.6)));
+        }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
       }
       var viewportResizeScrollHandler = null;
@@ -18229,6 +18242,10 @@ function initChat() {
           syncPwaChatVisualViewportInset();
           scrollMessagesToBottom();
         }, 1000);
+        setTimeout(function () {
+          syncPwaChatVisualViewportInset();
+          scrollMessagesToBottom();
+        }, 1600);
         syncPwaChatVisualViewportInset();
         if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
           if (viewportResizeScrollHandler) {

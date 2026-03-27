@@ -20654,6 +20654,12 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 /* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
 @media (display-mode: standalone) {
   .bottom-nav {
+    /* iOS PWA: backdrop-filter + fixed даёт «подпрыгивание» панели при скролле */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    contain: paint;
     padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px));
   }
 }
