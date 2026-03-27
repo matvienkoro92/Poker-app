@@ -15128,6 +15128,10 @@ window.chatGeneralUnread = false;
 window.chatPersonalUnread = false;
 var chatWithUserId = null;
 var personalMessagesCache = {};
+var personalMessagesCacheMeta = {};
+var personalPrefetchInFlight = {};
+var PERSONAL_PREFETCH_TTL_MS = 45000;
+var PERSONAL_PREFETCH_BATCH = 4;
 var chatWithUserName = null;
 /* "dialogs" = список чатов; иначе loadGeneral() перерисовывал скрытый общий чат и сбрасывал scroll */
 var chatActiveTab = "dialogs";
@@ -15175,11 +15179,12 @@ function initChat() {
 
   function setGeneralSendBusy(busy) {
     if (!generalSendBtn) return;
-    generalSendBtn.disabled = !!busy;
-    generalSendBtn.classList.toggle("chat-send-btn--waiting", !!busy);
+    /* Мгновенный UX: не уводим кнопку в "..." и не гасим её opacity во время сетевого ожидания. */
+    generalSendBtn.disabled = false;
+    generalSendBtn.classList.remove("chat-send-btn--waiting");
     generalSendBtn.setAttribute("aria-busy", busy ? "true" : "false");
     if (busy) {
-      generalSendBtn.textContent = "\u2026";
+      generalSendBtn.textContent = "\u2191";
       generalSendBtn.title = "Отправка…";
       generalSendBtn.setAttribute("aria-label", "Отправка…");
       generalSendBtn.classList.remove("chat-send-btn--mic");
@@ -15190,11 +15195,12 @@ function initChat() {
 
   function setPersonalSendBusy(busy) {
     if (!sendBtn) return;
-    sendBtn.disabled = !!busy;
-    sendBtn.classList.toggle("chat-send-btn--waiting", !!busy);
+    /* Мгновенный UX: не уводим кнопку в "..." и не гасим её opacity во время сетевого ожидания. */
+    sendBtn.disabled = false;
+    sendBtn.classList.remove("chat-send-btn--waiting");
     sendBtn.setAttribute("aria-busy", busy ? "true" : "false");
     if (busy) {
-      sendBtn.textContent = "\u2026";
+      sendBtn.textContent = "\u2191";
       sendBtn.title = "Отправка…";
       sendBtn.setAttribute("aria-label", "Отправка…");
       sendBtn.classList.remove("chat-send-btn--mic");
@@ -17493,6 +17499,49 @@ function initChat() {
     el.textContent = snippet ? name + ": " + snippet : name;
   }
 
+  function shouldUsePersonalCache(userId) {
+    if (!userId) return false;
+    var cache = personalMessagesCache[userId];
+    if (!Array.isArray(cache) || cache.length === 0) return false;
+    var meta = personalMessagesCacheMeta[userId];
+    if (!meta || !meta.ts) return true;
+    return (Date.now() - meta.ts) < PERSONAL_PREFETCH_TTL_MS;
+  }
+
+  function prefetchPersonalMessages(userId) {
+    if (!userId || !pokerApiHasCredential()) return;
+    if (chatWithUserId && peerChatIdsEqual(chatWithUserId, userId)) return;
+    if (personalPrefetchInFlight[userId]) return;
+    if (shouldUsePersonalCache(userId)) return;
+    personalPrefetchInFlight[userId] = true;
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId);
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.messages)) return;
+        personalMessagesCache[userId] = data.messages.slice();
+        personalMessagesCacheMeta[userId] = { ts: Date.now() };
+      })
+      .catch(function () {})
+      .then(function () {
+        delete personalPrefetchInFlight[userId];
+      });
+  }
+
+  function prefetchTopPersonalDialogs(contacts) {
+    if (!Array.isArray(contacts) || contacts.length === 0) return;
+    var picked = [];
+    for (var i = 0; i < contacts.length && picked.length < PERSONAL_PREFETCH_BATCH; i++) {
+      var id = contacts[i] && contacts[i].id ? String(contacts[i].id) : "";
+      if (!id) continue;
+      if (chatWithUserId && peerChatIdsEqual(chatWithUserId, id)) continue;
+      picked.push(id);
+    }
+    picked.forEach(function (id, idx) {
+      setTimeout(function () { prefetchPersonalMessages(id); }, idx * 120);
+    });
+  }
+
   function loadContacts() {
     if (!contactsEl) return;
     if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
@@ -17538,6 +17587,7 @@ function initChat() {
         }
       }
       if (data && data.ok && Array.isArray(data.contacts)) {
+        prefetchTopPersonalDialogs(data.contacts);
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
         // Если ещё ни разу не фиксировали момент просмотра общего чата в этом браузере,
@@ -17862,6 +17912,7 @@ function initChat() {
           if (sig !== lastPersonalMessagesSig) {
             lastPersonalMessagesSig = sig;
             personalMessagesCache[chatWithUserId] = messages.slice();
+            personalMessagesCacheMeta[chatWithUserId] = { ts: Date.now() };
             renderMessages(messages);
           }
         }
