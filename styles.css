@@ -1346,6 +1346,10 @@ html.app-view-home .home-welcome-outline::before {
   background-image: radial-gradient(880px 480px at 50% -42%, rgba(249, 115, 22, 0.28), transparent 52%),
     linear-gradient(180deg, #0f172a 0%, #020617 42%, #0b1120 100%);
 }
+/* PWA standalone: подъём формы входа над клавиатурой (--pwa-auth-vv-inset из JS по visualViewport) */
+html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pwa-auth-vv-inset, 0px));
+}
 .pwa-auth-screen--hidden {
   display: none !important;
 }
@@ -2010,6 +2014,12 @@ html.app-view-home .card .card__content {
   padding-right: max(8px, var(--screen-gutter-x));
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
 }
+/* Лента чата: таббар скрыт — 65px не нужен (иначе пустая полоса над футером TG / домашней зоной).
+   Без :has(): надёжнее в WKWebView / Telegram iOS. */
+.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-input-area {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
 /* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
    чтобы не было дёрганий и белых вспышек. */
 html.chat-keyboard-open {
@@ -2018,13 +2028,17 @@ html.chat-keyboard-open {
 html.chat-keyboard-open body {
   overflow: hidden !important;
 }
-/* Плавно скрываем нижнее меню только внутри активного раздела «Чат» и не в списке диалогов (поиск сверху) */
-body.chat-keyboard-open:has(.view--active[data-view="chat"]):not(:has(#chatDialogsView:not(.chat-dialogs-view--hidden))) .bottom-nav {
+/* Клавиатура в чате (включая поиск в списке диалогов): таббар перекрывал поле ввода в PWA — скрываем всегда */
+body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
   transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+}
+/* На случай если transform таббара не сработал в WebView — весь #app выше нижнего меню */
+body.chat-keyboard-open:has(.view--active[data-view="chat"]) #app.app {
+  z-index: 1002;
 }
 body.chat-keyboard-open .card__header {
   display: none !important;
@@ -2048,10 +2062,6 @@ body.chat-keyboard-open .card__header {
   /* В чате убираем лишние отступы сверху: окно чата должно стартовать как можно выше */
   padding-top: env(safe-area-inset-top, 0px);
 }
-.app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
-.app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
-  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
-}
 body.chat-keyboard-open .app {
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
@@ -2064,10 +2074,10 @@ html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat
     0
   );
 }
-/* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю */
+/* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю (!important ломает залипший слой) */
 body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
 body:not(.chat-keyboard-open) .chat-container .chat-input-area {
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0) !important;
 }
 /* Клавиатура открыта: без полноширинной подложки и без отступа «под таббар» — иначе в PWA полоса и зазор над клавиатурой */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,

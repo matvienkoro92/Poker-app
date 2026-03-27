@@ -4375,6 +4375,118 @@ function getPokerResolvedTelegramUser() {
   };
 })();
 
+// PWA на весь экран: 100dvh не сжимается с клавиатурой — поднимаем экран входа по visualViewport
+(function initPwaAuthVisualViewportLift() {
+  var vvHandler = null;
+  function isPwaDisplayStandalone() {
+    try {
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if (window.navigator && window.navigator.standalone) return true;
+    } catch (e) {}
+    return false;
+  }
+  function syncPwaAuthVvInset() {
+    var screen = document.getElementById("pwaAuthScreen");
+    if (!screen || screen.classList.contains("pwa-auth-screen--hidden")) {
+      document.documentElement.style.removeProperty("--pwa-auth-vv-inset");
+      return;
+    }
+    if (!document.documentElement.classList.contains("pwa-auth-vv-lift")) return;
+    if (!window.visualViewport) {
+      document.documentElement.style.removeProperty("--pwa-auth-vv-inset");
+      return;
+    }
+    var vv = window.visualViewport;
+    var ih = window.innerHeight || 0;
+    if (!ih) return;
+    var vvh = Number(vv.height) || 0;
+    var offsetTop = Number(vv.offsetTop) || 0;
+    var heightLoss = Math.max(0, Math.round(ih - vvh));
+    var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
+    if (overlap < 20 && heightLoss > overlap + 6) {
+      overlap = Math.max(overlap, Math.round(heightLoss - Math.max(0, offsetTop)));
+    }
+    if (overlap < 8 && vvh + 24 < ih) {
+      overlap = Math.max(overlap, heightLoss);
+    }
+    var cap = Math.min(460, Math.round(ih * 0.62));
+    var inset = Math.max(0, Math.min(overlap, cap));
+    document.documentElement.style.setProperty("--pwa-auth-vv-inset", inset + "px");
+  }
+  function detachVv() {
+    if (vvHandler && window.visualViewport && window.visualViewport.removeEventListener) {
+      try {
+        window.visualViewport.removeEventListener("resize", vvHandler);
+        window.visualViewport.removeEventListener("scroll", vvHandler);
+      } catch (eDet) {}
+    }
+    vvHandler = null;
+  }
+  function clearPwaAuthKb() {
+    document.documentElement.classList.remove("pwa-auth-vv-lift");
+    document.documentElement.style.removeProperty("--pwa-auth-vv-inset");
+    detachVv();
+  }
+  function attachVv() {
+    if (vvHandler) return;
+    vvHandler = function () {
+      syncPwaAuthVvInset();
+    };
+    if (window.visualViewport && window.visualViewport.addEventListener) {
+      window.visualViewport.addEventListener("resize", vvHandler);
+      window.visualViewport.addEventListener("scroll", vvHandler);
+    }
+  }
+  function onFocusIn(ev) {
+    if (!isPwaDisplayStandalone()) return;
+    var screen = document.getElementById("pwaAuthScreen");
+    if (!screen || screen.classList.contains("pwa-auth-screen--hidden")) return;
+    var t = ev.target;
+    if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
+    if (!screen.contains(t)) return;
+    document.documentElement.classList.add("pwa-auth-vv-lift");
+    syncPwaAuthVvInset();
+    attachVv();
+    requestAnimationFrame(function () {
+      syncPwaAuthVvInset();
+      requestAnimationFrame(function () {
+        syncPwaAuthVvInset();
+      });
+    });
+    setTimeout(syncPwaAuthVvInset, 80);
+    setTimeout(syncPwaAuthVvInset, 260);
+  }
+  function onFocusOut() {
+    var screen = document.getElementById("pwaAuthScreen");
+    function maybeClear() {
+      var a = document.activeElement;
+      if (screen && a && screen.contains(a) && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) return;
+      clearPwaAuthKb();
+    }
+    setTimeout(maybeClear, 0);
+    setTimeout(maybeClear, 100);
+    setTimeout(maybeClear, 320);
+    setTimeout(maybeClear, 550);
+    setTimeout(maybeClear, 900);
+  }
+  if (window.visualViewport && window.visualViewport.addEventListener && !window.__pokerPwaAuthVvInsetFlushAttached) {
+    window.__pokerPwaAuthVvInsetFlushAttached = true;
+    var authInsetFlushT = null;
+    window.visualViewport.addEventListener("resize", function () {
+      clearTimeout(authInsetFlushT);
+      authInsetFlushT = setTimeout(function () {
+        if (document.documentElement.classList.contains("pwa-auth-vv-lift")) return;
+        var ih = window.innerHeight || 0;
+        var vvh = Number(window.visualViewport.height) || 0;
+        if (!ih || vvh < ih - 36) return;
+        document.documentElement.style.removeProperty("--pwa-auth-vv-inset");
+      }, 120);
+    });
+  }
+  document.addEventListener("focusin", onFocusIn, true);
+  document.addEventListener("focusout", onFocusOut, true);
+})();
+
 // Оверлей загрузки: ранний inline-скрипт в index.html (до app.js), см. __pokerHideBootOverlay
 
 updateProfileUserName();
@@ -18497,6 +18609,16 @@ function initChat() {
         if (belowVv >= 14 && belowVv <= 58) acc = Math.min(52, belowVv);
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
+      function stripChatInputAreaTransforms() {
+        try {
+          document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
+            if (!node || !node.style) return;
+            node.style.removeProperty("transform");
+            node.style.removeProperty("-webkit-transform");
+            node.style.removeProperty("will-change");
+          });
+        } catch (eSt) {}
+      }
       function finalizeChatKeyboardDismiss() {
         try {
           if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
@@ -18509,6 +18631,7 @@ function initChat() {
           document.documentElement.style.removeProperty("--chat-vv-inset");
           document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eCls) {}
+        stripChatInputAreaTransforms();
         try {
           syncPwaChatVisualViewportInset();
         } catch (eSync) {}
@@ -18527,6 +18650,28 @@ function initChat() {
         } catch (ePad) {}
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
+      /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
+      if (!window.__pokerChatVvPostKeyboardCleanupAttached && window.visualViewport && window.visualViewport.addEventListener) {
+        window.__pokerChatVvPostKeyboardCleanupAttached = true;
+        var vvPostKbTimer = null;
+        window.visualViewport.addEventListener("resize", function () {
+          if (document.body.classList.contains("chat-keyboard-open")) return;
+          var ih = window.innerHeight || 0;
+          var vvh = Number(window.visualViewport.height) || 0;
+          if (!ih || vvh < ih - 40) return;
+          clearTimeout(vvPostKbTimer);
+          vvPostKbTimer = setTimeout(function () {
+            if (document.body.classList.contains("chat-keyboard-open")) return;
+            var ih2 = window.innerHeight || 0;
+            var vvh2 = Number(window.visualViewport.height) || 0;
+            if (!ih2 || vvh2 < ih2 - 40) return;
+            document.documentElement.classList.remove("chat-vv-lift");
+            document.documentElement.style.removeProperty("--chat-vv-inset");
+            document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+            stripChatInputAreaTransforms();
+          }, 110);
+        });
+      }
 
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
@@ -18557,11 +18702,11 @@ function initChat() {
         }
         var cap = Math.min(460, Math.round(ih * 0.55));
         var rawInset = Math.max(0, Math.min(overlap, cap));
-        /* Было inset*0.56-10 — часто давало 0 и поле оставалось под клавиатурой. Слегка уменьшаем «сырой» inset, с нижней границей по heightLoss */
-        var inset = Math.max(0, Math.round(rawInset * 0.66 - 4));
+        /* Сильнее поднимаем панель ввода: в PWA часть высоты клавиатуры терялась из‑за округления */
+        var inset = Math.max(0, Math.round(rawInset * 0.88 - 2));
         var vvRatio = vvh / ih;
-        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 40) {
-          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.6)));
+        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 48) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.74)));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
@@ -18670,6 +18815,12 @@ function initChat() {
         setTimeout(function () {
           if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
         }, 280);
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 520);
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 880);
       }
       if (chatComposerEl) {
         chatComposerEl.addEventListener("focus", onChatInputFocus);
