@@ -4401,15 +4401,23 @@ const views = document.querySelectorAll("[data-view]");
 const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-back)");
 const footer = document.querySelector(".card__footer");
 
+/** Inert только у экранов .view — не у body[data-view] и пр., иначе весь документ (в т.ч. .bottom-nav) перестаёт получать клики. */
+function pokerSyncInertForViewScreensOnly() {
+  try {
+    if (typeof HTMLElement === "undefined" || !("inert" in HTMLElement.prototype)) return;
+    /* Снять ошибочный inert с body после старых сборок */
+    if (document.body) document.body.removeAttribute("inert");
+    views.forEach(function (view) {
+      if (!view.classList || !view.classList.contains("view")) return;
+      if (view.classList.contains("view--active")) view.removeAttribute("inert");
+      else view.setAttribute("inert", "");
+    });
+  } catch (e) {}
+}
+
 (function pokerInitInactiveViewsInert() {
   function apply() {
-    try {
-      if (typeof HTMLElement === "undefined" || !("inert" in HTMLElement.prototype)) return;
-      views.forEach(function (view) {
-        if (view.classList.contains("view--active")) view.removeAttribute("inert");
-        else view.setAttribute("inert", "");
-      });
-    } catch (e) {}
+    pokerSyncInertForViewScreensOnly();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", apply);
   else apply();
@@ -4802,12 +4810,7 @@ function setView(viewName, navOpts) {
     }
   });
   try {
-    if (typeof HTMLElement !== "undefined" && "inert" in HTMLElement.prototype) {
-      views.forEach(function (view) {
-        if (view.classList.contains("view--active")) view.removeAttribute("inert");
-        else view.setAttribute("inert", "");
-      });
-    }
+    pokerSyncInertForViewScreensOnly();
   } catch (eInactiveViewsInert) {}
   // Мгновенный финальный вид нижней навигации при возврате на главную (без 250ms «доезда» поверх контента).
   if (viewName === "home" && prevView !== "home") {
