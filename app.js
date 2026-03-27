@@ -4857,6 +4857,7 @@ function setView(viewName, navOpts) {
       document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
       document.body.classList.remove("chat-keyboard-open");
       document.documentElement.style.removeProperty("--chat-vv-inset");
+      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
     } catch (eChatKbCls) {}
     /* Один expand вместо burst: повторы дергали viewportChanged/padding и таббар подпрыгивал */
     if (prevView !== "chat" && typeof window.tryTelegramWebAppExpand === "function") {
@@ -15872,6 +15873,7 @@ function initChat() {
         document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
         document.body.classList.remove("chat-keyboard-open");
         document.documentElement.style.removeProperty("--chat-vv-inset");
+        document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
         if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
           window.__pokerChatDetachVisualViewportListeners();
         }
@@ -17956,6 +17958,7 @@ function initChat() {
       document.body.classList.remove("chat-keyboard-open");
       document.documentElement.classList.remove("chat-vv-lift");
       document.documentElement.style.removeProperty("--chat-vv-inset");
+      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
     }
   }
 
@@ -18470,6 +18473,30 @@ function initChat() {
         /* Android Chrome / PWA: без подъёма по visualViewport поле иногда остаётся под клавиатурой */
         return !!(/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0);
       }
+      /**
+       * Доп. подъём только на iOS над системной панелью «стрелки / Готово».
+       * На Android панели нет — inset 0, подъём только через --chat-vv-inset.
+       */
+      function applyChatIosAccessoryInsetFromViewport() {
+        var doc = document.documentElement;
+        if (!document.body.classList.contains("chat-keyboard-open")) {
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          return;
+        }
+        if (!isIosLikeForChatViewport() || !window.visualViewport || !shouldUseChatVisualViewportLift()) {
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          return;
+        }
+        var vv = window.visualViewport;
+        var ih = window.innerHeight || 0;
+        var vvh = Number(vv.height) || 0;
+        var offsetTop = Number(vv.offsetTop) || 0;
+        var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
+        /* «Хвост» 14–58px чаще совпадает с accessory; больше — обычно клавиши/хром (vv-inset уже поднимает). */
+        var acc = 0;
+        if (belowVv >= 14 && belowVv <= 58) acc = Math.min(52, belowVv);
+        doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
+      }
       function finalizeChatKeyboardDismiss() {
         try {
           if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
@@ -18480,6 +18507,7 @@ function initChat() {
           document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
           document.body.classList.remove("chat-keyboard-open");
           document.documentElement.style.removeProperty("--chat-vv-inset");
+          document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eCls) {}
         try {
           syncPwaChatVisualViewportInset();
@@ -18504,10 +18532,12 @@ function initChat() {
         var doc = document.documentElement;
         if (!window.visualViewport) {
           doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
         if (!document.body.classList.contains("chat-keyboard-open") || !shouldUseChatVisualViewportLift()) {
           doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
         var vv = window.visualViewport;
@@ -18534,6 +18564,7 @@ function initChat() {
           inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.6)));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
+        applyChatIosAccessoryInsetFromViewport();
       }
       var viewportResizeScrollHandler = null;
       window.__pokerChatDetachVisualViewportListeners = function () {
@@ -19856,6 +19887,7 @@ function initChat() {
       document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
       document.body.classList.remove("chat-keyboard-open");
       document.documentElement.style.removeProperty("--chat-vv-inset");
+      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
       var relatedTarget = e.relatedTarget;
       setTimeout(function () {
         if (document.activeElement && suggestEl && suggestEl.contains(document.activeElement)) return;

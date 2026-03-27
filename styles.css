@@ -31,6 +31,8 @@
   --app-back-btn-min-height: 40px;
   /* iOS / PWA: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
   --chat-vv-inset: 0px;
+  /* iOS: доп. подъём над системной панелью «стрелки / Готово» (только там, где WebKit её показывает) */
+  --chat-ios-accessory-inset: 0px;
   /* Запас под шапку Telegram Mini App (до contentSafeAreaInset из JS); в обычном браузере подменяется на меньший */
   --app-extra-top-for-ui: 52px;
 }
@@ -2056,7 +2058,11 @@ body.chat-keyboard-open .app {
 /* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода к низу видимой области */
 html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
 html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
-  transform: translate3d(0, calc(-1 * var(--chat-vv-inset, 0px)), 0);
+  transform: translate3d(
+    0,
+    calc(-1 * (var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px))),
+    0
+  );
 }
 /* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю */
 body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
