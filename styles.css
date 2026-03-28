@@ -2063,6 +2063,13 @@ html.app-view-home .card .card__content {
 .view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-input-area {
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
+/* Клавиатура открыта: лента чуть ниже (+10px к верхнему отступу), композер поднимается сильнее через JS */
+html.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages {
+  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 22px);
+}
+html.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 22px);
+}
 /* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
    чтобы не было дёрганий и белых вспышек. */
 html.chat-keyboard-open {

@@ -18645,6 +18645,7 @@ function initChat() {
           } catch (eVv) {}
         }
         if (pad < 28) pad = 28;
+        if (isIosLikeForChatViewport()) pad += 28;
         box.style.paddingBottom = pad + "px";
       }
       function scrollDocumentToZero() {
@@ -18710,9 +18711,9 @@ function initChat() {
         var vvh = Number(vv.height) || 0;
         var offsetTop = Number(vv.offsetTop) || 0;
         var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
-        /* «Хвост» 14–44px — панель «стрелки / Готово»; выше — уже зона клавиатуры (не дублируем в translate). */
+        /* Хвост до ~52px — панель «стрелки / Готово» над клавишами; выше — уже в основном клавиатура. */
         var acc = 0;
-        if (belowVv >= 14 && belowVv <= 44) acc = Math.min(40, belowVv);
+        if (belowVv >= 10 && belowVv <= 54) acc = Math.min(52, Math.round(belowVv * 0.98));
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
       function stripChatInputAreaTransforms() {
@@ -18820,6 +18821,7 @@ function initChat() {
           }
         }
         var cap = Math.min(480, Math.round(ih * 0.52));
+        if (isIosLikeForChatViewport()) cap = Math.min(520, Math.round(ih * 0.58));
         var rawInset = Math.max(0, Math.min(overlap, cap));
         var factor = tg ? 0.84 : 0.88;
         var inset = Math.max(0, Math.round(rawInset * factor));
@@ -18833,6 +18835,10 @@ function initChat() {
         }
         if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 120) {
           inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * (tg ? 0.58 : 0.65))));
+        }
+        /* iOS: чёрная accessory + Telegram часто недооценивают overlap — доп. подъём композера */
+        if (isIosLikeForChatViewport()) {
+          inset = Math.min(cap, inset + 34);
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
