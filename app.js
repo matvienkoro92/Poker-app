@@ -15813,13 +15813,13 @@ function initChat() {
     if (!a || !b) return false;
     return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
   }
-  /** Уже есть закреплённые строки в #chatDialogsView — не показывать того же peer в #chatContacts */
+  /** Закреплённые админы (Анна, Вика, алиас tg_roman) — не дублировать в #chatContacts. Числовой tg_388008256 не скрываем:
+     в API приходит нормализованный id, иначе переписка с @roman1_matvienko не видна в прокручиваемом списке. */
   function chatContactIsDuplicateOfPinnedDialog(c) {
     if (!c || !c.id) return false;
     for (var pi = 0; pi < CHAT_ADMIN_IDS.length; pi++) {
       if (peerChatIdsEqual(c.id, CHAT_ADMIN_IDS[pi])) return true;
     }
-    if (normalizePeerIdForChat(c.id) === CHAT_ROMAN_NUMERIC_PEER) return true;
     return false;
   }
   function resolveMyChatDisplayName() {
