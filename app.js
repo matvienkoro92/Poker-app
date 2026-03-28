@@ -15783,6 +15783,20 @@ function initChat() {
     if (/^\d+$/.test(s)) return "tg_" + s;
     return "tg_" + s;
   }
+  function pokerChatMessageTimeMs(t) {
+    if (t == null || t === "") return NaN;
+    var ms = Date.parse(String(t).trim());
+    return isNaN(ms) ? NaN : ms;
+  }
+  /** Строго новее отметки просмотра (без бага строкового сравнения ISO). */
+  function pokerChatMessageIsNewerThanViewed(messageTime, lastViewed) {
+    var msgMs = pokerChatMessageTimeMs(messageTime);
+    if (isNaN(msgMs)) return false;
+    if (lastViewed == null || lastViewed === "") return true;
+    var lastMs = pokerChatMessageTimeMs(lastViewed);
+    if (isNaN(lastMs)) return true;
+    return msgMs > lastMs;
+  }
   function peerChatIdsEqual(a, b) {
     if (!a || !b) return false;
     return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
@@ -16603,7 +16617,15 @@ function initChat() {
     stored = JSON.parse(localStorage.getItem(CHAT_LAST_VIEWED_KEY) || "{}");
   } catch (e) { stored = {}; }
   var lastViewedGeneral = stored && stored.general != null ? stored.general : null;
-  var lastViewedPersonal = (stored && stored.personal && typeof stored.personal === "object") ? stored.personal : {};
+  var lastViewedPersonal = {};
+  try {
+    var rawPersonal = stored && stored.personal && typeof stored.personal === "object" ? stored.personal : {};
+    Object.keys(rawPersonal).forEach(function (k) {
+      lastViewedPersonal[normalizePeerIdForChat(k)] = rawPersonal[k];
+    });
+  } catch (ePers) {
+    lastViewedPersonal = {};
+  }
   function saveChatLastViewed() {
     try {
       localStorage.setItem(CHAT_LAST_VIEWED_KEY, JSON.stringify({ general: lastViewedGeneral, personal: lastViewedPersonal }));
@@ -16760,10 +16782,12 @@ function initChat() {
         var myMemberIdForUnread = resolveMyChatMemberId();
         /* Пока ни разу не открывали общий чат (lastViewedGeneral == null), не считаем старую ленту
            непрочитанной — как в loadContacts, иначе счётчик дергается между 0 и числом с сервера. */
-        var unreadCount =
-          lastViewedGeneral != null
-            ? messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; }).length
-            : 0;
+        var unreadCount = 0;
+        if (lastViewedGeneral != null && myMemberIdForUnread) {
+          unreadCount = messages.filter(function (m) {
+            return pokerChatMessageIsNewerThanViewed(m.time, lastView) && m.from !== myMemberIdForUnread;
+          }).length;
+        }
         // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
         // (в Telegram Mini App не включаем, чтобы не конфликтовать с Telegram поведением)
         if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
@@ -16771,7 +16795,9 @@ function initChat() {
           if (!isOnGeneral && lastViewedGeneral != null && unreadCount > 0) {
             var lastUnread = null;
             try {
-              var unreadMsgs = messages.filter(function (m) { return (m.time || "") > lastView && m.from !== myMemberIdForUnread; });
+              var unreadMsgs = messages.filter(function (m) {
+                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && m.from !== myMemberIdForUnread;
+              });
               lastUnread = unreadMsgs.length ? unreadMsgs[unreadMsgs.length - 1] : null;
             } catch (eUnread) {}
             if (lastUnread) {
@@ -17652,8 +17678,6 @@ function initChat() {
       else if (typeof alert === "function") alert("Войдите через Telegram, чтобы отправлять сообщения в общий чат.");
       return;
     }
-    sendingGeneral = true;
-    setGeneralSendBusy(true);
     try {
       var body = pokerApiAuthJsonBody({ text: text });
       if (generalImage) body.image = generalImage;
@@ -17668,6 +17692,17 @@ function initChat() {
       var optVoice = generalVoice || null;
       var optDocument = generalDocument ? { dataUrl: generalDocument.dataUrl, fileName: generalDocument.fileName } : null;
       var optReply = generalReplyTo ? { fromName: generalReplyTo.fromName || "Игрок", text: generalReplyTo.text || "" } : null;
+      try {
+        appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
+      } catch (e) {
+        if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
+      }
+      scrollGeneralToBottomOnNextRender = true;
+      try {
+        if (generalMessages && typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(generalMessages, true);
+      } catch (ePinG) {}
+      sendingGeneral = true;
+      setGeneralSendBusy(true);
       chatComposerDrafts.general = "";
       if (chatComposerMounted === "general" && chatComposerEl) {
         chatComposerEl.value = "";
@@ -17687,11 +17722,6 @@ function initChat() {
       if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
       var voicePrev = document.getElementById("chatGeneralVoicePreview");
       if (voicePrev) voicePrev.classList.add("chat-voice-preview--hidden");
-      try {
-        appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
-      } catch (e) {
-        if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
-      }
       fetch(base + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -17700,11 +17730,7 @@ function initChat() {
         sendingGeneral = false;
         setGeneralSendBusy(false);
         if (data && data.ok) {
-          // После removeChild(optimistic) браузер часто сбрасывает scrollTop — без флага
-          // renderGeneralMessages думает, что мы не у низа, и оставляет прокрутку 0 (прыжок наверх).
           scrollGeneralToBottomOnNextRender = true;
-          var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
-          if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
           var msg = data.message;
           if (msg && msg.id) {
             window._pendingGeneralMessage = msg;
@@ -17878,7 +17904,7 @@ function initChat() {
     if (personalPrefetchInFlight[userId]) return;
     if (shouldUsePersonalCache(userId)) return;
     personalPrefetchInFlight[userId] = true;
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId);
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
     fetch(url)
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -18094,6 +18120,10 @@ function initChat() {
         else if (status.indexOf("sent") >= 0 || status.indexOf("send") >= 0 || status.indexOf("отправ") >= 0) { delivered = false; read = false; }
       }
       if (m) {
+        if (m.peerHasRead === true) {
+          delivered = true;
+          read = true;
+        }
         if (m.delivered === true || m.isDelivered === true || m.deliveredAt || m.delivered_at) delivered = true;
         if (m.read === true || m.isRead === true || m.seen === true || m.isSeen === true || m.readAt || m.read_at || m.seenAt || m.seen_at) { delivered = true; read = true; }
         if (Array.isArray(m.readBy) && m.readBy.length) { delivered = true; read = true; }
@@ -18236,10 +18266,14 @@ function initChat() {
         }
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
-        var lastView = (chatWithUserId && lastViewedPersonal[chatWithUserId] != null) ? lastViewedPersonal[chatWithUserId] : "";
-        var personalLastSet = chatWithUserId && lastViewedPersonal[chatWithUserId] != null;
+        var peerLvKey = chatWithUserId ? normalizePeerIdForChat(chatWithUserId) : "";
+        var lastView = peerLvKey && lastViewedPersonal[peerLvKey] != null ? lastViewedPersonal[peerLvKey] : "";
+        var personalLastSet = !!(peerLvKey && lastViewedPersonal[peerLvKey] != null);
+        var peerNorm = peerLvKey;
         var unreadCount = personalLastSet
-          ? messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; }).length
+          ? messages.filter(function (m) {
+              return pokerChatMessageIsNewerThanViewed(m.time, lastView) && normalizePeerIdForChat(m.from) === peerNorm;
+            }).length
           : 0;
         // PWA: звуковое уведомление — только когда пользователь не смотрит личный диалог.
         if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
@@ -18247,7 +18281,9 @@ function initChat() {
           if (!isOnPersonal && personalLastSet && unreadCount > 0) {
             var lastUnreadP = null;
             try {
-              var unreadMsgsP = messages.filter(function (m) { return (m.time || "") > lastView && m.from === chatWithUserId; });
+              var unreadMsgsP = messages.filter(function (m) {
+                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && normalizePeerIdForChat(m.from) === peerNorm;
+              });
               lastUnreadP = unreadMsgsP.length ? unreadMsgsP[unreadMsgsP.length - 1] : null;
             } catch (eUnreadP) {}
             if (lastUnreadP) {
@@ -18260,8 +18296,8 @@ function initChat() {
             }
           }
         }
-        if (isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
-          lastViewedPersonal[chatWithUserId] = latest;
+        if (isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden") && peerLvKey) {
+          lastViewedPersonal[peerLvKey] = latest;
           saveChatLastViewed();
           window.chatPersonalUnread = false;
           window.chatPersonalUnreadCount = 0;
@@ -18394,8 +18430,6 @@ function initChat() {
       if (tg && tg.showAlert) tg.showAlert("Ошибка: чат не загружен");
       return;
     }
-    sendingPrivate = true;
-    setPersonalSendBusy(true);
     var body = pokerApiAuthJsonBody({ with: chatWithUserId, text: text });
     if (personalImage) body.image = personalImage;
     if (personalVoice) body.voice = personalVoice;
@@ -18409,6 +18443,15 @@ function initChat() {
     var optVoice = personalVoice || null;
     var optDocument = personalDocument ? { dataUrl: personalDocument.dataUrl, fileName: personalDocument.fileName } : null;
     var optReply = personalReplyTo ? { fromName: personalReplyTo.fromName || "Игрок", text: personalReplyTo.text || "" } : null;
+    try {
+      appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
+    } catch (err) {}
+    scrollPersonalToBottomOnNextRender = true;
+    try {
+      if (typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(messagesEl, true);
+    } catch (ePin) {}
+    sendingPrivate = true;
+    setPersonalSendBusy(true);
     chatComposerDrafts.personal = "";
     if (chatComposerMounted === "personal" && chatComposerEl) {
       chatComposerEl.value = "";
@@ -18428,9 +18471,6 @@ function initChat() {
     if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
     var voicePrevP = document.getElementById("chatPersonalVoicePreview");
     if (voicePrevP) voicePrevP.classList.add("chat-voice-preview--hidden");
-    try {
-      appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
-    } catch (err) {}
     var hasUpload = !!(body.document || body.image || body.voice);
     var progressWrap = document.getElementById("chatPersonalUploadProgress");
     var progressFill = document.getElementById("chatPersonalUploadProgressFill");
@@ -18447,10 +18487,8 @@ function initChat() {
       setPersonalSendBusy(false);
       hideProgress();
       if (data && data.ok) {
-        // См. общий чат: removeChild(optimistic) сбрасывает scrollTop → без флага оказываемся наверху.
+        /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
         scrollPersonalToBottomOnNextRender = true;
-        var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
-        if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
         var msg = data.message;
         if (msg && msg.id && chatWithUserId) {
           window._pendingPersonalMessage = msg;

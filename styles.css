@@ -2079,11 +2079,11 @@ body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
 body:not(.chat-keyboard-open) .chat-container .chat-input-area {
   transform: translate3d(0, 0, 0) !important;
 }
-/* Клавиатура открыта: без полноширинной подложки и без отступа «под таббар» — иначе в PWA полоса и зазор над клавиатурой */
+/* Клавиатура открыта: без отступа «под таббар»; фон как у страницы — прозрачность давала «смену» фона при фокусе */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
   padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
-  background: transparent;
+  background: var(--overscroll-canvas);
   box-shadow: none;
 }
 .chat-switcher-row {
