@@ -105,7 +105,8 @@ body::-webkit-scrollbar,
 }
 [data-theme="light"] .chat-ctx-menu__reactions,
 [data-theme="light"] .chat-ctx-menu__items-wrap {
-  background: #fff7ed;
+  background: rgba(248, 250, 252, 0.96);
+  border-color: rgba(234, 88, 12, 0.22);
 }
 [data-theme="light"] .updates-block {
   background: rgba(255, 255, 255, 0.5);
@@ -514,13 +515,16 @@ body[data-view="chat"] {
   max-height: 100dvh;
   overflow: hidden;
 }
-/* Таббар — сосед #app, но остаётся потомком того же fixed-body: явно клеим к низу портала */
+/* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
+  top: auto;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
   transform: translate3d(0, 0, 0);
 }
 
@@ -2030,11 +2034,12 @@ html.chat-keyboard-open body {
 }
 /* Клавиатура в чате (включая поиск в списке диалогов): таббар перекрывал поле ввода в PWA — скрываем всегда */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  /* Без transition по transform — панель не «плывёт» по dvh/клавиатуре */
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 /* На случай если transform таббара не сработал в WebView — весь #app выше нижнего меню */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) #app.app {
@@ -2050,11 +2055,11 @@ body.chat-keyboard-open .card__header {
 }
 #app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) ~ .bottom-nav,
 #app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) ~ .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)),
 .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) {
@@ -2062,7 +2067,8 @@ body.chat-keyboard-open .card__header {
   /* В чате убираем лишние отступы сверху: окно чата должно стартовать как можно выше */
   padding-top: env(safe-area-inset-top, 0px);
 }
-body.chat-keyboard-open .app {
+/* Только чат: иначе при фокусе в полях других экранов срывается запас под таббар и контент «прыгает» */
+body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
 /* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода к низу видимой области */
@@ -2073,18 +2079,32 @@ html.chat-vv-lift body.chat-keyboard-open .app:has(.view--active[data-view="chat
     calc(-1 * (var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px))),
     0
   );
+  will-change: transform;
 }
 /* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю (!important ломает залипший слой) */
 body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
 body:not(.chat-keyboard-open) .chat-container .chat-input-area {
   transform: translate3d(0, 0, 0) !important;
+  will-change: auto;
 }
-/* Клавиатура открыта: без отступа «под таббар»; фон как у страницы — прозрачность давала «смену» фона при фокусе */
+/* Клавиатура открыта: без отступа «под таббар».
+   Нужен непрозрачный фон (градиент как у экрана чата): полностью прозрачный слой в WKWebView ломает композитинг,
+   из‑за чего не срабатывает transform-подъём по visualViewport. Сплошной только --overscroll-canvas давал полосу «светлее» светлой темы — там свой градиент. */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
   padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
-  background: var(--overscroll-canvas);
   box-shadow: none;
+  background-color: var(--overscroll-canvas);
+  background-image: var(--body-bg);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
+  background-color: #fff7ed;
+  background-image: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 .chat-switcher-row {
   display: flex;
@@ -2337,11 +2357,11 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
 }
 /* Когда газета открыта: скрываем нижнее меню и верхнюю шапку приложения */
 #app:has(#gazetteModal[aria-hidden="false"]) ~ .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 .app:has(#gazetteModal[aria-hidden="false"]) .card__header {
   display: none !important;
@@ -3526,8 +3546,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   gap: 8px;
   padding: 8px 12px;
   margin-bottom: 8px;
-  background: var(--chat-stats-bg, rgba(168, 85, 247, 0.1));
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: var(--chat-stats-bg, rgba(249, 115, 22, 0.12));
+  border: 1px solid rgba(251, 146, 60, 0.34);
   border-radius: 8px;
 }
 .chat-stats-block__title {
@@ -3652,10 +3672,10 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   opacity: 1;
 }
 .chat-msg--own .chat-msg__body {
-  background: #3d3255;
-  border: 1px solid rgba(168, 85, 247, 0.55);
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(251, 146, 60, 0.42);
   border-bottom-right-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.35), 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.18), 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 .chat-msg--own .chat-msg__body::before {
   content: "";
@@ -3666,7 +3686,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   height: 0;
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
-  border-left: 8px solid #3d3255;
+  border-left: 8px solid rgba(15, 23, 42, 0.78);
 }
 .chat-msg--own .chat-msg__avatar,
 .chat-msg--own .chat-msg__avatar-spacer {
@@ -3692,12 +3712,12 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   border-right: 8px solid #1e293b;
 }
 [data-theme="light"] .chat-msg--own .chat-msg__body {
-  background: #ede9fe;
-  border: 1px solid rgba(168, 85, 247, 0.6);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.25), 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: rgba(248, 250, 252, 0.94);
+  border: 1px solid rgba(234, 88, 12, 0.42);
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.22), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 [data-theme="light"] .chat-msg--own .chat-msg__body::before {
-  border-left-color: #ede9fe;
+  border-left-color: rgba(248, 250, 252, 0.94);
 }
 [data-theme="light"] .chat-msg--other .chat-msg__body {
   background: #e2e8f0;
@@ -3939,12 +3959,12 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   line-height: 1.2;
 }
 .chat-msg__reaction:hover {
-  background: rgba(168, 85, 247, 0.2);
-  border-color: rgba(168, 85, 247, 0.4);
+  background: rgba(249, 115, 22, 0.22);
+  border-color: rgba(251, 146, 60, 0.4);
 }
 .chat-msg__reaction--mine {
-  background: rgba(168, 85, 247, 0.25);
-  border-color: rgba(168, 85, 247, 0.5);
+  background: rgba(249, 115, 22, 0.28);
+  border-color: rgba(251, 146, 60, 0.48);
 }
 .chat-msg__reaction-count {
   font-size: 11px;
@@ -3989,7 +4009,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   cursor: pointer;
 }
 .chat-reaction-picker__emoji:hover {
-  background: rgba(168, 85, 247, 0.22);
+  background: rgba(249, 115, 22, 0.24);
 }
 .chat-msg__time {
   font-size: 11px;
@@ -4064,8 +4084,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   align-items: flex-start;
   gap: 4px;
   padding: 4px 8px;
-  background: rgba(168, 85, 247, 0.15);
-  border-left: 3px solid var(--accent);
+  background: rgba(249, 115, 22, 0.14);
+  border-left: 3px solid rgba(251, 146, 60, 0.85);
   border-radius: 6px;
   font-size: 12px;
 }
@@ -4151,7 +4171,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   background: rgba(15, 23, 42, 0.96);
   border-radius: 999px;
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.45);
+  border: 1px solid rgba(251, 146, 60, 0.3);
 }
 .chat-ctx-menu__reaction-emoji {
   flex-shrink: 0;
@@ -4167,9 +4187,9 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.chat-ctx-menu__reaction-emoji:hover { background: rgba(168, 85, 247, 0.18); }
+.chat-ctx-menu__reaction-emoji:hover { background: rgba(249, 115, 22, 0.20); }
 .chat-ctx-menu__reaction-emoji.chat-ctx-menu__item--active {
-  background: rgba(168, 85, 247, 0.28);
+  background: rgba(249, 115, 22, 0.3);
   transform: scale(1.08);
 }
 .chat-ctx-menu__items-wrap {
@@ -4180,7 +4200,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   background: rgba(15, 23, 42, 0.98);
   border-radius: 18px;
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  border: 1px solid rgba(251, 146, 60, 0.28);
 }
 .chat-ctx-menu__item {
   display: flex;
@@ -4197,9 +4217,9 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.chat-ctx-menu__item:hover { background: rgba(168, 85, 247, 0.18); }
+.chat-ctx-menu__item:hover { background: rgba(249, 115, 22, 0.20); }
 .chat-ctx-menu__item.chat-ctx-menu__item--active {
-  background: rgba(168, 85, 247, 0.28);
+  background: rgba(249, 115, 22, 0.3);
   transform: scale(1.02);
 }
 .chat-ctx-menu__icon {
@@ -4234,16 +4254,16 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   margin-right: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(249, 115, 22, 0.14);
   color: var(--text);
   font-size: 16px;
   cursor: pointer;
 }
-.chat-attach-btn:hover { background: rgba(168, 85, 247, 0.25); }
+.chat-attach-btn:hover { background: rgba(249, 115, 22, 0.28); }
 /* Кнопки в строке ввода: непрозрачный фон в одном стиле с полем */
 .chat-input-area .chat-attach-btn {
   background: var(--block-bg-solid);
-  border-color: rgba(168, 85, 247, 0.45);
+  border-color: rgba(251, 146, 60, 0.42);
 }
 .chat-input-area .chat-attach-btn:hover {
   background: var(--block-bg-solid);
@@ -4278,7 +4298,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   border: none;
   cursor: pointer;
 }
-.chat-attach-dropdown__item:hover { background: rgba(168, 85, 247, 0.15); }
+.chat-attach-dropdown__item:hover { background: rgba(249, 115, 22, 0.17); }
 .chat-image-preview {
   display: none;
   margin-bottom: 4px;
@@ -4319,7 +4339,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   gap: 8px;
   margin-bottom: 4px;
   padding: 6px 10px;
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(249, 115, 22, 0.12);
   border-radius: 8px;
   font-size: 13px;
 }
@@ -4390,8 +4410,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   height: 36px;
   border: none;
   border-radius: 10px;
-  background: rgba(168, 85, 247, 0.2);
-  color: #c4b5fd;
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
   font-size: 18px;
   cursor: pointer;
   display: flex;
@@ -4399,7 +4419,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   justify-content: center;
 }
 .chat-voice-btn:hover {
-  background: rgba(168, 85, 247, 0.25);
+  background: rgba(249, 115, 22, 0.28);
 }
 .chat-voice-btn--recording {
   background: rgba(239, 68, 68, 0.4);
@@ -4408,8 +4428,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
 }
 .chat-input-area .chat-voice-btn {
   background: var(--block-bg-solid);
-  border: 1px solid rgba(168, 85, 247, 0.42);
-  color: #c4b5fd;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  color: #fdba74;
 }
 .chat-input-area .chat-voice-btn:hover {
   background: var(--block-bg-solid);
@@ -4456,7 +4476,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   word-break: break-all;
 }
 .chat-msg__document-link {
-  color: var(--accent, #a855f7);
+  color: var(--accent, #fb923c);
   text-decoration: none;
   font-weight: 500;
   white-space: nowrap;
@@ -4466,7 +4486,7 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
 }
 .chat-msg__document-link--view:hover,
 .chat-msg__document-link--view:focus {
-  color: var(--accent, #a855f7);
+  color: var(--accent, #fb923c);
   text-decoration: underline;
 }
 .chat-msg__document-link:hover,
@@ -4691,10 +4711,34 @@ img.chat-contact__avatar {
   font-family: inherit;
   box-sizing: border-box;
 }
-/* Поле сообщения в чате: сплошная подложка, иначе на iOS сквозь полупрозрачный --block-bg видна лента */
+/* Поле сообщения в чате: как на экране верификации PWA (slate + оранжевая обводка) */
 .view--active[data-view="chat"] .chat-input--textarea,
 .view--active[data-view="chat"] input.chat-input:not(.chat-find-input) {
-  background: var(--block-bg-solid);
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(251, 146, 60, 0.38);
+  color: #f8fafc;
+  border-radius: 14px;
+}
+.view--active[data-view="chat"] .chat-input::placeholder {
+  color: rgba(148, 163, 184, 0.88);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-input--textarea,
+[data-theme="light"] .view--active[data-view="chat"] input.chat-input:not(.chat-find-input) {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(234, 88, 12, 0.38);
+  color: var(--text);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-input::placeholder {
+  color: rgba(100, 116, 139, 0.78);
+}
+.view--active[data-view="chat"] .chat-send-btn {
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  color: var(--btn-on-accent, #fff);
+}
+.view--active[data-view="chat"] .chat-send-btn:hover {
+  opacity: 0.96;
+  filter: brightness(1.03);
 }
 .chat-input::placeholder { color: var(--text-muted); }
 .chat-input--textarea {
@@ -4895,14 +4939,14 @@ img.chat-contact__avatar {
   padding: 6px 12px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(249, 115, 22, 0.14);
   color: var(--text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   text-align: center;
 }
-.chat-manager-btn:hover { background: rgba(168, 85, 247, 0.25); }
+.chat-manager-btn:hover { background: rgba(249, 115, 22, 0.28); }
 .chat-manager-btn:disabled,
 .chat-manager-btn--disabled {
   opacity: 0.5;
@@ -5012,9 +5056,9 @@ img.chat-contact__avatar {
   font-size: 15px;
   width: 100%;
 }
-.chat-dialog-item:hover { background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); }
+.chat-dialog-item:hover { background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.40); }
 .chat-dialog-item--pinned,
-.chat-dialog-item--club { border-color: rgba(168, 85, 247, 0.35); background: rgba(168, 85, 247, 0.08); }
+.chat-dialog-item--club { border-color: rgba(251, 146, 60, 0.35); background: rgba(249, 115, 22, 0.10); }
 .chat-dialog-item__icon { font-size: 20px; flex-shrink: 0; }
 .chat-dialog-item__avatar {
   width: 40px;
@@ -5161,7 +5205,7 @@ img.chat-contact__avatar {
   justify-content: center;
 }
 .chat-dialog-item--club .chat-dialog-item__main-label {
-  color: var(--accent, #a855f7);
+  color: var(--accent, #fb923c);
   font-weight: 500;
 }
 .chat-dialog-item__preview {
@@ -5179,7 +5223,7 @@ img.chat-contact__avatar {
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: var(--accent, #a855f7);
+  background: linear-gradient(to top, #ea580c, #fb923c);
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -5188,6 +5232,7 @@ img.chat-contact__avatar {
   justify-content: center;
   flex-shrink: 0;
   box-sizing: border-box;
+  border: 1px solid rgba(251, 146, 60, 0.35);
 }
 .chat-dialog-item__unread.chat-dialog-item__unread--visible,
 .chat-contact__unread.chat-contact__unread--visible {
@@ -5277,7 +5322,7 @@ img.chat-contact__avatar {
 }
 .chat-find-suggest__item:hover,
 .chat-find-suggest__item:focus {
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(249, 115, 22, 0.14);
   outline: none;
 }
 .chat-find-suggest__item strong { color: var(--accent); }
@@ -6211,53 +6256,13 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   word-break: break-word;
   max-width: 100%;
 }
-.chat-general-download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--text);
-  background: var(--block-bg-solid);
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  border-radius: 16px;
-  cursor: pointer;
-  font-family: inherit;
-  text-decoration: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.chat-general-header .chat-general-download-btn.chat-general-header__segment {
-  height: auto;
-  min-height: 0;
-  /* справа +3px к зазору до «Позвать друга» */
-  padding: 0 11px 0 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.chat-general-header .chat-general-download-btn.chat-general-header__segment:hover {
-  border: none;
-  color: #fb923c;
-}
 .chat-general-invite-friend-btn {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 2px 4px;
+  padding: 0;
   font-family: inherit;
   cursor: pointer;
   -webkit-appearance: none;
@@ -6266,22 +6271,24 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   background: transparent;
   color: inherit;
 }
-.chat-general-invite-friend-btn__line1,
-.chat-general-invite-friend-btn__line2 {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-  color: var(--accent);
-  text-align: center;
+.chat-general-invite-friend-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: inherit;
+}
+.chat-general-header .chat-general-invite-friend-btn__icon svg {
+  width: 16px;
+  height: 16px;
 }
 .chat-general-header .chat-general-invite-friend-btn.chat-general-header__segment {
   height: auto;
   min-height: 0;
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: 2px 8px 2px 6px;
+  flex: 0 0 38px;
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -6289,14 +6296,6 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
 }
 .chat-general-header .chat-general-invite-friend-btn.chat-general-header__segment:hover {
   border: none;
-}
-.chat-general-header .chat-general-invite-friend-btn.chat-general-header__segment:hover .chat-general-invite-friend-btn__line1,
-.chat-general-header .chat-general-invite-friend-btn.chat-general-header__segment:hover .chat-general-invite-friend-btn__line2 {
-  color: #fb923c;
-}
-[data-theme="light"] .chat-general-header .chat-general-invite-friend-btn__line1,
-[data-theme="light"] .chat-general-header .chat-general-invite-friend-btn__line2 {
-  color: #ea580c;
 }
 .chat-general-header .chat-general-copy-link-btn.chat-general-header__segment {
   width: 38px;
@@ -6364,12 +6363,6 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
     background: rgba(248, 250, 252, 0.94);
   }
 }
-[data-theme="light"] .chat-general-header .chat-general-download-btn.chat-general-header__segment {
-  color: var(--accent);
-}
-[data-theme="light"] .chat-general-header .chat-general-download-btn.chat-general-header__segment:hover {
-  color: #fb923c;
-}
 .chat-general-header .chat-general-admins-btn__top {
   color: var(--accent);
 }
@@ -6381,11 +6374,6 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
 }
 [data-theme="light"] .chat-general-header .chat-general-admins-btn__bottom {
   color: #fb923c;
-}
-.chat-general-download-btn:hover {
-  background: rgba(168, 85, 247, 0.12);
-  color: var(--text);
-  border-color: rgba(168, 85, 247, 0.35);
 }
 .chat-title--small { margin-bottom: 6px; font-size: 17px; }
 .chat-conv-header {
@@ -6422,8 +6410,8 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   font-family: inherit;
 }
 .chat-conv-title__copy:hover {
-  background: rgba(168, 85, 247, 0.12);
-  border-color: rgba(168, 85, 247, 0.4);
+  background: rgba(249, 115, 22, 0.14);
+  border-color: rgba(251, 146, 60, 0.4);
 }
 .chat-contacts {
   display: flex;
@@ -6464,7 +6452,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
 .chat-dialogs-block .chat-contact:last-child::after {
   display: none;
 }
-.chat-contact:hover { background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); }
+.chat-contact:hover { background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.40); }
 .chat-contact__avatar {
   width: 40px;
   height: 40px;
@@ -13925,13 +13913,13 @@ a.home-mini-icon-item {
   padding: 0;
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
-  background: rgba(168, 85, 247, 0.15);
+  background: rgba(249, 115, 22, 0.14);
   color: var(--text);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
 }
-.chat-templates-modal__icon-btn:hover { background: rgba(168, 85, 247, 0.25); }
+.chat-templates-modal__icon-btn:hover { background: rgba(249, 115, 22, 0.28); }
 .chat-templates-modal__body {
   padding: 10px 12px 12px;
   overflow: auto;
@@ -13994,8 +13982,8 @@ a.home-mini-icon-item {
   cursor: pointer;
 }
 .chat-templates-modal__item-btn:hover { background: rgba(255, 255, 255, 0.14); }
-.chat-templates-modal__item-btn--edit { background: rgba(168, 85, 247, 0.2); }
-.chat-templates-modal__item-btn--edit:hover { background: rgba(168, 85, 247, 0.35); }
+.chat-templates-modal__item-btn--edit { background: rgba(249, 115, 22, 0.22); }
+.chat-templates-modal__item-btn--edit:hover { background: rgba(251, 146, 60, 0.35); }
 .chat-templates-modal__item-btn--delete { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 .chat-templates-modal__item-btn--delete:hover { background: rgba(239, 68, 68, 0.35); }
 .chat-templates-modal__empty {
@@ -14049,10 +14037,15 @@ a.home-mini-icon-item {
 }
 .chat-templates-modal__btn:hover { background: rgba(255, 255, 255, 0.10); }
 .chat-templates-modal__btn--primary {
-  background: rgba(168, 85, 247, 0.25);
-  border-color: rgba(168, 85, 247, 0.45);
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  border-color: rgba(251, 146, 60, 0.35);
+  color: var(--btn-on-accent, #fff);
 }
-.chat-templates-modal__btn--primary:hover { background: rgba(168, 85, 247, 0.35); }
+.chat-templates-modal__btn--primary:hover {
+  background: linear-gradient(to top, #c2410c, #ea580c);
+  border-color: rgba(251, 146, 60, 0.5);
+  filter: brightness(1.02);
+}
 .chat-templates-modal__btn--ghost {
   background: transparent;
 }
@@ -15405,11 +15398,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   display: none !important;
 }
 #app:has(.view--active[data-view="spring-rating"]) ~ .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 /* Зал славы и расписание: скрываем верхнее и нижнее меню (как в турнире дня и газете) */
 .card:has(.view--active[data-view="hall-of-fame"]) .card__header,
@@ -15418,11 +15411,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 }
 #app:has(.view--active[data-view="hall-of-fame"]) ~ .bottom-nav,
 #app:has(.view--active[data-view="schedule"]) ~ .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 /* Кнопки игр и приложений (с главной): скрываем верхнее и нижнее меню */
 .card:has(.view--active[data-view="bonus-game"]) .card__header,
@@ -15451,11 +15444,11 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 #app:has(.view--active[data-view="streams"]) ~ .bottom-nav,
 #app:has(.view--active[data-view="equilator"]) ~ .bottom-nav,
 #app:has(.view--active[data-view="winter-rating"]) ~ .bottom-nav {
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.26s;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 
 /* Нижнее меню скрыто — компактный запас + safe-area (меньше «пустой» нижней резинки) */
@@ -20725,7 +20718,10 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   left: 0;
   right: 0;
   bottom: 0;
+  top: auto;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 8px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
     max(10px, env(safe-area-inset-bottom, 0px)) max(12px, var(--app-gutter), env(safe-area-inset-left, 0px));
   min-height: 56px;
@@ -20739,21 +20735,22 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   justify-content: center;
   align-items: center;
   gap: 0;
+  flex-wrap: nowrap;
   z-index: 1001;
   pointer-events: auto;
   box-sizing: border-box;
   overflow: visible;
-  /* Стабилизация слоя position:fixed в WKWebView (меньше субпиксельных зазоров при резинке) */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* Один слой композита + явный «домашний» transform; translateY в скрытых состояниях не анимируем */
+  transform: translate3d(0, 0, 0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  /* На iOS фиксированный элемент иногда "подпрыгивает" при изменении layout viewport.
-     Убираем transition для transform, чтобы не было визуального «подъёма» при свайпах. */
-  transition: opacity 0.25s ease-out;
+  overscroll-behavior: none;
+  transition: opacity 0.2s ease-out;
+  opacity: 1;
+  visibility: visible;
 }
 /* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
-@media (display-mode: standalone) {
+@media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
     /* iOS PWA: backdrop-filter + fixed даёт «подпрыгивание» панели при скролле */
     -webkit-backdrop-filter: none;

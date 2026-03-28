@@ -15326,6 +15326,16 @@ var chatIsEditingMessage = false;
 window.chatGeneralUnread = false;
 window.chatPersonalUnread = false;
 var chatWithUserId = null;
+/** Откладывает вызов на кадр после отрисовки, чтобы optimistic-пузырь появлялся сразу, а не после ответа сервера. */
+function pokerChatRunAfterPaint(fn) {
+  if (typeof requestAnimationFrame === "function") {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(fn);
+    });
+  } else {
+    setTimeout(fn, 0);
+  }
+}
 var personalMessagesCache = {};
 var personalMessagesCacheMeta = {};
 var personalPrefetchInFlight = {};
@@ -17703,63 +17713,65 @@ function initChat() {
       } catch (ePinG) {}
       sendingGeneral = true;
       setGeneralSendBusy(true);
-      chatComposerDrafts.general = "";
-      if (chatComposerMounted === "general" && chatComposerEl) {
-        chatComposerEl.value = "";
-        try { resizeChatTextarea(chatComposerEl); } catch (e) {}
-        try { updateGeneralSendBtnIcon(); } catch (e) {}
-        setTimeout(function () {
-          try { chatComposerEl.blur(); } catch (e) {}
-        }, 50);
-      }
-      generalReplyTo = null;
-      generalImage = null;
-      generalDocument = null;
-      generalVoice = null;
-      var prevEl = document.getElementById("chatGeneralReplyPreview");
-      if (prevEl) { prevEl.classList.remove("chat-reply-preview--visible"); prevEl.querySelector(".chat-reply-preview__text").textContent = ""; }
-      var imgPrev = document.getElementById("chatGeneralImagePreview");
-      if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
-      var voicePrev = document.getElementById("chatGeneralVoicePreview");
-      if (voicePrev) voicePrev.classList.add("chat-voice-preview--hidden");
-      fetch(base + "/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }).then(function (r) { return r.json(); }).then(function (data) {
-        sendingGeneral = false;
-        setGeneralSendBusy(false);
-        if (data && data.ok) {
-          scrollGeneralToBottomOnNextRender = true;
-          var msg = data.message;
-          if (msg && msg.id) {
-            window._pendingGeneralMessage = msg;
-            var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null };
-            if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return m.id === msg.id; })) {
-              var msgs = cache.messages.concat([msg]);
-              window._chatGeneralCache = { messages: msgs, participantsCount: cache.participantsCount, onlineCount: cache.onlineCount };
-              lastGeneralMessagesSig = null;
-              if (chatActiveTab === "general" && !chatIsEditingMessage) {
-                lastGeneralMessagesSig = generalMessagesSignature(msgs);
-                renderGeneralMessages(msgs);
+      pokerChatRunAfterPaint(function () {
+        chatComposerDrafts.general = "";
+        if (chatComposerMounted === "general" && chatComposerEl) {
+          chatComposerEl.value = "";
+          try { resizeChatTextarea(chatComposerEl); } catch (e) {}
+          try { updateGeneralSendBtnIcon(); } catch (e) {}
+          setTimeout(function () {
+            try { chatComposerEl.blur(); } catch (e) {}
+          }, 50);
+        }
+        generalReplyTo = null;
+        generalImage = null;
+        generalDocument = null;
+        generalVoice = null;
+        var prevEl = document.getElementById("chatGeneralReplyPreview");
+        if (prevEl) { prevEl.classList.remove("chat-reply-preview--visible"); prevEl.querySelector(".chat-reply-preview__text").textContent = ""; }
+        var imgPrev = document.getElementById("chatGeneralImagePreview");
+        if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
+        var voicePrev = document.getElementById("chatGeneralVoicePreview");
+        if (voicePrev) voicePrev.classList.add("chat-voice-preview--hidden");
+        fetch(base + "/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          sendingGeneral = false;
+          setGeneralSendBusy(false);
+          if (data && data.ok) {
+            scrollGeneralToBottomOnNextRender = true;
+            var msg = data.message;
+            if (msg && msg.id) {
+              window._pendingGeneralMessage = msg;
+              var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null };
+              if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return m.id === msg.id; })) {
+                var msgs = cache.messages.concat([msg]);
+                window._chatGeneralCache = { messages: msgs, participantsCount: cache.participantsCount, onlineCount: cache.onlineCount };
+                lastGeneralMessagesSig = null;
+                if (chatActiveTab === "general" && !chatIsEditingMessage) {
+                  lastGeneralMessagesSig = generalMessagesSignature(msgs);
+                  renderGeneralMessages(msgs);
+                }
               }
             }
+            loadGeneral();
+          } else {
+            var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
+            if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
+            var msg = (data && data.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(msg);
+            else if (typeof alert === "function") alert(msg);
           }
-          loadGeneral();
-        } else {
+        }).catch(function () {
+          sendingGeneral = false;
+          setGeneralSendBusy(false);
           var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-          var msg = (data && data.error) || "Ошибка";
-          if (tg && tg.showAlert) tg.showAlert(msg);
-          else if (typeof alert === "function") alert(msg);
-        }
-      }).catch(function () {
-        sendingGeneral = false;
-        setGeneralSendBusy(false);
-        var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
-        if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-        else if (typeof alert === "function") alert(POKER_NET_ERR);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
+        });
       });
     } catch (err) {
       sendingGeneral = false;
@@ -18452,124 +18464,126 @@ function initChat() {
     } catch (ePin) {}
     sendingPrivate = true;
     setPersonalSendBusy(true);
-    chatComposerDrafts.personal = "";
-    if (chatComposerMounted === "personal" && chatComposerEl) {
-      chatComposerEl.value = "";
-      try { resizeChatTextarea(chatComposerEl); } catch (e) {}
-      try { updatePersonalSendBtnIcon(); } catch (e) {}
-      setTimeout(function () {
-        try { chatComposerEl.blur(); } catch (e) {}
-      }, 50);
-    }
-    personalReplyTo = null;
-    personalImage = null;
-    personalDocument = null;
-    personalVoice = null;
-    var prevEl = document.getElementById("chatPersonalReplyPreview");
-    if (prevEl) { prevEl.classList.remove("chat-reply-preview--visible"); prevEl.querySelector(".chat-reply-preview__text").textContent = ""; }
-    var imgPrev = document.getElementById("chatPersonalImagePreview");
-    if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
-    var voicePrevP = document.getElementById("chatPersonalVoicePreview");
-    if (voicePrevP) voicePrevP.classList.add("chat-voice-preview--hidden");
-    var hasUpload = !!(body.document || body.image || body.voice);
-    var progressWrap = document.getElementById("chatPersonalUploadProgress");
-    var progressFill = document.getElementById("chatPersonalUploadProgressFill");
-    var progressLabel = document.getElementById("chatPersonalUploadProgressLabel");
-    function hideProgress() {
-      if (progressWrap) {
-        progressWrap.classList.remove("chat-upload-progress--visible");
-        progressWrap.setAttribute("aria-hidden", "true");
+    pokerChatRunAfterPaint(function () {
+      chatComposerDrafts.personal = "";
+      if (chatComposerMounted === "personal" && chatComposerEl) {
+        chatComposerEl.value = "";
+        try { resizeChatTextarea(chatComposerEl); } catch (e) {}
+        try { updatePersonalSendBtnIcon(); } catch (e) {}
+        setTimeout(function () {
+          try { chatComposerEl.blur(); } catch (e) {}
+        }, 50);
       }
-      if (progressFill) progressFill.style.width = "0%";
-    }
-    function handleResponse(data) {
-      sendingPrivate = false;
-      setPersonalSendBusy(false);
-      hideProgress();
-      if (data && data.ok) {
-        /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
-        scrollPersonalToBottomOnNextRender = true;
-        var msg = data.message;
-        if (msg && msg.id && chatWithUserId) {
-          window._pendingPersonalMessage = msg;
-          window._pendingPersonalWith = chatWithUserId;
+      personalReplyTo = null;
+      personalImage = null;
+      personalDocument = null;
+      personalVoice = null;
+      var prevEl = document.getElementById("chatPersonalReplyPreview");
+      if (prevEl) { prevEl.classList.remove("chat-reply-preview--visible"); prevEl.querySelector(".chat-reply-preview__text").textContent = ""; }
+      var imgPrev = document.getElementById("chatPersonalImagePreview");
+      if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
+      var voicePrevP = document.getElementById("chatPersonalVoicePreview");
+      if (voicePrevP) voicePrevP.classList.add("chat-voice-preview--hidden");
+      var hasUpload = !!(body.document || body.image || body.voice);
+      var progressWrap = document.getElementById("chatPersonalUploadProgress");
+      var progressFill = document.getElementById("chatPersonalUploadProgressFill");
+      var progressLabel = document.getElementById("chatPersonalUploadProgressLabel");
+      function hideProgress() {
+        if (progressWrap) {
+          progressWrap.classList.remove("chat-upload-progress--visible");
+          progressWrap.setAttribute("aria-hidden", "true");
         }
-        lastPersonalMessagesSig = null;
-        loadMessages();
-      } else {
+        if (progressFill) progressFill.style.width = "0%";
+      }
+      function handleResponse(data) {
+        sendingPrivate = false;
+        setPersonalSendBusy(false);
+        hideProgress();
+        if (data && data.ok) {
+          /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
+          scrollPersonalToBottomOnNextRender = true;
+          var msg = data.message;
+          if (msg && msg.id && chatWithUserId) {
+            window._pendingPersonalMessage = msg;
+            window._pendingPersonalWith = chatWithUserId;
+          }
+          lastPersonalMessagesSig = null;
+          loadMessages();
+        } else {
+          var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
+          if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
+          chatComposerDrafts.personal = optText;
+          if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
+          if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+          if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+        }
+      }
+      function handleError() {
+        sendingPrivate = false;
+        setPersonalSendBusy(false);
+        hideProgress();
         var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
         if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
         chatComposerDrafts.personal = optText;
         if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
         if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-        if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+        if (tg && tg.showAlert) tg.showAlert("Не удалось отправить. Проверьте интернет или уменьшите файл (до 8 МБ).");
       }
-    }
-    function handleError() {
-      sendingPrivate = false;
-      setPersonalSendBusy(false);
-      hideProgress();
-      var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
-      if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-      chatComposerDrafts.personal = optText;
-      if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
-      if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-      if (tg && tg.showAlert) tg.showAlert("Не удалось отправить. Проверьте интернет или уменьшите файл (до 8 МБ).");
-    }
-    if (hasUpload && progressWrap && progressFill && typeof XMLHttpRequest !== "undefined") {
-      if (progressLabel) progressLabel.textContent = "Отправка…";
-      progressWrap.classList.add("chat-upload-progress--visible");
-      progressWrap.setAttribute("aria-hidden", "false");
-      progressFill.style.width = "0%";
-      var bodyStr = JSON.stringify(body);
-      var xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener("progress", function (e) {
-        if (e.lengthComputable && progressFill) progressFill.style.width = Math.round((e.loaded / e.total) * 100) + "%";
-        else if (progressFill) progressFill.style.width = "50%";
-      });
-      xhr.addEventListener("load", function () {
-        var data = null;
-        try {
-          data = JSON.parse(xhr.responseText || "{}");
-        } catch (err) {}
-        if (xhr.status >= 200 && xhr.status < 300) {
-          handleResponse(data);
-        } else {
-          var errMsg = "Не удалось отправить";
-          if (xhr.status === 413) errMsg = "Файл слишком большой. Попробуйте документ до 8 МБ.";
-          else if (data && data.error) errMsg = data.error;
-          handleResponse({ ok: false, error: errMsg });
-        }
-      });
-      xhr.addEventListener("error", handleError);
-      xhr.addEventListener("abort", handleError);
-      xhr.open("POST", base + "/api/chat");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(bodyStr);
-    } else {
-      fetch(base + "/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }).then(function (r) {
-        if (!r.ok) {
-          return r.text().then(function (t) {
+      if (hasUpload && progressWrap && progressFill && typeof XMLHttpRequest !== "undefined") {
+        if (progressLabel) progressLabel.textContent = "Отправка…";
+        progressWrap.classList.add("chat-upload-progress--visible");
+        progressWrap.setAttribute("aria-hidden", "false");
+        progressFill.style.width = "0%";
+        var bodyStr = JSON.stringify(body);
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", function (e) {
+          if (e.lengthComputable && progressFill) progressFill.style.width = Math.round((e.loaded / e.total) * 100) + "%";
+          else if (progressFill) progressFill.style.width = "50%";
+        });
+        xhr.addEventListener("load", function () {
+          var data = null;
+          try {
+            data = JSON.parse(xhr.responseText || "{}");
+          } catch (err) {}
+          if (xhr.status >= 200 && xhr.status < 300) {
+            handleResponse(data);
+          } else {
             var errMsg = "Не удалось отправить";
-            if (r.status === 413) errMsg = "Файл слишком большой. Попробуйте документ до 8 МБ.";
-            else {
-              try {
-                var j = JSON.parse(t);
-                if (j && j.error) errMsg = j.error;
-              } catch (e) {}
-            }
-            return { ok: false, error: errMsg };
-          });
-        }
-        return r.json();
-      }).then(function (data) {
-        handleResponse(data);
-      }).catch(handleError);
-    }
+            if (xhr.status === 413) errMsg = "Файл слишком большой. Попробуйте документ до 8 МБ.";
+            else if (data && data.error) errMsg = data.error;
+            handleResponse({ ok: false, error: errMsg });
+          }
+        });
+        xhr.addEventListener("error", handleError);
+        xhr.addEventListener("abort", handleError);
+        xhr.open("POST", base + "/api/chat");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(bodyStr);
+      } else {
+        fetch(base + "/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(function (r) {
+          if (!r.ok) {
+            return r.text().then(function (t) {
+              var errMsg = "Не удалось отправить";
+              if (r.status === 413) errMsg = "Файл слишком большой. Попробуйте документ до 8 МБ.";
+              else {
+                try {
+                  var j = JSON.parse(t);
+                  if (j && j.error) errMsg = j.error;
+                } catch (e) {}
+              }
+              return { ok: false, error: errMsg };
+            });
+          }
+          return r.json();
+        }).then(function (data) {
+          handleResponse(data);
+        }).catch(handleError);
+      }
+    });
   }
 
   if (!chatListenersAttached) {
@@ -19719,15 +19733,6 @@ function initChat() {
     updateAdminShiftOnline();
     if (onlineAdminUserId && typeof openConvFromDialogs === "function") openConvFromDialogs(onlineAdminUserId, onlineAdminUserName);
     else showDialogs();
-  });
-
-  var chatGeneralDownloadBtn = document.querySelector('#chatGeneralView .chat-general-download-btn[data-view-target="download"][data-download-page]');
-  if (chatGeneralDownloadBtn) chatGeneralDownloadBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    setView("download");
-    var page = chatGeneralDownloadBtn.getAttribute("data-download-page") || "main";
-    if (typeof setDownloadPage === "function") setDownloadPage(page);
   });
 
   (function initChatGeneralInviteFriendBtn() {
