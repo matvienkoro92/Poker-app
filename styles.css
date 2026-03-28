@@ -114,15 +114,17 @@ body::-webkit-scrollbar,
 [data-theme="light"] .updates-block {
   background: rgba(255, 255, 255, 0.5);
 }
-[data-theme="light"] .download-app:not(.download-app--poker21):not(.download-app--xpoker):not(.download-app--pppoker):not(.download-app--supremapoker) {
-  background: linear-gradient(135deg, rgba(255, 248, 240, 0.95), rgba(255, 237, 213, 0.9));
+[data-theme="light"] .download-app:not(.download-app--poker21) {
+  background: transparent;
   color: var(--text);
-  border-color: rgba(249, 115, 22, 0.4);
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: none;
 }
-[data-theme="light"] .download-app:not(.download-app--poker21):not(.download-app--xpoker):not(.download-app--pppoker):not(.download-app--supremapoker):hover {
-  background: linear-gradient(135deg, #f97316, #fb923c);
-  color: var(--btn-on-accent);
-  border-color: rgba(249, 115, 22, 0.6);
+[data-theme="light"] .download-app:not(.download-app--poker21):hover {
+  background: rgba(255, 247, 237, 0.65);
+  color: var(--text);
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: none;
 }
 [data-theme="light"] .home-mini-icon-item {
   background: rgba(255, 251, 247, 0.9);
@@ -759,6 +761,36 @@ body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
   overflow: visible;
 }
 
+/* Скачать: fallback без :has() (старые WebView) — таб-бар виден, padding-bottom .app не трогаем */
+body[data-view="download"] {
+  display: block !important;
+}
+body[data-view="download"] .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+body[data-view="download"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="download"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible;
+}
+body[data-view="download"] .card .card__content {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible !important;
+}
+body[data-view="download"] .view.view--active[data-view="download"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
 /*
  * Видеоуроки: единый scrollport на <html> (класс вешает setView).
  * Без лишних min-height на html/.app — иначе в iOS/TG раздувается scrollHeight («пустой хвост») и скролл залипает ~на 9-й карточке.
@@ -855,6 +887,56 @@ html.app-view-hall-html-scroll .card .card__content {
   min-height: min-content;
   flex-shrink: 0;
   max-height: none;
+}
+
+/*
+ * Скачать: scrollport на <html> (как зал славы). Иначе в части TG/iOS WebView не крутится body.
+ * Запас снизу под фиксированный таб-бар — как padding-bottom у .app.
+ */
+html.app-view-download-html-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto !important;
+  min-height: 100%;
+  max-height: none !important;
+  overscroll-behavior-y: auto !important;
+  overflow-anchor: none;
+  scroll-padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+}
+html.app-view-download-html-scroll body,
+html.app-view-download-html-scroll body.app-view-long-scroll {
+  overflow-y: visible !important;
+  overflow-x: hidden;
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  min-height: 0 !important;
+  overscroll-behavior-y: auto;
+}
+html.app-view-download-html-scroll .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  flex-shrink: 0;
+}
+html.app-view-download-html-scroll .card {
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
+  overflow: visible;
+}
+html.app-view-download-html-scroll .card .card__content {
+  overflow: visible !important;
+  min-height: min-content;
+  flex-shrink: 0;
+  max-height: none;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html.app-view-download-html-scroll {
+    scroll-padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Высота/оверфлоу чата; фон полей вокруг карточки — см. html.app-view-chat / #app:has(...) выше */
@@ -1920,7 +2002,8 @@ body.pwa-auth-gated #app {
 /* Длинные списки (видеоуроки, задачи): карточка растёт по контенту, не обрезается flex-родителем .app */
 .card:has(.view--active[data-view="learn-play-hub"]) .card__content,
 .card:has(.view--active[data-view="video-lessons"]) .card__content,
-.card:has(.view--active[data-view="poker-tasks"]) .card__content {
+.card:has(.view--active[data-view="poker-tasks"]) .card__content,
+.card:has(.view--active[data-view="download"]) .card__content {
   min-width: 0;
   overflow: visible;
 }
@@ -6080,25 +6163,28 @@ body[data-view="download"] .download-back:hover {
   color: var(--btn-on-accent);
 }
 
+/* Как «Назад» в шапке общего чата: чёрная подложка, оранжевая обводка и стрелка */
 body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back) {
-  background: rgba(15, 23, 42, 0.55);
-  border-color: rgba(56, 189, 248, 0.38);
-  color: #7dd3fc;
+  background: #000;
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
-  background: rgba(30, 41, 59, 0.88);
-  border-color: #38bdf8;
-  color: #e0f2fe;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+  color: #fb923c;
 }
 [data-theme="light"] body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back) {
-  background: rgba(255, 253, 251, 0.96);
-  border-color: rgba(14, 165, 233, 0.4);
-  color: #0369a1;
+  background: #000;
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 [data-theme="light"] body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
-  background: rgba(224, 242, 254, 0.95);
-  border-color: #0284c7;
-  color: #0c4a6e;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+  color: #fb923c;
 }
 /* Общий чат: как зал славы — «Назад» отдельно, остальное одной полосой с разделителями */
 .chat-general-header {
@@ -10744,64 +10830,33 @@ a.home-mini-icon-item {
   color: #fff;
 }
 
-.download-app--xpoker {
-  background: linear-gradient(145deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  border: 1px solid rgba(191, 219, 254, 0.4);
-  color: #fff;
-  box-shadow:
-    0 6px 20px rgba(37, 99, 235, 0.35),
-    0 0 16px rgba(96, 165, 250, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-.download-app--xpoker:hover {
-  background: linear-gradient(145deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
-  border-color: rgba(191, 219, 254, 0.6);
-  box-shadow:
-    0 12px 32px rgba(37, 99, 235, 0.45),
-    0 0 24px rgba(96, 165, 250, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-  color: #fff;
-}
-
-.download-app--pppoker {
-  background: linear-gradient(145deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
-  border: 1px solid rgba(187, 247, 208, 0.4);
-  color: #fff;
-  box-shadow:
-    0 6px 20px rgba(34, 197, 94, 0.35),
-    0 0 16px rgba(74, 222, 128, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-.download-app--pppoker:hover {
-  background: linear-gradient(145deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
-  border-color: rgba(187, 247, 208, 0.6);
-  box-shadow:
-    0 12px 32px rgba(34, 197, 94, 0.45),
-    0 0 24px rgba(74, 222, 128, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-  color: #fff;
-}
-
+/* Xpoker / PPPoker / Supremapoker: только обводка, без цветной заливки */
+.download-app--xpoker,
+.download-app--pppoker,
 .download-app--supremapoker {
-  background: linear-gradient(145deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
-  border: 1px solid rgba(255, 237, 213, 0.4);
-  color: #fff;
-  box-shadow:
-    0 6px 20px rgba(234, 88, 12, 0.35),
-    0 0 16px rgba(251, 146, 60, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: var(--text);
+  box-shadow: none;
 }
+.download-app--xpoker::before,
+.download-app--pppoker::before,
+.download-app--supremapoker::before {
+  display: none;
+}
+.download-app--xpoker:hover,
+.download-app--pppoker:hover,
 .download-app--supremapoker:hover {
-  background: linear-gradient(145deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
-  border-color: rgba(255, 237, 213, 0.6);
-  box-shadow:
-    0 12px 32px rgba(234, 88, 12, 0.45),
-    0 0 24px rgba(251, 146, 60, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: rgba(248, 250, 252, 0.06);
+  border-color: rgba(248, 250, 252, 0.28);
+  box-shadow: none;
+  color: var(--text);
   transform: translateY(-2px);
-  color: #fff;
+}
+.download-app--xpoker:active,
+.download-app--pppoker:active,
+.download-app--supremapoker:active {
+  box-shadow: none;
 }
 
 .download-layout__media {
@@ -11181,6 +11236,102 @@ a.home-mini-icon-item {
   color: #0f172a;
   transform: translateY(-2px);
   box-shadow: 0 6px 22px rgba(251, 191, 36, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Подстраницы не Poker21: кнопки без заливки */
+.download-page:not([data-download-page="poker21"]) .app-store-btn,
+.download-page:not([data-download-page="poker21"]) .android-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+.download-page:not([data-download-page="poker21"]) .app-store-btn::before,
+.download-page:not([data-download-page="poker21"]) .android-btn::before {
+  display: none;
+}
+.download-page:not([data-download-page="poker21"]) .app-store-btn:hover,
+.download-page:not([data-download-page="poker21"]) .app-store-btn:active,
+.download-page:not([data-download-page="poker21"]) .android-btn:hover,
+.download-page:not([data-download-page="poker21"]) .android-btn:active {
+  background: rgba(248, 250, 252, 0.08);
+  color: var(--text);
+  border-color: rgba(248, 250, 252, 0.3);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+.download-page:not([data-download-page="poker21"]) .app-store-btn:active,
+.download-page:not([data-download-page="poker21"]) .android-btn:active {
+  transform: translateY(0);
+}
+.download-page:not([data-download-page="poker21"]) .app-store-btn__icon svg,
+.download-page:not([data-download-page="poker21"]) .android-btn__icon svg {
+  filter: none;
+}
+.download-page:not([data-download-page="poker21"]) .download-pppoker-share-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+.download-page:not([data-download-page="poker21"]) .download-pppoker-share-btn:hover {
+  background: rgba(248, 250, 252, 0.08);
+  color: var(--text);
+  border-color: rgba(248, 250, 252, 0.3);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+body[data-view="download"] .download-page:not([data-download-page="poker21"]) .download-back {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.4);
+  color: var(--text);
+  box-shadow: none;
+}
+body[data-view="download"] .download-page:not([data-download-page="poker21"]) .download-back:hover {
+  background: rgba(248, 250, 252, 0.08);
+  border-color: rgba(249, 115, 22, 0.45);
+  color: var(--accent);
+}
+
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .app-store-btn,
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .android-btn {
+  background: transparent;
+  border-color: rgba(249, 115, 22, 0.35);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .app-store-btn:hover,
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .app-store-btn:active,
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .android-btn:hover,
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .android-btn:active {
+  background: rgba(255, 247, 237, 0.75);
+  border-color: rgba(249, 115, 22, 0.5);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .download-pppoker-share-btn {
+  background: transparent;
+  border-color: rgba(249, 115, 22, 0.35);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="light"] .download-page:not([data-download-page="poker21"]) .download-pppoker-share-btn:hover {
+  background: rgba(255, 247, 237, 0.75);
+  border-color: rgba(249, 115, 22, 0.5);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="light"] body[data-view="download"] .download-page:not([data-download-page="poker21"]) .download-back {
+  background: transparent;
+  border-color: rgba(249, 115, 22, 0.38);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="light"] body[data-view="download"] .download-page:not([data-download-page="poker21"]) .download-back:hover {
+  background: rgba(255, 247, 237, 0.85);
+  border-color: rgba(249, 115, 22, 0.55);
+  color: #c2410c;
 }
 
 .poker21-arrow-down {

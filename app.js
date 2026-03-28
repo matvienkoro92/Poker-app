@@ -5167,6 +5167,8 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-vl-html-scroll", viewName === "video-lessons");
   /* Зал славы: в TG/iOS часто крутится <html>, как у видеоуроков — иначе после inset:0 у градиента пропадает прокрутка */
   document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
+  /* Скачать: та же проблема, что у зала славы — часть WebView не крутит body при long-scroll */
+  document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
