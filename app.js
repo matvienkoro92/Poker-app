@@ -18595,6 +18595,39 @@ function initChat() {
         if (chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) return messagesEl;
         return null;
       }
+      function clearChatMessagesKeyboardPad() {
+        try {
+          if (generalMessages) generalMessages.style.removeProperty("padding-bottom");
+          if (messagesEl) messagesEl.style.removeProperty("padding-bottom");
+        } catch (ePadClr) {}
+      }
+      /** Нижний отступ ленты = перекрытие клавиатурой + полоса ввода, чтобы последние сообщения можно было прокрутить выше клавиатуры */
+      function updateChatMessagesKeyboardPad() {
+        clearChatMessagesKeyboardPad();
+        if (!document.body.classList.contains("chat-keyboard-open")) return;
+        var box = getVisibleMessagesEl();
+        if (!box) return;
+        var inputArea =
+          chatActiveTab === "general"
+            ? document.getElementById("chatGeneralInputArea")
+            : document.querySelector("#chatConvView .chat-input-area");
+        var ih = inputArea && inputArea.offsetHeight ? inputArea.offsetHeight : 96;
+        var cs = getComputedStyle(document.documentElement);
+        var vvInset = parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0;
+        var acc = parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0;
+        var pad = Math.round(vvInset + acc + ih + 20);
+        if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
+          try {
+            var ihWin = window.innerHeight || 0;
+            var vvh = Number(window.visualViewport.height) || 0;
+            var offTop = Number(window.visualViewport.offsetTop) || 0;
+            var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
+            if (overlap > 24) pad = Math.max(pad, Math.round(overlap + ih * 0.35 + 12));
+          } catch (eVv) {}
+        }
+        if (pad < 32) pad = 32;
+        box.style.paddingBottom = pad + "px";
+      }
       function scrollDocumentToZero() {
         var se = document.scrollingElement;
         if (se && se.scrollTop !== 0) se.scrollTop = 0;
@@ -18684,6 +18717,7 @@ function initChat() {
           document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eCls) {}
         stripChatInputAreaTransforms();
+        clearChatMessagesKeyboardPad();
         try {
           syncPwaChatVisualViewportInset();
         } catch (eSync) {}
@@ -18762,6 +18796,7 @@ function initChat() {
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
+        if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
       var viewportResizeScrollHandler = null;
       window.__pokerChatDetachVisualViewportListeners = function () {
@@ -18785,6 +18820,7 @@ function initChat() {
           document.documentElement.classList.add("chat-vv-lift");
         }
         function scrollMessagesToBottom() {
+          updateChatMessagesKeyboardPad();
           var se = document.scrollingElement;
           if (se && se.scrollTop !== 0) se.scrollTop = 0;
           if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
@@ -19670,24 +19706,8 @@ function initChat() {
     });
   }
 
-  var onlineAdminUserId = null;
-  var onlineAdminUserName = null;
-  var chatGeneralAdminsBtnOnlineEl = document.getElementById("chatGeneralAdminsBtnOnline");
-
-  function detectOnlineAdminFromDOM() {
-    if (!dialogsView) return { id: null, name: null };
-    var onlineEl = dialogsView.querySelector(".chat-dialog-item__online.chat-dialog-item__online--visible");
-    var item = onlineEl && onlineEl.closest ? onlineEl.closest(".chat-dialog-item") : null;
-    return {
-      id: item && item.dataset ? (item.dataset.chatUserId || null) : null,
-      name: item && item.dataset ? (item.dataset.chatUserName || null) : null,
-    };
-  }
-
   function updateAdminShiftOnline() {
     if (!dialogsView) return;
-    onlineAdminUserId = null;
-    onlineAdminUserName = null;
     var moscowHour = parseInt(new Date().toLocaleString("en-GB", { timeZone: "Europe/Moscow", hour: "2-digit", hour12: false }), 10);
     if (isNaN(moscowHour)) moscowHour = new Date().getUTCHours() + 3;
     if (moscowHour < 0) moscowHour += 24;
@@ -19704,20 +19724,7 @@ function initChat() {
       if (currentlyVisible !== !!onShift) {
         onEl.classList.toggle("chat-dialog-item__online--visible", !!onShift);
       }
-      if (onShift) {
-        onlineAdminUserId = btn.dataset.chatUserId || null;
-        onlineAdminUserName = btn.dataset.chatUserName || null;
-      }
     });
-    // На всякий случай синхронизируем выбранного админа с тем, что реально видно.
-    var detected = detectOnlineAdminFromDOM();
-    if (detected.id) {
-      onlineAdminUserId = detected.id;
-      onlineAdminUserName = detected.name;
-    }
-    if (chatGeneralAdminsBtnOnlineEl) {
-      chatGeneralAdminsBtnOnlineEl.textContent = onlineAdminUserName ? onlineAdminUserName + " онлайн" : "Админ онлайн";
-    }
   }
   updateAdminShiftOnline();
 
@@ -19725,14 +19732,6 @@ function initChat() {
     e.preventDefault();
     e.stopPropagation();
     showDialogs();
-  });
-  var chatGeneralAdminsBtn = document.getElementById("chatGeneralAdminsBtn");
-  if (chatGeneralAdminsBtn) chatGeneralAdminsBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    updateAdminShiftOnline();
-    if (onlineAdminUserId && typeof openConvFromDialogs === "function") openConvFromDialogs(onlineAdminUserId, onlineAdminUserName);
-    else showDialogs();
   });
 
   (function initChatGeneralInviteFriendBtn() {
