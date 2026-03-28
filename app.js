@@ -18807,17 +18807,32 @@ function initChat() {
         if (overlap < 8 && vvh + 24 < ih) {
           overlap = Math.max(overlap, heightLoss);
         }
-        var cap = Math.min(380, Math.round(ih * 0.42));
-        var rawInset = Math.max(0, Math.min(overlap, cap));
         var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-        /* TG: клиент уже немного сдвигает вьюпорт — чуть меньше коэффициент, чем в PWA, чтобы не было огромной пустоты над полем. */
-        var factor = tg ? 0.68 : 0.72;
+        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
+        if (tg && tw) {
+          var tgvH = Number(tw.viewportHeight);
+          var tgvS = Number(tw.viewportStableHeight);
+          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 8) {
+            var dTg = Math.round(tgvS - tgvH);
+            overlap = Math.max(overlap, dTg);
+            heightLoss = Math.max(heightLoss, dTg);
+          }
+        }
+        var cap = Math.min(480, Math.round(ih * 0.52));
+        var rawInset = Math.max(0, Math.min(overlap, cap));
+        var factor = tg ? 0.84 : 0.88;
         var inset = Math.max(0, Math.round(rawInset * factor));
         var vvRatio = vvh / ih;
-        var minBoost = tg ? 0.48 : 0.55;
-        var minTh = tg ? 24 : 32;
-        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < minTh) {
-          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * minBoost)));
+        if (vvRatio > 0 && vvRatio < 0.88 && ih > 0) {
+          var fromVv = Math.round((ih - vvh) * 0.82);
+          inset = Math.max(inset, Math.min(cap, fromVv));
+        }
+        if (heightLoss >= 40) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.78)));
+        }
+        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 120) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * (tg ? 0.58 : 0.65))));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
