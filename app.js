@@ -15380,6 +15380,8 @@ function initChat() {
   var convTitleIdWrap = document.getElementById("chatConvTitleIdWrap");
   var convTitleId = document.getElementById("chatConvTitleId");
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087", "tg_roman"];
+  /** Как TELEGRAM_ROMAN_CHAT_ID / normalizePeerChatUserId(tg_roman) на сервере — не дублировать Романа в списке под закрепом */
+  var CHAT_ROMAN_NUMERIC_PEER = "tg_388008256";
   var messagesEl = document.getElementById("chatMessages");
   var sendBtn = document.getElementById("chatSendBtn");
   var switcherBtn = document.getElementById("chatSwitcherBtn");
@@ -15810,6 +15812,15 @@ function initChat() {
   function peerChatIdsEqual(a, b) {
     if (!a || !b) return false;
     return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
+  }
+  /** Уже есть закреплённые строки в #chatDialogsView — не показывать того же peer в #chatContacts */
+  function chatContactIsDuplicateOfPinnedDialog(c) {
+    if (!c || !c.id) return false;
+    for (var pi = 0; pi < CHAT_ADMIN_IDS.length; pi++) {
+      if (peerChatIdsEqual(c.id, CHAT_ADMIN_IDS[pi])) return true;
+    }
+    if (normalizePeerIdForChat(c.id) === CHAT_ROMAN_NUMERIC_PEER) return true;
+    return false;
   }
   function resolveMyChatDisplayName() {
     try {
@@ -17866,6 +17877,7 @@ function initChat() {
     if (dialogsView) dialogsView.querySelectorAll(".chat-dialog-item__unread[data-dialog-unread-for]").forEach(function (el) {
       var id = el.getAttribute("data-dialog-unread-for");
       var n = id ? (adminUnread[id] || 0) : 0;
+      if (id === "tg_roman") n = Math.max(n, adminUnread[CHAT_ROMAN_NUMERIC_PEER] || 0);
       var txt = n > 99 ? "99+" : (n > 0 ? String(n) : "");
       el.textContent = txt;
       el.classList.toggle("chat-dialog-item__unread--visible", n > 0);
@@ -17990,6 +18002,9 @@ function initChat() {
       }
       if (data && data.ok && Array.isArray(data.contacts)) {
         prefetchTopPersonalDialogs(data.contacts);
+        var contactsForList = data.contacts.filter(function (c) {
+          return !chatContactIsDuplicateOfPinnedDialog(c);
+        });
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
         // Если ещё ни разу не фиксировали момент просмотра общего чата в этом браузере,
@@ -18001,19 +18016,22 @@ function initChat() {
         var online = data.onlineCount != null ? data.onlineCount : "—";
         window.lastListStats = total + " конт · " + online + " онл";
         updateChatHeaderStats();
-        if (data.contacts.length === 0) {
-          contactsEl.innerHTML = '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>';
+        if (contactsForList.length === 0) {
+          contactsEl.innerHTML =
+            data.contacts.length === 0
+              ? '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>'
+              : '<p class="chat-empty">Других диалогов нет — переписка с админами в закреплённых строках выше.</p>';
           updateDialogUnreadBadges();
           updateChatNavDot();
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
           var existing = block ? block.querySelectorAll(".chat-contact") : [];
-          var sameList = existing.length === data.contacts.length && data.contacts.every(function (c, i) {
+          var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
             var btn = existing[i];
             return btn && btn.dataset.chatId === c.id;
           });
           if (sameList && existing.length > 0) {
-            data.contacts.forEach(function (c, i) {
+            contactsForList.forEach(function (c, i) {
               var btn = existing[i];
               if (!btn) return;
               btn.dataset.chatOnline = c.online ? "1" : "0";
@@ -18038,7 +18056,7 @@ function initChat() {
             return;
           }
           var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
-          var contactButtons = data.contacts.map(function (c) {
+          var contactButtons = contactsForList.map(function (c) {
             var roleClass = c.admin ? " chat-contact__role--admin" : "";
             var roleText = c.admin ? "Админ" : "Игрок";
             var onlineHtml = '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
