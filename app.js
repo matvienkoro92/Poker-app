@@ -18685,11 +18685,11 @@ function initChat() {
       }
       function shouldUseChatVisualViewportLift() {
         if (!window.visualViewport) return false;
-        /* В Telegram WebView высоту окна с клавиатурой клиент уже подстраивает — лишний translate даёт «прыжок» и пустоту над полем. */
-        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return false;
         if (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()) return true;
-        /* Android Chrome / PWA: без подъёма по visualViewport поле иногда остаётся под клавиатурой */
-        return !!(/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0);
+        /* Android Chrome / PWA */
+        if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0) return true;
+        /* Telegram: окно частично поджимается, но без translate поле часто остаётся под клавиатурой — подъём нужен; inset ниже чуть смягчён под TG. */
+        return typeof isTelegramWebApp === "function" && isTelegramWebApp();
       }
       /**
        * Доп. подъём только на iOS над системной панелью «стрелки / Готово».
@@ -18809,11 +18809,15 @@ function initChat() {
         }
         var cap = Math.min(380, Math.round(ih * 0.42));
         var rawInset = Math.max(0, Math.min(overlap, cap));
-        /* Умеренный подъём: завышенный inset даёт большой зазор между лентой и полем (transform не меняет layout). */
-        var inset = Math.max(0, Math.round(rawInset * 0.62));
+        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        /* TG: клиент уже немного сдвигает вьюпорт — чуть меньше коэффициент, чем в PWA, чтобы не было огромной пустоты над полем. */
+        var factor = tg ? 0.68 : 0.72;
+        var inset = Math.max(0, Math.round(rawInset * factor));
         var vvRatio = vvh / ih;
-        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 28) {
-          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.5)));
+        var minBoost = tg ? 0.48 : 0.55;
+        var minTh = tg ? 24 : 32;
+        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < minTh) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * minBoost)));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();

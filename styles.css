@@ -463,16 +463,41 @@ html.app--tg-content-inset .app {
   position: relative;
   z-index: 2;
 }
-/* Чаты: тот же фон подложки, что и на главной (переменные темы + applyBg на #app) */
+/* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
 html.app-view-chat,
-body.app-view-chat {
+body.app-view-chat,
+html:has(.view--active[data-view="chat"]),
+body:has(.view--active[data-view="chat"]) {
   background-color: var(--overscroll-canvas) !important;
-  background-image: var(--body-bg);
+  background-image: var(--bg-blur-gradient) !important;
 }
 [data-theme="light"] html.app-view-chat,
-[data-theme="light"] body.app-view-chat {
-  background-image: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
+[data-theme="light"] body.app-view-chat,
+[data-theme="light"] html:has(.view--active[data-view="chat"]),
+[data-theme="light"] body:has(.view--active[data-view="chat"]) {
   background-color: var(--overscroll-canvas) !important;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
+}
+html.app-view-chat #app.app,
+#app.app:has(.view--active[data-view="chat"]) {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: var(--bg-blur-gradient) !important;
+}
+[data-theme="light"] html.app-view-chat #app.app,
+[data-theme="light"] #app.app:has(.view--active[data-view="chat"]) {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
+}
+/* Скрываем «главный» цветной слой и backdrop у подложки — иначе за карточкой остаётся другой рисунок */
+.app:has(.view--active[data-view="chat"]) .bg-gradient {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.app:has(.view--active[data-view="chat"]) .bg-blur,
+[data-theme="light"] .app:has(.view--active[data-view="chat"]) .bg-blur {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 body:has(.view--active[data-view="chat"]) {
   overflow: hidden;
@@ -832,7 +857,7 @@ html.app-view-hall-html-scroll .card .card__content {
   max-height: none;
 }
 
-/* Высота/оверфлоу чата; фон как на главной — inline applyBg() + .bg-gradient / .bg-blur */
+/* Высота/оверфлоу чата; фон полей вокруг карточки — см. html.app-view-chat / #app:has(...) выше */
 .app:has(.view--active[data-view="chat"]),
 html.app-view-chat #app.app {
   height: 100%;
