@@ -18633,17 +18633,18 @@ function initChat() {
         var cs = getComputedStyle(document.documentElement);
         var vvInset = parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0;
         var acc = parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0;
-        var pad = Math.round(vvInset + acc + ih + 20);
+        var pad = Math.round(vvInset + acc + ih + 12);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
             var ihWin = window.innerHeight || 0;
             var vvh = Number(window.visualViewport.height) || 0;
             var offTop = Number(window.visualViewport.offsetTop) || 0;
             var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
-            if (overlap > 24) pad = Math.max(pad, Math.round(overlap + ih * 0.35 + 12));
+            /* Не тянуть pad до полного overlap — vvInset в pad уже отражает подъём композера. */
+            if (overlap > 24) pad = Math.max(pad, Math.round(Math.max(vvInset, overlap * 0.55) + ih + 8));
           } catch (eVv) {}
         }
-        if (pad < 32) pad = 32;
+        if (pad < 28) pad = 28;
         box.style.paddingBottom = pad + "px";
       }
       function scrollDocumentToZero() {
@@ -18684,6 +18685,8 @@ function initChat() {
       }
       function shouldUseChatVisualViewportLift() {
         if (!window.visualViewport) return false;
+        /* В Telegram WebView высоту окна с клавиатурой клиент уже подстраивает — лишний translate даёт «прыжок» и пустоту над полем. */
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return false;
         if (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()) return true;
         /* Android Chrome / PWA: без подъёма по visualViewport поле иногда остаётся под клавиатурой */
         return !!(/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0);
@@ -18707,9 +18710,9 @@ function initChat() {
         var vvh = Number(vv.height) || 0;
         var offsetTop = Number(vv.offsetTop) || 0;
         var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
-        /* «Хвост» 14–58px чаще совпадает с accessory; больше — обычно клавиши/хром (vv-inset уже поднимает). */
+        /* «Хвост» 14–44px — панель «стрелки / Готово»; выше — уже зона клавиатуры (не дублируем в translate). */
         var acc = 0;
-        if (belowVv >= 14 && belowVv <= 58) acc = Math.min(52, belowVv);
+        if (belowVv >= 14 && belowVv <= 44) acc = Math.min(40, belowVv);
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
       function stripChatInputAreaTransforms() {
@@ -18804,13 +18807,13 @@ function initChat() {
         if (overlap < 8 && vvh + 24 < ih) {
           overlap = Math.max(overlap, heightLoss);
         }
-        var cap = Math.min(460, Math.round(ih * 0.55));
+        var cap = Math.min(380, Math.round(ih * 0.42));
         var rawInset = Math.max(0, Math.min(overlap, cap));
-        /* Сильнее поднимаем панель ввода: в PWA часть высоты клавиатуры терялась из‑за округления */
-        var inset = Math.max(0, Math.round(rawInset * 0.88 - 2));
+        /* Умеренный подъём: завышенный inset даёт большой зазор между лентой и полем (transform не меняет layout). */
+        var inset = Math.max(0, Math.round(rawInset * 0.62));
         var vvRatio = vvh / ih;
-        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 48) {
-          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.74)));
+        if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 28) {
+          inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.5)));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
@@ -22436,8 +22439,8 @@ function updateTournamentDayBlock() {
     } else if (nameStr === "Фриролл") {
       trophyFile = "tournament-day-trophy.png";
     } else if (weekday === 0) {
-      // Воскресный турнир недели
-      trophyFile = "tournament-day-sunday.png";
+      // Воскресный турнир недели — промо с перчаткой / 300k
+      trophyFile = "tournament-day-glove-champion-300k.png";
     } else if (weekday === 1) {
       // Понедельник — Magic MKO 500₽ (кастом: кубок с шаром и «500»)
       trophyFile = "tournament-day-monday-magic-500.png";
@@ -22457,8 +22460,10 @@ function updateTournamentDayBlock() {
     var trophySrc = typeof getAssetUrl === "function" ? getAssetUrl(trophyFile) : "";
     if (scheduleTrophyImg && trophySrc) scheduleTrophyImg.src = trophySrc;
     var homeTrophyImg = document.getElementById("tournamentDayHomeTrophyImg");
-    if (homeTrophyImg && trophySrc) {
-      homeTrophyImg.src = trophySrc;
+    var homeTrophyFile = dayImageOverride || trophyFile;
+    var homeTrophySrc = typeof getAssetUrl === "function" ? getAssetUrl(homeTrophyFile) : "";
+    if (homeTrophyImg && homeTrophySrc) {
+      homeTrophyImg.src = homeTrophySrc;
       homeTrophyImg.alt = nameStr ? "Турнир дня: " + nameStr : "";
     }
     var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");

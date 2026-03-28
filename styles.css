@@ -2006,10 +2006,21 @@ html.app-view-home .card .card__content {
   width: 100%;
   padding-top: 0;
 }
+/* Лента и список диалогов: не оставляем прозрачными — иначе виден .bg-blur с backdrop-filter под #app,
+   и при фокусе поля (chat-keyboard-open, сдвиг viewport / z-index) композитинг меняется и фон «светлеет». */
 .view--active[data-view="chat"] .chat-messages {
-  background-color: transparent;
-  background-image: none;
   border: none;
+  background-color: var(--overscroll-canvas);
+  background-image: var(--bg-blur-gradient);
+}
+.view--active[data-view="chat"] .chat-list-view {
+  background-color: var(--overscroll-canvas);
+  background-image: var(--bg-blur-gradient);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-messages,
+[data-theme="light"] .view--active[data-view="chat"] .chat-list-view {
+  background-color: var(--overscroll-canvas);
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
 }
 .view--active[data-view="chat"] .chat-input-wrap,
 .view--active[data-view="chat"] .chat-input-area,
