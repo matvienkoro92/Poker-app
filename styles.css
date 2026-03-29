@@ -6208,25 +6208,31 @@ body[data-view="download"] .download-back:hover {
   color: var(--btn-on-accent);
 }
 
-/* Как «Назад» в шапке общего чата: чёрная подложка, оранжевая обводка и стрелка */
-body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back) {
+/* «Назад» в личных чатах: чёрная подложка, оранжевая обводка (общий чат — нейтральная плашка, см. .chat-general-header__toolbar-back) */
+body[data-view="chat"]
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back) {
   background: #000;
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
-body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
+body[data-view="chat"]
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent);
   color: #fb923c;
 }
-[data-theme="light"] body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back) {
+[data-theme="light"]
+  body[data-view="chat"]
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back) {
   background: #000;
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-[data-theme="light"] body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
+[data-theme="light"]
+  body[data-view="chat"]
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent);
   color: #fb923c;
@@ -6240,8 +6246,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   margin-bottom: 0;
   flex-wrap: nowrap;
   padding: 8px max(8px, var(--screen-gutter-x, 12px));
-  /* Размытие вокруг кнопок без внешней рамки; обводка только у кнопки «Назад» и полосы сегментов */
-  background: rgba(15, 23, 42, 0.16);
+  background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
@@ -6265,7 +6270,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   flex-shrink: 0;
   align-self: center;
 }
-/* «Назад» — как одна ячейка «Поделиться»: 40×40, чёрная подложка, акцент, тот же hover */
+/* «Назад» и сегменты: нейтральное стекло, без акцентного цвета */
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   pointer-events: auto;
   align-self: center;
@@ -6287,27 +6292,28 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   letter-spacing: 0;
   border-radius: 16px;
   box-sizing: border-box;
-  background: #000;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(248, 250, 252, 0.88);
+  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--accent);
-  color: #fb923c;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
-  background: #000;
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: rgba(30, 41, 59, 0.88);
+  box-shadow: none;
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fb923c;
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: #0f172a;
 }
 /* Компактная пара: только ширина двух иконок, без растягивания на весь экран */
 .chat-general-header__segments {
@@ -6323,10 +6329,10 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   height: var(--chat-general-header-strip-min-height);
   min-height: var(--chat-general-header-strip-min-height);
   max-height: var(--chat-general-header-strip-min-height);
-  background: #000;
-  border: 1px solid var(--accent);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: none;
   pointer-events: auto;
 }
 .chat-general-header__segment {
@@ -6340,7 +6346,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent);
+  color: rgba(248, 250, 252, 0.85);
   background: transparent;
   box-shadow: none;
   cursor: pointer;
@@ -6348,7 +6354,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   transition: color 0.15s, background 0.15s;
   text-align: center;
   text-decoration: none;
-  border-right: 1px solid rgba(249, 115, 22, 0.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
   -webkit-appearance: none;
   appearance: none;
   align-self: stretch;
@@ -6358,8 +6364,8 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   border-right: none;
 }
 .chat-general-header__segment:hover {
-  color: #fb923c;
-  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 .chat-general-header__segment--icon {
   flex: 0 0 40px;
@@ -6367,7 +6373,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   min-width: 40px;
   max-width: 40px;
   padding: 0;
-  color: var(--accent);
+  color: rgba(248, 250, 252, 0.85);
 }
 .chat-general-copy-link-btn {
   display: inline-flex;
@@ -6461,36 +6467,36 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
   border: none;
 }
 [data-theme="dark"] .chat-general-header__segments {
-  border-color: var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
 }
 [data-theme="dark"] .chat-general-header__segment {
-  border-right-color: rgba(251, 146, 60, 0.35);
+  border-right-color: rgba(255, 255, 255, 0.14);
 }
 [data-theme="dark"] .chat-general-header__segment:hover {
-  color: #fb923c;
+  color: #fff;
   background: rgba(255, 255, 255, 0.1);
 }
 [data-theme="light"] .chat-general-header__segments {
-  border-color: var(--accent);
-  background: #000;
+  border-color: rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.08);
 }
 [data-theme="light"] .chat-general-header {
-  background: rgba(255, 255, 255, 0.26);
+  background: transparent;
 }
 [data-theme="light"] .chat-conv-top-inner {
   background: rgba(255, 255, 255, 0.26);
 }
 [data-theme="light"] .chat-general-header__segment {
-  border-right-color: rgba(234, 88, 12, 0.4);
-  color: var(--accent);
+  border-right-color: rgba(15, 23, 42, 0.1);
+  color: rgba(30, 41, 59, 0.88);
 }
 [data-theme="light"] .chat-general-header__segment:hover {
-  color: #fb923c;
-  background: rgba(255, 255, 255, 0.08);
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.06);
 }
 [data-theme="light"] .chat-general-header__segment--icon {
-  color: var(--accent);
+  color: rgba(30, 41, 59, 0.88);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .chat-general-header,
@@ -6499,7 +6505,7 @@ body[data-view="chat"] .chat-back-btn:not(.winter-rating-lightbox__back):hover {
     -webkit-backdrop-filter: none;
   }
   .chat-general-header {
-    background: rgba(30, 41, 59, 0.92);
+    background: transparent;
   }
   .chat-conv-top-inner {
     background: rgba(30, 41, 59, 0.92);

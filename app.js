@@ -2991,6 +2991,25 @@ function getPokerResolvedTelegramUser() {
   function isPwaStandaloneAuth() {
     return isPwaStandaloneMode() && !isTelegramMiniAppRuntime();
   }
+  /**
+   * Не показываем карточку «Верификация для входа в PWA» внутри клиента Telegram (Mini App / WebView).
+   * Скрипт telegram-web-app.js есть и в обычном браузере — отличаем по platform / version WebApp.
+   */
+  function shouldSuppressMiniAppPwaLoginBanner() {
+    try {
+      if (isPwaStandaloneAuth()) return false;
+      if (typeof isTelegramWebApp !== "function" || !isTelegramWebApp()) return false;
+      var w = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (!w) return false;
+      var p = (w.platform != null && String(w.platform).trim()) ? String(w.platform).toLowerCase() : "";
+      if (p === "web") return false;
+      if (p) return true;
+      var v = w.version != null ? String(w.version).trim() : "";
+      return !!v;
+    } catch (e) {
+      return false;
+    }
+  }
   function showPwaAuthScreen() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
@@ -3783,7 +3802,11 @@ function getPokerResolvedTelegramUser() {
       if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
       if (banner) {
         banner.classList.remove("auth-banner--verifying");
-        banner.classList.remove("auth-banner--hidden");
+        if (shouldSuppressMiniAppPwaLoginBanner()) {
+          banner.classList.add("auth-banner--hidden");
+        } else {
+          banner.classList.remove("auth-banner--hidden");
+        }
       }
       if (bannerRetry) bannerRetry.hidden = !showRetry;
       if (bannerLink) bannerLink.style.display = "none";
@@ -3960,6 +3983,16 @@ function getPokerResolvedTelegramUser() {
      */
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
+    if (shouldSuppressMiniAppPwaLoginBanner()) {
+      try {
+        var innerMount = document.getElementById("authBannerLoginMount");
+        if (innerMount) {
+          innerMount.innerHTML = "";
+          innerMount.removeAttribute("data-pwa-widget-mounted");
+        }
+      } catch (eSup) {}
+      return;
+    }
     if (!mount) return;
 
     if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
@@ -4214,7 +4247,11 @@ function getPokerResolvedTelegramUser() {
       mountTelegramLoginWidgetForPwa();
       if (banner) {
         banner.classList.remove("auth-banner--verifying");
-        banner.classList.remove("auth-banner--hidden");
+        if (shouldSuppressMiniAppPwaLoginBanner()) {
+          banner.classList.add("auth-banner--hidden");
+        } else {
+          banner.classList.remove("auth-banner--hidden");
+        }
       }
       setTimeout(hideBootOverlay, 120);
       return;
@@ -18793,7 +18830,11 @@ function initChat() {
           if (messagesEl) messagesEl.style.removeProperty("padding-bottom");
         } catch (ePadClr) {}
       }
-      /** Нижний отступ ленты = перекрытие клавиатурой + полоса ввода, чтобы последние сообщения можно было прокрутить выше клавиатуры */
+      /**
+       * Нижний отступ ленты — высота композера и небольшой зазор, чтобы докрутить последние сообщения.
+       * --chat-vv-inset / --chat-ios-accessory-inset уже задают translate поля ввода; включать их в padding
+       * повторно нельзя — получается двойной «воздух» между последним сообщением и строкой ввода.
+       */
       function updateChatMessagesKeyboardPad() {
         clearChatMessagesKeyboardPad();
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -18804,22 +18845,21 @@ function initChat() {
             ? document.getElementById("chatGeneralInputArea")
             : document.querySelector("#chatConvView .chat-input-area");
         var ih = inputArea && inputArea.offsetHeight ? inputArea.offsetHeight : 96;
-        var cs = getComputedStyle(document.documentElement);
-        var vvInset = parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0;
-        var acc = parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0;
-        var pad = Math.round(vvInset + acc + ih + 12);
+        var pad = Math.round(ih + 12);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
             var ihWin = window.innerHeight || 0;
             var vvh = Number(window.visualViewport.height) || 0;
             var offTop = Number(window.visualViewport.offsetTop) || 0;
             var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
-            /* Не тянуть pad до полного overlap — vvInset в pad уже отражает подъём композера. */
-            if (overlap > 24) pad = Math.max(pad, Math.round(Math.max(vvInset, overlap * 0.55) + ih + 8));
+            /* Редко layout не сжимается и лента уезжает под клавиатуру — чуть усиливаем, без дубля vv-inset. */
+            if (overlap > 48) {
+              pad = Math.max(pad, Math.round(ih + 12 + Math.min(overlap * 0.22, 56)));
+            }
           } catch (eVv) {}
         }
         if (pad < 28) pad = 28;
-        if (isIosLikeForChatViewport()) pad += 28;
+        if (isIosLikeForChatViewport()) pad += 8;
         box.style.paddingBottom = pad + "px";
       }
       function scrollDocumentToZero() {
