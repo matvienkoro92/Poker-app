@@ -15370,12 +15370,10 @@ var chatIsEditingMessage = false;
 window.chatGeneralUnread = false;
 window.chatPersonalUnread = false;
 var chatWithUserId = null;
-/** Откладывает вызов на кадр после отрисовки, чтобы optimistic-пузырь появлялся сразу, а не после ответа сервера. */
+/** Один кадр перед сетью — достаточно для отрисовки optimistic-пузыря; два кадра добавляли лишнюю микрозадержку. */
 function pokerChatRunAfterPaint(fn) {
   if (typeof requestAnimationFrame === "function") {
-    requestAnimationFrame(function () {
-      requestAnimationFrame(fn);
-    });
+    requestAnimationFrame(fn);
   } else {
     setTimeout(fn, 0);
   }
@@ -16707,6 +16705,78 @@ function initChat() {
     }).join(";");
     return messages.length + "-" + (last.id || "") + "-" + (last.time || "") + "-" + reactionsPart;
   }
+
+  /** Пока POST в полёте, любая перезагрузка ленты с сервера снова рисует исходный список — без этого optimistic пропадает до ответа API. */
+  var optimisticGeneralPayload = null;
+  var optimisticPersonalPayload = null;
+  function mergeOptimisticGeneralIntoMessages(messages) {
+    messages = messages || [];
+    if (!optimisticGeneralPayload || !sendingGeneral) return messages;
+    var myId = resolveMyChatMemberId();
+    if (!myId || !optimisticGeneralPayload.from || !peerChatIdsEqual(optimisticGeneralPayload.from, myId)) return messages;
+    var og = optimisticGeneralPayload;
+    var ogTime = new Date(og.time).getTime();
+    if (isNaN(ogTime)) return messages;
+    for (var iGen = messages.length - 1; iGen >= 0 && iGen >= messages.length - 35; iGen--) {
+      var mG = messages[iGen];
+      if (!peerChatIdsEqual(mG.from, myId)) continue;
+      var mt = mG.time ? new Date(mG.time).getTime() : 0;
+      if (mt < ogTime - 4000) continue;
+      if (og.text && String(mG.text || "").trim() === String(og.text || "").trim()) return messages;
+      if (og.image && mG.image && Math.abs(mt - ogTime) < 180000) return messages;
+      if (og.voice && mG.voice && Math.abs(mt - ogTime) < 180000) return messages;
+      if (og.document && mG.document && Math.abs(mt - ogTime) < 180000) return messages;
+    }
+    var synG = {
+      from: og.from,
+      fromName: resolveMyChatDisplayName() || "Вы",
+      text: og.text || "",
+      time: og.time,
+      __clientOptimistic: true,
+    };
+    if (og.image) synG.image = og.image;
+    if (og.voice) synG.voice = og.voice;
+    if (og.document && og.document.dataUrl) {
+      synG.document = og.document.dataUrl;
+      synG.documentName = og.document.fileName || "document.pdf";
+    }
+    if (og.replyTo) synG.replyTo = og.replyTo;
+    return messages.concat([synG]);
+  }
+  function mergeOptimisticPersonalIntoMessages(messages) {
+    messages = messages || [];
+    if (!optimisticPersonalPayload || !sendingPrivate) return messages;
+    var myIdP = resolveMyChatMemberId();
+    if (!myIdP || !optimisticPersonalPayload.from || !peerChatIdsEqual(optimisticPersonalPayload.from, myIdP)) return messages;
+    var ogp = optimisticPersonalPayload;
+    var ogpTime = new Date(ogp.time).getTime();
+    if (isNaN(ogpTime)) return messages;
+    for (var iP = messages.length - 1; iP >= 0 && iP >= messages.length - 35; iP--) {
+      var mP = messages[iP];
+      if (!peerChatIdsEqual(mP.from, myIdP)) continue;
+      var mpt = mP.time ? new Date(mP.time).getTime() : 0;
+      if (mpt < ogpTime - 4000) continue;
+      if (ogp.text && String(mP.text || "").trim() === String(ogp.text || "").trim()) return messages;
+      if (ogp.image && mP.image && Math.abs(mpt - ogpTime) < 180000) return messages;
+      if (ogp.voice && mP.voice && Math.abs(mpt - ogpTime) < 180000) return messages;
+      if (ogp.document && mP.document && Math.abs(mpt - ogpTime) < 180000) return messages;
+    }
+    var synP = {
+      from: ogp.from,
+      fromName: resolveMyChatDisplayName() || "Вы",
+      text: ogp.text || "",
+      time: ogp.time,
+      __clientOptimistic: true,
+    };
+    if (ogp.image) synP.image = ogp.image;
+    if (ogp.voice) synP.voice = ogp.voice;
+    if (ogp.document && ogp.document.dataUrl) {
+      synP.document = ogp.document.dataUrl;
+      synP.documentName = ogp.document.fileName || "document.pdf";
+    }
+    if (ogp.replyTo) synP.replyTo = ogp.replyTo;
+    return messages.concat([synP]);
+  }
   function updateUnreadDots() {
     updateChatNavDot();
   }
@@ -16839,6 +16909,7 @@ function initChat() {
           messages = messages.concat([pending]);
         }
         window._pendingGeneralMessage = null;
+        messages = mergeOptimisticGeneralIntoMessages(messages);
         window._chatGeneralCache = { messages: messages, participantsCount: data.participantsCount, onlineCount: data.onlineCount };
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
@@ -17221,6 +17292,7 @@ function initChat() {
       } else if (!isOwn && m.id) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
+      if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
       var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
@@ -17757,17 +17829,31 @@ function initChat() {
       var optVoice = generalVoice || null;
       var optDocument = generalDocument ? { dataUrl: generalDocument.dataUrl, fileName: generalDocument.fileName } : null;
       var optReply = generalReplyTo ? { fromName: generalReplyTo.fromName || "Игрок", text: generalReplyTo.text || "" } : null;
+      optimisticGeneralPayload = {
+        text: optText || "",
+        image: optImage || null,
+        voice: optVoice || null,
+        document: optDocument,
+        replyTo: body.replyTo || null,
+        from: resolveMyChatMemberId(),
+        time: new Date().toISOString(),
+      };
+      sendingGeneral = true;
+      setGeneralSendBusy(true);
       try {
         appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
       } catch (e) {
+        optimisticGeneralPayload = null;
+        sendingGeneral = false;
+        setGeneralSendBusy(false);
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
+        return;
       }
       scrollGeneralToBottomOnNextRender = true;
       try {
         if (generalMessages && typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(generalMessages, true);
+        if (generalMessages) try { void generalMessages.offsetHeight; } catch (eFlushG) {}
       } catch (ePinG) {}
-      sendingGeneral = true;
-      setGeneralSendBusy(true);
       pokerChatRunAfterPaint(function () {
         chatComposerDrafts.general = "";
         if (chatComposerMounted === "general" && chatComposerEl) {
@@ -17796,6 +17882,7 @@ function initChat() {
           sendingGeneral = false;
           setGeneralSendBusy(false);
           if (data && data.ok) {
+            optimisticGeneralPayload = null;
             scrollGeneralToBottomOnNextRender = true;
             var msg = data.message;
             if (msg && msg.id) {
@@ -17813,6 +17900,7 @@ function initChat() {
             }
             loadGeneral();
           } else {
+            optimisticGeneralPayload = null;
             var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
             if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
             var msg = (data && data.error) || "Ошибка";
@@ -17820,6 +17908,7 @@ function initChat() {
             else if (typeof alert === "function") alert(msg);
           }
         }).catch(function () {
+          optimisticGeneralPayload = null;
           sendingGeneral = false;
           setGeneralSendBusy(false);
           var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
@@ -17829,6 +17918,7 @@ function initChat() {
         });
       });
     } catch (err) {
+      optimisticGeneralPayload = null;
       sendingGeneral = false;
       setGeneralSendBusy(false);
       if (typeof console !== "undefined" && console.error) console.error("sendGeneral failed", err);
@@ -18226,6 +18316,7 @@ function initChat() {
       } else if (!isOwn && m.id) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
+      if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
       var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
@@ -18331,6 +18422,7 @@ function initChat() {
         }
         window._pendingPersonalMessage = null;
         window._pendingPersonalWith = null;
+        messages = mergeOptimisticPersonalIntoMessages(messages);
         var pt = data.participantsCount != null ? data.participantsCount : "—";
         var ol = data.onlineCount != null ? data.onlineCount : "—";
         window.lastConvStats = pt + " уч · " + ol + " онл";
@@ -18517,15 +18609,30 @@ function initChat() {
     var optVoice = personalVoice || null;
     var optDocument = personalDocument ? { dataUrl: personalDocument.dataUrl, fileName: personalDocument.fileName } : null;
     var optReply = personalReplyTo ? { fromName: personalReplyTo.fromName || "Игрок", text: personalReplyTo.text || "" } : null;
+    optimisticPersonalPayload = {
+      text: optText || "",
+      image: optImage || null,
+      voice: optVoice || null,
+      document: optDocument,
+      replyTo: body.replyTo || null,
+      from: resolveMyChatMemberId(),
+      time: new Date().toISOString(),
+    };
+    sendingPrivate = true;
+    setPersonalSendBusy(true);
     try {
       appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
-    } catch (err) {}
+    } catch (err) {
+      optimisticPersonalPayload = null;
+      sendingPrivate = false;
+      setPersonalSendBusy(false);
+      return;
+    }
     scrollPersonalToBottomOnNextRender = true;
     try {
       if (typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(messagesEl, true);
+      if (messagesEl) try { void messagesEl.offsetHeight; } catch (eFlushP) {}
     } catch (ePin) {}
-    sendingPrivate = true;
-    setPersonalSendBusy(true);
     pokerChatRunAfterPaint(function () {
       chatComposerDrafts.personal = "";
       if (chatComposerMounted === "personal" && chatComposerEl) {
@@ -18562,6 +18669,7 @@ function initChat() {
         setPersonalSendBusy(false);
         hideProgress();
         if (data && data.ok) {
+          optimisticPersonalPayload = null;
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
           scrollPersonalToBottomOnNextRender = true;
           var msg = data.message;
@@ -18572,6 +18680,7 @@ function initChat() {
           lastPersonalMessagesSig = null;
           loadMessages();
         } else {
+          optimisticPersonalPayload = null;
           var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
           chatComposerDrafts.personal = optText;
@@ -18581,6 +18690,7 @@ function initChat() {
         }
       }
       function handleError() {
+        optimisticPersonalPayload = null;
         sendingPrivate = false;
         setPersonalSendBusy(false);
         hideProgress();
