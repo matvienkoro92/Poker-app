@@ -3002,6 +3002,9 @@ function getPokerResolvedTelegramUser() {
   }
   function hidePwaAuthScreen() {
     if (!pwaAuthScreenEl) return;
+    try {
+      pwaAuthScreenEl.classList.remove("pwa-auth-screen--identifying");
+    } catch (eId) {}
     pwaAuthScreenEl.classList.add("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "true");
     try {
@@ -3020,6 +3023,28 @@ function getPokerResolvedTelegramUser() {
     if (!identifyingMiniEl) return;
     identifyingMiniEl.classList.add("auth-identifying-mini--hidden");
     identifyingMiniEl.setAttribute("aria-busy", "false");
+  }
+
+  /** PWA: экран «идентификация» поверх приложения (не внутри скрытого #app). */
+  var pwaAuthIdentifyingPanelEl = document.getElementById("pwaAuthIdentifyingPanel");
+  var PWA_AUTH_IDENTIFY_MIN_MS = 620;
+  function setPwaAuthIdentifyingPhase(on) {
+    if (!pwaAuthScreenEl) return;
+    try {
+      if (on) {
+        pwaAuthScreenEl.classList.add("pwa-auth-screen--identifying");
+        if (pwaAuthIdentifyingPanelEl) {
+          pwaAuthIdentifyingPanelEl.hidden = false;
+          pwaAuthIdentifyingPanelEl.setAttribute("aria-busy", "true");
+        }
+      } else {
+        pwaAuthScreenEl.classList.remove("pwa-auth-screen--identifying");
+        if (pwaAuthIdentifyingPanelEl) {
+          pwaAuthIdentifyingPanelEl.hidden = true;
+          pwaAuthIdentifyingPanelEl.setAttribute("aria-busy", "false");
+        }
+      }
+    } catch (ePwaId) {}
   }
 
   /* Резерв к data-onauth: иногда eval/callback виджета не срабатывает, а postMessage от oauth.telegram.org всё равно приходит. */
@@ -4112,6 +4137,27 @@ function getPokerResolvedTelegramUser() {
     return false;
   }
 
+  /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */
+  function runPwaStandaloneUnidentifiedFlow(hideBootOverlay) {
+    showPwaAuthScreen();
+    setPwaAuthIdentifyingPhase(true);
+    try {
+      if (typeof hideBootOverlay === "function") hideBootOverlay();
+    } catch (eBoot0) {}
+    if (attemptPwaSideAuthRestore(hideBootOverlay)) {
+      setPwaAuthIdentifyingPhase(false);
+      return;
+    }
+    window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+    updateHeaderGreeting();
+    setTimeout(function () {
+      setPwaAuthIdentifyingPhase(false);
+      showUnauthorized();
+      resetBannerForPwaLogin();
+      mountTelegramLoginWidgetForPwa();
+    }, PWA_AUTH_IDENTIFY_MIN_MS);
+  }
+
   function runVerifyFlow() {
     function hideBootOverlay() {
       try {
@@ -4123,13 +4169,7 @@ function getPokerResolvedTelegramUser() {
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
     if (!initData && isPwaStandaloneAuth()) {
-      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
-      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
-      updateHeaderGreeting();
-      showUnauthorized();
-      resetBannerForPwaLogin();
-      mountTelegramLoginWidgetForPwa();
-      setTimeout(hideBootOverlay, 120);
+      runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
       return;
     }
 
@@ -4356,7 +4396,10 @@ function getPokerResolvedTelegramUser() {
   );
 
   var wtgBoot = getTelegramWebAppNow();
-  if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
+  if (isPwaStandaloneAuth()) {
+    /* В PWA initData из Telegram не придёт — не ждём таймер в WebApp-ветке (полоска в #app всё равно скрыта). */
+    runVerifyFlow();
+  } else if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
     // initData иногда появляется с задержкой даже при открытии кнопкой бота.
     // Не блокируем первый рендер на 25с: ждём немного и пускаем verify/виджет.
     showIdentifyingMini();
@@ -4367,6 +4410,7 @@ function getPokerResolvedTelegramUser() {
 
   window.__pokerOpenPwaLoginScreen = function () {
     try {
+      setPwaAuthIdentifyingPhase(false);
       showPwaAuthScreen();
       mountTelegramLoginWidgetForPwa();
     } catch (ePwaOpen) {}

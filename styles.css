@@ -1467,6 +1467,51 @@ html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
 .pwa-auth-screen--hidden {
   display: none !important;
 }
+/* Фаза «идентификация» до показа кнопок входа (контент вне #app, всегда виден в PWA) */
+.pwa-auth-screen--identifying .pwa-auth-screen__inner {
+  display: none !important;
+}
+.pwa-auth-screen__identifying {
+  display: none;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 430px;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px 14px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.pwa-auth-screen--identifying .pwa-auth-screen__identifying {
+  display: flex;
+}
+.pwa-auth-screen__identifying-spinner {
+  width: 28px;
+  height: 28px;
+  margin: 18px 0 14px;
+  border: 3px solid rgba(148, 163, 184, 0.45);
+  border-top-color: #fb923c;
+  border-radius: 50%;
+  animation: auth-identifying-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+.pwa-auth-screen__identifying-text {
+  margin: 0;
+  max-width: 280px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(203, 213, 225, 0.95);
+}
+[data-theme="light"] .pwa-auth-screen__identifying-text {
+  color: rgba(51, 65, 85, 0.92);
+}
+[data-theme="light"] .pwa-auth-screen__identifying-spinner {
+  border-color: rgba(148, 163, 184, 0.5);
+  border-top-color: #ea580c;
+}
 .pwa-auth-screen__inner {
   width: 100%;
   max-width: 430px;

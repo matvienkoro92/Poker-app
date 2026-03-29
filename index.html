@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.023">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.024">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -320,6 +320,12 @@
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
       <!-- Версия: атрибут data-app-version на <html> — оверлей загрузки, экран входа PWA и футер главной. +0.001 на push / npm run bump:pwa-version -->
+      <div class="pwa-auth-screen__identifying" id="pwaAuthIdentifyingPanel" aria-live="polite" aria-busy="true" hidden>
+        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
+        <h1 class="pwa-auth-screen__title">TWO ACES</h1>
+        <span class="pwa-auth-screen__identifying-spinner" aria-hidden="true"></span>
+        <p class="pwa-auth-screen__identifying-text">Подождите, идентифицируем ваш аккаунт</p>
+      </div>
       <div class="pwa-auth-screen__inner">
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
