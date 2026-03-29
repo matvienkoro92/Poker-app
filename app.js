@@ -2972,18 +2972,6 @@ function getPokerResolvedTelegramUser() {
   var hintEl = document.getElementById("authBannerHint");
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
 
-  function disableLegacyAuthBannerForMiniApp() {
-    if (!isTelegramWebApp()) return;
-    if (banner && banner.parentNode) {
-      try { banner.parentNode.removeChild(banner); } catch (eRm) {}
-    }
-    banner = null;
-    bannerLink = null;
-    bannerText = null;
-    bannerRetry = null;
-    hintEl = null;
-  }
-
   function isPwaStandaloneMode() {
     try {
       if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
@@ -3003,7 +2991,6 @@ function getPokerResolvedTelegramUser() {
   function isPwaStandaloneAuth() {
     return isPwaStandaloneMode() && !isTelegramMiniAppRuntime();
   }
-  disableLegacyAuthBannerForMiniApp();
   function showPwaAuthScreen() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
@@ -3749,7 +3736,8 @@ function getPokerResolvedTelegramUser() {
   function setBannerVerifying() {
     if (!isPwaStandaloneAuth()) {
       if (banner) banner.classList.add("auth-banner--hidden");
-      hideIdentifyingMini();
+      /* Mini App: баннер убран из DOM раньше ломал виджет; полоса «идентификация» должна быть видна */
+      showIdentifyingMini();
       return;
     }
     if (bannerText) bannerText.textContent = "Профиль прогружается…";
@@ -3765,8 +3753,14 @@ function getPokerResolvedTelegramUser() {
 
   function setBannerFailure(message, showRetry) {
     if (!isPwaStandaloneAuth()) {
-      if (banner) banner.classList.add("auth-banner--hidden");
       hideIdentifyingMini();
+      if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
+      if (banner) {
+        banner.classList.remove("auth-banner--verifying");
+        banner.classList.remove("auth-banner--hidden");
+      }
+      if (bannerRetry) bannerRetry.hidden = !showRetry;
+      if (bannerLink) bannerLink.style.display = "none";
       return;
     }
     if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
@@ -4160,6 +4154,10 @@ function getPokerResolvedTelegramUser() {
           "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
       }
       mountTelegramLoginWidgetForPwa();
+      if (banner) {
+        banner.classList.remove("auth-banner--verifying");
+        banner.classList.remove("auth-banner--hidden");
+      }
       setTimeout(hideBootOverlay, 120);
       return;
     }
