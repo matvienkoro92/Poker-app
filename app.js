@@ -3026,22 +3026,23 @@ function getPokerResolvedTelegramUser() {
   }
 
   /** PWA: экран «идентификация» поверх приложения (не внутри скрытого #app). */
-  var pwaAuthIdentifyingPanelEl = document.getElementById("pwaAuthIdentifyingPanel");
   var PWA_AUTH_IDENTIFY_MIN_MS = 620;
   function setPwaAuthIdentifyingPhase(on) {
     if (!pwaAuthScreenEl) return;
+    var panel = document.getElementById("pwaAuthIdentifyingPanel");
     try {
       if (on) {
-        pwaAuthScreenEl.classList.add("pwa-auth-screen--identifying");
-        if (pwaAuthIdentifyingPanelEl) {
-          pwaAuthIdentifyingPanelEl.hidden = false;
-          pwaAuthIdentifyingPanelEl.setAttribute("aria-busy", "true");
+        /* Без панели в DOM (старый кэш HTML) нельзя вешать --identifying: CSS прячет .pwa-auth-screen__inner → пустой экран. */
+        if (panel) {
+          pwaAuthScreenEl.classList.add("pwa-auth-screen--identifying");
+          panel.hidden = false;
+          panel.setAttribute("aria-busy", "true");
         }
       } else {
         pwaAuthScreenEl.classList.remove("pwa-auth-screen--identifying");
-        if (pwaAuthIdentifyingPanelEl) {
-          pwaAuthIdentifyingPanelEl.hidden = true;
-          pwaAuthIdentifyingPanelEl.setAttribute("aria-busy", "false");
+        if (panel) {
+          panel.hidden = true;
+          panel.setAttribute("aria-busy", "false");
         }
       }
     } catch (ePwaId) {}
@@ -4151,10 +4152,27 @@ function getPokerResolvedTelegramUser() {
     window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
     updateHeaderGreeting();
     setTimeout(function () {
-      setPwaAuthIdentifyingPhase(false);
-      showUnauthorized();
-      resetBannerForPwaLogin();
-      mountTelegramLoginWidgetForPwa();
+      try {
+        setPwaAuthIdentifyingPhase(false);
+        showUnauthorized();
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      } catch (ePwaFlow) {
+        try {
+          setPwaAuthIdentifyingPhase(false);
+          document.body.classList.remove("pwa-auth-gated");
+          document.body.classList.remove("pwa-auth-preinit");
+        } catch (e2) {}
+        if (typeof window.__pokerHideBootOverlay === "function") {
+          try {
+            window.__pokerHideBootOverlay();
+          } catch (e3) {}
+        }
+      } finally {
+        try {
+          setPwaAuthIdentifyingPhase(false);
+        } catch (eF) {}
+      }
     }, PWA_AUTH_IDENTIFY_MIN_MS);
   }
 
@@ -16719,6 +16737,7 @@ function initChat() {
     if (isNaN(ogTime)) return messages;
     for (var iGen = messages.length - 1; iGen >= 0 && iGen >= messages.length - 35; iGen--) {
       var mG = messages[iGen];
+      if (!mG || mG.from == null || mG.from === "") continue;
       if (!peerChatIdsEqual(mG.from, myId)) continue;
       var mt = mG.time ? new Date(mG.time).getTime() : 0;
       if (mt < ogTime - 4000) continue;
@@ -16753,6 +16772,7 @@ function initChat() {
     if (isNaN(ogpTime)) return messages;
     for (var iP = messages.length - 1; iP >= 0 && iP >= messages.length - 35; iP--) {
       var mP = messages[iP];
+      if (!mP || mP.from == null || mP.from === "") continue;
       if (!peerChatIdsEqual(mP.from, myIdP)) continue;
       var mpt = mP.time ? new Date(mP.time).getTime() : 0;
       if (mpt < ogpTime - 4000) continue;
