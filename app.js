@@ -2848,6 +2848,57 @@ function pokerApplyAppTopPadding() {
   root.style.setProperty("--app-extra-top-for-ui", "12px");
 }
 
+/**
+ * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
+ * иногда не совпадают с реальным экраном — снизу «воздух», таббар приподнят.
+ */
+function pokerNukeIosKeyboardViewportArtifacts() {
+  try {
+    if (window.visualViewport) {
+      var vv = window.visualViewport;
+      if (typeof vv.scrollTo === "function") {
+        vv.scrollTo(0, 0);
+      } else if (typeof vv.scroll === "function") {
+        vv.scroll(0, 0);
+      }
+      var ot = Number(vv.offsetTop) || 0;
+      if (ot > 0.5) {
+        var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        window.scrollTo(0, y + ot);
+      }
+    }
+  } catch (eVv) {}
+  try {
+    window.scrollTo(0, 0);
+    var se = document.scrollingElement;
+    if (se) se.scrollTop = 0;
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  } catch (eScr) {}
+  try {
+    if (document.body && document.body.getAttribute("data-view") === "chat") {
+      var ih = window.innerHeight || 0;
+      if (ih > 0) {
+        document.body.style.minHeight = ih + "px";
+        var raf = window.requestAnimationFrame || function (fn) {
+          setTimeout(fn, 16);
+        };
+        raf(function () {
+          raf(function () {
+            try {
+              document.body.style.removeProperty("minHeight");
+            } catch (eMh) {}
+          });
+        });
+      }
+    }
+  } catch (eBody) {}
+  try {
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
+  } catch (eTg) {}
+}
+
 // Инициализация Telegram WebApp (если открыто внутри Telegram)
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -2871,6 +2922,9 @@ if (tg) {
     tg.onEvent("viewportChanged", function (e) {
       if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
       if (e && e.isStateStable) tryExpand();
+      if (e && e.isStateStable && document.body && !document.body.classList.contains("chat-keyboard-open")) {
+        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+      }
     });
   }
   document.addEventListener("visibilitychange", function () {
@@ -5069,6 +5123,9 @@ function setView(viewName, navOpts) {
         if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
       } catch (eKb2) {}
       try {
+        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+      } catch (eNk2) {}
+      try {
         var tw2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tw2 && typeof tw2.expand === "function") tw2.expand();
       } catch (eTw2) {}
@@ -5078,6 +5135,9 @@ function setView(viewName, navOpts) {
         if (document.body.classList.contains("chat-keyboard-open")) return;
         if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
       } catch (eKb3) {}
+      try {
+        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+      } catch (eNk3) {}
     }, 380);
   }
   if (prevView && prevView !== viewName) {
@@ -5087,6 +5147,18 @@ function setView(viewName, navOpts) {
     document.body.style.overflow = "";
     document.body.style.position = "";
     document.body.setAttribute("data-view", viewName || "");
+  }
+  if (prevView === "chat" && viewName !== "chat") {
+    try {
+      var rafPostChat = window.requestAnimationFrame || function (fn) {
+        setTimeout(fn, 16);
+      };
+      rafPostChat(function () {
+        try {
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+        } catch (ePostNv) {}
+      });
+    } catch (ePostChat) {}
   }
   views.forEach(function (view) {
     if (view.dataset.view === viewName) {
@@ -18903,8 +18975,10 @@ function initChat() {
       }
       function clearChatMessagesKeyboardPad() {
         try {
-          if (generalMessages) generalMessages.style.removeProperty("padding-bottom");
-          if (messagesEl) messagesEl.style.removeProperty("padding-bottom");
+          /* На всех лентах чата — иначе после dismiss остаётся inline padding-bottom. */
+          document.querySelectorAll(".chat-messages").forEach(function (el) {
+            if (el && el.style) el.style.removeProperty("padding-bottom");
+          });
         } catch (ePadClr) {}
       }
       /**
@@ -19054,12 +19128,8 @@ function initChat() {
           if (tw && typeof tw.expand === "function") tw.expand();
         } catch (eTg) {}
         try {
-          if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
-          var se = document.scrollingElement;
-          if (se) se.scrollTop = 0;
-          if (document.documentElement) document.documentElement.scrollTop = 0;
-          if (document.body) document.body.scrollTop = 0;
-        } catch (eScr) {}
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+        } catch (eNuke) {}
         try {
           if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
         } catch (eRe) {}
@@ -19076,36 +19146,56 @@ function initChat() {
               doc.style.removeProperty("--chat-vv-inset");
               doc.style.removeProperty("--chat-ios-accessory-inset");
             } catch (e2) {}
+            try {
+              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+            } catch (eNuke2) {}
           });
         } catch (eRaf) {}
+        [80, 220, 520].forEach(function (ms) {
+          setTimeout(function () {
+            if (document.body.classList.contains("chat-keyboard-open")) return;
+            try {
+              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+            } catch (eD) {}
+            stripChatInputAreaTransforms();
+            try {
+              if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
+            } catch (eR2) {}
+          }, ms);
+        });
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
       if (!window.__pokerChatVvPostKeyboardCleanupAttached && window.visualViewport && window.visualViewport.addEventListener) {
         window.__pokerChatVvPostKeyboardCleanupAttached = true;
         var vvPostKbTimer = null;
-        window.visualViewport.addEventListener("resize", function () {
+        function onVvAfterKeyboardMaybeClosed() {
           if (document.body.classList.contains("chat-keyboard-open")) return;
           var ih = window.innerHeight || 0;
           var vvh = Number(window.visualViewport.height) || 0;
-          /* Мягче порог: иначе «хвост» подъёма композера дольше не сбрасывается на части устройств. */
-          if (!ih || vvh < ih - 28) return;
+          /* iPhone 15: vv иногда близок к полной высоте, но 28px порог не срабатывает — ловим с 12px. */
+          if (!ih || vvh < ih - 12) return;
           clearTimeout(vvPostKbTimer);
           vvPostKbTimer = setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
             var ih2 = window.innerHeight || 0;
             var vvh2 = Number(window.visualViewport.height) || 0;
-            if (!ih2 || vvh2 < ih2 - 28) return;
+            if (!ih2 || vvh2 < ih2 - 12) return;
             document.documentElement.classList.remove("chat-vv-lift");
             document.documentElement.style.removeProperty("--chat-vv-inset");
             document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
             stripChatInputAreaTransforms();
             try {
+              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+            } catch (eNu) {}
+            try {
               var twP = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
               if (twP && typeof twP.expand === "function") twP.expand();
             } catch (eEx) {}
           }, 110);
-        });
+        }
+        window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
+        window.visualViewport.addEventListener("scroll", onVvAfterKeyboardMaybeClosed);
       }
 
       function syncPwaChatVisualViewportInset() {
@@ -20458,10 +20548,17 @@ function initChat() {
       if (lastSuggestions.length) showSuggest(lastSuggestions);
     });
     findByIdInputDialogs.addEventListener("blur", function (e) {
-      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-      document.body.classList.remove("chat-keyboard-open");
-      document.documentElement.style.removeProperty("--chat-vv-inset");
-      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+      try {
+        if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+          window.__pokerFinalizeChatKeyboardDismiss();
+        } else {
+          document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+          document.body.classList.remove("chat-keyboard-open");
+          document.documentElement.style.removeProperty("--chat-vv-inset");
+          document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+        }
+      } catch (eDlgFin) {}
       var relatedTarget = e.relatedTarget;
       setTimeout(function () {
         if (document.activeElement && suggestEl && suggestEl.contains(document.activeElement)) return;
