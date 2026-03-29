@@ -2979,17 +2979,18 @@ function getPokerResolvedTelegramUser() {
     } catch (e) {}
     return false;
   }
-  function isTelegramMiniAppRuntime() {
+  /**
+   * PWA с иконки: WebApp может отдать initDataUnsafe.user без подписанного initData.
+   * Старый критерий «есть user → Mini App» ломал вход: ждали initData, экран TWO ACES/«идентификация» зависал.
+   * Считаем установленный PWA отдельно: только непустой initData отключает PWA-экран (режим с подписью).
+   */
+  function isPwaStandaloneAuth() {
+    if (!isPwaStandaloneMode()) return false;
     try {
       var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (!wtg) return false;
-      if (wtg.initDataUnsafe && wtg.initDataUnsafe.user && wtg.initDataUnsafe.user.id != null) return true;
-      if (wtg.initData && String(wtg.initData).trim()) return true;
+      if (wtg && String(wtg.initData || "").trim()) return false;
     } catch (e) {}
-    return false;
-  }
-  function isPwaStandaloneAuth() {
-    return isPwaStandaloneMode() && !isTelegramMiniAppRuntime();
+    return true;
   }
   /**
    * Не показываем карточку «Верификация для входа в PWA» внутри клиента Telegram (Mini App / WebView).
@@ -4182,9 +4183,11 @@ function getPokerResolvedTelegramUser() {
       setPwaAuthIdentifyingPhase(false);
       return;
     }
-    window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
-    updateHeaderGreeting();
-    setTimeout(function () {
+    try {
+      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+      updateHeaderGreeting();
+    } catch (eHdr) {}
+    function finishPwaStandaloneIdentifyUi() {
       try {
         setPwaAuthIdentifyingPhase(false);
         showUnauthorized();
@@ -4206,7 +4209,15 @@ function getPokerResolvedTelegramUser() {
           setPwaAuthIdentifyingPhase(false);
         } catch (eF) {}
       }
-    }, PWA_AUTH_IDENTIFY_MIN_MS);
+    }
+    setTimeout(finishPwaStandaloneIdentifyUi, PWA_AUTH_IDENTIFY_MIN_MS);
+    /* Фолбэк: если основной таймер не отработал или фаза залипла — снять «идентификацию» и показать кнопки входа. */
+    setTimeout(function () {
+      try {
+        if (!pwaAuthScreenEl || !pwaAuthScreenEl.classList.contains("pwa-auth-screen--identifying")) return;
+        finishPwaStandaloneIdentifyUi();
+      } catch (eWd) {}
+    }, 5000);
   }
 
   function runVerifyFlow() {
@@ -4240,6 +4251,7 @@ function getPokerResolvedTelegramUser() {
       updateHeaderGreeting();
       showUnauthorized();
       resetBannerForPwaLogin();
+      hideIdentifyingMini();
       if (userUnsafe && bannerText) {
         bannerText.textContent =
           "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
