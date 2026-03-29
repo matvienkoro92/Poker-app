@@ -5015,6 +5015,71 @@ function setView(viewName, navOpts) {
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
+  /* Уход с чата по таббару/жесту: blur и полный сброс клавиатуры/ visualViewport — иначе на iOS залипают
+     html.chat-keyboard-open (overflow:hidden), inset и таббар «парит» с зазором снизу до главной. */
+  if (prevView === "chat" && viewName !== "chat") {
+    try {
+      var compLeave = document.getElementById("chatSharedComposer");
+      if (compLeave && document.activeElement === compLeave && typeof compLeave.blur === "function") compLeave.blur();
+      var dlgLeave = document.getElementById("chatFindByIdInputDialogs");
+      if (dlgLeave && document.activeElement === dlgLeave && typeof dlgLeave.blur === "function") dlgLeave.blur();
+      var findLeave = document.getElementById("chatFindByIdInput");
+      if (findLeave && document.activeElement === findLeave && typeof findLeave.blur === "function") findLeave.blur();
+    } catch (eBlurLeaveChat) {}
+    try {
+      if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+        window.__pokerFinalizeChatKeyboardDismiss();
+      } else {
+        document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+        document.body.classList.remove("chat-keyboard-open");
+        document.documentElement.style.removeProperty("--chat-vv-inset");
+        document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+        if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+          window.__pokerChatDetachVisualViewportListeners();
+        }
+      }
+    } catch (eFinKb) {}
+    try {
+      var twLeave = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (twLeave && typeof twLeave.expand === "function") twLeave.expand();
+    } catch (eTwExp) {}
+    try {
+      if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
+    } catch (eRes) {}
+    try {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+    } catch (ePadL) {}
+    try {
+      var bnavLeaveChat = document.querySelector(".bottom-nav");
+      if (bnavLeaveChat) {
+        bnavLeaveChat.classList.add("bottom-nav--no-transition");
+        var rafLvc = window.requestAnimationFrame || function (fn) {
+          setTimeout(fn, 16);
+        };
+        rafLvc(function () {
+          rafLvc(function () {
+            bnavLeaveChat.classList.remove("bottom-nav--no-transition");
+          });
+        });
+      }
+    } catch (eNavLvc) {}
+    setTimeout(function () {
+      try {
+        if (document.body.classList.contains("chat-keyboard-open")) return;
+        if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
+      } catch (eKb2) {}
+      try {
+        var tw2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tw2 && typeof tw2.expand === "function") tw2.expand();
+      } catch (eTw2) {}
+    }, 120);
+    setTimeout(function () {
+      try {
+        if (document.body.classList.contains("chat-keyboard-open")) return;
+        if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
+      } catch (eKb3) {}
+    }, 380);
+  }
   if (prevView && prevView !== viewName) {
     viewScrollMemory[prevView] = getMainDocumentScrollY();
   }
@@ -19085,7 +19150,9 @@ function initChat() {
         var cap = Math.min(480, Math.round(ih * 0.52));
         if (isIosLikeForChatViewport()) cap = Math.min(520, Math.round(ih * 0.58));
         var rawInset = Math.max(0, Math.min(overlap, cap));
+        /* iOS (в т.ч. iPhone 15): innerHeight/vv часто недооценивают клавиатуру — меньший factor оставляет зазор над клавишами. */
         var factor = tg ? 0.84 : 0.88;
+        if (isIosLikeForChatViewport()) factor = tg ? 0.9 : 0.93;
         var inset = Math.max(0, Math.round(rawInset * factor));
         var vvRatio = vvh / ih;
         if (vvRatio > 0 && vvRatio < 0.88 && ih > 0) {
@@ -19098,9 +19165,9 @@ function initChat() {
         if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 120) {
           inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * (tg ? 0.58 : 0.65))));
         }
-        /* iOS: чёрная accessory + Telegram часто недооценивают overlap — доп. подъём композера */
+        /* iOS: accessory bar + WKWebView недооценивают overlap — доп. подъём композера (+ запас под «хвост» после dismiss). */
         if (isIosLikeForChatViewport()) {
-          inset = Math.min(cap, inset + 34);
+          inset = Math.min(cap, inset + (tg ? 40 : 46));
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();

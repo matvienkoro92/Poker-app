@@ -11030,10 +11030,14 @@ a.home-mini-icon-item {
 
 .cashout-manager-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-top: 12px;
-  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .cashout-manager-btn {
   display: inline-flex;
@@ -11049,7 +11053,9 @@ a.home-mini-icon-item {
   border: 1px solid var(--border-subtle);
   color: var(--text);
   background: var(--block-bg);
-  min-width: 140px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   box-sizing: border-box;
 }
 .cashout-manager-btn:hover {
