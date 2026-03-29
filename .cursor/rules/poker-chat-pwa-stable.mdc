@@ -1,0 +1,26 @@
+---
+description: Зафиксированное поведение чата и PWA — не ломать без явной необходимости
+alwaysApply: true
+---
+
+# Чат и PWA: защищённые решения (регрессии запрещены)
+
+## PWA / экран TWO ACES
+
+- Не вешать `pwa-auth-preinit` до показа `#pwaAuthScreen` (раньше давало пустой экран).
+- Скрипты внизу `index.html`: `defer`, порядок — `telegram-web-app` → `updates-data` → `poker-tasks-data` → `app.js` → **`winter-rating-data` после app.js** (тяжёлый файл не блокирует авторизацию).
+- `isPwaStandaloneAuth`: standalone без подписанного `initData`; **не** считать Mini App только по `initDataUnsafe.user`.
+- Флоу идентификации PWA: таймер + фолбэк ~5 с, `updateHeaderGreeting` не должен блокировать постановку таймера.
+
+## Клавиатура в чате
+
+- Отступ ленты (`updateChatMessagesKeyboardPad`): **`lift = --chat-vv-inset + --chat-ios-accessory-inset`** + зазор — от **визуально поднятого** композера (translate), не от «якоря» в потоке.
+- При закрытии клавиатуры: снимать **`chat-keyboard-open` с `html` и `body`**, чистить `--chat-vv-inset` / `--chat-ios-accessory-inset`, `clearChatMessagesKeyboardPad`, **сбрасывать transform** у `.chat-input-area` (залипание слоя на части WebView).
+- Финализатор: `finalizeChatKeyboardDismiss` / `window.__pokerFinalizeChatKeyboardDismiss`.
+
+## Кнопки «Назад» в чате
+
+- Общий чат: `.chat-general-header__toolbar-back` — нейтральная «стеклянная» плашка, **не** чёрно-оранжевая ветка `body[data-view="chat"] .chat-back-btn`.
+- Личные: `.chat-conv-top__toolbar-back` — те же стили, что у общего.
+
+Перед изменениями в этих зонах — перечитать текущий код и не откатывать описанную логику «упрощением».

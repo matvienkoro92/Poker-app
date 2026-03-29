@@ -18946,6 +18946,14 @@ function initChat() {
         try {
           document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
             if (!node || !node.style) return;
+            /* Явный ноль + reflow — иначе на части WK/TG слой остаётся сдвинутым, снизу «лишнее» место. */
+            node.style.setProperty("transform", "translate3d(0, 0, 0)", "");
+            try {
+              node.style.setProperty("-webkit-transform", "translate3d(0, 0, 0)", "");
+            } catch (eW) {}
+            try {
+              void node.offsetHeight;
+            } catch (eOh) {}
             node.style.removeProperty("transform");
             node.style.removeProperty("-webkit-transform");
             node.style.removeProperty("will-change");
@@ -18958,17 +18966,28 @@ function initChat() {
             window.__pokerChatDetachVisualViewportListeners();
           }
         } catch (eDet) {}
+        var doc = document.documentElement;
         try {
-          document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+          doc.classList.remove("chat-keyboard-open", "chat-vv-lift");
           document.body.classList.remove("chat-keyboard-open");
-          document.documentElement.style.removeProperty("--chat-vv-inset");
-          document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+          /* Сначала явный 0 — сброс кэша calc()/композитинга; remove на следующем кадре. */
+          doc.style.setProperty("--chat-vv-inset", "0px");
+          doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
         stripChatInputAreaTransforms();
         clearChatMessagesKeyboardPad();
         try {
           syncPwaChatVisualViewportInset();
         } catch (eSync) {}
+        try {
+          doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+        } catch (eRm) {}
+        stripChatInputAreaTransforms();
+        try {
+          var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tw && typeof tw.expand === "function") tw.expand();
+        } catch (eTg) {}
         try {
           if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
           var se = document.scrollingElement;
@@ -18982,6 +19001,18 @@ function initChat() {
         try {
           if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
         } catch (ePad) {}
+        try {
+          var raf = window.requestAnimationFrame || function (fn) {
+            setTimeout(fn, 16);
+          };
+          raf(function () {
+            stripChatInputAreaTransforms();
+            try {
+              doc.style.removeProperty("--chat-vv-inset");
+              doc.style.removeProperty("--chat-ios-accessory-inset");
+            } catch (e2) {}
+          });
+        } catch (eRaf) {}
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
@@ -18992,17 +19023,22 @@ function initChat() {
           if (document.body.classList.contains("chat-keyboard-open")) return;
           var ih = window.innerHeight || 0;
           var vvh = Number(window.visualViewport.height) || 0;
-          if (!ih || vvh < ih - 40) return;
+          /* Мягче порог: иначе «хвост» подъёма композера дольше не сбрасывается на части устройств. */
+          if (!ih || vvh < ih - 28) return;
           clearTimeout(vvPostKbTimer);
           vvPostKbTimer = setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
             var ih2 = window.innerHeight || 0;
             var vvh2 = Number(window.visualViewport.height) || 0;
-            if (!ih2 || vvh2 < ih2 - 40) return;
+            if (!ih2 || vvh2 < ih2 - 28) return;
             document.documentElement.classList.remove("chat-vv-lift");
             document.documentElement.style.removeProperty("--chat-vv-inset");
             document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
             stripChatInputAreaTransforms();
+            try {
+              var twP = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+              if (twP && typeof twP.expand === "function") twP.expand();
+            } catch (eEx) {}
           }, 110);
         });
       }
@@ -19181,6 +19217,12 @@ function initChat() {
         setTimeout(function () {
           if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
         }, 880);
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 1350);
+        setTimeout(function () {
+          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+        }, 2200);
       }
       if (chatComposerEl) {
         chatComposerEl.addEventListener("focus", onChatInputFocus);
