@@ -165,7 +165,8 @@ body::-webkit-scrollbar,
 [data-theme="light"] .download-back,
 [data-theme="light"] .poker-streak-screen__back,
 [data-theme="light"] .poker-task-screen__back,
-[data-theme="light"] .chat-back-btn {
+[data-theme="light"]
+  .chat-back-btn:not(.chat-general-header__toolbar-back):not(.chat-conv-top__toolbar-back) {
   background: rgba(255, 253, 251, 0.96);
   color: #0f172a;
   border-color: rgba(148, 163, 184, 0.5);
@@ -175,7 +176,8 @@ body::-webkit-scrollbar,
 [data-theme="light"] .download-back:hover,
 [data-theme="light"] .poker-streak-screen__back:hover,
 [data-theme="light"] .poker-task-screen__back:hover,
-[data-theme="light"] .chat-back-btn:hover {
+[data-theme="light"]
+  .chat-back-btn:not(.chat-general-header__toolbar-back):not(.chat-conv-top__toolbar-back):hover {
   background: #fff;
   color: #c2410c;
   border-color: rgba(249, 115, 22, 0.55);
@@ -6208,23 +6210,29 @@ body[data-view="download"] .download-back:hover {
   color: var(--btn-on-accent);
 }
 
-/* «Назад» в личных чатах: чёрная подложка, оранжевая обводка (общий чат — нейтральная плашка, см. .chat-general-header__toolbar-back) */
+/* «Назад» в остальных местах чата — чёрная подложка (личные и общий — нейтральные плашки, см. ниже) */
 body[data-view="chat"]
-  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back) {
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):not(
+    .chat-conv-top__toolbar-back
+  ) {
   background: #000;
   border-color: var(--accent);
   color: var(--accent);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 body[data-view="chat"]
-  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):hover {
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):not(
+    .chat-conv-top__toolbar-back
+  ):hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent);
   color: #fb923c;
 }
 [data-theme="light"]
   body[data-view="chat"]
-  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back) {
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):not(
+    .chat-conv-top__toolbar-back
+  ) {
   background: #000;
   border-color: var(--accent);
   color: var(--accent);
@@ -6232,7 +6240,9 @@ body[data-view="chat"]
 }
 [data-theme="light"]
   body[data-view="chat"]
-  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):hover {
+  .chat-back-btn:not(.winter-rating-lightbox__back):not(.chat-general-header__toolbar-back):not(
+    .chat-conv-top__toolbar-back
+  ):hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent);
   color: #fb923c;
@@ -6311,6 +6321,50 @@ body[data-view="chat"]
   box-shadow: none;
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: #0f172a;
+}
+/* Личные сообщения: та же нейтральная плашка «Назад», что в общем чате */
+.chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  min-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
+  height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
+  max-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
+  margin: 0 !important;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 0;
+  letter-spacing: 0;
+  border-radius: 16px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(248, 250, 252, 0.88);
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+[data-theme="light"] .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back {
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: rgba(30, 41, 59, 0.88);
+  box-shadow: none;
+}
+[data-theme="light"] .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back:hover {
   background: rgba(15, 23, 42, 0.06);
   border-color: rgba(15, 23, 42, 0.14);
   color: #0f172a;

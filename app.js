@@ -18843,30 +18843,30 @@ function initChat() {
         } catch (ePadClr) {}
       }
       /**
-       * Нижний отступ ленты — высота композера и небольшой зазор, чтобы докрутить последние сообщения.
-       * --chat-vv-inset / --chat-ios-accessory-inset уже задают translate поля ввода; включать их в padding
-       * повторно нельзя — получается двойной «воздух» между последним сообщением и строкой ввода.
+       * Нижний отступ ленты относительно визуальной позиции композера после поля translate
+       * (--chat-vv-inset + --chat-ios-accessory-inset), а не от якоря лейаута.
+       * Низ скролла ленты = верх поля в потоке (L); поле рисуется выше на «lift», значит последнее сообщение нужно
+       * поднять минимум на lift + зазор, иначе «воздух» считают от старого закрепления.
        */
       function updateChatMessagesKeyboardPad() {
         clearChatMessagesKeyboardPad();
         if (!document.body.classList.contains("chat-keyboard-open")) return;
         var box = getVisibleMessagesEl();
         if (!box) return;
-        var inputArea =
-          chatActiveTab === "general"
-            ? document.getElementById("chatGeneralInputArea")
-            : document.querySelector("#chatConvView .chat-input-area");
-        var ih = inputArea && inputArea.offsetHeight ? inputArea.offsetHeight : 96;
-        var pad = Math.round(ih + 12);
+        var cs = getComputedStyle(document.documentElement);
+        var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
+        var gap = 12;
+        var pad = Math.round(lift + gap);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
             var ihWin = window.innerHeight || 0;
             var vvh = Number(window.visualViewport.height) || 0;
             var offTop = Number(window.visualViewport.offsetTop) || 0;
             var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
-            /* Редко layout не сжимается и лента уезжает под клавиатуру — чуть усиливаем, без дубля vv-inset. */
+            /* Layout почти не сжался, а клавиатура есть — переменные могли обнулиться; добор без второго lift. */
             if (overlap > 48) {
-              pad = Math.max(pad, Math.round(ih + 12 + Math.min(overlap * 0.22, 56)));
+              var slack = Math.max(0, overlap - lift);
+              pad = Math.max(pad, Math.round(lift + gap + Math.min(slack * 0.22, 56)));
             }
           } catch (eVv) {}
         }
