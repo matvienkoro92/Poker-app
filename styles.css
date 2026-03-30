@@ -2631,6 +2631,31 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   color: #3d3228;
 }
 
+.club-charter-modal .gazette-modal__pick-back-bar {
+  margin-bottom: 8px;
+}
+.club-charter-modal .gazette-modal__back {
+  background: rgba(139, 90, 43, 0.14);
+  border-color: rgba(44, 24, 16, 0.48);
+  color: #2c1810;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.club-charter-modal .gazette-modal__back:hover {
+  background: rgba(139, 90, 43, 0.24);
+  border-color: rgba(44, 24, 16, 0.65);
+  color: #1a0f0a;
+}
+[data-theme="light"] .club-charter-modal .gazette-modal__back {
+  background: rgba(139, 90, 43, 0.12);
+  border-color: rgba(44, 24, 16, 0.42);
+  color: #2c1810;
+}
+[data-theme="light"] .club-charter-modal .gazette-modal__back:hover {
+  background: rgba(139, 90, 43, 0.2);
+  border-color: rgba(44, 24, 16, 0.58);
+  color: #1a0f0a;
+}
+
 #app:has(#clubCharterModal[aria-hidden="false"]) ~ .bottom-nav {
   transform: translate3d(0, 100%, 0);
   opacity: 0;

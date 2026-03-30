@@ -2013,30 +2013,51 @@ function runGazetteAndTasksInit() {
     }, 0);
   }
   (function initClubCharterModal() {
+    var CLUB_CHARTER_HASH = "#club-charter";
     var modal = document.getElementById("clubCharterModal");
     var openBtn = document.getElementById("clubCharterOpenBtn");
     var closeBtn = document.getElementById("clubCharterModalClose");
+    var backBtn = document.getElementById("clubCharterModalBack");
     var shareBtn = document.getElementById("clubCharterShareBtn");
     var copyBtn = document.getElementById("clubCharterCopyBtn");
     var backdrop = document.getElementById("clubCharterModalBackdrop");
     var paper = modal && modal.querySelector(".club-charter-modal__paper");
     if (!modal || !openBtn) return;
-    function openCharter() {
+    function openCharter(opts) {
+      opts = opts || {};
       modal.setAttribute("aria-hidden", "false");
       if (paper) paper.scrollTop = 0;
+      if (!opts.skipHistory) {
+        try {
+          if (String(window.location.hash || "") !== CLUB_CHARTER_HASH) {
+            window.history.replaceState({}, "", window.location.pathname + window.location.search + CLUB_CHARTER_HASH);
+          }
+        } catch (eHist) {}
+      }
     }
     function closeCharter() {
       modal.setAttribute("aria-hidden", "true");
+      try {
+        if (String(window.location.hash || "") === CLUB_CHARTER_HASH) {
+          window.history.replaceState({}, "", window.location.pathname + window.location.search);
+        }
+      } catch (eCloseHist) {}
     }
     function getCharterShareText() {
       return "Устав клуба «Два туза»";
     }
     function getCharterShareLink() {
-      // Ссылка по аналогии с газетой/рейтинговыми ссылками: открывает приложение (home по умолчанию).
+      var base = "";
       try {
-        if (typeof getAppBaseUrlForLinks === "function") return String(getAppBaseUrlForLinks());
+        if (typeof getAppBaseUrlForLinks === "function") base = String(getAppBaseUrlForLinks());
       } catch (eShare) {}
-      return (window.location && window.location.href ? String(window.location.href) : "");
+      if (!base) {
+        try {
+          var loc = window.location;
+          if (loc) base = String(loc.origin + loc.pathname).replace(/\/$/, "");
+        } catch (eBase) {}
+      }
+      return base ? base + CLUB_CHARTER_HASH : "";
     }
     function notifyUser(text) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -2077,6 +2098,12 @@ function runGazetteAndTasksInit() {
       openCharter();
     });
     if (closeBtn) closeBtn.addEventListener("click", closeCharter);
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        closeCharter();
+      });
+    }
     if (backdrop) backdrop.addEventListener("click", closeCharter);
     if (shareBtn) {
       shareBtn.addEventListener("click", function (e) {
@@ -2095,6 +2122,16 @@ function runGazetteAndTasksInit() {
       if (modal.getAttribute("aria-hidden") !== "false") return;
       closeCharter();
     });
+    window.addEventListener("hashchange", function () {
+      if (window.location.hash === CLUB_CHARTER_HASH) {
+        openCharter({ skipHistory: true });
+      } else if (modal.getAttribute("aria-hidden") === "false") {
+        modal.setAttribute("aria-hidden", "true");
+      }
+    });
+    setTimeout(function () {
+      if (window.location.hash === CLUB_CHARTER_HASH) openCharter({ skipHistory: true });
+    }, 0);
   })();
 })();
 }
