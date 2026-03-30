@@ -626,6 +626,14 @@ html.app-view-home {
 html.app-view-home body {
   overflow-y: visible !important;
 }
+/* Локальный браузер: часть движков не скроллит html как scrollingElement на главной. */
+html.app-view-home.app-view-home-local {
+  overflow-y: visible;
+}
+html.app-view-home.app-view-home-local body {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
 /* Видеоуроки / хаб: класс с setView. Скролл на body — см. комментарий к :has() выше (обрез после ~9 блоков при scroll на html). */
 html.app-view-long-scroll {
   overflow-y: visible !important;

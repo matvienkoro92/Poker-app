@@ -4711,6 +4711,8 @@ function pokerSyncInertForViewScreensOnly() {
   var viewName = initialView ? initialView.getAttribute("data-view") : "";
   if (viewName === "home") {
     document.documentElement.classList.add("app-view-home");
+    var tgInit = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    document.documentElement.classList.toggle("app-view-home-local", !tgInit);
   }
 })();
 
@@ -5388,6 +5390,8 @@ function setView(viewName, navOpts) {
   } else if (viewName === "home") {
     document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-home");
+    var tgForHome = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    document.documentElement.classList.toggle("app-view-home-local", !tgForHome);
     var ratingSection = document.getElementById("winterRatingSection");
     var winterView = document.querySelector('[data-view="winter-rating"]');
     var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
@@ -5397,7 +5401,7 @@ function setView(viewName, navOpts) {
       winterView.appendChild(ratingSection);
     }
   } else {
-    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-home");
+    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-home", "app-view-home-local");
     var ratingSection = document.getElementById("winterRatingSection");
     var winterView = document.querySelector('[data-view="winter-rating"]');
     var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
