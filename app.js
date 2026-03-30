@@ -22410,7 +22410,6 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         var archiveWeekStarts = weekStartsDesc.filter(function (ws) {
           return ws !== currentWeek.start;
         });
-        var curTotals = sumReportsInWindow(items, currentWeek.start, currentWeek.end);
         function buildWeekBlock(weekStartMs, list, idPrefixBase) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(items, meta.start, meta.end);
@@ -22441,14 +22440,10 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           };
         }
 
+        var currentBlock = buildWeekBlock(currentWeek.start, currentItems, "ar-cur-");
         var html = [];
         html.push('<div class="admin-report-sent-current">');
-        if (currentItems.length === 0) {
-          html.push('<p class="admin-report-sent-period-hint">За текущую неделю (' + escapeReportHtml(currentWeek.label) + ') отчётов пока нет.</p>');
-        } else {
-          html.push(buildDaysHtmlFromList(currentItems, "ar-cur-"));
-        }
-        html.push(buildWeekTotalRow(curTotals, currentWeek.label, "ar-week-current"));
+        html.push(currentBlock.html);
         html.push("</div>");
 
         if (archiveWeekStarts.length > 0) {
@@ -22472,9 +22467,8 @@ window.addEventListener("poker-telegram-auth", function (ev) {
 
         var reportById = {};
         items.forEach(function (r) { reportById[r.id] = r; });
-        var weekTotalsById = {
-          "ar-week-current": { totals: curTotals, label: currentWeek.label },
-        };
+        var weekTotalsById = {};
+        weekTotalsById[currentBlock.weekId] = { totals: currentBlock.totals, label: currentBlock.label };
         archiveWeekStarts.forEach(function (ws) {
           var meta = weekMetaFromStart(ws);
           weekTotalsById["ar-week-" + meta.key] = {
