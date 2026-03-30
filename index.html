@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.046">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.055">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -145,7 +145,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=246" />
+    <link rel="stylesheet" href="./styles.css?v=255" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -476,35 +476,82 @@
             </div>
             </div>
 
-            <div class="tournament-day-home-wrap">
-              <h2 class="tournament-day-home-wrap__title">Турнир дня</h2>
-              <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="schedule" aria-label="Турнир дня — перейти к расписанию">
-                <div class="feature__icon feature__icon--tournament-day-home" aria-hidden="true">
-                  <img
-                    id="tournamentDayHomeTrophyImg"
-                    class="tournament-day-block__trophy-img tournament-day-block__trophy-img--home-promo"
-                    src="./assets/tournament-day-two-aces.png"
-                    alt=""
-                    width="144"
-                    height="144"
-                    decoding="async"
-                  />
+            <div class="tournament-day-home-dual">
+              <div class="tournament-day-home-wrap tournament-day-home-wrap--freeroll">
+                <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="download" aria-label="Следующий фриролл — скачать клиент">
+                  <div class="feature__body tournament-day-block__body">
+                    <div class="tournament-day-block__home-head">
+                      <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
+                      <div class="feature__title tournament-day-block__name tournament-day-name--freeroll" id="freerollHomeName">—</div>
+                    </div>
+                    <div class="feature__desc tournament-day-block__meta">
+                      <div class="tournament-day-block__stats">
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Вход</span>
+                          <span class="tournament-day-block__stat-value" id="freerollHomeBuyin">0₽</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Приз</span>
+                          <span class="tournament-day-block__stat-value" id="freerollHomeGuarantee">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Время</span>
+                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="freerollHomeWeekTime">Сб, 18:00 МСК</span>
+                        </div>
+                      </div>
+                      <div class="tournament-day-block__countdown">
+                        <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+                <div class="tournament-day-actions-row">
+                  <a
+                    href="#"
+                    class="tournament-day-share-btn tournament-day-freeroll-play-cta"
+                    id="freerollHomePlayBtn"
+                    data-view-target="download"
+                    aria-label="Сыграть во фриролл — скачать клиент"
+                  >Сыграть во фриролл</a>
                 </div>
-                <div class="feature__body tournament-day-block__body">
-                  <div class="feature__title tournament-day-block__name" id="tournamentDayName">—</div>
-                  <div class="feature__desc tournament-day-block__meta"><span id="tournamentDayBuyin">—</span> · <span id="tournamentDayGuarantee">—</span> · 18:00<br><span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span></div>
-                  <span class="tournament-day-block__cta">Расписание &gt;&gt;</span>
+              </div>
+              <div class="tournament-day-home-wrap tournament-day-home-wrap--tournament-day">
+                <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="schedule" aria-label="Турнир дня — перейти к расписанию">
+                  <div class="feature__body tournament-day-block__body">
+                    <div class="tournament-day-block__home-head">
+                      <h2 class="tournament-day-block__home-heading">Турнир дня</h2>
+                      <div class="feature__title tournament-day-block__name" id="tournamentDayName">—</div>
+                    </div>
+                    <div class="feature__desc tournament-day-block__meta">
+                      <div class="tournament-day-block__stats">
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Вход</span>
+                          <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Приз</span>
+                          <span class="tournament-day-block__stat-value" id="tournamentDayGuarantee">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Время</span>
+                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="tournamentDayHomeWeekTime">—, 18:00 МСК</span>
+                        </div>
+                      </div>
+                      <div class="tournament-day-block__countdown">
+                        <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+                <div class="tournament-day-actions-row">
+                  <a
+                    href="#"
+                    class="tournament-day-share-btn tournament-day-schedule-cta"
+                    id="tournamentDayScheduleBtn"
+                    data-view-target="schedule"
+                    aria-label="Расписание турниров на неделю"
+                  >Расписание на неделю</a>
                 </div>
-              </a>
-              <div class="tournament-day-actions-row">
-                <button
-                  type="button"
-                  class="tournament-day-share-btn"
-                  id="tournamentDayShareBtn"
-                  aria-label="Позвать друга на турнир дня"
-                >
-                  Позвать друга
-                </button>
               </div>
             </div>
 
@@ -4189,6 +4236,18 @@
               <li>
                 <p>В турнирах все бонусы за комбинации всегда только по двум картам.</p>
               </li>
+              <li>
+                <p>Перелив фишек запрещён — намеренный проигрыш в турнирах и в кэше другим игрокам с целью передать фишки.</p>
+              </li>
+              <li>
+                <p>Любые сделки и займы в чатах клуба с другими игроками — только на вашу ответственность. Клуб не рекомендует вступать в финансовые отношения с другими игроками клуба. Всё это только на ваше усмотрение и под вашу ответственность. Заранее поинтересуйтесь о репутации игрока в чате, но даже это ничего не гарантирует.</p>
+              </li>
+              <li>
+                <p>Приобретайте фишки только у админов клуба <a href="https://t.me/qweenpoker" target="_blank" rel="noopener noreferrer">@qweenpoker</a> и <a href="https://t.me/vikipoker" target="_blank" rel="noopener noreferrer">@vikipoker</a>.</p>
+              </li>
+              <li>
+                <p>Прямые оскорбления других игроков категорически не приветствуются, кроме случаев, где это «чисто по игре».</p>
+              </li>
             </ol>
           </div>
         </div>
@@ -5248,7 +5307,7 @@
     <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=225"></script>
+    <script defer src="./app.js?v=231"></script>
     <script defer src="./winter-rating-data.js?v=69"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

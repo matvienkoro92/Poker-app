@@ -48,7 +48,7 @@ function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
 }
 
-/** Главная: скролл на html только в реальном Mini App (непустой initData). Локально скрипт даёт WebApp без initData — крутим body (класс app-view-home-local). */
+/** Реальный Mini App: непустой initData — часто удобнее крутить документ на <html>. Локально WebApp есть, initData пуст — единый скролл на <body> (класс app-view-browser-local на всех вкладках кроме чата). */
 function pokerHomeShouldScrollHtmlElement() {
   try {
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -2022,9 +2022,47 @@ function runGazetteAndTasksInit() {
     var copyBtn = document.getElementById("clubCharterCopyBtn");
     var backdrop = document.getElementById("clubCharterModalBackdrop");
     var paper = modal && modal.querySelector(".club-charter-modal__paper");
+    var charterScrollLockY = 0;
+    var charterBehindLocked = false;
+    function lockCharterBehindScroll() {
+      if (charterBehindLocked) return;
+      charterScrollLockY =
+        window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop) || 0;
+      charterBehindLocked = true;
+      try {
+        document.documentElement.classList.add("club-charter-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "hidden";
+          b.style.position = "fixed";
+          b.style.top = "-" + charterScrollLockY + "px";
+          b.style.left = "0";
+          b.style.right = "0";
+          b.style.width = "100%";
+        }
+      } catch (eLock) {}
+    }
+    function unlockCharterBehindScroll() {
+      if (!charterBehindLocked) return;
+      charterBehindLocked = false;
+      try {
+        document.documentElement.classList.remove("club-charter-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "";
+          b.style.position = "";
+          b.style.top = "";
+          b.style.left = "";
+          b.style.right = "";
+          b.style.width = "";
+        }
+        window.scrollTo(0, charterScrollLockY);
+      } catch (eUnlock) {}
+    }
     if (!modal || !openBtn) return;
     function openCharter(opts) {
       opts = opts || {};
+      lockCharterBehindScroll();
       modal.setAttribute("aria-hidden", "false");
       if (paper) paper.scrollTop = 0;
       if (!opts.skipHistory) {
@@ -2037,6 +2075,7 @@ function runGazetteAndTasksInit() {
     }
     function closeCharter() {
       modal.setAttribute("aria-hidden", "true");
+      unlockCharterBehindScroll();
       try {
         if (String(window.location.hash || "") === CLUB_CHARTER_HASH) {
           window.history.replaceState({}, "", window.location.pathname + window.location.search);
@@ -2126,7 +2165,7 @@ function runGazetteAndTasksInit() {
       if (window.location.hash === CLUB_CHARTER_HASH) {
         openCharter({ skipHistory: true });
       } else if (modal.getAttribute("aria-hidden") === "false") {
-        modal.setAttribute("aria-hidden", "true");
+        closeCharter();
       }
     });
     setTimeout(function () {
@@ -4836,14 +4875,17 @@ function pokerSyncInertForViewScreensOnly() {
   else apply();
 })();
 
-// На главной при загрузке — класс для layout без :has() (устройства без поддержки, убирает отступ внизу)
+// При запуске: главная / локальный браузер (скролл на body на всех не-chat экранах без initData)
 (function () {
   var initialView = document.querySelector(".view--active[data-view]");
   var viewName = initialView ? initialView.getAttribute("data-view") : "";
   if (viewName === "home") {
     document.documentElement.classList.add("app-view-home");
-    document.documentElement.classList.toggle("app-view-home-local", !pokerHomeShouldScrollHtmlElement());
   }
+  document.documentElement.classList.toggle(
+    "app-view-browser-local",
+    viewName !== "chat" && !pokerHomeShouldScrollHtmlElement()
+  );
 })();
 
 /** Страховка для локального браузера: если после чата/модалки остался глобальный lock, возвращаем скролл документа. */
@@ -5226,6 +5268,15 @@ function pokerEnsureChatTelegramVerified() {
   return true;
 }
 
+/** Открытие диалога менеджера из депозита после setView("chat"): не полагаться на фиксированный таймаут. */
+function pokerTryConsumePendingManagerFromCashout() {
+  var pm = window.__pendingOpenManagerFromCashout;
+  if (!pm || !pm.userId) return;
+  if (typeof window.chatOpenConvFromDialogs !== "function") return;
+  window.__pendingOpenManagerFromCashout = null;
+  window.chatOpenConvFromDialogs(pm.userId, pm.userName || "Менеджер");
+}
+
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   var restoreScrollOnEnter = navOpts.fromBack === true;
@@ -5405,7 +5456,9 @@ function setView(viewName, navOpts) {
     } catch (eNavChat) {}
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
-      idleChat(function () { initChat(); });
+      idleChat(function () {
+        if (!window.chatListenersAttached && typeof initChat === "function") initChat();
+      });
     } else if (window.chatListenersAttached) {
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
@@ -5531,23 +5584,25 @@ function setView(viewName, navOpts) {
   if (headerSwitcherWrap) headerSwitcherWrap.classList.toggle("header-chat-switcher--hidden", viewName !== "chat");
   if (viewName === "chat") {
     document.documentElement.classList.add("app-view-chat");
-    document.documentElement.classList.remove("app-view-winter-rating", "app-view-home", "app-view-home-local");
+    document.documentElement.classList.remove("app-view-winter-rating", "app-view-home");
     updateChatNavDot();
     if (window.chatListenersAttached && typeof window.chatRefresh === "function") {
       window.chatRefresh();
     } else {
       initChat();
     }
+    try {
+      pokerTryConsumePendingManagerFromCashout();
+    } catch (eCashoutMgr) {}
   } else if (viewName === "winter-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-home-local", "app-view-spring-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-winter-rating");
   } else if (viewName === "spring-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-home-local", "app-view-winter-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-winter-rating");
     document.documentElement.classList.add("app-view-spring-rating");
   } else if (viewName === "home") {
     document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-home");
-    document.documentElement.classList.toggle("app-view-home-local", !pokerHomeShouldScrollHtmlElement());
     var ratingSection = document.getElementById("winterRatingSection");
     var winterView = document.querySelector('[data-view="winter-rating"]');
     var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
@@ -5557,7 +5612,7 @@ function setView(viewName, navOpts) {
       winterView.appendChild(ratingSection);
     }
   } else {
-    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-home", "app-view-home-local");
+    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-home");
     var ratingSection = document.getElementById("winterRatingSection");
     var winterView = document.querySelector('[data-view="winter-rating"]');
     var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
@@ -5567,6 +5622,10 @@ function setView(viewName, navOpts) {
       winterView.appendChild(ratingSection);
     }
   }
+  document.documentElement.classList.toggle(
+    "app-view-browser-local",
+    viewName !== "chat" && !pokerHomeShouldScrollHtmlElement()
+  );
   /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу, только <html> с классом как на главной */
   var longScroll =
     viewName === "video-lessons" ||
@@ -10417,10 +10476,8 @@ function initCashoutDepositForm() {
       var platform = isP21 ? "Poker21" : "Xpoker";
       var lines = ["Заявка на пополнение", "Сумма: " + (amount.trim() || "—") + " руб.", "Платформа: " + platform, "ID: " + (id.trim() || "—")];
       window.__pendingDepositMessage = lines.join("\n");
+      window.__pendingOpenManagerFromCashout = { userId: "tg_2144406710", userName: "Анна" };
       if (typeof setView === "function") setView("chat");
-      setTimeout(function () {
-        if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs("tg_2144406710", "Анна");
-      }, 150);
     });
   }
 
@@ -11454,10 +11511,8 @@ document.addEventListener("click", function (e) {
     var userId = hereBtn.getAttribute("data-cashout-chat-user-id");
     var userName = hereBtn.getAttribute("data-cashout-chat-user-name") || "Менеджер";
     if (userId && typeof setView === "function") {
+      window.__pendingOpenManagerFromCashout = { userId: userId, userName: userName };
       setView("chat");
-      setTimeout(function () {
-        if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs(userId, userName);
-      }, 150);
     }
     return;
   }
@@ -20328,7 +20383,13 @@ function initChat() {
     window.__pendingOpenClubChatGeneral = false;
     window.__openClubChatAfterNextContacts = true;
   }
-  showDialogs();
+  if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
+    var pcm = window.__pendingOpenManagerFromCashout;
+    window.__pendingOpenManagerFromCashout = null;
+    openConvFromDialogs(pcm.userId, pcm.userName || "Менеджер");
+  } else {
+    showDialogs();
+  }
 
   if (dialogsView) {
     var assetPath = (window.location.pathname || "").replace(/\/[^/]*$/, "") || "/";
@@ -21729,7 +21790,7 @@ window.addEventListener("poker-telegram-auth", function (ev) {
 
 (function initShareStatsAdminModal() {
   var SHARE_BUTTON_LABELS = {
-    tournament_day: "Турнир дня (Позвать друга)",
+    tournament_day: "Турнир дня (поделиться)",
     daily_prediction: "Предсказание на день",
     gazette_article: "Газета (новость)",
     winter_rating_week_top: "Рейтинг — топы недели",
@@ -23087,16 +23148,22 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Фриролл", buyin: "Бесплатно · R:250₽ / A:500₽", guarantee: "100 000₽" }
 ];
 
+/** Короткое имя дня недели по календарю Москвы для момента utcMs (Date или число). */
+function pokerMskWeekdayShortAt(utcMs) {
+  var wk = new Date(utcMs).toLocaleDateString("en-US", { timeZone: "Europe/Moscow", weekday: "short" });
+  var map = { Sun: "вс", Mon: "пн", Tue: "вт", Wed: "ср", Thu: "чт", Fri: "пт", Sat: "сб" };
+  var ru = map[wk];
+  return ru ? ru.charAt(0).toUpperCase() + ru.slice(1) : "—";
+}
+
 function updateTournamentDayBlock() {
-  var els = [
-    document.getElementById("tournamentDayName"),
-    document.getElementById("scheduleTournamentDayName")
-  ].filter(Boolean);
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);
   var timerLabelEls = [document.getElementById("tournamentDayTimerLabel"), document.getElementById("scheduleTournamentDayTimerLabel")].filter(Boolean);
   var timerEls = [document.getElementById("tournamentDayTimer"), document.getElementById("scheduleTournamentDayTimer")].filter(Boolean);
-  if (els.length === 0 || buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
+  var hasNameSlot =
+    document.getElementById("tournamentDayName") || document.getElementById("scheduleTournamentDayName");
+  if (!hasNameSlot || buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
   var MSK_START_UTC_HOUR = 15;
   var MSK_END_REG_UTC_HOUR = 18;
   function getMskDateParts() {
@@ -23134,6 +23201,26 @@ function updateTournamentDayBlock() {
     var nextMskDow = nextDate.getDay();
     return { t: TOURNAMENT_OF_DAY_BY_WEEKDAY[nextMskDow], target: nextStart, label: "", weekday: nextMskDow };
   }
+  function addDaysToYmd(y, m0, d, add) {
+    var dt = new Date(Date.UTC(y, m0, d, 12, 0, 0, 0));
+    dt.setUTCDate(dt.getUTCDate() + add);
+    return { y: dt.getUTCFullYear(), m: dt.getUTCMonth(), d: dt.getUTCDate() };
+  }
+  /** Следующий субботний фриролл (индекс 6 в TOURNAMENT_OF_DAY_BY_WEEKDAY), 18:00 МСК — та же логика старта/конца рег, что у турнира дня. */
+  function getNextFreerollState(now) {
+    var FR = TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
+    var p = getMskDateParts();
+    var mskDow = getMskDayOfWeek();
+    var satOffset = (6 - mskDow + 7) % 7;
+    var sat = addDaysToYmd(p.y, p.m, p.d, satOffset);
+    var startSat = new Date(Date.UTC(sat.y, sat.m, sat.d, MSK_START_UTC_HOUR, 0, 0, 0));
+    var endRegSat = new Date(Date.UTC(sat.y, sat.m, sat.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    if (now < startSat) return { t: FR, target: startSat, label: "" };
+    if (now < endRegSat) return { t: FR, target: endRegSat, label: "до конца рег " };
+    var nextSat = addDaysToYmd(sat.y, sat.m, sat.d, 7);
+    var nextStart = new Date(Date.UTC(nextSat.y, nextSat.m, nextSat.d, MSK_START_UTC_HOUR, 0, 0, 0));
+    return { t: FR, target: nextStart, label: "" };
+  }
   function formatTimer() {
     var n = new Date();
     var state = getTournamentDayState(n);
@@ -23145,17 +23232,30 @@ function updateTournamentDayBlock() {
       time: "18:00",
       guarantee: guaranteeStr
     };
-    els.forEach(function (el) {
-      el.textContent = nameStr;
+    var homeTdName = document.getElementById("tournamentDayName");
+    var scheduleTdName = document.getElementById("scheduleTournamentDayName");
+    var hideNameOnHome = nameStr === "Фриролл" || nameStr === "Rebuy";
+    if (homeTdName) {
+      homeTdName.textContent = hideNameOnHome ? "" : nameStr;
       if (nameStr === "Фриролл") {
-        el.classList.add("tournament-day-name--freeroll");
+        homeTdName.classList.add("tournament-day-name--freeroll");
       } else {
-        el.classList.remove("tournament-day-name--freeroll");
+        homeTdName.classList.remove("tournament-day-name--freeroll");
       }
-    });
+    }
+    if (scheduleTdName) {
+      scheduleTdName.textContent = nameStr;
+      if (nameStr === "Фриролл") {
+        scheduleTdName.classList.add("tournament-day-name--freeroll");
+      } else {
+        scheduleTdName.classList.remove("tournament-day-name--freeroll");
+      }
+    }
     buyinEls.forEach(function (el) { el.textContent = buyinStr; });
     guaranteeEls.forEach(function (el) { el.textContent = guaranteeStr; });
-    timerLabelEls.forEach(function (el) { el.textContent = state.label; });
+    timerLabelEls.forEach(function (el) {
+      el.textContent = state.label ? state.label : "Старт через: ";
+    });
     var diff = state.target - n;
     var timerStr = diff <= 0 ? "Скоро" : (function () {
       var h = Math.floor(diff / 3600000);
@@ -23164,6 +23264,45 @@ function updateTournamentDayBlock() {
       return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
     })();
     timerEls.forEach(function (el) { el.textContent = timerStr; });
+    var tdWeekTime = document.getElementById("tournamentDayHomeWeekTime");
+    if (tdWeekTime && state.target) {
+      tdWeekTime.textContent = pokerMskWeekdayShortAt(state.target.getTime()) + ", 18:00 МСК";
+    }
+    var frName = document.getElementById("freerollHomeName");
+    var frBuy = document.getElementById("freerollHomeBuyin");
+    var frGuar = document.getElementById("freerollHomeGuarantee");
+    var frLab = document.getElementById("freerollHomeTimerLabel");
+    var frTime = document.getElementById("freerollHomeTimer");
+    if (frName && frGuar && frLab && frTime) {
+      var frState = getNextFreerollState(n);
+      var frT = frState.t;
+      frName.textContent = "";
+      frName.classList.add("tournament-day-name--freeroll");
+      if (frBuy) frBuy.textContent = "0₽";
+      frGuar.textContent = frT.guarantee;
+      frLab.textContent = frState.label ? frState.label : "Старт через: ";
+      var frDiff = frState.target - n;
+      var frTimerStr =
+        frDiff <= 0
+          ? "Скоро"
+          : (function () {
+              var frDayMs = 86400000;
+              if (frDiff > frDayMs) {
+                var fd = Math.floor(frDiff / frDayMs);
+                var fhRem = Math.floor((frDiff % frDayMs) / 3600000);
+                return fd + "д " + fhRem + "ч";
+              }
+              var fh = Math.floor(frDiff / 3600000);
+              var fm = Math.floor((frDiff % 3600000) / 60000);
+              var fs = Math.floor((frDiff % 60000) / 1000);
+              return (fh < 10 ? "0" : "") + fh + ":" + (fm < 10 ? "0" : "") + fm + ":" + (fs < 10 ? "0" : "") + fs;
+            })();
+      frTime.textContent = frTimerStr;
+      var frWeekTime = document.getElementById("freerollHomeWeekTime");
+      if (frWeekTime && frState.target) {
+        frWeekTime.textContent = pokerMskWeekdayShortAt(frState.target.getTime()) + ", 18:00 МСК";
+      }
+    }
     var scheduleTrophyImg = document.getElementById("scheduleTournamentDayTrophyImg");
     var weekday = state.weekday;
     var pToday = getDisplayedTournamentMskParts(n);
@@ -23253,7 +23392,7 @@ if (document.readyState === "loading") {
   initTournamentDayBlock();
 }
 
-// Поделиться турниром дня с другом (кнопка под блоком «Турнир дня» на главной и на экране расписания)
+// Поделиться турниром дня (если на странице есть кнопка с id scheduleTournamentDayShareBtn)
 function handleTournamentDayShare() {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var share = window._tournamentDayShare || {};
@@ -23290,7 +23429,7 @@ function handleTournamentDayShare() {
     if (typeof recordShareButtonClick === "function") recordShareButtonClick("tournament_day");
 }
 (function initTournamentDayShareButton() {
-  var shareBtns = [document.getElementById("tournamentDayShareBtn"), document.getElementById("scheduleTournamentDayShareBtn")];
+  var shareBtns = [document.getElementById("scheduleTournamentDayShareBtn")];
   shareBtns.forEach(function (btn) {
     if (btn) btn.addEventListener("click", handleTournamentDayShare);
   });
