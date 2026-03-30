@@ -1794,6 +1794,26 @@ body.pwa-auth-gated #app {
   align-items: center;
   gap: 8px;
 }
+.header-actions__row .welcome-admin-report-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--block-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+.header-actions__row .welcome-admin-report-btn:hover {
+  opacity: 1;
+}
 .header-admin-report {
   font-size: 11px;
   padding-inline: 6px;
@@ -2361,6 +2381,14 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   margin: 0;
 }
 
+.welcome-title-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .welcome-date {
   margin: 4px 0 0;
   font-size: 13px;
@@ -2368,27 +2396,64 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   font-weight: 500;
 }
 
-.welcome-gazette-icon {
+.welcome-home-icon-tile {
   position: relative;
   flex-shrink: 0;
-  padding: 4px 0;
-  font-size: 38px;
-  line-height: 1;
-  opacity: 0.9;
-  background: none;
-  border: none;
+  width: 48px;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 2px solid rgba(148, 163, 184, 0.45);
+  background: rgba(15, 23, 42, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 14px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.welcome-gazette-icon:hover {
+.welcome-home-icon-tile:hover {
+  border-color: rgba(251, 146, 60, 0.5);
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .welcome-home-icon-tile {
+  border-color: rgba(100, 116, 139, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .welcome-home-icon-tile:hover {
+  border-color: rgba(249, 115, 22, 0.45);
+  background: rgba(255, 247, 237, 0.95);
+}
+
+.welcome-charter-icon__emoji {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.welcome-gazette-icon {
   opacity: 1;
 }
 
 .welcome-gazette-icon__badge-wrap {
   position: absolute;
-  top: 0;
+  top: 4px;
   left: 50%;
-  transform: translate(-50%, -2px);
+  transform: translate(-50%, 0);
   pointer-events: none;
 }
 
@@ -2407,13 +2472,174 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
 
 .welcome-gazette-icon__emoji {
   display: block;
+  font-size: 24px;
+  line-height: 1;
 }
 
-.welcome-admin-report-row {
+/* Модалка «Устав клуба» */
+.club-charter-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: flex;
-  justify-content: flex-end;
-  margin-top: 2px;
-  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.club-charter-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.club-charter-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  cursor: pointer;
+}
+.club-charter-modal__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  box-sizing: border-box;
+}
+.club-charter-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  border-radius: 4px;
+  border: 2px solid rgba(44, 37, 24, 0.55);
+  background: rgba(245, 240, 230, 0.92);
+  color: #1a1510;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  -webkit-tap-highlight-color: transparent;
+}
+.club-charter-modal__close:hover {
+  background: #fff;
+}
+.club-charter-modal__paper {
+  position: relative;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  padding: 28px 20px 24px;
+  box-sizing: border-box;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1c1410;
+  background:
+    linear-gradient(rgba(139, 90, 43, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 90, 43, 0.05) 1px, transparent 1px),
+    #f3ecdf;
+  background-size: 14px 14px, 14px 14px, auto;
+  border: 4px double #2a2118;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 1px rgba(42, 33, 24, 0.35),
+    0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.club-charter-modal__paper::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: 1px;
+  pointer-events: none;
+}
+.club-charter-modal__kicker {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #5c4a3a;
+}
+.club-charter-modal__title {
+  margin: 0 0 12px;
+  padding: 0 36px 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  color: #120e0a;
+  text-transform: none;
+}
+.club-charter-modal__rule {
+  height: 3px;
+  margin: 0 auto 18px;
+  max-width: 220px;
+  background: linear-gradient(90deg, transparent, #2a2118, transparent);
+  opacity: 0.75;
+}
+.club-charter-modal__list {
+  margin: 0;
+  padding: 0 0 0 22px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.club-charter-modal__list > li {
+  margin: 0 0 16px;
+  padding-left: 4px;
+}
+.club-charter-modal__list > li:last-child {
+  margin-bottom: 0;
+}
+.club-charter-modal__list p {
+  margin: 0 0 8px;
+}
+.club-charter-modal__list p:last-child {
+  margin-bottom: 0;
+}
+.club-charter-modal__note {
+  margin-top: 6px !important;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: inherit;
+  font-style: italic;
+  color: #3d3228;
+  background: rgba(255, 255, 255, 0.45);
+  border-left: 3px solid #2a2118;
+  border-radius: 0 6px 6px 0;
+}
+[data-theme="light"] .club-charter-modal__paper {
+  background:
+    linear-gradient(rgba(139, 90, 43, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 90, 43, 0.045) 1px, transparent 1px),
+    #faf6ee;
+  color: #1a1510;
+}
+[data-theme="light"] .club-charter-modal__note {
+  background: rgba(255, 255, 255, 0.75);
+  color: #3d3228;
+}
+
+#app:has(#clubCharterModal[aria-hidden="false"]) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+}
+.app:has(#clubCharterModal[aria-hidden="false"]) .card__header {
+  display: none !important;
 }
 
 .welcome-admin-report-btn {

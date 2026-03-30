@@ -2012,6 +2012,90 @@ function runGazetteAndTasksInit() {
       }, 400);
     }, 0);
   }
+  (function initClubCharterModal() {
+    var modal = document.getElementById("clubCharterModal");
+    var openBtn = document.getElementById("clubCharterOpenBtn");
+    var closeBtn = document.getElementById("clubCharterModalClose");
+    var shareBtn = document.getElementById("clubCharterShareBtn");
+    var copyBtn = document.getElementById("clubCharterCopyBtn");
+    var backdrop = document.getElementById("clubCharterModalBackdrop");
+    var paper = modal && modal.querySelector(".club-charter-modal__paper");
+    if (!modal || !openBtn) return;
+    function openCharter() {
+      modal.setAttribute("aria-hidden", "false");
+      if (paper) paper.scrollTop = 0;
+    }
+    function closeCharter() {
+      modal.setAttribute("aria-hidden", "true");
+    }
+    function getCharterShareText() {
+      return "Устав клуба «Два туза»";
+    }
+    function getCharterShareLink() {
+      // Ссылка по аналогии с газетой/рейтинговыми ссылками: открывает приложение (home по умолчанию).
+      try {
+        if (typeof getAppBaseUrlForLinks === "function") return String(getAppBaseUrlForLinks());
+      } catch (eShare) {}
+      return (window.location && window.location.href ? String(window.location.href) : "");
+    }
+    function notifyUser(text) {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && typeof tg.showAlert === "function") tg.showAlert(text);
+      else if (typeof alert === "function") alert(text);
+    }
+    function runCharterShare() {
+      var link = getCharterShareLink();
+      var shareText = getCharterShareText();
+      var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(shareText);
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+    }
+    function runCharterCopy() {
+      var link = getCharterShareLink();
+      var shareText = getCharterShareText();
+      var textToCopy = link;
+      try {
+        if (typeof navigator !== "undefined" && navigator && typeof navigator.clipboard !== "undefined" && typeof navigator.clipboard.writeText === "function") {
+          navigator.clipboard.writeText(textToCopy).then(function () {
+            notifyUser("Ссылка скопирована.");
+          }).catch(function () {
+            notifyUser("Не удалось скопировать ссылку.");
+          });
+        } else {
+          notifyUser("Скопируйте ссылку вручную: " + shareText);
+        }
+      } catch (eCopy) {
+        notifyUser("Не удалось скопировать ссылку.");
+      }
+    }
+    window.openClubCharterModal = openCharter;
+    window.closeClubCharterModal = closeCharter;
+    openBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      openCharter();
+    });
+    if (closeBtn) closeBtn.addEventListener("click", closeCharter);
+    if (backdrop) backdrop.addEventListener("click", closeCharter);
+    if (shareBtn) {
+      shareBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        runCharterShare();
+      });
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        runCharterCopy();
+      });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (modal.getAttribute("aria-hidden") !== "false") return;
+      closeCharter();
+    });
+  })();
 })();
 }
 
@@ -5908,7 +5992,7 @@ function setViewAnimated(viewName, direction) {
     if (e.touches.length !== 1) return;
     try {
       var t = e.target;
-      swipeDisabled = !!(t && t.closest && t.closest(".chat-messages, .chat-dialogs-list, .chat-messages-wrap, .bottom-nav, textarea, input, .chat-general-header, .chat-conv-top, .chat-switcher-row"));
+      swipeDisabled = !!(t && t.closest && t.closest(".chat-messages, .chat-dialogs-list, .chat-messages-wrap, .bottom-nav, textarea, input, .chat-general-header, .chat-conv-top, .chat-switcher-row, .welcome-title-row__actions"));
       // Внутри экрана чата полностью отключаем глобальный свайп между вкладками
       // (home/chat/download/...), чтобы верхняя часть чата не уводила на главную.
       if (!swipeDisabled && getCurrentView() === "chat") {

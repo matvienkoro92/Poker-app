@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.039">
+<html lang="ru" data-theme="dark" class="app-view-home" data-build="v4" data-app-version="1.043">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
@@ -145,7 +145,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=241" />
+    <link rel="stylesheet" href="./styles.css?v=244" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -359,6 +359,9 @@
               <span class="header-greeting" id="headerGreeting">Привет!</span>
             </span>
             <div class="header-actions__row">
+              <button type="button" class="welcome-admin-report-btn header-admin-report--hidden" id="adminReportBtn" title="Отчёт за смену" aria-label="Отчёт за смену">
+                <span class="welcome-admin-report-btn__icon" aria-hidden="true">📋</span>
+              </button>
               <button type="button" class="radio-toggle theme-toggle" id="radioToggle" title="Радио: выкл" aria-label="Радио: выкл">
                 <span class="radio-toggle__icon radio-toggle__icon--off" aria-hidden="true">🎵</span>
                 <span class="radio-toggle__icon radio-toggle__icon--chill" aria-hidden="true">🎧</span>
@@ -409,17 +412,17 @@
               <div class="welcome-title-wrap">
                 <h1 class="title title--welcome">Добро пожаловать!</h1>
               </div>
-              <button type="button" class="welcome-gazette-icon" id="gazetteOpenBtn" title="Газета" aria-label="Открыть газету Вестник Два туза">
-                <span class="welcome-gazette-icon__badge-wrap">
-                  <span class="welcome-gazette-icon__unread" id="gazetteUnreadDot" aria-hidden="true"></span>
-                </span>
-                <span class="welcome-gazette-icon__emoji" aria-hidden="true">📰</span>
-              </button>
-            </div>
-            <div class="welcome-admin-report-row">
-              <button type="button" class="welcome-admin-report-btn header-admin-report--hidden" id="adminReportBtn" title="Отчёт за смену" aria-label="Отчёт за смену">
-                <span class="welcome-admin-report-btn__icon" aria-hidden="true">📋</span>
-              </button>
+              <div class="welcome-title-row__actions">
+                <button type="button" class="welcome-home-icon-tile welcome-charter-icon" id="clubCharterOpenBtn" title="Устав клуба" aria-label="Открыть устав клуба «Два туза»">
+                  <span class="welcome-charter-icon__emoji" aria-hidden="true">🪖</span>
+                </button>
+                <button type="button" class="welcome-home-icon-tile welcome-gazette-icon" id="gazetteOpenBtn" title="Газета" aria-label="Открыть газету Вестник Два туза">
+                  <span class="welcome-gazette-icon__badge-wrap">
+                    <span class="welcome-gazette-icon__unread" id="gazetteUnreadDot" aria-hidden="true"></span>
+                  </span>
+                  <span class="welcome-gazette-icon__emoji" aria-hidden="true">📰</span>
+                </button>
+              </div>
             </div>
             <p class="subtitle">
               Закрытый покерный онлайн-клуб для своих.
@@ -4155,6 +4158,35 @@
           </div>
           <div class="partnership-modal__nav" aria-hidden="true">
             <span class="partnership-modal__page-indicator" id="partnershipPageIndicator">1 / 5</span>
+          </div>
+        </div>
+      </div>
+      <div class="club-charter-modal" id="clubCharterModal" role="dialog" aria-modal="true" aria-labelledby="clubCharterModalTitle" aria-hidden="true">
+        <div class="club-charter-modal__backdrop" id="clubCharterModalBackdrop"></div>
+        <div class="club-charter-modal__sheet">
+          <button type="button" class="club-charter-modal__close" id="clubCharterModalClose" aria-label="Закрыть">×</button>
+          <div class="club-charter-modal__paper">
+            <p class="club-charter-modal__kicker">Официальный документ</p>
+            <h2 class="club-charter-modal__title" id="clubCharterModalTitle">Устав клуба «Два туза»</h2>
+            <div class="club-charter-modal__rule" aria-hidden="true"></div>
+            <div class="gazette-modal__share-row club-charter-modal__share-row" role="group" aria-label="Поделиться или скопировать ссылку">
+              <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" id="clubCharterShareBtn" aria-label="Поделиться уставом клуба">Поделиться</button>
+              <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" id="clubCharterCopyBtn" aria-label="Скопировать ссылку на устав клуба">Скопировать</button>
+            </div>
+            <ol class="club-charter-modal__list">
+              <li>
+                <p>В розыгрышах участвуют только активные игроки клуба «Два туза», это сделано, чтобы исключить возможность выиграть мультаккам в розыгрыше, которые неактивны в клубе, но создают аккаунты только для розыгрыша.</p>
+                <p class="club-charter-modal__note">
+                  Активным считается тот, кто депал хотя бы раз за последние 2 недели или имеет деньги на балансе и играл в кеш или в турниры последние 2 недели.
+                </p>
+              </li>
+              <li>
+                <p>Все разыгрываемые билеты — это беккинг 50 на 50 с клубом.</p>
+              </li>
+              <li>
+                <p>В турнирах все бонусы за комбинации всегда только по двум картам.</p>
+              </li>
+            </ol>
           </div>
         </div>
       </div>
