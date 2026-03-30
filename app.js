@@ -48,6 +48,16 @@ function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
 }
 
+/** Главная: скролл на html только в реальном Mini App (непустой initData). Локально скрипт даёт WebApp без initData — крутим body (класс app-view-home-local). */
+function pokerHomeShouldScrollHtmlElement() {
+  try {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    return !!(tg && String(tg.initData || "").trim());
+  } catch (eHomeScroll) {
+    return false;
+  }
+}
+
 /**
  * Базовый URL для ссылок "в это же приложение" (startapp=...).
  * - В Telegram Mini App используем `data-telegram-app-url` (t.me).
@@ -4711,10 +4721,35 @@ function pokerSyncInertForViewScreensOnly() {
   var viewName = initialView ? initialView.getAttribute("data-view") : "";
   if (viewName === "home") {
     document.documentElement.classList.add("app-view-home");
-    var tgInit = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    document.documentElement.classList.toggle("app-view-home-local", !tgInit);
+    document.documentElement.classList.toggle("app-view-home-local", !pokerHomeShouldScrollHtmlElement());
   }
 })();
+
+/** Страховка для локального браузера: если после чата/модалки остался глобальный lock, возвращаем скролл документа. */
+function pokerEnsureUnlockedDocumentScrollForNonChat() {
+  try {
+    var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    if (view === "chat") return;
+    document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+    if (document.body) {
+      document.body.classList.remove("chat-keyboard-open");
+      if (document.body.style && document.body.style.overflow === "hidden") document.body.style.overflow = "";
+      if (document.body.style && document.body.style.position === "fixed") document.body.style.position = "";
+    }
+    if (document.documentElement && document.documentElement.style && document.documentElement.style.overflow === "hidden") {
+      document.documentElement.style.overflow = "";
+    }
+    document.documentElement.style.removeProperty("--chat-vv-inset");
+    document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+  } catch (eDocUnlock) {}
+}
+
+/* На старте страницы сразу снимаем возможный залипший lock (актуально для локального браузера после reload). */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", pokerEnsureUnlockedDocumentScrollForNonChat);
+} else {
+  pokerEnsureUnlockedDocumentScrollForNonChat();
+}
 
 /** Сброс прокрутки окна (html/body) — при смене экрана иначе остаётся Y с предыдущей страницы. */
 function scrollMainDocumentToTop() {
@@ -5149,6 +5184,7 @@ function setView(viewName, navOpts) {
       } catch (eNk3) {}
     }, 380);
   }
+  if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
   if (prevView && prevView !== viewName) {
     viewScrollMemory[prevView] = getMainDocumentScrollY();
   }
@@ -5374,7 +5410,7 @@ function setView(viewName, navOpts) {
   if (headerSwitcherWrap) headerSwitcherWrap.classList.toggle("header-chat-switcher--hidden", viewName !== "chat");
   if (viewName === "chat") {
     document.documentElement.classList.add("app-view-chat");
-    document.documentElement.classList.remove("app-view-winter-rating", "app-view-home");
+    document.documentElement.classList.remove("app-view-winter-rating", "app-view-home", "app-view-home-local");
     updateChatNavDot();
     if (window.chatListenersAttached && typeof window.chatRefresh === "function") {
       window.chatRefresh();
@@ -5382,16 +5418,15 @@ function setView(viewName, navOpts) {
       initChat();
     }
   } else if (viewName === "winter-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-spring-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-home-local", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-winter-rating");
   } else if (viewName === "spring-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-winter-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-home-local", "app-view-winter-rating");
     document.documentElement.classList.add("app-view-spring-rating");
   } else if (viewName === "home") {
     document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-home");
-    var tgForHome = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    document.documentElement.classList.toggle("app-view-home-local", !tgForHome);
+    document.documentElement.classList.toggle("app-view-home-local", !pokerHomeShouldScrollHtmlElement());
     var ratingSection = document.getElementById("winterRatingSection");
     var winterView = document.querySelector('[data-view="winter-rating"]');
     var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");

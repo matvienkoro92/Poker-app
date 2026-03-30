@@ -360,6 +360,15 @@ body {
   justify-content: flex-start;
   overflow: hidden;
 }
+/*
+ * body — flex (по умолчанию row) + align-items: stretch: без align-self дочерний #app тянется по высоте
+ * вьюпорта, а overflow:hidden обрезает контент → scrollHeight ≈ 100vh (локально «не скроллится нигде»).
+ * Таббар вне #app усиливает этот эффект. flex-shrink: 0 — не сжимать колонку контента.
+ */
+#app.app {
+  align-self: flex-start;
+  flex-shrink: 0;
+}
 /* Telegram 7.10+: верх из WebApp.contentSafeAreaInset (--app-top-from-tg из JS), плюс safe-area как нижняя граница */
 html.app--tg-content-inset .app {
   padding-top: max(10px, env(safe-area-inset-top, 0px), var(--app-top-from-tg, 48px));
@@ -587,8 +596,12 @@ body[data-view="spring-rating"] {
   position: static;
   overflow-y: auto;
   overflow-x: hidden;
-  width: auto;
   -webkit-overflow-scrolling: touch;
+  /* Браузер / локальный превью: иначе body остаётся row-flex + stretch — скролл документа ломается (в TG чаще крутится html). */
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
 }
 /* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
@@ -626,13 +639,17 @@ html.app-view-home {
 html.app-view-home body {
   overflow-y: visible !important;
 }
-/* Локальный браузер: часть движков не скроллит html как scrollingElement на главной. */
+/* Превью в браузере: WebApp есть, initData пуст — скролл на body (см. pokerHomeShouldScrollHtmlElement в app.js). */
 html.app-view-home.app-view-home-local {
   overflow-y: visible;
 }
 html.app-view-home.app-view-home-local body {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
 }
 /* Видеоуроки / хаб: класс с setView. Скролл на body — см. комментарий к :has() выше (обрез после ~9 блоков при scroll на html). */
 html.app-view-long-scroll {
@@ -6325,6 +6342,41 @@ body[data-view="chat"]
   border-color: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
+.chat-general-header__title-btn {
+  pointer-events: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--chat-general-header-strip-min-height);
+  height: var(--chat-general-header-strip-min-height);
+  max-height: var(--chat-general-header-strip-min-height);
+  margin: 0;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(248, 250, 252, 0.88);
+  box-shadow: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.chat-general-header__title-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   background: rgba(15, 23, 42, 0.08);
   border-color: rgba(15, 23, 42, 0.14);
@@ -6332,6 +6384,16 @@ body[data-view="chat"]
   box-shadow: none;
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: #0f172a;
+}
+[data-theme="light"] .chat-general-header__title-btn {
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: rgba(30, 41, 59, 0.88);
+}
+[data-theme="light"] .chat-general-header__title-btn:hover {
   background: rgba(15, 23, 42, 0.06);
   border-color: rgba(15, 23, 42, 0.14);
   color: #0f172a;
