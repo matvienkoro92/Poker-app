@@ -2852,9 +2852,14 @@ function pokerApplyAppTopPadding() {
  * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
  * иногда не совпадают с реальным экраном — снизу «воздух», таббар приподнят.
  */
-function pokerNukeIosKeyboardViewportArtifacts() {
+function pokerNukeIosKeyboardViewportArtifacts(opts) {
+  opts = opts || {};
+  var resetMainScroll = opts.resetMainScroll === true;
+  var isChatView = !!(document.body && document.body.getAttribute("data-view") === "chat");
+  /* vv.scrollTo / expand на каждом resize visualViewport ломают обычный скролл на главной и др. — только чат или явный сброс после клавиатуры. */
+  var doVvRepair = resetMainScroll || isChatView;
   try {
-    if (window.visualViewport) {
+    if (doVvRepair && window.visualViewport) {
       var vv = window.visualViewport;
       if (typeof vv.scrollTo === "function") {
         vv.scrollTo(0, 0);
@@ -2868,13 +2873,16 @@ function pokerNukeIosKeyboardViewportArtifacts() {
       }
     }
   } catch (eVv) {}
-  try {
-    window.scrollTo(0, 0);
-    var se = document.scrollingElement;
-    if (se) se.scrollTop = 0;
-    if (document.documentElement) document.documentElement.scrollTop = 0;
-    if (document.body) document.body.scrollTop = 0;
-  } catch (eScr) {}
+  /* Сброс layout scroll только после клавиатуры в чате — иначе при каждом scroll visualViewport страница «прилипает» к верху. */
+  if (resetMainScroll) {
+    try {
+      window.scrollTo(0, 0);
+      var se = document.scrollingElement;
+      if (se) se.scrollTop = 0;
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    } catch (eScr) {}
+  }
   try {
     if (document.body && document.body.getAttribute("data-view") === "chat") {
       var ih = window.innerHeight || 0;
@@ -2894,8 +2902,10 @@ function pokerNukeIosKeyboardViewportArtifacts() {
     }
   } catch (eBody) {}
   try {
-    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-    else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
+    if (doVvRepair) {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
+    }
   } catch (eTg) {}
 }
 
@@ -2922,9 +2932,6 @@ if (tg) {
     tg.onEvent("viewportChanged", function (e) {
       if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
       if (e && e.isStateStable) tryExpand();
-      if (e && e.isStateStable && document.body && !document.body.classList.contains("chat-keyboard-open")) {
-        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
-      }
     });
   }
   document.addEventListener("visibilitychange", function () {
@@ -19128,7 +19135,7 @@ function initChat() {
           if (tw && typeof tw.expand === "function") tw.expand();
         } catch (eTg) {}
         try {
-          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
         } catch (eNuke) {}
         try {
           if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
@@ -19147,7 +19154,7 @@ function initChat() {
               doc.style.removeProperty("--chat-ios-accessory-inset");
             } catch (e2) {}
             try {
-              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
             } catch (eNuke2) {}
           });
         } catch (eRaf) {}
@@ -19186,16 +19193,12 @@ function initChat() {
             document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
             stripChatInputAreaTransforms();
             try {
-              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
-            } catch (eNu) {}
-            try {
               var twP = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
               if (twP && typeof twP.expand === "function") twP.expand();
             } catch (eEx) {}
           }, 110);
         }
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
-        window.visualViewport.addEventListener("scroll", onVvAfterKeyboardMaybeClosed);
       }
 
       function syncPwaChatVisualViewportInset() {
@@ -20556,7 +20559,7 @@ function initChat() {
           document.body.classList.remove("chat-keyboard-open");
           document.documentElement.style.removeProperty("--chat-vv-inset");
           document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
-          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
         }
       } catch (eDlgFin) {}
       var relatedTarget = e.relatedTarget;
