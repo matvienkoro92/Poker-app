@@ -339,6 +339,8 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* Нижний оверскролл не двигает position:fixed таббар в iOS/TG WebView */
+  overscroll-behavior-y: none;
 }
 
 /* Отступ сверху: safe-area + зазор под шапку (в TG задаётся JS по contentSafeAreaInset, см. .app--tg-content-inset) */
@@ -618,6 +620,7 @@ html.app-view-home {
   -webkit-overflow-scrolling: touch;
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--body-bg);
+  overscroll-behavior-y: none;
 }
 /* Иначе одновременно крутятся html и body — залипание скролла на главной */
 html.app-view-home body {
@@ -630,7 +633,7 @@ html.app-view-long-scroll {
   -webkit-overflow-scrolling: touch;
   height: auto !important;
   min-height: 100%;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   scroll-padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
 }
 body.app-view-long-scroll {
@@ -643,7 +646,7 @@ body.app-view-long-scroll {
   width: 100%;
   box-sizing: border-box;
   height: auto !important;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   scroll-padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
 }
 html.app-view-long-scroll .app {
@@ -804,7 +807,7 @@ html.app-view-vl-html-scroll {
   height: auto !important;
   min-height: 100%;
   max-height: none !important;
-  overscroll-behavior-y: auto !important;
+  overscroll-behavior-y: none !important;
   overflow-anchor: none;
   scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
 }
@@ -817,7 +820,7 @@ html.app-view-vl-html-scroll body.app-view-long-scroll {
   box-sizing: border-box;
   height: auto !important;
   min-height: 0 !important;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
 }
 /* Запас под контент без «двойного вьюпорта»: не дублируем 100dvh поверх базового .app */
 html.app-view-vl-html-scroll .app {
@@ -857,7 +860,7 @@ html.app-view-hall-html-scroll {
   height: auto !important;
   min-height: 100%;
   max-height: none !important;
-  overscroll-behavior-y: auto !important;
+  overscroll-behavior-y: none !important;
   overflow-anchor: none;
   scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
 }
@@ -870,7 +873,7 @@ html.app-view-hall-html-scroll body.app-view-long-scroll {
   box-sizing: border-box;
   height: auto !important;
   min-height: 0 !important;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
 }
 html.app-view-hall-html-scroll .app {
   overflow: visible !important;
@@ -902,7 +905,7 @@ html.app-view-download-html-scroll {
   height: auto !important;
   min-height: 100%;
   max-height: none !important;
-  overscroll-behavior-y: auto !important;
+  overscroll-behavior-y: none !important;
   overflow-anchor: none;
   scroll-padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
 }
@@ -915,7 +918,7 @@ html.app-view-download-html-scroll body.app-view-long-scroll {
   box-sizing: border-box;
   height: auto !important;
   min-height: 0 !important;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
 }
 html.app-view-download-html-scroll .app {
   overflow: visible !important;
@@ -20993,8 +20996,9 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   /* Непрозрачная база + градиент: иначе под backdrop-filter на iOS при скролле/PWA «просвечивает» лента */
   background-color: var(--overscroll-canvas);
   background-image: var(--nav-bg);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  /* backdrop-filter + оверскролл в WKWebView дают «отрыв» таббара от низа — только сплошная подложка */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   border-top: 1px solid rgba(148, 163, 184, 0.4);
   display: flex;
   justify-content: center;
@@ -21017,9 +21021,6 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
 /* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
-    /* iOS PWA: backdrop-filter + fixed даёт «подпрыгивание» панели при скролле */
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
     transform: translate3d(0, 0, 0);
     padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px));
   }
