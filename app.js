@@ -22219,6 +22219,12 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           if (fromMonth === toMonth) return fromDay + "–" + toDay + " " + toMonth;
           return formatRuMonthDay(weekStartMs, true) + " – " + formatRuMonthDay(weekEndDateMs, true);
         }
+        function weekCompactLabelFromStartMs(weekStartMs) {
+          var weekEndDateMs = weekStartMs + (6 * DAY_MS);
+          var fromCompact = formatRuMonthDay(weekStartMs, true).replace(/\s+/g, "");
+          var toCompact = formatRuMonthDay(weekEndDateMs, true).replace(/\s+/g, "");
+          return fromCompact + "-" + toCompact;
+        }
         /**
          * Бизнес-неделя отчётов: Пн 18:00 МСК -> следующий Пн 18:00 МСК.
          * До понедельника 18:00 отчёты относятся к прошлой неделе.
@@ -22319,6 +22325,46 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           });
           return parts.join("");
         }
+        function buildDaysSpoilersHtmlFromList(list, idPrefix) {
+          if (!list || list.length === 0) return '<p class="admin-report-sent-period-hint">В этой неделе отчётов по дням пока нет.</p>';
+          var byDay = {};
+          list.forEach(function (r) {
+            var eff = reportEffectiveTimestampMs(r);
+            var meta = formatRuWeekdayDateFromTs(eff);
+            var d = (meta.weekday || "").trim() || "—";
+            if (!byDay[d]) byDay[d] = [];
+            byDay[d].push(r);
+          });
+          var daysToRender = weekdayOrder.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
+          Object.keys(byDay).forEach(function (d) {
+            if (weekdayOrder.indexOf(d) === -1) daysToRender.push(d);
+          });
+          var parts = [];
+          daysToRender.forEach(function (day) {
+            var listDay = byDay[day];
+            if (!listDay || listDay.length === 0) return;
+            listDay.sort(function (a, b) {
+              var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              return tb - ta;
+            });
+            parts.push('<details class="admin-report-sent-day-spoiler">');
+            parts.push('<summary class="admin-report-sent-day-title">' + escapeReportHtml(day) + "</summary>");
+            parts.push('<div class="admin-report-sent-day-spoiler__inner">');
+            listDay.forEach(function (it, idx) {
+              var who = it.authorName || "";
+              var comment = it.comment || "";
+              var id = idPrefix + (it.id || day + "-" + idx);
+              var detailHtml = buildReportDetailHtml(it);
+              var reportId = (it.id || "").toString();
+              var effMs = reportEffectiveTimestampMs(it);
+              var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
+              parts.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
+            });
+            parts.push("</div></details>");
+          });
+          return parts.join("");
+        }
 
         function buildWeekTotalRow(weekTotals, label, weekId) {
           var hasNumeric = Object.keys(weekTotals).some(function (k) {
@@ -22368,15 +22414,27 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         function buildWeekBlock(weekStartMs, list, idPrefixBase) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(items, meta.start, meta.end);
-          var detailsHtml = buildDaysHtmlFromList(list, idPrefixBase + meta.key + "-");
-          var totalRowHtml = buildWeekTotalRow(totals, meta.label, "ar-week-" + meta.key);
+          var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
+          var totalDetailHtml = buildReportDetailHtml(totals);
           return {
             html:
-              '<div class="admin-report-sent-week">' +
-                '<p class="admin-report-sent-period-hint">Неделя: ' + escapeReportHtml(meta.label) + " (Пн 18:00 МСК → Пн 18:00 МСК)</p>" +
-                (detailsHtml || '<p class="admin-report-sent-period-hint">В этой неделе отчётов пока нет.</p>') +
-                totalRowHtml +
-              "</div>",
+              '<details class="admin-report-sent-week">' +
+                '<summary class="admin-report-sent-archive__summary">Неделя ' + escapeReportHtml(weekCompactLabelFromStartMs(meta.start)) + "</summary>" +
+                '<div class="admin-report-sent-week__inner">' +
+                  '<details class="admin-report-sent-week-subspoiler">' +
+                    '<summary class="admin-report-sent-day-title">Итого по неделе' +
+                      '<button type="button" class="admin-report-week-copy-btn" data-week-id="' + escapeReportHtml("ar-week-" + meta.key) + '" title="Скопировать итог за неделю">⧉</button>' +
+                    "</summary>" +
+                    '<div class="admin-report-sent-week-subspoiler__inner">' +
+                      (totalDetailHtml ? '<div class="admin-report-sent-detail__inner">' + totalDetailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Итогов за неделю пока нет.</p>') +
+                    "</div>" +
+                  "</details>" +
+                  '<details class="admin-report-sent-week-subspoiler">' +
+                    '<summary class="admin-report-sent-day-title">По дням</summary>' +
+                    '<div class="admin-report-sent-week-subspoiler__inner">' + detailsHtml + "</div>" +
+                  "</details>" +
+                "</div>" +
+              "</details>",
             weekId: "ar-week-" + meta.key,
             totals: totals,
             label: meta.label,
