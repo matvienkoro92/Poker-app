@@ -22197,12 +22197,54 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           return;
         }
         var weekdayOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
-        var prevWeekFrom = new Date("2026-03-15T00:00:00+03:00").getTime();
-        var prevWeekTo = new Date("2026-03-22T23:59:59.999+03:00").getTime();
-        var currentWeekFrom = new Date("2026-03-23T00:00:00+03:00").getTime();
-        var currentWeekTo = new Date("2026-03-29T23:59:59.999+03:00").getTime();
-        var CURRENT_WEEK_LABEL = "23–29 марта";
-        var PREV_WEEK_LABEL = "15–22 марта";
+        var DAY_MS = 24 * 60 * 60 * 1000;
+        var WEEK_MS = 7 * DAY_MS;
+        var MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
+        function mskDateFromTs(ts) {
+          return new Date(ts + MSK_SHIFT_MS);
+        }
+        function formatRuMonthDay(ms, withMonth) {
+          return new Intl.DateTimeFormat("ru-RU", {
+            timeZone: "Europe/Moscow",
+            day: "numeric",
+            month: withMonth ? "long" : undefined,
+          }).format(new Date(ms));
+        }
+        function weekLabelFromStartMs(weekStartMs) {
+          var weekEndDateMs = weekStartMs + (6 * DAY_MS);
+          var fromMonth = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", month: "long" }).format(new Date(weekStartMs));
+          var toMonth = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", month: "long" }).format(new Date(weekEndDateMs));
+          var fromDay = formatRuMonthDay(weekStartMs, false);
+          var toDay = formatRuMonthDay(weekEndDateMs, false);
+          if (fromMonth === toMonth) return fromDay + "–" + toDay + " " + toMonth;
+          return formatRuMonthDay(weekStartMs, true) + " – " + formatRuMonthDay(weekEndDateMs, true);
+        }
+        /**
+         * Бизнес-неделя отчётов: Пн 18:00 МСК -> следующий Пн 18:00 МСК.
+         * До понедельника 18:00 отчёты относятся к прошлой неделе.
+         */
+        function weekStartMsForReport(ts) {
+          var msk = mskDateFromTs(ts);
+          var y = msk.getUTCFullYear();
+          var m = msk.getUTCMonth();
+          var d = msk.getUTCDate();
+          var wd = msk.getUTCDay(); // 0=Вс..6=Сб
+          var daysFromMonday = (wd + 6) % 7;
+          var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * DAY_MS;
+          var monday18MskMs = mondayStartMskMs + (18 * 60 * 60 * 1000);
+          var shiftedTs = ts + MSK_SHIFT_MS;
+          if (shiftedTs < monday18MskMs) monday18MskMs -= WEEK_MS;
+          return monday18MskMs - MSK_SHIFT_MS;
+        }
+        function weekMetaFromStart(weekStartMs) {
+          return {
+            start: weekStartMs,
+            end: weekStartMs + WEEK_MS - 1,
+            label: weekLabelFromStartMs(weekStartMs),
+            key: "w-" + String(weekStartMs),
+          };
+        }
+        var currentWeek = weekMetaFromStart(weekStartMsForReport(Date.now()));
 
         function emptyWeekTotals() {
           return {
@@ -22302,40 +22344,68 @@ window.addEventListener("poker-telegram-auth", function (ev) {
           );
         }
 
-        function inCurrentWeek(t) {
-          return t && t >= currentWeekFrom && t <= currentWeekTo;
-        }
-
-        var currentItems = items.filter(function (r) {
-          return inCurrentWeek(reportEffectiveTimestampMs(r));
+        var weeksByKey = {};
+        items.forEach(function (r) {
+          var eff = reportEffectiveTimestampMs(r);
+          if (!eff || eff !== eff) return;
+          var ws = weekStartMsForReport(eff);
+          var key = String(ws);
+          if (!weeksByKey[key]) weeksByKey[key] = [];
+          weeksByKey[key].push(r);
         });
-        var archiveItems = items.filter(function (r) {
-          return !inCurrentWeek(reportEffectiveTimestampMs(r));
+        var weekStartsDesc = Object.keys(weeksByKey).map(function (s) {
+          return Number(s);
+        }).filter(function (n) {
+          return n === n;
+        }).sort(function (a, b) {
+          return b - a;
         });
-
-        var curTotals = sumReportsInWindow(items, currentWeekFrom, currentWeekTo);
-        var prevTotals = null;
-        if (archiveItems.length > 0) {
-          prevTotals = sumReportsInWindow(items, prevWeekFrom, prevWeekTo);
+        var currentItems = weeksByKey[String(currentWeek.start)] || [];
+        var archiveWeekStarts = weekStartsDesc.filter(function (ws) {
+          return ws !== currentWeek.start;
+        });
+        var curTotals = sumReportsInWindow(items, currentWeek.start, currentWeek.end);
+        function buildWeekBlock(weekStartMs, list, idPrefixBase) {
+          var meta = weekMetaFromStart(weekStartMs);
+          var totals = sumReportsInWindow(items, meta.start, meta.end);
+          var detailsHtml = buildDaysHtmlFromList(list, idPrefixBase + meta.key + "-");
+          var totalRowHtml = buildWeekTotalRow(totals, meta.label, "ar-week-" + meta.key);
+          return {
+            html:
+              '<div class="admin-report-sent-week">' +
+                '<p class="admin-report-sent-period-hint">Неделя: ' + escapeReportHtml(meta.label) + " (Пн 18:00 МСК → Пн 18:00 МСК)</p>" +
+                (detailsHtml || '<p class="admin-report-sent-period-hint">В этой неделе отчётов пока нет.</p>') +
+                totalRowHtml +
+              "</div>",
+            weekId: "ar-week-" + meta.key,
+            totals: totals,
+            label: meta.label,
+          };
         }
 
         var html = [];
         html.push('<div class="admin-report-sent-current">');
         if (currentItems.length === 0) {
-          html.push('<p class="admin-report-sent-period-hint">За текущую неделю (' + escapeReportHtml(CURRENT_WEEK_LABEL) + ') отчётов пока нет.</p>');
+          html.push('<p class="admin-report-sent-period-hint">За текущую неделю (' + escapeReportHtml(currentWeek.label) + ') отчётов пока нет.</p>');
         } else {
           html.push(buildDaysHtmlFromList(currentItems, "ar-cur-"));
         }
-        html.push(buildWeekTotalRow(curTotals, CURRENT_WEEK_LABEL, "ar-week-current"));
+        html.push(buildWeekTotalRow(curTotals, currentWeek.label, "ar-week-current"));
         html.push("</div>");
 
-        if (archiveItems.length > 0) {
+        if (archiveWeekStarts.length > 0) {
+          var archiveHtml = [];
           html.push(
             '<details class="admin-report-sent-archive">' +
-              '<summary class="admin-report-sent-archive__summary">Прошлая неделя и ранее (до 22 марта, ' + escapeReportHtml(PREV_WEEK_LABEL) + ")</summary>" +
+              '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
               '<div class="admin-report-sent-archive__inner">' +
-              buildDaysHtmlFromList(archiveItems, "ar-arch-") +
-              buildWeekTotalRow(prevTotals, PREV_WEEK_LABEL, "ar-week-prev") +
+              (function () {
+                archiveWeekStarts.forEach(function (ws) {
+                  var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-");
+                  archiveHtml.push(block.html);
+                });
+                return archiveHtml.join("");
+              })() +
               "</div></details>"
           );
         }
@@ -22345,9 +22415,15 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         var reportById = {};
         items.forEach(function (r) { reportById[r.id] = r; });
         var weekTotalsById = {
-          "ar-week-current": { totals: curTotals, label: CURRENT_WEEK_LABEL },
-          "ar-week-prev": prevTotals ? { totals: prevTotals, label: PREV_WEEK_LABEL } : null,
+          "ar-week-current": { totals: curTotals, label: currentWeek.label },
         };
+        archiveWeekStarts.forEach(function (ws) {
+          var meta = weekMetaFromStart(ws);
+          weekTotalsById["ar-week-" + meta.key] = {
+            totals: sumReportsInWindow(items, meta.start, meta.end),
+            label: meta.label,
+          };
+        });
         var weekLabels = {
           deposit: "Депозит",
           cashout: "Выводы",
