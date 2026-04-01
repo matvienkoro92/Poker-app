@@ -3008,6 +3008,53 @@ function pokerApplyAppTopPadding() {
 }
 
 /**
+ * Запас под фиксированный .bottom-nav: реальная высота из layout (локальный Chrome, TG/WebView).
+ * Чистый CSS (env safe-area) на десктопе даёт 0 снизу — панель перекрывала «Игры и приложения».
+ * Скрытый таббар (visibility / уехал за низ) — снимаем inline, остаётся fallback и правила .app:has(…).
+ * Зазор над таббаром: 15px (дублирует --app-tabbar-content-gap в CSS).
+ * Без верхнего потолка pad иногда раздувался до сотен px — ограничиваем.
+ */
+function pokerApplyBottomTabbarPad() {
+  var tabbarGapPx = 15;
+  try {
+    var root = document.documentElement;
+    var nav = document.querySelector(".bottom-nav");
+    if (!nav || typeof nav.getBoundingClientRect !== "function") {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      return;
+    }
+    var st = window.getComputedStyle(nav);
+    if (st.visibility === "hidden" || st.display === "none") {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      return;
+    }
+    var vh = window.innerHeight || 0;
+    if (vh < 120) return;
+    var rect = nav.getBoundingClientRect();
+    if (!rect || !(rect.height > 0)) {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      return;
+    }
+    if (rect.top > vh - 20) {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      return;
+    }
+    var oh = Math.round(nav.offsetHeight || 0);
+    var h = oh >= 36 ? oh : Math.ceil(rect.height);
+    if (h < 36 || h > 200) {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      return;
+    }
+    var pad = Math.min(h + tabbarGapPx, 195);
+    root.style.setProperty("--app-bottom-tabbar-pad", pad + "px");
+  } catch (eBtp) {
+    try {
+      document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
+    } catch (e2) {}
+  }
+}
+
+/**
  * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
  * иногда не совпадают с реальным экраном — снизу «воздух», таббар приподнят.
  */
@@ -3090,6 +3137,7 @@ if (tg) {
   if (tg.onEvent && typeof tg.onEvent === "function") {
     tg.onEvent("viewportChanged", function (e) {
       if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+      if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
       if (e && e.isStateStable) tryExpand();
     });
   }
@@ -3133,7 +3181,25 @@ if (tg) {
 pokerApplyAppTopPadding();
 setTimeout(pokerApplyAppTopPadding, 250);
 setTimeout(pokerApplyAppTopPadding, 700);
-
+pokerApplyBottomTabbarPad();
+setTimeout(pokerApplyBottomTabbarPad, 0);
+setTimeout(pokerApplyBottomTabbarPad, 100);
+setTimeout(pokerApplyBottomTabbarPad, 400);
+(function pokerBindBottomTabbarPadResize() {
+  var t = null;
+  function schedule() {
+    if (t) clearTimeout(t);
+    t = setTimeout(function () {
+      t = null;
+      if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+    }, 60);
+  }
+  window.addEventListener("resize", schedule, { passive: true });
+  window.addEventListener("orientationchange", schedule, { passive: true });
+  if (window.visualViewport && typeof window.visualViewport.addEventListener === "function") {
+    window.visualViewport.addEventListener("resize", schedule, { passive: true });
+  }
+})();
 (function setRandomListenersCount() {
   var el = document.getElementById("headerRadioListenersCount");
   if (el) el.textContent = Math.floor(Math.random() * (15 - 7 + 1)) + 7;
@@ -4872,6 +4938,15 @@ function pokerSyncInertForViewScreensOnly() {
     document.documentElement.classList.add("app-view-home");
   }
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
+  /* long-scroll без главной: с long-scroll на home ломается скролл в части WebView (конфликт с app-view-browser-local). */
+  var longScrollInit =
+    viewName === "video-lessons" ||
+    viewName === "learn-play-hub" ||
+    viewName === "poker-tasks" ||
+    viewName === "hall-of-fame" ||
+    viewName === "download";
+  document.documentElement.classList.toggle("app-view-long-scroll", longScrollInit);
+  if (document.body) document.body.classList.toggle("app-view-long-scroll", longScrollInit);
 })();
 
 /** Сброс inline-блокировки фона (модалки «Устав», чат и т.п.) — иначе залипает position:fixed + top */
@@ -4913,9 +4988,40 @@ if (document.readyState === "loading") {
   pokerEnsureUnlockedDocumentScrollForNonChat();
 }
 
+function pokerIsDownloadViewActive() {
+  try {
+    return !!(document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "download");
+  } catch (eDv) {
+    return false;
+  }
+}
+
+/** Скролл документа перенесён в .card__content на «Скачать» и «Зал славы» (локальный Chrome / единый UX). */
+function pokerGetPanelScrollCardContentEl() {
+  try {
+    var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    if (v !== "download" && v !== "hall-of-fame") return null;
+    var card = document.querySelector("main.card");
+    return card ? card.querySelector(".card__content") : null;
+  } catch (ePan) {
+    return null;
+  }
+}
+
+function pokerGetDownloadCardContentScrollEl() {
+  try {
+    if (!pokerIsDownloadViewActive()) return null;
+    return pokerGetPanelScrollCardContentEl();
+  } catch (eDl) {
+    return null;
+  }
+}
+
 /** Сброс прокрутки окна (html/body) — при смене экрана иначе остаётся Y с предыдущей страницы. */
 function scrollMainDocumentToTop() {
   try {
+    var dl = pokerGetPanelScrollCardContentEl();
+    if (dl) dl.scrollTop = 0;
     if (typeof window.scrollTo === "function") {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     } else {
@@ -4930,6 +5036,8 @@ function scrollMainDocumentToTop() {
 
 function getMainDocumentScrollY() {
   try {
+    var dl = pokerGetPanelScrollCardContentEl();
+    if (dl) return dl.scrollTop || 0;
     var se = document.scrollingElement || document.documentElement;
     return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
   } catch (eY) {
@@ -4940,6 +5048,12 @@ function getMainDocumentScrollY() {
 function setMainDocumentScrollY(y) {
   try {
     y = Math.max(0, y);
+    var dl = pokerGetPanelScrollCardContentEl();
+    if (dl) {
+      var maxY = Math.max(0, (dl.scrollHeight || 0) - (dl.clientHeight || 0));
+      dl.scrollTop = Math.min(y, maxY);
+      return;
+    }
     if (typeof window.scrollTo === "function") {
       window.scrollTo({ top: y, left: 0, behavior: "auto" });
     } else {
@@ -5622,7 +5736,7 @@ function setView(viewName, navOpts) {
     }
   }
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу, только <html> с классом как на главной */
+  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную сюда не включать (ломает скролл). */
   var longScroll =
     viewName === "video-lessons" ||
     viewName === "learn-play-hub" ||
@@ -5633,9 +5747,9 @@ function setView(viewName, navOpts) {
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   /* Видеоуроки: в iOS/Telegram WebView крутится чаще <html> (scrollingElement); overflow:visible на html обрезает «хвост» списка */
   document.documentElement.classList.toggle("app-view-vl-html-scroll", viewName === "video-lessons");
-  /* Зал славы: в TG/iOS часто крутится <html>, как у видеоуроков — иначе после inset:0 у градиента пропадает прокрутка */
+  /* Зал славы: класс на html — внутренний scrollport в .card__content (как «Скачать»); раньше был scroll на <html>. */
   document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
-  /* Скачать: та же проблема, что у зала славы — часть WebView не крутит body при long-scroll */
+  /* Скачать: scrollport в .card__content (локальный Chrome + TG); класс на html — цепочка высот/overflow */
   document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
@@ -5689,6 +5803,22 @@ function setView(viewName, navOpts) {
       setTimeout(scrollMainDocumentToTop, 50);
     }
   }
+  try {
+    pokerApplyBottomTabbarPad();
+    if (viewName === "home") {
+      var rafBtp = window.requestAnimationFrame || function (fn) {
+        setTimeout(fn, 16);
+      };
+      rafBtp(function () {
+        rafBtp(function () {
+          if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+        });
+      });
+      setTimeout(function () {
+        if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+      }, 150);
+    }
+  } catch (eBtpSetView) {}
 }
 
 function setHallOfFameSubtabActive(section) {
@@ -5975,223 +6105,6 @@ function updateRaffleBadge(hasActive) {
   }
   // Кнопку "Розыгрыш 30 билетов" убрали из главной.
 }
-
-var MAIN_VIEW_ORDER = ["home", "chat", "download", "cashout", "profile"];
-var SWIPE_MIN_DIST = 60;
-/* Выше порог — меньше ложных «горизонтальных» свайпов при вертикальном скролле длинных табов */
-var SWIPE_MAX_VERTICAL_RATIO = 1.05;
-/* Если уже тянем таб, но жест стал в основном вертикальным — отпускаем, иначе preventDefault ломает скролл */
-var SWIPE_CANCEL_VERTICAL_RATIO = 1.12;
-
-function setViewAnimated(viewName, direction) {
-  var current = document.querySelector(".view--active[data-view]");
-  var currentName = current ? current.getAttribute("data-view") : null;
-  if (!current || currentName === viewName) return;
-  if (MAIN_VIEW_ORDER.indexOf(currentName) < 0 || MAIN_VIEW_ORDER.indexOf(viewName) < 0) {
-    setView(viewName);
-    return;
-  }
-  var nextView = document.querySelector(".view[data-view=\"" + viewName + "\"]");
-  var content = document.querySelector(".card__content");
-  if (!nextView || !content) {
-    setView(viewName);
-    return;
-  }
-  var isNext = direction === 1;
-  var contentHeight = content.offsetHeight;
-  if (contentHeight > 0) content.style.minHeight = contentHeight + "px";
-  content.classList.add("card__content--swipe-animating");
-  current.classList.add("view--swipe-current", isNext ? "view--swipe-out-left" : "view--swipe-out-right");
-  nextView.classList.add("view--swipe-next", isNext ? "view--swipe-in-from-right" : "view--swipe-in-from-left", "view--swipe-in-start");
-  nextView.offsetHeight;
-  nextView.classList.remove("view--swipe-in-start");
-  var cleaned = false;
-  function cleanup() {
-    if (cleaned) return;
-    cleaned = true;
-    content.style.minHeight = "";
-    content.classList.remove("card__content--swipe-animating");
-    current.classList.remove("view--swipe-current", "view--swipe-out-left", "view--swipe-out-right");
-    nextView.classList.remove("view--swipe-next", "view--swipe-in-from-right", "view--swipe-in-from-left", "view--swipe-in-start");
-    setView(viewName);
-  }
-  function onEnd(e) {
-    if (e.propertyName !== "transform" || (e.target !== current && e.target !== nextView)) return;
-    cleanup();
-  }
-  nextView.addEventListener("transitionend", onEnd, { once: true });
-  current.addEventListener("transitionend", onEnd, { once: true });
-  setTimeout(cleanup, 350);
-}
-
-(function initSwipeNav() {
-  var startX = 0;
-  var startY = 0;
-  var dragging = false;
-  var currentViewEl = null;
-  var nextViewEl = null;
-  var dragDirection = 0;
-  // В чате листаем вертикально (сообщения/список). Чтобы скролл не конфликтовал
-  // с горизонтальным свайп-навигационным обработчиком, отключаем свайп, если
-  // жест начался внутри скроллящихся областей чата.
-  var swipeDisabled = false;
-  function clearSwipeNavInteractionState() {
-    try {
-      var content = document.querySelector(".card__content");
-      if (content) content.classList.remove("card__content--swipe-animating");
-      if (currentViewEl) {
-        currentViewEl.style.transition = "";
-        currentViewEl.style.transform = "";
-        currentViewEl.classList.remove(
-          "view--swipe-current",
-          "view--swipe-drag",
-          "view--swipe-out-left",
-          "view--swipe-out-right"
-        );
-      }
-      if (nextViewEl) {
-        nextViewEl.style.transition = "";
-        nextViewEl.style.transform = "";
-        nextViewEl.classList.remove(
-          "view--swipe-next",
-          "view--swipe-drag",
-          "view--swipe-in-from-right",
-          "view--swipe-in-from-left",
-          "view--swipe-in-start"
-        );
-      }
-    } catch (err) {}
-    dragging = false;
-    currentViewEl = null;
-    nextViewEl = null;
-    dragDirection = 0;
-  }
-  function getCurrentView() {
-    var active = document.querySelector(".view--active[data-view]");
-    return active ? active.getAttribute("data-view") : null;
-  }
-  function goToAdjacent(direction) {
-    var current = getCurrentView();
-    var idx = MAIN_VIEW_ORDER.indexOf(current);
-    if (idx < 0) return;
-    if (direction === 1 && idx < MAIN_VIEW_ORDER.length - 1) {
-      setViewAnimated(MAIN_VIEW_ORDER[idx + 1], 1);
-    } else if (direction === -1 && idx > 0) {
-      setViewAnimated(MAIN_VIEW_ORDER[idx - 1], -1);
-    }
-  }
-  function onTouchStart(e) {
-    if (e.touches.length !== 1) return;
-    try {
-      var t = e.target;
-      swipeDisabled = !!(t && t.closest && t.closest(".chat-messages, .chat-dialogs-list, .chat-messages-wrap, .bottom-nav, textarea, input, .chat-general-header, .chat-conv-top, .chat-switcher-row, .welcome-title-row__actions"));
-      // Внутри экрана чата полностью отключаем глобальный свайп между вкладками
-      // (home/chat/download/...), чтобы верхняя часть чата не уводила на главную.
-      if (!swipeDisabled && getCurrentView() === "chat") {
-        swipeDisabled = true;
-      }
-    } catch (err) {
-      swipeDisabled = false;
-    }
-    if (swipeDisabled) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    dragging = false;
-    currentViewEl = null;
-    nextViewEl = null;
-    dragDirection = 0;
-  }
-  function onTouchEnd(e) {
-    if (e.changedTouches.length !== 1) return;
-    // Если для этого жеста свайп был отключён (например, в чате),
-    // то полностью игнорируем окончание касания и не навигируем между экранами.
-    if (swipeDisabled) {
-      swipeDisabled = false;
-      clearSwipeNavInteractionState();
-      return;
-    }
-    var current = getCurrentView();
-    if (MAIN_VIEW_ORDER.indexOf(current) < 0) {
-      clearSwipeNavInteractionState();
-      return;
-    }
-    var endX = e.changedTouches[0].clientX;
-    var endY = e.changedTouches[0].clientY;
-    var dx = endX - startX;
-    var dy = endY - startY;
-    var absDx = Math.abs(dx);
-    var absDy = Math.abs(dy);
-    if (dragging && currentViewEl && nextViewEl) {
-      e.preventDefault();
-      var totalWidth = currentViewEl.offsetWidth || window.innerWidth;
-      var progress = Math.min(1, Math.max(0, absDx / (totalWidth * 0.3)));
-      var shouldNavigate = progress > 0.4;
-      var dirNav = dragDirection;
-      clearSwipeNavInteractionState();
-      if (!shouldNavigate) return;
-      goToAdjacent(dirNav);
-      return;
-    }
-    if (absDx < SWIPE_MIN_DIST) return;
-    if (absDy > absDx * SWIPE_MAX_VERTICAL_RATIO) return;
-    e.preventDefault();
-    if (dx < 0) goToAdjacent(1);
-    else goToAdjacent(-1);
-  }
-  function onTouchMove(e) {
-    if (e.touches.length !== 1) return;
-    if (swipeDisabled) return;
-    var current = getCurrentView();
-    var idx = MAIN_VIEW_ORDER.indexOf(current);
-    if (idx < 0) return;
-    var x = e.touches[0].clientX;
-    var y = e.touches[0].clientY;
-    var dx = x - startX;
-    var dy = y - startY;
-    var absDx = Math.abs(dx);
-    var absDy = Math.abs(dy);
-    if (!dragging) {
-      if (absDx < 10 || absDy > absDx * SWIPE_MAX_VERTICAL_RATIO) return;
-      dragDirection = dx < 0 ? 1 : -1;
-      var targetIdx = idx + dragDirection;
-      if (targetIdx < 0 || targetIdx >= MAIN_VIEW_ORDER.length) return;
-      var content = document.querySelector(".card__content");
-      if (!content) return;
-      currentViewEl = document.querySelector('.view[data-view="' + current + '"]');
-      nextViewEl = document.querySelector('.view[data-view="' + MAIN_VIEW_ORDER[targetIdx] + '"]');
-      if (!currentViewEl || !nextViewEl) return;
-      content.classList.add("card__content--swipe-animating");
-      currentViewEl.classList.add("view--swipe-current", "view--swipe-drag");
-      nextViewEl.classList.add("view--swipe-next", "view--swipe-drag");
-      nextViewEl.style.transform = "translateX(" + (dragDirection === 1 ? "100%" : "-100%") + ")";
-      dragging = true;
-    }
-    if (!dragging || !currentViewEl || !nextViewEl) return;
-    if (absDy > absDx * SWIPE_CANCEL_VERTICAL_RATIO) {
-      clearSwipeNavInteractionState();
-      return;
-    }
-    e.preventDefault();
-    var width = currentViewEl.offsetWidth || window.innerWidth;
-    var progress = Math.max(-1, Math.min(1, dx / width));
-    currentViewEl.style.transform = "translateX(" + (progress * 100) + "%)";
-    nextViewEl.style.transform = "translateX(" + (dragDirection === 1 ? 100 + progress * 100 : -100 + progress * 100) + "%)";
-  }
-  var card = document.querySelector(".card");
-  if (card) {
-    card.addEventListener("touchstart", onTouchStart, { passive: true });
-    card.addEventListener("touchmove", onTouchMove, { passive: false });
-    card.addEventListener("touchend", onTouchEnd, { passive: false });
-    card.addEventListener(
-      "touchcancel",
-      function () {
-        swipeDisabled = false;
-        clearSwipeNavInteractionState();
-      },
-      { passive: true }
-    );
-  }
-})();
 
 // Рейтинг Турнирщиков зимы — 01.12 по конец февраля. Логика баллов: см. «Хпокер баллы» (XPOKER_BALLS / winterRatingPointsForPlace).
 // Учитывать данные и с синих, и с красных скринов. Синий скрин («Игровые данные»): призовые в наших единицах = выигрыш из скрина × 100. Красный скрин: призовые так же (выигрыш × 100), места и игроки — как на скрине.
@@ -12001,6 +11914,8 @@ function setDownloadPage(pageName) {
       page.classList.remove("download-page--active");
     }
   });
+  var dlCc = typeof pokerGetDownloadCardContentScrollEl === "function" ? pokerGetDownloadCardContentScrollEl() : null;
+  if (dlCc) dlCc.scrollTop = 0;
 }
 
 downloadAppButtons.forEach(function (btn) {
@@ -17412,6 +17327,7 @@ function initChat() {
         generalMessages
       ) {
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
+        updateGeneralInputLocked(false);
       }
     }).catch(function () {
       if (
@@ -17421,6 +17337,7 @@ function initChat() {
         generalMessages
       ) {
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>";
+        updateGeneralInputLocked(false);
       }
     });
   }
@@ -18166,6 +18083,7 @@ function initChat() {
   }
 
   var sendingGeneral = false;
+  var sendingGeneralSince = 0;
   function appendOptimisticGeneralMessage(text, image, voice, document, replyTo) {
     if (!generalMessages) return;
     var emptyEl = generalMessages.querySelector(".chat-empty");
@@ -18193,10 +18111,11 @@ function initChat() {
   }
   function sendGeneral(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var text = getChatGeneralText().trim();
+    var rawGeneral = getChatGeneralText();
+    var text = rawGeneral != null ? String(rawGeneral).trim() : "";
     // Сообщение из chat-шаблона: подставляем текст напрямую,
     // чтобы не зависеть от того, успело ли обновиться нужное поле.
-    if (typeof overrideText === "string") text = overrideText.trim();
+    if (typeof overrideText === "string") text = String(overrideText).trim();
     // Редактирование сообщения: отправляем PATCH, а не POST нового.
     if (chatEditMode && chatEditSource === "general" && chatEditMessageId) {
       if (!text || sendingGeneral) return;
@@ -18228,7 +18147,24 @@ function initChat() {
       });
       return;
     }
-    if ((!text && !generalImage && !generalVoice && !generalDocument) || sendingGeneral) return;
+    if (sendingGeneral) {
+      if (Date.now() - sendingGeneralSince < 45000) {
+        if (text || generalImage || generalVoice || generalDocument) {
+          if (tg && tg.showAlert) tg.showAlert("Подождите, предыдущее сообщение ещё отправляется…");
+          else if (typeof alert === "function") alert("Подождите, предыдущее сообщение ещё отправляется…");
+        }
+        return;
+      }
+      sendingGeneral = false;
+      setGeneralSendBusy(false);
+    }
+    if (!text && !generalImage && !generalVoice && !generalDocument) {
+      if (rawGeneral != null && String(rawGeneral).length > 0) {
+        if (tg && tg.showAlert) tg.showAlert("Введите текст сообщения, не только пробелы.");
+        else if (typeof alert === "function") alert("Введите текст сообщения, не только пробелы.");
+      }
+      return;
+    }
     var genArea = document.getElementById("chatGeneralInputArea");
     if (genArea && genArea.classList.contains("chat-input-area--locked")) {
       if (tg && tg.showAlert) tg.showAlert("Нет доступа к общему чату.");
@@ -18263,12 +18199,14 @@ function initChat() {
         time: new Date().toISOString(),
       };
       sendingGeneral = true;
+      sendingGeneralSince = Date.now();
       setGeneralSendBusy(true);
       try {
         appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
       } catch (e) {
         optimisticGeneralPayload = null;
         sendingGeneral = false;
+        sendingGeneralSince = 0;
         setGeneralSendBusy(false);
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
         return;
@@ -18302,8 +18240,19 @@ function initChat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
-        }).then(function (r) { return r.json(); }).then(function (data) {
+        })
+          .then(function (r) {
+            return r.json().catch(function () {
+              return { ok: false, error: "Не удалось разобрать ответ сервера" };
+            }).then(function (data) {
+              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+              if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "");
+              return d;
+            });
+          })
+          .then(function (data) {
           sendingGeneral = false;
+          sendingGeneralSince = 0;
           setGeneralSendBusy(false);
           if (data && data.ok) {
             optimisticGeneralPayload = null;
@@ -18334,6 +18283,7 @@ function initChat() {
         }).catch(function () {
           optimisticGeneralPayload = null;
           sendingGeneral = false;
+          sendingGeneralSince = 0;
           setGeneralSendBusy(false);
           var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
@@ -18344,6 +18294,7 @@ function initChat() {
     } catch (err) {
       optimisticGeneralPayload = null;
       sendingGeneral = false;
+      sendingGeneralSince = 0;
       setGeneralSendBusy(false);
       if (typeof console !== "undefined" && console.error) console.error("sendGeneral failed", err);
       if (tg && tg.showAlert) tg.showAlert("Не удалось отправить сообщение");
@@ -20258,9 +20209,13 @@ function initChat() {
         updatePersonalSendBtnIcon();
       });
       chatComposerEl.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey && chatComposerMounted === "personal") {
+        if (e.key !== "Enter" || e.shiftKey) return;
+        if (chatComposerMounted === "personal") {
           e.preventDefault();
           sendMessage();
+        } else if (chatComposerMounted === "general") {
+          e.preventDefault();
+          sendGeneral();
         }
       });
       resizeChatTextarea(chatComposerEl);
@@ -20474,37 +20429,6 @@ function initChat() {
       }
       if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_copy_link");
     });
-  })();
-
-  (function initChatSwipeBack() {
-    var SWIPE_MIN = 60;
-    var SWIPE_MAX_VERTICAL = 100;
-    var startX = 0;
-    var startY = 0;
-    function onTouchStart(e) {
-      if (e.touches && e.touches[0]) {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-      }
-    }
-    function onTouchEnd(e) {
-      if (!e.changedTouches || !e.changedTouches[0]) return;
-      var endX = e.changedTouches[0].clientX;
-      var endY = e.changedTouches[0].clientY;
-      var dx = endX - startX;
-      var dy = endY - startY;
-      if (dx < -SWIPE_MIN && Math.abs(dy) < SWIPE_MAX_VERTICAL) {
-        showDialogs();
-      }
-    }
-    if (generalView) {
-      generalView.addEventListener("touchstart", onTouchStart, { passive: true });
-      generalView.addEventListener("touchend", onTouchEnd, { passive: true });
-    }
-    if (convView) {
-      convView.addEventListener("touchstart", onTouchStart, { passive: true });
-      convView.addEventListener("touchend", onTouchEnd, { passive: true });
-    }
   })();
 
   function runDialogActionForBtn(btn) {

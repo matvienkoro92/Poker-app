@@ -37,6 +37,10 @@
   --chat-input-field-bg: rgba(15, 23, 42, 0.72);
   /* Запас под шапку Telegram Mini App (до contentSafeAreaInset из JS); в обычном браузере подменяется на меньший */
   --app-extra-top-for-ui: 52px;
+  /* Воздух между последним контентом и верхом таббара (см. pokerApplyBottomTabbarPad: высота бара + этот зазор) */
+  --app-tabbar-content-gap: 15px;
+  /* Fallback без JS: оценка высоты бара + зазор; 72px — ядро ряда иконок в локальном Chrome */
+  --app-bottom-tabbar-pad: calc(72px + max(10px, env(safe-area-inset-bottom, 0px)) + var(--app-tabbar-content-gap));
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -350,8 +354,7 @@ body {
   width: 100%;
   min-height: 100vh;
   padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + var(--app-extra-top-for-ui)));
-  /* Запас под фиксированное таб-меню (~56px + паддинги); без лишнего «хвоста» при нижней резинке */
-  padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--app-bottom-tabbar-pad);
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
   display: flex;
@@ -374,9 +377,11 @@ html.app--tg-content-inset .app {
   padding-top: max(10px, env(safe-area-inset-top, 0px), var(--app-top-from-tg, 48px));
 }
 @media (display-mode: standalone), (display-mode: fullscreen) {
-  /* +6px к запасу под нижнее меню — совпадает с усиленным padding-bottom у .bottom-nav в PWA */
+  :root {
+    /* Как .bottom-nav в PWA: max(12px, safe + 6px) снизу */
+    --app-bottom-tabbar-pad: calc(72px + max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px)) + var(--app-tabbar-content-gap));
+  }
   .app {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     /* Нет шапки Telegram Mini App (~52px «Закрыть») — базовый padding-top даёт лишний зазор на главной */
     padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 10px));
   }
@@ -587,18 +592,14 @@ body:not([data-view="chat"]) {
 /* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
 html:has(.view--active[data-view="video-lessons"]),
-html:has(.view--active[data-view="poker-tasks"]),
-html:has(.view--active[data-view="hall-of-fame"]),
-html:has(.view--active[data-view="download"]) {
+html:has(.view--active[data-view="poker-tasks"]) {
   overflow-y: visible !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 html:has(.view--active[data-view="learn-play-hub"]) body,
 html:has(.view--active[data-view="video-lessons"]) body,
-html:has(.view--active[data-view="poker-tasks"]) body,
-html:has(.view--active[data-view="hall-of-fame"]) body,
-html:has(.view--active[data-view="download"]) body {
+html:has(.view--active[data-view="poker-tasks"]) body {
   overflow-y: auto !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -608,12 +609,19 @@ html:has(.view--active[data-view="download"]) body {
   box-sizing: border-box;
   height: auto !important;
 }
+/* «Зал славы» и «Скачать» не в :has() выше: иначе :has() перебивает классы app-view-*-html-scroll / внутренний scrollport. */
 /* Главная: фон на корне (оверскролл); вертикальный скролл — на <body> через .app-view-browser-local (и TG Mini App), иначе часть WebView не крутит <html> */
 html.app-view-home {
   -webkit-overflow-scrolling: touch;
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--body-bg);
   overscroll-behavior-y: none;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
+}
+html.app-view-home body {
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
+  /* Иначе поздний контент внизу (админ-полоска, счётчики) дёргает scroll anchoring */
+  overflow-anchor: none;
 }
 /* Один скролл на <body> на всех экранах кроме чата (класс вешает app.js). Убирает поломку на устройствах, где крутится только body, не html. */
 html.app-view-browser-local {
@@ -639,8 +647,8 @@ html.app-view-browser-local body {
 }
 html.app-view-browser-local:not(.app-view-chat) #app.app {
   overflow: visible !important;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* 0: flex-колонка не тянется на весь вьюпорт пустотой (min-content в части WK давал лишнюю высоту + «чёрная дыра» при скролле) */
+  min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
   flex-shrink: 0;
@@ -649,10 +657,11 @@ html.app-view-browser-local:not(.app-view-chat) #app.app .card {
   min-height: min-content;
   flex-shrink: 0;
 }
-html.app-view-browser-local:not(.app-view-chat) .card .card__content {
+/* Не задавать visible на экранах с внутренним layout/скроллом — иначе перебивает overflow:hidden (рейтинги) и overflow-y:auto (скачать) */
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll) .card .card__content {
   overflow: visible !important;
 }
-/* Видеоуроки / хаб: класс с setView. Скролл на body — см. комментарий к :has() выше (обрез после ~9 блоков при scroll на html). */
+/* Длинные страницы (не главная): класс с setView / IIFE. Скролл на body — см. :has() выше. */
 html.app-view-long-scroll {
   overflow-y: visible !important;
   overflow-x: hidden;
@@ -782,9 +791,7 @@ body[data-view="hall-of-fame"] .card {
 }
 body[data-view="hall-of-fame"] .card .card__content {
   flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible !important;
+  min-width: 0;
 }
 body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
   flex-shrink: 0;
@@ -792,14 +799,9 @@ body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
   overflow: visible;
 }
 
-/* Скачать: fallback без :has() (старые WebView) — таб-бар виден, padding-bottom .app не трогаем */
+/* Скачать: fallback по data-view — без overflow:visible на .card__content (ломает внутренний scrollport, см. блок ниже и конец файла) */
 body[data-view="download"] {
   display: block !important;
-}
-body[data-view="download"] .app {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
 }
 body[data-view="download"] .app > .bg-gradient {
   inset: 0;
@@ -808,13 +810,10 @@ body[data-view="download"] .card {
   flex-shrink: 0;
   min-height: min-content;
   max-height: none;
-  overflow: visible;
 }
 body[data-view="download"] .card .card__content {
   flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible !important;
+  min-width: 0;
 }
 body[data-view="download"] .view.view--active[data-view="download"] {
   flex-shrink: 0;
@@ -876,97 +875,179 @@ html.vl-modal-scroll-lock.app-view-vl-html-scroll {
 }
 
 /*
- * Зал славы: единый scrollport на <html> (тот же класс багов, что app-view-vl-html-scroll).
- * Иначе при html.app-view-long-scroll + overflow:visible на html часть WebView не крутит body.
+ * Скачать: внутренний scrollport у .card__content (локальный Chrome + TG).
+ * html:has(body[data-view="download"]) — не зависит от класса на <html> (если JS отстаёт).
+ * Дублирующий слой в самом конце styles.css перебивает поздние .card:has(...) с overflow:visible.
  */
-html.app-view-hall-html-scroll {
-  overflow-y: auto !important;
+html:has(body[data-view="download"]),
+html.app-view-download-html-scroll {
+  overflow: hidden !important;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  height: auto !important;
-  min-height: 100%;
-  max-height: none !important;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   overscroll-behavior-y: none !important;
-  overflow-anchor: none;
-  scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
 }
-html.app-view-hall-html-scroll body,
-html.app-view-hall-html-scroll body.app-view-long-scroll {
-  overflow-y: visible !important;
+html:has(body[data-view="download"]) body,
+html:has(body[data-view="download"]) body.app-view-long-scroll,
+html.app-view-download-html-scroll body,
+html.app-view-download-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
   overflow-x: hidden;
-  display: block !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
-  height: auto !important;
+  height: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
   min-height: 0 !important;
+  margin: 0;
   overscroll-behavior-y: none;
 }
-html.app-view-hall-html-scroll .app {
-  overflow: visible !important;
+html:has(body[data-view="download"]) body > audio,
+html.app-view-download-html-scroll body > audio {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+html:has(body[data-view="download"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-download-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="download"]):not(.app-view-chat) #app.app,
+html.app-view-download-html-scroll #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  flex-shrink: 0;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
-html.app-view-hall-html-scroll .card {
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
-  overflow: visible;
+html:has(body[data-view="download"]) .card,
+html.app-view-download-html-scroll .card {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 420px;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
 }
-html.app-view-hall-html-scroll .card .card__content {
-  overflow: visible !important;
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
+html:has(body[data-view="download"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-download-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="download"]) .card .card__content,
+html.app-view-download-html-scroll .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
 }
 
 /*
- * Скачать: scrollport на <html> (как зал славы). Иначе в части TG/iOS WebView не крутится body.
- * Запас снизу под фиксированный таб-бар — как padding-bottom у .app.
+ * Зал славы: внутренний scrollport в .card__content (как «Скачать») — локальный Chrome не крутит html/body с long-scroll.
+ * Таббар скрыт на экране — scroll-padding как у body[data-view="hall-of-fame"] .app (компактный низ).
  */
-html.app-view-download-html-scroll {
-  overflow-y: auto !important;
+html:has(body[data-view="hall-of-fame"]),
+html.app-view-hall-html-scroll {
+  overflow: hidden !important;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  height: auto !important;
-  min-height: 100%;
-  max-height: none !important;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   overscroll-behavior-y: none !important;
-  overflow-anchor: none;
-  scroll-padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
 }
-html.app-view-download-html-scroll body,
-html.app-view-download-html-scroll body.app-view-long-scroll {
-  overflow-y: visible !important;
+html:has(body[data-view="hall-of-fame"]) body,
+html:has(body[data-view="hall-of-fame"]) body.app-view-long-scroll,
+html.app-view-hall-html-scroll body,
+html.app-view-hall-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
   overflow-x: hidden;
-  display: block !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
-  height: auto !important;
+  height: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
   min-height: 0 !important;
+  margin: 0;
   overscroll-behavior-y: none;
 }
-html.app-view-download-html-scroll .app {
-  overflow: visible !important;
+html:has(body[data-view="hall-of-fame"]) body > audio,
+html.app-view-hall-html-scroll body > audio {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+html:has(body[data-view="hall-of-fame"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-hall-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="hall-of-fame"]):not(.app-view-chat) #app.app,
+html.app-view-hall-html-scroll #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  flex-shrink: 0;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
-html.app-view-download-html-scroll .card {
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
-  overflow: visible;
+html:has(body[data-view="hall-of-fame"]) .card,
+html.app-view-hall-html-scroll .card {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 420px;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
 }
-html.app-view-download-html-scroll .card .card__content {
-  overflow: visible !important;
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
+html:has(body[data-view="hall-of-fame"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-hall-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="hall-of-fame"]) .card .card__content,
+html.app-view-hall-html-scroll .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
+  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px)));
 }
 @media (display-mode: standalone), (display-mode: fullscreen) {
-  html.app-view-download-html-scroll {
-    scroll-padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  html:has(body[data-view="hall-of-fame"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+  html.app-view-browser-local.app-view-hall-html-scroll:not(.app-view-chat) .card .card__content,
+  html:has(body[data-view="hall-of-fame"]) .card .card__content,
+  html.app-view-hall-html-scroll .card .card__content {
+    scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px)));
   }
 }
 
@@ -2098,10 +2179,17 @@ body.pwa-auth-gated #app {
 /* Длинные списки (видеоуроки, задачи): карточка растёт по контенту, не обрезается flex-родителем .app */
 .card:has(.view--active[data-view="learn-play-hub"]) .card__content,
 .card:has(.view--active[data-view="video-lessons"]) .card__content,
-.card:has(.view--active[data-view="poker-tasks"]) .card__content,
-.card:has(.view--active[data-view="download"]) .card__content {
+.card:has(.view--active[data-view="poker-tasks"]) .card__content {
   min-width: 0;
   overflow: visible;
+}
+/* Зал славы: только min-width — overflow-y в блоке html.app-view-hall-html-scroll */
+.card:has(.view--active[data-view="hall-of-fame"]) .card__content {
+  min-width: 0;
+}
+/* Скачать: только min-width — overflow задаётся html:has(download) / конец файла (иначе тут visible перекрывает авто-скролл) */
+.card:has(.view--active[data-view="download"]) .card__content {
+  min-width: 0;
 }
 /* fallback для главной без :has() */
 html.app-view-home .card .card__content {
@@ -2150,54 +2238,34 @@ html.app-view-home .card .card__content {
   visibility: hidden;
 }
 
-/* Плавное перелистывание при свайпе: две страницы видны, текущая уезжает, новая въезжает */
-.card__content--swipe-animating {
-  overflow: hidden !important;
-  position: relative !important;
-}
-.card__content--swipe-animating .view--swipe-current,
-.card__content--swipe-animating .view--swipe-next {
-  display: block !important;
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100% !important;
-  min-height: 100%;
-  transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
-  z-index: 1;
-}
-.card__content--swipe-animating .view--swipe-next {
-  z-index: 2;
-}
-.card__content--swipe-animating .view--swipe-current.view--swipe-out-left {
-  transform: translateX(-100%);
-}
-.card__content--swipe-animating .view--swipe-current.view--swipe-out-right {
-  transform: translateX(100%);
-}
-.card__content--swipe-animating .view--swipe-next.view--swipe-in-from-right {
-  transform: translateX(0);
-}
-.card__content--swipe-animating .view--swipe-next.view--swipe-in-from-left {
-  transform: translateX(0);
-}
-.card__content--swipe-animating .view--swipe-next.view--swipe-in-from-right.view--swipe-in-start {
-  transform: translateX(100%);
-}
-.card__content--swipe-animating .view--swipe-next.view--swipe-in-from-left.view--swipe-in-start {
-  transform: translateX(-100%);
-}
-.card__content--swipe-animating .view--swipe-current.view--swipe-drag {
-  transition: none;
-}
-.card__content--swipe-animating .view--swipe-next.view--swipe-drag {
-  transition: none;
-}
 .view--active[data-view="home"] {
-  padding-bottom: 8px;
+  padding-bottom: 28px;
+}
+/* Низкий ландшафт: фиксированный таббар перекрывает последний ряд сетки на главной */
+@media (orientation: landscape) and (max-height: 520px) {
+  .view--active[data-view="home"] {
+    padding-bottom: max(44px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* Депозит / кэшаут: без резинового оверскролла у корня (у html по умолчанию contain) */
+html:has(body[data-view="cashout"]) {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  min-height: 0 !important;
+}
+body[data-view="cashout"] {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  /* У body по умолчанию и у .app-view-browser-local body — min-height: 100dvh; при коротком депозите
+     внизу остаётся пустой «хвост» на весь экран */
+  min-height: 0 !important;
+}
+.app:has(.view--active[data-view="cashout"]) {
+  min-height: 0 !important;
+}
+.view--active[data-view="cashout"] {
+  padding-bottom: 30px;
 }
 
 .view--active[data-view="chat"] {
@@ -16040,17 +16108,20 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
 .winter-rating__dates .winter-rating__date-panel--hidden {
   display: none;
 }
-/* Экран рейтинга — уместить в один экран, контент не уезжает в сторону */
+/* Экран рейтинга — уместить в один экран, контент не уезжает в сторону (зима + весна) */
 .card:has(.view--active[data-view="winter-rating"]) .card__content,
-html.app-view-winter-rating .card .card__content {
-  overflow: hidden;
-  overflow-x: hidden;
+.card:has(.view--active[data-view="spring-rating"]) .card__content,
+html.app-view-winter-rating .card .card__content,
+html.app-view-spring-rating .card .card__content {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
   min-height: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
-.view--active[data-view="winter-rating"] {
+.view--active[data-view="winter-rating"],
+.view--active[data-view="spring-rating"] {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -16059,7 +16130,8 @@ html.app-view-winter-rating .card .card__content {
   display: flex;
   flex-direction: column;
 }
-html.app-view-winter-rating .card .view.view--active[data-view="winter-rating"] {
+html.app-view-winter-rating .card .view.view--active[data-view="winter-rating"],
+html.app-view-spring-rating .card .view.view--active[data-view="spring-rating"] {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -16070,18 +16142,23 @@ html.app-view-winter-rating .card .view.view--active[data-view="winter-rating"] 
 }
 /* Карточка на экране рейтинга — не уезжает в сторону, всегда в видимой области */
 .app:has(.view--active[data-view="winter-rating"]) .card,
-html.app-view-winter-rating .app .card {
+.app:has(.view--active[data-view="spring-rating"]) .card,
+html.app-view-winter-rating .app .card,
+html.app-view-spring-rating .app .card {
   min-width: 0;
   max-width: 100%;
   width: 100%;
   overflow-x: hidden;
 }
 .app:has(.view--active[data-view="winter-rating"]),
-html.app-view-winter-rating .app {
+.app:has(.view--active[data-view="spring-rating"]),
+html.app-view-winter-rating .app,
+html.app-view-spring-rating .app {
   overflow-x: hidden;
 }
 /* Фон карточки на экране рейтинга (fallback без :has(), против чёрного экрана на части устройств) */
-html.app-view-winter-rating .card {
+html.app-view-winter-rating .card,
+html.app-view-spring-rating .card {
   background: var(--card-bg);
   min-height: 200px;
   min-width: 0;
@@ -16089,12 +16166,15 @@ html.app-view-winter-rating .card {
   width: 100%;
   overflow-x: hidden;
 }
-html.app-view-winter-rating .card::before {
+html.app-view-winter-rating .card::before,
+html.app-view-spring-rating .card::before {
   opacity: 0;
   pointer-events: none;
 }
 .view--active[data-view="winter-rating"] .winter-rating,
-html.app-view-winter-rating .card .winter-rating {
+.view--active[data-view="spring-rating"] .winter-rating,
+html.app-view-winter-rating .card .winter-rating,
+html.app-view-spring-rating .card .winter-rating {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -16106,34 +16186,36 @@ html.app-view-winter-rating .card .winter-rating {
   padding: 6px 0 8px;
 }
 .view--active[data-view="winter-rating"] .winter-rating__table-wrap,
-html.app-view-winter-rating .card .winter-rating__table-wrap {
+.view--active[data-view="spring-rating"] .winter-rating__table-wrap,
+html.app-view-winter-rating .card .winter-rating__table-wrap,
+html.app-view-spring-rating .card .winter-rating__table-wrap {
   min-width: 0;
   overflow-x: auto;
 }
-.view--active[data-view="winter-rating"] .winter-rating__title {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__title {
   margin: 0 0 12px;
   font-size: 18px;
   gap: 6px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__cup {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__cup {
   font-size: 43px; /* +10% от 39 */
   margin-left: -6px;
   margin-right: 2px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__updated {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__updated {
   margin: 0;
   font-size: 10px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__table-caption-row {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-caption-row {
   margin: 0 12px 4px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__table-caption {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-caption {
   font-size: 13px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__counters {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__counters {
   font-size: 10px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__table-wrap {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-wrap {
   margin: 0 12px 6px;
   flex: 1;
   min-height: 0;
@@ -16142,85 +16224,62 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   overscroll-behavior: contain;
   touch-action: pan-y pan-x;
 }
-.view--active[data-view="winter-rating"] .winter-rating__table {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table {
   font-size: 11px;
 }
 /* Итоговая таблица в экране рейтинга — оставляем крупный шрифт */
-.view--active[data-view="winter-rating"] #winterRatingTableWrap .winter-rating__table {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table {
   font-size: 15px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__table th,
-.view--active[data-view="winter-rating"] .winter-rating__table td {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table th,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table td {
   padding: 4px 6px;
 }
-.view--active[data-view="winter-rating"] #winterRatingTableWrap .winter-rating__table th,
-.view--active[data-view="winter-rating"] #winterRatingTableWrap .winter-rating__table td {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table th,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table td {
   padding: 8px 10px;
 }
-.view--active[data-view="winter-rating"] #winterRatingTableOverall th:last-child,
-.view--active[data-view="winter-rating"] #winterRatingTableOverall td:last-child {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableOverall th:last-child,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableOverall td:last-child {
   padding-left: 4px;
   padding-right: 6px;
 }
-.view--active[data-view="winter-rating"] #winterRatingTableWrap .winter-rating__table th:last-child,
-.view--active[data-view="winter-rating"] #winterRatingTableWrap .winter-rating__table td:last-child {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table th:last-child,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table td:last-child {
   padding-left: 8px;
   padding-right: 10px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__show-all-wrap {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__show-all-wrap {
   margin: 0 12px 4px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__show-all-btn {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__show-all-btn {
   font-size: 12px;
   padding: 4px 8px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__dates-caption {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates-caption {
   margin: 6px 12px 4px;
   font-size: 13px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__dates-hint {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates-hint {
   margin: 0 12px 4px;
   font-size: 11px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__dates {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates {
   flex-direction: column;
   gap: 0;
   margin: 0 12px;
 }
 /* После календаря и блока «самый выигрыш» — минимальный отступ, без пропасти от gap между скрытыми date-item */
-.view--active[data-view="winter-rating"] .winter-rating__calendar-wrap {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__calendar-wrap {
   margin-bottom: 8px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__single-top-row {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__single-top-row {
   margin-bottom: 8px;
 }
-.view--active[data-view="winter-rating"] .winter-rating__dates .winter-rating__date-item {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates .winter-rating__date-item {
   margin-bottom: 0;
 }
-/* Таблица по датам и календарь видны и в рейтинге весны */
-.view--active[data-view="spring-rating"] .winter-rating__dates-caption {
-  margin: 6px 12px 4px;
-  font-size: 13px;
-}
-.view--active[data-view="spring-rating"] .winter-rating__dates-hint {
-  margin: 0 12px 4px;
-  font-size: 11px;
-}
-.view--active[data-view="spring-rating"] .winter-rating__dates {
-  flex-direction: column;
-  gap: 0;
-  margin: 0 12px;
-}
-.view--active[data-view="spring-rating"] .winter-rating__calendar-wrap {
-  margin-bottom: 8px;
-}
-.view--active[data-view="spring-rating"] .winter-rating__single-top-row {
-  margin-bottom: 8px;
-}
-.view--active[data-view="spring-rating"] .winter-rating__dates .winter-rating__date-item {
-  margin-bottom: 0;
-}
-.view--active[data-view="winter-rating"] .bonus-game-back {
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .bonus-game-back {
   margin: 0 0 5px;
 }
 /* Рейтинг весны: убираем отступ между кнопкой «Назад» и листочками */
@@ -22021,3 +22080,122 @@ html.app-view-winter-rating .card .winter-rating__table-wrap {
   pointer-events: none;
 }
 
+/*
+ * Скачать — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Дублирует ключевые свойства на случай правок выше по файлу.
+ */
+html:has(body[data-view="download"]),
+html.app-view-download-html-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+}
+html:has(body[data-view="download"]) body,
+html:has(body[data-view="download"]) body.app-view-long-scroll,
+html.app-view-download-html-scroll body,
+html.app-view-download-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+}
+body[data-view="download"] #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+body[data-view="download"] #app.app .card {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="download"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+}
+
+/*
+ * Зал славы — финальный слой (как «Скачать»): #app + data-view перебивает long-scroll .card__content visible.
+ */
+html:has(body[data-view="hall-of-fame"]),
+html.app-view-hall-html-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+}
+html:has(body[data-view="hall-of-fame"]) body,
+html:has(body[data-view="hall-of-fame"]) body.app-view-long-scroll,
+html.app-view-hall-html-scroll body,
+html.app-view-hall-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+}
+body[data-view="hall-of-fame"] #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+body[data-view="hall-of-fame"] #app.app .card {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="hall-of-fame"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  body[data-view="hall-of-fame"] #app.app .card .card__content {
+    scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
+  }
+}
