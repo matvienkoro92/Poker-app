@@ -35,12 +35,15 @@
   --chat-ios-accessory-inset: 0px;
   /* Поле ввода и вся полоса композера — один фон (без «светлой» окантовки при фокусе / клавиатуре) */
   --chat-input-field-bg: rgba(15, 23, 42, 0.72);
-  /* Запас под шапку Telegram Mini App (до contentSafeAreaInset из JS); в обычном браузере подменяется на меньший */
-  --app-extra-top-for-ui: 52px;
+  /* До pokerApplyAppTopPadding: компактно; в TG с inset задаётся отдельно, иначе JS ставит 12px */
+  --app-extra-top-for-ui: 12px;
   /* Воздух между последним контентом и верхом таббара (см. pokerApplyBottomTabbarPad: высота бара + этот зазор) */
   --app-tabbar-content-gap: 15px;
-  /* Fallback без JS: оценка высоты бара + зазор; 72px — ядро ряда иконок в локальном Chrome */
-  --app-bottom-tabbar-pad: calc(72px + max(10px, env(safe-area-inset-bottom, 0px)) + var(--app-tabbar-content-gap));
+  /*
+   * Fallback до измерения: одна сумма без второго env(safe-area) — нижний safe уже в padding .bottom-nav и в его offsetHeight.
+   * 90px — медиана визуальной высоты бара; JS уточняет через ResizeObserver.
+   */
+  --app-bottom-tabbar-pad: calc(90px + var(--app-tabbar-content-gap));
 }
 
 /* Скрыть полосы прокрутки по краям (скролл остаётся) */
@@ -353,7 +356,7 @@ body {
   box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
-  padding-top: max(20px, calc(env(safe-area-inset-top, 0px) + var(--app-extra-top-for-ui)));
+  padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + var(--app-extra-top-for-ui)));
   padding-bottom: var(--app-bottom-tabbar-pad);
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
@@ -398,7 +401,7 @@ html.app--tg-content-inset .app {
 @media (display-mode: standalone), (display-mode: fullscreen) {
   :root {
     /* Как .bottom-nav в PWA: max(12px, safe + 6px) снизу */
-    --app-bottom-tabbar-pad: calc(72px + max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px)) + var(--app-tabbar-content-gap));
+    --app-bottom-tabbar-pad: calc(90px + var(--app-tabbar-content-gap));
   }
   .app {
     /* Нет шапки Telegram Mini App (~52px «Закрыть») — базовый padding-top даёт лишний зазор на главной */
@@ -480,6 +483,7 @@ html.app--tg-content-inset .app {
 .card:has(.view--active[data-view="home"]) {
   background: linear-gradient(135deg, #0f172a 0%, #0f172a 100%);
   border: none;
+  padding-top: 12px;
 }
 .card:has(.view--active[data-view="home"])::after {
   content: "";
@@ -501,6 +505,11 @@ html.app--tg-content-inset .app {
 .card:has(.view--active[data-view="home"]) .auth-banner {
   position: relative;
   z-index: 2;
+}
+/* Верхняя панель главной: те же вертикальные внутренние отступы, что у .video-lessons__top-bar; −10px снизу к контенту (было −5, ещё −5) */
+.card:has(.view--active[data-view="home"]) .card__header {
+  padding: 4px 0;
+  margin: 0 0 -10px;
 }
 /* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
 html.app-view-chat,
@@ -1190,6 +1199,10 @@ html.app-view-chat #app.app {
 html.app-view-home .card {
   border: none;
 }
+/* Главная: 5px воздуха над таббаром (дублирует tabbarGapPx в pokerApplyBottomTabbarPad до inline-pad) */
+#app.app.app--view-home {
+  --app-tabbar-content-gap: 5px;
+}
 .card:has(.view--active[data-view="home"])::before,
 html.app-view-home .card::before {
   display: none;
@@ -1211,7 +1224,8 @@ html.app-view-home .home-welcome-outline {
   /* Справа/сверху/снизу — как раньше; слева +8px к базовым 10px для основного контента (кнопка рейтинга компенсирует через переменные) */
   --home-outline-pad-x: 10px;
   --home-outline-pad-left: 18px;
-  padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(40px + 10px + 44px) var(--home-outline-pad-left);
+  /* Снизу: полоса под кнопкой рейтинга + зазор над таббаром 5px (см. pokerApplyBottomTabbarPad на главной) */
+  padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(40px + 10px + 34px) var(--home-outline-pad-left);
 }
 /* «Рейтинг турнирщиков»: по центру, на верхней половине нижней линии обводки (как таб на рамке); на всю ширину рамки */
 html.app-view-home .home-welcome-outline .features--home-rating-on-border,
@@ -8866,14 +8880,22 @@ a.tournament-day-share-btn {
   align-items: center;
   justify-content: space-between;
   gap: 8px 10px;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
+  padding: 4px 0;
   width: 100%;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--card-bg);
 }
 .video-lessons__top-bar .bonus-game-back {
   margin-bottom: 0;
   align-self: center;
   flex-shrink: 0;
+  min-height: 40px;
+  height: 40px;
+  font-size: 1.32rem;
 }
 .video-lessons__top-bar .video-lessons__share-row-wrap {
   margin: 0;
@@ -8890,15 +8912,17 @@ a.tournament-day-share-btn {
   max-width: 100%;
 }
 .video-lessons__top-bar .raffles-hero__share-btn--primary {
-  padding-left: 12px;
-  padding-right: 12px;
+  padding: 10px 12px;
   font-size: 12px;
   letter-spacing: 0.02em;
 }
+.video-lessons__top-bar .raffles-hero__share-btn--copy-icon {
+  width: 40px;
+  height: 40px;
+}
 @media (min-width: 360px) {
   .video-lessons__top-bar .raffles-hero__share-btn--primary {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding: 10px 18px;
     font-size: 13px;
     letter-spacing: 0.04em;
   }

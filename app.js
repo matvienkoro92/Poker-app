@@ -3003,7 +3003,7 @@ function pokerApplyAppTopPadding() {
   }
   root.classList.remove("app--tg-content-inset");
   root.style.removeProperty("--app-top-from-tg");
-  if (tw) return;
+  /* Mini App без contentSafeAreaInset.top: не оставлять :root +52px — иначе огромный зазор под «шапку» */
   root.style.setProperty("--app-extra-top-for-ui", "12px");
 }
 
@@ -3011,48 +3011,53 @@ function pokerApplyAppTopPadding() {
  * Запас под фиксированный .bottom-nav: реальная высота из layout (локальный Chrome, TG/WebView).
  * Чистый CSS (env safe-area) на десктопе даёт 0 снизу — панель перекрывала «Игры и приложения».
  * Скрытый таббар (visibility / уехал за низ) — снимаем inline, остаётся fallback и правила .app:has(…).
- * Зазор над таббаром: 15px (дублирует --app-tabbar-content-gap в CSS).
- * Без верхнего потолка pad иногда раздувался до сотен px — ограничиваем.
+ * Зазор над таббаром: 15px (остальные экраны), на главной 5px — дублирует --app-tabbar-content-gap для #app.app--view-home.
+ * Высоту берём из getBoundingClientRect (как fixed у низа экрана), без второго safe-area в pad — он уже внутри .bottom-nav.
+ * viewportChanged не трогаем: при expand TG даёт ложные кадры и скачок pad через секунды; ResizeObserver на .bottom-nav — источник правды.
  */
 function pokerApplyBottomTabbarPad() {
-  var tabbarGapPx = 15;
+  var tabbarGapPx =
+    document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "home" ? 5 : 15;
+  if (pokerApplyBottomTabbarPad._lastGap !== tabbarGapPx) {
+    pokerApplyBottomTabbarPad._lastGap = tabbarGapPx;
+    pokerApplyBottomTabbarPad._lastPad = null;
+  }
   try {
     var root = document.documentElement;
     var nav = document.querySelector(".bottom-nav");
     if (!nav || typeof nav.getBoundingClientRect !== "function") {
       root.style.removeProperty("--app-bottom-tabbar-pad");
+      pokerApplyBottomTabbarPad._lastPad = null;
       return;
     }
     var st = window.getComputedStyle(nav);
     if (st.visibility === "hidden" || st.display === "none") {
       root.style.removeProperty("--app-bottom-tabbar-pad");
+      pokerApplyBottomTabbarPad._lastPad = null;
       return;
     }
     var vh = window.innerHeight || 0;
     if (vh < 120) return;
     var rect = nav.getBoundingClientRect();
-    if (!rect || !(rect.height > 0)) {
-      root.style.removeProperty("--app-bottom-tabbar-pad");
-      return;
-    }
-    if (rect.top > vh - 20) {
-      root.style.removeProperty("--app-bottom-tabbar-pad");
-      return;
-    }
-    var oh = Math.round(nav.offsetHeight || 0);
-    var h = oh >= 36 ? oh : Math.ceil(rect.height);
-    if (h < 36 || h > 200) {
-      root.style.removeProperty("--app-bottom-tabbar-pad");
-      return;
-    }
-    var pad = Math.min(h + tabbarGapPx, 195);
+    /* Не сбрасываем inline на 0×0 при гонке вёрстки / expand TG — оставляем последний pad */
+    if (!rect || !(rect.height > 0.5)) return;
+    if (rect.top > vh - 20) return;
+    var h = Math.round(rect.height);
+    if (h < 36 || h > 240) return;
+    var pad = Math.min(h + tabbarGapPx, 220);
+    var prev = pokerApplyBottomTabbarPad._lastPad;
+    if (prev != null && Math.abs(pad - prev) < 1) return;
+    pokerApplyBottomTabbarPad._lastPad = pad;
     root.style.setProperty("--app-bottom-tabbar-pad", pad + "px");
   } catch (eBtp) {
     try {
       document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
+      pokerApplyBottomTabbarPad._lastPad = null;
     } catch (e2) {}
   }
 }
+pokerApplyBottomTabbarPad._lastPad = null;
+pokerApplyBottomTabbarPad._lastGap = null;
 
 /**
  * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
@@ -3137,7 +3142,7 @@ if (tg) {
   if (tg.onEvent && typeof tg.onEvent === "function") {
     tg.onEvent("viewportChanged", function (e) {
       if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
-      if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+      /* Нижний pad — только ResizeObserver / resize: иначе при нестабильном viewport pad «прыгает» */
       if (e && e.isStateStable) tryExpand();
     });
   }
@@ -3185,6 +3190,21 @@ pokerApplyBottomTabbarPad();
 setTimeout(pokerApplyBottomTabbarPad, 0);
 setTimeout(pokerApplyBottomTabbarPad, 100);
 setTimeout(pokerApplyBottomTabbarPad, 400);
+/* Пара кадров до ResizeObserver; без load/fonts — поздние вызовы снова меняли pad */
+(function pokerBottomTabbarPadEarlyFlush() {
+  var run = function () {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  };
+  var raf = window.requestAnimationFrame || function (fn) {
+    setTimeout(fn, 16);
+  };
+  var n = 0;
+  function rafBurst() {
+    run();
+    if (++n < 3) raf(rafBurst);
+  }
+  raf(rafBurst);
+})();
 (function pokerBindBottomTabbarPadResize() {
   var t = null;
   function schedule() {
@@ -3199,6 +3219,14 @@ setTimeout(pokerApplyBottomTabbarPad, 400);
   if (window.visualViewport && typeof window.visualViewport.addEventListener === "function") {
     window.visualViewport.addEventListener("resize", schedule, { passive: true });
   }
+})();
+(function pokerBindBottomNavResizeObserver() {
+  var nav = document.querySelector(".bottom-nav");
+  if (!nav || typeof ResizeObserver === "undefined") return;
+  var ro = new ResizeObserver(function () {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  });
+  ro.observe(nav);
 })();
 (function setRandomListenersCount() {
   var el = document.getElementById("headerRadioListenersCount");
