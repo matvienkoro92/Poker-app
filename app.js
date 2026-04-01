@@ -4940,10 +4940,11 @@ function pokerSyncInertForViewScreensOnly() {
   document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
+  document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  document.documentElement.classList.remove("app-view-vl-html-scroll");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
   /* long-scroll без главной: с long-scroll на home ломается скролл в части WebView (конфликт с app-view-browser-local). */
   var longScrollInit =
-    viewName === "video-lessons" ||
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
     viewName === "hall-of-fame" ||
@@ -4999,11 +5000,11 @@ function pokerIsDownloadViewActive() {
   }
 }
 
-/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, профиль и «Зал славы» (локальный Chrome / единый UX). */
+/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "profile") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "profile" && v !== "video-lessons") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {
@@ -5746,23 +5747,23 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
   /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную сюда не включать (ломает скролл). */
   var longScroll =
-    viewName === "video-lessons" ||
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
     viewName === "hall-of-fame" ||
     viewName === "download";
   document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
-  /* Видеоуроки: в iOS/Telegram WebView крутится чаще <html> (scrollingElement); overflow:visible на html обрезает «хвост» списка */
-  document.documentElement.classList.toggle("app-view-vl-html-scroll", viewName === "video-lessons");
+  /* Видеоуроки: внутренний scrollport в .card__content (как профиль); класс app-view-video-lessons-html-scroll — см. styles.css */
+  document.documentElement.classList.remove("app-view-vl-html-scroll");
   /* Зал славы: класс на html — внутренний scrollport в .card__content (как «Скачать»); раньше был scroll на <html>. */
   document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
   /* Скачать: scrollport в .card__content (локальный Chrome + TG); класс на html — цепочка высот/overflow */
   document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
-  /* Главная, депозит, профиль: тот же внутренний scrollport в .card__content, что и у «Скачать». */
+  /* Главная, депозит, профиль, видеоуроки: тот же внутренний scrollport в .card__content, что и у «Скачать». */
   document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
+  document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
@@ -11728,15 +11729,18 @@ function initVideoLessons() {
   /* Длинный экран: при входе показываем шапку с фото и заголовком, а не середину списка */
   function scrollTopNow() {
     try {
-      if (typeof window.scrollTo === "function") {
-        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      } else {
-        window.scrollTo(0, 0);
+      if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+      else {
+        if (typeof window.scrollTo === "function") {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        } else {
+          window.scrollTo(0, 0);
+        }
+        var se = document.scrollingElement;
+        if (se) se.scrollTop = 0;
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
       }
-      var se = document.scrollingElement;
-      if (se) se.scrollTop = 0;
-      if (document.documentElement) document.documentElement.scrollTop = 0;
-      if (document.body) document.body.scrollTop = 0;
     } catch (err) {}
   }
   scrollTopNow();
@@ -11772,6 +11776,7 @@ function initVideoLessons() {
   var pendingY = null;
   function getScrollY() {
     try {
+      if (typeof getMainDocumentScrollY === "function") return getMainDocumentScrollY();
       var se = document.scrollingElement || document.documentElement;
       return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
     } catch (e) {
@@ -11781,11 +11786,14 @@ function initVideoLessons() {
   function setScrollY(y) {
     try {
       y = Math.max(0, y);
-      if (typeof window.scrollTo === "function") window.scrollTo(0, y);
-      var se = document.scrollingElement || document.documentElement;
-      if (se) se.scrollTop = y;
-      if (document.documentElement) document.documentElement.scrollTop = y;
-      if (document.body) document.body.scrollTop = y;
+      if (typeof setMainDocumentScrollY === "function") setMainDocumentScrollY(y);
+      else {
+        if (typeof window.scrollTo === "function") window.scrollTo(0, y);
+        var se = document.scrollingElement || document.documentElement;
+        if (se) se.scrollTop = y;
+        if (document.documentElement) document.documentElement.scrollTop = y;
+        if (document.body) document.body.scrollTop = y;
+      }
     } catch (e2) {}
   }
   document.addEventListener(
@@ -14595,7 +14603,7 @@ function initRaffles() {
   }
 })();
 
-/** Пока открыта модалка «О тренере» или «Отзывы» на видеоуроках — блокируем скролл фона (scrollport на &lt;html&gt;). */
+/** Пока открыта модалка «О тренере» или «Отзывы» на видеоуроках — блокируем скролл ленты (.card__content). */
 function syncVideoLessonsModalScrollLock() {
   var coach = document.getElementById("videoLessonsCoachModal");
   var rev = document.getElementById("videoLessonsReviewsModal");
@@ -14605,7 +14613,10 @@ function syncVideoLessonsModalScrollLock() {
   var root = document.documentElement;
   if (anyOpen) {
     if (!root.classList.contains("vl-modal-scroll-lock")) {
-      var y = root.scrollTop;
+      var panelOpen = typeof pokerGetPanelScrollCardContentEl === "function" ? pokerGetPanelScrollCardContentEl() : null;
+      var y = 0;
+      if (panelOpen) y = panelOpen.scrollTop || 0;
+      else y = root.scrollTop || 0;
       if (y == null || isNaN(y)) y = 0;
       root.setAttribute("data-vl-scroll-lock-top", String(y));
       root.classList.add("vl-modal-scroll-lock");
@@ -14615,13 +14626,16 @@ function syncVideoLessonsModalScrollLock() {
     if (isNaN(saved)) saved = 0;
     root.classList.remove("vl-modal-scroll-lock");
     root.removeAttribute("data-vl-scroll-lock-top");
+    var panelRestore = typeof pokerGetPanelScrollCardContentEl === "function" ? pokerGetPanelScrollCardContentEl() : null;
     var raf = window.requestAnimationFrame || function (cb) {
       setTimeout(cb, 16);
     };
     raf(function () {
-      root.scrollTop = saved;
+      if (panelRestore) panelRestore.scrollTop = saved;
+      else root.scrollTop = saved;
       raf(function () {
-        root.scrollTop = saved;
+        if (panelRestore) panelRestore.scrollTop = saved;
+        else root.scrollTop = saved;
       });
     });
   }

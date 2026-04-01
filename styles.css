@@ -364,6 +364,25 @@ body {
   overflow: hidden;
 }
 /*
+ * Внутренний скролл в .card__content (главная, скачать, депозит, профиль, зал славы):
+ * нижний запас под таббар уже задаётся scroll-padding-bottom у .card__content — padding-bottom .app
+ * дублировал бы пустую полосу с фоном #app над фиксированным .bottom-nav.
+ */
+html:has(body[data-view="home"]) #app.app,
+html.app-view-home-html-scroll #app.app,
+html:has(body[data-view="download"]) #app.app,
+html.app-view-download-html-scroll #app.app,
+html:has(body[data-view="cashout"]) #app.app,
+html.app-view-cashout-html-scroll #app.app,
+html:has(body[data-view="profile"]) #app.app,
+html.app-view-profile-html-scroll #app.app,
+html:has(body[data-view="hall-of-fame"]) #app.app,
+html.app-view-hall-html-scroll #app.app,
+html:has(body[data-view="video-lessons"]) #app.app,
+html.app-view-video-lessons-html-scroll #app.app {
+  padding-bottom: 0 !important;
+}
+/*
  * body — flex (по умолчанию row) + align-items: stretch: без align-self дочерний #app тянется по высоте
  * вьюпорта, а overflow:hidden обрезает контент → scrollHeight ≈ 100vh (локально «не скроллится нигде»).
  * Таббар вне #app усиливает этот эффект. flex-shrink: 0 — не сжимать колонку контента.
@@ -591,14 +610,12 @@ body:not([data-view="chat"]) {
 }
 /* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
-html:has(.view--active[data-view="video-lessons"]),
 html:has(.view--active[data-view="poker-tasks"]) {
   overflow-y: visible !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 html:has(.view--active[data-view="learn-play-hub"]) body,
-html:has(.view--active[data-view="video-lessons"]) body,
 html:has(.view--active[data-view="poker-tasks"]) body {
   overflow-y: auto !important;
   overflow-x: hidden;
@@ -658,7 +675,7 @@ html.app-view-browser-local:not(.app-view-chat) #app.app .card {
   flex-shrink: 0;
 }
 /* Не задавать visible на экранах с внутренним layout/скроллом — иначе перебивает overflow:hidden (рейтинги) и overflow-y:auto (скачать) */
-html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-profile-html-scroll) .card .card__content {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll) .card .card__content {
   overflow: visible !important;
 }
 /* Длинные страницы (не главная): класс с setView / IIFE. Скролл на body — см. :has() выше. */
@@ -703,49 +720,13 @@ body.app-view-long-scroll .card .card__content {
   overflow: visible !important;
 }
 
-/* Видеоуроки: дублируем без единственной зависимости от app-view-long-scroll (старые WebView / порядок классов) */
-.card:has(.view--active[data-view="video-lessons"]) {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible;
-}
-.card:has(.view--active[data-view="video-lessons"]) .card__content {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible !important;
-}
-.view.view--active[data-view="video-lessons"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
 /*
- * Видеоуроки: fallback без :has() (часть WebView Telegram/Android не применяет .card:has(...)).
- * Иначе .card остаётся с min-height: 0 и overflow у .app обрезает список (~видны уроки до 10–11).
+ * Видеоуроки: fallback по data-view (как профиль); скролл — в .card__content (app-view-video-lessons-html-scroll).
  */
 body[data-view="video-lessons"] {
   display: block !important;
 }
-body[data-view="video-lessons"] .app {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  /* Без :has() таб-бар скрыт, а padding-bottom .app остаётся «под навигацию» — убираем */
-  padding-bottom: max(8px, calc(4px + env(safe-area-inset-bottom, 0px))) !important;
-}
-/*
- * «Чёрная дыра» под контентом: .bg-gradient с inset:-40% абсолютно позиционирован в #app.
- * При overflow:visible на .app вылет за padding-box попадает в scrollable overflow <html> —
- * scrollHeight ≈ высота контента + сотни/тысячи px снизу (процент от высоты #app).
- * Обрезка только для этого экрана; фон карточки и .bg-blur (inset:0) не страдают.
- */
 body[data-view="video-lessons"] .app > .bg-gradient {
-  inset: 0;
-}
-html.app-view-vl-html-scroll .app > .bg-gradient {
   inset: 0;
 }
 /* Зал славы, хаб, задачи, «Скачать»: тот же long-scroll — без обрезки градиент снова раздувает прокрутку */
@@ -756,13 +737,10 @@ body[data-view="video-lessons"] .card {
   flex-shrink: 0;
   min-height: min-content;
   max-height: none;
-  overflow: visible;
 }
 body[data-view="video-lessons"] .card .card__content {
   flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible !important;
+  min-width: 0;
 }
 body[data-view="video-lessons"] .view.view--active[data-view="video-lessons"] {
   flex-shrink: 0;
@@ -881,61 +859,15 @@ body[data-view="profile"] .view.view--active[data-view="profile"] {
   overflow: visible;
 }
 
-/*
- * Видеоуроки: единый scrollport на <html> (класс вешает setView).
- * Без лишних min-height на html/.app — иначе в iOS/TG раздувается scrollHeight («пустой хвост») и скролл залипает ~на 9-й карточке.
- */
-html.app-view-vl-html-scroll {
-  overflow-y: auto !important;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  height: auto !important;
-  min-height: 100%;
-  max-height: none !important;
-  overscroll-behavior-y: none !important;
-  overflow-anchor: none;
-  scroll-padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
-}
-html.app-view-vl-html-scroll body,
-html.app-view-vl-html-scroll body.app-view-long-scroll {
-  overflow-y: visible !important;
-  overflow-x: hidden;
-  display: block !important;
-  width: 100%;
-  box-sizing: border-box;
-  height: auto !important;
-  min-height: 0 !important;
-  overscroll-behavior-y: none;
-}
-/* Запас под контент без «двойного вьюпорта»: не дублируем 100dvh поверх базового .app */
-html.app-view-vl-html-scroll .app {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  flex-shrink: 0;
-}
-html.app-view-vl-html-scroll .card {
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
-  overflow: visible;
-}
-html.app-view-vl-html-scroll .card .card__content {
-  overflow: visible !important;
-  min-height: min-content;
-  flex-shrink: 0;
-  max-height: none;
-}
-
-/* Модалки «О тренере» / «Отзывы»: не крутить ленту видеоуроков под fixed-слоем */
-html.vl-modal-scroll-lock.app-view-vl-html-scroll {
+/* Модалки «О тренере» / «Отзывы» на видеоуроках: не крутить .card__content под fixed-слоем */
+html.vl-modal-scroll-lock.app-view-video-lessons-html-scroll .card .card__content {
   overflow-y: hidden !important;
   overflow-x: hidden;
   overscroll-behavior-y: none !important;
 }
 
 /*
- * Скачать, главная, депозит, профиль: внутренний scrollport у .card__content (локальный Chrome + TG).
+ * Скачать, главная, депозит, профиль, видеоуроки: внутренний scrollport у .card__content (локальный Chrome + TG).
  * html:has(body[data-view="…"]) — не зависит от класса на <html> (если JS отстаёт).
  * Дублирующий слой в самом конце styles.css перебивает поздние .card:has(...) с overflow:visible.
  */
@@ -946,7 +878,9 @@ html.app-view-home-html-scroll,
 html:has(body[data-view="cashout"]),
 html.app-view-cashout-html-scroll,
 html:has(body[data-view="profile"]),
-html.app-view-profile-html-scroll {
+html.app-view-profile-html-scroll,
+html:has(body[data-view="video-lessons"]),
+html.app-view-video-lessons-html-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   width: 100%;
@@ -972,7 +906,11 @@ html.app-view-cashout-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="profile"]) body,
 html:has(body[data-view="profile"]) body.app-view-long-scroll,
 html.app-view-profile-html-scroll body,
-html.app-view-profile-html-scroll body.app-view-long-scroll {
+html.app-view-profile-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="video-lessons"]) body,
+html:has(body[data-view="video-lessons"]) body.app-view-long-scroll,
+html.app-view-video-lessons-html-scroll body,
+html.app-view-video-lessons-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   display: flex !important;
@@ -994,7 +932,9 @@ html.app-view-home-html-scroll body > audio,
 html:has(body[data-view="cashout"]) body > audio,
 html.app-view-cashout-html-scroll body > audio,
 html:has(body[data-view="profile"]) body > audio,
-html.app-view-profile-html-scroll body > audio {
+html.app-view-profile-html-scroll body > audio,
+html:has(body[data-view="video-lessons"]) body > audio,
+html.app-view-video-lessons-html-scroll body > audio {
   flex: 0 0 auto;
   width: 0;
   height: 0;
@@ -1018,7 +958,11 @@ html.app-view-cashout-html-scroll #app.app,
 html:has(body[data-view="profile"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
 html.app-view-browser-local.app-view-long-scroll.app-view-profile-html-scroll:not(.app-view-chat) #app.app,
 html:has(body[data-view="profile"]):not(.app-view-chat) #app.app,
-html.app-view-profile-html-scroll #app.app {
+html.app-view-profile-html-scroll #app.app,
+html:has(body[data-view="video-lessons"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-video-lessons-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="video-lessons"]):not(.app-view-chat) #app.app,
+html.app-view-video-lessons-html-scroll #app.app {
   flex: 1 1 auto !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -1037,7 +981,9 @@ html.app-view-home-html-scroll .card,
 html:has(body[data-view="cashout"]) .card,
 html.app-view-cashout-html-scroll .card,
 html:has(body[data-view="profile"]) .card,
-html.app-view-profile-html-scroll .card {
+html.app-view-profile-html-scroll .card,
+html:has(body[data-view="video-lessons"]) .card,
+html.app-view-video-lessons-html-scroll .card {
   flex: 1 1 auto;
   width: 100%;
   max-width: 420px;
@@ -1061,7 +1007,11 @@ html.app-view-cashout-html-scroll .card .card__content,
 html:has(body[data-view="profile"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
 html.app-view-browser-local.app-view-profile-html-scroll:not(.app-view-chat) .card .card__content,
 html:has(body[data-view="profile"]) .card .card__content,
-html.app-view-profile-html-scroll .card .card__content {
+html.app-view-profile-html-scroll .card .card__content,
+html:has(body[data-view="video-lessons"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-video-lessons-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="video-lessons"]) .card .card__content,
+html.app-view-video-lessons-html-scroll .card .card__content {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   min-width: 0;
@@ -2311,12 +2261,14 @@ body.pwa-auth-gated #app {
 .card:has(.view--active[data-view="home"]) .card__content > .view {
   min-width: 0;
 }
-/* Длинные списки (видеоуроки, задачи): карточка растёт по контенту, не обрезается flex-родителем .app */
+/* Длинные списки (хаб, задачи): скролл на body; видеоуроки — внутренний scrollport (app-view-video-lessons-html-scroll) */
 .card:has(.view--active[data-view="learn-play-hub"]) .card__content,
-.card:has(.view--active[data-view="video-lessons"]) .card__content,
 .card:has(.view--active[data-view="poker-tasks"]) .card__content {
   min-width: 0;
   overflow: visible;
+}
+.card:has(.view--active[data-view="video-lessons"]) .card__content {
+  min-width: 0;
 }
 /* Зал славы: только min-width — overflow-y в блоке html.app-view-hall-html-scroll */
 .card:has(.view--active[data-view="hall-of-fame"]) .card__content {
@@ -22216,7 +22168,7 @@ html.app-view-spring-rating .card .winter-rating__table-wrap {
 }
 
 /*
- * Скачать, главная, депозит, профиль — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Скачать, главная, депозит, профиль, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
  * Дублирует ключевые свойства на случай правок выше по файлу.
  */
 html:has(body[data-view="download"]),
@@ -22226,7 +22178,9 @@ html.app-view-home-html-scroll,
 html:has(body[data-view="cashout"]),
 html.app-view-cashout-html-scroll,
 html:has(body[data-view="profile"]),
-html.app-view-profile-html-scroll {
+html.app-view-profile-html-scroll,
+html:has(body[data-view="video-lessons"]),
+html.app-view-video-lessons-html-scroll {
   overflow: hidden !important;
   height: 100vh !important;
   height: 100dvh !important;
@@ -22248,7 +22202,11 @@ html.app-view-cashout-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="profile"]) body,
 html:has(body[data-view="profile"]) body.app-view-long-scroll,
 html.app-view-profile-html-scroll body,
-html.app-view-profile-html-scroll body.app-view-long-scroll {
+html.app-view-profile-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="video-lessons"]) body,
+html:has(body[data-view="video-lessons"]) body.app-view-long-scroll,
+html.app-view-video-lessons-html-scroll body,
+html.app-view-video-lessons-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -22261,7 +22219,8 @@ html.app-view-profile-html-scroll body.app-view-long-scroll {
 body[data-view="download"] #app.app,
 body[data-view="home"] #app.app,
 body[data-view="cashout"] #app.app,
-body[data-view="profile"] #app.app {
+body[data-view="profile"] #app.app,
+body[data-view="video-lessons"] #app.app {
   flex: 1 1 auto !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -22272,11 +22231,13 @@ body[data-view="profile"] #app.app {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-start !important;
+  padding-bottom: 0 !important;
 }
 body[data-view="download"] #app.app .card,
 body[data-view="home"] #app.app .card,
 body[data-view="cashout"] #app.app .card,
-body[data-view="profile"] #app.app .card {
+body[data-view="profile"] #app.app .card,
+body[data-view="video-lessons"] #app.app .card {
   flex: 1 1 auto !important;
   width: 100% !important;
   max-width: 420px !important;
@@ -22285,7 +22246,8 @@ body[data-view="profile"] #app.app .card {
   display: flex !important;
   flex-direction: column !important;
 }
-body[data-view="download"] #app.app .card .card__content {
+body[data-view="download"] #app.app .card .card__content,
+body[data-view="video-lessons"] #app.app .card .card__content {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   min-width: 0 !important;
@@ -22352,6 +22314,7 @@ body[data-view="hall-of-fame"] #app.app {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-start !important;
+  padding-bottom: 0 !important;
 }
 body[data-view="hall-of-fame"] #app.app .card {
   flex: 1 1 auto !important;
