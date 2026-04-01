@@ -571,37 +571,18 @@ html.app-view-chat .bottom-nav {
   transform: translate3d(0, 0, 0);
 }
 
-/* Надёжный скролл для всех обычных разделов (дом, расписание, рейтинг и т.п.) даже на старых WebView */
-body[data-view="home"],
-body[data-view="schedule"],
-body[data-view="rating"],
-body[data-view="raffles"],
-body[data-view="news"],
-body[data-view="tasks"],
-body[data-view="hall"],
-body[data-view="download"],
-body[data-view="learn-play-hub"],
-body[data-view="video-lessons"],
-body[data-view="poker-tasks"],
-body[data-view="hall-of-fame"],
-body[data-view="bonus-game"],
-body[data-view="cooler-game"],
-body[data-view="plasterer-game"],
-body[data-view="cashout"],
-body[data-view="profile"],
-body[data-view="streams"],
-body[data-view="equilator"],
-body[data-view="winter-rating"],
-body[data-view="spring-rating"] {
+/* Надёжный скролл: любой экран кроме чата (новые data-view не нужно вносить вручную) */
+body:not([data-view="chat"]) {
   position: static;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  /* Браузер / локальный превью: иначе body остаётся row-flex + stretch — скролл документа ломается (в TG чаще крутится html). */
+  /* Иначе body остаётся row-flex + stretch — высота #app ≈ вьюпорт и контент обрезается */
   display: block !important;
   width: 100%;
   box-sizing: border-box;
   height: auto !important;
+  touch-action: pan-y pinch-zoom;
 }
 /* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
@@ -627,19 +608,14 @@ html:has(.view--active[data-view="download"]) body {
   box-sizing: border-box;
   height: auto !important;
 }
-/* Redmi и др.: часть WebView скроллит html — даём явный скролл (класс вешается при загрузке главной) */
+/* Главная: фон на корне (оверскролл); вертикальный скролл — на <body> через .app-view-browser-local (и TG Mini App), иначе часть WebView не крутит <html> */
 html.app-view-home {
-  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--body-bg);
   overscroll-behavior-y: none;
 }
-/* Иначе одновременно крутятся html и body — залипание скролла на главной */
-html.app-view-home body {
-  overflow-y: visible !important;
-}
-/* Локальный браузер / превью без initData: один скролл на body на всех экранах кроме чата (см. pokerHomeShouldScrollHtmlElement + app-view-browser-local в app.js). */
+/* Один скролл на <body> на всех экранах кроме чата (класс вешает app.js). Убирает поломку на устройствах, где крутится только body, не html. */
 html.app-view-browser-local {
   overflow-y: visible !important;
   overflow-x: hidden;
@@ -659,6 +635,7 @@ html.app-view-browser-local body {
   min-height: 100dvh;
   height: auto !important;
   overscroll-behavior-y: none;
+  touch-action: pan-y pinch-zoom;
 }
 html.app-view-browser-local:not(.app-view-chat) #app.app {
   overflow: visible !important;

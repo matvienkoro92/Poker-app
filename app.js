@@ -48,16 +48,6 @@ function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
 }
 
-/** Реальный Mini App: непустой initData — часто удобнее крутить документ на <html>. Локально WebApp есть, initData пуст — единый скролл на <body> (класс app-view-browser-local на всех вкладках кроме чата). */
-function pokerHomeShouldScrollHtmlElement() {
-  try {
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    return !!(tg && String(tg.initData || "").trim());
-  } catch (eHomeScroll) {
-    return false;
-  }
-}
-
 /**
  * Базовый URL для ссылок "в это же приложение" (startapp=...).
  * - В Telegram Mini App используем `data-telegram-app-url` (t.me).
@@ -2980,10 +2970,9 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
 
 // Восстановление скролла при «Назад» (чтобы body не оставался overflow: hidden после модалок)
 window.addEventListener("popstate", function () {
-  if (document.body) {
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-  }
+  try {
+    if (typeof pokerClearBodyDocumentScrollLockInline === "function") pokerClearBodyDocumentScrollLockInline();
+  } catch (ePop) {}
 });
 
 /** Верхний отступ #app: PWA — только CSS; в Telegram — contentSafeAreaInset; в обычном браузере — без лишних +52px под шапку TG */
@@ -4882,13 +4871,24 @@ function pokerSyncInertForViewScreensOnly() {
   if (viewName === "home") {
     document.documentElement.classList.add("app-view-home");
   }
-  document.documentElement.classList.toggle(
-    "app-view-browser-local",
-    viewName !== "chat" && !pokerHomeShouldScrollHtmlElement()
-  );
+  document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
 })();
 
-/** Страховка для локального браузера: если после чата/модалки остался глобальный lock, возвращаем скролл документа. */
+/** Сброс inline-блокировки фона (модалки «Устав», чат и т.п.) — иначе залипает position:fixed + top */
+function pokerClearBodyDocumentScrollLockInline() {
+  try {
+    var b = document.body;
+    if (!b || !b.style) return;
+    b.style.overflow = "";
+    b.style.position = "";
+    b.style.removeProperty("top");
+    b.style.removeProperty("left");
+    b.style.removeProperty("right");
+    b.style.removeProperty("width");
+  } catch (eClr) {}
+}
+
+/** Страховка: после чата/модалки вернуть скролл документа (не трогаем экран чата). */
 function pokerEnsureUnlockedDocumentScrollForNonChat() {
   try {
     var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
@@ -4896,8 +4896,7 @@ function pokerEnsureUnlockedDocumentScrollForNonChat() {
     document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
     if (document.body) {
       document.body.classList.remove("chat-keyboard-open");
-      if (document.body.style && document.body.style.overflow === "hidden") document.body.style.overflow = "";
-      if (document.body.style && document.body.style.position === "fixed") document.body.style.position = "";
+      pokerClearBodyDocumentScrollLockInline();
     }
     if (document.documentElement && document.documentElement.style && document.documentElement.style.overflow === "hidden") {
       document.documentElement.style.overflow = "";
@@ -5356,15 +5355,15 @@ function setView(viewName, navOpts) {
       } catch (eNk3) {}
     }, 380);
   }
-  if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
   if (prevView && prevView !== viewName) {
     viewScrollMemory[prevView] = getMainDocumentScrollY();
   }
   if (document.body) {
-    document.body.style.overflow = "";
-    document.body.style.position = "";
+    pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
   }
+  /* После data-view: иначе при выходе из чата ensure видел data-view=chat и выходил раньше времени */
+  if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
   if (prevView === "chat" && viewName !== "chat") {
     try {
       var rafPostChat = window.requestAnimationFrame || function (fn) {
@@ -5622,10 +5621,7 @@ function setView(viewName, navOpts) {
       winterView.appendChild(ratingSection);
     }
   }
-  document.documentElement.classList.toggle(
-    "app-view-browser-local",
-    viewName !== "chat" && !pokerHomeShouldScrollHtmlElement()
-  );
+  document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
   /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу, только <html> с классом как на главной */
   var longScroll =
     viewName === "video-lessons" ||
