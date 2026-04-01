@@ -4937,6 +4937,9 @@ function pokerSyncInertForViewScreensOnly() {
   if (viewName === "home") {
     document.documentElement.classList.add("app-view-home");
   }
+  document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
+  document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
+  document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
   /* long-scroll без главной: с long-scroll на home ломается скролл в части WebView (конфликт с app-view-browser-local). */
   var longScrollInit =
@@ -4996,11 +4999,11 @@ function pokerIsDownloadViewActive() {
   }
 }
 
-/** Скролл документа перенесён в .card__content на «Скачать» и «Зал славы» (локальный Chrome / единый UX). */
+/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, профиль и «Зал славы» (локальный Chrome / единый UX). */
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "profile") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {
@@ -5069,6 +5072,11 @@ function setMainDocumentScrollY(y) {
 function clampMainDocumentScrollY(y) {
   try {
     y = Math.max(0, Number(y) || 0);
+    var dl = pokerGetPanelScrollCardContentEl();
+    if (dl) {
+      var maxPanel = Math.max(0, (dl.scrollHeight || 0) - (dl.clientHeight || 0));
+      return Math.min(y, maxPanel);
+    }
     var h = Math.max(
       document.documentElement.scrollHeight || 0,
       document.body.scrollHeight || 0
@@ -5751,6 +5759,10 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
   /* Скачать: scrollport в .card__content (локальный Chrome + TG); класс на html — цепочка высот/overflow */
   document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
+  /* Главная, депозит, профиль: тот же внутренний scrollport в .card__content, что и у «Скачать». */
+  document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
+  document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
+  document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
@@ -23154,7 +23166,7 @@ function updateTournamentDayBlock() {
     };
     var homeTdName = document.getElementById("tournamentDayName");
     var scheduleTdName = document.getElementById("scheduleTournamentDayName");
-    var hideNameOnHome = nameStr === "Фриролл" || nameStr === "Rebuy";
+    var hideNameOnHome = nameStr === "Фриролл" || nameStr === "Rebuy" || nameStr === "Нокаут Мистери";
     if (homeTdName) {
       homeTdName.textContent = hideNameOnHome ? "" : nameStr;
       if (nameStr === "Фриролл") {
@@ -23164,7 +23176,7 @@ function updateTournamentDayBlock() {
       }
     }
     if (scheduleTdName) {
-      scheduleTdName.textContent = nameStr;
+      scheduleTdName.textContent = nameStr === "Нокаут Мистери" ? "" : nameStr;
       if (nameStr === "Фриролл") {
         scheduleTdName.classList.add("tournament-day-name--freeroll");
       } else {

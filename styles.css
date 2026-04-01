@@ -658,7 +658,7 @@ html.app-view-browser-local:not(.app-view-chat) #app.app .card {
   flex-shrink: 0;
 }
 /* Не задавать visible на экранах с внутренним layout/скроллом — иначе перебивает overflow:hidden (рейтинги) и overflow-y:auto (скачать) */
-html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll) .card .card__content {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-profile-html-scroll) .card .card__content {
   overflow: visible !important;
 }
 /* Длинные страницы (не главная): класс с setView / IIFE. Скролл на body — см. :has() выше. */
@@ -821,6 +821,66 @@ body[data-view="download"] .view.view--active[data-view="download"] {
   overflow: visible;
 }
 
+/* Главная: fallback по data-view — как у «Скачать» */
+body[data-view="home"] {
+  display: block !important;
+}
+body[data-view="home"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="home"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="home"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="home"] .view.view--active[data-view="home"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Депозит: тот же fallback карточки (совместно с блоком html:has(cashout) ниже) */
+body[data-view="cashout"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="cashout"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="cashout"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="cashout"] .view.view--active[data-view="cashout"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Профиль: fallback карточки — как главная / депозит */
+body[data-view="profile"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="profile"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="profile"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="profile"] .view.view--active[data-view="profile"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
 /*
  * Видеоуроки: единый scrollport на <html> (класс вешает setView).
  * Без лишних min-height на html/.app — иначе в iOS/TG раздувается scrollHeight («пустой хвост») и скролл залипает ~на 9-й карточке.
@@ -875,12 +935,18 @@ html.vl-modal-scroll-lock.app-view-vl-html-scroll {
 }
 
 /*
- * Скачать: внутренний scrollport у .card__content (локальный Chrome + TG).
- * html:has(body[data-view="download"]) — не зависит от класса на <html> (если JS отстаёт).
+ * Скачать, главная, депозит, профиль: внутренний scrollport у .card__content (локальный Chrome + TG).
+ * html:has(body[data-view="…"]) — не зависит от класса на <html> (если JS отстаёт).
  * Дублирующий слой в самом конце styles.css перебивает поздние .card:has(...) с overflow:visible.
  */
 html:has(body[data-view="download"]),
-html.app-view-download-html-scroll {
+html.app-view-download-html-scroll,
+html:has(body[data-view="home"]),
+html.app-view-home-html-scroll,
+html:has(body[data-view="cashout"]),
+html.app-view-cashout-html-scroll,
+html:has(body[data-view="profile"]),
+html.app-view-profile-html-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   width: 100%;
@@ -894,7 +960,19 @@ html.app-view-download-html-scroll {
 html:has(body[data-view="download"]) body,
 html:has(body[data-view="download"]) body.app-view-long-scroll,
 html.app-view-download-html-scroll body,
-html.app-view-download-html-scroll body.app-view-long-scroll {
+html.app-view-download-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="home"]) body,
+html:has(body[data-view="home"]) body.app-view-long-scroll,
+html.app-view-home-html-scroll body,
+html.app-view-home-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="cashout"]) body,
+html:has(body[data-view="cashout"]) body.app-view-long-scroll,
+html.app-view-cashout-html-scroll body,
+html.app-view-cashout-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="profile"]) body,
+html:has(body[data-view="profile"]) body.app-view-long-scroll,
+html.app-view-profile-html-scroll body,
+html.app-view-profile-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   display: flex !important;
@@ -910,7 +988,13 @@ html.app-view-download-html-scroll body.app-view-long-scroll {
   overscroll-behavior-y: none;
 }
 html:has(body[data-view="download"]) body > audio,
-html.app-view-download-html-scroll body > audio {
+html.app-view-download-html-scroll body > audio,
+html:has(body[data-view="home"]) body > audio,
+html.app-view-home-html-scroll body > audio,
+html:has(body[data-view="cashout"]) body > audio,
+html.app-view-cashout-html-scroll body > audio,
+html:has(body[data-view="profile"]) body > audio,
+html.app-view-profile-html-scroll body > audio {
   flex: 0 0 auto;
   width: 0;
   height: 0;
@@ -922,7 +1006,19 @@ html.app-view-download-html-scroll body > audio {
 html:has(body[data-view="download"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
 html.app-view-browser-local.app-view-long-scroll.app-view-download-html-scroll:not(.app-view-chat) #app.app,
 html:has(body[data-view="download"]):not(.app-view-chat) #app.app,
-html.app-view-download-html-scroll #app.app {
+html.app-view-download-html-scroll #app.app,
+html:has(body[data-view="home"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-home-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="home"]):not(.app-view-chat) #app.app,
+html.app-view-home-html-scroll #app.app,
+html:has(body[data-view="cashout"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-cashout-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="cashout"]):not(.app-view-chat) #app.app,
+html.app-view-cashout-html-scroll #app.app,
+html:has(body[data-view="profile"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-profile-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="profile"]):not(.app-view-chat) #app.app,
+html.app-view-profile-html-scroll #app.app {
   flex: 1 1 auto !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -935,7 +1031,13 @@ html.app-view-download-html-scroll #app.app {
   justify-content: flex-start;
 }
 html:has(body[data-view="download"]) .card,
-html.app-view-download-html-scroll .card {
+html.app-view-download-html-scroll .card,
+html:has(body[data-view="home"]) .card,
+html.app-view-home-html-scroll .card,
+html:has(body[data-view="cashout"]) .card,
+html.app-view-cashout-html-scroll .card,
+html:has(body[data-view="profile"]) .card,
+html.app-view-profile-html-scroll .card {
   flex: 1 1 auto;
   width: 100%;
   max-width: 420px;
@@ -947,7 +1049,19 @@ html.app-view-download-html-scroll .card {
 html:has(body[data-view="download"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
 html.app-view-browser-local.app-view-download-html-scroll:not(.app-view-chat) .card .card__content,
 html:has(body[data-view="download"]) .card .card__content,
-html.app-view-download-html-scroll .card .card__content {
+html.app-view-download-html-scroll .card .card__content,
+html:has(body[data-view="home"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-home-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="home"]) .card .card__content,
+html.app-view-home-html-scroll .card .card__content,
+html:has(body[data-view="cashout"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-cashout-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="cashout"]) .card .card__content,
+html.app-view-cashout-html-scroll .card .card__content,
+html:has(body[data-view="profile"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-profile-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="profile"]) .card .card__content,
+html.app-view-profile-html-scroll .card .card__content {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   min-width: 0;
@@ -957,6 +1071,25 @@ html.app-view-download-html-scroll .card .card__content {
   overscroll-behavior-y: contain;
   touch-action: pan-y pinch-zoom;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad);
+}
+
+/*
+ * Главная, депозит, профиль: scrollport на .card__content с overflow-x:hidden обрезал вынос за padding .card
+ * (home-welcome-outline и т.п.) — как при скролле body. Расширяем зону прокрутки и возвращаем внутренний inset.
+ */
+html:has(body[data-view="home"]) .card .card__content,
+html.app-view-home-html-scroll .card .card__content,
+html:has(body[data-view="cashout"]) .card .card__content,
+html.app-view-cashout-html-scroll .card .card__content,
+html:has(body[data-view="profile"]) .card .card__content,
+html.app-view-profile-html-scroll .card .card__content {
+  margin-left: calc(-1 * var(--card-padding-x));
+  margin-right: calc(-1 * var(--card-padding-x));
+  width: calc(100% + 2 * var(--card-padding-x));
+  max-width: none;
+  padding-left: var(--card-padding-x);
+  padding-right: var(--card-padding-x);
+  box-sizing: border-box;
 }
 
 /*
@@ -1114,7 +1247,9 @@ html.app-view-home .card::before {
 .app.app--view-home .home-welcome-outline,
 html.app-view-home .home-welcome-outline {
   position: relative;
-  z-index: 2;
+  /* Не поднимать весь блок над соседями: absolute «Рейтинг турнирщиков» (.features--home-rating-on-border)
+     вылезает вниз из обводки и иначе перекрывает турниры дня и сетку при скролле .card__content. */
+  z-index: auto;
   margin-top: -2mm;
   /* Поскольку «на главной» у .card нет обычной рамки (border убран),
      выравниваем обводку home-welcome-outline с рамкой карточки: уходим
@@ -2169,9 +2304,9 @@ body.pwa-auth-gated #app {
   display: flex;
   flex-direction: column;
 }
+/* overflow-y задаётся блоком html:has(home) / app-view-home-html-scroll (как «Скачать») */
 .card:has(.view--active[data-view="home"]) .card__content {
   min-width: 0;
-  overflow: visible;
 }
 .card:has(.view--active[data-view="home"]) .card__content > .view {
   min-width: 0;
@@ -2191,8 +2326,8 @@ body.pwa-auth-gated #app {
 .card:has(.view--active[data-view="download"]) .card__content {
   min-width: 0;
 }
-/* fallback для главной без :has() */
-html.app-view-home .card .card__content {
+/* fallback для главной без :has(); при внутреннем скролле класс app-view-home-html-scroll — не трогаем overflow */
+html.app-view-home:not(.app-view-home-html-scroll) .card .card__content {
   min-width: 0;
   overflow: visible;
 }
@@ -22081,11 +22216,17 @@ html.app-view-spring-rating .card .winter-rating__table-wrap {
 }
 
 /*
- * Скачать — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Скачать, главная, депозит, профиль — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
  * Дублирует ключевые свойства на случай правок выше по файлу.
  */
 html:has(body[data-view="download"]),
-html.app-view-download-html-scroll {
+html.app-view-download-html-scroll,
+html:has(body[data-view="home"]),
+html.app-view-home-html-scroll,
+html:has(body[data-view="cashout"]),
+html.app-view-cashout-html-scroll,
+html:has(body[data-view="profile"]),
+html.app-view-profile-html-scroll {
   overflow: hidden !important;
   height: 100vh !important;
   height: 100dvh !important;
@@ -22095,7 +22236,19 @@ html.app-view-download-html-scroll {
 html:has(body[data-view="download"]) body,
 html:has(body[data-view="download"]) body.app-view-long-scroll,
 html.app-view-download-html-scroll body,
-html.app-view-download-html-scroll body.app-view-long-scroll {
+html.app-view-download-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="home"]) body,
+html:has(body[data-view="home"]) body.app-view-long-scroll,
+html.app-view-home-html-scroll body,
+html.app-view-home-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="cashout"]) body,
+html:has(body[data-view="cashout"]) body.app-view-long-scroll,
+html.app-view-cashout-html-scroll body,
+html.app-view-cashout-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="profile"]) body,
+html:has(body[data-view="profile"]) body.app-view-long-scroll,
+html.app-view-profile-html-scroll body,
+html.app-view-profile-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -22105,7 +22258,10 @@ html.app-view-download-html-scroll body.app-view-long-scroll {
   max-height: 100dvh !important;
   min-height: 0 !important;
 }
-body[data-view="download"] #app.app {
+body[data-view="download"] #app.app,
+body[data-view="home"] #app.app,
+body[data-view="cashout"] #app.app,
+body[data-view="profile"] #app.app {
   flex: 1 1 auto !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -22117,7 +22273,10 @@ body[data-view="download"] #app.app {
   align-items: center !important;
   justify-content: flex-start !important;
 }
-body[data-view="download"] #app.app .card {
+body[data-view="download"] #app.app .card,
+body[data-view="home"] #app.app .card,
+body[data-view="cashout"] #app.app .card,
+body[data-view="profile"] #app.app .card {
   flex: 1 1 auto !important;
   width: 100% !important;
   max-width: 420px !important;
@@ -22136,6 +22295,26 @@ body[data-view="download"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
   touch-action: pan-y pinch-zoom !important;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+}
+body[data-view="home"] #app.app .card .card__content,
+body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  margin-left: calc(-1 * var(--card-padding-x)) !important;
+  margin-right: calc(-1 * var(--card-padding-x)) !important;
+  width: calc(100% + 2 * var(--card-padding-x)) !important;
+  max-width: none !important;
+  padding-left: var(--card-padding-x) !important;
+  padding-right: var(--card-padding-x) !important;
+  box-sizing: border-box !important;
 }
 
 /*
