@@ -5560,6 +5560,8 @@ img.chat-contact__avatar {
   align-self: center;
   position: relative;
   z-index: 2;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .chat-send-btn:hover { opacity: 0.9; }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }

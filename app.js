@@ -19997,8 +19997,36 @@ function initChat() {
     var generalVoicePreviewEl = document.getElementById("chatGeneralVoicePreview");
     var generalSendBtnRef = generalSendBtn;
     var sendBtnRef = sendBtn;
-    var generalSendLastTouchTs = 0;
-    var personalSendLastTouchTs = 0;
+    /** Один тап = одно действие: в TG/WKWebView touchend+preventDefault часто убивает click; pointerup(не-mouse)+click дают дубль — режем по времени. */
+    function bindChatSendTap(btn, run) {
+      if (!btn || typeof run !== "function") return;
+      var key = "_pokerChatSendTapBound";
+      if (btn[key]) return;
+      btn[key] = true;
+      var lastInvoke = 0;
+      function invoke(e) {
+        if (e && typeof e.preventDefault === "function") e.preventDefault();
+        var now = Date.now();
+        if (now - lastInvoke < 520) return;
+        lastInvoke = now;
+        try {
+          flushChatComposerToDrafts();
+        } catch (eInv) {}
+        run();
+      }
+      btn.addEventListener("click", function (e) {
+        invoke(e);
+      });
+      btn.addEventListener(
+        "pointerup",
+        function (e) {
+          if (!e.isPrimary) return;
+          if (e.pointerType === "mouse") return;
+          invoke(e);
+        },
+        { passive: false }
+      );
+    }
     (function initVoiceRecording() {
       var voiceTarget = null;
       var voiceStream = null;
@@ -20153,8 +20181,10 @@ function initChat() {
             voiceTarget = null;
             if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
           }
-          generalBtn.classList.remove("chat-voice-btn--recording");
-          generalBtn.title = "Голосовое сообщение";
+          if (generalBtn) {
+            generalBtn.classList.remove("chat-voice-btn--recording");
+            generalBtn.title = "Голосовое сообщение";
+          }
           if (generalSendBtnRef && typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
         } else if (voiceTarget === "personal") {
           stopAndDiscard();
@@ -20168,19 +20198,7 @@ function initChat() {
           startRecording("general");
         }
       }
-      if (generalBtn) {
-        generalBtn.addEventListener("click", function (e) {
-          e.preventDefault();
-          if (Date.now() - generalSendLastTouchTs < 500) return;
-          runGeneralSendAction();
-        });
-        /* Не фильтровать по e.target: в TG/WKWebView target иногда не кнопка — тихий return раньше + preventDefault гасил click. */
-        generalBtn.addEventListener("touchend", function (e) {
-          e.preventDefault();
-          generalSendLastTouchTs = Date.now();
-          runGeneralSendAction();
-        }, { passive: false });
-      }
+      bindChatSendTap(generalBtn, runGeneralSendAction);
       if (generalVoiceRemove && generalVoicePreviewEl) {
         generalVoiceRemove.addEventListener("click", function () {
           generalVoice = null;
@@ -20223,8 +20241,10 @@ function initChat() {
             var pvPrev = document.getElementById("chatPersonalVoicePreview");
             if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
           }
-          personalBtn.classList.remove("chat-voice-btn--recording");
-          personalBtn.title = "Голосовое сообщение";
+          if (personalBtn) {
+            personalBtn.classList.remove("chat-voice-btn--recording");
+            personalBtn.title = "Голосовое сообщение";
+          }
           if (sendBtnRef && typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
         } else if (voiceTarget === "general") {
           stopAndDiscard();
@@ -20237,18 +20257,7 @@ function initChat() {
           startRecording("personal");
         }
       }
-      if (personalBtn) {
-        personalBtn.addEventListener("click", function (e) {
-          e.preventDefault();
-          if (Date.now() - personalSendLastTouchTs < 500) return;
-          runPersonalSendAction();
-        });
-        personalBtn.addEventListener("touchend", function (e) {
-          e.preventDefault();
-          personalSendLastTouchTs = Date.now();
-          runPersonalSendAction();
-        }, { passive: false });
-      }
+      bindChatSendTap(personalBtn, runPersonalSendAction);
       if (personalVoiceRemove && personalVoicePreviewEl) {
         personalVoiceRemove.addEventListener("click", function () {
           personalVoice = null;
