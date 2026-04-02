@@ -2996,7 +2996,8 @@ function pokerApplyAppTopPadding() {
     tw.contentSafeAreaInset.top > 0
   ) {
     root.classList.add("app--tg-content-inset");
-    var px = Math.max(12, Math.round(tw.contentSafeAreaInset.top + 8));
+    /* Без +8: иначе после стабилизации viewport отступ заметно растёт относительно первого кадра */
+    var px = Math.max(12, Math.round(tw.contentSafeAreaInset.top));
     root.style.setProperty("--app-top-from-tg", px + "px");
     root.style.removeProperty("--app-extra-top-for-ui");
     return;
@@ -3141,8 +3142,11 @@ if (tg) {
   setTimeout(tryExpand, 1500);
   if (tg.onEvent && typeof tg.onEvent === "function") {
     tg.onEvent("viewportChanged", function (e) {
-      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
-      /* Нижний pad — только ResizeObserver / resize: иначе при нестабильном viewport pad «прыгает» */
+      /* Пока isStateStable === false, inset часто «раздувается» — потом лишний отступ сверху */
+      if (!(e && e.isStateStable === false) && typeof pokerApplyAppTopPadding === "function") {
+        pokerApplyAppTopPadding();
+      }
+      /* Нижний pad — только ResizeObserver / resize */
       if (e && e.isStateStable) tryExpand();
     });
   }
@@ -3184,8 +3188,17 @@ if (tg) {
 }
 
 pokerApplyAppTopPadding();
-setTimeout(pokerApplyAppTopPadding, 250);
-setTimeout(pokerApplyAppTopPadding, 700);
+/* Повторы 250/700 ms давали второй проход после TG и рост padding-top; достаточно rAF + viewportChanged */
+(function pokerApplyAppTopPaddingRaf() {
+  var raf = window.requestAnimationFrame || function (fn) {
+    setTimeout(fn, 16);
+  };
+  raf(function () {
+    raf(function () {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+    });
+  });
+})();
 pokerApplyBottomTabbarPad();
 setTimeout(pokerApplyBottomTabbarPad, 0);
 setTimeout(pokerApplyBottomTabbarPad, 100);
@@ -4966,7 +4979,9 @@ function pokerSyncInertForViewScreensOnly() {
     document.documentElement.classList.add("app-view-home");
   }
   document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
+  document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
+  document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.remove("app-view-vl-html-scroll");
@@ -5028,11 +5043,11 @@ function pokerIsDownloadViewActive() {
   }
 }
 
-/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
+/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, рейтинг весны, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "profile" && v !== "video-lessons") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "profile" && v !== "video-lessons") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {
@@ -5787,9 +5802,10 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-hall-html-scroll", viewName === "hall-of-fame");
   /* Скачать: scrollport в .card__content (локальный Chrome + TG); класс на html — цепочка высот/overflow */
   document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
-  /* Главная, депозит, профиль, видеоуроки: тот же внутренний scrollport в .card__content, что и у «Скачать». */
+  /* Главная, депозит, рейтинг весны, профиль, видеоуроки: тот же внутренний scrollport в .card__content, что и у «Скачать». */
   document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
+  document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   var appEl = document.getElementById("app");
@@ -20062,35 +20078,43 @@ function initChat() {
           if (tg && tg.showAlert) tg.showAlert("Нет доступа к микрофону");
         });
       }
+      function runGeneralSendAction() {
+        if (voiceTarget === "general") {
+          stopVoiceTimer();
+          if (voiceRecorder) {
+            try {
+              if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
+              voiceRecorder.stop();
+            } catch (err) {}
+          } else {
+            voiceTarget = null;
+            if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
+          }
+          generalBtn.classList.remove("chat-voice-btn--recording");
+          generalBtn.title = "Голосовое сообщение";
+          if (generalSendBtnRef && typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+        } else if (voiceTarget === "personal") {
+          stopAndDiscard();
+          if (personalBtn) personalBtn.classList.remove("chat-voice-btn--recording");
+          var pvPrev = document.getElementById("chatPersonalVoicePreview");
+          if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
+          startRecording("general");
+        } else if (getChatGeneralText().trim() || generalImage || generalVoice || generalDocument) {
+          sendGeneral();
+        } else {
+          startRecording("general");
+        }
+      }
       if (generalBtn) {
         generalBtn.addEventListener("click", function (e) {
           e.preventDefault();
-          if (voiceTarget === "general") {
-            stopVoiceTimer();
-            if (voiceRecorder) {
-              try {
-                if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
-                voiceRecorder.stop();
-              } catch (err) {}
-            } else {
-              voiceTarget = null;
-              if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
-            }
-            generalBtn.classList.remove("chat-voice-btn--recording");
-            generalBtn.title = "Голосовое сообщение";
-            if (generalSendBtnRef && typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
-          } else if (voiceTarget === "personal") {
-            stopAndDiscard();
-            if (personalBtn) personalBtn.classList.remove("chat-voice-btn--recording");
-            var pvPrev = document.getElementById("chatPersonalVoicePreview");
-            if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
-            startRecording("general");
-          } else if (getChatGeneralText().trim() || generalImage || generalVoice || generalDocument) {
-            sendGeneral();
-          } else {
-            startRecording("general");
-          }
+          runGeneralSendAction();
         });
+        generalBtn.addEventListener("touchend", function (e) {
+          if (e.target !== generalBtn && !generalBtn.contains(e.target)) return;
+          e.preventDefault();
+          runGeneralSendAction();
+        }, { passive: false });
       }
       if (generalVoiceRemove && generalVoicePreviewEl) {
         generalVoiceRemove.addEventListener("click", function () {
@@ -20189,18 +20213,8 @@ function initChat() {
       });
     })();
 
-    // На мобильных: отправка должна происходить с первого тапа по кнопке.
-    // Добавляем touchend, который при наличии текста/вложений сразу шлёт сообщение
-    // и предотвращает последующий click (чтобы не было двойной отправки).
-    if (generalSendBtn && chatComposerEl) {
-      generalSendBtn.addEventListener("touchend", function (e) {
-        var hasContent = getChatGeneralText().trim() || generalImage || generalVoice || generalDocument;
-        if (!hasContent) return; // если нет текста/вложений, пусть работает логика микрофона
-        e.preventDefault();
-        e.stopPropagation();
-        sendGeneral();
-      }, { passive: false });
-    }
+    // Личный чат: touchend только при наличии текста/вложений — дублирует personalBtn.touchend,
+    // когда кнопка отправки совпадает с personalBtn (без отдельной кнопки микрофона).
     if (sendBtn && chatComposerEl) {
       sendBtn.addEventListener("touchend", function (e) {
         var hasContentP = getChatPersonalText().trim() || personalImage || personalVoice || personalDocument;
