@@ -6380,11 +6380,10 @@ function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
     if (!isStandalone) return;
     var nav = typeof navigator !== "undefined" ? navigator : null;
     if (!nav || typeof nav.clearAppBadge !== "function") return;
-    var n = typeof unreadTotal === "number" && unreadTotal > 0 ? unreadTotal : 0;
+    var n = typeof unreadTotal === "number" && !isNaN(unreadTotal) ? Math.max(0, Math.floor(unreadTotal)) : 0;
     if (n > 0) {
       if (typeof nav.setAppBadge === "function") {
-        var badgeNum = Math.min(n, 99);
-        nav.setAppBadge(badgeNum).catch(function () {});
+        nav.setAppBadge(Math.min(n, 99)).catch(function () {});
       }
     } else {
       nav.clearAppBadge().catch(function () {});
@@ -6393,7 +6392,11 @@ function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
 }
 
 function updateChatNavDot() {
-  var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
+  var personalUnread =
+    typeof window.chatPersonalUnreadTotalFromContacts === "number"
+      ? window.chatPersonalUnreadTotalFromContacts
+      : window.chatPersonalUnreadCount || 0;
+  var raw = (window.chatGeneralUnreadCount || 0) + personalUnread;
   // Если какие-то непрочитанные помечены флагами, но счётчик не пришёл — показываем хотя бы 1.
   if (raw === 0 && (window.chatGeneralUnread || window.chatPersonalUnread)) raw = 1;
   // В бейдже хотим реальное количество непрочитанных (общий чат + личные), без деления пополам.
@@ -17503,6 +17506,8 @@ function initChat() {
   window.chatPersonalUnread = false;
   window.chatGeneralUnreadCount = 0;
   window.chatPersonalUnreadCount = 0;
+  /** Сумма непрочитанных по всем личным диалогам из ответа mode=contacts (для бейджа таббара и PWA icon). */
+  window.chatPersonalUnreadTotalFromContacts = undefined;
 
   var reactionPickerEl = document.getElementById("chatReactionPicker");
   var currentReactionPickerClose = null;
@@ -18902,6 +18907,7 @@ function initChat() {
   function loadContacts() {
     if (!contactsEl) return;
     if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+      window.chatPersonalUnreadTotalFromContacts = 0;
       var clubPrevG = document.getElementById("chatDialogClubPreview");
       if (clubPrevG) clubPrevG.textContent = "Войдите в аккаунт";
       if (!contactsEl.querySelector(".chat-guest-cta")) {
@@ -18944,6 +18950,14 @@ function initChat() {
         }
       }
       if (data && data.ok && Array.isArray(data.contacts)) {
+        var sumPersonalUnreads = 0;
+        for (var su = 0; su < data.contacts.length; su++) {
+          var sc = data.contacts[su];
+          if (!sc) continue;
+          var suc = Number(sc.unreadCount);
+          if (!isNaN(suc) && suc > 0) sumPersonalUnreads += suc;
+        }
+        window.chatPersonalUnreadTotalFromContacts = sumPersonalUnreads;
         prefetchTopPersonalDialogs(data.contacts);
         var contactsForList = data.contacts.filter(function (c) {
           return !chatContactIsDuplicateOfPinnedDialog(c);
@@ -21280,8 +21294,11 @@ function initChat() {
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     loadGeneral();
-    if (chatWithUserId) loadMessages();
-    else if (dialogsView && !dialogsView.classList.contains("chat-dialogs-view--hidden")) loadContacts();
+    if (chatWithUserId) {
+      loadMessages();
+      /* Сумма личных непрочитанных для бейджа берётся из mode=contacts — обновляем и в открытом диалоге. */
+      loadContacts();
+    } else if (dialogsView && !dialogsView.classList.contains("chat-dialogs-view--hidden")) loadContacts();
     else if (chatActiveTab === "personal") loadContacts();
     else if (chatActiveTab === "admins" && adminsView && !adminsView.classList.contains("chat-admins-view--hidden")) loadAdminsOnline();
   }, 10000);
@@ -23594,9 +23611,7 @@ function updateTournamentDayBlock() {
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);
   var timerLabelEls = [document.getElementById("tournamentDayTimerLabel"), document.getElementById("scheduleTournamentDayTimerLabel")].filter(Boolean);
   var timerEls = [document.getElementById("tournamentDayTimer"), document.getElementById("scheduleTournamentDayTimer")].filter(Boolean);
-  var hasNameSlot =
-    document.getElementById("tournamentDayName") || document.getElementById("scheduleTournamentDayName");
-  if (!hasNameSlot || buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
+  if (buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
   var MSK_START_UTC_HOUR = 15;
   var MSK_END_REG_UTC_HOUR = 18;
   function getMskDateParts() {
@@ -23665,17 +23680,7 @@ function updateTournamentDayBlock() {
       time: "18:00",
       guarantee: guaranteeStr
     };
-    var homeTdName = document.getElementById("tournamentDayName");
     var scheduleTdName = document.getElementById("scheduleTournamentDayName");
-    var hideNameOnHome = nameStr === "Фриролл" || nameStr === "Rebuy" || nameStr === "Нокаут Мистери";
-    if (homeTdName) {
-      homeTdName.textContent = hideNameOnHome ? "" : nameStr;
-      if (nameStr === "Фриролл") {
-        homeTdName.classList.add("tournament-day-name--freeroll");
-      } else {
-        homeTdName.classList.remove("tournament-day-name--freeroll");
-      }
-    }
     if (scheduleTdName) {
       scheduleTdName.textContent = nameStr === "Нокаут Мистери" ? "" : nameStr;
       if (nameStr === "Фриролл") {
