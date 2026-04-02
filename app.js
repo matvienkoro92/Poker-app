@@ -18213,30 +18213,88 @@ function initChat() {
 
   var sendingGeneral = false;
   var sendingGeneralSince = 0;
-  function appendOptimisticGeneralMessage(text, image, voice, document, replyTo) {
+  function appendOptimisticGeneralMessage(text, image, voice, docAttachment, replyTo) {
     if (!generalMessages) return;
     var emptyEl = generalMessages.querySelector(".chat-empty");
     if (emptyEl) generalMessages.innerHTML = "";
     var authAvatarEl = document.getElementById("authUserAvatar");
     var myAvatarUrl = (authAvatarEl && authAvatarEl.src && authAvatarEl.src.indexOf("data:") !== 0 && authAvatarEl.src.indexOf("http") === 0) ? authAvatarEl.src : "";
     var myNmOpt = resolveMyChatDisplayName();
-    var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml((myNmOpt && myNmOpt[0]) || "Я") + '</span>';
-    var time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    var placeholderLetter = "Я";
+    try {
+      if (myNmOpt && typeof myNmOpt === "string" && myNmOpt.length) {
+        for (var ci = 0; ci < myNmOpt.length; ci++) {
+          var ch = myNmOpt.charAt(ci);
+          if (ch.trim()) {
+            placeholderLetter = ch;
+            break;
+          }
+        }
+      }
+    } catch (ePl) {}
+    var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(placeholderLetter) + "</span>";
+    var time = "";
+    try {
+      time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    } catch (eTime) {
+      time = "";
+    }
     var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(replyTo.fromName || "Игрок") + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
     var textContent = "";
     if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(image) + '" alt="Картинка" />';
     else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
-    else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
-    else if (text) textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
+    else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
+    else if (text) {
+      try {
+        textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
+      } catch (eLink) {
+        textContent = escapeHtml(text).replace(/\n/g, "<br>");
+      }
+    }
     var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myNmOpt) + '</span>' +
       '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
       '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
-    var optBodyClass = "chat-msg__body" + (text && !image && !voice && !document ? " chat-msg__body--has-text" : "");
-    var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + time + '</span></div></div></div></div>';
+    var optBodyClass = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+    var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + '</span></div></div></div></div>';
     var wrap = document.createElement("div");
-    wrap.innerHTML = html;
-    generalMessages.appendChild(wrap.firstElementChild);
-    generalMessages.scrollTop = generalMessages.scrollHeight;
+    var newNode = null;
+    try {
+      wrap.innerHTML = html;
+      newNode = wrap.firstElementChild;
+    } catch (eInner) {}
+    if (!newNode) {
+      newNode = document.createElement("div");
+      newNode.className = "chat-msg chat-msg--own";
+      newNode.setAttribute("data-optimistic", "true");
+      var row = document.createElement("div");
+      row.className = "chat-msg__row";
+      var body = document.createElement("div");
+      body.className = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+      var textWrap = document.createElement("div");
+      textWrap.className = "chat-msg__text";
+      if (image && typeof image === "string") {
+        var im = document.createElement("img");
+        im.className = "chat-msg__image";
+        im.alt = "Картинка";
+        im.src = image;
+        textWrap.appendChild(im);
+      } else if (voice && typeof voice === "string") {
+        var aud = document.createElement("audio");
+        aud.className = "chat-msg__voice";
+        aud.controls = true;
+        aud.src = voice;
+        textWrap.appendChild(aud);
+      } else {
+        textWrap.textContent = text != null ? String(text) : "";
+      }
+      body.appendChild(textWrap);
+      row.appendChild(body);
+      newNode.appendChild(row);
+    }
+    generalMessages.appendChild(newNode);
+    try {
+      generalMessages.scrollTop = generalMessages.scrollHeight;
+    } catch (eScroll) {}
   }
   function sendGeneral(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
@@ -18333,14 +18391,8 @@ function initChat() {
       try {
         appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
       } catch (e) {
-        optimisticGeneralPayload = null;
-        sendingGeneral = false;
-        sendingGeneralSince = 0;
-        setGeneralSendBusy(false);
+        /* Не блокировать POST: в TG WKWebView innerHTML/append иногда падает — лента подтянется через mergeOptimistic + loadGeneral. */
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
-        if (tg && tg.showAlert) tg.showAlert("Не удалось отобразить сообщение. Обновите чат и попробуйте снова.");
-        else if (typeof alert === "function") alert("Не удалось отобразить сообщение. Обновите чат и попробуйте снова.");
-        return;
       }
       scrollGeneralToBottomOnNextRender = true;
       try {
@@ -19006,7 +19058,7 @@ function initChat() {
   }
 
   var sendingPrivate = false;
-  function appendOptimisticPersonalMessage(text, image, voice, document, replyTo) {
+  function appendOptimisticPersonalMessage(text, image, voice, docAttachment, replyTo) {
     if (!messagesEl) return false;
     try {
       var emptyEl = messagesEl.querySelector(".chat-empty");
@@ -19017,25 +19069,76 @@ function initChat() {
         var nm = resolveMyChatDisplayName();
         return nm != null && nm !== "" ? String(nm) : "Вы";
       })();
-      var initial = nameStr[0] || "Я";
+      var initial = "Я";
+      try {
+        if (nameStr && nameStr.length) {
+          for (var cip = 0; cip < nameStr.length; cip++) {
+            var chp = nameStr.charAt(cip);
+            if (chp.trim()) {
+              initial = chp;
+              break;
+            }
+          }
+        }
+      } catch (eIni) {}
       var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(initial) + '</span>';
-      var time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      var timeP = "";
+      try {
+        timeP = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      } catch (eTimeP) {}
       var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(String(replyTo.fromName || "Игрок").slice(0, 100)) + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
       var textContent = "";
       if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(String(image)) + '" alt="Картинка" />';
       else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
-      else if (document && document.dataUrl && document.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(document.dataUrl) + '">📄 ' + escapeHtml(document.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(document.dataUrl) + '" download="' + escapeHtml(document.fileName) + '">Скачать</a></span>';
-      else if (text) textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
+      else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
+      else if (text) {
+        try {
+          textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
+        } catch (eLinkP) {
+          textContent = escapeHtml(String(text)).replace(/\n/g, "<br>");
+        }
+      }
       var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(nameStr) + '</span>' +
         '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
         '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
-      var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !document ? " chat-msg__body--has-text" : "");
+      var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
       var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
-      var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + time + '</span>' + ticks + '</div></div></div></div>';
+      var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + '</span>' + ticks + '</div></div></div></div>';
       var wrap = document.createElement("div");
-      wrap.innerHTML = html;
-      var first = wrap.firstElementChild;
-      if (!first) return false;
+      var first = null;
+      try {
+        wrap.innerHTML = html;
+        first = wrap.firstElementChild;
+      } catch (eInnP) {}
+      if (!first) {
+        first = document.createElement("div");
+        first.className = "chat-msg chat-msg--own";
+        first.setAttribute("data-optimistic", "true");
+        var rowP = document.createElement("div");
+        rowP.className = "chat-msg__row";
+        var bodyP = document.createElement("div");
+        bodyP.className = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+        var twP = document.createElement("div");
+        twP.className = "chat-msg__text";
+        if (image && typeof image === "string") {
+          var imP = document.createElement("img");
+          imP.className = "chat-msg__image";
+          imP.alt = "Картинка";
+          imP.src = image;
+          twP.appendChild(imP);
+        } else if (voice && typeof voice === "string") {
+          var audP = document.createElement("audio");
+          audP.className = "chat-msg__voice";
+          audP.controls = true;
+          audP.src = voice;
+          twP.appendChild(audP);
+        } else {
+          twP.textContent = text != null ? String(text) : "";
+        }
+        bodyP.appendChild(twP);
+        rowP.appendChild(bodyP);
+        first.appendChild(rowP);
+      }
       messagesEl.appendChild(first);
       messagesEl.scrollTop = messagesEl.scrollHeight;
       return true;
@@ -19129,10 +19232,7 @@ function initChat() {
     try {
       appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
     } catch (err) {
-      optimisticPersonalPayload = null;
-      sendingPrivate = false;
-      setPersonalSendBusy(false);
-      return;
+      if (typeof console !== "undefined" && console.error) console.error("appendOptimisticPersonalMessage failed", err);
     }
     scrollPersonalToBottomOnNextRender = true;
     try {
