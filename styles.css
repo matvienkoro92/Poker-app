@@ -1362,7 +1362,7 @@ html.app-view-home .home-welcome-outline > .hero-row,
 html.app-view-home .home-welcome-outline::before {
   content: "";
   position: absolute;
-  top: 10px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 40px;
@@ -11729,8 +11729,11 @@ a.home-mini-icon-item {
   display: block;
   fill: #fff;
 }
-[data-theme="light"] .home-mini-icon--telegram svg {
-  fill: #fff;
+.home-mini-icon--telegram svg path {
+  fill: inherit;
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon--telegram svg {
+  fill: #c2410c;
 }
 
 .download-layout {
@@ -22495,6 +22498,10 @@ body[data-view="profile"] #app.app .card .card__content {
   padding-left: var(--card-padding-x) !important;
   padding-right: var(--card-padding-x) !important;
   box-sizing: border-box !important;
+}
+/* Главная: margin-top: -2mm у .home-welcome-outline + overflow-y:auto на .card__content обрезали верхнюю линию рамки (::before) */
+body[data-view="home"] #app.app .card .card__content {
+  padding-top: calc(2mm + 8px) !important;
 }
 
 /*

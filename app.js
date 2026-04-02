@@ -6155,6 +6155,28 @@ function hallFameOpenTelegramShareForSection(section) {
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;
 
+/** PWA на рабочем столе: красная цифра на иконке (Badging API). Только в standalone; без push не обновится, пока приложение закрыто. */
+function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
+  try {
+    var isStandalone =
+      typeof window !== "undefined" &&
+      ((window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        window.navigator.standalone === true);
+    if (!isStandalone) return;
+    var nav = typeof navigator !== "undefined" ? navigator : null;
+    if (!nav || typeof nav.clearAppBadge !== "function") return;
+    var n = typeof unreadTotal === "number" && unreadTotal > 0 ? unreadTotal : 0;
+    if (n > 0) {
+      if (typeof nav.setAppBadge === "function") {
+        /* Запрошено: на ярлыке всегда «1», если есть любые непрочитанные */
+        nav.setAppBadge(1).catch(function () {});
+      }
+    } else {
+      nav.clearAppBadge().catch(function () {});
+    }
+  } catch (eBadge) {}
+}
+
 function updateChatNavDot() {
   var raw = (window.chatGeneralUnreadCount || 0) + (window.chatPersonalUnreadCount || 0);
   // Если какие-то непрочитанные помечены флагами, но счётчик не пришёл — показываем хотя бы 1.
@@ -6175,6 +6197,7 @@ function updateChatNavDot() {
     }
     badge.setAttribute("aria-label", on ? "Непрочитанных: " + count : "Нет непрочитанных");
   }
+  pokerSyncPwaAppIconUnreadBadge(count);
 }
 
 function updateRaffleBadge(hasActive) {
