@@ -20279,9 +20279,8 @@ function initChat() {
       });
     })();
 
-    // Личный чат: запасной touchend на chatSendBtn, если она не совпала с personalBtn (отдельная кнопка 🎤).
-    // Если кнопка одна — срабатывает уже personalBtn.touchend выше; иначе двойной sendMessage.
-    if (sendBtn && chatComposerEl && sendBtn !== personalBtn) {
+    // Личный чат: запасной touchend только если есть отдельная кнопка 🎤 (personalBtn внутри IIFE выше — снаружи не видна; иначе ReferenceError и обрыв всего app.js после initChat).
+    if (sendBtn && chatComposerEl && document.getElementById("chatPersonalVoiceBtn")) {
       sendBtn.addEventListener("touchend", function (e) {
         var hasContentP = getChatPersonalText().trim() || personalImage || personalVoice || personalDocument;
         if (!hasContentP) return;
