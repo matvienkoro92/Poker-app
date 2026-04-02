@@ -19722,6 +19722,12 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
+        /* Установленный PWA (не WebView Telegram): +46 к vv-inset и отдельный accessory давали двойной lift — зазор между полем и input accessory. */
+        var tgAcc = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        if (pokerPwaStandaloneForKeyboardInset() && !tgAcc) {
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          return;
+        }
         var vv = window.visualViewport;
         var ih = window.innerHeight || 0;
         var vvh = Number(vv.height) || 0;
@@ -19902,9 +19908,11 @@ function initChat() {
         if (vvRatio > 0 && vvRatio < 0.8 && heightLoss >= 48 && inset < 120) {
           inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * (tg ? 0.58 : 0.65))));
         }
-        /* iOS: accessory bar + WKWebView недооценивают overlap — доп. подъём композера (+ запас под «хвост» после dismiss). */
+        /* iOS: accessory bar + WKWebView недооценивают overlap — доп. подъём (в PWA без TG accessory не дублируем с --chat-ios-accessory-inset). */
         if (isIosLikeForChatViewport()) {
-          inset = Math.min(cap, inset + (tg ? 40 : 46));
+          var iosBoost = tg ? 40 : 46;
+          if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 12;
+          inset = Math.min(cap, inset + iosBoost);
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
