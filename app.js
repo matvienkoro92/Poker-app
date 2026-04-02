@@ -2012,6 +2012,10 @@ function runGazetteAndTasksInit() {
     var copyBtn = document.getElementById("clubCharterCopyBtn");
     var backdrop = document.getElementById("clubCharterModalBackdrop");
     var paper = modal && modal.querySelector(".club-charter-modal__paper");
+    var tabRaffle = document.getElementById("clubCharterTabRaffle");
+    var tabComm = document.getElementById("clubCharterTabComm");
+    var panelRaffle = document.getElementById("clubCharterPanelRaffle");
+    var panelComm = document.getElementById("clubCharterPanelComm");
     var charterScrollLockY = 0;
     var charterBehindLocked = false;
     function lockCharterBehindScroll() {
@@ -2050,10 +2054,30 @@ function runGazetteAndTasksInit() {
       } catch (eUnlock) {}
     }
     if (!modal || !openBtn) return;
+    function setCharterTab(which) {
+      var isRaffle = which === "raffle";
+      if (tabRaffle) {
+        tabRaffle.setAttribute("aria-selected", isRaffle ? "true" : "false");
+        tabRaffle.classList.toggle("club-charter-modal__tab--active", isRaffle);
+      }
+      if (tabComm) {
+        tabComm.setAttribute("aria-selected", isRaffle ? "false" : "true");
+        tabComm.classList.toggle("club-charter-modal__tab--active", !isRaffle);
+      }
+      if (panelRaffle) {
+        panelRaffle.hidden = !isRaffle;
+        panelRaffle.setAttribute("aria-hidden", isRaffle ? "false" : "true");
+      }
+      if (panelComm) {
+        panelComm.hidden = isRaffle;
+        panelComm.setAttribute("aria-hidden", isRaffle ? "true" : "false");
+      }
+    }
     function openCharter(opts) {
       opts = opts || {};
       lockCharterBehindScroll();
       modal.setAttribute("aria-hidden", "false");
+      setCharterTab("raffle");
       if (paper) paper.scrollTop = 0;
       if (!opts.skipHistory) {
         try {
@@ -2144,6 +2168,18 @@ function runGazetteAndTasksInit() {
       copyBtn.addEventListener("click", function (e) {
         e.preventDefault();
         runCharterCopy();
+      });
+    }
+    if (tabRaffle) {
+      tabRaffle.addEventListener("click", function (e) {
+        e.preventDefault();
+        setCharterTab("raffle");
+      });
+    }
+    if (tabComm) {
+      tabComm.addEventListener("click", function (e) {
+        e.preventDefault();
+        setCharterTab("comm");
       });
     }
     document.addEventListener("keydown", function (e) {
@@ -4984,14 +5020,14 @@ function pokerSyncInertForViewScreensOnly() {
   document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.remove("app-view-vl-html-scroll");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* long-scroll без главной: с long-scroll на home ломается скролл в части WebView (конфликт с app-view-browser-local). */
+  /* long-scroll без главной и без «Скачать»: внутренний scrollport в .card__content (как у главной). */
   var longScrollInit =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame" ||
-    viewName === "download";
+    viewName === "hall-of-fame";
   document.documentElement.classList.toggle("app-view-long-scroll", longScrollInit);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScrollInit);
 })();
@@ -5043,11 +5079,11 @@ function pokerIsDownloadViewActive() {
   }
 }
 
-/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, рейтинг весны, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
+/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, рейтинг весны, розыгрыши, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "profile" && v !== "video-lessons") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "raffles" && v !== "profile" && v !== "video-lessons") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {
@@ -5792,8 +5828,7 @@ function setView(viewName, navOpts) {
   var longScroll =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame" ||
-    viewName === "download";
+    viewName === "hall-of-fame";
   document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   /* Видеоуроки: внутренний scrollport в .card__content (как профиль); класс app-view-video-lessons-html-scroll — см. styles.css */
@@ -5808,6 +5843,7 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   if (viewName === "hall-of-fame") {
@@ -15844,15 +15880,38 @@ function initChat() {
 
   function flushChatComposerToDrafts() {
     if (!chatComposerEl) return;
+    try {
+      if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
+        chatComposerDrafts.general = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+        return;
+      }
+      if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
+        chatComposerDrafts.personal = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+        return;
+      }
+    } catch (eFlushDom) {}
     if (chatComposerMounted === "general") chatComposerDrafts.general = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
     else if (chatComposerMounted === "personal") chatComposerDrafts.personal = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
   }
+  /** Текст для отправки: сначала реальный родитель textarea в DOM (флажок chatComposerMounted иногда рассинхронен с mount). */
   function getChatGeneralText() {
-    if (chatComposerMounted === "general" && chatComposerEl) return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+    if (!chatComposerEl) return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
+    try {
+      if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
+        return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+      }
+    } catch (eGG) {}
+    if (chatComposerMounted === "general") return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
     return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
   }
   function getChatPersonalText() {
-    if (chatComposerMounted === "personal" && chatComposerEl) return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+    if (!chatComposerEl) return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
+    try {
+      if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
+        return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
+      }
+    } catch (eGP) {}
+    if (chatComposerMounted === "personal") return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
     return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
   }
   function mountChatComposer(mode) {
@@ -18279,6 +18338,8 @@ function initChat() {
         sendingGeneralSince = 0;
         setGeneralSendBusy(false);
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
+        if (tg && tg.showAlert) tg.showAlert("Не удалось отобразить сообщение. Обновите чат и попробуйте снова.");
+        else if (typeof alert === "function") alert("Не удалось отобразить сообщение. Обновите чат и попробуйте снова.");
         return;
       }
       scrollGeneralToBottomOnNextRender = true;
@@ -19936,6 +19997,8 @@ function initChat() {
     var generalVoicePreviewEl = document.getElementById("chatGeneralVoicePreview");
     var generalSendBtnRef = generalSendBtn;
     var sendBtnRef = sendBtn;
+    var generalSendLastTouchTs = 0;
+    var personalSendLastTouchTs = 0;
     (function initVoiceRecording() {
       var voiceTarget = null;
       var voiceStream = null;
@@ -20108,11 +20171,13 @@ function initChat() {
       if (generalBtn) {
         generalBtn.addEventListener("click", function (e) {
           e.preventDefault();
+          if (Date.now() - generalSendLastTouchTs < 500) return;
           runGeneralSendAction();
         });
+        /* Не фильтровать по e.target: в TG/WKWebView target иногда не кнопка — тихий return раньше + preventDefault гасил click. */
         generalBtn.addEventListener("touchend", function (e) {
-          if (e.target !== generalBtn && !generalBtn.contains(e.target)) return;
           e.preventDefault();
+          generalSendLastTouchTs = Date.now();
           runGeneralSendAction();
         }, { passive: false });
       }
@@ -20175,11 +20240,12 @@ function initChat() {
       if (personalBtn) {
         personalBtn.addEventListener("click", function (e) {
           e.preventDefault();
+          if (Date.now() - personalSendLastTouchTs < 500) return;
           runPersonalSendAction();
         });
         personalBtn.addEventListener("touchend", function (e) {
-          if (e.target !== personalBtn && !personalBtn.contains(e.target)) return;
           e.preventDefault();
+          personalSendLastTouchTs = Date.now();
           runPersonalSendAction();
         }, { passive: false });
       }
@@ -20213,9 +20279,9 @@ function initChat() {
       });
     })();
 
-    // Личный чат: touchend только при наличии текста/вложений — дублирует personalBtn.touchend,
-    // когда кнопка отправки совпадает с personalBtn (без отдельной кнопки микрофона).
-    if (sendBtn && chatComposerEl) {
+    // Личный чат: запасной touchend на chatSendBtn, если она не совпала с personalBtn (отдельная кнопка 🎤).
+    // Если кнопка одна — срабатывает уже personalBtn.touchend выше; иначе двойной sendMessage.
+    if (sendBtn && chatComposerEl && sendBtn !== personalBtn) {
       sendBtn.addEventListener("touchend", function (e) {
         var hasContentP = getChatPersonalText().trim() || personalImage || personalVoice || personalDocument;
         if (!hasContentP) return;
@@ -20278,6 +20344,18 @@ function initChat() {
       });
       chatComposerEl.addEventListener("keydown", function (e) {
         if (e.key !== "Enter" || e.shiftKey) return;
+        try {
+          if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
+            e.preventDefault();
+            sendMessage();
+            return;
+          }
+          if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
+            e.preventDefault();
+            sendGeneral();
+            return;
+          }
+        } catch (eKd) {}
         if (chatComposerMounted === "personal") {
           e.preventDefault();
           sendMessage();

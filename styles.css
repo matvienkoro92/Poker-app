@@ -367,7 +367,7 @@ body {
   overflow: hidden;
 }
 /*
- * Внутренний скролл в .card__content (главная, скачать, депозит, рейтинг весны, профиль, зал славы):
+ * Внутренний скролл в .card__content (главная, скачать, депозит, рейтинг весны, розыгрыши, профиль, зал славы):
  * нижний запас под таббар уже задаётся scroll-padding-bottom у .card__content — padding-bottom .app
  * дублировал бы пустую полосу с фоном #app над фиксированным .bottom-nav.
  */
@@ -384,7 +384,9 @@ html.app-view-hall-html-scroll #app.app,
 html:has(body[data-view="video-lessons"]) #app.app,
 html.app-view-video-lessons-html-scroll #app.app,
 html:has(body[data-view="spring-rating"]) #app.app,
-html.app-view-spring-rating-html-scroll #app.app {
+html.app-view-spring-rating-html-scroll #app.app,
+html:has(body[data-view="raffles"]) #app.app,
+html.app-view-raffles-html-scroll #app.app {
   padding-bottom: 0 !important;
 }
 /*
@@ -663,7 +665,8 @@ html.app-view-browser-local {
   min-height: 100%;
   overscroll-behavior-y: none;
 }
-html.app-view-browser-local body {
+/* Без скролла body на экранах с внутренним scrollport в .card__content — иначе тот же приоритет, что у главной/скачать/депозит, даёт двойной скролл или «липкий» document */
+html.app-view-browser-local:not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll) body {
   overflow-y: auto !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -689,7 +692,7 @@ html.app-view-browser-local:not(.app-view-chat) #app.app .card {
   flex-shrink: 0;
 }
 /* Не задавать visible на экранах с внутренним layout/скроллом — иначе перебивает overflow:hidden (рейтинги) и overflow-y:auto (скачать) */
-html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll) .card .card__content {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll) .card .card__content {
   overflow: visible !important;
 }
 /* Длинные страницы (не главная): класс с setView / IIFE. Скролл на body — см. :has() выше. */
@@ -743,7 +746,7 @@ body[data-view="video-lessons"] {
 body[data-view="video-lessons"] .app > .bg-gradient {
   inset: 0;
 }
-/* Зал славы, хаб, задачи, «Скачать»: тот же long-scroll — без обрезки градиент снова раздувает прокрутку */
+/* Зал славы, хаб, задачи: long-scroll — без обрезки градиент снова раздувает прокрутку («Скачать» — внутренний scrollport в .card__content) */
 html.app-view-long-scroll .app > .bg-gradient {
   inset: 0;
 }
@@ -876,6 +879,28 @@ body[data-view="spring-rating"] .view.view--active[data-view="spring-rating"] {
   overflow: visible;
 }
 
+/* Розыгрыши: как главная / рейтинг весны */
+body[data-view="raffles"] {
+  display: block !important;
+}
+body[data-view="raffles"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="raffles"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="raffles"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="raffles"] .view.view--active[data-view="raffles"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
 /* Профиль: fallback карточки — как главная / депозит */
 body[data-view="profile"] .app > .bg-gradient {
   inset: 0;
@@ -918,7 +943,9 @@ html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
 html.app-view-video-lessons-html-scroll,
 html:has(body[data-view="spring-rating"]),
-html.app-view-spring-rating-html-scroll {
+html.app-view-spring-rating-html-scroll,
+html:has(body[data-view="raffles"]),
+html.app-view-raffles-html-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   width: 100%;
@@ -952,7 +979,11 @@ html.app-view-video-lessons-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="spring-rating"]) body,
 html:has(body[data-view="spring-rating"]) body.app-view-long-scroll,
 html.app-view-spring-rating-html-scroll body,
-html.app-view-spring-rating-html-scroll body.app-view-long-scroll {
+html.app-view-spring-rating-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="raffles"]) body,
+html:has(body[data-view="raffles"]) body.app-view-long-scroll,
+html.app-view-raffles-html-scroll body,
+html.app-view-raffles-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   overflow-x: hidden;
   display: flex !important;
@@ -978,7 +1009,9 @@ html.app-view-profile-html-scroll body > audio,
 html:has(body[data-view="video-lessons"]) body > audio,
 html.app-view-video-lessons-html-scroll body > audio,
 html:has(body[data-view="spring-rating"]) body > audio,
-html.app-view-spring-rating-html-scroll body > audio {
+html.app-view-spring-rating-html-scroll body > audio,
+html:has(body[data-view="raffles"]) body > audio,
+html.app-view-raffles-html-scroll body > audio {
   flex: 0 0 auto;
   width: 0;
   height: 0;
@@ -1010,7 +1043,11 @@ html.app-view-video-lessons-html-scroll #app.app,
 html:has(body[data-view="spring-rating"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
 html.app-view-browser-local.app-view-long-scroll.app-view-spring-rating-html-scroll:not(.app-view-chat) #app.app,
 html:has(body[data-view="spring-rating"]):not(.app-view-chat) #app.app,
-html.app-view-spring-rating-html-scroll #app.app {
+html.app-view-spring-rating-html-scroll #app.app,
+html:has(body[data-view="raffles"]):not(.app-view-chat).app-view-browser-local.app-view-long-scroll #app.app,
+html.app-view-browser-local.app-view-long-scroll.app-view-raffles-html-scroll:not(.app-view-chat) #app.app,
+html:has(body[data-view="raffles"]):not(.app-view-chat) #app.app,
+html.app-view-raffles-html-scroll #app.app {
   flex: 1 1 auto !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -1033,7 +1070,9 @@ html.app-view-profile-html-scroll .card,
 html:has(body[data-view="video-lessons"]) .card,
 html.app-view-video-lessons-html-scroll .card,
 html:has(body[data-view="spring-rating"]) .card,
-html.app-view-spring-rating-html-scroll .card {
+html.app-view-spring-rating-html-scroll .card,
+html:has(body[data-view="raffles"]) .card,
+html.app-view-raffles-html-scroll .card {
   flex: 1 1 auto;
   width: 100%;
   max-width: 420px;
@@ -1065,7 +1104,11 @@ html.app-view-video-lessons-html-scroll .card .card__content,
 html:has(body[data-view="spring-rating"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
 html.app-view-browser-local.app-view-spring-rating-html-scroll:not(.app-view-chat) .card .card__content,
 html:has(body[data-view="spring-rating"]) .card .card__content,
-html.app-view-spring-rating-html-scroll .card .card__content {
+html.app-view-spring-rating-html-scroll .card .card__content,
+html:has(body[data-view="raffles"]).app-view-browser-local:not(.app-view-chat) .card .card__content,
+html.app-view-browser-local.app-view-raffles-html-scroll:not(.app-view-chat) .card .card__content,
+html:has(body[data-view="raffles"]) .card .card__content,
+html.app-view-raffles-html-scroll .card .card__content {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   min-width: 0;
@@ -1089,6 +1132,8 @@ html:has(body[data-view="download"]) .card .card__content,
 html.app-view-download-html-scroll .card .card__content,
 html:has(body[data-view="spring-rating"]) .card .card__content,
 html.app-view-spring-rating-html-scroll .card .card__content,
+html:has(body[data-view="raffles"]) .card .card__content,
+html.app-view-raffles-html-scroll .card .card__content,
 html:has(body[data-view="profile"]) .card .card__content,
 html.app-view-profile-html-scroll .card .card__content {
   margin-left: calc(-1 * var(--card-padding-x));
@@ -2337,9 +2382,11 @@ body.pwa-auth-gated #app {
 .card:has(.view--active[data-view="hall-of-fame"]) .card__content {
   min-width: 0;
 }
-/* Скачать, рейтинг весны: только min-width — overflow задаётся html:has(...) / конец файла */
+/* Скачать, депозит, рейтинг весны, розыгрыши: только min-width — overflow задаётся html:has(...) / конец файла */
 .card:has(.view--active[data-view="download"]) .card__content,
-.card:has(.view--active[data-view="spring-rating"]) .card__content {
+.card:has(.view--active[data-view="cashout"]) .card__content,
+.card:has(.view--active[data-view="spring-rating"]) .card__content,
+.card:has(.view--active[data-view="raffles"]) .card__content {
   min-width: 0;
 }
 /* fallback для главной без :has(); при внутреннем скролле класс app-view-home-html-scroll — не трогаем overflow */
@@ -2818,10 +2865,57 @@ html.club-charter-modal-open {
 }
 .club-charter-modal__rule {
   height: 3px;
-  margin: 0 auto 18px;
+  margin: 0 auto 14px;
   max-width: 220px;
   background: linear-gradient(90deg, transparent, #2a2118, transparent);
   opacity: 0.75;
+}
+.club-charter-modal__tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 0 4px;
+}
+.club-charter-modal__tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 180px;
+  padding: 10px 14px;
+  margin: 0;
+  border: 2px solid rgba(44, 37, 24, 0.45);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #2c1810;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.club-charter-modal__tab:hover {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(44, 37, 24, 0.6);
+}
+.club-charter-modal__tab--active {
+  background: rgba(124, 45, 18, 0.18);
+  border-color: rgba(124, 45, 18, 0.55);
+  color: #431407;
+  box-shadow: inset 0 0 0 1px rgba(124, 45, 18, 0.12);
+}
+.club-charter-modal__tab:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
+}
+.club-charter-modal__panels {
+  margin-top: 4px;
+}
+.club-charter-modal__panel[hidden] {
+  display: none !important;
 }
 .club-charter-modal__list {
   margin: 0;
@@ -5464,6 +5558,8 @@ img.chat-contact__avatar {
   justify-content: center;
   line-height: 1;
   align-self: center;
+  position: relative;
+  z-index: 2;
 }
 .chat-send-btn:hover { opacity: 0.9; }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -5477,6 +5573,7 @@ img.chat-contact__avatar {
   position: absolute;
   right: 54px; /* перед микрофоном (36px) + небольшой зазор */
   bottom: 8px;
+  z-index: 1;
   width: 28px;
   height: 28px;
   padding: 0;
@@ -22269,7 +22366,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 }
 
 /*
- * Скачать, главная, депозит, рейтинг весны, профиль, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Скачать, главная, депозит, рейтинг весны, розыгрыши, профиль, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
  * Дублирует ключевые свойства на случай правок выше по файлу.
  */
 html:has(body[data-view="download"]),
@@ -22280,6 +22377,8 @@ html:has(body[data-view="cashout"]),
 html.app-view-cashout-html-scroll,
 html:has(body[data-view="spring-rating"]),
 html.app-view-spring-rating-html-scroll,
+html:has(body[data-view="raffles"]),
+html.app-view-raffles-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
@@ -22306,6 +22405,10 @@ html:has(body[data-view="spring-rating"]) body,
 html:has(body[data-view="spring-rating"]) body.app-view-long-scroll,
 html.app-view-spring-rating-html-scroll body,
 html.app-view-spring-rating-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="raffles"]) body,
+html:has(body[data-view="raffles"]) body.app-view-long-scroll,
+html.app-view-raffles-html-scroll body,
+html.app-view-raffles-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="profile"]) body,
 html:has(body[data-view="profile"]) body.app-view-long-scroll,
 html.app-view-profile-html-scroll body,
@@ -22327,6 +22430,7 @@ body[data-view="download"] #app.app,
 body[data-view="home"] #app.app,
 body[data-view="cashout"] #app.app,
 body[data-view="spring-rating"] #app.app,
+body[data-view="raffles"] #app.app,
 body[data-view="profile"] #app.app,
 body[data-view="video-lessons"] #app.app {
   flex: 1 1 auto !important;
@@ -22345,6 +22449,7 @@ body[data-view="download"] #app.app .card,
 body[data-view="home"] #app.app .card,
 body[data-view="cashout"] #app.app .card,
 body[data-view="spring-rating"] #app.app .card,
+body[data-view="raffles"] #app.app .card,
 body[data-view="profile"] #app.app .card,
 body[data-view="video-lessons"] #app.app .card {
   flex: 1 1 auto !important;
@@ -22370,6 +22475,7 @@ body[data-view="download"] #app.app .card .card__content,
 body[data-view="home"] #app.app .card .card__content,
 body[data-view="cashout"] #app.app .card .card__content,
 body[data-view="spring-rating"] #app.app .card .card__content,
+body[data-view="raffles"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content {
   flex: 1 1 auto !important;
   min-height: 0 !important;

@@ -4219,36 +4219,51 @@
             <p class="club-charter-modal__kicker">Официальный документ</p>
             <h2 class="club-charter-modal__title" id="clubCharterModalTitle">Устав клуба «Два туза»</h2>
             <div class="club-charter-modal__rule" aria-hidden="true"></div>
+            <nav class="club-charter-modal__tabs" role="tablist" aria-label="Разделы устава">
+              <button type="button" class="club-charter-modal__tab club-charter-modal__tab--active" role="tab" id="clubCharterTabRaffle" aria-selected="true" aria-controls="clubCharterPanelRaffle">Розыгрыш</button>
+              <button type="button" class="club-charter-modal__tab" role="tab" id="clubCharterTabComm" aria-selected="false" aria-controls="clubCharterPanelComm">Коммуникация</button>
+            </nav>
             <div class="gazette-modal__share-row club-charter-modal__share-row" role="group" aria-label="Поделиться или скопировать ссылку">
               <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" id="clubCharterShareBtn" aria-label="Поделиться уставом клуба">Поделиться</button>
               <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" id="clubCharterCopyBtn" aria-label="Скопировать ссылку на устав клуба">Скопировать</button>
             </div>
-            <ol class="club-charter-modal__list">
-              <li>
-                <p>В розыгрышах участвуют только активные игроки клуба «Два туза», это сделано, чтобы исключить возможность выиграть мультаккам в розыгрыше, которые неактивны в клубе, но создают аккаунты только для розыгрыша.</p>
-                <p class="club-charter-modal__note">
-                  Активным считается тот, кто депал хотя бы раз за последние 2 недели или имеет деньги на балансе и играл в кеш или в турниры последние 2 недели.
-                </p>
-              </li>
-              <li>
-                <p>Все разыгрываемые билеты — это беккинг 50 на 50 с клубом.</p>
-              </li>
-              <li>
-                <p>В турнирах все бонусы за комбинации всегда только по двум картам.</p>
-              </li>
-              <li>
-                <p>Перелив фишек запрещён — намеренный проигрыш в турнирах и в кэше другим игрокам с целью передать фишки.</p>
-              </li>
-              <li>
-                <p>Любые сделки и займы в чатах клуба с другими игроками — только на вашу ответственность. Клуб не рекомендует вступать в финансовые отношения с другими игроками клуба. Всё это только на ваше усмотрение и под вашу ответственность. Заранее поинтересуйтесь о репутации игрока в чате, но даже это ничего не гарантирует.</p>
-              </li>
-              <li>
-                <p>Приобретайте фишки только у админов клуба <a href="https://t.me/qweenpoker" target="_blank" rel="noopener noreferrer">@qweenpoker</a> и <a href="https://t.me/vikipoker" target="_blank" rel="noopener noreferrer">@vikipoker</a>.</p>
-              </li>
-              <li>
-                <p>Прямые оскорбления других игроков категорически не приветствуются, кроме случаев, где это «чисто по игре».</p>
-              </li>
-            </ol>
+            <div class="club-charter-modal__panels">
+              <div id="clubCharterPanelRaffle" class="club-charter-modal__panel" role="tabpanel" aria-labelledby="clubCharterTabRaffle">
+                <ol class="club-charter-modal__list">
+                  <li>
+                    <p>В розыгрышах участвуют только активные игроки клуба «Два туза», это сделано, чтобы исключить возможность выиграть мультаккам в розыгрыше, которые неактивны в клубе, но создают аккаунты только для розыгрыша.</p>
+                    <p class="club-charter-modal__note">
+                      Активным считается тот, кто депал хотя бы раз за последние 2 недели или имеет деньги на балансе и играл в кеш или в турниры последние 2 недели.
+                    </p>
+                  </li>
+                  <li>
+                    <p>Все разыгрываемые билеты — это беккинг 50 на 50 с клубом.</p>
+                  </li>
+                  <li>
+                    <p>Для игроков, пришедших из розыгрыша, бонусы и миссии клуба не активны.</p>
+                  </li>
+                  <li>
+                    <p>В турнирах все бонусы за комбинации всегда только по двум картам.</p>
+                  </li>
+                </ol>
+              </div>
+              <div id="clubCharterPanelComm" class="club-charter-modal__panel" role="tabpanel" aria-labelledby="clubCharterTabComm" hidden>
+                <ol class="club-charter-modal__list">
+                  <li>
+                    <p>Перелив фишек запрещён — намеренный проигрыш в турнирах и в кэше другим игрокам с целью передать фишки.</p>
+                  </li>
+                  <li>
+                    <p>Любые сделки и займы в чатах клуба с другими игроками — только на вашу ответственность. Клуб не рекомендует вступать в финансовые отношения с другими игроками клуба. Всё это только на ваше усмотрение и под вашу ответственность. Заранее поинтересуйтесь о репутации игрока в чате, но даже это ничего не гарантирует.</p>
+                  </li>
+                  <li>
+                    <p>Приобретайте фишки только у админов клуба <a href="https://t.me/qweenpoker" target="_blank" rel="noopener noreferrer">@qweenpoker</a> и <a href="https://t.me/vikipoker" target="_blank" rel="noopener noreferrer">@vikipoker</a>.</p>
+                  </li>
+                  <li>
+                    <p>Прямые оскорбления других игроков категорически не приветствуются, кроме случаев, где это «чисто по игре».</p>
+                  </li>
+                </ol>
+              </div>
+            </div>
           </div>
         </div>
       </div>
