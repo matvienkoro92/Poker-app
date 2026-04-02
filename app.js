@@ -334,6 +334,218 @@ function pokerApiHasCredential() {
   return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
 }
 
+function pokerIsPwaDisplayStandalone() {
+  try {
+    if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.navigator && window.navigator.standalone) return true;
+  } catch (e) {}
+  return false;
+}
+
+function pokerChatPushUrlBase64ToUint8Array(base64String) {
+  if (!base64String || typeof base64String !== "string") return null;
+  try {
+    var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    var base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    var rawData = atob(base64);
+    var outputArray = new Uint8Array(rawData.length);
+    for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  } catch (e2) {
+    return null;
+  }
+}
+
+function pokerFetchChatPushConfig() {
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base) return Promise.resolve(null);
+  return fetch(base + "/api/chat-push-subscribe", { cache: "no-store" })
+    .then(function (x) {
+      return x.json();
+    })
+    .catch(function () {
+      return null;
+    })
+    .then(function (r) {
+      return r && r.ok ? r : null;
+    });
+}
+
+function pokerChatPushSetServerEnabled(wantOn) {
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base || !pokerApiHasCredential()) return Promise.resolve({ ok: false, error: "no auth" });
+  return fetch(base + "/api/chat-push-subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pokerApiAuthJsonBody({ action: wantOn ? "enable" : "disable" })),
+  })
+    .then(function (x) {
+      return x.json();
+    })
+    .catch(function () {
+      return { ok: false };
+    });
+}
+
+function pokerChatPushSubscribeToBrowser() {
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base || !pokerApiHasCredential()) return Promise.resolve({ ok: false, error: "auth" });
+  if (!("serviceWorker" in navigator)) return Promise.resolve({ ok: false, error: "no_sw" });
+  return pokerFetchChatPushConfig()
+    .then(function (cfg) {
+      if (!cfg || !cfg.pushConfigured || !cfg.publicKey) return { ok: false, error: "not_configured" };
+      var keyArr = pokerChatPushUrlBase64ToUint8Array(cfg.publicKey);
+      if (!keyArr) return { ok: false, error: "bad_key" };
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyArr });
+      }).then(function (sub) {
+        var json = sub.toJSON();
+        return fetch(base + "/api/chat-push-subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerApiAuthJsonBody({ action: "subscribe", subscription: json })),
+        }).then(function (r) {
+          return r.json();
+        });
+      });
+    })
+    .catch(function () {
+      return { ok: false };
+    });
+}
+
+function pokerChatPushUnsubscribeBrowser() {
+  if (!("serviceWorker" in navigator)) return Promise.resolve();
+  return navigator.serviceWorker.ready
+    .then(function (reg) {
+      return reg.pushManager.getSubscription();
+    })
+    .then(function (sub) {
+      if (sub) return sub.unsubscribe();
+    })
+    .catch(function () {});
+}
+
+var profileChatPushBound = false;
+function initProfileChatPush() {
+  var row = document.getElementById("profileChatPushRow");
+  var toggle = document.getElementById("profileChatPushToggle");
+  var hint = document.getElementById("profileChatPushHint");
+  if (!row || !toggle) return;
+  var show = pokerIsPwaDisplayStandalone() && pokerApiHasCredential();
+  row.classList.toggle("profile-chat-push--hidden", !show);
+  row.setAttribute("aria-hidden", show ? "false" : "true");
+  if (!show) return;
+
+  function setHint(t) {
+    if (hint) hint.textContent = t;
+  }
+
+  function refreshState() {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base) return;
+    fetch(base + "/api/chat-push-subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (!d || !d.ok) {
+          setHint("Не удалось загрузить настройки.");
+          return;
+        }
+        if (!d.pushConfigured) {
+          setHint("Пуши на сервере не настроены (VAPID).");
+          toggle.disabled = true;
+          toggle.checked = false;
+          return;
+        }
+        toggle.disabled = false;
+        toggle.checked = !!d.notificationsEnabled;
+        if (typeof Notification !== "undefined") {
+          if (Notification.permission === "denied") {
+            setHint("Уведомления заблокированы в настройках браузера.");
+          } else if (d.notificationsEnabled && d.hasSubscription) {
+            setHint("Уведомления включены — приходят при закрытом приложении.");
+          } else if (d.notificationsEnabled && !d.hasSubscription) {
+            setHint("Разрешите уведомления или переключите выкл/вкл, чтобы завершить подписку.");
+            if (Notification.permission === "granted" && !window.__pokerChatPushAutoSubOnce) {
+              window.__pokerChatPushAutoSubOnce = true;
+              pokerChatPushSubscribeToBrowser().then(function () {
+                refreshState();
+              });
+            }
+          } else {
+            setHint("Только для приложения с рабочего стола (PWA).");
+          }
+        }
+      })
+      .catch(function () {
+        setHint("Ошибка сети.");
+      });
+  }
+
+  if (!profileChatPushBound) {
+    profileChatPushBound = true;
+    toggle.addEventListener("change", function () {
+      var on = toggle.checked;
+      if (!on) {
+        toggle.disabled = true;
+        pokerChatPushUnsubscribeBrowser();
+        pokerChatPushSetServerEnabled(false).then(function (r) {
+          toggle.disabled = false;
+          if (!r || !r.ok) toggle.checked = true;
+          refreshState();
+        });
+        return;
+      }
+      toggle.disabled = true;
+      pokerChatPushSetServerEnabled(true).then(function (r) {
+        if (!r || !r.ok) {
+          toggle.checked = false;
+          toggle.disabled = false;
+          refreshState();
+          return;
+        }
+        if (typeof Notification === "undefined") {
+          toggle.checked = false;
+          toggle.disabled = false;
+          pokerChatPushSetServerEnabled(false);
+          refreshState();
+          return;
+        }
+        Notification.requestPermission().then(function (perm) {
+          if (perm !== "granted") {
+            toggle.checked = false;
+            pokerChatPushSetServerEnabled(false);
+            setHint(perm === "denied" ? "Браузер запретил уведомления." : "Без разрешения пуши недоступны.");
+            toggle.disabled = false;
+            refreshState();
+            return;
+          }
+          pokerChatPushSubscribeToBrowser().then(function (subr) {
+            if (!subr || !subr.ok) {
+              toggle.checked = false;
+              pokerChatPushSetServerEnabled(false);
+              setHint((subr && subr.error) || "Не удалось подписаться.");
+            }
+            toggle.disabled = false;
+            refreshState();
+          });
+        });
+      }).catch(function () {
+        toggle.checked = false;
+        toggle.disabled = false;
+        refreshState();
+      });
+    });
+  }
+  refreshState();
+}
+
 (function initRadioToggle() {
   var radio = document.getElementById("chillRadio");
   var btn = document.getElementById("radioToggle");
@@ -402,6 +614,11 @@ function pokerApiHasCredential() {
   });
 })();
 
+(function initPwaServiceWorkerGlobal() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("./sw.js").catch(function () {});
+})();
+
 (function initPwaInstall() {
   var btn = document.getElementById("pwaInstallBtn");
   if (!btn) return;
@@ -445,9 +662,6 @@ function pokerApiHasCredential() {
     btn.removeAttribute("hidden");
   });
   if (isIos() || (typeof navigator.share === "function")) btn.removeAttribute("hidden");
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(function () {});
-  }
   btn.addEventListener("click", function () {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     function doShareAndCopy() {
@@ -5713,6 +5927,7 @@ function setView(viewName, navOpts) {
     loadProfileRespect();
     initProfileFriends();
     initProfileExitBtn();
+    initProfileChatPush();
   }
   if (viewName === "cashout") {
     initCashoutDepositForm();
@@ -6155,7 +6370,7 @@ function hallFameOpenTelegramShareForSection(section) {
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;
 
-/** PWA на рабочем столе: красная цифра на иконке (Badging API). Только в standalone; без push не обновится, пока приложение закрыто. */
+/** PWA на рабочем столе: цифра на иконке (Badging API), как в таббаре — до 99. Только в standalone; без push не обновится, пока приложение закрыто. */
 function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
   try {
     var isStandalone =
@@ -6168,8 +6383,8 @@ function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
     var n = typeof unreadTotal === "number" && unreadTotal > 0 ? unreadTotal : 0;
     if (n > 0) {
       if (typeof nav.setAppBadge === "function") {
-        /* Запрошено: на ярлыке всегда «1», если есть любые непрочитанные */
-        nav.setAppBadge(1).catch(function () {});
+        var badgeNum = Math.min(n, 99);
+        nav.setAppBadge(badgeNum).catch(function () {});
       }
     } else {
       nav.clearAppBadge().catch(function () {});
@@ -10338,6 +10553,19 @@ function updateProfileExitBtnVisibility() {
 }
 
 function pokerClearSessionsAndReloadForLogin() {
+  try {
+    var baseLogout = typeof getApiBase === "function" ? getApiBase() : "";
+    if (baseLogout && pokerApiHasCredential()) {
+      fetch(baseLogout + "/api/chat-push-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: "disable" })),
+      }).catch(function () {});
+    }
+  } catch (eLogoutPush) {}
+  try {
+    pokerChatPushUnsubscribeBrowser();
+  } catch (eUnsub) {}
   try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
   try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
   try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}

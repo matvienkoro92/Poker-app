@@ -20720,6 +20720,53 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   background: rgba(255, 255, 255, 0.08);
 }
 
+.profile-chat-push {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--block-bg-solid);
+  box-sizing: border-box;
+}
+.profile-chat-push--hidden {
+  display: none !important;
+}
+.profile-chat-push__title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.profile-chat-push__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text);
+}
+.profile-chat-push__checkbox {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: #ea580c;
+}
+.profile-chat-push__text {
+  flex: 1;
+  min-width: 0;
+}
+.profile-chat-push__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+[data-theme="light"] .profile-chat-push__checkbox {
+  accent-color: #c2410c;
+}
+
 /* Стримы (с главной: Игры и приложения) */
 .streams-title {
   margin: 0 0 8px;
