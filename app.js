@@ -19783,6 +19783,20 @@ function initChat() {
             }
           } catch (eVv) {}
         }
+        /* Композер position:fixed над клавиатурой — в потоке места нет, поднимаем pad по реальной высоте полосы + bottom. */
+        try {
+          var barEl = null;
+          if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
+            barEl = document.getElementById("chatGeneralInputArea");
+          } else if (chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
+            barEl = convView.querySelector(".chat-container .chat-input-area");
+          }
+          if (barEl && window.getComputedStyle(barEl).position === "fixed") {
+            var bh = barEl.offsetHeight || 72;
+            var btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
+            pad = Math.max(pad, Math.round(bh + btm + gap));
+          }
+        } catch (eBarPad) {}
         if (pad < 28) pad = 28;
         if (isIosLikeForChatViewport()) pad += 8;
         box.style.paddingBottom = pad + "px";
@@ -19899,6 +19913,15 @@ function initChat() {
             node.style.removeProperty("will-change");
             /* applyChatInputAreasVisualLift задавал margin-bottom с !important — без снятия перебивает CSS после dismiss, строка «исчезает». */
             node.style.removeProperty("margin-bottom");
+            node.style.removeProperty("position");
+            node.style.removeProperty("left");
+            node.style.removeProperty("width");
+            node.style.removeProperty("right");
+            node.style.removeProperty("bottom");
+            node.style.removeProperty("top");
+            node.style.removeProperty("z-index");
+            node.style.removeProperty("max-width");
+            node.style.removeProperty("box-sizing");
           });
         } catch (eSt) {}
       }
@@ -19998,8 +20021,7 @@ function initChat() {
       }
 
       /**
-       * Дублирует translate из CSS: иногда calc/селекторы не цепляются, inline !important стабильнее в WK/TG.
-       * margin-bottom не трогаем здесь — только transform; иначе inline !important на margin залипал после blur и строка пропадала.
+       * Fallback без visualViewport: только translate по CSS-переменным (flex/overflow часто «съедают» подъём).
        */
       function applyChatInputAreasVisualLift() {
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -20034,6 +20056,97 @@ function initChat() {
           }
         }
       }
+      /**
+       * Привязка полосы ввода к низу visualViewport (position:fixed + bottom) — надёжнее transform внутри overflow:flex.
+       */
+      function applyChatComposerKeyboardPosition() {
+        if (!document.body.classList.contains("chat-keyboard-open")) return;
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") {
+          applyChatInputAreasVisualLift();
+          return;
+        }
+        var ih = window.innerHeight || 0;
+        var iw = window.innerWidth || document.documentElement.clientWidth || 0;
+        var vv = window.visualViewport;
+        var bottomPx = 0;
+        if (vv && ih > 0) {
+          var ot = Number(vv.offsetTop) || 0;
+          var vvh = Number(vv.height) || 0;
+          bottomPx = Math.max(0, Math.round(ih - ot - vvh));
+        }
+        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tw) {
+          var tgvH = Number(tw.viewportHeight);
+          var tgvS = Number(tw.viewportStableHeight);
+          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10) {
+            bottomPx = Math.max(bottomPx, Math.round(tgvS - tgvH));
+          }
+        }
+        var composerFocus = chatComposerEl && document.activeElement === chatComposerEl;
+        if (composerFocus && ih > 220) {
+          bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.32)));
+        }
+        if (composerFocus && bottomPx > 0 && bottomPx < 72) {
+          bottomPx = Math.max(bottomPx, 72);
+        }
+        var gEl = document.getElementById("chatGeneralInputArea");
+        var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
+        var genVis = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
+        var convVis = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+        function clearDockOne(el) {
+          if (!el || !el.style) return;
+          el.style.removeProperty("position");
+          el.style.removeProperty("left");
+          el.style.removeProperty("width");
+          el.style.removeProperty("right");
+          el.style.removeProperty("bottom");
+          el.style.removeProperty("top");
+          el.style.removeProperty("z-index");
+          el.style.removeProperty("max-width");
+          el.style.removeProperty("box-sizing");
+          el.style.removeProperty("transform");
+          el.style.removeProperty("-webkit-transform");
+          el.style.removeProperty("will-change");
+          el.style.removeProperty("margin-bottom");
+        }
+        function dockOne(el) {
+          if (!el || !el.style) return;
+          var appEl = document.getElementById("app");
+          var leftPx = 0;
+          var widthPx = Math.max(260, iw);
+          try {
+            if (appEl && appEl.getBoundingClientRect) {
+              var br = appEl.getBoundingClientRect();
+              leftPx = Math.max(0, Math.round(br.left));
+              widthPx = Math.max(260, Math.round(br.width));
+            }
+          } catch (eBr) {}
+          el.style.setProperty("position", "fixed", "important");
+          el.style.setProperty("left", leftPx + "px", "important");
+          el.style.setProperty("width", widthPx + "px", "important");
+          el.style.setProperty("right", "auto", "important");
+          el.style.setProperty("bottom", bottomPx + "px", "important");
+          el.style.setProperty("z-index", "10040", "important");
+          el.style.setProperty("transform", "none", "important");
+          el.style.setProperty("-webkit-transform", "none", "important");
+          el.style.setProperty("margin-bottom", "0", "important");
+          el.style.setProperty("max-width", "none", "important");
+          el.style.setProperty("box-sizing", "border-box", "important");
+        }
+        if (vv && ih > 0) {
+          if (gEl && !genVis) clearDockOne(gEl);
+          if (pEl && !convVis) clearDockOne(pEl);
+          if (genVis) dockOne(gEl);
+          else if (gEl) clearDockOne(gEl);
+          if (convVis) dockOne(pEl);
+          else if (pEl) clearDockOne(pEl);
+        } else {
+          if (gEl) clearDockOne(gEl);
+          if (pEl) clearDockOne(pEl);
+          applyChatInputAreasVisualLift();
+        }
+      }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!document.body.classList.contains("chat-keyboard-open")) {
@@ -20061,7 +20174,7 @@ function initChat() {
             doc.style.setProperty("--chat-vv-inset", insetFb + "px");
             if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
             else doc.style.removeProperty("--chat-ios-accessory-inset");
-            applyChatInputAreasVisualLift();
+            applyChatComposerKeyboardPosition();
             updateChatMessagesKeyboardPad();
           }
           return;
@@ -20179,9 +20292,10 @@ function initChat() {
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
-        applyChatInputAreasVisualLift();
+        applyChatComposerKeyboardPosition();
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
+      window.__pokerSyncPwaChatVisualViewportInset = syncPwaChatVisualViewportInset;
       var viewportResizeScrollHandler = null;
       var chatWindowResizeHandler = null;
       window.__pokerChatDetachVisualViewportListeners = function () {
@@ -21004,6 +21118,21 @@ function initChat() {
       chatComposerEl.addEventListener("input", function () {
         flushChatComposerToDrafts();
         resizeChatTextarea(chatComposerEl);
+        try {
+          if (
+            document.body.classList.contains("chat-keyboard-open") &&
+            typeof window.__pokerSyncPwaChatVisualViewportInset === "function"
+          ) {
+            var rafI = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 16);
+            };
+            rafI(function () {
+              try {
+                window.__pokerSyncPwaChatVisualViewportInset();
+              } catch (eSynI) {}
+            });
+          }
+        } catch (ePadSyn) {}
         updateGeneralSendBtnIcon();
         updatePersonalSendBtnIcon();
         try {
