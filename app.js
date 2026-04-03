@@ -358,6 +358,15 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", pokerSyncIosPwaRootClass);
 }
 window.addEventListener("orientationchange", pokerSyncIosPwaRootClass);
+window.addEventListener("orientationchange", function pokerPwaTabbarGapOnOrientation() {
+  pokerSyncPwaIosBottomNavGap._peak = 0;
+  try {
+    document.documentElement.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+  } catch (eOr) {}
+  try {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (ePad) {}
+});
 
 function pokerChatPushUrlBase64ToUint8Array(base64String) {
   if (!base64String || typeof base64String !== "string") return null;
@@ -3285,6 +3294,9 @@ function pokerApplyAppTopPadding() {
  */
 function pokerApplyBottomTabbarPad() {
   try {
+    if (typeof pokerSyncBottomNavTelegramInset === "function") pokerSyncBottomNavTelegramInset();
+  } catch (eSn) {}
+  try {
     if (typeof pokerSyncIosPwaRootClass === "function") pokerSyncIosPwaRootClass();
   } catch (eIosCls) {}
   var tabbarGapPx =
@@ -3325,10 +3337,107 @@ function pokerApplyBottomTabbarPad() {
       document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
       pokerApplyBottomTabbarPad._lastPad = null;
     } catch (e2) {}
+  } finally {
+    try {
+      if (typeof pokerSyncPwaIosBottomNavGap === "function") pokerSyncPwaIosBottomNavGap();
+    } catch (eGap) {}
   }
 }
 pokerApplyBottomTabbarPad._lastPad = null;
 pokerApplyBottomTabbarPad._lastGap = null;
+
+/**
+ * Telegram Mini App (Bot API 8+): на iOS нижний отступ надёжнее брать из contentSafeAreaInset/safeAreaInset,
+ * иначе env(safe-area-inset-bottom) + раскладка WebView дают лишнюю полосу под таббаром. Standalone PWA не трогаем.
+ */
+function pokerSyncBottomNavTelegramInset() {
+  try {
+    var root = document.documentElement;
+    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
+      root.classList.remove("app--tg-bottom-nav-inset");
+      root.style.removeProperty("--app-bottom-nav-inset-tg");
+      return;
+    }
+    var tw = window.Telegram && window.Telegram.WebApp;
+    if (!tw || !tw.initData) {
+      root.classList.remove("app--tg-bottom-nav-inset");
+      root.style.removeProperty("--app-bottom-nav-inset-tg");
+      return;
+    }
+    var pick = -1;
+    if (tw.contentSafeAreaInset != null && typeof tw.contentSafeAreaInset.bottom === "number") {
+      pick = Math.round(tw.contentSafeAreaInset.bottom);
+    }
+    if (pick <= 0 && tw.safeAreaInset != null && typeof tw.safeAreaInset.bottom === "number") {
+      pick = Math.round(tw.safeAreaInset.bottom);
+    }
+    if (pick > 0) {
+      root.style.setProperty("--app-bottom-nav-inset-tg", Math.max(6, pick) + "px");
+      root.classList.add("app--tg-bottom-nav-inset");
+    } else {
+      root.classList.remove("app--tg-bottom-nav-inset");
+      root.style.removeProperty("--app-bottom-nav-inset-tg");
+    }
+  } catch (eTgBn) {}
+}
+
+/**
+ * iOS установленное PWA: между низом position:fixed таббара и innerHeight иногда остаётся тёмная полоска
+ * (рассинхрон layout/visual viewport в WKWebView). Тянем таббар вниз на измеренный зазор; _peak не уменьшаем —
+ * иначе после сдвига rect.bottom > innerHeight и значение «схлопывается» каждый кадр.
+ */
+function pokerSyncPwaIosBottomNavGap() {
+  try {
+    var root = document.documentElement;
+    if (typeof pokerIsPwaDisplayStandalone !== "function" || !pokerIsPwaDisplayStandalone()) {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      pokerSyncPwaIosBottomNavGap._peak = 0;
+      return;
+    }
+    var ios =
+      /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
+      (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+    if (!ios) {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      pokerSyncPwaIosBottomNavGap._peak = 0;
+      return;
+    }
+    if (document.body && document.body.classList.contains("chat-keyboard-open")) {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      return;
+    }
+    var nav = document.querySelector(".bottom-nav");
+    if (!nav || typeof nav.getBoundingClientRect !== "function") {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      return;
+    }
+    var st = window.getComputedStyle(nav);
+    if (st.visibility === "hidden" || st.display === "none" || parseFloat(st.opacity || "1") < 0.05) {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      return;
+    }
+    var ih = window.innerHeight || 0;
+    if (ih < 120) return;
+    var rect = nav.getBoundingClientRect();
+    if (!rect || rect.top > ih - 24) return;
+    var instant = ih - rect.bottom;
+    var fromRect = instant > 0.5 ? Math.round(instant) : 0;
+    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(56, fromRect);
+    var vv = window.visualViewport;
+    if (vv && typeof vv.height === "number" && typeof vv.offsetTop === "number") {
+      var vvSlack = Math.round(ih - vv.offsetTop - vv.height);
+      if (vvSlack > 0 && vvSlack <= 56 && vvSlack > pokerSyncPwaIosBottomNavGap._peak) {
+        pokerSyncPwaIosBottomNavGap._peak = vvSlack;
+      }
+    }
+    if (pokerSyncPwaIosBottomNavGap._peak > 0) {
+      root.style.setProperty("--pwa-ios-tabbar-bottom-gap", pokerSyncPwaIosBottomNavGap._peak + "px");
+    } else {
+      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+    }
+  } catch (ePwaGap) {}
+}
+pokerSyncPwaIosBottomNavGap._peak = 0;
 
 /**
  * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
@@ -3416,8 +3525,19 @@ if (tg) {
       if (!(e && e.isStateStable === false) && typeof pokerApplyAppTopPadding === "function") {
         pokerApplyAppTopPadding();
       }
+      if (!(e && e.isStateStable === false) && typeof pokerSyncBottomNavTelegramInset === "function") {
+        pokerSyncBottomNavTelegramInset();
+      }
       /* Нижний pad — только ResizeObserver / resize */
       if (e && e.isStateStable) tryExpand();
+    });
+    ["contentSafeAreaChanged", "safeAreaChanged"].forEach(function (ev) {
+      try {
+        tg.onEvent(ev, function () {
+          if (typeof pokerSyncBottomNavTelegramInset === "function") pokerSyncBottomNavTelegramInset();
+          if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+        });
+      } catch (eSafeEv) {}
     });
   }
   document.addEventListener("visibilitychange", function () {
@@ -3458,6 +3578,10 @@ if (tg) {
 }
 
 pokerApplyAppTopPadding();
+pokerSyncBottomNavTelegramInset();
+setTimeout(pokerSyncBottomNavTelegramInset, 0);
+setTimeout(pokerSyncBottomNavTelegramInset, 120);
+setTimeout(pokerSyncBottomNavTelegramInset, 400);
 /* Повторы 250/700 ms давали второй проход после TG и рост padding-top; достаточно rAF + viewportChanged */
 (function pokerApplyAppTopPaddingRaf() {
   var raf = window.requestAnimationFrame || function (fn) {

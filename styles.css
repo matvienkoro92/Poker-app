@@ -21970,13 +21970,14 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   border-top: 1px solid rgba(148, 163, 184, 0.4);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   gap: 0;
   flex-wrap: nowrap;
   z-index: 1001;
   pointer-events: auto;
   box-sizing: border-box;
   overflow: visible;
+  /* flex-end: иконки/подписи прижаты к зоне safe-area — без лишнего «воздуха» от align-items:center */
   /* Один слой композита + явный «домашний» transform; translateY в скрытых состояниях не анимируем */
   transform: translate3d(0, 0, 0);
   -webkit-backface-visibility: hidden;
@@ -21993,6 +21994,14 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
     transform: translate3d(0, 0, 0);
     padding-bottom: max(10px, max(env(safe-area-inset-bottom, 0px), 34px));
   }
+}
+/* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
+html.app--tg-bottom-nav-inset .bottom-nav {
+  padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
+}
+/* iOS PWA: зазор между fixed-таббаром и низом экрана — pokerSyncPwaIosBottomNavGap в app.js */
+html.poker-ios-pwa .bottom-nav {
+  bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap, 0px));
 }
 .bottom-nav__item {
   flex: 1;
