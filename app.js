@@ -20123,11 +20123,12 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
+          var dockBottomPx = Math.max(0, bottomPx - 10);
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
           el.style.setProperty("right", "auto", "important");
-          el.style.setProperty("bottom", bottomPx + "px", "important");
+          el.style.setProperty("bottom", dockBottomPx + "px", "important");
           el.style.setProperty("z-index", "10040", "important");
           el.style.setProperty("transform", "none", "important");
           el.style.setProperty("-webkit-transform", "none", "important");
