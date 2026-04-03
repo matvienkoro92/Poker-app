@@ -407,7 +407,7 @@ html.app--tg-content-inset .app {
 }
 @media (display-mode: standalone), (display-mode: fullscreen) {
   :root {
-    /* Как .bottom-nav в PWA: max(12px, safe + 6px) снизу */
+    /* Fallback до измерения JS; реальный padding-bottom таббара — max(10px, max(env, 34px)) в standalone */
     --app-bottom-tabbar-pad: calc(90px + var(--app-tabbar-content-gap));
   }
   .app {
@@ -21986,18 +21986,13 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   opacity: 1;
   visibility: visible;
 }
-/* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу.
- * На части iPhone env(safe-area-inset-bottom) в WKWebView иногда 0 — порог 34px как у индикатора «домой». */
+/* PWA / fullscreen: если env снизу в WKWebView обнулился — не даём таббару залезть на индикатор «домой» (34px).
+ * Не суммируем safe-area с отдельным «+6/+14»: при нормальном env≈34 это давало лишнюю тёмную полосу под иконками (iPhone 14 и др.). */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
     transform: translate3d(0, 0, 0);
-    padding-bottom: max(12px, calc(6px + max(34px, env(safe-area-inset-bottom, 0px))));
+    padding-bottom: max(10px, max(env(safe-area-inset-bottom, 0px), 34px));
   }
-}
-/* iOS + установленное приложение: класс вешает app.js (pokerSyncIosPwaRootClass). Без этого при env≈34 получалось 6+34=40 — как у max(10,env) в базе, «ничего не меняется».
- * 14px + max(34, env) даёт заметный запас (48px при типичном env). */
-html.poker-ios-pwa .bottom-nav {
-  padding-bottom: max(14px, calc(14px + max(34px, env(safe-area-inset-bottom, 0px)))) !important;
 }
 .bottom-nav__item {
   flex: 1;
@@ -22572,13 +22567,13 @@ body[data-view="home"] #app.app .card .card__content {
     ) !important;
   }
 }
-/* Синхронно с большим padding-bottom таббара на iOS PWA (html.poker-ios-pwa). */
+/* Тот же нижний floor, что у standalone PWA, после выравнивания .bottom-nav (без лишнего padding-bottom на iOS PWA). */
 html.poker-ios-pwa:has(body[data-view="home"]) .card .card__content,
 html.poker-ios-pwa.app-view-home-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content {
   padding-bottom: max(
     var(--app-bottom-tabbar-pad, 105px),
-    calc(82px + max(34px, env(safe-area-inset-bottom, 0px)))
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
   ) !important;
 }
 
