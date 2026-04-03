@@ -361,7 +361,9 @@ window.addEventListener("orientationchange", pokerSyncIosPwaRootClass);
 window.addEventListener("orientationchange", function pokerPwaTabbarGapOnOrientation() {
   pokerSyncPwaIosBottomNavGap._peak = 0;
   try {
-    document.documentElement.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+    var oRoot = document.documentElement;
+    oRoot.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+    oRoot.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
   } catch (eOr) {}
   try {
     if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
@@ -3381,16 +3383,37 @@ function pokerSyncBottomNavTelegramInset() {
   } catch (eTgBn) {}
 }
 
+/** Реальное значение env(safe-area-inset-bottom) в px (getComputedStyle на пробнике). */
+function pokerReadIosEnvSafeAreaBottomPx() {
+  var host = document.body || document.documentElement;
+  if (!host || typeof host.appendChild !== "function") return 0;
+  var p = document.createElement("div");
+  p.style.cssText =
+    "position:fixed;visibility:hidden;left:-80px;bottom:0;width:1px;height:1px;margin:0;border:0;padding:0;padding-bottom:env(safe-area-inset-bottom, 0px);pointer-events:none;opacity:0;";
+  try {
+    host.appendChild(p);
+    var v = parseFloat(window.getComputedStyle(p).paddingBottom);
+    p.remove();
+    return isFinite(v) && v > 0 ? v : 0;
+  } catch (eR) {
+    try {
+      p.remove();
+    } catch (eR2) {}
+    return 0;
+  }
+}
+
 /**
- * iOS установленное PWA: между низом position:fixed таббара и innerHeight иногда остаётся тёмная полоска
- * (рассинхрон layout/visual viewport в WKWebView). Тянем таббар вниз на измеренный зазор; _peak не уменьшаем —
- * иначе после сдвига rect.bottom > innerHeight и значение «схлопывается» каждый кадр.
+ * iOS PWA: (1) padding-bottom таббара — ужимаем типичные ~34px env до ~20px (в PWA часто выглядит как лишняя полоса).
+ * (2) «воздух» под fixed-таббаром — innerHeight/clientHeight/visualViewport; bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap)).
+ * _peak только растёт до сброса ориентации — иначе после сдвига замер схлопывается.
  */
 function pokerSyncPwaIosBottomNavGap() {
   try {
     var root = document.documentElement;
     if (typeof pokerIsPwaDisplayStandalone !== "function" || !pokerIsPwaDisplayStandalone()) {
       root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       pokerSyncPwaIosBottomNavGap._peak = 0;
       return;
     }
@@ -3399,37 +3422,69 @@ function pokerSyncPwaIosBottomNavGap() {
       (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
     if (!ios) {
       root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       pokerSyncPwaIosBottomNavGap._peak = 0;
       return;
     }
     if (document.body && document.body.classList.contains("chat-keyboard-open")) {
       root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
     var nav = document.querySelector(".bottom-nav");
     if (!nav || typeof nav.getBoundingClientRect !== "function") {
       root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
     var st = window.getComputedStyle(nav);
     if (st.visibility === "hidden" || st.display === "none" || parseFloat(st.opacity || "1") < 0.05) {
       root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
+
+    var envB = pokerReadIosEnvSafeAreaBottomPx();
+    var padBottom;
+    if (envB <= 0.5) {
+      padBottom = 34;
+    } else if (envB >= 22) {
+      padBottom = 20;
+    } else {
+      padBottom = Math.max(10, Math.round(envB));
+    }
+    root.style.setProperty("--pwa-ios-tabbar-pad-bottom", padBottom + "px");
+
     var ih = window.innerHeight || 0;
     if (ih < 120) return;
     var rect = nav.getBoundingClientRect();
     if (!rect || rect.top > ih - 24) return;
-    var instant = ih - rect.bottom;
-    var fromRect = instant > 0.5 ? Math.round(instant) : 0;
-    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(56, fromRect);
+
     var vv = window.visualViewport;
+    var layoutBottom = ih;
+    if (vv && typeof vv.height === "number") {
+      layoutBottom = Math.max(ih, Math.round((Number(vv.offsetTop) || 0) + vv.height));
+    }
+
+    var clientH = document.documentElement.clientHeight || 0;
+    if (clientH > 80 && clientH < ih) {
+      var chSlack = Math.round(ih - clientH);
+      if (chSlack > pokerSyncPwaIosBottomNavGap._peak && chSlack > 0 && chSlack <= 120) {
+        pokerSyncPwaIosBottomNavGap._peak = chSlack;
+      }
+    }
+
+    var instant = layoutBottom - rect.bottom;
+    var fromRect = instant > 0.25 ? Math.round(instant) : 0;
+    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(120, fromRect);
+
     if (vv && typeof vv.height === "number" && typeof vv.offsetTop === "number") {
       var vvSlack = Math.round(ih - vv.offsetTop - vv.height);
-      if (vvSlack > 0 && vvSlack <= 56 && vvSlack > pokerSyncPwaIosBottomNavGap._peak) {
+      if (vvSlack > 0 && vvSlack <= 120 && vvSlack > pokerSyncPwaIosBottomNavGap._peak) {
         pokerSyncPwaIosBottomNavGap._peak = vvSlack;
       }
     }
+
     if (pokerSyncPwaIosBottomNavGap._peak > 0) {
       root.style.setProperty("--pwa-ios-tabbar-bottom-gap", pokerSyncPwaIosBottomNavGap._peak + "px");
     } else {
@@ -3634,6 +3689,18 @@ setTimeout(pokerApplyBottomTabbarPad, 400);
     if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
   });
   ro.observe(nav);
+})();
+/* iOS PWA: WKWebView поздно стабилизирует вьюпорт — несколько секунд добиваем зазор/tabbar-pad */
+(function pokerPwaIosBottomNavGapBurst() {
+  var ua = navigator.userAgent || "";
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+  if (!ios || typeof pokerIsPwaDisplayStandalone !== "function" || !pokerIsPwaDisplayStandalone()) return;
+  var n = 0;
+  function tick() {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+    if (++n < 30) setTimeout(tick, 90);
+  }
+  setTimeout(tick, 0);
 })();
 (function setRandomListenersCount() {
   var el = document.getElementById("headerRadioListenersCount");

@@ -21999,9 +21999,13 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 html.app--tg-bottom-nav-inset .bottom-nav {
   padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
 }
-/* iOS PWA: зазор между fixed-таббаром и низом экрана — pokerSyncPwaIosBottomNavGap в app.js */
+/*
+ * iOS PWA: pokerSyncPwaIosBottomNavGap — bottom-gap + --pwa-ios-tabbar-pad-bottom (ужим типичный env~34 до 20px).
+ * !important: перебивает standalone max(env,34px), иначе на iPhone 14 полоса под табами не уходит.
+ */
 html.poker-ios-pwa .bottom-nav {
   bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap, 0px));
+  padding-bottom: var(--pwa-ios-tabbar-pad-bottom, 20px) !important;
 }
 .bottom-nav__item {
   flex: 1;
