@@ -19845,20 +19845,28 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
-        /* Установленный PWA (не WebView Telegram): +46 к vv-inset и отдельный accessory давали двойной lift — зазор между полем и input accessory. */
         var tgAcc = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-        if (pokerPwaStandaloneForKeyboardInset() && !tgAcc) {
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          return;
-        }
         var vv = window.visualViewport;
         var ih = window.innerHeight || 0;
         var vvh = Number(vv.height) || 0;
         var offsetTop = Number(vv.offsetTop) || 0;
         var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
-        /* Хвост до ~52px — панель «стрелки / Готово» над клавишами; выше — уже в основном клавиатура. */
+        /* Полоса под vv — панель «стрелки / Готово» над клавишами (типично ~36–50px). */
         var acc = 0;
-        if (belowVv >= 10 && belowVv <= 54) acc = Math.min(52, Math.round(belowVv * 0.98));
+        if (belowVv >= 8 && belowVv <= 62) {
+          acc = Math.min(56, Math.round(belowVv * 0.98));
+        } else if (
+          !tgAcc &&
+          pokerPwaStandaloneForKeyboardInset() &&
+          document.body.classList.contains("chat-keyboard-open") &&
+          belowVv < 8 &&
+          ih > 0 &&
+          vvh > 0 &&
+          ih - vvh > 55
+        ) {
+          /* PWA WKWebView: иногда vv доходит до низа клавиатуры, belowVv≈0 — всё равно поднимаем под input accessory. */
+          acc = 44;
+        }
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
       function stripChatInputAreaTransforms() {
@@ -20038,8 +20046,8 @@ function initChat() {
         /* iOS: accessory bar + WKWebView недооценивают overlap — доп. подъём (в PWA без TG accessory не дублируем с --chat-ios-accessory-inset). */
         if (isIosLikeForChatViewport()) {
           var iosBoost = tg ? 40 : 46;
-          /* В standalone раньше +12 давало заметный «воздух» между полем и input accessory на части моделей; overlap из vv достаточен. */
-          if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 0;
+          /* PWA: iosBoost=0 + отключённый accessory оставляли поле под клавиатурой; небольшой boost + --chat-ios-accessory-inset (см. applyChatIosAccessoryInsetFromViewport). */
+          if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 20;
           inset = Math.min(cap, inset + iosBoost);
         }
         /*
