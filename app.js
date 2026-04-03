@@ -20134,17 +20134,28 @@ function initChat() {
           scrollMessagesToBottom();
         }, 1600);
         syncPwaChatVisualViewportInset();
-        if (chatWindowResizeHandler) {
+        /*
+         * window.resize на iOS (в т.ч. PWA) часто бьёт раньше/между кадрами visualViewport — overlap на мгновение 0,
+         * при iosBoost=0 для standalone inset обнуляется и поле остаётся под клавиатурой. Resize оставляем только под Android.
+         */
+        if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0) {
+          if (chatWindowResizeHandler) {
+            try {
+              window.removeEventListener("resize", chatWindowResizeHandler);
+            } catch (eWr0) {}
+            chatWindowResizeHandler = null;
+          }
+          chatWindowResizeHandler = function () {
+            syncPwaChatVisualViewportInset();
+            if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
+          };
+          window.addEventListener("resize", chatWindowResizeHandler);
+        } else if (chatWindowResizeHandler) {
           try {
             window.removeEventListener("resize", chatWindowResizeHandler);
-          } catch (eWr0) {}
+          } catch (eWr0b) {}
           chatWindowResizeHandler = null;
         }
-        chatWindowResizeHandler = function () {
-          syncPwaChatVisualViewportInset();
-          if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
-        };
-        window.addEventListener("resize", chatWindowResizeHandler);
         if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
           if (viewportResizeScrollHandler) {
             window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
