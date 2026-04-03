@@ -342,6 +342,23 @@ function pokerIsPwaDisplayStandalone() {
   return false;
 }
 
+/** Класс на <html> для отступов таббара/главной на iOS PWA (14‑я серия и др.): надёжнее, чем только display-mode. */
+function pokerSyncIosPwaRootClass() {
+  try {
+    var root = document.documentElement;
+    var ios =
+      /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
+      (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+    if (pokerIsPwaDisplayStandalone() && ios) root.classList.add("poker-ios-pwa");
+    else root.classList.remove("poker-ios-pwa");
+  } catch (e) {}
+}
+pokerSyncIosPwaRootClass();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", pokerSyncIosPwaRootClass);
+}
+window.addEventListener("orientationchange", pokerSyncIosPwaRootClass);
+
 function pokerChatPushUrlBase64ToUint8Array(base64String) {
   if (!base64String || typeof base64String !== "string") return null;
   try {
@@ -3267,6 +3284,9 @@ function pokerApplyAppTopPadding() {
  * viewportChanged не трогаем: при expand TG даёт ложные кадры и скачок pad через секунды; ResizeObserver на .bottom-nav — источник правды.
  */
 function pokerApplyBottomTabbarPad() {
+  try {
+    if (typeof pokerSyncIosPwaRootClass === "function") pokerSyncIosPwaRootClass();
+  } catch (eIosCls) {}
   var tabbarGapPx =
     document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "home" ? 5 : 15;
   if (pokerApplyBottomTabbarPad._lastGap !== tabbarGapPx) {
@@ -16118,9 +16138,7 @@ function initChat() {
   var convTitleTgId = document.getElementById("chatConvTitleTgId");
   var convTitleIdWrap = document.getElementById("chatConvTitleIdWrap");
   var convTitleId = document.getElementById("chatConvTitleId");
-  var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087", "tg_roman"];
-  /** Как TELEGRAM_ROMAN_CHAT_ID / normalizePeerChatUserId(tg_roman) на сервере — не дублировать Романа в списке под закрепом */
-  var CHAT_ROMAN_NUMERIC_PEER = "tg_388008256";
+  var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087"];
   var messagesEl = document.getElementById("chatMessages");
   var sendBtn = document.getElementById("chatSendBtn");
   var switcherBtn = document.getElementById("chatSwitcherBtn");
@@ -16575,8 +16593,7 @@ function initChat() {
     if (!a || !b) return false;
     return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
   }
-  /** Закреплённые админы (Анна, Вика, алиас tg_roman) — не дублировать в #chatContacts. Числовой tg_388008256 не скрываем:
-     в API приходит нормализованный id, иначе переписка с @roman1_matvienko не видна в прокручиваемом списке. */
+  /** Закреплённые админы (Анна, Вика) — не дублировать в #chatContacts. */
   function chatContactIsDuplicateOfPinnedDialog(c) {
     if (!c || !c.id) return false;
     for (var pi = 0; pi < CHAT_ADMIN_IDS.length; pi++) {
@@ -18825,7 +18842,6 @@ function initChat() {
     if (dialogsView) dialogsView.querySelectorAll(".chat-dialog-item__unread[data-dialog-unread-for]").forEach(function (el) {
       var id = el.getAttribute("data-dialog-unread-for");
       var n = id ? (adminUnread[id] || 0) : 0;
-      if (id === "tg_roman") n = Math.max(n, adminUnread[CHAT_ROMAN_NUMERIC_PEER] || 0);
       var txt = n > 99 ? "99+" : (n > 0 ? String(n) : "");
       el.textContent = txt;
       el.classList.toggle("chat-dialog-item__unread--visible", n > 0);
@@ -19925,7 +19941,8 @@ function initChat() {
         /* iOS: accessory bar + WKWebView недооценивают overlap — доп. подъём (в PWA без TG accessory не дублируем с --chat-ios-accessory-inset). */
         if (isIosLikeForChatViewport()) {
           var iosBoost = tg ? 40 : 46;
-          if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 12;
+          /* В standalone раньше +12 давало заметный «воздух» между полем и input accessory на части моделей; overlap из vv достаточен. */
+          if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 0;
           inset = Math.min(cap, inset + iosBoost);
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");

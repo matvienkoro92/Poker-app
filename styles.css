@@ -2558,9 +2558,10 @@ body.chat-keyboard-open .card__header {
   /* В чате убираем лишние отступы сверху: окно чата должно стартовать как можно выше */
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* Только чат: иначе при фокусе в полях других экранов срывается запас под таббар и контент «прыгает» */
+/* Только чат: иначе при фокусе в полях других экранов срывается запас под таббар и контент «прыгает».
+ * С клавиатурой safe-area снизу дублирует «воздух» над системной панелью — достаточно 0. */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
-  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0;
 }
 /* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода над клавиатурой (--chat-vv-inset из JS). Без .chat-vv-lift: достаточно chat-keyboard-open + переменных. */
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
@@ -2578,10 +2579,12 @@ body:not(.chat-keyboard-open) .chat-container .chat-input-area {
   transform: translate3d(0, 0, 0) !important;
   will-change: auto;
 }
-/* Клавиатура открыта: тот же фон, что у поля — иначе вокруг textarea остаётся «свой» цвет, а отступы полосы светлеют */
+/* Клавиатура открыта: тот же фон, что у поля — иначе вокруг textarea остаётся «свой» цвет, а отступы полосы светлеют.
+ * Не тянуть env(safe-area-inset-bottom) сюда: при открытой клавиатуре iOS часто всё равно отдаёт ~34px «домой»,
+ * получается пустая тёмная полоса между строкой ввода и панелью «стрелки / Готово» (заметно на 14 Pro Max PWA). */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
-  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  padding-bottom: 8px;
   box-shadow: none;
   background-color: var(--chat-input-field-bg);
   background-image: none;
@@ -21984,13 +21987,17 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   visibility: visible;
 }
 /* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу.
- * На части iPhone (в т.ч. 14 Pro Max) env(safe-area-inset-bottom) в WKWebView иногда 0 — порог 34px как у индикатора «домой»;
- * при корректном env(34) итог тот же max(12, 40px), без лишнего зазора на новых моделях. */
+ * На части iPhone env(safe-area-inset-bottom) в WKWebView иногда 0 — порог 34px как у индикатора «домой». */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
     transform: translate3d(0, 0, 0);
     padding-bottom: max(12px, calc(6px + max(34px, env(safe-area-inset-bottom, 0px))));
   }
+}
+/* iOS + установленное приложение: класс вешает app.js (pokerSyncIosPwaRootClass). Без этого при env≈34 получалось 6+34=40 — как у max(10,env) в базе, «ничего не меняется».
+ * 14px + max(34, env) даёт заметный запас (48px при типичном env). */
+html.poker-ios-pwa .bottom-nav {
+  padding-bottom: max(14px, calc(14px + max(34px, env(safe-area-inset-bottom, 0px)))) !important;
 }
 .bottom-nav__item {
   flex: 1;
@@ -22564,6 +22571,15 @@ body[data-view="home"] #app.app .card .card__content {
       calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
     ) !important;
   }
+}
+/* Синхронно с большим padding-bottom таббара на iOS PWA (html.poker-ios-pwa). */
+html.poker-ios-pwa:has(body[data-view="home"]) .card .card__content,
+html.poker-ios-pwa.app-view-home-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content {
+  padding-bottom: max(
+    var(--app-bottom-tabbar-pad, 105px),
+    calc(82px + max(34px, env(safe-area-inset-bottom, 0px)))
+  ) !important;
 }
 
 /*
