@@ -19981,6 +19981,10 @@ function initChat() {
         if (!document.body.classList.contains("chat-keyboard-open") || !shouldUseChatVisualViewportLift()) {
           doc.style.removeProperty("--chat-vv-inset");
           doc.style.removeProperty("--chat-ios-accessory-inset");
+          try {
+            var hIdle = window.innerHeight || 0;
+            if (hIdle > 200) window.__pokerChatInnerHBaseline = hIdle;
+          } catch (eIdleH) {}
           return;
         }
         var vv = window.visualViewport;
@@ -20035,11 +20039,29 @@ function initChat() {
           if (pokerPwaStandaloneForKeyboardInset() && !tg) iosBoost = 0;
           inset = Math.min(cap, inset + iosBoost);
         }
+        /*
+         * Android (Infinix/XOS и др.): innerHeight падает при клавиатуре, а visualViewport.height остаётся ≈ innerHeight — overlap≈0.
+         * Базовая высота — в момент focus (onChatInputFocus) и при закрытой клавиатуре (ветка return выше).
+         */
+        if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0 && !isIosLikeForChatViewport()) {
+          try {
+            var baseH = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curH = window.innerHeight || 0;
+            if (baseH > 260 && curH > 0) {
+              var winLoss = Math.round(baseH - curH);
+              if (winLoss > 72) {
+                var fromWin = Math.min(cap, Math.round(winLoss * 0.92));
+                inset = Math.max(inset, fromWin);
+              }
+            }
+          } catch (eAndKb) {}
+        }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
       var viewportResizeScrollHandler = null;
+      var chatWindowResizeHandler = null;
       window.__pokerChatDetachVisualViewportListeners = function () {
         if (
           viewportResizeScrollHandler &&
@@ -20052,8 +20074,18 @@ function initChat() {
           } catch (eVvDet) {}
           viewportResizeScrollHandler = null;
         }
+        if (chatWindowResizeHandler) {
+          try {
+            window.removeEventListener("resize", chatWindowResizeHandler);
+          } catch (eWinDet) {}
+          chatWindowResizeHandler = null;
+        }
       };
       function onChatInputFocus() {
+        try {
+          var ihFocus = window.innerHeight || 0;
+          if (ihFocus > 200) window.__pokerChatInnerHBaseline = ihFocus;
+        } catch (eBl) {}
         var el = getVisibleMessagesEl();
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
@@ -20102,6 +20134,17 @@ function initChat() {
           scrollMessagesToBottom();
         }, 1600);
         syncPwaChatVisualViewportInset();
+        if (chatWindowResizeHandler) {
+          try {
+            window.removeEventListener("resize", chatWindowResizeHandler);
+          } catch (eWr0) {}
+          chatWindowResizeHandler = null;
+        }
+        chatWindowResizeHandler = function () {
+          syncPwaChatVisualViewportInset();
+          if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
+        };
+        window.addEventListener("resize", chatWindowResizeHandler);
         if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
           if (viewportResizeScrollHandler) {
             window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
@@ -20116,6 +20159,12 @@ function initChat() {
         }
       }
       function onChatInputBlur() {
+        if (chatWindowResizeHandler) {
+          try {
+            window.removeEventListener("resize", chatWindowResizeHandler);
+          } catch (eWr1) {}
+          chatWindowResizeHandler = null;
+        }
         if (viewportResizeScrollHandler && typeof window.visualViewport !== "undefined" && window.visualViewport.removeEventListener) {
           window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
           window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
