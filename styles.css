@@ -611,6 +611,24 @@ html.app-view-chat .bottom-nav {
   transform: translate3d(0, 0, 0);
 }
 
+/*
+ * iOS PWA (не чат): на части WKWebView min-height с 100dvh короче фактического layout viewport —
+ * снизу остаётся «дыра», fixed .bottom-nav визуально над физическим низом. 100lvh ближе к полному экрану
+ * без UI браузера; fill-available оставляем последним там, где он даёт большую высоту (перебивается lvh).
+ */
+html.poker-ios-pwa:not(.app-view-chat) {
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  min-height: 100lvh;
+}
+html.poker-ios-pwa:not(.app-view-chat) body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  min-height: 100lvh;
+}
+
 /* Надёжный скролл: любой экран кроме чата (новые data-view не нужно вносить вручную) */
 body:not([data-view="chat"]) {
   position: static;
@@ -21998,15 +22016,6 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 /* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
 html.app--tg-bottom-nav-inset .bottom-nav {
   padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
-}
-/*
- * iOS PWA: у WKWebView нередко fixed bottom:0 = низ layout viewport, а физический низ экрана ниже — чёрная полоса.
- * Сдвигаем панель вниз на safe-area (или минимум 18px при env=0). padding-bottom даёт зазор над индикатором «домой».
- * Класс poker-ios-pwa вешается inline-скриптом в index.html до defer app.js. Android standalone не получает класс.
- */
-html.poker-ios-pwa .bottom-nav {
-  bottom: calc(-1 * max(18px, env(safe-area-inset-bottom, 0px))) !important;
-  padding-bottom: max(22px, calc(10px + env(safe-area-inset-bottom, 0px))) !important;
 }
 .bottom-nav__item {
   flex: 1;

@@ -3383,7 +3383,7 @@ function pokerSyncBottomNavTelegramInset() {
 }
 
 /**
- * iOS PWA: отступ таббара задаётся в styles.css (bottom + padding с env). Снимаем устаревшие inline-переменные с :root.
+ * iOS PWA: нижний отступ таббара — в styles.css (standalone + env). Снимаем устаревшие inline-переменные с :root.
  */
 function pokerSyncPwaIosBottomNavGap() {
   try {
