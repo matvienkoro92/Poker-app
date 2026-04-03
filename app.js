@@ -16843,10 +16843,7 @@ function initChat() {
       if (adminsView) adminsView.classList.add("chat-admins-view--hidden");
       window.chatGeneralUnread = false;
       scrollGeneralToBottomOnNextRender = true;
-      if (generalMessages) {
-        generalMessages.scrollTop = generalMessages.scrollHeight;
-        requestAnimationFrame(function () { generalMessages.scrollTop = generalMessages.scrollHeight; });
-      }
+      /* scrollTop до renderGeneralMessages даёт ложный max (старый/пустой DOM) и дёрганье после fetch */
       loadGeneral();
     } else if (tab === "personal") {
       if (!chatWithUserId) {
@@ -16978,12 +16975,6 @@ function initChat() {
       window.chatGeneralUnread = false;
       chatActiveTab = "general";
       scrollGeneralToBottomOnNextRender = true;
-      if (generalMessages) {
-        generalMessages.scrollTop = generalMessages.scrollHeight;
-        requestAnimationFrame(function () {
-          generalMessages.scrollTop = generalMessages.scrollHeight;
-        });
-      }
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
       mountChatComposer("general");
@@ -18090,19 +18081,24 @@ function initChat() {
       })(imgs[ii]);
     }
     if (aggressive) {
-      setTimeout(snap, 60);
-      setTimeout(snap, 200);
-      setTimeout(snap, 500);
-      if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
-        var vvPin = function () {
-          snap();
-        };
-        window.visualViewport.addEventListener("resize", vvPin);
-        setTimeout(function () {
-          try {
-            window.visualViewport.removeEventListener("resize", vvPin);
-          } catch (eVv) {}
-        }, 1200);
+      /* Без клавиатуры (первое открытие чата) vv.resize на iOS сыплется при стабилизации layout — серия snap() даёт «прыжок» вверх-вниз ~1 с */
+      if (document.body.classList.contains("chat-keyboard-open")) {
+        setTimeout(snap, 60);
+        setTimeout(snap, 200);
+        setTimeout(snap, 500);
+        if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
+          var vvPin = function () {
+            snap();
+          };
+          window.visualViewport.addEventListener("resize", vvPin);
+          setTimeout(function () {
+            try {
+              window.visualViewport.removeEventListener("resize", vvPin);
+            } catch (eVv) {}
+          }, 1200);
+        }
+      } else {
+        setTimeout(snap, 100);
       }
     }
   }
@@ -18194,12 +18190,10 @@ function initChat() {
     }
     restoreScroll(false);
     requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        restoreScroll(true);
-        if (openingForceBottomG || wasNearBottom) {
-          pinChatMessagesToBottom(generalMessages, !!openingForceBottomG);
-        }
-      });
+      restoreScroll(true);
+      if (openingForceBottomG || wasNearBottom) {
+        pinChatMessagesToBottom(generalMessages, !!openingForceBottomG);
+      }
     });
     generalMessages.querySelectorAll(".chat-msg__name-btn").forEach(function (btn) {
       var avatar = btn.dataset.pmAvatar || "";
