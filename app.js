@@ -19982,20 +19982,83 @@ function initChat() {
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
       }
 
+      /**
+       * Дублирует подъём из CSS на #chatGeneralInputArea / .chat-container .chat-input-area:
+       * иногда селекторы или calc не дают сдвиг, а inline !important стабильнее в WK/TG.
+       * При фокусе в композере добираем lift по высоте окна, если переменные занижены.
+       */
+      function applyChatInputAreasVisualLift() {
+        if (!document.body.classList.contains("chat-keyboard-open")) return;
+        var doc = document.documentElement;
+        var cs = window.getComputedStyle(doc);
+        var vvPx = parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0;
+        var accPx = parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0;
+        var lift = Math.max(0, Math.round(vvPx + accPx));
+        var ih = window.innerHeight || 0;
+        var capLift = Math.min(520, Math.round(ih * 0.55));
+        var composerFocus = chatComposerEl && document.activeElement === chatComposerEl;
+        var inChat = String(document.body.getAttribute("data-view") || "") === "chat";
+        if (inChat && composerFocus && ih > 200) {
+          var want = Math.min(capLift, Math.max(200, Math.round(ih * 0.36)));
+          if (lift < want) lift = want;
+        }
+        var tr = "translate3d(0, " + -lift + "px, 0)";
+        var mb = -lift + "px";
+        if (generalView && !generalView.classList.contains("chat-general-view--hidden")) {
+          var gEl = document.getElementById("chatGeneralInputArea");
+          if (gEl && gEl.style) {
+            gEl.style.setProperty("transform", tr, "important");
+            gEl.style.setProperty("-webkit-transform", tr, "important");
+            gEl.style.setProperty("margin-bottom", mb, "important");
+            gEl.style.setProperty("will-change", "transform", "important");
+          }
+        }
+        if (convView && !convView.classList.contains("chat-conv-view--hidden")) {
+          var pEl = convView.querySelector && convView.querySelector(".chat-container .chat-input-area");
+          if (pEl && pEl.style) {
+            pEl.style.setProperty("transform", tr, "important");
+            pEl.style.setProperty("-webkit-transform", tr, "important");
+            pEl.style.setProperty("margin-bottom", mb, "important");
+            pEl.style.setProperty("will-change", "transform", "important");
+          }
+        }
+      }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
-        if (!window.visualViewport) {
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          return;
-        }
-        if (!document.body.classList.contains("chat-keyboard-open") || !shouldUseChatVisualViewportLift()) {
+        if (!document.body.classList.contains("chat-keyboard-open")) {
           doc.style.removeProperty("--chat-vv-inset");
           doc.style.removeProperty("--chat-ios-accessory-inset");
           try {
             var hIdle = window.innerHeight || 0;
             if (hIdle > 200) window.__pokerChatInnerHBaseline = hIdle;
           } catch (eIdleH) {}
+          stripChatInputAreaTransforms();
+          return;
+        }
+        /* Раньше при !visualViewport сразу снимали переменные — при открытой клавиатуре поле оставалось под клавишами. */
+        if (!window.visualViewport) {
+          if (String(document.body.getAttribute("data-view") || "") === "chat") {
+            var ihFb = window.innerHeight || 0;
+            var capFb = Math.min(520, Math.round(ihFb * 0.55));
+            var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
+            var lossFb = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
+            var insetFb = Math.min(capFb, Math.max(140, Math.round(lossFb * 0.92)));
+            if (insetFb < 170) insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.36)));
+            if (chatComposerEl && document.activeElement === chatComposerEl) {
+              insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.38)));
+            }
+            doc.style.setProperty("--chat-vv-inset", insetFb + "px");
+            if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
+            else doc.style.removeProperty("--chat-ios-accessory-inset");
+            applyChatInputAreasVisualLift();
+            updateChatMessagesKeyboardPad();
+          }
+          return;
+        }
+        if (!shouldUseChatVisualViewportLift()) {
+          doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          stripChatInputAreaTransforms();
           return;
         }
         var vv = window.visualViewport;
@@ -20084,21 +20147,28 @@ function initChat() {
             }
           } catch (eIosIh) {}
         }
-        /* Экран чата: vv/TG иногда отдаёт overlap≈0 — без подстраховки --chat-vv-inset мало и translate визуально «не поднимает». */
+        /* Экран чата: vv иногда даёт overlap≈0 и heightLoss≈0 — без фокуса композера kbLikely ложен и поле под клавиатурой. */
         if (String(document.body.getAttribute("data-view") || "") === "chat") {
+          var composerKb = chatComposerEl && document.activeElement === chatComposerEl;
           var kbLikely =
-            heightLoss > 56 || (vvh > 0 && ih > 0 && vvh + 88 < ih);
+            composerKb ||
+            heightLoss > 48 ||
+            (vvh > 0 && ih > 0 && vvh + 100 < ih);
           if (kbLikely) {
-            var softFloor = Math.min(cap, Math.max(130, Math.round(ih * 0.3)));
-            if (inset < 92) {
+            var softFloor = Math.min(cap, Math.max(150, Math.round(ih * 0.32)));
+            if (inset < 110) {
               inset = Math.max(inset, softFloor);
-            } else if (isIosLikeForChatViewport() && inset < 132 && heightLoss > 95) {
+            } else if (isIosLikeForChatViewport() && inset < 140 && heightLoss > 88) {
               inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.88)));
+            }
+            if (composerKb && inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
+              inset = Math.min(cap, Math.max(inset, Math.round(ih * 0.38)));
             }
           }
         }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
+        applyChatInputAreasVisualLift();
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
       var viewportResizeScrollHandler = null;
