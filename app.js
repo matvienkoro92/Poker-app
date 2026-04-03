@@ -6214,11 +6214,18 @@ function setView(viewName, navOpts) {
       }, 120);
     } else {
       scrollMainDocumentToTop();
-      rafScroll(function () {
-        scrollMainDocumentToTop();
-      });
-      setTimeout(scrollMainDocumentToTop, 0);
-      setTimeout(scrollMainDocumentToTop, 50);
+      /* Чат: один проход достаточно — пятикратный сброс скролла окна дёргает экран при первом входе и борется с внутренним скроллом ленты. */
+      if (viewName !== "chat") {
+        rafScroll(function () {
+          scrollMainDocumentToTop();
+        });
+        setTimeout(scrollMainDocumentToTop, 0);
+        setTimeout(scrollMainDocumentToTop, 50);
+      } else {
+        rafScroll(function () {
+          scrollMainDocumentToTop();
+        });
+      }
     }
   }
   try {
@@ -18075,10 +18082,15 @@ function initChat() {
           im.removeEventListener("load", onImg);
           im.removeEventListener("error", onImg);
           snap();
-          requestAnimationFrame(function () {
-            snap();
+          /* Без клавиатуры тройной snap на каждой картинке даёт «рваную» ленту при первом открытии. */
+          if (document.body.classList.contains("chat-keyboard-open")) {
+            requestAnimationFrame(function () {
+              snap();
+              requestAnimationFrame(snap);
+            });
+          } else {
             requestAnimationFrame(snap);
-          });
+          }
         }
         im.addEventListener("load", onImg);
         im.addEventListener("error", onImg);
