@@ -18085,7 +18085,7 @@ function initChat() {
       })(imgs[ii]);
     }
     if (aggressive) {
-      /* Без клавиатуры (первое открытие чата) vv.resize на iOS сыплется при стабилизации layout — серия snap() даёт «прыжок» вверх-вниз ~1 с */
+      /* На открытой клавиатуре оставляем «догоняющие» snap; без клавиатуры они дёргают первый вход в общий чат. */
       if (document.body.classList.contains("chat-keyboard-open")) {
         setTimeout(snap, 60);
         setTimeout(snap, 200);
@@ -18101,8 +18101,6 @@ function initChat() {
             } catch (eVv) {}
           }, 1200);
         }
-      } else {
-        setTimeout(snap, 100);
       }
     }
   }
