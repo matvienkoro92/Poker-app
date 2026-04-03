@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.066">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.068">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -3944,6 +3944,7 @@
           <button type="button" class="visitors-admin-modal__show-btn primary-button" id="visitorsAdminShowListBtn">Посмотреть</button>
           <button type="button" class="visitors-admin-modal__broadcast-btn primary-button" id="visitorsAdminBroadcastBtn">Отправить рассылку</button>
           <div class="visitors-admin-modal__admin-tools-row">
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminPushToAdminsBtn">Пуш админам</button>
             <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminShareStatsBtn">Статистика кнопок</button>
             <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminTrackingLinksBtn">Создать ссылку</button>
           </div>
@@ -3969,6 +3970,24 @@
             <span class="visitors-admin-modal__broadcast-file-name" id="visitorsBroadcastFileName"></span>
           </label>
           <button type="button" class="visitors-admin-modal__show-btn primary-button" id="visitorsBroadcastSendBtn">Отправить</button>
+        </div>
+      </div>
+      <!-- Модалка: Web Push только админам (PWA, подписка как у чата) -->
+      <div class="visitors-admin-modal visitors-admin-modal--broadcast" id="adminPushBroadcastModal" role="dialog" aria-modal="true" aria-label="Пуш админам" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="adminPushBroadcastModalBackdrop"></div>
+        <div class="visitors-admin-modal__box visitors-admin-modal__box--broadcast">
+          <button type="button" class="visitors-admin-modal__close" id="adminPushBroadcastModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Пуш админам</h2>
+          <p class="visitors-admin-modal__broadcast-hint" id="adminPushHint">Только для админов приложения; доставка на устройства с включённым пушем о чате (установленная PWA).</p>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Заголовок</span>
+            <input type="text" id="adminPushTitleInput" class="visitors-admin-modal__broadcast-input" maxlength="80" placeholder="Заголовок уведомления" />
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Текст пуша</span>
+            <textarea id="adminPushBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
+          </label>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushSendBtn">Отправить</button>
         </div>
       </div>
       <!-- Модалка «Статистика кнопок Переслать» (только админ) -->
@@ -5334,7 +5353,7 @@
     <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=257"></script>
+    <script defer src="./app.js?v=259"></script>
     <script defer src="./winter-rating-data.js?v=69"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

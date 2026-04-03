@@ -20,6 +20,7 @@ const handlers = {
   chat: () => require(path.join(handlersDir, "chat.js")),
   "chat-push-subscribe": () => require(path.join(handlersDir, "chat-push-subscribe.js")),
   "chat-push-broadcast": () => require(path.join(handlersDir, "chat-push-broadcast.js")),
+  "chat-push-admin-send": () => require(path.join(handlersDir, "chat-push-admin-send.js")),
   visit: () => require(path.join(handlersDir, "visit.js")),
   "section-views": () => require(path.join(handlersDir, "section-views.js")),
   users: () => require(path.join(handlersDir, "users.js")),

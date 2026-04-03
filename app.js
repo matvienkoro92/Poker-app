@@ -3589,8 +3589,17 @@ function pokerPulseChatFixedViewportHeightAfterKeyboard() {
     try {
       var vv0 = window.visualViewport;
       if (vv0) {
-        var pack = (Number(vv0.offsetTop) || 0) + (Number(vv0.height) || 0);
-        if (pack > ih - 1) target = Math.max(target, Math.round(pack));
+        var vvh = Number(vv0.height) || 0;
+        var ot = Number(vv0.offsetTop) || 0;
+        var pack = ot + vvh;
+        /*
+         * После blur offsetTop часто ещё >0, а vvh уже почти ih — pack > ih раздувает target на один кадр,
+         * ломается flex/100dvh и чат с композером визуально «поднимаются» с зазором снизу.
+         * Учитываем pack только пока vv реально короче layout (клавиатура ещё жмёт окно).
+         */
+        if (pack > ih - 1 && vvh < ih - 10) {
+          target = Math.max(target, Math.round(pack));
+        }
       }
     } catch (eVvP) {}
     var body = document.body;
@@ -20809,14 +20818,28 @@ function initChat() {
           var active = document.activeElement;
           if (active === chatComposerEl) return;
           var el = getVisibleMessagesEl();
-          var savedScroll = el ? el.scrollTop : 0;
+          var anchorFromBottom = 0;
+          if (el) {
+            try {
+              anchorFromBottom = Math.max(0, el.scrollHeight - el.clientHeight - el.scrollTop);
+            } catch (eAnc) {}
+          }
           var inChat = !!el;
           if (!inChat) scrollDocumentToZero();
           finalizeChatKeyboardDismiss();
           if (!inChat) scrollDocumentToZero();
-          if (el && savedScroll > 0) {
-            requestAnimationFrame(function () {
-              try { el.scrollTop = savedScroll; } catch (e3) {}
+          /* Якорь от низа: после снятия padding-bottom ленты сырой scrollTop смещает блок относительно композера. */
+          if (el) {
+            var rafB = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 16);
+            };
+            rafB(function () {
+              rafB(function () {
+                try {
+                  var max = Math.max(0, el.scrollHeight - el.clientHeight);
+                  el.scrollTop = Math.max(0, max - anchorFromBottom);
+                } catch (e3) {}
+              });
             });
           }
         }
@@ -22693,6 +22716,88 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     var modal = document.getElementById("visitorsBroadcastModal");
     if (modal) modal.setAttribute("aria-hidden", "true");
   }
+
+  function openAdminPushModal() {
+    var modal = document.getElementById("adminPushBroadcastModal");
+    var titleEl = document.getElementById("adminPushTitleInput");
+    var textEl = document.getElementById("adminPushBodyInput");
+    var hint = document.getElementById("adminPushHint");
+    if (titleEl) titleEl.value = "";
+    if (textEl) textEl.value = "";
+    if (hint) {
+      hint.textContent =
+        "Только для админов приложения; доставка на устройства с включённым пушем о чате (установленная PWA).";
+    }
+    if (modal) modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeAdminPushModal() {
+    var modal = document.getElementById("adminPushBroadcastModal");
+    if (modal) modal.setAttribute("aria-hidden", "true");
+  }
+
+  function sendAdminPush() {
+    var titleEl = document.getElementById("adminPushTitleInput");
+    var textEl = document.getElementById("adminPushBodyInput");
+    var btn = document.getElementById("adminPushSendBtn");
+    var hint = document.getElementById("adminPushHint");
+    var title = (titleEl && titleEl.value) || "";
+    title = String(title).trim();
+    var text = (textEl && textEl.value) || "";
+    text = String(text).trim();
+    if (!title || !text) {
+      var tgNeed = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgNeed && tgNeed.showAlert) tgNeed.showAlert("Укажите заголовок и текст пуша");
+      else alert("Укажите заголовок и текст пуша");
+      return;
+    }
+    var base = getApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    if (btn) {
+      btn.disabled = true;
+      if (btn.__adminPushLabel == null) btn.__adminPushLabel = btn.textContent ? btn.textContent.trim() : "Отправить";
+      btn.textContent = "Отправка…";
+    }
+    if (hint) hint.textContent = "Отправляем…";
+    fetch(base + "/api/chat-push-admin-send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ title: title, text: text })),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = btn.__adminPushLabel || "Отправить";
+        }
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (d && d.ok) {
+          if (hint) {
+            hint.textContent =
+              "Запрос выполнен. Уведомления получат админы с подпиской push (проверьте на устройстве).";
+          }
+          closeAdminPushModal();
+          if (tgw && tgw.showAlert) tgw.showAlert("Пуш админам отправлен");
+        } else {
+          if (hint) hint.textContent = d && d.error ? d.error : "Ошибка";
+          if (tgw && tgw.showAlert) tgw.showAlert(d && d.error ? d.error : "Ошибка");
+          else alert(d && d.error ? d.error : "Ошибка");
+        }
+      })
+      .catch(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = btn.__adminPushLabel || "Отправить";
+        }
+        if (hint) hint.textContent = "Ошибка сети";
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgw && tgw.showAlert) tgw.showAlert(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети");
+        else if (typeof POKER_NET_ERR !== "undefined") alert(POKER_NET_ERR);
+      });
+  }
+
   function sendBroadcast() {
     var textEl = document.getElementById("visitorsBroadcastText");
     var fileEl = document.getElementById("visitorsBroadcastImageFile");
@@ -23034,6 +23139,14 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (broadcastModalClose) broadcastModalClose.addEventListener("click", closeBroadcastModal);
     if (broadcastModalBackdrop) broadcastModalBackdrop.addEventListener("click", closeBroadcastModal);
     if (broadcastSendBtn) broadcastSendBtn.addEventListener("click", sendBroadcast);
+    var adminPushBtn = document.getElementById("adminPushToAdminsBtn");
+    var adminPushClose = document.getElementById("adminPushBroadcastModalClose");
+    var adminPushBackdrop = document.getElementById("adminPushBroadcastModalBackdrop");
+    var adminPushSend = document.getElementById("adminPushSendBtn");
+    if (adminPushBtn) adminPushBtn.addEventListener("click", openAdminPushModal);
+    if (adminPushClose) adminPushClose.addEventListener("click", closeAdminPushModal);
+    if (adminPushBackdrop) adminPushBackdrop.addEventListener("click", closeAdminPushModal);
+    if (adminPushSend) adminPushSend.addEventListener("click", sendAdminPush);
     try {
       window.pokerRecheckAdminFooter = checkAdminAndShowVisitorsButton;
     } catch (eExp) {}
