@@ -3429,30 +3429,71 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
       if (document.body) document.body.scrollTop = 0;
     } catch (eScr) {}
   }
-  try {
-    if (document.body && document.body.getAttribute("data-view") === "chat") {
-      var ih = window.innerHeight || 0;
-      if (ih > 0) {
-        document.body.style.minHeight = ih + "px";
-        var raf = window.requestAnimationFrame || function (fn) {
-          setTimeout(fn, 16);
-        };
-        raf(function () {
+  /*
+   * minHeight + expand на каждом отложенном вызове без клавиатуры гоняли вёрстку WKWebView (14 Pro Max и др.):
+   * innerHeight ещё «плавает» — строка ввода и чат не доезжали вниз, снизу оставался зазор.
+   * Оставляем только при явном resetMainScroll (finalize / выход с клавиатуры).
+   */
+  if (resetMainScroll) {
+    try {
+      if (document.body && document.body.getAttribute("data-view") === "chat") {
+        var ih = window.innerHeight || 0;
+        if (ih > 0) {
+          document.body.style.minHeight = ih + "px";
+          var raf = window.requestAnimationFrame || function (fn) {
+            setTimeout(fn, 16);
+          };
           raf(function () {
-            try {
-              document.body.style.removeProperty("minHeight");
-            } catch (eMh) {}
+            raf(function () {
+              try {
+                document.body.style.removeProperty("minHeight");
+              } catch (eMh) {}
+            });
           });
-        });
+        }
       }
-    }
-  } catch (eBody) {}
+    } catch (eBody) {}
+    try {
+      if (doVvRepair) {
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
+      }
+    } catch (eTg) {}
+  }
+}
+
+/**
+ * iOS WKWebView после blur input: visualViewport.offsetTop иногда остаётся > 0 без соответствующего scrollY —
+ * контент «висячий», снизу пусто. Компенсация scroll + немедленный возврат в 0 на следующем кадре.
+ */
+function pokerRepairIosStuckVisualViewportOffset() {
+  if (!window.visualViewport) return;
+  if (document.body && document.body.classList.contains("chat-keyboard-open")) return;
   try {
-    if (doVvRepair) {
-      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
-    }
-  } catch (eTg) {}
+    var ua = navigator.userAgent || "";
+    var iosLike = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!iosLike) return;
+    var vv = window.visualViewport;
+    var ot = Number(vv.offsetTop) || 0;
+    if (ot <= 0.5) return;
+    var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    window.scrollTo(0, y + ot);
+    var raf = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    raf(function () {
+      try {
+        window.scrollTo(0, 0);
+        var se = document.scrollingElement;
+        if (se) se.scrollTop = 0;
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+        if (window.visualViewport && typeof window.visualViewport.scrollTo === "function") {
+          window.visualViewport.scrollTo(0, 0);
+        }
+      } catch (eZ) {}
+    });
+  } catch (eRep) {}
 }
 
 // Инициализация Telegram WebApp (если открыто внутри Telegram)
@@ -5865,7 +5906,7 @@ function setView(viewName, navOpts) {
         if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
       } catch (eKb2) {}
       try {
-        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
       } catch (eNk2) {}
       try {
         var tw2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -5878,7 +5919,7 @@ function setView(viewName, navOpts) {
         if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") window.__pokerFinalizeChatKeyboardDismiss();
       } catch (eKb3) {}
       try {
-        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+        if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
       } catch (eNk3) {}
     }, 380);
   }
@@ -5898,7 +5939,7 @@ function setView(viewName, navOpts) {
       };
       rafPostChat(function () {
         try {
-          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+          if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
         } catch (ePostNv) {}
       });
     } catch (ePostChat) {}
@@ -6215,17 +6256,13 @@ function setView(viewName, navOpts) {
       }, 120);
     } else {
       scrollMainDocumentToTop();
-      /* Чат: один проход достаточно — пятикратный сброс скролла окна дёргает экран при первом входе и борется с внутренним скроллом ленты. */
+      /* Чат: только синхронный сброс — повторный rAF доводил окно и давал «вверх—вниз» в первые сотни мс вместе с лентой. */
       if (viewName !== "chat") {
         rafScroll(function () {
           scrollMainDocumentToTop();
         });
         setTimeout(scrollMainDocumentToTop, 0);
         setTimeout(scrollMainDocumentToTop, 50);
-      } else {
-        rafScroll(function () {
-          scrollMainDocumentToTop();
-        });
       }
     }
   }
@@ -18061,6 +18098,28 @@ function initChat() {
     var suitSym = n <= 13 ? "\u2663" : n <= 26 ? "\u2666" : n <= 39 ? "\u2665" : "\u2660";
     return cardChar + suitSym;
   }
+  /** Только догрузка картинок — без тройного snap (первый вход в чат). */
+  function pinChatMessagesToBottomImagesOnly(el) {
+    if (!el) return;
+    function snap() {
+      try {
+        el.scrollTop = el.scrollHeight;
+      } catch (eSnap) {}
+    }
+    var imgs = el.querySelectorAll("img.chat-msg__image");
+    for (var ii = 0; ii < imgs.length; ii++) {
+      (function (im) {
+        if (im.complete && im.naturalHeight) return;
+        function onImg() {
+          im.removeEventListener("load", onImg);
+          im.removeEventListener("error", onImg);
+          requestAnimationFrame(snap);
+        }
+        im.addEventListener("load", onImg);
+        im.addEventListener("error", onImg);
+      })(imgs[ii]);
+    }
+  }
   /** Удерживаем низ ленты: после lazy-картинок / перерасчёта вёрстки scrollTop иначе «отстаёт» и лента прыгает вверх. */
   function pinChatMessagesToBottom(el, aggressive) {
     if (!el) return;
@@ -18206,13 +18265,28 @@ function initChat() {
         generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
       }
     }
-    restoreScroll(false);
-    requestAnimationFrame(function () {
-      restoreScroll(true);
-      if (openingForceBottomG || wasNearBottom) {
-        pinChatMessagesToBottom(generalMessages, !!openingForceBottomG);
-      }
-    });
+    /* Первый заход / открытие снизу: синхронный scroll часто бьёт по старой высоте — один скролл после двух rAF, без второго прохода в том же кадре. */
+    if (openingForceBottomG) {
+      try {
+        generalMessages.scrollTop = generalMessages.scrollHeight;
+      } catch (eScrollG0) {}
+      var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+      rafOpenG(function () {
+        rafOpenG(function () {
+          generalMessages.scrollTop = generalMessages.scrollHeight;
+          scrollGeneralToBottomOnNextRender = false;
+          pinChatMessagesToBottomImagesOnly(generalMessages);
+        });
+      });
+    } else {
+      restoreScroll(false);
+      requestAnimationFrame(function () {
+        restoreScroll(true);
+        if (wasNearBottom) {
+          pinChatMessagesToBottom(generalMessages, false);
+        }
+      });
+    }
     generalMessages.querySelectorAll(".chat-msg__name-btn").forEach(function (btn) {
       var avatar = btn.dataset.pmAvatar || "";
       function openUserModal() {
@@ -19317,15 +19391,29 @@ function initChat() {
         messagesEl.scrollTop = Math.min(prevScrollTopP, Math.max(0, maxScrollP));
       }
     }
-    restoreScrollP(false);
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        restoreScrollP(true);
-        if (openingForceBottomP || wasNearBottomP) {
-          pinChatMessagesToBottom(messagesEl, !!openingForceBottomP);
-        }
+    if (openingForceBottomP) {
+      try {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      } catch (eScrollP0) {}
+      var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+      rafOpenP(function () {
+        rafOpenP(function () {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+          scrollPersonalToBottomOnNextRender = false;
+          pinChatMessagesToBottomImagesOnly(messagesEl);
+        });
       });
-    });
+    } else {
+      restoreScrollP(false);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          restoreScrollP(true);
+          if (wasNearBottomP) {
+            pinChatMessagesToBottom(messagesEl, false);
+          }
+        });
+      });
+    }
     messagesEl.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var id = btn.dataset.msgId;
@@ -19782,8 +19870,8 @@ function initChat() {
         if (!box) return;
         var cs = getComputedStyle(document.documentElement);
         var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
-        /* Визуальный зазор между последним сообщением и полосой ввода / обводкой поля (14 Pro Max и др.: иначе низ «врезается»). */
-        var gap = 22;
+        /* Базовый зазор — умеренный; ±добор по классу экрана (Pro Max нужно больше, mini/SE — меньше). */
+        var gap = 13;
         var pad = Math.round(lift + gap);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
@@ -19813,7 +19901,18 @@ function initChat() {
           }
         } catch (eBarPad) {}
         if (pad < 28) pad = 28;
-        if (isIosLikeForChatViewport()) pad += 14;
+        if (isIosLikeForChatViewport()) {
+          pad += 8;
+          try {
+            var sw = window.screen && window.screen.width ? Number(window.screen.width) : 0;
+            var sh = window.screen && window.screen.height ? Number(window.screen.height) : 0;
+            var longSide = Math.max(sw, sh);
+            var shortSide = sw > 0 && sh > 0 ? Math.min(sw, sh) : 0;
+            var tabletish = shortSide >= 600;
+            if (!tabletish && longSide >= 890) pad += 24;
+            else if (!tabletish && longSide <= 834) pad -= 6;
+          } catch (ePhPad) {}
+        }
         box.style.paddingBottom = pad + "px";
       }
       function scrollDocumentToZero() {
@@ -19957,6 +20056,10 @@ function initChat() {
         stripChatInputAreaTransforms();
         clearChatMessagesKeyboardPad();
         try {
+          var taKbDone = document.getElementById("chatSharedComposer");
+          if (taKbDone && typeof resizeChatTextarea === "function") resizeChatTextarea(taKbDone);
+        } catch (eTaKb) {}
+        try {
           syncPwaChatVisualViewportInset();
         } catch (eSync) {}
         try {
@@ -19964,6 +20067,12 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eRm) {}
         stripChatInputAreaTransforms();
+        try {
+          if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+        } catch (eScr0) {}
+        try {
+          if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
+        } catch (eVvRep) {}
         try {
           var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
           if (tw && typeof tw.expand === "function") tw.expand();
@@ -19978,6 +20087,9 @@ function initChat() {
           if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
         } catch (ePad) {}
         try {
+          if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+        } catch (eTb) {}
+        try {
           var raf = window.requestAnimationFrame || function (fn) {
             setTimeout(fn, 16);
           };
@@ -19988,17 +20100,35 @@ function initChat() {
               doc.style.removeProperty("--chat-ios-accessory-inset");
             } catch (e2) {}
             try {
+              if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+            } catch (eScr1) {}
+            try {
+              if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
+            } catch (eVv2) {}
+            try {
               if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
             } catch (eNuke2) {}
+            try {
+              if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+            } catch (eTb2) {}
           });
         } catch (eRaf) {}
         [80, 220, 520].forEach(function (ms) {
           setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
             try {
-              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts();
+              if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
             } catch (eD) {}
+            try {
+              if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+            } catch (eScD) {}
+            try {
+              if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
+            } catch (eVvD) {}
             stripChatInputAreaTransforms();
+            try {
+              if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+            } catch (eTbD) {}
             try {
               if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
             } catch (eR2) {}
@@ -20026,6 +20156,15 @@ function initChat() {
             document.documentElement.style.removeProperty("--chat-vv-inset");
             document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
             stripChatInputAreaTransforms();
+            try {
+              if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+            } catch (eScVv) {}
+            try {
+              if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
+            } catch (eVvP) {}
+            try {
+              if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+            } catch (eTbV) {}
             try {
               var twP = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
               if (twP && typeof twP.expand === "function") twP.expand();
