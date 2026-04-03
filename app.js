@@ -20055,6 +20055,23 @@ function initChat() {
             }
           } catch (eAndKb) {}
         }
+        /*
+         * iOS/PWA (в т.ч. Safari WKWebView): при открытой клавиатуре vv иногда даёт overlap≈0, iosBoost для standalone обнулён —
+         * --chat-vv-inset остаётся 0, поле под клавиатурой. Baseline innerHeight в момент focus + падение высоты даёт оценку клавиатуры (без дубля с TG API).
+         */
+        if (isIosLikeForChatViewport() && !tg) {
+          try {
+            var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curIh = window.innerHeight || 0;
+            if (baseIh > 260 && curIh > 0) {
+              var winLossIh = Math.round(baseIh - curIh);
+              if (winLossIh > 64) {
+                var fromWinIh = Math.min(cap, Math.round(winLossIh * 0.88));
+                inset = Math.max(inset, fromWinIh);
+              }
+            }
+          } catch (eIosIh) {}
+        }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
