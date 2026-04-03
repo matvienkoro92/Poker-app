@@ -21983,11 +21983,13 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   opacity: 1;
   visibility: visible;
 }
-/* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу */
+/* PWA: нижняя зона часто визуально «отрывается» от края — чуть больше запас под safe-area и домашнюю полосу.
+ * На части iPhone (в т.ч. 14 Pro Max) env(safe-area-inset-bottom) в WKWebView иногда 0 — порог 34px как у индикатора «домой»;
+ * при корректном env(34) итог тот же max(12, 40px), без лишнего зазора на новых моделях. */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   .bottom-nav {
     transform: translate3d(0, 0, 0);
-    padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 6px));
+    padding-bottom: max(12px, calc(6px + max(34px, env(safe-area-inset-bottom, 0px))));
   }
 }
 .bottom-nav__item {
@@ -22549,6 +22551,19 @@ body[data-view="profile"] #app.app .card .card__content {
 /* Главная: margin-top: -2mm у .home-welcome-outline + overflow-y:auto на .card__content обрезали верхнюю линию рамки (::before) */
 body[data-view="home"] #app.app .card .card__content {
   padding-top: calc(2mm + 8px) !important;
+}
+
+/* PWA главная: нижний запас под фиксированный таббар. Если JS/env на части iPhone занижают --app-bottom-tabbar-pad,
+ * контент (турниры дня) не уезжает под меню; при нормальном измерении max() оставляет бóльший из двух значений. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html:has(body[data-view="home"]) .card .card__content,
+  html.app-view-home-html-scroll .card .card__content,
+  body[data-view="home"] #app.app .card .card__content {
+    padding-bottom: max(
+      var(--app-bottom-tabbar-pad, 105px),
+      calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
+    ) !important;
+  }
 }
 
 /*
