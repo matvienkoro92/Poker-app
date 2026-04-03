@@ -22000,12 +22000,32 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
 }
 /*
- * iOS PWA: pokerSyncPwaIosBottomNavGap — bottom-gap + --pwa-ios-tabbar-pad-bottom (ужим типичный env~34 до 20px).
- * !important: перебивает standalone max(env,34px). Fallback 8px до первого кадра JS.
+ * iOS PWA (iPhone 14 Pro и др.): у части WKWebView fixed bottom:0 совпадает с layout, но под панелью остаётся полоса
+ * до физического низа — ::after тем же фоном «дотягивает» chrome. Только html.poker-ios-pwa — Android/десктоп не трогаем.
+ * padding-bottom — через JS (--pwa-ios-tabbar-pad-bottom), !important перебивает standalone max(env,34px).
  */
 html.poker-ios-pwa .bottom-nav {
-  bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap, 0px));
+  bottom: 0 !important;
   padding-bottom: var(--pwa-ios-tabbar-pad-bottom, 8px) !important;
+  isolation: isolate;
+}
+html.poker-ios-pwa .bottom-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  width: 100%;
+  min-height: 32px;
+  height: calc(8px + max(28px, env(safe-area-inset-bottom, 0px)));
+  max-height: 72px;
+  background-color: var(--overscroll-canvas);
+  pointer-events: none;
+  z-index: 0;
+}
+html.poker-ios-pwa .bottom-nav > * {
+  position: relative;
+  z-index: 1;
 }
 .bottom-nav__item {
   flex: 1;

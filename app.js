@@ -359,7 +359,6 @@ if (document.readyState === "loading") {
 }
 window.addEventListener("orientationchange", pokerSyncIosPwaRootClass);
 window.addEventListener("orientationchange", function pokerPwaTabbarGapOnOrientation() {
-  pokerSyncPwaIosBottomNavGap._peak = 0;
   try {
     var oRoot = document.documentElement;
     oRoot.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
@@ -3404,73 +3403,44 @@ function pokerReadIosEnvSafeAreaBottomPx() {
 }
 
 /**
- * iOS PWA: (1) padding-bottom таббара — минимальный (env>0 → 8px; иначе небольшой запас). Полные 20–34px визуально «съедают» полэкрана.
- * (2) Зазор под fixed — только по rect vs layoutBottom. Не использовать ih−clientHeight: в PWA часто даёт ложные ~24px и раздувает отступ.
+ * iOS PWA: только внутренний padding таббара (--pwa-ios-tabbar-pad-bottom). Зазор «под» fixed в WKWebView
+ * закрывает CSS ::after у .bottom-nav (фон до физического низа), а не bottom: calc(-Npx) — замеры rect/innerHeight там часто ложные.
  */
 function pokerSyncPwaIosBottomNavGap() {
   try {
     var root = document.documentElement;
+    root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
     if (typeof pokerIsPwaDisplayStandalone !== "function" || !pokerIsPwaDisplayStandalone()) {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
       root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      pokerSyncPwaIosBottomNavGap._peak = 0;
       return;
     }
     var ios =
       /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
       (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
     if (!ios) {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
       root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      pokerSyncPwaIosBottomNavGap._peak = 0;
       return;
     }
     if (document.body && document.body.classList.contains("chat-keyboard-open")) {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
       root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
     var nav = document.querySelector(".bottom-nav");
-    if (!nav || typeof nav.getBoundingClientRect !== "function") {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
+    if (!nav) {
       root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
     var st = window.getComputedStyle(nav);
     if (st.visibility === "hidden" || st.display === "none" || parseFloat(st.opacity || "1") < 0.05) {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
       root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
       return;
     }
 
     var envB = pokerReadIosEnvSafeAreaBottomPx();
-    /* 8px при нормальном env — достаточно над индикатором «домой» в полноэкранном PWA; 12px если env обнулился */
     var padBottom = envB > 0.5 ? 8 : 12;
     root.style.setProperty("--pwa-ios-tabbar-pad-bottom", padBottom + "px");
-
-    var ih = window.innerHeight || 0;
-    if (ih < 120) return;
-    var rect = nav.getBoundingClientRect();
-    if (!rect || rect.top > ih - 24) return;
-
-    var vv = window.visualViewport;
-    var layoutBottom = ih;
-    if (vv && typeof vv.height === "number") {
-      layoutBottom = Math.max(ih, Math.round((Number(vv.offsetTop) || 0) + vv.height));
-    }
-
-    var instant = layoutBottom - rect.bottom;
-    var fromRect = instant > 0.25 ? Math.round(instant) : 0;
-    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(80, fromRect);
-
-    if (pokerSyncPwaIosBottomNavGap._peak > 0) {
-      root.style.setProperty("--pwa-ios-tabbar-bottom-gap", pokerSyncPwaIosBottomNavGap._peak + "px");
-    } else {
-      root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
-    }
   } catch (ePwaGap) {}
 }
-pokerSyncPwaIosBottomNavGap._peak = 0;
 
 /**
  * iOS/TG WKWebView: после закрытия клавиатуры visualViewport.offsetTop / высота dvh
@@ -3668,7 +3638,7 @@ setTimeout(pokerApplyBottomTabbarPad, 400);
   });
   ro.observe(nav);
 })();
-/* iOS PWA: WKWebView поздно стабилизирует вьюпорт — несколько секунд добиваем зазор/tabbar-pad */
+/* iOS PWA: поздняя стабилизация — пересчёт --pwa-ios-tabbar-pad-bottom */
 (function pokerPwaIosBottomNavGapBurst() {
   var ua = navigator.userAgent || "";
   var ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
