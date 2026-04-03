@@ -20085,10 +20085,11 @@ function initChat() {
         }
         var composerFocus = chatComposerEl && document.activeElement === chatComposerEl;
         if (composerFocus && ih > 220) {
-          bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.32)));
+          /* Чуть ниже: уменьшаем мягкий пол подъёма, чтобы полоса не висела слишком высоко. */
+          bottomPx = Math.max(bottomPx, Math.min(360, Math.round(ih * 0.29)));
         }
-        if (composerFocus && bottomPx > 0 && bottomPx < 72) {
-          bottomPx = Math.max(bottomPx, 72);
+        if (composerFocus && bottomPx > 0 && bottomPx < 56) {
+          bottomPx = Math.max(bottomPx, 56);
         }
         var gEl = document.getElementById("chatGeneralInputArea");
         var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
