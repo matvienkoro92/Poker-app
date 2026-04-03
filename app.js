@@ -19829,7 +19829,20 @@ function initChat() {
         /* Android Chrome / PWA */
         if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0) return true;
         /* Telegram: окно частично поджимается, но без translate поле часто остаётся под клавиатурой — подъём нужен; inset ниже чуть смягчён под TG. */
-        return typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return true;
+        /* Мобильный Safari/Chrome вне TG: иначе при открытой клавиатуре sync обнулял inset и поле не поднималось. */
+        try {
+          if (
+            (navigator.maxTouchPoints || 0) > 0 &&
+            /Mobile|iPhone|Android|webOS|BlackBerry|Opera Mini/i.test(navigator.userAgent || "") &&
+            document.body &&
+            document.body.classList.contains("chat-keyboard-open") &&
+            String(document.body.getAttribute("data-view") || "") === "chat"
+          ) {
+            return true;
+          }
+        } catch (eMobLift) {}
+        return false;
       }
       /**
        * Доп. подъём только на iOS над системной панелью «стрелки / Готово».
@@ -19841,7 +19854,7 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
-        if (!isIosLikeForChatViewport() || !window.visualViewport || !shouldUseChatVisualViewportLift()) {
+        if (!isIosLikeForChatViewport() || !window.visualViewport) {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
@@ -19884,6 +19897,8 @@ function initChat() {
             node.style.removeProperty("transform");
             node.style.removeProperty("-webkit-transform");
             node.style.removeProperty("will-change");
+            /* applyChatInputAreasVisualLift задавал margin-bottom с !important — без снятия перебивает CSS после dismiss, строка «исчезает». */
+            node.style.removeProperty("margin-bottom");
           });
         } catch (eSt) {}
       }
@@ -19983,9 +19998,8 @@ function initChat() {
       }
 
       /**
-       * Дублирует подъём из CSS на #chatGeneralInputArea / .chat-container .chat-input-area:
-       * иногда селекторы или calc не дают сдвиг, а inline !important стабильнее в WK/TG.
-       * При фокусе в композере добираем lift по высоте окна, если переменные занижены.
+       * Дублирует translate из CSS: иногда calc/селекторы не цепляются, inline !important стабильнее в WK/TG.
+       * margin-bottom не трогаем здесь — только transform; иначе inline !important на margin залипал после blur и строка пропадала.
        */
       function applyChatInputAreasVisualLift() {
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -20003,13 +20017,11 @@ function initChat() {
           if (lift < want) lift = want;
         }
         var tr = "translate3d(0, " + -lift + "px, 0)";
-        var mb = -lift + "px";
         if (generalView && !generalView.classList.contains("chat-general-view--hidden")) {
           var gEl = document.getElementById("chatGeneralInputArea");
           if (gEl && gEl.style) {
             gEl.style.setProperty("transform", tr, "important");
             gEl.style.setProperty("-webkit-transform", tr, "important");
-            gEl.style.setProperty("margin-bottom", mb, "important");
             gEl.style.setProperty("will-change", "transform", "important");
           }
         }
@@ -20018,7 +20030,6 @@ function initChat() {
           if (pEl && pEl.style) {
             pEl.style.setProperty("transform", tr, "important");
             pEl.style.setProperty("-webkit-transform", tr, "important");
-            pEl.style.setProperty("margin-bottom", mb, "important");
             pEl.style.setProperty("will-change", "transform", "important");
           }
         }
