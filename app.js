@@ -20385,7 +20385,6 @@ function initChat() {
           }
           chatWindowResizeHandler = function () {
             syncPwaChatVisualViewportInset();
-            if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
           };
           window.addEventListener("resize", chatWindowResizeHandler);
         } else if (chatWindowResizeHandler) {
@@ -20401,7 +20400,6 @@ function initChat() {
           }
           viewportResizeScrollHandler = function () {
             syncPwaChatVisualViewportInset();
-            if (document.body.classList.contains("chat-keyboard-open")) scrollMessagesToBottom();
           };
           window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
           window.visualViewport.addEventListener("scroll", viewportResizeScrollHandler);
@@ -21121,16 +21119,14 @@ function initChat() {
         flushChatComposerToDrafts();
         resizeChatTextarea(chatComposerEl);
         try {
-          if (
-            document.body.classList.contains("chat-keyboard-open") &&
-            typeof window.__pokerSyncPwaChatVisualViewportInset === "function"
-          ) {
+          if (document.body.classList.contains("chat-keyboard-open")) {
             var rafI = window.requestAnimationFrame || function (fn) {
               setTimeout(fn, 16);
             };
             rafI(function () {
               try {
-                window.__pokerSyncPwaChatVisualViewportInset();
+                applyChatComposerKeyboardPosition();
+                updateChatMessagesKeyboardPad();
               } catch (eSynI) {}
             });
           }
