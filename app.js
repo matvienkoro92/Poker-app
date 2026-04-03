@@ -3300,6 +3300,22 @@ function pokerApplyBottomTabbarPad() {
   try {
     if (typeof pokerSyncIosPwaRootClass === "function") pokerSyncIosPwaRootClass();
   } catch (eIosCls) {}
+  /* В треде общий/личный таббар скрыт — inline pad с прошлого экрана не должен жить на :root (гонка после клавиатуры). */
+  try {
+    if (document.body && document.body.getAttribute("data-view") === "chat") {
+      var gvPad = document.getElementById("chatGeneralView");
+      var cvPad = document.getElementById("chatConvView");
+      var threadPad =
+        !!(gvPad && !gvPad.classList.contains("chat-general-view--hidden")) ||
+        !!(cvPad && !cvPad.classList.contains("chat-conv-view--hidden"));
+      if (threadPad) {
+        document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
+        pokerApplyBottomTabbarPad._lastPad = null;
+        if (typeof pokerSyncPwaIosBottomNavGap === "function") pokerSyncPwaIosBottomNavGap();
+        return;
+      }
+    }
+  } catch (eChatPad) {}
   var tabbarGapPx =
     document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "home" ? 5 : 15;
   if (pokerApplyBottomTabbarPad._lastGap !== tabbarGapPx) {
@@ -3401,6 +3417,16 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
   opts = opts || {};
   var resetMainScroll = opts.resetMainScroll === true;
   var isChatView = !!(document.body && document.body.getAttribute("data-view") === "chat");
+  var chatThreadOpen = false;
+  try {
+    if (isChatView) {
+      var gvN = document.getElementById("chatGeneralView");
+      var cvN = document.getElementById("chatConvView");
+      chatThreadOpen =
+        !!(gvN && !gvN.classList.contains("chat-general-view--hidden")) ||
+        !!(cvN && !cvN.classList.contains("chat-conv-view--hidden"));
+    }
+  } catch (eTh) {}
   /* vv.scrollTo / expand на каждом resize visualViewport ломают обычный скролл на главной и др. — только чат или явный сброс после клавиатуры. */
   var doVvRepair = resetMainScroll || isChatView;
   try {
@@ -3435,8 +3461,13 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
    * Оставляем только при явном resetMainScroll (finalize / выход с клавиатуры).
    */
   if (resetMainScroll) {
+    /*
+     * Пульс minHeight по innerHeight в треде чата на iPhone после клавиатуры давал ложную высоту
+     * (ih ещё не догнал закрытие) — снизу «воздух», весь блок визуально выше.
+     * В списке диалогов оставляем — там другая вёрстка.
+     */
     try {
-      if (document.body && document.body.getAttribute("data-view") === "chat") {
+      if (document.body && document.body.getAttribute("data-view") === "chat" && !chatThreadOpen) {
         var ih = window.innerHeight || 0;
         if (ih > 0) {
           document.body.style.minHeight = ih + "px";
@@ -3475,6 +3506,27 @@ function pokerRepairIosStuckVisualViewportOffset() {
     if (!iosLike) return;
     var vv = window.visualViewport;
     var ot = Number(vv.offsetTop) || 0;
+    try {
+      if (typeof vv.scrollTo === "function") vv.scrollTo(0, 0);
+      else if (typeof vv.scroll === "function") vv.scroll(0, 0);
+    } catch (eVv0) {}
+    var inChatFixed =
+      document.documentElement.classList.contains("app-view-chat") ||
+      String((document.body && document.body.getAttribute("data-view")) || "") === "chat";
+    /*
+     * У body в чате position:fixed — window.scrollTo(0, y+ot) с последующим 0 на iPhone 14/WK
+     * давал «залипание»: страница визуально выше, снизу полоса. Ограничиваемся vv + сбросом scroll.
+     */
+    if (inChatFixed) {
+      try {
+        window.scrollTo(0, 0);
+        var se0 = document.scrollingElement;
+        if (se0) se0.scrollTop = 0;
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      } catch (eSc0) {}
+      return;
+    }
     if (ot <= 0.5) return;
     var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
     window.scrollTo(0, y + ot);
@@ -18255,6 +18307,7 @@ function initChat() {
     var prevScrollTop = generalMessages.scrollTop;
     var prevScrollHeight = generalMessages.scrollHeight;
     var wasNearBottom = prevScrollHeight - prevScrollTop - generalMessages.clientHeight < 80;
+    var generalMsgWrap = generalMessages.parentElement;
     generalMessages.innerHTML = html;
     function restoreScroll(clearScrollFlag) {
       var maxScroll = generalMessages.scrollHeight - generalMessages.clientHeight;
@@ -18265,16 +18318,15 @@ function initChat() {
         generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
       }
     }
-    /* Первый заход / открытие снизу: синхронный scroll часто бьёт по старой высоте — один скролл после двух rAF, без второго прохода в том же кадре. */
+    /* Первый заход: не показываем ленту, пока не выставим низ (обёртка opacity:0 в CSS) — иначе кадр с «верхом» и прыжок вниз. */
     if (openingForceBottomG) {
-      try {
-        generalMessages.scrollTop = generalMessages.scrollHeight;
-      } catch (eScrollG0) {}
+      if (generalMsgWrap && generalMsgWrap.classList) generalMsgWrap.classList.add("chat-messages-wrap--settling");
       var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenG(function () {
         rafOpenG(function () {
           generalMessages.scrollTop = generalMessages.scrollHeight;
           scrollGeneralToBottomOnNextRender = false;
+          if (generalMsgWrap && generalMsgWrap.classList) generalMsgWrap.classList.remove("chat-messages-wrap--settling");
           pinChatMessagesToBottomImagesOnly(generalMessages);
         });
       });
@@ -19381,6 +19433,7 @@ function initChat() {
     var prevScrollTopP = messagesEl.scrollTop;
     var prevScrollHeightP = messagesEl.scrollHeight;
     var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
+    var personalMsgWrap = messagesEl.parentElement;
     messagesEl.innerHTML = html;
     function restoreScrollP(clearScrollFlag) {
       var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
@@ -19392,14 +19445,13 @@ function initChat() {
       }
     }
     if (openingForceBottomP) {
-      try {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      } catch (eScrollP0) {}
+      if (personalMsgWrap && personalMsgWrap.classList) personalMsgWrap.classList.add("chat-messages-wrap--settling");
       var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenP(function () {
         rafOpenP(function () {
           messagesEl.scrollTop = messagesEl.scrollHeight;
           scrollPersonalToBottomOnNextRender = false;
+          if (personalMsgWrap && personalMsgWrap.classList) personalMsgWrap.classList.remove("chat-messages-wrap--settling");
           pinChatMessagesToBottomImagesOnly(messagesEl);
         });
       });

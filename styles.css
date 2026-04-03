@@ -2568,7 +2568,8 @@ body.chat-keyboard-open .card__header {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+  /* Без анимации: иначе ~200ms таббар «уезжает», вёрстка чата пересчитывается и лента визуально прыгает вверх—вниз при первом входе в тред. */
+  transition: none !important;
 }
 .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)),
 .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) {
@@ -6163,6 +6164,12 @@ img.chat-contact__avatar {
   /* Шапка с кнопками будет поверх (absolute), поэтому не смещаем ленту */
   margin-top: 0;
   padding-top: 0;
+}
+/* Первые кадры после подстановки HTML: не показываем ленту с scrollTop=0 до выставления низа — убирает мерцание «верх→низ». */
+.chat-general-view .chat-messages-wrap.chat-messages-wrap--settling,
+.chat-container .chat-messages-wrap.chat-messages-wrap--settling {
+  opacity: 0;
+  transition: none;
 }
 .chat-general-view .chat-messages {
   position: absolute;
