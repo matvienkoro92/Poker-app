@@ -20123,7 +20123,7 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
-          var dockBottomPx = Math.max(0, bottomPx - 10);
+          var dockBottomPx = Math.max(0, bottomPx - 20);
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
