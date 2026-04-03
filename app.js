@@ -3382,63 +3382,14 @@ function pokerSyncBottomNavTelegramInset() {
   } catch (eTgBn) {}
 }
 
-/** Реальное значение env(safe-area-inset-bottom) в px (getComputedStyle на пробнике). */
-function pokerReadIosEnvSafeAreaBottomPx() {
-  var host = document.body || document.documentElement;
-  if (!host || typeof host.appendChild !== "function") return 0;
-  var p = document.createElement("div");
-  p.style.cssText =
-    "position:fixed;visibility:hidden;left:-80px;bottom:0;width:1px;height:1px;margin:0;border:0;padding:0;padding-bottom:env(safe-area-inset-bottom, 0px);pointer-events:none;opacity:0;";
-  try {
-    host.appendChild(p);
-    var v = parseFloat(window.getComputedStyle(p).paddingBottom);
-    p.remove();
-    return isFinite(v) && v > 0 ? v : 0;
-  } catch (eR) {
-    try {
-      p.remove();
-    } catch (eR2) {}
-    return 0;
-  }
-}
-
 /**
- * iOS PWA: только внутренний padding таббара (--pwa-ios-tabbar-pad-bottom). Зазор «под» fixed в WKWebView
- * закрывает CSS ::after у .bottom-nav (фон до физического низа), а не bottom: calc(-Npx) — замеры rect/innerHeight там часто ложные.
+ * iOS PWA: отступ таббара задаётся в styles.css (bottom + padding с env). Снимаем устаревшие inline-переменные с :root.
  */
 function pokerSyncPwaIosBottomNavGap() {
   try {
     var root = document.documentElement;
     root.style.removeProperty("--pwa-ios-tabbar-bottom-gap");
-    if (typeof pokerIsPwaDisplayStandalone !== "function" || !pokerIsPwaDisplayStandalone()) {
-      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      return;
-    }
-    var ios =
-      /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
-      (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
-    if (!ios) {
-      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      return;
-    }
-    if (document.body && document.body.classList.contains("chat-keyboard-open")) {
-      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      return;
-    }
-    var nav = document.querySelector(".bottom-nav");
-    if (!nav) {
-      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      return;
-    }
-    var st = window.getComputedStyle(nav);
-    if (st.visibility === "hidden" || st.display === "none" || parseFloat(st.opacity || "1") < 0.05) {
-      root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
-      return;
-    }
-
-    var envB = pokerReadIosEnvSafeAreaBottomPx();
-    var padBottom = envB > 0.5 ? 8 : 12;
-    root.style.setProperty("--pwa-ios-tabbar-pad-bottom", padBottom + "px");
+    root.style.removeProperty("--pwa-ios-tabbar-pad-bottom");
   } catch (ePwaGap) {}
 }
 
