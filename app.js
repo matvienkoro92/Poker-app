@@ -3374,6 +3374,9 @@ pokerApplyBottomTabbarPad._lastGap = null;
  */
 function pokerFlushBottomNavAndViewportAfterChatChrome() {
   try {
+    pokerApplyBottomTabbarPad._lastPad = null;
+  } catch (eInvPad) {}
+  try {
     var nav = document.querySelector(".bottom-nav");
     if (nav) {
       nav.classList.add("bottom-nav--no-transition");
@@ -3395,6 +3398,12 @@ function pokerFlushBottomNavAndViewportAfterChatChrome() {
   try {
     if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
   } catch (eScr) {}
+  try {
+    if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
+  } catch (ePulVv) {}
+  try {
+    if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
+  } catch (eRepVv) {}
   try {
     var tw = window.Telegram && window.Telegram.WebApp;
     if (tw && typeof tw.expand === "function") tw.expand();
@@ -3556,6 +3565,61 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
 }
 
 /**
+ * После закрытия клавиатуры в треде WK/TG 100dvh на body иногда короче реального innerHeight —
+ * flex-колонка сжимается, композер «уезжает вниз», сверху остаётся полоса / клип. Короткий inline-пульс
+ * совмещает высоту с innerHeight (+ при необходимости vv), затем снимаем — пересчитывается dvh.
+ */
+function pokerPulseChatFixedViewportHeightAfterKeyboard() {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "chat") return;
+    if (document.body.classList.contains("chat-keyboard-open")) return;
+    var touchLike =
+      (navigator.maxTouchPoints || 0) > 0 ||
+      /iPad|iPhone|iPod|Android/i.test(navigator.userAgent || "");
+    if (!touchLike) return;
+    var gv = document.getElementById("chatGeneralView");
+    var cv = document.getElementById("chatConvView");
+    var thread =
+      !!(gv && !gv.classList.contains("chat-general-view--hidden")) ||
+      !!(cv && !cv.classList.contains("chat-conv-view--hidden"));
+    if (!thread) return;
+    var ih = window.innerHeight || 0;
+    if (ih < 240) return;
+    var target = ih;
+    try {
+      var vv0 = window.visualViewport;
+      if (vv0) {
+        var pack = (Number(vv0.offsetTop) || 0) + (Number(vv0.height) || 0);
+        if (pack > ih - 1) target = Math.max(target, Math.round(pack));
+      }
+    } catch (eVvP) {}
+    var body = document.body;
+    var html = document.documentElement;
+    body.style.setProperty("height", target + "px");
+    body.style.setProperty("min-height", target + "px");
+    body.style.setProperty("max-height", target + "px");
+    html.style.setProperty("height", target + "px");
+    html.style.setProperty("min-height", target + "px");
+    html.style.setProperty("max-height", target + "px");
+    var raf = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    raf(function () {
+      raf(function () {
+        try {
+          body.style.removeProperty("height");
+          body.style.removeProperty("min-height");
+          body.style.removeProperty("max-height");
+          html.style.removeProperty("height");
+          html.style.removeProperty("min-height");
+          html.style.removeProperty("max-height");
+        } catch (eR) {}
+      });
+    });
+  } catch (ePulse) {}
+}
+
+/**
  * iOS WKWebView после blur input: visualViewport.offsetTop иногда остаётся > 0 без соответствующего scrollY —
  * контент «висячий», снизу пусто. Компенсация scroll + немедленный возврат в 0 на следующем кадре.
  */
@@ -3578,6 +3642,7 @@ function pokerRepairIosStuckVisualViewportOffset() {
     /*
      * У body в чате position:fixed — window.scrollTo(0, y+ot) с последующим 0 на iPhone 14/WK
      * давал «залипание»: страница визуально выше, снизу полоса. Ограничиваемся vv + сбросом scroll.
+     * При ot>0 после клавиатуры без дожима vv композер / низ экрана остаются сдвинутыми — повторяем scrollTo на кадрах.
      */
     if (inChatFixed) {
       try {
@@ -3587,6 +3652,31 @@ function pokerRepairIosStuckVisualViewportOffset() {
         if (document.documentElement) document.documentElement.scrollTop = 0;
         if (document.body) document.body.scrollTop = 0;
       } catch (eSc0) {}
+      if (ot > 0.5) {
+        var rafFix = window.requestAnimationFrame || function (fn) {
+          setTimeout(fn, 16);
+        };
+        rafFix(function () {
+          try {
+            if (document.body && document.body.classList.contains("chat-keyboard-open")) return;
+            var vv1 = window.visualViewport;
+            if (vv1 && typeof vv1.scrollTo === "function") vv1.scrollTo(0, 0);
+            else if (vv1 && typeof vv1.scroll === "function") vv1.scroll(0, 0);
+          } catch (eVv1) {}
+        });
+        rafFix(function () {
+          rafFix(function () {
+            try {
+              if (document.body && document.body.classList.contains("chat-keyboard-open")) return;
+              var vv2 = window.visualViewport;
+              if (vv2 && typeof vv2.scrollTo === "function") vv2.scrollTo(0, 0);
+              else if (vv2 && typeof vv2.scroll === "function") vv2.scroll(0, 0);
+              var twF = window.Telegram && window.Telegram.WebApp;
+              if (twF && typeof twF.expand === "function") twF.expand();
+            } catch (eVv2) {}
+          });
+        });
+      }
       return;
     }
     if (ot <= 0.5) return;
@@ -17106,6 +17196,11 @@ function initChat() {
         if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
       }, 120);
     } catch (eDlgFlush2) {}
+    try {
+      setTimeout(function () {
+        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+      }, 320);
+    } catch (eDlgFlush3) {}
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
@@ -20195,6 +20290,9 @@ function initChat() {
           if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
         } catch (eNuke) {}
         try {
+          if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
+        } catch (ePulKb) {}
+        try {
           if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
         } catch (eRe) {}
         try {
@@ -20223,6 +20321,9 @@ function initChat() {
               if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
             } catch (eNuke2) {}
             try {
+              if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
+            } catch (ePulKb2) {}
+            try {
               if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
             } catch (eTb2) {}
           });
@@ -20239,6 +20340,9 @@ function initChat() {
             try {
               if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
             } catch (eVvD) {}
+            try {
+              if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
+            } catch (ePulD) {}
             stripChatInputAreaTransforms();
             try {
               if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
@@ -20285,6 +20389,9 @@ function initChat() {
             try {
               if (typeof pokerRepairIosStuckVisualViewportOffset === "function") pokerRepairIosStuckVisualViewportOffset();
             } catch (eVvP) {}
+            try {
+              if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
+            } catch (ePulVv) {}
             try {
               if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
             } catch (eTbV) {}
