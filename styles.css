@@ -2590,6 +2590,14 @@ html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view
   margin-bottom: calc(-1 * var(--chat-input-lift));
   will-change: transform;
 }
+/* Тот же подъём без .app:has() — в части WK/Telegram :has на предке даёт пустой матч, поле не сдвигается. */
+html.chat-keyboard-open body.chat-keyboard-open[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html.chat-keyboard-open body.chat-keyboard-open[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  --chat-input-lift: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px));
+  transform: translate3d(0, calc(-1 * var(--chat-input-lift)), 0) !important;
+  margin-bottom: calc(-1 * var(--chat-input-lift)) !important;
+  will-change: transform;
+}
 /* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю (!important ломает залипший слой) */
 body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
 body:not(.chat-keyboard-open) .chat-container .chat-input-area {

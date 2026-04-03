@@ -20084,6 +20084,19 @@ function initChat() {
             }
           } catch (eIosIh) {}
         }
+        /* Экран чата: vv/TG иногда отдаёт overlap≈0 — без подстраховки --chat-vv-inset мало и translate визуально «не поднимает». */
+        if (String(document.body.getAttribute("data-view") || "") === "chat") {
+          var kbLikely =
+            heightLoss > 56 || (vvh > 0 && ih > 0 && vvh + 88 < ih);
+          if (kbLikely) {
+            var softFloor = Math.min(cap, Math.max(130, Math.round(ih * 0.3)));
+            if (inset < 92) {
+              inset = Math.max(inset, softFloor);
+            } else if (isIosLikeForChatViewport() && inset < 132 && heightLoss > 95) {
+              inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.88)));
+            }
+          }
+        }
         doc.style.setProperty("--chat-vv-inset", inset + "px");
         applyChatIosAccessoryInsetFromViewport();
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
@@ -20246,7 +20259,18 @@ function initChat() {
         }, 2200);
       }
       if (chatComposerEl) {
+        chatComposerEl.addEventListener(
+          "touchstart",
+          function () {
+            try {
+              var ihTs = window.innerHeight || 0;
+              if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
+            } catch (eTsBl) {}
+          },
+          { passive: true }
+        );
         chatComposerEl.addEventListener("focus", onChatInputFocus);
+        chatComposerEl.addEventListener("focusin", onChatInputFocus);
         chatComposerEl.addEventListener("blur", onChatInputBlur);
       }
     })();
