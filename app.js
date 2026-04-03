@@ -16831,6 +16831,11 @@ function initChat() {
   function setTab(tab) {
     chatActiveTab = tab;
     closeSwitcherDropdown();
+    /* Раньше setTab("dialogs") только прятал dialogsView первой строкой — список диалогов не показывался; chatRefresh дополнял showDialogs(), что ломало общий/админ таб после setTab("general"). */
+    if (tab === "dialogs") {
+      showDialogs();
+      return;
+    }
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (tab === "general") {
       if (generalView) { generalView.classList.remove("chat-general-view--hidden"); generalView.style.display = ""; }
@@ -20233,6 +20238,9 @@ function initChat() {
         window._chatGeneralCache.messages.length
       ) {
         renderGeneralMessages(window._chatGeneralCache.messages);
+        try {
+          lastGeneralMessagesSig = generalMessagesSignature(window._chatGeneralCache.messages);
+        } catch (eSigSync) {}
         if (window._chatGeneralCache.participantsCount != null || window._chatGeneralCache.onlineCount != null) {
           window.lastGeneralStats = (window._chatGeneralCache.participantsCount != null ? window._chatGeneralCache.participantsCount : "—") + " уч · " + (window._chatGeneralCache.onlineCount != null ? window._chatGeneralCache.onlineCount : "—") + " онл";
           updateChatHeaderStats();
@@ -20240,7 +20248,6 @@ function initChat() {
       }
       setTab(chatActiveTab);
       if (chatWithUserId) showConv(chatWithUserId, chatWithUserName);
-      else showDialogs();
     };
     document.querySelectorAll(".chat-manager-btn--tg").forEach(function (link) {
       link.addEventListener("click", function (e) {
