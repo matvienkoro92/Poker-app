@@ -18058,11 +18058,15 @@ function initChat() {
         el.scrollTop = el.scrollHeight;
       } catch (eSnap) {}
     }
-    snap();
-    requestAnimationFrame(function () {
+    /* Тройной snap при открытии без клавиатуры даёт лишний «вверх—вниз» после renderGeneralMessages (уже выставил scroll). */
+    var tripleSnap = !aggressive || document.body.classList.contains("chat-keyboard-open");
+    if (tripleSnap) {
       snap();
-      requestAnimationFrame(snap);
-    });
+      requestAnimationFrame(function () {
+        snap();
+        requestAnimationFrame(snap);
+      });
+    }
     var imgs = el.querySelectorAll("img.chat-msg__image");
     for (var ii = 0; ii < imgs.length; ii++) {
       (function (im) {
@@ -20239,6 +20243,9 @@ function initChat() {
       }
     })();
     window.chatRefresh = function () {
+      /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
+      setTab(chatActiveTab);
+      if (chatWithUserId) showConv(chatWithUserId, chatWithUserName);
       var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
       if (
         chatActiveTab === "general" &&
@@ -20248,6 +20255,7 @@ function initChat() {
         window._chatGeneralCache.messages &&
         window._chatGeneralCache.messages.length
       ) {
+        scrollGeneralToBottomOnNextRender = true;
         renderGeneralMessages(window._chatGeneralCache.messages);
         try {
           lastGeneralMessagesSig = generalMessagesSignature(window._chatGeneralCache.messages);
@@ -20257,8 +20265,6 @@ function initChat() {
           updateChatHeaderStats();
         }
       }
-      setTab(chatActiveTab);
-      if (chatWithUserId) showConv(chatWithUserId, chatWithUserName);
     };
     document.querySelectorAll(".chat-manager-btn--tg").forEach(function (link) {
       link.addEventListener("click", function (e) {
