@@ -3411,11 +3411,12 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
       } else if (typeof vv.scroll === "function") {
         vv.scroll(0, 0);
       }
-      var ot = Number(vv.offsetTop) || 0;
-      if (ot > 0.5) {
-        var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        window.scrollTo(0, y + ot);
-      }
+      /*
+       * Не компенсируем vv.offsetTop через window.scrollTo здесь: при отложенном nuke без resetMainScroll
+       * (finalizeChatKeyboardDismiss 80/220/520 ms) на iOS после клавиатуры offsetTop ещё ненулевой —
+       * страница остаётся со сдвигом, чат визуально выше, снизу полоса «воздуха» над таббаром.
+       * Сброс scroll делаем только в ветке resetMainScroll ниже.
+       */
     }
   } catch (eVv) {}
   /* Сброс layout scroll только после клавиатуры в чате — иначе при каждом scroll visualViewport страница «прилипает» к верху. */
@@ -16906,6 +16907,9 @@ function initChat() {
       }
     } catch (eDlgKb) {}
     try {
+      if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+    } catch (eDlgScr) {}
+    try {
       var bnavDlg = document.querySelector(".bottom-nav");
       if (bnavDlg) {
         bnavDlg.classList.add("bottom-nav--no-transition");
@@ -19778,7 +19782,8 @@ function initChat() {
         if (!box) return;
         var cs = getComputedStyle(document.documentElement);
         var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
-        var gap = 12;
+        /* Визуальный зазор между последним сообщением и полосой ввода / обводкой поля (14 Pro Max и др.: иначе низ «врезается»). */
+        var gap = 22;
         var pad = Math.round(lift + gap);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
@@ -19808,7 +19813,7 @@ function initChat() {
           }
         } catch (eBarPad) {}
         if (pad < 28) pad = 28;
-        if (isIosLikeForChatViewport()) pad += 8;
+        if (isIosLikeForChatViewport()) pad += 14;
         box.style.paddingBottom = pad + "px";
       }
       function scrollDocumentToZero() {
@@ -20042,11 +20047,11 @@ function initChat() {
         var lift = Math.max(0, Math.round(vvPx + accPx));
         var ih = window.innerHeight || 0;
         var capLift = Math.min(520, Math.round(ih * 0.55));
-        var composerFocus = chatComposerEl && document.activeElement === chatComposerEl;
         var inChat = String(document.body.getAttribute("data-view") || "") === "chat";
-        if (inChat && composerFocus && ih > 200) {
-          var want = Math.min(capLift, Math.max(200, Math.round(ih * 0.36)));
-          if (lift < want) lift = want;
+        /* Тот же мягкий пол, что и у fixed bottom (без vv / старые WebView). */
+        if (inChat && ih > 200) {
+          var floorTf = Math.min(400, Math.round(ih * 0.27));
+          if (lift < floorTf) lift = Math.min(capLift, floorTf);
         }
         var tr = "translate3d(0, " + -lift + "px, 0)";
         if (generalView && !generalView.classList.contains("chat-general-view--hidden")) {
@@ -20068,6 +20073,8 @@ function initChat() {
       }
       /**
        * Привязка полосы ввода к низу visualViewport (position:fixed + bottom) — надёжнее transform внутри overflow:flex.
+       * Одна формула для всех устройств: расстояние от низа layout viewport до низа visualViewport (= зона клавиатуры/UI),
+       * плюс при необходимости Telegram viewportStableHeight − viewportHeight, единый fallback если vv «молчит».
        */
       function applyChatComposerKeyboardPosition() {
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -20075,6 +20082,9 @@ function initChat() {
           applyChatInputAreasVisualLift();
           return;
         }
+        /* Отступ низа полосы ввода от верхней границы клавиатуры (меньше — ближе к клавишам). Один для iOS/Android/TG/PWA. */
+        var CHAT_COMPOSER_KEYBOARD_GAP_PX = 20;
+        var CHAT_VV_BOTTOM_FALLBACK_MIN = 88;
         var ih = window.innerHeight || 0;
         var iw = window.innerWidth || document.documentElement.clientWidth || 0;
         var vv = window.visualViewport;
@@ -20093,13 +20103,9 @@ function initChat() {
             bottomPx = Math.max(bottomPx, Math.round(tgvS - tgvH));
           }
         }
-        var composerFocus = chatComposerEl && document.activeElement === chatComposerEl;
-        if (composerFocus && ih > 220) {
-          /* Чуть ниже: уменьшаем мягкий пол подъёма, чтобы полоса не висела слишком высоко. */
-          bottomPx = Math.max(bottomPx, Math.min(360, Math.round(ih * 0.29)));
-        }
-        if (composerFocus && bottomPx > 0 && bottomPx < 56) {
-          bottomPx = Math.max(bottomPx, 56);
+        /* Без отдельных полов по ОС/фокусу: только общий подстраховочный пол при сломанном vv. */
+        if (ih > 200 && bottomPx < CHAT_VV_BOTTOM_FALLBACK_MIN) {
+          bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.27)));
         }
         var gEl = document.getElementById("chatGeneralInputArea");
         var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
@@ -20133,7 +20139,7 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
-          var dockBottomPx = Math.max(0, bottomPx - 20);
+          var dockBottomPx = Math.max(0, bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX);
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
