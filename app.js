@@ -3341,7 +3341,12 @@ function pokerApplyBottomTabbarPad() {
     var rect = nav.getBoundingClientRect();
     /* Не сбрасываем inline на 0×0 при гонке вёрстки / expand TG — оставляем последний pad */
     if (!rect || !(rect.height > 0.5)) return;
-    if (rect.top > vh - 20) return;
+    /* Таббар ещё за пределами вьюпорта (клавиатура / translate) — не держим устаревший pad на :root. */
+    if (rect.top > vh - 20) {
+      root.style.removeProperty("--app-bottom-tabbar-pad");
+      pokerApplyBottomTabbarPad._lastPad = null;
+      return;
+    }
     var h = Math.round(rect.height);
     if (h < 36 || h > 240) return;
     var pad = Math.min(h + tabbarGapPx, 220);
@@ -3362,6 +3367,63 @@ function pokerApplyBottomTabbarPad() {
 }
 pokerApplyBottomTabbarPad._lastPad = null;
 pokerApplyBottomTabbarPad._lastGap = null;
+
+/**
+ * После клавиатуры / смены «тред ↔ диалоги» на iOS иногда залипают transform таббара и visualViewport —
+ * таббар висит выше низа с чёрной полосой. Сбрасываем инлайн, expand, resize, пересчитываем pad.
+ */
+function pokerFlushBottomNavAndViewportAfterChatChrome() {
+  try {
+    var nav = document.querySelector(".bottom-nav");
+    if (nav) {
+      nav.classList.add("bottom-nav--no-transition");
+      try {
+        nav.style.removeProperty("transform");
+        nav.style.removeProperty("opacity");
+        nav.style.removeProperty("visibility");
+      } catch (eRm) {}
+      try {
+        void nav.offsetHeight;
+      } catch (eOh) {}
+    }
+  } catch (eN) {}
+  try {
+    if (window.visualViewport && typeof window.visualViewport.scrollTo === "function") {
+      window.visualViewport.scrollTo(0, 0);
+    }
+  } catch (eVv) {}
+  try {
+    if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+  } catch (eScr) {}
+  try {
+    var tw = window.Telegram && window.Telegram.WebApp;
+    if (tw && typeof tw.expand === "function") tw.expand();
+  } catch (eTg) {}
+  try {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (eTb) {}
+  try {
+    if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
+  } catch (eRe) {}
+  try {
+    var nav2 = document.querySelector(".bottom-nav");
+    if (nav2) {
+      var raf = window.requestAnimationFrame || function (fn) {
+        setTimeout(fn, 16);
+      };
+      raf(function () {
+        raf(function () {
+          try {
+            nav2.classList.remove("bottom-nav--no-transition");
+          } catch (eC) {}
+          try {
+            if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+          } catch (eTb2) {}
+        });
+      });
+    }
+  } catch (eRaf) {}
+}
 
 /**
  * Telegram Mini App (Bot API 8+): на iOS нижний отступ надёжнее брать из contentSafeAreaInset/safeAreaInset,
@@ -5964,6 +6026,9 @@ function setView(viewName, navOpts) {
         var tw2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tw2 && typeof tw2.expand === "function") tw2.expand();
       } catch (eTw2) {}
+      try {
+        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+      } catch (eFlLv) {}
     }, 120);
     setTimeout(function () {
       try {
@@ -5973,6 +6038,9 @@ function setView(viewName, navOpts) {
       try {
         if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
       } catch (eNk3) {}
+      try {
+        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+      } catch (eFlLv2) {}
     }, 380);
   }
   if (prevView && prevView !== viewName) {
@@ -16998,20 +17066,6 @@ function initChat() {
     try {
       if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
     } catch (eDlgScr) {}
-    try {
-      var bnavDlg = document.querySelector(".bottom-nav");
-      if (bnavDlg) {
-        bnavDlg.classList.add("bottom-nav--no-transition");
-        var rafD = window.requestAnimationFrame || function (fn) {
-          setTimeout(fn, 16);
-        };
-        rafD(function () {
-          rafD(function () {
-            bnavDlg.classList.remove("bottom-nav--no-transition");
-          });
-        });
-      }
-    } catch (eNavDlg) {}
     chatActiveTab = "dialogs";
     chatWithUserId = null;
     chatWithUserName = null;
@@ -17044,6 +17098,14 @@ function initChat() {
     updateUnreadDots();
     mountChatComposer("detached");
     syncChatInertForIosAccessory();
+    try {
+      if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+    } catch (eDlgFlush) {}
+    try {
+      setTimeout(function () {
+        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+      }, 120);
+    } catch (eDlgFlush2) {}
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
@@ -20186,6 +20248,15 @@ function initChat() {
             } catch (eR2) {}
           }, ms);
         });
+        try {
+          if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+        } catch (eFlushKb) {}
+        try {
+          setTimeout(function () {
+            if (document.body.classList.contains("chat-keyboard-open")) return;
+            if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+          }, 180);
+        } catch (eFlushKb2) {}
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
@@ -20221,6 +20292,9 @@ function initChat() {
               var twP = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
               if (twP && typeof twP.expand === "function") twP.expand();
             } catch (eEx) {}
+            try {
+              if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+            } catch (eFlVv) {}
           }, 110);
         }
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);

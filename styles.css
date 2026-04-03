@@ -2547,8 +2547,8 @@ body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  /* Без transition по transform — панель не «плывёт» по dvh/клавиатуре */
-  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+  /* Как в треде: без transition — иначе на iPhone TG/WK после закрытия клавиатуры таббар и viewport «ломают» низ (полоса под панелью). */
+  transition: none !important;
 }
 /* На случай если transform таббара не сработал в WebView — весь #app выше нижнего меню */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) #app.app {
