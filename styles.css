@@ -22001,11 +22001,11 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 }
 /*
  * iOS PWA: pokerSyncPwaIosBottomNavGap — bottom-gap + --pwa-ios-tabbar-pad-bottom (ужим типичный env~34 до 20px).
- * !important: перебивает standalone max(env,34px), иначе на iPhone 14 полоса под табами не уходит.
+ * !important: перебивает standalone max(env,34px). Fallback 8px до первого кадра JS.
  */
 html.poker-ios-pwa .bottom-nav {
   bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap, 0px));
-  padding-bottom: var(--pwa-ios-tabbar-pad-bottom, 20px) !important;
+  padding-bottom: var(--pwa-ios-tabbar-pad-bottom, 8px) !important;
 }
 .bottom-nav__item {
   flex: 1;

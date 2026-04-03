@@ -3404,9 +3404,8 @@ function pokerReadIosEnvSafeAreaBottomPx() {
 }
 
 /**
- * iOS PWA: (1) padding-bottom таббара — ужимаем типичные ~34px env до ~20px (в PWA часто выглядит как лишняя полоса).
- * (2) «воздух» под fixed-таббаром — innerHeight/clientHeight/visualViewport; bottom: calc(-1 * var(--pwa-ios-tabbar-bottom-gap)).
- * _peak только растёт до сброса ориентации — иначе после сдвига замер схлопывается.
+ * iOS PWA: (1) padding-bottom таббара — минимальный (env>0 → 8px; иначе небольшой запас). Полные 20–34px визуально «съедают» полэкрана.
+ * (2) Зазор под fixed — только по rect vs layoutBottom. Не использовать ih−clientHeight: в PWA часто даёт ложные ~24px и раздувает отступ.
  */
 function pokerSyncPwaIosBottomNavGap() {
   try {
@@ -3445,14 +3444,8 @@ function pokerSyncPwaIosBottomNavGap() {
     }
 
     var envB = pokerReadIosEnvSafeAreaBottomPx();
-    var padBottom;
-    if (envB <= 0.5) {
-      padBottom = 34;
-    } else if (envB >= 22) {
-      padBottom = 20;
-    } else {
-      padBottom = Math.max(10, Math.round(envB));
-    }
+    /* 8px при нормальном env — достаточно над индикатором «домой» в полноэкранном PWA; 12px если env обнулился */
+    var padBottom = envB > 0.5 ? 8 : 12;
     root.style.setProperty("--pwa-ios-tabbar-pad-bottom", padBottom + "px");
 
     var ih = window.innerHeight || 0;
@@ -3466,24 +3459,9 @@ function pokerSyncPwaIosBottomNavGap() {
       layoutBottom = Math.max(ih, Math.round((Number(vv.offsetTop) || 0) + vv.height));
     }
 
-    var clientH = document.documentElement.clientHeight || 0;
-    if (clientH > 80 && clientH < ih) {
-      var chSlack = Math.round(ih - clientH);
-      if (chSlack > pokerSyncPwaIosBottomNavGap._peak && chSlack > 0 && chSlack <= 120) {
-        pokerSyncPwaIosBottomNavGap._peak = chSlack;
-      }
-    }
-
     var instant = layoutBottom - rect.bottom;
     var fromRect = instant > 0.25 ? Math.round(instant) : 0;
-    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(120, fromRect);
-
-    if (vv && typeof vv.height === "number" && typeof vv.offsetTop === "number") {
-      var vvSlack = Math.round(ih - vv.offsetTop - vv.height);
-      if (vvSlack > 0 && vvSlack <= 120 && vvSlack > pokerSyncPwaIosBottomNavGap._peak) {
-        pokerSyncPwaIosBottomNavGap._peak = vvSlack;
-      }
-    }
+    if (fromRect > pokerSyncPwaIosBottomNavGap._peak) pokerSyncPwaIosBottomNavGap._peak = Math.min(80, fromRect);
 
     if (pokerSyncPwaIosBottomNavGap._peak > 0) {
       root.style.setProperty("--pwa-ios-tabbar-bottom-gap", pokerSyncPwaIosBottomNavGap._peak + "px");
