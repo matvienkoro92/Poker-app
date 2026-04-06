@@ -2991,6 +2991,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
   scheduleWeekTopIdle(function () {
     if (window.updateWinterRatingWeekTopPreviews) window.updateWinterRatingWeekTopPreviews();
     if (typeof updateSpringRatingHomePromoStats === "function") updateSpringRatingHomePromoStats();
+    if (typeof pokerUpdateHomeWelcomeOutlineFrame === "function") pokerUpdateHomeWelcomeOutlineFrame();
   });
 
   // Админская кнопка «Сообщить в чат об обновлении рейтинга»
@@ -6159,6 +6160,12 @@ function setView(viewName, navOpts) {
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
+    try {
+      if (viewName !== "home" && prevView === "home") {
+        var olH = document.querySelector(".view[data-view=\"home\"] .home-welcome-outline");
+        if (olH) olH.style.removeProperty("--home-welcome-outline-frame-h");
+      }
+    } catch (eHof) {}
   }
   /* После data-view: иначе при выходе из чата ensure видел data-view=chat и выходил раньше времени */
   if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
@@ -6223,6 +6230,16 @@ function setView(viewName, navOpts) {
       var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idle(function () { initChat(); });
     }
+    try {
+      if (typeof pokerUpdateHomeWelcomeOutlineFrame === "function") {
+        var rafHof = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
+        rafHof(function () {
+          rafHof(function () {
+            pokerUpdateHomeWelcomeOutlineFrame();
+          });
+        });
+      }
+    } catch (eHomeOf) {}
   }
   if (viewName === "chat") {
     try {
@@ -6941,7 +6958,7 @@ function getSpringRatingTotalRewardSumForDates(dateStrs) {
   }
   return total;
 }
-/** Блок под кнопкой «Рейтинг весны» на главной: апрель 1—5 и спойлер «Март · итоги» с неделями */
+/** Блок под кнопкой «Рейтинг весны» на главной: строка апреля (как у марта) и спойлер «Март · итоги» с неделями */
 function updateSpringRatingHomePromoStats() {
   var wrap = document.getElementById("springRatingHomePromoStats");
   if (!wrap) return;
@@ -6951,7 +6968,7 @@ function updateSpringRatingHomePromoStats() {
       return;
     }
     var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
-    var aprEl = document.getElementById("springRatingHomePromoApril1Line");
+    var aprTot = document.getElementById("springRatingHomePromoAprilTotal");
     var marTot = document.getElementById("springRatingHomePromoMarchTotal");
     var w1 = document.getElementById("springRatingHomePromoMarchW1");
     var w2 = document.getElementById("springRatingHomePromoMarchW2");
@@ -6959,10 +6976,7 @@ function updateSpringRatingHomePromoStats() {
     var w4 = document.getElementById("springRatingHomePromoMarchW4");
     var w5 = document.getElementById("springRatingHomePromoMarchW5");
     var aprSum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_APRIL_FIRST_WEEK_DATES !== "undefined" ? SPRING_HOME_APRIL_FIRST_WEEK_DATES : []);
-    if (aprEl) {
-      aprEl.textContent =
-        aprSum > 0 ? "1—5 апреля · общий выигрыш " + fmt(aprSum) + " ₽" : "1—5 апреля · общий выигрыш —";
-    }
+    if (aprTot) aprTot.textContent = aprSum > 0 ? fmt(aprSum) + " ₽" : "—";
     var s1 = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MARCH_WEEK1_DATES !== "undefined" ? SPRING_HOME_MARCH_WEEK1_DATES : []);
     var s2 = getSpringRatingTotalRewardSumForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
     var s3 = getSpringRatingTotalRewardSumForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
@@ -6983,6 +6997,40 @@ function updateSpringRatingHomePromoStats() {
     if (typeof console !== "undefined" && console.warn) console.warn("updateSpringRatingHomePromoStats", e);
     wrap.setAttribute("hidden", "");
   }
+}
+/** Нижняя обводка welcome-блока: линия проходит по вертикали через середину шапки промо «Рейтинг турнирщиков», не под блок статистики */
+function pokerUpdateHomeWelcomeOutlineFrame() {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "home") return;
+    var homeView = document.querySelector(".view--active[data-view=\"home\"]");
+    var outline = homeView && homeView.querySelector(".home-welcome-outline");
+    var header = outline && outline.querySelector(".spring-rating-home-promo-unified__header");
+    if (!outline || !header) return;
+    var oRect = outline.getBoundingClientRect();
+    var hRect = header.getBoundingClientRect();
+    if (!(oRect.height > 8) || !(hRect.height > 4)) return;
+    var midY = hRect.top + hRect.height / 2;
+    var hPx = midY - oRect.top;
+    hPx = Math.max(56, Math.min(hPx, oRect.height - 4));
+    outline.style.setProperty("--home-welcome-outline-frame-h", Math.round(hPx * 100) / 100 + "px");
+    pokerEnsureHomeWelcomeOutlineFrameObserver(outline);
+  } catch (e) {}
+}
+function pokerEnsureHomeWelcomeOutlineFrameObserver(outline) {
+  try {
+    if (!outline || outline._pokerWelcomeOutlineRo) return;
+    if (typeof ResizeObserver === "undefined") return;
+    outline._pokerWelcomeOutlineRo = new ResizeObserver(function () {
+      if (typeof pokerUpdateHomeWelcomeOutlineFrame === "function") pokerUpdateHomeWelcomeOutlineFrame();
+    });
+    outline._pokerWelcomeOutlineRo.observe(outline);
+    if (!window._pokerWelcomeOutlineResizeHook) {
+      window._pokerWelcomeOutlineResizeHook = true;
+      window.addEventListener("resize", function () {
+        if (typeof pokerUpdateHomeWelcomeOutlineFrame === "function") pokerUpdateHomeWelcomeOutlineFrame();
+      });
+    }
+  } catch (eRo) {}
 }
 function getSpringRatingMarchTopWins() {
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};

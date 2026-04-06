@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.126">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.141">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -158,7 +158,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=268" />
+    <link rel="stylesheet" href="./styles.css?v=280" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -184,8 +184,8 @@
         box-sizing: border-box;
         --home-outline-pad-x: 10px;
         --home-outline-pad-left: 18px;
-        /* Было 40+10+44 — дублировало запас под меню вместе с .app padding-bottom */
-        padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(22px + 8px + 56px) var(--home-outline-pad-left);
+        /* Зазор до «Следующий фриролл» — margin-top у .tournament-day-home-dual (styles.css); без лишнего padding-bottom */
+        padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
       }
       .app.app--view-home .home-welcome-outline::before {
         content: "";
@@ -193,7 +193,9 @@
         top: 0;
         left: 0;
         right: 0;
-        bottom: 32px;
+        bottom: auto;
+        height: var(--home-welcome-outline-frame-h, 100%);
+        box-sizing: border-box;
         border: 1px solid var(--card-border);
         border-radius: var(--radius-lg);
         border-bottom-left-radius: 16px;
@@ -405,53 +407,6 @@
           <!-- Главная -->
           <div class="view view--active" data-view="home">
             <div class="home-welcome-outline">
-            <div class="features features--home-rating-on-border">
-              <div class="features-row features-row--full features-row--spring-promo-stack">
-                <div class="spring-rating-home-promo-wrap">
-                  <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-promo" data-view-target="spring-rating" aria-label="Рейтинг турнирщиков весны на 250 000р">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize feature__title-prize--spring">На 250 000р</span>
-                        <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
-                        <span class="feature__title-updated">обновлено 03.04.26</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </a>
-                  <div class="spring-rating-home-promo-stats" id="springRatingHomePromoStats" hidden>
-                    <div class="spring-rating-home-promo-stats__april-block">
-                      <p class="spring-rating-home-promo-stats__heading">Апрель</p>
-                      <p class="spring-rating-home-promo-stats__sub" id="springRatingHomePromoApril1Line">1—5 апреля · общий выигрыш —</p>
-                    </div>
-                    <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--march">
-                      <summary class="spring-rating-home-promo-stats__summary spring-rating-home-promo-stats__summary--march">
-                        <span class="spring-rating-home-promo-stats__summary-main"><strong>Март</strong> · итоги</span>
-                        <span class="spring-rating-home-promo-stats__summary-meta">Общий выигрыш за март: <strong id="springRatingHomePromoMarchTotal">—</strong></span>
-                      </summary>
-                      <div class="spring-rating-home-promo-stats__nested">
-                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
-                          <summary id="springRatingHomePromoMarchW1">1—8 марта · —</summary>
-                        </details>
-                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
-                          <summary id="springRatingHomePromoMarchW2">9—15 марта · —</summary>
-                        </details>
-                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
-                          <summary id="springRatingHomePromoMarchW3">16—22 марта · —</summary>
-                        </details>
-                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
-                          <summary id="springRatingHomePromoMarchW4">23—29 марта · —</summary>
-                        </details>
-                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
-                          <summary id="springRatingHomePromoMarchW5">30—31 марта · —</summary>
-                        </details>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div class="welcome-title-row">
               <div class="welcome-title-wrap">
                 <h1 class="title title--welcome">Добро пожаловать!</h1>
@@ -520,6 +475,57 @@
                   <span class="home-mini-icon" aria-hidden="true">🎲</span>
                   <span class="home-mini-icon__label">Розыгрыши</span>
                 </a>
+              </div>
+            </div>
+            <div class="features features--home-rating-on-border">
+              <div class="features-row features-row--full features-row--spring-promo-stack">
+                <div class="spring-rating-home-promo-wrap">
+                  <div class="spring-rating-home-promo-unified">
+                    <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-promo spring-rating-home-promo-unified__header" data-view-target="spring-rating" aria-label="Рейтинг турнирщиков весны на 250 000р">
+                      <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                      <div class="feature__body">
+                        <div class="feature__title feature__title--center feature__title--spring-promo-lines">
+                          <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                          <span class="feature__title-prize feature__title-prize--spring">на 250 000р</span>
+                          <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
+                          <span class="feature__title-updated">обновлено 03.04.26</span>
+                        </div>
+                      </div>
+                      <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                    </a>
+                    <div class="spring-rating-home-promo-stats spring-rating-home-promo-stats--in-card" id="springRatingHomePromoStats" hidden>
+                    <div class="spring-rating-home-promo-stats__april-block">
+                      <div class="spring-rating-home-promo-stats__april-row">
+                        <span class="spring-rating-home-promo-stats__summary-main"><strong>Апрель</strong></span>
+                        <span class="spring-rating-home-promo-stats__summary-meta">Общий выигрыш игроков: <strong id="springRatingHomePromoAprilTotal">—</strong></span>
+                      </div>
+                    </div>
+                    <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--march">
+                      <summary class="spring-rating-home-promo-stats__summary spring-rating-home-promo-stats__summary--march">
+                        <span class="spring-rating-home-promo-stats__summary-main"><strong>Март</strong> · итоги</span>
+                        <span class="spring-rating-home-promo-stats__summary-meta">Общий выигрыш игроков: <strong id="springRatingHomePromoMarchTotal">—</strong></span>
+                      </summary>
+                      <div class="spring-rating-home-promo-stats__nested">
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW1">1—8 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW2">9—15 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW3">16—22 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW4">23—29 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW5">30—31 марта · —</summary>
+                        </details>
+                      </div>
+                    </details>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             </div>
@@ -5385,7 +5391,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=314"></script>
+    <script defer src="./app.js?v=318"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

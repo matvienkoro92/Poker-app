@@ -1322,8 +1322,7 @@ html.app-view-home .card::before {
 .app.app--view-home .home-welcome-outline,
 html.app-view-home .home-welcome-outline {
   position: relative;
-  /* Не поднимать весь блок над соседями: absolute «Рейтинг турнирщиков» (.features--home-rating-on-border)
-     вылезает вниз из обводки и иначе перекрывает турниры дня и сетку при скролле .card__content. */
+  /* Кнопка «Рейтинг весны» в потоке после hero-row; нижняя линия рамки ::before — посередине шапки промо (высота через --home-welcome-outline-frame-h). */
   z-index: auto;
   margin-top: -2mm;
   /* Поскольку «на главной» у .card нет обычной рамки (border убран),
@@ -1336,25 +1335,27 @@ html.app-view-home .home-welcome-outline {
   /* Справа/сверху/снизу — как раньше; слева +8px к базовым 10px для основного контента (кнопка рейтинга компенсирует через переменные) */
   --home-outline-pad-x: 10px;
   --home-outline-pad-left: 18px;
-  /* Снизу: полоса под кнопкой рейтинга + спойлеры март/апрель + зазор над таббаром (см. pokerApplyBottomTabbarPad) */
-  padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(40px + 10px + 34px + 120px) var(--home-outline-pad-left);
+  /* Снизу: зазор 30px до блока «Следующий фриролл» задаёт margin-top у .tournament-day-home-dual */
+  padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
 }
-/* «Рейтинг турнирщиков»: по центру, на верхней половине нижней линии обводки (как таб на рамке); на всю ширину рамки */
+/* «Рейтинг весны»: после «Зал славы», уже не absolute — 20px от низа hero-row до верха кнопки */
 html.app-view-home .home-welcome-outline .features--home-rating-on-border,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border {
-  position: absolute;
-  left: calc(-1 * var(--home-outline-pad-left, 18px));
-  right: calc(-1 * var(--home-outline-pad-x, 10px));
+  position: relative;
+  margin: 20px 0 0;
+  left: auto;
+  right: auto;
   top: auto;
-  bottom: 40px;
-  transform: translateY(50%);
-  margin: 0;
+  bottom: auto;
+  transform: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 0;
-  z-index: 4;
+  z-index: auto;
+  width: 100%;
+  box-sizing: border-box;
   pointer-events: none;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .features-row--full,
@@ -1368,7 +1369,7 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .featu
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .feature.feature--link.feature--rating-promo {
   pointer-events: auto;
   width: auto !important;
-  max-width: min(96vw, 380px) !important;
+  max-width: min(92vw, 300px) !important;
   flex: 0 1 auto;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap,
@@ -1377,8 +1378,47 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: min(96vw, 380px);
+  max-width: min(92vw, 300px);
   pointer-events: auto;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(51, 65, 85, 0.88));
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.22),
+              0 4px 20px rgba(251, 191, 36, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+  transition: box-shadow 0.15s ease;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
+              0 6px 24px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo:hover,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo:hover {
+  box-shadow: none !important;
+}
+[data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
+  background: linear-gradient(145deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.94));
+  border-color: rgba(217, 119, 6, 0.4);
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats {
@@ -1392,23 +1432,46 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   border: 1px solid rgba(251, 191, 36, 0.28);
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
 }
-.spring-rating-home-promo-stats__heading {
-  margin: 0 0 4px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fde68a;
-  letter-spacing: 0.03em;
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
+  margin-top: 0;
+  padding: 8px 12px 10px;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid rgba(251, 191, 36, 0.22);
+  box-shadow: none;
+  background: rgba(15, 23, 42, 0.28);
 }
-.spring-rating-home-promo-stats__sub {
-  margin: 0 0 12px;
-  font-size: 12px;
-  line-height: 1.35;
-  color: rgba(248, 250, 252, 0.88);
+[data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
+  background: rgba(255, 255, 255, 0.45);
+  border-top-color: rgba(217, 119, 6, 0.25);
+}
+.spring-rating-home-promo-stats__april-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 8px;
+  padding: 0 0 6px;
+  margin: 0;
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.spring-rating-home-promo-stats__april-row .spring-rating-home-promo-stats__summary-main {
+  flex-shrink: 0;
+}
+.spring-rating-home-promo-stats__april-row .spring-rating-home-promo-stats__summary-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .spring-rating-home-promo-stats__details--march {
   margin: 0;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
-  padding-top: 8px;
+  padding-top: 5px;
 }
 .spring-rating-home-promo-stats__summary {
   cursor: pointer;
@@ -1422,16 +1485,16 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 6px 12px;
-  padding: 6px 0 8px;
-  font-size: 12px;
+  gap: 3px 10px;
+  padding: 2px 0 4px;
+  font-size: 10.5px;
   color: rgba(248, 250, 252, 0.92);
 }
 .spring-rating-home-promo-stats__summary-main {
   font-weight: 600;
 }
 .spring-rating-home-promo-stats__summary-meta {
-  font-size: 11px;
+  font-size: 9.5px;
   color: rgba(248, 250, 252, 0.72);
 }
 .spring-rating-home-promo-stats__summary-meta strong {
@@ -1467,10 +1530,9 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   background: linear-gradient(165deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
   border-color: rgba(217, 119, 6, 0.35);
 }
-[data-theme="light"] .spring-rating-home-promo-stats__heading {
-  color: #b45309;
+[data-theme="light"] .spring-rating-home-promo-stats__april-row {
+  color: rgba(30, 41, 59, 0.92);
 }
-[data-theme="light"] .spring-rating-home-promo-stats__sub,
 [data-theme="light"] .spring-rating-home-promo-stats__summary--march,
 [data-theme="light"] .spring-rating-home-promo-stats__details--week summary {
   color: rgba(30, 41, 59, 0.92);
@@ -1478,10 +1540,10 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 [data-theme="light"] .spring-rating-home-promo-stats__summary-meta {
   color: rgba(30, 41, 59, 0.65);
 }
-/* +10px воздуха между рядом «Зал славы» + иконки и кнопкой «Рейтинг турнирщиков» у нижней обводки */
+/* Зазор «Рейтинг весны» от эмблемы — margin-top у .features--home-rating-on-border */
 html.app-view-home .home-welcome-outline > .hero-row,
 .app.app--view-home .home-welcome-outline > .hero-row {
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 .app.app--view-home .home-welcome-outline::before,
 html.app-view-home .home-welcome-outline::before {
@@ -1490,7 +1552,10 @@ html.app-view-home .home-welcome-outline::before {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 40px;
+  bottom: auto;
+  /* Нижняя линия рамки — на середине шапки «Рейтинг турнирщиков», не под всю карточку (--home-welcome-outline-frame-h задаёт app.js) */
+  height: var(--home-welcome-outline-frame-h, 100%);
+  box-sizing: border-box;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   border-bottom-left-radius: 16px;
@@ -7785,6 +7850,10 @@ body[data-view="chat"]
 .feature__title--uppercase {
   text-transform: uppercase;
 }
+/* Промо «Рейтинг весны»: 4 строки без принудительного uppercase */
+.feature__title--spring-promo-lines {
+  text-transform: none;
+}
 .feature--rating-spring-full .feature__title-snowflake {
   margin-right: 0.25em;
   opacity: 0.95;
@@ -8162,18 +8231,17 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .feature--rating-spring-promo .feature__title-updated {
   display: block;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 0.1em;
   margin-left: 0;
   padding: 0 2px;
   box-sizing: border-box;
-  font-size: 0.65em;
   font-weight: 400;
   color: rgba(248, 250, 252, 0.5);
   letter-spacing: 0.02em;
   text-align: center;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 [data-theme="light"] .feature--rating-spring-promo .feature__title-updated {
   color: rgba(30, 41, 59, 0.5);
@@ -8183,17 +8251,17 @@ html.app-view-home .feature--rating-spring-promo:hover,
   opacity: 0.95;
   vertical-align: middle;
 }
-/* Высота и кубки как у кнопки «Рейтинг турнирщиков зимы» */
+/* Компактная высота и кубки: 4 строки заголовка в промо «Рейтинг весны» */
 .feature--rating-spring-promo.feature--rating-promo {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px !important;
-  min-height: 72px;
+  padding: 10px 14px !important;
+  min-height: 60px;
   box-sizing: border-box;
 }
 .feature--rating-spring-promo .feature__cup {
-  font-size: clamp(22px, 11vmin, 50px);
+  font-size: clamp(18px, 8vmin, 38px);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -8207,7 +8275,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   display: flex;
   flex-direction: column;
   justify-content: center;
-  line-height: 1.35;
+  line-height: 1.22;
   flex: 1 1 0;
   min-width: 0;
   /* не обрезаем текст между кубками — переносим строки */
@@ -8216,7 +8284,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
 .feature--rating-spring-promo .feature__title {
   min-width: 0;
   overflow: visible;
-  font-size: clamp(9px, 2.9vw, 14px) !important;
+  font-size: clamp(7.5px, 2.35vw, 10px) !important;
   font-weight: 700;
 }
 .feature--rating-spring-promo .feature__title-line1,
@@ -8225,27 +8293,34 @@ html.app-view-home .feature--rating-spring-promo:hover,
   display: block;
   width: 100%;
   max-width: 100%;
+}
+/* Разный кегль по строкам (от базы .feature__title): короче текст — крупнее, чтобы визуальная ширина строк была близка */
+.feature--rating-spring-promo .feature__title-line1 {
+  font-size: 1em;
+  line-height: 1.18;
+  text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
-  -webkit-hyphens: auto;
-}
-.feature--rating-spring-promo .feature__title-line1 {
-  font-size: 0.78em;
-  text-align: center;
 }
 .feature--rating-spring-promo .feature__title-prize {
-  font-size: clamp(0.95em, 4.2vw, 1.5em);
+  font-size: 1.55em;
+  line-height: 1.12;
   font-weight: 700;
   text-align: center;
+  white-space: nowrap;
 }
 .feature--rating-spring-promo .feature__title-line3--spring {
-  font-size: 1.1em;
-  margin-top: 0.15em;
+  font-size: 1.34em;
+  line-height: 1.14;
+  margin-top: 0.04em;
   color: #f8fafc !important;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
   text-align: center;
+  white-space: nowrap;
+}
+.feature--rating-spring-promo .feature__title-updated {
+  font-size: 1.14em;
+  line-height: 1.15;
 }
 [data-theme="light"] .feature--rating-spring-promo .feature__title-line1,
 [data-theme="light"] .feature--rating-spring-promo .feature__title-line3--spring {
@@ -8267,64 +8342,54 @@ html.app-view-home .feature--rating-spring-promo:hover,
   color: #b45309 !important;
   text-shadow: none;
 }
-/* Та же высота, что у кнопки «Рейтинг турнирщиков зимы» */
+/* Узкие экраны — ещё компактнее, до 4 строк в промо */
 @media (max-width: 400px) {
   .feature--rating-spring-promo.feature--rating-promo {
-    padding: 10px 16px !important;
-    min-height: 64px;
+    padding: 8px 12px !important;
+    min-height: 52px;
   }
   .feature--rating-spring-promo .feature__title {
-    font-size: 11px !important;
-    line-height: 1.28;
+    font-size: 9px !important;
+    line-height: 1.22;
   }
   .feature--rating-spring-promo .feature__title-line1 {
-    font-size: 0.8em;
+    font-size: 1em;
   }
   .feature--rating-spring-promo .feature__body {
-    line-height: 1.28;
+    line-height: 1.22;
   }
   .feature--rating-spring-promo .feature__cup {
-    font-size: 36px;
+    font-size: 30px;
   }
   .feature--rating-spring-promo .feature__cup--left {
-    margin-right: 8px;
+    margin-right: 7px;
   }
   .feature--rating-spring-promo .feature__cup--right {
-    margin-left: 8px;
+    margin-left: 7px;
   }
 }
 @media (max-width: 360px) {
   .feature--rating-spring-promo.feature--rating-promo {
-    padding: 10px 14px !important;
+    padding: 8px 11px !important;
+    min-height: 50px;
   }
   .feature--rating-spring-promo .feature__title {
-    font-size: 10px !important;
-  }
-  .feature--rating-spring-promo .feature__title-line1 {
-    font-size: 0.75em;
-  }
-  .feature--rating-spring-promo .feature__title-prize {
-    font-size: 1.08em;
+    font-size: 8.5px !important;
   }
   .feature--rating-spring-promo .feature__cup {
-    font-size: 32px;
+    font-size: 28px;
   }
 }
 @media (max-width: 320px) {
   .feature--rating-spring-promo.feature--rating-promo {
-    padding: 8px 12px !important;
+    padding: 7px 10px !important;
+    min-height: 48px;
   }
   .feature--rating-spring-promo .feature__title {
-    font-size: 9px !important;
-  }
-  .feature--rating-spring-promo .feature__title-line1 {
-    font-size: 0.68em;
-  }
-  .feature--rating-spring-promo .feature__title-prize {
-    font-size: 0.98em;
+    font-size: 8px !important;
   }
   .feature--rating-spring-promo .feature__cup {
-    font-size: 28px;
+    font-size: 26px;
   }
   .feature--rating-spring-promo .feature__cup--left {
     margin-right: 6px;
@@ -8335,21 +8400,15 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 @media (max-width: 300px) {
   .feature--rating-spring-promo.feature--rating-promo {
-    padding: 6px 10px !important;
-    min-height: 58px;
+    padding: 6px 9px !important;
+    min-height: 46px;
   }
   .feature--rating-spring-promo .feature__title {
-    font-size: 8px !important;
-    line-height: 1.26;
-  }
-  .feature--rating-spring-promo .feature__title-line1 {
-    font-size: 0.65em;
-  }
-  .feature--rating-spring-promo .feature__title-prize {
-    font-size: 0.92em;
+    font-size: 7.5px !important;
+    line-height: 1.2;
   }
   .feature--rating-spring-promo .feature__cup {
-    font-size: 24px;
+    font-size: 22px;
   }
   .feature--rating-spring-promo .feature__cup--left {
     margin-right: 5px;
@@ -8361,17 +8420,11 @@ html.app-view-home .feature--rating-spring-promo:hover,
 @media (max-width: 280px) {
   .feature--rating-spring-promo.feature--rating-promo {
     padding: 6px 8px !important;
-    min-height: 54px;
+    min-height: 44px;
   }
   .feature--rating-spring-promo .feature__title {
     font-size: 7px !important;
-    line-height: 1.24;
-  }
-  .feature--rating-spring-promo .feature__title-line1 {
-    font-size: 0.6em;
-  }
-  .feature--rating-spring-promo .feature__title-prize {
-    font-size: 0.85em;
+    line-height: 1.2;
   }
   .feature--rating-spring-promo .feature__cup {
     font-size: 22px;
@@ -8418,7 +8471,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   align-items: stretch;
   gap: 0;
   width: 100%;
-  margin-top: 55px;
+  margin-top: 30px;
   box-sizing: border-box;
   border: 1px solid rgba(251, 146, 60, 0.5);
   border-radius: 16px;
