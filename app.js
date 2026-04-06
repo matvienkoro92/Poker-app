@@ -442,20 +442,43 @@ function pokerChatPushSubscribeToBrowser() {
       var keyArr = pokerChatPushUrlBase64ToUint8Array(cfg.publicKey);
       if (!keyArr) return { ok: false, error: "bad_key" };
       return navigator.serviceWorker.ready.then(function (reg) {
-        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyArr });
-      }).then(function (sub) {
-        var json = sub.toJSON();
-        return fetch(base + "/api/chat-push-subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ action: "subscribe", subscription: json })),
-        }).then(function (r) {
-          return r.json();
-        });
+        return reg.pushManager
+          .getSubscription()
+          .then(function (existing) {
+            if (existing) return existing.unsubscribe().catch(function () {});
+          })
+          .then(function () {
+            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyArr });
+          })
+          .then(function (sub) {
+            var json = sub.toJSON();
+            return fetch(base + "/api/chat-push-subscribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(pokerApiAuthJsonBody({ action: "subscribe", subscription: json })),
+            }).then(function (r) {
+              return r
+                .json()
+                .catch(function () {
+                  return {};
+                })
+                .then(function (data) {
+                  if (!r.ok) {
+                    return { ok: false, error: (data && data.error) || "HTTP " + r.status };
+                  }
+                  if (data && data.ok) return { ok: true };
+                  return { ok: false, error: (data && data.error) || "subscribe_save_failed" };
+                });
+            });
+          });
       });
     })
-    .catch(function () {
-      return { ok: false };
+    .catch(function (e) {
+      var msg = e && e.message ? String(e.message) : "subscribe_failed";
+      try {
+        if (typeof console !== "undefined" && console.warn) console.warn("[chat-push] subscribe", msg);
+      } catch (e2) {}
+      return { ok: false, error: msg };
     });
 }
 
@@ -595,7 +618,11 @@ function initProfileChatPush() {
             setHint("Разрешите уведомления в браузере — личные сообщения, когда приложение в фоне или закрыто.");
             if (Notification.permission === "granted" && !window.__pokerChatPushAutoSubOnce) {
               window.__pokerChatPushAutoSubOnce = true;
-              pokerChatPushSubscribeToBrowser().then(function () {
+              pokerChatPushSubscribeToBrowser().then(function (subr) {
+                if (!subr || !subr.ok) {
+                  window.__pokerChatPushAutoSubOnce = false;
+                  setHint((subr && subr.error) || "Не удалось подписаться. Выключите уведомления в профиле и включите снова.");
+                }
                 refreshState();
               });
             }
