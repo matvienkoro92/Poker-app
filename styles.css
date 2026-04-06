@@ -20927,6 +20927,12 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-chat-push--hidden {
   display: none !important;
 }
+.profile-chat-push--ios-miniapp .profile-chat-push__label {
+  display: none !important;
+}
+.profile-chat-push--ios-miniapp .profile-chat-push__hint {
+  margin-top: 0;
+}
 .profile-chat-push__title {
   margin: 0 0 10px;
   font-size: 14px;

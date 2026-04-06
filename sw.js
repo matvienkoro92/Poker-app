@@ -8,6 +8,7 @@ self.addEventListener("activate", function (e) {
 self.addEventListener("fetch", function () {});
 
 self.addEventListener("push", function (event) {
+  var root = self.location.origin || "";
   var data = {
     title: "Два туза",
     body: "Новое сообщение в чате",
@@ -23,15 +24,28 @@ self.addEventListener("push", function (event) {
       if (j && j.tag) data.tag = j.tag;
     }
   } catch (e1) {}
+  var iconUrl = root + "/assets/logo-two-aces.png";
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: "./assets/logo-two-aces.png",
-      badge: "./assets/logo-two-aces.png",
-      tag: data.tag || "poker-chat",
-      renotify: true,
-      data: { openUrl: data.openUrl },
-    })
+    self.registration
+      .showNotification(data.title, {
+        body: data.body,
+        icon: iconUrl,
+        badge: iconUrl,
+        tag: data.tag || "poker-chat",
+        renotify: true,
+        data: { openUrl: data.openUrl },
+      })
+      .catch(function (eShow) {
+        try {
+          console.error("[sw] showNotification", eShow && eShow.message ? eShow.message : eShow);
+        } catch (eLog) {}
+        return self.registration.showNotification(data.title, {
+          body: data.body,
+          tag: data.tag || "poker-chat",
+          renotify: true,
+          data: { openUrl: data.openUrl },
+        });
+      })
   );
 });
 

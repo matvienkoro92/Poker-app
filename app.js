@@ -243,6 +243,14 @@ function pokerSavePwaGuestMode(v) {
 
 /** Для запросов к API: Mini App — initData; PWA — pwaSession (Telegram) или pwaVkSession (ВКонтакте) */
 function pokerApiAuthQuery(lead) {
+  try {
+    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
+      var tokQ = pokerReadPwaTgSessionToken();
+      if (tokQ) return lead + "pwaSession=" + encodeURIComponent(tokQ);
+      var vkQ = pokerReadPwaVkSessionToken();
+      if (vkQ) return lead + "pwaVkSession=" + encodeURIComponent(vkQ);
+    }
+  } catch (eQ) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg0 && tg0.initData) return lead + "initData=" + encodeURIComponent(tg0.initData);
   var tok = pokerReadPwaTgSessionToken();
@@ -255,6 +263,25 @@ function pokerApiAuthQuery(lead) {
 function pokerApiAuthJsonBody(extra) {
   var o = Object.assign({}, extra || {});
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  /** PWA с «Домой»: при сохранённой pwaSession не шлём initData из скрипта WebApp — иначе на сервере раньше брался чужой tg id и пуш писался не в тот Redis-ключ, что чат. */
+  try {
+    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
+      var tokS = pokerReadPwaTgSessionToken();
+      if (tokS) {
+        o.pwaSession = tokS;
+        delete o.initData;
+        delete o.pwaVkSession;
+        return o;
+      }
+      var vkS = pokerReadPwaVkSessionToken();
+      if (vkS) {
+        o.pwaVkSession = vkS;
+        delete o.initData;
+        delete o.pwaSession;
+        return o;
+      }
+    }
+  } catch (ePwaBody) {}
   if (tg0 && tg0.initData) {
     o.initData = tg0.initData;
     delete o.pwaSession;
@@ -358,6 +385,18 @@ function pokerChatPushClientSupported() {
     (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
   if (ios && !pokerIsPwaDisplayStandalone()) return false;
   return true;
+}
+
+/** iOS / iPadOS: в обычном WebView (Telegram, Safari вне «Домой») веб-пуш недоступен — подписка в Redis не сохранится. */
+function pokerChatPushIosNeedsStandalonePwa() {
+  try {
+    var ios =
+      /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
+      (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+    return ios && !pokerIsPwaDisplayStandalone();
+  } catch (e) {
+    return false;
+  }
 }
 
 /** Класс на <html> для отступов таббара/главной на iOS PWA (14‑я серия и др.): надёжнее, чем только display-mode. */
@@ -576,14 +615,42 @@ function initProfileChatPush() {
   var toggle = document.getElementById("profileChatPushToggle");
   var hint = document.getElementById("profileChatPushHint");
   if (!row || !toggle) return;
-  var show = pokerApiHasCredential() && pokerChatPushClientSupported();
-  row.classList.toggle("profile-chat-push--hidden", !show);
-  row.setAttribute("aria-hidden", show ? "false" : "true");
-  if (!show) return;
 
   function setHint(t) {
     if (hint) hint.textContent = t;
   }
+
+  var cred = pokerApiHasCredential();
+  var canUsePush = pokerChatPushClientSupported();
+  var iosNeedsHomeScreen = pokerChatPushIosNeedsStandalonePwa();
+
+  if (!cred) {
+    row.classList.add("profile-chat-push--hidden");
+    row.classList.remove("profile-chat-push--ios-miniapp");
+    row.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  if (iosNeedsHomeScreen && !canUsePush) {
+    row.classList.remove("profile-chat-push--hidden");
+    row.classList.add("profile-chat-push--ios-miniapp");
+    row.setAttribute("aria-hidden", "false");
+    setHint(
+      "На iPhone и iPad внутри Telegram (и в Safari без режима «с экрана Домой») браузер не даёт сохранить веб-пуш — на сервере не будет подписки (в логах: subscriptionEndpointsInRedis: 0). Добавьте «Два туза» на экран «Домой», откройте приложение оттуда и включите уведомления в этом профиле."
+    );
+    return;
+  }
+
+  row.classList.remove("profile-chat-push--ios-miniapp");
+
+  if (!canUsePush) {
+    row.classList.add("profile-chat-push--hidden");
+    row.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  row.classList.remove("profile-chat-push--hidden");
+  row.setAttribute("aria-hidden", "false");
 
   function refreshState() {
     var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -613,7 +680,10 @@ function initProfileChatPush() {
           if (Notification.permission === "denied") {
             setHint("Уведомления заблокированы в настройках браузера.");
           } else if (d.notificationsEnabled && d.hasSubscription) {
-            setHint("Уведомления включены — приходят при закрытом приложении.");
+            setHint(
+              "Уведомления включены — приходят при закрытом приложении." +
+                (d.memberId ? " Аккаунт для пушей на сервере: " + d.memberId + "." : "")
+            );
           } else if (d.notificationsEnabled && !d.hasSubscription) {
             setHint("Разрешите уведомления в браузере — личные сообщения, когда приложение в фоне или закрыто.");
             if (Notification.permission === "granted" && !window.__pokerChatPushAutoSubOnce) {
