@@ -505,8 +505,36 @@ function pokerChatPushSubscribeToBrowser() {
                   if (!r.ok) {
                     return { ok: false, error: (data && data.error) || "HTTP " + r.status };
                   }
-                  if (data && data.ok) return { ok: true };
-                  return { ok: false, error: (data && data.error) || "subscribe_save_failed" };
+                  if (!(data && data.ok)) {
+                    return { ok: false, error: (data && data.error) || "subscribe_save_failed" };
+                  }
+                  return fetch(base + "/api/chat-push-subscribe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
+                    cache: "no-store",
+                  })
+                    .then(function (rs) {
+                      return rs.json().catch(function () {
+                        return null;
+                      });
+                    })
+                    .then(function (st) {
+                      if (st && st.ok && st.hasSubscription) return { ok: true };
+                      try {
+                        if (typeof console !== "undefined" && console.warn) {
+                          console.warn("[chat-push] subscribe ok но status.hasSubscription false", st);
+                        }
+                      } catch (eSt) {}
+                      return {
+                        ok: false,
+                        error:
+                          "Сервер ответил на подписку, но не видит endpoint (пуш не сохранится). Проверьте домен API в приложении и повторите выкл/вкл.",
+                      };
+                    })
+                    .catch(function () {
+                      return { ok: false, error: "Не удалось проверить подписку на сервере." };
+                    });
                 });
             });
           });
