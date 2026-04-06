@@ -15883,11 +15883,20 @@ function initChat() {
     stored = JSON.parse(localStorage.getItem(CHAT_LAST_VIEWED_KEY) || "{}");
   } catch (e) { stored = {}; }
   var lastViewedGeneral = stored && stored.general != null ? stored.general : null;
+  try {
+    if (lastViewedGeneral !== null && lastViewedGeneral !== undefined && String(lastViewedGeneral).trim() === "") lastViewedGeneral = null;
+    else if (lastViewedGeneral != null && isNaN(Date.parse(String(lastViewedGeneral).trim()))) lastViewedGeneral = null;
+  } catch (eLvGen) {
+    lastViewedGeneral = null;
+  }
   var lastViewedPersonal = {};
   try {
     var rawPersonal = stored && stored.personal && typeof stored.personal === "object" ? stored.personal : {};
     Object.keys(rawPersonal).forEach(function (k) {
-      lastViewedPersonal[normalizePeerIdForChat(k)] = rawPersonal[k];
+      var v = rawPersonal[k];
+      if (v == null || String(v).trim() === "") return;
+      if (isNaN(Date.parse(String(v).trim()))) return;
+      lastViewedPersonal[normalizePeerIdForChat(k)] = v;
     });
   } catch (ePers) {
     lastViewedPersonal = {};
@@ -16128,7 +16137,7 @@ function initChat() {
         var unreadCount = 0;
         if (lastViewedGeneral != null && myMemberIdForUnread) {
           unreadCount = messages.filter(function (m) {
-            return pokerChatMessageIsNewerThanViewed(m.time, lastView) && m.from !== myMemberIdForUnread;
+            return pokerChatMessageIsNewerThanViewed(m.time, lastView) && !peerChatIdsEqual(m.from, myMemberIdForUnread);
           }).length;
         }
         // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
@@ -16139,7 +16148,7 @@ function initChat() {
             var lastUnread = null;
             try {
               var unreadMsgs = messages.filter(function (m) {
-                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && m.from !== myMemberIdForUnread;
+                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && !peerChatIdsEqual(m.from, myMemberIdForUnread);
               });
               lastUnread = unreadMsgs.length ? unreadMsgs[unreadMsgs.length - 1] : null;
             } catch (eUnread) {}
@@ -16153,8 +16162,10 @@ function initChat() {
           }
         }
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible) {
-          lastViewedGeneral = latest;
-          saveChatLastViewed();
+          if (latest && !isNaN(Date.parse(String(latest).trim()))) {
+            lastViewedGeneral = latest;
+            saveChatLastViewed();
+          }
           window.chatGeneralUnread = false;
           window.chatGeneralUnreadCount = 0;
         } else if (lastViewedGeneral != null && unreadCount > 0) {
@@ -17493,9 +17504,6 @@ function initChat() {
         });
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
-        // Если ещё ни разу не фиксировали момент просмотра общего чата в этом браузере,
-        // не считаем старые сообщения "непрочитанными", чтобы не мигало всё целиком.
-        if (lastViewedGeneral == null) genUnread = 0;
         window.chatGeneralUnreadCount = genUnread;
         window.chatGeneralUnread = genUnread > 0;
         var total = data.participantsCount != null ? data.participantsCount : "—";
@@ -17829,8 +17837,10 @@ function initChat() {
           }
         }
         if (isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden") && peerLvKey) {
-          lastViewedPersonal[peerLvKey] = latest;
-          saveChatLastViewed();
+          if (latest && !isNaN(Date.parse(String(latest).trim()))) {
+            lastViewedPersonal[peerLvKey] = latest;
+            saveChatLastViewed();
+          }
           window.chatPersonalUnread = false;
           window.chatPersonalUnreadCount = 0;
         } else if (chatWithUserId && personalLastSet && unreadCount > 0) {
@@ -22756,16 +22766,13 @@ function updateTournamentDayBlock() {
     if (tdWeekTime && state.target) {
       tdWeekTime.textContent = pokerMskWeekdayShortAt(state.target.getTime()) + ", 18:00 МСК";
     }
-    var frName = document.getElementById("freerollHomeName");
     var frBuy = document.getElementById("freerollHomeBuyin");
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");
     var frTime = document.getElementById("freerollHomeTimer");
-    if (frName && frGuar && frLab && frTime) {
+    if (frGuar && frLab && frTime) {
       var frState = getNextFreerollState(n);
       var frT = frState.t;
-      frName.textContent = frT.name || "Фриролл";
-      frName.classList.add("tournament-day-name--freeroll");
       if (frBuy) frBuy.textContent = frT.buyin || "0₽";
       frGuar.textContent = frT.guarantee;
       frLab.textContent = frState.label ? frState.label : "Старт через: ";

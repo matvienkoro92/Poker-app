@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.120">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.126">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -158,7 +158,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=266" />
+    <link rel="stylesheet" href="./styles.css?v=268" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -493,7 +493,7 @@
                 >
                   <span class="home-mini-icon home-mini-icon--telegram" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" focusable="false" aria-hidden="true">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                      <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.43l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
                     </svg>
                   </span>
                   <span class="home-mini-icon__label">Чат в ТГ</span>
@@ -530,17 +530,16 @@
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
                       <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
-                      <div class="feature__title tournament-day-block__name tournament-day-name--freeroll" id="freerollHomeName">—</div>
                     </div>
                     <div class="feature__desc tournament-day-block__meta">
                       <div class="tournament-day-block__stats">
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Вход</span>
-                          <span class="tournament-day-block__stat-value" id="freerollHomeBuyin">0₽</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Приз</span>
                           <span class="tournament-day-block__stat-value" id="freerollHomeGuarantee">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Вход</span>
+                          <span class="tournament-day-block__stat-value" id="freerollHomeBuyin">0₽</span>
                         </div>
                         <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Время</span>
@@ -572,12 +571,12 @@
                     <div class="feature__desc tournament-day-block__meta">
                       <div class="tournament-day-block__stats">
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Вход</span>
-                          <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Приз</span>
                           <span class="tournament-day-block__stat-value" id="tournamentDayGuarantee">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Вход</span>
+                          <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
                         </div>
                         <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Время</span>
@@ -5386,7 +5385,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=311"></script>
+    <script defer src="./app.js?v=314"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
