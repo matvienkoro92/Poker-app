@@ -15231,31 +15231,8 @@ function initChat() {
       return '<button type="button" class="chat-msg__id-link" data-app-id="' + escapeHtml(idUp) + '">' + escapeHtml(idUp) + '</button>';
     });
   }
-  /** Системное «принят в чат»: явная кликабельная ссылка на TG, без голого t.me в тексте. */
   function chatMessageBodyHtml(m) {
     var raw = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
-    if (m && m.clubAdmissionNotice) {
-      var un = String(m.clubAdmissionTargetUsername != null ? m.clubAdmissionTargetUsername : "").replace(/^@+/, "").trim();
-      var tgId = String(m.clubAdmissionTargetTgId != null ? m.clubAdmissionTargetTgId : "").replace(/^tg_/, "").trim();
-      if (un && /^[a-zA-Z0-9_]{5,32}$/.test(un)) {
-        return (
-          "✅ В чат принят игрок. Логин: " +
-          '<a href="https://t.me/' +
-          un +
-          '" class="chat-msg__tg-link" target="_blank" rel="noopener noreferrer">@' +
-          escapeHtml(un) +
-          "</a>"
-        );
-      }
-      if (tgId && /^\d+$/.test(tgId)) {
-        return (
-          "✅ В чат принят игрок. Логин: " +
-          '<a href="tg://user?id=' +
-          escapeHtml(tgId) +
-          '" class="chat-msg__tg-link">написать в Telegram</a> <span class="chat-msg__admit-nick-missing">(ник не указан)</span>'
-        );
-      }
-    }
     return linkTgUsernames(linkAppIds(linkUrls(raw)));
   }
 
@@ -16665,6 +16642,9 @@ function initChat() {
     }
   }
   function renderGeneralMessages(messages) {
+    messages = (messages || []).filter(function (m) {
+      return !(m && m.clubAdmissionNotice);
+    });
     if (!messages || messages.length === 0) {
       generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
       return;
