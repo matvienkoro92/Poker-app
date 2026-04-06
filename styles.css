@@ -22372,7 +22372,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 }
 .chat-club-access-modal__row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   flex-wrap: wrap;
   padding: 10px 12px;
@@ -22380,9 +22380,15 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.04);
 }
-.chat-club-access-modal__name {
+.chat-club-access-modal__name-col {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.chat-club-access-modal__name-line {
   font-size: 14px;
   color: var(--text);
   word-break: break-all;
@@ -22390,6 +22396,12 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   align-items: center;
   flex-wrap: wrap;
   gap: 0 4px;
+  width: 100%;
+}
+.chat-club-access-modal__joined {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
 }
 .chat-club-access-modal__profile-btn {
   max-width: 100%;
@@ -22429,6 +22441,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-self: center;
 }
 .chat-club-access-modal__btn {
   padding: 6px 10px;

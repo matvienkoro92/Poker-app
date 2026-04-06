@@ -2574,7 +2574,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
   function getMarchDatesFromData() {
     var byDate = getRatingByDate();
     if (typeof byDate !== "object" || !Object.keys(byDate).length) return [];
-    return Object.keys(byDate).filter(function (d) { return /\.03\.2026$/.test(d); });
+    return Object.keys(byDate).filter(function (d) { return /\.(03|04|05)\.2026$/.test(d); });
   }
   /**
    * Топ заносов за один турнир: зима и весна отдельно. Индекс скрина = порядок турнира в массиве
@@ -2721,11 +2721,11 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
         marchWrap.removeAttribute("hidden");
         marchWrap.style.display = "";
         if (marchData.max) {
-          marchSummary.textContent = "Самый большой выигрыш за март: " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
+          marchSummary.textContent = "Самый большой выигрыш за весну: " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
         } else {
-          marchSummary.textContent = "Самый большой выигрыш за март: —";
+          marchSummary.textContent = "Самый большой выигрыш за весну: —";
         }
-        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 выигрыша за март:" : "";
+        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 выигрыша за весну:" : "";
         if (marchData.top3 && marchData.top3.length) {
           marchList.innerHTML = marchData.top3.map(function (r, i) {
             var sum = formatRewardRound(r.reward);
@@ -2868,27 +2868,30 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
       pastSection.classList.add("winter-rating-week--collapsed");
       if (pastBody) pastBody.hidden = true;
     }
-    // Клик по заголовку разворачивает/сворачивает только тело
-    document.querySelectorAll(".winter-rating-week__toggle").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var section = btn.closest(".winter-rating-week");
-        if (!section) return;
-        var bodyId = section.id === "winterRatingNextWeekSection"
-          ? "winterRatingNextWeekBody"
-          : section.id === "winterRatingCurrentWeekSection"
-          ? "winterRatingCurrentWeekBody"
-          : section.id === "winterRatingPastWeekSection"
-          ? "winterRatingPastWeekBody"
-          : null;
-        if (!bodyId) return;
-        var body = document.getElementById(bodyId);
-        if (!body) return;
-        var collapsed = !body.hidden;
-        body.hidden = collapsed;
-        if (collapsed) section.classList.add("winter-rating-week--collapsed");
-        else section.classList.remove("winter-rating-week--collapsed");
-      }, { once: false });
-    });
+    // Клик по заголовку разворачивает/сворачивает только тело (один раз — иначе при каждом обновлении превью дублируются обработчики)
+    if (document.body.getAttribute("data-winter-week-toggle-bound") !== "1") {
+      document.body.setAttribute("data-winter-week-toggle-bound", "1");
+      document.querySelectorAll(".winter-rating-week__toggle").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var section = btn.closest(".winter-rating-week");
+          if (!section) return;
+          var bodyId = section.id === "winterRatingNextWeekSection"
+            ? "winterRatingNextWeekBody"
+            : section.id === "winterRatingCurrentWeekSection"
+            ? "winterRatingCurrentWeekBody"
+            : section.id === "winterRatingPastWeekSection"
+            ? "winterRatingPastWeekBody"
+            : null;
+          if (!bodyId) return;
+          var body = document.getElementById(bodyId);
+          if (!body) return;
+          var collapsed = !body.hidden;
+          body.hidden = collapsed;
+          if (collapsed) section.classList.add("winter-rating-week--collapsed");
+          else section.classList.remove("winter-rating-week--collapsed");
+        }, { once: false });
+      });
+    }
     var pastWeekSection = document.getElementById("winterRatingPastWeekSection");
     var pastWeekSumWrap = document.getElementById("winterRatingPastWeekSumWrap");
     var pastWeekSumList = document.getElementById("winterRatingPastWeekSumList");
@@ -2978,9 +2981,12 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     });
   })();
   window.updateWinterRatingWeekTopPreviews = updateButtonPreviews;
-  setTimeout(function () {
+  var scheduleWeekTopIdle = window.requestIdleCallback
+    ? function (fn) { window.requestIdleCallback(fn, { timeout: 1800 }); }
+    : function (fn) { setTimeout(fn, 1); };
+  scheduleWeekTopIdle(function () {
     if (window.updateWinterRatingWeekTopPreviews) window.updateWinterRatingWeekTopPreviews();
-  }, 0);
+  });
 
   // Админская кнопка «Сообщить в чат об обновлении рейтинга»
   (function initWinterRatingAdminNotify() {
@@ -3197,7 +3203,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     if (kind === "current") openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
     else if (kind === "past") openModal("Топы прошлой недели", GAZETTE_DATES, "past");
     else if (kind === "feb") {
-      if (isSpringRatingMode()) openModal("Топы Марта", getMarchDatesFromData(), "mar");
+      if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
       else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
     }
   };
@@ -3231,7 +3237,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
         else window.open(link, "_blank");
         return;
       }
-      if (isSpringRatingMode()) openModal("Топы Марта", getMarchDatesFromData(), "mar");
+      if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
       else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
     });
   }
@@ -8944,7 +8950,7 @@ function getSpringRatingMarchTopWins() {
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
   var allWins = [];
   Object.keys(tournamentsByDate).forEach(function (dateStr) {
-    if (!/\.03\./.test(dateStr)) return;
+    if (!/\.(03|04|05)\.2026$/.test(dateStr)) return;
     var list = tournamentsByDate[dateStr];
     if (!Array.isArray(list)) return;
     list.forEach(function (t) {
@@ -9445,7 +9451,7 @@ function getWinterRatingPlayerSummary(nick) {
         if (p) {
           var reward = p.reward != null ? p.reward : 0;
           var league = t.league != null ? Number(t.league) : null;
-          if (league == null && isSpringRatingMode() && String(dateStr).indexOf(".03.") !== -1 && t.buyin != null) {
+          if (league == null && isSpringRatingMode() && /\.(03|04|05)\./.test(String(dateStr)) && t.buyin != null) {
             var buyin = Number(t.buyin);
             if (buyin === buyin) {
               league = buyin >= 500 ? 1 : (buyin >= 100 ? 2 : 1);
@@ -10001,8 +10007,8 @@ function getSpringRatingOverallByLeague(leagueNum) {
   if (!isSpringRatingMode()) return [];
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
   var byNick = {};
-  var marchRegex = /\.03\.2026$/;
-  var dateStrs = Object.keys(tournamentsByDate).filter(function (d) { return marchRegex.test(d); });
+  var springOverallRegex = /\.(03|04|05)\.2026$/;
+  var dateStrs = Object.keys(tournamentsByDate).filter(function (d) { return springOverallRegex.test(d); });
   for (var i = 0; i < dateStrs.length; i++) {
     var list = tournamentsByDate[dateStrs[i]];
     if (!Array.isArray(list) || !list.length) continue;
@@ -10050,7 +10056,12 @@ function getSpringRatingOverallByLeague(leagueNum) {
 
 function initWinterRating() {
   try {
-    if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
+    var schedPrev = window.requestIdleCallback
+      ? function (fn) { window.requestIdleCallback(fn, { timeout: 600 }); }
+      : function (fn) { setTimeout(fn, 0); };
+    schedPrev(function () {
+      if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
+    });
   } catch (e) {}
   try {
     initWinterRatingLightbox();
@@ -10064,7 +10075,7 @@ function initWinterRating() {
     conditionsBtn.addEventListener("click", function () { openSpringRatingInfoModal(); });
   }
   var febBtnLabel = document.querySelector("#winterRatingTopFebruaryBtn .winter-rating__week-top-btn-label");
-  if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? "Топы Марта" : "Топы Февраля";
+  if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? "Топы весны" : "Топы Февраля";
   var titleTextEl = document.querySelector("#winterRatingSection .winter-rating__title-text");
   if (titleTextEl) {
     titleTextEl.innerHTML = isSpringRatingMode()
@@ -10078,7 +10089,11 @@ function initWinterRating() {
     if (!item) return;
     var panel = item.querySelector(".winter-rating__date-panel");
     var btn = item.querySelector(".winter-rating__date-btn");
-    if (panel) panel.classList.remove("winter-rating__date-panel--hidden");
+    if (panel) {
+      panel.classList.remove("winter-rating__date-panel--hidden");
+      var lwOpen = panel.querySelector(".spring-rating-date-leagues");
+      if (lwOpen && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwOpen, dateStr);
+    }
     if (btn) btn.setAttribute("aria-expanded", "true");
     try { item.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
   };
@@ -10578,6 +10593,50 @@ function initWinterRating() {
       dateItems = datesContainer.querySelectorAll(".winter-rating__date-item");
     }
   }
+  function fillScreensForDate(container, dStr, leagueNum) {
+    if (!container) return;
+    var files = leagueNum != null
+      ? (getSpringRatingImagesByLeague(leagueNum)[dStr] || [])
+      : (getRatingImages()[dStr] || []);
+    if (!files || !files.length) return;
+    var cacheV = "v=18";
+    container.innerHTML = files.map(function (f, i) {
+      return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
+    }).join("");
+    container.querySelectorAll(".winter-rating__screenshot").forEach(function (cell, idx) {
+      var openLightbox = function (e) {
+        if (e) e.preventDefault();
+        openWinterRatingLightbox(dStr, idx, leagueNum);
+      };
+      cell.addEventListener("click", openLightbox);
+      cell.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(); }
+      });
+    });
+  }
+  function fillSpringLeagueBlocks(leaguesWrap, dateStr) {
+    if (!leaguesWrap || leaguesWrap.getAttribute("data-spring-filled") === "1") return;
+    [1, 2].forEach(function (leagueNum) {
+      var block = leaguesWrap.querySelector(".spring-rating-date-league--" + leagueNum);
+      if (!block) return;
+      var screensEl = block.querySelector(".winter-rating__screenshots[data-league=\"" + leagueNum + "\"]");
+      var tournamentsEl = block.querySelector(".winter-rating__date-tournaments-list[data-league=\"" + leagueNum + "\"]");
+      var tableEl = block.querySelector(".winter-rating__date-table-wrap[data-league=\"" + leagueNum + "\"]");
+      if (screensEl) fillScreensForDate(screensEl, dateStr, leagueNum);
+      if (tournamentsEl) {
+        var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100₽ до 500₽";
+        tournamentsEl.innerHTML = "<p class=\"winter-rating__date-tournaments-caption\">" + label + "</p>";
+      }
+      if (tableEl) {
+        var rows = getSpringRatingRowsForDateLeague(dateStr, leagueNum);
+        tableEl.innerHTML = rows && rows.length ? renderWinterRatingTable(rows) : "<p class=\"winter-rating__spring-placeholder\">Нет данных за эту дату</p>";
+      }
+    });
+    leaguesWrap.setAttribute("data-spring-filled", "1");
+  }
+  try {
+    window.__pokerFillSpringDateLeagues = fillSpringLeagueBlocks;
+  } catch (eSpringFill) {}
   dateItems.forEach(function (item) {
     try {
       var dateStr = item.getAttribute("data-rating-date");
@@ -10587,44 +10646,14 @@ function initWinterRating() {
       var tableWrap = item.querySelector(".winter-rating__date-table-wrap:not(.spring-rating-date-table)");
       var screensContainer = item.querySelector(".winter-rating__screenshots:not([data-league])");
       if (!btn || !panel) return;
-      function fillScreensForDate(container, dStr, leagueNum) {
-        if (!container) return;
-        var files = leagueNum != null
-          ? (getSpringRatingImagesByLeague(leagueNum)[dStr] || [])
-          : (getRatingImages()[dStr] || []);
-        if (!files || !files.length) return;
-        var cacheV = "v=18";
-        container.innerHTML = files.map(function (f, i) {
-          return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
-        }).join("");
-        container.querySelectorAll(".winter-rating__screenshot").forEach(function (cell, idx) {
-          var openLightbox = function (e) {
-            if (e) e.preventDefault();
-            openWinterRatingLightbox(dStr, idx, leagueNum);
-          };
-          cell.addEventListener("click", openLightbox);
-          cell.addEventListener("keydown", function (e) {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(); }
-          });
-        });
-      }
       if (leaguesWrap) {
-        var tabs = leaguesWrap.querySelectorAll(".spring-rating-date-league-tab");
-        var leagueBlocks = leaguesWrap.querySelectorAll(".spring-rating-date-league");
         [1, 2].forEach(function (leagueNum) {
           var block = leaguesWrap.querySelector(".spring-rating-date-league--" + leagueNum);
           if (!block) return;
-          var screensEl = block.querySelector(".winter-rating__screenshots[data-league=\"" + leagueNum + "\"]");
           var tournamentsEl = block.querySelector(".winter-rating__date-tournaments-list[data-league=\"" + leagueNum + "\"]");
-          var tableEl = block.querySelector(".winter-rating__date-table-wrap[data-league=\"" + leagueNum + "\"]");
-          if (screensEl) fillScreensForDate(screensEl, dateStr, leagueNum);
           if (tournamentsEl) {
-            var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100₽ до 500₽";
-            tournamentsEl.innerHTML = "<p class=\"winter-rating__date-tournaments-caption\">" + label + "</p>";
-          }
-          if (tableEl) {
-            var rows = getSpringRatingRowsForDateLeague(dateStr, leagueNum);
-            tableEl.innerHTML = rows && rows.length ? renderWinterRatingTable(rows) : "<p class=\"winter-rating__spring-placeholder\">Нет данных за эту дату</p>";
+            var capLabel = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100₽ до 500₽";
+            tournamentsEl.innerHTML = "<p class=\"winter-rating__date-tournaments-caption\">" + capLabel + "</p>";
           }
         });
         if (leaguesWrap.getAttribute("data-tabs-bound") !== "1") {
@@ -10663,12 +10692,7 @@ function initWinterRating() {
           btn.setAttribute("aria-expanded", open ? "true" : "false");
           if (open) {
             if (leaguesWrap) {
-              [1, 2].forEach(function (leagueNum) {
-                var block = leaguesWrap.querySelector(".spring-rating-date-league--" + leagueNum);
-                if (!block) return;
-                var screensEl = block.querySelector(".winter-rating__screenshots[data-league=\"" + leagueNum + "\"]");
-                if (screensEl) fillScreensForDate(screensEl, dateStr, leagueNum);
-              });
+              fillSpringLeagueBlocks(leaguesWrap, dateStr);
             } else if (screensContainer) fillScreensForDate(screensContainer, dateStr);
           }
           requestAnimationFrame(function () { window.scrollTo(0, scrollY); });
@@ -10695,9 +10719,23 @@ function initWinterRating() {
       return b.localeCompare(a);
     }).map(function (k) { return monthSet[k]; });
     if (isSpringRatingMode()) {
-      availableMonths = [{ year: 2026, month: 3 }];
       var springByDate = getSpringRatingTournamentsByDate();
-      availableDates = typeof springByDate === "object" ? Object.keys(springByDate).filter(function (d) { return /\.03\.2026$/.test(d); }).sort(function (a, b) { return winterRatingDateKeyToStamp(b) - winterRatingDateKeyToStamp(a); }) : [];
+      var springKeys = typeof springByDate === "object" && springByDate ? Object.keys(springByDate) : [];
+      availableDates = springKeys
+        .filter(function (d) { return /\.2026$/.test(d); })
+        .sort(function (a, b) { return winterRatingDateKeyToStamp(b) - winterRatingDateKeyToStamp(a); });
+      var monthSetSpring = {};
+      availableDates.forEach(function (d) {
+        var p = d ? d.split(".") : [];
+        if (p.length >= 3) {
+          var y = parseInt(p[2], 10);
+          var m = parseInt(p[1], 10);
+          if (y && m) monthSetSpring[y + "-" + (m < 10 ? "0" + m : m)] = { year: y, month: m };
+        }
+      });
+      availableMonths = Object.keys(monthSetSpring)
+        .sort(function (a, b) { return b.localeCompare(a); })
+        .map(function (k) { return monthSetSpring[k]; });
     }
     if (!availableMonths.length) return;
     calendarWrap._availableMonths = availableMonths;
@@ -10712,6 +10750,8 @@ function initWinterRating() {
     var dateModalBody = document.getElementById("winterRatingDateModalBody");
     function openDateModal(dateStr, panel) {
       if (!dateModal || !dateModalBody || !panel) return;
+      var lwModal = panel.querySelector(".spring-rating-date-leagues");
+      if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr);
       dateModalBody.innerHTML = "";
       var clone = panel.cloneNode(true);
       clone.classList.remove("winter-rating__date-panel--hidden");
@@ -17384,6 +17424,23 @@ function initChat() {
     }
   }
 
+  function formatClubChatJoinedAt(iso) {
+    if (!iso || String(iso).trim() === "") return "дата неизвестна";
+    var d = new Date(String(iso).trim());
+    if (isNaN(d.getTime())) return "дата неизвестна";
+    try {
+      return d.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      return "дата неизвестна";
+    }
+  }
+
   function openChatClubAccessModal() {
     var modal = document.getElementById("chatClubAccessModal");
     var pendingEl = document.getElementById("chatClubAdminPendingList");
@@ -17438,11 +17495,30 @@ function initChat() {
                 nm +
                 "</button>"
               : nm;
-          return (
-            '<div class="chat-club-access-modal__row"><span class="chat-club-access-modal__name">' +
+          var joinedLine = "";
+          if (type === "inChat") {
+            if (u.isAdmin) {
+              joinedLine =
+                '<span class="chat-club-access-modal__joined">Администратор</span>';
+            } else {
+              joinedLine =
+                '<span class="chat-club-access-modal__joined">Вступил: ' +
+                escapeHtml(formatClubChatJoinedAt(u.joinedAt)) +
+                "</span>";
+            }
+          }
+          var nameCol =
+            '<span class="chat-club-access-modal__name-col">' +
+            '<span class="chat-club-access-modal__name-line">' +
             nameBlock +
             adminBadge +
-            '</span><span class="chat-club-access-modal__actions">' +
+            "</span>" +
+            joinedLine +
+            "</span>";
+          return (
+            '<div class="chat-club-access-modal__row">' +
+            nameCol +
+            '<span class="chat-club-access-modal__actions">' +
             btns +
             "</span></div>"
           );
