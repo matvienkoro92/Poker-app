@@ -1336,8 +1336,8 @@ html.app-view-home .home-welcome-outline {
   /* Справа/сверху/снизу — как раньше; слева +8px к базовым 10px для основного контента (кнопка рейтинга компенсирует через переменные) */
   --home-outline-pad-x: 10px;
   --home-outline-pad-left: 18px;
-  /* Снизу: полоса под кнопкой рейтинга + зазор над таббаром 5px (см. pokerApplyBottomTabbarPad на главной) */
-  padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(40px + 10px + 34px) var(--home-outline-pad-left);
+  /* Снизу: полоса под кнопкой рейтинга + спойлеры март/апрель + зазор над таббаром (см. pokerApplyBottomTabbarPad) */
+  padding: calc(2mm + 10px) var(--home-outline-pad-x) calc(40px + 10px + 34px + 120px) var(--home-outline-pad-left);
 }
 /* «Рейтинг турнирщиков»: по центру, на верхней половине нижней линии обводки (как таб на рамке); на всю ширину рамки */
 html.app-view-home .home-welcome-outline .features--home-rating-on-border,
@@ -1370,6 +1370,113 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .featu
   width: auto !important;
   max-width: min(96vw, 380px) !important;
   flex: 0 1 auto;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: min(96vw, 380px);
+  pointer-events: auto;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats {
+  pointer-events: auto;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, rgba(30, 41, 59, 0.72), rgba(22, 31, 48, 0.82));
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
+}
+.spring-rating-home-promo-stats__heading {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fde68a;
+  letter-spacing: 0.03em;
+}
+.spring-rating-home-promo-stats__sub {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(248, 250, 252, 0.88);
+}
+.spring-rating-home-promo-stats__details--march {
+  margin: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 8px;
+}
+.spring-rating-home-promo-stats__summary {
+  cursor: pointer;
+  list-style: none;
+}
+.spring-rating-home-promo-stats__summary::-webkit-details-marker {
+  display: none;
+}
+.spring-rating-home-promo-stats__summary--march {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 6px 0 8px;
+  font-size: 12px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.spring-rating-home-promo-stats__summary-main {
+  font-weight: 600;
+}
+.spring-rating-home-promo-stats__summary-meta {
+  font-size: 11px;
+  color: rgba(248, 250, 252, 0.72);
+}
+.spring-rating-home-promo-stats__summary-meta strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+.spring-rating-home-promo-stats__nested {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0 2px 4px;
+  border-left: 2px solid rgba(251, 191, 36, 0.2);
+  margin-left: 2px;
+}
+.spring-rating-home-promo-stats__details--week {
+  margin: 0;
+  font-size: 11px;
+}
+.spring-rating-home-promo-stats__details--week summary {
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: 8px;
+  color: rgba(248, 250, 252, 0.85);
+  list-style: none;
+}
+.spring-rating-home-promo-stats__details--week summary::-webkit-details-marker {
+  display: none;
+}
+.spring-rating-home-promo-stats__details--week summary:hover {
+  background: rgba(251, 191, 36, 0.08);
+}
+[data-theme="light"] .spring-rating-home-promo-stats {
+  background: linear-gradient(165deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
+  border-color: rgba(217, 119, 6, 0.35);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__heading {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-home-promo-stats__sub,
+[data-theme="light"] .spring-rating-home-promo-stats__summary--march,
+[data-theme="light"] .spring-rating-home-promo-stats__details--week summary {
+  color: rgba(30, 41, 59, 0.92);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__summary-meta {
+  color: rgba(30, 41, 59, 0.65);
 }
 /* +10px воздуха между рядом «Зал славы» + иконки и кнопкой «Рейтинг турнирщиков» у нижней обводки */
 html.app-view-home .home-welcome-outline > .hero-row,

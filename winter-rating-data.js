@@ -1,4 +1,4 @@
-// Данные зимнего рейтинга. Обновлять по датам. Подключается до app.js. Учитывать данные и с синих, и с красных скринов (призовые = выигрыш × 100).
+// Данные зимнего рейтинга. Обновлять по датам. Подключается после app.js (defer). Учитывать данные и с синих, и с красных скринов (призовые = выигрыш × 100).
 var WINTER_RATING_BY_DATE = {
   "31.01.2026": [
     { nick: "ПокерМанки", points: 135, reward: 24528 },
@@ -2194,7 +2194,16 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
   "04.04.2026": [
     "rating-04-04-2026-league1-s-bounty-2-3-150k-00h.png",
     "rating-04-04-2026-league1-dv-turbo-500-90k-10h.png",
-    "rating-04-04-2026-league1-new-hot-pko-2-3-15h.png"
+    "rating-04-04-2026-league1-dv-rebuy-12h.png",
+    "rating-04-04-2026-league1-new-hot-pko-2-3-15h.png",
+    "rating-04-04-2026-league1-nok-20h.png"
+  ],
+  "05.04.2026": [
+    "rating-05-04-2026-league1-s-bounty-2-3-150k-00h.png",
+    "rating-05-04-2026-league1-dv-rebuy-12h.png",
+    "rating-05-04-2026-league1-6plus-holdem-500-15h.png",
+    "rating-05-04-2026-league1-rebuy-17h.png",
+    "rating-05-04-2026-league1-voskresnyj-tournir-18h.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2308,10 +2317,16 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-04-04-2026-league2-deep-night-20k-02h.png",
     "rating-04-04-2026-league2-magic-bounty-60k-11h.png",
     "rating-04-04-2026-league2-plo4-25k-16h.png",
-    "rating-04-04-2026-league2-hyper-turbo-300-20h.png"
+    "rating-04-04-2026-league2-hyper-turbo-300-20h.png",
+    "rating-04-04-2026-league2-mok-mko-7max-21h.png"
+  ],
+  "05.04.2026": [
+    "rating-05-04-2026-league2-tournament-rebuy-14h.png",
+    "rating-05-04-2026-league2-mok-mko-7max-21h.png",
+    "rating-05-04-2026-league2-energetik-22h.png"
   ]
 };
-var SPRING_RATING_UPDATED = "04.04.2026";
+var SPRING_RATING_UPDATED = "05.04.2026";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
@@ -3667,6 +3682,13 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "11:00", name: "Magic Bounty🥊 60k", buyin: 10000, league: 2, players: [
       { nick: "Рыбнадзор", place: 3, reward: 2348 }
     ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 15200, league: 1, players: [
+      { nick: "FrankL", place: 2, reward: 9040 },
+      { nick: "Waaar", place: 6, reward: 0 },
+      { nick: "VOSOvec", place: 7, reward: 0 },
+      { nick: "Банк_Псб", place: 10, reward: 0 },
+      { nick: "Andrei350", place: 11, reward: 0 }
+    ] },
     { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
       { nick: "хер вам)))))", place: 6, reward: 5232 },
       { nick: "Бардюр", place: 11, reward: 67 },
@@ -3676,8 +3698,77 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Sarmat1305", place: 4, reward: 2136 },
       { nick: "YuraK700", place: 7, reward: 1056 }
     ] },
+    { time: "20:00", name: "НОК 🥊", buyin: 28000, league: 1, players: [
+      { nick: "@Felix", place: 2, reward: 16875 },
+      { nick: "Waaar", place: 3, reward: 8719 },
+      { nick: "simba", place: 10, reward: 0 },
+      { nick: "kriak", place: 11, reward: 0 },
+      { nick: "mr.Freeman", place: 13, reward: 563 }
+    ] },
     { time: "20:00", name: "💎Hyper Turbo 300💎", buyin: 300, league: 2, players: [
       { nick: "AlenaSt", place: 6, reward: 2850 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 16800, league: 2, players: [
+      { nick: "Ksuha", place: 1, reward: 13120 },
+      { nick: "Marishka", place: 4, reward: 1205 },
+      { nick: "XORTYRETSKOGO", place: 5, reward: 950 },
+      { nick: "Архитектор", place: 8, reward: 590 },
+      { nick: "набутылкин", place: 9, reward: 0 }
+    ] }
+  ],
+  "05.04.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 🥊 150k", buyin: 20000, league: 1, players: [
+      { nick: "Em13!!", place: 1, reward: 85920 },
+      { nick: "OMGraise_27", place: 2, reward: 0 },
+      { nick: "АршакМкртчян", place: 3, reward: 0 },
+      { nick: "Rusag81", place: 4, reward: 0 },
+      { nick: "kabanchik", place: 5, reward: 0 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 20000, league: 1, players: [
+      { nick: "FrankL", place: 3, reward: 7600 },
+      { nick: "Waaar", place: 4, reward: 0 },
+      { nick: "MilkyWay77", place: 7, reward: 0 },
+      { nick: "king00001", place: 8, reward: 0 },
+      { nick: "Ksuha", place: 11, reward: 0 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 5800, league: 2, players: [
+      { nick: "MilkyWay77", place: 2, reward: 2350 },
+      { nick: "PlayerHyeEr", place: 5, reward: 1020 },
+      { nick: "Ksuha", place: 8, reward: 0 },
+      { nick: "zagrebnagreb", place: 9, reward: 0 },
+      { nick: "Tanechka", place: 10, reward: 0 }
+    ] },
+    { time: "15:00", name: "🔶6+ HOLD'EM 500🔶", buyin: 500, league: 1, players: [
+      { nick: "kabanchik", place: 1, reward: 23510 },
+      { nick: "AndrushaMorf", place: 2, reward: 0 }
+    ] },
+    { time: "17:00", name: "Rebuy", buyin: 26400, league: 1, players: [
+      { nick: "Waaar", place: 2, reward: 14280 },
+      { nick: "king00001", place: 3, reward: 8500 },
+      { nick: "tatarin_1", place: 4, reward: 6800 },
+      { nick: "WiNifly", place: 5, reward: 6200 },
+      { nick: "Ksuha", place: 9, reward: 0 }
+    ] },
+    { time: "18:00", name: "Воскресный турнир", buyin: 106000, league: 1, players: [
+      { nick: "WiNifly", place: 2, reward: 42175 },
+      { nick: "Алеша™", place: 11, reward: 3500 },
+      { nick: "Waaar", place: 14, reward: 8225 },
+      { nick: "FrankL", place: 19, reward: 1350 },
+      { nick: "Sokol", place: 21, reward: 2475 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 20400, league: 2, players: [
+      { nick: "tatarin_1", place: 1, reward: 12000 },
+      { nick: "ДжекПотный", place: 2, reward: 12170 },
+      { nick: "Tanechka", place: 3, reward: 2310 },
+      { nick: "PlayerHyeEr", place: 4, reward: 1690 },
+      { nick: "Yaroslava", place: 5, reward: 1380 }
+    ] },
+    { time: "22:00", name: "Energetik Tournament", buyin: 11400, league: 2, players: [
+      { nick: "Shkarubo", place: 1, reward: 5950 },
+      { nick: "MilkyWay77", place: 2, reward: 3560 },
+      { nick: "ШЛЯПАУСАТ", place: 3, reward: 2370 },
+      { nick: "pitbulltip", place: 6, reward: 0 },
+      { nick: "PlayerHyeEr", place: 7, reward: 0 }
     ] }
   ]
 };

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.110">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.119">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -406,19 +406,50 @@
           <div class="view view--active" data-view="home">
             <div class="home-welcome-outline">
             <div class="features features--home-rating-on-border">
-              <div class="features-row features-row--full">
-                <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-promo" data-view-target="spring-rating" aria-label="Рейтинг турнирщиков весны на 250 000р">
-                  <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                  <div class="feature__body">
-                    <div class="feature__title feature__title--center feature__title--uppercase">
-                      <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                      <span class="feature__title-prize feature__title-prize--spring">На 250 000р</span>
-                      <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
-                     <span class="feature__title-updated">обновлено 03.04.26</span>
+              <div class="features-row features-row--full features-row--spring-promo-stack">
+                <div class="spring-rating-home-promo-wrap">
+                  <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-promo" data-view-target="spring-rating" aria-label="Рейтинг турнирщиков весны на 250 000р">
+                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
+                    <div class="feature__body">
+                      <div class="feature__title feature__title--center feature__title--uppercase">
+                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                        <span class="feature__title-prize feature__title-prize--spring">На 250 000р</span>
+                        <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
+                        <span class="feature__title-updated">обновлено 03.04.26</span>
+                      </div>
                     </div>
+                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
+                  </a>
+                  <div class="spring-rating-home-promo-stats" id="springRatingHomePromoStats" hidden>
+                    <div class="spring-rating-home-promo-stats__april-block">
+                      <p class="spring-rating-home-promo-stats__heading">Апрель</p>
+                      <p class="spring-rating-home-promo-stats__sub" id="springRatingHomePromoApril1Line">1—5 апреля · общий выигрыш —</p>
+                    </div>
+                    <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--march">
+                      <summary class="spring-rating-home-promo-stats__summary spring-rating-home-promo-stats__summary--march">
+                        <span class="spring-rating-home-promo-stats__summary-main"><strong>Март</strong> · итоги</span>
+                        <span class="spring-rating-home-promo-stats__summary-meta">Общий выигрыш за март: <strong id="springRatingHomePromoMarchTotal">—</strong></span>
+                      </summary>
+                      <div class="spring-rating-home-promo-stats__nested">
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW1">1—8 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW2">9—15 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW3">16—22 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW4">23—29 марта · —</summary>
+                        </details>
+                        <details class="spring-rating-home-promo-stats__details spring-rating-home-promo-stats__details--week">
+                          <summary id="springRatingHomePromoMarchW5">30—31 марта · —</summary>
+                        </details>
+                      </div>
+                    </details>
                   </div>
-                  <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                </a>
+                </div>
               </div>
             </div>
             <div class="welcome-title-row">
@@ -513,7 +544,7 @@
                         </div>
                         <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Время</span>
-                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="freerollHomeWeekTime">Сб, 18:00 МСК</span>
+                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="freerollHomeWeekTime">Ср, 18:00 МСК</span>
                         </div>
                       </div>
                       <div class="tournament-day-block__countdown">
@@ -5355,8 +5386,8 @@
     <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=301"></script>
-    <script defer src="./winter-rating-data.js?v=108"></script>
+    <script defer src="./app.js?v=310"></script>
+    <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
       (function () {
