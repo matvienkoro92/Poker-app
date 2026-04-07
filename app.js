@@ -12559,20 +12559,30 @@ function initRaffles() {
   (function initRafflesSubscribersAdminNotify() {
     if (!rafflesNotifySubsBtn) return;
     rafflesNotifySubsBtn.addEventListener("click", function () {
+      if (window.__pokerRaffleSubsBroadcastInFlight) return;
       if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
         return;
       }
+      window.__pokerRaffleSubsBroadcastInFlight = true;
       var btn = rafflesNotifySubsBtn;
       var originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = "Рассылаем…";
       if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = "";
       var extra = raffleManualBroadcastBodyFromCurrentRaffle();
+      var broadcastIdemKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
       fetch(base + "/api/raffle-manual-subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.assign(pokerGuestOrAuthedPostBody({}), extra)),
+        body: JSON.stringify(
+          Object.assign(pokerGuestOrAuthedPostBody({}), extra, {
+            broadcastIdempotencyKey: broadcastIdemKey,
+          })
+        ),
       })
         .then(raffleManualSubscribersParseResponse)
         .then(function (data) {
@@ -12617,6 +12627,7 @@ function initRaffles() {
           if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = POKER_NET_ERR;
         })
         .finally(function () {
+          window.__pokerRaffleSubsBroadcastInFlight = false;
           btn.disabled = false;
           btn.textContent = originalText;
         });
@@ -12721,10 +12732,12 @@ function initRaffles() {
   (function initRafflesRetryFailedBroadcast() {
     if (!rafflesRetryFailedBroadcastBtn) return;
     function runRetryFailedBroadcast() {
+      if (window.__pokerRaffleSubsBroadcastInFlight) return;
       if (!base || !initData) {
         if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
         return;
       }
+      window.__pokerRaffleSubsBroadcastInFlight = true;
       var btn = rafflesRetryFailedBroadcastBtn;
       var originalText = btn.textContent;
       btn.disabled = true;
@@ -12734,10 +12747,13 @@ function initRaffles() {
         rafflesNotifySubsHint.textContent = "";
       }
       var extra = raffleManualBroadcastBodyFromCurrentRaffle();
-      var payload = Object.assign(
-        { initData: initData, retryFailedOnly: true },
-        extra
-      );
+      var retryIdemKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
+      var payload = Object.assign({ initData: initData, retryFailedOnly: true }, extra, {
+        broadcastIdempotencyKey: retryIdemKey,
+      });
       fetch(base + "/api/raffle-manual-subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -12785,6 +12801,7 @@ function initRaffles() {
           if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = POKER_NET_ERR;
         })
         .finally(function () {
+          window.__pokerRaffleSubsBroadcastInFlight = false;
           btn.disabled = false;
           btn.textContent = originalText;
         });
