@@ -15697,6 +15697,9 @@ function initChat() {
     mountChatComposer("detached");
     syncChatInertForIosAccessory();
     try {
+      refreshChatSelfPinBars();
+    } catch (ePinDlg) {}
+    try {
       if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
     } catch (eDlgFlush) {}
     try {
@@ -15769,7 +15772,7 @@ function initChat() {
     openClubChatShell();
     loadGeneral();
   }
-  function openConvFromDialogs(userId, userName, dtId) {
+  function openConvFromDialogs(userId, userName, peerP21Id) {
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (generalView) generalView.classList.add("chat-general-view--hidden");
@@ -15783,7 +15786,7 @@ function initChat() {
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
     setTab("personal");
-    showConv(userId, userName || userId, dtId);
+    showConv(userId, userName || userId, peerP21Id);
     if (window.__pendingDepositMessage && chatComposerEl) {
       chatComposerDrafts.personal = String(window.__pendingDepositMessage);
       chatComposerEl.value = chatComposerDrafts.personal;
@@ -16647,7 +16650,7 @@ function initChat() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.userId) {
-          showConv(data.userId, data.userName || data.userId, data.dtId);
+          showConv(data.userId, data.userName || data.userId, data.p21Id);
           setTab("personal");
         } else {
           if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
@@ -16788,6 +16791,159 @@ function initChat() {
   var personalVoice = null;
   var chatCtxMsg = null;
   var chatCtxSource = null;
+
+  var CHAT_SELF_PINS_STORAGE_KEY = "poker_chat_self_pins_v1";
+  function pokerSelfPinStorageKey(source, peerId) {
+    return source === "general" ? "g" : "p:" + normalizePeerIdForChat(peerId || "");
+  }
+  function pokerLoadSelfPinsBucket() {
+    try {
+      var raw = localStorage.getItem(CHAT_SELF_PINS_STORAGE_KEY);
+      var o = raw ? JSON.parse(raw) : {};
+      return o && typeof o === "object" ? o : {};
+    } catch (eB) {
+      return {};
+    }
+  }
+  function pokerPersistSelfPinsBucket(bucket) {
+    try {
+      localStorage.setItem(CHAT_SELF_PINS_STORAGE_KEY, JSON.stringify(bucket));
+    } catch (eP) {}
+  }
+  function pokerGetSelfPin(source, peerId) {
+    var b = pokerLoadSelfPinsBucket();
+    var rec = b[pokerSelfPinStorageKey(source, peerId)];
+    return rec && rec.id ? rec : null;
+  }
+  function pokerSetSelfPin(source, peerId, record) {
+    if (!record || !record.id) return;
+    var b = pokerLoadSelfPinsBucket();
+    b[pokerSelfPinStorageKey(source, peerId)] = record;
+    pokerPersistSelfPinsBucket(b);
+  }
+  function pokerClearSelfPin(source, peerId) {
+    var b = pokerLoadSelfPinsBucket();
+    delete b[pokerSelfPinStorageKey(source, peerId)];
+    pokerPersistSelfPinsBucket(b);
+  }
+  function pokerMaybeClearSelfPinIfIdMissing(source, peerId, messages) {
+    var pin = pokerGetSelfPin(source, peerId);
+    if (!pin || !pin.id) return;
+    var list = messages || [];
+    if (!list.some(function (m) {
+      return m && String(m.id) === String(pin.id);
+    })) {
+      pokerClearSelfPin(source, peerId);
+    }
+  }
+  function pokerBuildSelfPinRecord(msg, el) {
+    if (!msg || !msg.id) return null;
+    var fromName = (msg.fromName || (msg.own ? resolveMyChatDisplayName() : "Игрок") || "Игрок").trim();
+    var text = (msg.text != null ? String(msg.text) : "").trim();
+    if (text.length > 400) text = text.slice(0, 400) + "…";
+    var imgEl = el && el.querySelector ? el.querySelector(".chat-msg__image") : null;
+    var imageSrc = imgEl && imgEl.src ? String(imgEl.src) : "";
+    var docName = "";
+    if (el && el.querySelector) {
+      var dl = el.querySelector(".chat-msg__document-link--view");
+      if (dl && dl.textContent) docName = String(dl.textContent).replace(/^📄\s*/, "").trim();
+    }
+    return {
+      id: String(msg.id),
+      own: !!msg.own,
+      fromName: fromName || "Игрок",
+      text: text,
+      hasImage: !!msg.hasImage,
+      hasVoice: !!msg.hasVoice,
+      hasDocument: !!msg.hasDocument,
+      imageSrc: imageSrc && imageSrc.indexOf("blob:") !== 0 ? imageSrc : "",
+      documentName: docName || "",
+    };
+  }
+  function pokerRenderSelfPinnedInnerHtml(pin) {
+    if (!pin || !pin.id) return "";
+    var isOwn = !!pin.own;
+    var cls = "chat-msg chat-msg--self-pin-stub " + (isOwn ? "chat-msg--own" : "chat-msg--other");
+    var bodyMain = "";
+    if (pin.hasImage && pin.imageSrc) {
+      bodyMain +=
+        '<div class="chat-msg__text"><img class="chat-pinned-self__thumb" src="' +
+        escapeHtml(pin.imageSrc) +
+        '" alt="" loading="lazy" decoding="async" /></div>';
+    } else if (pin.hasVoice) {
+      bodyMain += '<div class="chat-msg__text"><span class="chat-pinned-self__placeholder">[Голосовое сообщение]</span></div>';
+    } else if (pin.hasDocument) {
+      bodyMain +=
+        '<div class="chat-msg__text"><span class="chat-pinned-self__placeholder">📄 ' +
+        escapeHtml((pin.documentName || "Документ").slice(0, 80)) +
+        "</span></div>";
+    } else if (pin.text) {
+      bodyMain +=
+        '<div class="chat-msg__text">' +
+        linkTgUsernames(linkAppIds(linkUrls(escapeHtml(pin.text).replace(/\n/g, "<br>")))) +
+        "</div>";
+    } else {
+      bodyMain += '<div class="chat-msg__text"><span class="chat-pinned-self__placeholder">[Сообщение]</span></div>';
+    }
+    var who = escapeHtml(pin.fromName || "Игрок");
+    var meta =
+      '<div class="chat-msg__meta"><span class="chat-msg__name-block"><span class="chat-msg__name">' +
+      who +
+      "</span></span></div>";
+    var foot =
+      '<div class="chat-msg__footer"><span class="chat-msg__time" aria-hidden="true"> </span></div>';
+    var innerMsg =
+      '<div class="' +
+      cls +
+      '" data-msg-id="' +
+      escapeHtml(pin.id) +
+      '" data-msg-from-name="' +
+      who +
+      '"' +
+      (pin.text ? ' data-msg-text="' + escapeHtml(pin.text) + '"' : "") +
+      ">" +
+      '<div class="chat-msg__row"><div class="chat-msg__body chat-msg__body--has-text">' +
+      meta +
+      '<div class="chat-msg__body-main">' +
+      bodyMain +
+      foot +
+      "</div></div></div></div>";
+    return (
+      '<div class="chat-pinned-self__label">Закреплено для вас</div>' +
+      innerMsg
+    );
+  }
+  function refreshChatSelfPinBars() {
+    var gHost = document.getElementById("chatGeneralPinnedSelf");
+    if (gHost) {
+      var gPin = pokerGetSelfPin("general", null);
+      if (!gPin || !gPin.id) {
+        gHost.classList.remove("chat-pinned-self--visible");
+        gHost.innerHTML = "";
+        gHost.setAttribute("aria-hidden", "true");
+      } else {
+        gHost.innerHTML = pokerRenderSelfPinnedInnerHtml(gPin);
+        gHost.classList.add("chat-pinned-self--visible");
+        gHost.setAttribute("aria-hidden", "false");
+        attachContextMenuForOthers(gHost, "general", generalMessages);
+      }
+    }
+    var pHost = document.getElementById("chatPersonalPinnedSelf");
+    if (pHost) {
+      var peerP = chatWithUserId;
+      var pPin = peerP ? pokerGetSelfPin("personal", peerP) : null;
+      if (!pPin || !pPin.id || !peerP) {
+        pHost.classList.remove("chat-pinned-self--visible");
+        pHost.innerHTML = "";
+        pHost.setAttribute("aria-hidden", "true");
+      } else {
+        pHost.innerHTML = pokerRenderSelfPinnedInnerHtml(pPin);
+        pHost.classList.add("chat-pinned-self--visible");
+        pHost.setAttribute("aria-hidden", "false");
+        attachContextMenuForOthers(pHost, "personal", messagesEl);
+      }
+    }
+  }
 
   // Редактирование сообщения через окно ввода:
   // - по кнопке "Изменить" (в контекстном меню) заполняем input заново
@@ -17132,8 +17288,14 @@ function initChat() {
     messages = (messages || []).filter(function (m) {
       return !(m && m.clubAdmissionNotice);
     });
+    try {
+      pokerMaybeClearSelfPinIfIdMissing("general", null, messages);
+    } catch (ePinG) {}
     if (!messages || messages.length === 0) {
       generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
+      try {
+        refreshChatSelfPinBars();
+      } catch (ePinG2) {}
       return;
     }
     var myIdRender = resolveMyChatMemberId();
@@ -17335,10 +17497,14 @@ function initChat() {
         startChatEdit("general", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
       });
     });
-    attachContextMenuForOthers(generalMessages, "general");
+    attachContextMenuForOthers(generalMessages, "general", generalMessages);
+    try {
+      refreshChatSelfPinBars();
+    } catch (ePinRfG) {}
   }
 
-  function attachContextMenuForOthers(container, source) {
+  function attachContextMenuForOthers(container, source, scrollParentOpt) {
+    var scrollParent = scrollParentOpt || container;
     var ctxMenu = document.getElementById("chatContextMenu");
     var ctxBackdrop = document.getElementById("chatContextBackdrop");
     var longPressTimer = null;
@@ -17349,15 +17515,40 @@ function initChat() {
       chatCtxSource = source;
       ctxOpenedForEl = el;
       if (!ctxMenu) return;
-      var isOwn = !!msg.own;
-      var canEdit = isOwn && !msg.hasImage && !msg.hasVoice && !msg.hasDocument;
-      var canDelete = isOwn || !!chatIsAdmin;
-      ctxMenu.querySelectorAll("[data-action=\"delete\"]").forEach(function (item) {
-        item.style.display = canDelete ? "" : "none";
-      });
-      ctxMenu.querySelectorAll("[data-action=\"edit\"]").forEach(function (item) {
-        item.style.display = canEdit ? "" : "none";
-      });
+      var stub = el.classList.contains("chat-msg--self-pin-stub");
+      var reactRow = ctxMenu.querySelector(".chat-ctx-menu__reactions");
+      if (stub) {
+        if (reactRow) reactRow.style.display = "none";
+        ctxMenu.querySelectorAll(".chat-ctx-menu__item").forEach(function (item) {
+          var a = item.dataset.action;
+          if (a === "unpin") item.style.display = "";
+          else if (a === "copy" && msg.text) item.style.display = "";
+          else item.style.display = "none";
+        });
+      } else {
+        if (reactRow) reactRow.style.display = "";
+        var isOwn = !!msg.own;
+        var canEdit = isOwn && !msg.hasImage && !msg.hasVoice && !msg.hasDocument;
+        var canDelete = isOwn || !!chatIsAdmin;
+        ctxMenu.querySelectorAll("[data-action=\"delete\"]").forEach(function (item) {
+          item.style.display = canDelete ? "" : "none";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"edit\"]").forEach(function (item) {
+          item.style.display = canEdit ? "" : "none";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"pin\"]").forEach(function (item) {
+          item.style.display = msg && msg.id ? "" : "none";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"unpin\"]").forEach(function (item) {
+          item.style.display = "none";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"reply\"]").forEach(function (item) {
+          item.style.display = "";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"copy\"]").forEach(function (item) {
+          item.style.display = "";
+        });
+      }
       if (ctxBackdrop) {
         ctxBackdrop.classList.add("chat-ctx-backdrop--visible");
         ctxBackdrop.setAttribute("aria-hidden", "false");
@@ -17394,8 +17585,8 @@ function initChat() {
       requestAnimationFrame(function () {
         var layout = computeCtxMenuLayout();
         /* Меню обрезается сверху — чуть сдвигаем только scrollTop ленты чата, не трогая document */
-        if (layout.menuTop < 12 && container) {
-          container.scrollTop = Math.max(0, container.scrollTop - (12 - layout.menuTop));
+        if (layout.menuTop < 12 && scrollParent) {
+          scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop - (12 - layout.menuTop));
         }
         requestAnimationFrame(function () {
           layout = computeCtxMenuLayout();
@@ -17425,6 +17616,14 @@ function initChat() {
       function onLongPress(coords) {
         var textEl = el.querySelector(".chat-msg__text");
         var text = textEl ? (textEl.textContent || "").trim() : "";
+        if (el.classList.contains("chat-msg--self-pin-stub") && el.dataset.msgText) {
+          text = String(el.dataset.msgText || "")
+            .replace(/&quot;/g, '"')
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&amp;/g, "&")
+            .trim();
+        }
         var hasImage = !!el.querySelector(".chat-msg__image");
         var hasVoice = !!el.querySelector(".chat-msg__voice");
         var hasDocument = !!el.querySelector(".chat-msg__document");
@@ -17492,6 +17691,7 @@ function initChat() {
       function onMenuEditCapture(e) {
         var editBtn = e.target && e.target.closest ? e.target.closest(".chat-ctx-menu__item[data-action=\"edit\"]") : null;
         if (!editBtn) return;
+        if (ctxOpenedForEl && ctxOpenedForEl.classList.contains("chat-msg--self-pin-stub")) return;
         var m = chatCtxMsg;
         var sr = chatCtxSource;
         if (!m || !m.own) return;
@@ -17602,6 +17802,27 @@ function initChat() {
               else loadMessages();
             }
           }).finally(function () { hideMenu(); });
+        } else if (action === "pin" && msg.id && el) {
+          var peerPin = src === "personal" ? chatWithUserId : null;
+          if (src === "personal" && !peerPin) {
+            hideMenu();
+            return;
+          }
+          var rec = pokerBuildSelfPinRecord(msg, el);
+          if (rec) {
+            pokerSetSelfPin(src, peerPin, rec);
+            refreshChatSelfPinBars();
+          }
+          hideMenu();
+        } else if (action === "unpin") {
+          var peerUn = src === "personal" ? chatWithUserId : null;
+          if (src === "personal" && !peerUn) {
+            hideMenu();
+            return;
+          }
+          pokerClearSelfPin(src, peerUn);
+          refreshChatSelfPinBars();
+          hideMenu();
         } else {
           hideMenu();
         }
@@ -17905,9 +18126,12 @@ function initChat() {
     if (convView) convView.classList.add("chat-conv-view--hidden");
     updateChatHeaderStats();
     loadContacts();
+    try {
+      refreshChatSelfPinBars();
+    } catch (ePinLst) {}
   }
 
-  function showConv(userId, userName, dtIdFromContact) {
+  function showConv(userId, userName, peerP21IdFromContact) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
     if (myOpen && userId && peerChatIdsEqual(userId, myOpen)) {
@@ -17923,7 +18147,10 @@ function initChat() {
       var nm = (userName && String(userName).trim()) ? String(userName).trim() : (userId ? String(userId) : "");
       convTitle.textContent = nm;
     }
-    if (convTitleId) convTitleId.textContent = dtIdFromContact != null && String(dtIdFromContact).trim() ? String(dtIdFromContact).trim() : "\u2014";
+    if (convTitleId) {
+      convTitleId.textContent =
+        peerP21IdFromContact != null && String(peerP21IdFromContact).trim() ? String(peerP21IdFromContact).trim() : "\u2014";
+    }
     personalReplyTo = null;
     personalImage = null;
     personalVoice = null;
@@ -18179,6 +18406,12 @@ function initChat() {
               var btn = existing[i];
               if (!btn) return;
               btn.dataset.chatOnline = c.online ? "1" : "0";
+              if (c.p21Id != null && String(c.p21Id).trim() !== "") btn.dataset.chatP21Id = String(c.p21Id).trim();
+              else try {
+                delete btn.dataset.chatP21Id;
+              } catch (eP21d) {
+                btn.removeAttribute("data-chat-p21-id");
+              }
               var onEl = btn.querySelector(".chat-contact__online");
               if (onEl) {
                 var nowVisible = !!c.online;
@@ -18210,7 +18443,31 @@ function initChat() {
             var avatarEl = c.avatar
               ? '<img class="chat-contact__avatar" src="' + escapeHtml(c.avatar) + '" alt="" loading="lazy" />'
               : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + '</span>';
-            return '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' + escapeHtml(c.id) + '" data-chat-name="' + escapeHtml(c.name) + '" data-chat-initial="' + escapeHtml(initial) + '" data-chat-online="' + (c.online ? "1" : "0") + '"' + (c.dtId ? ' data-chat-dt-id="' + escapeHtml(c.dtId) + '"' : '') + '>' + avatarEl + '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block"><span class="chat-contact__label">' + escapeHtml(c.name) + '</span><span class="chat-contact__role' + roleClass + '">' + escapeHtml(roleText) + '</span></span><span class="chat-contact__right">' + onlineHtml + '</span></span>' + unreadBadge + '</button>';
+            return (
+              '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
+              escapeHtml(c.id) +
+              '" data-chat-name="' +
+              escapeHtml(c.name) +
+              '" data-chat-initial="' +
+              escapeHtml(initial) +
+              '" data-chat-online="' +
+              (c.online ? "1" : "0") +
+              '"' +
+              (c.p21Id ? ' data-chat-p21-id="' + escapeHtml(String(c.p21Id)) + '"' : "") +
+              ">" +
+              avatarEl +
+              '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block"><span class="chat-contact__label">' +
+              escapeHtml(c.name) +
+              '</span><span class="chat-contact__role' +
+              roleClass +
+              '">' +
+              escapeHtml(roleText) +
+              '</span></span><span class="chat-contact__right">' +
+              onlineHtml +
+              "</span></span>" +
+              unreadBadge +
+              "</button>"
+            );
           }).join("");
           contactsEl.innerHTML = '<div class="chat-dialogs-block">' + contactButtons + '</div>';
           updateDialogUnreadBadges();
@@ -18276,8 +18533,14 @@ function initChat() {
 
   function renderMessages(messages) {
     if (!messagesEl) return;
+    try {
+      pokerMaybeClearSelfPinIfIdMissing("personal", chatWithUserId, messages);
+    } catch (ePinPM) {}
     if (!messages || messages.length === 0) {
       messagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
+      try {
+        refreshChatSelfPinBars();
+      } catch (ePinPM2) {}
       return;
     }
     function personalReceiptHtml(m, isOwn) {
@@ -18452,7 +18715,10 @@ function initChat() {
         if (typeof window._loadRespectVotersList === "function") window._loadRespectVotersList(id);
       });
     });
-    attachContextMenuForOthers(messagesEl, "personal");
+    attachContextMenuForOthers(messagesEl, "personal", messagesEl);
+    try {
+      refreshChatSelfPinBars();
+    } catch (ePinRfP) {}
   }
 
   function loadMessages() {
@@ -18475,8 +18741,10 @@ function initChat() {
         var ol = data.onlineCount != null ? data.onlineCount : "—";
         window.lastConvStats = pt + " уч · " + ol + " онл";
         updateChatHeaderStats();
-        if (data.otherDtId != null && convTitleId) {
-          convTitleId.textContent = String(data.otherDtId).trim() || "—";
+        if (convTitleId) {
+          var titleP21 =
+            data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
+          convTitleId.textContent = titleP21 || "—";
         }
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
@@ -19715,9 +19983,9 @@ function initChat() {
           if (tg && tg.showAlert) tg.showAlert("Укажите data-chat-user-id (ID приложения или Telegram ID)");
           return;
         }
-        function doShow(tgUserId) {
+        function doShow(tgUserId, peerP21) {
           setTab("personal");
-          showConv(tgUserId, userName);
+          showConv(tgUserId, userName, peerP21);
         }
         if (raw.startsWith("tg_")) {
           doShow(raw);
@@ -19726,7 +19994,7 @@ function initChat() {
           fetch(base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
             .then(function (r) { return r.json(); })
             .then(function (data) {
-              if (data && data.ok && data.userId) doShow(data.userId);
+              if (data && data.ok && data.userId) doShow(data.userId, data.p21Id);
               else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
             })
             .catch(function () { if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); });
@@ -19769,7 +20037,7 @@ function initChat() {
             findByIdBtn.disabled = false;
             findByIdInput.value = "";
             if (data && data.ok && data.userId) {
-              showConv(data.userId, data.userName || data.userId);
+              showConv(data.userId, data.userName || data.userId, data.p21Id);
             } else {
               if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
             }
@@ -20640,7 +20908,7 @@ function initChat() {
         return;
       }
       if (el.classList && el.classList.contains("chat-contact") && el.dataset.chatId) {
-        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, el.dataset.chatDtId);
+        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, el.dataset.chatP21Id);
         return;
       }
       if (el.getAttribute && el.getAttribute("data-chat-user-id")) {
@@ -20904,7 +21172,7 @@ function initChat() {
         .then(function (r) { return r.json(); })
         .then(function (data) {
           findByIdInputDialogs.value = "";
-          if (data && data.ok && data.userId) openConvFromDialogs(data.userId, data.userName || data.userId, data.dtId);
+          if (data && data.ok && data.userId) openConvFromDialogs(data.userId, data.userName || data.userId, data.p21Id);
           else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
         })
         .catch(function () {

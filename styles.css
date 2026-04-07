@@ -6427,9 +6427,65 @@ img.chat-contact__avatar {
   min-height: 0;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   /* Шапка с кнопками будет поверх (absolute), поэтому не смещаем ленту */
   margin-top: 0;
   padding-top: 0;
+}
+.chat-pinned-self {
+  flex: 0 0 auto;
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px max(8px, var(--screen-gutter-x)) 6px;
+  background: rgba(15, 23, 42, 0.45);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  z-index: 3;
+}
+.chat-pinned-self.chat-pinned-self--visible {
+  display: block;
+}
+[data-theme="light"] .chat-pinned-self {
+  background: rgba(241, 245, 249, 0.92);
+  border-bottom-color: rgba(148, 163, 184, 0.35);
+}
+.chat-pinned-self__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.chat-pinned-self .chat-msg--self-pin-stub {
+  margin-top: 0;
+  margin-bottom: 0;
+  max-width: 100%;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body {
+  padding: 8px 10px;
+  max-width: 100%;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__footer {
+  margin-top: 4px;
+}
+.chat-pinned-self .chat-pinned-self__thumb {
+  max-width: 120px;
+  max-height: 72px;
+  border-radius: 8px;
+  display: block;
+  margin-top: 4px;
+  object-fit: cover;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__text {
+  font-size: 13px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.chat-pinned-self__placeholder {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 /* Первые кадры после подстановки HTML: не показываем ленту с scrollTop=0 до выставления низа — убирает мерцание «верх→низ». */
 .chat-general-view .chat-messages-wrap.chat-messages-wrap--settling,
@@ -6438,11 +6494,9 @@ img.chat-contact__avatar {
   transition: none;
 }
 .chat-general-view .chat-messages {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
   max-height: none;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -6753,13 +6807,13 @@ img.chat-contact__avatar {
   min-height: 0;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .chat-container .chat-messages {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
   max-height: none;
   overflow-y: scroll;
   overflow-x: hidden;
