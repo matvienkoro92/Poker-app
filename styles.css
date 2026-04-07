@@ -4951,9 +4951,25 @@ html.club-charter-modal-open {
   flex-direction: column;
   align-items: stretch;
   gap: 2px;
+  --chat-msg-image-column-w: min(calc(260px / 1.5), calc(70vw / 1.5));
 }
 .chat-msg__body-main--with-image .chat-msg__text {
   flex: 0 1 auto;
+  /* Текст и ссылки не шире колонки превью */
+  max-width: var(--chat-msg-image-column-w);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.chat-msg--own .chat-msg__body-main--with-image .chat-msg__text {
+  align-self: flex-end;
+}
+.chat-msg--other .chat-msg__body-main--with-image .chat-msg__text {
+  align-self: flex-start;
+}
+.chat-msg__body-main--with-image .chat-msg__image {
+  max-width: var(--chat-msg-image-column-w);
 }
 .chat-msg__body-main--with-image .chat-msg__footer {
   align-self: flex-end;
