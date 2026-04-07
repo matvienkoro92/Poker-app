@@ -2700,10 +2700,10 @@ body[data-view="cashout"] {
 }
 /* Клавиатура открыта: лента чуть ниже (+10px к верхнему отступу), композер поднимается сильнее через JS */
 html.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages {
-  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 22px);
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
 }
 html.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
-  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 22px);
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
 }
 /* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
    чтобы не было дёрганий и белых вспышек. */
@@ -4975,6 +4975,13 @@ html.club-charter-modal-open {
   align-self: flex-end;
   margin-top: 2px;
 }
+/* Свои фото в ленте: в 1,5× крупнее базового превью min(260px/1.5, 70vw/1.5) */
+.chat-msg--own .chat-msg__body-main--with-image {
+  --chat-msg-image-column-w: min(260px, 70vw);
+}
+.chat-msg--own .chat-msg__image {
+  max-width: min(260px, 70vw);
+}
 .chat-msg__admit-nick-missing {
   color: var(--text-muted);
   font-size: 0.92em;
@@ -6418,8 +6425,8 @@ img.chat-contact__avatar {
   min-height: 0;
   overflow: hidden;
   width: 100%;
-  /* Высота плавающей полосы кнопок под системной шапкой (промежуточная: не 48px, не ультра-компакт) */
-  --chat-general-floating-toolbar-h: 56px;
+  /* Высота плавающей полосы «Назад + кнопки»; safe-area сверху даёт .app в режиме чата */
+  --chat-general-floating-toolbar-h: 48px;
 }
 .chat-general-view--hidden { display: none !important; }
 .chat-general-view .chat-messages-wrap {
@@ -6453,7 +6460,7 @@ img.chat-contact__avatar {
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: calc(48px + var(--chat-general-floating-toolbar-h));
+  margin-top: var(--chat-general-floating-toolbar-h);
   margin-left: 0;
   margin-right: 0;
 }
@@ -6467,7 +6474,7 @@ img.chat-contact__avatar {
   border-top-color: rgba(148, 163, 184, 0.22);
 }
 .chat-conv-view > .chat-pinned-self {
-  margin-top: calc(48px + var(--chat-general-floating-toolbar-h));
+  margin-top: var(--chat-general-floating-toolbar-h);
   margin-left: 0;
   margin-right: 0;
 }
@@ -6685,7 +6692,7 @@ img.chat-contact__avatar {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   /* Лента под плавающей шапкой чата */
-  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 12px);
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
   padding-left: max(8px, var(--screen-gutter-x));
   padding-right: max(8px, var(--screen-gutter-x));
   box-sizing: border-box;
@@ -6767,8 +6774,8 @@ img.chat-contact__avatar {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  /* Совпадает с .chat-general-view — высота плавающего ряда под системной шапкой */
-  --chat-general-floating-toolbar-h: 56px;
+  /* Совпадает с .chat-general-view — высота плавающей полосы; safe-area сверху у .app */
+  --chat-general-floating-toolbar-h: 48px;
 }
 .chat-conv-view--hidden { display: none !important; }
 .chat-conv-top {
@@ -6779,7 +6786,7 @@ img.chat-contact__avatar {
   margin-bottom: 0;
   min-height: 0;
   position: absolute;
-  top: 48px;
+  top: 0;
   left: 0;
   right: 0;
   transform: none;
@@ -6796,7 +6803,7 @@ img.chat-contact__avatar {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 8px 0;
+  padding: 4px 0;
   border-radius: 0;
   background: rgba(15, 23, 42, 0.28);
   backdrop-filter: none;
@@ -6808,7 +6815,7 @@ img.chat-contact__avatar {
 /* Имя/ID сразу справа от «Назад», плашка тянется как заголовок в общем чате */
 .chat-conv-view .chat-conv-top-inner {
   justify-content: flex-start;
-  padding: 8px max(8px, var(--screen-gutter-x, 12px));
+  padding: 4px max(8px, var(--screen-gutter-x, 12px));
 }
 .chat-conv-top .chat-back-btn {
   margin-bottom: 0;
@@ -7004,7 +7011,7 @@ img.chat-contact__avatar {
 }
 /* Личные сообщения: лента под плавающей шапкой + доп. зазор */
 .chat-conv-view .chat-container .chat-messages {
-  padding-top: calc(48px + var(--chat-general-floating-toolbar-h) + 12px);
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
   padding-left: max(8px, var(--screen-gutter-x));
   padding-right: max(8px, var(--screen-gutter-x));
   box-sizing: border-box;
@@ -7474,7 +7481,7 @@ body[data-view="chat"]
   gap: 8px;
   margin-bottom: 0;
   flex-wrap: nowrap;
-  padding: 8px max(8px, var(--screen-gutter-x, 12px));
+  padding: 4px max(8px, var(--screen-gutter-x, 12px));
   background: rgba(15, 23, 42, 0.26);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -7482,7 +7489,7 @@ body[data-view="chat"]
   border-radius: 0;
   box-shadow: none;
   position: absolute;
-  top: 48px;
+  top: 0;
   left: 0;
   right: 0;
   transform: none;
