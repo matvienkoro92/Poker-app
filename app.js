@@ -13089,6 +13089,7 @@ function initRaffles() {
   }
   if (createBtn) {
     createBtn.addEventListener("click", function () {
+      if (window.__pokerRaffleCreateInFlight) return;
       var isTickets = getRaffleCreateType() === "tickets";
       var endDateEl = isTickets ? raffleEndDateInput : raffleEndDateOther;
       var endVal = endDateEl ? endDateEl.value : "";
@@ -13163,7 +13164,12 @@ function initRaffles() {
         totalWinners = Math.max(1, totalWinners);
         title = document.getElementById("raffleTitle") ? document.getElementById("raffleTitle").value.trim().slice(0, 200) : "";
       }
+      window.__pokerRaffleCreateInFlight = true;
       createBtn.disabled = true;
+      var idemKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -13174,19 +13180,24 @@ function initRaffles() {
             groups: groups,
             endDate: endDate.toISOString(),
             title: title || undefined,
+            createIdempotencyKey: idemKey,
           })
         ),
       })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+          window.__pokerRaffleCreateInFlight = false;
           createBtn.disabled = false;
           if (data && data.ok && data.raffle) {
             createForm.classList.add("raffle-create-form--hidden");
             loadRaffles();
-            if (tg && tg.showAlert) tg.showAlert("Розыгрыш создан");
+            if (!data.idempotentReplay && tg && tg.showAlert) tg.showAlert("Розыгрыш создан");
           } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
         })
-        .catch(function () { createBtn.disabled = false; });
+        .catch(function () {
+          window.__pokerRaffleCreateInFlight = false;
+          createBtn.disabled = false;
+        });
     });
   }
 
