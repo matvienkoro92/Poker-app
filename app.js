@@ -4254,15 +4254,13 @@ function getPokerResolvedTelegramUser() {
   /**
    * PWA с иконки: WebApp может отдать initDataUnsafe.user без подписанного initData.
    * Старый критерий «есть user → Mini App» ломал вход: ждали initData, экран TWO ACES/«идентификация» зависал.
-   * Считаем установленный PWA отдельно: только непустой initData отключает PWA-экран (режим с подписью).
+   * Режим display-mode: standalone / navigator.standalone достаточен: в Mini App Telegram это обычно не так.
+   * Нельзя отключать PWA-экран по непустому initData — telegram-web-app.js кладёт tgWebAppData в sessionStorage;
+   * после Safari/Mini App с тем же origin в установленном PWA подтягивается чужой initData → ветка Mini App,
+   * shouldSuppress гасит баннер, вход не крепится — пользователь видит пустой/белый экран.
    */
   function isPwaStandaloneAuth() {
-    if (!isPwaStandaloneMode()) return false;
-    try {
-      var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (wtg && String(wtg.initData || "").trim()) return false;
-    } catch (e) {}
-    return true;
+    return isPwaStandaloneMode();
   }
   /**
    * Не показываем карточку «Верификация для входа в PWA» внутри клиента Telegram (Mini App / WebView).
@@ -5506,7 +5504,7 @@ function getPokerResolvedTelegramUser() {
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
-    if (!initData && isPwaStandaloneAuth()) {
+    if (isPwaStandaloneAuth()) {
       runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
       return;
     }
