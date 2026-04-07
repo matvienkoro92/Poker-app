@@ -4810,6 +4810,23 @@ html.club-charter-modal-open {
   user-select: none;
   flex-shrink: 0;
 }
+.chat-msg__meta-sub {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.chat-msg__meta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1 1 0;
+  max-width: 100%;
+  gap: 0;
+}
+.chat-msg__meta-stack > .chat-msg__name-btn {
+  align-self: stretch;
+}
 .chat-msg__name-row {
   display: flex;
   align-items: center;

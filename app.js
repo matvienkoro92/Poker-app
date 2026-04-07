@@ -16725,17 +16725,6 @@ function initChat() {
     var suit = n <= 13 ? "треф" : n <= 26 ? "бубны" : n <= 39 ? "черви" : "пики";
     return cardName + " " + suit;
   }
-  function levelToStatusCard(level) {
-    var n = parseInt(level, 10);
-    if (isNaN(n) || n < 1) return "2\u2663";
-    if (n === 53) return "джокер обычный";
-    if (n === 54) return "джокер сияющий";
-    if (n >= 55) return "Бог покера";
-    var value = ((n - 1) % 13) + 2;
-    var cardChar = value <= 10 ? String(value) : value === 11 ? "J" : value === 12 ? "Q" : value === 13 ? "K" : "A";
-    var suitSym = n <= 13 ? "\u2663" : n <= 26 ? "\u2666" : n <= 39 ? "\u2665" : "\u2660";
-    return cardChar + suitSym;
-  }
   /** Только догрузка картинок — без тройного snap (первый вход в чат). */
   function pinChatMessagesToBottomImagesOnly(el) {
     if (!el) return;
@@ -16861,19 +16850,19 @@ function initChat() {
         : '<span class="chat-msg__avatar-spacer"></span>';
       var nameStr = escapeHtml(m.fromName || "Игрок");
       var p21Str = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
-      var rankCard = m.fromStatus != null ? (levelToStatusCard(m.fromStatus) || String(m.fromStatus)) : "2\u2663";
       var respectVal = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
       var respectClass = "chat-msg__respect";
       if (m.fromRespect > 0) respectClass += " chat-msg__respect--positive";
       else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
       var respectDataAttrs = !isOwn && m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
       var sep = '<span class="chat-msg__meta-sep"> · </span>';
-      var metaLineParts = '<span class="chat-msg__name">' + nameStr + "</span>" + sep + '<span class="chat-msg__p21-inline">P21: ' + p21Str + "</span>" + sep + '<span class="chat-msg__rank-inline">' + escapeHtml(rankCard) + "</span>";
-      var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Уважение: ' + escapeHtml(respectVal) + "</span></span>";
+      var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span></div>";
+      var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
+      var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
       var pmAvatarAttr = !isOwn && m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
       var nameEl = isOwn
-        ? '<div class="chat-msg__meta-line">' + metaLineParts + sep + respectPart + "</div>"
-        : '<button type="button" class="chat-msg__name-btn" data-pm-id="' + escapeHtml(m.from) + '" data-pm-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' + pmAvatarAttr + '><div class="chat-msg__meta-line">' + metaLineParts + "</div></button>" + sep + respectPart;
+        ? '<div class="chat-msg__meta-stack">' + metaLineTop + metaLineRespect + "</div>"
+        : '<div class="chat-msg__meta-stack"><button type="button" class="chat-msg__name-btn" data-pm-id="' + escapeHtml(m.from) + '" data-pm-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' + pmAvatarAttr + ">" + metaLineTop + "</button>" + metaLineRespect + "</div>";
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtml = "";
       if (m.id && m.reactions && typeof m.reactions === "object") {
@@ -17346,9 +17335,10 @@ function initChat() {
         textContent = escapeHtml(text).replace(/\n/g, "<br>");
       }
     }
-    var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(myNmOpt) + '</span>' +
-      '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
-      '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
+    var sepOpt = '<span class="chat-msg__meta-sep"> · </span>';
+    var optMeta = '<div class="chat-msg__meta-stack">' +
+      '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + escapeHtml(myNmOpt) + "</span>" + sepOpt + '<span class="chat-msg__p21-inline">\u2014</span></div>' +
+      '<div class="chat-msg__meta-line chat-msg__meta-sub"><span class="chat-msg__respect" title="Уважение в чате">Ув: \u2014</span></div></div>';
     var optBodyClass = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
     var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + '</span></div></div></div></div>';
     var wrap = document.createElement("div");
@@ -18023,12 +18013,17 @@ function initChat() {
         : '<span class="chat-msg__avatar-spacer"></span>';
       var nameStrP = escapeHtml(m.fromName || "Игрок");
       var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
-      var rankCardP = m.fromStatus != null ? (levelToStatusCard(m.fromStatus) || String(m.fromStatus)) : "2\u2663";
-      var nameRowP = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + nameStrP + "</span>" +
-        '<span class="chat-msg__p21-inline">P21_ID: ' + p21StrP + "</span>" +
-        '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">' + escapeHtml(rankCardP) + "</span></span></div>";
-      var metaBlockP = nameRowP;
-      var nameElP = isOwn ? metaBlockP : '<span class="chat-msg__name-block">' + metaBlockP + "</span>";
+      var respectValP = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
+      var respectClassP = "chat-msg__respect";
+      if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
+      else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
+      var respectDataAttrsP = !isOwn && m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
+      var sepP = '<span class="chat-msg__meta-sep"> · </span>';
+      var metaLineTopP = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStrP + "</span>" + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span></div>";
+      var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
+      var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
+      var metaContentP = '<div class="chat-msg__meta-stack">' + metaLineTopP + metaLineRespectP + "</div>";
+      var nameElP = isOwn ? metaContentP : '<span class="chat-msg__name-block">' + metaContentP + "</span>";
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtmlP = "";
       if (m.id && m.reactions && typeof m.reactions === "object") {
@@ -18107,6 +18102,18 @@ function initChat() {
         var oldText = (btn.dataset.msgText || "").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         if (!msgId) return;
         startChatEdit("personal", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
+      });
+    });
+    messagesEl.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
+      row.addEventListener("click", function () {
+        var id = row.dataset.userId;
+        if (!id || !pokerApiHasCredential() || !base) return;
+        var modal = document.getElementById("respectVotersModal");
+        if (!modal) return;
+        modal.dataset.targetUserId = id;
+        modal.classList.add("respect-voters-modal--open");
+        modal.setAttribute("aria-hidden", "false");
+        if (typeof window._loadRespectVotersList === "function") window._loadRespectVotersList(id);
       });
     });
     attachContextMenuForOthers(messagesEl, "personal");
@@ -18247,9 +18254,10 @@ function initChat() {
           textContent = escapeHtml(String(text)).replace(/\n/g, "<br>");
         }
       }
-      var optMeta = '<div class="chat-msg__name-row"><span class="chat-msg__name">' + escapeHtml(nameStr) + '</span>' +
-        '<span class="chat-msg__p21-inline">P21_ID: —</span>' +
-        '<span class="chat-msg__rank-inline">Ранг: <span class="chat-msg__rank-card">2♣</span></span></div>';
+      var sepOptP = '<span class="chat-msg__meta-sep"> · </span>';
+      var optMeta = '<div class="chat-msg__meta-stack">' +
+        '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + escapeHtml(nameStr) + "</span>" + sepOptP + '<span class="chat-msg__p21-inline">\u2014</span></div>' +
+        '<div class="chat-msg__meta-line chat-msg__meta-sub"><span class="chat-msg__respect" title="Уважение в чате">Ув: \u2014</span></div></div>';
       var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
       var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
       var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + '</span>' + ticks + '</div></div></div></div>';
