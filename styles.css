@@ -5387,7 +5387,8 @@ html.club-charter-modal-open {
   display: block;
   margin-top: 4px;
   cursor: pointer;
-  max-width: min(260px, 70vw);
+  /* Превью в 1,5× компактнее прежнего min(260px, 70vw); файл без пережатия — полное качество по нажатию */
+  max-width: min(calc(260px / 1.5), calc(70vw / 1.5));
   width: 100%;
   height: auto;
   border-radius: 10px;

@@ -15008,6 +15008,23 @@ function initChat() {
   var base = getApiBase();
   /* учётные данные чата: pokerApiAuth* (Mini App initData или PWA pwaSession) */
 
+  function syncChatRespectDisplayForUser(userId, score) {
+    if (!userId || score == null || typeof document === "undefined") return;
+    var n = typeof score === "number" ? score : parseInt(score, 10);
+    if (isNaN(n)) n = 0;
+    var label = n === 0 ? "\u2014" : String(n);
+    document.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
+      if (row.getAttribute("data-user-id") !== String(userId)) return;
+      var sp = row.querySelector(".chat-msg__respect");
+      if (!sp) return;
+      sp.textContent = "Ув: " + label;
+      sp.classList.remove("chat-msg__respect--positive", "chat-msg__respect--negative");
+      if (n > 0) sp.classList.add("chat-msg__respect--positive");
+      else if (n < 0) sp.classList.add("chat-msg__respect--negative");
+    });
+  }
+  window.syncChatRespectDisplayForUser = syncChatRespectDisplayForUser;
+
   var chatUserModalEl = document.getElementById("chatUserModal");
   var chatUserModalUserId = null;
   var chatUserModalUserName = null;
@@ -15143,10 +15160,13 @@ function initChat() {
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) {
             updateChatUserModalRespectButtons("up");
-            if (modalRespectVal) {
+            if (modalRespectVal && d.score != null && d.score !== "") {
+              modalRespectVal.textContent = String(d.score);
+            } else if (modalRespectVal) {
               var n = parseInt(modalRespectVal.textContent, 10);
-              modalRespectVal.textContent = (isNaN(n) ? 0 : n) + 1;
+              modalRespectVal.textContent = String((isNaN(n) ? 0 : n) + 1);
             }
+            if (d.score != null && d.score !== "") window.syncChatRespectDisplayForUser(chatUserModalUserId, d.score);
           } else {
             modalRespectUp.disabled = false;
             if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_raised" ? "Уже поднимали" : (d && d.error) || "Ошибка");
@@ -15166,10 +15186,13 @@ function initChat() {
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) {
             updateChatUserModalRespectButtons("down");
-            if (modalRespectVal) {
+            if (modalRespectVal && d.score != null && d.score !== "") {
+              modalRespectVal.textContent = String(d.score);
+            } else if (modalRespectVal) {
               var n = parseInt(modalRespectVal.textContent, 10);
-              modalRespectVal.textContent = (isNaN(n) ? 0 : n) - 1;
+              modalRespectVal.textContent = String((isNaN(n) ? 0 : n) - 1);
             }
+            if (d.score != null && d.score !== "") window.syncChatRespectDisplayForUser(chatUserModalUserId, d.score);
           } else {
             modalRespectDown.disabled = false;
             if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_lowered" ? "Уже уменьшали" : (d && d.error) || "Ошибка");
@@ -15244,8 +15267,12 @@ function initChat() {
           body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "up" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           rvBtnUp.disabled = false;
-          if (d && d.ok) loadRespectVotersList(targetId);
-          else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_raised" ? "Уже поднимали" : (d && d.error) || "Ошибка");
+          if (d && d.ok) {
+            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
+              window.syncChatRespectDisplayForUser(targetId, d.score);
+            }
+            loadRespectVotersList(targetId);
+          } else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_raised" ? "Уже поднимали" : (d && d.error) || "Ошибка");
         }).catch(function () { rvBtnUp.disabled = false; });
       });
     }
@@ -15260,8 +15287,12 @@ function initChat() {
           body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "down" })),
         }).then(function (r) { return r.json(); }).then(function (d) {
           rvBtnDown.disabled = false;
-          if (d && d.ok) loadRespectVotersList(targetId);
-          else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_lowered" ? "Уже уменьшали" : (d && d.error) || "Ошибка");
+          if (d && d.ok) {
+            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
+              window.syncChatRespectDisplayForUser(targetId, d.score);
+            }
+            loadRespectVotersList(targetId);
+          } else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_lowered" ? "Уже уменьшали" : (d && d.error) || "Ошибка");
         }).catch(function () { rvBtnDown.disabled = false; });
       });
     }
