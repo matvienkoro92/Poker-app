@@ -16658,7 +16658,15 @@ function initChat() {
   }
 
   function resizeImage(file, maxW, maxH, quality) {
-    maxW = maxW || 400; maxH = maxH || 400; quality = quality || 0.8;
+    maxW = maxW || 800;
+    maxH = maxH || 800;
+    if (quality == null || isNaN(quality)) quality = 0.92;
+    /* Цель по длине base64 — укладываться в лимит chat.js (450k), без обрыва на q=0.6 */
+    var JPEG_MAX_B64 = 400000;
+    function jpegBase64Len(dataUrl) {
+      var c = dataUrl.indexOf(",");
+      return c >= 0 ? dataUrl.length - c - 1 : dataUrl.length;
+    }
     return new Promise(function (resolve, reject) {
       var img = new Image();
       var url = URL.createObjectURL(file);
@@ -16672,12 +16680,32 @@ function initChat() {
         canvas.width = w; canvas.height = h;
         var ctx = canvas.getContext("2d");
         if (!ctx) { resolve(url); return; }
+        function encodeUnderLimit() {
+          var q = quality;
+          var dataUrl = null;
+          var a;
+          for (a = 0; a < 12; a++) {
+            dataUrl = canvas.toDataURL("image/jpeg", q);
+            if (jpegBase64Len(dataUrl) <= JPEG_MAX_B64) return dataUrl;
+            q = Math.max(0.74, q - 0.04);
+          }
+          return dataUrl;
+        }
         ctx.drawImage(img, 0, 0, w, h);
         try {
-          var dataUrl = canvas.toDataURL("image/jpeg", quality);
-          if (dataUrl.length > 250000) {
-            resolve(canvas.toDataURL("image/jpeg", 0.6));
-          } else resolve(dataUrl);
+          var out = encodeUnderLimit();
+          if (jpegBase64Len(out) > JPEG_MAX_B64) {
+            var w2 = Math.max(480, Math.round(w * 0.85));
+            var h2 = Math.max(480, Math.round(h * 0.85));
+            canvas.width = w2;
+            canvas.height = h2;
+            ctx = canvas.getContext("2d");
+            if (!ctx) { resolve(out); return; }
+            ctx.drawImage(img, 0, 0, w2, h2);
+            quality = 0.92;
+            out = encodeUnderLimit();
+          }
+          resolve(out);
         } catch (e) { reject(e); }
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Не удалось загрузить")); };
@@ -19457,8 +19485,8 @@ function initChat() {
         var f = generalFileInput.files && generalFileInput.files[0];
         if (!f || !f.type.startsWith("image/")) return;
         generalDocument = null;
-        // До 400×400 JPEG с ленты — баланс читаемости и размера в Redis/трафике (как в личке).
-        resizeImage(f, 400, 400, 0.88).then(function (dataUrl) {
+        // До 800px по длинной стороне, JPEG ~0.92; при перегрузе лимита API плавно снижаем q (не «мыло» 0.6).
+        resizeImage(f, 800, 800, 0.92).then(function (dataUrl) {
           generalImage = dataUrl;
           updateGeneralSendBtnIcon();
           if (generalImagePreview) {
@@ -20064,7 +20092,7 @@ function initChat() {
         var f = personalFileInput.files && personalFileInput.files[0];
         if (!f || !f.type.startsWith("image/")) return;
         personalDocument = null;
-        resizeImage(f, 400, 400, 0.88).then(function (dataUrl) {
+        resizeImage(f, 800, 800, 0.92).then(function (dataUrl) {
           personalImage = dataUrl;
           updatePersonalSendBtnIcon();
           if (personalImagePreview) {
