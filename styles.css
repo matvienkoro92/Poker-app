@@ -6535,7 +6535,7 @@ img.chat-contact__avatar {
   width: 100%;
   padding: 8px 0;
   border-radius: 0;
-  background: rgba(15, 23, 42, 0.16);
+  background: rgba(15, 23, 42, 0.28);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
@@ -6628,8 +6628,8 @@ img.chat-contact__avatar {
   padding: 6px 12px;
   margin: 0;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.09);
   color: rgba(248, 250, 252, 0.88);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px) saturate(1.25);
@@ -6664,7 +6664,7 @@ img.chat-contact__avatar {
   text-align: center;
 }
 [data-theme="light"] .chat-conv-peer-title-chip {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.48);
   border-color: rgba(15, 23, 42, 0.12);
   color: rgba(30, 41, 59, 0.88);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
@@ -7212,7 +7212,7 @@ body[data-view="chat"]
   margin-bottom: 0;
   flex-wrap: nowrap;
   padding: 8px max(8px, var(--screen-gutter-x, 12px));
-  background: transparent;
+  background: rgba(15, 23, 42, 0.26);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
@@ -7258,8 +7258,8 @@ body[data-view="chat"]
   letter-spacing: 0;
   border-radius: 16px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(248, 250, 252, 0.88);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px) saturate(1.25);
@@ -7268,7 +7268,7 @@ body[data-view="chat"]
   transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
@@ -7286,8 +7286,8 @@ body[data-view="chat"]
   margin: 0;
   padding: 0 12px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.09);
   color: rgba(248, 250, 252, 0.88);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px) saturate(1.25);
@@ -7305,12 +7305,12 @@ body[data-view="chat"]
   transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .chat-general-header__title-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.48);
   border-color: rgba(15, 23, 42, 0.12);
   color: rgba(30, 41, 59, 0.88);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
@@ -7318,12 +7318,12 @@ body[data-view="chat"]
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back:hover {
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.56);
   border-color: rgba(15, 23, 42, 0.14);
   color: #0f172a;
 }
 [data-theme="light"] .chat-general-header__title-btn {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.48);
   border-color: rgba(15, 23, 42, 0.12);
   color: rgba(30, 41, 59, 0.88);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
@@ -7331,7 +7331,7 @@ body[data-view="chat"]
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 [data-theme="light"] .chat-general-header__title-btn:hover {
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.56);
   border-color: rgba(15, 23, 42, 0.14);
   color: #0f172a;
 }
@@ -7356,16 +7356,16 @@ body[data-view="chat"]
   letter-spacing: 0;
   border-radius: 16px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.17);
   color: rgba(248, 250, 252, 0.88);
   box-shadow: none;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.17);
   color: #fff;
 }
 [data-theme="light"] .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back {
@@ -7393,8 +7393,8 @@ body[data-view="chat"]
   height: var(--chat-general-header-strip-min-height);
   min-height: var(--chat-general-header-strip-min-height);
   max-height: var(--chat-general-header-strip-min-height);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.17);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px) saturate(1.25);
@@ -7545,16 +7545,16 @@ body[data-view="chat"]
 }
 [data-theme="light"] .chat-general-header__segments {
   border-color: rgba(15, 23, 42, 0.12);
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.48);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 [data-theme="light"] .chat-general-header {
-  background: transparent;
+  background: rgba(226, 232, 240, 0.55);
 }
 [data-theme="light"] .chat-conv-top-inner {
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(226, 232, 240, 0.52);
 }
 [data-theme="light"] .chat-general-header__segment {
   border-right-color: rgba(15, 23, 42, 0.1);
@@ -7580,14 +7580,14 @@ body[data-view="chat"]
     -webkit-backdrop-filter: none;
   }
   .chat-general-header {
-    background: transparent;
+    background: rgba(15, 23, 42, 0.94);
   }
   .chat-conv-top-inner {
-    background: rgba(30, 41, 59, 0.92);
+    background: rgba(15, 23, 42, 0.96);
   }
   [data-theme="light"] .chat-general-header,
   [data-theme="light"] .chat-conv-top-inner {
-    background: rgba(248, 250, 252, 0.94);
+    background: rgba(226, 232, 240, 0.96);
   }
   [data-theme="light"] .chat-general-header .chat-back-btn.chat-general-header__toolbar-back,
   [data-theme="light"] .chat-general-header__title-btn,
