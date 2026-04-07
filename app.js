@@ -16791,6 +16791,8 @@ function initChat() {
   var personalVoice = null;
   var chatCtxMsg = null;
   var chatCtxSource = null;
+  /** Элемент сообщения для меню — общий для всех вызовов attachContextMenuForOthers (runAction вешается только на первый). */
+  var chatCtxOpenedEl = null;
 
   var CHAT_SELF_PINS_STORAGE_KEY = "poker_chat_self_pins_v1";
   function pokerSelfPinStorageKey(source, peerId) {
@@ -17509,11 +17511,10 @@ function initChat() {
     var ctxBackdrop = document.getElementById("chatContextBackdrop");
     var longPressTimer = null;
     var menuOpenedAt = 0;
-    var ctxOpenedForEl = null;
     function showMenu(el, msg, coords) {
       chatCtxMsg = msg;
       chatCtxSource = source;
-      ctxOpenedForEl = el;
+      chatCtxOpenedEl = el;
       if (!ctxMenu) return;
       var stub = el.classList.contains("chat-msg--self-pin-stub");
       var reactRow = ctxMenu.querySelector(".chat-ctx-menu__reactions");
@@ -17595,9 +17596,11 @@ function initChat() {
       });
     }
     function hideMenu() {
-      if (ctxOpenedForEl) {
-        ctxOpenedForEl.classList.remove("chat-msg--ctx-highlight");
-        ctxOpenedForEl = null;
+      if (chatCtxOpenedEl) {
+        try {
+          chatCtxOpenedEl.classList.remove("chat-msg--ctx-highlight");
+        } catch (eHl) {}
+        chatCtxOpenedEl = null;
       }
       if (ctxBackdrop) {
         ctxBackdrop.classList.remove("chat-ctx-backdrop--visible");
@@ -17691,7 +17694,7 @@ function initChat() {
       function onMenuEditCapture(e) {
         var editBtn = e.target && e.target.closest ? e.target.closest(".chat-ctx-menu__item[data-action=\"edit\"]") : null;
         if (!editBtn) return;
-        if (ctxOpenedForEl && ctxOpenedForEl.classList.contains("chat-msg--self-pin-stub")) return;
+        if (chatCtxOpenedEl && chatCtxOpenedEl.classList.contains("chat-msg--self-pin-stub")) return;
         var m = chatCtxMsg;
         var sr = chatCtxSource;
         if (!m || !m.own) return;
@@ -17711,7 +17714,7 @@ function initChat() {
         if (!ctxMenu.classList.contains("chat-ctx-menu--visible")) return;
         if (ctxMenu.contains(e.target)) return;
         if (ctxBackdrop && ctxBackdrop.contains(e.target)) return;
-        if (ctxOpenedForEl && (e.target === ctxOpenedForEl || ctxOpenedForEl.contains(e.target))) return;
+        if (chatCtxOpenedEl && (e.target === chatCtxOpenedEl || chatCtxOpenedEl.contains(e.target))) return;
         hideMenu();
       }
       document.addEventListener("click", closeIfOutside);
@@ -17719,7 +17722,7 @@ function initChat() {
       function runAction(action, activeEl) {
         var msg = chatCtxMsg;
         var src = chatCtxSource;
-        var el = ctxOpenedForEl;
+        var el = chatCtxOpenedEl;
         if (!msg) {
           hideMenu();
           return;
