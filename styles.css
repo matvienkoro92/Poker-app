@@ -4900,6 +4900,27 @@ html.club-charter-modal-open {
   margin-top: 2px;
 }
 .chat-msg__text { word-wrap: break-word; white-space: pre-wrap; }
+/* Время в одной строке с текстом (короткие) или выровнено по нижнему краю блока текста (несколько строк), у правого края пузыря */
+.chat-msg__body-main {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.chat-msg__body-main--solo-footer {
+  justify-content: flex-end;
+}
+.chat-msg__body-main .chat-msg__text {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 3.75rem);
+}
+.chat-msg__body-main--solo-footer .chat-msg__footer {
+  max-width: 100%;
+}
 .chat-msg__admit-nick-missing {
   color: var(--text-muted);
   font-size: 0.92em;
@@ -4920,17 +4941,15 @@ html.club-charter-modal-open {
   font: inherit;
   cursor: pointer;
 }
-.chat-msg__footer {
-  display: flex;
+.chat-msg__body-main .chat-msg__footer {
+  display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 4px;
-  margin-top: -8px;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
+  margin-top: 0;
+  width: auto;
   justify-content: flex-end;
-  width: 100%;
-}
-.chat-msg__body--has-text .chat-msg__footer {
-  margin-top: 4px;
 }
 .chat-msg__reactions-wrap {
   display: flex;
@@ -5014,8 +5033,11 @@ html.club-charter-modal-open {
 .chat-msg__time {
   font-size: 11px;
   color: var(--text-muted);
-  margin-left: auto;
   white-space: nowrap;
+  line-height: 1.25;
+}
+.chat-msg__body-main .chat-msg__footer .chat-msg__ticks {
+  margin-left: 0;
 }
 .chat-msg__respect-row {
   margin-top: 2px;

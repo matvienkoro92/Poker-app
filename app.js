@@ -16879,7 +16879,10 @@ function initChat() {
       var reactionsRow = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtml + '</span></div>' : "";
       var metaBlock = isFirstInGroup ? nameEl + adminBadge : "";
       var bodyClass = "chat-msg__body" + (text && text.trim() ? " chat-msg__body--has-text" : "");
-      return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + textBlock + '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + '</div>' + reactionsRow + '</div></div></div>';
+      var footerHtmlG = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + "</div>";
+      var bodyMainClsG = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "");
+      var bodyMainHtmlG = '<div class="' + bodyMainClsG + '">' + textBlock + footerHtmlG + "</div>";
+      return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
     }).join("");
     var openingForceBottomG = scrollGeneralToBottomOnNextRender;
     var prevScrollTop = generalMessages.scrollTop;
@@ -17340,7 +17343,8 @@ function initChat() {
       '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + escapeHtml(myNmOpt) + "</span>" + sepOpt + '<span class="chat-msg__p21-inline">\u2014</span></div>' +
       '<div class="chat-msg__meta-line chat-msg__meta-sub"><span class="chat-msg__respect" title="Уважение в чате">Ув: \u2014</span></div></div>';
     var optBodyClass = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
-    var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + '</span></div></div></div></div>';
+    var optBodyMainG = '<div class="chat-msg__body-main"><div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + "</span></div></div>";
+    var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + optBodyMainG + '</div></div></div>';
     var wrap = document.createElement("div");
     var newNode = null;
     try {
@@ -18041,7 +18045,10 @@ function initChat() {
       var metaBlockP = isFirstInGroup ? nameElP + adminBadge : "";
       var bodyClassP = "chat-msg__body" + (text && text.trim() ? " chat-msg__body--has-text" : "");
       var ticks = personalReceiptHtml(m, isOwn);
-      return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + textBlock + '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticks + '</div>' + reactionsRowP + '</div></div></div>';
+      var footerHtmlP = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticks + "</div>";
+      var bodyMainClsP = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "");
+      var bodyMainHtmlP = '<div class="' + bodyMainClsP + '">' + textBlock + footerHtmlP + "</div>";
+      return '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + bodyMainHtmlP + reactionsRowP + '</div></div></div>';
     }).join("");
     var openingForceBottomP = scrollPersonalToBottomOnNextRender;
     var prevScrollTopP = messagesEl.scrollTop;
@@ -18260,7 +18267,8 @@ function initChat() {
         '<div class="chat-msg__meta-line chat-msg__meta-sub"><span class="chat-msg__respect" title="Уважение в чате">Ув: \u2014</span></div></div>';
       var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
       var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
-      var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + '<div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + '</span>' + ticks + '</div></div></div></div>';
+      var optBodyMainP = '<div class="chat-msg__body-main"><div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks + "</div></div>";
+      var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta">' + optMeta + '</div>' + replyBlock + optBodyMainP + '</div></div></div>';
       var wrap = document.createElement("div");
       var first = null;
       try {
