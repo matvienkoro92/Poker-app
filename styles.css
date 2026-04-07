@@ -534,11 +534,16 @@ body:has(.view--active[data-view="chat"]) {
   background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
 }
 html.app-view-chat #app.app,
+html:has(body[data-view="chat"]) #app.app,
 #app.app:has(.view--active[data-view="chat"]) {
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--bg-blur-gradient) !important;
+  /* Без бокового --app-gutter: лента и список диалогов на всю ширину карточки (остаются env safe-area). */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 [data-theme="light"] html.app-view-chat #app.app,
+[data-theme="light"] html:has(body[data-view="chat"]) #app.app,
 [data-theme="light"] #app.app:has(.view--active[data-view="chat"]) {
   background-color: var(--overscroll-canvas) !important;
   background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
@@ -2688,8 +2693,8 @@ body[data-view="cashout"] {
   border: none;
 }
 .view--active[data-view="chat"] .chat-input-area {
-  padding-left: max(8px, var(--screen-gutter-x));
-  padding-right: max(8px, var(--screen-gutter-x));
+  padding-left: 0;
+  padding-right: 0;
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
 }
 /* Лента чата: таббар скрыт — 65px не нужен (иначе пустая полоса над футером TG / домашней зоной).
@@ -6072,8 +6077,7 @@ img.chat-contact__avatar {
   min-height: 0;
   max-height: 100%;
   overflow: hidden;
-  /* Единые боковые отступы: строки админов и игроков визуально совпадают с остальными экранами. */
-  padding: 0 var(--screen-gutter-x) 0;
+  padding: 0;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
@@ -6360,7 +6364,7 @@ img.chat-contact__avatar {
 .chat-find-by-id--in-dialogs-scroll {
   margin-top: 4px;
   margin-bottom: 10px;
-  padding: 0 2px;
+  padding: 0;
   position: relative;
   z-index: 2;
 }
@@ -6470,7 +6474,7 @@ img.chat-contact__avatar {
   max-width: 100%;
   align-self: stretch;
   box-sizing: border-box;
-  padding: 4px max(8px, var(--screen-gutter-x)) 0;
+  padding: 4px 0 0;
   margin-bottom: 0;
   background: rgba(15, 23, 42, 0.45);
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
@@ -6486,6 +6490,10 @@ img.chat-contact__avatar {
   margin-top: var(--chat-general-floating-toolbar-h);
   margin-left: 0;
   margin-right: 0;
+}
+/* Без закрепов стек пустой по высоте: margin-top дублировал запас ленты (padding-top у .chat-messages) — лишний зазор сверху */
+.chat-general-view:not(.chat-general-view--any-pinned) > .chat-general-pinned-stack {
+  margin-top: 0;
 }
 .chat-general-pinned-stack .chat-pinned-self {
   margin-top: 0;
@@ -6716,8 +6724,8 @@ img.chat-contact__avatar {
   transform: translateZ(0);
   /* Лента под плавающей шапкой чата */
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
-  padding-left: max(8px, var(--screen-gutter-x));
-  padding-right: max(8px, var(--screen-gutter-x));
+  padding-left: 0;
+  padding-right: 0;
   box-sizing: border-box;
 }
 .chat-general-view .chat-input-area {
@@ -6838,7 +6846,7 @@ img.chat-contact__avatar {
 /* Имя/ID сразу справа от «Назад», плашка тянется как заголовок в общем чате */
 .chat-conv-view .chat-conv-top-inner {
   justify-content: flex-start;
-  padding: 4px max(8px, var(--screen-gutter-x, 12px));
+  padding: 4px 0;
 }
 .chat-conv-top .chat-back-btn {
   margin-bottom: 0;
@@ -6909,6 +6917,13 @@ img.chat-contact__avatar {
   min-width: 0;
   margin-bottom: 0;
   gap: 10px;
+}
+/* Имя у «Назад», аватар справа (в разметке сначала аватар, затем плашка) */
+.chat-conv-view .chat-conv-top .chat-conv-header .chat-conv-peer-title-chip {
+  order: 1;
+}
+.chat-conv-view .chat-conv-top .chat-conv-header .chat-conv-peer-avatar-wrap {
+  order: 2;
 }
 .chat-conv-peer-avatar-wrap {
   flex-shrink: 0;
@@ -7071,8 +7086,8 @@ img.chat-contact__avatar {
 /* Личные сообщения: лента под плавающей шапкой + доп. зазор */
 .chat-conv-view .chat-container .chat-messages {
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
-  padding-left: max(8px, var(--screen-gutter-x));
-  padding-right: max(8px, var(--screen-gutter-x));
+  padding-left: 0;
+  padding-right: 0;
   box-sizing: border-box;
 }
 .chat-conv-view .chat-messages > .chat-msg:first-child {
@@ -7540,7 +7555,7 @@ body[data-view="chat"]
   gap: 8px;
   margin-bottom: 0;
   flex-wrap: nowrap;
-  padding: 4px max(8px, var(--screen-gutter-x, 12px));
+  padding: 4px 0;
   background: rgba(15, 23, 42, 0.26);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
