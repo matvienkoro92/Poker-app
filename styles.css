@@ -6440,7 +6440,7 @@ img.chat-contact__avatar {
   max-width: 100%;
   align-self: stretch;
   box-sizing: border-box;
-  padding: 4px max(8px, var(--screen-gutter-x));
+  padding: 4px max(8px, var(--screen-gutter-x)) 0;
   margin-bottom: 0;
   background: rgba(15, 23, 42, 0.45);
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
@@ -6494,7 +6494,7 @@ img.chat-contact__avatar {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   width: 100%;
   text-align: center;
 }
@@ -6522,7 +6522,7 @@ img.chat-contact__avatar {
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body {
-  padding: 8px 10px;
+  padding: 6px 10px 0;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -6579,7 +6579,7 @@ img.chat-contact__avatar {
 }
 .chat-pinned-self .chat-pinned-self__thumb-wrap {
   flex: 0 0 auto;
-  width: 52px;
+  width: 78px;
   height: 52px;
   border-radius: 8px;
   overflow: hidden;
@@ -6609,14 +6609,22 @@ img.chat-contact__avatar {
   font-size: 13px;
   line-height: 1.35;
   word-break: break-word;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body-main .chat-msg__text,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body-main .chat-msg__text {
   flex: 0 1 auto;
+  min-width: 0;
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__footer,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__footer {
-  margin-top: 4px;
+  margin-top: 2px;
+  margin-bottom: 0;
   justify-content: center;
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__text,
@@ -6625,6 +6633,12 @@ img.chat-contact__avatar {
   line-height: 1.35;
   word-break: break-word;
   text-align: center;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 .chat-pinned-self__placeholder {
   color: var(--text-muted);
