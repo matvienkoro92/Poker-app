@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.180">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.186">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -214,7 +214,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=293" />
+    <link rel="stylesheet" href="./styles.css?v=298" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1655,7 +1655,10 @@
                   </button>
                 </div>
               </div>
+              <div class="chat-general-pinned-stack" id="chatGeneralPinnedStack">
+              <div class="chat-pinned-self" id="chatGeneralPinnedGlobal" aria-hidden="true"></div>
               <div class="chat-pinned-self" id="chatGeneralPinnedSelf" aria-hidden="true"></div>
+              </div>
               <div class="chat-messages-wrap">
               <div class="chat-messages" id="chatGeneralMessages" role="log" aria-live="polite">
                 <p class="chat-empty">Загрузка...</p>
@@ -1771,7 +1774,9 @@
                 <button type="button" class="chat-ctx-menu__item" data-action="reply"><span class="chat-ctx-menu__icon" aria-hidden="true">↩</span>Ответить</button>
                 <button type="button" class="chat-ctx-menu__item" data-action="copy"><span class="chat-ctx-menu__icon" aria-hidden="true">📋</span>Копировать</button>
                 <button type="button" class="chat-ctx-menu__item" data-action="pin"><span class="chat-ctx-menu__icon" aria-hidden="true">📌</span>Закрепить</button>
+                <button type="button" class="chat-ctx-menu__item" data-action="pin-global"><span class="chat-ctx-menu__icon" aria-hidden="true">📌</span>Закрепить для всех</button>
                 <button type="button" class="chat-ctx-menu__item" data-action="unpin"><span class="chat-ctx-menu__icon" aria-hidden="true">📍</span>Открепить</button>
+                <button type="button" class="chat-ctx-menu__item" data-action="unpin-global"><span class="chat-ctx-menu__icon" aria-hidden="true">📍</span>Открепить для всех</button>
                 <button type="button" class="chat-ctx-menu__item" data-action="edit"><span class="chat-ctx-menu__icon" aria-hidden="true">✎</span>Изменить</button>
                 <button type="button" class="chat-ctx-menu__item" data-action="delete"><span class="chat-ctx-menu__icon" aria-hidden="true">🗑</span>Удалить</button>
               </div>
@@ -5462,7 +5467,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=348"></script>
+    <script defer src="./app.js?v=353"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

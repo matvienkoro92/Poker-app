@@ -6445,19 +6445,40 @@ img.chat-contact__avatar {
   background: rgba(15, 23, 42, 0.45);
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   z-index: 3;
+  overflow-x: hidden;
 }
 /* Сразу под плавающей полосой «Главный чат» / имя+ID в личке */
-.chat-general-view > .chat-pinned-self,
+.chat-general-view > .chat-general-pinned-stack {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: calc(48px + var(--chat-general-floating-toolbar-h));
+  margin-left: 0;
+  margin-right: 0;
+}
+.chat-general-pinned-stack .chat-pinned-self {
+  margin-top: 0;
+}
+.chat-general-pinned-stack .chat-pinned-self + .chat-pinned-self {
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+[data-theme="light"] .chat-general-pinned-stack .chat-pinned-self + .chat-pinned-self {
+  border-top-color: rgba(148, 163, 184, 0.22);
+}
 .chat-conv-view > .chat-pinned-self {
   margin-top: calc(48px + var(--chat-general-floating-toolbar-h));
   margin-left: 0;
   margin-right: 0;
 }
 .chat-pinned-self.chat-pinned-self--visible {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 /* Лента без двойного отступа: место под шапку занимает полоса закрепления */
-.chat-general-view.chat-general-view--self-pinned .chat-messages-wrap .chat-messages {
+.chat-general-view.chat-general-view--any-pinned .chat-messages-wrap .chat-messages {
   padding-top: 4px;
 }
 .chat-conv-view.chat-conv-view--self-pinned .chat-container .chat-messages {
@@ -6474,35 +6495,162 @@ img.chat-contact__avatar {
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 4px;
+  width: 100%;
+  text-align: center;
 }
-.chat-pinned-self .chat-msg--self-pin-stub {
+.chat-pinned-self .chat-msg--self-pin-stub,
+.chat-pinned-self .chat-msg--global-pin-stub {
   margin-top: 0;
   margin-bottom: 0;
   max-width: 100%;
+  width: 100%;
+  align-self: center;
 }
-.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body {
+.chat-pinned-self .chat-msg--self-pin-stub.chat-msg--own,
+.chat-pinned-self .chat-msg--self-pin-stub.chat-msg--other,
+.chat-pinned-self .chat-msg--global-pin-stub.chat-msg--own,
+.chat-pinned-self .chat-msg--global-pin-stub.chat-msg--other {
+  align-self: center;
+}
+.chat-pinned-self .chat-msg--self-pin-stub.chat-msg--pin-with-thumb,
+.chat-pinned-self .chat-msg--global-pin-stub.chat-msg--pin-with-thumb {
+  align-self: stretch;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__row,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__row {
+  justify-content: center;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body {
   padding: 8px 10px;
   max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
-.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__footer {
-  margin-top: 4px;
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__meta,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__meta {
+  justify-content: center;
 }
-.chat-pinned-self .chat-pinned-self__thumb {
-  max-width: 120px;
-  max-height: 72px;
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__name-block,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__name-block {
+  text-align: center;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body-main,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body-main {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.chat-pinned-self .chat-msg--pin-with-thumb .chat-msg__row {
+  justify-content: stretch;
+  width: 100%;
+  max-width: 100%;
+}
+.chat-pinned-self .chat-msg--pin-with-thumb {
+  width: 100%;
+  max-width: 100%;
+}
+.chat-pinned-self .chat-msg--pin-with-thumb .chat-msg__body {
+  text-align: left;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+.chat-pinned-self .chat-msg--pin-with-thumb .chat-msg__body-main {
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+}
+.chat-pinned-self .chat-pinned-self__media-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+}
+.chat-pinned-self .chat-pinned-self__media-row--thumb-only {
+  width: auto;
+  align-self: flex-start;
+}
+.chat-pinned-self .chat-pinned-self__thumb-wrap {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
   border-radius: 8px;
-  display: block;
-  margin-top: 4px;
-  object-fit: cover;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.12);
 }
-.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__text {
+[data-theme="light"] .chat-pinned-self .chat-pinned-self__thumb-wrap {
+  background: rgba(15, 23, 42, 0.06);
+}
+.chat-pinned-self .chat-pinned-self__thumb-wrap .chat-pinned-self__thumb {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  display: block;
+  object-fit: cover;
+  border-radius: 0;
+}
+.chat-pinned-self .chat-pinned-self__text-col {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: left;
+}
+.chat-pinned-self .chat-msg--pin-with-thumb .chat-pinned-self__text-col .chat-msg__text {
+  text-align: left;
+  margin: 0;
   font-size: 13px;
   line-height: 1.35;
   word-break: break-word;
 }
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body-main .chat-msg__text,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body-main .chat-msg__text {
+  flex: 0 1 auto;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__footer,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__footer {
+  margin-top: 4px;
+  justify-content: center;
+}
+.chat-pinned-self .chat-msg--self-pin-stub .chat-msg__text,
+.chat-pinned-self .chat-msg--global-pin-stub .chat-msg__text {
+  font-size: 13px;
+  line-height: 1.35;
+  word-break: break-word;
+  text-align: center;
+}
 .chat-pinned-self__placeholder {
   color: var(--text-muted);
   font-size: 13px;
+}
+.chat-pinned-self .chat-msg--self-pin-stub,
+.chat-pinned-self .chat-msg--global-pin-stub {
+  cursor: pointer;
+}
+.chat-pinned-self .chat-pinned-self__label {
+  cursor: pointer;
+}
+@keyframes chat-msg-pinned-jump-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+  }
+  20% {
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+  }
+}
+.chat-msg.chat-msg--pinned-jump-flash {
+  animation: chat-msg-pinned-jump-flash 1.25s ease-out;
+  border-radius: 12px;
 }
 /* Первые кадры после подстановки HTML: не показываем ленту с scrollTop=0 до выставления низа — убирает мерцание «верх→низ». */
 .chat-general-view .chat-messages-wrap.chat-messages-wrap--settling,

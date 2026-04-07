@@ -16691,7 +16691,12 @@ function initChat() {
         }
         window._pendingGeneralMessage = null;
         messages = mergeOptimisticGeneralIntoMessages(messages);
-        window._chatGeneralCache = { messages: messages, participantsCount: data.participantsCount, onlineCount: data.onlineCount };
+        window._chatGeneralCache = {
+          messages: messages,
+          participantsCount: data.participantsCount,
+          onlineCount: data.onlineCount,
+          generalPinned: data.generalPinned != null ? data.generalPinned : null,
+        };
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
@@ -16845,6 +16850,7 @@ function initChat() {
     if (text.length > 400) text = text.slice(0, 400) + "…";
     var imgEl = el && el.querySelector ? el.querySelector(".chat-msg__image") : null;
     var imageSrc = imgEl && imgEl.src ? String(imgEl.src) : "";
+    if (!imageSrc && msg.image) imageSrc = String(msg.image);
     var docName = "";
     if (el && el.querySelector) {
       var dl = el.querySelector(".chat-msg__document-link--view");
@@ -16855,23 +16861,42 @@ function initChat() {
       own: !!msg.own,
       fromName: fromName || "Игрок",
       text: text,
-      hasImage: !!msg.hasImage,
+      hasImage: !!(msg.hasImage || msg.image),
       hasVoice: !!msg.hasVoice,
       hasDocument: !!msg.hasDocument,
       imageSrc: imageSrc && imageSrc.indexOf("blob:") !== 0 ? imageSrc : "",
       documentName: docName || "",
     };
   }
-  function pokerRenderSelfPinnedInnerHtml(pin) {
+  function pokerRenderSelfPinnedInnerHtml(pin, labelOpt, stubExtraClass) {
     if (!pin || !pin.id) return "";
+    var label = typeof labelOpt === "string" && labelOpt.trim() ? labelOpt.trim() : "Закреплено для вас";
+    var extraStub =
+      stubExtraClass && String(stubExtraClass).trim() ? String(stubExtraClass).trim() + " " : "";
     var isOwn = !!pin.own;
-    var cls = "chat-msg chat-msg--self-pin-stub " + (isOwn ? "chat-msg--own" : "chat-msg--other");
+    var cls = "chat-msg " + extraStub + "chat-msg--self-pin-stub " + (isOwn ? "chat-msg--own" : "chat-msg--other");
     var bodyMain = "";
-    if (pin.hasImage && pin.imageSrc) {
+    var pinThumbSrc = pin.imageSrc && String(pin.imageSrc).trim() && String(pin.imageSrc).indexOf("blob:") !== 0
+      ? String(pin.imageSrc).trim()
+      : "";
+    if (pinThumbSrc) {
+      cls += " chat-msg--pin-with-thumb";
+      var textCol = "";
+      if (pin.text) {
+        textCol =
+          '<div class="chat-pinned-self__text-col"><div class="chat-msg__text">' +
+          linkTgUsernames(linkAppIds(linkUrls(escapeHtml(pin.text).replace(/\n/g, "<br>")))) +
+          "</div></div>";
+      }
       bodyMain +=
-        '<div class="chat-msg__text"><img class="chat-pinned-self__thumb" src="' +
-        escapeHtml(pin.imageSrc) +
-        '" alt="" loading="lazy" decoding="async" /></div>';
+        '<div class="chat-pinned-self__media-row' +
+        (textCol ? "" : " chat-pinned-self__media-row--thumb-only") +
+        '">' +
+        '<div class="chat-pinned-self__thumb-wrap"><img class="chat-pinned-self__thumb" src="' +
+        escapeHtml(pinThumbSrc) +
+        '" alt="" loading="lazy" decoding="async" /></div>' +
+        textCol +
+        "</div>";
     } else if (pin.hasVoice) {
       bodyMain += '<div class="chat-msg__text"><span class="chat-pinned-self__placeholder">[Голосовое сообщение]</span></div>';
     } else if (pin.hasDocument) {
@@ -16888,10 +16913,6 @@ function initChat() {
       bodyMain += '<div class="chat-msg__text"><span class="chat-pinned-self__placeholder">[Сообщение]</span></div>';
     }
     var who = escapeHtml(pin.fromName || "Игрок");
-    var meta =
-      '<div class="chat-msg__meta"><span class="chat-msg__name-block"><span class="chat-msg__name">' +
-      who +
-      "</span></span></div>";
     var foot =
       '<div class="chat-msg__footer"><span class="chat-msg__time" aria-hidden="true"> </span></div>';
     var innerMsg =
@@ -16905,18 +16926,97 @@ function initChat() {
       (pin.text ? ' data-msg-text="' + escapeHtml(pin.text) + '"' : "") +
       ">" +
       '<div class="chat-msg__row"><div class="chat-msg__body chat-msg__body--has-text">' +
-      meta +
       '<div class="chat-msg__body-main">' +
       bodyMain +
       foot +
       "</div></div></div></div>";
     return (
-      '<div class="chat-pinned-self__label">Закреплено для вас</div>' +
+      '<div class="chat-pinned-self__label">' +
+      escapeHtml(label) +
+      "</div>" +
       innerMsg
     );
   }
+  /** Прокрутка ленты к сообщению без scrollIntoView (не тянет document на iOS). */
+  function scrollChatListToMessageById(scrollEl, msgId) {
+    if (!scrollEl || msgId == null || msgId === "") return;
+    var want = String(msgId);
+    var el = null;
+    try {
+      var nodes = scrollEl.querySelectorAll(".chat-msg[data-msg-id]");
+      for (var i = 0; i < nodes.length; i++) {
+        if (String(nodes[i].getAttribute("data-msg-id")) === want) {
+          el = nodes[i];
+          break;
+        }
+      }
+    } catch (eQ) {
+      return;
+    }
+    if (!el) {
+      try {
+        if (typeof tg !== "undefined" && tg && tg.showAlert) {
+          tg.showAlert("Сообщения нет в загруженной части чата");
+        } else if (typeof alert === "function") alert("Сообщения нет в загруженной части чата");
+      } catch (eA) {}
+      return;
+    }
+    var pad = 16;
+    var cRect = scrollEl.getBoundingClientRect();
+    var eRect = el.getBoundingClientRect();
+    var relTop = eRect.top - cRect.top + scrollEl.scrollTop;
+    try {
+      scrollEl.scrollTop = Math.max(0, relTop - pad);
+    } catch (eSc) {}
+    try {
+      el.classList.add("chat-msg--pinned-jump-flash");
+      setTimeout(function () {
+        try {
+          el.classList.remove("chat-msg--pinned-jump-flash");
+        } catch (eR) {}
+      }, 1400);
+    } catch (eF) {}
+  }
+  /** Тап по полосе закрепления — перейти к сообщению в ленте (длинное нажатие по-прежнему открывает меню). */
+  function bindChatPinnedBarNavigate(host, scrollEl) {
+    if (!host || host.dataset.pokerPinnedBarNavigate === "1") return;
+    host.dataset.pokerPinnedBarNavigate = "1";
+    host.addEventListener("click", function (e) {
+      if (!scrollEl) return;
+      try {
+        var menu = document.getElementById("chatContextMenu");
+        if (menu && menu.classList.contains("chat-ctx-menu--visible")) return;
+      } catch (eM) {}
+      if (e.target && e.target.closest && e.target.closest("a")) return;
+      var stub = null;
+      try {
+        stub = host.querySelector(".chat-msg[data-msg-id]");
+      } catch (eStub) {}
+      if (!stub) return;
+      var mid = stub.getAttribute("data-msg-id");
+      if (!mid) return;
+      scrollChatListToMessageById(scrollEl, mid);
+    });
+  }
   function refreshChatSelfPinBars() {
     var gView = document.getElementById("chatGeneralView");
+    var hasGlobalPinned = false;
+    var hasSelfGeneralPinned = false;
+    var gGlobalHost = document.getElementById("chatGeneralPinnedGlobal");
+    if (gGlobalHost) {
+      var gPinAll = window._chatGeneralCache && window._chatGeneralCache.generalPinned;
+      if (!gPinAll || !gPinAll.id) {
+        gGlobalHost.classList.remove("chat-pinned-self--visible");
+        gGlobalHost.innerHTML = "";
+        gGlobalHost.setAttribute("aria-hidden", "true");
+      } else {
+        gGlobalHost.innerHTML = pokerRenderSelfPinnedInnerHtml(gPinAll, "Закреплено для всех", "chat-msg--global-pin-stub");
+        gGlobalHost.classList.add("chat-pinned-self--visible");
+        gGlobalHost.setAttribute("aria-hidden", "false");
+        attachContextMenuForOthers(gGlobalHost, "general", generalMessages);
+        hasGlobalPinned = true;
+      }
+    }
     var gHost = document.getElementById("chatGeneralPinnedSelf");
     if (gHost) {
       var gPin = pokerGetSelfPin("general", null);
@@ -16924,17 +17024,20 @@ function initChat() {
         gHost.classList.remove("chat-pinned-self--visible");
         gHost.innerHTML = "";
         gHost.setAttribute("aria-hidden", "true");
-        if (gView) gView.classList.remove("chat-general-view--self-pinned");
       } else {
         gHost.innerHTML = pokerRenderSelfPinnedInnerHtml(gPin);
         gHost.classList.add("chat-pinned-self--visible");
         gHost.setAttribute("aria-hidden", "false");
-        if (gView) gView.classList.add("chat-general-view--self-pinned");
         attachContextMenuForOthers(gHost, "general", generalMessages);
+        hasSelfGeneralPinned = true;
       }
-    } else if (gView) {
-      gView.classList.remove("chat-general-view--self-pinned");
     }
+    if (gView) {
+      if (hasGlobalPinned || hasSelfGeneralPinned) gView.classList.add("chat-general-view--any-pinned");
+      else gView.classList.remove("chat-general-view--any-pinned");
+    }
+    if (gGlobalHost) bindChatPinnedBarNavigate(gGlobalHost, generalMessages);
+    if (gHost) bindChatPinnedBarNavigate(gHost, generalMessages);
     var convViewEl = document.getElementById("chatConvView");
     var pHost = document.getElementById("chatPersonalPinnedSelf");
     if (pHost) {
@@ -16955,6 +17058,7 @@ function initChat() {
     } else if (convViewEl) {
       convViewEl.classList.remove("chat-conv-view--self-pinned");
     }
+    if (pHost) bindChatPinnedBarNavigate(pHost, messagesEl);
   }
 
   // Редактирование сообщения через окно ввода:
@@ -17526,15 +17630,23 @@ function initChat() {
       chatCtxSource = source;
       chatCtxOpenedEl = el;
       if (!ctxMenu) return;
-      var stub = el.classList.contains("chat-msg--self-pin-stub");
+      var isSelfStub = el.classList.contains("chat-msg--self-pin-stub") && !el.classList.contains("chat-msg--global-pin-stub");
+      var isGlobalStub = el.classList.contains("chat-msg--global-pin-stub");
+      var stub = isSelfStub || isGlobalStub;
       var reactRow = ctxMenu.querySelector(".chat-ctx-menu__reactions");
       if (stub) {
         if (reactRow) reactRow.style.display = "none";
         ctxMenu.querySelectorAll(".chat-ctx-menu__item").forEach(function (item) {
           var a = item.dataset.action;
-          if (a === "unpin") item.style.display = "";
-          else if (a === "copy" && msg.text) item.style.display = "";
-          else item.style.display = "none";
+          if (isGlobalStub) {
+            if (a === "unpin-global" && chatIsAdmin) item.style.display = "";
+            else if (a === "copy" && msg.text) item.style.display = "";
+            else item.style.display = "none";
+          } else {
+            if (a === "unpin") item.style.display = "";
+            else if (a === "copy" && msg.text) item.style.display = "";
+            else item.style.display = "none";
+          }
         });
       } else {
         if (reactRow) reactRow.style.display = "";
@@ -17550,7 +17662,13 @@ function initChat() {
         ctxMenu.querySelectorAll("[data-action=\"pin\"]").forEach(function (item) {
           item.style.display = msg && msg.id ? "" : "none";
         });
+        ctxMenu.querySelectorAll("[data-action=\"pin-global\"]").forEach(function (item) {
+          item.style.display = source === "general" && chatIsAdmin && msg && msg.id ? "" : "none";
+        });
         ctxMenu.querySelectorAll("[data-action=\"unpin\"]").forEach(function (item) {
+          item.style.display = "none";
+        });
+        ctxMenu.querySelectorAll("[data-action=\"unpin-global\"]").forEach(function (item) {
           item.style.display = "none";
         });
         ctxMenu.querySelectorAll("[data-action=\"reply\"]").forEach(function (item) {
@@ -17629,7 +17747,10 @@ function initChat() {
       function onLongPress(coords) {
         var textEl = el.querySelector(".chat-msg__text");
         var text = textEl ? (textEl.textContent || "").trim() : "";
-        if (el.classList.contains("chat-msg--self-pin-stub") && el.dataset.msgText) {
+        if (
+          (el.classList.contains("chat-msg--self-pin-stub") || el.classList.contains("chat-msg--global-pin-stub")) &&
+          el.dataset.msgText
+        ) {
           text = String(el.dataset.msgText || "")
             .replace(/&quot;/g, '"')
             .replace(/&lt;/g, "<")
@@ -17637,7 +17758,7 @@ function initChat() {
             .replace(/&amp;/g, "&")
             .trim();
         }
-        var hasImage = !!el.querySelector(".chat-msg__image");
+        var hasImage = !!(el.querySelector(".chat-msg__image") || el.querySelector(".chat-pinned-self__thumb"));
         var hasVoice = !!el.querySelector(".chat-msg__voice");
         var hasDocument = !!el.querySelector(".chat-msg__document");
         var isOwn = el.classList.contains("chat-msg--own");
@@ -17704,7 +17825,13 @@ function initChat() {
       function onMenuEditCapture(e) {
         var editBtn = e.target && e.target.closest ? e.target.closest(".chat-ctx-menu__item[data-action=\"edit\"]") : null;
         if (!editBtn) return;
-        if (chatCtxOpenedEl && chatCtxOpenedEl.classList.contains("chat-msg--self-pin-stub")) return;
+        if (
+          chatCtxOpenedEl &&
+          (chatCtxOpenedEl.classList.contains("chat-msg--self-pin-stub") ||
+            chatCtxOpenedEl.classList.contains("chat-msg--global-pin-stub"))
+        ) {
+          return;
+        }
         var m = chatCtxMsg;
         var sr = chatCtxSource;
         if (!m || !m.own) return;
@@ -17815,6 +17942,36 @@ function initChat() {
               else loadMessages();
             }
           }).finally(function () { hideMenu(); });
+        } else if (action === "pin-global" && msg.id && src === "general" && chatIsAdmin) {
+          fetch(base + "/api/chat", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pokerApiAuthJsonBody({ action: "generalPin", messageId: msg.id })),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              if (d && d.ok) loadGeneral();
+            })
+            .finally(function () {
+              hideMenu();
+            });
+        } else if (action === "unpin-global" && src === "general" && chatIsAdmin) {
+          fetch(base + "/api/chat", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pokerApiAuthJsonBody({ action: "generalUnpin" })),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              if (d && d.ok) loadGeneral();
+            })
+            .finally(function () {
+              hideMenu();
+            });
         } else if (action === "pin" && msg.id && el) {
           var peerPin = src === "personal" ? chatWithUserId : null;
           if (src === "personal" && !peerPin) {
@@ -18092,7 +18249,7 @@ function initChat() {
               var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null };
               if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return m.id === msg.id; })) {
                 var msgs = cache.messages.concat([msg]);
-                window._chatGeneralCache = { messages: msgs, participantsCount: cache.participantsCount, onlineCount: cache.onlineCount };
+                window._chatGeneralCache = Object.assign({}, cache, { messages: msgs });
                 lastGeneralMessagesSig = null;
                 if (chatActiveTab === "general" && !chatIsEditingMessage) {
                   lastGeneralMessagesSig = generalMessagesSignature(msgs);
