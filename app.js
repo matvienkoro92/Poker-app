@@ -462,7 +462,10 @@ function pokerApiHasCredential() {
 
 function pokerIsPwaDisplayStandalone() {
   try {
+    if (window.__pokerDisplayStandaloneBoot === true) return true;
     if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+    if (window.matchMedia && window.matchMedia("(display-mode: window-controls-overlay)").matches) return true;
     if (window.navigator && window.navigator.standalone) return true;
   } catch (e) {}
   return false;
@@ -4246,7 +4249,10 @@ function getPokerResolvedTelegramUser() {
 
   function isPwaStandaloneMode() {
     try {
+      if (window.__pokerDisplayStandaloneBoot === true) return true;
       if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: window-controls-overlay)").matches) return true;
       if (window.navigator && window.navigator.standalone) return true;
     } catch (e) {}
     return false;
@@ -4286,8 +4292,9 @@ function getPokerResolvedTelegramUser() {
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "false");
     try {
-      document.body.classList.add("pwa-auth-gated");
+      /* Сначала preinit: критический CSS в index.html держит #pwaAuthScreen видимым при гонках с --hidden */
       document.body.classList.add("pwa-auth-preinit");
+      document.body.classList.add("pwa-auth-gated");
     } catch (e) {}
   }
   function hidePwaAuthScreen() {
@@ -5700,6 +5707,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   window.pokerRetryTelegramAuthVerification = function () {
+    /* В PWA объект WebApp есть, initData часто пуст — иначе кнопка «Повторить» на оверлее ничего не делала */
+    if (isPwaStandaloneAuth()) {
+      runVerifyFlow();
+      return;
+    }
     var wtgR = getTelegramWebAppNow();
     if (wtgR && wtgR.initData) {
       runVerifyFlow();
@@ -5771,6 +5783,29 @@ function getPokerResolvedTelegramUser() {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
     else bind();
   })();
+
+  /* Редкий залипший шлюз: #app скрыт по gated, экран входа остался --hidden — без UI */
+  setTimeout(function pokerPwaStaleGateRecover() {
+    try {
+      if (!isPwaStandaloneMode()) return;
+      var el = document.getElementById("pwaAuthScreen");
+      if (!el || !document.body.classList.contains("pwa-auth-gated")) return;
+      if (!el.classList.contains("pwa-auth-screen--hidden")) return;
+      el.classList.remove("pwa-auth-screen--hidden");
+      el.setAttribute("aria-hidden", "false");
+      try {
+        document.body.classList.add("pwa-auth-preinit");
+      } catch (ePre) {}
+      try {
+        setPwaAuthIdentifyingPhase(false);
+      } catch (eId) {}
+      try {
+        showUnauthorized();
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+      } catch (eMount) {}
+    } catch (eRec) {}
+  }, 10000);
 })();
 
 // PWA на весь экран: 100dvh не сжимается с клавиатурой — поднимаем экран входа по visualViewport
@@ -5778,7 +5813,10 @@ function getPokerResolvedTelegramUser() {
   var vvHandler = null;
   function isPwaDisplayStandalone() {
     try {
+      if (window.__pokerDisplayStandaloneBoot === true) return true;
       if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: window-controls-overlay)").matches) return true;
       if (window.navigator && window.navigator.standalone) return true;
     } catch (e) {}
     return false;

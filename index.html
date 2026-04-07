@@ -1,17 +1,25 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.188">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.189">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
       (function () {
         try {
-          var st = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+          var mq = window.matchMedia && window.matchMedia.bind(window);
+          var st = mq && mq("(display-mode: standalone)").matches;
+          var mu = mq && mq("(display-mode: minimal-ui)").matches;
+          var wco = mq && mq("(display-mode: window-controls-overlay)").matches;
           var sa = !!(window.navigator && window.navigator.standalone);
+          window.__pokerDisplayStandaloneBoot = !!(st || mu || wco || sa);
           var ios =
             /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
             (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
-          if ((st || sa) && ios) document.documentElement.classList.add("poker-ios-pwa");
-        } catch (e) {}
+          if (window.__pokerDisplayStandaloneBoot && ios) document.documentElement.classList.add("poker-ios-pwa");
+        } catch (e) {
+          try {
+            window.__pokerDisplayStandaloneBoot = false;
+          } catch (e2) {}
+        }
       })();
     </script>
     <meta charset="UTF-8" />
@@ -323,7 +331,10 @@
       (function () {
         var stallTimer;
         var isStandalone =
+          window.__pokerDisplayStandaloneBoot === true ||
           (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) ||
+          (window.matchMedia && window.matchMedia("(display-mode: window-controls-overlay)").matches) ||
           window.navigator.standalone === true;
         function hideBootOverlay() {
           var el = document.getElementById("appBootOverlay");
@@ -5494,7 +5505,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=355"></script>
+    <script defer src="./app.js?v=356"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
