@@ -14984,6 +14984,7 @@ var personalPrefetchInFlight = {};
 var PERSONAL_PREFETCH_TTL_MS = 45000;
 var PERSONAL_PREFETCH_BATCH = 4;
 var chatWithUserName = null;
+var chatWithPeerAvatarUrl = null;
 /* "dialogs" = список чатов; иначе loadGeneral() перерисовывал скрытый общий чат и сбрасывал scroll */
 var chatActiveTab = "dialogs";
 var chatIsAdmin = false;
@@ -15018,6 +15019,41 @@ function initChat() {
   var chatDialogClub = document.getElementById("chatDialogClub");
   var convTitle = document.getElementById("chatConvTitle");
   var convTitleId = document.getElementById("chatConvTitleId");
+  var convPeerAvatar = document.getElementById("chatConvPeerAvatar");
+  var convPeerAvatarPh = document.getElementById("chatConvPeerAvatarPh");
+  function applyConvPeerAvatarHeader(url, displayName) {
+    if (!convPeerAvatar || !convPeerAvatarPh) return;
+    var nm = displayName != null && String(displayName).trim() ? String(displayName).trim() : "";
+    convPeerAvatarPh.textContent = nm ? nm.charAt(0) : "?";
+    var u = url != null && String(url).trim() ? String(url).trim() : "";
+    convPeerAvatar.onload = null;
+    convPeerAvatar.onerror = null;
+    if (!u) {
+      convPeerAvatar.removeAttribute("src");
+      convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
+      convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
+      convPeerAvatar.alt = "";
+      return;
+    }
+    convPeerAvatar.alt = nm || "";
+    convPeerAvatar.onload = function () {
+      convPeerAvatar.classList.remove("chat-conv-peer-avatar--hidden");
+      convPeerAvatarPh.classList.add("chat-conv-peer-avatar--hidden");
+    };
+    convPeerAvatar.onerror = function () {
+      convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
+      convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
+    };
+    convPeerAvatar.src = u;
+    if (convPeerAvatar.complete) {
+      if (convPeerAvatar.naturalWidth > 0) convPeerAvatar.onload();
+      else convPeerAvatar.onerror();
+    }
+  }
+  function clearConvPeerAvatarHeader() {
+    chatWithPeerAvatarUrl = null;
+    applyConvPeerAvatarHeader("", "");
+  }
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087"];
   var messagesEl = document.getElementById("chatMessages");
   var sendBtn = document.getElementById("chatSendBtn");
@@ -15228,7 +15264,7 @@ function initChat() {
     function openChatUserModalById(id, name, avatarUrl) {
       var userName = name || "Игрок";
       if (!id || !chatUserModalEl) {
-        if (id) { setTab("personal"); showConv(id, userName); }
+        if (id) { setTab("personal"); showConv(id, userName, undefined, avatarUrl); }
         return;
       }
       chatUserModalUserId = id;
@@ -15704,6 +15740,7 @@ function initChat() {
     chatWithUserName = null;
     if (convTitle) convTitle.textContent = "";
     if (convTitleId) convTitleId.textContent = "\u2014";
+    clearConvPeerAvatarHeader();
     if (dialogsView) dialogsView.classList.remove("chat-dialogs-view--hidden");
     if (generalView) generalView.classList.add("chat-general-view--hidden");
     if (personalView) personalView.classList.add("chat-personal-view--hidden");
@@ -17515,7 +17552,10 @@ function initChat() {
       }
       var reactionsRow = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtml + '</span></div>' : "";
       var metaBlock = isFirstInGroup ? nameEl + adminBadge : "";
-      var bodyClass = "chat-msg__body" + (text && text.trim() ? " chat-msg__body--has-text" : "");
+      var bodyClass =
+        "chat-msg__body" +
+        (text && text.trim() ? " chat-msg__body--has-text" : "") +
+        (isOwn && m.image ? " chat-msg__body--own-image" : "");
       var footerHtmlG = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + "</div>";
       var bodyMainClsG = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "") + (m.image ? " chat-msg__body-main--with-image" : "");
       var bodyMainHtmlG = '<div class="' + bodyMainClsG + '">' + textBlock + footerHtmlG + "</div>";
@@ -18089,7 +18129,10 @@ function initChat() {
         textContent = escapeHtml(text).replace(/\n/g, "<br>");
       }
     }
-    var optBodyClass = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+    var optBodyClass =
+      "chat-msg__body" +
+      (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
+      (image ? " chat-msg__body--own-image" : "");
     var textBlockG = textContent ? '<div class="chat-msg__text">' + textContent + "</div>" : "";
     var footerHtmlOptG = '<div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + "</span></div>";
     var bodyMainClsOptG = "chat-msg__body-main" + (!textBlockG ? " chat-msg__body-main--solo-footer" : "") + (image ? " chat-msg__body-main--with-image" : "");
@@ -18108,7 +18151,10 @@ function initChat() {
       var row = document.createElement("div");
       row.className = "chat-msg__row";
       var body = document.createElement("div");
-      body.className = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+      body.className =
+        "chat-msg__body" +
+        (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
+        (image ? " chat-msg__body--own-image" : "");
       var textWrap = document.createElement("div");
       textWrap.className = "chat-msg__text";
       if (image && typeof image === "string") {
@@ -18328,6 +18374,7 @@ function initChat() {
     chatWithUserId = null;
     if (convTitle) convTitle.textContent = "";
     if (convTitleId) convTitleId.textContent = "\u2014";
+    clearConvPeerAvatarHeader();
     if (listView) listView.classList.remove("chat-list-view--hidden");
     if (convView) convView.classList.add("chat-conv-view--hidden");
     updateChatHeaderStats();
@@ -18337,7 +18384,7 @@ function initChat() {
     } catch (ePinLst) {}
   }
 
-  function showConv(userId, userName, peerP21IdFromContact) {
+  function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
     if (myOpen && userId && peerChatIdsEqual(userId, myOpen)) {
@@ -18349,6 +18396,25 @@ function initChat() {
     }
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    var peerAvParam = peerAvatarUrlOpt != null && String(peerAvatarUrlOpt).trim() ? String(peerAvatarUrlOpt).trim() : "";
+    var peerAvCache = "";
+    if (userId && personalMessagesCache[userId] && Array.isArray(personalMessagesCache[userId])) {
+      var msgsC = personalMessagesCache[userId];
+      var myIdC = resolveMyChatMemberId();
+      for (var ci = msgsC.length - 1; ci >= 0; ci--) {
+        var cm = msgsC[ci];
+        if (!cm || !cm.from) continue;
+        if (myIdC && peerChatIdsEqual(cm.from, myIdC)) continue;
+        if (!peerChatIdsEqual(cm.from, userId)) continue;
+        if (cm.fromAvatar) {
+          peerAvCache = String(cm.fromAvatar).trim();
+          break;
+        }
+      }
+    }
+    var peerAv = peerAvParam || peerAvCache || "";
+    chatWithPeerAvatarUrl = peerAv || null;
+    applyConvPeerAvatarHeader(peerAv, chatWithUserName);
     if (convTitle) {
       var nm = (userName && String(userName).trim()) ? String(userName).trim() : (userId ? String(userId) : "");
       convTitle.textContent = nm;
@@ -18840,7 +18906,10 @@ function initChat() {
       }
       var reactionsRowP = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtmlP + '</span></div>' : "";
       var metaBlockP = isFirstInGroup ? nameElP + adminBadge : "";
-      var bodyClassP = "chat-msg__body" + (text && text.trim() ? " chat-msg__body--has-text" : "");
+      var bodyClassP =
+        "chat-msg__body" +
+        (text && text.trim() ? " chat-msg__body--has-text" : "") +
+        (isOwn && m.image ? " chat-msg__body--own-image" : "");
       var ticks = personalReceiptHtml(m, isOwn);
       var footerHtmlP = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticks + "</div>";
       var bodyMainClsP = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "") + (m.image ? " chat-msg__body-main--with-image" : "");
@@ -18952,6 +19021,24 @@ function initChat() {
             data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
           convTitleId.textContent = titleP21 || "—";
         }
+        var peerAvData = data.otherAvatar != null && String(data.otherAvatar).trim() ? String(data.otherAvatar).trim() : "";
+        if (!peerAvData && messages.length && chatWithUserId) {
+          var myIdL = resolveMyChatMemberId();
+          for (var li = messages.length - 1; li >= 0; li--) {
+            var ml = messages[li];
+            if (!ml || !ml.from) continue;
+            if (myIdL && peerChatIdsEqual(ml.from, myIdL)) continue;
+            if (!peerChatIdsEqual(ml.from, chatWithUserId)) continue;
+            if (ml.fromAvatar) {
+              peerAvData = String(ml.fromAvatar).trim();
+              break;
+            }
+          }
+        }
+        if (peerAvData) {
+          chatWithPeerAvatarUrl = peerAvData;
+          applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
+        }
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var peerLvKey = chatWithUserId ? normalizePeerIdForChat(chatWithUserId) : "";
@@ -19061,7 +19148,10 @@ function initChat() {
           textContent = escapeHtml(String(text)).replace(/\n/g, "<br>");
         }
       }
-      var optBodyClassP = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+      var optBodyClassP =
+        "chat-msg__body" +
+        (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
+        (image ? " chat-msg__body--own-image" : "");
       var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
       var optBodyMainP = '<div class="chat-msg__body-main' + (image ? " chat-msg__body-main--with-image" : "") + '"><div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks + "</div></div>";
       var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta"></div>' + replyBlock + optBodyMainP + '</div></div></div>';
@@ -19078,7 +19168,10 @@ function initChat() {
         var rowP = document.createElement("div");
         rowP.className = "chat-msg__row";
         var bodyP = document.createElement("div");
-        bodyP.className = "chat-msg__body" + (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "");
+        bodyP.className =
+          "chat-msg__body" +
+          (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
+          (image ? " chat-msg__body--own-image" : "");
         var twP = document.createElement("div");
         twP.className = "chat-msg__text";
         if (image && typeof image === "string") {
@@ -20150,7 +20243,7 @@ function initChat() {
     window.chatRefresh = function () {
       /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
       setTab(chatActiveTab);
-      if (chatWithUserId) showConv(chatWithUserId, chatWithUserName);
+      if (chatWithUserId) showConv(chatWithUserId, chatWithUserName, undefined, chatWithPeerAvatarUrl);
       var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
       if (
         chatActiveTab === "general" &&
