@@ -20086,6 +20086,66 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
     min-width: 140px;
   }
 }
+.admin-chat-push-all__subs-line {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.admin-chat-push-all__subs-btn {
+  margin-left: 10px;
+  padding: 5px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: var(--block-bg, rgba(30, 41, 59, 0.65));
+  color: inherit;
+  cursor: pointer;
+}
+.admin-chat-push-all__subs-btn:active {
+  opacity: 0.88;
+}
+.admin-chat-push-all__subs-wrap {
+  max-height: min(40vh, 280px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 14px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.35);
+}
+[data-theme="light"] .admin-chat-push-all__subs-wrap {
+  background: rgba(241, 245, 249, 0.55);
+}
+.admin-chat-push-all__subs-wrap--hidden {
+  display: none !important;
+}
+.admin-chat-push-all__subs-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.admin-chat-push-all__subs-item:last-child {
+  border-bottom: none;
+}
+.admin-chat-push-all__subs-id {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.admin-chat-push-all__subs-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.admin-chat-push-all__remain {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
 .tracking-links-admin__form {
   margin-bottom: 16px;
 }

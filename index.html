@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.186">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.187">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -214,7 +214,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=298" />
+    <link rel="stylesheet" href="./styles.css?v=299" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4057,6 +4057,7 @@
           <button type="button" class="visitors-admin-modal__broadcast-btn primary-button" id="visitorsAdminBroadcastBtn">Отправить рассылку</button>
           <div class="visitors-admin-modal__admin-tools-row">
             <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminPushToAdminsBtn">Пуш админам</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminPushToAllChatSubsBtn">Пуш подписчикам чата</button>
             <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminShareStatsBtn">Статистика кнопок</button>
             <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminTrackingLinksBtn">Создать ссылку</button>
           </div>
@@ -4100,6 +4101,32 @@
             <textarea id="adminPushBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
           </label>
           <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushSendBtn">Отправить</button>
+        </div>
+      </div>
+      <div class="visitors-admin-modal visitors-admin-modal--broadcast" id="adminChatPushAllModal" role="dialog" aria-modal="true" aria-label="Пуш подписчикам чата" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="adminChatPushAllModalBackdrop"></div>
+        <div class="visitors-admin-modal__box visitors-admin-modal__box--broadcast">
+          <button type="button" class="visitors-admin-modal__close" id="adminChatPushAllModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Пуш подписчикам чата</h2>
+          <p class="visitors-admin-modal__broadcast-hint" id="adminPushAllHint">Пользователи с включёнными оповещениями о чате в профиле и сохранённой подпиской Web Push (PWA).</p>
+          <p class="admin-chat-push-all__subs-line">
+            Подписчиков: <strong id="adminPushAllCount">—</strong>
+            <button type="button" class="admin-chat-push-all__subs-btn" id="adminPushAllShowSubsBtn" aria-expanded="false">Кто подписан</button>
+          </p>
+          <div class="admin-chat-push-all__subs-wrap admin-chat-push-all__subs-wrap--hidden" id="adminPushAllSubsWrap" aria-hidden="true">
+            <div class="admin-chat-push-all__subs-list" id="adminPushAllSubsList" role="list"></div>
+          </div>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Заголовок</span>
+            <input type="text" id="adminPushAllTitleInput" class="visitors-admin-modal__broadcast-input" maxlength="80" placeholder="Заголовок уведомления" autocomplete="off" />
+            <span class="admin-chat-push-all__remain" id="adminPushAllTitleRemain" aria-live="polite"></span>
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Текст пуша</span>
+            <textarea id="adminPushAllBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
+            <span class="admin-chat-push-all__remain" id="adminPushAllBodyRemain" aria-live="polite"></span>
+          </label>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushAllSendBtn">Отправить всем</button>
         </div>
       </div>
       <!-- Модалка «Статистика кнопок Переслать» (только админ) -->
@@ -5467,7 +5494,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=353"></script>
+    <script defer src="./app.js?v=354"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

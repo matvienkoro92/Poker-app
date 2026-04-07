@@ -22056,6 +22056,191 @@ document.addEventListener("visibilitychange", function () {
       });
   }
 
+  function ruPushCharsRemainLabel(remaining) {
+    var n = Math.max(0, Math.floor(remaining));
+    var w;
+    if (n % 10 === 1 && n % 100 !== 11) w = "символ";
+    else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) w = "символа";
+    else w = "символов";
+    return "Можно ввести ещё: " + n + " " + w;
+  }
+  function refreshAdminPushAllRemainInputs() {
+    var tm = window.__adminPushAllTitleMax != null ? window.__adminPushAllTitleMax : 80;
+    var bm = window.__adminPushAllBodyMax != null ? window.__adminPushAllBodyMax : 200;
+    var t = document.getElementById("adminPushAllTitleInput");
+    var b = document.getElementById("adminPushAllBodyInput");
+    var tr = document.getElementById("adminPushAllTitleRemain");
+    var br = document.getElementById("adminPushAllBodyRemain");
+    if (t) {
+      t.setAttribute("maxlength", String(tm));
+      if (tr) tr.textContent = ruPushCharsRemainLabel(tm - (t.value || "").length);
+    }
+    if (b) {
+      b.setAttribute("maxlength", String(bm));
+      if (br) br.textContent = ruPushCharsRemainLabel(bm - (b.value || "").length);
+    }
+  }
+  function closeAdminPushAllModal() {
+    var modal = document.getElementById("adminChatPushAllModal");
+    if (modal) modal.setAttribute("aria-hidden", "true");
+  }
+  function toggleAdminPushAllSubs() {
+    var wrap = document.getElementById("adminPushAllSubsWrap");
+    var listEl = document.getElementById("adminPushAllSubsList");
+    var btn = document.getElementById("adminPushAllShowSubsBtn");
+    if (!wrap || !listEl || !btn) return;
+    var hidden = wrap.classList.contains("admin-chat-push-all__subs-wrap--hidden");
+    if (hidden) {
+      wrap.classList.remove("admin-chat-push-all__subs-wrap--hidden");
+      wrap.setAttribute("aria-hidden", "false");
+      btn.setAttribute("aria-expanded", "true");
+      var subs = window.__adminPushAllSubs || [];
+      if (!subs.length) {
+        listEl.innerHTML = "<p class=\"admin-chat-push-all__subs-empty\">Нет активных подписчиков.</p>";
+        return;
+      }
+      listEl.innerHTML = subs
+        .map(function (s) {
+          var d = esc(s.display != null ? s.display : s.memberId || "");
+          var id = esc(s.memberId || "");
+          return (
+            '<div class="admin-chat-push-all__subs-item" role="listitem"><div>' +
+            d +
+            '</div><div class="admin-chat-push-all__subs-id">' +
+            id +
+            "</div></div>"
+          );
+        })
+        .join("");
+    } else {
+      wrap.classList.add("admin-chat-push-all__subs-wrap--hidden");
+      wrap.setAttribute("aria-hidden", "true");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  }
+  function openAdminPushAllModal() {
+    var modal = document.getElementById("adminChatPushAllModal");
+    var titleEl = document.getElementById("adminPushAllTitleInput");
+    var textEl = document.getElementById("adminPushAllBodyInput");
+    var hint = document.getElementById("adminPushAllHint");
+    var countEl = document.getElementById("adminPushAllCount");
+    var wrap = document.getElementById("adminPushAllSubsWrap");
+    var listEl = document.getElementById("adminPushAllSubsList");
+    var toggleBtn = document.getElementById("adminPushAllShowSubsBtn");
+    if (titleEl) titleEl.value = "";
+    if (textEl) textEl.value = "";
+    window.__adminPushAllTitleMax = 80;
+    window.__adminPushAllBodyMax = 200;
+    window.__adminPushAllSubs = [];
+    if (wrap) {
+      wrap.classList.add("admin-chat-push-all__subs-wrap--hidden");
+      wrap.setAttribute("aria-hidden", "true");
+    }
+    if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "false");
+    if (listEl) listEl.innerHTML = "";
+    if (countEl) countEl.textContent = "…";
+    if (hint) {
+      hint.textContent =
+        "Пользователи с включёнными оповещениями о чате в профиле и сохранённой подпиской Web Push (PWA).";
+    }
+    refreshAdminPushAllRemainInputs();
+    if (modal) modal.setAttribute("aria-hidden", "false");
+
+    var base = getApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      if (countEl) countEl.textContent = "—";
+      return;
+    }
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base + "/api/chat-push-admin-broadcast" + q, { cache: "no-store" })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          if (countEl) countEl.textContent = "—";
+          if (hint && data && data.error) hint.textContent = data.error;
+          return;
+        }
+        window.__adminPushAllTitleMax = data.titleMax != null ? data.titleMax : 80;
+        window.__adminPushAllBodyMax = data.bodyMax != null ? data.bodyMax : 200;
+        window.__adminPushAllSubs = Array.isArray(data.subscribers) ? data.subscribers : [];
+        if (countEl) countEl.textContent = String(data.count != null ? data.count : 0);
+        var extra = "";
+        if (data.pushConfigured === false) {
+          extra = " На сервере не настроен VAPID — отправка не сработает.";
+        }
+        if (hint) {
+          hint.textContent =
+            "Пользователи с включёнными оповещениями о чате в профиле и сохранённой подпиской Web Push (PWA)." +
+            extra;
+        }
+        refreshAdminPushAllRemainInputs();
+      })
+      .catch(function () {
+        if (countEl) countEl.textContent = "—";
+      });
+  }
+  function sendAdminPushAll() {
+    var titleEl = document.getElementById("adminPushAllTitleInput");
+    var textEl = document.getElementById("adminPushAllBodyInput");
+    var btn = document.getElementById("adminPushAllSendBtn");
+    var hint = document.getElementById("adminPushAllHint");
+    var title = (titleEl && titleEl.value) || "";
+    title = String(title).trim();
+    var text = (textEl && textEl.value) || "";
+    text = String(text).trim();
+    if (!title || !text) {
+      var tgNeed = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgNeed && tgNeed.showAlert) tgNeed.showAlert("Укажите заголовок и текст пуша");
+      else alert("Укажите заголовок и текст пуша");
+      return;
+    }
+    var base = getApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    if (btn) {
+      btn.disabled = true;
+      if (btn.__adminPushAllLabel == null) btn.__adminPushAllLabel = btn.textContent ? btn.textContent.trim() : "Отправить всем";
+      btn.textContent = "Отправка…";
+    }
+    if (hint) hint.textContent = "Отправляем…";
+    fetch(base + "/api/chat-push-admin-broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ title: title, text: text })),
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (d) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = btn.__adminPushAllLabel || "Отправить всем";
+        }
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (d && d.ok) {
+          var n = d.recipients != null ? d.recipients : "—";
+          if (hint) hint.textContent = "Запрос выполнен. Активных подписчиков (по данным до отправки): " + n + ".";
+          closeAdminPushAllModal();
+          if (tgw && tgw.showAlert) tgw.showAlert("Пуш отправлен подписчикам чата");
+        } else {
+          if (hint) hint.textContent = d && d.error ? d.error : "Ошибка";
+          if (tgw && tgw.showAlert) tgw.showAlert(d && d.error ? d.error : "Ошибка");
+          else if (d && d.error) alert(d.error);
+        }
+      })
+      .catch(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = btn.__adminPushAllLabel || "Отправить всем";
+        }
+        if (hint) hint.textContent = "Ошибка сети";
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgw && tgw.showAlert) tgw.showAlert(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети");
+        else if (typeof POKER_NET_ERR !== "undefined") alert(POKER_NET_ERR);
+      });
+  }
+
   function sendBroadcast() {
     var textEl = document.getElementById("visitorsBroadcastText");
     var fileEl = document.getElementById("visitorsBroadcastImageFile");
@@ -22405,6 +22590,26 @@ document.addEventListener("visibilitychange", function () {
     if (adminPushClose) adminPushClose.addEventListener("click", closeAdminPushModal);
     if (adminPushBackdrop) adminPushBackdrop.addEventListener("click", closeAdminPushModal);
     if (adminPushSend) adminPushSend.addEventListener("click", sendAdminPush);
+    var adminPushAllOpenBtn = document.getElementById("adminPushToAllChatSubsBtn");
+    var adminPushAllClose = document.getElementById("adminChatPushAllModalClose");
+    var adminPushAllBackdrop = document.getElementById("adminChatPushAllModalBackdrop");
+    var adminPushAllSend = document.getElementById("adminPushAllSendBtn");
+    var adminPushAllShowSubs = document.getElementById("adminPushAllShowSubsBtn");
+    var adminPushAllTitleInp = document.getElementById("adminPushAllTitleInput");
+    var adminPushAllBodyInp = document.getElementById("adminPushAllBodyInput");
+    if (adminPushAllOpenBtn) adminPushAllOpenBtn.addEventListener("click", openAdminPushAllModal);
+    if (adminPushAllClose) adminPushAllClose.addEventListener("click", closeAdminPushAllModal);
+    if (adminPushAllBackdrop) adminPushAllBackdrop.addEventListener("click", closeAdminPushAllModal);
+    if (adminPushAllSend) adminPushAllSend.addEventListener("click", sendAdminPushAll);
+    if (adminPushAllShowSubs) adminPushAllShowSubs.addEventListener("click", toggleAdminPushAllSubs);
+    if (adminPushAllTitleInp) {
+      adminPushAllTitleInp.addEventListener("input", refreshAdminPushAllRemainInputs);
+      adminPushAllTitleInp.addEventListener("keyup", refreshAdminPushAllRemainInputs);
+    }
+    if (adminPushAllBodyInp) {
+      adminPushAllBodyInp.addEventListener("input", refreshAdminPushAllRemainInputs);
+      adminPushAllBodyInp.addEventListener("keyup", refreshAdminPushAllRemainInputs);
+    }
     try {
       window.pokerRecheckAdminFooter = checkAdminAndShowVisitorsButton;
     } catch (eExp) {}
