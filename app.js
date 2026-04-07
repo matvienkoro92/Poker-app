@@ -44,6 +44,105 @@
 var POKER_NET_ERR =
   "Нет связи с сервером. Проверьте интернет и попробуйте снова или перезайдите в приложение.";
 
+/** Таймаут одного HTTP-запроса (мс): обрывает «зависшие» соединения без смены Wi‑Fi/LTE. */
+var POKER_FETCH_TIMEOUT_MS = 20000;
+
+/**
+ * fetch с таймаутом (AbortController). Не дублирует signal из init — перезапись signal.
+ */
+function pokerFetchWithTimeout(url, init, timeoutMs) {
+  var ms = timeoutMs != null && timeoutMs > 0 ? timeoutMs : POKER_FETCH_TIMEOUT_MS;
+  var ac = new AbortController();
+  var timer = setTimeout(function () {
+    try {
+      ac.abort();
+    } catch (eAb) {}
+  }, ms);
+  var baseInit = init || {};
+  var merged = {};
+  var k;
+  for (k in baseInit) {
+    if (Object.prototype.hasOwnProperty.call(baseInit, k)) merged[k] = baseInit[k];
+  }
+  merged.signal = ac.signal;
+  return fetch(url, merged).finally(function () {
+    try {
+      clearTimeout(timer);
+    } catch (eCl) {}
+  });
+}
+
+/**
+ * Повтор при сетевой ошибке / таймауте / abort (1 попытка + повторы).
+ * Успешный HTTP-ответ не разбирается — возвращается как у fetch.
+ */
+function pokerFetchRetry(url, init, opts) {
+  opts = opts || {};
+  var timeoutMs = opts.timeoutMs != null && opts.timeoutMs > 0 ? opts.timeoutMs : POKER_FETCH_TIMEOUT_MS;
+  var maxAttempts = opts.maxAttempts != null && opts.maxAttempts > 0 ? opts.maxAttempts : 3;
+  var retryDelayMs = opts.retryDelayMs != null && opts.retryDelayMs >= 0 ? opts.retryDelayMs : 650;
+  function sleep(d) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, d);
+    });
+  }
+  function run(attemptIndex) {
+    return pokerFetchWithTimeout(url, init, timeoutMs).catch(function (err) {
+      if (attemptIndex + 1 < maxAttempts) {
+        return sleep(retryDelayMs * (attemptIndex + 1)).then(function () {
+          return run(attemptIndex + 1);
+        });
+      }
+      return Promise.reject(err);
+    });
+  }
+  return run(0);
+}
+
+/** Оверлей загрузки: показать ошибку сети и кнопку «Повторить» (если оверлей ещё виден). Возвращает true, если панель переключена. */
+function pokerTryBootOverlayNetworkError(message) {
+  try {
+    var el = document.getElementById("appBootOverlay");
+    if (!el || el.classList.contains("app-boot-overlay--hidden")) return false;
+    var main = document.getElementById("appBootOverlayMain");
+    var errPanel = document.getElementById("appBootOverlayErrorPanel");
+    var errMsg = document.getElementById("appBootOverlayErrMsg");
+    if (!errPanel || !errMsg) return false;
+    el.classList.add("app-boot-overlay--error");
+    errMsg.textContent =
+      message ||
+      "Нет связи или таймаут. Проверьте интернет и нажмите «Повторить».";
+    errPanel.hidden = false;
+    if (main) main.hidden = true;
+    el.setAttribute("aria-busy", "false");
+    return true;
+  } catch (eOv) {
+    return false;
+  }
+}
+
+function pokerResetBootOverlayLoading() {
+  try {
+    var el = document.getElementById("appBootOverlay");
+    if (!el) return;
+    var main = document.getElementById("appBootOverlayMain");
+    var errPanel = document.getElementById("appBootOverlayErrorPanel");
+    el.classList.remove("app-boot-overlay--error");
+    if (errPanel) errPanel.hidden = true;
+    if (main) {
+      main.hidden = false;
+      var t = main.querySelector(".app-boot-overlay__conn-title");
+      if (t) t.textContent = "Соединение";
+      var st = document.getElementById("appBootOverlayStatusText");
+      if (st) st.textContent = "Загружаем интерфейс…";
+    }
+    el.setAttribute("aria-busy", "true");
+  } catch (eR) {}
+}
+
+window.pokerTryBootOverlayNetworkError = pokerTryBootOverlayNetworkError;
+window.pokerResetBootOverlayLoading = pokerResetBootOverlayLoading;
+
 function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
 }
@@ -4542,7 +4641,7 @@ function getPokerResolvedTelegramUser() {
     mount.setAttribute("data-tg-popup-fetch-started", "1");
     var base = getTelegramAuthApiBase();
     if (!base) return;
-    fetch(base + "/api/telegram-bot-info", { method: "GET", cache: "no-store" })
+    pokerFetchWithTimeout(base + "/api/telegram-bot-info", { method: "GET", cache: "no-store" }, 14000)
       .then(function (res) {
         return res
           .json()
@@ -5287,12 +5386,16 @@ function getPokerResolvedTelegramUser() {
   function postAuthTelegram(initData, wantPwaSession) {
     var base = getTelegramAuthApiBase();
     if (!base) return Promise.reject(new Error("no_base"));
-    return fetch(base + "/api/auth-telegram", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, wantPwaSession: !!wantPwaSession }),
-      cache: "no-store",
-    }).then(function (res) {
+    return pokerFetchRetry(
+      base + "/api/auth-telegram",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: initData, wantPwaSession: !!wantPwaSession }),
+        cache: "no-store",
+      },
+      { timeoutMs: POKER_FETCH_TIMEOUT_MS, maxAttempts: 3, retryDelayMs: 750 }
+    ).then(function (res) {
       return res
         .json()
         .catch(function () {
@@ -5449,7 +5552,7 @@ function getPokerResolvedTelegramUser() {
     // В PWA держим загрузочный оверлей чуть дольше, чтобы не мигал экран входа.
     setTimeout(hideBootOverlay, isPwaStandaloneMode() ? 1600 : 200);
 
-    var maxAuthAttempts = 8;
+    var maxAuthAttempts = 5;
     var attempts = 0;
     function tryOnce() {
       attempts += 1;
@@ -5511,10 +5614,10 @@ function getPokerResolvedTelegramUser() {
           updateHeaderGreeting();
           showUnauthorized();
           setBannerFailure(
-            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
+            "Не удалось связаться с сервером (таймаут или нет сети). Нажмите «Повторить проверку», при необходимости смените Wi‑Fi / мобильный интернет или отключите VPN.",
             true
           );
-          hideBootOverlay();
+          if (!pokerTryBootOverlayNetworkError("Нет связи с сервером или таймаут. Нажмите «Повторить».")) hideBootOverlay();
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e4) {}
@@ -5528,10 +5631,10 @@ function getPokerResolvedTelegramUser() {
           updateHeaderGreeting();
           showUnauthorized();
           setBannerFailure(
-            "Не удалось связаться с сервером. Проверьте интернет, при VPN или прокси попробуйте отключить их или нажмите «Повторить проверку», либо перезайдите в приложение.",
+            "Не удалось связаться с сервером (таймаут или нет сети). Нажмите «Повторить проверку», при необходимости смените Wi‑Fi / мобильный интернет или отключите VPN.",
             true
           );
-          hideBootOverlay();
+          if (!pokerTryBootOverlayNetworkError("Нет связи с сервером или таймаут. Нажмите «Повторить».")) hideBootOverlay();
           try {
             window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: false, reason: "network" } }));
           } catch (e5) {}
@@ -5655,6 +5758,21 @@ function getPokerResolvedTelegramUser() {
       mountTelegramLoginWidgetForPwa();
     } catch (ePwaOpen) {}
   };
+
+  (function pokerBindBootOverlayRetryOnce() {
+    function bind() {
+      var btn = document.getElementById("appBootOverlayRetryBtn");
+      if (!btn || btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", function () {
+        pokerResetBootOverlayLoading();
+        if (typeof window.pokerRetryTelegramAuthVerification === "function") window.pokerRetryTelegramAuthVerification();
+        else if (window.location && typeof window.location.reload === "function") window.location.reload();
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+    else bind();
+  })();
 })();
 
 // PWA на весь экран: 100dvh не сжимается с клавиатурой — поднимаем экран входа по visualViewport
@@ -16986,13 +17104,16 @@ function initChat() {
     var da = d.getDate();
     return d.getFullYear() + "-" + (mo < 10 ? "0" : "") + mo + "-" + (da < 10 ? "0" : "") + da;
   }
-  function chatMessageWeekdayLabelRu(ts) {
+  var CHAT_MONTH_GENITIVE_RU = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  /** Подпись разделителя: «6 апреля» (локальная дата сообщения). */
+  function chatMessageDateLabelRu(ts) {
     if (ts == null || ts === "") return "";
     var d = new Date(ts);
     if (isNaN(d.getTime())) return "";
-    var s = d.toLocaleDateString("ru-RU", { weekday: "long" });
-    if (!s) return "";
-    return s.charAt(0).toUpperCase() + s.slice(1);
+    var day = d.getDate();
+    var mo = d.getMonth();
+    if (mo < 0 || mo > 11) return "";
+    return day + " " + CHAT_MONTH_GENITIVE_RU[mo];
   }
   /** Разделитель при смене дня относительно предыдущего сообщения в ленте (локальный календарь). */
   function chatDayDividerHtmlBeforeMessage(prevMsg, msg) {
@@ -17002,7 +17123,7 @@ function initChat() {
     if (!prevMsg || !prevMsg.time) return "";
     var kPrev = chatMessageCalendarDayKey(prevMsg.time);
     if (kPrev === kCur) return "";
-    var lab = chatMessageWeekdayLabelRu(msg.time);
+    var lab = chatMessageDateLabelRu(msg.time);
     if (!lab) return "";
     return '<div class="chat-day-divider" role="separator" aria-label="' + escapeHtml(lab) + '"><span class="chat-day-divider__label">' + escapeHtml(lab) + "</span></div>";
   }

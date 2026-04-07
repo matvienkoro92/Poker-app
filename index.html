@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.173">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.175">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -142,6 +142,37 @@
       html[data-theme="light"] .app-boot-overlay__version {
         color: #94a3b8;
       }
+      .app-boot-overlay__error-panel {
+        text-align: center;
+      }
+      .app-boot-overlay__err-msg {
+        margin: 0 auto 16px;
+      }
+      .app-boot-overlay__retry-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 22px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #0f172a;
+        background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+        border: 1px solid rgba(234, 88, 12, 0.85);
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+        -webkit-tap-highlight-color: transparent;
+      }
+      .app-boot-overlay__retry-btn:active {
+        transform: scale(0.98);
+      }
+      html[data-theme="light"] .app-boot-overlay__retry-btn {
+        color: #fff;
+        background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%);
+        border-color: rgba(154, 52, 18, 0.9);
+      }
       .app-boot-overlay.app-boot-overlay--hidden {
         opacity: 0;
         visibility: hidden;
@@ -269,9 +300,15 @@
           height="48"
           decoding="async"
         />
-        <p class="app-boot-overlay__conn-title">Соединение</p>
-        <div class="app-boot-overlay__spinner" aria-hidden="true"></div>
-        <p class="app-boot-overlay__text">Загружаем интерфейс…</p>
+        <div id="appBootOverlayMain">
+          <p class="app-boot-overlay__conn-title">Соединение</p>
+          <div class="app-boot-overlay__spinner" aria-hidden="true"></div>
+          <p class="app-boot-overlay__text" id="appBootOverlayStatusText">Загружаем интерфейс…</p>
+        </div>
+        <div id="appBootOverlayErrorPanel" class="app-boot-overlay__error-panel" hidden>
+          <p class="app-boot-overlay__text app-boot-overlay__err-msg" id="appBootOverlayErrMsg"></p>
+          <button type="button" class="app-boot-overlay__retry-btn" id="appBootOverlayRetryBtn">Повторить</button>
+        </div>
         <p class="app-boot-overlay__version" id="appBootOverlayVersion"></p>
         <script>
           (function () {
@@ -294,6 +331,9 @@
           try {
             clearTimeout(stallTimer);
           } catch (e) {}
+          try {
+            if (typeof window.pokerResetBootOverlayLoading === "function") window.pokerResetBootOverlayLoading();
+          } catch (eR) {}
           el.classList.add("app-boot-overlay--hidden");
           el.setAttribute("aria-hidden", "true");
           el.setAttribute("aria-busy", "false");
@@ -329,10 +369,14 @@
         stallTimer = setTimeout(function () {
           var el = document.getElementById("appBootOverlay");
           if (!el || el.classList.contains("app-boot-overlay--hidden")) return;
-          var p = el.querySelector(".app-boot-overlay__text");
-          if (p)
-            p.textContent =
-              "Соединение затягивается — проверьте сеть или перезайдите.\nПопробуйте без VPN / прокси.";
+          var msg =
+            "Соединение затягивается — таймаут сети.\nПроверьте Wi‑Fi или мобильный интернет, при необходимости нажмите «Повторить».";
+          try {
+            if (typeof window.pokerTryBootOverlayNetworkError === "function" && window.pokerTryBootOverlayNetworkError(msg)) return;
+          } catch (eP) {}
+          var p = document.getElementById("appBootOverlayStatusText");
+          if (!p) p = el.querySelector(".app-boot-overlay__text");
+          if (p) p.textContent = msg;
         }, 14000);
         window.__pokerHideBootOverlay = hideBootOverlay;
       })();
@@ -5414,7 +5458,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=342"></script>
+    <script defer src="./app.js?v=344"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
