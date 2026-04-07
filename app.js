@@ -16376,8 +16376,8 @@ function initChat() {
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
         var lastView = lastViewedGeneral != null ? lastViewedGeneral : "";
         var myMemberIdForUnread = resolveMyChatMemberId();
-        /* Локальный ноль непрочитанных при lastViewedGeneral == null — иначе каждый poll loadGeneral
-           обнулял бы бейдж раньше, чем сработает loadContacts (на вкладке «general» он не в каждом тике). */
+        /* Локальный пересчёт для звука; бейдж «главный чат» и chatGeneralUnreadCount вне открытого
+           экрана общего чата задаёт только loadContacts (server generalUnreadCount), иначе гонка с loadGeneral. */
         var unreadCount = 0;
         if (lastViewedGeneral != null && myMemberIdForUnread) {
           unreadCount = messages.filter(function (m) {
@@ -16412,15 +16412,8 @@ function initChat() {
           }
           window.chatGeneralUnread = false;
           window.chatGeneralUnreadCount = 0;
-        } else if (lastViewedGeneral != null && unreadCount > 0) {
-          window.chatGeneralUnread = true;
-          window.chatGeneralUnreadCount = unreadCount;
-        } else if (lastViewedGeneral == null) {
-          /* Серверный generalUnreadCount задаёт loadContacts — не затирать нулём при опросе general. */
-        } else {
-          window.chatGeneralUnread = false;
-          window.chatGeneralUnreadCount = 0;
         }
+        /* Вне экрана «главный чат» не трогаем chatGeneralUnread* — только mode=contacts. */
         var total = data.participantsCount != null ? data.participantsCount : "—";
         var online = data.onlineCount != null ? data.onlineCount : "—";
         window.lastGeneralStats = total + " уч · " + online + " онл";
