@@ -16916,6 +16916,7 @@ function initChat() {
     );
   }
   function refreshChatSelfPinBars() {
+    var gView = document.getElementById("chatGeneralView");
     var gHost = document.getElementById("chatGeneralPinnedSelf");
     if (gHost) {
       var gPin = pokerGetSelfPin("general", null);
@@ -16923,13 +16924,18 @@ function initChat() {
         gHost.classList.remove("chat-pinned-self--visible");
         gHost.innerHTML = "";
         gHost.setAttribute("aria-hidden", "true");
+        if (gView) gView.classList.remove("chat-general-view--self-pinned");
       } else {
         gHost.innerHTML = pokerRenderSelfPinnedInnerHtml(gPin);
         gHost.classList.add("chat-pinned-self--visible");
         gHost.setAttribute("aria-hidden", "false");
+        if (gView) gView.classList.add("chat-general-view--self-pinned");
         attachContextMenuForOthers(gHost, "general", generalMessages);
       }
+    } else if (gView) {
+      gView.classList.remove("chat-general-view--self-pinned");
     }
+    var convViewEl = document.getElementById("chatConvView");
     var pHost = document.getElementById("chatPersonalPinnedSelf");
     if (pHost) {
       var peerP = chatWithUserId;
@@ -16938,12 +16944,16 @@ function initChat() {
         pHost.classList.remove("chat-pinned-self--visible");
         pHost.innerHTML = "";
         pHost.setAttribute("aria-hidden", "true");
+        if (convViewEl) convViewEl.classList.remove("chat-conv-view--self-pinned");
       } else {
         pHost.innerHTML = pokerRenderSelfPinnedInnerHtml(pPin);
         pHost.classList.add("chat-pinned-self--visible");
         pHost.setAttribute("aria-hidden", "false");
+        if (convViewEl) convViewEl.classList.add("chat-conv-view--self-pinned");
         attachContextMenuForOthers(pHost, "personal", messagesEl);
       }
+    } else if (convViewEl) {
+      convViewEl.classList.remove("chat-conv-view--self-pinned");
     }
   }
 

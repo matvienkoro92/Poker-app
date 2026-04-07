@@ -6437,14 +6437,31 @@ img.chat-contact__avatar {
   flex: 0 0 auto;
   display: none;
   width: 100%;
+  max-width: 100%;
+  align-self: stretch;
   box-sizing: border-box;
-  padding: 8px max(8px, var(--screen-gutter-x)) 6px;
+  padding: 4px max(8px, var(--screen-gutter-x));
+  margin-bottom: 0;
   background: rgba(15, 23, 42, 0.45);
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   z-index: 3;
 }
+/* Сразу под плавающей полосой «Главный чат» / имя+ID в личке */
+.chat-general-view > .chat-pinned-self,
+.chat-conv-view > .chat-pinned-self {
+  margin-top: calc(48px + var(--chat-general-floating-toolbar-h));
+  margin-left: 0;
+  margin-right: 0;
+}
 .chat-pinned-self.chat-pinned-self--visible {
   display: block;
+}
+/* Лента без двойного отступа: место под шапку занимает полоса закрепления */
+.chat-general-view.chat-general-view--self-pinned .chat-messages-wrap .chat-messages {
+  padding-top: 4px;
+}
+.chat-conv-view.chat-conv-view--self-pinned .chat-container .chat-messages {
+  padding-top: 4px;
 }
 [data-theme="light"] .chat-pinned-self {
   background: rgba(241, 245, 249, 0.92);
@@ -6456,7 +6473,7 @@ img.chat-contact__avatar {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .chat-pinned-self .chat-msg--self-pin-stub {
   margin-top: 0;
