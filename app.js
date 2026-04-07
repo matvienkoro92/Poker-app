@@ -14995,6 +14995,39 @@ window.chatClubPendingReviewCount = 0;
 var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
+var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v2";
+function pokerChatContactsAuthFingerprint() {
+  var q = "";
+  try {
+    if (typeof pokerApiAuthQuery === "function") q = pokerApiAuthQuery("&") || "";
+  } catch (eFp) {}
+  if (!q || q === "&initData=") return "";
+  return q;
+}
+function pokerTryReadContactsCache() {
+  try {
+    if (typeof localStorage === "undefined") return null;
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return null;
+    var fp = pokerChatContactsAuthFingerprint();
+    if (!fp) return null;
+    var raw = localStorage.getItem(POKER_CHAT_CONTACTS_CACHE_KEY);
+    if (!raw) return null;
+    var pack = JSON.parse(raw);
+    if (!pack || typeof pack.fp !== "string" || pack.fp !== fp || pack.data == null) return null;
+    return pack.data;
+  } catch (eRd) {
+    return null;
+  }
+}
+function pokerWriteContactsCache(data) {
+  try {
+    if (typeof localStorage === "undefined" || !data || !data.ok) return;
+    var fp = pokerChatContactsAuthFingerprint();
+    if (!fp) return;
+    localStorage.setItem(POKER_CHAT_CONTACTS_CACHE_KEY, JSON.stringify({ fp: fp, t: Date.now(), data: data }));
+  } catch (eWr) {}
+}
+
 function initChat() {
   var dialogsView = document.getElementById("chatDialogsView");
   var generalView = document.getElementById("chatGeneralView");
@@ -15755,7 +15788,7 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = "48px";
+        genHeader.style.top = "0";
         genHeader.style.left = "0";
         genHeader.style.right = "0";
         genHeader.style.transform = "none";
@@ -15793,7 +15826,7 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = "48px";
+          genHeader.style.top = "0";
           genHeader.style.left = "0";
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
@@ -18590,7 +18623,8 @@ function initChat() {
       lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
     } catch (e) {}
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam;
-    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+    var contactsInstantFromCache = false;
+    function applyContactsApiResponse(data) {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess) clubChatAccess = data.clubChatAccess;
@@ -18758,16 +18792,34 @@ function initChat() {
           updateChatNavDot();
         }
       }
-    }).catch(function () {
-      contactsEl.innerHTML = "<p class=\"chat-empty\">Ошибка</p>";
-      if (window.__openClubChatAfterNextContacts) {
-        window.__openClubChatAfterNextContacts = false;
-        setTimeout(function () {
-          if (typeof tryOpenClubChatFromDialogs === "function") tryOpenClubChatFromDialogs();
-          else if (typeof openClubChat === "function") openClubChat();
-        }, 0);
+    }
+    try {
+      var c0 = pokerTryReadContactsCache();
+      if (c0) {
+        contactsInstantFromCache = true;
+        applyContactsApiResponse(c0);
       }
-    });
+    } catch (eInst) {}
+    fetch(url)
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        try {
+          if (data && data.ok) pokerWriteContactsCache(data);
+        } catch (eSav) {}
+        applyContactsApiResponse(data);
+      })
+      .catch(function () {
+        if (!contactsInstantFromCache) contactsEl.innerHTML = "<p class=\"chat-empty\">Ошибка</p>";
+        if (window.__openClubChatAfterNextContacts) {
+          window.__openClubChatAfterNextContacts = false;
+          setTimeout(function () {
+            if (typeof tryOpenClubChatFromDialogs === "function") tryOpenClubChatFromDialogs();
+            else if (typeof openClubChat === "function") openClubChat();
+          }, 0);
+        }
+      });
   }
 
 
@@ -19421,6 +19473,33 @@ function initChat() {
   if (!chatListenersAttached) {
     chatListenersAttached = true;
     window.chatListenersAttached = true;
+    (function schedulePrefetchChatContactsCache() {
+      var idle = window.requestIdleCallback || function (cb) {
+        setTimeout(cb, 400);
+      };
+      idle(function () {
+        try {
+          if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
+          if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+          if (!pokerChatContactsAuthFingerprint()) return;
+          var lastViewedParamP = "";
+          try {
+            var lvP = Object.assign({}, lastViewedPersonal || {});
+            if (lastViewedGeneral != null) lvP.general = lastViewedGeneral;
+            lastViewedParamP = "&lastViewed=" + encodeURIComponent(JSON.stringify(lvP));
+          } catch (eLv) {}
+          var urlP = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParamP;
+          fetch(urlP)
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              if (d && d.ok) pokerWriteContactsCache(d);
+            })
+            .catch(function () {});
+        } catch (ePf) {}
+      });
+    })();
     (function () {
       function getVisibleMessagesEl() {
         if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) return generalMessages;
