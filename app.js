@@ -16658,7 +16658,7 @@ function initChat() {
   }
 
   function resizeImage(file, maxW, maxH, quality) {
-    maxW = maxW || 800; maxH = maxH || 800; quality = quality || 0.8;
+    maxW = maxW || 400; maxH = maxH || 400; quality = quality || 0.8;
     return new Promise(function (resolve, reject) {
       var img = new Image();
       var url = URL.createObjectURL(file);
@@ -19457,9 +19457,8 @@ function initChat() {
         var f = generalFileInput.files && generalFileInput.files[0];
         if (!f || !f.type.startsWith("image/")) return;
         generalDocument = null;
-        // Для общего чата тоже шлём нормальное фото (как в личке),
-        // а не миниатюру 240×240 — так при открытии будет чёткая картинка.
-        resizeImage(f, 800, 800, 0.88).then(function (dataUrl) {
+        // До 400×400 JPEG с ленты — баланс читаемости и размера в Redis/трафике (как в личке).
+        resizeImage(f, 400, 400, 0.88).then(function (dataUrl) {
           generalImage = dataUrl;
           updateGeneralSendBtnIcon();
           if (generalImagePreview) {
@@ -20065,7 +20064,7 @@ function initChat() {
         var f = personalFileInput.files && personalFileInput.files[0];
         if (!f || !f.type.startsWith("image/")) return;
         personalDocument = null;
-        resizeImage(f, 800, 800, 0.88).then(function (dataUrl) {
+        resizeImage(f, 400, 400, 0.88).then(function (dataUrl) {
           personalImage = dataUrl;
           updatePersonalSendBtnIcon();
           if (personalImagePreview) {
