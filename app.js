@@ -6991,7 +6991,7 @@ function hallFameOpenTelegramShareForSection(section) {
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;
 
-/** PWA на рабочем столе: цифра на иконке (Badging API), как в таббаре — до 99. Только в standalone; без push не обновится, пока приложение закрыто. */
+/** PWA на рабочем столе: цифра на иконке (Badging API) — то же «общий + личные», что и в таббаре (updateChatNavDot), до 99. Пока приложение закрыто — только push/ОС. */
 function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
   try {
     var isStandalone =
@@ -20542,14 +20542,23 @@ function initChat() {
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     loadGeneral();
-    if (chatWithUserId) {
-      loadMessages();
-      /* Сумма личных непрочитанных для бейджа берётся из mode=contacts — обновляем и в открытом диалоге. */
-      loadContacts();
-    } else if (dialogsView && !dialogsView.classList.contains("chat-dialogs-view--hidden")) loadContacts();
-    else if (chatActiveTab === "personal") loadContacts();
+    if (chatWithUserId) loadMessages();
+    /* Бейдж таббара и иконки PWA: generalUnreadCount + сумма личных из mode=contacts — дергать не только
+       в списке диалогов, иначе на вкладке «общий»/главная цифра на ярлыке отстаёт от реальности. */
+    var guestPoll = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    if (credPoll && !guestPoll) loadContacts();
     else if (chatActiveTab === "admins" && adminsView && !adminsView.classList.contains("chat-admins-view--hidden")) loadAdminsOnline();
   }, 10000);
+
+  window.__pokerRefreshChatUnreadForPwaBadge = function () {
+    try {
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+      loadGeneral();
+      loadContacts();
+    } catch (eUnreadRef) {}
+  };
 }
 
 function isLocalEnv() {
@@ -20840,6 +20849,15 @@ document.addEventListener("visibilitychange", function () {
     try {
       if (typeof pokerChatPushSyncIfNeeded === "function") pokerChatPushSyncIfNeeded();
     } catch (eVis2) {}
+    try {
+      var pwaFg =
+        typeof window !== "undefined" &&
+        ((window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          window.navigator.standalone === true);
+      if (pwaFg && typeof window.__pokerRefreshChatUnreadForPwaBadge === "function") {
+        window.__pokerRefreshChatUnreadForPwaBadge();
+      }
+    } catch (ePwaFgUnread) {}
   }, 500);
 });
 
