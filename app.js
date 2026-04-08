@@ -3921,6 +3921,166 @@ function pokerPulseChatFixedViewportHeightAfterKeyboard() {
 }
 
 /**
+ * Профиль (и др. с внутренним scrollport): после закрытия клавиатуры WK/TG иногда оставляют 100dvh/html
+ * короче визуального окна — снизу полоса фона. Короткий inline-пульс по innerHeight (как в чате).
+ */
+function pokerPulseShellHeightToInnerHeightForProfile() {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "profile") return;
+    if (document.body.classList.contains("chat-keyboard-open")) return;
+    var touchLike =
+      (navigator.maxTouchPoints || 0) > 0 ||
+      /iPad|iPhone|iPod|Android/i.test(navigator.userAgent || "");
+    if (!touchLike) return;
+    var ih = window.innerHeight || 0;
+    if (ih < 240) return;
+    var target = ih;
+    try {
+      var vv0 = window.visualViewport;
+      if (vv0) {
+        var vvh = Number(vv0.height) || 0;
+        var ot = Number(vv0.offsetTop) || 0;
+        var pack = ot + vvh;
+        if (pack > ih - 1 && vvh < ih - 10) {
+          target = Math.max(target, Math.round(pack));
+        }
+      }
+    } catch (eVvP) {}
+    var body = document.body;
+    var html = document.documentElement;
+    body.style.setProperty("height", target + "px");
+    body.style.setProperty("min-height", target + "px");
+    body.style.setProperty("max-height", target + "px");
+    html.style.setProperty("height", target + "px");
+    html.style.setProperty("min-height", target + "px");
+    html.style.setProperty("max-height", target + "px");
+    var raf = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    raf(function () {
+      raf(function () {
+        try {
+          body.style.removeProperty("height");
+          body.style.removeProperty("min-height");
+          body.style.removeProperty("max-height");
+          html.style.removeProperty("height");
+          html.style.removeProperty("min-height");
+          html.style.removeProperty("max-height");
+        } catch (eR) {}
+      });
+    });
+  } catch (ePulse) {}
+}
+
+function pokerFlushViewportAfterProfileFieldBlur() {
+  if (!document.body || document.body.getAttribute("data-view") !== "profile") return;
+  try {
+    if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
+      pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
+    }
+  } catch (e1) {}
+  try {
+    if (typeof pokerRepairIosStuckVisualViewportOffset === "function") {
+      pokerRepairIosStuckVisualViewportOffset();
+    }
+  } catch (e2) {}
+  try {
+    if (typeof pokerPulseShellHeightToInnerHeightForProfile === "function") {
+      pokerPulseShellHeightToInnerHeightForProfile();
+    }
+  } catch (eP) {}
+  try {
+    pokerApplyBottomTabbarPad._lastPad = null;
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (e3) {}
+  try {
+    if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+      pokerFlushBottomNavAndViewportAfterChatChrome();
+    }
+  } catch (e4) {}
+  setTimeout(function () {
+    if (!document.body || document.body.getAttribute("data-view") !== "profile") return;
+    try {
+      if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
+        pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
+      }
+    } catch (e5) {}
+    try {
+      if (typeof pokerRepairIosStuckVisualViewportOffset === "function") {
+        pokerRepairIosStuckVisualViewportOffset();
+      }
+    } catch (e6) {}
+    try {
+      if (typeof pokerPulseShellHeightToInnerHeightForProfile === "function") {
+        pokerPulseShellHeightToInnerHeightForProfile();
+      }
+    } catch (eP2) {}
+    try {
+      pokerApplyBottomTabbarPad._lastPad = null;
+      if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+    } catch (e7) {}
+    try {
+      if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+        pokerFlushBottomNavAndViewportAfterChatChrome();
+      }
+    } catch (e8) {}
+  }, 220);
+}
+
+function initProfileKeyboardViewportCleanup() {
+  var profileRoot = document.querySelector('.view[data-view="profile"]');
+  if (!profileRoot || profileRoot.getAttribute("data-kb-vv-bound") === "1") return;
+  profileRoot.setAttribute("data-kb-vv-bound", "1");
+  var flushTimer = null;
+  function scheduleFlush() {
+    if (flushTimer) clearTimeout(flushTimer);
+    flushTimer = setTimeout(function () {
+      flushTimer = null;
+      var a = document.activeElement;
+      if (
+        a &&
+        profileRoot.contains(a) &&
+        (a.tagName === "INPUT" || a.tagName === "TEXTAREA")
+      ) {
+        return;
+      }
+      if (typeof pokerFlushViewportAfterProfileFieldBlur === "function") {
+        pokerFlushViewportAfterProfileFieldBlur();
+      }
+    }, 60);
+  }
+  profileRoot.addEventListener(
+    "focusout",
+    function (ev) {
+      var t = ev.target;
+      if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
+      if (t.id === "profileAvatarInput") return;
+      scheduleFlush();
+    },
+    true
+  );
+  var vvDebounce = null;
+  function onVvResizeProfile() {
+    if (document.body.getAttribute("data-view") !== "profile") return;
+    if (document.body.classList.contains("chat-keyboard-open")) return;
+    var ih = window.innerHeight || 0;
+    var vvh = window.visualViewport ? Number(window.visualViewport.height) || 0 : 0;
+    if (!ih || vvh < ih - 12) return;
+    clearTimeout(vvDebounce);
+    vvDebounce = setTimeout(function () {
+      vvDebounce = null;
+      if (document.body.getAttribute("data-view") !== "profile") return;
+      if (typeof pokerFlushViewportAfterProfileFieldBlur === "function") {
+        pokerFlushViewportAfterProfileFieldBlur();
+      }
+    }, 110);
+  }
+  if (window.visualViewport && typeof window.visualViewport.addEventListener === "function") {
+    window.visualViewport.addEventListener("resize", onVvResizeProfile, { passive: true });
+  }
+}
+
+/**
  * iOS WKWebView после blur input: visualViewport.offsetTop иногда остаётся > 0 без соответствующего scrollY —
  * контент «висячий», снизу пусто. Компенсация scroll + немедленный возврат в 0 на следующем кадре.
  */
@@ -6670,6 +6830,10 @@ function setView(viewName, navOpts) {
     updateProfileUserName();
     updateProfileExitBtnVisibility();
     updateProfileDtId();
+    try {
+      if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
+    } catch (eFrC) {}
+    initProfileKeyboardViewportCleanup();
     initProfileP21Id();
     initProfilePersonal();
     initProfileAvatar();
@@ -9626,7 +9790,6 @@ function initProfileP21Id() {
   input.addEventListener("input", function () {
     input.value = (input.value || "").replace(/\D/g, "").slice(0, 6);
   });
-  input.addEventListener("blur", saveP21Id);
   if (saveBtn) saveBtn.addEventListener("click", saveP21Id);
 }
 
@@ -9677,10 +9840,15 @@ function initProfilePersonal() {
   var saveBtn = document.getElementById("profilePersonalSaveBtn");
   var feedback = document.getElementById("profilePersonalFeedback");
   if (!textarea || !saveBtn) return;
+  if (saveBtn.dataset.personalBound === "1") return;
+  saveBtn.dataset.personalBound = "1";
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
-  if (base && initData) {
-    fetch(base + "/api/users?initData=" + encodeURIComponent(initData))
+  var canServer =
+    !!base &&
+    ((typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) ||
+      (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
+  if (canServer) {
+    fetch(base + "/api/users" + pokerRafflesApiQueryLeading())
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.personalInfo != null) textarea.value = data.personalInfo;
@@ -9689,8 +9857,15 @@ function initProfilePersonal() {
   }
   function savePersonal() {
     var val = (textarea.value || "").trim().slice(0, 500);
-    if (!base || !initData) {
-      if (feedback) { feedback.textContent = "Откройте в Telegram"; feedback.classList.add("profile-personal__feedback--visible"); setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500); }
+    if (!base || !canServer) {
+      if (feedback) {
+        feedback.textContent = "Войдите в аккаунт или откройте в Telegram, чтобы сохранить.";
+        feedback.classList.add("profile-personal__feedback--visible");
+        setTimeout(function () {
+          feedback.textContent = "";
+          feedback.classList.remove("profile-personal__feedback--visible");
+        }, 3500);
+      }
       return;
     }
     var personalSaveLabel = saveBtn.textContent ? saveBtn.textContent.trim() : "Сохранить";
@@ -9699,22 +9874,41 @@ function initProfilePersonal() {
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ initData: initData, personalInfo: val }),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ personalInfo: val })),
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.json().catch(function () {
+          return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status };
+        });
+      })
       .then(function (data) {
         saveBtn.disabled = false;
         saveBtn.textContent = personalSaveLabel;
         if (feedback) {
-          feedback.textContent = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
+          var msg = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
+          var m = String(msg).toLowerCase();
+          if (/telegram|телеграм|откройте/.test(m) && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+            msg = "Откройте приложение в Telegram";
+          }
+          feedback.textContent = msg;
           feedback.classList.add("profile-personal__feedback--visible");
-          setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500);
+          setTimeout(function () {
+            feedback.textContent = "";
+            feedback.classList.remove("profile-personal__feedback--visible");
+          }, 2500);
         }
       })
       .catch(function () {
         saveBtn.disabled = false;
         saveBtn.textContent = personalSaveLabel;
-        if (feedback) { feedback.textContent = POKER_NET_ERR; feedback.classList.add("profile-personal__feedback--visible"); setTimeout(function () { feedback.textContent = ""; feedback.classList.remove("profile-personal__feedback--visible"); }, 2500); }
+        if (feedback) {
+          feedback.textContent = POKER_NET_ERR;
+          feedback.classList.add("profile-personal__feedback--visible");
+          setTimeout(function () {
+            feedback.textContent = "";
+            feedback.classList.remove("profile-personal__feedback--visible");
+          }, 2500);
+        }
       });
   }
   saveBtn.addEventListener("click", savePersonal);
@@ -9787,12 +9981,21 @@ function initProfileFriends() {
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) {
           listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Ошибка загрузки</p>";
+          try {
+            if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
+          } catch (eRe) {}
           return;
         }
         if (data.friends.length === 0) {
           listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Пока нет друзей</p>";
+          try {
+            if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(0);
+          } catch (eZ) {}
           return;
         }
+        try {
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(data.friends.length);
+        } catch (eFcModal) {}
         listEl.innerHTML = data.friends.map(function (f) {
           var tgLine = f.userName || f.userId || "Игрок";
           var contact = f.contactName != null && String(f.contactName).trim() ? String(f.contactName).trim() : "";
@@ -9877,6 +10080,9 @@ function initProfileFriends() {
                     if (typeof window.chatRefresh === "function") window.chatRefresh();
                     if (!listEl.querySelector(".friends-list-modal__item")) {
                       listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Пока нет друзей</p>";
+                      try {
+                        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(0);
+                      } catch (eLM) {}
                     }
                   } else {
                     removeBtn.disabled = false;
@@ -9970,7 +10176,7 @@ function initProfileAvatar() {
 
   var pendingAvatarDataUrl = null;
   var uploadInProgress = false;
-  var BTN_LABEL = "Сохранить";
+  var BTN_LABEL = "Сохранить фото";
 
   function showAvatarFeedback(text, isError) {
     if (!feedbackEl) return;
@@ -10064,7 +10270,7 @@ function initProfileAvatar() {
     avatarEl.src = dataUrl;
     btnEl.classList.add("profile-avatar-block__btn--pending");
     inputEl.value = "";
-    showAvatarFeedback("Нажмите «Сохранить», чтобы отправить фото", false);
+    showAvatarFeedback("Нажмите «Сохранить фото», чтобы отправить снимок", false);
   }
 
   function uploadAvatar(dataUrl) {
@@ -15270,6 +15476,39 @@ function pokerSyncChatContactsFilterTabs() {
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
 }
+
+/** Подписи «Друзья (N)» на кнопке профиля и вкладке списка чатов. count === null — без скобок (нет авторизации). */
+function pokerUpdateFriendsCountLabels(count) {
+  var text =
+    typeof count === "number" && !isNaN(count)
+      ? "Друзья (" + Math.max(0, Math.floor(count)) + ")"
+      : "Друзья";
+  try {
+    var profileBtn = document.getElementById("profileFriendsBtn");
+    if (profileBtn) profileBtn.textContent = text;
+    var chatTab = document.getElementById("chatContactsFilterFriends");
+    if (chatTab) chatTab.textContent = text;
+  } catch (eLbl) {}
+}
+
+function pokerRefreshFriendsCountFromApi() {
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
+    pokerUpdateFriendsCountLabels(null);
+    return;
+  }
+  var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+  fetch(base + "/api/friends" + fq)
+    .then(function (r) {
+      return r.json();
+    })
+    .then(function (data) {
+      if (data && data.ok && Array.isArray(data.friends)) {
+        pokerUpdateFriendsCountLabels(data.friends.length);
+      }
+    })
+    .catch(function () {});
+}
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
@@ -19741,6 +19980,11 @@ function initChat() {
             var fid = data.friendIds[fi];
             if (fid != null && String(fid) !== "") friendSet[String(fid)] = true;
           }
+          try {
+            if (typeof pokerUpdateFriendsCountLabels === "function") {
+              pokerUpdateFriendsCountLabels(data.friendIds.length);
+            }
+          } catch (eFc) {}
         }
         window.__pokerChatFriendIdsSet = friendSet;
         if (showFriendsOnly) {
