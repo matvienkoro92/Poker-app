@@ -19240,10 +19240,12 @@ function initChat() {
 
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(chatWithUserId);
+    var loadForPeer = chatWithUserId;
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer);
     fetch(url)
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
+      if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
       if (data && data.ok) {
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
         var messages = data.messages || [];
@@ -19346,6 +19348,7 @@ function initChat() {
       }
     })
       .catch(function () {
+        if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
         if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
           messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
         }

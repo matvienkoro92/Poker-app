@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.209">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.212">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1587,7 +1587,7 @@
           <div class="view" data-view="chat">
             <!-- Один textarea для общего и личного чата: иначе iOS показывает панель «< > Готово» над клавиатурой -->
             <div id="chatComposerPool" class="chat-composer-pool" aria-hidden="true">
-              <textarea class="chat-input chat-input--textarea" id="chatSharedComposer" maxlength="1000" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
+              <textarea class="chat-input chat-input--textarea" id="chatSharedComposer" maxlength="4096" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
             </div>
             <div class="chat-dialogs-view" id="chatDialogsView">
               <div class="chat-dialogs-list-wrap">
@@ -5096,7 +5096,7 @@
               </label>
               <label class="chat-templates-modal__label">
                 Текст
-                <textarea class="chat-templates-modal__textarea" id="chatTemplatesModalTextInput" rows="8" maxlength="1000" placeholder="Текст, который будет вставляться в чат..."></textarea>
+                <textarea class="chat-templates-modal__textarea" id="chatTemplatesModalTextInput" rows="8" maxlength="4096" placeholder="Текст, который будет вставляться в чат..."></textarea>
               </label>
               <div class="chat-templates-modal__form-actions">
                 <button type="button" class="chat-templates-modal__btn chat-templates-modal__btn--ghost" id="chatTemplatesModalCancelBtn">Отмена</button>
@@ -5515,7 +5515,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=364"></script>
+    <script defer src="./app.js?v=366"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
