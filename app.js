@@ -1342,43 +1342,87 @@ function getAssetUrl(relativePath) {
     window.closePdfViewer = closePdfViewer;
   }
 
+  function pokerDownloadChatPdfDataUrl(href, fileName) {
+    try {
+      var m = href.match(/^data:([^;]+);base64,(.+)$/);
+      if (m && m[2]) {
+        var binary = atob(m[2]);
+        var arr = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+        var blob = new Blob([arr], { type: (m[1] || "application/pdf").split(";")[0] });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = fileName || "document.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return true;
+      }
+    } catch (err) {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) window.Telegram.WebApp.showAlert("Не удалось скачать. Попробуйте ещё раз.");
+    }
+    return false;
+  }
   document.body.addEventListener("click", function (e) {
-    var link = e.target && e.target.closest ? e.target.closest("a.chat-msg__document-link") : null;
+    var dlBtn = e.target && e.target.closest ? e.target.closest("button[data-chat-pdf-download]") : null;
+    if (dlBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var wrapDl = dlBtn.closest(".chat-msg__document-wrap");
+      var viewDl = wrapDl && wrapDl.querySelector("a.chat-msg__document-link--view");
+      var hrefDl = viewDl && viewDl.getAttribute("href");
+      var fnDl = (wrapDl && wrapDl.getAttribute("data-document-name")) || "document.pdf";
+      if (hrefDl && hrefDl.indexOf("data:") === 0) pokerDownloadChatPdfDataUrl(hrefDl, fnDl);
+      return;
+    }
+    var shBtn = e.target && e.target.closest ? e.target.closest("button[data-chat-pdf-share]") : null;
+    if (shBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var wrapSh = shBtn.closest(".chat-msg__document-wrap");
+      var viewSh = wrapSh && wrapSh.querySelector("a.chat-msg__document-link--view");
+      var hrefSh = viewSh && viewSh.getAttribute("href");
+      var fnSh = (wrapSh && wrapSh.getAttribute("data-document-name")) || "document.pdf";
+      if (!hrefSh || hrefSh.indexOf("data:") !== 0) return;
+      try {
+        var mSh = hrefSh.match(/^data:([^;]+);base64,(.+)$/);
+        if (!mSh || !mSh[2]) throw new Error("bad_pdf_data");
+        var binSh = atob(mSh[2]);
+        var u8 = new Uint8Array(binSh.length);
+        for (var j = 0; j < binSh.length; j++) u8[j] = binSh.charCodeAt(j);
+        var mimeSh = (mSh[1] || "application/pdf").split(";")[0];
+        var blobSh = new Blob([u8], { type: mimeSh });
+        var fileSh = new File([blobSh], fnSh || "document.pdf", { type: mimeSh, lastModified: Date.now() });
+        if (navigator.share && typeof navigator.canShare === "function" && navigator.canShare({ files: [fileSh] })) {
+          navigator
+            .share({ files: [fileSh], title: fnSh })
+            .catch(function (ex) {
+              if (ex && ex.name === "AbortError") return;
+              if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert)
+                window.Telegram.WebApp.showAlert("Не удалось поделиться. Попробуйте «Скачать».");
+            });
+          return;
+        }
+      } catch (eShare) {}
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert)
+        window.Telegram.WebApp.showAlert("Поделиться файлом здесь не поддерживается. Сохраните через «Скачать».");
+      else if (typeof alert === "function") alert("Поделиться файлом не поддерживается. Используйте «Скачать».");
+      return;
+    }
+    var link = e.target && e.target.closest ? e.target.closest("a.chat-msg__document-link--view") : null;
     if (!link || !link.href) return;
     var href = link.getAttribute("href");
     if (!href || href.indexOf("data:") !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    var fileName = link.getAttribute("download") || "document.pdf";
-    var isDownload = link.hasAttribute("download");
-    if (isDownload) {
-      try {
-        var m = href.match(/^data:([^;]+);base64,(.+)$/);
-        if (m && m[2]) {
-          var binary = atob(m[2]);
-          var arr = new Uint8Array(binary.length);
-          for (var i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
-          var blob = new Blob([arr], { type: (m[1] || "application/pdf").split(";")[0] });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = fileName || "document.pdf";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }
-      } catch (err) {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) window.Telegram.WebApp.showAlert("Не удалось скачать. Попробуйте ещё раз.");
-      }
+    if (pdfViewer && pdfViewerIframe) {
+      openPdfViewer(href);
     } else {
-      if (pdfViewer && pdfViewerIframe) {
-        openPdfViewer(href);
-      } else {
-        var w = window.open(href, "_blank", "noopener,noreferrer");
-        if (!w && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-          window.Telegram.WebApp.showAlert("Нажмите «Скачать» и откройте файл в приложении для PDF.");
-        }
+      var w = window.open(href, "_blank", "noopener,noreferrer");
+      if (!w && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert("Нажмите «Скачать» и откройте файл в приложении для PDF.");
       }
     }
   });
@@ -17783,6 +17827,28 @@ function initChat() {
   }
   var CHAT_MSG_AVATAR_IMG_ATTRS = ' width="36" height="36" loading="lazy" decoding="async"';
 
+  function chatDocumentBlockHtml(documentUrl, documentName) {
+    var rawUrl = documentUrl != null ? String(documentUrl) : "";
+    if (!rawUrl) return "";
+    var name = documentName != null && String(documentName).trim() ? String(documentName).trim() : "document.pdf";
+    var docHref = escapeHtml(rawUrl);
+    var docNameEsc = escapeHtml(name);
+    return (
+      '<span class="chat-msg__document chat-msg__document-wrap" data-document-name="' +
+      docNameEsc +
+      '">' +
+      '<a class="chat-msg__document-link chat-msg__document-link--view" href="' +
+      docHref +
+      '">📄 ' +
+      docNameEsc +
+      '</a>' +
+      '<div class="chat-msg__document-actions">' +
+      '<button type="button" class="chat-msg__document-btn chat-msg__document-btn--download" data-chat-pdf-download="1">Скачать</button>' +
+      '<button type="button" class="chat-msg__document-btn chat-msg__document-btn--share" data-chat-pdf-share="1">Поделиться</button>' +
+      "</div></span>"
+    );
+  }
+
   function renderGeneralMessages(messages) {
     messages = (messages || []).filter(function (m) {
       return !(m && m.clubAdmissionNotice);
@@ -17826,7 +17892,7 @@ function initChat() {
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
-      var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
+      var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtn = "";
       var editBtn = "";
       var blockBtn = "";
@@ -18448,7 +18514,7 @@ function initChat() {
         escapeHtml(image) +
         '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
     } else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
-    else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
+    else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
     else if (text) {
       try {
         textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
@@ -19222,7 +19288,7 @@ function initChat() {
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
-      var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
+      var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtnP = "";
       var editBtnP = "";
       var replyBlock = m.replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(m.replyTo.fromName || "Игрок") + ':</strong> ' + escapeHtml(String(m.replyTo.text || "").slice(0, 80)) + (String(m.replyTo.text || "").length > 80 ? "…" : "") + '</div>' : "";
@@ -19357,6 +19423,331 @@ function initChat() {
       scheduleSyncChatScrollBottomButtons();
     } catch (eSbP) {}
   }
+
+  function renderDialogPreviewMessagesInto(targetEl, messages) {
+    if (!targetEl) return;
+    var CHAT_DIALOG_PREVIEW_MAX = 50;
+    var slice =
+      messages && messages.length > CHAT_DIALOG_PREVIEW_MAX ? messages.slice(-CHAT_DIALOG_PREVIEW_MAX) : messages;
+    if (!slice || slice.length === 0) {
+      targetEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
+      return;
+    }
+    function personalReceiptHtmlPrev(m, isOwn) {
+      if (!isOwn) return "";
+      var delivered = false;
+      var read = false;
+      var status =
+        (m && (m.deliveryStatus || m.status || m.state)) != null
+          ? String(m.deliveryStatus || m.status || m.state)
+          : "";
+      status = status.toLowerCase();
+      if (status) {
+        if (status.indexOf("read") >= 0 || status.indexOf("seen") >= 0 || status.indexOf("прочит") >= 0) {
+          delivered = true;
+          read = true;
+        } else if (
+          status.indexOf("deliver") >= 0 ||
+          status.indexOf("delivered") >= 0 ||
+          status.indexOf("достав") >= 0
+        ) {
+          delivered = true;
+        } else if (status.indexOf("sent") >= 0 || status.indexOf("send") >= 0 || status.indexOf("отправ") >= 0) {
+          delivered = false;
+          read = false;
+        }
+      }
+      if (m) {
+        if (m.peerHasRead === true) {
+          delivered = true;
+          read = true;
+        }
+        if (m.delivered === true || m.isDelivered === true || m.deliveredAt || m.delivered_at) delivered = true;
+        if (
+          m.read === true ||
+          m.isRead === true ||
+          m.seen === true ||
+          m.isSeen === true ||
+          m.readAt ||
+          m.read_at ||
+          m.seenAt ||
+          m.seen_at
+        ) {
+          delivered = true;
+          read = true;
+        }
+        if (Array.isArray(m.readBy) && m.readBy.length) {
+          delivered = true;
+          read = true;
+        }
+        if (Array.isArray(m.seenBy) && m.seenBy.length) {
+          delivered = true;
+          read = true;
+        }
+      }
+      var textTicks = delivered ? "✓✓" : "✓";
+      var cls =
+        "chat-msg__ticks" +
+        (delivered ? " chat-msg__ticks--delivered" : " chat-msg__ticks--sent") +
+        (read ? " chat-msg__ticks--read" : "");
+      return '<div class="' + cls + '" aria-hidden="true">' + textTicks + "</div>";
+    }
+    var myIdRenderP = resolveMyChatMemberId();
+    var html = slice
+      .map(function (m, i) {
+        var prev = i > 0 ? slice[i - 1] : null;
+        var next = i < slice.length - 1 ? slice[i + 1] : null;
+        var sameUser = function (a, b) {
+          if (!a || !b || a.from == null || a.from === "" || b.from == null || b.from === "") return false;
+          return peerChatIdsEqual(a.from, b.from);
+        };
+        var isFirstInGroup = !prev || !sameUser(prev, m);
+        var isLastInGroup = !next || !sameUser(next, m);
+        var isOwn = !!(myIdRenderP && peerChatIdsEqual(m.from, myIdRenderP));
+        var cls = (isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other") + " chat-msg--dialog-preview";
+        var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
+        var text = chatMessageBodyHtml(m);
+        var imgBlock = m.image
+          ? '<img class="chat-msg__image" src="' +
+            escapeHtml(m.image) +
+            '" alt="Картинка"' +
+            chatMsgImageAttrs(i, slice.length) +
+            " />"
+          : "";
+        var voiceBlock = m.voice
+          ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>'
+          : "";
+        var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
+        var replyBlock = m.replyTo
+          ? '<div class="chat-msg__reply"><strong>' +
+            escapeHtml(m.replyTo.fromName || "Игрок") +
+            ":</strong> " +
+            escapeHtml(String(m.replyTo.text || "").slice(0, 80)) +
+            (String(m.replyTo.text || "").length > 80 ? "…" : "") +
+            "</div>"
+          : "";
+        var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
+        var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
+        var avLetter = (m.fromName && m.fromName.charAt(0)) || (m.from && m.from.charAt(1)) || "И";
+        var avatarEl = isLastInGroup
+          ? m.fromAvatar
+            ? '<img class="chat-msg__avatar" src="' +
+              escapeHtml(m.fromAvatar) +
+              '" alt=""' +
+              CHAT_MSG_AVATAR_IMG_ATTRS +
+              " />"
+            : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(avLetter) + "</span>"
+          : '<span class="chat-msg__avatar-spacer"></span>';
+        var nameElP = "";
+        if (!isOwn) {
+          var nameStrP = escapeHtml(m.fromName || "Игрок");
+          var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
+          var respectValP =
+            m.fromRespect !== undefined && m.fromRespect !== null
+              ? m.fromRespect === 0
+                ? "\u2014"
+                : String(m.fromRespect)
+              : "\u2014";
+          var respectClassP = "chat-msg__respect";
+          if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
+          else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
+          var sepP = '<span class="chat-msg__meta-sep"> · </span>';
+          var metaLineTopP =
+            '<div class="chat-msg__meta-line">' +
+            '<span class="chat-msg__name">' +
+            nameStrP +
+            "</span>" +
+            sepP +
+            '<span class="chat-msg__p21-inline">' +
+            p21StrP +
+            "</span></div>";
+          var respectPartP =
+            '<span class="chat-msg__respect-row chat-msg__respect-inline"><span class="' +
+            respectClassP +
+            '" title="Уважение в чате">Ув: ' +
+            escapeHtml(respectValP) +
+            "</span></span>";
+          var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
+          var metaContentP = '<div class="chat-msg__meta-stack">' + metaLineTopP + metaLineRespectP + "</div>";
+          nameElP = '<span class="chat-msg__name-block">' + metaContentP + "</span>";
+        }
+        var textBlock =
+          text || imgBlock || voiceBlock || documentBlock
+            ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + "</div>"
+            : "";
+        var reactionsHtmlP = "";
+        if (m.id && m.reactions && typeof m.reactions === "object") {
+          var pillsP = [];
+          for (var emp in m.reactions) {
+            if (
+              Object.prototype.hasOwnProperty.call(m.reactions, emp) &&
+              Array.isArray(m.reactions[emp]) &&
+              m.reactions[emp].length > 0
+            ) {
+              var countP = m.reactions[emp].length;
+              pillsP.push(
+                '<span class="chat-dialog-preview__reaction-pill">' +
+                  escapeHtml(emp) +
+                  ' <span class="chat-msg__reaction-count">' +
+                  countP +
+                  "</span></span>"
+              );
+            }
+          }
+          reactionsHtmlP = pillsP.join("");
+        }
+        var reactionsRowP = reactionsHtmlP
+          ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtmlP + "</span></div>"
+          : "";
+        var metaBlockP = isFirstInGroup ? nameElP + adminBadge : "";
+        var bodyClassP =
+          "chat-msg__body" +
+          (text && text.trim() ? " chat-msg__body--has-text" : "") +
+          (isOwn && m.image ? " chat-msg__body--own-image" : "");
+        var ticks = personalReceiptHtmlPrev(m, isOwn);
+        var footerHtmlP =
+          '<div class="chat-msg__footer">' +
+          '<span class="chat-msg__time">' +
+          time +
+          "</span>" +
+          editedBadge +
+          ticks +
+          "</div>";
+        var bodyMainClsP =
+          "chat-msg__body-main" +
+          (!textBlock ? " chat-msg__body-main--solo-footer" : "") +
+          (m.image ? " chat-msg__body-main--with-image" : "");
+        var bodyMainHtmlP = '<div class="' + bodyMainClsP + '">' + textBlock + footerHtmlP + "</div>";
+        var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
+        return (
+          dayDividerP +
+          '<div class="' +
+          cls +
+          '"><div class="chat-msg__row">' +
+          avatarEl +
+          '<div class="' +
+          bodyClassP +
+          '"><div class="chat-msg__meta">' +
+          metaBlockP +
+          "</div>" +
+          replyBlock +
+          bodyMainHtmlP +
+          reactionsRowP +
+          "</div></div></div>"
+        );
+      })
+      .join("");
+    targetEl.innerHTML = html;
+    try {
+      applyChatMsgTallTextTimeBelowLayout(targetEl);
+    } catch (eLayoutPrev) {}
+    requestAnimationFrame(function () {
+      targetEl.scrollTop = targetEl.scrollHeight;
+    });
+  }
+
+  function closeChatDialogPreviewModal() {
+    var modal = document.getElementById("chatDialogPreviewModal");
+    if (!modal) return;
+    modal.classList.remove("chat-dialog-preview-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function openChatDialogPreviewModal(userId, userName, peerP21Id) {
+    var modal = document.getElementById("chatDialogPreviewModal");
+    var titleEl = document.getElementById("chatDialogPreviewTitle");
+    var subEl = document.getElementById("chatDialogPreviewSub");
+    var prevMsgEl = document.getElementById("chatDialogPreviewMessages");
+    var avatarEl = document.getElementById("chatDialogPreviewAvatar");
+    var avatarPh = document.getElementById("chatDialogPreviewAvatarPlaceholder");
+    if (!modal || !prevMsgEl || !userId || !base) return;
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+    modal.dataset.previewUserId = userId;
+    modal.dataset.previewUserName = userName || "";
+    modal.dataset.previewP21Id = peerP21Id || "";
+    if (titleEl) titleEl.textContent = userName || userId;
+    if (subEl) {
+      var subInit = peerP21Id && String(peerP21Id).trim() ? "Poker21: " + String(peerP21Id).trim() : "";
+      subEl.textContent = subInit;
+    }
+    if (avatarEl) {
+      avatarEl.style.display = "none";
+      avatarEl.removeAttribute("src");
+      avatarEl.onerror = null;
+    }
+    if (avatarPh) {
+      var ini = (userName || userId || "?").trim().charAt(0) || "?";
+      avatarPh.textContent = ini.toUpperCase();
+      avatarPh.style.display = "flex";
+    }
+    prevMsgEl.innerHTML = '<p class="chat-empty">Загрузка…</p>';
+    modal.classList.add("chat-dialog-preview-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+    var url =
+      base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
+    fetch(url)
+      .then(function (r) {
+        return r.json().catch(function () {
+          return { ok: false, error: "Ошибка ответа" };
+        });
+      })
+      .then(function (data) {
+        if (!modal.classList.contains("chat-dialog-preview-modal--open")) return;
+        if (modal.dataset.previewUserId !== userId) return;
+        if (!data || !data.ok) {
+          prevMsgEl.innerHTML =
+            '<p class="chat-empty">' + escapeHtml((data && data.error) || "Не удалось загрузить сообщения") + "</p>";
+          return;
+        }
+        var p21v = data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : "";
+        if (p21v) modal.dataset.previewP21Id = p21v;
+        if (subEl) {
+          if (p21v) subEl.textContent = "Poker21: " + p21v;
+          else if (peerP21Id && String(peerP21Id).trim()) subEl.textContent = "Poker21: " + String(peerP21Id).trim();
+          else subEl.textContent = "";
+        }
+        var av = data.otherAvatar != null && String(data.otherAvatar).trim() ? String(data.otherAvatar).trim() : "";
+        if (av && avatarEl && avatarPh) {
+          avatarEl.onerror = function () {
+            avatarEl.style.display = "none";
+            avatarPh.style.display = "flex";
+          };
+          avatarEl.src = av;
+          avatarEl.style.display = "";
+          avatarPh.style.display = "none";
+        }
+        renderDialogPreviewMessagesInto(prevMsgEl, data.messages || []);
+      })
+      .catch(function () {
+        if (!modal.classList.contains("chat-dialog-preview-modal--open")) return;
+        if (modal.dataset.previewUserId !== userId) return;
+        prevMsgEl.innerHTML = '<p class="chat-empty">Ошибка сети</p>';
+      });
+  }
+
+  (function bindChatDialogPreviewModalOnce() {
+    var modal = document.getElementById("chatDialogPreviewModal");
+    if (!modal || modal._chatDialogPreviewModalBound) return;
+    modal._chatDialogPreviewModalBound = true;
+    var backdrop = document.getElementById("chatDialogPreviewBackdrop");
+    var closeBtn = document.getElementById("chatDialogPreviewClose");
+    var openBtn = document.getElementById("chatDialogPreviewOpenBtn");
+    function onBackdrop(e) {
+      if (e.target === backdrop) closeChatDialogPreviewModal();
+    }
+    if (backdrop) backdrop.addEventListener("click", onBackdrop);
+    if (closeBtn) closeBtn.addEventListener("click", closeChatDialogPreviewModal);
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        var uid = modal.dataset.previewUserId;
+        var uname = modal.dataset.previewUserName;
+        var p21 = modal.dataset.previewP21Id;
+        if (!uid) return;
+        closeChatDialogPreviewModal();
+        openConvFromDialogs(uid, uname, p21);
+      });
+    }
+  })();
 
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
@@ -19512,7 +19903,7 @@ function initChat() {
           '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
       }
       else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
-      else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
+      else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
       else if (text) {
         try {
           textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
@@ -21662,6 +22053,36 @@ function initChat() {
       }
     }
     var dialogsSelector = ".chat-dialog-item--club, .chat-dialog-item--find-user, .chat-dialog-item[data-chat-user-id], .chat-contact";
+    /** Долгое нажатие на строку личного диалога: превью переписки (только не-админ). */
+    function dialogRowEligibleForPlayerPreview(btn) {
+      if (chatIsAdmin) return false;
+      if (!btn || !btn.classList) return false;
+      if (btn.classList.contains("chat-dialog-item--find-user")) return false;
+      if (btn.classList.contains("chat-dialog-item--club")) return false;
+      if (btn.classList.contains("chat-contact") && btn.dataset.chatId) return true;
+      if (btn.getAttribute && btn.getAttribute("data-chat-user-id")) return true;
+      return false;
+    }
+    function getDialogPreviewPeerFromBtn(btn) {
+      if (!btn) return null;
+      if (btn.classList.contains("chat-contact") && btn.dataset.chatId) {
+        return {
+          userId: btn.dataset.chatId,
+          userName: btn.dataset.chatName || "",
+          p21Id: btn.dataset.chatP21Id || "",
+        };
+      }
+      var uid = btn.getAttribute("data-chat-user-id");
+      if (uid) {
+        var uname = btn.getAttribute("data-chat-user-name") || "";
+        if (!uname) {
+          var lab = btn.querySelector(".chat-dialog-item__label");
+          if (lab) uname = (lab.textContent || "").trim();
+        }
+        return { userId: uid, userName: uname, p21Id: "" };
+      }
+      return null;
+    }
     /** Порог в px: если палец сдвинулся больше — считаем жест скроллом, не открываем диалог. */
     var CHAT_DIALOG_TAP_MOVE_THRESHOLD = 18;
     function attachChatDialogButton(btn) {
@@ -21679,11 +22100,19 @@ function initChat() {
           Math.abs(e.clientY - btn._chatTapStartY) > CHAT_DIALOG_TAP_MOVE_THRESHOLD
         ) {
           btn._chatTapWasScroll = true;
+          if (btn._dialogPreviewLpTimer) {
+            clearTimeout(btn._dialogPreviewLpTimer);
+            btn._dialogPreviewLpTimer = null;
+          }
         }
       }
       function onDocUp(e) {
         if (e.pointerId !== btn._chatTapPtrId) return;
         btn._chatTapTracking = false;
+        if (btn._dialogPreviewLpTimer) {
+          clearTimeout(btn._dialogPreviewLpTimer);
+          btn._dialogPreviewLpTimer = null;
+        }
         detachMoveListeners();
       }
       btn.addEventListener(
@@ -21695,6 +22124,22 @@ function initChat() {
           btn._chatTapPtrId = e.pointerId;
           btn._chatTapStartX = e.clientX;
           btn._chatTapStartY = e.clientY;
+          if (dialogRowEligibleForPlayerPreview(btn)) {
+            if (btn._dialogPreviewLpTimer) {
+              clearTimeout(btn._dialogPreviewLpTimer);
+              btn._dialogPreviewLpTimer = null;
+            }
+            btn._dialogPreviewLpTimer = setTimeout(function () {
+              btn._dialogPreviewLpTimer = null;
+              if (!dialogRowEligibleForPlayerPreview(btn)) return;
+              var peer = getDialogPreviewPeerFromBtn(btn);
+              if (!peer || !peer.userId) return;
+              btn._dialogPreviewLongPressHandled = true;
+              btn._chatTapWasScroll = false;
+              if (typeof tg !== "undefined" && tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("medium");
+              openChatDialogPreviewModal(peer.userId, peer.userName, peer.p21Id);
+            }, 550);
+          }
           document.addEventListener("pointermove", onDocMove, true);
           document.addEventListener("pointerup", onDocUp, true);
           document.addEventListener("pointercancel", onDocUp, true);
@@ -21704,6 +22149,12 @@ function initChat() {
       btn.addEventListener(
         "click",
         function (e) {
+          if (btn._dialogPreviewLongPressHandled) {
+            e.preventDefault();
+            e.stopPropagation();
+            btn._dialogPreviewLongPressHandled = false;
+            return;
+          }
           if (btn._chatTapWasScroll) {
             e.preventDefault();
             e.stopPropagation();

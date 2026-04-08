@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.222">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.225">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -222,7 +222,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=322" />
+    <link rel="stylesheet" href="./styles.css?v=325" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -5077,6 +5077,28 @@
           </div>
         </div>
       </div>
+      <div class="chat-dialog-preview-modal" id="chatDialogPreviewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="chatDialogPreviewTitle" aria-label="Превью диалога">
+        <div class="chat-dialog-preview-modal__backdrop" id="chatDialogPreviewBackdrop"></div>
+        <div class="chat-dialog-preview-modal__inner" role="document">
+          <button type="button" class="chat-dialog-preview-modal__close" id="chatDialogPreviewClose" aria-label="Закрыть">×</button>
+          <div class="chat-dialog-preview-modal__header">
+            <div class="chat-dialog-preview-modal__avatar-wrap">
+              <img id="chatDialogPreviewAvatar" class="chat-dialog-preview-modal__avatar" alt="" style="display: none;" />
+              <span id="chatDialogPreviewAvatarPlaceholder" class="chat-dialog-preview-modal__avatar chat-dialog-preview-modal__avatar--placeholder" aria-hidden="true"></span>
+            </div>
+            <div class="chat-dialog-preview-modal__titles">
+              <h3 class="chat-dialog-preview-modal__title" id="chatDialogPreviewTitle"></h3>
+              <p class="chat-dialog-preview-modal__sub" id="chatDialogPreviewSub"></p>
+            </div>
+          </div>
+          <div class="chat-dialog-preview-modal__messages-wrap">
+            <div class="chat-messages chat-dialog-preview-modal__messages" id="chatDialogPreviewMessages" role="log"></div>
+          </div>
+          <div class="chat-dialog-preview-modal__footer">
+            <button type="button" class="chat-dialog-preview-modal__open-btn" id="chatDialogPreviewOpenBtn">Открыть чат</button>
+          </div>
+        </div>
+      </div>
       <div class="chat-templates-modal" id="chatTemplatesModal" aria-hidden="true" role="dialog" aria-label="Шаблоны сообщений">
         <div class="chat-templates-modal__backdrop" id="chatTemplatesModalBackdrop"></div>
         <div class="chat-templates-modal__inner" role="document">
@@ -5515,7 +5537,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=372"></script>
+    <script defer src="./app.js?v=374"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
