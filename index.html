@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.250">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.269">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -573,7 +573,7 @@
                           <span class="feature__title-line1">Рейтинг турнирщиков</span>
                           <span class="feature__title-prize feature__title-prize--spring">на 250 000р</span>
                           <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
-                          <span class="feature__title-updated">обновлено 03.04.26</span>
+                          <span class="feature__title-updated">обновлено 07.04.26</span>
                         </div>
                       </div>
                       <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
@@ -911,61 +911,22 @@
                   <span class="winter-rating__week-top-btn-preview" id="winterRatingTopFebruaryPreview"></span>
                 </button>
               </div>
-              <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingCurrentWeekSection" hidden>
-                <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="current">
-                  <span>23–29 марта</span>
-                  <span class="winter-rating-week__summary" id="winterRatingCurrentWeekSummary"></span>
-                </button>
-                <div class="winter-rating-week__body" id="winterRatingCurrentWeekBody" hidden>
-                  <div class="winter-rating__past-week-row">
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekSumWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ суммарный выигрыш за неделю</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekSumList"></ul>
-                    </div>
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingCurrentWeekWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ занос за 1 турнир</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingCurrentWeekList"></ul>
-                    </div>
+              <div class="spring-rating-view-totals-stack" id="springRatingViewTotals" hidden>
+                <div class="spring-rating-home-promo-stats spring-rating-view-totals-panel spring-rating-view-totals-panel--april">
+                  <div class="spring-rating-view-totals__april-head">
+                    <span class="spring-rating-view-totals__month-title"><strong>Апрель</strong></span>
+                    <span class="spring-rating-view-totals__month-meta">Общий выигрыш игроков: <strong id="springRatingViewAprilTotal">—</strong></span>
                   </div>
-                  <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingCurrentWeekTotalBelow"></p>
+                  <div class="spring-rating-view-totals__weeks-host" id="springRatingViewAprilWeeks"></div>
                 </div>
-              </div>
-              <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingNextWeekSection" hidden>
-                <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="next">
-                  <span>16–22 марта</span>
-                  <span class="winter-rating-week__summary" id="winterRatingNextWeekSummary"></span>
-                </button>
-                <div class="winter-rating-week__body" id="winterRatingNextWeekBody" hidden>
-                  <div class="winter-rating__past-week-row">
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingNextWeekSumWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ суммарный выигрыш за неделю</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingNextWeekSumList"></ul>
-                    </div>
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingNextWeekWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ занос за 1 турнир</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingNextWeekList"></ul>
-                    </div>
-                  </div>
-                  <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingNextWeekTotalBelow"></p>
-                </div>
-              </div>
-              <div class="winter-rating__past-week-section winter-rating-week" id="winterRatingPastWeekSection" hidden>
-                <button type="button" class="winter-rating__past-week-heading winter-rating-week__toggle" data-week="past">
-                  <span>9–15 марта</span>
-                  <span class="winter-rating-week__summary" id="winterRatingPastWeekSummary"></span>
-                </button>
-                <div class="winter-rating-week__body" id="winterRatingPastWeekBody" hidden>
-                  <div class="winter-rating__past-week-row">
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingPastWeekSumWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ суммарный выигрыш за неделю</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingPastWeekSumList"></ul>
-                    </div>
-                    <div class="winter-rating__past-week-wrap winter-rating__single-top-wrap--march" id="winterRatingPastWeekWrap" hidden>
-                      <h4 class="winter-rating__past-week-title">Топ занос за 1 турнир</h4>
-                      <ul class="winter-rating__single-top-list" id="winterRatingPastWeekList"></ul>
-                    </div>
-                  </div>
-                  <p class="winter-rating__past-week-total winter-rating__past-week-total--below" id="winterRatingPastWeekTotalBelow"></p>
+                <div class="spring-rating-home-promo-stats spring-rating-view-totals-panel spring-rating-view-totals-panel--march">
+                  <details class="spring-rating-view-totals__month spring-rating-view-totals__month--march">
+                    <summary class="spring-rating-view-totals__month-summary">
+                      <span class="spring-rating-view-totals__month-title"><strong>Март</strong> · итоги</span>
+                      <span class="spring-rating-view-totals__month-meta">Общий выигрыш игроков: <strong id="springRatingViewMarchTotal">—</strong></span>
+                    </summary>
+                    <div class="spring-rating-view-totals__weeks-host" id="springRatingViewMarchWeeks"></div>
+                  </details>
                 </div>
               </div>
               <h3 class="winter-rating__dates-caption"><span class="winter-rating__caption-icon" aria-hidden="true">❄</span> Таблица по датам</h3>
@@ -4515,8 +4476,8 @@
             <div class="gazette-modal__pages">
               <div class="gazette-front">
                 <div class="gazette-front__meta">
-                  <span class="gazette-front__date">Суббота, 21 марта 2026</span>
-                  <span class="gazette-front__issue">Выпуск № 3 (весна)</span>
+                  <span class="gazette-front__date">Вторник, 8 апреля 2026</span>
+                  <span class="gazette-front__issue">Выпуск № 4 (весна)</span>
                 </div>
                 <div class="gazette-front__headline-wrap">
                   <div class="gazette-front__headline-main">ПЕРВАЯ ПОЛОСА</div>
@@ -4524,27 +4485,42 @@
                 </div>
                 <div class="gazette-front__grid">
                   <div class="gazette-front__main gazette-front__main--lead">
-                    <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="17">
-                      <div class="gazette-front__section">Доска позора · последний номер</div>
-                      <p class="gazette-front__posted-date">Размещено: 22 марта 2026&nbsp;г.</p>
+                    <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="18">
+                      <div class="gazette-front__section">Сказка редакции · FrankL / AndrushaMorf / 4ezzi</div>
+                      <p class="gazette-front__posted-date">Размещено: 8 апреля 2026&nbsp;г.</p>
                       <h3 class="gazette-front__title">
-                        Корги в галстуке против календаря: февраль ждёт зп, март — «где возврат?»
+                        Трехликий герой и кубок весны
                       </h3>
                       <div class="gazette-front__thumb">
                         <img
-                          src="./assets/hall-shame-dmitry-corgi-chat-1.png"
-                          alt="Скрин Telegram: переписка с корги в костюме"
+                          src="./assets/rating-05-04-2026-league1-crazy-main-event-frankl.png"
+                          alt="Иллюстрация к сказке: герой у стола в большом зале"
                           loading="lazy"
                         />
                       </div>
                       <p class="gazette-front__lead">
-                        Личка как сериал: обещания после зарплаты, философия про переводы и мартовская эскалация — в материалах «Вестника».
+                        Трое суток, три ника и честная арифметика кубка — укладываем малыша спать после поля боя и сверки с рейтингом весны.
                       </p>
                       <span class="gazette-front__read-more">Читать в номере →</span>
                     </a>
                   </div>
                   <div class="gazette-front__side gazette-front__side--prev">
                     <article class="gazette-front__col gazette-front__col--first">
+                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="17">
+                        <div class="gazette-front__section">Доска позора</div>
+                        <p class="gazette-front__posted-date">Размещено: 22 марта 2026&nbsp;г.</p>
+                        <h4 class="gazette-front__title-small">
+                          Корги в галстуке против календаря: февраль ждёт зп, март — «где возврат?»
+                        </h4>
+                        <div class="gazette-front__thumb-small">
+                          <img src="./assets/hall-shame-dmitry-corgi-chat-1.png" alt="Скрин Telegram: переписка с корги в костюме" loading="lazy" decoding="async" />
+                        </div>
+                        <p class="gazette-front__lead-small">
+                          Личка как сериал: обещания после зарплаты и мартовская эскалация.
+                        </p>
+                      </a>
+                    </article>
+                    <article class="gazette-front__col">
                       <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="16">
                         <div class="gazette-front__section">Зал славы · сказка</div>
                         <p class="gazette-front__posted-date">Размещено: 21 марта 2026&nbsp;г.</p>
@@ -4556,21 +4532,6 @@
                         </div>
                         <p class="gazette-front__lead-small">
                           Сармат, Waaar, Фокс, Эмиль, Дикий, Кулер и АндоюшиМорф — хроника заносов в волшебном тоне.
-                        </p>
-                      </a>
-                    </article>
-                    <article class="gazette-front__col">
-                      <a href="#" class="gazette-front__teaser-link" data-gazette-article-link="15">
-                        <div class="gazette-front__section">Турнир четверга</div>
-                        <p class="gazette-front__posted-date">Размещено: 19 марта 2026&nbsp;г.</p>
-                        <h4 class="gazette-front__title-small">
-                          Кулер и 95 тысяч: Вселенная наняла победителя без собеседования
-                        </h4>
-                        <div class="gazette-front__thumb-small">
-                          <img src="./assets/gazette-culer-thursday-95100-march19.png" alt="Турнир Четверга: Coo1er91 — 95 100₽" loading="lazy" />
-                        </div>
-                        <p class="gazette-front__lead-small">
-                          19 марта, 18:00 — мир снова щедр к тем, кому везёт чемоданом.
                         </p>
                       </a>
                     </article>
@@ -4598,6 +4559,35 @@
             <button type="button" class="gazette-modal__back" id="gazetteModalBackNews" aria-label="Назад к выбору страницы">←</button>
             <div class="gazette-modal__content-masthead">Горячие новости недели</div>
             <div class="gazette-modal__content-rule"></div>
+            <article class="gazette-modal__lead gazette-modal__lead--top gazette-modal__lead--fairytale" data-gazette-article="18">
+              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
+              <p class="gazette-modal__content-date">Размещено: 8 апреля 2026&nbsp;г.</p>
+              <p class="gazette-fairytale__kicker">Сказка редакции на ночь · FrankL / AndrushaMorf / 4ezzi</p>
+              <h3 class="gazette-modal__headline gazette-modal__headline--main gazette-modal__headline--fairytale">ТРИ ЛИКА И КРИСТАЛЬНЫЙ КУБОК ВЕСНЫ: СКАЗКА ДЛЯ МАЛЕНЬКОГО ГЕРОЯ, КОТОРЫЙ ВЕРИТ В ЧЕСТНЫЙ ФИНАЛ</h3>
+              <div class="gazette-modal__photo-wrap">
+                <img src="./assets/rating-05-04-2026-league1-crazy-main-event-frankl.png" alt="Сказка: большой зал и путь к кубку весны" class="gazette-modal__photo" loading="lazy" decoding="async" />
+                <p class="gazette-modal__photo-caption">Когда зал зажигает свечи, храбрец помнит: кубок весны не волшебство из воздуха, а терпение, расчёт и жар, когда пора добирать банк.</p>
+              </div>
+              <div class="gazette-modal__photo-wrap">
+                <img src="./assets/gazette-frankl-bounty-magic-april7-2026.png" alt="Сказка: страница с турниром и короной победителя" class="gazette-modal__photo" loading="lazy" decoding="async" />
+                <p class="gazette-modal__photo-caption">Волшебная таблица помнит каждое имя: порой герой входит под одним ником, выходит под другим — а совесть у него одна.</p>
+              </div>
+              <div class="gazette-modal__body gazette-modal__body--fairytale">
+                <p class="gazette-fairytale__lead">Жил-был в Покерной Стране Весны мальчик, которого за столом звали по-разному: FrankL, AndrushaMorf и 4ezzi. На самом деле это был один отважный путник — просто судьба дала ему три ника, как три плаща: когда нужно, он снимал один и надевал другой. И была у него мечта не про дракона, а про хрустальный кубок весны, который сияет только тому, кто умеет дойти до конца раздачи и не злиться на последнюю карту.</p>
+                <p>У каждого плаща был цвет и дар. 4ezzi носил зелёный плащ терпения (pppoker). Он давал ему навык — Лицо под мхом (или все ебло во мху) — сидеть тихо, пока спешащие соперники сами наступают на свои блефы; и навык Зелёное Семя стека — копить маленькие победы, как садовник поливает ростки, пока не вырастет крепкий твёрдый и зелёный стек. 5-го апреля зелёный плащ помог ему занять седьмое место в майне и выиграть 155 800р</p>
+                <p>Синий плащ (AndrushaMorf) сиял блеском ясного расчёта. Его сила — холодная голова, когда другие тревожно смотрят на мультиаккаунты через коварные цифры впн-адресов, АндрюшаМорф смотрит только на свой ледяной меч рейза и идёт по головам. Так 7-го апреля он выигрывает баунти за 1000р и забирает 167 788р</p>
+                <p>FrankL ходил в чёрно-красном плаще удальца: там, где надо давить ставкой, защищать блайнды и не отступать перед страхом. Его беспощадному пламени, исходящему от плаща, не нужен был дракон — хватало завистливого «ай-ой» с баббла от соперников. Шестого апреля чёрно-красный плащ принял сражение в DV Rebuy, где трон занял доблестный Waaar, а наш герой учтиво занял двенадцатую строчку — и это тоже часть сказки: не каждый бой выигрывается в тот же вечер.</p>
+                <p>Трёхликий герой провёл на поле боя трое суток, сложил выигрыши по трём никам, как три слоя пирога, и получил 319 588 ₽. Злой призрак Ривера — не злодей на всю жизнь, а просто напоминание: иногда карта обидная, зато друзья в рейтинге и смелый финал остаются с тобой.</p>
+                <p class="gazette-fairytale__moral"><em>Спи спокойно, малыш: три имени в сказке — про разные настроения одного сердца. Если утром захочешь не сказку, а строки и цифры, открой <a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">рейтинг весны</a> — там живут Waaar, kabanchik, Em13!! и все остальные герои этой дороги. И пусть тебе снятся только добрые шоудауны.</em></p>
+              </div>
+              <p class="gazette-modal__share-row">
+                <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="18" aria-label="Переслать новость">Переслать</button>
+                <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="18" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
+              </p>
+              <p class="gazette-modal__subscribe-in-article">
+                <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
+              </p>
+            </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="17">
               <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 22 марта 2026&nbsp;г.</p>
@@ -5585,8 +5575,8 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=396"></script>
-    <script defer src="./winter-rating-data.js?v=116"></script>
+    <script defer src="./app.js?v=413"></script>
+    <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
       (function () {

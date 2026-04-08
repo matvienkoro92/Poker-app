@@ -1542,6 +1542,8 @@ function getAssetUrl(relativePath) {
 })();
 
 // Топы по выигрышу за набор дат (прошлая/текущая неделя)
+/** Версия газеты для /api/deploy-hook + рассылки (номер последней опубликованной новости). */
+var GAZETTE_VERSION = "18";
 var GAZETTE_DATES = ["15.02.2026", "16.02.2026", "17.02.2026", "18.02.2026", "19.02.2026", "20.02.2026", "21.02.2026", "22.02.2026"];
 var CURRENT_WEEK_DATES = ["23.02.2026", "24.02.2026", "25.02.2026", "26.02.2026", "27.02.2026", "28.02.2026", "29.02.2026"];
 /** Рейтинг весны: даты прошлой недели по марту (9–15 марта) */
@@ -1553,7 +1555,22 @@ var MARCH_NEXT_WEEK_DATES = ["16.03.2026", "17.03.2026", "18.03.2026", "19.03.20
 /** Главная: сводка «Март / апрель» у кнопки рейтинга весны */
 var SPRING_HOME_MARCH_WEEK1_DATES = ["01.03.2026", "02.03.2026", "03.03.2026", "04.03.2026", "05.03.2026", "06.03.2026", "07.03.2026", "08.03.2026"];
 var SPRING_HOME_MARCH_TAIL_DATES = ["30.03.2026", "31.03.2026"];
-var SPRING_HOME_APRIL_FIRST_WEEK_DATES = ["01.04.2026", "02.04.2026", "03.04.2026", "04.04.2026", "05.04.2026"];
+/** Апрель: 1—5 число и календарная неделя 6—12 */
+var SPRING_HOME_APRIL_DAYS_1_5 = ["01.04.2026", "02.04.2026", "03.04.2026", "04.04.2026", "05.04.2026"];
+var SPRING_HOME_APRIL_DAYS_6_12 = ["06.04.2026", "07.04.2026", "08.04.2026", "09.04.2026", "10.04.2026", "11.04.2026", "12.04.2026"];
+var SPRING_HOME_APRIL_PROMO_TOTAL_DATES = SPRING_HOME_APRIL_DAYS_1_5.concat(SPRING_HOME_APRIL_DAYS_6_12);
+/** Экран рейтинга весны: недели внутри раскрывающихся «Апрель» / «Март · итоги» */
+var SPRING_VIEW_APRIL_WEEK_BLOCKS = [
+  { label: "1—5 апреля", dates: SPRING_HOME_APRIL_DAYS_1_5 },
+  { label: "6—12 апреля", dates: SPRING_HOME_APRIL_DAYS_6_12 }
+];
+var SPRING_VIEW_MARCH_WEEK_BLOCKS = [
+  { label: "1—8 марта", dates: SPRING_HOME_MARCH_WEEK1_DATES },
+  { label: "9—15 марта", dates: MARCH_PAST_WEEK_DATES },
+  { label: "16—22 марта", dates: MARCH_NEXT_WEEK_DATES },
+  { label: "23—29 марта", dates: MARCH_CURRENT_WEEK_DATES },
+  { label: "30—31 марта", dates: SPRING_HOME_MARCH_TAIL_DATES }
+];
 
 function updateSpringRatingPromoDateFromVar() {
   try {
@@ -1576,23 +1593,17 @@ function normalizeWinterNick(n) {
   if (lower === "pryanik2la") return "Пряник";
   if (lower === "фокс") return "Фокс";
   if (lower === "waaarr" || lower === "waaar" || lower === "waaaar") return "Waaar";
-   if (lower === "andrushamorf") return "FrankL";
+  if (lower === "andrushamorf" || lower === "4ezzi") return "FrankL";
   return n;
 }
 function normalizeWinterNickForFinalTable(n) {
-  n = normalizeWinterNick(n);
-  if (!n) return n;
-  if (String(n).toLowerCase() === "andrushamorf") return "FrankL";
-  return n;
+  return normalizeWinterNick(n);
 }
 function winterRatingSamePlayer(nickA, nickB) {
   var a = normalizeWinterNick(nickA);
   var b = normalizeWinterNick(nickB);
   if (!a || !b) return a === b;
-  if (a === b) return true;
-  var aL = String(a).toLowerCase();
-  var bL = String(b).toLowerCase();
-  return (aL === "frankl" && bL === "andrushamorf") || (aL === "andrushamorf" && bL === "frankl");
+  return a === b;
 }
 function getTopByDates(dates) {
   if (!dates || !dates.length) return [];
@@ -3218,214 +3229,6 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
       } else {
         marchWrap.setAttribute("hidden", "");
         marchWrap.style.display = "none";
-      }
-    }
-    var currentWeekSection = document.getElementById("winterRatingCurrentWeekSection");
-    var currentWeekSumWrap = document.getElementById("winterRatingCurrentWeekSumWrap");
-    var currentWeekSumList = document.getElementById("winterRatingCurrentWeekSumList");
-    var currentWeekTotalBelow = document.getElementById("winterRatingCurrentWeekTotalBelow");
-    var currentWeekSummary = document.getElementById("winterRatingCurrentWeekSummary");
-    if (currentWeekSumWrap && currentWeekSumList) {
-      if (isSpringRatingMode() && typeof getSpringRatingCurrentWeekTopSum === "function") {
-        if (currentWeekSection) {
-          currentWeekSection.removeAttribute("hidden");
-          currentWeekSection.style.display = "";
-        }
-        var currentWeekSumData = getSpringRatingCurrentWeekTopSum();
-        currentWeekSumWrap.removeAttribute("hidden");
-        currentWeekSumWrap.style.display = "";
-        if (currentWeekSumData.top3 && currentWeekSumData.top3.length) {
-          currentWeekSumList.innerHTML = currentWeekSumData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          currentWeekSumList.innerHTML = "";
-        }
-        var currentTotalText = currentWeekSumData.totalWeek > 0 ? formatRewardRound(currentWeekSumData.totalWeek) + " ₽" : "—";
-        if (currentWeekTotalBelow) currentWeekTotalBelow.textContent = "Всего выиграно игроками: " + currentTotalText;
-        if (currentWeekSummary) currentWeekSummary.textContent = "Общий выигрыш: " + currentTotalText;
-      } else {
-        if (currentWeekSection) {
-          currentWeekSection.setAttribute("hidden", "");
-          currentWeekSection.style.display = "none";
-        }
-        currentWeekSumWrap.setAttribute("hidden", "");
-        currentWeekSumWrap.style.display = "none";
-        if (currentWeekTotalBelow) currentWeekTotalBelow.textContent = "";
-      }
-    }
-    var currentWeekWrap = document.getElementById("winterRatingCurrentWeekWrap");
-    var currentWeekList = document.getElementById("winterRatingCurrentWeekList");
-    if (currentWeekWrap && currentWeekList) {
-      if (isSpringRatingMode() && typeof getSpringRatingCurrentWeekTopWins === "function") {
-        var currentWeekData = getSpringRatingCurrentWeekTopWins();
-        currentWeekWrap.removeAttribute("hidden");
-        currentWeekWrap.style.display = "";
-        if (currentWeekData.top3 && currentWeekData.top3.length) {
-          currentWeekList.innerHTML = currentWeekData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          currentWeekList.innerHTML = "";
-        }
-      } else {
-        currentWeekWrap.setAttribute("hidden", "");
-        currentWeekWrap.style.display = "none";
-      }
-    }
-    var nextWeekSection = document.getElementById("winterRatingNextWeekSection");
-    var nextWeekSumWrap = document.getElementById("winterRatingNextWeekSumWrap");
-    var nextWeekSumList = document.getElementById("winterRatingNextWeekSumList");
-    var nextWeekTotalBelow = document.getElementById("winterRatingNextWeekTotalBelow");
-    var nextWeekSummary = document.getElementById("winterRatingNextWeekSummary");
-    if (nextWeekSumWrap && nextWeekSumList) {
-      if (isSpringRatingMode() && typeof getSpringRatingNextWeekTopSum === "function") {
-        if (nextWeekSection) {
-          nextWeekSection.removeAttribute("hidden");
-          nextWeekSection.style.display = "";
-        }
-        var nextWeekSumData = getSpringRatingNextWeekTopSum();
-        nextWeekSumWrap.removeAttribute("hidden");
-        nextWeekSumWrap.style.display = "";
-        if (nextWeekSumData.top3 && nextWeekSumData.top3.length) {
-          nextWeekSumList.innerHTML = nextWeekSumData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          nextWeekSumList.innerHTML = "";
-        }
-        var nextTotalText = nextWeekSumData.totalWeek > 0 ? formatRewardRound(nextWeekSumData.totalWeek) + " ₽" : "—";
-        if (nextWeekTotalBelow) nextWeekTotalBelow.textContent = "Всего выиграно игроками: " + nextTotalText;
-        if (nextWeekSummary) nextWeekSummary.textContent = "Общий выигрыш: " + nextTotalText;
-      } else {
-        if (nextWeekSection) {
-          nextWeekSection.setAttribute("hidden", "");
-          nextWeekSection.style.display = "none";
-        }
-        nextWeekSumWrap.setAttribute("hidden", "");
-        nextWeekSumWrap.style.display = "none";
-        if (nextWeekTotalBelow) nextWeekTotalBelow.textContent = "";
-      }
-    }
-    var nextWeekWrap = document.getElementById("winterRatingNextWeekWrap");
-    var nextWeekList = document.getElementById("winterRatingNextWeekList");
-    if (nextWeekWrap && nextWeekList) {
-      if (isSpringRatingMode() && typeof getSpringRatingNextWeekTopWins === "function") {
-        var nextWeekData = getSpringRatingNextWeekTopWins();
-        nextWeekWrap.removeAttribute("hidden");
-        nextWeekWrap.style.display = "";
-        if (nextWeekData.top3 && nextWeekData.top3.length) {
-          nextWeekList.innerHTML = nextWeekData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          nextWeekList.innerHTML = "";
-        }
-      } else {
-        nextWeekWrap.setAttribute("hidden", "");
-        nextWeekWrap.style.display = "none";
-      }
-    }
-    // Сворачиваем/разворачиваем недели марта: текущая (23–29) открыта, 16–22 (предыдущая) закрыта
-    var nextBody = document.getElementById("winterRatingNextWeekBody");
-    var currentBody = document.getElementById("winterRatingCurrentWeekBody");
-    var pastBody = document.getElementById("winterRatingPastWeekBody");
-    var nextSection = document.getElementById("winterRatingNextWeekSection");
-    var currentSection = document.getElementById("winterRatingCurrentWeekSection");
-    var pastSection = document.getElementById("winterRatingPastWeekSection");
-    if (nextSection) {
-      nextSection.classList.add("winter-rating-week--collapsed");
-      if (nextBody) nextBody.hidden = true;
-    }
-    if (currentSection) {
-      currentSection.classList.remove("winter-rating-week--collapsed");
-      if (currentBody) currentBody.hidden = false;
-    }
-    if (pastSection) {
-      pastSection.classList.add("winter-rating-week--collapsed");
-      if (pastBody) pastBody.hidden = true;
-    }
-    // Клик по заголовку разворачивает/сворачивает только тело (один раз — иначе при каждом обновлении превью дублируются обработчики)
-    if (document.body.getAttribute("data-winter-week-toggle-bound") !== "1") {
-      document.body.setAttribute("data-winter-week-toggle-bound", "1");
-      document.querySelectorAll(".winter-rating-week__toggle").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var section = btn.closest(".winter-rating-week");
-          if (!section) return;
-          var bodyId = section.id === "winterRatingNextWeekSection"
-            ? "winterRatingNextWeekBody"
-            : section.id === "winterRatingCurrentWeekSection"
-            ? "winterRatingCurrentWeekBody"
-            : section.id === "winterRatingPastWeekSection"
-            ? "winterRatingPastWeekBody"
-            : null;
-          if (!bodyId) return;
-          var body = document.getElementById(bodyId);
-          if (!body) return;
-          var collapsed = !body.hidden;
-          body.hidden = collapsed;
-          if (collapsed) section.classList.add("winter-rating-week--collapsed");
-          else section.classList.remove("winter-rating-week--collapsed");
-        }, { once: false });
-      });
-    }
-    var pastWeekSection = document.getElementById("winterRatingPastWeekSection");
-    var pastWeekSumWrap = document.getElementById("winterRatingPastWeekSumWrap");
-    var pastWeekSumList = document.getElementById("winterRatingPastWeekSumList");
-    var pastWeekTotalBelow = document.getElementById("winterRatingPastWeekTotalBelow");
-    var pastWeekSummary = document.getElementById("winterRatingPastWeekSummary");
-    if (pastWeekSumWrap && pastWeekSumList) {
-      if (isSpringRatingMode() && typeof getSpringRatingPastWeekTopSum === "function") {
-        if (pastWeekSection) {
-          pastWeekSection.removeAttribute("hidden");
-          pastWeekSection.style.display = "";
-        }
-        var pastWeekSumData = getSpringRatingPastWeekTopSum();
-        pastWeekSumWrap.removeAttribute("hidden");
-        pastWeekSumWrap.style.display = "";
-        if (pastWeekSumData.top3 && pastWeekSumData.top3.length) {
-          pastWeekSumList.innerHTML = pastWeekSumData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          pastWeekSumList.innerHTML = "";
-        }
-        var pastTotalText = pastWeekSumData.totalWeek > 0 ? formatRewardRound(pastWeekSumData.totalWeek) + " ₽" : "—";
-        if (pastWeekTotalBelow) pastWeekTotalBelow.textContent = "Всего выиграно игроками: " + pastTotalText;
-        if (pastWeekSummary) pastWeekSummary.textContent = "Общий выигрыш: " + pastTotalText;
-      } else {
-        if (pastWeekSection) {
-          pastWeekSection.setAttribute("hidden", "");
-          pastWeekSection.style.display = "none";
-        }
-        pastWeekSumWrap.setAttribute("hidden", "");
-        pastWeekSumWrap.style.display = "none";
-        if (pastWeekTotalBelow) pastWeekTotalBelow.textContent = "";
-      }
-    }
-    var pastWeekWrap = document.getElementById("winterRatingPastWeekWrap");
-    var pastWeekList = document.getElementById("winterRatingPastWeekList");
-    if (pastWeekWrap && pastWeekList) {
-      if (isSpringRatingMode() && typeof getSpringRatingPastWeekTopWins === "function") {
-        var pastWeekData = getSpringRatingPastWeekTopWins();
-        pastWeekWrap.removeAttribute("hidden");
-        pastWeekWrap.style.display = "";
-        if (pastWeekData.top3 && pastWeekData.top3.length) {
-          pastWeekList.innerHTML = pastWeekData.top3.map(function (r, i) {
-            var sum = formatRewardRound(r.reward);
-            return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escapePreview(r.nick) + " — " + sum + " ₽</li>";
-          }).join("");
-        } else {
-          pastWeekList.innerHTML = "";
-        }
-      } else {
-        pastWeekWrap.setAttribute("hidden", "");
-        pastWeekWrap.style.display = "none";
       }
     }
   }
@@ -7468,7 +7271,7 @@ function getRatingByDate() {
           var p = players[pi];
           var n = normalizeWinterNick(p && p.nick);
           if (!n) continue;
-          var pts = winterRatingPointsForPlace(p.place, p.reward);
+          var pts = winterRatingTournamentPlayerPoints(p);
           var rew = p.reward != null ? Number(p.reward) : 0;
           if (rew !== rew) rew = 0;
           if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
@@ -7506,32 +7309,40 @@ function getSpringRatingTotalRewardSumForDates(dateStrs) {
   }
   return total;
 }
-/** Блок под кнопкой «Рейтинг весны» на главной: строка апреля (как у марта) и спойлер «Март · итоги» с неделями */
+/** Блок под промо на главной и дубликат на экране рейтинга весны (перед «Таблица по датам»): апрель и март · итоги */
 function updateSpringRatingHomePromoStats() {
   var wrap = document.getElementById("springRatingHomePromoStats");
-  if (!wrap) return;
+  var viewWrap = document.getElementById("springRatingViewTotals");
+  if (!wrap && !viewWrap) return;
   try {
     if (typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined") {
-      wrap.setAttribute("hidden", "");
+      if (wrap) wrap.setAttribute("hidden", "");
+      if (viewWrap) viewWrap.setAttribute("hidden", "");
       return;
     }
     var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
     var aprTot = document.getElementById("springRatingHomePromoAprilTotal");
     var marTot = document.getElementById("springRatingHomePromoMarchTotal");
+    var aprView = document.getElementById("springRatingViewAprilTotal");
+    var marView = document.getElementById("springRatingViewMarchTotal");
     var w1 = document.getElementById("springRatingHomePromoMarchW1");
     var w2 = document.getElementById("springRatingHomePromoMarchW2");
     var w3 = document.getElementById("springRatingHomePromoMarchW3");
     var w4 = document.getElementById("springRatingHomePromoMarchW4");
     var w5 = document.getElementById("springRatingHomePromoMarchW5");
-    var aprSum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_APRIL_FIRST_WEEK_DATES !== "undefined" ? SPRING_HOME_APRIL_FIRST_WEEK_DATES : []);
-    if (aprTot) aprTot.textContent = aprSum > 0 ? fmt(aprSum) + " ₽" : "—";
+    var aprSum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_APRIL_PROMO_TOTAL_DATES !== "undefined" ? SPRING_HOME_APRIL_PROMO_TOTAL_DATES : []);
+    var aprText = aprSum > 0 ? fmt(aprSum) + " ₽" : "—";
+    if (aprTot) aprTot.textContent = aprText;
+    if (aprView) aprView.textContent = aprText;
     var s1 = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MARCH_WEEK1_DATES !== "undefined" ? SPRING_HOME_MARCH_WEEK1_DATES : []);
     var s2 = getSpringRatingTotalRewardSumForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
     var s3 = getSpringRatingTotalRewardSumForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
     var s4 = getSpringRatingTotalRewardSumForDates(typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : []);
     var s5 = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MARCH_TAIL_DATES !== "undefined" ? SPRING_HOME_MARCH_TAIL_DATES : []);
     var marchAll = s1 + s2 + s3 + s4 + s5;
-    if (marTot) marTot.textContent = marchAll > 0 ? fmt(marchAll) + " ₽" : "—";
+    var marText = marchAll > 0 ? fmt(marchAll) + " ₽" : "—";
+    if (marTot) marTot.textContent = marText;
+    if (marView) marView.textContent = marText;
     function line(period, sum) {
       return period + " · общий выигрыш " + (sum > 0 ? fmt(sum) + " ₽" : "—");
     }
@@ -7540,11 +7351,73 @@ function updateSpringRatingHomePromoStats() {
     if (w3) w3.textContent = line("16—22 марта", s3);
     if (w4) w4.textContent = line("23—29 марта", s4);
     if (w5) w5.textContent = line("30—31 марта", s5);
-    wrap.removeAttribute("hidden");
+    if (wrap) wrap.removeAttribute("hidden");
+    if (viewWrap) viewWrap.removeAttribute("hidden");
+    if (typeof renderSpringRatingViewTotalsWeeks === "function") renderSpringRatingViewTotalsWeeks();
   } catch (e) {
     if (typeof console !== "undefined" && console.warn) console.warn("updateSpringRatingHomePromoStats", e);
-    wrap.setAttribute("hidden", "");
+    if (wrap) wrap.setAttribute("hidden", "");
+    if (viewWrap) viewWrap.setAttribute("hidden", "");
   }
+}
+/** Раскрывающиеся недели в блоке итогов на экране рейтинга весны (перед «Таблица по датам») */
+function renderSpringRatingViewTotalsWeeks() {
+  var aprilHost = document.getElementById("springRatingViewAprilWeeks");
+  var marchHost = document.getElementById("springRatingViewMarchWeeks");
+  if (!aprilHost || !marchHost) return;
+  if (typeof getSpringRatingWeekTopSumForDates !== "function") return;
+  var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
+  function escNick(s) {
+    return typeof escapeHtmlRating === "function" ? escapeHtmlRating(s) : String(s == null ? "" : s).replace(/</g, "&lt;");
+  }
+  function weekDetailsHtml(block, openWeeks) {
+    var dates = block.dates;
+    if (!Array.isArray(dates)) dates = [];
+    var sumData = getSpringRatingWeekTopSumForDates(dates);
+    var winData = getSpringRatingWeekTopWinsForDates(dates);
+    var totalWeek = sumData.totalWeek > 0 ? sumData.totalWeek : 0;
+    var totalText = totalWeek > 0 ? fmt(totalWeek) + " ₽" : "—";
+    var sumList = sumData.top3 && sumData.top3.length
+      ? sumData.top3.map(function (r, i) {
+          return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
+        }).join("")
+      : "<li class=\"winter-rating__single-top-item\">—</li>";
+    var winList = winData.top3 && winData.top3.length
+      ? winData.top3.map(function (r, i) {
+          return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
+        }).join("")
+      : "<li class=\"winter-rating__single-top-item\">—</li>";
+    var openAttr = openWeeks ? " open" : "";
+    return (
+      "<details class=\"spring-rating-view-week\"" + openAttr + ">" +
+      "<summary class=\"spring-rating-view-week__summary\">" +
+      "<span class=\"spring-rating-view-week__label\">" + block.label + "</span>" +
+      "<span class=\"spring-rating-view-week__meta\">Общий выигрыш: " + totalText + "</span>" +
+      "</summary>" +
+      "<div class=\"spring-rating-view-week__inner\">" +
+      "<div class=\"winter-rating__past-week-row\">" +
+      "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
+      "<h4 class=\"winter-rating__past-week-title\">Топ суммарный выигрыш за неделю</h4>" +
+      "<ul class=\"winter-rating__single-top-list\">" + sumList + "</ul>" +
+      "</div>" +
+      "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
+      "<h4 class=\"winter-rating__past-week-title\">Топ занос за 1 турнир</h4>" +
+      "<ul class=\"winter-rating__single-top-list\">" + winList + "</ul>" +
+      "</div>" +
+      "</div>" +
+      "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">Всего выиграно игроками: " + totalText + "</p>" +
+      "</div>" +
+      "</details>"
+    );
+  }
+  var aprBlocks = typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [];
+  var marBlocks = typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [];
+  aprilHost.innerHTML = aprBlocks.map(function (b) {
+    return weekDetailsHtml(b, true);
+  }).join("");
+  marchHost.innerHTML = marBlocks.map(function (b) {
+    return weekDetailsHtml(b, false);
+  }).join("");
 }
 /** Нижняя обводка welcome-блока: линия проходит по вертикали через середину шапки промо «Рейтинг турнирщиков», не под блок статистики */
 function pokerUpdateHomeWelcomeOutlineFrame() {
@@ -7603,10 +7476,10 @@ function getSpringRatingMarchTopWins() {
   var top3 = allWins.slice(0, 3);
   return { max: max, top3: top3 };
 }
-/** Топ-3 по сумме выигрышей за прошлую неделю (март) и общая сумма за неделю */
-function getSpringRatingPastWeekTopSum() {
+/** Топ-3 по сумме выигрышей за набор дат (неделя рейтинга весны) и общая сумма */
+function getSpringRatingWeekTopSumForDates(allowedDates) {
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_PAST_WEEK_DATES !== "undefined" && MARCH_PAST_WEEK_DATES.length ? MARCH_PAST_WEEK_DATES : [];
+  if (!Array.isArray(allowedDates)) allowedDates = [];
   var byNick = {};
   var totalWeek = 0;
   allowedDates.forEach(function (dateStr) {
@@ -7627,133 +7500,56 @@ function getSpringRatingPastWeekTopSum() {
   });
   var sorted = Object.keys(byNick).map(function (n) { return { nick: n, reward: byNick[n] }; }).sort(function (a, b) { return b.reward - a.reward; });
   return { top3: sorted.slice(0, 3), totalWeek: totalWeek };
+}
+/** Топ-3 заносов за 1 турнир за набор дат */
+function getSpringRatingWeekTopWinsForDates(allowedDates) {
+  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
+  if (!Array.isArray(allowedDates)) allowedDates = [];
+  var allWins = [];
+  var totalWeek = 0;
+  allowedDates.forEach(function (dateStr) {
+    var list = tournamentsByDate[dateStr];
+    if (!Array.isArray(list)) return;
+    list.forEach(function (t) {
+      var players = t.players || [];
+      players.forEach(function (p) {
+        var rew = p.reward != null ? Number(p.reward) : 0;
+        if (rew !== rew || rew <= 0) return;
+        var nick = normalizeWinterNick(p && p.nick);
+        if (!nick) return;
+        allWins.push({ nick: nick, reward: rew });
+        totalWeek += rew;
+      });
+    });
+  });
+  allWins.sort(function (a, b) { return b.reward - a.reward; });
+  return { top3: allWins.slice(0, 3), totalWeek: totalWeek };
+}
+/** Топ-3 по сумме выигрышей за прошлую неделю (март) и общая сумма за неделю */
+function getSpringRatingPastWeekTopSum() {
+  return getSpringRatingWeekTopSumForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
 }
 /** Топ-3 занос за 1 турнир за прошлую неделю (март) — один выигрыш на игрока, сортировка по убыванию */
 function getSpringRatingPastWeekTopWins() {
-  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_PAST_WEEK_DATES !== "undefined" && MARCH_PAST_WEEK_DATES.length ? MARCH_PAST_WEEK_DATES : [];
-  var allWins = [];
-  var totalWeek = 0;
-  allowedDates.forEach(function (dateStr) {
-    var list = tournamentsByDate[dateStr];
-    if (!Array.isArray(list)) return;
-    list.forEach(function (t) {
-      var players = t.players || [];
-      players.forEach(function (p) {
-        var rew = p.reward != null ? Number(p.reward) : 0;
-        if (rew !== rew || rew <= 0) return;
-        var nick = normalizeWinterNick(p && p.nick);
-        if (!nick) return;
-        allWins.push({ nick: nick, reward: rew });
-        totalWeek += rew;
-      });
-    });
-  });
-  allWins.sort(function (a, b) { return b.reward - a.reward; });
-  var top3 = allWins.slice(0, 3);
-  return { top3: top3, totalWeek: totalWeek };
+  return getSpringRatingWeekTopWinsForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
 }
 /** Топ-3 по сумме выигрышей за текущую неделю (март) и общая сумма за неделю */
 function getSpringRatingCurrentWeekTopSum() {
-  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_CURRENT_WEEK_DATES !== "undefined" && MARCH_CURRENT_WEEK_DATES.length ? MARCH_CURRENT_WEEK_DATES : [];
-  var byNick = {};
-  var totalWeek = 0;
-  allowedDates.forEach(function (dateStr) {
-    var list = tournamentsByDate[dateStr];
-    if (!Array.isArray(list)) return;
-    list.forEach(function (t) {
-      var players = t.players || [];
-      players.forEach(function (p) {
-        var rew = p.reward != null ? Number(p.reward) : 0;
-        if (rew !== rew || rew <= 0) return;
-        var nick = normalizeWinterNick(p && p.nick);
-        if (!nick) return;
-        if (!byNick[nick]) byNick[nick] = 0;
-        byNick[nick] += rew;
-        totalWeek += rew;
-      });
-    });
-  });
-  var sorted = Object.keys(byNick).map(function (n) { return { nick: n, reward: byNick[n] }; }).sort(function (a, b) { return b.reward - a.reward; });
-  return { top3: sorted.slice(0, 3), totalWeek: totalWeek };
+  return getSpringRatingWeekTopSumForDates(typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : []);
 }
 /** Топ-3 занос за 1 турнир за текущую неделю (март) */
 function getSpringRatingCurrentWeekTopWins() {
-  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_CURRENT_WEEK_DATES !== "undefined" && MARCH_CURRENT_WEEK_DATES.length ? MARCH_CURRENT_WEEK_DATES : [];
-  var allWins = [];
-  var totalWeek = 0;
-  allowedDates.forEach(function (dateStr) {
-    var list = tournamentsByDate[dateStr];
-    if (!Array.isArray(list)) return;
-    list.forEach(function (t) {
-      var players = t.players || [];
-      players.forEach(function (p) {
-        var rew = p.reward != null ? Number(p.reward) : 0;
-        if (rew !== rew || rew <= 0) return;
-        var nick = normalizeWinterNick(p && p.nick);
-        if (!nick) return;
-        allWins.push({ nick: nick, reward: rew });
-        totalWeek += rew;
-      });
-    });
-  });
-  allWins.sort(function (a, b) { return b.reward - a.reward; });
-  var top3 = allWins.slice(0, 3);
-  return { top3: top3, totalWeek: totalWeek };
+  return getSpringRatingWeekTopWinsForDates(typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : []);
 }
 
 /** Топ-3 по сумме выигрышей за следующую неделю (16–22 марта) и общая сумма за неделю */
 function getSpringRatingNextWeekTopSum() {
-  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_NEXT_WEEK_DATES !== "undefined" && MARCH_NEXT_WEEK_DATES.length ? MARCH_NEXT_WEEK_DATES : [];
-  var byNick = {};
-  var totalWeek = 0;
-  allowedDates.forEach(function (dateStr) {
-    var list = tournamentsByDate[dateStr];
-    if (!Array.isArray(list)) return;
-    list.forEach(function (t) {
-      var players = t.players || [];
-      players.forEach(function (p) {
-        var rew = p.reward != null ? Number(p.reward) : 0;
-        if (rew !== rew || rew <= 0) return;
-        var nick = normalizeWinterNick(p && p.nick);
-        if (!nick) return;
-        if (!byNick[nick]) byNick[nick] = 0;
-        byNick[nick] += rew;
-        totalWeek += rew;
-      });
-    });
-  });
-  var sorted = Object.keys(byNick).map(function (n) { return { nick: n, reward: byNick[n] }; }).sort(function (a, b) { return b.reward - a.reward; });
-  return { top3: sorted.slice(0, 3), totalWeek: totalWeek };
+  return getSpringRatingWeekTopSumForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
 }
 
 /** Топ-3 занос за 1 турнир за следующую неделю (16–22 марта) */
 function getSpringRatingNextWeekTopWins() {
-  var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
-  var allowedDates = typeof MARCH_NEXT_WEEK_DATES !== "undefined" && MARCH_NEXT_WEEK_DATES.length ? MARCH_NEXT_WEEK_DATES : [];
-  var allWins = [];
-  var totalWeek = 0;
-  allowedDates.forEach(function (dateStr) {
-    var list = tournamentsByDate[dateStr];
-    if (!Array.isArray(list)) return;
-    list.forEach(function (t) {
-      var players = t.players || [];
-      players.forEach(function (p) {
-        var rew = p.reward != null ? Number(p.reward) : 0;
-        if (rew !== rew || rew <= 0) return;
-        var nick = normalizeWinterNick(p && p.nick);
-        if (!nick) return;
-        allWins.push({ nick: nick, reward: rew });
-        totalWeek += rew;
-      });
-    });
-  });
-  allWins.sort(function (a, b) { return b.reward - a.reward; });
-  var top3 = allWins.slice(0, 3);
-  return { top3: top3, totalWeek: totalWeek };
+  return getSpringRatingWeekTopWinsForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
 }
 function getRatingImages() {
   if (isSpringRatingMode() && typeof SPRING_RATING_IMAGES_LEAGUE1 !== "undefined" && SPRING_RATING_IMAGES_LEAGUE1) return SPRING_RATING_IMAGES_LEAGUE1;
@@ -7782,7 +7578,7 @@ function getSpringRatingRowsForDateLeague(dateStr, leagueNum) {
       var p = players[k];
       var n = normalizeWinterNick(p && p.nick);
       if (!n) continue;
-      var pts = winterRatingPointsForPlace(p.place, p.reward);
+      var pts = winterRatingTournamentPlayerPoints(p);
       var rew = p.reward != null ? Number(p.reward) : 0;
       if (rew !== rew) rew = 0;
       if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
@@ -8002,6 +7798,15 @@ function winterRatingPointsForPlace(place, reward) {
   var pts = XPOKER_BALLS[place];
   return pts != null ? pts : 0;
 }
+/** Явные баллы в данных турнира (весна/ручная правка) перекрывают таблицу мест. */
+function winterRatingTournamentPlayerPoints(p) {
+  if (!p) return 0;
+  if (p.points != null) {
+    var ex = Number(p.points);
+    if (ex === ex) return ex;
+  }
+  return winterRatingPointsForPlace(p.place, p.reward);
+}
 function mergeWinterRatingRowsByNick(rows) {
   if (!rows || !rows.length) return [];
   var byNick = {};
@@ -8096,7 +7901,7 @@ function getWinterRatingPlayerSummary(nick) {
             time: t.time || "",
             tournamentLabel: t.name || t.time || "",
             place: p.place,
-            points: winterRatingPointsForPlace(p.place, reward),
+            points: winterRatingTournamentPlayerPoints(p),
             reward: reward,
             league: league,
           });
@@ -8659,7 +8464,7 @@ function getSpringRatingOverallByLeague(leagueNum) {
         var p = players[k];
         var n = normalizeWinterNickForFinalTable(p && p.nick);
         if (!n) continue;
-        var pts = winterRatingPointsForPlace(p.place, p.reward);
+        var pts = winterRatingTournamentPlayerPoints(p);
         var rew = p.reward != null ? Number(p.reward) : 0;
         if (rew !== rew) rew = 0;
         if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
@@ -8695,6 +8500,7 @@ function initWinterRating() {
       : function (fn) { setTimeout(fn, 0); };
     schedPrev(function () {
       if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
+      if (typeof updateSpringRatingHomePromoStats === "function") updateSpringRatingHomePromoStats();
     });
   } catch (e) {}
   try {
