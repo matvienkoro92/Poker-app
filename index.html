@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.236">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.240">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=331" />
+    <link rel="stylesheet" href="./styles.css?v=335" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1647,6 +1647,33 @@
                   </span>
                   <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_1897001087" aria-hidden="true"></span>
                 </button>
+                </div>
+                <div
+                  class="chat-contacts-filter chat-contacts-filter--hidden"
+                  id="chatContactsFilter"
+                  role="tablist"
+                  aria-label="Кто в списке переписок"
+                >
+                  <button
+                    type="button"
+                    class="chat-contacts-filter__tab chat-contacts-filter__tab--active"
+                    data-filter="all"
+                    role="tab"
+                    aria-selected="true"
+                    id="chatContactsFilterAll"
+                  >
+                    Все
+                  </button>
+                  <button
+                    type="button"
+                    class="chat-contacts-filter__tab"
+                    data-filter="friends"
+                    role="tab"
+                    aria-selected="false"
+                    id="chatContactsFilterFriends"
+                  >
+                    Друзья
+                  </button>
                 </div>
                 <div class="chat-contacts chat-contacts--in-dialogs" id="chatContacts">
                   <p class="chat-empty">Загрузка...</p>
@@ -5548,7 +5575,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=382"></script>
+    <script defer src="./app.js?v=386"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

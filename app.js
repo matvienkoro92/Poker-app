@@ -9896,9 +9896,43 @@ function initProfileFriends() {
           return;
         }
         listEl.innerHTML = data.friends.map(function (f) {
-          var name = (f.userName || f.userId || "Игрок").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-          var id = (f.userId || "").replace(/"/g, "&quot;");
-          return "<a href=\"#\" class=\"friends-list-modal__item\" data-user-id=\"" + id + "\" data-user-name=\"" + name + "\">" + name + " <span class=\"friends-list-modal__item-action\">Написать</span></a>";
+          var tgLine = f.userName || f.userId || "Игрок";
+          var contact = f.contactName != null && String(f.contactName).trim() ? String(f.contactName).trim() : "";
+          var forModal = contact
+            ? contact
+            : tgLine.indexOf("@") === 0
+              ? tgLine.slice(1)
+              : tgLine;
+          var esc = function (s) {
+            return String(s || "")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;");
+          };
+          var id = esc(f.userId || "");
+          var dataName = esc(forModal);
+          var htmlLabels = contact
+            ? '<span class="friends-list-modal__item-labels">' +
+              '<span class="friends-list-modal__item-name">' +
+              esc(contact) +
+              "</span>" +
+              '<span class="friends-list-modal__item-login">' +
+              esc(tgLine) +
+              "</span></span>"
+            : '<span class="friends-list-modal__item-labels friends-list-modal__item-labels--single">' +
+              '<span class="friends-list-modal__item-name">' +
+              esc(tgLine) +
+              "</span></span>";
+          return (
+            '<a href="#" class="friends-list-modal__item" data-user-id="' +
+            id +
+            '" data-user-name="' +
+            dataName +
+            '">' +
+            htmlLabels +
+            ' <span class="friends-list-modal__item-action">Написать</span></a>'
+          );
         }).join("");
         listEl.querySelectorAll(".friends-list-modal__item").forEach(function (item) {
           item.addEventListener("click", function (e) {
@@ -15163,7 +15197,26 @@ window.chatClubPendingReviewCount = 0;
 var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
-var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v2";
+var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v4";
+var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
+function pokerGetChatContactsListFilter() {
+  try {
+    return sessionStorage.getItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY) === "friends" ? "friends" : "all";
+  } catch (eF) {
+    return "all";
+  }
+}
+function pokerSyncChatContactsFilterTabs() {
+  var wrap = document.getElementById("chatContactsFilter");
+  if (!wrap) return;
+  var mode = pokerGetChatContactsListFilter();
+  wrap.querySelectorAll(".chat-contacts-filter__tab").forEach(function (btn) {
+    var f = btn.getAttribute("data-filter");
+    var active = f === "friends" ? mode === "friends" : mode !== "friends";
+    btn.classList.toggle("chat-contacts-filter__tab--active", !!active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+}
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
@@ -15732,18 +15785,44 @@ function initChat() {
     if (modalAddFriend) {
       modalAddFriend.addEventListener("click", function () {
         if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalAddFriend.disabled) return;
+        var defaultContact = (chatUserModalUserName || "").trim();
+        var prompted = null;
+        try {
+          prompted =
+            typeof window.prompt === "function"
+              ? window.prompt(
+                  "Имя контакта в списке друзей (над логином в Telegram).\nМожно оставить как есть или изменить:",
+                  defaultContact
+                )
+              : defaultContact;
+        } catch (ePrompt) {
+          prompted = defaultContact;
+        }
+        if (prompted === null) return;
+        var contactName = String(prompted).trim();
         modalAddFriend.disabled = true;
         fetch(base + "/api/friends", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d && d.ok) updateChatUserModalFriendState(true, chatUserModalUserName);
-          else {
+          body: JSON.stringify(
+            pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, contactName: contactName })
+          ),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (d && d.ok) {
+              updateChatUserModalFriendState(true, chatUserModalUserName);
+              if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            } else {
+              modalAddFriend.disabled = false;
+              if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+            }
+          })
+          .catch(function () {
             modalAddFriend.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
-          }
-        }).catch(function () { modalAddFriend.disabled = false; });
+          });
       });
     }
   }
@@ -19142,7 +19221,9 @@ function initChat() {
     } catch (e) {}
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam;
     var contactsInstantFromCache = false;
-    function applyContactsApiResponse(data) {
+    function applyContactsApiResponse(data, opts) {
+      opts = opts || {};
+      var fromFilterOnly = !!opts.fromFilterOnly;
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess) clubChatAccess = data.clubChatAccess;
@@ -19160,8 +19241,15 @@ function initChat() {
         }
       }
       if (data && data.ok && Array.isArray(data.contacts)) {
+        window.__pokerLastContactsApiData = data;
+        var filterRowEl = document.getElementById("chatContactsFilter");
+        if (filterRowEl) {
+          var credF = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+          filterRowEl.classList.toggle("chat-contacts-filter--hidden", !credF);
+          if (credF) pokerSyncChatContactsFilterTabs();
+        }
         try {
-          if (pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
+          if (!fromFilterOnly && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
             var nextUC = {};
             for (var ui = 0; ui < data.contacts.length; ui++) {
               var c0 = data.contacts[ui];
@@ -19199,11 +19287,24 @@ function initChat() {
           if (!isNaN(suc) && suc > 0) sumPersonalUnreads += suc;
         }
         window.chatPersonalUnreadTotalFromContacts = sumPersonalUnreads;
-        prefetchTopPersonalDialogs(data.contacts);
+        if (!fromFilterOnly) prefetchTopPersonalDialogs(data.contacts);
         var contactsForList = data.contacts.filter(function (c) {
           return !chatContactIsDuplicateOfPinnedDialog(c);
         });
         contactsForList = pokerSortContactsByDialogListPins(contactsForList);
+        var showFriendsOnly = pokerGetChatContactsListFilter() === "friends";
+        var friendSet = {};
+        if (data.friendIds && Array.isArray(data.friendIds)) {
+          for (var fi = 0; fi < data.friendIds.length; fi++) {
+            var fid = data.friendIds[fi];
+            if (fid != null && String(fid) !== "") friendSet[String(fid)] = true;
+          }
+        }
+        if (showFriendsOnly) {
+          contactsForList = contactsForList.filter(function (c) {
+            return !!(friendSet[c.id] || friendSet[String(c.id)]);
+          });
+        }
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
         window.chatGeneralUnreadCount = genUnread;
@@ -19213,18 +19314,32 @@ function initChat() {
         window.lastListStats = total + " конт · " + online + " онл";
         updateChatHeaderStats();
         if (contactsForList.length === 0) {
-          contactsEl.innerHTML =
-            data.contacts.length === 0
-              ? '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>'
-              : '<p class="chat-empty">Других диалогов нет — переписка с админами в закреплённых строках выше.</p>';
+          var emptyListHtml;
+          if (data.contacts.length === 0) {
+            emptyListHtml =
+              '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>';
+          } else if (showFriendsOnly) {
+            emptyListHtml =
+              '<p class="chat-empty">Нет переписок с друзьями. Добавьте игрока в друзья из профиля или откройте «Все».</p>';
+          } else {
+            emptyListHtml =
+              '<p class="chat-empty">Других диалогов нет — переписка с админами в закреплённых строках выше.</p>';
+          }
+          contactsEl.innerHTML = emptyListHtml;
           updateDialogUnreadBadges();
           updateChatNavDot();
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
           var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
+          var chatListRowDisplayTitle = function (c) {
+            var cn = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
+            return cn || c.name;
+          };
           var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
             var btn = existing[i];
-            return btn && btn.dataset.chatId === c.id;
+            if (!btn || btn.dataset.chatId !== c.id) return false;
+            var wantName = chatListRowDisplayTitle(c);
+            return (btn.getAttribute("data-chat-name") || "") === wantName;
           });
           if (sameList && existing.length > 0) {
             contactsForList.forEach(function (c, i) {
@@ -19276,17 +19391,31 @@ function initChat() {
             var onlineHtml = '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
             var unreadNum = c.unreadCount > 0 ? (c.unreadCount > 99 ? "99+" : String(c.unreadCount)) : "";
             var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
-            var initial = firstChar(c.name);
+            var displayTitle = chatListRowDisplayTitle(c);
+            var hasAlias = c.contactName != null && String(c.contactName).trim() !== "";
+            var initial = firstChar(displayTitle);
             var avatarEl = c.avatar
               ? '<img class="chat-contact__avatar" src="' +
                 escapeHtml(c.avatar) +
                 '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
               : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
+            var nameBlockInner = hasAlias
+              ? '<span class="chat-contact__name-stack">' +
+                '<span class="chat-contact__label chat-contact__label--primary">' +
+                escapeHtml(String(c.contactName).trim()) +
+                '</span>' +
+                '<span class="chat-contact__login-sub">' +
+                escapeHtml(c.name) +
+                "</span></span>"
+              : '<span class="chat-contact__label">' + escapeHtml(c.name) + "</span>";
+            var nameCellPart = pinIcon
+              ? '<span class="chat-contact__name-pin-row">' + pinIcon + nameBlockInner + "</span>"
+              : nameBlockInner;
             var innerBtn =
               '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
               escapeHtml(c.id) +
               '" data-chat-name="' +
-              escapeHtml(c.name) +
+              escapeHtml(displayTitle) +
               '" data-chat-initial="' +
               escapeHtml(initial) +
               '" data-chat-online="' +
@@ -19296,10 +19425,7 @@ function initChat() {
               ">" +
               avatarEl +
               '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
-              (pinIcon ? '<span class="chat-contact__name-pin-row">' + pinIcon + '<span class="chat-contact__label">' : '<span class="chat-contact__label">') +
-              escapeHtml(c.name) +
-              "</span>" +
-              (pinIcon ? "</span>" : "") +
+              nameCellPart +
               '<span class="chat-contact__role' +
               roleClass +
               '">' +
@@ -19338,6 +19464,29 @@ function initChat() {
         }
       }
     }
+    if (!contactsEl._chatContactsFilterBound) {
+      contactsEl._chatContactsFilterBound = true;
+      var filterWrapEl = document.getElementById("chatContactsFilter");
+      if (filterWrapEl) {
+        filterWrapEl.addEventListener("click", function (e) {
+          var tb =
+            e.target && e.target.closest ? e.target.closest(".chat-contacts-filter__tab") : null;
+          if (!tb || !filterWrapEl.contains(tb)) return;
+          var fv = tb.getAttribute("data-filter");
+          if (fv !== "friends" && fv !== "all") return;
+          try {
+            sessionStorage.setItem(
+              POKER_CHAT_CONTACTS_LIST_FILTER_KEY,
+              fv === "friends" ? "friends" : "all"
+            );
+          } catch (eStF) {}
+          pokerSyncChatContactsFilterTabs();
+          if (window.__pokerLastContactsApiData) {
+            applyContactsApiResponse(window.__pokerLastContactsApiData, { fromFilterOnly: true });
+          }
+        });
+      }
+    }
     try {
       var c0 = pokerTryReadContactsCache();
       if (c0) {
@@ -19365,6 +19514,7 @@ function initChat() {
           }, 0);
         }
       });
+    window.__pokerReloadChatContacts = loadContacts;
   }
 
   (function bindChatContactSwipeAndPinList() {
@@ -19384,6 +19534,8 @@ function initChat() {
         p.style.transform = "";
         p.classList.remove("chat-contact-swipe__panel--open");
         p.classList.remove("chat-contact-swipe__panel--dragging");
+        var w0 = p.closest(".chat-contact-swipe");
+        if (w0) w0.classList.remove("chat-contact-swipe--show-actions");
       });
     }
     function snapPanel(panel, open) {
@@ -19436,6 +19588,8 @@ function initChat() {
         if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) + 2) {
           swipeState.mode = "horiz";
           swipeState.panel.classList.add("chat-contact-swipe__panel--dragging");
+          var wHoriz = swipeState.panel.closest(".chat-contact-swipe");
+          if (wHoriz) wHoriz.classList.add("chat-contact-swipe--show-actions");
           closeOtherSwipePanels(swipeState.panel);
           try {
             swipeState.panel.setPointerCapture(e.pointerId);
@@ -19463,7 +19617,10 @@ function initChat() {
       if (st.mode !== "horiz") return;
       if (st.panel) st.panel.classList.remove("chat-contact-swipe__panel--dragging");
       var txNow = getPanelTx(st.panel);
-      snapPanel(st.panel, txNow <= -REVEAL / 2);
+      var snapOpen = txNow <= -REVEAL / 2;
+      snapPanel(st.panel, snapOpen);
+      var wUp = st.panel.closest(".chat-contact-swipe");
+      if (wUp) wUp.classList.toggle("chat-contact-swipe--show-actions", !!snapOpen);
       if (st.didAxisDrag) {
         var cInner = st.panel.querySelector(".chat-contact");
         if (cInner) cInner._suppressNextClickUntil = Date.now() + 420;
@@ -19480,7 +19637,13 @@ function initChat() {
           document.removeEventListener("pointermove", onDocMove, true);
           document.removeEventListener("pointerup", onDocUp, true);
           document.removeEventListener("pointercancel", onDocUp, true);
-          if (swipeState.panel) swipeState.panel.classList.remove("chat-contact-swipe__panel--dragging");
+          if (swipeState.panel) {
+            swipeState.panel.classList.remove("chat-contact-swipe__panel--dragging");
+            var wPr = swipeState.panel.closest(".chat-contact-swipe");
+            if (wPr && !swipeState.panel.classList.contains("chat-contact-swipe__panel--open")) {
+              wPr.classList.remove("chat-contact-swipe--show-actions");
+            }
+          }
           swipeState = null;
         }
         swipeState = {
