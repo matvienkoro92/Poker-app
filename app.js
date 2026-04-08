@@ -9409,6 +9409,14 @@ function updateProfileDtId() {
         var personalInput = document.getElementById("profilePersonalInput");
         if (personalInput) personalInput.value = data.personalInfo;
       }
+      if (data && data.ok) {
+        try {
+          var cdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
+          window.__pokerChatDisplayName = cdn;
+          var cdnEl = document.getElementById("profileChatDisplayNameInput");
+          if (cdnEl) cdnEl.value = cdn;
+        } catch (eCdn2) {}
+      }
     })
     .catch(function () {
       el.textContent = cached || "\u2014";
@@ -9453,6 +9461,9 @@ function pokerClearSessionsAndReloadForLogin() {
   try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
   try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
   try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
+  try {
+    delete window.__pokerChatDisplayName;
+  } catch (eCdnL) {}
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
@@ -9469,6 +9480,7 @@ function initProfileExitBtn() {
 
 function initProfileP21Id() {
   var input = document.getElementById("profileP21IdInput");
+  var nameInput = document.getElementById("profileChatDisplayNameInput");
   var saveBtn = document.getElementById("profileSaveBtn");
   var feedback = document.getElementById("profileSaveFeedback");
   if (!input) return;
@@ -9504,10 +9516,16 @@ function initProfileP21Id() {
             body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: localP21 })),
           }).then(function (r) { return r.json(); }).catch(function () {});
         }
+        try {
+          var sdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
+          window.__pokerChatDisplayName = sdn;
+          if (nameInput) nameInput.value = sdn;
+        } catch (eSd) {}
       })
       .catch(function () {});
   }
   function saveP21Id() {
+    var nameVal = nameInput ? String(nameInput.value || "").trim().slice(0, 80) : "";
     var val = (input.value || "").replace(/\D/g, "").slice(0, 6);
     input.value = val;
     if (val.length > 0 && val.length !== 6) {
@@ -9519,11 +9537,47 @@ function initProfileP21Id() {
           feedback.classList.remove("profile-save-feedback--visible");
         }, 2500);
       }
+      var baseEarly = getApiBase();
+      if (baseEarly && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer())) {
+        fetch(baseEarly + "/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ chatDisplayName: nameVal })),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            try {
+              window.__pokerChatDisplayName = nameVal;
+            } catch (eNm) {}
+            if (feedback) {
+              var okNm = data && data.ok;
+              feedback.textContent = okNm ? "Имя в чатах сохранено" : (data && data.error) || "Ошибка";
+              feedback.classList.add("profile-save-feedback--visible");
+              setTimeout(function () {
+                feedback.textContent = "";
+                feedback.classList.remove("profile-save-feedback--visible");
+              }, 2500);
+            }
+          })
+          .catch(function () {
+            if (feedback) {
+              feedback.textContent = POKER_NET_ERR;
+              feedback.classList.add("profile-save-feedback--visible");
+              setTimeout(function () {
+                feedback.textContent = "";
+                feedback.classList.remove("profile-save-feedback--visible");
+              }, 2500);
+            }
+          });
+      }
       return;
     }
     setStoredP21(val);
     var base = getApiBase();
     if (!base || (!pokerApiHasCredential() && !pokerCanSyncGuestProfileToServer())) {
+      try {
+        window.__pokerChatDisplayName = nameVal;
+      } catch (eLoc) {}
       if (feedback) {
         feedback.textContent = "Сохранено локально. Войдите в аккаунт или откройте в Telegram, чтобы синхронизировать.";
         feedback.classList.add("profile-save-feedback--visible");
@@ -9537,12 +9591,15 @@ function initProfileP21Id() {
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: val || "" })),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: val || "", chatDisplayName: nameVal })),
     })
       .then(function (r) {
         return r.json().catch(function () { return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status }; });
       })
         .then(function (data) {
+        try {
+          window.__pokerChatDisplayName = nameVal;
+        } catch (eOkNm) {}
         if (feedback) {
           var msg = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
           var m = String(msg).toLowerCase();
@@ -9905,12 +9962,40 @@ function initProfileAvatar() {
   var avatarEl = document.getElementById("profileAvatar");
   var inputEl = document.getElementById("profileAvatarInput");
   var btnEl = document.getElementById("profileAvatarBtn");
+  var feedbackEl = document.getElementById("profileAvatarFeedback");
   if (!avatarEl || !inputEl || !btnEl) return;
 
   var base = getApiBase();
   if (!base) return;
 
+  var pendingAvatarDataUrl = null;
+  var uploadInProgress = false;
+  var BTN_LABEL = "Сохранить";
+
+  function showAvatarFeedback(text, isError) {
+    if (!feedbackEl) return;
+    feedbackEl.textContent = text || "";
+    feedbackEl.classList.toggle("profile-avatar-block__feedback--visible", !!text);
+    feedbackEl.style.color = isError ? "#ef4444" : "";
+    if (text && !isError) {
+      var hideMs = /сохранена/i.test(text) ? 5200 : 3500;
+      setTimeout(function () {
+        if (feedbackEl.textContent === text) {
+          feedbackEl.textContent = "";
+          feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
+        }
+      }, hideMs);
+    }
+  }
+
+  function clearPendingUi() {
+    pendingAvatarDataUrl = null;
+    btnEl.classList.remove("profile-avatar-block__btn--pending");
+  }
+
   function loadAvatar() {
+    clearPendingUi();
+    inputEl.value = "";
     var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     fetch(base + "/api/avatar" + aq)
       .then(function (r) { return r.json(); })
@@ -9929,7 +10014,11 @@ function initProfileAvatar() {
   function resizeImage(file, maxW, maxH, quality, cb) {
     var img = new Image();
     var canvas = document.createElement("canvas");
+    var objUrl = URL.createObjectURL(file);
     img.onload = function () {
+      try {
+        URL.revokeObjectURL(objUrl);
+      } catch (eRev) {}
       var w = img.width, h = img.height;
       if (w > maxW || h > maxH) {
         var r = Math.min(maxW / w, maxH / h);
@@ -9950,15 +10039,18 @@ function initProfileAvatar() {
       }
     };
     img.onerror = function () {
+      try {
+        URL.revokeObjectURL(objUrl);
+      } catch (eRev2) {}
       var reader = new FileReader();
       reader.onload = function () { cb(reader.result); };
       reader.readAsDataURL(file);
     };
-    img.src = URL.createObjectURL(file);
+    img.src = objUrl;
   }
 
   function openProfileAvatarFilePicker() {
-    if (btnEl.disabled) return;
+    if (uploadInProgress) return;
     if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
       if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
       else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
@@ -9967,9 +10059,98 @@ function initProfileAvatar() {
     inputEl.click();
   }
 
+  function finalizePendingPreview(dataUrl) {
+    pendingAvatarDataUrl = dataUrl;
+    avatarEl.src = dataUrl;
+    btnEl.classList.add("profile-avatar-block__btn--pending");
+    inputEl.value = "";
+    showAvatarFeedback("Нажмите «Сохранить», чтобы отправить фото", false);
+  }
+
+  function uploadAvatar(dataUrl) {
+    uploadInProgress = true;
+    btnEl.disabled = true;
+    btnEl.textContent = "Сохранение…";
+    var payload =
+      typeof pokerApiAuthJsonBody === "function"
+        ? pokerApiAuthJsonBody({ image: dataUrl })
+        : { image: dataUrl, initData: tg && tg.initData ? tg.initData : "" };
+    fetch(base + "/api/avatar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        uploadInProgress = false;
+        btnEl.disabled = false;
+        btnEl.textContent = BTN_LABEL;
+        inputEl.value = "";
+        if (data && data.ok && data.avatar) {
+          clearPendingUi();
+          avatarEl.src = data.avatar;
+          loadHeaderAvatar();
+          showAvatarFeedback("Фотография сохранена", false);
+        } else {
+          if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка загрузки");
+          showAvatarFeedback((data && data.error) || "Ошибка сохранения", true);
+          setTimeout(function () {
+            feedbackEl.textContent = "";
+            feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
+            feedbackEl.style.color = "";
+          }, 4000);
+        }
+      })
+      .catch(function () {
+        uploadInProgress = false;
+        btnEl.disabled = false;
+        btnEl.textContent = BTN_LABEL;
+        inputEl.value = "";
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        showAvatarFeedback(POKER_NET_ERR, true);
+        setTimeout(function () {
+          feedbackEl.textContent = "";
+          feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
+          feedbackEl.style.color = "";
+        }, 4000);
+      });
+  }
+
   btnEl.addEventListener("click", function () {
-    openProfileAvatarFilePicker();
+    if (uploadInProgress) return;
+    if (!pendingAvatarDataUrl) {
+      showAvatarFeedback("Сначала выберите фото (нажмите на аватар)", false);
+      return;
+    }
+    var toSend = pendingAvatarDataUrl;
+    var base64 = toSend.replace(/^data:image\/\w+;base64,/, "");
+    if (base64.length > 100000) {
+      var im = new Image();
+      im.onload = function () {
+        var canvas = document.createElement("canvas");
+        var w = im.width,
+          h = im.height;
+        var r = Math.min(150 / w, 150 / h, 1);
+        w = Math.round(w * r);
+        h = Math.round(h * r);
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(im, 0, 0, w, h);
+        try {
+          uploadAvatar(canvas.toDataURL("image/jpeg", 0.6));
+        } catch (eSm) {
+          uploadAvatar(toSend);
+        }
+      };
+      im.onerror = function () {
+        uploadAvatar(toSend);
+      };
+      im.src = toSend;
+    } else {
+      uploadAvatar(toSend);
+    }
   });
+
   avatarEl.addEventListener("click", function () {
     openProfileAvatarFilePicker();
   });
@@ -9984,56 +10165,24 @@ function initProfileAvatar() {
     var file = inputEl.files && inputEl.files[0];
     if (!file || !file.type.match(/^image\/(jpeg|png|webp)$/)) {
       if (tg && tg.showAlert) tg.showAlert("Выберите изображение (JPG, PNG или WebP).");
+      inputEl.value = "";
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       if (tg && tg.showAlert) tg.showAlert("Файл не более 5 МБ.");
+      inputEl.value = "";
       return;
     }
-    var avatarBtnLabel = btnEl.textContent ? btnEl.textContent.trim() : "Загрузить аватар";
-    btnEl.disabled = true;
-    btnEl.textContent = "Загрузка…";
     resizeImage(file, 200, 200, 0.8, function (dataUrl) {
       var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
       if (base64.length > 100000) {
         resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
-          uploadAvatar(dataUrl2);
+          finalizePendingPreview(dataUrl2);
         });
       } else {
-        uploadAvatar(dataUrl);
+        finalizePendingPreview(dataUrl);
       }
     });
-
-    function uploadAvatar(dataUrl) {
-      var payload =
-        typeof pokerApiAuthJsonBody === "function"
-          ? pokerApiAuthJsonBody({ image: dataUrl })
-          : { image: dataUrl, initData: tg && tg.initData ? tg.initData : "" };
-      fetch(base + "/api/avatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          btnEl.disabled = false;
-          btnEl.textContent = avatarBtnLabel;
-          inputEl.value = "";
-          if (data && data.ok && data.avatar) {
-            avatarEl.src = data.avatar;
-            loadHeaderAvatar();
-            if (tg && tg.showAlert) tg.showAlert("Аватар обновлён!");
-          } else {
-            if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка загрузки");
-          }
-        })
-        .catch(function () {
-          btnEl.disabled = false;
-          btnEl.textContent = avatarBtnLabel;
-          inputEl.value = "";
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-        });
-    }
   });
 
   loadAvatar();
@@ -15615,7 +15764,11 @@ function initChat() {
           ? String(data.contactName).trim()
           : "";
       chatUserModalContactName = contactNm;
-      var titleDisp = contactNm || chatUserModalPeerLogin || (fallbackName || "Игрок");
+      var peerChatDisp =
+        data && data.chatDisplayName != null && String(data.chatDisplayName).trim()
+          ? String(data.chatDisplayName).trim()
+          : "";
+      var titleDisp = contactNm || peerChatDisp || chatUserModalPeerLogin || (fallbackName || "Игрок");
       if (modalTitle) modalTitle.textContent = titleDisp;
       chatUserModalUserName = titleDisp;
       if (modalAvatar) modalAvatar.alt = titleDisp;
@@ -15624,6 +15777,9 @@ function initChat() {
       }
       if (modalLoginSub) {
         if (contactNm && chatUserModalPeerLogin) {
+          modalLoginSub.textContent = chatUserModalPeerLogin;
+          modalLoginSub.hidden = false;
+        } else if (peerChatDisp && chatUserModalPeerLogin) {
           modalLoginSub.textContent = chatUserModalPeerLogin;
           modalLoginSub.hidden = false;
         } else {
@@ -16201,6 +16357,10 @@ function initChat() {
     pokerSaveChatDialogListPins(next);
   }
   function resolveMyChatDisplayName() {
+    try {
+      var _cdn = window.__pokerChatDisplayName;
+      if (_cdn != null && String(_cdn).trim()) return String(_cdn).trim();
+    } catch (eCdn) {}
     try {
       var _auth2 = window.__pokerTelegramAuth;
       if (_auth2 && _auth2.user && (_auth2.status === "verified" || _auth2.status === "dev_skip")) {

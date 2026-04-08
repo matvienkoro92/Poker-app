@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.275">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.280">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=339" />
+    <link rel="stylesheet" href="./styles.css?v=341" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -3855,9 +3855,25 @@
               Привет, <span id="profileUserName">имя</span><span class="profile-user-meta" id="profileUserMeta"></span>, здесь все твои достижения в клубе Два туза.
             </p>
             <div class="profile-avatar-block">
-              <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.png" alt="Аватар" role="button" tabindex="0" title="Сменить фото" aria-label="Сменить фото" />
+              <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.png" alt="Аватар" role="button" tabindex="0" title="Выбрать фото" aria-label="Выбрать фото" />
               <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
-              <button type="button" class="profile-avatar-block__btn" id="profileAvatarBtn">Загрузить аватар</button>
+              <button type="button" class="profile-avatar-block__btn" id="profileAvatarBtn">Сохранить</button>
+              <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
+            </div>
+            <div class="profile-chat-name">
+              <label class="profile-chat-name__label" for="profileChatDisplayNameInput">Имя в чатах</label>
+              <input
+                type="text"
+                id="profileChatDisplayNameInput"
+                class="profile-chat-name__input"
+                maxlength="80"
+                placeholder="Как вас видят в сообщениях вместо логина"
+                aria-label="Имя в чатах"
+                autocomplete="nickname"
+              />
+              <p class="profile-chat-name__hint">
+                Если не пусто — так вас показывают в общем и личных чатах. У контакта может быть своё имя в друзьях — оно важнее.
+              </p>
             </div>
             <section class="profile-friends">
               <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
@@ -5660,7 +5676,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=419"></script>
+    <script defer src="./app.js?v=423"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
