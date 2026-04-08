@@ -6238,16 +6238,15 @@ img.chat-contact__avatar {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto;
-  touch-action: pan-y;
+  /* Как scrollport «Скачать» (.card .card__content): без ухода оверскролла в родителя, pinch-zoom, единый низ под таббар */
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
   display: flex;
   flex-direction: column;
   gap: 0;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 10px);
+  padding-bottom: var(--app-bottom-tabbar-pad);
   box-sizing: border-box;
-  scroll-padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 4px);
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
 }
 .chat-dialogs-block {
   background: var(--block-bg);
@@ -6918,13 +6917,15 @@ img.chat-contact__avatar {
   flex: 1 1 0;
   min-height: 0;
   height: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
+  padding-bottom: var(--app-bottom-tabbar-pad);
+  box-sizing: border-box;
   position: relative;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 .chat-list-view--hidden { display: none !important; }
 .chat-conv-view {

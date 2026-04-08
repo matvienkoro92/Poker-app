@@ -19836,8 +19836,8 @@ function initChat() {
         if (!box) return;
         var cs = getComputedStyle(document.documentElement);
         var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
-        /* Базовый зазор — умеренный; ±добор по классу экрана (Pro Max нужно больше, mini/SE — меньше). */
-        var gap = 13;
+        /* Зазор лента↔композер при открытой клавиатуре: был ~13px + iOS-доборы; уменьшено ~в 3 раза (меньше пустоты над полем). */
+        var gap = Math.max(3, Math.round(13 / 3));
         var pad = Math.round(lift + gap);
         if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
           try {
@@ -19848,7 +19848,7 @@ function initChat() {
             /* Layout почти не сжался, а клавиатура есть — переменные могли обнулиться; добор без второго lift. */
             if (overlap > 48) {
               var slack = Math.max(0, overlap - lift);
-              pad = Math.max(pad, Math.round(lift + gap + Math.min(slack * 0.22, 56)));
+              pad = Math.max(pad, Math.round(lift + gap + Math.min((slack * 0.22) / 3, 56 / 3)));
             }
           } catch (eVv) {}
         }
@@ -19868,15 +19868,15 @@ function initChat() {
         } catch (eBarPad) {}
         if (pad < 28) pad = 28;
         if (isIosLikeForChatViewport()) {
-          pad += 8;
+          pad += Math.round(8 / 3);
           try {
             var sw = window.screen && window.screen.width ? Number(window.screen.width) : 0;
             var sh = window.screen && window.screen.height ? Number(window.screen.height) : 0;
             var longSide = Math.max(sw, sh);
             var shortSide = sw > 0 && sh > 0 ? Math.min(sw, sh) : 0;
             var tabletish = shortSide >= 600;
-            if (!tabletish && longSide >= 890) pad += 24;
-            else if (!tabletish && longSide <= 834) pad -= 6;
+            if (!tabletish && longSide >= 890) pad += Math.round(24 / 3);
+            else if (!tabletish && longSide <= 834) pad -= Math.round(6 / 3);
           } catch (ePhPad) {}
         }
         box.style.paddingBottom = pad + "px";
