@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.212">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.217">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -222,7 +222,7 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=316" />
+    <link rel="stylesheet" href="./styles.css?v=318" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1716,7 +1716,7 @@
                     <button type="button" class="chat-back-btn chat-conv-top__toolbar-back" id="chatBackBtn" aria-label="Назад">←</button>
                     <div class="chat-conv-header">
                       <div class="chat-conv-peer-avatar-wrap" aria-hidden="true">
-                        <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" />
+                        <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
                         <span id="chatConvPeerAvatarPh" class="chat-conv-peer-avatar chat-conv-peer-avatar--ph">?</span>
                       </div>
                       <div class="chat-conv-peer-title-chip">
@@ -5515,7 +5515,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=366"></script>
+    <script defer src="./app.js?v=369"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

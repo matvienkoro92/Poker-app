@@ -1283,7 +1283,8 @@ html.app-view-chat #app.app {
   min-height: 0;
   flex: 1;
   width: 100%;
-  max-width: 420px;
+  /* Было 420px — на широких окнах десктопного Mini App оставались огромные поля по бокам */
+  max-width: min(100%, 520px);
   padding: 4px 0 8px;
   gap: 4px;
   border: none;
@@ -1293,6 +1294,16 @@ html.app-view-chat #app.app {
   display: flex;
   flex-direction: column;
   background: transparent;
+}
+@media (min-width: 700px) {
+  .card:has(.view--active[data-view="chat"]) {
+    max-width: min(100%, 720px);
+  }
+}
+@media (min-width: 1100px) {
+  .card:has(.view--active[data-view="chat"]) {
+    max-width: min(100%, 960px);
+  }
 }
 .card:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) {
   padding-top: 0;
@@ -4844,9 +4855,14 @@ html.club-charter-modal-open {
   flex-shrink: 1;
 }
 .chat-msg__name-btn:hover .chat-msg__name { text-decoration: underline; }
+/* Свои: не width:100% — иначе пузырь с flex:1 у .chat-msg__body растягивается/уезжает влево от края */
 .chat-msg--own {
   align-self: flex-end;
-  width: 100%;
+  margin-left: auto;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 85%;
 }
 .chat-msg--other {
   align-self: flex-start;

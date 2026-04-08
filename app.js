@@ -1274,6 +1274,19 @@ function getAssetUrl(relativePath) {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
         return;
       }
+      if (startApp === "club_chat_dm" && typeof setView === "function") {
+        var peerDm = (sp.get("with") || "").trim();
+        if (peerDm) {
+          window.__pendingOpenChatPersonalFromDeepLink = {
+            userId: peerDm,
+            userName: null,
+            peerP21Id: null,
+          };
+        }
+        setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        return;
+      }
       var hallFromLink = resolveHallFameSectionFromStartParam(startApp);
       if (hallFromLink && typeof navigateToHallFameSection === "function") {
         navigateToHallFameSection(hallFromLink);
@@ -2541,6 +2554,21 @@ function runGazetteAndTasksInit() {
       }, 0);
     } else if (urlStart === "club_chat") {
       window.__pendingOpenClubChatGeneral = true;
+      setTimeout(function () {
+        if (typeof setView === "function") setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      }, 0);
+    } else if (urlStart === "club_chat_dm") {
+      try {
+        var peerDmQ = new URLSearchParams(location.search || "").get("with");
+        if (peerDmQ && String(peerDmQ).trim()) {
+          window.__pendingOpenChatPersonalFromDeepLink = {
+            userId: String(peerDmQ).trim(),
+            userName: null,
+            peerP21Id: null,
+          };
+        }
+      } catch (eDmQ) {}
       setTimeout(function () {
         if (typeof setView === "function") setView("chat");
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
@@ -6651,6 +6679,10 @@ function setView(viewName, navOpts) {
         window.__pendingOpenClubChatGeneral = false;
         if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
         else if (typeof window.openClubChat === "function") window.openClubChat();
+      } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
+        var pdlNav = window.__pendingOpenChatPersonalFromDeepLink;
+        window.__pendingOpenChatPersonalFromDeepLink = null;
+        window.chatOpenConvFromDialogs(pdlNav.userId, pdlNav.userName || pdlNav.userId, pdlNav.peerP21Id || undefined);
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -15063,12 +15095,19 @@ function initChat() {
     convPeerAvatar.onerror = null;
     if (!u) {
       convPeerAvatar.removeAttribute("src");
+      try {
+        convPeerAvatar.removeAttribute("fetchpriority");
+      } catch (eRmFp) {}
       convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
       convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
       convPeerAvatar.alt = "";
       return;
     }
     convPeerAvatar.alt = nm || "";
+    try {
+      convPeerAvatar.setAttribute("decoding", "async");
+      convPeerAvatar.setAttribute("fetchpriority", "high");
+    } catch (eFp) {}
     convPeerAvatar.onload = function () {
       convPeerAvatar.classList.remove("chat-conv-peer-avatar--hidden");
       convPeerAvatarPh.classList.add("chat-conv-peer-avatar--hidden");
@@ -17686,6 +17725,16 @@ function initChat() {
     return '<div class="chat-day-divider" role="separator" aria-label="' + escapeHtml(lab) + '"><span class="chat-day-divider__label">' + escapeHtml(lab) + "</span></div>";
   }
 
+  /** Низ ленты — сразу и с высоким приоритетом; старые фото — lazy, без перегруза канала. */
+  var CHAT_MSG_IMG_TAIL_PRIORITIZED = 5;
+  function chatMsgImageAttrs(idx, len) {
+    if (len <= CHAT_MSG_IMG_TAIL_PRIORITIZED || idx >= len - CHAT_MSG_IMG_TAIL_PRIORITIZED) {
+      return ' loading="eager" decoding="async" fetchpriority="high"';
+    }
+    return ' loading="lazy" decoding="async"';
+  }
+  var CHAT_MSG_AVATAR_IMG_ATTRS = ' width="36" height="36" loading="lazy" decoding="async"';
+
   function renderGeneralMessages(messages) {
     messages = (messages || []).filter(function (m) {
       return !(m && m.clubAdmissionNotice);
@@ -17725,7 +17774,9 @@ function initChat() {
       if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
-      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
+      var imgBlock = m.image
+        ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
+        : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
       var cornerDelBtn = "";
@@ -17735,7 +17786,9 @@ function initChat() {
       var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
       var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var avatarEl = isLastInGroup
-        ? (m.fromAvatar ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + (m.fromName || "И")[0] + '</span>')
+        ? (m.fromAvatar
+          ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
+          : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + (m.fromName || "И")[0] + "</span>")
         : '<span class="chat-msg__avatar-spacer"></span>';
       var nameEl = "";
       if (!isOwn) {
@@ -18328,7 +18381,9 @@ function initChat() {
         }
       }
     } catch (ePl) {}
-    var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(placeholderLetter) + "</span>";
+    var optAvatarEl = myAvatarUrl
+      ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
+      : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(placeholderLetter) + "</span>";
     var time = "";
     try {
       time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
@@ -18337,8 +18392,12 @@ function initChat() {
     }
     var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(replyTo.fromName || "Игрок") + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
     var textContent = "";
-    if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(image) + '" alt="Картинка" />';
-    else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
+    if (image) {
+      textContent =
+        '<img class="chat-msg__image" src="' +
+        escapeHtml(image) +
+        '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
+    } else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
     else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
     else if (text) {
       try {
@@ -18932,7 +18991,9 @@ function initChat() {
             var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
             var initial = firstChar(c.name);
             var avatarEl = c.avatar
-              ? '<img class="chat-contact__avatar" src="' + escapeHtml(c.avatar) + '" alt="" loading="lazy" />'
+              ? '<img class="chat-contact__avatar" src="' +
+                escapeHtml(c.avatar) +
+                '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
               : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + '</span>';
             return (
               '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
@@ -19104,7 +19165,9 @@ function initChat() {
       if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
-      var imgBlock = m.image ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка" loading="eager" decoding="async" />' : "";
+      var imgBlock = m.image
+        ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
+        : "";
       var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
       var documentBlock = m.document ? '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(m.document) + '">📄 ' + escapeHtml(m.documentName || "document.pdf") + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(m.document) + '" download="' + escapeHtml(m.documentName || "document.pdf") + '">Скачать</a></span>' : "";
       var cornerDelBtnP = "";
@@ -19113,7 +19176,9 @@ function initChat() {
       var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
       var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var avatarEl = isLastInGroup
-        ? (m.fromAvatar ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + (m.fromName || "И")[0] + '</span>')
+        ? (m.fromAvatar
+          ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
+          : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + (m.fromName || "И")[0] + "</span>")
         : '<span class="chat-msg__avatar-spacer"></span>';
       var nameElP = "";
       if (!isOwn) {
@@ -19376,14 +19441,21 @@ function initChat() {
           }
         }
       } catch (eIni) {}
-      var optAvatarEl = myAvatarUrl ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt="" />' : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(initial) + '</span>';
+      var optAvatarEl = myAvatarUrl
+        ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
+        : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(initial) + "</span>";
       var timeP = "";
       try {
         timeP = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
       } catch (eTimeP) {}
       var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(String(replyTo.fromName || "Игрок").slice(0, 100)) + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
       var textContent = "";
-      if (image) textContent = '<img class="chat-msg__image" src="' + escapeHtml(String(image)) + '" alt="Картинка" />';
+      if (image) {
+        textContent =
+          '<img class="chat-msg__image" src="' +
+          escapeHtml(String(image)) +
+          '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
+      }
       else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
       else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = '<span class="chat-msg__document chat-msg__document-wrap">' + '<a class="chat-msg__document-link chat-msg__document-link--view" href="' + escapeHtml(docAttachment.dataUrl) + '">📄 ' + escapeHtml(docAttachment.fileName) + '</a> <a class="chat-msg__document-link" href="' + escapeHtml(docAttachment.dataUrl) + '" download="' + escapeHtml(docAttachment.fileName) + '">Скачать</a></span>';
       else if (text) {
@@ -19811,6 +19883,26 @@ function initChat() {
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
         );
       }
+      /**
+       * Десктопный Telegram / ПК-браузер: нет виртуальной клавиатуры, перекрывающей низ —
+       * не ставим chat-keyboard-open (иначе visualViewport даёт ложный inset и композер уезжает вверх).
+       */
+      function isChatPhysicalKeyboardContext() {
+        try {
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.platform) {
+            var p = String(tg.platform).toLowerCase();
+            if (p === "tdesktop" || p === "macos" || p === "unigram") return true;
+            if (p === "weba" || p === "web" || p === "webk") {
+              return (navigator.maxTouchPoints || 0) === 0;
+            }
+          }
+        } catch (ePk) {}
+        if ((navigator.maxTouchPoints || 0) > 0) return false;
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "")) return false;
+        return true;
+      }
+      window.__pokerIsChatPhysicalKeyboardContext = isChatPhysicalKeyboardContext;
       function shouldUseChatVisualViewportLift() {
         if (!window.visualViewport) return false;
         if (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()) return true;
@@ -20363,6 +20455,17 @@ function initChat() {
           var ihFocus = window.innerHeight || 0;
           if (ihFocus > 200) window.__pokerChatInnerHBaseline = ihFocus;
         } catch (eBl) {}
+        if (isChatPhysicalKeyboardContext()) {
+          var elDesk = getVisibleMessagesEl();
+          if (elDesk) {
+            requestAnimationFrame(function () {
+              try {
+                elDesk.scrollTop = elDesk.scrollHeight;
+              } catch (eSc) {}
+            });
+          }
+          return;
+        }
         var el = getVisibleMessagesEl();
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
@@ -21344,7 +21447,11 @@ function initChat() {
     window.__pendingOpenClubChatGeneral = false;
     window.__openClubChatAfterNextContacts = true;
   }
-  if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
+  if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
+    var pdl = window.__pendingOpenChatPersonalFromDeepLink;
+    window.__pendingOpenChatPersonalFromDeepLink = null;
+    openConvFromDialogs(pdl.userId, pdl.userName || pdl.userId, pdl.peerP21Id || undefined);
+  } else if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
     openConvFromDialogs(pcm.userId, pcm.userName || "Менеджер");
@@ -21697,8 +21804,13 @@ function initChat() {
       findSuggestDebounce = setTimeout(fetchSuggest, 280);
     });
     findByIdInputDialogs.addEventListener("focus", function () {
-      document.documentElement.classList.add("chat-keyboard-open");
-      document.body.classList.add("chat-keyboard-open");
+      if (
+        typeof window.__pokerIsChatPhysicalKeyboardContext !== "function" ||
+        !window.__pokerIsChatPhysicalKeyboardContext()
+      ) {
+        document.documentElement.classList.add("chat-keyboard-open");
+        document.body.classList.add("chat-keyboard-open");
+      }
       if (lastSuggestions.length) showSuggest(lastSuggestions);
     });
     findByIdInputDialogs.addEventListener("blur", function (e) {
