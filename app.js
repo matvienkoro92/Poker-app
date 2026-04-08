@@ -1342,14 +1342,32 @@ function getAssetUrl(relativePath) {
     window.closePdfViewer = closePdfViewer;
   }
 
+  var POKER_BLOB_DOWNLOAD_CLEANUP_MS = 180000;
+  function pokerHiddenDownloadAnchorStyle() {
+    /* Не off-screen display:none: часть WebView режет программный клик; не revoke сразу — iOS срывает «Сохранить». */
+    return "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;";
+  }
   function pokerSaveBlobAsFileDownload(blob, fileName) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
     a.download = (fileName && String(fileName).trim()) || "document.pdf";
-    a.style.cssText = "position:fixed;left:-9999px;top:0;";
+    a.rel = "noopener";
+    a.style.cssText = pokerHiddenDownloadAnchorStyle();
     document.body.appendChild(a);
-    a.click();
+    try {
+      a.click();
+    } catch (eClick) {
+      try {
+        document.body.removeChild(a);
+      } catch (eRm0) {}
+      try {
+        URL.revokeObjectURL(url);
+      } catch (eRv0) {}
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert)
+        window.Telegram.WebApp.showAlert("Не удалось скачать. Попробуйте ещё раз.");
+      return;
+    }
     setTimeout(function () {
       try {
         document.body.removeChild(a);
@@ -1357,7 +1375,7 @@ function getAssetUrl(relativePath) {
       try {
         URL.revokeObjectURL(url);
       } catch (eRv) {}
-    }, 4000);
+    }, POKER_BLOB_DOWNLOAD_CLEANUP_MS);
   }
   /** Скачивание PDF из чата: нативный download в том же жесте пользователя, без раннего revokeObjectURL. */
   function pokerTriggerChatPdfDownload(href, fileName) {
@@ -1376,48 +1394,42 @@ function getAssetUrl(relativePath) {
         var ab = document.createElement("a");
         ab.href = href;
         ab.download = name;
-        ab.style.cssText = "position:fixed;left:-9999px;top:0;";
+        ab.rel = "noopener";
+        ab.style.cssText = pokerHiddenDownloadAnchorStyle();
         document.body.appendChild(ab);
-        ab.click();
+        try {
+          ab.click();
+        } catch (eBl) {
+          try {
+            document.body.removeChild(ab);
+          } catch (eAb0) {}
+          failAlert();
+          return false;
+        }
         setTimeout(function () {
           try {
             document.body.removeChild(ab);
           } catch (eAb) {}
-        }, 2000);
+        }, POKER_BLOB_DOWNLOAD_CLEANUP_MS);
         return true;
       }
       if (/^https?:\/\//i.test(href)) {
-        fetch(href, { mode: "cors", credentials: "omit", cache: "force-cache" })
-          .then(function (r) {
-            if (!r.ok) throw new Error("bad");
-            return r.blob();
-          })
-          .then(function (b) {
-            pokerSaveBlobAsFileDownload(b, name);
-          })
-          .catch(function () {
+        /* fetch().then(blob) теряет user activation — на iOS/Telegram скачивание «вспыхивает» и отменяется. */
+        var tgH = window.Telegram && window.Telegram.WebApp;
+        if (tgH && typeof tgH.openLink === "function") {
+          try {
+            tgH.openLink(href);
+          } catch (eTg) {
             var ox = window.open(href, "_blank", "noopener,noreferrer");
             if (!ox) failAlert();
-          });
+          }
+        } else {
+          var ox2 = window.open(href, "_blank", "noopener,noreferrer");
+          if (!ox2) failAlert();
+        }
         return true;
       }
       if (href.indexOf("data:") === 0) {
-        /* Короткие data: — сразу через нативный <a download> (без atob/Blob). */
-        var FAST_DATA_LEN = 1800000;
-        if (href.length <= FAST_DATA_LEN) {
-          var ad = document.createElement("a");
-          ad.href = href;
-          ad.download = name;
-          ad.style.cssText = "position:fixed;left:-9999px;top:0;";
-          document.body.appendChild(ad);
-          ad.click();
-          setTimeout(function () {
-            try {
-              document.body.removeChild(ad);
-            } catch (eAd) {}
-          }, 800);
-          return true;
-        }
         var m = href.match(/^data:([^;]+);base64,(.+)$/);
         if (!m || !m[2]) {
           failAlert();
@@ -1497,7 +1509,7 @@ function getAssetUrl(relativePath) {
         window.Telegram.WebApp.showAlert("Нажмите «Скачать» и откройте файл в приложении для PDF.");
       }
     }
-  });
+  }, true);
 })();
 
 (function initSpringRatingLeagueTabs() {
@@ -9862,12 +9874,17 @@ function initProfileFriends() {
   if (closeBtn) closeBtn.addEventListener("click", closeFriendsModal);
   btn.addEventListener("click", function () {
     var base = getApiBase();
-    var initData = tg && tg.initData ? tg.initData : "";
-    if (!base || !initData) return;
+    if (!base) return;
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
+      return;
+    }
     listEl.innerHTML = "<p class=\"friends-list-modal__loading\">Загрузка…</p>";
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("friends-list-modal--open");
-    fetch(base + "/api/friends?initData=" + encodeURIComponent(initData))
+    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    fetch(base + "/api/friends" + fq)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) {
@@ -9938,12 +9955,12 @@ function loadHeaderAvatar() {
     }
   } catch (eA) {}
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
-  if (!base || !initData) {
+  if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
     avatarEl.style.display = "none";
     return;
   }
-  fetch(base + "/api/avatar?initData=" + encodeURIComponent(initData))
+  var hq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+  fetch(base + "/api/avatar" + hq)
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok && data.avatar) {
@@ -9967,13 +9984,11 @@ function initProfileAvatar() {
   if (!avatarEl || !inputEl || !btnEl) return;
 
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
   if (!base) return;
 
   function loadAvatar() {
-    var url = base + "/api/avatar";
-    if (initData) url += "?initData=" + encodeURIComponent(initData);
-    fetch(url)
+    var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    fetch(base + "/api/avatar" + aq)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.avatar) {
@@ -10019,8 +10034,9 @@ function initProfileAvatar() {
   }
 
   btnEl.addEventListener("click", function () {
-    if (!initData) {
-      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
       return;
     }
     inputEl.click();
@@ -10051,10 +10067,14 @@ function initProfileAvatar() {
     });
 
     function uploadAvatar(dataUrl) {
+      var payload =
+        typeof pokerApiAuthJsonBody === "function"
+          ? pokerApiAuthJsonBody({ image: dataUrl })
+          : { image: dataUrl, initData: tg && tg.initData ? tg.initData : "" };
       fetch(base + "/api/avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, image: dataUrl }),
+        body: JSON.stringify(payload),
       })
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -15867,6 +15887,69 @@ function initChat() {
     }
     return false;
   }
+  var CHAT_DIALOG_LIST_PINS_KEY = "poker_chat_dialog_list_pins_v1";
+  function pokerChatDialogListPinsStorageKey() {
+    var fp = typeof pokerChatContactsAuthFingerprint === "function" ? pokerChatContactsAuthFingerprint() : "";
+    return fp ? CHAT_DIALOG_LIST_PINS_KEY + ":" + fp : "";
+  }
+  function pokerLoadChatDialogListPins() {
+    try {
+      if (typeof localStorage === "undefined") return [];
+      var k = pokerChatDialogListPinsStorageKey();
+      if (!k) return [];
+      var raw = localStorage.getItem(k);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr.map(function (x) { return String(x); }).filter(function (s) { return s.length; });
+    } catch (ePins) {
+      return [];
+    }
+  }
+  function pokerSaveChatDialogListPins(ids) {
+    try {
+      var k = pokerChatDialogListPinsStorageKey();
+      if (!k || typeof localStorage === "undefined") return;
+      localStorage.setItem(k, JSON.stringify(ids));
+    } catch (eSav) {}
+  }
+  function pokerSortContactsByDialogListPins(contacts) {
+    if (!contacts || !contacts.length) return contacts || [];
+    var pins = pokerLoadChatDialogListPins();
+    if (!pins.length) return contacts;
+    var used = Object.create(null);
+    var out = [];
+    for (var pi = 0; pi < pins.length; pi++) {
+      var p = pins[pi];
+      for (var j = 0; j < contacts.length; j++) {
+        if (used[j]) continue;
+        var c = contacts[j];
+        if (c && c.id && peerChatIdsEqual(c.id, p)) {
+          out.push(c);
+          used[j] = true;
+          break;
+        }
+      }
+    }
+    for (var k2 = 0; k2 < contacts.length; k2++) {
+      if (!used[k2]) out.push(contacts[k2]);
+    }
+    return out;
+  }
+  function pokerContactIsDialogListPinned(contactId) {
+    if (!contactId) return false;
+    var pins = pokerLoadChatDialogListPins();
+    for (var i = 0; i < pins.length; i++) {
+      if (peerChatIdsEqual(pins[i], contactId)) return true;
+    }
+    return false;
+  }
+  function pokerToggleChatDialogListPin(contactId, removeOnly) {
+    var pins = pokerLoadChatDialogListPins();
+    var next = pins.filter(function (p) { return !peerChatIdsEqual(p, contactId); });
+    if (!removeOnly) next.unshift(String(contactId));
+    pokerSaveChatDialogListPins(next);
+  }
   function resolveMyChatDisplayName() {
     try {
       var _auth2 = window.__pokerTelegramAuth;
@@ -19120,6 +19203,7 @@ function initChat() {
         var contactsForList = data.contacts.filter(function (c) {
           return !chatContactIsDuplicateOfPinnedDialog(c);
         });
+        contactsForList = pokerSortContactsByDialogListPins(contactsForList);
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
         window.chatGeneralUnreadCount = genUnread;
@@ -19137,7 +19221,7 @@ function initChat() {
           updateChatNavDot();
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
-          var existing = block ? block.querySelectorAll(".chat-contact") : [];
+          var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
           var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
             var btn = existing[i];
             return btn && btn.dataset.chatId === c.id;
@@ -19174,7 +19258,19 @@ function initChat() {
             return;
           }
           var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
+          var pinOrderRender = pokerLoadChatDialogListPins();
           var contactButtons = contactsForList.map(function (c) {
+            var isPinned = false;
+            for (var pix = 0; pix < pinOrderRender.length; pix++) {
+              if (peerChatIdsEqual(pinOrderRender[pix], c.id)) {
+                isPinned = true;
+                break;
+              }
+            }
+            var pinIcon = isPinned
+              ? '<span class="chat-contact__pin-icon" aria-hidden="true" title="Закреплён">📌</span>'
+              : "";
+            var swipeActionLabel = isPinned ? "Открепить" : "Закрепить";
             var roleClass = c.admin ? " chat-contact__role--admin" : "";
             var roleText = c.admin ? "Админ" : "Игрок";
             var onlineHtml = '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
@@ -19185,8 +19281,8 @@ function initChat() {
               ? '<img class="chat-contact__avatar" src="' +
                 escapeHtml(c.avatar) +
                 '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
-              : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + '</span>';
-            return (
+              : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
+            var innerBtn =
               '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
               escapeHtml(c.id) +
               '" data-chat-name="' +
@@ -19199,9 +19295,12 @@ function initChat() {
               (c.p21Id ? ' data-chat-p21-id="' + escapeHtml(String(c.p21Id)) + '"' : "") +
               ">" +
               avatarEl +
-              '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block"><span class="chat-contact__label">' +
+              '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
+              (pinIcon ? '<span class="chat-contact__name-pin-row">' + pinIcon + '<span class="chat-contact__label">' : '<span class="chat-contact__label">') +
               escapeHtml(c.name) +
-              '</span><span class="chat-contact__role' +
+              "</span>" +
+              (pinIcon ? "</span>" : "") +
+              '<span class="chat-contact__role' +
               roleClass +
               '">' +
               escapeHtml(roleText) +
@@ -19209,7 +19308,16 @@ function initChat() {
               onlineHtml +
               "</span></span>" +
               unreadBadge +
-              "</button>"
+              "</button>";
+            return (
+              '<div class="chat-contact-swipe">' +
+              '<div class="chat-contact-swipe__actions" aria-hidden="true">' +
+              '<button type="button" class="chat-contact-swipe__pin" tabindex="-1" data-chat-swipe-pin="1">' +
+              escapeHtml(swipeActionLabel) +
+              "</button></div>" +
+              '<div class="chat-contact-swipe__panel">' +
+              innerBtn +
+              "</div></div>"
             );
           }).join("");
           contactsEl.innerHTML = '<div class="chat-dialogs-block">' + contactButtons + '</div>';
@@ -19259,6 +19367,149 @@ function initChat() {
       });
   }
 
+  (function bindChatContactSwipeAndPinList() {
+    if (!contactsEl || contactsEl._chatContactSwipePinInit) return;
+    contactsEl._chatContactSwipePinInit = true;
+    var REVEAL = 118;
+    var swipeState = null;
+    function getPanelTx(panel) {
+      if (!panel || !panel.style || !panel.style.transform) return 0;
+      var m = String(panel.style.transform).match(/translateX\(\s*(-?[0-9.]+)px\s*\)/);
+      return m ? parseFloat(m[1], 10) : 0;
+    }
+    function closeOtherSwipePanels(exceptPanel) {
+      if (!contactsEl) return;
+      contactsEl.querySelectorAll(".chat-contact-swipe__panel").forEach(function (p) {
+        if (exceptPanel && p === exceptPanel) return;
+        p.style.transform = "";
+        p.classList.remove("chat-contact-swipe__panel--open");
+        p.classList.remove("chat-contact-swipe__panel--dragging");
+      });
+    }
+    function snapPanel(panel, open) {
+      if (!panel) return;
+      panel.style.transform = open ? "translateX(-" + REVEAL + "px)" : "";
+      panel.classList.toggle("chat-contact-swipe__panel--open", !!open);
+    }
+    contactsEl.addEventListener(
+      "click",
+      function (e) {
+        var cbtn = e.target && e.target.closest ? e.target.closest(".chat-contact") : null;
+        if (!cbtn || !contactsEl.contains(cbtn)) return;
+        var u = cbtn._suppressNextClickUntil;
+        if (u != null && Date.now() < Number(u)) {
+          e.preventDefault();
+          e.stopPropagation();
+          cbtn._suppressNextClickUntil = 0;
+          return;
+        }
+      },
+      true
+    );
+    contactsEl.addEventListener(
+      "click",
+      function (e) {
+        var pinB = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__pin") : null;
+        if (!pinB || !contactsEl.contains(pinB)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var wrap = pinB.closest(".chat-contact-swipe");
+        var cbtn = wrap && wrap.querySelector(".chat-contact");
+        var cid = cbtn && cbtn.dataset.chatId;
+        if (!cid) return;
+        var removing = pokerContactIsDialogListPinned(cid);
+        pokerToggleChatDialogListPin(cid, removing);
+        closeOtherSwipePanels(null);
+        loadContacts();
+      },
+      true
+    );
+    function onDocMove(e) {
+      if (!swipeState || e.pointerId !== swipeState.ptrId) return;
+      var dx = e.clientX - swipeState.startX;
+      var dy = e.clientY - swipeState.startY;
+      if (swipeState.mode == null) {
+        if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx) + 2) {
+          swipeState.mode = "vert";
+          return;
+        }
+        if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) + 2) {
+          swipeState.mode = "horiz";
+          swipeState.panel.classList.add("chat-contact-swipe__panel--dragging");
+          closeOtherSwipePanels(swipeState.panel);
+          try {
+            swipeState.panel.setPointerCapture(e.pointerId);
+          } catch (eCap) {}
+        } else {
+          return;
+        }
+      }
+      if (swipeState.mode !== "horiz") return;
+      e.preventDefault();
+      var tx = Math.max(-REVEAL, Math.min(0, swipeState.startTx + dx));
+      swipeState.panel.style.transform = "translateX(" + tx + "px)";
+      if (Math.abs(dx) > 14) swipeState.didAxisDrag = true;
+    }
+    function onDocUp(e) {
+      if (!swipeState || e.pointerId !== swipeState.ptrId) return;
+      var st = swipeState;
+      swipeState = null;
+      try {
+        if (st.panel && st.panel.releasePointerCapture) st.panel.releasePointerCapture(e.pointerId);
+      } catch (eRel) {}
+      document.removeEventListener("pointermove", onDocMove, true);
+      document.removeEventListener("pointerup", onDocUp, true);
+      document.removeEventListener("pointercancel", onDocUp, true);
+      if (st.mode !== "horiz") return;
+      if (st.panel) st.panel.classList.remove("chat-contact-swipe__panel--dragging");
+      var txNow = getPanelTx(st.panel);
+      snapPanel(st.panel, txNow <= -REVEAL / 2);
+      if (st.didAxisDrag) {
+        var cInner = st.panel.querySelector(".chat-contact");
+        if (cInner) cInner._suppressNextClickUntil = Date.now() + 420;
+      }
+    }
+    contactsEl.addEventListener(
+      "pointerdown",
+      function (e) {
+        if (e.pointerType === "mouse" && e.button != null && e.button !== 0) return;
+        var panel = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__panel") : null;
+        if (!panel || !contactsEl.contains(panel)) return;
+        if (e.target.closest && e.target.closest(".chat-contact-swipe__pin")) return;
+        if (swipeState) {
+          document.removeEventListener("pointermove", onDocMove, true);
+          document.removeEventListener("pointerup", onDocUp, true);
+          document.removeEventListener("pointercancel", onDocUp, true);
+          if (swipeState.panel) swipeState.panel.classList.remove("chat-contact-swipe__panel--dragging");
+          swipeState = null;
+        }
+        swipeState = {
+          ptrId: e.pointerId,
+          startX: e.clientX,
+          startY: e.clientY,
+          startTx: getPanelTx(panel),
+          panel: panel,
+          mode: null,
+          didAxisDrag: false,
+        };
+        document.addEventListener("pointermove", onDocMove, true);
+        document.addEventListener("pointerup", onDocUp, true);
+        document.addEventListener("pointercancel", onDocUp, true);
+      },
+      { passive: true }
+    );
+    var listScroll = document.querySelector(".chat-dialogs-list");
+    if (listScroll && !listScroll._chatSwipeScrollCloseBound) {
+      listScroll._chatSwipeScrollCloseBound = true;
+      listScroll.addEventListener(
+        "scroll",
+        function () {
+          closeOtherSwipePanels(null);
+        },
+        { passive: true }
+      );
+    }
+  })();
 
   function loadAdminsOnline() {
     if (!adminsView || !pokerApiHasCredential()) return;
