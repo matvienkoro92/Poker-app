@@ -2698,6 +2698,8 @@ body[data-view="cashout"] {
   border: none;
   background-color: var(--overscroll-canvas);
   background-image: var(--bg-blur-gradient);
+  /* Догрузка img выше видимой области — браузер держит якорь, меньше сдвига при lazy (snap к низу только если уже у низа, см. app.js). */
+  overflow-anchor: auto;
 }
 .view--active[data-view="chat"] .chat-list-view {
   background-color: var(--overscroll-canvas);
@@ -6660,7 +6662,7 @@ img.chat-contact__avatar {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 2px;
+  margin-bottom: 0;
   width: 100%;
   text-align: center;
 }
@@ -6688,7 +6690,9 @@ img.chat-contact__avatar {
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__body,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__body {
-  padding: 6px 10px 0;
+  padding: 4px 10px 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -6707,6 +6711,9 @@ img.chat-contact__avatar {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 .chat-pinned-self .chat-msg--pin-with-thumb .chat-msg__row {
   justify-content: stretch;
@@ -6722,6 +6729,8 @@ img.chat-contact__avatar {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 .chat-pinned-self .chat-msg--pin-with-thumb .chat-msg__body-main {
   align-items: stretch;
@@ -6731,13 +6740,15 @@ img.chat-contact__avatar {
 .chat-pinned-self .chat-pinned-self__media-row {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   min-width: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 .chat-pinned-self .chat-pinned-self__media-row--thumb-only {
   width: auto;
@@ -6745,8 +6756,9 @@ img.chat-contact__avatar {
 }
 .chat-pinned-self .chat-pinned-self__thumb-wrap {
   flex: 0 0 auto;
-  width: 78px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
+  aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.12);
@@ -6768,12 +6780,17 @@ img.chat-contact__avatar {
   flex: 1 1 0;
   min-width: 0;
   text-align: left;
+  align-self: center;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 .chat-pinned-self .chat-msg--pin-with-thumb .chat-pinned-self__text-col .chat-msg__text {
   text-align: left;
   margin: 0;
+  padding-bottom: 0;
   font-size: 13px;
   line-height: 1.35;
+  max-height: calc(1.35em * 2);
   word-break: break-word;
   min-width: 0;
   display: -webkit-box;
@@ -6789,17 +6806,18 @@ img.chat-contact__avatar {
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__footer,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__footer {
-  margin-top: 2px;
-  margin-bottom: 0;
-  justify-content: center;
+  display: none;
 }
 .chat-pinned-self .chat-msg--self-pin-stub .chat-msg__text,
 .chat-pinned-self .chat-msg--global-pin-stub .chat-msg__text {
   font-size: 13px;
   line-height: 1.35;
+  max-height: calc(1.35em * 2);
   word-break: break-word;
   text-align: center;
   min-width: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

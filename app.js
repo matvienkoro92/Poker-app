@@ -15153,6 +15153,21 @@ function initChat() {
       return true;
     }
   }
+  /** Snap вниз только если пользователь у низа ленты (или идёт анимация первого открытия). Иначе догрузка img не дёргает окно. */
+  function snapChatMessagesToBottomIfPinned(messagesScrollEl) {
+    if (!messagesScrollEl) return;
+    try {
+      var wrap = messagesScrollEl.parentElement;
+      if (wrap && wrap.classList && wrap.classList.contains("chat-messages-wrap--settling")) {
+        messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
+        return;
+      }
+    } catch (eW) {}
+    if (!chatMessagesNearBottom(messagesScrollEl, CHAT_SCROLL_BOTTOM_NEAR_PX)) return;
+    try {
+      messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
+    } catch (eS) {}
+  }
   function syncChatScrollBottomButtons() {
     try {
       if (
@@ -17618,11 +17633,6 @@ function initChat() {
   /** Только догрузка картинок — без тройного snap (первый вход в чат). */
   function pinChatMessagesToBottomImagesOnly(el) {
     if (!el) return;
-    function snap() {
-      try {
-        el.scrollTop = el.scrollHeight;
-      } catch (eSnap) {}
-    }
     var imgs = el.querySelectorAll("img.chat-msg__image");
     for (var ii = 0; ii < imgs.length; ii++) {
       (function (im) {
@@ -17630,7 +17640,9 @@ function initChat() {
         function onImg() {
           im.removeEventListener("load", onImg);
           im.removeEventListener("error", onImg);
-          requestAnimationFrame(snap);
+          requestAnimationFrame(function () {
+            snapChatMessagesToBottomIfPinned(el);
+          });
         }
         im.addEventListener("load", onImg);
         im.addEventListener("error", onImg);
@@ -17661,15 +17673,19 @@ function initChat() {
         function onImg() {
           im.removeEventListener("load", onImg);
           im.removeEventListener("error", onImg);
-          snap();
-          /* Без клавиатуры тройной snap на каждой картинке даёт «рваную» ленту при первом открытии. */
+          snapChatMessagesToBottomIfPinned(el);
+          /* У низа ленты подтянуть после смещения вёрстки; при прокрутке вверх не трогаем scrollTop. */
           if (document.body.classList.contains("chat-keyboard-open")) {
             requestAnimationFrame(function () {
-              snap();
-              requestAnimationFrame(snap);
+              snapChatMessagesToBottomIfPinned(el);
+              requestAnimationFrame(function () {
+                snapChatMessagesToBottomIfPinned(el);
+              });
             });
           } else {
-            requestAnimationFrame(snap);
+            requestAnimationFrame(function () {
+              snapChatMessagesToBottomIfPinned(el);
+            });
           }
         }
         im.addEventListener("load", onImg);
@@ -17679,12 +17695,15 @@ function initChat() {
     if (aggressive) {
       /* На открытой клавиатуре оставляем «догоняющие» snap; без клавиатуры они дёргают первый вход в общий чат. */
       if (document.body.classList.contains("chat-keyboard-open")) {
-        setTimeout(snap, 60);
-        setTimeout(snap, 200);
-        setTimeout(snap, 500);
+        function snapPinned() {
+          snapChatMessagesToBottomIfPinned(el);
+        }
+        setTimeout(snapPinned, 60);
+        setTimeout(snapPinned, 200);
+        setTimeout(snapPinned, 500);
         if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
           var vvPin = function () {
-            snap();
+            snapChatMessagesToBottomIfPinned(el);
           };
           window.visualViewport.addEventListener("resize", vvPin);
           setTimeout(function () {
