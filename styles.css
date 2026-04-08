@@ -7224,6 +7224,27 @@ img.chat-contact__avatar {
   gap: 2px;
   max-width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.chat-conv-peer-title-chip:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.chat-conv-peer-title-chip:focus {
+  outline: none;
+}
+.chat-conv-peer-title-chip:focus-visible {
+  outline: 2px solid var(--accent, #f97316);
+  outline-offset: 2px;
+}
+[data-theme="light"] .chat-conv-peer-title-chip:hover {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(15, 23, 42, 0.16);
 }
 .chat-conv-peer-title-chip__name {
   font-size: 13px;
@@ -8282,8 +8303,9 @@ body[data-view="chat"]
   right: 0;
   top: 0;
   bottom: 0;
-  width: 118px;
+  width: 52px;
   display: flex;
+  flex-direction: row;
   align-items: stretch;
   justify-content: stretch;
   z-index: 0;
@@ -8302,19 +8324,62 @@ body[data-view="chat"]
 .chat-contact-swipe__pin {
   flex: 1;
   margin: 0;
-  padding: 8px 6px;
+  padding: 6px 4px;
   border: none;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 400;
   font-family: inherit;
   color: #fff;
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-contact-swipe__pin-icon {
+  display: block;
+  line-height: 1;
+  position: relative;
+  top: 1px;
+}
+.chat-contact-swipe__pin--unpin .chat-contact-swipe__pin-icon {
+  opacity: 0.92;
+  transform: scaleX(-1);
 }
 .chat-contact-swipe__pin:active {
+  background: rgba(0, 0, 0, 0.12);
+}
+.chat-contact-swipe--wide-actions .chat-contact-swipe__actions {
+  width: 104px;
+}
+.chat-contact-swipe__friend {
+  flex: 1;
+  margin: 0;
+  padding: 6px 4px;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 26px;
+  font-weight: 300;
+  font-family: inherit;
+  line-height: 1;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-contact-swipe__friend-icon {
+  display: block;
+  line-height: 1;
+  position: relative;
+  top: -1px;
+}
+.chat-contact-swipe__friend:active {
   background: rgba(0, 0, 0, 0.12);
 }
 .chat-contact-swipe__panel {
@@ -8412,6 +8477,42 @@ body[data-view="chat"]
   color: #f97316;
   font-style: normal;
   font-weight: 600;
+}
+.chat-contact__role--friend {
+  color: #4ade80;
+  font-style: normal;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+[data-theme="light"] .chat-contact__role--friend {
+  color: #16a34a;
+}
+.chat-contact__role-friend-icon {
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.chat-contact__name-stack--friend .chat-contact__friend-name-nick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.chat-contact__name-stack--friend .chat-contact__label--primary {
+  flex-shrink: 0;
+}
+.chat-contact__friend-nick {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
 }
 .chat-contact__right {
   flex-shrink: 0;
@@ -16168,6 +16269,36 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   padding: 12px 16px 16px;
   border-top: 1px solid var(--border-subtle);
 }
+.chat-dialog-preview-modal__footer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+}
+.chat-dialog-preview-modal__add-friend-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.16);
+  border: 1px solid rgba(251, 146, 60, 0.55);
+  white-space: nowrap;
+}
+.chat-dialog-preview-modal__add-friend-btn:hover {
+  filter: brightness(1.08);
+}
+.chat-dialog-preview-modal__add-friend-btn:active {
+  transform: scale(0.99);
+}
+.chat-dialog-preview-modal__footer-row .chat-dialog-preview-modal__open-btn {
+  flex: 1;
+  min-width: 0;
+}
 .chat-dialog-preview-modal__open-btn {
   width: 100%;
   padding: 12px 16px;
@@ -16621,11 +16752,31 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   color: var(--text);
   background: rgba(148, 163, 184, 0.25);
 }
-.chat-user-modal__title {
+.chat-user-modal__title-block {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0 32px 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.chat-user-modal__title {
+  margin: 0;
   font-size: 17px;
   font-weight: 700;
   color: var(--text);
+  line-height: 1.25;
+}
+.chat-user-modal__login-sub {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+[data-theme="light"] .chat-user-modal__login-sub {
+  color: rgba(71, 85, 105, 0.92);
 }
 .chat-user-modal__p21 {
   margin: 0 0 8px;
@@ -16672,6 +16823,49 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.chat-user-modal__friend-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.chat-user-modal__edit-friend-name {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.chat-user-modal__edit-friend-name:hover:not(:disabled) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+.chat-user-modal__remove-friend {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(248, 113, 113, 0.95);
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.chat-user-modal__remove-friend:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+[data-theme="light"] .chat-user-modal__remove-friend {
+  color: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.35);
+}
+[data-theme="light"] .chat-user-modal__remove-friend:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.08);
 }
 .chat-user-modal__friend-btn {
   padding: 8px 12px;

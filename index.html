@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.240">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.248">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=335" />
+    <link rel="stylesheet" href="./styles.css?v=339" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1751,10 +1751,10 @@
                         <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
                         <span id="chatConvPeerAvatarPh" class="chat-conv-peer-avatar chat-conv-peer-avatar--ph">?</span>
                       </div>
-                      <div class="chat-conv-peer-title-chip">
+                      <button type="button" class="chat-conv-peer-title-chip" id="chatConvProfileOpenBtn" aria-label="Профиль собеседника">
                         <span class="chat-conv-peer-title-chip__name" id="chatConvTitle">Чат</span>
                         <span class="chat-conv-peer-title-chip__id"><span id="chatConvTitleId">—</span></span>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -5073,7 +5073,10 @@
               <img id="chatUserModalAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
               <span id="chatUserModalAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true"></span>
             </div>
-            <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
+            <div class="chat-user-modal__title-block">
+              <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
+              <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
+            </div>
           </div>
           <p class="chat-user-modal__intro">Эта информация видна другим пользователям</p>
           <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
@@ -5108,7 +5111,11 @@
               <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown">Уменьшить уважение</button>
             </div>
             <div class="chat-user-modal__friend-row">
-              <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
+              <div class="chat-user-modal__friend-buttons">
+                <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
+                <button type="button" class="chat-user-modal__edit-friend-name" id="chatUserModalEditFriendName" style="display: none;">Изменить</button>
+                <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
+              </div>
               <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
             </div>
             <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
@@ -5133,7 +5140,10 @@
             <div class="chat-messages chat-dialog-preview-modal__messages" id="chatDialogPreviewMessages" role="log"></div>
           </div>
           <div class="chat-dialog-preview-modal__footer">
-            <button type="button" class="chat-dialog-preview-modal__open-btn" id="chatDialogPreviewOpenBtn">Открыть чат</button>
+            <div class="chat-dialog-preview-modal__footer-row">
+              <button type="button" class="chat-dialog-preview-modal__add-friend-btn" id="chatDialogPreviewAddFriendBtn" hidden>В друзья</button>
+              <button type="button" class="chat-dialog-preview-modal__open-btn" id="chatDialogPreviewOpenBtn">Открыть чат</button>
+            </div>
           </div>
         </div>
       </div>
@@ -5575,7 +5585,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=386"></script>
+    <script defer src="./app.js?v=394"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
