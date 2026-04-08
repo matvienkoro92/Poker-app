@@ -16174,8 +16174,16 @@ function initChat() {
           if (data && data.ok) {
             var up = Array.isArray(data.up) ? data.up : [];
             var down = Array.isArray(data.down) ? data.down : [];
-            rvUpEl.textContent = up.map(function (uid) { return String(uid).replace(/^tg_/, "ID"); }).join(", ") || "Никто";
-            rvDownEl.textContent = down.map(function (uid) { return String(uid).replace(/^tg_/, "ID"); }).join(", ") || "Никто";
+            var vd =
+              data.voterDisplay && typeof data.voterDisplay === "object" ? data.voterDisplay : {};
+            function respectVoterLineLabel(uid) {
+              var id = String(uid || "").trim();
+              if (!id) return "—";
+              if (vd[id] != null && String(vd[id]).trim()) return String(vd[id]).trim();
+              return id;
+            }
+            rvUpEl.textContent = up.map(respectVoterLineLabel).join(", ") || "Никто";
+            rvDownEl.textContent = down.map(respectVoterLineLabel).join(", ") || "Никто";
           } else {
             rvUpEl.textContent = "—";
             rvDownEl.textContent = "—";
