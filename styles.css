@@ -5340,16 +5340,42 @@ html.club-charter-modal-open {
 .chat-reaction-picker {
   position: fixed;
   z-index: 1001;
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  max-width: min(92vw, 380px);
+  padding: 8px 10px;
   background: rgba(15, 23, 42, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.5);
-  border-radius: 999px;
+  border-radius: 14px;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
+}
+.chat-reaction-picker__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.chat-reaction-picker__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.95);
+  padding: 0 2px;
+}
+.chat-reaction-picker__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.chat-reaction-picker__divider {
+  height: 1px;
+  margin: 8px 0;
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 1px;
 }
 .chat-reaction-picker.chat-reaction-picker--hidden {
   display: none;
@@ -5522,23 +5548,36 @@ html.club-charter-modal-open {
   transform: scale(1);
 }
 .chat-ctx-menu__reactions {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px 10px 10px;
   background: rgba(15, 23, 42, 0.96);
-  border-radius: 999px;
+  border-radius: 16px;
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
   border: 1px solid rgba(251, 146, 60, 0.3);
 }
+.chat-ctx-menu__reactions-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.85);
+  padding: 0 2px;
+}
+.chat-ctx-menu__reactions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
 .chat-ctx-menu__reaction-emoji {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  font-size: 22px;
+  font-size: 20px;
   border: none;
   border-radius: 12px;
   background: transparent;
@@ -6522,7 +6561,7 @@ img.chat-contact__avatar {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-/* Между админами и списком игроков: «Все» / «Друзья» */
+/* Между админами и списком игроков: «Все» / «Друзья» — полоса-разделитель */
 .chat-contacts-filter {
   display: flex;
   align-items: stretch;
@@ -6531,9 +6570,11 @@ img.chat-contact__avatar {
   margin: 0;
   padding: 0 8px;
   min-height: 34px;
-  background: var(--block-bg);
-  border: 1px solid var(--border-subtle);
-  border-top: none;
+  background: var(--accent-soft);
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-subtle));
+  border-top: 1px solid rgba(251, 146, 60, 0.34);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border-subtle));
   box-sizing: border-box;
 }
 .chat-contacts-filter--hidden {
@@ -6557,10 +6598,10 @@ img.chat-contact__avatar {
 }
 .chat-contacts-filter__tab--active {
   color: var(--text);
-  border-bottom-color: var(--accent, #a855f7);
+  border-bottom-color: var(--accent);
 }
 .chat-contacts-filter__tab:focus-visible {
-  outline: 2px solid var(--accent, #a855f7);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 .chat-dialog-item {
@@ -22022,6 +22063,15 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border-subtle);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-avatar-block__img:hover {
+  border-color: rgba(249, 115, 22, 0.4);
+}
+.profile-avatar-block__img:focus-visible {
+  outline: 2px solid rgba(249, 115, 22, 0.65);
+  outline-offset: 3px;
 }
 .profile-avatar-block__btn {
   display: inline-block;

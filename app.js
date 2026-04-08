@@ -9957,13 +9957,27 @@ function initProfileAvatar() {
     img.src = URL.createObjectURL(file);
   }
 
-  btnEl.addEventListener("click", function () {
+  function openProfileAvatarFilePicker() {
+    if (btnEl.disabled) return;
     if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
       if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
       else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
       return;
     }
     inputEl.click();
+  }
+
+  btnEl.addEventListener("click", function () {
+    openProfileAvatarFilePicker();
+  });
+  avatarEl.addEventListener("click", function () {
+    openProfileAvatarFilePicker();
+  });
+  avatarEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openProfileAvatarFilePicker();
+    }
   });
 
   inputEl.addEventListener("change", function () {
@@ -17163,19 +17177,86 @@ function initChat() {
   var reactionPickerEl = document.getElementById("chatReactionPicker");
   var currentReactionPickerClose = null;
 
+  /** Порядок плашек реакций (как в пикере; 🔥 первым). Синхронизировать с CHAT_REACTION_EMOJI_* в lib/api-handlers/chat.js */
+  var CHAT_REACTION_DISPLAY_ORDER = [
+    "🔥",
+    "👍",
+    "👎",
+    "❤️",
+    "😂",
+    "🤣",
+    "😮",
+    "😢",
+    "🙏",
+    "😍",
+    "🥰",
+    "😊",
+    "🎉",
+    "👏",
+    "🙌",
+    "💯",
+    "✨",
+    "⭐",
+    "🤔",
+    "😤",
+    "🥳",
+    "🤝",
+    "💪",
+    "😉",
+    "😎",
+    "🤩",
+    "😭",
+    "🤯",
+    "♠️",
+    "♥️",
+    "♦️",
+    "♣️",
+    "🃏",
+    "🎲",
+    "🎰",
+    "💰",
+    "🤑",
+    "🏆",
+    "👑",
+    "🧠",
+  ];
+  var CHAT_REACTION_ORDER_IDX = {};
+  CHAT_REACTION_DISPLAY_ORDER.forEach(function (emOrd, idxOrd) {
+    CHAT_REACTION_ORDER_IDX[emOrd] = idxOrd;
+  });
+  function sortChatReactionEmojiKeys(keys) {
+    return keys.slice().sort(function (a, b) {
+      var ia = Object.prototype.hasOwnProperty.call(CHAT_REACTION_ORDER_IDX, a) ? CHAT_REACTION_ORDER_IDX[a] : 10000;
+      var ib = Object.prototype.hasOwnProperty.call(CHAT_REACTION_ORDER_IDX, b) ? CHAT_REACTION_ORDER_IDX[b] : 10000;
+      if (ia !== ib) return ia - ib;
+      if (a < b) return -1;
+      if (a > b) return 1;
+      return 0;
+    });
+  }
+
   function buildChatReactionsPillsHtml(msgId, reactions, source, withIdForPersonal) {
     var myIdR = resolveMyChatMemberId();
     if (!msgId || !reactions || typeof reactions !== "object") return "";
+    var keysR = [];
+    for (var emK in reactions) {
+      if (
+        Object.prototype.hasOwnProperty.call(reactions, emK) &&
+        Array.isArray(reactions[emK]) &&
+        reactions[emK].length > 0
+      ) {
+        keysR.push(emK);
+      }
+    }
     var pillsR = [];
-    for (var emR in reactions) {
-      if (!Object.prototype.hasOwnProperty.call(reactions, emR) || !Array.isArray(reactions[emR]) || reactions[emR].length === 0) continue;
+    sortChatReactionEmojiKeys(keysR).forEach(function (emR) {
       var countR = reactions[emR].length;
       var iReactedR = myIdR && reactions[emR].indexOf(myIdR) >= 0;
       var dataWithR = source === "personal" && withIdForPersonal ? ' data-with="' + escapeHtml(withIdForPersonal) + '"' : "";
       pillsR.push(
         '<button type="button" class="chat-msg__reaction ' + (iReactedR ? "chat-msg__reaction--mine" : "") + '" data-msg-id="' + escapeHtml(msgId) + '" data-emoji="' + escapeHtml(emR) + '" data-source="' + escapeHtml(source || "general") + '"' + dataWithR + ">" + escapeHtml(emR) + ' <span class="chat-msg__reaction-count">' + countR + "</span></button>"
       );
-    }
+    });
     return pillsR.join("");
   }
 
@@ -17331,9 +17412,17 @@ function initChat() {
     reactionPickerEl.dataset.source = btn.dataset.source || "general";
     reactionPickerEl.dataset.with = btn.dataset.with || "";
     reactionPickerEl.style.left = rect.left + "px";
-    reactionPickerEl.style.top = (rect.top - 44) + "px";
+    reactionPickerEl.style.top = (rect.top - 8) + "px";
     reactionPickerEl.classList.remove("chat-reaction-picker--hidden");
     reactionPickerEl.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        var h = reactionPickerEl.offsetHeight || 120;
+        var w = reactionPickerEl.offsetWidth || 200;
+        reactionPickerEl.style.top = Math.max(8, rect.top - h - 8) + "px";
+        reactionPickerEl.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - w - 8)) + "px";
+      });
+    });
     function closePicker(ev) {
       if (ev && ev.target && ev.target.closest && ev.target.closest(".chat-reaction-picker")) return;
       reactionPickerEl.classList.add("chat-reaction-picker--hidden");
@@ -18386,14 +18475,18 @@ function initChat() {
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtml = "";
       if (m.id && m.reactions && typeof m.reactions === "object") {
-        var pills = [];
+        var emKeysG = [];
         for (var em in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, em) && Array.isArray(m.reactions[em]) && m.reactions[em].length > 0) {
-            var count = m.reactions[em].length;
-            var iReacted = myIdRender && m.reactions[em].indexOf(myIdRender) >= 0;
-            pills.push('<button type="button" class="chat-msg__reaction ' + (iReacted ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(em) + '" data-source="general">' + escapeHtml(em) + ' <span class="chat-msg__reaction-count">' + count + '</span></button>');
+            emKeysG.push(em);
           }
         }
+        var pills = [];
+        sortChatReactionEmojiKeys(emKeysG).forEach(function (em) {
+          var count = m.reactions[em].length;
+          var iReacted = myIdRender && m.reactions[em].indexOf(myIdRender) >= 0;
+          pills.push('<button type="button" class="chat-msg__reaction ' + (iReacted ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(em) + '" data-source="general">' + escapeHtml(em) + ' <span class="chat-msg__reaction-count">' + count + '</span></button>');
+        });
         reactionsHtml = pills.join("");
       }
       var reactionsRow = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtml + '</span></div>' : "";
@@ -18558,7 +18651,7 @@ function initChat() {
       /* Не вызывать scrollIntoView: на iOS/WebKit прокручивается вся цепочка предков (включая
          document), из‑за чего «улетает» лента, строка ввода и ломается обратная прокрутка. */
       var GAP = 10;
-      var menuWidth = 280;
+      var menuWidth = 300;
       var bottomNavHeight = 96;
       var maxBottom = window.innerHeight - bottomNavHeight;
       ctxMenu.style.width = menuWidth + "px";
@@ -19496,18 +19589,8 @@ function initChat() {
         window.lastListStats = total + " конт · " + online + " онл";
         updateChatHeaderStats();
         if (contactsForList.length === 0) {
-          var emptyListHtml;
-          if (data.contacts.length === 0) {
-            emptyListHtml =
-              '<p class="chat-empty">Пока нет личных переписок. Напишите кому-то по ID выше или дождитесь ответа.</p>';
-          } else if (showFriendsOnly) {
-            emptyListHtml =
-              '<p class="chat-empty">Нет переписок с друзьями. Добавьте игрока в друзья из профиля или откройте «Все».</p>';
-          } else {
-            emptyListHtml =
-              '<p class="chat-empty">Других диалогов нет — переписка с админами в закреплённых строках выше.</p>';
-          }
-          contactsEl.innerHTML = emptyListHtml;
+          contactsEl.innerHTML =
+            '<p class="chat-empty">Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.</p>';
           updateDialogUnreadBadges();
           updateChatNavDot();
         } else {
@@ -20168,14 +20251,18 @@ function initChat() {
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtmlP = "";
       if (m.id && m.reactions && typeof m.reactions === "object") {
-        var pillsP = [];
+        var emKeysP = [];
         for (var emp in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, emp) && Array.isArray(m.reactions[emp]) && m.reactions[emp].length > 0) {
-            var countP = m.reactions[emp].length;
-            var iReactedP = myIdRenderP && m.reactions[emp].indexOf(myIdRenderP) >= 0;
-            pillsP.push('<button type="button" class="chat-msg__reaction ' + (iReactedP ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(emp) + '" data-source="personal" data-with="' + escapeHtml(chatWithUserId || "") + '">' + escapeHtml(emp) + ' <span class="chat-msg__reaction-count">' + countP + '</span></button>');
+            emKeysP.push(emp);
           }
         }
+        var pillsP = [];
+        sortChatReactionEmojiKeys(emKeysP).forEach(function (emp) {
+          var countP = m.reactions[emp].length;
+          var iReactedP = myIdRenderP && m.reactions[emp].indexOf(myIdRenderP) >= 0;
+          pillsP.push('<button type="button" class="chat-msg__reaction ' + (iReactedP ? 'chat-msg__reaction--mine' : '') + '" data-msg-id="' + escapeHtml(m.id) + '" data-emoji="' + escapeHtml(emp) + '" data-source="personal" data-with="' + escapeHtml(chatWithUserId || "") + '">' + escapeHtml(emp) + ' <span class="chat-msg__reaction-count">' + countP + '</span></button>');
+        });
         reactionsHtmlP = pillsP.join("");
       }
       var reactionsRowP = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtmlP + '</span></div>' : "";
@@ -20439,23 +20526,27 @@ function initChat() {
             : "";
         var reactionsHtmlP = "";
         if (m.id && m.reactions && typeof m.reactions === "object") {
-          var pillsP = [];
+          var emKeysPrev = [];
           for (var emp in m.reactions) {
             if (
               Object.prototype.hasOwnProperty.call(m.reactions, emp) &&
               Array.isArray(m.reactions[emp]) &&
               m.reactions[emp].length > 0
             ) {
-              var countP = m.reactions[emp].length;
-              pillsP.push(
-                '<span class="chat-dialog-preview__reaction-pill">' +
-                  escapeHtml(emp) +
-                  ' <span class="chat-msg__reaction-count">' +
-                  countP +
-                  "</span></span>"
-              );
+              emKeysPrev.push(emp);
             }
           }
+          var pillsP = [];
+          sortChatReactionEmojiKeys(emKeysPrev).forEach(function (emp) {
+            var countP = m.reactions[emp].length;
+            pillsP.push(
+              '<span class="chat-dialog-preview__reaction-pill">' +
+                escapeHtml(emp) +
+                ' <span class="chat-msg__reaction-count">' +
+                countP +
+                "</span></span>"
+            );
+          });
           reactionsHtmlP = pillsP.join("");
         }
         var reactionsRowP = reactionsHtmlP

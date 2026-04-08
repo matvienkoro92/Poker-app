@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.271">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.275">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1764,12 +1764,57 @@
               </div>
             </div>
             <div class="chat-reaction-picker chat-reaction-picker--hidden" id="chatReactionPicker" role="dialog" aria-label="Выбор реакции" aria-hidden="true">
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="👍">👍</button>
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="❤️">❤️</button>
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="😂">😂</button>
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="😮">😮</button>
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="😢">😢</button>
-              <button type="button" class="chat-reaction-picker__emoji" data-emoji="🙏">🙏</button>
+              <div class="chat-reaction-picker__group">
+                <span class="chat-reaction-picker__label">Базовые</span>
+                <div class="chat-reaction-picker__row" role="group" aria-label="Базовые смайлы">
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🔥" title="🔥">🔥</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👍" title="👍">👍</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👎" title="👎">👎</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="❤️" title="❤️">❤️</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😂" title="😂">😂</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤣" title="🤣">🤣</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😮" title="😮">😮</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😢" title="😢">😢</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🙏" title="🙏">🙏</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😍" title="😍">😍</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🥰" title="🥰">🥰</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😊" title="😊">😊</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎉" title="🎉">🎉</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👏" title="👏">👏</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🙌" title="🙌">🙌</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💯" title="💯">💯</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="✨" title="✨">✨</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="⭐" title="⭐">⭐</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤔" title="🤔">🤔</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😤" title="😤">😤</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🥳" title="🥳">🥳</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤝" title="🤝">🤝</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💪" title="💪">💪</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😉" title="😉">😉</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😎" title="😎">😎</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤩" title="🤩">🤩</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😭" title="😭">😭</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤯" title="🤯">🤯</button>
+                </div>
+              </div>
+              <div class="chat-reaction-picker__divider" aria-hidden="true"></div>
+              <div class="chat-reaction-picker__group">
+                <span class="chat-reaction-picker__label">Покер</span>
+                <div class="chat-reaction-picker__row" role="group" aria-label="Покерные смайлы">
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♠️" title="♠️">♠️</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♥️" title="♥️">♥️</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♦️" title="♦️">♦️</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♣️" title="♣️">♣️</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🃏" title="🃏">🃏</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎲" title="🎲">🎲</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎰" title="🎰">🎰</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💰" title="💰">💰</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤑" title="🤑">🤑</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🏆" title="🏆">🏆</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👑" title="👑">👑</button>
+                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🧠" title="🧠">🧠</button>
+                </div>
+              </div>
             </div>
             <div class="chat-emoji-picker chat-emoji-picker--hidden" id="chatEmojiPicker" role="dialog" aria-label="Смайлики" aria-hidden="true">
               <div class="chat-emoji-picker__grid" id="chatEmojiPickerGrid"></div>
@@ -1777,12 +1822,52 @@
             <div class="chat-ctx-backdrop" id="chatContextBackdrop" aria-hidden="true"></div>
             <div class="chat-ctx-menu" id="chatContextMenu" role="menu" aria-hidden="true">
               <div class="chat-ctx-menu__reactions" aria-label="Реакции">
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👍" title="👍">👍</button>
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="❤️" title="❤️">❤️</button>
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😂" title="😂">😂</button>
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😮" title="😮">😮</button>
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😢" title="😢">😢</button>
-                <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🙏" title="🙏">🙏</button>
+                <span class="chat-ctx-menu__reactions-label">Базовые</span>
+                <div class="chat-ctx-menu__reactions-row" role="group" aria-label="Базовые смайлы">
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🔥" title="🔥">🔥</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👍" title="👍">👍</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👎" title="👎">👎</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="❤️" title="❤️">❤️</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😂" title="😂">😂</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤣" title="🤣">🤣</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😮" title="😮">😮</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😢" title="😢">😢</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🙏" title="🙏">🙏</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😍" title="😍">😍</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🥰" title="🥰">🥰</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😊" title="😊">😊</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎉" title="🎉">🎉</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👏" title="👏">👏</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🙌" title="🙌">🙌</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💯" title="💯">💯</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="✨" title="✨">✨</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="⭐" title="⭐">⭐</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤔" title="🤔">🤔</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😤" title="😤">😤</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🥳" title="🥳">🥳</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤝" title="🤝">🤝</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💪" title="💪">💪</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😉" title="😉">😉</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😎" title="😎">😎</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤩" title="🤩">🤩</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😭" title="😭">😭</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤯" title="🤯">🤯</button>
+                </div>
+                <span class="chat-ctx-menu__reactions-label">Покер</span>
+                <div class="chat-ctx-menu__reactions-row" role="group" aria-label="Покерные смайлы">
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♠️" title="♠️">♠️</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♥️" title="♥️">♥️</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♦️" title="♦️">♦️</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♣️" title="♣️">♣️</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🃏" title="🃏">🃏</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎲" title="🎲">🎲</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎰" title="🎰">🎰</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💰" title="💰">💰</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤑" title="🤑">🤑</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🏆" title="🏆">🏆</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👑" title="👑">👑</button>
+                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🧠" title="🧠">🧠</button>
+                </div>
               </div>
               <div class="chat-ctx-menu__items-wrap">
                 <button type="button" class="chat-ctx-menu__item" data-action="reply"><span class="chat-ctx-menu__icon" aria-hidden="true">↩</span>Ответить</button>
@@ -3770,7 +3855,7 @@
               Привет, <span id="profileUserName">имя</span><span class="profile-user-meta" id="profileUserMeta"></span>, здесь все твои достижения в клубе Два туза.
             </p>
             <div class="profile-avatar-block">
-              <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.png" alt="Аватар" />
+              <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.png" alt="Аватар" role="button" tabindex="0" title="Сменить фото" aria-label="Сменить фото" />
               <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
               <button type="button" class="profile-avatar-block__btn" id="profileAvatarBtn">Загрузить аватар</button>
             </div>
@@ -5575,7 +5660,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=415"></script>
+    <script defer src="./app.js?v=419"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
