@@ -15099,6 +15099,122 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
 
+  var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
+  var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
+  var CHAT_SCROLL_BOTTOM_NEAR_PX = 100;
+  var chatScrollBottomBtnRaf = null;
+  function chatMessagesNearBottom(el, thresholdPx) {
+    if (!el) return true;
+    try {
+      var th = thresholdPx != null ? thresholdPx : CHAT_SCROLL_BOTTOM_NEAR_PX;
+      var max = el.scrollHeight - el.clientHeight;
+      if (max <= 8) return true;
+      return max - el.scrollTop <= th;
+    } catch (e) {
+      return true;
+    }
+  }
+  function syncChatScrollBottomButtons() {
+    try {
+      if (
+        chatGeneralScrollBottomBtn &&
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        generalMessages
+      ) {
+        var showG = !chatMessagesNearBottom(generalMessages, CHAT_SCROLL_BOTTOM_NEAR_PX);
+        chatGeneralScrollBottomBtn.classList.toggle("chat-scroll-bottom-btn--hidden", !showG);
+        chatGeneralScrollBottomBtn.setAttribute("aria-hidden", showG ? "false" : "true");
+      } else if (chatGeneralScrollBottomBtn) {
+        chatGeneralScrollBottomBtn.classList.add("chat-scroll-bottom-btn--hidden");
+        chatGeneralScrollBottomBtn.setAttribute("aria-hidden", "true");
+      }
+    } catch (eG) {}
+    try {
+      if (
+        chatPersonalScrollBottomBtn &&
+        chatActiveTab === "personal" &&
+        convView &&
+        !convView.classList.contains("chat-conv-view--hidden") &&
+        messagesEl
+      ) {
+        var showP = !chatMessagesNearBottom(messagesEl, CHAT_SCROLL_BOTTOM_NEAR_PX);
+        chatPersonalScrollBottomBtn.classList.toggle("chat-scroll-bottom-btn--hidden", !showP);
+        chatPersonalScrollBottomBtn.setAttribute("aria-hidden", showP ? "false" : "true");
+      } else if (chatPersonalScrollBottomBtn) {
+        chatPersonalScrollBottomBtn.classList.add("chat-scroll-bottom-btn--hidden");
+        chatPersonalScrollBottomBtn.setAttribute("aria-hidden", "true");
+      }
+    } catch (eP) {}
+  }
+  function scheduleSyncChatScrollBottomButtons() {
+    if (chatScrollBottomBtnRaf != null) return;
+    chatScrollBottomBtnRaf = requestAnimationFrame(function () {
+      chatScrollBottomBtnRaf = null;
+      syncChatScrollBottomButtons();
+    });
+  }
+  try {
+    window.__pokerSyncChatScrollBottomButtons = syncChatScrollBottomButtons;
+    window.__pokerScheduleSyncChatScrollBottomButtons = scheduleSyncChatScrollBottomButtons;
+  } catch (eSbWin) {}
+  if (generalMessages) {
+    generalMessages.addEventListener("scroll", scheduleSyncChatScrollBottomButtons, { passive: true });
+  }
+  if (messagesEl) {
+    messagesEl.addEventListener("scroll", scheduleSyncChatScrollBottomButtons, { passive: true });
+  }
+  if (typeof ResizeObserver !== "undefined" && generalMessages) {
+    try {
+      var roG = new ResizeObserver(function () {
+        scheduleSyncChatScrollBottomButtons();
+      });
+      roG.observe(generalMessages);
+    } catch (eRoG) {}
+  }
+  if (typeof ResizeObserver !== "undefined" && messagesEl) {
+    try {
+      var roP = new ResizeObserver(function () {
+        scheduleSyncChatScrollBottomButtons();
+      });
+      roP.observe(messagesEl);
+    } catch (eRoP) {}
+  }
+  window.addEventListener("resize", scheduleSyncChatScrollBottomButtons, { passive: true });
+  if (chatGeneralScrollBottomBtn) {
+    chatGeneralScrollBottomBtn.addEventListener("click", function () {
+      try {
+        if (generalMessages) {
+          generalMessages.scrollTop = generalMessages.scrollHeight;
+        }
+      } catch (eCG) {}
+      var twHg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (twHg && twHg.HapticFeedback && typeof twHg.HapticFeedback.impactOccurred === "function") {
+        try {
+          twHg.HapticFeedback.impactOccurred("light");
+        } catch (eHg) {}
+      }
+      scheduleSyncChatScrollBottomButtons();
+    });
+  }
+  if (chatPersonalScrollBottomBtn) {
+    chatPersonalScrollBottomBtn.addEventListener("click", function () {
+      try {
+        if (messagesEl) {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      } catch (eCP) {}
+      var twHp = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (twHp && twHp.HapticFeedback && typeof twHp.HapticFeedback.impactOccurred === "function") {
+        try {
+          twHp.HapticFeedback.impactOccurred("light");
+        } catch (eHp) {}
+      }
+      scheduleSyncChatScrollBottomButtons();
+    });
+  }
+
   function flushChatComposerToDrafts() {
     if (!chatComposerEl) return;
     try {
@@ -15693,6 +15809,12 @@ function initChat() {
           chatComposerEl.tabIndex = composerFocus ? 0 : -1;
         }
       }
+      /* Вне экрана диалогов поле поиска скрыто (display:none), но на части iOS WK всё равно попадает в «цепочку» клавиатуры ◀ ▶ — убираем из tab order. Тап по полю на экране «Чаты» остаётся (focus по клику для tabindex=-1). */
+      var findDlg = document.getElementById("chatFindByIdInputDialogs");
+      if (findDlg && typeof findDlg.setAttribute === "function") {
+        if (dialogsShown) findDlg.removeAttribute("tabindex");
+        else findDlg.setAttribute("tabindex", "-1");
+      }
     } catch (eInert) {}
   }
   function setTab(tab) {
@@ -15742,6 +15864,9 @@ function initChat() {
     updateChatHeaderStats();
     updateUnreadDots();
     syncChatInertForIosAccessory();
+    try {
+      scheduleSyncChatScrollBottomButtons();
+    } catch (eSbTab) {}
   }
   function showDialogs() {
     /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
@@ -15803,6 +15928,9 @@ function initChat() {
     mountChatComposer("detached");
     syncChatInertForIosAccessory();
     try {
+      scheduleSyncChatScrollBottomButtons();
+    } catch (eSbDlg) {}
+    try {
       refreshChatSelfPinBars();
     } catch (ePinDlg) {}
     try {
@@ -15853,6 +15981,9 @@ function initChat() {
       applyClubGeneralHeaderLayout();
       mountChatComposer("general");
       syncChatInertForIosAccessory();
+      try {
+        scheduleSyncChatScrollBottomButtons();
+      } catch (eSbClub) {}
     }
 
     var st = typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState() : "ok";
@@ -17393,6 +17524,55 @@ function initChat() {
     var suit = n <= 13 ? "треф" : n <= 26 ? "бубны" : n <= 39 ? "черви" : "пики";
     return cardName + " " + suit;
   }
+  /** Первый показ ленты: обёртка остаётся скрытой, пока высота стабильна и img в сообщениях декодированы — иначе после снятия маски лента «отъезжает» вверх и snap на load даёт скачок. */
+  function finishChatMessagesOpenSettle(messagesEl, msgWrap) {
+    if (!messagesEl) return;
+    if (!msgWrap || !msgWrap.classList) {
+      pinChatMessagesToBottomImagesOnly(messagesEl);
+      return;
+    }
+    pinChatMessagesToBottomImagesOnly(messagesEl);
+    var raf = requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    var deadline = Date.now() + 650;
+    var stable = 0;
+    var lastH = -1;
+    function anyMsgImageIncomplete() {
+      var imgs = messagesEl.querySelectorAll("img.chat-msg__image");
+      for (var i = 0; i < imgs.length; i++) {
+        if (!imgs[i].complete) return true;
+      }
+      return false;
+    }
+    function tick() {
+      try {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      } catch (eT) {}
+      var h = messagesEl.scrollHeight;
+      if (h === lastH) stable++;
+      else {
+        stable = 0;
+        lastH = h;
+      }
+      var incomplete = anyMsgImageIncomplete();
+      var timedOut = Date.now() >= deadline;
+      if ((stable >= 2 && !incomplete) || (stable >= 2 && timedOut) || timedOut) {
+        try {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        } catch (eF) {}
+        msgWrap.classList.remove("chat-messages-wrap--settling");
+        try {
+          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
+            window.__pokerScheduleSyncChatScrollBottomButtons();
+          }
+        } catch (eSbSettle) {}
+        return;
+      }
+      raf(tick);
+    }
+    raf(tick);
+  }
   /** Только догрузка картинок — без тройного snap (первый вход в чат). */
   function pinChatMessagesToBottomImagesOnly(el) {
     if (!el) return;
@@ -17518,6 +17698,9 @@ function initChat() {
       try {
         refreshChatSelfPinBars();
       } catch (ePinG2) {}
+      try {
+        scheduleSyncChatScrollBottomButtons();
+      } catch (eSbGE) {}
       return;
     }
     var myIdRender = resolveMyChatMemberId();
@@ -17618,8 +17801,7 @@ function initChat() {
         rafOpenG(function () {
           generalMessages.scrollTop = generalMessages.scrollHeight;
           scrollGeneralToBottomOnNextRender = false;
-          if (generalMsgWrap && generalMsgWrap.classList) generalMsgWrap.classList.remove("chat-messages-wrap--settling");
-          pinChatMessagesToBottomImagesOnly(generalMessages);
+          finishChatMessagesOpenSettle(generalMessages, generalMsgWrap);
         });
       });
     } else {
@@ -17726,6 +17908,9 @@ function initChat() {
     try {
       refreshChatSelfPinBars();
     } catch (ePinRfG) {}
+    try {
+      scheduleSyncChatScrollBottomButtons();
+    } catch (eSbG) {}
   }
 
   function attachContextMenuForOthers(container, source, scrollParentOpt) {
@@ -18865,6 +19050,9 @@ function initChat() {
       try {
         refreshChatSelfPinBars();
       } catch (ePinPM2) {}
+      try {
+        scheduleSyncChatScrollBottomButtons();
+      } catch (eSbPE) {}
       return;
     }
     function personalReceiptHtml(m, isOwn) {
@@ -18991,8 +19179,7 @@ function initChat() {
         rafOpenP(function () {
           messagesEl.scrollTop = messagesEl.scrollHeight;
           scrollPersonalToBottomOnNextRender = false;
-          if (personalMsgWrap && personalMsgWrap.classList) personalMsgWrap.classList.remove("chat-messages-wrap--settling");
-          pinChatMessagesToBottomImagesOnly(messagesEl);
+          finishChatMessagesOpenSettle(messagesEl, personalMsgWrap);
         });
       });
     } else {
@@ -19046,6 +19233,9 @@ function initChat() {
     try {
       refreshChatSelfPinBars();
     } catch (ePinRfP) {}
+    try {
+      scheduleSyncChatScrollBottomButtons();
+    } catch (eSbP) {}
   }
 
   function loadMessages() {
@@ -19513,6 +19703,11 @@ function initChat() {
             if (el && el.style) el.style.removeProperty("padding-bottom");
           });
         } catch (ePadClr) {}
+        try {
+          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
+            window.__pokerScheduleSyncChatScrollBottomButtons();
+          }
+        } catch (eSbClr) {}
       }
       /**
        * Нижний отступ ленты относительно визуальной позиции композера после поля translate
@@ -19571,6 +19766,11 @@ function initChat() {
           } catch (ePhPad) {}
         }
         box.style.paddingBottom = pad + "px";
+        try {
+          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
+            window.__pokerScheduleSyncChatScrollBottomButtons();
+          }
+        } catch (eSbKb) {}
       }
       function scrollDocumentToZero() {
         var se = document.scrollingElement;

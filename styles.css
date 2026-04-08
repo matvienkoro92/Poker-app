@@ -368,7 +368,7 @@ body {
 }
 /*
  * Внутренний скролл в .card__content (главная, скачать, депозит, рейтинг весны, розыгрыши, профиль, зал славы):
- * нижний запас под таббар уже задаётся scroll-padding-bottom у .card__content — padding-bottom .app
+ * нижний запас под таббар — padding-bottom у .card__content (см. scrollport выше); padding-bottom .app
  * дублировал бы пустую полосу с фоном #app над фиксированным .bottom-nav.
  */
 html:has(body[data-view="home"]) #app.app,
@@ -523,13 +523,13 @@ html.app-view-chat,
 body.app-view-chat,
 html:has(.view--active[data-view="chat"]),
 body:has(.view--active[data-view="chat"]) {
-  --chat-side-pad: 2px;
+  --chat-side-pad: 12px;
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--bg-blur-gradient) !important;
 }
 html:has(body[data-view="chat"]),
 body[data-view="chat"] {
-  --chat-side-pad: 2px;
+  --chat-side-pad: 12px;
 }
 [data-theme="light"] html.app-view-chat,
 [data-theme="light"] body.app-view-chat,
@@ -959,6 +959,7 @@ html.vl-modal-scroll-lock.app-view-video-lessons-html-scroll .card .card__conten
  * Скачать, главная, депозит, профиль, видеоуроки: внутренний scrollport у .card__content (локальный Chrome + TG).
  * html:has(body[data-view="…"]) — не зависит от класса на <html> (если JS отстаёт).
  * Дублирующий слой в самом конце styles.css перебивает поздние .card:has(...) с overflow:visible.
+ * У scrollport нижний отступ — padding-bottom на .card__content (scroll-padding-bottom якоря не удлиняет).
  */
 html:has(body[data-view="download"]),
 html.app-view-download-html-scroll,
@@ -1146,6 +1147,7 @@ html.app-view-raffles-html-scroll .card .card__content {
   overscroll-behavior-y: contain;
   touch-action: pan-y pinch-zoom;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad);
+  padding-bottom: var(--app-bottom-tabbar-pad);
 }
 
 /*
@@ -2701,8 +2703,8 @@ body[data-view="cashout"] {
   border: none;
 }
 .view--active[data-view="chat"] .chat-input-area {
-  padding-left: var(--chat-side-pad, 2px);
-  padding-right: var(--chat-side-pad, 2px);
+  padding-left: var(--chat-side-pad, 12px);
+  padding-right: var(--chat-side-pad, 12px);
   padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
 }
 /* Лента чата: таббар скрыт — 65px не нужен (иначе пустая полоса над футером TG / домашней зоной).
@@ -4643,6 +4645,8 @@ html.club-charter-modal-open {
   user-select: none;
   -webkit-touch-callout: none;
   max-width: 85%;
+  /* Колонка .chat-messages — flex; иначе min-width:auto и длинные URL расширяют пузырь за вьюпорт, текст режется overflow-x:hidden */
+  min-width: 0;
   font-size: 13px;
   line-height: 1.4;
   display: flex;
@@ -4681,9 +4685,13 @@ html.club-charter-modal-open {
 .chat-msg__body {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 8px 10px;
   border-radius: 18px;
   position: relative;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Галочки статуса (личные сообщения, только свои) */
@@ -4946,7 +4954,13 @@ html.club-charter-modal-open {
   color: var(--text-muted);
   margin-top: 2px;
 }
-.chat-msg__text { word-wrap: break-word; white-space: pre-wrap; }
+.chat-msg__text {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+}
 /* Время у правого края пузыря; по вертикали — с одной короткой строкой или по низу многострочного блока */
 .chat-msg__body-main {
   display: flex;
@@ -5035,6 +5049,8 @@ html.club-charter-modal-open {
 .chat-msg__id-link {
   color: var(--accent);
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .chat-msg__tg-link:hover,
 .chat-msg__link:hover,
@@ -5244,6 +5260,9 @@ html.club-charter-modal-open {
   border-radius: 4px;
   font-size: 11px;
   color: var(--text-muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .chat-msg__reply strong { color: var(--text); }
 /* Подложка при открытом контекстном меню: затемнение, сообщение и меню поверх (z-index выше chat-input-area) */
@@ -5910,6 +5929,69 @@ img.chat-contact__avatar {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+/* Колонка «вниз к низу» + отправка: ширина как у микрофона — emoji остаётся с right:54px */
+.chat-composer-actions {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Стекло как у chat-general-header__toolbar-back; над кнопкой отправки */
+.chat-scroll-bottom-btn {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 0;
+  letter-spacing: 0;
+  border-radius: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(248, 250, 252, 0.88);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.chat-scroll-bottom-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.chat-scroll-bottom-btn--hidden {
+  display: none !important;
+}
+[data-theme="light"] .chat-scroll-bottom-btn {
+  background: rgba(255, 255, 255, 0.48);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: rgba(30, 41, 59, 0.88);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+[data-theme="light"] .chat-scroll-bottom-btn:hover {
+  background: rgba(255, 255, 255, 0.56);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: #0f172a;
+}
 .chat-send-btn:hover { opacity: 0.9; }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .chat-send-btn.chat-voice-btn--recording {
@@ -6093,7 +6175,7 @@ img.chat-contact__avatar {
   min-height: 0;
   max-height: 100%;
   overflow: hidden;
-  padding: 0 var(--chat-side-pad, 2px);
+  padding: 0 var(--chat-side-pad, 12px);
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
@@ -6380,7 +6462,7 @@ img.chat-contact__avatar {
 .chat-find-by-id--in-dialogs-scroll {
   margin-top: 4px;
   margin-bottom: 10px;
-  padding: 0 var(--chat-side-pad, 2px);
+  padding: 0 var(--chat-side-pad, 12px);
   position: relative;
   z-index: 2;
 }
@@ -6490,7 +6572,7 @@ img.chat-contact__avatar {
   max-width: 100%;
   align-self: stretch;
   box-sizing: border-box;
-  padding: 4px var(--chat-side-pad, 2px) 0;
+  padding: 4px var(--chat-side-pad, 12px) 0;
   margin-bottom: 0;
   background: rgba(15, 23, 42, 0.45);
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
@@ -6740,8 +6822,8 @@ img.chat-contact__avatar {
   transform: translateZ(0);
   /* Лента под плавающей шапкой чата */
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
-  padding-left: var(--chat-side-pad, 2px);
-  padding-right: var(--chat-side-pad, 2px);
+  padding-left: var(--chat-side-pad, 12px);
+  padding-right: var(--chat-side-pad, 12px);
   box-sizing: border-box;
 }
 .chat-general-view .chat-input-area {
@@ -6862,7 +6944,7 @@ img.chat-contact__avatar {
 /* Имя/ID сразу справа от «Назад», плашка тянется как заголовок в общем чате */
 .chat-conv-view .chat-conv-top-inner {
   justify-content: flex-start;
-  padding: 4px var(--chat-side-pad, 2px);
+  padding: 4px var(--chat-side-pad, 12px);
 }
 .chat-conv-top .chat-back-btn {
   margin-bottom: 0;
@@ -7102,8 +7184,8 @@ img.chat-contact__avatar {
 /* Личные сообщения: лента под плавающей шапкой + доп. зазор */
 .chat-conv-view .chat-container .chat-messages {
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
-  padding-left: var(--chat-side-pad, 2px);
-  padding-right: var(--chat-side-pad, 2px);
+  padding-left: var(--chat-side-pad, 12px);
+  padding-right: var(--chat-side-pad, 12px);
   box-sizing: border-box;
 }
 .chat-conv-view .chat-messages > .chat-msg:first-child {
@@ -7571,7 +7653,7 @@ body[data-view="chat"]
   gap: 8px;
   margin-bottom: 0;
   flex-wrap: nowrap;
-  padding: calc(env(safe-area-inset-top, 0px) + 4px) var(--chat-side-pad, 2px) 4px;
+  padding: calc(env(safe-area-inset-top, 0px) + 4px) var(--chat-side-pad, 12px) 4px;
   background: rgba(15, 23, 42, 0.26);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -23302,6 +23384,7 @@ body[data-view="video-lessons"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
   touch-action: pan-y pinch-zoom !important;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
 }
 body[data-view="download"] #app.app .card .card__content,
 body[data-view="home"] #app.app .card .card__content,
@@ -23318,6 +23401,7 @@ body[data-view="profile"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
   touch-action: pan-y pinch-zoom !important;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
   margin-left: calc(-1 * var(--card-padding-x)) !important;
   margin-right: calc(-1 * var(--card-padding-x)) !important;
   width: calc(100% + 2 * var(--card-padding-x)) !important;
@@ -23331,12 +23415,17 @@ body[data-view="home"] #app.app .card .card__content {
   padding-top: calc(2mm + 8px) !important;
 }
 
-/* PWA главная: нижний запас под фиксированный таббар. Если JS/env на части iPhone занижают --app-bottom-tabbar-pad,
- * контент (турниры дня) не уезжает под меню; при нормальном измерении max() оставляет бóльший из двух значений. */
+/* PWA / iOS: нижний floor под таббар, если JS занижает --app-bottom-tabbar-pad (главная, скачать, профиль и др. с scrollport в .card__content). */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   html:has(body[data-view="home"]) .card .card__content,
   html.app-view-home-html-scroll .card .card__content,
-  body[data-view="home"] #app.app .card .card__content {
+  body[data-view="home"] #app.app .card .card__content,
+  html:has(body[data-view="download"]) .card .card__content,
+  html.app-view-download-html-scroll .card .card__content,
+  body[data-view="download"] #app.app .card .card__content,
+  html:has(body[data-view="profile"]) .card .card__content,
+  html.app-view-profile-html-scroll .card .card__content,
+  body[data-view="profile"] #app.app .card .card__content {
     padding-bottom: max(
       var(--app-bottom-tabbar-pad, 105px),
       calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
@@ -23346,7 +23435,13 @@ body[data-view="home"] #app.app .card .card__content {
 /* Тот же нижний floor, что у standalone PWA, после выравнивания .bottom-nav (без лишнего padding-bottom на iOS PWA). */
 html.poker-ios-pwa:has(body[data-view="home"]) .card .card__content,
 html.poker-ios-pwa.app-view-home-html-scroll .card .card__content,
-html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content {
+html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="download"]) .card .card__content,
+html.poker-ios-pwa.app-view-download-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
+html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {
   padding-bottom: max(
     var(--app-bottom-tabbar-pad, 105px),
     calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
