@@ -17433,6 +17433,9 @@ function initChat() {
       span.textContent = "(отредактировано)";
       footer.insertBefore(span, footer.lastElementChild);
     }
+    requestAnimationFrame(function () {
+      applyChatMsgTallTextTimeBelowLayout(root);
+    });
   }
 
   function startChatEdit(src, msgId, oldText, fromName) {
@@ -17693,6 +17696,32 @@ function initChat() {
       }
     }
   }
+  /** При длинном тексте время внизу пузыря (колонка), а не справа от последней строки. */
+  var CHAT_MSG_TALL_TEXT_LINE_THRESHOLD = 5;
+  function applyChatMsgTallTextTimeBelowLayout(root) {
+    if (!root || !root.querySelectorAll) return;
+    var mains = root.querySelectorAll(".chat-msg__body-main");
+    for (var i = 0; i < mains.length; i++) {
+      var main = mains[i];
+      if (main.classList.contains("chat-msg__body-main--with-image") || main.classList.contains("chat-msg__body-main--solo-footer")) {
+        main.classList.remove("chat-msg__body-main--time-below");
+        continue;
+      }
+      var textEl = main.querySelector(".chat-msg__text");
+      if (!textEl) {
+        main.classList.remove("chat-msg__body-main--time-below");
+        continue;
+      }
+      var lh = parseFloat(window.getComputedStyle(textEl).lineHeight);
+      if (!isFinite(lh) || lh <= 0) {
+        var fs = parseFloat(window.getComputedStyle(textEl).fontSize) || 14;
+        lh = fs * 1.35;
+      }
+      var lines = Math.max(1, Math.round(textEl.scrollHeight / lh));
+      if (lines >= CHAT_MSG_TALL_TEXT_LINE_THRESHOLD) main.classList.add("chat-msg__body-main--time-below");
+      else main.classList.remove("chat-msg__body-main--time-below");
+    }
+  }
   function chatMessageCalendarDayKey(ts) {
     if (ts == null || ts === "") return "";
     var d = new Date(ts);
@@ -17852,6 +17881,7 @@ function initChat() {
       var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenG(function () {
         rafOpenG(function () {
+          applyChatMsgTallTextTimeBelowLayout(generalMessages);
           generalMessages.scrollTop = generalMessages.scrollHeight;
           scrollGeneralToBottomOnNextRender = false;
           finishChatMessagesOpenSettle(generalMessages, generalMsgWrap);
@@ -17860,6 +17890,7 @@ function initChat() {
     } else {
       restoreScroll(false);
       requestAnimationFrame(function () {
+        applyChatMsgTallTextTimeBelowLayout(generalMessages);
         restoreScroll(true);
         if (wasNearBottom) {
           pinChatMessagesToBottom(generalMessages, false);
@@ -18454,6 +18485,9 @@ function initChat() {
       newNode.appendChild(row);
     }
     generalMessages.appendChild(newNode);
+    requestAnimationFrame(function () {
+      applyChatMsgTallTextTimeBelowLayout(generalMessages);
+    });
     try {
       generalMessages.scrollTop = generalMessages.scrollHeight;
     } catch (eScroll) {}
@@ -19242,6 +19276,7 @@ function initChat() {
       var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenP(function () {
         rafOpenP(function () {
+          applyChatMsgTallTextTimeBelowLayout(messagesEl);
           messagesEl.scrollTop = messagesEl.scrollHeight;
           scrollPersonalToBottomOnNextRender = false;
           finishChatMessagesOpenSettle(messagesEl, personalMsgWrap);
@@ -19251,6 +19286,7 @@ function initChat() {
       restoreScrollP(false);
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
+          applyChatMsgTallTextTimeBelowLayout(messagesEl);
           restoreScrollP(true);
           if (wasNearBottomP) {
             pinChatMessagesToBottom(messagesEl, false);
@@ -19511,6 +19547,9 @@ function initChat() {
         first.appendChild(rowP);
       }
       messagesEl.appendChild(first);
+      requestAnimationFrame(function () {
+        applyChatMsgTallTextTimeBelowLayout(messagesEl);
+      });
       messagesEl.scrollTop = messagesEl.scrollHeight;
       return true;
     } catch (e) {

@@ -4989,6 +4989,19 @@ html.club-charter-modal-open {
   gap: 6px;
   min-width: 0;
 }
+/* От пяти визуальных строк текста — время под текстом, не справа от последней строки (класс из app.js). */
+.chat-msg__body-main--time-below {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.chat-msg__body-main--time-below .chat-msg__text {
+  flex: 0 1 auto;
+}
+.chat-msg__body-main--time-below .chat-msg__footer {
+  align-self: flex-end;
+  margin-top: 0;
+}
 .chat-msg__body-main--solo-footer {
   justify-content: flex-end;
 }
