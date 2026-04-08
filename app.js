@@ -7370,7 +7370,7 @@ function renderSpringRatingViewTotalsWeeks() {
   function escNick(s) {
     return typeof escapeHtmlRating === "function" ? escapeHtmlRating(s) : String(s == null ? "" : s).replace(/</g, "&lt;");
   }
-  function weekDetailsHtml(block, openWeeks) {
+  function weekDetailsHtml(block, openWeeks, monthTotals) {
     var dates = block.dates;
     if (!Array.isArray(dates)) dates = [];
     var sumData = getSpringRatingWeekTopSumForDates(dates);
@@ -7388,8 +7388,10 @@ function renderSpringRatingViewTotalsWeeks() {
         }).join("")
       : "<li class=\"winter-rating__single-top-item\">—</li>";
     var openAttr = openWeeks ? " open" : "";
+    var sumTitle = monthTotals ? "Топ суммарный выигрыш за март" : "Топ суммарный выигрыш за неделю";
+    var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month" : "");
     return (
-      "<details class=\"spring-rating-view-week\"" + openAttr + ">" +
+      "<details class=\"" + detailClass + "\"" + openAttr + ">" +
       "<summary class=\"spring-rating-view-week__summary\">" +
       "<span class=\"spring-rating-view-week__label\">" + block.label + "</span>" +
       "<span class=\"spring-rating-view-week__meta\">Общий выигрыш: " + totalText + "</span>" +
@@ -7397,7 +7399,7 @@ function renderSpringRatingViewTotalsWeeks() {
       "<div class=\"spring-rating-view-week__inner\">" +
       "<div class=\"winter-rating__past-week-row\">" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
-      "<h4 class=\"winter-rating__past-week-title\">Топ суммарный выигрыш за неделю</h4>" +
+      "<h4 class=\"winter-rating__past-week-title\">" + sumTitle + "</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + sumList + "</ul>" +
       "</div>" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
@@ -7412,12 +7414,30 @@ function renderSpringRatingViewTotalsWeeks() {
   }
   var aprBlocks = typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [];
   var marBlocks = typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [];
+  var marchAllSeen = {};
+  var marchAllDates = [];
+  marBlocks.forEach(function (blk) {
+    if (!Array.isArray(blk.dates)) return;
+    blk.dates.forEach(function (d) {
+      if (d && !marchAllSeen[d]) {
+        marchAllSeen[d] = 1;
+        marchAllDates.push(d);
+      }
+    });
+  });
   aprilHost.innerHTML = aprBlocks.map(function (b) {
-    return weekDetailsHtml(b, true);
+    return weekDetailsHtml(b, true, false);
   }).join("");
-  marchHost.innerHTML = marBlocks.map(function (b) {
-    return weekDetailsHtml(b, false);
-  }).join("");
+  var marchMonthHtml = marchAllDates.length
+    ? weekDetailsHtml({ label: "Итого за март", dates: marchAllDates }, true, true)
+    : "";
+  marchHost.innerHTML =
+    marchMonthHtml +
+    marBlocks
+      .map(function (b) {
+        return weekDetailsHtml(b, false, false);
+      })
+      .join("");
 }
 /** Нижняя обводка welcome-блока: линия проходит по вертикали через середину шапки промо «Рейтинг турнирщиков», не под блок статистики */
 function pokerUpdateHomeWelcomeOutlineFrame() {
