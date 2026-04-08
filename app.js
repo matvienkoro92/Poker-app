@@ -1342,27 +1342,99 @@ function getAssetUrl(relativePath) {
     window.closePdfViewer = closePdfViewer;
   }
 
-  function pokerDownloadChatPdfDataUrl(href, fileName) {
+  function pokerSaveBlobAsFileDownload(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = (fileName && String(fileName).trim()) || "document.pdf";
+    a.style.cssText = "position:fixed;left:-9999px;top:0;";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      try {
+        document.body.removeChild(a);
+      } catch (eRmA) {}
+      try {
+        URL.revokeObjectURL(url);
+      } catch (eRv) {}
+    }, 4000);
+  }
+  /** Скачивание PDF из чата: нативный download в том же жесте пользователя, без раннего revokeObjectURL. */
+  function pokerTriggerChatPdfDownload(href, fileName) {
+    var name = (fileName && String(fileName).trim()) || "document.pdf";
+    var failAlert = function () {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert)
+        window.Telegram.WebApp.showAlert("Не удалось скачать. Попробуйте ещё раз.");
+    };
+    if (!href) {
+      failAlert();
+      return false;
+    }
+    href = String(href);
     try {
-      var m = href.match(/^data:([^;]+);base64,(.+)$/);
-      if (m && m[2]) {
+      if (href.indexOf("blob:") === 0) {
+        var ab = document.createElement("a");
+        ab.href = href;
+        ab.download = name;
+        ab.style.cssText = "position:fixed;left:-9999px;top:0;";
+        document.body.appendChild(ab);
+        ab.click();
+        setTimeout(function () {
+          try {
+            document.body.removeChild(ab);
+          } catch (eAb) {}
+        }, 2000);
+        return true;
+      }
+      if (/^https?:\/\//i.test(href)) {
+        fetch(href, { mode: "cors", credentials: "omit", cache: "force-cache" })
+          .then(function (r) {
+            if (!r.ok) throw new Error("bad");
+            return r.blob();
+          })
+          .then(function (b) {
+            pokerSaveBlobAsFileDownload(b, name);
+          })
+          .catch(function () {
+            var ox = window.open(href, "_blank", "noopener,noreferrer");
+            if (!ox) failAlert();
+          });
+        return true;
+      }
+      if (href.indexOf("data:") === 0) {
+        /* Короткие data: — сразу через нативный <a download> (без atob/Blob). */
+        var FAST_DATA_LEN = 1800000;
+        if (href.length <= FAST_DATA_LEN) {
+          var ad = document.createElement("a");
+          ad.href = href;
+          ad.download = name;
+          ad.style.cssText = "position:fixed;left:-9999px;top:0;";
+          document.body.appendChild(ad);
+          ad.click();
+          setTimeout(function () {
+            try {
+              document.body.removeChild(ad);
+            } catch (eAd) {}
+          }, 800);
+          return true;
+        }
+        var m = href.match(/^data:([^;]+);base64,(.+)$/);
+        if (!m || !m[2]) {
+          failAlert();
+          return false;
+        }
         var binary = atob(m[2]);
         var arr = new Uint8Array(binary.length);
         for (var i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
         var blob = new Blob([arr], { type: (m[1] || "application/pdf").split(";")[0] });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = fileName || "document.pdf";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        pokerSaveBlobAsFileDownload(blob, name);
         return true;
       }
     } catch (err) {
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) window.Telegram.WebApp.showAlert("Не удалось скачать. Попробуйте ещё раз.");
+      failAlert();
+      return false;
     }
+    failAlert();
     return false;
   }
   document.body.addEventListener("click", function (e) {
@@ -1372,9 +1444,9 @@ function getAssetUrl(relativePath) {
       e.stopPropagation();
       var wrapDl = dlBtn.closest(".chat-msg__document-wrap");
       var viewDl = wrapDl && wrapDl.querySelector("a.chat-msg__document-link--view");
-      var hrefDl = viewDl && viewDl.getAttribute("href");
+      var hrefDl = viewDl && (viewDl.href || viewDl.getAttribute("href"));
       var fnDl = (wrapDl && wrapDl.getAttribute("data-document-name")) || "document.pdf";
-      if (hrefDl && hrefDl.indexOf("data:") === 0) pokerDownloadChatPdfDataUrl(hrefDl, fnDl);
+      pokerTriggerChatPdfDownload(hrefDl, fnDl);
       return;
     }
     var shBtn = e.target && e.target.closest ? e.target.closest("button[data-chat-pdf-share]") : null;
@@ -21913,7 +21985,7 @@ function initChat() {
     var assetBase = assetPath.replace(/\/?$/, "/") + "assets/";
     dialogsView.querySelectorAll(".chat-dialog-item img.chat-dialog-item__avatar[src]").forEach(function (img) {
       var s = img.getAttribute("src") || "";
-      if (s.indexOf("dep-manager") !== -1) img.src = assetBase + (s.indexOf("vika") !== -1 ? "dep-manager-vika.png" : "dep-manager.png");
+      if (s.indexOf("dep-manager") !== -1) img.src = assetBase + (s.indexOf("vika") !== -1 ? "dep-manager-vika.jpg" : "dep-manager.jpg");
       else if (s.indexOf("logo-two-aces") !== -1) img.src = assetBase + "logo-two-aces.png";
     });
   }
@@ -22053,9 +22125,8 @@ function initChat() {
       }
     }
     var dialogsSelector = ".chat-dialog-item--club, .chat-dialog-item--find-user, .chat-dialog-item[data-chat-user-id], .chat-contact";
-    /** Долгое нажатие на строку личного диалога: превью переписки (только не-админ). */
+    /** Долгое нажатие на строку личного диалога: превью переписки (игроки и админы; не клуб / не поиск). */
     function dialogRowEligibleForPlayerPreview(btn) {
-      if (chatIsAdmin) return false;
       if (!btn || !btn.classList) return false;
       if (btn.classList.contains("chat-dialog-item--find-user")) return false;
       if (btn.classList.contains("chat-dialog-item--club")) return false;

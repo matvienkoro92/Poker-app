@@ -5658,14 +5658,15 @@ html.club-charter-modal-open {
 }
 .chat-msg__document-actions {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
   width: 100%;
   box-sizing: border-box;
 }
 .chat-msg__document-btn {
-  flex: 1 1 calc(50% - 4px);
+  flex: 0 0 auto;
+  width: 100%;
   min-width: 0;
   margin: 0;
   padding: 8px 10px;
@@ -15881,7 +15882,7 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   color: #14532d;
 }
 
-/* Превью личного диалога из списка (долгое нажатие, не-админ) */
+/* Превью личного диалога из списка (долгое нажатие) */
 .chat-dialog-preview-modal {
   position: fixed;
   inset: 0;
@@ -15893,11 +15894,14 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   opacity: 0;
   visibility: hidden;
+  /* Иначе полноэкранный слой выше профиля/«Друзья» перехватывает клики, пока модалка закрыта. */
+  pointer-events: none;
   transition: opacity 0.2s, visibility 0.2s;
 }
 .chat-dialog-preview-modal.chat-dialog-preview-modal--open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 .chat-dialog-preview-modal__backdrop {
   position: absolute;

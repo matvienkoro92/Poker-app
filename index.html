@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.225">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.230">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -222,7 +222,8 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./styles.css?v=325" />
+    <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
+    <link rel="stylesheet" href="./styles.css?v=327" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -511,9 +512,13 @@
               <div class="hero">
                 <a href="#" class="hero__link" data-view-target="hall-of-fame" title="Зал славы" aria-label="Зал славы Два туза">
                   <img
-                    src="./assets/hall-of-fame-hero.png"
+                    src="./assets/hall-of-fame-hero.jpg"
                     alt="Зал славы Два туза"
                     class="hero__video hero__image"
+                    width="448"
+                    height="448"
+                    decoding="async"
+                    fetchpriority="high"
                   />
                 </a>
               </div>
@@ -1615,7 +1620,7 @@
                   <span class="chat-dialog-item__unread" id="chatDialogClubUnread" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="chat-dialog-item" data-chat-user-id="tg_2144406710" data-chat-user-name="Анна" data-chat-hours="06:00–18:00 мск" data-shift-start="6" data-shift-end="18" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager.png" alt="" />
+                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager.jpg" alt="" width="40" height="40" decoding="async" />
                   <span class="chat-dialog-item__label-wrap">
                     <span class="chat-dialog-item__label-block">
                       <span class="chat-dialog-item__label">Анна</span>
@@ -1629,7 +1634,7 @@
                   <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_2144406710" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="chat-dialog-item" data-chat-user-id="tg_1897001087" data-chat-user-name="Вика" data-chat-hours="18:00–02:00 мск" data-shift-start="18" data-shift-end="2" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager-vika.png" alt="" />
+                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager-vika.jpg" alt="" width="40" height="40" decoding="async" />
                   <span class="chat-dialog-item__label-wrap">
                     <span class="chat-dialog-item__label-block">
                       <span class="chat-dialog-item__label">Вика</span>
@@ -3734,9 +3739,12 @@
               <p class="subtitle">⏰ 06:00–18:00 мск — Анна</p>
               <div class="cashout-media">
                 <img
-                  src="./assets/dep-manager.png"
+                  src="./assets/dep-manager.jpg"
                   alt="Менеджер Анна"
                   class="cashout-image"
+                  width="720"
+                  height="720"
+                  decoding="async"
                 />
               </div>
               <div class="cashout-manager-actions">
@@ -3749,9 +3757,12 @@
               <p class="subtitle cashout-manager-subtitle">⏰ 18:00–02:00 мск — Вика</p>
               <div class="cashout-media">
                 <img
-                  src="./assets/dep-manager-vika.png"
+                  src="./assets/dep-manager-vika.jpg"
                   alt="Менеджер Вика"
                   class="cashout-image"
+                  width="720"
+                  height="720"
+                  decoding="async"
                 />
               </div>
               <div class="cashout-manager-actions">
@@ -4514,7 +4525,7 @@
                           Злой Ривер и пятнадцать героев: кто в 2026-м не дал последней карте испортить праздник
                         </h4>
                         <div class="gazette-front__thumb-small">
-                          <img src="./assets/hall-of-fame-hero.png" alt="Зал славы: топ выигрышей за один турнир" loading="lazy" />
+                          <img src="./assets/hall-of-fame-hero.jpg" alt="Зал славы: топ выигрышей за один турнир" width="448" height="448" loading="lazy" decoding="async" />
                         </div>
                         <p class="gazette-front__lead-small">
                           Сармат, Waaar, Фокс, Эмиль, Дикий, Кулер и АндоюшиМорф — хроника заносов в волшебном тоне.
@@ -5537,7 +5548,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=374"></script>
+    <script defer src="./app.js?v=377"></script>
     <script defer src="./winter-rating-data.js?v=116"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
