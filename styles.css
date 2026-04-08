@@ -8340,14 +8340,21 @@ body[data-view="chat"]
   justify-content: center;
 }
 .chat-contact-swipe__pin-icon {
-  display: block;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   position: relative;
-  top: 1px;
+  top: 0;
 }
-.chat-contact-swipe__pin--unpin .chat-contact-swipe__pin-icon {
-  opacity: 0.92;
-  transform: scaleX(-1);
+.chat-contact-swipe__pin-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.chat-contact-swipe__pin--unpin .chat-contact-swipe__pin-icon svg {
+  opacity: 0.98;
 }
 .chat-contact-swipe__pin:active {
   background: rgba(0, 0, 0, 0.12);
@@ -23106,7 +23113,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .friends-list-modal__inner {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 380px;
   max-height: 70vh;
   overflow: hidden;
   display: flex;
@@ -23158,7 +23165,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 }
 .friends-list-modal__item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
   padding: 10px 12px;
@@ -23166,8 +23173,9 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   color: var(--text);
   text-decoration: none;
   border-radius: 8px;
-  margin-bottom: 4px;
-  cursor: pointer;
+  margin-bottom: 6px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
 }
 .friends-list-modal__item:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -23195,14 +23203,47 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   color: var(--text-muted);
   line-height: 1.2;
 }
-.friends-list-modal__item-action {
-  font-size: 12px;
-  color: var(--accent);
-  margin-left: auto;
+.friends-list-modal__item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   flex-shrink: 0;
+  min-width: 0;
 }
-.friends-list-modal__item:hover .friends-list-modal__item-action {
-  text-decoration: underline;
+.friends-list-modal__btn {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.friends-list-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.friends-list-modal__btn--profile {
+  color: #0f172a;
+  background: linear-gradient(180deg, #fdba74 0%, #f97316 100%);
+  border-color: rgba(251, 146, 60, 0.5);
+}
+.friends-list-modal__btn--profile:hover {
+  filter: brightness(1.05);
+}
+.friends-list-modal__btn--remove {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: var(--border-subtle);
+}
+.friends-list-modal__btn--remove:hover {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
 }
 
 .profile-personal {

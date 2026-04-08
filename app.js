@@ -9940,25 +9940,74 @@ function initProfileFriends() {
               esc(tgLine) +
               "</span></span>";
           return (
-            '<a href="#" class="friends-list-modal__item" data-user-id="' +
+            '<div class="friends-list-modal__item" data-user-id="' +
             id +
             '" data-user-name="' +
             dataName +
             '">' +
             htmlLabels +
-            ' <span class="friends-list-modal__item-action">Написать</span></a>'
+            '<div class="friends-list-modal__item-actions">' +
+            '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile">Открыть профиль</button>' +
+            '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove">Удалить из друзей</button>' +
+            "</div></div>"
           );
         }).join("");
         listEl.querySelectorAll(".friends-list-modal__item").forEach(function (item) {
-          item.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = item.dataset.userId;
-            var name = item.dataset.userName;
-            if (id && typeof window.openChatUserModalById === "function") {
-              closeFriendsModal();
-              window.openChatUserModalById(id, name);
-            }
-          });
+          var profileBtn = item.querySelector(".friends-list-modal__btn--profile");
+          var removeBtn = item.querySelector(".friends-list-modal__btn--remove");
+          if (profileBtn) {
+            profileBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var id = item.dataset.userId;
+              var name = item.dataset.userName;
+              if (id && typeof window.openChatUserModalById === "function") {
+                closeFriendsModal();
+                window.openChatUserModalById(id, name);
+              }
+            });
+          }
+          if (removeBtn) {
+            removeBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var idRaw = item.getAttribute("data-user-id");
+              if (!idRaw || !base) return;
+              var confirmed =
+                typeof window.confirm === "function"
+                  ? window.confirm("Убрать этого человека из друзей?")
+                  : true;
+              if (!confirmed) return;
+              removeBtn.disabled = true;
+              fetch(base + "/api/friends", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: idRaw })),
+              })
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function (d) {
+                  if (d && d.ok) {
+                    item.remove();
+                    if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+                    if (typeof window.chatRefresh === "function") window.chatRefresh();
+                    if (!listEl.querySelector(".friends-list-modal__item")) {
+                      listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Пока нет друзей</p>";
+                    }
+                  } else {
+                    removeBtn.disabled = false;
+                    if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+                    else if (typeof alert === "function") alert((d && d.error) || "Ошибка");
+                  }
+                })
+                .catch(function () {
+                  removeBtn.disabled = false;
+                  if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+                  else if (typeof alert === "function") alert(POKER_NET_ERR);
+                });
+            });
+          }
         });
       })
       .catch(function () {
@@ -19682,6 +19731,15 @@ function initChat() {
             updateChatNavDot();
             return;
           }
+          var chatSwipePinIconSvg =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
+            "</svg>";
+          var chatSwipeUnpinIconSvg =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
+            '<line x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke-width="2.35"/>' +
+            "</svg>";
           var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
           var pinOrderRender = pokerLoadChatDialogListPins();
           var contactButtons = contactsForList.map(function (c) {
@@ -19796,7 +19854,9 @@ function initChat() {
               escapeHtml(swipePinAria) +
               '" title="' +
               escapeHtml(swipePinAria) +
-              '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">\uD83D\uDCCE</span></button>' +
+              '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">' +
+              (isPinned ? chatSwipeUnpinIconSvg : chatSwipePinIconSvg) +
+              "</span></button>" +
               swipeFriendBtn +
               "</div>" +
               '<div class="chat-contact-swipe__panel">' +
