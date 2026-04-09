@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.346">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.351">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -222,8 +222,12 @@
     <meta name="twitter:description" content="Горячие новости покерного клуба «Два туза». Откройте в Telegram." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
+    <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/download-hero.png" />
+    <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
+    <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=380" />
+    <link rel="stylesheet" href="./styles.css?v=383" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -305,9 +309,11 @@
           src="./assets/logo-two-aces.png"
           alt="Two Aces"
           class="app-boot-overlay__logo"
-          width="48"
-          height="48"
-          decoding="async"
+          width="52"
+          height="52"
+          decoding="sync"
+          fetchpriority="high"
+          loading="eager"
         />
         <div id="appBootOverlayMain">
           <p class="app-boot-overlay__conn-title">Соединение</p>
@@ -396,13 +402,13 @@
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
       <!-- Версия: атрибут data-app-version на <html> — оверлей загрузки, экран входа PWA и футер главной. +0.001 на push / npm run bump:pwa-version -->
       <div class="pwa-auth-screen__identifying" id="pwaAuthIdentifyingPanel" aria-live="polite" aria-busy="true" hidden>
-        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
+        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <span class="pwa-auth-screen__identifying-spinner" aria-hidden="true"></span>
         <p class="pwa-auth-screen__identifying-text">Подождите, идентифицируем ваш аккаунт</p>
       </div>
       <div class="pwa-auth-screen__inner">
-        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" />
+        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
       </div>
@@ -441,6 +447,11 @@
               src="./assets/logo-two-aces.png"
               alt="Клуб Два туза"
               class="logo__image"
+              width="42"
+              height="42"
+              decoding="sync"
+              fetchpriority="high"
+              loading="eager"
             />
             <div class="logo__text">
               <div class="logo__title" aria-label="Клуб «Два туза»">
@@ -1572,7 +1583,7 @@
                 </div>
                 <div class="chat-dialogs-block">
                 <button type="button" class="chat-dialog-item chat-dialog-item--club" data-chat-type="club" id="chatDialogClub" tabindex="-1">
-                  <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" />
+                  <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" width="52" height="52" decoding="sync" fetchpriority="high" loading="eager" />
                   <span class="chat-dialog-item__club-wrap">
                     <span class="chat-dialog-item__title-row">
                       <span class="chat-dialog-item__label">Главный чат</span>
@@ -1584,7 +1595,7 @@
                   <span class="chat-dialog-item__unread" id="chatDialogClubUnread" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="chat-dialog-item" data-chat-user-id="tg_2144406710" data-chat-user-name="Анна" data-chat-hours="06:00–18:00 мск" data-shift-start="6" data-shift-end="18" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager.jpg" alt="" width="40" height="40" decoding="async" />
+                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager.jpg" alt="" width="40" height="40" decoding="async" fetchpriority="high" loading="eager" />
                   <span class="chat-dialog-item__label-wrap">
                     <span class="chat-dialog-item__label-block">
                       <span class="chat-dialog-item__label">Анна</span>
@@ -1598,7 +1609,7 @@
                   <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_2144406710" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="chat-dialog-item" data-chat-user-id="tg_1897001087" data-chat-user-name="Вика" data-chat-hours="18:00–02:00 мск" data-shift-start="18" data-shift-end="2" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager-vika.jpg" alt="" width="40" height="40" decoding="async" />
+                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager-vika.jpg" alt="" width="40" height="40" decoding="async" fetchpriority="high" loading="eager" />
                   <span class="chat-dialog-item__label-wrap">
                     <span class="chat-dialog-item__label-block">
                       <span class="chat-dialog-item__label">Вика</span>
@@ -1938,6 +1949,7 @@
               <div class="chat-group-info-modal__backdrop" id="chatGroupInfoModalBackdrop" tabindex="-1"></div>
               <div class="chat-group-info-modal__box">
                 <button type="button" class="chat-group-info-modal__close" id="chatGroupInfoModalClose" aria-label="Закрыть">×</button>
+                <div class="chat-group-info-modal__scroll">
                 <div class="chat-group-info-modal__head">
                   <input type="file" id="chatGroupInfoAvatarFile" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
                   <button type="button" class="chat-group-info-modal__avatar-btn" id="chatGroupInfoAvatarBtn" disabled aria-label="Аватар группы">
@@ -1951,10 +1963,15 @@
                     <input type="text" class="chat-input" id="chatGroupInfoTitleInput" maxlength="100" autocomplete="off" />
                   </label>
                   <p class="chat-group-info-modal__meta" id="chatGroupInfoMeta"></p>
-                  <label class="chat-group-info-modal__label">Описание <span class="chat-group-info-modal__desc-note" id="chatGroupInfoDescNote">его видят все участники</span>
-                    <textarea class="chat-input chat-group-info-modal__desc" id="chatGroupInfoDescription" maxlength="2000" rows="3" autocomplete="off" placeholder="Кратко о группе"></textarea>
-                  </label>
-                  <p class="chat-group-info-modal__read-only-hint" id="chatGroupInfoReadOnlyHint" hidden>Изменять название и описание может только создатель.</p>
+                  <div class="chat-group-info-modal__desc-editor" id="chatGroupInfoDescEditWrap" hidden>
+                    <label class="chat-group-info-modal__label">Описание <span class="chat-group-info-modal__desc-note" id="chatGroupInfoDescNote">его видят все участники</span>
+                      <textarea class="chat-input chat-group-info-modal__desc" id="chatGroupInfoDescription" maxlength="2000" rows="3" autocomplete="off" placeholder="Кратко о группе"></textarea>
+                    </label>
+                  </div>
+                  <div class="chat-group-info-modal__desc-view-block" id="chatGroupInfoDescViewWrap" hidden>
+                    <p class="chat-group-info-modal__desc-view-caption">Описание</p>
+                    <p class="chat-group-info-modal__desc-view-text" id="chatGroupInfoDescView"></p>
+                  </div>
                   <button type="button" class="profile-exit-btn chat-group-info-modal__save-profile" id="chatGroupInfoSaveProfileBtn" hidden>Сохранить изменения</button>
                 </div>
                 <div class="chat-group-info-modal__section-head">
@@ -1974,6 +1991,7 @@
                       <button type="button" class="chat-group-info-modal__delete-cancel" id="chatGroupInfoDeleteCancelBtn">Отмена</button>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -2055,6 +2073,11 @@
                       src="./assets/download-hero.png"
                       alt="Морфеус за покерным столом предлагает на выбор четыре покер-рума"
                       class="download-image"
+                      width="2048"
+                      height="2048"
+                      decoding="async"
+                      fetchpriority="high"
+                      loading="eager"
                     />
                   </div>
 
@@ -3976,6 +3999,8 @@
                   width="720"
                   height="720"
                   decoding="async"
+                  fetchpriority="high"
+                  loading="eager"
                 />
               </div>
               <div class="cashout-manager-actions">
@@ -3994,6 +4019,8 @@
                   width="720"
                   height="720"
                   decoding="async"
+                  fetchpriority="high"
+                  loading="eager"
                 />
               </div>
               <div class="cashout-manager-actions">
@@ -5857,7 +5884,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=477"></script>
+    <script defer src="./app.js?v=480"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
