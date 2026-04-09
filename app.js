@@ -25002,7 +25002,11 @@ function initChat() {
     var titleEl = document.getElementById("chatGroupInfoModalTitle");
     var metaEl = document.getElementById("chatGroupInfoMeta");
     var avImg = document.getElementById("chatGroupInfoAvatar");
+    var avatarBtn = document.getElementById("chatGroupInfoAvatarBtn");
+    var avatarFile = document.getElementById("chatGroupInfoAvatarFile");
+    var avatarEditHint = document.getElementById("chatGroupInfoAvatarEditHint");
     var membersEl = document.getElementById("chatGroupInfoMembers");
+    var openGroupId = "";
     function closeModal() {
       modal.classList.add("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
@@ -25097,25 +25101,47 @@ function initChat() {
           );
         })
         .join("");
+      var creator = !!(g.iAmCreator);
+      if (avatarBtn) {
+        avatarBtn.disabled = !creator;
+        avatarBtn.setAttribute("aria-label", creator ? "Сменить аватар группы" : "Аватар группы");
+      }
+      if (avatarEditHint) avatarEditHint.hidden = !creator;
     }
     window.__pokerOpenChatGroupInfo = function (groupId) {
       var gid = groupId != null ? String(groupId).trim() : "";
       if (!gid || gid.indexOf("group_") !== 0) return;
+      openGroupId = gid;
       if (titleEl) titleEl.textContent = "Группа";
       if (metaEl) metaEl.textContent = "";
       setGroupAvatar("", "");
+      if (avatarBtn) {
+        avatarBtn.disabled = true;
+        avatarBtn.setAttribute("aria-label", "Аватар группы");
+      }
+      if (avatarEditHint) avatarEditHint.hidden = true;
       if (membersEl) membersEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
       modal.classList.remove("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
       var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-      var url = base + "/api/chat" + q + "&with=" + encodeURIComponent(gid) + "&metaOnly=1";
-      fetch(url)
+      var urlMeta = base + "/api/chat" + q + "&with=" + encodeURIComponent(gid) + "&metaonly=1";
+      fetch(urlMeta)
         .then(function (r) {
           return r.json();
         })
         .then(function (data) {
-          if (data && data.ok && data.group) renderGroup(data.group);
-          else if (membersEl) {
+          if (data && data.ok && data.group) {
+            renderGroup(data.group);
+            return;
+          }
+          if (data && data.ok && data.isGroupChat && !data.group) {
+            if (membersEl) {
+              membersEl.innerHTML =
+                '<p class="chat-empty">Сервер не вернул состав группы. Обновите страницу или откройте чат позже.</p>';
+            }
+            return;
+          }
+          if (membersEl) {
             membersEl.innerHTML =
               '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
           }
@@ -25124,6 +25150,58 @@ function initChat() {
           if (membersEl) membersEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
         });
     };
+    if (avatarBtn && avatarFile) {
+      avatarBtn.addEventListener("click", function (e) {
+        if (avatarBtn.disabled) return;
+        e.preventDefault();
+        avatarFile.click();
+      });
+    }
+    if (avatarFile) {
+      avatarFile.addEventListener("change", function () {
+        var f = avatarFile.files && avatarFile.files[0];
+        var gidUp = openGroupId;
+        if (!f || !gidUp) return;
+        if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+        if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+          if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert("Войдите, чтобы сменить аватар");
+          else if (typeof alert === "function") alert("Войдите, чтобы сменить аватар");
+          return;
+        }
+        resizeImage(f, 256, 256, 0.88)
+          .then(function (dataUrl) {
+            avatarFile.value = "";
+            return fetch(base + "/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(
+                pokerApiAuthJsonBody({ action: "updateGroupAvatar", groupId: gidUp, avatar: dataUrl })
+              ),
+            }).then(function (r) {
+              return r.json();
+            });
+          })
+          .then(function (data) {
+            if (data && data.ok && data.groupAvatar) {
+              var tt = titleEl ? titleEl.textContent : "";
+              setGroupAvatar(data.groupAvatar, tt);
+              if (typeof chatWithUserId !== "undefined" && chatWithUserId && typeof peerChatIdsEqual === "function") {
+                if (peerChatIdsEqual(chatWithUserId, gidUp)) {
+                  chatWithPeerAvatarUrl = data.groupAvatar;
+                  applyConvPeerAvatarHeader(data.groupAvatar, chatWithUserName || tt);
+                }
+              }
+              if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            } else if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+            else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+          })
+          .catch(function () {
+            avatarFile.value = "";
+            if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+            else if (typeof alert === "function") alert(POKER_NET_ERR);
+          });
+      });
+    }
     if (backdrop) backdrop.addEventListener("click", closeModal);
     if (btnClose) btnClose.addEventListener("click", closeModal);
     if (membersEl) {

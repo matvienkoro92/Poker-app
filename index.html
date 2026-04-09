@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.336">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.338">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=374" />
+    <link rel="stylesheet" href="./styles.css?v=376" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1877,10 +1877,12 @@
               <div class="chat-group-info-modal__box">
                 <button type="button" class="chat-group-info-modal__close" id="chatGroupInfoModalClose" aria-label="Закрыть">×</button>
                 <div class="chat-group-info-modal__head">
-                  <div class="chat-group-info-modal__avatar-wrap" aria-hidden="true">
+                  <input type="file" id="chatGroupInfoAvatarFile" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
+                  <button type="button" class="chat-group-info-modal__avatar-btn" id="chatGroupInfoAvatarBtn" disabled aria-label="Аватар группы">
                     <img class="chat-group-info-modal__avatar chat-group-info-modal__avatar--hidden" id="chatGroupInfoAvatar" alt="" width="64" height="64" decoding="async" />
                     <span class="chat-group-info-modal__avatar-ph" id="chatGroupInfoAvatarPh">👥</span>
-                  </div>
+                  </button>
+                  <p class="chat-group-info-modal__avatar-edit-hint" id="chatGroupInfoAvatarEditHint" hidden>Создатель: нажмите на фото, чтобы загрузить новый аватар</p>
                   <h2 id="chatGroupInfoModalTitle" class="chat-group-info-modal__title">Группа</h2>
                   <p class="chat-group-info-modal__meta" id="chatGroupInfoMeta"></p>
                 </div>
@@ -5768,7 +5770,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=467"></script>
+    <script defer src="./app.js?v=469"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
