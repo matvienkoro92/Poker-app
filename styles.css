@@ -3320,51 +3320,67 @@ html.club-charter-modal-open {
   background: linear-gradient(90deg, transparent, #2a2118, transparent);
   opacity: 0.75;
 }
-/* Ряд «Поделиться / Скопировать» — сразу под линией заголовка, выше вкладок Розыгрыш / Коммуникация */
+/* Ряд «Поделиться / Скопировать» — сразу под линией заголовка, выше меню разделов */
 .club-charter-modal .club-charter-modal__share-row {
   margin: 4px 0 12px;
   padding-top: 8px;
 }
-.club-charter-modal__tabs {
+/* Розыгрыш / Коммуникация — список-меню, не отдельные «кнопки-плитки» */
+.club-charter-modal__menu {
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 0 0 14px;
-  padding: 0 4px;
+  flex-direction: column;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 1px solid rgba(44, 37, 24, 0.28);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
-.club-charter-modal__tab {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 180px;
-  padding: 10px 14px;
+.club-charter-modal__menu-item {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   margin: 0;
-  border: 2px solid rgba(44, 37, 24, 0.45);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.35);
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid rgba(44, 37, 24, 0.14);
+  background: transparent;
   color: #2c1810;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
-.club-charter-modal__tab:hover {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(44, 37, 24, 0.6);
+.club-charter-modal__menu-item:last-child {
+  border-bottom: none;
 }
-.club-charter-modal__tab--active {
-  background: rgba(124, 45, 18, 0.18);
-  border-color: rgba(124, 45, 18, 0.55);
+.club-charter-modal__menu-item:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+.club-charter-modal__menu-item--active {
+  background: rgba(124, 45, 18, 0.1);
   color: #431407;
-  box-shadow: inset 0 0 0 1px rgba(124, 45, 18, 0.12);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 rgba(124, 45, 18, 0.75);
 }
-.club-charter-modal__tab:focus-visible {
+.club-charter-modal__menu-item:focus-visible {
   outline: 2px solid #c2410c;
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+[data-theme="light"] .club-charter-modal__menu {
+  background: rgba(255, 252, 247, 0.85);
+  border-color: rgba(44, 37, 24, 0.22);
+}
+[data-theme="light"] .club-charter-modal__menu-item:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+[data-theme="light"] .club-charter-modal__menu-item--active {
+  background: rgba(124, 45, 18, 0.08);
 }
 .club-charter-modal__panels {
   margin-top: 4px;
@@ -3664,7 +3680,7 @@ html.club-charter-modal-open {
 .gazette-front {
   margin-top: 8px;
   padding: 8px 10px;
-  border: 1px solid rgba(44, 24, 16, 0.6);
+  border: 2px solid rgba(44, 24, 16, 0.6);
 }
 .gazette-front__meta {
   display: flex;
@@ -3676,13 +3692,13 @@ html.club-charter-modal-open {
   color: rgba(44, 24, 16, 0.8);
   margin-bottom: 6px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(44, 24, 16, 0.6);
+  border-bottom: 2px solid rgba(44, 24, 16, 0.6);
 }
 .gazette-front__headline-wrap {
   text-align: center;
   margin-bottom: 8px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(44, 24, 16, 0.6);
+  border-bottom: 2px solid rgba(44, 24, 16, 0.6);
 }
 .gazette-front__headline-main {
   font-size: 20px;
@@ -3711,7 +3727,7 @@ html.club-charter-modal-open {
 }
 /* Слева шире — последняя новость; справа уже — две предыдущие */
 .gazette-front__main--lead {
-  border-right: 1px solid rgba(44, 24, 16, 0.35);
+  border-right: 2px solid rgba(44, 24, 16, 0.35);
   padding-right: 8px;
   min-width: 0;
 }
@@ -3725,7 +3741,7 @@ html.club-charter-modal-open {
   .gazette-front__main--lead {
     border-right: none;
     padding-right: 0;
-    border-bottom: 1px solid rgba(44, 24, 16, 0.35);
+    border-bottom: 2px solid rgba(44, 24, 16, 0.35);
     padding-bottom: 8px;
     margin-bottom: 8px;
   }
@@ -3780,7 +3796,7 @@ html.club-charter-modal-open {
 }
 .gazette-front__thumb,
 .gazette-front__thumb-small {
-  border: 1px solid rgba(44, 24, 16, 0.35);
+  border: 2px solid rgba(44, 24, 16, 0.35);
   background: rgba(0, 0, 0, 0.05);
   overflow: hidden;
   margin-bottom: 4px;
@@ -3829,7 +3845,7 @@ html.club-charter-modal-open {
   box-shadow: 0 0 0 1px rgba(127, 29, 29, 0.9), 0 2px 6px rgba(127, 29, 29, 0.55);
 }
 .gazette-front__col {
-  border-top: 1px solid rgba(44, 24, 16, 0.3);
+  border-top: 2px solid rgba(44, 24, 16, 0.3);
   padding-top: 4px;
 }
 .gazette-modal__pages {
@@ -3869,10 +3885,10 @@ html.club-charter-modal-open {
     linear-gradient(90deg, rgba(139, 90, 43, 0.04) 1px, transparent 1px);
   background-size: 12px 12px;
   border: none;
-  border-top: 3px double #2c1810;
-  border-left: 2px solid #2c1810;
-  border-right: 2px solid #2c1810;
-  border-bottom: 3px double #2c1810;
+  border-top: 5px double #2c1810;
+  border-left: 3px solid #2c1810;
+  border-right: 3px solid #2c1810;
+  border-bottom: 5px double #2c1810;
   box-shadow:
     inset 0 0 40px rgba(139, 90, 43, 0.06),
     2px 2px 0 rgba(0, 0, 0, 0.06),
@@ -3918,7 +3934,7 @@ html.club-charter-modal-open {
 .gazette-modal__page-card-rule {
   display: block;
   width: 100%;
-  height: 2px;
+  height: 4px;
   background: #2c1810;
   margin: 0;
 }
@@ -4006,6 +4022,27 @@ html.club-charter-modal-open {
 .gazette-modal__subscribe-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.gazette-modal__subscribe-wrap .gazette-modal__subscribe-btn.raffles-hero__share-btn {
+  width: auto;
+  max-width: none;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.gazette-modal__subscribe-wrap .raffles-subscribe-btn[data-subscribed="1"] {
+  opacity: 0.4;
+  color: rgba(15, 23, 42, 0.6);
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+.gazette-modal__subscribe-wrap .raffles-subscribe-btn[data-subscribed="1"]:hover:not(:disabled) {
+  opacity: 0.55;
+  background: rgba(251, 191, 36, 0.28);
+  border-color: rgba(251, 191, 36, 0.5);
 }
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
 /* Кнопка подписки в блоке новостей */
@@ -4357,7 +4394,7 @@ html.club-charter-modal-open {
   padding: 0;
   text-align: stretch;
 }
-.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn {
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn) {
   display: flex;
   width: 100%;
   max-width: 100%;
@@ -4379,14 +4416,14 @@ html.club-charter-modal-open {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:hover:not(:disabled) {
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):hover:not(:disabled) {
   color: #5c4033;
   opacity: 0.9;
 }
-.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:active:not(:disabled) {
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):active:not(:disabled) {
   opacity: 0.85;
 }
-.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:disabled {
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):disabled {
   opacity: 0.65;
   cursor: not-allowed;
   transform: none;
@@ -4565,45 +4602,33 @@ html.club-charter-modal-open {
   opacity: 0.8;
 }
 
-/* Газета: под статьёй — явные кнопки «Переслать» / «Скопировать ссылку» */
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-btn {
+/* Газета под статьёй: ряд как в розыгрышах (.raffles-hero__share-row) — сброс газетных «ссылок» у .gazette-modal__share-btn */
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__share-btn {
+  flex: 0 0 auto;
   text-decoration: none;
-  border-radius: 12px;
-  border: 1px solid rgba(44, 24, 16, 0.22);
-  background: rgba(255, 252, 246, 0.95);
-  box-shadow: 0 2px 0 rgba(44, 24, 16, 0.07);
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease,
-    color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+  word-break: normal;
 }
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-btn:hover {
-  opacity: 1;
-  color: #2c1810;
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__share-btn::before {
+  display: none;
 }
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 0 rgba(44, 24, 16, 0.06);
-  opacity: 1;
-}
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-telegram {
-  background: linear-gradient(180deg, #35b6f5 0%, #229ed9 55%, #1e8bc2 100%);
-  border-color: rgba(15, 110, 160, 0.85);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(30, 130, 190, 0.35);
-}
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-telegram:hover {
-  color: #fff;
-  filter: brightness(1.04);
-}
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-copy {
-  background: rgba(255, 255, 255, 0.97);
-  color: #2c1810;
-  font-size: 13px;
-  min-height: 44px;
-  padding: 10px 12px;
-}
-.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions .gazette-modal__share-copy:hover {
-  border-color: rgba(44, 24, 16, 0.38);
-  background: #fffef9;
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__subscribe-in-article-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: auto;
+  max-width: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Комментарии к статьям газеты */
@@ -4714,6 +4739,23 @@ html.club-charter-modal-open {
   color: #292524;
   white-space: pre-wrap;
   word-break: break-word;
+}
+.gazette-article-comments__text--yellow-press {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.55;
+  color: #7c2d12;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  border-left: 3px solid rgba(185, 28, 28, 0.55);
+  padding-left: 10px;
+  margin-left: 2px;
+}
+[data-theme="light"] .gazette-article-comments__text--yellow-press {
+  color: #9a3412;
+  border-left-color: rgba(185, 28, 28, 0.45);
 }
 .gazette-article-comments__form[hidden] {
   display: none !important;
@@ -20285,7 +20327,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 @media (min-width: 640px) {
   .hall-shame-board__item--featured {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
   }
 }
@@ -20306,7 +20348,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 }
 @media (min-width: 640px) {
   .hall-shame-board__featured-media {
-    align-self: flex-start;
+    align-self: stretch;
     flex: 0 0 200px;
     width: 200px;
     max-width: 200px;
@@ -22659,6 +22701,35 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   flex: 1 1 0;
   min-width: 0;
 }
+.profile-chat-name__field-caption {
+  margin: 0 0 5px;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+}
+.profile-chat-name__field-caption--p21 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font-size: 11px;
+}
+.profile-chat-name__p21-arrow {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1;
+  color: #22c55e;
+  animation: profile-p21-hint-arrow-bounce 1.35s ease-in-out infinite;
+  vertical-align: middle;
+}
+[data-theme="light"] .profile-chat-name__p21-arrow {
+  color: #16a34a;
+}
 .profile-chat-name__input {
   display: block;
   width: 100%;
@@ -22766,9 +22837,11 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-visible-to-others__level-img {
   display: block;
   max-width: 120px;
-  height: auto;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 8px;
   border-radius: 8px;
+  object-fit: cover;
 }
 .profile-visible-to-others__level-text {
   margin: 0;

@@ -1969,26 +1969,25 @@ function runGazetteAndTasksInit() {
   var GAZETTE_SUBSCRIBED_KEY = "poker_gazette_subscribed";
   var inDevHtml = "";
   function setSubscribeButtonState(subscribed) {
-    var text = subscribed ? "Отписаться от газеты" : "Подписаться на газету";
+    var textPick = subscribed ? "Отписаться от газеты" : "Подписаться на газету";
+    var textArticle = subscribed ? "Отписаться" : "Подписаться на газету";
     if (subscribeBtn) {
       subscribeBtn.disabled = false;
-      subscribeBtn.innerHTML = text + inDevHtml;
+      subscribeBtn.innerHTML = textPick + inDevHtml;
       subscribeBtn.dataset.subscribed = subscribed ? "1" : "0";
     }
     if (subscribeBtnNews) {
       subscribeBtnNews.disabled = false;
-      subscribeBtnNews.innerHTML = text + inDevHtml;
+      subscribeBtnNews.innerHTML = textPick + inDevHtml;
       subscribeBtnNews.dataset.subscribed = subscribed ? "1" : "0";
     }
     var articleBtns = modal && modal.querySelectorAll(".gazette-modal__subscribe-in-article-btn");
     if (articleBtns) {
       for (var i = 0; i < articleBtns.length; i++) {
         var btn = articleBtns[i];
-        var wrap = btn.closest(".gazette-modal__subscribe-in-article");
         btn.disabled = false;
-        btn.textContent = text;
+        btn.textContent = textArticle;
         btn.dataset.subscribed = subscribed ? "1" : "0";
-        if (wrap) wrap.style.display = subscribed ? "none" : "";
       }
     }
   }
@@ -2175,12 +2174,18 @@ function runGazetteAndTasksInit() {
               aidAttr +
               '">Удалить</button>'
             : "";
+          var yp = !!(c.yellowPress || c.yellow_press);
+          var textClass =
+            "gazette-article-comments__text" +
+            (yp ? " gazette-article-comments__text--yellow-press" : "");
           return (
             '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head">' +
             authorNode +
             meta +
             delBtn +
-            '</header><p class="gazette-article-comments__text">' +
+            '</header><p class="' +
+            textClass +
+            '">' +
             text +
             "</p></article>"
           );
@@ -2237,7 +2242,7 @@ function runGazetteAndTasksInit() {
       wrap.innerHTML =
         '<header class="gazette-article-comments__panel-head">' +
         '<h4 class="gazette-article-comments__title">Комментарии читателей</h4>' +
-        '<p class="gazette-article-comments__panel-sub">Лента ниже; своё сообщение можно набрать в отдельном поле.</p>' +
+        '<p class="gazette-article-comments__panel-sub">Лента ниже. Кнопка «Преобразовать и отправить» оформляет текст в духе жёлтой прессы (смысл сохраняется) и добавляет нотку в пользу клуба.</p>' +
         "</header>" +
         '<p class="gazette-article-comments__hint gazette-article-comments__hint--login"' +
         (cred ? " hidden" : "") +
@@ -2252,7 +2257,7 @@ function runGazetteAndTasksInit() {
         '>' +
         '<p class="gazette-article-comments__composer-lead" id="gazetteCommentComposerLead_' +
         esc(aid) +
-        '">Окно для текста</p>' +
+        '">Преобразование в стиле «жёлтой прессы»</p>' +
         '<form class="gazette-article-comments__form"' +
         (cred ? "" : " hidden") +
         ' novalidate aria-labelledby="gazetteCommentComposerLead_' +
@@ -2260,11 +2265,11 @@ function runGazetteAndTasksInit() {
         '">' +
         '<label class="gazette-article-comments__label" for="gazetteCommentInput_' +
         esc(aid) +
-        '">Наберите комментарий здесь</label>' +
+        '">Ваш комментарий (будет преобразован)</label>' +
         '<textarea id="gazetteCommentInput_' +
         esc(aid) +
-        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Введите текст — он появится в ленте после отправки."></textarea>' +
-        '<button type="submit" class="gazette-article-comments__submit">Отправить</button>' +
+        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Напишите мысль своими словами — после отправки она выйдет ярче, но по сути останется вашей."></textarea>' +
+        '<button type="submit" class="gazette-article-comments__submit">Преобразовать и отправить</button>' +
         '<p class="gazette-article-comments__form-status" aria-live="polite"></p>' +
         "</form></div>";
       var actionsCard = article.querySelector("[data-gazette-article-actions]");
@@ -2326,7 +2331,7 @@ function runGazetteAndTasksInit() {
           return;
         }
         if (sub) sub.disabled = true;
-        if (st) st.textContent = "";
+        if (st) st.textContent = "Преобразуем в стиле жёлтой прессы…";
         var profileHint = {};
         try {
           var authG = window.__pokerTelegramAuth;
@@ -2353,7 +2358,7 @@ function runGazetteAndTasksInit() {
             if (sub) sub.disabled = false;
             if (res.ok && res.data && res.data.ok) {
               ta.value = "";
-              if (st) st.textContent = "Комментарий опубликован.";
+              if (st) st.textContent = "Готово — сообщение в ленте.";
               loadGazetteCommentsFeed(feed);
               return;
             }
@@ -3260,11 +3265,11 @@ function runGazetteAndTasksInit() {
       var isRaffle = which === "raffle";
       if (tabRaffle) {
         tabRaffle.setAttribute("aria-selected", isRaffle ? "true" : "false");
-        tabRaffle.classList.toggle("club-charter-modal__tab--active", isRaffle);
+        tabRaffle.classList.toggle("club-charter-modal__menu-item--active", isRaffle);
       }
       if (tabComm) {
         tabComm.setAttribute("aria-selected", isRaffle ? "false" : "true");
-        tabComm.classList.toggle("club-charter-modal__tab--active", !isRaffle);
+        tabComm.classList.toggle("club-charter-modal__menu-item--active", !isRaffle);
       }
       if (panelRaffle) {
         panelRaffle.hidden = !isRaffle;
@@ -10688,6 +10693,60 @@ function initPokerShowsPlayer() {
   });
 }
 
+/** Плейсхолдер профиля: лёгкий JPEG (~18 KB), не полноразмерный PNG. */
+var POKER_PROFILE_AVATAR_PLACEHOLDER = "./assets/profile-pokerist.jpg";
+var POKER_AVATAR_CACHE_TTL_MS = 20 * 60 * 1000;
+
+function pokerAvatarCacheStorageKey() {
+  try {
+    var id =
+      typeof window.pokerResolveMyChatMemberId === "function"
+        ? window.pokerResolveMyChatMemberId()
+        : "";
+    id = id != null ? String(id).trim() : "";
+    return id ? "poker_avatar_data:" + id : "";
+  } catch (eK) {
+    return "";
+  }
+}
+
+function pokerReadAvatarCacheEntry() {
+  var k = pokerAvatarCacheStorageKey();
+  if (!k || typeof sessionStorage === "undefined") return null;
+  try {
+    var raw = sessionStorage.getItem(k);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    if (!o || typeof o.t !== "number") return null;
+    if (Date.now() - o.t > POKER_AVATAR_CACHE_TTL_MS) return null;
+    return { avatar: o.a ? String(o.a) : "", t: o.t };
+  } catch (eR) {
+    return null;
+  }
+}
+
+function pokerWriteAvatarCacheEntry(avatarDataUrlOrEmpty) {
+  var k = pokerAvatarCacheStorageKey();
+  if (!k || typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(
+      k,
+      JSON.stringify({
+        a: avatarDataUrlOrEmpty ? String(avatarDataUrlOrEmpty) : "",
+        t: Date.now(),
+      })
+    );
+  } catch (eW) {}
+}
+
+function pokerApplyProfileAvatarMirror(src) {
+  var m = document.getElementById("profileAvatarMirror");
+  if (m && src) {
+    m.src = src;
+    m.alt = "Покерист";
+  }
+}
+
 function loadHeaderAvatar() {
   var avatarEl = document.getElementById("authUserAvatar");
   if (!avatarEl) return;
@@ -10708,11 +10767,27 @@ function loadHeaderAvatar() {
     if (!applyTelegramPhotoFallback()) avatarEl.style.display = "none";
     return;
   }
+  var cached = pokerReadAvatarCacheEntry();
+  if (cached) {
+    if (cached.avatar) {
+      avatarEl.src = cached.avatar;
+      avatarEl.alt = "Аватар";
+      avatarEl.style.display = "";
+      return;
+    }
+    if (applyTelegramPhotoFallback()) return;
+    avatarEl.removeAttribute("src");
+    avatarEl.style.display = "none";
+    return;
+  }
   var hq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
   var tsSep = hq.indexOf("?") === 0 ? "&" : "?";
   fetch(base + "/api/avatar" + hq + tsSep + "_ts=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
+      if (data && data.ok) {
+        pokerWriteAvatarCacheEntry(data.avatar || "");
+      }
       if (data && data.ok && data.avatar) {
         avatarEl.src = data.avatar;
         avatarEl.alt = "Аватар";
@@ -10754,25 +10829,45 @@ function initProfileAvatar() {
   function fetchProfileAvatarFromServer() {
     if (uploadInProgress || avatarPickSessionActive) return;
     inputEl.value = "";
+    var cached = pokerReadAvatarCacheEntry();
+    if (cached) {
+      if (uploadInProgress || avatarPickSessionActive) return;
+      revokePendingObjectUrl();
+      if (cached.avatar) {
+        avatarEl.src = cached.avatar;
+        avatarEl.alt = "Аватар";
+        pokerApplyProfileAvatarMirror(cached.avatar);
+      } else {
+        avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
+        pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+      }
+      return;
+    }
     var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     var tsSep = aq.indexOf("?") === 0 ? "&" : "?";
     fetch(base + "/api/avatar" + aq + tsSep + "_ts=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (uploadInProgress || avatarPickSessionActive) return;
+        if (data && data.ok) {
+          pokerWriteAvatarCacheEntry(data.avatar || "");
+        }
         if (data && data.ok && data.avatar) {
           revokePendingObjectUrl();
           avatarEl.src = data.avatar;
           avatarEl.alt = "Аватар";
+          pokerApplyProfileAvatarMirror(data.avatar);
         } else {
           revokePendingObjectUrl();
-          avatarEl.src = "./assets/profile-pokerist.png";
+          avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
+          pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
         }
       })
       .catch(function () {
         if (!uploadInProgress && !avatarPickSessionActive) {
           revokePendingObjectUrl();
-          avatarEl.src = "./assets/profile-pokerist.png";
+          avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
+          pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
         }
       });
   }
@@ -10875,6 +10970,7 @@ function initProfileAvatar() {
         if (data && data.ok && data.avatar) {
           revokePendingObjectUrl();
           var newSrc = data.avatar;
+          pokerWriteAvatarCacheEntry(newSrc);
           try {
             /* Дважды подряд тот же data: URL — часть движков не перерисовывает img без сброса src. */
             if (String(avatarEl.src || "") === String(newSrc)) {
@@ -10892,6 +10988,7 @@ function initProfileAvatar() {
             avatarEl.src = newSrc;
           }
           avatarEl.alt = "Аватар";
+          pokerApplyProfileAvatarMirror(newSrc);
           loadHeaderAvatar();
           showAvatarFeedback("Фотография сохранена", false);
         } else {
@@ -17301,6 +17398,8 @@ function initChat() {
   }
 
   if (!base) {
+    var wrapNoBase = generalMessages.parentElement;
+    if (wrapNoBase && wrapNoBase.classList) wrapNoBase.classList.remove("chat-messages-wrap--settling");
     generalMessages.innerHTML = "<p class=\"chat-empty\">Не задан адрес API.</p>";
     return;
   }
@@ -17737,6 +17836,8 @@ function initChat() {
           ? "Выполняется проверка входа через Telegram. Подождите несколько секунд и снова откройте «Главный чат» или вернитесь на главную."
           : "Чтобы общаться в чатах, нужно сначала войти: на главной нажмите «Войти через Telegram» или откройте приложение из бота.";
       if (generalMessages) {
+        var wrapNeedLogin = generalMessages.parentElement;
+        if (wrapNeedLogin && wrapNeedLogin.classList) wrapNeedLogin.classList.remove("chat-messages-wrap--settling");
         generalMessages.innerHTML =
           '<div class="chat-general-gate chat-general-gate--need-login"><p class="chat-empty">' + escapeHtml(gateMsg) + "</p></div>";
       }
@@ -17849,6 +17950,8 @@ function initChat() {
 
   function renderGeneralAccessGate(state) {
     if (!generalMessages) return;
+    var wrapG = generalMessages.parentElement;
+    if (wrapG && wrapG.classList) wrapG.classList.remove("chat-messages-wrap--settling");
     var msg =
       state === "pending"
         ? "Заявка на рассмотрении. После одобрения администратором здесь появятся сообщения."
@@ -18838,6 +18941,8 @@ function initChat() {
         !generalView.classList.contains("chat-general-view--hidden") &&
         generalMessages
       ) {
+        var wrapErr = generalMessages.parentElement;
+        if (wrapErr && wrapErr.classList) wrapErr.classList.remove("chat-messages-wrap--settling");
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
         updateGeneralInputLocked(false);
       }
@@ -18848,6 +18953,8 @@ function initChat() {
         !generalView.classList.contains("chat-general-view--hidden") &&
         generalMessages
       ) {
+        var wrapCatch = generalMessages.parentElement;
+        if (wrapCatch && wrapCatch.classList) wrapCatch.classList.remove("chat-messages-wrap--settling");
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>";
         updateGeneralInputLocked(false);
       }
@@ -19649,10 +19756,15 @@ function initChat() {
     messages = (messages || []).filter(function (m) {
       return !(m && m.clubAdmissionNotice);
     });
+    var generalMsgWrapEarly = generalMessages ? generalMessages.parentElement : null;
+    var openingForceBottomG = scrollGeneralToBottomOnNextRender;
     try {
       pokerMaybeClearSelfPinIfIdMissing("general", null, messages);
     } catch (ePinG) {}
     if (!messages || messages.length === 0) {
+      if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
+        generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
+      }
       generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
       try {
         refreshChatSelfPinBars();
@@ -19745,11 +19857,16 @@ function initChat() {
       var dayDividerG = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerG + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
     }).join("");
-    var openingForceBottomG = scrollGeneralToBottomOnNextRender;
+    /* Маску ставим до innerHTML: иначе один кадр с текстом, затем opacity:0 — «мигание». */
+    if (openingForceBottomG && generalMsgWrapEarly && generalMsgWrapEarly.classList) {
+      generalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
+    } else if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
+      generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
+    }
     var prevScrollTop = generalMessages.scrollTop;
     var prevScrollHeight = generalMessages.scrollHeight;
     var wasNearBottom = prevScrollHeight - prevScrollTop - generalMessages.clientHeight < 80;
-    var generalMsgWrap = generalMessages.parentElement;
+    var generalMsgWrap = generalMsgWrapEarly;
     generalMessages.innerHTML = html;
     function restoreScroll(clearScrollFlag) {
       var maxScroll = generalMessages.scrollHeight - generalMessages.clientHeight;
@@ -19760,9 +19877,8 @@ function initChat() {
         generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
       }
     }
-    /* Первый заход: не показываем ленту, пока не выставим низ (обёртка opacity:0 в CSS) — иначе кадр с «верхом» и прыжок вниз. */
+    /* Первый заход: обёртка уже settling до innerHTML; здесь только скролл и снятие маски после стабилизации высоты. */
     if (openingForceBottomG) {
-      if (generalMsgWrap && generalMsgWrap.classList) generalMsgWrap.classList.add("chat-messages-wrap--settling");
       var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenG(function () {
         rafOpenG(function () {
@@ -21398,10 +21514,15 @@ function initChat() {
 
   function renderMessages(messages) {
     if (!messagesEl) return;
+    var personalMsgWrapEarly = messagesEl.parentElement;
+    var openingForceBottomP = scrollPersonalToBottomOnNextRender;
     try {
       pokerMaybeClearSelfPinIfIdMissing("personal", chatWithUserId, messages);
     } catch (ePinPM) {}
     if (!messages || messages.length === 0) {
+      if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
+        personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
+      }
       messagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
       try {
         refreshChatSelfPinBars();
@@ -21532,11 +21653,15 @@ function initChat() {
       var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerP + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + bodyMainHtmlP + reactionsRowP + '</div></div></div>';
     }).join("");
-    var openingForceBottomP = scrollPersonalToBottomOnNextRender;
+    if (openingForceBottomP && personalMsgWrapEarly && personalMsgWrapEarly.classList) {
+      personalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
+    } else if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
+      personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
+    }
     var prevScrollTopP = messagesEl.scrollTop;
     var prevScrollHeightP = messagesEl.scrollHeight;
     var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
-    var personalMsgWrap = messagesEl.parentElement;
+    var personalMsgWrap = personalMsgWrapEarly;
     messagesEl.innerHTML = html;
     function restoreScrollP(clearScrollFlag) {
       var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
@@ -21548,7 +21673,6 @@ function initChat() {
       }
     }
     if (openingForceBottomP) {
-      if (personalMsgWrap && personalMsgWrap.classList) personalMsgWrap.classList.add("chat-messages-wrap--settling");
       var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenP(function () {
         rafOpenP(function () {
