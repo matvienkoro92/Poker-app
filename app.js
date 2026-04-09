@@ -5357,9 +5357,9 @@ function getPokerResolvedTelegramUser() {
       '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
       linkTme +
       ".</p>" +
-      '<p class="auth-banner__code-intro">Если вы ещё не писали боту, сначала откройте его — " +
+      '<p class="auth-banner__code-intro">Если вы ещё не писали боту, сначала откройте его — ' +
       linkTme +
-      " и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код» и введите здесь код из бота.</p>" +
+      ' и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код» и введите здесь код из бота.</p>' +
       "</div>";
     wrap.innerHTML =
       backRow +
