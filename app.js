@@ -2249,20 +2249,12 @@ function runGazetteAndTasksInit() {
         '<div class="gazette-article-comments__composer-card"' +
         (cred ? "" : " hidden") +
         '>' +
-        '<p class="gazette-article-comments__composer-lead" id="gazetteCommentComposerLead_' +
-        esc(aid) +
-        '">Окно для текста</p>' +
         '<form class="gazette-article-comments__form"' +
         (cred ? "" : " hidden") +
-        ' novalidate aria-labelledby="gazetteCommentComposerLead_' +
-        esc(aid) +
-        '">' +
-        '<label class="gazette-article-comments__label" for="gazetteCommentInput_' +
-        esc(aid) +
-        '">Наберите комментарий здесь</label>' +
+        ' novalidate aria-label="Новый комментарий">' +
         '<textarea id="gazetteCommentInput_' +
         esc(aid) +
-        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Введите текст — он появится в ленте после отправки."></textarea>' +
+        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Введите текст — он появится в ленте после отправки." aria-label="Текст комментария"></textarea>' +
         '<button type="submit" class="gazette-article-comments__submit">Отправить</button>' +
         '<p class="gazette-article-comments__form-status" aria-live="polite"></p>' +
         "</form></div>";
@@ -16697,7 +16689,8 @@ function initChat() {
     var visOk = typeof document !== "undefined" && document.visibilityState === "visible";
     var convOpen = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
     var peer = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-    var shouldPing = viewChat && visOk && chatActiveTab === "personal" && convOpen && !!peer;
+    var isGrpFocus = peer.indexOf("group_") === 0;
+    var shouldPing = viewChat && visOk && chatActiveTab === "personal" && convOpen && !!peer && !isGrpFocus;
     if (!shouldPing) {
       stopChatDmFocusSession();
       return;
@@ -16713,7 +16706,7 @@ function initChat() {
         var vis2 = typeof document !== "undefined" && document.visibilityState === "visible";
         var co2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
         var p2 = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-        if (!v2 || !vis2 || chatActiveTab !== "personal" || !co2 || !p2) {
+        if (!v2 || !vis2 || chatActiveTab !== "personal" || !co2 || !p2 || p2.indexOf("group_") === 0) {
           stopChatDmFocusSession();
           return;
         }
@@ -17426,6 +17419,7 @@ function initChat() {
   function normalizePeerIdForChat(raw) {
     var s = String(raw || "").trim();
     if (!s) return "";
+    if (s.indexOf("group_") === 0) return s;
     if (s.indexOf("tg_") === 0 || s.indexOf("vk_") === 0 || s.indexOf("guest_") === 0) return s;
     if (/^\d+$/.test(s)) return "tg_" + s;
     return "tg_" + s;
@@ -17451,6 +17445,7 @@ function initChat() {
   /** Закреплённые админы (Анна, Вика) — не дублировать в #chatContacts. */
   function chatContactIsDuplicateOfPinnedDialog(c) {
     if (!c || !c.id) return false;
+    if (c.isGroupChat) return false;
     for (var pi = 0; pi < CHAT_ADMIN_IDS.length; pi++) {
       if (peerChatIdsEqual(c.id, CHAT_ADMIN_IDS[pi])) return true;
     }
@@ -20639,7 +20634,8 @@ function initChat() {
   function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
-    if (myOpen && userId && peerChatIdsEqual(userId, myOpen)) {
+    var isGroupConv = userId && String(userId).indexOf("group_") === 0;
+    if (myOpen && userId && !isGroupConv && peerChatIdsEqual(userId, myOpen)) {
       var selfMsg =
         "Это личный чат с самим собой — входящие от игроков здесь не отображаются. Откройте диалог с игроком из списка контактов ниже или найдите человека по ID / нику.";
       if (tg && tg.showAlert) tg.showAlert(selfMsg);
@@ -20650,7 +20646,14 @@ function initChat() {
     chatWithUserName = userName || userId;
     var peerAvParam = peerAvatarUrlOpt != null && String(peerAvatarUrlOpt).trim() ? String(peerAvatarUrlOpt).trim() : "";
     var peerAvCache = "";
-    if (userId && personalMessagesCache[userId] && Array.isArray(personalMessagesCache[userId])) {
+    if (isGroupConv) {
+      applyConvPeerAvatarHeader("", "");
+      if (convPeerAvatarPh) {
+        convPeerAvatarPh.textContent = "\uD83D\uDC65";
+        convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
+      }
+      if (convPeerAvatar) convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
+    } else if (userId && personalMessagesCache[userId] && Array.isArray(personalMessagesCache[userId])) {
       var msgsC = personalMessagesCache[userId];
       var myIdC = resolveMyChatMemberId();
       for (var ci = msgsC.length - 1; ci >= 0; ci--) {
@@ -20664,16 +20667,19 @@ function initChat() {
         }
       }
     }
-    var peerAv = peerAvParam || peerAvCache || "";
+    var peerAv = isGroupConv ? "" : peerAvParam || peerAvCache || "";
     chatWithPeerAvatarUrl = peerAv || null;
-    applyConvPeerAvatarHeader(peerAv, chatWithUserName);
+    if (!isGroupConv) applyConvPeerAvatarHeader(peerAv, chatWithUserName);
     if (convTitle) {
       var nm = (userName && String(userName).trim()) ? String(userName).trim() : (userId ? String(userId) : "");
       convTitle.textContent = nm;
     }
     if (convTitleId) {
-      convTitleId.textContent =
-        peerP21IdFromContact != null && String(peerP21IdFromContact).trim() ? String(peerP21IdFromContact).trim() : "\u2014";
+      convTitleId.textContent = isGroupConv
+        ? "\u2014"
+        : peerP21IdFromContact != null && String(peerP21IdFromContact).trim()
+          ? String(peerP21IdFromContact).trim()
+          : "\u2014";
     }
     personalReplyTo = null;
     personalImage = null;
@@ -20783,6 +20789,7 @@ function initChat() {
 
   function prefetchPersonalMessages(userId) {
     if (!userId || !pokerApiHasCredential()) return;
+    if (String(userId).indexOf("group_") === 0) return;
     if (chatWithUserId && peerChatIdsEqual(chatWithUserId, userId)) return;
     if (personalPrefetchInFlight[userId]) return;
     if (shouldUsePersonalCache(userId)) return;
@@ -20806,7 +20813,7 @@ function initChat() {
     var picked = [];
     for (var i = 0; i < contacts.length && picked.length < PERSONAL_PREFETCH_BATCH; i++) {
       var id = contacts[i] && contacts[i].id ? String(contacts[i].id) : "";
-      if (!id) continue;
+      if (!id || id.indexOf("group_") === 0) continue;
       if (chatWithUserId && peerChatIdsEqual(chatWithUserId, id)) continue;
       picked.push(id);
     }
@@ -20934,6 +20941,7 @@ function initChat() {
         window.__pokerChatFriendIdsSet = friendSet;
         if (showFriendsOnly) {
           contactsForList = contactsForList.filter(function (c) {
+            if (c && c.isGroupChat) return true;
             return !!(friendSet[c.id] || friendSet[String(c.id)]);
           });
         }
@@ -20966,6 +20974,7 @@ function initChat() {
             if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
             var wantFriend = !!(friendSet[c.id] || friendSet[String(c.id)]);
             if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
+            if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
             return true;
           });
           if (sameList && existing.length > 0) {
@@ -21011,27 +21020,37 @@ function initChat() {
           var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
           var pinOrderRender = pokerLoadChatDialogListPins();
           var contactButtons = contactsForList.map(function (c) {
+            var isGroupRow = !!(c && c.isGroupChat);
             var isPinned = false;
-            for (var pix = 0; pix < pinOrderRender.length; pix++) {
-              if (peerChatIdsEqual(pinOrderRender[pix], c.id)) {
-                isPinned = true;
-                break;
+            if (!isGroupRow) {
+              for (var pix = 0; pix < pinOrderRender.length; pix++) {
+                if (peerChatIdsEqual(pinOrderRender[pix], c.id)) {
+                  isPinned = true;
+                  break;
+                }
               }
             }
-            var isFriendContact = !!(friendSet[c.id] || friendSet[String(c.id)]);
-            var pinIcon = isPinned
-              ? '<span class="chat-contact__pin-icon" aria-hidden="true" title="Закреплён">📌</span>'
-              : "";
+            var isFriendContact = !isGroupRow && !!(friendSet[c.id] || friendSet[String(c.id)]);
+            var pinIcon =
+              isGroupRow || !isPinned
+                ? ""
+                : '<span class="chat-contact__pin-icon" aria-hidden="true" title="Закреплён">📌</span>';
             var swipePinAria = isPinned ? "Открепить диалог" : "Закрепить диалог";
             var swipePinBtnClass =
               "chat-contact-swipe__pin" + (isPinned ? " chat-contact-swipe__pin--unpin" : "");
-            var roleClass = c.admin
-              ? " chat-contact__role--admin"
-              : isFriendContact
-                ? " chat-contact__role--friend"
-                : "";
+            var roleClass = isGroupRow
+              ? " chat-contact__role--group"
+              : c.admin
+                ? " chat-contact__role--admin"
+                : isFriendContact
+                  ? " chat-contact__role--friend"
+                  : "";
             var roleInnerHtml;
-            if (c.admin) {
+            if (isGroupRow) {
+              var mcN = c.memberCount != null ? Number(c.memberCount) : 0;
+              roleInnerHtml =
+                mcN > 0 ? escapeHtml(String(mcN) + " уч.") : escapeHtml("Группа");
+            } else if (c.admin) {
               roleInnerHtml = escapeHtml("Админ");
             } else if (isFriendContact) {
               roleInnerHtml =
@@ -21040,14 +21059,18 @@ function initChat() {
             } else {
               roleInnerHtml = escapeHtml("Игрок");
             }
-            var onlineHtml = '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
+            var onlineHtml = isGroupRow
+              ? '<span class="chat-contact__online" aria-hidden="true"></span>'
+              : '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
             var unreadNum = c.unreadCount > 0 ? (c.unreadCount > 99 ? "99+" : String(c.unreadCount)) : "";
             var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
             var displayTitle = chatListRowDisplayTitle(c);
             var hasAlias = c.contactName != null && String(c.contactName).trim() !== "";
-            var initial = firstChar(displayTitle);
+            var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
             var nameBlockInner;
-            if (isFriendContact) {
+            if (isGroupRow) {
+              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(c.name || displayTitle) + "</span>";
+            } else if (isFriendContact) {
               if (hasAlias) {
                 nameBlockInner =
                   '<span class="chat-contact__name-stack chat-contact__name-stack--friend">' +
@@ -21073,11 +21096,13 @@ function initChat() {
             } else {
               nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(c.name) + "</span>";
             }
-            var avatarEl = c.avatar
-              ? '<img class="chat-contact__avatar" src="' +
-                escapeHtml(c.avatar) +
-                '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
-              : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
+            var avatarEl = isGroupRow
+              ? '<span class="chat-contact__avatar chat-contact__avatar--placeholder chat-contact__avatar--group" aria-hidden="true">\uD83D\uDC65</span>'
+              : c.avatar
+                ? '<img class="chat-contact__avatar" src="' +
+                  escapeHtml(c.avatar) +
+                  '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
+                : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
             var nameCellPart = pinIcon
               ? '<span class="chat-contact__name-pin-row">' + pinIcon + nameBlockInner + "</span>"
               : nameBlockInner;
@@ -21088,6 +21113,8 @@ function initChat() {
               escapeHtml(displayTitle) +
               '" data-chat-friend="' +
               (isFriendContact ? "1" : "0") +
+              '" data-chat-group="' +
+              (isGroupRow ? "1" : "0") +
               '" data-chat-initial="' +
               escapeHtml(initial) +
               '" data-chat-online="' +
@@ -21107,6 +21134,14 @@ function initChat() {
               "</span></span>" +
               unreadBadge +
               "</button>";
+            if (isGroupRow) {
+              return (
+                '<div class="chat-contact-swipe chat-contact-swipe--group">' +
+                '<div class="chat-contact-swipe__panel">' +
+                innerBtn +
+                "</div></div>"
+              );
+            }
             var swipeFriendBtn = !isFriendContact
               ? '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>'
               : "";
@@ -22113,17 +22148,30 @@ function initChat() {
         window._pendingPersonalMessage = null;
         window._pendingPersonalWith = null;
         messages = mergeOptimisticPersonalIntoMessages(messages);
+        var isGrpThread =
+          data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
+        if (isGrpThread && data.groupTitle && convTitle) {
+          var gt = String(data.groupTitle).trim();
+          if (gt) {
+            convTitle.textContent = gt;
+            chatWithUserName = gt;
+          }
+        }
         var pt = data.participantsCount != null ? data.participantsCount : "—";
         var ol = data.onlineCount != null ? data.onlineCount : "—";
         window.lastConvStats = pt + " уч · " + ol + " онл";
         updateChatHeaderStats();
         if (convTitleId) {
-          var titleP21 =
-            data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
-          convTitleId.textContent = titleP21 || "—";
+          if (isGrpThread) {
+            convTitleId.textContent = pt !== "—" ? String(pt) + " уч." : "\u2014";
+          } else {
+            var titleP21 =
+              data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
+            convTitleId.textContent = titleP21 || "\u2014";
+          }
         }
         var peerAvData = data.otherAvatar != null && String(data.otherAvatar).trim() ? String(data.otherAvatar).trim() : "";
-        if (!peerAvData && messages.length && chatWithUserId) {
+        if (!peerAvData && !isGrpThread && messages.length && chatWithUserId) {
           var myIdL = resolveMyChatMemberId();
           for (var li = messages.length - 1; li >= 0; li--) {
             var ml = messages[li];
@@ -22136,7 +22184,14 @@ function initChat() {
             }
           }
         }
-        if (peerAvData) {
+        if (isGrpThread && !peerAvData) {
+          applyConvPeerAvatarHeader("", "");
+          if (convPeerAvatarPh) {
+            convPeerAvatarPh.textContent = "\uD83D\uDC65";
+            convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
+          }
+          if (convPeerAvatar) convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
+        } else if (peerAvData) {
           chatWithPeerAvatarUrl = peerAvData;
           applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
         }
@@ -22146,9 +22201,14 @@ function initChat() {
         var lastView = peerLvKey && lastViewedPersonal[peerLvKey] != null ? lastViewedPersonal[peerLvKey] : "";
         var personalLastSet = !!(peerLvKey && lastViewedPersonal[peerLvKey] != null);
         var peerNorm = peerLvKey;
+        var myIdUnread = resolveMyChatMemberId();
         var unreadCount = personalLastSet
           ? messages.filter(function (m) {
-              return pokerChatMessageIsNewerThanViewed(m.time, lastView) && normalizePeerIdForChat(m.from) === peerNorm;
+              if (!pokerChatMessageIsNewerThanViewed(m.time, lastView)) return false;
+              if (isGrpThread) {
+                return !!(myIdUnread && !peerChatIdsEqual(m.from, myIdUnread));
+              }
+              return normalizePeerIdForChat(m.from) === peerNorm;
             }).length
           : 0;
         // Звук лички (PWA и Mini App): когда открыт другой экран / другой диалог; общий чат в TWA по-прежнему без звука.
@@ -22158,7 +22218,11 @@ function initChat() {
             var lastUnreadP = null;
             try {
               var unreadMsgsP = messages.filter(function (m) {
-                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && normalizePeerIdForChat(m.from) === peerNorm;
+                if (!pokerChatMessageIsNewerThanViewed(m.time, lastView)) return false;
+                if (isGrpThread) {
+                  return !!(myIdUnread && !peerChatIdsEqual(m.from, myIdUnread));
+                }
+                return normalizePeerIdForChat(m.from) === peerNorm;
               });
               lastUnreadP = unreadMsgsP.length ? unreadMsgsP[unreadMsgsP.length - 1] : null;
             } catch (eUnreadP) {}
@@ -23538,6 +23602,11 @@ function initChat() {
         e.stopPropagation();
         var uidP = chatWithUserId;
         if (!uidP) return;
+        if (String(uidP).indexOf("group_") === 0) {
+          if (tg && tg.showAlert) tg.showAlert("Это групповой чат — профиль одного игрока здесь не открывается.");
+          else if (typeof alert === "function") alert("Это групповой чат — профиль одного игрока здесь не открывается.");
+          return;
+        }
         var myOpenP = resolveMyChatMemberId();
         if (myOpenP && peerChatIdsEqual(uidP, myOpenP)) {
           if (tg && tg.showAlert) tg.showAlert("Это вы — свой профиль смотрите в разделе «Профиль».");
@@ -24508,13 +24577,17 @@ function initChat() {
       if (!btn || !btn.classList) return false;
       if (btn.classList.contains("chat-dialog-item--find-user")) return false;
       if (btn.classList.contains("chat-dialog-item--club")) return false;
-      if (btn.classList.contains("chat-contact") && btn.dataset.chatId) return true;
+      if (btn.classList.contains("chat-contact") && btn.dataset.chatId) {
+        if (btn.getAttribute("data-chat-group") === "1") return false;
+        return true;
+      }
       if (btn.getAttribute && btn.getAttribute("data-chat-user-id")) return true;
       return false;
     }
     function getDialogPreviewPeerFromBtn(btn) {
       if (!btn) return null;
       if (btn.classList.contains("chat-contact") && btn.dataset.chatId) {
+        if (btn.getAttribute("data-chat-group") === "1") return null;
         return {
           userId: btn.dataset.chatId,
           userName: btn.dataset.chatName || "",
@@ -24852,6 +24925,286 @@ function initChat() {
       }
     });
   }
+
+  (function initChatCreateGroupModal() {
+    var modal = document.getElementById("chatCreateGroupModal");
+    var btnOpen = document.getElementById("chatNewGroupBtn");
+    if (!modal || !btnOpen) return;
+    var backdrop = document.getElementById("chatCreateGroupModalBackdrop");
+    var btnClose = document.getElementById("chatCreateGroupModalClose");
+    var btnCancel = document.getElementById("chatCreateGroupCancelBtn");
+    var btnSubmit = document.getElementById("chatCreateGroupSubmitBtn");
+    var titleInp = document.getElementById("chatCreateGroupTitleInput");
+    var pickerAll = document.getElementById("chatCreateGroupPickerAll");
+    var pickerFriends = document.getElementById("chatCreateGroupPickerFriends");
+    var paneAll = document.getElementById("chatCreateGroupPaneAll");
+    var paneFriends = document.getElementById("chatCreateGroupPaneFriends");
+    var paneManual = document.getElementById("chatCreateGroupPaneManual");
+    var manualInp = document.getElementById("chatCreateGroupManualInput");
+    var manualHint = document.getElementById("chatCreateGroupManualHint");
+    var manualAdd = document.getElementById("chatCreateGroupManualAddBtn");
+    var selectedEl = document.getElementById("chatCreateGroupSelected");
+    var selectedMap = Object.create(null);
+
+    function closeModal() {
+      modal.classList.add("chat-create-group-modal--hidden");
+      modal.setAttribute("aria-hidden", "true");
+    }
+    function openModal() {
+      selectedMap = Object.create(null);
+      if (titleInp) titleInp.value = "";
+      if (manualInp) manualInp.value = "";
+      if (manualHint) manualHint.textContent = "";
+      setTabCreateGroup("all");
+      renderPickers();
+      renderSelected();
+      modal.classList.remove("chat-create-group-modal--hidden");
+      modal.setAttribute("aria-hidden", "false");
+      try {
+        if (titleInp) titleInp.focus();
+      } catch (eFoc) {}
+    }
+    function renderSelected() {
+      if (!selectedEl) return;
+      var ids = Object.keys(selectedMap);
+      if (!ids.length) {
+        selectedEl.innerHTML = '<span class="chat-create-group-modal__selected-empty">Пока никого</span>';
+        return;
+      }
+      selectedEl.innerHTML = ids
+        .map(function (id) {
+          return (
+            '<span class="chat-create-group-modal__chip"><span>' +
+            escapeHtml(selectedMap[id] || id) +
+            '</span><button type="button" class="chat-create-group-modal__chip-remove" data-remove-id="' +
+            escapeHtml(id) +
+            '" aria-label="Убрать">×</button></span>'
+          );
+        })
+        .join("");
+    }
+    function contactListFromApi() {
+      var d = window.__pokerLastContactsApiData;
+      if (!d || !Array.isArray(d.contacts)) return [];
+      return d.contacts.filter(function (c) {
+        return c && c.id && !c.isGroupChat && String(c.id).indexOf("group_") !== 0;
+      });
+    }
+    function paintPicker(container, arr) {
+      if (!container) return;
+      if (!arr.length) {
+        container.innerHTML =
+          '<p class="chat-create-group-modal__empty">Нет контактов. Добавьте людей вручную или пообщайтесь в клубе.</p>';
+        return;
+      }
+      container.innerHTML = arr
+        .map(function (c) {
+          var id = c.id;
+          var nm =
+            c.contactName != null && String(c.contactName).trim()
+              ? String(c.contactName).trim()
+              : c.name || id;
+          var on = !!selectedMap[id];
+          return (
+            '<button type="button" class="chat-create-group-modal__pick' +
+            (on ? " chat-create-group-modal__pick--on" : "") +
+            '" data-pick-id="' +
+            escapeHtml(id) +
+            '" data-pick-name="' +
+            escapeHtml(nm) +
+            '">' +
+            escapeHtml(nm) +
+            "</button>"
+          );
+        })
+        .join("");
+    }
+    function renderPickers() {
+      var list = contactListFromApi();
+      var friendSet = window.__pokerChatFriendIdsSet || {};
+      var fr = list.filter(function (c) {
+        return !!(friendSet[c.id] || friendSet[String(c.id)]);
+      });
+      paintPicker(pickerAll, list);
+      paintPicker(pickerFriends, fr);
+    }
+    function setTabCreateGroup(tab) {
+      var tabs = modal.querySelectorAll("[data-create-group-tab]");
+      for (var ti = 0; ti < tabs.length; ti++) {
+        var t = tabs[ti];
+        var on = t.getAttribute("data-create-group-tab") === tab;
+        t.classList.toggle("chat-create-group-modal__tab--active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+      }
+      if (paneAll) {
+        var showA = tab === "all";
+        paneAll.classList.toggle("chat-create-group-modal__pane--hidden", !showA);
+        if (showA) paneAll.removeAttribute("hidden");
+        else paneAll.setAttribute("hidden", "hidden");
+      }
+      if (paneFriends) {
+        var showF = tab === "friends";
+        paneFriends.classList.toggle("chat-create-group-modal__pane--hidden", !showF);
+        if (showF) paneFriends.removeAttribute("hidden");
+        else paneFriends.setAttribute("hidden", "hidden");
+      }
+      if (paneManual) {
+        var showM = tab === "manual";
+        paneManual.classList.toggle("chat-create-group-modal__pane--hidden", !showM);
+        if (showM) paneManual.removeAttribute("hidden");
+        else paneManual.setAttribute("hidden", "hidden");
+      }
+    }
+    modal.querySelectorAll("[data-create-group-tab]").forEach(function (t) {
+      t.addEventListener("click", function () {
+        var v = t.getAttribute("data-create-group-tab");
+        if (v) setTabCreateGroup(v);
+      });
+    });
+    function attachPickerDel(container) {
+      if (!container || container._cgPickDel) return;
+      container._cgPickDel = true;
+      container.addEventListener("click", function (e) {
+        var b = e.target && e.target.closest ? e.target.closest("[data-pick-id]") : null;
+        if (!b || !container.contains(b)) return;
+        e.preventDefault();
+        var pid = b.getAttribute("data-pick-id");
+        var pn = b.getAttribute("data-pick-name") || pid;
+        if (!pid) return;
+        if (selectedMap[pid]) delete selectedMap[pid];
+        else selectedMap[pid] = pn;
+        renderSelected();
+        renderPickers();
+      });
+    }
+    attachPickerDel(pickerAll);
+    attachPickerDel(pickerFriends);
+    if (selectedEl && !selectedEl._cgChipDel) {
+      selectedEl._cgChipDel = true;
+      selectedEl.addEventListener("click", function (e) {
+        var b = e.target && e.target.closest ? e.target.closest("[data-remove-id]") : null;
+        if (!b || !selectedEl.contains(b)) return;
+        e.preventDefault();
+        var rid = b.getAttribute("data-remove-id");
+        if (rid) delete selectedMap[rid];
+        renderSelected();
+        renderPickers();
+      });
+    }
+    function tryAddManual() {
+      if (!manualInp || !manualHint) return;
+      manualHint.textContent = "";
+      var raw = (manualInp.value || "").trim().replace(/^@/, "");
+      if (!raw) {
+        manualHint.textContent = "Введите ник или ID";
+        return;
+      }
+      var idPart = raw.toUpperCase();
+      var byId =
+        /^\d{6}$/.test(idPart) ||
+        /^ID\d{6}$/.test(idPart) ||
+        (idPart.startsWith("ID") && idPart.length === 8 && /^ID\d{6}$/.test(idPart));
+      var url;
+      if (byId) {
+        var id = idPart.startsWith("ID") ? idPart : "ID" + idPart;
+        url = base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&");
+      } else {
+        url = base + "/api/users?username=" + encodeURIComponent(raw) + pokerApiAuthQuery("&");
+      }
+      fetch(url)
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data && data.ok && data.userId) {
+            var uid = data.userId;
+            var unm = data.userName || uid;
+            var myIdX = resolveMyChatMemberId();
+            if (myIdX && peerChatIdsEqual(uid, myIdX)) {
+              manualHint.textContent = "Нельзя добавить себя";
+              return;
+            }
+            selectedMap[uid] = unm;
+            manualInp.value = "";
+            renderSelected();
+            renderPickers();
+            return;
+          }
+          manualHint.textContent = (data && data.error) || "Не найдено";
+        })
+        .catch(function () {
+          manualHint.textContent = POKER_NET_ERR;
+        });
+    }
+    if (manualAdd) manualAdd.addEventListener("click", tryAddManual);
+    if (manualInp) {
+      manualInp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          tryAddManual();
+        }
+      });
+    }
+    if (btnSubmit) {
+      btnSubmit.addEventListener("click", function () {
+        var title = titleInp ? String(titleInp.value || "").trim() : "";
+        if (!title) {
+          if (tg && tg.showAlert) tg.showAlert("Введите название группы");
+          else if (typeof alert === "function") alert("Введите название группы");
+          return;
+        }
+        var ids = Object.keys(selectedMap);
+        if (ids.length < 1) {
+          if (tg && tg.showAlert) tg.showAlert("Добавьте хотя бы одного участника");
+          else if (typeof alert === "function") alert("Добавьте хотя бы одного участника");
+          return;
+        }
+        if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+        if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+          if (tg && tg.showAlert) tg.showAlert("Войдите, чтобы создать группу");
+          return;
+        }
+        btnSubmit.disabled = true;
+        fetch(base + "/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerApiAuthJsonBody({ action: "createGroup", title: title, memberIds: ids })),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            btnSubmit.disabled = false;
+            if (data && data.ok && data.group && data.group.id) {
+              closeModal();
+              openConvFromDialogs(data.group.id, data.group.title || title);
+              if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+            else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+          })
+          .catch(function () {
+            btnSubmit.disabled = false;
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+            else if (typeof alert === "function") alert(POKER_NET_ERR);
+          });
+      });
+    }
+    btnOpen.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
+        return;
+      }
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите, чтобы создать группу");
+        return;
+      }
+      openModal();
+    });
+    if (backdrop) backdrop.addEventListener("click", closeModal);
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    if (btnCancel) btnCancel.addEventListener("click", closeModal);
+  })();
 
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {

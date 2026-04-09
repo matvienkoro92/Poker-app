@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.330">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.333">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=368" />
+    <link rel="stylesheet" href="./styles.css?v=372" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1559,12 +1559,15 @@
               <div class="chat-dialogs-list-wrap">
               <div class="chat-dialogs-list">
                 <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--in-dialogs-scroll">
-                  <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
-                    <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
-                    <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
-                    <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
-                      <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>
+                  <div class="chat-find-row">
+                    <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
+                      <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
+                      <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
+                      <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
+                        <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>
+                      </div>
                     </div>
+                    <button type="button" class="chat-find-new-group-btn" id="chatNewGroupBtn" aria-label="Создать групповой чат" title="Новый групповой чат">+</button>
                   </div>
                 </div>
                 <div class="chat-dialogs-block">
@@ -1820,6 +1823,43 @@
             </div>
             <div class="chat-emoji-picker chat-emoji-picker--hidden" id="chatEmojiPicker" role="dialog" aria-label="Смайлики" aria-hidden="true">
               <div class="chat-emoji-picker__grid" id="chatEmojiPickerGrid"></div>
+            </div>
+            <div class="chat-create-group-modal chat-create-group-modal--hidden" id="chatCreateGroupModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="chatCreateGroupModalTitle">
+              <div class="chat-create-group-modal__backdrop" id="chatCreateGroupModalBackdrop" tabindex="-1"></div>
+              <div class="chat-create-group-modal__box">
+                <button type="button" class="chat-create-group-modal__close" id="chatCreateGroupModalClose" aria-label="Закрыть">×</button>
+                <h2 id="chatCreateGroupModalTitle" class="chat-create-group-modal__title">Новый групповой чат</h2>
+                <label class="chat-create-group-modal__label">Название
+                  <input type="text" class="chat-input chat-create-group-modal__title-input" id="chatCreateGroupTitleInput" maxlength="100" autocomplete="off" placeholder="Например: Кеш пятница" />
+                </label>
+                <div class="chat-create-group-modal__tabs" role="tablist" aria-label="Источник списка">
+                  <button type="button" class="chat-create-group-modal__tab chat-create-group-modal__tab--active" data-create-group-tab="all" role="tab" aria-selected="true" id="chatCreateGroupTabAll">Все</button>
+                  <button type="button" class="chat-create-group-modal__tab" data-create-group-tab="friends" role="tab" aria-selected="false" id="chatCreateGroupTabFriends">Друзья</button>
+                  <button type="button" class="chat-create-group-modal__tab" data-create-group-tab="manual" role="tab" aria-selected="false" id="chatCreateGroupTabManual">Вручную</button>
+                </div>
+                <div id="chatCreateGroupPaneAll" class="chat-create-group-modal__pane" role="tabpanel">
+                  <p class="chat-create-group-modal__hint">Нажмите на человека, чтобы добавить или убрать из группы</p>
+                  <div class="chat-create-group-modal__picker" id="chatCreateGroupPickerAll"></div>
+                </div>
+                <div id="chatCreateGroupPaneFriends" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
+                  <div class="chat-create-group-modal__picker" id="chatCreateGroupPickerFriends"></div>
+                </div>
+                <div id="chatCreateGroupPaneManual" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
+                  <div class="chat-create-group-modal__manual-row">
+                    <input type="text" class="chat-input" id="chatCreateGroupManualInput" maxlength="35" placeholder="Ник в Telegram или ID" autocomplete="off" />
+                    <button type="button" class="chat-create-group-modal__add-manual" id="chatCreateGroupManualAddBtn">Добавить</button>
+                  </div>
+                  <p class="chat-create-group-modal__hint chat-create-group-modal__hint--err" id="chatCreateGroupManualHint" aria-live="polite"></p>
+                </div>
+                <div class="chat-create-group-modal__selected-wrap">
+                  <span class="chat-create-group-modal__selected-label">В группе:</span>
+                  <div class="chat-create-group-modal__selected" id="chatCreateGroupSelected"></div>
+                </div>
+                <div class="chat-create-group-modal__actions">
+                  <button type="button" class="profile-exit-btn chat-create-group-modal__submit" id="chatCreateGroupSubmitBtn">Создать</button>
+                  <button type="button" class="chat-create-group-modal__cancel" id="chatCreateGroupCancelBtn">Отмена</button>
+                </div>
+              </div>
             </div>
             <div class="chat-ctx-backdrop" id="chatContextBackdrop" aria-hidden="true"></div>
             <div class="chat-ctx-menu" id="chatContextMenu" role="menu" aria-hidden="true">
@@ -5701,7 +5741,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=461"></script>
+    <script defer src="./app.js?v=464"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
