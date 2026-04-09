@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.329">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.330">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=367" />
+    <link rel="stylesheet" href="./styles.css?v=368" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -3858,6 +3858,9 @@
             </p>
             <div class="profile-avatar-block">
               <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать фото" aria-label="Выбрать фото" />
+              <button type="button" class="profile-avatar-block__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате">
+                Уважение <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+              </button>
               <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
               <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
             </div>
@@ -3909,13 +3912,6 @@
               <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
             </div>
             <div class="profile-visible-to-others">
-              <p class="profile-visible-to-others__intro">Эта информация видна другим пользователям</p>
-              <div class="profile-visible-to-others__level">
-                <img id="profileAvatarMirror" src="./assets/profile-pokerist.jpg" alt="Покерист" class="profile-visible-to-others__level-img" width="256" height="139" decoding="async" />
-                <button type="button" class="profile-visible-to-others__respect profile-visible-to-others__respect--btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение">
-                  Уважение в чате <span id="profileRespectValue" class="profile-visible-to-others__respect-val">—</span>
-                </button>
-              </div>
               <section class="profile-status">
                 <h2 class="profile-status__title">Ваш уровень 1 из 55</h2>
                 <div class="profile-status__scale-wrap">
