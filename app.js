@@ -159,6 +159,46 @@ function getAppBaseUrlForLinks() {
   return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
 }
 
+/** Установленное PWA / standalone: для Web Share вне Telegram Mini App */
+function pokerIsPwaStandaloneForShare() {
+  try {
+    if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+    if (window.matchMedia && window.matchMedia("(display-mode: window-controls-overlay)").matches) return true;
+    if (window.navigator && window.navigator.standalone === true) return true;
+    if (document.referrer && String(document.referrer).indexOf("android-app://") === 0) return true;
+  } catch (e) {}
+  return false;
+}
+
+/**
+ * В standalone PWA без Telegram WebApp — системный диалог «Поделиться».
+ * @param {{ title?: string, text?: string, url?: string }} payload
+ * @returns {Promise<boolean>} true если share вызван (в т.ч. отмена пользователем); false — фолбэк на t.me/…
+ */
+function pokerTryPwaWebShare(payload) {
+  if (!pokerIsPwaStandaloneForShare()) return Promise.resolve(false);
+  if (isTelegramWebApp()) return Promise.resolve(false);
+  var nav = typeof navigator !== "undefined" ? navigator : null;
+  if (!nav || typeof nav.share !== "function") return Promise.resolve(false);
+  payload = payload || {};
+  var url = payload.url != null ? String(payload.url).trim() : "";
+  var data = {};
+  if (payload.title) data.title = String(payload.title);
+  if (payload.text) data.text = String(payload.text);
+  if (url) data.url = url;
+  if (!data.text && !data.url) return Promise.resolve(false);
+  try {
+    if (typeof nav.canShare === "function" && !nav.canShare(data)) return Promise.resolve(false);
+  } catch (eCan) {}
+  return nav.share(data).then(function () {
+    return true;
+  }).catch(function (err) {
+    if (err && err.name === "AbortError") return true;
+    return false;
+  });
+}
+
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 /** PWA: сессия после OAuth ВКонтакте */
@@ -1880,11 +1920,17 @@ function runGazetteAndTasksInit() {
         var headline = headlineEl ? headlineEl.textContent.trim() : "";
         var shareText = headline.length > 0 ? headline : "Новая новость в газете «Вестник Два туза»";
         var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareText + "\n" + link);
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-        else if (tg && tg.openLink) tg.openLink(shareUrl);
-        else window.open(shareUrl, "_blank");
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
+        pokerTryPwaWebShare({ text: shareText + "\n" + link, url: link }).then(function (pwaOk) {
+          if (pwaOk) {
+            if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
+            return;
+          }
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+          else if (tg && tg.openLink) tg.openLink(shareUrl);
+          else window.open(shareUrl, "_blank");
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
+        });
       } else {
         if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(link).then(function () {
@@ -1942,10 +1988,12 @@ function runGazetteAndTasksInit() {
   if (subscribeBtn || subscribeBtnNews) {
     var gazetteSubscribeHandledInTouchend = false;
     function runGazetteSubscribe() {
-      var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
-      if (!initData) {
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram, чтобы подписаться."); else alert("Откройте приложение в Telegram, чтобы подписаться.");
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        var tgNeed = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        var msgNeed =
+          "Войдите в приложение (Telegram в мини‑аппе или через кнопку входа на сайте), чтобы подписаться на газету.";
+        if (tgNeed && tgNeed.showAlert) tgNeed.showAlert(msgNeed);
+        else alert(msgNeed);
         return;
       }
       var activeBtn = subscribeBtn || subscribeBtnNews;
@@ -1955,6 +2003,19 @@ function runGazetteAndTasksInit() {
       var appEl = document.getElementById("app");
       var base = (appEl && appEl.getAttribute("data-api-base")) || (typeof location !== "undefined" && location.origin) || "";
       var apiUrl = (base ? base.replace(/\/$/, "") : "") + "/api/gazette-subscribe";
+      var payload =
+        typeof pokerApiAuthJsonBody === "function"
+          ? pokerApiAuthJsonBody({ unsubscribe: subscribed })
+          : {
+              initData: (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "",
+              unsubscribe: subscribed,
+            };
+      if (!payload.initData && !payload.pwaSession && !payload.pwaVkSession) {
+        var tgEmpty = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgEmpty && tgEmpty.showAlert) tgEmpty.showAlert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+        else alert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+        return;
+      }
       if (subscribeBtn) {
         subscribeBtn.disabled = true;
         subscribeBtn.textContent = "Подписываем…";
@@ -1973,7 +2034,7 @@ function runGazetteAndTasksInit() {
       fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, unsubscribe: subscribed }),
+        body: JSON.stringify(payload),
       })
         .then(function (r) {
           return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -2029,6 +2090,278 @@ function runGazetteAndTasksInit() {
       for (var k = 0; k < articleSubscribeBtns.length; k++) bindSubscribeClick(articleSubscribeBtns[k]);
     }
   }
+
+  (function initGazetteArticleComments() {
+    var shareRowSelector = ".gazette-modal__share-row";
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+    function formatCommentAt(at) {
+      try {
+        var d = new Date(at);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleString("ru-RU", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch (eFmt) {
+        return "";
+      }
+    }
+    function renderGazetteCommentsFeed(feed, items, isAdmin) {
+      if (!feed) return;
+      if (!items || !items.length) {
+        feed.innerHTML =
+          '<p class="gazette-article-comments__empty">Пока нет комментариев — напишите первым.</p>';
+        return;
+      }
+      feed.innerHTML = items
+        .map(function (c) {
+          var text = esc(c.text || "");
+          var author = esc(c.author || "Читатель");
+          var ds = formatCommentAt(c.at);
+          var meta = ds
+            ? '<time class="gazette-article-comments__time">' + esc(ds) + "</time>"
+            : "";
+          var cid = c.id != null ? String(c.id) : "";
+          var showDel = isAdmin && cid;
+          var aidAttr = esc(String(feed.getAttribute("data-gazette-article-comments-article-id") || ""));
+          var delBtn = showDel
+            ? '<button type="button" class="gazette-article-comments__delete" data-gazette-comment-delete="' +
+              esc(cid) +
+              '" data-gazette-comment-article="' +
+              aidAttr +
+              '">Удалить</button>'
+            : "";
+          return (
+            '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head"><span class="gazette-article-comments__author">' +
+            author +
+            "</span>" +
+            meta +
+            delBtn +
+            '</header><p class="gazette-article-comments__text">' +
+            text +
+            "</p></article>"
+          );
+        })
+        .join("");
+    }
+    function loadGazetteCommentsFeed(feed) {
+      var aid = feed.getAttribute("data-gazette-article-comments-article-id");
+      if (!aid) return;
+      var base = typeof getApiBase === "function" ? getApiBase() : "";
+      if (!base) {
+        renderGazetteCommentsFeed(feed, [], false);
+        return;
+      }
+      feed.innerHTML = '<p class="gazette-article-comments__loading">Загрузка…</p>';
+      var q =
+        "?articleId=" +
+        encodeURIComponent(aid) +
+        (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "");
+      fetch(base + "/api/gazette-article-comments" + q)
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          if (res.ok && res.data && res.data.ok && Array.isArray(res.data.comments)) {
+            renderGazetteCommentsFeed(feed, res.data.comments, !!res.data.isAdmin);
+          } else {
+            renderGazetteCommentsFeed(feed, [], false);
+          }
+        })
+        .catch(function () {
+          renderGazetteCommentsFeed(feed, [], false);
+        });
+    }
+    function refreshAllGazetteCommentFeeds() {
+      var feeds = newsEl.querySelectorAll(".gazette-article-comments__feed[data-gazette-article-comments-article-id]");
+      for (var i = 0; i < feeds.length; i++) loadGazetteCommentsFeed(feeds[i]);
+    }
+    function injectGazetteCommentsForArticle(article) {
+      if (!article || article.getAttribute("data-gazette-comments-injected") === "1") return;
+      if (article.getAttribute("data-gazette-draft") === "1") return;
+      var aid = article.getAttribute("data-gazette-article");
+      if (!aid || !/^\d+$/.test(aid)) return;
+      article.setAttribute("data-gazette-comments-injected", "1");
+      var shareRow = article.querySelector(shareRowSelector);
+      var wrap = document.createElement("section");
+      wrap.className = "gazette-article-comments";
+      wrap.setAttribute("aria-label", "Комментарии к новости");
+      var cred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+      var hintText =
+        "Чтобы оставить комментарий, войдите через Telegram или ВКонтакте (PWA) либо откройте приложение в Telegram.";
+      wrap.innerHTML =
+        '<h4 class="gazette-article-comments__title">Комментарии читателей</h4>' +
+        '<p class="gazette-article-comments__hint gazette-article-comments__hint--login"' +
+        (cred ? " hidden" : "") +
+        ">" +
+        esc(hintText) +
+        '</p>' +
+        '<div class="gazette-article-comments__feed" data-gazette-article-comments-article-id="' +
+        esc(aid) +
+        '"></div>' +
+        '<form class="gazette-article-comments__form"' +
+        (cred ? "" : " hidden") +
+        " novalidate>" +
+        '<label class="gazette-article-comments__label" for="gazetteCommentInput_' +
+        esc(aid) +
+        '">Ваш комментарий</label>' +
+        '<textarea id="gazetteCommentInput_' +
+        esc(aid) +
+        '" class="gazette-article-comments__textarea" maxlength="2000" rows="3" placeholder="Мнение, вопрос редакции, уточнение…"></textarea>' +
+        '<button type="submit" class="gazette-article-comments__submit">Отправить</button>' +
+        '<p class="gazette-article-comments__form-status" aria-live="polite"></p>' +
+        "</form>";
+      var actionsCard = article.querySelector("[data-gazette-article-actions]");
+      if (actionsCard) {
+        actionsCard.appendChild(wrap);
+      } else {
+        var shareRow = article.querySelector(shareRowSelector);
+        if (shareRow && shareRow.parentNode) {
+          shareRow.parentNode.insertBefore(wrap, shareRow);
+        } else {
+          article.appendChild(wrap);
+        }
+      }
+      loadGazetteCommentsFeed(wrap.querySelector(".gazette-article-comments__feed"));
+    }
+    function injectAllGazetteArticleComments() {
+      var arts = newsEl.querySelectorAll("article[data-gazette-article]");
+      for (var a = 0; a < arts.length; a++) injectGazetteCommentsForArticle(arts[a]);
+    }
+    injectAllGazetteArticleComments();
+    if (typeof MutationObserver !== "undefined" && newsEl) {
+      var moGac = new MutationObserver(function () {
+        if (newsEl.hidden) return;
+        injectAllGazetteArticleComments();
+        refreshAllGazetteCommentFeeds();
+      });
+      try {
+        moGac.observe(newsEl, { attributes: true, attributeFilter: ["hidden"] });
+      } catch (eMoGac) {}
+    }
+    var gacDelegatedBound = false;
+    function bindGazetteCommentsDelegated() {
+      if (gacDelegatedBound || !newsEl) return;
+      gacDelegatedBound = true;
+      newsEl.addEventListener("submit", function (ev) {
+        var form = ev.target;
+        if (!form || !form.classList || !form.classList.contains("gazette-article-comments__form")) return;
+        if (!newsEl.contains(form)) return;
+        ev.preventDefault();
+        var section = form.closest(".gazette-article-comments");
+        var feed = section && section.querySelector(".gazette-article-comments__feed");
+        var ta = form.querySelector(".gazette-article-comments__textarea");
+        var st = form.querySelector(".gazette-article-comments__form-status");
+        var sub = form.querySelector(".gazette-article-comments__submit");
+        if (!feed || !ta) return;
+        var aid = feed.getAttribute("data-gazette-article-comments-article-id");
+        var text = ta.value ? ta.value.trim() : "";
+        if (!text) {
+          if (st) st.textContent = "Введите текст комментария.";
+          return;
+        }
+        if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+          if (st) st.textContent = "Войдите в приложение, чтобы комментировать.";
+          return;
+        }
+        var basePost = typeof getApiBase === "function" ? getApiBase() : "";
+        if (!basePost || typeof pokerApiAuthJsonBody !== "function") {
+          if (st) st.textContent = "Не удалось отправить.";
+          return;
+        }
+        if (sub) sub.disabled = true;
+        if (st) st.textContent = "";
+        var payload = pokerApiAuthJsonBody({ articleId: parseInt(aid, 10), text: text });
+        fetch(basePost + "/api/gazette-article-comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              return { ok: r.ok, data: data };
+            });
+          })
+          .then(function (res) {
+            if (sub) sub.disabled = false;
+            if (res.ok && res.data && res.data.ok) {
+              ta.value = "";
+              if (st) st.textContent = "Комментарий опубликован.";
+              loadGazetteCommentsFeed(feed);
+              return;
+            }
+            var msg =
+              res.data && res.data.error ? String(res.data.error) : "Не удалось отправить.";
+            if (st) st.textContent = msg;
+          })
+          .catch(function () {
+            if (sub) sub.disabled = false;
+            if (st) st.textContent = "Сеть недоступна.";
+          });
+      });
+      newsEl.addEventListener("click", function (ev) {
+        var delEl = ev.target && ev.target.closest && ev.target.closest("[data-gazette-comment-delete]");
+        if (!delEl || !newsEl.contains(delEl)) return;
+        ev.preventDefault();
+        var cid = delEl.getAttribute("data-gazette-comment-delete");
+        var artId = delEl.getAttribute("data-gazette-comment-article");
+        if (!cid || !artId) return;
+        if (!confirm("Удалить этот комментарий?")) return;
+        var baseDel = typeof getApiBase === "function" ? getApiBase() : "";
+        if (!baseDel || typeof pokerApiAuthJsonBody !== "function") return;
+        if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+        delEl.disabled = true;
+        var payloadDel = pokerApiAuthJsonBody({
+          action: "delete",
+          commentId: cid,
+          articleId: parseInt(artId, 10),
+        });
+        fetch(baseDel + "/api/gazette-article-comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloadDel),
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              return { ok: r.ok, data: data };
+            });
+          })
+          .then(function (res) {
+            delEl.disabled = false;
+            var feedDel = newsEl.querySelector(
+              '[data-gazette-article-comments-article-id="' + artId + '"]'
+            );
+            if (res.ok && res.data && res.data.ok) {
+              if (feedDel) loadGazetteCommentsFeed(feedDel);
+              return;
+            }
+            var tgDel = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            var msgDel =
+              res.data && res.data.error ? String(res.data.error) : "Не удалось удалить";
+            if (tgDel && tgDel.showAlert) tgDel.showAlert(msgDel);
+            else alert(msgDel);
+          })
+          .catch(function () {
+            delEl.disabled = false;
+            var tgDel2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            if (tgDel2 && tgDel2.showAlert) tgDel2.showAlert("Сеть недоступна");
+            else alert("Сеть недоступна");
+          });
+      });
+    }
+    bindGazetteCommentsDelegated();
+  })();
   }
 
   (function initPartnershipModal() {
@@ -2477,13 +2810,28 @@ function runGazetteAndTasksInit() {
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
           if (window.__touchWasScroll && window.__touchWasScroll()) return;
-          var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
-          if (!initData) {
-            var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram, чтобы подписаться."); else alert("Откройте приложение в Telegram, чтобы подписаться.");
+          if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+            var tgCred = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            var msgCred =
+              "Войдите в приложение (Telegram в мини‑аппе или через кнопку входа на сайте), чтобы подписаться.";
+            if (tgCred && tgCred.showAlert) tgCred.showAlert(msgCred);
+            else alert(msgCred);
             return;
           }
           var subscribed = btn.dataset.subscribed === "1";
+          var payload =
+            typeof pokerApiAuthJsonBody === "function"
+              ? pokerApiAuthJsonBody({ unsubscribe: subscribed })
+              : {
+                  initData: (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "",
+                  unsubscribe: subscribed,
+                };
+          if (!payload.initData && !payload.pwaSession && !payload.pwaVkSession) {
+            var tgEmpty = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            if (tgEmpty && tgEmpty.showAlert) tgEmpty.showAlert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+            else alert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+            return;
+          }
           var appEl = document.getElementById("app");
           var base = (appEl && appEl.getAttribute("data-api-base")) || (typeof location !== "undefined" && location.origin) || "";
           var apiUrl = (base ? base.replace(/\/$/, "") : "") + "/api/rating-subscribe";
@@ -2494,7 +2842,7 @@ function runGazetteAndTasksInit() {
           fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ initData: initData, unsubscribe: subscribed }),
+            body: JSON.stringify(payload),
           })
             .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; }); })
             .then(function (data) {
@@ -2854,10 +3202,13 @@ function runGazetteAndTasksInit() {
       var link = getCharterShareLink();
       var shareText = getCharterShareText();
       var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(shareText);
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
-      else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
-      else window.open(shareUrl, "_blank");
+      pokerTryPwaWebShare({ title: shareText, text: shareText + "\n" + link, url: link }).then(function (pwaOk) {
+        if (pwaOk) return;
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+        else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+      });
     }
     function runCharterCopy() {
       var link = getCharterShareLink();
@@ -3975,6 +4326,12 @@ function pokerPulseShellHeightToInnerHeightForProfile() {
 function pokerFlushViewportAfterProfileFieldBlur() {
   if (!document.body || document.body.getAttribute("data-view") !== "profile") return;
   try {
+    document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+    document.body.classList.remove("chat-keyboard-open");
+    document.documentElement.style.removeProperty("--chat-vv-inset");
+    document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+  } catch (eKbProf) {}
+  try {
     if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
       pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
     }
@@ -4049,6 +4406,27 @@ function initProfileKeyboardViewportCleanup() {
       }
     }, 60);
   }
+  profileRoot.addEventListener(
+    "focusin",
+    function (ev) {
+      var t = ev.target;
+      if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
+      if (t.id === "profileAvatarInput") return;
+      if (
+        typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
+        window.__pokerIsChatPhysicalKeyboardContext()
+      ) {
+        return;
+      }
+      if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
+        window.__pokerActivateChatKeyboardViewport();
+      } else {
+        document.documentElement.classList.add("chat-keyboard-open");
+        document.body.classList.add("chat-keyboard-open");
+      }
+    },
+    true
+  );
   profileRoot.addEventListener(
     "focusout",
     function (ev) {
@@ -7248,11 +7626,14 @@ function hallFameOpenTelegramShareForSection(section) {
   var intro = HALL_FAME_SHARE_INTRO[section] || "Зал славы «Два туза»";
   var text = intro + "\n\n" + url;
   var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-  var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-  if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-  else if (tg && tg.openLink) tg.openLink(shareUrl);
-  else window.open(shareUrl, "_blank", "noopener,noreferrer");
+  pokerTryPwaWebShare({ title: intro, text: text, url: url }).then(function (pwaOk) {
+    if (pwaOk) return;
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+    else if (tg && tg.openLink) tg.openLink(shareUrl);
+    else window.open(shareUrl, "_blank", "noopener,noreferrer");
+  });
 }
 
 (function initHallOfFamePanelShareButtons() {
@@ -8556,11 +8937,17 @@ function initWinterRatingPlayerModal() {
       var totalStr = modal._winterPlayerModalTotalStr || "0";
       var shareText = "Игрок " + nick + " уже выиграл " + totalStr + ". Посмотрите отчет по турнирам - " + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareText);
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-      else if (tg && tg.openLink) tg.openLink(shareUrl);
-      else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
+      pokerTryPwaWebShare({ text: shareText, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+        else if (tg && tg.openLink) tg.openLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
+      });
     });
   }
 }
@@ -10167,23 +10554,20 @@ function loadHeaderAvatar() {
 function initProfileAvatar() {
   var avatarEl = document.getElementById("profileAvatar");
   var inputEl = document.getElementById("profileAvatarInput");
-  var btnEl = document.getElementById("profileAvatarBtn");
   var feedbackEl = document.getElementById("profileAvatarFeedback");
-  if (!avatarEl || !inputEl || !btnEl) return;
+  if (!avatarEl || !inputEl) return;
 
   var base = getApiBase();
   if (!base) return;
 
-  var pendingAvatarDataUrl = null;
   var uploadInProgress = false;
-  var BTN_LABEL = "Сохранить фото";
 
   function showAvatarFeedback(text, isError) {
     if (!feedbackEl) return;
     feedbackEl.textContent = text || "";
     feedbackEl.classList.toggle("profile-avatar-block__feedback--visible", !!text);
     feedbackEl.style.color = isError ? "#ef4444" : "";
-    if (text && !isError) {
+    if (text && !isError && !/сохранение/i.test(text)) {
       var hideMs = /сохранена/i.test(text) ? 5200 : 3500;
       setTimeout(function () {
         if (feedbackEl.textContent === text) {
@@ -10194,13 +10578,7 @@ function initProfileAvatar() {
     }
   }
 
-  function clearPendingUi() {
-    pendingAvatarDataUrl = null;
-    btnEl.classList.remove("profile-avatar-block__btn--pending");
-  }
-
   function loadAvatar() {
-    clearPendingUi();
     inputEl.value = "";
     var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     fetch(base + "/api/avatar" + aq)
@@ -10265,18 +10643,9 @@ function initProfileAvatar() {
     inputEl.click();
   }
 
-  function finalizePendingPreview(dataUrl) {
-    pendingAvatarDataUrl = dataUrl;
-    avatarEl.src = dataUrl;
-    btnEl.classList.add("profile-avatar-block__btn--pending");
-    inputEl.value = "";
-    showAvatarFeedback("Нажмите «Сохранить фото», чтобы отправить снимок", false);
-  }
-
   function uploadAvatar(dataUrl) {
     uploadInProgress = true;
-    btnEl.disabled = true;
-    btnEl.textContent = "Сохранение…";
+    showAvatarFeedback("Сохранение…", false);
     var payload =
       typeof pokerApiAuthJsonBody === "function"
         ? pokerApiAuthJsonBody({ image: dataUrl })
@@ -10289,11 +10658,8 @@ function initProfileAvatar() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         uploadInProgress = false;
-        btnEl.disabled = false;
-        btnEl.textContent = BTN_LABEL;
         inputEl.value = "";
         if (data && data.ok && data.avatar) {
-          clearPendingUi();
           avatarEl.src = data.avatar;
           loadHeaderAvatar();
           showAvatarFeedback("Фотография сохранена", false);
@@ -10309,8 +10675,6 @@ function initProfileAvatar() {
       })
       .catch(function () {
         uploadInProgress = false;
-        btnEl.disabled = false;
-        btnEl.textContent = BTN_LABEL;
         inputEl.value = "";
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         showAvatarFeedback(POKER_NET_ERR, true);
@@ -10322,13 +10686,7 @@ function initProfileAvatar() {
       });
   }
 
-  btnEl.addEventListener("click", function () {
-    if (uploadInProgress) return;
-    if (!pendingAvatarDataUrl) {
-      showAvatarFeedback("Сначала выберите фото (нажмите на аватар)", false);
-      return;
-    }
-    var toSend = pendingAvatarDataUrl;
+  function uploadAvatarAfterPick(toSend) {
     var base64 = toSend.replace(/^data:image\/\w+;base64,/, "");
     if (base64.length > 100000) {
       var im = new Image();
@@ -10355,7 +10713,7 @@ function initProfileAvatar() {
     } else {
       uploadAvatar(toSend);
     }
-  });
+  }
 
   avatarEl.addEventListener("click", function () {
     openProfileAvatarFilePicker();
@@ -10383,10 +10741,14 @@ function initProfileAvatar() {
       var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
       if (base64.length > 100000) {
         resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
-          finalizePendingPreview(dataUrl2);
+          avatarEl.src = dataUrl2;
+          inputEl.value = "";
+          uploadAvatarAfterPick(dataUrl2);
         });
       } else {
-        finalizePendingPreview(dataUrl);
+        avatarEl.src = dataUrl;
+        inputEl.value = "";
+        uploadAvatarAfterPick(dataUrl);
       }
     });
   });
@@ -11567,15 +11929,21 @@ function closeDailyPredictionModal() {
       if (prediction) shortText += "\n\n" + prediction;
       shortText += "\n\nПосмотрите своё предсказание здесь —\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shortText);
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink(shareUrl);
-      } else if (tg && tg.openLink) {
-        tg.openLink(shareUrl);
-      } else {
-        window.open(shareUrl, "_blank");
-      }
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("daily_prediction");
+      pokerTryPwaWebShare({ text: shortText, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("daily_prediction");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) {
+          tg.openTelegramLink(shareUrl);
+        } else if (tg && tg.openLink) {
+          tg.openLink(shareUrl);
+        } else {
+          window.open(shareUrl, "_blank");
+        }
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("daily_prediction");
+      });
     });
   }
   document.addEventListener("keydown", function (e) {
@@ -12518,23 +12886,38 @@ function initRaffles() {
     }
     rafflesSubscribeBtn.addEventListener("click", function () {
       var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      var init = tgLocal && tgLocal.initData ? tgLocal.initData : initData;
       var baseUrl = getApiBase();
-      if (!init || !baseUrl) {
+      if (!baseUrl) {
+        if (tgLocal && tgLocal.showAlert) tgLocal.showAlert("Не задан адрес API.");
+        else alert("Не задан адрес API.");
+        return;
+      }
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
         if (tgLocal && tgLocal.showAlert) {
-          tgLocal.showAlert("Откройте приложение в Telegram, чтобы подписаться.");
+          tgLocal.showAlert(
+            "Войдите в приложение (Telegram в мини‑аппе или через кнопку входа на сайте), чтобы подписаться."
+          );
         } else {
-          alert("Откройте приложение в Telegram, чтобы подписаться.");
+          alert("Войдите в приложение, чтобы подписаться.");
         }
         return;
       }
       var subscribed = rafflesSubscribeBtn.dataset.subscribed === "1";
+      var payload =
+        typeof pokerApiAuthJsonBody === "function"
+          ? pokerApiAuthJsonBody({ unsubscribe: subscribed })
+          : { initData: (tgLocal && tgLocal.initData) || initData || "", unsubscribe: subscribed };
+      if (!payload.initData && !payload.pwaSession && !payload.pwaVkSession) {
+        if (tgLocal && tgLocal.showAlert) tgLocal.showAlert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+        else alert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
+        return;
+      }
       rafflesSubscribeBtn.disabled = true;
       rafflesSubscribeBtn.textContent = "Подписываем…";
       fetch(baseUrl.replace(/\/$/, "") + "/api/raffle-subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: init, unsubscribe: subscribed }),
+        body: JSON.stringify(payload),
       })
         .then(function (r) {
           return r.json().catch(function () {
@@ -13690,10 +14073,17 @@ function initRaffles() {
         tournamentName +
         "\n" +
         link;
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl); else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
+      pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
+      });
     });
   }
 
@@ -14238,15 +14628,19 @@ function initRaffles() {
     rafflesInviteFriendBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
-      var shareUrl =
-        "https://t.me/share/url?url=&text=" +
-        encodeURIComponent(
-          "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link
-        );
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-      else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+      var inviteBody =
+        "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link;
+      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteBody);
+      pokerTryPwaWebShare({ text: inviteBody, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+      });
     });
   }
 })();
@@ -14290,13 +14684,18 @@ function initRaffles() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = videoLessonsSectionLink();
       if (!link) return;
-      var shareUrl =
-        "https://t.me/share/url?url=&text=" +
-        encodeURIComponent(shareInviteText + "\n" + link);
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-      else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+      var inviteFull = shareInviteText + "\n" + link;
+      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteFull);
+      pokerTryPwaWebShare({ text: inviteFull, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+      });
     });
   }
 })();
@@ -14813,13 +15212,18 @@ function syncVideoLessonsModalScrollLock() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var linkInv = coachReviewsDeepLink();
       if (!linkInv) return;
-      var shareUrlInv =
-        "https://t.me/share/url?url=&text=" +
-        encodeURIComponent(coachReviewsShareText + "\n" + linkInv);
-      var tgInv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tgInv && tgInv.openTelegramLink) tgInv.openTelegramLink(shareUrlInv);
-      else window.open(shareUrlInv, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews");
+      var reviewsFull = coachReviewsShareText + "\n" + linkInv;
+      var shareUrlInv = "https://t.me/share/url?url=&text=" + encodeURIComponent(reviewsFull);
+      pokerTryPwaWebShare({ text: reviewsFull, url: linkInv }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews");
+          return;
+        }
+        var tgInv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgInv && tgInv.openTelegramLink) tgInv.openTelegramLink(shareUrlInv);
+        else window.open(shareUrlInv, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews");
+      });
     });
   }
 })();
@@ -17928,6 +18332,11 @@ function initChat() {
           onlineCount: data.onlineCount,
           generalPinned: data.generalPinned != null ? data.generalPinned : null,
         };
+        /* Полоса закрепления (глобальное / личное) зависит от generalPinned в кэше; без этого при том же
+           наборе сообщений renderGeneralMessages не вызывается — после открепления админом плашка залипала. */
+        try {
+          refreshChatSelfPinBars();
+        } catch (ePinLoadG) {}
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
@@ -19881,10 +20290,11 @@ function initChat() {
       if (clubPrevG) clubPrevG.textContent = "Войдите в аккаунт";
       if (!contactsEl.querySelector(".chat-guest-cta")) {
         contactsEl.innerHTML =
+          '<div class="chat-contacts-list-block">' +
           '<div class="chat-guest-cta">' +
           '<p class="chat-empty chat-empty--guest-msg">Чтобы писать в чате, войдите в свой аккаунт</p>' +
           '<button type="button" class="profile-exit-btn" id="chatGuestLoginBtn">Войти в аккаунт</button>' +
-          "</div>";
+          "</div></div>";
         var gBtn = document.getElementById("chatGuestLoginBtn");
         if (gBtn) {
           gBtn.addEventListener("click", function () {
@@ -20002,7 +20412,9 @@ function initChat() {
         updateChatHeaderStats();
         if (contactsForList.length === 0) {
           contactsEl.innerHTML =
-            '<p class="chat-empty">Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.</p>';
+            '<div class="chat-contacts-list-block">' +
+            '<p class="chat-empty">Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.</p>' +
+            "</div>";
           updateDialogUnreadBadges();
           updateChatNavDot();
         } else {
@@ -20185,7 +20597,10 @@ function initChat() {
               "</div></div>"
             );
           }).join("");
-          contactsEl.innerHTML = '<div class="chat-dialogs-block">' + contactButtons + '</div>';
+          contactsEl.innerHTML =
+            '<div class="chat-contacts-list-block"><div class="chat-dialogs-block">' +
+            contactButtons +
+            "</div></div>";
           updateDialogUnreadBadges();
           contactsEl.querySelectorAll(".chat-contact img.chat-contact__avatar").forEach(function (img) {
             img.onerror = function () {
@@ -20244,7 +20659,9 @@ function initChat() {
         applyContactsApiResponse(data);
       })
       .catch(function () {
-        if (!contactsInstantFromCache) contactsEl.innerHTML = "<p class=\"chat-empty\">Ошибка</p>";
+        if (!contactsInstantFromCache)
+          contactsEl.innerHTML =
+            '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
         if (window.__openClubChatAfterNextContacts) {
           window.__openClubChatAfterNextContacts = false;
           setTimeout(function () {
@@ -22250,8 +22667,11 @@ function initChat() {
         /* Экран чата: vv иногда даёт overlap≈0 и heightLoss≈0 — без фокуса композера kbLikely ложен и поле под клавиатурой. */
         if (String(document.body.getAttribute("data-view") || "") === "chat") {
           var composerKb = chatComposerEl && document.activeElement === chatComposerEl;
+          var findDlgEl = document.getElementById("chatFindByIdInputDialogs");
+          var findDlgKb = !!(findDlgEl && document.activeElement === findDlgEl);
           var kbLikely =
             composerKb ||
+            findDlgKb ||
             heightLoss > 48 ||
             (vvh > 0 && ih > 0 && vvh + 100 < ih);
           if (kbLikely) {
@@ -22261,8 +22681,21 @@ function initChat() {
             } else if (isIosLikeForChatViewport() && inset < 140 && heightLoss > 88) {
               inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.88)));
             }
-            if (composerKb && inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
+            if ((composerKb || findDlgKb) && inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
               inset = Math.min(cap, Math.max(inset, Math.round(ih * 0.38)));
+            }
+          }
+        }
+        if (String(document.body.getAttribute("data-view") || "") === "profile") {
+          var aeProf = document.activeElement;
+          var profKb =
+            aeProf &&
+            (aeProf.id === "profileChatDisplayNameInput" || aeProf.id === "profileP21IdInput");
+          if (profKb) {
+            var softFloorProf = Math.min(cap, Math.max(150, Math.round(ih * 0.32)));
+            if (inset < 110) inset = Math.max(inset, softFloorProf);
+            if (inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
+              inset = Math.min(cap, Math.max(inset, Math.round(ih * 0.36)));
             }
           }
         }
@@ -22390,6 +22823,14 @@ function initChat() {
           window.visualViewport.addEventListener("scroll", viewportResizeScrollHandler);
         }
       }
+      window.__pokerActivateChatKeyboardViewport = onChatInputFocus;
+      function isAnyChatKeyboardChromeFocus(el) {
+        if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return false;
+        if (chatComposerEl && el === chatComposerEl) return true;
+        var id = el.id || "";
+        if (id === "chatFindByIdInputDialogs" || id === "chatFindByIdInput") return true;
+        return false;
+      }
       function onChatInputBlur() {
         if (chatWindowResizeHandler) {
           try {
@@ -22404,7 +22845,7 @@ function initChat() {
         }
         function runBlurCleanup() {
           var active = document.activeElement;
-          if (active === chatComposerEl) return;
+          if (isAnyChatKeyboardChromeFocus(active)) return;
           var el = getVisibleMessagesEl();
           var anchorFromBottom = 0;
           if (el) {
@@ -22434,22 +22875,28 @@ function initChat() {
         setTimeout(runBlurCleanup, 0);
         /* iOS: blur и visualViewport обновляются не синхронно — повторяем сброс, иначе поле ввода «остаётся выше». */
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 90);
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 280);
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 520);
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 880);
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 1350);
         setTimeout(function () {
-          if (document.activeElement !== chatComposerEl) finalizeChatKeyboardDismiss();
+          if (isAnyChatKeyboardChromeFocus(document.activeElement)) return;
+          finalizeChatKeyboardDismiss();
         }, 2200);
       }
       if (chatComposerEl) {
@@ -23372,11 +23819,17 @@ function initChat() {
       if (!link) return;
       var text = "Заходи в общий чат клуба «Два туза» в приложении:\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-      var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tgw && tgw.openTelegramLink) tgw.openTelegramLink(shareUrl);
-      else if (tgw && tgw.openLink) tgw.openLink(shareUrl);
-      else window.open(shareUrl, "_blank");
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
+      pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
+          return;
+        }
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgw && tgw.openTelegramLink) tgw.openTelegramLink(shareUrl);
+        else if (tgw && tgw.openLink) tgw.openLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
+      });
     });
   })();
 
@@ -23727,12 +24180,21 @@ function initChat() {
     });
     findByIdInputDialogs.addEventListener("focus", function () {
       if (
-        typeof window.__pokerIsChatPhysicalKeyboardContext !== "function" ||
-        !window.__pokerIsChatPhysicalKeyboardContext()
+        typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
+        window.__pokerIsChatPhysicalKeyboardContext()
       ) {
+        if (lastSuggestions.length) showSuggest(lastSuggestions);
+        return;
+      }
+      if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
+        window.__pokerActivateChatKeyboardViewport();
+      } else {
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
       }
+      try {
+        findByIdInputDialogs.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      } catch (eSi) {}
       if (lastSuggestions.length) showSuggest(lastSuggestions);
     });
     findByIdInputDialogs.addEventListener("blur", function (e) {
@@ -26438,7 +26900,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Фриролл", buyin: "Бесплатно · R:250₽ / A:500₽", guarantee: "100 000₽" }
 ];
 
-/** Главная: блок «Следующий фриролл» — каждую среду 18:00 МСК, вход 0, гарантия 1M (отдельно от субботнего ряда турнира дня). */
+/** Среда 18:00 МСК: бай-ин 0, гарантия 1M — только карточка «Следующий фриролл» на главной (в таблицу расписания не выносим). */
 var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 000 000₽" };
 
 /** Короткое имя дня недели по календарю Москвы для момента utcMs (Date или число). */
@@ -26497,21 +26959,26 @@ function updateTournamentDayBlock() {
     dt.setUTCDate(dt.getUTCDate() + add);
     return { y: dt.getUTCFullYear(), m: dt.getUTCMonth(), d: dt.getUTCDate() };
   }
-  /** Следующий фриролл для карточки на главной (каждую среду 18:00 МСК) — та же логика старта/конца рег, что у турнира дня. */
-  function getNextFreerollState(now) {
-    var FR = NEXT_HOME_FREEROLL;
+  /** Слот фриролла в заданный день недели (МСК), та же логика старта / конца рег, что у турнира дня. */
+  function getNextWeekdayFreerollSlot(now, targetDow, tInfo) {
     var p = getMskDateParts();
     var mskDow = getMskDayOfWeek();
-    var wedDow = 3;
-    var wedOffset = (wedDow - mskDow + 7) % 7;
-    var wed = addDaysToYmd(p.y, p.m, p.d, wedOffset);
-    var startWed = new Date(Date.UTC(wed.y, wed.m, wed.d, MSK_START_UTC_HOUR, 0, 0, 0));
-    var endRegWed = new Date(Date.UTC(wed.y, wed.m, wed.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
-    if (now < startWed) return { t: FR, target: startWed, label: "" };
-    if (now < endRegWed) return { t: FR, target: endRegWed, label: "до конца рег " };
-    var nextWed = addDaysToYmd(wed.y, wed.m, wed.d, 7);
-    var nextStart = new Date(Date.UTC(nextWed.y, nextWed.m, nextWed.d, MSK_START_UTC_HOUR, 0, 0, 0));
-    return { t: FR, target: nextStart, label: "" };
+    var offset = (targetDow - mskDow + 7) % 7;
+    var day = addDaysToYmd(p.y, p.m, p.d, offset);
+    var startSlot = new Date(Date.UTC(day.y, day.m, day.d, MSK_START_UTC_HOUR, 0, 0, 0));
+    var endRegSlot = new Date(Date.UTC(day.y, day.m, day.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    if (now < startSlot) return { t: tInfo, target: startSlot, label: "" };
+    if (now < endRegSlot) return { t: tInfo, target: endRegSlot, label: "до конца рег " };
+    var nextDay = addDaysToYmd(day.y, day.m, day.d, 7);
+    var nextStart = new Date(Date.UTC(nextDay.y, nextDay.m, nextDay.d, MSK_START_UTC_HOUR, 0, 0, 0));
+    return { t: tInfo, target: nextStart, label: "" };
+  }
+  /** Карточка «Следующий фриролл»: чередование ближайшего среды (1M) и ближайшей субботы (100k из турнира дня). */
+  function getNextFreerollState(now) {
+    var wed = getNextWeekdayFreerollSlot(now, 3, NEXT_HOME_FREEROLL);
+    var sat = getNextWeekdayFreerollSlot(now, 6, TOURNAMENT_OF_DAY_BY_WEEKDAY[6]);
+    if (wed.target.getTime() <= sat.target.getTime()) return wed;
+    return sat;
   }
   function formatTimer() {
     var n = new Date();
@@ -26698,14 +27165,18 @@ function handleTournamentDayShare() {
         " Скачать можно здесь:\n" +
         link;
     }
-    var shareUrl =
-      "https://t.me/share/url?url=&text=" +
-      encodeURIComponent(text);
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-    else if (tg && tg.openLink) tg.openLink(shareUrl);
-    else window.open(shareUrl, "_blank");
-    if (typeof recordShareButtonClick === "function") recordShareButtonClick("tournament_day");
+    var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+    pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
+      if (pwaOk) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("tournament_day");
+        return;
+      }
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+      else if (tg && tg.openLink) tg.openLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("tournament_day");
+    });
 }
 (function initTournamentDayShareButton() {
   var shareBtns = [document.getElementById("scheduleTournamentDayShareBtn")];

@@ -2971,6 +2971,32 @@ html.app--tg-content-inset
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
   padding-bottom: 0;
 }
+/* Профиль: таббар как в чате — не перекрывает поля при клавиатуре */
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: none !important;
+}
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) .app {
+  padding-bottom: 0;
+}
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) #app.app {
+  z-index: 1002;
+}
+/* Профиль: запас снизу у scrollport, чтобы имя / Poker21 прокручивались над клавиатурой */
+html.chat-keyboard-open body[data-view="profile"] .card .card__content {
+  padding-bottom: calc(
+    var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + env(safe-area-inset-bottom, 0px) + 10px
+  );
+  box-sizing: border-box;
+}
+/* Список чатов: поиск вверху — нижний отступ по inset, иначе поле остаётся под клавиатурой */
+html.chat-keyboard-open body[data-view="chat"] .chat-dialogs-view .chat-dialogs-list {
+  padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
+  box-sizing: border-box;
+}
 /* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода над клавиатурой (--chat-vv-inset из JS). Без .chat-vv-lift: достаточно chat-keyboard-open + переменных. */
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
@@ -3288,6 +3314,11 @@ html.club-charter-modal-open {
   max-width: 220px;
   background: linear-gradient(90deg, transparent, #2a2118, transparent);
   opacity: 0.75;
+}
+/* Ряд «Поделиться / Скопировать» — сразу под линией заголовка, выше вкладок Розыгрыш / Коммуникация */
+.club-charter-modal .club-charter-modal__share-row {
+  margin: 4px 0 12px;
+  padding-top: 8px;
 }
 .club-charter-modal__tabs {
   display: flex;
@@ -4299,6 +4330,79 @@ html.club-charter-modal-open {
   max-width: 100%;
   box-sizing: border-box;
 }
+/* Единый блок действий под статьёй: переслать, ссылка, подписка, комментарии */
+.gazette-modal__article-actions-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0 28px;
+  padding: 16px 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(139, 90, 43, 0.45);
+  background: linear-gradient(165deg, rgba(255, 252, 248, 0.98) 0%, rgba(254, 243, 229, 0.92) 55%, rgba(250, 236, 216, 0.9) 100%);
+  box-shadow:
+    0 2px 16px rgba(44, 24, 16, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+  gap: 10px;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article--article-actions {
+  margin: 0;
+  padding: 0;
+  text-align: stretch;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  background: linear-gradient(180deg, rgba(255, 251, 247, 0.98) 0%, rgba(254, 243, 229, 0.95) 100%);
+  border: 1px solid rgba(139, 90, 43, 0.45);
+  color: #5c4033;
+  box-shadow: 0 2px 8px rgba(92, 64, 51, 0.1);
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 247, 237, 1) 0%, rgba(255, 237, 213, 0.98) 100%);
+  border-color: rgba(139, 90, 43, 0.55);
+  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.12);
+  transform: translateY(-1px);
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.gazette-modal__article-actions-card .gazette-article-comments {
+  margin: 4px 0 0;
+  padding: 14px 4px 2px;
+  border: none;
+  border-top: 1px solid rgba(139, 90, 43, 0.3);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gazette-modal__article-actions-card .gazette-article-comments__title {
+  margin-top: 2px;
+}
 /* Современная иконка «поделиться» для кнопок Отправить другу / Поделиться */
 .gazette-modal__share-btn,
 .winter-rating__share-btn,
@@ -4375,6 +4479,145 @@ html.club-charter-modal-open {
   transform: translateY(0);
   box-shadow: 0 1px 4px rgba(92, 64, 51, 0.12);
 }
+
+/* Комментарии к статьям газеты */
+.gazette-article-comments {
+  margin: 20px 0 8px;
+  padding: 14px 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 90, 43, 0.35);
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.55) 0%, rgba(254, 243, 229, 0.4) 100%);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.gazette-article-comments__title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5c4033;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.gazette-article-comments__hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #78350f;
+}
+.gazette-article-comments__hint[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__feed {
+  margin-bottom: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gazette-article-comments__loading,
+.gazette-article-comments__empty {
+  margin: 0;
+  font-size: 12px;
+  color: #78716c;
+  font-style: italic;
+}
+.gazette-article-comments__item {
+  margin: 0 0 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(139, 90, 43, 0.28);
+}
+.gazette-article-comments__item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.gazette-article-comments__item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-bottom: 4px;
+}
+.gazette-article-comments__author {
+  font-size: 12px;
+  font-weight: 700;
+  color: #422006;
+}
+.gazette-article-comments__time {
+  font-size: 11px;
+  color: #78716c;
+}
+.gazette-article-comments__delete {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(185, 28, 28, 0.45);
+  background: rgba(254, 226, 226, 0.6);
+  color: #991b1b;
+  cursor: pointer;
+}
+.gazette-article-comments__delete:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.gazette-article-comments__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #292524;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.gazette-article-comments__form[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c4033;
+}
+.gazette-article-comments__textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(139, 90, 43, 0.4);
+  background: rgba(255, 255, 255, 0.85);
+  color: #1c1917;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+.gazette-article-comments__submit {
+  min-height: 40px;
+  padding: 8px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(21, 128, 61, 0.85);
+  background: linear-gradient(180deg, #15803d 0%, #166534 100%);
+  color: #ecfdf5;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gazette-article-comments__submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.gazette-article-comments__form-status {
+  margin: 8px 0 0;
+  min-height: 1.2em;
+  font-size: 12px;
+  color: #78350f;
+}
+
 .gazette-modal__intro {
   margin: 0 0 18px;
   font-size: 13px;
@@ -6573,16 +6816,52 @@ img.chat-contact__avatar {
   background: color-mix(in srgb, var(--block-bg-solid) 94%, var(--accent) 6%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
-/* Нижняя часть той же рамки — список диалогов (без шва между табами и списком) */
-.chat-dialogs-list .chat-contacts .chat-dialogs-block {
+/* Блок списка контактов под «Все / Друзья»: чуть светлее сегмента вкладок */
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block {
   border: 1px solid var(--chat-contacts-rail-border);
   border-top: none;
   border-radius: 0 0 14px 14px;
+  background: color-mix(in srgb, var(--block-bg-solid) 92%, rgba(255, 255, 255, 0.1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+[data-theme="light"] .chat-dialogs-list .chat-contacts .chat-contacts-list-block {
+  background: color-mix(in srgb, var(--block-bg-solid) 98%, #fff 2%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+/* Нижняя часть той же рамки — сами строки контактов без второй обводки */
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block .chat-dialogs-block {
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 /* Вкладки скрыты — список снова отдельная карточка со всех сторон */
-.chat-dialogs-list > .chat-contacts-filter.chat-contacts-filter--hidden ~ .chat-contacts .chat-dialogs-block {
+.chat-dialogs-list > .chat-contacts-filter.chat-contacts-filter--hidden ~ .chat-contacts .chat-contacts-list-block {
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
+  margin-top: 5px;
+  background: color-mix(in srgb, var(--block-bg-solid) 94%, rgba(255, 255, 255, 0.08));
+}
+[data-theme="light"]
+  .chat-dialogs-list
+  > .chat-contacts-filter.chat-contacts-filter--hidden
+  ~ .chat-contacts
+  .chat-contacts-list-block {
+  background: color-mix(in srgb, var(--block-bg-solid) 99%, #fff 1%);
+}
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block .chat-contact-swipe__panel {
+  background: transparent;
+}
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block .chat-contact:hover {
+  background: rgba(249, 115, 22, 0.11);
+}
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block .chat-empty {
+  margin: 0;
+  padding: 16px 14px 18px;
+}
+.chat-dialogs-list .chat-contacts .chat-contacts-list-block .chat-guest-cta {
+  padding: 12px 12px 16px;
 }
 /* Между админами и списком игроков: «Все» / «Друзья» */
 .chat-contacts-filter {
