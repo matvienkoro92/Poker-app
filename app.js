@@ -1790,12 +1790,19 @@ function runGazetteAndTasksInit() {
                 ? data.total
                 : 0;
             if (gazetteNotifySubsHint) {
+              var chatLine =
+                data && data.chatPosted === true
+                  ? " Также опубликовано в общем чате клуба."
+                  : data && data.chatPosted === false
+                    ? " Запись в общий чат не создана (ошибка Redis)."
+                    : "";
               gazetteNotifySubsHint.textContent =
                 "Личные сообщения отправлены: " +
                 sent +
                 " из " +
                 total +
-                " подписчиков газеты.";
+                " подписчиков газеты." +
+                chatLine;
             }
           } else if (gazetteNotifySubsHint) {
             gazetteNotifySubsHint.textContent =
@@ -2133,13 +2140,23 @@ function runGazetteAndTasksInit() {
       feed.innerHTML = items
         .map(function (c) {
           var text = esc(c.text || "");
-          var authorPlain = c.author != null ? String(c.author) : "Читатель";
+          var cd = c.chatDisplayName != null ? String(c.chatDisplayName).trim() : "";
+          var slug = c.userNameSlug != null ? String(c.userNameSlug).replace(/^@+/, "").trim() : "";
+          var authorPlain = cd
+            ? cd
+            : slug
+              ? "@" + slug
+              : c.author != null
+                ? String(c.author)
+                : "Читатель";
           var authorEsc = esc(authorPlain);
           var midRaw = c.memberId != null ? String(c.memberId).trim() : "";
           var authorNode =
             midRaw && (/^tg_\d+$/.test(midRaw) || /^vk_\d+$/.test(midRaw))
               ? '<button type="button" class="gazette-article-comments__author gazette-article-comments__author--profile" data-gazette-comment-member-id="' +
                 esc(midRaw) +
+                '" data-gazette-comment-display-name="' +
+                esc(authorPlain) +
                 '">' +
                 authorEsc +
                 "</button>"
@@ -2212,13 +2229,16 @@ function runGazetteAndTasksInit() {
       article.setAttribute("data-gazette-comments-injected", "1");
       var shareRow = article.querySelector(shareRowSelector);
       var wrap = document.createElement("section");
-      wrap.className = "gazette-article-comments";
+      wrap.className = "gazette-article-comments gazette-article-comments--panel";
       wrap.setAttribute("aria-label", "Комментарии к новости");
       var cred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
       var hintText =
         "Чтобы оставить комментарий, войдите через Telegram или ВКонтакте (PWA) либо откройте приложение в Telegram.";
       wrap.innerHTML =
+        '<header class="gazette-article-comments__panel-head">' +
         '<h4 class="gazette-article-comments__title">Комментарии читателей</h4>' +
+        '<p class="gazette-article-comments__panel-sub">Лента ниже; своё сообщение можно набрать в отдельном поле.</p>' +
+        "</header>" +
         '<p class="gazette-article-comments__hint gazette-article-comments__hint--login"' +
         (cred ? " hidden" : "") +
         ">" +
@@ -2227,18 +2247,26 @@ function runGazetteAndTasksInit() {
         '<div class="gazette-article-comments__feed" data-gazette-article-comments-article-id="' +
         esc(aid) +
         '"></div>' +
+        '<div class="gazette-article-comments__composer-card"' +
+        (cred ? "" : " hidden") +
+        '>' +
+        '<p class="gazette-article-comments__composer-lead" id="gazetteCommentComposerLead_' +
+        esc(aid) +
+        '">Окно для текста</p>' +
         '<form class="gazette-article-comments__form"' +
         (cred ? "" : " hidden") +
-        " novalidate>" +
+        ' novalidate aria-labelledby="gazetteCommentComposerLead_' +
+        esc(aid) +
+        '">' +
         '<label class="gazette-article-comments__label" for="gazetteCommentInput_' +
         esc(aid) +
-        '">Ваш комментарий</label>' +
+        '">Наберите комментарий здесь</label>' +
         '<textarea id="gazetteCommentInput_' +
         esc(aid) +
-        '" class="gazette-article-comments__textarea" maxlength="2000" rows="3" placeholder="Мнение, вопрос редакции, уточнение…"></textarea>' +
+        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Введите текст — он появится в ленте после отправки."></textarea>' +
         '<button type="submit" class="gazette-article-comments__submit">Отправить</button>' +
         '<p class="gazette-article-comments__form-status" aria-live="polite"></p>' +
-        "</form>";
+        "</form></div>";
       var actionsCard = article.querySelector("[data-gazette-article-actions]");
       if (actionsCard) {
         actionsCard.appendChild(wrap);
@@ -2345,7 +2373,10 @@ function runGazetteAndTasksInit() {
           ev.stopPropagation();
           var midP = profBtn.getAttribute("data-gazette-comment-member-id");
           if (!midP) return;
-          var nameP = (profBtn.textContent || "").trim() || "Игрок";
+          var nameP =
+            (profBtn.getAttribute("data-gazette-comment-display-name") || "").trim() ||
+            (profBtn.textContent || "").trim() ||
+            "Игрок";
           if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
           if (typeof window.openChatUserModalById === "function") {
             window.openChatUserModalById(midP, nameP, null);
@@ -7321,6 +7352,7 @@ function setView(viewName, navOpts) {
     initProfileAvatar();
     syncProfileStatusVisual();
     loadProfileRespect();
+    initProfileRespectVotersButton();
     initProfileFriends();
     initProfileExitBtn();
     initProfileChatPush();
@@ -10453,6 +10485,29 @@ function loadProfileRespect() {
     });
 }
 
+function initProfileRespectVotersButton() {
+  var btn = document.getElementById("profileRespectOpenVotersBtn");
+  if (!btn || btn.getAttribute("data-respect-voters-bound") === "1") return;
+  btn.setAttribute("data-respect-voters-bound", "1");
+  btn.addEventListener("click", function () {
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
+      return;
+    }
+    var myId =
+      typeof window.pokerResolveMyChatMemberId === "function" ? window.pokerResolveMyChatMemberId() : null;
+    if (!myId) {
+      if (tg && tg.showAlert) tg.showAlert("Не удалось определить аккаунт.");
+      else if (typeof alert === "function") alert("Не удалось определить аккаунт.");
+      return;
+    }
+    if (typeof window.pokerOpenRespectVotersModal === "function") {
+      window.pokerOpenRespectVotersModal(myId, { hideVoteButtons: true });
+    }
+  });
+}
+
 function initProfileFriends() {
   var btn = document.getElementById("profileFriendsBtn");
   var modal = document.getElementById("friendsListModal");
@@ -10789,10 +10844,16 @@ function initProfileAvatar() {
       else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
       return;
     }
+    /* Сброс перед click: иначе повторный выбор того же файла не даёт событие change (iOS / часть WebKit). */
+    try {
+      inputEl.value = "";
+    } catch (eInp0) {}
     inputEl.click();
   }
 
   function uploadAvatar(dataUrl) {
+    /* Обработка файла закончилась — сессия выбора снята; дальше только uploadInProgress блокирует повторный pick. */
+    avatarPickSessionActive = false;
     uploadInProgress = true;
     showAvatarFeedback("Загрузка на сервер…", false);
     var payload =
@@ -10811,12 +10872,25 @@ function initProfileAvatar() {
         });
       })
       .then(function (data) {
-        uploadInProgress = false;
-        avatarPickSessionActive = false;
-        inputEl.value = "";
         if (data && data.ok && data.avatar) {
           revokePendingObjectUrl();
-          avatarEl.src = data.avatar;
+          var newSrc = data.avatar;
+          try {
+            /* Дважды подряд тот же data: URL — часть движков не перерисовывает img без сброса src. */
+            if (String(avatarEl.src || "") === String(newSrc)) {
+              avatarEl.src = "";
+              var rafA = window.requestAnimationFrame || function (fn) {
+                setTimeout(fn, 16);
+              };
+              rafA(function () {
+                avatarEl.src = newSrc;
+              });
+            } else {
+              avatarEl.src = newSrc;
+            }
+          } catch (eSrcA) {
+            avatarEl.src = newSrc;
+          }
           avatarEl.alt = "Аватар";
           loadHeaderAvatar();
           showAvatarFeedback("Фотография сохранена", false);
@@ -10832,9 +10906,6 @@ function initProfileAvatar() {
         }
       })
       .catch(function () {
-        uploadInProgress = false;
-        avatarPickSessionActive = false;
-        inputEl.value = "";
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         showAvatarFeedback(POKER_NET_ERR, true);
         fetchProfileAvatarFromServer();
@@ -10843,6 +10914,13 @@ function initProfileAvatar() {
           feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
           feedbackEl.style.color = "";
         }, 4000);
+      })
+      .finally(function () {
+        uploadInProgress = false;
+        avatarPickSessionActive = false;
+        try {
+          inputEl.value = "";
+        } catch (eFin) {}
       });
   }
 
@@ -10850,7 +10928,16 @@ function initProfileAvatar() {
     var base64 = toSend.replace(/^data:image\/\w+;base64,/, "");
     if (base64.length > 100000) {
       var im = new Image();
+      var settled = false;
+      var tIm = setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        uploadAvatar(toSend);
+      }, 12000);
       im.onload = function () {
+        if (settled) return;
+        clearTimeout(tIm);
+        settled = true;
         var canvas = document.createElement("canvas");
         var w = im.width,
           h = im.height;
@@ -10867,6 +10954,9 @@ function initProfileAvatar() {
         }
       };
       im.onerror = function () {
+        if (settled) return;
+        clearTimeout(tIm);
+        settled = true;
         uploadAvatar(toSend);
       };
       im.src = toSend;
@@ -10905,19 +10995,41 @@ function initProfileAvatar() {
       avatarEl.alt = "Аватар";
     } catch (eOb) {}
     resizeImage(file, 200, 200, 0.8, function (dataUrl) {
-      var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-      if (base64.length > 100000) {
-        resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
+      try {
+        var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
+        if (base64.length > 100000) {
+          resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
+            try {
+              revokePendingObjectUrl();
+              avatarEl.src = dataUrl2;
+              try {
+                inputEl.value = "";
+              } catch (eInp1) {}
+              uploadAvatarAfterPick(dataUrl2);
+            } catch (eRs2) {
+              avatarPickSessionActive = false;
+              try {
+                inputEl.value = "";
+              } catch (eInp2) {}
+              showAvatarFeedback("Не удалось подготовить фото", true);
+              fetchProfileAvatarFromServer();
+            }
+          });
+        } else {
           revokePendingObjectUrl();
-          avatarEl.src = dataUrl2;
+          avatarEl.src = dataUrl;
+          try {
+            inputEl.value = "";
+          } catch (eInp3) {}
+          uploadAvatarAfterPick(dataUrl);
+        }
+      } catch (eRs) {
+        avatarPickSessionActive = false;
+        try {
           inputEl.value = "";
-          uploadAvatarAfterPick(dataUrl2);
-        });
-      } else {
-        revokePendingObjectUrl();
-        avatarEl.src = dataUrl;
-        inputEl.value = "";
-        uploadAvatarAfterPick(dataUrl);
+        } catch (eInp4) {}
+        showAvatarFeedback("Не удалось подготовить фото", true);
+        fetchProfileAvatarFromServer();
       }
     });
   });
@@ -16556,6 +16668,7 @@ function initChat() {
     var modalWriteBtn = document.getElementById("chatUserModalWriteBtn");
     var modalRespectUp = document.getElementById("chatUserModalRespectUp");
     var modalRespectDown = document.getElementById("chatUserModalRespectDown");
+    var modalRespectHint = document.getElementById("chatUserModalRespectHint");
     var modalAddFriend = document.getElementById("chatUserModalAddFriend");
     var modalEditFriendName = document.getElementById("chatUserModalEditFriendName");
     var modalRemoveFriend = document.getElementById("chatUserModalRemoveFriend");
@@ -16626,8 +16739,46 @@ function initChat() {
       }
     }
     function updateChatUserModalRespectButtons(myVote) {
-      if (modalRespectUp) modalRespectUp.disabled = myVote === "up";
-      if (modalRespectDown) modalRespectDown.disabled = myVote === "down";
+      if (!modalRespectUp || !modalRespectDown) return;
+      var v = myVote === "up" || myVote === "down" ? myVote : null;
+      if (!v) {
+        modalRespectUp.disabled = false;
+        modalRespectUp.textContent = "Поднять уважение";
+        modalRespectUp.setAttribute("data-rv-action", "up");
+        modalRespectDown.disabled = false;
+        modalRespectDown.textContent = "Уменьшить уважение";
+        modalRespectDown.setAttribute("data-rv-action", "down");
+        if (modalRespectHint) {
+          modalRespectHint.textContent = "";
+          modalRespectHint.hidden = true;
+        }
+        return;
+      }
+      if (v === "up") {
+        modalRespectUp.disabled = true;
+        modalRespectUp.textContent = "Поднять уважение";
+        modalRespectUp.setAttribute("data-rv-action", "up");
+        modalRespectDown.disabled = false;
+        modalRespectDown.textContent = "Отменить уважение";
+        modalRespectDown.setAttribute("data-rv-action", "withdraw");
+        if (modalRespectHint) {
+          modalRespectHint.textContent = "Вы уже подняли уважение игрока";
+          modalRespectHint.hidden = false;
+        }
+        return;
+      }
+      if (v === "down") {
+        modalRespectDown.disabled = true;
+        modalRespectDown.textContent = "Уменьшить уважение";
+        modalRespectDown.setAttribute("data-rv-action", "down");
+        modalRespectUp.disabled = false;
+        modalRespectUp.textContent = "Вернуть уважение";
+        modalRespectUp.setAttribute("data-rv-action", "withdraw");
+        if (modalRespectHint) {
+          modalRespectHint.textContent = "Вы уменьшили уважение игроку";
+          modalRespectHint.hidden = false;
+        }
+      }
     }
     function openChatUserModalById(id, name, avatarUrl) {
       var userName = name || "Игрок";
@@ -16667,6 +16818,10 @@ function initChat() {
       if (typeof updateChatUserModalRespectButtons === "function") {
         if (modalRespectUp) modalRespectUp.disabled = true;
         if (modalRespectDown) modalRespectDown.disabled = true;
+      }
+      if (modalRespectHint) {
+        modalRespectHint.textContent = "";
+        modalRespectHint.hidden = true;
       }
       if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(false, null);
       chatUserModalEl.setAttribute("aria-hidden", "false");
@@ -16722,56 +16877,70 @@ function initChat() {
         }
       });
     }
+    function chatUserModalPostRespect(action) {
+      if (!chatUserModalUserId || !base || !pokerApiHasCredential()) return;
+      if (action !== "up" && action !== "down" && action !== "withdraw") return;
+      if (modalRespectUp) modalRespectUp.disabled = true;
+      if (modalRespectDown) modalRespectDown.disabled = true;
+      fetch(base + "/api/respect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, action: action })),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          if (d && d.ok) {
+            if (modalRespectVal && d.score != null && d.score !== "") modalRespectVal.textContent = String(d.score);
+            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
+              window.syncChatRespectDisplayForUser(chatUserModalUserId, d.score);
+            }
+            var nextVote =
+              action === "withdraw" ? null : action === "up" ? "up" : action === "down" ? "down" : null;
+            updateChatUserModalRespectButtons(nextVote);
+          } else {
+            fetch(base + "/api/respect?userId=" + encodeURIComponent(chatUserModalUserId) + pokerApiAuthQuery("&"))
+              .then(function (r2) {
+                return r2.json();
+              })
+              .then(function (data2) {
+                if (data2 && data2.ok) {
+                  updateChatUserModalRespectButtons(data2.myVote || null);
+                  if (modalRespectVal && data2.score != null) modalRespectVal.textContent = String(data2.score);
+                }
+              });
+            var msg = (d && d.error) || "Ошибка";
+            if (d && d.error === "already_raised") msg = "Вы уже подняли уважение игрока";
+            else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение игроку";
+            if (tg && tg.showAlert) tg.showAlert(msg);
+          }
+        })
+        .catch(function () {
+          fetch(base + "/api/respect?userId=" + encodeURIComponent(chatUserModalUserId) + pokerApiAuthQuery("&"))
+            .then(function (r3) {
+              return r3.json();
+            })
+            .then(function (data3) {
+              if (data3 && data3.ok) updateChatUserModalRespectButtons(data3.myVote || null);
+            });
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
+    }
     if (modalRespectUp) {
       modalRespectUp.addEventListener("click", function () {
         if (!chatUserModalUserId || !base || !pokerApiHasCredential()) return;
         if (modalRespectUp.disabled) return;
-        modalRespectUp.disabled = true;
-        fetch(base + "/api/respect", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, action: "up" })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d && d.ok) {
-            updateChatUserModalRespectButtons("up");
-            if (modalRespectVal && d.score != null && d.score !== "") {
-              modalRespectVal.textContent = String(d.score);
-            } else if (modalRespectVal) {
-              var n = parseInt(modalRespectVal.textContent, 10);
-              modalRespectVal.textContent = String((isNaN(n) ? 0 : n) + 1);
-            }
-            if (d.score != null && d.score !== "") window.syncChatRespectDisplayForUser(chatUserModalUserId, d.score);
-          } else {
-            modalRespectUp.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_raised" ? "Уже поднимали" : (d && d.error) || "Ошибка");
-          }
-        }).catch(function () { modalRespectUp.disabled = false; });
+        var a = modalRespectUp.getAttribute("data-rv-action") || "up";
+        chatUserModalPostRespect(a === "withdraw" ? "withdraw" : "up");
       });
     }
     if (modalRespectDown) {
       modalRespectDown.addEventListener("click", function () {
         if (!chatUserModalUserId || !base || !pokerApiHasCredential()) return;
         if (modalRespectDown.disabled) return;
-        modalRespectDown.disabled = true;
-        fetch(base + "/api/respect", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: chatUserModalUserId, action: "down" })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d && d.ok) {
-            updateChatUserModalRespectButtons("down");
-            if (modalRespectVal && d.score != null && d.score !== "") {
-              modalRespectVal.textContent = String(d.score);
-            } else if (modalRespectVal) {
-              var n = parseInt(modalRespectVal.textContent, 10);
-              modalRespectVal.textContent = String((isNaN(n) ? 0 : n) - 1);
-            }
-            if (d.score != null && d.score !== "") window.syncChatRespectDisplayForUser(chatUserModalUserId, d.score);
-          } else {
-            modalRespectDown.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_lowered" ? "Уже уменьшали" : (d && d.error) || "Ошибка");
-          }
-        }).catch(function () { modalRespectDown.disabled = false; });
+        var a = modalRespectDown.getAttribute("data-rv-action") || "down";
+        chatUserModalPostRespect(a === "withdraw" ? "withdraw" : "down");
       });
     }
     if (modalAddFriend) {
@@ -16972,9 +17141,97 @@ function initChat() {
     var rvDownEl = document.getElementById("respectVotersModalDown");
     var rvBtnUp = document.getElementById("respectVotersModalBtnUp");
     var rvBtnDown = document.getElementById("respectVotersModalBtnDown");
+    var rvVoteHintEl = document.getElementById("respectVotersModalVoteHint");
+    function applyRespectVotersModalVoteState(myVote) {
+      if (!rvBtnUp || !rvBtnDown) return;
+      if (respectVotersModalEl.classList.contains("respect-voters-modal--no-vote")) {
+        if (rvVoteHintEl) {
+          rvVoteHintEl.textContent = "";
+          rvVoteHintEl.hidden = true;
+        }
+        return;
+      }
+      var v = myVote === "up" || myVote === "down" ? myVote : null;
+      if (!v) {
+        rvBtnUp.disabled = false;
+        rvBtnUp.textContent = "Поднять уважение";
+        rvBtnUp.setAttribute("data-rv-action", "up");
+        rvBtnDown.disabled = false;
+        rvBtnDown.textContent = "Уменьшить уважение";
+        rvBtnDown.setAttribute("data-rv-action", "down");
+        if (rvVoteHintEl) {
+          rvVoteHintEl.textContent = "";
+          rvVoteHintEl.hidden = true;
+        }
+        return;
+      }
+      if (v === "up") {
+        rvBtnUp.disabled = true;
+        rvBtnUp.textContent = "Поднять уважение";
+        rvBtnUp.setAttribute("data-rv-action", "up");
+        rvBtnDown.disabled = false;
+        rvBtnDown.textContent = "Отменить уважение";
+        rvBtnDown.setAttribute("data-rv-action", "withdraw");
+        if (rvVoteHintEl) {
+          rvVoteHintEl.textContent = "Вы уже подняли уважение игрока";
+          rvVoteHintEl.hidden = false;
+        }
+        return;
+      }
+      if (v === "down") {
+        rvBtnDown.disabled = true;
+        rvBtnDown.textContent = "Уменьшить уважение";
+        rvBtnDown.setAttribute("data-rv-action", "down");
+        rvBtnUp.disabled = false;
+        rvBtnUp.textContent = "Вернуть уважение";
+        rvBtnUp.setAttribute("data-rv-action", "withdraw");
+        if (rvVoteHintEl) {
+          rvVoteHintEl.textContent = "Вы уменьшили уважение игроку";
+          rvVoteHintEl.hidden = false;
+        }
+      }
+    }
     function closeRespectVotersModal() {
-      respectVotersModalEl.classList.remove("respect-voters-modal--open");
+      respectVotersModalEl.classList.remove("respect-voters-modal--open", "respect-voters-modal--no-vote");
       respectVotersModalEl.setAttribute("aria-hidden", "true");
+      if (rvVoteHintEl) {
+        rvVoteHintEl.textContent = "";
+        rvVoteHintEl.hidden = true;
+      }
+    }
+    function postRespectVotersModalAction(action) {
+      var targetId = respectVotersModalEl.dataset.targetUserId;
+      if (!targetId || !base || !pokerApiHasCredential()) return;
+      if (respectVotersModalEl.classList.contains("respect-voters-modal--no-vote")) return;
+      if (action !== "up" && action !== "down" && action !== "withdraw") return;
+      if (rvBtnUp) rvBtnUp.disabled = true;
+      if (rvBtnDown) rvBtnDown.disabled = true;
+      fetch(base + "/api/respect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: action })),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          if (d && d.ok) {
+            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
+              window.syncChatRespectDisplayForUser(targetId, d.score);
+            }
+            loadRespectVotersList(targetId);
+          } else {
+            loadRespectVotersList(targetId);
+            var msg = (d && d.error) || "Ошибка";
+            if (d && d.error === "already_raised") msg = "Вы уже подняли уважение игрока";
+            else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение игроку";
+            if (tg && tg.showAlert) tg.showAlert(msg);
+          }
+        })
+        .catch(function () {
+          loadRespectVotersList(targetId);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
     }
     function loadRespectVotersList(userId) {
       if (!userId || !rvUpEl || !rvDownEl || !base || !pokerApiHasCredential()) return;
@@ -16996,59 +17253,49 @@ function initChat() {
             }
             rvUpEl.textContent = up.map(respectVoterLineLabel).join(", ") || "Никто";
             rvDownEl.textContent = down.map(respectVoterLineLabel).join(", ") || "Никто";
+            applyRespectVotersModalVoteState(data.myVote || null);
           } else {
             rvUpEl.textContent = "—";
             rvDownEl.textContent = "—";
+            applyRespectVotersModalVoteState(null);
           }
         })
         .catch(function () {
           rvUpEl.textContent = "—";
           rvDownEl.textContent = "Ошибка загрузки";
+          applyRespectVotersModalVoteState(null);
         });
     }
     window._loadRespectVotersList = loadRespectVotersList;
+    window.pokerOpenRespectVotersModal = function (userId, opts) {
+      if (!userId || !respectVotersModalEl) return;
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+      respectVotersModalEl.dataset.targetUserId = userId;
+      if (opts && opts.hideVoteButtons) {
+        respectVotersModalEl.classList.add("respect-voters-modal--no-vote");
+      } else {
+        respectVotersModalEl.classList.remove("respect-voters-modal--no-vote");
+      }
+      respectVotersModalEl.classList.add("respect-voters-modal--open");
+      respectVotersModalEl.setAttribute("aria-hidden", "false");
+      loadRespectVotersList(userId);
+    };
     var rvBackdrop = respectVotersModalEl.querySelector(".respect-voters-modal__backdrop");
     var rvClose = respectVotersModalEl.querySelector(".respect-voters-modal__close");
     if (rvBackdrop) rvBackdrop.addEventListener("click", closeRespectVotersModal);
     if (rvClose) rvClose.addEventListener("click", closeRespectVotersModal);
     if (rvBtnUp) {
       rvBtnUp.addEventListener("click", function () {
-        var targetId = respectVotersModalEl.dataset.targetUserId;
-        if (!targetId || !base || !pokerApiHasCredential() || rvBtnUp.disabled) return;
-        rvBtnUp.disabled = true;
-        fetch(base + "/api/respect", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "up" })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          rvBtnUp.disabled = false;
-          if (d && d.ok) {
-            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
-              window.syncChatRespectDisplayForUser(targetId, d.score);
-            }
-            loadRespectVotersList(targetId);
-          } else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_raised" ? "Уже поднимали" : (d && d.error) || "Ошибка");
-        }).catch(function () { rvBtnUp.disabled = false; });
+        if (rvBtnUp.disabled) return;
+        var a = rvBtnUp.getAttribute("data-rv-action") || "up";
+        postRespectVotersModalAction(a === "withdraw" ? "withdraw" : "up");
       });
     }
     if (rvBtnDown) {
       rvBtnDown.addEventListener("click", function () {
-        var targetId = respectVotersModalEl.dataset.targetUserId;
-        if (!targetId || !base || !pokerApiHasCredential() || rvBtnDown.disabled) return;
-        rvBtnDown.disabled = true;
-        fetch(base + "/api/respect", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, action: "down" })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          rvBtnDown.disabled = false;
-          if (d && d.ok) {
-            if (d.score != null && d.score !== "" && typeof window.syncChatRespectDisplayForUser === "function") {
-              window.syncChatRespectDisplayForUser(targetId, d.score);
-            }
-            loadRespectVotersList(targetId);
-          } else if (tg && tg.showAlert) tg.showAlert(d && d.error === "already_lowered" ? "Уже уменьшали" : (d && d.error) || "Ошибка");
-        }).catch(function () { rvBtnDown.disabled = false; });
+        if (rvBtnDown.disabled) return;
+        var a = rvBtnDown.getAttribute("data-rv-action") || "down";
+        postRespectVotersModalAction(a === "withdraw" ? "withdraw" : "down");
       });
     }
   }
@@ -17079,6 +17326,9 @@ function initChat() {
     } catch (eT) {}
     return null;
   }
+  try {
+    window.pokerResolveMyChatMemberId = resolveMyChatMemberId;
+  } catch (ePubMy) {}
   /** Как на сервере normalizePeerChatUserId — для сравнения peer id и защиты от «чата с собой». */
   function normalizePeerIdForChat(raw) {
     var s = String(raw || "").trim();
@@ -19537,12 +19787,9 @@ function initChat() {
       row.addEventListener("click", function () {
         var id = row.dataset.userId;
         if (!id || !pokerApiHasCredential() || !base) return;
-        var modal = document.getElementById("respectVotersModal");
-        if (!modal) return;
-        modal.dataset.targetUserId = id;
-        modal.classList.add("respect-voters-modal--open");
-        modal.setAttribute("aria-hidden", "false");
-        if (typeof window._loadRespectVotersList === "function") window._loadRespectVotersList(id);
+        if (typeof window.pokerOpenRespectVotersModal === "function") {
+          window.pokerOpenRespectVotersModal(id);
+        }
       });
     });
     generalMessages.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
@@ -21351,12 +21598,9 @@ function initChat() {
       row.addEventListener("click", function () {
         var id = row.dataset.userId;
         if (!id || !pokerApiHasCredential() || !base) return;
-        var modal = document.getElementById("respectVotersModal");
-        if (!modal) return;
-        modal.dataset.targetUserId = id;
-        modal.classList.add("respect-voters-modal--open");
-        modal.setAttribute("aria-hidden", "false");
-        if (typeof window._loadRespectVotersList === "function") window._loadRespectVotersList(id);
+        if (typeof window.pokerOpenRespectVotersModal === "function") {
+          window.pokerOpenRespectVotersModal(id);
+        }
       });
     });
     attachContextMenuForOthers(messagesEl, "personal", messagesEl);

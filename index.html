@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.310">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.319">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=352" />
+    <link rel="stylesheet" href="./styles.css?v=358" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -3862,32 +3862,32 @@
               <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
             </div>
             <div class="profile-chat-name">
-              <div class="profile-chat-name__head">
-                <span class="profile-chat-name__label">Введите ваше имя</span>
-                <div class="profile-chat-name__p21-inline">
-                  <label class="profile-chat-name__p21-label" for="profileP21IdInput">ID Poker21</label>
+              <div class="profile-chat-name__row">
+                <div class="profile-chat-name__cell">
+                  <input
+                    type="text"
+                    id="profileChatDisplayNameInput"
+                    class="profile-chat-name__input"
+                    maxlength="80"
+                    placeholder="Введите ваше имя"
+                    aria-label="Отображаемое имя в чатах"
+                    autocomplete="nickname"
+                  />
+                </div>
+                <div class="profile-chat-name__cell">
                   <input
                     type="text"
                     id="profileP21IdInput"
-                    class="profile-visible-to-others__p21-input profile-chat-name__p21-input"
+                    class="profile-chat-name__input profile-chat-name__input--id"
                     inputmode="numeric"
                     pattern="[0-9]*"
                     maxlength="6"
-                    placeholder="______"
+                    placeholder="ID Poker21"
                     aria-label="ID Poker21, 6 цифр"
                     autocomplete="off"
                   />
                 </div>
               </div>
-              <input
-                type="text"
-                id="profileChatDisplayNameInput"
-                class="profile-chat-name__input"
-                maxlength="80"
-                placeholder="Имя в чате"
-                aria-label="Отображаемое имя в чатах"
-                autocomplete="nickname"
-              />
               <div class="profile-chat-name__save-wrap">
                 <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
@@ -3906,10 +3906,11 @@
             </div>
             <div class="profile-visible-to-others">
               <p class="profile-visible-to-others__intro">Эта информация видна другим пользователям</p>
-              <p class="profile-visible-to-others__p21-save-hint">Имя и ID Poker21 сохраняются кнопкой «Сохранить» под полем имени.</p>
               <div class="profile-visible-to-others__level">
                 <img src="./assets/profile-pokerist.png" alt="Покерист" class="profile-visible-to-others__level-img" />
-                <p class="profile-visible-to-others__respect">Уважение в чате <span id="profileRespectValue" class="profile-visible-to-others__respect-val">—</span></p>
+                <button type="button" class="profile-visible-to-others__respect profile-visible-to-others__respect--btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение">
+                  Уважение в чате <span id="profileRespectValue" class="profile-visible-to-others__respect-val">—</span>
+                </button>
               </div>
               <section class="profile-status">
                 <h2 class="profile-status__title">Ваш уровень 1 из 55</h2>
@@ -4691,10 +4692,10 @@
                 </p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="19" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="19" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4721,10 +4722,10 @@
                 <p class="gazette-fairytale__moral"><em>Спи спокойно, малыш: три имени в сказке — про разные настроения одного сердца. Если утром захочешь не сказку, а строки и цифры, открой <a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">рейтинг весны</a> — там живут Waaar, kabanchik, Em13!! и все остальные герои этой дороги. И пусть тебе снятся только добрые шоудауны.</em></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="18" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="18" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4802,10 +4803,10 @@
                 </p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="17" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="17" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4830,10 +4831,10 @@
                 <p><a href="#" class="gazette-modal__rating-link" data-view-target="hall-of-fame" data-close-gazette="1">Открыть Зал славы и топ-15 заносов</a></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="16" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="16" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4853,10 +4854,10 @@
                 <p>У редакции остаётся ощущение, что Кулер так легко выиграл как раз потому, что месяц делал ремонт: забыл, как играть, забыл все свои навыки — и поэтому уверенно пошёл к победе.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="15" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="15" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4876,10 +4877,10 @@
                 <p><a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">Посмотреть рейтинг весны</a></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="14" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="14" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4914,10 +4915,10 @@
                 <p><em>По материалам чата клуба «Два туза». Цитаты героя сохранены.</em></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="13" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="13" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4936,10 +4937,10 @@
                 <p><a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">Посмотреть рейтинг весны</a></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="12" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="12" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4957,10 +4958,10 @@
                 <p><a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">Посмотреть рейтинг весны</a></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="11" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="11" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -4987,10 +4988,10 @@
                 <p><a href="#" class="gazette-modal__rating-link" data-view-target="spring-rating" data-close-gazette="1">Посмотреть рейтинг весны</a></p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="10" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="10" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5013,10 +5014,10 @@
                 <p>🔥 <a href="#" class="gazette-modal__rating-link" data-view-target="winter-rating" data-close-gazette="1">Посмотреть все цифры можно в рейтинге зимы</a> — там каждая копейка, каждый турнир и каждый титан на своих местах.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="9" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="9" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5036,10 +5037,10 @@
                 <p>Турнир вышел достойным, а бой — зрелищным, с таким количеством коллов и чеков, что зрители в чате уже требуют рематч. Клуб аплодирует стоя и с опаской смотрит на столы: если эти двое ещё раз столкнутся в хедз-апе, от столов останутся только осколки.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="8" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="8" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5058,10 +5059,10 @@
                 <p>«Вааар конечно лютая машина», — комментирует ПокерМанки. Вчера тот выиграл утренний турнир за 800₽, в вечернем столкнулся с глыбой и занял 2-е место — но тем не менее третий месяц подряд штурмует турниры без передышки и держится <a href="#" class="gazette-modal__rating-link" data-view-target="winter-rating" data-close-gazette="1">в топе клубного рейтинга</a> с огромным отрывом. 😱 Драма на столе не утихает!</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="7" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="7" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5078,10 +5079,10 @@
                 <p>В Турнире за 300₽ вчера разыграли 108 000₽ призовых — за первое место отдали больше тридцати тысяч. Два дня подряд Амалия показывает лучший результат в клубе по выигрышам и на этой неделе пока никого не пустила вперёд. В Турнире Вторника она шла к финалу рука об руку с Аспирином, как два лучших друга они бились спина к спине с врагами из других клубов. Но далее Амалия потеряла Аспирина по пути — тот вылетел шестым с 6400₽. Конечно её настрой угас, силы покинули, вера в себя иссякла и вылетела из турнира и она: в итоге четвёртое место и 8700₽. Останутся ли они друзьями после такого и были ли они друзьями на самом деле или их объединяла холодная жажда призов? По выигрышам за неделю Амалия по-прежнему первая в клубе — <a href="#" class="gazette-modal__rating-link" data-view-target="winter-rating" data-close-gazette="1">рейтинг не врёт</a>.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="6" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="6" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5099,10 +5100,10 @@
                 <p>Ожидают, что вскоре родятся ещё парочка смайлов — в духе легендарного «Нужно больше золота!» Игроки клуба уже шлют идеи: кто-то хочет эмодзи с кучей монет, кто-то — с лихом в мантии и тузом в рукаве. Как бы то ни было, покер и Варкрафт на одной странице — это уже история, и мы за ней следим.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="5" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="5" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5121,10 +5122,10 @@
                 <p>В чате на сообщение об отмене уже поставили четыре рукопожатия — символ солидарности с теми, кто не смирился. Редакция будет следить за развитием драмы.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="4" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="4" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5141,10 +5142,10 @@
                 <p>Невероятная развязка вчерашнего мэджика за 500₽! Гидрограф крушил всех подряд, сносил ноки одного за другим — в том числе жирный топ на 20к — и уже набрал 39к ноками. Казалось, победа в кармане. Но на его пути встал Кряк: хладнокровно придушил надежды, вскрыл блефы и только усмехался: «Кряк-кряк!» В итоге Кряк забирает 30 000₽, Гидрографу достаётся 51 000₽. Инсайдеры шепчут: если бы Кряк его не остановил, Гидрограф унёс бы все 66 000₽. И всё это в турнире за пять сотен. Драма на столе — такого вы ещё не видели!</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="3" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="3" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5158,10 +5159,10 @@
                 <p class="gazette-modal__photo-caption">В топе рейтинга всю зиму, выстрелы по 200–300к. Эксперты: «Вот почему его называют легендой клуба».</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="2" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="2" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5178,10 +5179,10 @@
                 <p>Шок на турнире понедельника: Кулер запушил T8o и выбил АК по окончании реги. Стол взорвался — такое решение кто-то назвал «инвалидным». Кулер парировал жёстко. Накал зашкаливал, но до рукоприкладства, по счастью, не дошло: оба остыли и договорились, что имели в виду «совсем другое». Остаётся вопрос: кто прав — тот, кто рискует, или тот, кого выбили? Читатели в комментариях уже делятся на два лагеря.</p>
               </div>
               <div class="gazette-modal__article-actions-card" data-gazette-article-actions>
-              <p class="gazette-modal__share-row gazette-modal__share-row--article-actions">
+              <div class="gazette-modal__share-row gazette-modal__share-row--article-actions" role="group" aria-label="Поделиться статьёй">
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram" data-gazette-share="1" aria-label="Переслать новость">Переслать</button>
                 <button type="button" class="gazette-modal__share-btn gazette-modal__share-copy" data-gazette-share="1" aria-label="Скопировать ссылку на новость">Скопировать ссылку</button>
-              </p>
+              </div>
               <p class="gazette-modal__subscribe-in-article gazette-modal__subscribe-in-article--article-actions">
                 <button type="button" class="gazette-modal__subscribe-in-article-btn" aria-label="Подписаться на газету">Подписаться на газету</button>
               </p>
@@ -5256,8 +5257,11 @@
           </section>
           <div class="chat-user-modal__actions">
             <div class="chat-user-modal__respect-actions">
-              <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectUp">Поднять уважение</button>
-              <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown">Уменьшить уважение</button>
+              <p class="chat-user-modal__respect-hint" id="chatUserModalRespectHint" aria-live="polite" hidden></p>
+              <div class="chat-user-modal__respect-btn-row">
+                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectUp" data-rv-action="up">Поднять уважение</button>
+                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown" data-rv-action="down">Уменьшить уважение</button>
+              </div>
             </div>
             <div class="chat-user-modal__friend-row">
               <div class="chat-user-modal__friend-buttons">
@@ -5331,9 +5335,10 @@
         <div class="respect-voters-modal__inner">
           <button type="button" class="respect-voters-modal__close" aria-label="Закрыть">×</button>
           <h3 class="respect-voters-modal__title">Уважение в чате</h3>
+          <p class="respect-voters-modal__vote-hint" id="respectVotersModalVoteHint" aria-live="polite" hidden></p>
           <div class="respect-voters-modal__actions">
-            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--up" id="respectVotersModalBtnUp">Поднять уважение</button>
-            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--down" id="respectVotersModalBtnDown">Уменьшить уважение</button>
+            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--up" id="respectVotersModalBtnUp" data-rv-action="up">Поднять уважение</button>
+            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--down" id="respectVotersModalBtnDown" data-rv-action="down">Уменьшить уважение</button>
           </div>
           <div class="respect-voters-modal__section">
             <h4 class="respect-voters-modal__subtitle">Подняли уважение</h4>
@@ -5734,7 +5739,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=447"></script>
+    <script defer src="./app.js?v=454"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
