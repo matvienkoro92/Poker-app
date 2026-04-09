@@ -2174,18 +2174,12 @@ function runGazetteAndTasksInit() {
               aidAttr +
               '">Удалить</button>'
             : "";
-          var yp = !!(c.yellowPress || c.yellow_press);
-          var textClass =
-            "gazette-article-comments__text" +
-            (yp ? " gazette-article-comments__text--yellow-press" : "");
           return (
             '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head">' +
             authorNode +
             meta +
             delBtn +
-            '</header><p class="' +
-            textClass +
-            '">' +
+            '</header><p class="gazette-article-comments__text">' +
             text +
             "</p></article>"
           );
@@ -2242,7 +2236,7 @@ function runGazetteAndTasksInit() {
       wrap.innerHTML =
         '<header class="gazette-article-comments__panel-head">' +
         '<h4 class="gazette-article-comments__title">Комментарии читателей</h4>' +
-        '<p class="gazette-article-comments__panel-sub">Лента ниже. Кнопка «Преобразовать и отправить» оформляет текст в духе жёлтой прессы (смысл сохраняется) и добавляет нотку в пользу клуба.</p>' +
+        '<p class="gazette-article-comments__panel-sub">Лента ниже; своё сообщение можно набрать в отдельном поле.</p>' +
         "</header>" +
         '<p class="gazette-article-comments__hint gazette-article-comments__hint--login"' +
         (cred ? " hidden" : "") +
@@ -2257,7 +2251,7 @@ function runGazetteAndTasksInit() {
         '>' +
         '<p class="gazette-article-comments__composer-lead" id="gazetteCommentComposerLead_' +
         esc(aid) +
-        '">Преобразование в стиле «жёлтой прессы»</p>' +
+        '">Окно для текста</p>' +
         '<form class="gazette-article-comments__form"' +
         (cred ? "" : " hidden") +
         ' novalidate aria-labelledby="gazetteCommentComposerLead_' +
@@ -2265,11 +2259,11 @@ function runGazetteAndTasksInit() {
         '">' +
         '<label class="gazette-article-comments__label" for="gazetteCommentInput_' +
         esc(aid) +
-        '">Ваш комментарий (будет преобразован)</label>' +
+        '">Наберите комментарий здесь</label>' +
         '<textarea id="gazetteCommentInput_' +
         esc(aid) +
-        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Напишите мысль своими словами — после отправки она выйдет ярче, но по сути останется вашей."></textarea>' +
-        '<button type="submit" class="gazette-article-comments__submit">Преобразовать и отправить</button>' +
+        '" class="gazette-article-comments__textarea" maxlength="2000" rows="4" placeholder="Введите текст — он появится в ленте после отправки."></textarea>' +
+        '<button type="submit" class="gazette-article-comments__submit">Отправить</button>' +
         '<p class="gazette-article-comments__form-status" aria-live="polite"></p>' +
         "</form></div>";
       var actionsCard = article.querySelector("[data-gazette-article-actions]");
@@ -2331,7 +2325,7 @@ function runGazetteAndTasksInit() {
           return;
         }
         if (sub) sub.disabled = true;
-        if (st) st.textContent = "Преобразуем в стиле жёлтой прессы…";
+        if (st) st.textContent = "Отправляем…";
         var profileHint = {};
         try {
           var authG = window.__pokerTelegramAuth;
@@ -2358,7 +2352,7 @@ function runGazetteAndTasksInit() {
             if (sub) sub.disabled = false;
             if (res.ok && res.data && res.data.ok) {
               ta.value = "";
-              if (st) st.textContent = "Готово — сообщение в ленте.";
+              if (st) st.textContent = "Комментарий опубликован.";
               loadGazetteCommentsFeed(feed);
               return;
             }
