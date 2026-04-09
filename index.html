@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.299">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.310">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=346" />
+    <link rel="stylesheet" href="./styles.css?v=352" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -3862,12 +3862,29 @@
               <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
             </div>
             <div class="profile-chat-name">
+              <div class="profile-chat-name__head">
+                <span class="profile-chat-name__label">Введите ваше имя</span>
+                <div class="profile-chat-name__p21-inline">
+                  <label class="profile-chat-name__p21-label" for="profileP21IdInput">ID Poker21</label>
+                  <input
+                    type="text"
+                    id="profileP21IdInput"
+                    class="profile-visible-to-others__p21-input profile-chat-name__p21-input"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="6"
+                    placeholder="______"
+                    aria-label="ID Poker21, 6 цифр"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
               <input
                 type="text"
                 id="profileChatDisplayNameInput"
                 class="profile-chat-name__input"
                 maxlength="80"
-                placeholder="Как вас видят в сообщениях вместо логина"
+                placeholder="Имя в чате"
                 aria-label="Отображаемое имя в чатах"
                 autocomplete="nickname"
               />
@@ -3889,14 +3906,7 @@
             </div>
             <div class="profile-visible-to-others">
               <p class="profile-visible-to-others__intro">Эта информация видна другим пользователям</p>
-              <p class="profile-visible-to-others__p21-hint">
-                Введите сюда айди из Poker21, чтобы участвовать в розыгрышах
-                <span class="profile-visible-to-others__p21-hint-arrow" aria-hidden="true">↓</span>
-              </p>
-              <p class="profile-visible-to-others__p21-save-hint">Имя и этот номер сохраняются кнопкой «Сохранить» выше.</p>
-              <div class="profile-visible-to-others__p21-row profile-visible-to-others__p21-row--solo">
-                <input type="text" id="profileP21IdInput" class="profile-visible-to-others__p21-input profile-visible-to-others__p21-input--wide" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="______" aria-label="ID Poker21, 6 цифр" autocomplete="off" />
-              </div>
+              <p class="profile-visible-to-others__p21-save-hint">Имя и ID Poker21 сохраняются кнопкой «Сохранить» под полем имени.</p>
               <div class="profile-visible-to-others__level">
                 <img src="./assets/profile-pokerist.png" alt="Покерист" class="profile-visible-to-others__level-img" />
                 <p class="profile-visible-to-others__respect">Уважение в чате <span id="profileRespectValue" class="profile-visible-to-others__respect-val">—</span></p>
@@ -4661,7 +4671,6 @@
             <div class="gazette-modal__content-masthead">Горячие новости недели</div>
             <div class="gazette-modal__content-rule"></div>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="19">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 9 апреля 2026&nbsp;г.</p>
               <p class="gazette-modal__headline-cont">Колонка редакции</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">
@@ -4692,7 +4701,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top gazette-modal__lead--fairytale" data-gazette-article="18">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 8 апреля 2026&nbsp;г.</p>
               <p class="gazette-fairytale__kicker">Сказка редакции на ночь · FrankL / AndrushaMorf / 4ezzi</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main gazette-modal__headline--fairytale">ТРИ ЛИКА И КРИСТАЛЬНЫЙ КУБОК ВЕСНЫ: СКАЗКА ДЛЯ МАЛЕНЬКОГО ГЕРОЯ, КОТОРЫЙ ВЕРИТ В ЧЕСТНЫЙ ФИНАЛ</h3>
@@ -4723,7 +4731,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="17">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 22 марта 2026&nbsp;г.</p>
               <p class="gazette-modal__headline-cont">Доска позора · репортаж</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">
@@ -4805,7 +4812,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top gazette-modal__lead--fairytale" data-gazette-article="16">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 21 марта 2026&nbsp;г.</p>
               <p class="gazette-fairytale__kicker">Сказка редакции · Зал славы</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main gazette-modal__headline--fairytale">КОГДА ЗЛОЙ РИВЕР ЗАХОТЕЛ ПОГУБИТЬ РАЗДАЧИ, А ПЯТНАДЦАТЬ ГЕРОЕВ СКАЗАЛИ ЕМУ: «НЕ СЕГОДНЯ»</h3>
@@ -4834,7 +4840,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="15">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 19 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР, 95&nbsp;100₽ И НЕСПРАВЕДЛИВЫЙ МИР: ПОЧЕМУ УДАЧА НАНИМАЕТ НА РАБОТУ БЕЗ СОБЕСЕДОВАНИЯ</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4858,7 +4863,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="14">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 14 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ФРИРОЛЛ НА 150 000₽: ГЕРОЙ МАМАЛЕНА ПРОТИВ ВСЕГО МИРА. Один против зла и нечести, семь на финалке — пятеро честных, один «за донат», и Putri, выигравший пять оллинов подряд</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4882,7 +4886,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="13">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 13 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КУЛЕР ВЕРНУЛСЯ В БОЛЬШУЮ ИГРУ И СРАЗУ ПОПАЛ В ОЧКО. Легенда зарекалась — и превзошла себя: тридцать столов подряд в минусе. Каламбур судьбы и стихи на злобу дня!</h3>
               <div class="gazette-modal__body">
@@ -4921,7 +4924,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="12">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 8 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АНДРЮШАМОРФ (FRANKL) ЖЁСТКО ПОДЖИМАЕТ ВАААРА В ЛИГЕ 1. ВСЕГО 60 БАЛЛОВ РАЗРЫВА — КТО УДЕРЖИТ КОРОНУ?</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4944,7 +4946,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="11">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 6 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ПЯТНИЦА ПРОГРЕССИВ: 57 ИГРОКОВ, 9 В ПРИЗАХ. WITCH — БРОНЗА И 15 000₽. АСПИРИН, MANIAKK, KRIAK И ALENAST В ТОП-9</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4966,7 +4967,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="10">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 5 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КРИМИНАЛЬНАЯ СВОДКА КЛУБА ЗА 5Е МАРТА. НАЖИВА 370 000₽. АНДРЮШАМОРФ НАНОСИТ ДВОЙНОЙ УДАР. РЫБНАДЗОР СНОВА НАД РЫБАМИ. ПРЯНИК ПОТЕРЯЛ СОЗНАНИЕ!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -4997,7 +4997,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="9">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 1 марта 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">РАЗОРВАЛИ ФЕВРАЛЬ В ПОСЛЕДНЮЮ НОЧЬ: 225 ТЫСЯЧ ЗА ВЕЧЕР — ЭМИЛЬ И ВАААР ДОБИЛИ РЕЙТИНГ. Кто отобрался с 300₽ на путевку за 120 000₽, а кто вынес нокаут за 5000₽? Цифры, от которых стынет кровь!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5024,7 +5023,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="8">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АМАЛИЯ И АСПИРИН: ХЕДЗ-АП ЗА 100К, ГДЕ РЕШАЛОСЬ, КТО ЗДЕСЬ ДОМИНАНТ</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5048,7 +5046,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="7">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 26 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СЕНСАЦИЯ! ПОКЕРМАНКИ ВЫЖИМАЕТ 900 000₽ И ТРИЖДЫ В ХУ РАЗНОСИТ ВАААРА — «ДО ЛЯМА РУКОЙ ПОДАТЬ!»</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5071,7 +5068,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="6">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ТУРНИР ЗА 300₽ СОБРАЛ 108 ТЫСЯЧ ПРИЗОВЫХ: АМАЛИЯ И АСПИРИН — ЛУЧШИЕ ДРУЗЬЯ ИЛИ ХОЛОДНОКРОВНЫЕ ОДИНОЧКИ-ИСКАТЕЛИ БОГАТСТВА?</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5092,7 +5088,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead" data-gazette-article="5">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 25 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ЛЮБОВЬ ПОКЕРА И ВАРКРАФТА: была ли интимная связь? Откуда взялись два новых смайла — эксклюзив!</h3>
               <div class="gazette-modal__photo-wrap gazette-modal__photo-wrap--warm">
@@ -5114,7 +5109,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="4">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">КОНЕЦ РОЗЫГРЫША! Клуб в трауре: владельца обвиняют в предательстве, игроки в депрессии — эксклюзивное интервью с пострадавшим!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5137,7 +5131,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="3">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">ШОК! Кряк задушил Гидрографа в прямом эфире — 30 тысяч в карман, жертва в слёзах!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5158,7 +5151,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="2">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 24 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">АндрюшаМорф РВЁТ банк: почти четверть миллиона за воскресенье — «Легенда не сдаётся!»</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5176,7 +5168,6 @@
               </div>
             </article>
             <article class="gazette-modal__lead gazette-modal__lead--top" data-gazette-article="1">
-              <p class="gazette-modal__article-back"><button type="button" class="gazette-modal__back" aria-label="Назад к выбору страницы">←</button></p>
               <p class="gazette-modal__content-date">Размещено: 23 февраля 2026&nbsp;г.</p>
               <h3 class="gazette-modal__headline gazette-modal__headline--main">СКАНДАЛ НА СТОЛЕ: Кулер пушит мусор и выбивает АК — стол в ярости, игроки требуют извинений!</h3>
               <div class="gazette-modal__photo-wrap">
@@ -5743,7 +5734,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=440"></script>
+    <script defer src="./app.js?v=447"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

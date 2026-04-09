@@ -2997,6 +2997,11 @@ html.chat-keyboard-open body[data-view="chat"] .chat-dialogs-view .chat-dialogs-
   padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
   box-sizing: border-box;
 }
+/* Контакты: строка поиска / фильтр — запас снизу у списка, иначе последние строки под клавиатурой */
+html.chat-keyboard-open body[data-view="chat"] .chat-contacts {
+  padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
+  box-sizing: border-box;
+}
 /* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода над клавиатурой (--chat-vv-inset из JS). Без .chat-vv-lift: достаточно chat-keyboard-open + переменных. */
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
@@ -3478,9 +3483,9 @@ html.club-charter-modal-open {
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
   box-sizing: border-box;
   opacity: 0;
   visibility: hidden;
@@ -3499,8 +3504,17 @@ html.club-charter-modal-open {
 .gazette-modal__paper {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  max-height: calc(100vh - 32px);
+  max-width: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100vh;
+  max-height: 100dvh;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow-y: auto;
   overflow-x: hidden;
   touch-action: pan-y;
@@ -3569,8 +3583,8 @@ html.club-charter-modal-open {
 }
 .gazette-modal__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
   width: 32px;
   height: 32px;
   padding: 0;
@@ -3581,7 +3595,7 @@ html.club-charter-modal-open {
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  z-index: 2;
+  z-index: 10;
 }
 .gazette-modal__close:hover {
   background: rgba(139, 90, 43, 0.25);
@@ -3596,14 +3610,6 @@ html.club-charter-modal-open {
 }
 .app:has(#gazetteModal[aria-hidden="false"]) .card__header {
   display: none !important;
-}
-/* В самой газете скрываем только кнопку «Закрыть» (×), «На главную» оставляем */
-#gazetteModal[aria-hidden="false"] .gazette-modal__close {
-  display: none !important;
-}
-/* Отступы под кнопку закрыть (top) и справа от неё */
-.gazette-modal__paper {
-  padding-top: 0;
 }
 .gazette-admin-row {
   margin: 8px 0 16px;
@@ -3957,7 +3963,6 @@ html.club-charter-modal-open {
 .gazette-modal__subscribe-wrap {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid rgba(139, 90, 43, 0.25);
   text-align: center;
 }
 .gazette-modal__subscribe-text {
@@ -3965,6 +3970,12 @@ html.club-charter-modal-open {
   font-size: 12px;
   color: #5c4033;
   line-height: 1.4;
+}
+.gazette-modal__subscribe-btn,
+.gazette-modal__subscribe-in-news-btn,
+.gazette-modal__subscribe-in-article-btn,
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn {
+  outline: none;
 }
 .gazette-modal__subscribe-btn {
   display: inline-flex;
@@ -3974,33 +3985,27 @@ html.club-charter-modal-open {
   max-width: 260px;
   padding: 12px 24px;
   font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #fef3e2;
-  background: linear-gradient(180deg, #a5241c 0%, #7f1711 100%);
-  border-radius: 999px;
-  border: 1px solid #3c0b07;
-  box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: #2c1810;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   cursor: pointer;
   font-family: Georgia, "Times New Roman", serif;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 .gazette-modal__subscribe-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #b5271f 0%, #8c1a13 100%);
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+  color: #5c4033;
+  opacity: 0.92;
 }
 .gazette-modal__subscribe-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
 /* Кнопка подписки в блоке новостей */
@@ -4014,16 +4019,18 @@ html.club-charter-modal-open {
   font-size: 14px;
   font-weight: 600;
   color: #2c1810;
-  background: rgba(139, 90, 43, 0.2);
-  border: 1px solid rgba(139, 90, 43, 0.5);
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.2s, border-color 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 .gazette-modal__subscribe-in-news-btn:hover:not(:disabled) {
-  background: rgba(139, 90, 43, 0.35);
-  border-color: rgba(139, 90, 43, 0.65);
+  color: #5c4033;
+  opacity: 0.9;
 }
 .gazette-modal__subscribe-in-news-btn:disabled {
   opacity: 0.7;
@@ -4040,16 +4047,18 @@ html.club-charter-modal-open {
   font-size: 14px;
   font-weight: 600;
   color: #2c1810;
-  background: rgba(139, 90, 43, 0.2);
-  border: 1px solid rgba(139, 90, 43, 0.5);
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.2s, border-color 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 .gazette-modal__subscribe-in-article-btn:hover:not(:disabled) {
-  background: rgba(139, 90, 43, 0.35);
-  border-color: rgba(139, 90, 43, 0.65);
+  color: #5c4033;
+  opacity: 0.9;
 }
 .gazette-modal__subscribe-in-article-btn:disabled {
   opacity: 0.7;
@@ -4058,8 +4067,8 @@ html.club-charter-modal-open {
 /* Контент страницы (новости или заносы) */
 .gazette-modal__content {
   padding: 50px 52px 24px 20px;
-  overflow-y: auto;
-  max-height: calc(100vh - 32px);
+  overflow-y: visible;
+  max-height: none;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -4096,12 +4105,6 @@ html.club-charter-modal-open {
 .gazette-modal__content--news .gazette-modal__back {
   margin-top: 0;
   margin-bottom: 8px;
-}
-.gazette-modal__article-back {
-  margin: 0 0 8px;
-}
-.gazette-modal__article-back .gazette-modal__back {
-  margin-bottom: 0;
 }
 .gazette-modal__content--news .gazette-modal__content-masthead {
   margin-top: 12px;
@@ -4320,7 +4323,6 @@ html.club-charter-modal-open {
 .gazette-modal__share-row {
   margin: 16px 0 20px 0;
   padding: 12px 16px 0;
-  border-top: 1px solid rgba(139, 90, 43, 0.25);
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -4336,13 +4338,11 @@ html.club-charter-modal-open {
   flex-direction: column;
   gap: 12px;
   margin: 18px 0 28px;
-  padding: 16px 14px 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(139, 90, 43, 0.45);
-  background: linear-gradient(165deg, rgba(255, 252, 248, 0.98) 0%, rgba(254, 243, 229, 0.92) 55%, rgba(250, 236, 216, 0.9) 100%);
-  box-shadow:
-    0 2px 16px rgba(44, 24, 16, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -4366,25 +4366,25 @@ html.club-charter-modal-open {
   justify-content: center;
   min-height: 44px;
   padding: 12px 16px;
-  border-radius: 14px;
+  border-radius: 0;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
-  background: linear-gradient(180deg, rgba(255, 251, 247, 0.98) 0%, rgba(254, 243, 229, 0.95) 100%);
-  border: 1px solid rgba(139, 90, 43, 0.45);
-  color: #5c4033;
-  box-shadow: 0 2px 8px rgba(92, 64, 51, 0.1);
+  transition: color 0.15s ease, opacity 0.15s ease;
+  background: transparent;
+  border: none;
+  color: #2c1810;
+  box-shadow: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 247, 237, 1) 0%, rgba(255, 237, 213, 0.98) 100%);
-  border-color: rgba(139, 90, 43, 0.55);
-  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.12);
-  transform: translateY(-1px);
+  color: #5c4033;
+  opacity: 0.9;
 }
 .gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:active:not(:disabled) {
-  transform: translateY(0);
+  opacity: 0.85;
 }
 .gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:disabled {
   opacity: 0.65;
@@ -4393,9 +4393,8 @@ html.club-charter-modal-open {
 }
 .gazette-modal__article-actions-card .gazette-article-comments {
   margin: 4px 0 0;
-  padding: 14px 4px 2px;
+  padding: 14px 0 2px;
   border: none;
-  border-top: 1px solid rgba(139, 90, 43, 0.3);
   border-radius: 0;
   background: transparent;
   box-shadow: none;
@@ -4438,19 +4437,25 @@ html.club-charter-modal-open {
   box-sizing: border-box;
   min-height: 44px;
   padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(139, 90, 43, 0.45);
-  background: linear-gradient(180deg, rgba(255, 251, 247, 0.98) 0%, rgba(254, 243, 229, 0.95) 100%);
-  color: #5c4033;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #2c1810;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
-  box-shadow: 0 2px 8px rgba(92, 64, 51, 0.1);
+  transition: color 0.15s ease, opacity 0.15s ease;
+  box-shadow: none;
   white-space: normal;
   text-align: center;
   line-height: 1.25;
   word-break: break-word;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
+}
+.gazette-modal__share-btn:focus-visible {
+  opacity: 0.85;
 }
 .gazette-modal__share-btn.gazette-modal__share-copy {
   flex: 1 1 calc(50% - 5px);
@@ -4459,34 +4464,30 @@ html.club-charter-modal-open {
   padding: 8px 10px;
 }
 .gazette-modal__share-btn.gazette-modal__share-telegram {
-  background: linear-gradient(180deg, #15803d 0%, #166534 100%);
-  border-color: rgba(21, 128, 61, 0.95);
-  color: #ecfdf5;
-  box-shadow: 0 0 0 1px rgba(4, 120, 87, 0.9), 0 4px 12px rgba(4, 120, 87, 0.6);
+  background: transparent;
+  border: none;
+  color: #2c1810;
+  box-shadow: none;
 }
 .gazette-modal__share-btn.gazette-modal__share-telegram:hover {
-  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
-  border-color: rgba(4, 120, 87, 1);
-  box-shadow: 0 0 0 1px rgba(4, 120, 87, 1), 0 6px 16px rgba(4, 120, 87, 0.7);
+  color: #5c4033;
+  opacity: 0.9;
 }
 .gazette-modal__share-btn:hover {
-  background: linear-gradient(180deg, rgba(255, 247, 237, 1) 0%, rgba(255, 237, 213, 0.98) 100%);
-  border-color: rgba(139, 90, 43, 0.55);
-  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.15);
-  transform: translateY(-1px);
+  color: #5c4033;
+  opacity: 0.9;
 }
 .gazette-modal__share-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(92, 64, 51, 0.12);
+  opacity: 0.8;
 }
 
 /* Комментарии к статьям газеты */
 .gazette-article-comments {
   margin: 20px 0 8px;
-  padding: 14px 12px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(139, 90, 43, 0.35);
-  background: linear-gradient(180deg, rgba(255, 251, 245, 0.55) 0%, rgba(254, 243, 229, 0.4) 100%);
+  padding: 14px 0 16px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -4522,14 +4523,12 @@ html.club-charter-modal-open {
   font-style: italic;
 }
 .gazette-article-comments__item {
-  margin: 0 0 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed rgba(139, 90, 43, 0.28);
+  margin: 0 0 12px;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .gazette-article-comments__item:last-child {
   margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
 }
 .gazette-article-comments__item-head {
   display: flex;
@@ -4543,19 +4542,41 @@ html.club-charter-modal-open {
   font-weight: 700;
   color: #422006;
 }
+/* Профиль чата (карточка игрока) — внешне как имя в тексте */
+.gazette-article-comments__author--profile {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
+}
+.gazette-article-comments__author--profile:hover {
+  opacity: 0.88;
+}
 .gazette-article-comments__time {
   font-size: 11px;
   color: #78716c;
 }
 .gazette-article-comments__delete {
   margin-left: auto;
-  padding: 2px 8px;
+  padding: 2px 0;
   font-size: 11px;
-  border-radius: 8px;
-  border: 1px solid rgba(185, 28, 28, 0.45);
-  background: rgba(254, 226, 226, 0.6);
-  color: #991b1b;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #7f1d1d;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
 }
 .gazette-article-comments__delete:disabled {
   opacity: 0.6;
@@ -4586,26 +4607,35 @@ html.club-charter-modal-open {
   box-sizing: border-box;
   min-height: 72px;
   margin-bottom: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(139, 90, 43, 0.4);
-  background: rgba(255, 255, 255, 0.85);
+  padding: 10px 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(44, 24, 16, 0.35);
+  background: transparent;
   color: #1c1917;
   font-size: 14px;
   font-family: inherit;
   line-height: 1.45;
   resize: vertical;
+  outline: none;
+  box-shadow: none;
+}
+.gazette-article-comments__textarea::placeholder {
+  color: rgba(44, 24, 16, 0.45);
 }
 .gazette-article-comments__submit {
   min-height: 40px;
-  padding: 8px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(21, 128, 61, 0.85);
-  background: linear-gradient(180deg, #15803d 0%, #166534 100%);
-  color: #ecfdf5;
+  padding: 8px 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #2c1810;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
 }
 .gazette-article-comments__submit:disabled {
   opacity: 0.65;
@@ -22480,6 +22510,41 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   margin: 0 auto 20px;
   padding: 0 12px;
   box-sizing: border-box;
+}
+.profile-chat-name__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-bottom: 8px;
+}
+.profile-chat-name__head .profile-chat-name__label {
+  display: block;
+  margin-bottom: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: left;
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.profile-chat-name__p21-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  margin-left: auto;
+}
+.profile-chat-name__p21-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.profile-chat-name__p21-input {
+  min-width: 6.25rem;
+  max-width: 8rem;
 }
 .profile-chat-name__label {
   display: block;

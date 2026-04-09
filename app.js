@@ -1844,6 +1844,14 @@ function runGazetteAndTasksInit() {
   function closeGazette() {
     modal.setAttribute("aria-hidden", "true");
     showGazetteView("pick");
+    try {
+      document.documentElement.classList.remove("gazette-comment-keyboard");
+    } catch (eGk) {}
+    try {
+      if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+        window.__pokerFinalizeChatKeyboardDismiss();
+      }
+    } catch (eKb) {}
   }
   modal.addEventListener("click", function (e) {
     var card = e.target && e.target.closest ? e.target.closest(".gazette-modal__page-card") : null;
@@ -2125,7 +2133,17 @@ function runGazetteAndTasksInit() {
       feed.innerHTML = items
         .map(function (c) {
           var text = esc(c.text || "");
-          var author = esc(c.author || "Читатель");
+          var authorPlain = c.author != null ? String(c.author) : "Читатель";
+          var authorEsc = esc(authorPlain);
+          var midRaw = c.memberId != null ? String(c.memberId).trim() : "";
+          var authorNode =
+            midRaw && (/^tg_\d+$/.test(midRaw) || /^vk_\d+$/.test(midRaw))
+              ? '<button type="button" class="gazette-article-comments__author gazette-article-comments__author--profile" data-gazette-comment-member-id="' +
+                esc(midRaw) +
+                '">' +
+                authorEsc +
+                "</button>"
+              : '<span class="gazette-article-comments__author">' + authorEsc + "</span>";
           var ds = formatCommentAt(c.at);
           var meta = ds
             ? '<time class="gazette-article-comments__time">' + esc(ds) + "</time>"
@@ -2141,9 +2159,8 @@ function runGazetteAndTasksInit() {
               '">Удалить</button>'
             : "";
           return (
-            '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head"><span class="gazette-article-comments__author">' +
-            author +
-            "</span>" +
+            '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head">' +
+            authorNode +
             meta +
             delBtn +
             '</header><p class="gazette-article-comments__text">' +
@@ -2282,7 +2299,18 @@ function runGazetteAndTasksInit() {
         }
         if (sub) sub.disabled = true;
         if (st) st.textContent = "";
-        var payload = pokerApiAuthJsonBody({ articleId: parseInt(aid, 10), text: text });
+        var profileHint = {};
+        try {
+          var authG = window.__pokerTelegramAuth;
+          if (authG && authG.status === "verified" && authG.user) {
+            var uG = authG.user;
+            if (uG.first_name) profileHint.profileFirstName = String(uG.first_name).trim().slice(0, 64);
+            if (uG.last_name) profileHint.profileLastName = String(uG.last_name).trim().slice(0, 64);
+          }
+        } catch (eHint) {}
+        var payload = pokerApiAuthJsonBody(
+          Object.assign({ articleId: parseInt(aid, 10), text: text }, profileHint)
+        );
         fetch(basePost + "/api/gazette-article-comments", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2311,6 +2339,19 @@ function runGazetteAndTasksInit() {
           });
       });
       newsEl.addEventListener("click", function (ev) {
+        var profBtn = ev.target && ev.target.closest && ev.target.closest("[data-gazette-comment-member-id]");
+        if (profBtn && newsEl.contains(profBtn)) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          var midP = profBtn.getAttribute("data-gazette-comment-member-id");
+          if (!midP) return;
+          var nameP = (profBtn.textContent || "").trim() || "Игрок";
+          if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+          if (typeof window.openChatUserModalById === "function") {
+            window.openChatUserModalById(midP, nameP, null);
+          }
+          return;
+        }
         var delEl = ev.target && ev.target.closest && ev.target.closest("[data-gazette-comment-delete]");
         if (!delEl || !newsEl.contains(delEl)) return;
         ev.preventDefault();
@@ -2361,6 +2402,55 @@ function runGazetteAndTasksInit() {
       });
     }
     bindGazetteCommentsDelegated();
+    (function bindGazetteCommentKeyboardRepair() {
+      if (!modal) return;
+      var blurTimer = null;
+      function scheduleFinalizeGazetteKb() {
+        clearTimeout(blurTimer);
+        blurTimer = setTimeout(function () {
+          blurTimer = null;
+          var active = document.activeElement;
+          if (
+            active &&
+            active.classList &&
+            active.classList.contains("gazette-article-comments__textarea") &&
+            modal.contains(active)
+          ) {
+            return;
+          }
+          try {
+            document.documentElement.classList.remove("gazette-comment-keyboard");
+          } catch (eRm) {}
+          try {
+            if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+              window.__pokerFinalizeChatKeyboardDismiss();
+            }
+          } catch (eFin) {}
+        }, 120);
+      }
+      modal.addEventListener(
+        "focusin",
+        function (ev) {
+          var t = ev.target;
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (!modal.contains(t)) return;
+          try {
+            document.documentElement.classList.add("gazette-comment-keyboard");
+          } catch (eIn) {}
+        },
+        true
+      );
+      modal.addEventListener(
+        "focusout",
+        function (ev) {
+          var t = ev.target;
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (!modal.contains(t)) return;
+          scheduleFinalizeGazetteKb();
+        },
+        true
+      );
+    })();
   })();
   }
 
@@ -4424,6 +4514,20 @@ function initProfileKeyboardViewportCleanup() {
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
       }
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          try {
+            if (document.activeElement === t) {
+              t.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+            }
+          } catch (eSi) {}
+          try {
+            if (typeof window.__pokerSyncPwaChatVisualViewportInset === "function") {
+              window.__pokerSyncPwaChatVisualViewportInset();
+            }
+          } catch (eSyncP) {}
+        });
+      });
     },
     true
   );
@@ -10322,18 +10426,31 @@ function loadProfileRespect() {
   var el = document.getElementById("profileRespectValue");
   if (!el) return;
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
-  if (!base || !initData) { el.textContent = "\u2014"; return; }
-  fetch(base + "/api/respect?initData=" + encodeURIComponent(initData))
+  if (!base) {
+    el.textContent = "\u2014";
+    return;
+  }
+  if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+    el.textContent = "\u2014";
+    return;
+  }
+  var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+  if (!q || q === "?initData=") {
+    el.textContent = "\u2014";
+    return;
+  }
+  fetch(base + "/api/respect" + q)
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      if (data && data.ok && data.score !== undefined) {
-        el.textContent = data.score === 0 ? "\u2014" : String(data.score);
+      if (data && data.ok && data.score !== undefined && data.score !== null) {
+        el.textContent = String(data.score);
       } else {
         el.textContent = "\u2014";
       }
     })
-    .catch(function () { el.textContent = "\u2014"; });
+    .catch(function () {
+      el.textContent = "\u2014";
+    });
 }
 
 function initProfileFriends() {
@@ -10519,35 +10636,41 @@ function initPokerShowsPlayer() {
 function loadHeaderAvatar() {
   var avatarEl = document.getElementById("authUserAvatar");
   if (!avatarEl) return;
-  try {
-    var au = window.__pokerTelegramAuth;
-    if (au && au.user && au.user.photo_url && String(au.user.photo_url).indexOf("http") === 0) {
-      avatarEl.src = au.user.photo_url;
-      avatarEl.alt = "Аватар";
-      avatarEl.style.display = "";
-      return;
-    }
-  } catch (eA) {}
+  function applyTelegramPhotoFallback() {
+    try {
+      var au = window.__pokerTelegramAuth;
+      if (au && au.user && au.user.photo_url && String(au.user.photo_url).indexOf("http") === 0) {
+        avatarEl.src = au.user.photo_url;
+        avatarEl.alt = "Аватар";
+        avatarEl.style.display = "";
+        return true;
+      }
+    } catch (eA) {}
+    return false;
+  }
   var base = getApiBase();
   if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
-    avatarEl.style.display = "none";
+    if (!applyTelegramPhotoFallback()) avatarEl.style.display = "none";
     return;
   }
   var hq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-  fetch(base + "/api/avatar" + hq)
+  var tsSep = hq.indexOf("?") === 0 ? "&" : "?";
+  fetch(base + "/api/avatar" + hq + tsSep + "_ts=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok && data.avatar) {
         avatarEl.src = data.avatar;
         avatarEl.alt = "Аватар";
         avatarEl.style.display = "";
-      } else {
+        return;
+      }
+      if (!applyTelegramPhotoFallback()) {
         avatarEl.removeAttribute("src");
         avatarEl.style.display = "none";
       }
     })
     .catch(function () {
-      avatarEl.style.display = "none";
+      if (!applyTelegramPhotoFallback()) avatarEl.style.display = "none";
     });
 }
 
@@ -10561,14 +10684,57 @@ function initProfileAvatar() {
   if (!base) return;
 
   var uploadInProgress = false;
+  var avatarPickSessionActive = false;
+  var objectUrlPending = null;
+
+  function revokePendingObjectUrl() {
+    if (objectUrlPending) {
+      try {
+        URL.revokeObjectURL(objectUrlPending);
+      } catch (eRevO) {}
+      objectUrlPending = null;
+    }
+  }
+
+  function fetchProfileAvatarFromServer() {
+    if (uploadInProgress || avatarPickSessionActive) return;
+    inputEl.value = "";
+    var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    var tsSep = aq.indexOf("?") === 0 ? "&" : "?";
+    fetch(base + "/api/avatar" + aq + tsSep + "_ts=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (uploadInProgress || avatarPickSessionActive) return;
+        if (data && data.ok && data.avatar) {
+          revokePendingObjectUrl();
+          avatarEl.src = data.avatar;
+          avatarEl.alt = "Аватар";
+        } else {
+          revokePendingObjectUrl();
+          avatarEl.src = "./assets/profile-pokerist.png";
+        }
+      })
+      .catch(function () {
+        if (!uploadInProgress && !avatarPickSessionActive) {
+          revokePendingObjectUrl();
+          avatarEl.src = "./assets/profile-pokerist.png";
+        }
+      });
+  }
+
+  if (avatarEl.getAttribute("data-poker-avatar-bound") === "1") {
+    fetchProfileAvatarFromServer();
+    return;
+  }
+  avatarEl.setAttribute("data-poker-avatar-bound", "1");
 
   function showAvatarFeedback(text, isError) {
     if (!feedbackEl) return;
     feedbackEl.textContent = text || "";
     feedbackEl.classList.toggle("profile-avatar-block__feedback--visible", !!text);
     feedbackEl.style.color = isError ? "#ef4444" : "";
-    if (text && !isError && !/сохранение/i.test(text)) {
-      var hideMs = /сохранена/i.test(text) ? 5200 : 3500;
+    if (text && !isError && !/загрузк|сохранение/i.test(text)) {
+      var hideMs = /сохранена|загружена|обновлена/i.test(text) ? 5200 : 3500;
       setTimeout(function () {
         if (feedbackEl.textContent === text) {
           feedbackEl.textContent = "";
@@ -10576,23 +10742,6 @@ function initProfileAvatar() {
         }
       }, hideMs);
     }
-  }
-
-  function loadAvatar() {
-    inputEl.value = "";
-    var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    fetch(base + "/api/avatar" + aq)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data && data.ok && data.avatar) {
-          avatarEl.src = data.avatar;
-        } else {
-          avatarEl.src = "./assets/profile-pokerist.png";
-        }
-      })
-      .catch(function () {
-        avatarEl.src = "./assets/profile-pokerist.png";
-      });
   }
 
   function resizeImage(file, maxW, maxH, quality, cb) {
@@ -10634,7 +10783,7 @@ function initProfileAvatar() {
   }
 
   function openProfileAvatarFilePicker() {
-    if (uploadInProgress) return;
+    if (uploadInProgress || avatarPickSessionActive) return;
     if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
       if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
       else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
@@ -10645,7 +10794,7 @@ function initProfileAvatar() {
 
   function uploadAvatar(dataUrl) {
     uploadInProgress = true;
-    showAvatarFeedback("Сохранение…", false);
+    showAvatarFeedback("Загрузка на сервер…", false);
     var payload =
       typeof pokerApiAuthJsonBody === "function"
         ? pokerApiAuthJsonBody({ image: dataUrl })
@@ -10654,18 +10803,27 @@ function initProfileAvatar() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      cache: "no-store",
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.json().catch(function () {
+          return { ok: false, error: r.ok ? "Некорректный ответ" : "HTTP " + r.status };
+        });
+      })
       .then(function (data) {
         uploadInProgress = false;
+        avatarPickSessionActive = false;
         inputEl.value = "";
         if (data && data.ok && data.avatar) {
+          revokePendingObjectUrl();
           avatarEl.src = data.avatar;
+          avatarEl.alt = "Аватар";
           loadHeaderAvatar();
           showAvatarFeedback("Фотография сохранена", false);
         } else {
           if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка загрузки");
           showAvatarFeedback((data && data.error) || "Ошибка сохранения", true);
+          fetchProfileAvatarFromServer();
           setTimeout(function () {
             feedbackEl.textContent = "";
             feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
@@ -10675,9 +10833,11 @@ function initProfileAvatar() {
       })
       .catch(function () {
         uploadInProgress = false;
+        avatarPickSessionActive = false;
         inputEl.value = "";
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         showAvatarFeedback(POKER_NET_ERR, true);
+        fetchProfileAvatarFromServer();
         setTimeout(function () {
           feedbackEl.textContent = "";
           feedbackEl.classList.remove("profile-avatar-block__feedback--visible");
@@ -10737,15 +10897,24 @@ function initProfileAvatar() {
       inputEl.value = "";
       return;
     }
+    avatarPickSessionActive = true;
+    revokePendingObjectUrl();
+    try {
+      objectUrlPending = URL.createObjectURL(file);
+      avatarEl.src = objectUrlPending;
+      avatarEl.alt = "Аватар";
+    } catch (eOb) {}
     resizeImage(file, 200, 200, 0.8, function (dataUrl) {
       var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
       if (base64.length > 100000) {
         resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
+          revokePendingObjectUrl();
           avatarEl.src = dataUrl2;
           inputEl.value = "";
           uploadAvatarAfterPick(dataUrl2);
         });
       } else {
+        revokePendingObjectUrl();
         avatarEl.src = dataUrl;
         inputEl.value = "";
         uploadAvatarAfterPick(dataUrl);
@@ -10753,7 +10922,7 @@ function initProfileAvatar() {
     });
   });
 
-  loadAvatar();
+  fetchProfileAvatarFromServer();
 }
 
 // Стримы: трансляция экрана и микрофона в реальном времени (PeerJS). Задержка 2 мин — отдельный сервер.
@@ -18304,7 +18473,16 @@ function initChat() {
         return;
       }
     }
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general";
+    /* mode=general с trackSeen по умолчанию помечает ленту прочитанной в Redis — без этого фоновый
+       loadGeneral (например из showDialogs при пустом кэше) снимал бейдж, хотя пользователь не заходил в общий чат. */
+    var chatViewActiveForGeneral = !!document.querySelector('[data-view="chat"].view--active');
+    var userActuallyViewingGeneral =
+      chatViewActiveForGeneral &&
+      chatActiveTab === "general" &&
+      generalView &&
+      !generalView.classList.contains("chat-general-view--hidden");
+    var trackSeenQs = userActuallyViewingGeneral ? "" : "&trackSeen=0";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs;
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
@@ -22554,7 +22732,8 @@ function initChat() {
         }
         /* Раньше при !visualViewport сразу снимали переменные — при открытой клавиатуре поле оставалось под клавишами. */
         if (!window.visualViewport) {
-          if (String(document.body.getAttribute("data-view") || "") === "chat") {
+          var dvNoVv = String(document.body.getAttribute("data-view") || "");
+          if (dvNoVv === "chat" || dvNoVv === "profile") {
             var ihFb = window.innerHeight || 0;
             var capFb = Math.min(520, Math.round(ihFb * 0.55));
             var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -22669,9 +22848,12 @@ function initChat() {
           var composerKb = chatComposerEl && document.activeElement === chatComposerEl;
           var findDlgEl = document.getElementById("chatFindByIdInputDialogs");
           var findDlgKb = !!(findDlgEl && document.activeElement === findDlgEl);
+          var findByIdEl = document.getElementById("chatFindByIdInput");
+          var findByIdKb = !!(findByIdEl && document.activeElement === findByIdEl);
           var kbLikely =
             composerKb ||
             findDlgKb ||
+            findByIdKb ||
             heightLoss > 48 ||
             (vvh > 0 && ih > 0 && vvh + 100 < ih);
           if (kbLikely) {
@@ -22681,16 +22863,21 @@ function initChat() {
             } else if (isIosLikeForChatViewport() && inset < 140 && heightLoss > 88) {
               inset = Math.max(inset, Math.min(cap, Math.round(heightLoss * 0.88)));
             }
-            if ((composerKb || findDlgKb) && inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
+            if ((composerKb || findDlgKb || findByIdKb) && inset < Math.min(cap, Math.max(200, Math.round(ih * 0.36)))) {
               inset = Math.min(cap, Math.max(inset, Math.round(ih * 0.38)));
             }
           }
         }
         if (String(document.body.getAttribute("data-view") || "") === "profile") {
           var aeProf = document.activeElement;
-          var profKb =
+          var profRootKb = document.querySelector('.view[data-view="profile"]');
+          var profKb = !!(
             aeProf &&
-            (aeProf.id === "profileChatDisplayNameInput" || aeProf.id === "profileP21IdInput");
+            profRootKb &&
+            profRootKb.contains(aeProf) &&
+            (aeProf.tagName === "INPUT" || aeProf.tagName === "TEXTAREA") &&
+            aeProf.id !== "profileAvatarInput"
+          );
           if (profKb) {
             var softFloorProf = Math.min(cap, Math.max(150, Math.round(ih * 0.32)));
             if (inset < 110) inset = Math.max(inset, softFloorProf);
@@ -23044,6 +23231,40 @@ function initChat() {
       findByIdBtn.addEventListener("click", findByIdAndOpen);
       if (findByIdInput) findByIdInput.addEventListener("keydown", function (e) {
         if (e.key === "Enter") { e.preventDefault(); findByIdAndOpen(); }
+      });
+    }
+    if (findByIdInput) {
+      findByIdInput.addEventListener("focus", function () {
+        if (
+          typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
+          window.__pokerIsChatPhysicalKeyboardContext()
+        ) {
+          return;
+        }
+        if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
+          window.__pokerActivateChatKeyboardViewport();
+        } else {
+          document.documentElement.classList.add("chat-keyboard-open");
+          document.body.classList.add("chat-keyboard-open");
+        }
+        try {
+          findByIdInput.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        } catch (eSi2) {}
+      });
+      findByIdInput.addEventListener("blur", function () {
+        try {
+          if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+            window.__pokerFinalizeChatKeyboardDismiss();
+          } else {
+            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+            document.body.classList.remove("chat-keyboard-open");
+            document.documentElement.style.removeProperty("--chat-vv-inset");
+            document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+            if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
+              pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
+            }
+          }
+        } catch (eFindBlur) {}
       });
     }
     var generalFileInput = document.getElementById("chatGeneralFileInput");
