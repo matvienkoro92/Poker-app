@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.338">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.345">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=376" />
+    <link rel="stylesheet" href="./styles.css?v=380" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1713,16 +1713,20 @@
                   <div class="chat-conv-top-inner">
                     <button type="button" class="chat-back-btn chat-conv-top__toolbar-back" id="chatBackBtn" aria-label="Назад">←</button>
                     <div class="chat-conv-header">
+                      <div class="chat-conv-header__title-actions">
+                        <button type="button" class="chat-conv-peer-title-chip" id="chatConvProfileOpenBtn" aria-label="Профиль собеседника">
+                          <span class="chat-conv-peer-title-chip__name" id="chatConvTitle">Чат</span>
+                          <span class="chat-conv-peer-title-chip__id"><span id="chatConvTitleId">—</span></span>
+                        </button>
+                        <button type="button" class="chat-conv-group-add-btn" id="chatConvGroupAddMembersBtn" hidden aria-label="Добавить участников">+</button>
+                      </div>
                       <div class="chat-conv-peer-avatar-wrap" aria-hidden="true">
                         <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
                         <span id="chatConvPeerAvatarPh" class="chat-conv-peer-avatar chat-conv-peer-avatar--ph">?</span>
                       </div>
-                      <button type="button" class="chat-conv-peer-title-chip" id="chatConvProfileOpenBtn" aria-label="Профиль собеседника">
-                        <span class="chat-conv-peer-title-chip__name" id="chatConvTitle">Чат</span>
-                        <span class="chat-conv-peer-title-chip__id"><span id="chatConvTitleId">—</span></span>
-                      </button>
                     </div>
                   </div>
+                  <p class="chat-conv-group-desc chat-conv-group-desc--hidden" id="chatConvGroupDesc" aria-hidden="true"></p>
                 </div>
                 <div class="chat-pinned-self" id="chatPersonalPinnedSelf" aria-hidden="true"></div>
                 <div class="chat-container">
@@ -1843,6 +1847,9 @@
                 <label class="chat-create-group-modal__label">Название
                   <input type="text" class="chat-input chat-create-group-modal__title-input" id="chatCreateGroupTitleInput" maxlength="100" autocomplete="off" placeholder="Например: Кеш пятница" />
                 </label>
+                <label class="chat-create-group-modal__label">Описание <span class="chat-create-group-modal__optional">необязательно</span>
+                  <textarea class="chat-input chat-create-group-modal__desc-input" id="chatCreateGroupDescInput" maxlength="2000" rows="2" autocomplete="off" placeholder="Увидят все участники группы"></textarea>
+                </label>
                 <div class="chat-create-group-modal__tabs" role="tablist" aria-label="Источник списка">
                   <button type="button" class="chat-create-group-modal__tab chat-create-group-modal__tab--active" data-create-group-tab="all" role="tab" aria-selected="true" id="chatCreateGroupTabAll">Все</button>
                   <button type="button" class="chat-create-group-modal__tab" data-create-group-tab="friends" role="tab" aria-selected="false" id="chatCreateGroupTabFriends">Друзья</button>
@@ -1872,6 +1879,61 @@
                 </div>
               </div>
             </div>
+            <div
+              class="chat-create-group-modal chat-group-add-members-modal chat-create-group-modal--hidden"
+              id="chatGroupAddMembersModal"
+              role="dialog"
+              aria-modal="true"
+              aria-hidden="true"
+              aria-labelledby="chatGroupAddMembersModalTitle"
+            >
+              <div class="chat-create-group-modal__backdrop" id="chatGroupAddMembersModalBackdrop" tabindex="-1"></div>
+              <div class="chat-create-group-modal__box">
+                <button type="button" class="chat-create-group-modal__close" id="chatGroupAddMembersModalClose" aria-label="Закрыть">×</button>
+                <h2 id="chatGroupAddMembersModalTitle" class="chat-create-group-modal__title">Добавить участников</h2>
+                <p class="chat-create-group-modal__hint" id="chatGroupAddMembersMetaHint"></p>
+                <div class="chat-create-group-modal__tabs" role="tablist" aria-label="Список контактов">
+                  <button
+                    type="button"
+                    class="chat-create-group-modal__tab chat-create-group-modal__tab--active"
+                    data-group-add-tab="all"
+                    role="tab"
+                    aria-selected="true"
+                    id="chatGroupAddTabAll"
+                  >
+                    Все
+                  </button>
+                  <button type="button" class="chat-create-group-modal__tab" data-group-add-tab="friends" role="tab" aria-selected="false" id="chatGroupAddTabFriends">
+                    Друзья
+                  </button>
+                  <button type="button" class="chat-create-group-modal__tab" data-group-add-tab="manual" role="tab" aria-selected="false" id="chatGroupAddTabManual">
+                    Вручную
+                  </button>
+                </div>
+                <div id="chatGroupAddPaneAll" class="chat-create-group-modal__pane" role="tabpanel">
+                  <p class="chat-create-group-modal__hint">Нажмите на человека, чтобы отметить для приглашения</p>
+                  <div class="chat-create-group-modal__picker" id="chatGroupAddPickerAll"></div>
+                </div>
+                <div id="chatGroupAddPaneFriends" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
+                  <div class="chat-create-group-modal__picker" id="chatGroupAddPickerFriends"></div>
+                </div>
+                <div id="chatGroupAddPaneManual" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
+                  <div class="chat-create-group-modal__manual-row">
+                    <input type="text" class="chat-input" id="chatGroupAddManualInput" maxlength="35" placeholder="Ник в Telegram или ID" autocomplete="off" />
+                    <button type="button" class="chat-create-group-modal__add-manual" id="chatGroupAddManualBtn">Добавить</button>
+                  </div>
+                  <p class="chat-create-group-modal__hint chat-create-group-modal__hint--err" id="chatGroupAddManualHint" aria-live="polite"></p>
+                </div>
+                <div class="chat-create-group-modal__selected-wrap">
+                  <span class="chat-create-group-modal__selected-label">Будут добавлены:</span>
+                  <div class="chat-create-group-modal__selected" id="chatGroupAddSelected"></div>
+                </div>
+                <div class="chat-create-group-modal__actions">
+                  <button type="button" class="profile-exit-btn chat-create-group-modal__submit" id="chatGroupAddSubmitBtn">Добавить в группу</button>
+                  <button type="button" class="chat-create-group-modal__cancel" id="chatGroupAddCancelBtn">Отмена</button>
+                </div>
+              </div>
+            </div>
             <div class="chat-group-info-modal chat-group-info-modal--hidden" id="chatGroupInfoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="chatGroupInfoModalTitle">
               <div class="chat-group-info-modal__backdrop" id="chatGroupInfoModalBackdrop" tabindex="-1"></div>
               <div class="chat-group-info-modal__box">
@@ -1883,11 +1945,36 @@
                     <span class="chat-group-info-modal__avatar-ph" id="chatGroupInfoAvatarPh">👥</span>
                   </button>
                   <p class="chat-group-info-modal__avatar-edit-hint" id="chatGroupInfoAvatarEditHint" hidden>Создатель: нажмите на фото, чтобы загрузить новый аватар</p>
+                  <p class="chat-group-info-modal__creator-badge" id="chatGroupInfoCreatorBadge" hidden>Вы — создатель группы</p>
                   <h2 id="chatGroupInfoModalTitle" class="chat-group-info-modal__title">Группа</h2>
+                  <label class="chat-group-info-modal__label chat-group-info-modal__title-edit-label" id="chatGroupInfoTitleLabel" hidden>Название
+                    <input type="text" class="chat-input" id="chatGroupInfoTitleInput" maxlength="100" autocomplete="off" />
+                  </label>
                   <p class="chat-group-info-modal__meta" id="chatGroupInfoMeta"></p>
+                  <label class="chat-group-info-modal__label">Описание <span class="chat-group-info-modal__desc-note" id="chatGroupInfoDescNote">его видят все участники</span>
+                    <textarea class="chat-input chat-group-info-modal__desc" id="chatGroupInfoDescription" maxlength="2000" rows="3" autocomplete="off" placeholder="Кратко о группе"></textarea>
+                  </label>
+                  <p class="chat-group-info-modal__read-only-hint" id="chatGroupInfoReadOnlyHint" hidden>Изменять название и описание может только создатель.</p>
+                  <button type="button" class="profile-exit-btn chat-group-info-modal__save-profile" id="chatGroupInfoSaveProfileBtn" hidden>Сохранить изменения</button>
                 </div>
-                <h3 class="chat-group-info-modal__section-title">Участники</h3>
+                <div class="chat-group-info-modal__section-head">
+                  <h3 class="chat-group-info-modal__section-title">Участники</h3>
+                  <button type="button" class="chat-group-info-modal__add-members-icon-btn" id="chatGroupInfoAddMembersBtn" aria-label="Добавить участников">+</button>
+                </div>
                 <div class="chat-group-info-modal__members" id="chatGroupInfoMembers"></div>
+                <div class="chat-group-info-modal__danger" id="chatGroupInfoDanger" hidden>
+                  <button type="button" class="chat-group-info-modal__delete-open" id="chatGroupInfoDeleteOpenBtn">Удалить группу</button>
+                  <div class="chat-group-info-modal__delete-panel" id="chatGroupInfoDeletePanel" hidden>
+                    <p class="chat-group-info-modal__delete-lead">Наберите слово <strong>удалить</strong>, затем подтвердите. Это действие необратимо.</p>
+                    <label class="chat-group-info-modal__delete-label">Подтверждение
+                      <input type="text" class="chat-input chat-group-info-modal__delete-input" id="chatGroupInfoDeleteInput" maxlength="32" autocomplete="off" placeholder="удалить" />
+                    </label>
+                    <div class="chat-group-info-modal__delete-actions">
+                      <button type="button" class="chat-group-info-modal__delete-final profile-exit-btn" id="chatGroupInfoDeleteFinalBtn" disabled>Удалить навсегда</button>
+                      <button type="button" class="chat-group-info-modal__delete-cancel" id="chatGroupInfoDeleteCancelBtn">Отмена</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="chat-ctx-backdrop" id="chatContextBackdrop" aria-hidden="true"></div>
@@ -5770,7 +5857,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=469"></script>
+    <script defer src="./app.js?v=476"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
