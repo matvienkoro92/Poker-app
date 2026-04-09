@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.333">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.336">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -223,7 +223,7 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-culer-thursday-95100-march19.png" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=372" />
+    <link rel="stylesheet" href="./styles.css?v=374" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1829,6 +1829,17 @@
               <div class="chat-create-group-modal__box">
                 <button type="button" class="chat-create-group-modal__close" id="chatCreateGroupModalClose" aria-label="Закрыть">×</button>
                 <h2 id="chatCreateGroupModalTitle" class="chat-create-group-modal__title">Новый групповой чат</h2>
+                <div class="chat-create-group-modal__avatar-row">
+                  <input type="file" class="chat-input-file" id="chatCreateGroupAvatarInput" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
+                  <button type="button" class="chat-create-group-modal__avatar-btn" id="chatCreateGroupAvatarBtn" aria-label="Выбрать аватар группы">
+                    <span class="chat-create-group-modal__avatar-ph" id="chatCreateGroupAvatarPh">📷</span>
+                    <img class="chat-create-group-modal__avatar-img chat-create-group-modal__avatar-img--hidden" id="chatCreateGroupAvatarPreview" alt="" width="72" height="72" decoding="async" />
+                  </button>
+                  <div class="chat-create-group-modal__avatar-hint">
+                    <span class="chat-create-group-modal__avatar-title">Аватар группы</span>
+                    <button type="button" class="chat-create-group-modal__avatar-clear" id="chatCreateGroupAvatarClear" hidden>Убрать фото</button>
+                  </div>
+                </div>
                 <label class="chat-create-group-modal__label">Название
                   <input type="text" class="chat-input chat-create-group-modal__title-input" id="chatCreateGroupTitleInput" maxlength="100" autocomplete="off" placeholder="Например: Кеш пятница" />
                 </label>
@@ -1859,6 +1870,22 @@
                   <button type="button" class="profile-exit-btn chat-create-group-modal__submit" id="chatCreateGroupSubmitBtn">Создать</button>
                   <button type="button" class="chat-create-group-modal__cancel" id="chatCreateGroupCancelBtn">Отмена</button>
                 </div>
+              </div>
+            </div>
+            <div class="chat-group-info-modal chat-group-info-modal--hidden" id="chatGroupInfoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="chatGroupInfoModalTitle">
+              <div class="chat-group-info-modal__backdrop" id="chatGroupInfoModalBackdrop" tabindex="-1"></div>
+              <div class="chat-group-info-modal__box">
+                <button type="button" class="chat-group-info-modal__close" id="chatGroupInfoModalClose" aria-label="Закрыть">×</button>
+                <div class="chat-group-info-modal__head">
+                  <div class="chat-group-info-modal__avatar-wrap" aria-hidden="true">
+                    <img class="chat-group-info-modal__avatar chat-group-info-modal__avatar--hidden" id="chatGroupInfoAvatar" alt="" width="64" height="64" decoding="async" />
+                    <span class="chat-group-info-modal__avatar-ph" id="chatGroupInfoAvatarPh">👥</span>
+                  </div>
+                  <h2 id="chatGroupInfoModalTitle" class="chat-group-info-modal__title">Группа</h2>
+                  <p class="chat-group-info-modal__meta" id="chatGroupInfoMeta"></p>
+                </div>
+                <h3 class="chat-group-info-modal__section-title">Участники</h3>
+                <div class="chat-group-info-modal__members" id="chatGroupInfoMembers"></div>
               </div>
             </div>
             <div class="chat-ctx-backdrop" id="chatContextBackdrop" aria-hidden="true"></div>
@@ -5741,7 +5768,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=464"></script>
+    <script defer src="./app.js?v=467"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
