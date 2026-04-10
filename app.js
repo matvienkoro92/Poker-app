@@ -24278,6 +24278,7 @@ function initChat() {
       function finalizeChatKeyboardDismiss() {
         try {
           window.__pokerChatLastDockBottomPx = null;
+          window.__pokerChatKbDockMonotonicUntil = 0;
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
             window.__pokerChatVvInsetDebounceTimer = null;
@@ -24555,14 +24556,17 @@ function initChat() {
             }
           } catch (eBr) {}
           var dockBottomPx = Math.max(0, Math.round(bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX));
-          /* iOS: vv даёт соседние кадры с ±10–40px — без гистерезиса полоса «прыгает» вверх/вниз. */
+          /* iOS: при выезде клавиатуры vv сначала занижает bottom — берём max в первые ~450 ms (монотонный подъём),
+           * затем гистерезис против мелкого дрожания. Одна «низкая» первая отметка без max залипала и давала дёрганье. */
           if (isIosLikeForChatViewport() && document.body.classList.contains("chat-keyboard-open")) {
             var prevDb = window.__pokerChatLastDockBottomPx;
-            if (prevDb != null && isFinite(prevDb) && Math.abs(dockBottomPx - prevDb) < 20) {
+            var monoUntil = Number(window.__pokerChatKbDockMonotonicUntil) || 0;
+            if (Date.now() < monoUntil && prevDb != null && isFinite(prevDb)) {
+              dockBottomPx = Math.max(prevDb, dockBottomPx);
+            } else if (prevDb != null && isFinite(prevDb) && Math.abs(dockBottomPx - prevDb) < 14) {
               dockBottomPx = prevDb;
-            } else {
-              window.__pokerChatLastDockBottomPx = dockBottomPx;
             }
+            window.__pokerChatLastDockBottomPx = dockBottomPx;
           } else {
             window.__pokerChatLastDockBottomPx = dockBottomPx;
           }
@@ -24809,6 +24813,10 @@ function initChat() {
           return;
         }
         var el = getVisibleMessagesEl();
+        try {
+          window.__pokerChatLastDockBottomPx = null;
+          window.__pokerChatKbDockMonotonicUntil = Date.now() + 480;
+        } catch (eMono0) {}
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
         if (shouldUseChatVisualViewportLift()) {
@@ -24868,6 +24876,24 @@ function initChat() {
           }, 1600);
         }
         syncPwaChatVisualViewportInset();
+        if (isIosChatKb) {
+          try {
+            var rafVvFix = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 0);
+            };
+            rafVvFix(function () {
+              try {
+                if (window.visualViewport && typeof window.visualViewport.scrollTo === "function") {
+                  window.visualViewport.scrollTo(0, 0);
+                }
+              } catch (eVv0) {}
+              try {
+                syncPwaChatVisualViewportInset();
+                scrollMessagesToBottom();
+              } catch (eSynVv) {}
+            });
+          } catch (eRafVv) {}
+        }
         /*
          * window.resize на iOS (в т.ч. PWA) часто бьёт раньше/между кадрами visualViewport — overlap на мгновение 0,
          * при iosBoost=0 для standalone inset обнуляется и поле остаётся под клавиатурой. Resize оставляем только под Android.
@@ -24895,15 +24921,23 @@ function initChat() {
             window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           }
           if (isIosChatKb) {
-            /* scroll на iOS даёт десятки событий при подстройке к полю — конфликт с fixed bottom; только resize + debounce. */
+            /* scroll на iOS — не вешаем. resize: сразу rAF (пока клавиатура едет), плюс отложенный добор после стабилизации. */
             viewportResizeScrollHandler = function () {
+              var rafNow = window.requestAnimationFrame || function (fn) {
+                setTimeout(fn, 0);
+              };
+              rafNow(function () {
+                try {
+                  syncPwaChatVisualViewportInset();
+                } catch (eVvIm) {}
+              });
               if (window.__pokerChatVvInsetDebounceTimer) clearTimeout(window.__pokerChatVvInsetDebounceTimer);
               window.__pokerChatVvInsetDebounceTimer = setTimeout(function () {
                 window.__pokerChatVvInsetDebounceTimer = null;
                 try {
                   syncPwaChatVisualViewportInset();
                 } catch (eVvIos) {}
-              }, 42);
+              }, 52);
             };
             window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
           } else {
@@ -25014,7 +25048,6 @@ function initChat() {
           { passive: true }
         );
         chatComposerEl.addEventListener("focus", onChatInputFocus);
-        chatComposerEl.addEventListener("focusin", onChatInputFocus);
         chatComposerEl.addEventListener("blur", onChatInputBlur);
       }
     })();
