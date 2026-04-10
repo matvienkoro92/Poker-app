@@ -18598,9 +18598,16 @@ function initChat() {
     aud.controls = true;
     aud.preload = "metadata";
     aud.src = voiceUrl;
-    try {
-      aud.playbackRate = pokerGetSavedVoicePlaybackRate();
-    } catch (ePb) {}
+    aud.addEventListener(
+      "loadedmetadata",
+      function onVoiceMeta() {
+        aud.removeEventListener("loadedmetadata", onVoiceMeta);
+        try {
+          aud.playbackRate = pokerGetSavedVoicePlaybackRate();
+        } catch (ePb) {}
+      },
+      false
+    );
     wrap.appendChild(aud);
     var toolbar = document.createElement("div");
     toolbar.className = "chat-msg__voice-toolbar";
@@ -18652,17 +18659,23 @@ function initChat() {
       pokerSetSavedVoicePlaybackRate(rate);
       pokerApplyChatVoicePlaybackRateGlobally(rate);
     });
-    document.addEventListener(
-      "play",
-      function (ev) {
-        var t = ev.target;
-        if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
+    // WebKit / TG WebView: установка playbackRate в capture на «play» может срывать старт — после начала воспроизведения безопаснее.
+    document.addEventListener("playing", function (ev) {
+      var t = ev.target;
+      if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
+      var rate = pokerGetSavedVoicePlaybackRate();
+      function apply() {
         try {
-          t.playbackRate = pokerGetSavedVoicePlaybackRate();
+          if (t && t.classList && t.classList.contains("chat-msg__voice")) t.playbackRate = rate;
         } catch (ePl) {}
-      },
-      true
-    );
+      }
+      try {
+        if (typeof requestAnimationFrame === "function") requestAnimationFrame(apply);
+        else setTimeout(apply, 0);
+      } catch (eRaf) {
+        apply();
+      }
+    });
   })();
   function linkTgUsernames(escapedText) {
     if (!escapedText) return "";
@@ -24044,60 +24057,69 @@ function initChat() {
         } catch (eSbClr) {}
       }
       /**
-       * Нижний отступ ленты относительно визуальной позиции композера после поля translate
-       * (--chat-vv-inset + --chat-ios-accessory-inset), а не от якоря лейаута.
-       * Низ скролла ленты = верх поля в потоке (L); поле рисуется выше на «lift», значит последнее сообщение нужно
-       * поднять минимум на lift + зазор, иначе «воздух» считают от старого закрепления.
+       * Нижний отступ ленты: при position:fixed композера — только высота полосы + bottom (реальные пиксели),
+       * без max() с --chat-vv-inset (иначе двойной учёт с dock bottom и «прыжки» при вводе).
+       * Без fixed — lift по переменным (translate в потоке).
        */
       function updateChatMessagesKeyboardPad() {
         clearChatMessagesKeyboardPad();
         if (!document.body.classList.contains("chat-keyboard-open")) return;
         var box = getVisibleMessagesEl();
         if (!box) return;
-        var cs = getComputedStyle(document.documentElement);
-        var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
-        /* Зазор лента↔композер при открытой клавиатуре: был ~13px + iOS-доборы; уменьшено ~в 3 раза (меньше пустоты над полем). */
         var gap = Math.max(3, Math.round(13 / 3));
-        var pad = Math.round(lift + gap);
-        if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
-          try {
-            var ihWin = window.innerHeight || 0;
-            var vvh = Number(window.visualViewport.height) || 0;
-            var offTop = Number(window.visualViewport.offsetTop) || 0;
-            var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
-            /* Layout почти не сжался, а клавиатура есть — переменные могли обнулиться; добор без второго lift. */
-            if (overlap > 48) {
-              var slack = Math.max(0, overlap - lift);
-              pad = Math.max(pad, Math.round(lift + gap + Math.min((slack * 0.22) / 3, 56 / 3)));
-            }
-          } catch (eVv) {}
-        }
-        /* Композер position:fixed над клавиатурой — в потоке места нет, поднимаем pad по реальной высоте полосы + bottom. */
+        var barEl = null;
         try {
-          var barEl = null;
           if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
             barEl = document.getElementById("chatGeneralInputArea");
           } else if (chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
             barEl = convView.querySelector(".chat-container .chat-input-area");
           }
-          if (barEl && window.getComputedStyle(barEl).position === "fixed") {
-            var bh = barEl.offsetHeight || 72;
-            var btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
-            pad = Math.max(pad, Math.round(bh + btm + gap));
+        } catch (eBarFind) {}
+        var barFixed = false;
+        var bh = 0;
+        var btm = 0;
+        try {
+          if (barEl) {
+            barFixed = window.getComputedStyle(barEl).position === "fixed";
+            if (barFixed) {
+              bh = barEl.offsetHeight || 72;
+              btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
+            }
           }
         } catch (eBarPad) {}
-        if (pad < 28) pad = 28;
-        if (isIosLikeForChatViewport()) {
-          pad += Math.round(8 / 3);
-          try {
-            var sw = window.screen && window.screen.width ? Number(window.screen.width) : 0;
-            var sh = window.screen && window.screen.height ? Number(window.screen.height) : 0;
-            var longSide = Math.max(sw, sh);
-            var shortSide = sw > 0 && sh > 0 ? Math.min(sw, sh) : 0;
-            var tabletish = shortSide >= 600;
-            if (!tabletish && longSide >= 890) pad += Math.round(24 / 3);
-            else if (!tabletish && longSide <= 834) pad -= Math.round(6 / 3);
-          } catch (ePhPad) {}
+        var pad;
+        if (barFixed) {
+          pad = Math.round(bh + btm + gap);
+          if (pad < 28) pad = 28;
+        } else {
+          var cs = getComputedStyle(document.documentElement);
+          var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
+          pad = Math.round(lift + gap);
+          if (window.visualViewport && document.body.classList.contains("chat-keyboard-open")) {
+            try {
+              var ihWin = window.innerHeight || 0;
+              var vvh = Number(window.visualViewport.height) || 0;
+              var offTop = Number(window.visualViewport.offsetTop) || 0;
+              var overlap = Math.max(0, Math.round(ihWin - offTop - vvh));
+              if (overlap > 48) {
+                var slack = Math.max(0, overlap - lift);
+                pad = Math.max(pad, Math.round(lift + gap + Math.min((slack * 0.22) / 3, 56 / 3)));
+              }
+            } catch (eVv) {}
+          }
+          if (pad < 28) pad = 28;
+          if (isIosLikeForChatViewport()) {
+            pad += Math.round(8 / 3);
+            try {
+              var sw = window.screen && window.screen.width ? Number(window.screen.width) : 0;
+              var sh = window.screen && window.screen.height ? Number(window.screen.height) : 0;
+              var longSide = Math.max(sw, sh);
+              var shortSide = sw > 0 && sh > 0 ? Math.min(sw, sh) : 0;
+              var tabletish = shortSide >= 600;
+              if (!tabletish && longSide >= 890) pad += Math.round(24 / 3);
+              else if (!tabletish && longSide <= 834) pad -= Math.round(6 / 3);
+            } catch (ePhPad) {}
+          }
         }
         box.style.paddingBottom = pad + "px";
         try {
@@ -24459,30 +24481,39 @@ function initChat() {
           applyChatInputAreasVisualLift();
           return;
         }
-        /* Отступ низа полосы ввода от верхней границы клавиатуры (меньше — ближе к клавишам). Один для iOS/Android/TG/PWA. */
-        var CHAT_COMPOSER_KEYBOARD_GAP_PX = 20;
+        /* Отступ низа полосы от низа layout viewport до низа visualViewport (= зона под клавиатурой).
+         * Не добавлять повторно --chat-ios-accessory-inset: bottomPx уже учитывает полосу над клавишами — иначе двойной зазор и «парение» над accessory. */
+        var CHAT_COMPOSER_KEYBOARD_GAP_PX = 10;
         var CHAT_VV_BOTTOM_FALLBACK_MIN = 88;
         var ih = window.innerHeight || 0;
         var iw = window.innerWidth || document.documentElement.clientWidth || 0;
         var vv = window.visualViewport;
         var bottomPx = 0;
+        var vvhForKb = 0;
         if (vv && ih > 0) {
           var ot = Number(vv.offsetTop) || 0;
           var vvh = Number(vv.height) || 0;
+          vvhForKb = vvh;
           bottomPx = Math.max(0, Math.round(ih - ot - vvh));
         }
         var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        var tgvH = 0;
+        var tgvS = 0;
         if (tg && tw) {
-          var tgvH = Number(tw.viewportHeight);
-          var tgvS = Number(tw.viewportStableHeight);
+          tgvH = Number(tw.viewportHeight);
+          tgvS = Number(tw.viewportStableHeight);
           if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10) {
             bottomPx = Math.max(bottomPx, Math.round(tgvS - tgvH));
           }
         }
-        /* Без отдельных полов по ОС/фокусу: только общий подстраховочный пол при сломанном vv. */
+        /* Подстраховка только когда vv реально «сжат» клавиатурой — иначе на iOS ложный ih*0.27 дёргает поле при каждом resize. */
         if (ih > 200 && bottomPx < CHAT_VV_BOTTOM_FALLBACK_MIN) {
-          bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.27)));
+          var kbLikelyVv = vvhForKb > 0 && vvhForKb < ih * 0.92;
+          var kbLikelyTg = tg && tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10;
+          if (kbLikelyVv || kbLikelyTg) {
+            bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.27)));
+          }
         }
         var gEl = document.getElementById("chatGeneralInputArea");
         var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
@@ -24516,16 +24547,7 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
-          var accForDock = 0;
-          try {
-            accForDock = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue("--chat-ios-accessory-inset")) || 0;
-          } catch (eAccD) {}
-          if (isIosLikeForChatViewport()) {
-            var accFloorDock = tg ? 36 : 40;
-            accForDock = Math.max(accForDock, accFloorDock);
-          }
-          /* fixed bottom не использует CSS translate с --chat-ios-accessory-inset — добавляем явно, иначе iOS-панель перекрывает поле. */
-          var dockBottomPx = Math.max(0, Math.round(bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX + accForDock));
+          var dockBottomPx = Math.max(0, Math.round(bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX));
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
@@ -24836,8 +24858,19 @@ function initChat() {
             window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
             window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           }
+          var vvSyncPending = false;
           viewportResizeScrollHandler = function () {
-            syncPwaChatVisualViewportInset();
+            if (vvSyncPending) return;
+            vvSyncPending = true;
+            var raf = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 16);
+            };
+            raf(function () {
+              vvSyncPending = false;
+              try {
+                syncPwaChatVisualViewportInset();
+              } catch (eVvSyn) {}
+            });
           };
           window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
           window.visualViewport.addEventListener("scroll", viewportResizeScrollHandler);
