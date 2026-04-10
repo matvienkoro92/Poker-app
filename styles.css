@@ -8123,6 +8123,7 @@ img.chat-contact__avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 7px;
 }
 .chat-create-group-modal__cancel {
   width: 100%;
