@@ -3760,6 +3760,25 @@ function runGazetteAndTasksInit() {
         }
       } catch (eHash) {}
     }
+    function vpnProxyCurrentHash() {
+      return panelProxy && !panelProxy.hidden ? VPN_PROXY_HASH_PROXY : VPN_PROXY_HASH;
+    }
+    function vpnProxyShareAbsoluteUrl() {
+      try {
+        return window.location.origin + window.location.pathname + window.location.search + vpnProxyCurrentHash();
+      } catch (eU) {
+        return "";
+      }
+    }
+    function syncVpnProxyDeepLinkUi() {
+      var deep = document.getElementById("vpnProxyDeepLinkA");
+      if (!deep) return;
+      var h = vpnProxyCurrentHash();
+      try {
+        deep.setAttribute("href", h);
+        deep.setAttribute("title", window.location.origin + window.location.pathname + window.location.search + h);
+      } catch (eD) {}
+    }
     function setVpnProxyTab(which) {
       var isVpn = which === "vpn";
       if (tabVpn) {
@@ -3778,6 +3797,7 @@ function runGazetteAndTasksInit() {
         panelProxy.hidden = isVpn;
         panelProxy.setAttribute("aria-hidden", isVpn ? "true" : "false");
       }
+      syncVpnProxyDeepLinkUi();
     }
     function openModal(opts) {
       opts = opts || {};
@@ -3839,6 +3859,56 @@ function runGazetteAndTasksInit() {
         e.preventDefault();
         setVpnProxyTab("proxy");
         if (modal.getAttribute("aria-hidden") === "false") syncVpnProxyLocationHashForTab("proxy");
+      });
+    }
+    var vpnProxyCopyBtn = document.getElementById("vpnProxyCopyLinkBtn");
+    if (vpnProxyCopyBtn && vpnProxyCopyBtn.getAttribute("data-vpn-proxy-share-bound") !== "1") {
+      vpnProxyCopyBtn.setAttribute("data-vpn-proxy-share-bound", "1");
+      vpnProxyCopyBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        var linkCp = vpnProxyShareAbsoluteUrl();
+        if (!linkCp) return;
+        var msgCp = "Ссылка скопирована. Отправьте другу — откроется подборка ВПН и прокси.";
+        if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(linkCp).then(function () {
+            var tgCp = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            if (tgCp && tgCp.showAlert) tgCp.showAlert(msgCp);
+            else alert("Ссылка скопирована.");
+            if (typeof recordShareButtonClick === "function") recordShareButtonClick("vpn_proxy_modal_copy");
+          }).catch(function () {
+            var tgCp2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            if (tgCp2 && tgCp2.showAlert) tgCp2.showAlert("Ссылка: " + linkCp);
+            else alert("Ссылка: " + linkCp);
+          });
+        } else {
+          var tgCp3 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgCp3 && tgCp3.showAlert) tgCp3.showAlert("Ссылка: " + linkCp);
+          else alert("Ссылка: " + linkCp);
+        }
+      });
+    }
+    var vpnProxyShareBtn = document.getElementById("vpnProxyShareBtn");
+    if (vpnProxyShareBtn && vpnProxyShareBtn.getAttribute("data-vpn-proxy-share-bound") !== "1") {
+      vpnProxyShareBtn.setAttribute("data-vpn-proxy-share-bound", "1");
+      vpnProxyShareBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        var linkSh = vpnProxyShareAbsoluteUrl();
+        if (!linkSh) return;
+        var shareBody =
+          "Подборка ВПН и прокси от игроков клуба «Два туза»:\n" + linkSh;
+        var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareBody);
+        pokerTryPwaWebShare({ text: shareBody, url: linkSh }).then(function (pwaOk) {
+          if (pwaOk) {
+            if (typeof recordShareButtonClick === "function") recordShareButtonClick("vpn_proxy_modal");
+            return;
+          }
+          var tgSh = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgSh && tgSh.openTelegramLink) tgSh.openTelegramLink(shareUrl);
+          else window.open(shareUrl, "_blank");
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("vpn_proxy_modal");
+        });
       });
     }
     window.addEventListener("hashchange", function () {
@@ -5953,6 +6023,7 @@ function getPokerResolvedTelegramUser() {
     var introHtml =
       '<div class="auth-banner__code-intro-wrap" role="note">' +
       '<p class="auth-banner__code-intro">Укажите ниже ваш <strong>@username</strong> из Телеграм.</p>' +
+      '<p class="auth-banner__code-intro">Клуб узнаёт ваш @username после захода в мини-приложение TWO ACES <strong>внутри Telegram</strong> или после сообщения боту клуба в личку (/start или любой текст), если на сервере настроен webhook. Если недавно меняли @username — снова зайдите в мини-приложение или напишите боту.</p>' +
       '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
       linkTme +
       ".</p>" +

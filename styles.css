@@ -1860,6 +1860,7 @@ html.app-view-home .home-welcome-outline::before {
   text-align: left;
   padding-left: 2px;
   padding-right: 2px;
+  white-space: pre-line;
 }
 .pwa-auth-screen .auth-banner__code-hint strong {
   color: #f8fafc;
@@ -1989,6 +1990,7 @@ html.app-view-home .home-welcome-outline::before {
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.35;
+  white-space: pre-line;
 }
 .auth-banner__code-hint--error {
   color: #fca5a5;
@@ -1996,15 +1998,16 @@ html.app-view-home .home-welcome-outline::before {
 .auth-banner__code-hint--hidden {
   display: none !important;
 }
-[data-theme="light"] .auth-banner__verify-form {
+/* Только баннер внутри #app: #pwaAuthScreen снаружи #app — остаётся тёмная вёрстка формы входа */
+[data-theme="light"] #app .auth-banner__verify-form {
   background: rgba(248, 250, 252, 0.9);
   border-color: rgba(148, 163, 184, 0.35);
 }
-[data-theme="light"] .auth-banner__code-input {
+[data-theme="light"] #app .auth-banner__code-input {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(148, 163, 184, 0.45);
 }
-[data-theme="light"] .auth-banner__code-hint--error {
+[data-theme="light"] #app .auth-banner__code-hint--error {
   color: #dc2626;
 }
 .auth-banner__vk-login-btn {
@@ -2172,6 +2175,8 @@ html.app-view-home .home-welcome-outline::before {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  /* При светлой теме приложения html задаёт тёмный --text; без своего color наследуется невидимый текст на тёмном фоне оверлея */
+  color: rgba(241, 245, 249, 0.96);
   /* Симметричные отступы с safe area; контент по центру в .pwa-auth-screen__inner, версия внизу */
   padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 0
     max(20px, env(safe-area-inset-left, 0px));
@@ -2227,9 +2232,7 @@ html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
   line-height: 1.4;
   color: rgba(203, 213, 225, 0.95);
 }
-[data-theme="light"] .pwa-auth-screen__identifying-text {
-  color: rgba(51, 65, 85, 0.92);
-}
+/* Фон оверлея входа всегда тёмный — не переключаем цвет текста на «светлую тему» страницы */
 [data-theme="light"] .pwa-auth-screen__identifying-spinner {
   border-color: rgba(148, 163, 184, 0.5);
   border-top-color: #ea580c;
@@ -3523,6 +3526,48 @@ html.vpn-proxy-modal-open {
   font-size: 13px;
   line-height: 1.45;
   color: rgba(28, 20, 16, 0.85);
+}
+.vpn-proxy-modal__actions.raffles-hero__share-row {
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 14px;
+  row-gap: 10px;
+}
+.vpn-proxy-modal__deep-link {
+  flex: 1 1 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: var(--accent, #ea580c);
+  padding: 4px 6px;
+  word-break: break-word;
+}
+.vpn-proxy-modal__deep-link:hover {
+  color: #c2410c;
+}
+@media (min-width: 400px) {
+  .vpn-proxy-modal__actions.raffles-hero__share-row {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .vpn-proxy-modal__deep-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+    padding-left: 0;
+  }
+}
+[data-theme="light"] .vpn-proxy-modal__deep-link {
+  color: rgba(194, 65, 12, 0.95);
+}
+[data-theme="light"] .vpn-proxy-modal__deep-link:hover {
+  color: #9a3412;
 }
 .vpn-proxy-modal .gazette-article-comments--panel {
   margin-top: 4px;

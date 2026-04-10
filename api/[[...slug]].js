@@ -15,6 +15,7 @@ const handlers = {
   "auth-telegram-login": () => require(path.join(handlersDir, "auth-telegram-login.js")),
   "auth-pwa-code": () => require(path.join(handlersDir, "auth-pwa-code.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
+  "telegram-bot-webhook": () => require(path.join(handlersDir, "telegram-bot-webhook.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),
