@@ -18548,8 +18548,10 @@ function initChat() {
     }
     return dataUrl;
   }
-  function chatVoiceMessageHtml(voiceSrc) {
+  /** opts.footerToolbarHtml — время/галочки в одну строку с 1×…2× (только голос без подписи). */
+  function chatVoiceMessageHtml(voiceSrc, opts) {
     if (!voiceSrc) return "";
+    opts = opts || {};
     var src = escapeHtml(String(voiceSrc));
     var r = pokerGetSavedVoicePlaybackRate();
     function speedBtn(rate, label) {
@@ -18566,20 +18568,29 @@ function initChat() {
         "</button>"
       );
     }
+    var speedInner =
+      speedBtn(1, "1×") +
+      speedBtn(1.5, "1.5×") +
+      speedBtn(2, "2×");
+    var foot = opts.footerToolbarHtml != null && String(opts.footerToolbarHtml).trim() !== ""
+      ? '<div class="chat-msg__footer chat-msg__footer--voice-toolbar">' + opts.footerToolbarHtml + "</div>"
+      : "";
     return (
       '<div class="chat-msg__voice-wrap">' +
       '<audio class="chat-msg__voice" controls preload="metadata" src="' +
       src +
       '"></audio>' +
+      '<div class="chat-msg__voice-toolbar">' +
       '<div class="chat-msg__voice-speed" role="group" aria-label="Скорость воспроизведения">' +
-      speedBtn(1, "1×") +
-      speedBtn(1.5, "1.5×") +
-      speedBtn(2, "2×") +
+      speedInner +
+      "</div>" +
+      foot +
       "</div></div>"
     );
   }
-  function appendChatVoiceToTextWrap(textWrap, voiceUrl) {
+  function appendChatVoiceToTextWrap(textWrap, voiceUrl, voiceOpts) {
     if (!textWrap || !voiceUrl) return;
+    voiceOpts = voiceOpts || {};
     var wrap = document.createElement("div");
     wrap.className = "chat-msg__voice-wrap";
     var aud = document.createElement("audio");
@@ -18591,6 +18602,8 @@ function initChat() {
       aud.playbackRate = pokerGetSavedVoicePlaybackRate();
     } catch (ePb) {}
     wrap.appendChild(aud);
+    var toolbar = document.createElement("div");
+    toolbar.className = "chat-msg__voice-toolbar";
     var speed = document.createElement("div");
     speed.className = "chat-msg__voice-speed";
     speed.setAttribute("role", "group");
@@ -18609,8 +18622,23 @@ function initChat() {
     addRateBtn(1, "1×");
     addRateBtn(1.5, "1.5×");
     addRateBtn(2, "2×");
-    wrap.appendChild(speed);
+    toolbar.appendChild(speed);
+    if (voiceOpts.footerToolbarHtml != null && String(voiceOpts.footerToolbarHtml).trim() !== "") {
+      var ft = document.createElement("div");
+      ft.className = "chat-msg__footer chat-msg__footer--voice-toolbar";
+      ft.innerHTML = voiceOpts.footerToolbarHtml;
+      toolbar.appendChild(ft);
+    }
+    wrap.appendChild(toolbar);
     textWrap.appendChild(wrap);
+  }
+  /** Голос без текста/картинки/PDF — время ставим в строку с 1×…2× под плеером. */
+  function chatMsgVoiceOnlyNoCaption(m) {
+    if (!m || !m.voice) return false;
+    if (m.image) return false;
+    if (m.document) return false;
+    var tx = m.text != null ? String(m.text).trim() : "";
+    return tx === "";
   }
   (function bindChatVoicePlaybackSpeed() {
     if (window.__pokerChatVoiceRateUiBound) return;
@@ -20744,7 +20772,11 @@ function initChat() {
     var mains = root.querySelectorAll(".chat-msg__body-main");
     for (var i = 0; i < mains.length; i++) {
       var main = mains[i];
-      if (main.classList.contains("chat-msg__body-main--with-image") || main.classList.contains("chat-msg__body-main--solo-footer")) {
+      if (
+        main.classList.contains("chat-msg__body-main--with-image") ||
+        main.classList.contains("chat-msg__body-main--solo-footer") ||
+        main.classList.contains("chat-msg__body-main--voice-inline-time")
+      ) {
         main.classList.remove("chat-msg__body-main--time-below");
         continue;
       }
@@ -20937,14 +20969,22 @@ function initChat() {
       var imgBlock = m.image
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
-      var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
+      var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
+      var voiceOnlyG = chatMsgVoiceOnlyNoCaption(m);
+      var voiceBlock = m.voice
+        ? chatVoiceMessageHtml(
+            m.voice,
+            voiceOnlyG
+              ? { footerToolbarHtml: '<span class="chat-msg__time">' + time + "</span>" + editedBadge }
+              : undefined
+          )
+        : "";
       var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtn = "";
       var editBtn = "";
       var blockBtn = "";
       var replyBlock = m.replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(m.replyTo.fromName || "Игрок") + ':</strong> ' + escapeHtml(String(m.replyTo.text || "").slice(0, 80)) + (String(m.replyTo.text || "").length > 80 ? "…" : "") + '</div>' : "";
       var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
-      var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var avatarEl = isLastInGroup
         ? (m.fromAvatar
           ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
@@ -20989,8 +21029,14 @@ function initChat() {
         "chat-msg__body" +
         (text && text.trim() ? " chat-msg__body--has-text" : "") +
         (isOwn && m.image ? " chat-msg__body--own-image" : "");
-      var footerHtmlG = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + "</div>";
-      var bodyMainClsG = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "") + (m.image ? " chat-msg__body-main--with-image" : "");
+      var footerHtmlG = voiceOnlyG
+        ? ""
+        : '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + "</div>";
+      var bodyMainClsG =
+        "chat-msg__body-main" +
+        (!textBlock ? " chat-msg__body-main--solo-footer" : "") +
+        (m.image ? " chat-msg__body-main--with-image" : "") +
+        (voiceOnlyG ? " chat-msg__body-main--voice-inline-time" : "");
       var bodyMainHtmlG = '<div class="' + bodyMainClsG + '">' + textBlock + footerHtmlG + "</div>";
       var dayDividerG = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerG + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
@@ -21510,8 +21556,11 @@ function initChat() {
         '<img class="chat-msg__image" src="' +
         escapeHtml(image) +
         '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
-    } else if (voice) textContent = chatVoiceMessageHtml(voice);
-    else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
+    } else if (voice) {
+      textContent = chatVoiceMessageHtml(voice, {
+        footerToolbarHtml: '<span class="chat-msg__time">' + escapeHtml(time) + "</span>",
+      });
+    } else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
     else if (text) {
       try {
         textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
@@ -21524,8 +21573,14 @@ function initChat() {
       (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
       (image ? " chat-msg__body--own-image" : "");
     var textBlockG = textContent ? '<div class="chat-msg__text">' + textContent + "</div>" : "";
-    var footerHtmlOptG = '<div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + "</span></div>";
-    var bodyMainClsOptG = "chat-msg__body-main" + (!textBlockG ? " chat-msg__body-main--solo-footer" : "") + (image ? " chat-msg__body-main--with-image" : "");
+    var footerHtmlOptG = voice
+      ? ""
+      : '<div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + "</span></div>";
+    var bodyMainClsOptG =
+      "chat-msg__body-main" +
+      (!textBlockG ? " chat-msg__body-main--solo-footer" : "") +
+      (image ? " chat-msg__body-main--with-image" : "") +
+      (voice ? " chat-msg__body-main--voice-inline-time" : "");
     var bodyMainHtmlOptG = '<div class="' + bodyMainClsOptG + '">' + textBlockG + footerHtmlOptG + "</div>";
     var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta"></div>' + replyBlock + bodyMainHtmlOptG + "</div></div></div>";
     var wrap = document.createElement("div");
@@ -21554,7 +21609,10 @@ function initChat() {
         im.src = image;
         textWrap.appendChild(im);
       } else if (voice && typeof voice === "string") {
-        appendChatVoiceToTextWrap(textWrap, voice);
+        appendChatVoiceToTextWrap(textWrap, voice, {
+          footerToolbarHtml:
+            '<span class="chat-msg__time">' + escapeHtml(time) + "</span>",
+        });
       } else {
         textWrap.textContent = text != null ? String(text) : "";
       }
@@ -22892,13 +22950,22 @@ function initChat() {
       var imgBlock = m.image
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
-      var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
+      var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
+      var ticksEarlyP = personalReceiptHtml(m, isOwn);
+      var voiceOnlyP = chatMsgVoiceOnlyNoCaption(m);
+      var voiceBlock = m.voice
+        ? chatVoiceMessageHtml(
+            m.voice,
+            voiceOnlyP
+              ? { footerToolbarHtml: '<span class="chat-msg__time">' + time + "</span>" + editedBadge + ticksEarlyP }
+              : undefined
+          )
+        : "";
       var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtnP = "";
       var editBtnP = "";
       var replyBlock = m.replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(m.replyTo.fromName || "Игрок") + ':</strong> ' + escapeHtml(String(m.replyTo.text || "").slice(0, 80)) + (String(m.replyTo.text || "").length > 80 ? "…" : "") + '</div>' : "";
       var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
-      var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var avatarEl = isLastInGroup
         ? (m.fromAvatar
           ? '<img class="chat-msg__avatar" src="' + escapeHtml(m.fromAvatar) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
@@ -22954,9 +23021,14 @@ function initChat() {
         "chat-msg__body" +
         (text && text.trim() ? " chat-msg__body--has-text" : "") +
         (isOwn && m.image ? " chat-msg__body--own-image" : "");
-      var ticks = personalReceiptHtml(m, isOwn);
-      var footerHtmlP = '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticks + "</div>";
-      var bodyMainClsP = "chat-msg__body-main" + (!textBlock ? " chat-msg__body-main--solo-footer" : "") + (m.image ? " chat-msg__body-main--with-image" : "");
+      var footerHtmlP = voiceOnlyP
+        ? ""
+        : '<div class="chat-msg__footer">' + '<span class="chat-msg__time">' + time + '</span>' + editedBadge + ticksEarlyP + "</div>";
+      var bodyMainClsP =
+        "chat-msg__body-main" +
+        (!textBlock ? " chat-msg__body-main--solo-footer" : "") +
+        (m.image ? " chat-msg__body-main--with-image" : "") +
+        (voiceOnlyP ? " chat-msg__body-main--voice-inline-time" : "");
       var bodyMainHtmlP = '<div class="' + bodyMainClsP + '">' + textBlock + footerHtmlP + "</div>";
       var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerP + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + bodyMainHtmlP + reactionsRowP + '</div></div></div>';
@@ -23135,7 +23207,17 @@ function initChat() {
             chatMsgImageAttrs(i, slice.length) +
             " />"
           : "";
-        var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
+        var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
+        var ticksPrevDlg = personalReceiptHtmlPrev(m, isOwn);
+        var voiceOnlyPrevDlg = chatMsgVoiceOnlyNoCaption(m);
+        var voiceBlock = m.voice
+          ? chatVoiceMessageHtml(
+              m.voice,
+              voiceOnlyPrevDlg
+                ? { footerToolbarHtml: '<span class="chat-msg__time">' + time + "</span>" + editedBadge + ticksPrevDlg }
+                : undefined
+            )
+          : "";
         var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
         var replyBlock = m.replyTo
           ? '<div class="chat-msg__reply"><strong>' +
@@ -23146,7 +23228,6 @@ function initChat() {
             "</div>"
           : "";
         var adminBadge = m.fromAdmin ? '<span class="chat-msg__admin">(админ)</span>' : "";
-        var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
         var avLetter = (m.fromName && m.fromName.charAt(0)) || (m.from && m.from.charAt(1)) || "И";
         var avatarEl = isLastInGroup
           ? m.fromAvatar
@@ -23238,19 +23319,20 @@ function initChat() {
           "chat-msg__body" +
           (text && text.trim() ? " chat-msg__body--has-text" : "") +
           (isOwn && m.image ? " chat-msg__body--own-image" : "");
-        var ticks = personalReceiptHtmlPrev(m, isOwn);
-        var footerHtmlP =
-          '<div class="chat-msg__footer">' +
-          '<span class="chat-msg__time">' +
-          time +
-          "</span>" +
-          editedBadge +
-          ticks +
-          "</div>";
+        var footerHtmlP = voiceOnlyPrevDlg
+          ? ""
+          : '<div class="chat-msg__footer">' +
+            '<span class="chat-msg__time">' +
+            time +
+            "</span>" +
+            editedBadge +
+            ticksPrevDlg +
+            "</div>";
         var bodyMainClsP =
           "chat-msg__body-main" +
           (!textBlock ? " chat-msg__body-main--solo-footer" : "") +
-          (m.image ? " chat-msg__body-main--with-image" : "");
+          (m.image ? " chat-msg__body-main--with-image" : "") +
+          (voiceOnlyPrevDlg ? " chat-msg__body-main--voice-inline-time" : "");
         var bodyMainHtmlP = '<div class="' + bodyMainClsP + '">' + textBlock + footerHtmlP + "</div>";
         var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
         return (
@@ -23600,6 +23682,7 @@ function initChat() {
         timeP = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
       } catch (eTimeP) {}
       var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(String(replyTo.fromName || "Игрок").slice(0, 100)) + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
+      var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
       var textContent = "";
       if (image) {
         textContent =
@@ -23607,8 +23690,11 @@ function initChat() {
           escapeHtml(String(image)) +
           '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
       }
-      else if (voice) textContent = chatVoiceMessageHtml(String(voice));
-      else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
+      else if (voice) {
+        textContent = chatVoiceMessageHtml(String(voice), {
+          footerToolbarHtml: '<span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks,
+        });
+      } else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
       else if (text) {
         try {
           textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(text)).replace(/\n/g, "<br>"))));
@@ -23620,8 +23706,17 @@ function initChat() {
         "chat-msg__body" +
         (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
         (image ? " chat-msg__body--own-image" : "");
-      var ticks = '<span class="chat-msg__ticks chat-msg__ticks--sent" aria-hidden="true">✓</span>';
-      var optBodyMainP = '<div class="chat-msg__body-main' + (image ? " chat-msg__body-main--with-image" : "") + '"><div class="chat-msg__text">' + textContent + '</div><div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks + "</div></div>";
+      var optBodyMainP =
+        '<div class="chat-msg__body-main' +
+        (image ? " chat-msg__body-main--with-image" : "") +
+        (voice ? " chat-msg__body-main--voice-inline-time" : "") +
+        '"><div class="chat-msg__text">' +
+        textContent +
+        "</div>" +
+        (voice
+          ? ""
+          : '<div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks + "</div>") +
+        "</div>";
       var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClassP + '"><div class="chat-msg__meta"></div>' + replyBlock + optBodyMainP + '</div></div></div>';
       var wrap = document.createElement("div");
       var first = null;
@@ -23648,12 +23743,22 @@ function initChat() {
           imP.alt = "Картинка";
           imP.src = image;
           twP.appendChild(imP);
+          var bmImg = document.createElement("div");
+          bmImg.className = "chat-msg__body-main chat-msg__body-main--with-image";
+          bmImg.appendChild(twP);
+          bodyP.appendChild(bmImg);
         } else if (voice && typeof voice === "string") {
-          appendChatVoiceToTextWrap(twP, voice);
+          appendChatVoiceToTextWrap(twP, voice, {
+            footerToolbarHtml: '<span class="chat-msg__time">' + escapeHtml(timeP) + "</span>" + ticks,
+          });
+          var bmVoice = document.createElement("div");
+          bmVoice.className = "chat-msg__body-main chat-msg__body-main--voice-inline-time";
+          bmVoice.appendChild(twP);
+          bodyP.appendChild(bmVoice);
         } else {
           twP.textContent = text != null ? String(text) : "";
+          bodyP.appendChild(twP);
         }
-        bodyP.appendChild(twP);
         rowP.appendChild(bodyP);
         first.appendChild(rowP);
       }
@@ -26355,6 +26460,52 @@ function initChat() {
         };
       }
     } catch (eGmCache) {}
+    try {
+      function mergeGroupPickDomPeer(idRaw, nameHint, onlineHint, adminHint) {
+        if (!idRaw) return;
+        var ids = String(idRaw).trim();
+        if (!ids || ids.indexOf("group_") === 0) return;
+        if (!(ids.indexOf("tg_") === 0 || ids.indexOf("vk_") === 0)) return;
+        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(ids, myId0)) return;
+        if (byId[ids]) return;
+        byId[ids] = {
+          id: ids,
+          name: (nameHint != null && String(nameHint).trim()) ? String(nameHint).trim() : ids,
+          avatar: null,
+          online: !!onlineHint,
+          admin: !!adminHint,
+          unreadCount: 0,
+        };
+      }
+      var dlgV = document.getElementById("chatDialogsView");
+      if (dlgV) {
+        var admEls = dlgV.querySelectorAll(".chat-dialog-item[data-chat-user-id]");
+        for (var ai = 0; ai < admEls.length; ai++) {
+          var aEl = admEls[ai];
+          var aUid = aEl.getAttribute("data-chat-user-id");
+          var aNm = aEl.getAttribute("data-chat-user-name");
+          var aOn = !!(aEl.querySelector && aEl.querySelector(".chat-dialog-item__online"));
+          mergeGroupPickDomPeer(aUid, aNm || aUid, aOn, true);
+        }
+      }
+      var ccRoot = document.getElementById("chatContacts");
+      if (ccRoot) {
+        var cBtns = ccRoot.querySelectorAll(".chat-contact[data-chat-id]");
+        for (var ci = 0; ci < cBtns.length; ci++) {
+          var cb = cBtns[ci];
+          if (cb.getAttribute("data-chat-group") === "1") continue;
+          var cid = cb.getAttribute("data-chat-id");
+          if (!cid) continue;
+          var cnm = cb.getAttribute("data-chat-name");
+          var cOn = cb.getAttribute("data-chat-online") === "1";
+          if (byId[cid]) {
+            if (cOn && !byId[cid].online) byId[cid].online = true;
+            continue;
+          }
+          mergeGroupPickDomPeer(cid, cnm || cid, cOn, false);
+        }
+      }
+    } catch (eDomGp) {}
     var out = [];
     for (var k in byId) {
       if (Object.prototype.hasOwnProperty.call(byId, k)) out.push(byId[k]);
