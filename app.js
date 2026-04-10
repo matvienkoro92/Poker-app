@@ -1118,6 +1118,7 @@ function getAssetUrl(relativePath) {
 (function initImageLightbox() {
   var lightbox = document.getElementById("imageLightbox");
   var lightboxImg = lightbox ? lightbox.querySelector(".image-lightbox__img") : null;
+  var lightboxCaption = lightbox ? lightbox.querySelector(".image-lightbox__caption") : null;
   var backdrop = lightbox ? lightbox.querySelector(".image-lightbox__backdrop") : null;
   var closeBtn = lightbox ? lightbox.querySelector(".image-lightbox__close") : null;
   var prevBtn = lightbox ? lightbox.querySelector(".image-lightbox__prev") : null;
@@ -1141,20 +1142,34 @@ function getAssetUrl(relativePath) {
     if (counterEl) counterEl.textContent = multi ? galleryIndex + 1 + " / " + galleryList.length : "";
   }
 
+  function setLightboxCaption(text) {
+    if (!lightboxCaption) return;
+    var cap = text != null ? String(text).replace(/\s+/g, " ").trim() : "";
+    if (cap) {
+      lightboxCaption.textContent = cap;
+      lightboxCaption.hidden = false;
+    } else {
+      lightboxCaption.textContent = "";
+      lightboxCaption.hidden = true;
+    }
+  }
+
   function showGallerySlide() {
     if (!galleryList || !galleryList.length) return;
     var item = galleryList[galleryIndex];
     lightboxImg.src = item.src;
     lightboxImg.alt = item.alt ? item.alt : "Фото";
+    setLightboxCaption(item.caption);
     syncGalleryNav();
   }
 
-  function openSingle(src, alt) {
+  function openSingle(src, alt, caption) {
     galleryList = null;
     galleryIndex = 0;
     lightboxImg.src = src;
     var a = alt != null ? String(alt).trim() : "";
     lightboxImg.alt = a ? a : "Увеличено";
+    setLightboxCaption(caption);
     syncGalleryNav();
     lightbox.classList.add("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "false");
@@ -1191,6 +1206,7 @@ function getAssetUrl(relativePath) {
     lightbox.classList.remove("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "true");
     lightboxImg.removeAttribute("src");
+    setLightboxCaption("");
     syncGalleryNav();
   }
 
@@ -1239,9 +1255,33 @@ function getAssetUrl(relativePath) {
     var hallAlb = t.closest && t.closest(".hall-photo-album__btn");
     if (hallAlb) {
       var himg = hallAlb.querySelector("img");
-      if (himg && himg.src) {
+      var hallGrid = hallAlb.closest(".hall-photo-album__grid");
+      if (himg && himg.src && hallGrid) {
         e.preventDefault();
-        openSingle(himg.src);
+        var hallBtns = hallGrid.querySelectorAll(".hall-photo-album__btn");
+        var hallArr = [];
+        var hallIdx = 0;
+        for (var hbi = 0; hbi < hallBtns.length; hbi++) {
+          var hb = hallBtns[hbi];
+          var him = hb.querySelector("img");
+          if (!him || !him.src) continue;
+          if (hb === hallAlb) hallIdx = hallArr.length;
+          var hBody = hb.parentElement;
+          var hCapEl = hBody && hBody.querySelector(".hall-photo-album__caption");
+          var hCap = hCapEl ? String(hCapEl.textContent || "").replace(/\s+/g, " ").trim() : "";
+          hallArr.push({
+            src: him.src,
+            alt: him.alt ? String(him.alt).trim() : "",
+            caption: hCap,
+          });
+        }
+        if (hallArr.length) openGallery(hallArr, hallIdx);
+      } else if (himg && himg.src) {
+        e.preventDefault();
+        var soloBody = hallAlb.parentElement;
+        var soloCapEl = soloBody && soloBody.querySelector(".hall-photo-album__caption");
+        var soloCap = soloCapEl ? String(soloCapEl.textContent || "").replace(/\s+/g, " ").trim() : "";
+        openSingle(himg.src, himg.alt, soloCap);
       }
       return;
     }
@@ -17012,6 +17052,7 @@ function pokerWriteContactsCache(data) {
 var POKER_CHAT_GENERAL_DISK_KEY = "poker_chat_general_snapshot_v1";
 var POKER_CHAT_PERSONAL_DISK_KEY = "poker_chat_personal_snapshot_v1";
 var POKER_CHAT_DISK_GENERAL_MAX_MSG = 130;
+var POKER_CHAT_DISK_GENERAL_MAX_MEMBERS = 120;
 var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 150;
 var POKER_CHAT_DISK_PERSONAL_MAX_PEERS = 40;
 function pokerTrimChatDiskMessages(arr, max) {
@@ -17026,6 +17067,7 @@ function pokerWriteGeneralSnapshotToDisk(cache) {
     var fp = pokerChatContactsAuthFingerprint();
     if (!fp || !cache || !Array.isArray(cache.messages)) return;
     var msg = pokerTrimChatDiskMessages(cache.messages, POKER_CHAT_DISK_GENERAL_MAX_MSG);
+    var gm = Array.isArray(cache.generalMembers) ? cache.generalMembers.slice(0, POKER_CHAT_DISK_GENERAL_MAX_MEMBERS) : [];
     localStorage.setItem(
       POKER_CHAT_GENERAL_DISK_KEY,
       JSON.stringify({
@@ -17035,6 +17077,7 @@ function pokerWriteGeneralSnapshotToDisk(cache) {
         participantsCount: cache.participantsCount,
         onlineCount: cache.onlineCount,
         generalPinned: cache.generalPinned != null ? cache.generalPinned : null,
+        generalMembers: gm.length ? gm : undefined,
       })
     );
   } catch (eWrG) {
@@ -17058,6 +17101,7 @@ function pokerTryReadGeneralSnapshotFromDisk() {
       participantsCount: pack.participantsCount,
       onlineCount: pack.onlineCount,
       generalPinned: pack.generalPinned != null ? pack.generalPinned : null,
+      generalMembers: Array.isArray(pack.generalMembers) ? pack.generalMembers : null,
     };
   } catch (eRd) {
     return null;
@@ -17114,6 +17158,7 @@ function pokerHydrateChatSnapshotsFromDisk() {
         participantsCount: g.participantsCount,
         onlineCount: g.onlineCount,
         generalPinned: g.generalPinned != null ? g.generalPinned : null,
+        generalMembers: Array.isArray(g.generalMembers) ? g.generalMembers : [],
       };
     }
     var rawP = localStorage.getItem(POKER_CHAT_PERSONAL_DISK_KEY);
@@ -17223,9 +17268,6 @@ function initChat() {
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
-  try {
-    pokerHydrateChatSnapshotsFromDisk();
-  } catch (eHydInit) {}
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
   var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
@@ -17489,6 +17531,50 @@ function initChat() {
 
   var base = getApiBase();
   /* учётные данные чата: pokerApiAuth* (Mini App initData или PWA pwaSession) */
+
+  function syncClubChatRosterUi() {
+    var meta = document.getElementById("chatDialogClubRosterMeta");
+    var sub = document.getElementById("chatGeneralHeaderRosterMeta");
+    var access = clubChatAccess;
+    if (access === "need_apply" || access === "pending") {
+      if (meta) meta.hidden = true;
+      if (sub) {
+        sub.hidden = true;
+        sub.textContent = "";
+      }
+      return;
+    }
+    var c = window._chatGeneralCache;
+    var t = c && c.participantsCount != null ? c.participantsCount : null;
+    var o = c && c.onlineCount != null ? c.onlineCount : null;
+    if (t == null && o == null) {
+      if (meta) meta.hidden = true;
+      if (sub) {
+        sub.hidden = true;
+        sub.textContent = "";
+      }
+      return;
+    }
+    if (meta) {
+      var pEl = document.getElementById("chatDialogClubParticipants");
+      var oEl = document.getElementById("chatDialogClubOnline");
+      if (pEl) pEl.textContent = t != null ? String(t) : "—";
+      if (oEl) oEl.textContent = o != null ? String(o) : "—";
+      meta.hidden = false;
+    }
+    if (sub) {
+      sub.textContent = "Участников: " + (t != null ? t : "—") + " · Онлайн: " + (o != null ? o : "—");
+      sub.hidden = false;
+    }
+  }
+  try {
+    window.__pokerSyncClubChatRosterUi = syncClubChatRosterUi;
+  } catch (eSyncRoster) {}
+
+  try {
+    pokerHydrateChatSnapshotsFromDisk();
+    syncClubChatRosterUi();
+  } catch (eHydInit) {}
 
   /** Пока экран лички/группы с peer открыт и вкладка видна — сервер не шлёт Web Push по этому треду (Redis TTL продлевается пингом). */
   var chatDmFocusPingTimer = null;
@@ -19438,6 +19524,9 @@ function initChat() {
         updateChatHeaderStats();
       }
       try {
+        syncClubChatRosterUi();
+      } catch (eRosterP) {}
+      try {
         refreshChatSelfPinBars();
       } catch (ePinP) {}
     } catch (ePaintG) {}
@@ -19881,6 +19970,7 @@ function initChat() {
           participantsCount: data.participantsCount,
           onlineCount: data.onlineCount,
           generalPinned: data.generalPinned != null ? data.generalPinned : null,
+          generalMembers: Array.isArray(data.generalMembers) ? data.generalMembers : [],
         };
         if (!noGeneralAccess) {
           try {
@@ -19939,6 +20029,9 @@ function initChat() {
         var online = data.onlineCount != null ? data.onlineCount : "—";
         window.lastGeneralStats = total + " уч · " + online + " онл";
         updateChatHeaderStats();
+        try {
+          syncClubChatRosterUi();
+        } catch (eRosterG) {}
         /* Не трогаем DOM общего чата, пока экран скрыт — иначе scrollTop обнуляется и при входе лента «сверху». */
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible && !chatIsEditingMessage) {
           if (noGeneralAccess) {
@@ -21602,7 +21695,7 @@ function initChat() {
             var msg = data.message;
             if (msg && msg.id) {
               window._pendingGeneralMessage = msg;
-              var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null };
+              var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null, generalMembers: [] };
               if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return m.id === msg.id; })) {
                 var msgs = cache.messages.concat([msg]);
                 window._chatGeneralCache = Object.assign({}, cache, { messages: msgs });
@@ -22002,6 +22095,17 @@ function initChat() {
         var online = data.onlineCount != null ? data.onlineCount : "—";
         window.lastListStats = total + " конт · " + online + " онл";
         updateChatHeaderStats();
+        if (data.generalChatParticipantsCount != null) {
+          if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
+            window._chatGeneralCache = { messages: [], generalMembers: [] };
+          }
+          window._chatGeneralCache.participantsCount = data.generalChatParticipantsCount;
+          window._chatGeneralCache.onlineCount =
+            data.generalChatOnlineCount != null ? data.generalChatOnlineCount : 0;
+          try {
+            syncClubChatRosterUi();
+          } catch (eRosterContacts) {}
+        }
         if (contactsForList.length === 0) {
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block">' +
@@ -24642,6 +24746,9 @@ function initChat() {
           window.lastGeneralStats = (window._chatGeneralCache.participantsCount != null ? window._chatGeneralCache.participantsCount : "—") + " уч · " + (window._chatGeneralCache.onlineCount != null ? window._chatGeneralCache.onlineCount : "—") + " онл";
           updateChatHeaderStats();
         }
+        try {
+          syncClubChatRosterUi();
+        } catch (eRosterRf) {}
       }
     };
     document.querySelectorAll(".chat-manager-btn--tg").forEach(function (link) {
@@ -25561,6 +25668,16 @@ function initChat() {
     e.stopPropagation();
     showDialogs();
   });
+  var chatGeneralTitleBtn = document.getElementById("chatGeneralTitleBtn");
+  if (chatGeneralTitleBtn) {
+    chatGeneralTitleBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.__pokerOpenChatGeneralMembersModal === "function") {
+        window.__pokerOpenChatGeneralMembersModal();
+      }
+    });
+  }
 
   (function initChatGeneralInviteFriendBtn() {
     var inviteBtn = document.getElementById("chatGeneralInviteFriendBtn");
@@ -26396,8 +26513,10 @@ function initChat() {
     var modal = document.getElementById("chatGroupInfoModal");
     if (!modal) {
       window.__pokerOpenChatGroupInfo = function () {};
+      window.__pokerOpenChatGeneralMembersModal = function () {};
       return;
     }
+    var openGroupInfoMode = "group";
     var backdrop = document.getElementById("chatGroupInfoModalBackdrop");
     var btnClose = document.getElementById("chatGroupInfoModalClose");
     var titleEl = document.getElementById("chatGroupInfoModalTitle");
@@ -26415,6 +26534,7 @@ function initChat() {
     var descViewEl = document.getElementById("chatGroupInfoDescView");
     var saveBtn = document.getElementById("chatGroupInfoSaveProfileBtn");
     var membersEl = document.getElementById("chatGroupInfoMembers");
+    var addMembersBtnInfo = document.getElementById("chatGroupInfoAddMembersBtn");
     var openGroupId = "";
     var lastGroupInfoTitle = "";
     var dangerZone = document.getElementById("chatGroupInfoDanger");
@@ -26432,6 +26552,7 @@ function initChat() {
       if (deleteFinalBtn) deleteFinalBtn.disabled = true;
     }
     function closeModal() {
+      openGroupInfoMode = "group";
       modal.classList.add("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
     }
@@ -26503,7 +26624,12 @@ function initChat() {
         }
       }
       if (saveBtn) saveBtn.hidden = !creator;
-      var mems = g.members || [];
+      var mems = (g.members || []).slice().sort(function (a, b) {
+        var ao = a && a.online ? 1 : 0;
+        var bo = b && b.online ? 1 : 0;
+        if (bo !== ao) return bo - ao;
+        return String((a && a.name) || "").localeCompare(String((b && b.name) || ""), "ru");
+      });
       var onl = 0;
       for (var oi = 0; oi < mems.length; oi++) if (mems[oi] && mems[oi].online) onl++;
       var metaParts = [ruParticipantsCount(mems.length || g.memberCount || 0)];
@@ -26566,11 +26692,17 @@ function initChat() {
       if (avatarEditHint) avatarEditHint.hidden = !creator;
       if (dangerZone) dangerZone.hidden = !creator;
       resetGroupDeleteUi();
-      if (leaveWrap) leaveWrap.hidden = false;
+      if (openGroupInfoMode === "general") {
+        if (leaveWrap) leaveWrap.hidden = true;
+        if (addMembersBtnInfo) addMembersBtnInfo.hidden = true;
+      } else {
+        if (leaveWrap) leaveWrap.hidden = false;
+      }
     }
     window.__pokerOpenChatGroupInfo = function (groupId) {
       var gid = groupId != null ? String(groupId).trim() : "";
       if (!gid || gid.indexOf("group_") !== 0) return;
+      openGroupInfoMode = "group";
       openGroupId = gid;
       lastGroupInfoTitle = "";
       resetGroupDeleteUi();
@@ -26625,6 +26757,121 @@ function initChat() {
           if (membersEl) {
             membersEl.innerHTML =
               '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
+          }
+        })
+        .catch(function () {
+          if (membersEl) membersEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
+        });
+    };
+    window.__pokerOpenChatGeneralMembersModal = function () {
+      var tgLoc = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (typeof clubChatAccess !== "undefined" && clubChatAccess === "need_apply") {
+        var m1 = "Сначала получите доступ к главному чату.";
+        if (tgLoc && tgLoc.showAlert) tgLoc.showAlert(m1);
+        else if (typeof alert === "function") alert(m1);
+        return;
+      }
+      if (typeof clubChatAccess !== "undefined" && clubChatAccess === "pending") {
+        var m2 = "Состав будет доступен после одобрения заявки.";
+        if (tgLoc && tgLoc.showAlert) tgLoc.showAlert(m2);
+        else if (typeof alert === "function") alert(m2);
+        return;
+      }
+      openGroupInfoMode = "general";
+      openGroupId = "";
+      lastGroupInfoTitle = "Главный чат";
+      resetGroupDeleteUi();
+      if (dangerZone) dangerZone.hidden = true;
+      if (leaveWrap) leaveWrap.hidden = true;
+      if (addMembersBtnInfo) addMembersBtnInfo.hidden = true;
+      if (creatorBadge) creatorBadge.hidden = true;
+      if (titleEl) {
+        titleEl.hidden = false;
+        titleEl.textContent = "Главный чат";
+      }
+      if (titleLabel) titleLabel.hidden = true;
+      if (titleInput) titleInput.value = "";
+      if (descEditWrap) descEditWrap.hidden = true;
+      if (descViewWrap) descViewWrap.hidden = false;
+      if (descTa) {
+        descTa.value = "";
+        descTa.readOnly = true;
+      }
+      if (descViewEl) {
+        descViewEl.textContent =
+          "Участники общего чата клуба. Онлайн — недавняя активность в приложении (не статус Telegram).";
+        descViewEl.classList.remove("chat-group-info-modal__desc-view-text--empty");
+      }
+      if (saveBtn) saveBtn.hidden = true;
+      if (metaEl) metaEl.textContent = "";
+      setGroupAvatar("", "Главный чат");
+      if (avatarBtn) {
+        avatarBtn.disabled = true;
+        avatarBtn.setAttribute("aria-label", "Главный чат");
+      }
+      if (avatarEditHint) avatarEditHint.hidden = true;
+      function mapGeneralMembers(arr) {
+        return (arr || [])
+          .map(function (m) {
+            if (!m || !m.id) return null;
+            return {
+              id: m.id,
+              name: m.name || m.id,
+              avatar: m.avatar || null,
+              online: !!m.online,
+              isYou: !!m.isYou,
+              admin: !!m.admin,
+              isGroupCreator: false,
+            };
+          })
+          .filter(Boolean);
+      }
+      function showFromList(raw) {
+        var mm = mapGeneralMembers(raw);
+        renderGroup({
+          title: "Главный чат",
+          description:
+            "Участники общего чата. Онлайн — недавняя активность в приложении (не статус Telegram).",
+          members: mm,
+          iAmCreator: false,
+          memberCount: mm.length,
+          avatar: null,
+          createdAt: null,
+        });
+      }
+      modal.classList.remove("chat-group-info-modal--hidden");
+      modal.setAttribute("aria-hidden", "false");
+      var cachedGm =
+        window._chatGeneralCache && Array.isArray(window._chatGeneralCache.generalMembers)
+          ? window._chatGeneralCache.generalMembers
+          : null;
+      if (cachedGm && cachedGm.length) {
+        showFromList(cachedGm);
+        return;
+      }
+      if (membersEl) membersEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
+      var qG = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+      fetch(base + "/api/chat" + qG + "&mode=general&trackSeen=0")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data && data.ok) {
+            var gm = Array.isArray(data.generalMembers) ? data.generalMembers : [];
+            if (window._chatGeneralCache && typeof window._chatGeneralCache === "object") {
+              window._chatGeneralCache.generalMembers = gm;
+              if (data.participantsCount != null) window._chatGeneralCache.participantsCount = data.participantsCount;
+              if (data.onlineCount != null) window._chatGeneralCache.onlineCount = data.onlineCount;
+            }
+            showFromList(gm);
+            try {
+              if (typeof syncClubChatRosterUi === "function") syncClubChatRosterUi();
+            } catch (eSynM) {}
+            return;
+          }
+          if (membersEl) {
+            membersEl.innerHTML =
+              '<p class="chat-empty">' + escapeHtml((data && data.error) || "Не удалось загрузить список") + "</p>";
           }
         })
         .catch(function () {
@@ -26894,10 +27141,10 @@ function initChat() {
     }
     if (backdrop) backdrop.addEventListener("click", closeModal);
     if (btnClose) btnClose.addEventListener("click", closeModal);
-    var addMembersBtnInfo = document.getElementById("chatGroupInfoAddMembersBtn");
     if (addMembersBtnInfo) {
       addMembersBtnInfo.addEventListener("click", function (e) {
         e.preventDefault();
+        if (openGroupInfoMode === "general") return;
         var gida = openGroupId;
         if (!gida) return;
         if (typeof window.__pokerOpenChatGroupAddMembers === "function") {

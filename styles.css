@@ -6731,16 +6731,50 @@ img.chat-contact__avatar {
   justify-content: center;
   min-height: 0;
 }
+.image-lightbox__figure {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 96px);
+  max-height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
 .image-lightbox__img {
   position: relative;
   z-index: 1;
   max-width: 100%;
-  max-height: 100%;
+  max-height: min(62vh, calc(100vh - 200px));
   width: auto;
   height: auto;
   object-fit: contain;
   border-radius: 0;
   pointer-events: none;
+  flex-shrink: 0;
+}
+.image-lightbox__caption {
+  margin: 10px 0 0;
+  padding: 0 14px 4px;
+  max-width: 100%;
+  max-height: min(34vh, 260px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.image-lightbox__caption[hidden] {
+  display: none !important;
 }
 .image-lightbox__prev,
 .image-lightbox__next {
@@ -7537,6 +7571,26 @@ img.chat-contact__avatar {
 }
 .chat-dialog-item__title-row .chat-dialog-item__label {
   flex: 0 1 auto;
+}
+.chat-dialog-item__club-roster-meta {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text-muted, #94a3b8);
+  max-width: 100%;
+}
+.chat-dialog-item__club-roster-meta strong {
+  color: var(--text, #e2e8f0);
+  font-weight: 600;
+}
+.chat-dialog-item__club-roster-sep {
+  margin: 0 5px;
+  opacity: 0.55;
+}
+[data-theme="light"] .chat-dialog-item__club-roster-meta {
+  color: rgba(30, 41, 59, 0.55);
+}
+[data-theme="light"] .chat-dialog-item__club-roster-meta strong {
+  color: rgba(15, 23, 42, 0.88);
 }
 /* Админ: число необработанных заявок в главный чат */
 .chat-dialog-item__pending-review-badge {
@@ -9820,15 +9874,16 @@ body[data-view="chat"]
   pointer-events: auto;
   align-self: center;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--chat-general-header-strip-min-height);
-  height: var(--chat-general-header-strip-min-height);
-  max-height: var(--chat-general-header-strip-min-height);
+  height: auto;
+  max-height: none;
   margin: 0;
-  padding: 0 12px;
+  padding: 3px 12px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.09);
@@ -9839,14 +9894,35 @@ body[data-view="chat"]
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.15;
   letter-spacing: 0.01em;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.chat-general-header__title-main {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-general-header__title-sub {
+  display: block;
+  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0.82;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .chat-general-header__title-btn:hover {
   background: rgba(255, 255, 255, 0.08);

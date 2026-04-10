@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.378">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.380">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=400" />
+    <link rel="stylesheet" href="./styles.css?v=402" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1571,6 +1571,11 @@
                       <span class="chat-dialog-item__label">Главный чат</span>
                       <span class="chat-dialog-item__pending-review-badge" id="chatDialogClubPendingBadge" aria-hidden="true"></span>
                     </span>
+                    <span class="chat-dialog-item__club-roster-meta" id="chatDialogClubRosterMeta" hidden>
+                      Участников: <strong id="chatDialogClubParticipants">—</strong>
+                      <span class="chat-dialog-item__club-roster-sep" aria-hidden="true">·</span>
+                      Онлайн: <strong id="chatDialogClubOnline">—</strong>
+                    </span>
                     <span class="chat-dialog-item__preview" id="chatDialogClubPreview">Загрузка…</span>
                   </span>
                   <span class="chat-dialog-item__main-label">Чаты</span>
@@ -1643,7 +1648,10 @@
             <div class="chat-general-view chat-general-view--hidden" id="chatGeneralView">
               <div class="chat-general-header">
                 <button type="button" class="chat-back-btn chat-general-header__toolbar-back" id="chatGeneralBackBtn" aria-label="Назад к чатам">←</button>
-                <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат">Главный чат</button>
+                <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники и онлайн">
+                  <span class="chat-general-header__title-main">Главный чат</span>
+                  <span class="chat-general-header__title-sub" id="chatGeneralHeaderRosterMeta" hidden></span>
+                </button>
                 <div class="chat-general-header__segments" role="toolbar" aria-label="Действия в общем чате">
                   <button type="button" class="chat-general-invite-friend-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralInviteFriendBtn" title="Пригласить в общий чат" aria-label="Поделиться ссылкой на общий чат">
                     <span class="chat-general-invite-friend-btn__icon" aria-hidden="true">
@@ -4328,7 +4336,10 @@
         <button type="button" class="image-lightbox__backdrop" aria-label="Закрыть"></button>
         <div class="image-lightbox__content">
           <button type="button" class="image-lightbox__prev" hidden aria-label="Предыдущее фото">‹</button>
-          <img class="image-lightbox__img" src="" alt="" />
+          <div class="image-lightbox__figure">
+            <img class="image-lightbox__img" src="" alt="" />
+            <p class="image-lightbox__caption" id="imageLightboxCaption" hidden></p>
+          </div>
           <button type="button" class="image-lightbox__next" hidden aria-label="Следующее фото">›</button>
           <span class="image-lightbox__counter" aria-live="polite"></span>
           <button type="button" class="image-lightbox__close" aria-label="Закрыть">✕</button>
@@ -5970,7 +5981,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=498"></script>
+    <script defer src="./app.js?v=500"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
