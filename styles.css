@@ -1469,8 +1469,9 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   background: rgba(15, 23, 42, 0.28);
 }
 [data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
-  background: rgba(255, 255, 255, 0.45);
-  border-top-color: rgba(217, 119, 6, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 240, 0.94));
+  border-top-color: rgba(217, 119, 6, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .spring-rating-home-promo-stats__april-row {
   display: flex;
@@ -1565,6 +1566,18 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 [data-theme="light"] .spring-rating-home-promo-stats__summary-meta {
   color: rgba(30, 41, 59, 0.65);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__summary-meta strong {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-home-promo-stats__details--march {
+  border-top-color: rgba(180, 83, 9, 0.18);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__nested {
+  border-left-color: rgba(217, 119, 6, 0.28);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__details--week summary:hover {
+  background: rgba(251, 146, 60, 0.12);
 }
 .winter-rating:not(.spring-rating) #springRatingViewTotals {
   display: none !important;
@@ -4774,8 +4787,33 @@ html.vpn-proxy-modal-open {
   font-size: 11px;
   color: #78716c;
 }
-.gazette-article-comments__delete {
+.gazette-article-comments__mod-actions {
   margin-left: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.gazette-article-comments__edit {
+  padding: 2px 0;
+  font-size: 11px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #57534e;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
+  font-family: inherit;
+}
+.gazette-article-comments__edited {
+  font-size: 10px;
+  color: #a8a29e;
+  white-space: nowrap;
+}
+.gazette-article-comments__delete {
+  margin-left: 0;
   padding: 2px 0;
   font-size: 11px;
   border-radius: 0;
@@ -4786,10 +4824,60 @@ html.vpn-proxy-modal-open {
   text-decoration: underline;
   text-underline-offset: 2px;
   outline: none;
+  font-family: inherit;
 }
 .gazette-article-comments__delete:disabled {
   opacity: 0.6;
   cursor: default;
+}
+.gazette-article-comments__body {
+  margin: 0;
+}
+.gazette-article-comments__item--editing .gazette-article-comments__text[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__edit-box {
+  margin-top: 4px;
+}
+.gazette-article-comments__edit-box[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__edit-textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(44, 24, 16, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  color: #1c1917;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+.gazette-article-comments__edit-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gazette-article-comments__edit-save,
+.gazette-article-comments__edit-cancel {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(44, 24, 16, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  color: #292524;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gazette-article-comments__edit-save {
+  background: rgba(249, 115, 22, 0.14);
+  border-color: rgba(234, 88, 12, 0.32);
 }
 .gazette-article-comments__text {
   margin: 0;
@@ -11256,23 +11344,23 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-size: calc(10px * 1.2);
 }
 [data-theme="light"] .tournament-day-home-dual {
-  background: #000;
-  border-color: rgba(249, 115, 22, 0.5);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(249, 115, 22, 0.15);
+  background: linear-gradient(180deg, rgba(255, 253, 251, 0.98), rgba(255, 245, 235, 0.96));
+  border-color: rgba(249, 115, 22, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 12px rgba(249, 115, 22, 0.08);
 }
 [data-theme="light"] .tournament-day-home-dual .tournament-day-home-wrap:first-child {
-  border-right-color: rgba(249, 115, 22, 0.45);
+  border-right-color: rgba(249, 115, 22, 0.35);
 }
 [data-theme="light"] .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home {
   border: 0 !important;
-  border-bottom: 1px solid rgba(249, 115, 22, 0.35) !important;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.28) !important;
   border-radius: 0 !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65) !important;
 }
 [data-theme="light"] .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home:hover {
   border-color: transparent !important;
-  border-bottom-color: rgba(249, 115, 22, 0.45) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 0 0 1px rgba(249, 115, 22, 0.15) !important;
+  border-bottom-color: rgba(249, 115, 22, 0.4) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 0 0 1px rgba(249, 115, 22, 0.12) !important;
 }
 .tournament-day-home-wrap {
   box-sizing: border-box;
@@ -11342,12 +11430,12 @@ html.app-view-home .feature--rating-spring-promo:hover,
   box-shadow: none;
 }
 [data-theme="light"] .tournament-day-home-wrap .tournament-day-block__home-heading {
-  color: rgba(255, 251, 245, 0.98);
+  color: #1c1917;
 }
 [data-theme="light"] .tournament-day-home-wrap .tournament-day-block__home-head {
-  border-bottom-color: rgba(249, 115, 22, 0.5);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
-  background: linear-gradient(180deg, rgba(249, 115, 22, 0.22) 0%, rgba(249, 115, 22, 0.07) 100%);
+  border-bottom-color: rgba(249, 115, 22, 0.38);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  background: linear-gradient(180deg, rgba(255, 237, 213, 0.95) 0%, rgba(255, 247, 237, 0.55) 100%);
 }
 /* Главная, колонка фриролла: заголовок и CTA компактнее — одна строка в узкой половине */
 .tournament-day-home-wrap--freeroll .tournament-day-block__home-heading {
@@ -11443,7 +11531,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   margin-bottom: 3px;
 }
 [data-theme="light"] .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__stat-label {
-  color: rgba(254, 215, 170, 0.88);
+  color: rgba(120, 53, 15, 0.82);
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__stat-value {
   display: block;
@@ -11534,14 +11622,37 @@ a.tournament-day-share-btn {
   box-shadow: 0 3px 10px rgba(194, 65, 12, 0.6);
 }
 [data-theme="light"] .tournament-day-home-wrap .tournament-day-block--home {
-  background: #000 !important;
-  border-color: rgba(249, 115, 22, 0.5);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(249, 115, 22, 0.15) !important;
+  background: linear-gradient(180deg, rgba(255, 253, 251, 0.98), rgba(255, 247, 237, 0.94)) !important;
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 2px 8px rgba(255, 237, 213, 0.35), 0 0 0 1px rgba(249, 115, 22, 0.12) !important;
 }
 [data-theme="light"] .tournament-day-home-wrap .tournament-day-block--home:hover {
-  background: #000 !important;
-  border-color: rgba(249, 115, 22, 0.65);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 12px rgba(249, 115, 22, 0.2) !important;
+  background: linear-gradient(180deg, #fffdfb, rgba(255, 243, 230, 0.98)) !important;
+  border-color: rgba(249, 115, 22, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 2px 14px rgba(249, 115, 22, 0.14) !important;
+}
+[data-theme="light"] .tournament-day-home-wrap--freeroll .tournament-day-block--home .tournament-day-block__stats,
+[data-theme="light"] .tournament-day-home-wrap--tournament-day .tournament-day-block--home .tournament-day-block__stats {
+  border-color: rgba(249, 115, 22, 0.32);
+}
+[data-theme="light"]
+  .tournament-day-home-wrap--freeroll
+  .tournament-day-block--home
+  .tournament-day-block__stat
+  + .tournament-day-block__stat,
+[data-theme="light"]
+  .tournament-day-home-wrap--tournament-day
+  .tournament-day-block--home
+  .tournament-day-block__stat
+  + .tournament-day-block__stat {
+  border-top-color: rgba(249, 115, 22, 0.22);
+}
+[data-theme="light"] .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__meta .tournament-day-block__timer {
+  color: #c2410c;
+}
+[data-theme="light"] .tournament-day-actions-row {
+  border-color: rgba(249, 115, 22, 0.35);
+  background: rgba(255, 250, 245, 0.6);
 }
 
 .games-apps-block {
@@ -22538,6 +22649,27 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .footer-visitors__version {
   white-space: nowrap;
   opacity: 0.92;
+}
+
+.footer-deep-links {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  justify-content: center;
+  align-items: center;
+}
+.footer-deep-links__a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-deep-links__a:hover {
+  color: var(--text);
 }
 
 .footer-note {
