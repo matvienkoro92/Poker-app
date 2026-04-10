@@ -22085,7 +22085,15 @@ function initChat() {
     });
   }
 
-  function loadContacts() {
+  function loadContacts(opts) {
+    opts = opts || {};
+    var onContactsLoaded = typeof opts.onLoaded === "function" ? opts.onLoaded : null;
+    function fireContactsLoaded() {
+      if (!onContactsLoaded) return;
+      try {
+        onContactsLoaded();
+      } catch (eFireLc) {}
+    }
     if (!contactsEl) return;
     if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
       window.__pokerChatContactsUnreadSoundPrimed = false;
@@ -22196,7 +22204,13 @@ function initChat() {
         if (data.friendIds && Array.isArray(data.friendIds)) {
           for (var fi = 0; fi < data.friendIds.length; fi++) {
             var fid = data.friendIds[fi];
-            if (fid != null && String(fid) !== "") friendSet[String(fid)] = true;
+            if (fid == null || String(fid) === "") continue;
+            var fstr = String(fid);
+            friendSet[fstr] = true;
+            try {
+              var fnorm = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(fstr) : fstr;
+              if (fnorm && fnorm !== fstr) friendSet[fnorm] = true;
+            } catch (eFnFr) {}
           }
           try {
             if (typeof pokerUpdateFriendsCountLabels === "function") {
@@ -22552,6 +22566,7 @@ function initChat() {
       if (c0) {
         contactsInstantFromCache = true;
         applyContactsApiResponse(c0);
+        fireContactsLoaded();
       }
     } catch (eInst) {}
     fetch(url)
@@ -22563,11 +22578,13 @@ function initChat() {
           if (data && data.ok) pokerWriteContactsCache(data);
         } catch (eSav) {}
         applyContactsApiResponse(data);
+        fireContactsLoaded();
       })
       .catch(function () {
         if (!contactsInstantFromCache)
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
+        fireContactsLoaded();
         if (window.__openClubChatAfterNextContacts) {
           window.__openClubChatAfterNextContacts = false;
           setTimeout(function () {
@@ -26830,9 +26847,8 @@ function initChat() {
     }
     function renderPickersAm() {
       var list = contactListFromApiAm();
-      var friendSetAm = window.__pokerChatFriendIdsSet || {};
       var fr = list.filter(function (c) {
-        return !!(friendSetAm[c.id] || friendSetAm[String(c.id)]);
+        return c && c.id && typeof pokerChatPeerIdIsFriend === "function" && pokerChatPeerIdIsFriend(c.id);
       });
       paintPickerAm(pickerAllAm, list);
       paintPickerAm(pickerFriendsAm, fr);
@@ -27069,15 +27085,20 @@ function initChat() {
       if (metaHintAm) metaHintAm.textContent = "Загрузка…";
       if (btnSubmitAm) btnSubmitAm.disabled = false;
       setTabAmFn("all");
-      renderPickersAm();
-      renderSelectedAm();
-      if (typeof window.__pokerReloadChatContacts === "function") {
-        try {
-          window.__pokerReloadChatContacts();
-        } catch (eRelAm) {}
-      }
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
+      function paintGroupAddAfterContacts() {
+        try {
+          renderPickersAm();
+          renderSelectedAm();
+        } catch (ePaintAm) {}
+      }
+      paintGroupAddAfterContacts();
+      if (typeof window.__pokerReloadChatContacts === "function") {
+        try {
+          window.__pokerReloadChatContacts({ onLoaded: paintGroupAddAfterContacts });
+        } catch (eRelAm) {}
+      }
       setTimeout(function () {
         try {
           var mAm = document.getElementById("chatGroupAddMembersModal");
@@ -27930,15 +27951,21 @@ function initChat() {
       if (manualInp) manualInp.value = "";
       if (manualHint) manualHint.textContent = "";
       setTabCreateGroup("all");
-      if (typeof window.__pokerReloadChatContacts === "function") {
-        try {
-          window.__pokerReloadChatContacts();
-        } catch (eRelCg) {}
-      }
-      renderPickers();
-      renderSelected();
+      /* Сначала показываем модалку: иначе быстрый ответ mode=contacts приходит до снятия --hidden и refresh пикеров в applyContactsApiResponse пропускается — пустые «Все»/«Друзья». */
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
+      function paintCreateGroupAfterContacts() {
+        try {
+          renderPickers();
+          renderSelected();
+        } catch (ePaintCg) {}
+      }
+      paintCreateGroupAfterContacts();
+      if (typeof window.__pokerReloadChatContacts === "function") {
+        try {
+          window.__pokerReloadChatContacts({ onLoaded: paintCreateGroupAfterContacts });
+        } catch (eRelCg) {}
+      }
       try {
         var rafCg = window.requestAnimationFrame || function (fn) {
           setTimeout(fn, 0);
@@ -28024,9 +28051,8 @@ function initChat() {
     }
     function renderPickers() {
       var list = contactListFromApi();
-      var friendSet = window.__pokerChatFriendIdsSet || {};
       var fr = list.filter(function (c) {
-        return !!(friendSet[c.id] || friendSet[String(c.id)]);
+        return c && c.id && typeof pokerChatPeerIdIsFriend === "function" && pokerChatPeerIdIsFriend(c.id);
       });
       paintPicker(pickerAll, list);
       paintPicker(pickerFriends, fr);
