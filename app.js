@@ -17546,8 +17546,7 @@ function initChat() {
     }
     var c = window._chatGeneralCache;
     var t = c && c.participantsCount != null ? c.participantsCount : null;
-    var o = c && c.onlineCount != null ? c.onlineCount : null;
-    if (t == null && o == null) {
+    if (t == null) {
       if (meta) meta.hidden = true;
       if (sub) {
         sub.hidden = true;
@@ -17557,13 +17556,11 @@ function initChat() {
     }
     if (meta) {
       var pEl = document.getElementById("chatDialogClubParticipants");
-      var oEl = document.getElementById("chatDialogClubOnline");
-      if (pEl) pEl.textContent = t != null ? String(t) : "—";
-      if (oEl) oEl.textContent = o != null ? String(o) : "—";
+      if (pEl) pEl.textContent = String(t);
       meta.hidden = false;
     }
     if (sub) {
-      sub.textContent = "Участников: " + (t != null ? t : "—") + " · Онлайн: " + (o != null ? o : "—");
+      sub.textContent = "Участников: " + String(t);
       sub.hidden = false;
     }
   }
@@ -19515,12 +19512,8 @@ function initChat() {
       try {
         lastGeneralMessagesSig = generalMessagesSignature(cache.messages);
       } catch (eSigP) {}
-      if (cache.participantsCount != null || cache.onlineCount != null) {
-        window.lastGeneralStats =
-          (cache.participantsCount != null ? cache.participantsCount : "—") +
-          " уч · " +
-          (cache.onlineCount != null ? cache.onlineCount : "—") +
-          " онл";
+      if (cache.participantsCount != null) {
+        window.lastGeneralStats = String(cache.participantsCount) + " уч";
         updateChatHeaderStats();
       }
       try {
@@ -20026,8 +20019,7 @@ function initChat() {
         }
         /* Вне экрана «главный чат» не трогаем chatGeneralUnread* — только mode=contacts. */
         var total = data.participantsCount != null ? data.participantsCount : "—";
-        var online = data.onlineCount != null ? data.onlineCount : "—";
-        window.lastGeneralStats = total + " уч · " + online + " онл";
+        window.lastGeneralStats = total !== "—" ? String(total) + " уч" : "";
         updateChatHeaderStats();
         try {
           syncClubChatRosterUi();
@@ -22205,7 +22197,10 @@ function initChat() {
             if (isGroupRow) {
               var mcN = c.memberCount != null ? Number(c.memberCount) : 0;
               roleInnerHtml =
-                mcN > 0 ? escapeHtml(String(mcN) + " уч.") : escapeHtml("Группа");
+                '<span class="chat-contact__group-kind">Общий чат</span>' +
+                (mcN > 0
+                  ? '<span class="chat-contact__group-count">' + escapeHtml(String(mcN) + " уч.") + "</span>"
+                  : "");
             } else if (c.admin) {
               roleInnerHtml = escapeHtml("Админ");
             } else if (isFriendContact) {
@@ -24742,8 +24737,8 @@ function initChat() {
         try {
           lastGeneralMessagesSig = generalMessagesSignature(window._chatGeneralCache.messages);
         } catch (eSigSync) {}
-        if (window._chatGeneralCache.participantsCount != null || window._chatGeneralCache.onlineCount != null) {
-          window.lastGeneralStats = (window._chatGeneralCache.participantsCount != null ? window._chatGeneralCache.participantsCount : "—") + " уч · " + (window._chatGeneralCache.onlineCount != null ? window._chatGeneralCache.onlineCount : "—") + " онл";
+        if (window._chatGeneralCache.participantsCount != null) {
+          window.lastGeneralStats = String(window._chatGeneralCache.participantsCount) + " уч";
           updateChatHeaderStats();
         }
         try {
@@ -26696,6 +26691,39 @@ function initChat() {
       if (openGroupInfoMode === "general") {
         if (leaveWrap) leaveWrap.hidden = true;
         if (addMembersBtnInfo) addMembersBtnInfo.hidden = true;
+        if (creatorBadge) creatorBadge.hidden = true;
+        if (dangerZone) dangerZone.hidden = true;
+        resetGroupDeleteUi();
+        if (titleLabel) titleLabel.hidden = true;
+        if (titleEl) {
+          titleEl.hidden = false;
+          titleEl.textContent = "Главный чат";
+        }
+        if (titleInput) titleInput.value = "";
+        if (descEditWrap) descEditWrap.hidden = true;
+        if (descViewWrap) descViewWrap.hidden = false;
+        if (descTa) {
+          descTa.value = "";
+          descTa.readOnly = true;
+        }
+        if (descViewEl) {
+          descViewEl.textContent =
+            "Участники общего чата клуба. Онлайн — недавняя активность в приложении (не статус Telegram).";
+          descViewEl.classList.remove("chat-group-info-modal__desc-view-text--empty");
+        }
+        if (saveBtn) saveBtn.hidden = true;
+        if (avatarBtn) {
+          avatarBtn.disabled = true;
+          avatarBtn.setAttribute("aria-label", "Главный чат");
+        }
+        if (avatarEditHint) avatarEditHint.hidden = true;
+        setGroupAvatar("", "Главный чат");
+        lastGroupInfoTitle = "Главный чат";
+        if (metaEl) {
+          var metaGen = [ruParticipantsCount(mems.length || g.memberCount || 0)];
+          metaGen.push(onl + " онлайн");
+          metaEl.textContent = metaGen.join(" · ");
+        }
       } else {
         if (leaveWrap) leaveWrap.hidden = false;
       }
@@ -26739,11 +26767,13 @@ function initChat() {
       modal.setAttribute("aria-hidden", "false");
       var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
       var urlMeta = base + "/api/chat" + q + "&with=" + encodeURIComponent(gid) + "&metaonly=1";
+      var metaFetchGid = gid;
       fetch(urlMeta)
         .then(function (r) {
           return r.json();
         })
         .then(function (data) {
+          if (openGroupInfoMode !== "group" || openGroupId !== metaFetchGid) return;
           if (data && data.ok && data.group) {
             renderGroup(data.group);
             return;
@@ -26761,6 +26791,7 @@ function initChat() {
           }
         })
         .catch(function () {
+          if (openGroupInfoMode !== "group" || openGroupId !== metaFetchGid) return;
           if (membersEl) membersEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
         });
     };
@@ -26835,6 +26866,7 @@ function initChat() {
             "Участники общего чата. Онлайн — недавняя активность в приложении (не статус Telegram).",
           members: mm,
           iAmCreator: false,
+          iCanManageGroupMeta: false,
           memberCount: mm.length,
           avatar: null,
           createdAt: null,
@@ -26857,6 +26889,7 @@ function initChat() {
           return r.json();
         })
         .then(function (data) {
+          if (openGroupInfoMode !== "general") return;
           if (data && data.ok) {
             var gm = Array.isArray(data.generalMembers) ? data.generalMembers : [];
             if (window._chatGeneralCache && typeof window._chatGeneralCache === "object") {
@@ -26876,6 +26909,7 @@ function initChat() {
           }
         })
         .catch(function () {
+          if (openGroupInfoMode !== "general") return;
           if (membersEl) membersEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
         });
     };

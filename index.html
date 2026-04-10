@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.382">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.385">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=403" />
+    <link rel="stylesheet" href="./styles.css?v=404" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1574,8 +1574,6 @@
                     </span>
                     <span class="chat-dialog-item__club-roster-meta" id="chatDialogClubRosterMeta" hidden>
                       Участников: <strong id="chatDialogClubParticipants">—</strong>
-                      <span class="chat-dialog-item__club-roster-sep" aria-hidden="true">·</span>
-                      Онлайн: <strong id="chatDialogClubOnline">—</strong>
                     </span>
                     <span class="chat-dialog-item__preview" id="chatDialogClubPreview">Загрузка…</span>
                   </span>
@@ -1649,7 +1647,7 @@
             <div class="chat-general-view chat-general-view--hidden" id="chatGeneralView">
               <div class="chat-general-header">
                 <button type="button" class="chat-back-btn chat-general-header__toolbar-back" id="chatGeneralBackBtn" aria-label="Назад к чатам">←</button>
-                <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники и онлайн">
+                <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники">
                   <span class="chat-general-header__title-main">Главный чат</span>
                   <span class="chat-general-header__title-sub" id="chatGeneralHeaderRosterMeta" hidden></span>
                 </button>
@@ -5982,7 +5980,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=501"></script>
+    <script defer src="./app.js?v=504"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
