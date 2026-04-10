@@ -148,14 +148,33 @@ function isTelegramWebApp() {
 }
 
 /**
+ * Канонический HTTPS-базис для шаринга вне Mini App: совпадает с start_url PWA (/) и даёт ?startapp= на корне.
+ */
+function getWebsiteOriginBaseForLinks() {
+  try {
+    var o = String(window.location.origin || "").replace(/\/$/, "");
+    if (!o) return "";
+    var p = String(window.location.pathname || "/");
+    var pl = p.toLowerCase();
+    if (pl === "/index.html") return o + "/";
+    if (pl === "/" || p === "") return o + "/";
+    return (o + p).replace(/\/$/, "");
+  } catch (e) {
+    return "";
+  }
+}
+
+/**
  * Базовый URL для ссылок "в это же приложение" (добавляйте ?startapp=…).
- * - В Telegram Mini App используем `data-telegram-app-url` (t.me).
- * - В PWA — origin+pathname; тот же query ?startapp=… подхватывается при загрузке страницы.
+ * - В Telegram Mini App — `data-telegram-app-url` (t.me).
+ * - В браузере / PWA — канонический URL сайта (не застывший t.me); ?startapp= обрабатывается при открытии той же установки / вкладки.
  */
 function getAppBaseUrlForLinks() {
   var appEl = document.getElementById("app");
   var telegramAppUrl = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
   if (isTelegramWebApp() && telegramAppUrl) return String(telegramAppUrl).replace(/\/$/, "");
+  var web = getWebsiteOriginBaseForLinks();
+  if (web) return web;
   return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
 }
 
@@ -2165,7 +2184,6 @@ function runGazetteAndTasksInit() {
   if (closeBtn) closeBtn.addEventListener("click", closeGazette);
   if (backdrop) backdrop.addEventListener("click", closeGazette);
 
-  var appUrl = getAppBaseUrlForLinks();
   modal.addEventListener("click", function (e) {
     var ratingLink = e.target && e.target.closest ? e.target.closest("a[data-close-gazette][data-view-target]") : null;
     if (ratingLink) {
@@ -2210,7 +2228,10 @@ function runGazetteAndTasksInit() {
       e.preventDefault();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var idx = shareBtn.dataset.gazetteShare;
-      var link = idx !== undefined && idx !== "" ? appUrl + "?startapp=news_" + idx : appUrl + "?startapp=news";
+      var link =
+        idx !== undefined && idx !== ""
+          ? buildMiniAppStartLink("news_" + idx)
+          : buildMiniAppStartLink("news");
       var isTelegramShare = shareBtn.classList && shareBtn.classList.contains("gazette-modal__share-telegram");
       if (isTelegramShare) {
         var article = shareBtn.closest && shareBtn.closest("article");
@@ -3765,19 +3786,16 @@ function runGazetteAndTasksInit() {
     }
     function vpnProxyShareAbsoluteUrl() {
       try {
-        return window.location.origin + window.location.pathname + window.location.search + vpnProxyCurrentHash();
+        var base = String(getAppBaseUrlForLinks() || "")
+          .trim()
+          .replace(/\/+$/, "");
+        if (!base) return "";
+        var h = vpnProxyCurrentHash();
+        if (/^https?:\/\/[^/?#]+$/i.test(base)) return base + "/" + h;
+        return base + h;
       } catch (eU) {
         return "";
       }
-    }
-    function syncVpnProxyDeepLinkUi() {
-      var deep = document.getElementById("vpnProxyDeepLinkA");
-      if (!deep) return;
-      var h = vpnProxyCurrentHash();
-      try {
-        deep.setAttribute("href", h);
-        deep.setAttribute("title", window.location.origin + window.location.pathname + window.location.search + h);
-      } catch (eD) {}
     }
     function setVpnProxyTab(which) {
       var isVpn = which === "vpn";
@@ -3797,7 +3815,6 @@ function runGazetteAndTasksInit() {
         panelProxy.hidden = isVpn;
         panelProxy.setAttribute("aria-hidden", isVpn ? "true" : "false");
       }
-      syncVpnProxyDeepLinkUi();
     }
     function openModal(opts) {
       opts = opts || {};
@@ -11815,10 +11832,18 @@ function getStreamsAppUrl() {
 
 /** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
 function buildMiniAppStartLink(startParam) {
-  var appUrl = getAppBaseUrlForLinks();
-  appUrl = String(appUrl).replace(/\/$/, "");
+  var appUrl = String(getAppBaseUrlForLinks() || "")
+    .trim()
+    .replace(/\/+$/, "");
   var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
-  return appUrl + sep + "startapp=" + encodeURIComponent(String(startParam));
+  var needSlash = sep === "?" && /^https?:\/\/[^/?#]+$/i.test(appUrl);
+  return (
+    appUrl +
+    (needSlash ? "/" : "") +
+    sep +
+    "startapp=" +
+    encodeURIComponent(String(startParam))
+  );
 }
 
 function streamsCleanup() {
@@ -12187,8 +12212,7 @@ function initStreams() {
         var peer = new PeerJs(roomId, { debug: 0 });
         streamsBroadcastPeer = peer;
         peer.on("open", function () {
-          var appUrl = getStreamsAppUrl();
-          var link = appUrl + (appUrl.indexOf("?") >= 0 ? "&" : "?") + "startapp=streams_" + roomId;
+          var link = buildMiniAppStartLink("streams_" + roomId);
           if (shareLinkInput) shareLinkInput.value = link;
           if (roomInput) roomInput.placeholder = roomId;
           previewVideo.srcObject = streamsBroadcastStream;
