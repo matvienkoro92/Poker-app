@@ -3394,6 +3394,461 @@ function runGazetteAndTasksInit() {
       if (window.location.hash === CLUB_CHARTER_HASH) openCharter({ skipHistory: true });
     }, 0);
   })();
+
+  (function initVpnProxyModal() {
+    var modal = document.getElementById("vpnProxyModal");
+    var openBtn = document.getElementById("vpnProxyOpenBtn");
+    var closeBtn = document.getElementById("vpnProxyModalClose");
+    var backdrop = document.getElementById("vpnProxyModalBackdrop");
+    var paper = modal && modal.querySelector(".club-charter-modal__paper");
+    var tabVpn = document.getElementById("vpnProxyTabVpn");
+    var tabProxy = document.getElementById("vpnProxyTabProxy");
+    var panelVpn = document.getElementById("vpnProxyPanelVpn");
+    var panelProxy = document.getElementById("vpnProxyPanelProxy");
+    var feedVpn = document.getElementById("vpnProxyFeedVpn");
+    var feedProxy = document.getElementById("vpnProxyFeedProxy");
+    var hintVpn = document.getElementById("vpnProxyHintVpn");
+    var hintProxy = document.getElementById("vpnProxyHintProxy");
+    var compVpn = document.getElementById("vpnProxyComposerVpn");
+    var compProxy = document.getElementById("vpnProxyComposerProxy");
+    var lockY = 0;
+    var behindLocked = false;
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+    function trimUrlTrailing(s) {
+      return String(s || "").replace(/[),.;:!?]+$/g, "");
+    }
+    function linkifyCommentBody(raw) {
+      var s = String(raw || "");
+      var re = /(https?:\/\/\S+)/gi;
+      var parts = s.split(re);
+      var out = "";
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        if (i % 2 === 1 && /^https?:\/\//i.test(p)) {
+          var safeHref = trimUrlTrailing(p);
+          var href = esc(safeHref);
+          out +=
+            '<a href="' +
+            href +
+            '" target="_blank" rel="noopener noreferrer" class="vpn-proxy-modal__text-link">' +
+            esc(p) +
+            "</a>";
+        } else {
+          out += esc(p);
+        }
+      }
+      return out;
+    }
+    function formatCommentAt(at) {
+      try {
+        var d = new Date(at);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleString("ru-RU", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch (eFmt) {
+        return "";
+      }
+    }
+    function renderVpnProxyFeed(feed, items, isAdmin) {
+      if (!feed) return;
+      var linkify = feed.getAttribute("data-vpn-proxy-linkify") === "1";
+      if (!items || !items.length) {
+        feed.innerHTML =
+          '<p class="gazette-article-comments__empty">Пока нет сообщений — напишите первым.</p>';
+        return;
+      }
+      feed.innerHTML = items
+        .map(function (c) {
+          var textBody = linkify ? linkifyCommentBody(c.text || "") : esc(c.text || "");
+          var cd = c.chatDisplayName != null ? String(c.chatDisplayName).trim() : "";
+          var slug = c.userNameSlug != null ? String(c.userNameSlug).replace(/^@+/, "").trim() : "";
+          var authorPlain = cd
+            ? cd
+            : slug
+              ? "@" + slug
+              : c.author != null
+                ? String(c.author)
+                : "Игрок";
+          var authorEsc = esc(authorPlain);
+          var midRaw = c.memberId != null ? String(c.memberId).trim() : "";
+          var authorNode =
+            midRaw && (/^tg_\d+$/.test(midRaw) || /^vk_\d+$/.test(midRaw))
+              ? '<button type="button" class="gazette-article-comments__author gazette-article-comments__author--profile" data-gazette-comment-member-id="' +
+                esc(midRaw) +
+                '" data-gazette-comment-display-name="' +
+                esc(authorPlain) +
+                '">' +
+                authorEsc +
+                "</button>"
+              : '<span class="gazette-article-comments__author">' + authorEsc + "</span>";
+          var ds = formatCommentAt(c.at);
+          var meta = ds
+            ? '<time class="gazette-article-comments__time">' + esc(ds) + "</time>"
+            : "";
+          var cid = c.id != null ? String(c.id) : "";
+          var showDel = isAdmin && cid;
+          var aidAttr = esc(String(feed.getAttribute("data-gazette-article-comments-article-id") || ""));
+          var delBtn = showDel
+            ? '<button type="button" class="gazette-article-comments__delete" data-gazette-comment-delete="' +
+              esc(cid) +
+              '" data-gazette-comment-article="' +
+              aidAttr +
+              '">Удалить</button>'
+            : "";
+          return (
+            '<article class="gazette-article-comments__item"><header class="gazette-article-comments__item-head">' +
+            authorNode +
+            meta +
+            delBtn +
+            '</header><p class="gazette-article-comments__text">' +
+            textBody +
+            "</p></article>"
+          );
+        })
+        .join("");
+    }
+    function loadVpnProxyFeed(feed) {
+      if (!feed) return;
+      var aid = feed.getAttribute("data-gazette-article-comments-article-id");
+      if (!aid) return;
+      var base = typeof getApiBase === "function" ? getApiBase() : "";
+      if (!base) {
+        renderVpnProxyFeed(feed, [], false);
+        return;
+      }
+      feed.innerHTML = '<p class="gazette-article-comments__loading">Загрузка…</p>';
+      var q =
+        "?articleId=" +
+        encodeURIComponent(aid) +
+        (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "");
+      fetch(base + "/api/gazette-article-comments" + q)
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          if (res.ok && res.data && res.data.ok && Array.isArray(res.data.comments)) {
+            renderVpnProxyFeed(feed, res.data.comments, !!res.data.isAdmin);
+          } else {
+            renderVpnProxyFeed(feed, [], false);
+          }
+        })
+        .catch(function () {
+          renderVpnProxyFeed(feed, [], false);
+        });
+    }
+    function refreshVpnProxyAuthUi() {
+      var cred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+      if (hintVpn) {
+        if (cred) hintVpn.setAttribute("hidden", "");
+        else hintVpn.removeAttribute("hidden");
+      }
+      if (hintProxy) {
+        if (cred) hintProxy.setAttribute("hidden", "");
+        else hintProxy.removeAttribute("hidden");
+      }
+      if (compVpn) {
+        if (cred) compVpn.removeAttribute("hidden");
+        else compVpn.setAttribute("hidden", "");
+      }
+      if (compProxy) {
+        if (cred) compProxy.removeAttribute("hidden");
+        else compProxy.setAttribute("hidden", "");
+      }
+    }
+    function lockBehind() {
+      if (behindLocked || !modal) return;
+      behindLocked = true;
+      lockY =
+        window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop) || 0;
+      try {
+        document.documentElement.classList.add("vpn-proxy-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "hidden";
+          b.style.position = "fixed";
+          b.style.top = "-" + lockY + "px";
+          b.style.left = "0";
+          b.style.right = "0";
+          b.style.width = "100%";
+        }
+      } catch (eL) {}
+    }
+    function unlockBehind() {
+      if (!behindLocked) return;
+      behindLocked = false;
+      try {
+        document.documentElement.classList.remove("vpn-proxy-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "";
+          b.style.position = "";
+          b.style.top = "";
+          b.style.left = "";
+          b.style.right = "";
+          b.style.width = "";
+        }
+        window.scrollTo(0, lockY);
+      } catch (eU) {}
+    }
+    function setVpnProxyTab(which) {
+      var isVpn = which === "vpn";
+      if (tabVpn) {
+        tabVpn.setAttribute("aria-selected", isVpn ? "true" : "false");
+        tabVpn.classList.toggle("club-charter-modal__menu-item--active", isVpn);
+      }
+      if (tabProxy) {
+        tabProxy.setAttribute("aria-selected", isVpn ? "false" : "true");
+        tabProxy.classList.toggle("club-charter-modal__menu-item--active", !isVpn);
+      }
+      if (panelVpn) {
+        panelVpn.hidden = !isVpn;
+        panelVpn.setAttribute("aria-hidden", isVpn ? "false" : "true");
+      }
+      if (panelProxy) {
+        panelProxy.hidden = isVpn;
+        panelProxy.setAttribute("aria-hidden", isVpn ? "true" : "false");
+      }
+    }
+    function openModal() {
+      if (!modal) return;
+      lockBehind();
+      modal.setAttribute("aria-hidden", "false");
+      refreshVpnProxyAuthUi();
+      setVpnProxyTab("vpn");
+      if (paper) paper.scrollTop = 0;
+      loadVpnProxyFeed(feedVpn);
+      loadVpnProxyFeed(feedProxy);
+    }
+    function closeModal() {
+      if (!modal) return;
+      modal.setAttribute("aria-hidden", "true");
+      unlockBehind();
+    }
+    if (!modal || !openBtn) return;
+    openBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      openModal();
+    });
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        closeModal();
+      });
+    }
+    if (backdrop) backdrop.addEventListener("click", closeModal);
+    if (tabVpn) {
+      tabVpn.addEventListener("click", function (e) {
+        e.preventDefault();
+        setVpnProxyTab("vpn");
+      });
+    }
+    if (tabProxy) {
+      tabProxy.addEventListener("click", function (e) {
+        e.preventDefault();
+        setVpnProxyTab("proxy");
+      });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (!modal || modal.getAttribute("aria-hidden") !== "false") return;
+      closeModal();
+    });
+    modal.addEventListener("submit", function (ev) {
+      var form = ev.target;
+      if (!form || !form.classList || !form.classList.contains("gazette-article-comments__form")) return;
+      if (!modal.contains(form)) return;
+      ev.preventDefault();
+      var section = form.closest(".gazette-article-comments");
+      var feed = section && section.querySelector(".gazette-article-comments__feed");
+      var ta = form.querySelector(".gazette-article-comments__textarea");
+      var st = form.querySelector(".gazette-article-comments__form-status");
+      var sub = form.querySelector(".gazette-article-comments__submit");
+      if (!feed || !ta) return;
+      var aid = feed.getAttribute("data-gazette-article-comments-article-id");
+      var text = ta.value ? ta.value.trim() : "";
+      if (!text) {
+        if (st) st.textContent = "Введите текст.";
+        return;
+      }
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+        if (st) st.textContent = "Войдите в приложение.";
+        return;
+      }
+      var basePost = typeof getApiBase === "function" ? getApiBase() : "";
+      if (!basePost || typeof pokerApiAuthJsonBody !== "function") {
+        if (st) st.textContent = "Не удалось отправить.";
+        return;
+      }
+      if (sub) sub.disabled = true;
+      if (st) st.textContent = "Отправляем…";
+      var profileHint = {};
+      try {
+        var authG = window.__pokerTelegramAuth;
+        if (authG && authG.status === "verified" && authG.user) {
+          var uG = authG.user;
+          if (uG.first_name) profileHint.profileFirstName = String(uG.first_name).trim().slice(0, 64);
+          if (uG.last_name) profileHint.profileLastName = String(uG.last_name).trim().slice(0, 64);
+        }
+      } catch (eHint) {}
+      var payload = pokerApiAuthJsonBody(
+        Object.assign({ articleId: parseInt(aid, 10), text: text }, profileHint)
+      );
+      fetch(basePost + "/api/gazette-article-comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          if (sub) sub.disabled = false;
+          if (res.ok && res.data && res.data.ok) {
+            ta.value = "";
+            if (st) st.textContent = "Опубликовано.";
+            loadVpnProxyFeed(feed);
+            return;
+          }
+          var msg =
+            res.data && res.data.error ? String(res.data.error) : "Не удалось отправить.";
+          if (st) st.textContent = msg;
+        })
+        .catch(function () {
+          if (sub) sub.disabled = false;
+          if (st) st.textContent = "Сеть недоступна.";
+        });
+    });
+    modal.addEventListener("click", function (ev) {
+      var profBtn = ev.target && ev.target.closest && ev.target.closest("[data-gazette-comment-member-id]");
+      if (profBtn && modal.contains(profBtn)) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var midP = profBtn.getAttribute("data-gazette-comment-member-id");
+        if (!midP) return;
+        var nameP =
+          (profBtn.getAttribute("data-gazette-comment-display-name") || "").trim() ||
+          (profBtn.textContent || "").trim() ||
+          "Игрок";
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        if (typeof window.openChatUserModalById === "function") {
+          window.openChatUserModalById(midP, nameP, null);
+        }
+        return;
+      }
+      var delEl = ev.target && ev.target.closest && ev.target.closest("[data-gazette-comment-delete]");
+      if (!delEl || !modal.contains(delEl)) return;
+      ev.preventDefault();
+      var cid = delEl.getAttribute("data-gazette-comment-delete");
+      var artId = delEl.getAttribute("data-gazette-comment-article");
+      if (!cid || !artId) return;
+      if (!confirm("Удалить это сообщение?")) return;
+      var baseDel = typeof getApiBase === "function" ? getApiBase() : "";
+      if (!baseDel || typeof pokerApiAuthJsonBody !== "function") return;
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+      delEl.disabled = true;
+      var payloadDel = pokerApiAuthJsonBody({
+        action: "delete",
+        commentId: cid,
+        articleId: parseInt(artId, 10),
+      });
+      fetch(baseDel + "/api/gazette-article-comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payloadDel),
+      })
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          delEl.disabled = false;
+          var feedDel = modal.querySelector(
+            '[data-gazette-article-comments-article-id="' + artId + '"]'
+          );
+          if (res.ok && res.data && res.data.ok) {
+            if (feedDel) loadVpnProxyFeed(feedDel);
+            return;
+          }
+          var tgDel = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          var msgDel =
+            res.data && res.data.error ? String(res.data.error) : "Не удалось удалить";
+          if (tgDel && tgDel.showAlert) tgDel.showAlert(msgDel);
+          else alert(msgDel);
+        })
+        .catch(function () {
+          delEl.disabled = false;
+          var tgDel2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tgDel2 && tgDel2.showAlert) tgDel2.showAlert("Сеть недоступна");
+          else alert("Сеть недоступна");
+        });
+    });
+    (function bindVpnProxyKbRepair() {
+      if (!modal) return;
+      var blurTimer = null;
+      function scheduleFin() {
+        clearTimeout(blurTimer);
+        blurTimer = setTimeout(function () {
+          blurTimer = null;
+          var active = document.activeElement;
+          if (
+            active &&
+            active.classList &&
+            active.classList.contains("gazette-article-comments__textarea") &&
+            modal.contains(active)
+          ) {
+            return;
+          }
+          try {
+            document.documentElement.classList.remove("gazette-comment-keyboard");
+          } catch (eRm) {}
+          try {
+            if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+              window.__pokerFinalizeChatKeyboardDismiss();
+            }
+          } catch (eFin) {}
+        }, 120);
+      }
+      modal.addEventListener(
+        "focusin",
+        function (ev) {
+          var t = ev.target;
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (!modal.contains(t)) return;
+          try {
+            document.documentElement.classList.add("gazette-comment-keyboard");
+          } catch (eIn) {}
+        },
+        true
+      );
+      modal.addEventListener(
+        "focusout",
+        function (ev) {
+          var t = ev.target;
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (!modal.contains(t)) return;
+          scheduleFin();
+        },
+        true
+      );
+    })();
+  })();
 })();
 }
 

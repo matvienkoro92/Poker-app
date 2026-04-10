@@ -3332,10 +3332,11 @@ html.club-charter-modal-open {
   margin: 4px 0 12px;
   padding-top: 8px;
 }
-/* Розыгрыш / Коммуникация — список-меню, не отдельные «кнопки-плитки» */
+/* Розыгрыш / Коммуникация — одна строка, два таба */
 .club-charter-modal__menu {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
   margin: 0 0 16px;
   padding: 0;
   border: 1px solid rgba(44, 37, 24, 0.28);
@@ -3346,25 +3347,27 @@ html.club-charter-modal-open {
 }
 .club-charter-modal__menu-item {
   display: block;
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
   box-sizing: border-box;
   margin: 0;
-  padding: 12px 14px;
+  padding: 12px 10px;
   border: none;
-  border-bottom: 1px solid rgba(44, 37, 24, 0.14);
+  border-right: 1px solid rgba(44, 37, 24, 0.14);
   background: transparent;
   color: #2c1810;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 .club-charter-modal__menu-item:last-child {
-  border-bottom: none;
+  border-right: none;
 }
 .club-charter-modal__menu-item:hover {
   background: rgba(255, 255, 255, 0.32);
@@ -3373,7 +3376,7 @@ html.club-charter-modal-open {
   background: rgba(124, 45, 18, 0.1);
   color: #431407;
   font-weight: 700;
-  box-shadow: inset 3px 0 0 rgba(124, 45, 18, 0.75);
+  box-shadow: inset 0 -3px 0 rgba(124, 45, 18, 0.75);
 }
 .club-charter-modal__menu-item:focus-visible {
   outline: 2px solid #c2410c;
@@ -3479,6 +3482,60 @@ html.club-charter-modal-open {
   transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
 }
 .app:has(#clubCharterModal[aria-hidden="false"]) .card__header {
+  display: none !important;
+}
+
+/* Модалка «ВПН и прокси» (комментарии через gazette-article-comments, articleId 98 / 99) */
+html.vpn-proxy-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  height: 100%;
+}
+.club-charter-modal.vpn-proxy-modal {
+  z-index: 1001;
+}
+.vpn-proxy-open-btn {
+  color: var(--text);
+}
+.vpn-proxy-open-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vpn-proxy-open-btn__icon svg {
+  display: block;
+}
+.vpn-proxy-modal__intro {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(28, 20, 16, 0.85);
+}
+.vpn-proxy-modal .gazette-article-comments--panel {
+  margin-top: 4px;
+}
+.vpn-proxy-modal .gazette-article-comments__text {
+  word-break: break-word;
+}
+.vpn-proxy-modal__text-link {
+  color: #9a3412;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.vpn-proxy-modal__text-link:hover {
+  color: #c2410c;
+}
+[data-theme="light"] .vpn-proxy-modal__intro {
+  color: rgba(44, 24, 16, 0.88);
+}
+#app:has(#vpnProxyModal[aria-hidden="false"]) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+}
+.app:has(#vpnProxyModal[aria-hidden="false"]) .card__header {
   display: none !important;
 }
 
@@ -6930,12 +6987,14 @@ img.chat-contact__avatar {
   max-height: 100%;
   overflow: hidden;
   padding: 0 var(--chat-side-pad, 3px);
-  touch-action: pan-y;
+  /* pinch-zoom как у .chat-dialogs-list — иначе pan-y на дочерних строках режет горизонтальный свайп кнопок */
+  touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
 }
 .chat-dialog-item,
 .chat-contact {
-  touch-action: pan-y;
+  /* Горизонтальный свайп строки (закрепить / в друзья) + вертикальный скролл списка */
+  touch-action: pan-x pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
@@ -8519,8 +8578,8 @@ img.chat-contact__avatar {
   overflow-y: scroll;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  overscroll-behavior: contain;
+  touch-action: pan-y pinch-zoom;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   /* Лента под плавающей шапкой чата */
@@ -8981,8 +9040,8 @@ img.chat-contact__avatar {
   overflow-y: scroll;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  overscroll-behavior: contain;
+  touch-action: pan-y pinch-zoom;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
