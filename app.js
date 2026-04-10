@@ -25227,48 +25227,69 @@ function initChat() {
               voiceStream.getTracks().forEach(function (t) { t.stop(); });
               voiceStream = null;
             }
-            if (voiceChunks.length === 0) {
-              if (savedTarget === "general") {
+            var dest = savedTarget;
+            var voiceFinalizeDone = false;
+            function discardEmptyVoiceUi() {
+              if (dest === "general") {
                 if (generalBtn) { generalBtn.classList.remove("chat-voice-btn--recording"); generalBtn.title = "Голосовое сообщение"; }
                 if (generalVoicePreviewEl) {
                   generalVoicePreviewEl.classList.remove("chat-voice-preview--recording");
                   generalVoicePreviewEl.classList.add("chat-voice-preview--hidden");
                 }
               }
-              if (savedTarget === "personal") {
+              if (dest === "personal") {
                 if (personalBtn) { personalBtn.classList.remove("chat-voice-btn--recording"); personalBtn.title = "Голосовое сообщение"; }
                 var pvH = document.getElementById("chatPersonalVoicePreview");
                 if (pvH) { pvH.classList.remove("chat-voice-preview--recording"); pvH.classList.add("chat-voice-preview--hidden"); }
               }
               voiceTarget = null;
-              return;
             }
-            var blob = new Blob(voiceChunks, { type: mime });
-            voiceChunks = [];
-            var reader = new FileReader();
-            reader.onloadend = function () {
-              var dataUrl = reader.result;
-              if (savedTarget === "general") {
-                generalVoice = dataUrl;
-                if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
-                if (generalVoicePreviewEl) {
-                  generalVoicePreviewEl.classList.remove("chat-voice-preview--recording");
-                  generalVoicePreviewEl.classList.remove("chat-voice-preview--hidden");
+            function tryAssembleVoiceBlob(allowLaterTick) {
+              if (voiceFinalizeDone) return;
+              if (voiceChunks.length === 0) {
+                if (allowLaterTick) {
+                  setTimeout(function () {
+                    tryAssembleVoiceBlob(false);
+                  }, 160);
+                } else {
+                  voiceFinalizeDone = true;
+                  discardEmptyVoiceUi();
                 }
-              } else if (savedTarget === "personal") {
-                personalVoice = dataUrl;
-                if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-                var pv = document.getElementById("chatPersonalVoicePreview");
-                if (pv) {
-                  pv.classList.remove("chat-voice-preview--recording");
-                  pv.classList.remove("chat-voice-preview--hidden");
-                }
+                return;
               }
-              voiceTarget = null;
-            };
-            reader.readAsDataURL(blob);
+              voiceFinalizeDone = true;
+              var blob = new Blob(voiceChunks, { type: mime });
+              voiceChunks = [];
+              var reader = new FileReader();
+              reader.onloadend = function () {
+                var dataUrl = reader.result;
+                if (dest === "general") {
+                  generalVoice = dataUrl;
+                  if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+                  if (generalVoicePreviewEl) {
+                    generalVoicePreviewEl.classList.remove("chat-voice-preview--recording");
+                    generalVoicePreviewEl.classList.remove("chat-voice-preview--hidden");
+                  }
+                } else if (dest === "personal") {
+                  personalVoice = dataUrl;
+                  if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+                  var pv = document.getElementById("chatPersonalVoicePreview");
+                  if (pv) {
+                    pv.classList.remove("chat-voice-preview--recording");
+                    pv.classList.remove("chat-voice-preview--hidden");
+                  }
+                }
+                voiceTarget = null;
+              };
+              reader.readAsDataURL(blob);
+            }
+            /* WebKit/TG WebView: последний dataavailable иногда приходит после onstop — не считаем пустым сразу. */
+            setTimeout(function () {
+              tryAssembleVoiceBlob(true);
+            }, 0);
           };
-          voiceRecorder.start(1000);
+          /* Без тайм-слайса: один chunk при stop() — меньше гонок с пустым массивом при короткой записи. */
+          voiceRecorder.start();
           startVoiceTimer();
         }).catch(function () {
           voiceTarget = null;
@@ -26548,6 +26569,9 @@ function initChat() {
     }
     function closeModal() {
       openGroupInfoMode = "group";
+      try {
+        modal.classList.remove("chat-group-info-modal--can-manage");
+      } catch (eCm) {}
       modal.classList.add("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
     }
@@ -26642,44 +26666,45 @@ function initChat() {
       }
       if (metaEl) metaEl.textContent = metaParts.join(" · ");
       setGroupAvatar(g.avatar || "", t);
-      if (!membersEl) return;
-      if (!mems.length) {
-        membersEl.innerHTML = '<p class="chat-empty">Нет данных</p>';
-      } else {
-      membersEl.innerHTML = mems
-        .map(function (m) {
-          if (!m || !m.id) return "";
-          var nmRaw = m.name || m.id;
-          var nm = escapeHtml(nmRaw);
-          var badges = [];
-          if (m.isYou) badges.push("Вы");
-          if (m.isGroupCreator) badges.push("Создатель");
-          if (m.admin) badges.push("Админ");
-          var av =
-            m.avatar
-              ? '<img class="chat-group-info-modal__member-av" src="' +
-                escapeHtml(m.avatar) +
-                '" alt="" width="40" height="40" decoding="async" />'
-              : '<span class="chat-group-info-modal__member-av-ph">' + escapeHtml(nmRaw.charAt(0) || "?") + "</span>";
-          return (
-            '<button type="button" class="chat-group-info-modal__member" data-gi-user-id="' +
-            escapeHtml(m.id) +
-            '" data-gi-user-name="' +
-            escapeHtml(nmRaw) +
-            '">' +
-            av +
-            '<span class="chat-group-info-modal__member-main"><span class="chat-group-info-modal__member-name">' +
-            nm +
-            "</span>" +
-            (badges.length
-              ? '<span class="chat-group-info-modal__member-badges">' + escapeHtml(badges.join(" · ")) + "</span>"
-              : "") +
-            '</span><span class="chat-group-info-modal__member-online' +
-            (m.online ? " chat-group-info-modal__member-online--on" : "") +
-            '" aria-hidden="true"></span></button>'
-          );
-        })
-        .join("");
+      if (membersEl) {
+        if (!mems.length) {
+          membersEl.innerHTML = '<p class="chat-empty">Нет данных</p>';
+        } else {
+          membersEl.innerHTML = mems
+            .map(function (m) {
+              if (!m || !m.id) return "";
+              var nmRaw = m.name || m.id;
+              var nm = escapeHtml(nmRaw);
+              var badges = [];
+              if (m.isYou) badges.push("Вы");
+              if (m.isGroupCreator) badges.push("Создатель");
+              if (m.admin) badges.push("Админ");
+              var av =
+                m.avatar
+                  ? '<img class="chat-group-info-modal__member-av" src="' +
+                    escapeHtml(m.avatar) +
+                    '" alt="" width="40" height="40" decoding="async" />'
+                  : '<span class="chat-group-info-modal__member-av-ph">' + escapeHtml(nmRaw.charAt(0) || "?") + "</span>";
+              return (
+                '<button type="button" class="chat-group-info-modal__member" data-gi-user-id="' +
+                escapeHtml(m.id) +
+                '" data-gi-user-name="' +
+                escapeHtml(nmRaw) +
+                '">' +
+                av +
+                '<span class="chat-group-info-modal__member-main"><span class="chat-group-info-modal__member-name">' +
+                nm +
+                "</span>" +
+                (badges.length
+                  ? '<span class="chat-group-info-modal__member-badges">' + escapeHtml(badges.join(" · ")) + "</span>"
+                  : "") +
+                '</span><span class="chat-group-info-modal__member-online' +
+                (m.online ? " chat-group-info-modal__member-online--on" : "") +
+                '" aria-hidden="true"></span></button>'
+              );
+            })
+            .join("");
+        }
       }
       if (avatarBtn) {
         avatarBtn.disabled = !canManageMeta;
@@ -26727,6 +26752,12 @@ function initChat() {
       } else {
         if (leaveWrap) leaveWrap.hidden = false;
       }
+      try {
+        modal.classList.toggle(
+          "chat-group-info-modal--can-manage",
+          openGroupInfoMode === "group" && !!canManageMeta
+        );
+      } catch (eCm2) {}
     }
     window.__pokerOpenChatGroupInfo = function (groupId) {
       var gid = groupId != null ? String(groupId).trim() : "";
@@ -26734,6 +26765,9 @@ function initChat() {
       openGroupInfoMode = "group";
       openGroupId = gid;
       lastGroupInfoTitle = "";
+      try {
+        modal.classList.remove("chat-group-info-modal--can-manage");
+      } catch (eCmO) {}
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
       if (leaveWrap) leaveWrap.hidden = true;
@@ -26812,6 +26846,9 @@ function initChat() {
       openGroupInfoMode = "general";
       openGroupId = "";
       lastGroupInfoTitle = "Главный чат";
+      try {
+        modal.classList.remove("chat-group-info-modal--can-manage");
+      } catch (eCmG) {}
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
       if (leaveWrap) leaveWrap.hidden = true;

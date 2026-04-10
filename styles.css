@@ -7997,6 +7997,16 @@ img.chat-contact__avatar {
 .chat-create-group-modal__submit {
   width: 100%;
 }
+/* Только «Создать» в модалке новой группы — ~2× высоты profile-exit-btn */
+.chat-create-group-modal__submit--tall {
+  box-sizing: border-box;
+  min-height: 60px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .chat-create-group-modal__cancel {
   width: 100%;
   padding: 10px;
@@ -8016,6 +8026,14 @@ img.chat-contact__avatar {
     border-radius: 16px;
     max-height: min(85vh, 600px);
   }
+}
+/* Управление группой (название, описание, удаление): только с классом --can-manage (админ клуба по API). Иначе flex у label не перебивает [hidden] в части WebView. */
+.chat-group-info-modal:not(.chat-group-info-modal--can-manage) .chat-group-info-modal__danger,
+.chat-group-info-modal:not(.chat-group-info-modal--can-manage) .chat-group-info-modal__title-edit-label,
+.chat-group-info-modal:not(.chat-group-info-modal--can-manage) .chat-group-info-modal__desc-editor,
+.chat-group-info-modal:not(.chat-group-info-modal--can-manage) .chat-group-info-modal__save-profile,
+.chat-group-info-modal:not(.chat-group-info-modal--can-manage) .chat-group-info-modal__avatar-edit-hint {
+  display: none !important;
 }
 .chat-group-info-modal {
   position: fixed;
