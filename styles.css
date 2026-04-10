@@ -5380,7 +5380,12 @@ html.vpn-proxy-modal-open {
   user-select: none;
 }
 .chat-msg__ticks--sent { opacity: 0.75; }
-.chat-msg__ticks--delivered { opacity: 0.9; }
+/* Две галочки в одном узле (✓✓) — ближе друг к другу, как в мессенджерах */
+.chat-msg__ticks--delivered {
+  opacity: 0.9;
+  letter-spacing: -0.28em;
+  padding-right: 0.12em;
+}
 .chat-msg__ticks--read {
   color: #22c55e;
   opacity: 1;
@@ -6353,6 +6358,61 @@ html.vpn-proxy-modal-open {
 @keyframes chat-voice-pulse {
   50% { opacity: 0.85; }
 }
+.chat-msg__voice-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin-top: 4px;
+  max-width: 100%;
+}
+.chat-msg__voice-wrap .chat-msg__voice {
+  margin-top: 0;
+}
+.chat-msg__voice-speed {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.chat-msg__voice-speed-btn {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.2;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.35));
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.chat-msg__voice-speed-btn:hover,
+.chat-msg__voice-speed-btn:focus {
+  background: rgba(148, 163, 184, 0.2);
+  outline: none;
+}
+.chat-msg__voice-speed-btn--active {
+  border-color: rgba(249, 115, 22, 0.55);
+  background: rgba(249, 115, 22, 0.22);
+  color: var(--text, #f8fafc);
+}
+[data-theme="light"] .chat-msg__voice-speed-btn {
+  background: rgba(15, 23, 42, 0.06);
+  color: rgba(51, 65, 85, 0.95);
+}
+[data-theme="light"] .chat-msg__voice-speed-btn:hover,
+[data-theme="light"] .chat-msg__voice-speed-btn:focus {
+  background: rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] .chat-msg__voice-speed-btn--active {
+  border-color: rgba(234, 88, 12, 0.5);
+  background: rgba(249, 115, 22, 0.2);
+  color: rgba(15, 23, 42, 0.95);
+}
 .chat-msg__voice {
   max-width: 100%;
   min-width: 200px;
@@ -6993,8 +7053,8 @@ img.chat-contact__avatar {
 }
 .chat-dialog-item,
 .chat-contact {
-  /* Горизонтальный свайп строки (закрепить / в друзья) + вертикальный скролл списка */
-  touch-action: pan-x pan-y pinch-zoom;
+  /* Только вертикаль для нативного скролла; pan-x на строке отдавал жест браузеру и мешал свайпу панели (JS) */
+  touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
@@ -8131,6 +8191,32 @@ img.chat-contact__avatar {
 .chat-group-info-modal__member-online--on {
   opacity: 1;
 }
+.chat-group-info-modal__leave-wrap {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  flex-shrink: 0;
+}
+.chat-group-info-modal__leave-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-secondary, #94a3b8);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.chat-group-info-modal__leave-btn:hover,
+.chat-group-info-modal__leave-btn:focus {
+  background: rgba(148, 163, 184, 0.14);
+  outline: none;
+}
+.chat-group-info-modal__leave-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .chat-group-info-modal__danger {
   margin-top: 8px;
   padding-top: 14px;
@@ -8822,6 +8908,10 @@ img.chat-contact__avatar {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: background 0.15s ease, border-color 0.15s ease;
+}
+/* Иначе display:inline-flex перебивает UA [hidden] — плюс оставался виден в личных чатах */
+button.chat-conv-group-add-btn[hidden] {
+  display: none;
 }
 .chat-conv-group-add-btn:hover {
   background: rgba(249, 115, 22, 0.35);
@@ -14690,11 +14780,17 @@ a.home-mini-icon-item {
 .download-layout__media {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .download-image {
   width: 100%;
   max-width: 360px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
   border-radius: 22px;
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.9),

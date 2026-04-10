@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.354">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.362">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=386" />
+    <link rel="stylesheet" href="./styles.css?v=392" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1989,6 +1989,9 @@
                   <button type="button" class="chat-group-info-modal__add-members-icon-btn" id="chatGroupInfoAddMembersBtn" aria-label="Добавить участников">+</button>
                 </div>
                 <div class="chat-group-info-modal__members" id="chatGroupInfoMembers"></div>
+                <div class="chat-group-info-modal__leave-wrap" id="chatGroupInfoLeaveWrap" hidden>
+                  <button type="button" class="chat-group-info-modal__leave-btn" id="chatGroupInfoLeaveBtn">Выйти из группы</button>
+                </div>
                 <div class="chat-group-info-modal__danger" id="chatGroupInfoDanger" hidden>
                   <button type="button" class="chat-group-info-modal__delete-open" id="chatGroupInfoDeleteOpenBtn">Удалить группу</button>
                   <div class="chat-group-info-modal__delete-panel" id="chatGroupInfoDeletePanel" hidden>
@@ -2083,8 +2086,8 @@
                       src="./assets/download-hero.png"
                       alt="Морфеус за покерным столом предлагает на выбор четыре покер-рума"
                       class="download-image"
-                      width="2048"
-                      height="2048"
+                      width="720"
+                      height="720"
                       decoding="async"
                       fetchpriority="high"
                       loading="eager"
@@ -5968,7 +5971,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=481"></script>
+    <script defer src="./app.js?v=486"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

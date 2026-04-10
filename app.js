@@ -148,9 +148,9 @@ function isTelegramWebApp() {
 }
 
 /**
- * Базовый URL для ссылок "в это же приложение" (startapp=...).
+ * Базовый URL для ссылок "в это же приложение" (добавляйте ?startapp=…).
  * - В Telegram Mini App используем `data-telegram-app-url` (t.me).
- * - В PWA (без Telegram WebApp) используем текущий сайт (origin+pathname).
+ * - В PWA — origin+pathname; тот же query ?startapp=… подхватывается при загрузке страницы.
  */
 function getAppBaseUrlForLinks() {
   var appEl = document.getElementById("app");
@@ -2997,119 +2997,10 @@ function runGazetteAndTasksInit() {
       startParam = params.get("start_param") || "";
     } catch (e) {}
   }
-  if (startParam && (startParam === "news" || startParam.indexOf("news_") === 0)) {
-    var articleNum = startParam === "news" ? undefined : parseInt(startParam.replace("news_", ""), 10);
-    if (startParam !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;
-    setTimeout(function () { if (typeof openGazette === "function") openGazette("news", articleNum); }, 300);
-  }
-  if (startParam === "winter_rating") {
-    setTimeout(function () { if (typeof setView === "function") setView("winter-rating"); }, 0);
-  }
-  if (startParam === "spring_rating") {
-    setTimeout(function () { if (typeof setView === "function") setView("spring-rating"); }, 0);
-  }
-  if (startParam === "spring_rating_league_1" || startParam === "spring_rating_league_2") {
-    var leagueNum = startParam === "spring_rating_league_1" ? "1" : "2";
-    setTimeout(function () {
-      if (typeof setView === "function") setView("spring-rating");
-      setTimeout(function () {
-        if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(leagueNum);
-      }, 400);
-    }, 0);
-  }
-  if (startParam && startParam.indexOf("winter_rating_player_") === 0) {
-    var playerNick = decodeURIComponent(startParam.replace("winter_rating_player_", "").replace(/\+/g, " "));
-    if (playerNick) {
-      setTimeout(function () {
-        if (typeof setView === "function") setView("winter-rating");
-        setTimeout(function () {
-          if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNick);
-        }, 400);
-      }, 0);
-    }
-  }
-  if (startParam && startParam.indexOf("spring_rating_player_") === 0) {
-    var playerNick = decodeURIComponent(startParam.replace("spring_rating_player_", "").replace(/\+/g, " "));
-    if (playerNick) {
-      setTimeout(function () {
-        if (typeof setView === "function") setView("spring-rating");
-        setTimeout(function () {
-          if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNick);
-        }, 400);
-      }, 0);
-    }
-  }
-  if (startParam && startParam.indexOf("rating_") === 0 && startParam.indexOf("spring_rating_date_") !== 0) {
-    var dateParam = startParam.replace("rating_", "").replace(/_/g, ".");
-    setTimeout(function () {
-      if (typeof setView === "function") setView("winter-rating");
-      setTimeout(function () {
-        if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParam);
-      }, 400);
-    }, 0);
-  }
-  if (startParam && startParam.indexOf("spring_rating_date_") === 0) {
-    var dateParam = startParam.replace("spring_rating_date_", "").replace(/_/g, ".");
-    setTimeout(function () {
-      if (typeof setView === "function") setView("spring-rating");
-      setTimeout(function () {
-        if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParam);
-      }, 400);
-    }, 0);
-  }
-  if (startParam === "rating_top_past" || startParam === "rating_top_current" || startParam === "rating_top_february" || startParam === "rating_top_mar") {
-    var ratingTopKind = startParam === "rating_top_current" ? "current" : startParam === "rating_top_february" ? "feb" : startParam === "rating_top_mar" ? "feb" : "past";
-    var viewForTop = startParam === "rating_top_mar" ? "spring-rating" : "winter-rating";
-    setTimeout(function () {
-      if (typeof setView === "function") setView(viewForTop);
-      setTimeout(function () {
-        if (typeof window.openWinterRatingWeekTopModal === "function") window.openWinterRatingWeekTopModal(ratingTopKind);
-      }, 350);
-    }, 0);
-  }
-  if (startParam === "daily_prediction") {
-    setTimeout(function () {
-      if (typeof setView === "function") setView("home");
-      setTimeout(function () {
-        if (typeof openDailyPredictionModal === "function") openDailyPredictionModal();
-      }, 400);
-    }, 0);
-  }
-  var hallSecStart = resolveHallFameSectionFromStartParam(startParam);
-  if (hallSecStart) {
-    setTimeout(function () {
-      navigateToHallFameSection(hallSecStart);
-    }, 0);
-  }
-  if (startParam === "raffles") {
-    setTimeout(function () { if (typeof setView === "function") setView("raffles"); }, 0);
-  }
-  if (startParam === "video_lessons") {
-    setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
-  }
-  if (startParam === "vl_reviews_nikolay" || startParam === "video_lessons_reviews_nikolay") {
-    window.__pendingVideoLessonsOpenReviews = true;
-    setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
-  }
-  if (startParam === "club_chat") {
-    window.__pendingOpenClubChatGeneral = true;
-    setTimeout(function () {
-      if (typeof setView === "function") setView("chat");
-      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-    }, 0);
-  }
-  if (startParam === "stream") {
-    // Legacy deep link: некоторые ссылки/приглашения могут приходить как `startapp=stream`.
-    // Чтобы пользователь попадал в нужный экран, отправляем в `streams`.
-    setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
-  }
   function parseStreamsRoomIdFromStartParam(val) {
     if (!val) return null;
     val = String(val).trim();
     if (!val) return null;
-    // Код комнаты стрима — только 6 цифр. Примеры start_param:
-    //  - "streams_123456"
-    //  - "startapp=streams_123456"
     var m =
       val.match(/^streams_(\d{6})$/) ||
       val.match(/startapp=streams_(\d{6})/i);
@@ -3117,14 +3008,214 @@ function runGazetteAndTasksInit() {
     if (/^\d{6}$/.test(val)) return val;
     return null;
   }
-
-  var streamsRoomIdFromStartParam = parseStreamsRoomIdFromStartParam(startParam);
-  if (streamsRoomIdFromStartParam) {
-    // Сохраняем комнату для автозапуска просмотра после загрузки экрана `streams`.
-    window.__pendingStreamsRoomId = streamsRoomIdFromStartParam;
-    setTimeout(function () {
-      if (typeof setView === "function") setView("streams");
-    }, 0);
+  /**
+   * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
+   * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
+   */
+  function pokerApplyStartAppDeepLink(startParamRaw, opts) {
+    opts = opts || {};
+    var withPeerOpt = opts.withPeer != null ? String(opts.withPeer).trim() : "";
+    var startParam = startParamRaw != null ? String(startParamRaw).trim() : "";
+    if (!startParam) return;
+    if (startParam === "news" || startParam.indexOf("news_") === 0) {
+      var articleNum = startParam === "news" ? undefined : parseInt(startParam.replace("news_", ""), 10);
+      if (startParam !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;
+      setTimeout(function () {
+        if (typeof openGazette === "function") openGazette("news", articleNum);
+      }, 300);
+      return;
+    }
+    if (startParam === "winter_rating") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("winter-rating");
+      }, 0);
+      return;
+    }
+    if (startParam === "spring_rating") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("spring-rating");
+      }, 0);
+      return;
+    }
+    if (startParam === "spring_rating_league_1" || startParam === "spring_rating_league_2") {
+      var leagueNum = startParam === "spring_rating_league_1" ? "1" : "2";
+      setTimeout(function () {
+        if (typeof setView === "function") setView("spring-rating");
+        setTimeout(function () {
+          if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(leagueNum);
+        }, 400);
+      }, 0);
+      return;
+    }
+    if (startParam.indexOf("winter_rating_player_") === 0) {
+      var playerNickW = decodeURIComponent(startParam.replace("winter_rating_player_", "").replace(/\+/g, " "));
+      if (playerNickW) {
+        setTimeout(function () {
+          if (typeof setView === "function") setView("winter-rating");
+          setTimeout(function () {
+            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickW);
+          }, 400);
+        }, 0);
+      }
+      return;
+    }
+    if (startParam.indexOf("spring_rating_player_") === 0) {
+      var playerNickS = decodeURIComponent(startParam.replace("spring_rating_player_", "").replace(/\+/g, " "));
+      if (playerNickS) {
+        setTimeout(function () {
+          if (typeof setView === "function") setView("spring-rating");
+          setTimeout(function () {
+            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickS);
+          }, 400);
+        }, 0);
+      }
+      return;
+    }
+    if (startParam.indexOf("rating_") === 0 && startParam.indexOf("spring_rating_date_") !== 0) {
+      var dateParamR = startParam.replace("rating_", "").replace(/_/g, ".");
+      setTimeout(function () {
+        if (typeof setView === "function") setView("winter-rating");
+        setTimeout(function () {
+          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamR);
+        }, 400);
+      }, 0);
+      return;
+    }
+    if (startParam.indexOf("spring_rating_date_") === 0) {
+      var dateParamSp = startParam.replace("spring_rating_date_", "").replace(/_/g, ".");
+      setTimeout(function () {
+        if (typeof setView === "function") setView("spring-rating");
+        setTimeout(function () {
+          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSp);
+        }, 400);
+      }, 0);
+      return;
+    }
+    if (
+      startParam === "rating_top_past" ||
+      startParam === "rating_top_current" ||
+      startParam === "rating_top_february" ||
+      startParam === "rating_top_mar"
+    ) {
+      var ratingTopKind =
+        startParam === "rating_top_current" ? "current" : startParam === "rating_top_february" ? "feb" : startParam === "rating_top_mar" ? "feb" : "past";
+      var viewForTop = startParam === "rating_top_mar" ? "spring-rating" : "winter-rating";
+      setTimeout(function () {
+        if (typeof setView === "function") setView(viewForTop);
+        setTimeout(function () {
+          if (typeof window.openWinterRatingWeekTopModal === "function") window.openWinterRatingWeekTopModal(ratingTopKind);
+        }, 350);
+      }, 0);
+      return;
+    }
+    if (startParam === "daily_prediction") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("home");
+        setTimeout(function () {
+          if (typeof openDailyPredictionModal === "function") openDailyPredictionModal();
+        }, 400);
+      }, 0);
+      return;
+    }
+    var hallSecStart = resolveHallFameSectionFromStartParam(startParam);
+    if (hallSecStart) {
+      setTimeout(function () {
+        navigateToHallFameSection(hallSecStart);
+      }, 0);
+      return;
+    }
+    if (startParam === "raffles") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("raffles");
+      }, 0);
+      return;
+    }
+    if (startParam === "video_lessons") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("video-lessons");
+      }, 0);
+      return;
+    }
+    if (startParam === "vl_reviews_nikolay" || startParam === "video_lessons_reviews_nikolay") {
+      window.__pendingVideoLessonsOpenReviews = true;
+      setTimeout(function () {
+        if (typeof setView === "function") setView("video-lessons");
+      }, 0);
+      return;
+    }
+    if (startParam === "club_chat") {
+      window.__pendingOpenClubChatGeneral = true;
+      setTimeout(function () {
+        if (typeof setView === "function") setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      }, 0);
+      return;
+    }
+    if (startParam === "club_chat_dm") {
+      if (withPeerOpt) {
+        window.__pendingOpenChatPersonalFromDeepLink = {
+          userId: withPeerOpt,
+          userName: null,
+          peerP21Id: null,
+        };
+      }
+      setTimeout(function () {
+        if (typeof setView === "function") setView("chat");
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      }, 0);
+      return;
+    }
+    if (startParam === "stream") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("streams");
+      }, 0);
+      return;
+    }
+    var streamsRoomId = parseStreamsRoomIdFromStartParam(startParam);
+    if (streamsRoomId) {
+      window.__pendingStreamsRoomId = streamsRoomId;
+      setTimeout(function () {
+        if (typeof setView === "function") setView("streams");
+      }, 0);
+      return;
+    }
+    if (startParam.indexOf("poker_task_") === 0) {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("poker-tasks");
+        setTimeout(function () {
+          if (typeof window.startMttChallenge === "function") window.startMttChallenge();
+        }, 400);
+      }, 0);
+      return;
+    }
+    var simpleViewByStartApp = {
+      schedule: "schedule",
+      download: "download",
+      equilator: "equilator",
+      cashout: "cashout",
+      profile: "profile",
+      learn_play_hub: "learn-play-hub",
+      bonus_game: "bonus-game",
+      plasterer_game: "plasterer-game",
+      cooler_game: "cooler-game",
+    };
+    if (simpleViewByStartApp[startParam]) {
+      var vn = simpleViewByStartApp[startParam];
+      setTimeout(function () {
+        if (typeof setView === "function") setView(vn);
+      }, 0);
+    }
+  }
+  var qStartApp = "";
+  var qWithParam = "";
+  try {
+    var qsDeep = new URLSearchParams(typeof location !== "undefined" && location.search ? location.search : "");
+    qStartApp = (qsDeep.get("startapp") || "").trim();
+    qWithParam = (qsDeep.get("with") || "").trim();
+  } catch (eQsDeep) {}
+  var deepLinkParam = (startParam && String(startParam).trim()) || qStartApp;
+  if (deepLinkParam) {
+    pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
   }
   if (window.location.hash === "#streams") {
     setTimeout(function () {
@@ -3132,59 +3223,8 @@ function runGazetteAndTasksInit() {
     }, 0);
   }
   if (window.location.hash === "#stream") {
-    setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
-  }
-  try {
-    var urlStart = typeof location !== "undefined" && location.search ? new URLSearchParams(location.search).get("startapp") : null;
-    var streamsRoomIdFromQuery = parseStreamsRoomIdFromStartParam(urlStart);
-    if (streamsRoomIdFromQuery) {
-      // Поддержка ссылок вида: startapp=streams_<ROOM_ID> в query.
-      window.__pendingStreamsRoomId = streamsRoomIdFromQuery;
-      setTimeout(function () {
-        if (typeof setView === "function") setView("streams");
-      }, 0);
-    } else if (urlStart === "stream") {
-      // Legacy: startapp=stream
-      setTimeout(function () { if (typeof setView === "function") setView("streams"); }, 0);
-    } else if (resolveHallFameSectionFromStartParam(urlStart)) {
-      var hallFromQuery = resolveHallFameSectionFromStartParam(urlStart);
-      setTimeout(function () {
-        navigateToHallFameSection(hallFromQuery);
-      }, 0);
-    } else if (urlStart === "club_chat") {
-      window.__pendingOpenClubChatGeneral = true;
-      setTimeout(function () {
-        if (typeof setView === "function") setView("chat");
-        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      }, 0);
-    } else if (urlStart === "club_chat_dm") {
-      try {
-        var peerDmQ = new URLSearchParams(location.search || "").get("with");
-        if (peerDmQ && String(peerDmQ).trim()) {
-          window.__pendingOpenChatPersonalFromDeepLink = {
-            userId: String(peerDmQ).trim(),
-            userName: null,
-            peerP21Id: null,
-          };
-        }
-      } catch (eDmQ) {}
-      setTimeout(function () {
-        if (typeof setView === "function") setView("chat");
-        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      }, 0);
-    } else if (urlStart === "video_lessons") {
-      setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
-    } else if (urlStart === "vl_reviews_nikolay" || urlStart === "video_lessons_reviews_nikolay") {
-      window.__pendingVideoLessonsOpenReviews = true;
-      setTimeout(function () { if (typeof setView === "function") setView("video-lessons"); }, 0);
-    }
-  } catch (e) {}
-  if (startParam && startParam.indexOf("poker_task_") === 0) {
     setTimeout(function () {
-      if (typeof setView === "function") setView("poker-tasks");
-      setTimeout(function () {
-        if (typeof window.startMttChallenge === "function") window.startMttChallenge();
-      }, 400);
+      if (typeof setView === "function") setView("streams");
     }, 0);
   }
   if (window.location.hash && window.location.hash.indexOf("#poker_task_") === 0) {
@@ -18161,6 +18201,130 @@ function initChat() {
     if (!s) return "";
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+  var POKER_CHAT_VOICE_RATE_LS = "poker_chat_voice_playback_rate";
+  function pokerNormalizeChatVoiceRate(x) {
+    var n = typeof x === "number" ? x : parseFloat(String(x != null ? x : ""), 10);
+    if (n === 2 || n > 1.75) return 2;
+    if (Math.abs(n - 1.5) < 0.01 || (n > 1.25 && n < 1.75)) return 1.5;
+    return 1;
+  }
+  function pokerGetSavedVoicePlaybackRate() {
+    try {
+      return pokerNormalizeChatVoiceRate(localStorage.getItem(POKER_CHAT_VOICE_RATE_LS));
+    } catch (eR) {
+      return 1;
+    }
+  }
+  function pokerSetSavedVoicePlaybackRate(rate) {
+    try {
+      localStorage.setItem(POKER_CHAT_VOICE_RATE_LS, String(pokerNormalizeChatVoiceRate(rate)));
+    } catch (eW) {}
+  }
+  function pokerApplyChatVoicePlaybackRateGlobally(rate) {
+    var r = pokerNormalizeChatVoiceRate(rate);
+    var auds = document.querySelectorAll("audio.chat-msg__voice");
+    for (var ai = 0; ai < auds.length; ai++) {
+      try {
+        auds[ai].playbackRate = r;
+      } catch (eA) {}
+    }
+    var btns = document.querySelectorAll(".chat-msg__voice-speed-btn");
+    for (var bi = 0; bi < btns.length; bi++) {
+      var b = btns[bi];
+      var br = pokerNormalizeChatVoiceRate(b.getAttribute("data-voice-rate"));
+      var on = br === r;
+      b.classList.toggle("chat-msg__voice-speed-btn--active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+  }
+  function chatVoiceMessageHtml(voiceSrc) {
+    if (!voiceSrc) return "";
+    var src = escapeHtml(String(voiceSrc));
+    var r = pokerGetSavedVoicePlaybackRate();
+    function speedBtn(rate, label) {
+      var active = pokerNormalizeChatVoiceRate(rate) === r;
+      return (
+        '<button type="button" class="chat-msg__voice-speed-btn' +
+        (active ? " chat-msg__voice-speed-btn--active" : "") +
+        '" data-voice-rate="' +
+        rate +
+        '" aria-pressed="' +
+        (active ? "true" : "false") +
+        '">' +
+        label +
+        "</button>"
+      );
+    }
+    return (
+      '<div class="chat-msg__voice-wrap">' +
+      '<audio class="chat-msg__voice" controls preload="metadata" src="' +
+      src +
+      '"></audio>' +
+      '<div class="chat-msg__voice-speed" role="group" aria-label="Скорость воспроизведения">' +
+      speedBtn(1, "1×") +
+      speedBtn(1.5, "1.5×") +
+      speedBtn(2, "2×") +
+      "</div></div>"
+    );
+  }
+  function appendChatVoiceToTextWrap(textWrap, voiceUrl) {
+    if (!textWrap || !voiceUrl) return;
+    var wrap = document.createElement("div");
+    wrap.className = "chat-msg__voice-wrap";
+    var aud = document.createElement("audio");
+    aud.className = "chat-msg__voice";
+    aud.controls = true;
+    aud.preload = "metadata";
+    aud.src = voiceUrl;
+    try {
+      aud.playbackRate = pokerGetSavedVoicePlaybackRate();
+    } catch (ePb) {}
+    wrap.appendChild(aud);
+    var speed = document.createElement("div");
+    speed.className = "chat-msg__voice-speed";
+    speed.setAttribute("role", "group");
+    speed.setAttribute("aria-label", "Скорость воспроизведения");
+    var r0 = pokerGetSavedVoicePlaybackRate();
+    function addRateBtn(rate, label) {
+      var bb = document.createElement("button");
+      bb.type = "button";
+      bb.className = "chat-msg__voice-speed-btn";
+      if (pokerNormalizeChatVoiceRate(rate) === r0) bb.className += " chat-msg__voice-speed-btn--active";
+      bb.setAttribute("data-voice-rate", String(rate));
+      bb.setAttribute("aria-pressed", pokerNormalizeChatVoiceRate(rate) === r0 ? "true" : "false");
+      bb.textContent = label;
+      speed.appendChild(bb);
+    }
+    addRateBtn(1, "1×");
+    addRateBtn(1.5, "1.5×");
+    addRateBtn(2, "2×");
+    wrap.appendChild(speed);
+    textWrap.appendChild(wrap);
+  }
+  (function bindChatVoicePlaybackSpeed() {
+    if (window.__pokerChatVoiceRateUiBound) return;
+    window.__pokerChatVoiceRateUiBound = true;
+    document.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest && e.target.closest(".chat-msg__voice-speed-btn");
+      if (!btn) return;
+      var rate = pokerNormalizeChatVoiceRate(btn.getAttribute("data-voice-rate"));
+      e.preventDefault();
+      e.stopPropagation();
+      pokerSetSavedVoicePlaybackRate(rate);
+      pokerApplyChatVoicePlaybackRateGlobally(rate);
+    });
+    document.addEventListener(
+      "play",
+      function (ev) {
+        var t = ev.target;
+        if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
+        try {
+          t.playbackRate = pokerGetSavedVoicePlaybackRate();
+        } catch (ePl) {}
+      },
+      true
+    );
+  })();
   function linkTgUsernames(escapedText) {
     if (!escapedText) return "";
     return String(escapedText).replace(/@([a-zA-Z0-9_]{5,32})(?![a-zA-Z0-9_])/g, function (_, u) {
@@ -20460,7 +20624,7 @@ function initChat() {
       var imgBlock = m.image
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
-      var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
+      var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
       var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtn = "";
       var editBtn = "";
@@ -21033,7 +21197,7 @@ function initChat() {
         '<img class="chat-msg__image" src="' +
         escapeHtml(image) +
         '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
-    } else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(voice) + '"></audio>';
+    } else if (voice) textContent = chatVoiceMessageHtml(voice);
     else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
     else if (text) {
       try {
@@ -21077,11 +21241,7 @@ function initChat() {
         im.src = image;
         textWrap.appendChild(im);
       } else if (voice && typeof voice === "string") {
-        var aud = document.createElement("audio");
-        aud.className = "chat-msg__voice";
-        aud.controls = true;
-        aud.src = voice;
-        textWrap.appendChild(aud);
+        appendChatVoiceToTextWrap(textWrap, voice);
       } else {
         textWrap.textContent = text != null ? String(text) : "";
       }
@@ -21195,7 +21355,7 @@ function initChat() {
         /* Не блокировать POST: в TG WKWebView innerHTML/append иногда падает — лента подтянется через mergeOptimistic + loadGeneral. */
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
       }
-      scrollGeneralToBottomOnNextRender = true;
+      /* Не ставим scrollGeneralToBottomOnNextRender: он включает chat-messages-wrap--settling (opacity:0) — при отправке лента «пропадает» на кадры. Скролл вниз даёт pinChatMessagesToBottom и render без settling при wasNearBottom. */
       try {
         if (generalMessages && typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(generalMessages, true);
         if (generalMessages) try { void generalMessages.offsetHeight; } catch (eFlushG) {}
@@ -21240,7 +21400,6 @@ function initChat() {
           setGeneralSendBusy(false);
           if (data && data.ok) {
             optimisticGeneralPayload = null;
-            scrollGeneralToBottomOnNextRender = true;
             var msg = data.message;
             if (msg && msg.id) {
               window._pendingGeneralMessage = msg;
@@ -22120,11 +22279,15 @@ function initChat() {
       var dx = e.clientX - swipeState.startX;
       var dy = e.clientY - swipeState.startY;
       if (swipeState.mode == null) {
-        if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx) + 2) {
+        var adx = Math.abs(dx);
+        var ady = Math.abs(dy);
+        /* Вертикаль только при явном скролле — иначе легкий наклон перехватывал список и срывал свайп. */
+        if (ady > 22 && ady > adx * 1.35) {
           swipeState.mode = "vert";
           return;
         }
-        if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) + 2) {
+        /* Горизонталь при доминировании по X (в т.ч. диагональ «в сторону»). */
+        if (adx > 10 && adx >= ady * 0.92) {
           swipeState.mode = "horiz";
           swipeState.panel.classList.add("chat-contact-swipe__panel--dragging");
           var wHoriz = swipeState.panel.closest(".chat-contact-swipe");
@@ -22332,7 +22495,7 @@ function initChat() {
       var imgBlock = m.image
         ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
-      var voiceBlock = m.voice ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>' : "";
+      var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
       var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
       var cornerDelBtnP = "";
       var editBtnP = "";
@@ -22575,9 +22738,7 @@ function initChat() {
             chatMsgImageAttrs(i, slice.length) +
             " />"
           : "";
-        var voiceBlock = m.voice
-          ? '<audio class="chat-msg__voice" controls src="' + escapeHtml(m.voice) + '"></audio>'
-          : "";
+        var voiceBlock = m.voice ? chatVoiceMessageHtml(m.voice) : "";
         var documentBlock = m.document ? chatDocumentBlockHtml(m.document, m.documentName || "document.pdf") : "";
         var replyBlock = m.replyTo
           ? '<div class="chat-msg__reply"><strong>' +
@@ -23049,7 +23210,7 @@ function initChat() {
           escapeHtml(String(image)) +
           '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
       }
-      else if (voice) textContent = '<audio class="chat-msg__voice" controls src="' + escapeHtml(String(voice)) + '"></audio>';
+      else if (voice) textContent = chatVoiceMessageHtml(String(voice));
       else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
       else if (text) {
         try {
@@ -23091,11 +23252,7 @@ function initChat() {
           imP.src = image;
           twP.appendChild(imP);
         } else if (voice && typeof voice === "string") {
-          var audP = document.createElement("audio");
-          audP.className = "chat-msg__voice";
-          audP.controls = true;
-          audP.src = voice;
-          twP.appendChild(audP);
+          appendChatVoiceToTextWrap(twP, voice);
         } else {
           twP.textContent = text != null ? String(text) : "";
         }
@@ -23201,7 +23358,7 @@ function initChat() {
     } catch (err) {
       if (typeof console !== "undefined" && console.error) console.error("appendOptimisticPersonalMessage failed", err);
     }
-    scrollPersonalToBottomOnNextRender = true;
+    /* См. sendGeneral: флаг scrollPersonalToBottomOnNextRender даёт settling (opacity:0) — не при отправке. */
     try {
       if (typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(messagesEl, true);
       if (messagesEl) try { void messagesEl.offsetHeight; } catch (eFlushP) {}
@@ -23244,7 +23401,6 @@ function initChat() {
         if (data && data.ok) {
           optimisticPersonalPayload = null;
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
-          scrollPersonalToBottomOnNextRender = true;
           var msg = data.message;
           if (msg && msg.id && chatWithUserId) {
             window._pendingPersonalMessage = msg;
@@ -26068,6 +26224,8 @@ function initChat() {
     var deleteInput = document.getElementById("chatGroupInfoDeleteInput");
     var deleteFinalBtn = document.getElementById("chatGroupInfoDeleteFinalBtn");
     var deleteCancelBtn = document.getElementById("chatGroupInfoDeleteCancelBtn");
+    var leaveWrap = document.getElementById("chatGroupInfoLeaveWrap");
+    var leaveBtn = document.getElementById("chatGroupInfoLeaveBtn");
     function resetGroupDeleteUi() {
       if (deletePanel) deletePanel.hidden = true;
       if (deleteOpenBtn) deleteOpenBtn.hidden = false;
@@ -26209,6 +26367,7 @@ function initChat() {
       if (avatarEditHint) avatarEditHint.hidden = !creator;
       if (dangerZone) dangerZone.hidden = !creator;
       resetGroupDeleteUi();
+      if (leaveWrap) leaveWrap.hidden = false;
     }
     window.__pokerOpenChatGroupInfo = function (groupId) {
       var gid = groupId != null ? String(groupId).trim() : "";
@@ -26217,6 +26376,7 @@ function initChat() {
       lastGroupInfoTitle = "";
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
+      if (leaveWrap) leaveWrap.hidden = true;
       if (creatorBadge) creatorBadge.hidden = true;
       if (titleEl) {
         titleEl.hidden = false;
@@ -26412,6 +26572,67 @@ function initChat() {
         if (e.key === "Enter" && deleteFinalBtn && !deleteFinalBtn.disabled) {
           e.preventDefault();
           deleteFinalBtn.click();
+        }
+      });
+    }
+    function runLeaveGroupAfterConfirm() {
+      var gidLv = openGroupId;
+      if (!gidLv || !leaveBtn) return;
+      if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
+        else if (typeof alert === "function") alert("Войдите в аккаунт");
+        return;
+      }
+      leaveBtn.disabled = true;
+      fetch(base + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: "leaveGroup", groupId: gidLv })),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          leaveBtn.disabled = false;
+          if (data && data.ok && data.left) {
+            try {
+              delete personalMessagesCache[gidLv];
+            } catch (eC) {}
+            try {
+              delete personalMessagesCacheMeta[gidLv];
+            } catch (eC2) {}
+            lastPersonalMessagesSig = null;
+            closeModal();
+            if (typeof chatWithUserId !== "undefined" && chatWithUserId && typeof peerChatIdsEqual === "function") {
+              if (peerChatIdsEqual(chatWithUserId, gidLv)) {
+                showDialogs();
+              }
+            }
+            if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            if (typeof tg !== "undefined" && tg && tg.showToast) tg.showToast("Вы вышли из группы");
+          } else {
+            if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+            else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+          }
+        })
+        .catch(function () {
+          leaveBtn.disabled = false;
+          if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
+        });
+    }
+    if (leaveBtn) {
+      leaveBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var msgLv =
+          "Покинуть группу? Вы перестанете быть участником, диалог исчезнет из вашего списка. Если вы единственный участник, группа будет удалена.";
+        if (typeof tg !== "undefined" && tg && typeof tg.showConfirm === "function") {
+          tg.showConfirm(msgLv, function (ok) {
+            if (ok) runLeaveGroupAfterConfirm();
+          });
+        } else if (typeof confirm === "function" && confirm(msgLv)) {
+          runLeaveGroupAfterConfirm();
         }
       });
     }
