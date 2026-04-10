@@ -26592,8 +26592,9 @@ function initChat() {
       var t = g.title || "Группа";
       lastGroupInfoTitle = t;
       var creator = !!(g.iAmCreator);
+      var canManageMeta = !!(g.iCanManageGroupMeta);
       if (creatorBadge) creatorBadge.hidden = !creator;
-      if (creator) {
+      if (canManageMeta) {
         if (titleEl) titleEl.hidden = true;
         if (titleLabel) titleLabel.hidden = false;
         if (titleInput) titleInput.value = t;
@@ -26606,7 +26607,7 @@ function initChat() {
         if (titleInput) titleInput.value = "";
       }
       var gDesc = g.description != null ? String(g.description) : "";
-      if (creator) {
+      if (canManageMeta) {
         if (descEditWrap) descEditWrap.hidden = false;
         if (descViewWrap) descViewWrap.hidden = true;
         if (descTa) {
@@ -26623,7 +26624,7 @@ function initChat() {
           descViewEl.classList.toggle("chat-group-info-modal__desc-view-text--empty", !dvTrim);
         }
       }
-      if (saveBtn) saveBtn.hidden = !creator;
+      if (saveBtn) saveBtn.hidden = !canManageMeta;
       var mems = (g.members || []).slice().sort(function (a, b) {
         var ao = a && a.online ? 1 : 0;
         var bo = b && b.online ? 1 : 0;
@@ -26686,11 +26687,11 @@ function initChat() {
         .join("");
       }
       if (avatarBtn) {
-        avatarBtn.disabled = !creator;
-        avatarBtn.setAttribute("aria-label", creator ? "Сменить аватар группы" : "Аватар группы");
+        avatarBtn.disabled = !canManageMeta;
+        avatarBtn.setAttribute("aria-label", canManageMeta ? "Сменить аватар группы" : "Аватар группы");
       }
-      if (avatarEditHint) avatarEditHint.hidden = !creator;
-      if (dangerZone) dangerZone.hidden = !creator;
+      if (avatarEditHint) avatarEditHint.hidden = !canManageMeta;
+      if (dangerZone) dangerZone.hidden = !canManageMeta;
       resetGroupDeleteUi();
       if (openGroupInfoMode === "general") {
         if (leaveWrap) leaveWrap.hidden = true;
@@ -26883,6 +26884,14 @@ function initChat() {
         e.preventDefault();
         var gidSv = openGroupId;
         if (!gidSv || !titleInput || !descTa) return;
+        if (typeof chatIsAdmin !== "undefined" && !chatIsAdmin) {
+          if (typeof tg !== "undefined" && tg && tg.showAlert) {
+            tg.showAlert("Только администратор клуба может менять название и описание группы");
+          } else if (typeof alert === "function") {
+            alert("Только администратор клуба может менять название и описание группы");
+          }
+          return;
+        }
         if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
         if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
           if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
@@ -26950,6 +26959,15 @@ function initChat() {
         var f = avatarFile.files && avatarFile.files[0];
         var gidUp = openGroupId;
         if (!f || !gidUp) return;
+        if (typeof chatIsAdmin !== "undefined" && !chatIsAdmin) {
+          avatarFile.value = "";
+          if (typeof tg !== "undefined" && tg && tg.showAlert) {
+            tg.showAlert("Только администратор клуба может менять аватар группы");
+          } else if (typeof alert === "function") {
+            alert("Только администратор клуба может менять аватар группы");
+          }
+          return;
+        }
         if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
         if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
           if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert("Войдите, чтобы сменить аватар");
@@ -27087,6 +27105,14 @@ function initChat() {
         e.preventDefault();
         var gidDel = openGroupId;
         if (!gidDel || !deleteInput || deleteInput.value.trim().toLowerCase() !== "удалить") return;
+        if (typeof chatIsAdmin !== "undefined" && !chatIsAdmin) {
+          if (typeof tg !== "undefined" && tg && tg.showAlert) {
+            tg.showAlert("Только администратор клуба может удалить группу");
+          } else if (typeof alert === "function") {
+            alert("Только администратор клуба может удалить группу");
+          }
+          return;
+        }
         if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
         if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
           if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
