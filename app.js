@@ -24272,6 +24272,9 @@ function initChat() {
             node.style.removeProperty("z-index");
             node.style.removeProperty("max-width");
             node.style.removeProperty("box-sizing");
+            try {
+              node.classList.remove("chat-input-area--vv-dock");
+            } catch (eClsDock) {}
           });
         } catch (eSt) {}
       }
@@ -24279,6 +24282,8 @@ function initChat() {
         try {
           window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatKbDockMonotonicUntil = 0;
+          window.__pokerChatDockSmoothedPx = null;
+          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
             window.__pokerChatVvInsetDebounceTimer = null;
@@ -24442,6 +24447,15 @@ function initChat() {
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
       }
 
+      /** Вкл/выкл режим «только fixed bottom» без CSS-transform (общий чат / личка). */
+      function pokerSetChatComposerDockClass(on) {
+        try {
+          var g = document.getElementById("chatGeneralInputArea");
+          var p = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
+          if (g) g.classList.toggle("chat-input-area--vv-dock", !!on);
+          if (p) p.classList.toggle("chat-input-area--vv-dock", !!on);
+        } catch (eDockCls) {}
+      }
       /**
        * Fallback без visualViewport: только translate по CSS-переменным (flex/overflow часто «съедают» подъём).
        */
@@ -24479,31 +24493,14 @@ function initChat() {
         }
       }
       /**
-       * Привязка полосы ввода к низу visualViewport (position:fixed + bottom) — надёжнее transform внутри overflow:flex.
-       * Одна формула для всех устройств: расстояние от низа layout viewport до низа visualViewport (= зона клавиатуры/UI),
-       * плюс при необходимости Telegram viewportStableHeight − viewportHeight, единый fallback если vv «молчит».
+       * Высота зоны под веб-контентом (клавиатура + панель iOS над клавишами): от низа layout viewport до низа visualViewport.
+       * Одна метрика для fixed bottom — не дублировать --chat-ios-accessory-inset в bottom (иначе двойной зазор).
        */
-      function applyChatComposerKeyboardPosition() {
-        if (!document.body.classList.contains("chat-keyboard-open")) return;
-        if (String(document.body.getAttribute("data-view") || "") !== "chat") {
-          applyChatInputAreasVisualLift();
-          return;
-        }
-        /* Отступ низа полосы от низа layout viewport до низа visualViewport (= зона под клавиатурой).
-         * Не добавлять повторно --chat-ios-accessory-inset: bottomPx уже учитывает полосу над клавишами — иначе двойной зазор и «парение» над accessory. */
-        var CHAT_COMPOSER_KEYBOARD_GAP_PX = 10;
-        var CHAT_VV_BOTTOM_FALLBACK_MIN = 88;
+      function pokerMeasureChatObscuredBottomPx() {
         var ih = window.innerHeight || 0;
-        var iw = window.innerWidth || document.documentElement.clientWidth || 0;
         var vv = window.visualViewport;
-        var bottomPx = 0;
-        var vvhForKb = 0;
-        if (vv && ih > 0) {
-          var ot = Number(vv.offsetTop) || 0;
-          var vvh = Number(vv.height) || 0;
-          vvhForKb = vvh;
-          bottomPx = Math.max(0, Math.round(ih - ot - vvh));
-        }
+        var obscured = 0;
+        var vvh = 0;
         var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         var tgvH = 0;
@@ -24512,17 +24509,54 @@ function initChat() {
           tgvH = Number(tw.viewportHeight);
           tgvS = Number(tw.viewportStableHeight);
           if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10) {
-            bottomPx = Math.max(bottomPx, Math.round(tgvS - tgvH));
+            obscured = Math.max(obscured, Math.round(tgvS - tgvH));
           }
         }
-        /* Подстраховка только когда vv реально «сжат» клавиатурой — иначе на iOS ложный ih*0.27 дёргает поле при каждом resize. */
-        if (ih > 200 && bottomPx < CHAT_VV_BOTTOM_FALLBACK_MIN) {
-          var kbLikelyVv = vvhForKb > 0 && vvhForKb < ih * 0.92;
+        if (vv && ih > 0) {
+          var ot = Number(vv.offsetTop) || 0;
+          vvh = Number(vv.height) || 0;
+          obscured = Math.max(obscured, Math.max(0, Math.round(ih - ot - vvh)));
+        }
+        var CHAT_VV_BOTTOM_FALLBACK_MIN = 88;
+        if (ih > 200 && obscured < CHAT_VV_BOTTOM_FALLBACK_MIN) {
+          var kbLikelyVv = vvh > 0 && vvh < ih * 0.92;
           var kbLikelyTg = tg && tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10;
           if (kbLikelyVv || kbLikelyTg) {
-            bottomPx = Math.max(bottomPx, Math.min(400, Math.round(ih * 0.27)));
+            obscured = Math.max(obscured, Math.min(400, Math.round(ih * 0.27)));
           }
         }
+        if (isIosLikeForChatViewport() && !tg) {
+          try {
+            var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curIh = window.innerHeight || 0;
+            if (baseIh > 260 && curIh > 0) {
+              var winLossIh = Math.round(baseIh - curIh);
+              if (winLossIh > 64) {
+                obscured = Math.max(obscured, Math.min(400, Math.round(winLossIh * 0.88)));
+              }
+            }
+          } catch (eIosM) {}
+        }
+        if (isIosLikeForChatViewport() && document.body.classList.contains("chat-keyboard-open")) {
+          if (vvh > 0 && vvh + 100 < ih && obscured < 100) {
+            obscured = Math.max(obscured, 100);
+          }
+        }
+        return obscured;
+      }
+      /**
+       * Полоса ввода: только position:fixed; bottom = «закрыто снизу» − зазор. Класс chat-input-area--vv-dock отключает CSS-lift.
+       */
+      function applyChatComposerKeyboardPosition() {
+        if (!document.body.classList.contains("chat-keyboard-open")) return;
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") {
+          applyChatInputAreasVisualLift();
+          return;
+        }
+        var CHAT_GAP_PX = 8;
+        var ih = window.innerHeight || 0;
+        var iw = window.innerWidth || document.documentElement.clientWidth || 0;
+        var vv = window.visualViewport;
         var gEl = document.getElementById("chatGeneralInputArea");
         var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
         var genVis = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
@@ -24543,7 +24577,7 @@ function initChat() {
           el.style.removeProperty("will-change");
           el.style.removeProperty("margin-bottom");
         }
-        function dockOne(el) {
+        function dockOne(el, dockBottomPx) {
           if (!el || !el.style) return;
           var appEl = document.getElementById("app");
           var leftPx = 0;
@@ -24555,26 +24589,12 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
-          var dockBottomPx = Math.max(0, Math.round(bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX));
-          /* iOS: при выезде клавиатуры vv сначала занижает bottom — берём max в первые ~450 ms (монотонный подъём),
-           * затем гистерезис против мелкого дрожания. Одна «низкая» первая отметка без max залипала и давала дёрганье. */
-          if (isIosLikeForChatViewport() && document.body.classList.contains("chat-keyboard-open")) {
-            var prevDb = window.__pokerChatLastDockBottomPx;
-            var monoUntil = Number(window.__pokerChatKbDockMonotonicUntil) || 0;
-            if (Date.now() < monoUntil && prevDb != null && isFinite(prevDb)) {
-              dockBottomPx = Math.max(prevDb, dockBottomPx);
-            } else if (prevDb != null && isFinite(prevDb) && Math.abs(dockBottomPx - prevDb) < 14) {
-              dockBottomPx = prevDb;
-            }
-            window.__pokerChatLastDockBottomPx = dockBottomPx;
-          } else {
-            window.__pokerChatLastDockBottomPx = dockBottomPx;
-          }
+          var b = Math.max(0, Math.round(dockBottomPx));
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
           el.style.setProperty("right", "auto", "important");
-          el.style.setProperty("bottom", dockBottomPx + "px", "important");
+          el.style.setProperty("bottom", b + "px", "important");
           el.style.setProperty("z-index", "10040", "important");
           el.style.setProperty("transform", "none", "important");
           el.style.setProperty("-webkit-transform", "none", "important");
@@ -24582,18 +24602,30 @@ function initChat() {
           el.style.setProperty("max-width", "none", "important");
           el.style.setProperty("box-sizing", "border-box", "important");
         }
-        if (vv && ih > 0) {
-          if (gEl && !genVis) clearDockOne(gEl);
-          if (pEl && !convVis) clearDockOne(pEl);
-          if (genVis) dockOne(gEl);
-          else if (gEl) clearDockOne(gEl);
-          if (convVis) dockOne(pEl);
-          else if (pEl) clearDockOne(pEl);
-        } else {
+        if (!vv || ih <= 0) {
           if (gEl) clearDockOne(gEl);
           if (pEl) clearDockOne(pEl);
           applyChatInputAreasVisualLift();
+          return;
         }
+        var obscured = pokerMeasureChatObscuredBottomPx();
+        var targetBottom = Math.max(CHAT_GAP_PX, obscured - CHAT_GAP_PX);
+        if (isIosLikeForChatViewport()) {
+          var prevS = window.__pokerChatDockSmoothedPx;
+          if (prevS != null && isFinite(prevS)) {
+            targetBottom = Math.round(prevS * 0.5 + targetBottom * 0.5);
+          }
+          window.__pokerChatDockSmoothedPx = targetBottom;
+        } else {
+          window.__pokerChatDockSmoothedPx = targetBottom;
+        }
+        var dockBottomPx = targetBottom;
+        if (gEl && !genVis) clearDockOne(gEl);
+        if (pEl && !convVis) clearDockOne(pEl);
+        if (genVis && gEl) dockOne(gEl, dockBottomPx);
+        else if (gEl) clearDockOne(gEl);
+        if (convVis && pEl) dockOne(pEl, dockBottomPx);
+        else if (pEl) clearDockOne(pEl);
       }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
@@ -24813,12 +24845,12 @@ function initChat() {
           return;
         }
         var el = getVisibleMessagesEl();
-        try {
-          window.__pokerChatLastDockBottomPx = null;
-          window.__pokerChatKbDockMonotonicUntil = Date.now() + 480;
-        } catch (eMono0) {}
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
+        try {
+          window.__pokerChatDockSmoothedPx = null;
+          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(true);
+        } catch (eDockOn) {}
         if (shouldUseChatVisualViewportLift()) {
           document.documentElement.classList.add("chat-vv-lift");
         }
@@ -24876,24 +24908,6 @@ function initChat() {
           }, 1600);
         }
         syncPwaChatVisualViewportInset();
-        if (isIosChatKb) {
-          try {
-            var rafVvFix = window.requestAnimationFrame || function (fn) {
-              setTimeout(fn, 0);
-            };
-            rafVvFix(function () {
-              try {
-                if (window.visualViewport && typeof window.visualViewport.scrollTo === "function") {
-                  window.visualViewport.scrollTo(0, 0);
-                }
-              } catch (eVv0) {}
-              try {
-                syncPwaChatVisualViewportInset();
-                scrollMessagesToBottom();
-              } catch (eSynVv) {}
-            });
-          } catch (eRafVv) {}
-        }
         /*
          * window.resize на iOS (в т.ч. PWA) часто бьёт раньше/между кадрами visualViewport — overlap на мгновение 0,
          * при iosBoost=0 для standalone inset обнуляется и поле остаётся под клавиатурой. Resize оставляем только под Android.

@@ -3110,6 +3110,14 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
+/* JS: position:fixed + bottom — отключаем translate/margin из --chat-vv-inset, иначе двойной подъём и полоса под панелью iOS. */
+html.chat-keyboard-open .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-dock {
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+  --chat-input-lift: 0px !important;
+}
 .chat-switcher-row {
   display: flex;
   justify-content: center;
