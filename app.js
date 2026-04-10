@@ -8674,7 +8674,7 @@ function getSpringRatingTotalRewardSumForDates(dateStrs) {
   }
   return total;
 }
-/** Блок под промо на главной и дубликат на экране рейтинга весны (перед «Таблица по датам»): апрель и март · итоги */
+/** Сводка март/апрель на экране рейтинга весны (перед «Таблица по датам»). На главной блок убран — элементы springRatingHomePromo* отсутствуют. */
 function updateSpringRatingHomePromoStats() {
   var wrap = document.getElementById("springRatingHomePromoStats");
   var viewWrap = document.getElementById("springRatingViewTotals");
