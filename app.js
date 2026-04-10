@@ -22220,6 +22220,21 @@ function initChat() {
         }
         window.__pokerChatFriendIdsSet = friendSet;
         try {
+          var fpcM = window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
+            ? window.__pokerFriendsPickCache.friends
+            : [];
+          for (var fmj = 0; fmj < fpcM.length; fmj++) {
+            var frv = fpcM[fmj];
+            if (!frv || !frv.userId) continue;
+            var um = String(frv.userId);
+            window.__pokerChatFriendIdsSet[um] = true;
+            try {
+              var fn2 = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(um) : um;
+              if (fn2 && fn2 !== um) window.__pokerChatFriendIdsSet[fn2] = true;
+            } catch (eFn2) {}
+          }
+        } catch (eFpcM) {}
+        try {
           var cgMx = document.getElementById("chatCreateGroupModal");
           if (
             cgMx &&
@@ -26712,6 +26727,35 @@ function initChat() {
         }
       }
     } catch (eDomGp) {}
+    try {
+      var fPick = window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
+        ? window.__pokerFriendsPickCache.friends
+        : [];
+      for (var ffi = 0; ffi < fPick.length; ffi++) {
+        var frow = fPick[ffi];
+        if (!frow || !frow.userId) continue;
+        var fuid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(String(frow.userId)) : String(frow.userId);
+        if (!fuid || fuid.indexOf("group_") === 0 || fuid.indexOf("guest_") === 0) continue;
+        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(fuid, myId0)) continue;
+        if (byId[fuid]) continue;
+        var fDisp =
+          frow.contactName != null && String(frow.contactName).trim()
+            ? String(frow.contactName).trim()
+            : frow.userName || fuid;
+        var fEnt = {
+          id: fuid,
+          name: fDisp,
+          avatar: null,
+          online: false,
+          admin: false,
+          unreadCount: 0,
+        };
+        if (frow.contactName != null && String(frow.contactName).trim()) {
+          fEnt.contactName = String(frow.contactName).trim();
+        }
+        byId[fuid] = fEnt;
+      }
+    } catch (eFpick) {}
     var out = [];
     for (var k in byId) {
       if (Object.prototype.hasOwnProperty.call(byId, k)) out.push(byId[k]);
@@ -26725,6 +26769,44 @@ function initChat() {
     });
     return out;
   }
+
+  /**
+   * GET /api/friends — источник правды для списка друзей, если mode=contacts пустой или ещё не пришёл.
+   * Обновляет __pokerFriendsPickCache и __pokerChatFriendIdsSet для вкладки «Друзья».
+   */
+  window.__pokerFetchFriendsForGroupPick = function (done) {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      if (typeof done === "function") done();
+      return;
+    }
+    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    fetch(base + "/api/friends" + fq)
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        if (data && data.ok && Array.isArray(data.friends)) {
+          window.__pokerFriendsPickCache = { ts: Date.now(), friends: data.friends };
+          var set = window.__pokerChatFriendIdsSet || {};
+          for (var i = 0; i < data.friends.length; i++) {
+            var row = data.friends[i];
+            if (!row || !row.userId) continue;
+            var uid = String(row.userId);
+            set[uid] = true;
+            try {
+              var nx = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(uid) : uid;
+              if (nx && nx !== uid) set[nx] = true;
+            } catch (eNx) {}
+          }
+          window.__pokerChatFriendIdsSet = set;
+        }
+      })
+      .catch(function () {})
+      .then(function () {
+        if (typeof done === "function") done();
+      });
+  };
 
   /** Если mode=contacts без generalChatPickMembers / пустой кэш — подгружаем состав главного чата (trackSeen=0). */
   window.__pokerFetchGeneralRosterForGroupPickIfEmpty = function (done) {
@@ -27099,6 +27181,11 @@ function initChat() {
           window.__pokerReloadChatContacts({ onLoaded: paintGroupAddAfterContacts });
         } catch (eRelAm) {}
       }
+      try {
+        if (typeof window.__pokerFetchFriendsForGroupPick === "function") {
+          window.__pokerFetchFriendsForGroupPick(paintGroupAddAfterContacts);
+        }
+      } catch (eFrAm2) {}
       setTimeout(function () {
         try {
           var mAm = document.getElementById("chatGroupAddMembersModal");
@@ -27966,6 +28053,11 @@ function initChat() {
           window.__pokerReloadChatContacts({ onLoaded: paintCreateGroupAfterContacts });
         } catch (eRelCg) {}
       }
+      try {
+        if (typeof window.__pokerFetchFriendsForGroupPick === "function") {
+          window.__pokerFetchFriendsForGroupPick(paintCreateGroupAfterContacts);
+        }
+      } catch (eFrCg) {}
       try {
         var rafCg = window.requestAnimationFrame || function (fn) {
           setTimeout(fn, 0);
