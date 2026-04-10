@@ -22151,6 +22151,26 @@ function initChat() {
           ) {
             window.__pokerRefreshGroupAddPickers();
           }
+          var pickModalOpen =
+            (cgMx && !cgMx.classList.contains("chat-create-group-modal--hidden")) ||
+            (gaMx && !gaMx.classList.contains("chat-create-group-modal--hidden"));
+          if (
+            pickModalOpen &&
+            typeof window.__pokerFetchGeneralRosterForGroupPickIfEmpty === "function" &&
+            typeof pokerBuildGroupModalContactList === "function" &&
+            pokerBuildGroupModalContactList().length === 0
+          ) {
+            window.__pokerFetchGeneralRosterForGroupPickIfEmpty(function () {
+              try {
+                if (typeof window.__pokerRefreshCreateGroupPickers === "function") {
+                  window.__pokerRefreshCreateGroupPickers();
+                }
+                if (typeof window.__pokerRefreshGroupAddPickers === "function") {
+                  window.__pokerRefreshGroupAddPickers();
+                }
+              } catch (ePickF) {}
+            });
+          }
         } catch (ePkRf) {}
         if (showFriendsOnly) {
           contactsForList = contactsForList.filter(function (c) {
@@ -25236,6 +25256,8 @@ function initChat() {
       var voiceStream = null;
       var voiceChunks = [];
       var voiceRecorder = null;
+      /** true с начала onstop до сборки blob или discard — иначе второй тап даёт ветку «!voiceRecorder» и срывает превью. */
+      var voiceFinalizeInProgress = false;
       var voiceRecordStartTime = null;
       var voiceRecordTimerInterval = null;
       var generalTimerEl = document.getElementById("chatGeneralVoiceTimer");
@@ -25264,6 +25286,7 @@ function initChat() {
         voiceRecordTimerInterval = setInterval(updateVoiceTimer, 1000);
       }
       function stopAndDiscard() {
+        voiceFinalizeInProgress = false;
         voiceTarget = null;
         stopVoiceTimer();
         if (voiceRecorder && voiceRecorder.state !== "inactive") voiceRecorder.stop();
@@ -25279,6 +25302,7 @@ function initChat() {
           if (tg && tg.showAlert) tg.showAlert("Микрофон не поддерживается");
           return;
         }
+        voiceFinalizeInProgress = false;
         voiceTarget = target;
         if (target === "general") {
           if (generalBtn) { generalBtn.classList.add("chat-voice-btn--recording"); generalBtn.title = "Остановить запись"; }
@@ -25313,6 +25337,7 @@ function initChat() {
           voiceRecorder.onstop = function () {
             stopVoiceTimer();
             var mime = (voiceRecorder && voiceRecorder.mimeType) ? voiceRecorder.mimeType : "audio/webm";
+            voiceFinalizeInProgress = true;
             voiceRecorder = null;
             if (voiceStream) {
               voiceStream.getTracks().forEach(function (t) { t.stop(); });
@@ -25320,7 +25345,9 @@ function initChat() {
             }
             var dest = savedTarget;
             var voiceFinalizeDone = false;
+            var voiceAssembleDelaysMs = [0, 40, 100, 220, 450, 800];
             function discardEmptyVoiceUi() {
+              voiceFinalizeInProgress = false;
               if (dest === "general") {
                 if (generalBtn) { generalBtn.classList.remove("chat-voice-btn--recording"); generalBtn.title = "Голосовое сообщение"; }
                 if (generalVoicePreviewEl) {
@@ -25335,13 +25362,13 @@ function initChat() {
               }
               voiceTarget = null;
             }
-            function tryAssembleVoiceBlob(allowLaterTick) {
+            function tryAssembleVoiceBlob(attemptIdx) {
               if (voiceFinalizeDone) return;
               if (voiceChunks.length === 0) {
-                if (allowLaterTick) {
+                if (attemptIdx < voiceAssembleDelaysMs.length) {
                   setTimeout(function () {
-                    tryAssembleVoiceBlob(false);
-                  }, 160);
+                    tryAssembleVoiceBlob(attemptIdx + 1);
+                  }, voiceAssembleDelaysMs[attemptIdx]);
                 } else {
                   voiceFinalizeDone = true;
                   discardEmptyVoiceUi();
@@ -25352,7 +25379,11 @@ function initChat() {
               var blob = new Blob(voiceChunks, { type: mime });
               voiceChunks = [];
               var reader = new FileReader();
+              reader.onerror = function () {
+                discardEmptyVoiceUi();
+              };
               reader.onloadend = function () {
+                voiceFinalizeInProgress = false;
                 var dataUrl = reader.result;
                 if (typeof dataUrl === "string") dataUrl = pokerNormalizeVoiceDataUrl(dataUrl, mime);
                 if (dest === "general") {
@@ -25375,13 +25406,16 @@ function initChat() {
               };
               reader.readAsDataURL(blob);
             }
-            /* WebKit/TG WebView: последний dataavailable иногда приходит после onstop — не считаем пустым сразу. */
+            /* WebKit/TG WebView: dataavailable может прийти с задержкой после onstop. */
             setTimeout(function () {
-              tryAssembleVoiceBlob(true);
+              tryAssembleVoiceBlob(0);
             }, 0);
           };
-          /* Без тайм-слайса: один chunk при stop() — меньше гонок с пустым массивом при короткой записи. */
-          voiceRecorder.start();
+          try {
+            voiceRecorder.start(250);
+          } catch (eStartSlice) {
+            voiceRecorder.start();
+          }
           startVoiceTimer();
         }).catch(function () {
           voiceTarget = null;
@@ -25403,7 +25437,7 @@ function initChat() {
               if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
               voiceRecorder.stop();
             } catch (err) {}
-          } else {
+          } else if (!voiceFinalizeInProgress && !voiceStream) {
             voiceTarget = null;
             if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
           }
@@ -25437,6 +25471,7 @@ function initChat() {
       var generalVoiceStop = document.getElementById("chatGeneralVoiceStop");
       if (generalVoiceStop) generalVoiceStop.addEventListener("click", function (e) {
         e.preventDefault();
+        e.stopPropagation();
         if (voiceTarget === "general") {
           stopVoiceTimer();
           if (voiceRecorder) {
@@ -25444,7 +25479,7 @@ function initChat() {
               if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
               voiceRecorder.stop();
             } catch (err) {}
-          } else {
+          } else if (!voiceFinalizeInProgress && !voiceStream) {
             voiceTarget = null;
             if (generalVoicePreviewEl) { generalVoicePreviewEl.classList.remove("chat-voice-preview--recording"); generalVoicePreviewEl.classList.add("chat-voice-preview--hidden"); }
           }
@@ -25462,7 +25497,7 @@ function initChat() {
               if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
               voiceRecorder.stop();
             } catch (err) {}
-          } else {
+          } else if (!voiceFinalizeInProgress && !voiceStream) {
             voiceTarget = null;
             var pvPrev = document.getElementById("chatPersonalVoicePreview");
             if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
@@ -25496,6 +25531,7 @@ function initChat() {
       var personalVoiceStop = document.getElementById("chatPersonalVoiceStop");
       if (personalVoiceStop) personalVoiceStop.addEventListener("click", function (e) {
         e.preventDefault();
+        e.stopPropagation();
         if (voiceTarget === "personal") {
           stopVoiceTimer();
           if (voiceRecorder) {
@@ -25503,7 +25539,7 @@ function initChat() {
               if (voiceRecorder.state === "recording" && voiceRecorder.requestData) voiceRecorder.requestData();
               voiceRecorder.stop();
             } catch (err) {}
-          } else {
+          } else if (!voiceFinalizeInProgress && !voiceStream) {
             voiceTarget = null;
             var pvPrev = document.getElementById("chatPersonalVoicePreview");
             if (pvPrev) { pvPrev.classList.remove("chat-voice-preview--recording"); pvPrev.classList.add("chat-voice-preview--hidden"); }
@@ -26298,6 +26334,27 @@ function initChat() {
         byId[idc] = c;
       }
     }
+    try {
+      var gmCache = window._chatGeneralCache && Array.isArray(window._chatGeneralCache.generalMembers)
+        ? window._chatGeneralCache.generalMembers
+        : [];
+      for (i = 0; i < gmCache.length; i++) {
+        var gmx = gmCache[i];
+        if (!gmx || !gmx.id || gmx.isYou) continue;
+        var gxid = String(gmx.id);
+        if (gxid.indexOf("group_") === 0) continue;
+        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(gxid, myId0)) continue;
+        if (byId[gxid]) continue;
+        byId[gxid] = {
+          id: gxid,
+          name: gmx.name || gxid,
+          avatar: gmx.avatar != null ? gmx.avatar : null,
+          online: !!gmx.online,
+          admin: !!gmx.admin,
+          unreadCount: 0,
+        };
+      }
+    } catch (eGmCache) {}
     var out = [];
     for (var k in byId) {
       if (Object.prototype.hasOwnProperty.call(byId, k)) out.push(byId[k]);
@@ -26311,6 +26368,54 @@ function initChat() {
     });
     return out;
   }
+
+  /** Если mode=contacts без generalChatPickMembers / пустой кэш — подгружаем состав главного чата (trackSeen=0). */
+  window.__pokerFetchGeneralRosterForGroupPickIfEmpty = function (done) {
+    try {
+      if (typeof pokerBuildGroupModalContactList !== "function") {
+        if (typeof done === "function") done();
+        return;
+      }
+      if (pokerBuildGroupModalContactList().length > 0) {
+        if (typeof done === "function") done();
+        return;
+      }
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (typeof done === "function") done();
+        return;
+      }
+      if (window.__pokerGroupPickRosterFetchInFlight) {
+        if (typeof done === "function") done();
+        return;
+      }
+      window.__pokerGroupPickRosterFetchInFlight = true;
+      var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general&trackSeen=0";
+      fetch(url)
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          window.__pokerGroupPickRosterFetchInFlight = false;
+          if (data && data.ok && Array.isArray(data.generalMembers)) {
+            if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
+              window._chatGeneralCache = { messages: [], generalMembers: [] };
+            }
+            window._chatGeneralCache.generalMembers = data.generalMembers;
+            if (data.participantsCount != null) window._chatGeneralCache.participantsCount = data.participantsCount;
+            if (data.onlineCount != null) window._chatGeneralCache.onlineCount = data.onlineCount;
+          }
+        })
+        .catch(function () {
+          window.__pokerGroupPickRosterFetchInFlight = false;
+        })
+        .then(function () {
+          if (typeof done === "function") done();
+        });
+    } catch (eFr) {
+      window.__pokerGroupPickRosterFetchInFlight = false;
+      if (typeof done === "function") done();
+    }
+  };
 
   (function initChatGroupAddMembersModal() {
     var modal = document.getElementById("chatGroupAddMembersModal");
@@ -26633,6 +26738,22 @@ function initChat() {
       }
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
+      setTimeout(function () {
+        try {
+          var mAm = document.getElementById("chatGroupAddMembersModal");
+          if (!mAm || mAm.classList.contains("chat-create-group-modal--hidden")) return;
+          if (typeof pokerBuildGroupModalContactList !== "function") return;
+          if (pokerBuildGroupModalContactList().length > 0) return;
+          if (typeof window.__pokerFetchGeneralRosterForGroupPickIfEmpty !== "function") return;
+          window.__pokerFetchGeneralRosterForGroupPickIfEmpty(function () {
+            try {
+              if (typeof window.__pokerRefreshGroupAddPickers === "function") {
+                window.__pokerRefreshGroupAddPickers();
+              }
+            } catch (eBrAm) {}
+          });
+        } catch (eTam) {}
+      }, 560);
       var qAm = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
       fetch(base + "/api/chat" + qAm + "&with=" + encodeURIComponent(gid) + "&metaonly=1")
         .then(function (r) {
@@ -27478,6 +27599,22 @@ function initChat() {
       }
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
+      setTimeout(function () {
+        try {
+          var mCg = document.getElementById("chatCreateGroupModal");
+          if (!mCg || mCg.classList.contains("chat-create-group-modal--hidden")) return;
+          if (typeof pokerBuildGroupModalContactList !== "function") return;
+          if (pokerBuildGroupModalContactList().length > 0) return;
+          if (typeof window.__pokerFetchGeneralRosterForGroupPickIfEmpty !== "function") return;
+          window.__pokerFetchGeneralRosterForGroupPickIfEmpty(function () {
+            try {
+              if (typeof window.__pokerRefreshCreateGroupPickers === "function") {
+                window.__pokerRefreshCreateGroupPickers();
+              }
+            } catch (eBrCg) {}
+          });
+        } catch (eTcg) {}
+      }, 560);
       try {
         if (titleInp) titleInp.focus();
       } catch (eFoc) {}
