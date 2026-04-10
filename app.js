@@ -18519,6 +18519,35 @@ function initChat() {
       b.setAttribute("aria-pressed", on ? "true" : "false");
     }
   }
+  /** FileReader/WebKit часто отдаёт data:application/octet-stream или data:video/webm — сервер ждёт data:audio/… */
+  function pokerNormalizeVoiceDataUrl(dataUrl, recorderMime) {
+    if (typeof dataUrl !== "string" || dataUrl.indexOf("data:") !== 0) return dataUrl;
+    var comma = dataUrl.indexOf(",");
+    if (comma < 0) return dataUrl;
+    var header = dataUrl.slice(0, comma);
+    var low = header.toLowerCase();
+    if (low.indexOf("audio/") !== -1) return dataUrl;
+    var payload = dataUrl.slice(comma);
+    var pickAudio = "audio/webm";
+    try {
+      var rm = recorderMime != null ? String(recorderMime).trim() : "";
+      if (/^audio\//i.test(rm)) pickAudio = rm.split(";")[0].trim();
+      else if (/mp4|m4a|aac|caf|mp4a|mpeg/i.test(rm)) pickAudio = "audio/mp4";
+    } catch (ePick) {}
+    if (/^data:video\/webm/i.test(header)) {
+      return header.replace(/^data:video\/webm/i, "data:audio/webm") + payload;
+    }
+    if (/^data:video\/mp4/i.test(header)) {
+      return header.replace(/^data:video\/mp4/i, "data:audio/mp4") + payload;
+    }
+    if (/^data:video\/quicktime/i.test(header)) {
+      return header.replace(/^data:video\/quicktime/i, "data:audio/mp4") + payload;
+    }
+    if (low.indexOf("application/octet-stream") !== -1) {
+      return "data:" + pickAudio + ";base64," + dataUrl.slice(comma + 1);
+    }
+    return dataUrl;
+  }
   function chatVoiceMessageHtml(voiceSrc) {
     if (!voiceSrc) return "";
     var src = escapeHtml(String(voiceSrc));
@@ -21664,27 +21693,17 @@ function initChat() {
         if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
         var voicePrev = document.getElementById("chatGeneralVoicePreview");
         if (voicePrev) voicePrev.classList.add("chat-voice-preview--hidden");
-        fetch(base + "/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        })
-          .then(function (r) {
-            return r.json().catch(function () {
-              return { ok: false, error: "Не удалось разобрать ответ сервера" };
-            }).then(function (data) {
-              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
-              if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "");
-              return d;
-            });
-          })
-          .then(function (data) {
+        var bodyStrG = JSON.stringify(body);
+        var hasMediaG = !!(body.image || body.voice || body.document);
+        function applyGeneralPostResponse(data, httpOk) {
           sendingGeneral = false;
           sendingGeneralSince = 0;
           setGeneralSendBusy(false);
-          if (data && data.ok) {
+          var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+          if (!httpOk && !d.error) d.error = "Ошибка отправки";
+          if (httpOk && d && d.ok) {
             optimisticGeneralPayload = null;
-            var msg = data.message;
+            var msg = d.message;
             if (msg && msg.id) {
               window._pendingGeneralMessage = msg;
               var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null, generalMembers: [] };
@@ -21703,11 +21722,12 @@ function initChat() {
             optimisticGeneralPayload = null;
             var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
             if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-            var msg = (data && data.error) || "Ошибка";
-            if (tg && tg.showAlert) tg.showAlert(msg);
-            else if (typeof alert === "function") alert(msg);
+            var errT = (d && d.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(errT);
+            else if (typeof alert === "function") alert(errT);
           }
-        }).catch(function () {
+        }
+        function failGeneralPostNetwork() {
           optimisticGeneralPayload = null;
           sendingGeneral = false;
           sendingGeneralSince = 0;
@@ -21716,7 +21736,48 @@ function initChat() {
           if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           else if (typeof alert === "function") alert(POKER_NET_ERR);
-        });
+        }
+        if (hasMediaG && typeof XMLHttpRequest !== "undefined") {
+          var xhrG = new XMLHttpRequest();
+          xhrG.addEventListener("load", function () {
+            var parsed = null;
+            try {
+              parsed = JSON.parse(xhrG.responseText || "{}");
+            } catch (eJ) {
+              parsed = { ok: false, error: "Не удалось разобрать ответ сервера" };
+            }
+            var okHttp = xhrG.status >= 200 && xhrG.status < 300;
+            if (!okHttp && parsed && !parsed.error) {
+              if (xhrG.status === 413) parsed.error = "Вложение слишком большое.";
+              else parsed.error = "Ошибка " + (xhrG.status || "");
+            }
+            applyGeneralPostResponse(parsed, okHttp);
+          });
+          xhrG.addEventListener("error", failGeneralPostNetwork);
+          xhrG.addEventListener("abort", failGeneralPostNetwork);
+          xhrG.open("POST", base + "/api/chat");
+          xhrG.setRequestHeader("Content-Type", "application/json");
+          xhrG.send(bodyStrG);
+        } else {
+          fetch(base + "/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: bodyStrG,
+          })
+            .then(function (r) {
+              return r.json().catch(function () {
+                return { ok: false, error: "Не удалось разобрать ответ сервера" };
+              }).then(function (data) {
+                var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+                if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "");
+                return { d: d, ok: r.ok };
+              });
+            })
+            .then(function (pack) {
+              applyGeneralPostResponse(pack.d, pack.ok);
+            })
+            .catch(failGeneralPostNetwork);
+        }
       });
     } catch (err) {
       optimisticGeneralPayload = null;
@@ -22073,6 +22134,24 @@ function initChat() {
           } catch (eFc) {}
         }
         window.__pokerChatFriendIdsSet = friendSet;
+        try {
+          var cgMx = document.getElementById("chatCreateGroupModal");
+          if (
+            cgMx &&
+            !cgMx.classList.contains("chat-create-group-modal--hidden") &&
+            typeof window.__pokerRefreshCreateGroupPickers === "function"
+          ) {
+            window.__pokerRefreshCreateGroupPickers();
+          }
+          var gaMx = document.getElementById("chatGroupAddMembersModal");
+          if (
+            gaMx &&
+            !gaMx.classList.contains("chat-create-group-modal--hidden") &&
+            typeof window.__pokerRefreshGroupAddPickers === "function"
+          ) {
+            window.__pokerRefreshGroupAddPickers();
+          }
+        } catch (ePkRf) {}
         if (showFriendsOnly) {
           contactsForList = contactsForList.filter(function (c) {
             if (c && c.isGroupChat) return false;
@@ -23999,21 +24078,24 @@ function initChat() {
         var vvh = Number(vv.height) || 0;
         var offsetTop = Number(vv.offsetTop) || 0;
         var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
-        /* Полоса под vv — панель «стрелки / Готово» над клавишами (типично ~36–50px). */
+        /* Полоса под vv — input accessory / предиктив / «Готово» (на новых iOS иногда >62px; раньше >62 давало acc=0 и поле перекрывалось). */
         var acc = 0;
-        if (belowVv >= 8 && belowVv <= 62) {
-          acc = Math.min(56, Math.round(belowVv * 0.98));
+        if (belowVv >= 8) {
+          acc = Math.min(92, Math.round(Math.min(belowVv, 130) * 0.94));
         } else if (
           !tgAcc &&
           pokerPwaStandaloneForKeyboardInset() &&
-          document.body.classList.contains("chat-keyboard-open") &&
-          belowVv < 8 &&
           ih > 0 &&
           vvh > 0 &&
           ih - vvh > 55
         ) {
-          /* PWA WKWebView: иногда vv доходит до низа клавиатуры, belowVv≈0 — всё равно поднимаем под input accessory. */
           acc = 44;
+        } else if (tgAcc || belowVv > 0) {
+          /* TG / WK: vv на одном уровне с клавиатурой, belowVv почти 0 — всё равно нужен зазор под системную строку над клавишами. */
+          acc = tgAcc ? 40 : 44;
+        }
+        if (acc < 34 && ih > 0 && vvh > 0 && ih - vvh > 96) {
+          acc = Math.max(acc, tgAcc ? 38 : 42);
         }
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
@@ -24309,7 +24391,16 @@ function initChat() {
               widthPx = Math.max(260, Math.round(br.width));
             }
           } catch (eBr) {}
-          var dockBottomPx = Math.max(0, bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX);
+          var accForDock = 0;
+          try {
+            accForDock = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue("--chat-ios-accessory-inset")) || 0;
+          } catch (eAccD) {}
+          if (isIosLikeForChatViewport()) {
+            var accFloorDock = tg ? 36 : 40;
+            accForDock = Math.max(accForDock, accFloorDock);
+          }
+          /* fixed bottom не использует CSS translate с --chat-ios-accessory-inset — добавляем явно, иначе iOS-панель перекрывает поле. */
+          var dockBottomPx = Math.max(0, Math.round(bottomPx - CHAT_COMPOSER_KEYBOARD_GAP_PX + accForDock));
           el.style.setProperty("position", "fixed", "important");
           el.style.setProperty("left", leftPx + "px", "important");
           el.style.setProperty("width", widthPx + "px", "important");
@@ -25263,6 +25354,7 @@ function initChat() {
               var reader = new FileReader();
               reader.onloadend = function () {
                 var dataUrl = reader.result;
+                if (typeof dataUrl === "string") dataUrl = pokerNormalizeVoiceDataUrl(dataUrl, mime);
                 if (dest === "general") {
                   generalVoice = dataUrl;
                   if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
@@ -26171,6 +26263,55 @@ function initChat() {
     });
   }
 
+  /** Состав главного чата клуба + личные контакты — для модалок «новая группа» / «добавить в группу» (без ЛС список был пуст). */
+  function pokerBuildGroupModalContactList() {
+    var d = window.__pokerLastContactsApiData;
+    var contactsRaw = d && Array.isArray(d.contacts) ? d.contacts : [];
+    var contactsOnly = contactsRaw.filter(function (c) {
+      return c && c.id && !c.isGroupChat && String(c.id).indexOf("group_") !== 0;
+    });
+    var club = d && Array.isArray(d.generalChatPickMembers) ? d.generalChatPickMembers : [];
+    var byId = Object.create(null);
+    var myId0 = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
+    var i;
+    for (i = 0; i < club.length; i++) {
+      var m = club[i];
+      if (!m || !m.id) continue;
+      var id = String(m.id);
+      if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(id, myId0)) continue;
+      byId[id] = {
+        id: id,
+        name: m.name || id,
+        avatar: m.avatar != null ? m.avatar : null,
+        online: !!m.online,
+        admin: !!m.admin,
+        unreadCount: 0,
+      };
+    }
+    for (i = 0; i < contactsOnly.length; i++) {
+      var c = contactsOnly[i];
+      var idc = String(c.id);
+      if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(idc, myId0)) continue;
+      if (byId[idc]) {
+        byId[idc] = Object.assign({}, byId[idc], c);
+      } else {
+        byId[idc] = c;
+      }
+    }
+    var out = [];
+    for (var k in byId) {
+      if (Object.prototype.hasOwnProperty.call(byId, k)) out.push(byId[k]);
+    }
+    out.sort(function (a, b) {
+      var oa = a.online === b.online ? 0 : a.online ? -1 : 1;
+      if (oa !== 0) return oa;
+      var na = String(a.contactName || a.name || a.id || "").toLowerCase();
+      var nb = String(b.contactName || b.name || b.id || "").toLowerCase();
+      return na.localeCompare(nb, "ru");
+    });
+    return out;
+  }
+
   (function initChatGroupAddMembersModal() {
     var modal = document.getElementById("chatGroupAddMembersModal");
     if (!modal) {
@@ -26208,11 +26349,7 @@ function initChat() {
       return !!excludeKeysAm[k];
     }
     function contactListFromApiAm() {
-      var d = window.__pokerLastContactsApiData;
-      if (!d || !Array.isArray(d.contacts)) return [];
-      return d.contacts.filter(function (c) {
-        return c && c.id && !c.isGroupChat && String(c.id).indexOf("group_") !== 0;
-      });
+      return pokerBuildGroupModalContactList();
     }
     function paintPickerAm(container, arr) {
       if (!container) return;
@@ -26255,6 +26392,11 @@ function initChat() {
       paintPickerAm(pickerAllAm, list);
       paintPickerAm(pickerFriendsAm, fr);
     }
+    window.__pokerRefreshGroupAddPickers = function () {
+      try {
+        renderPickersAm();
+      } catch (eRfAm) {}
+    };
     function renderSelectedAm() {
       if (!selectedElAm) return;
       var ids = Object.keys(selectedMapAm);
@@ -26484,6 +26626,11 @@ function initChat() {
       setTabAmFn("all");
       renderPickersAm();
       renderSelectedAm();
+      if (typeof window.__pokerReloadChatContacts === "function") {
+        try {
+          window.__pokerReloadChatContacts();
+        } catch (eRelAm) {}
+      }
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
       var qAm = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
@@ -27324,6 +27471,11 @@ function initChat() {
       setTabCreateGroup("all");
       renderPickers();
       renderSelected();
+      if (typeof window.__pokerReloadChatContacts === "function") {
+        try {
+          window.__pokerReloadChatContacts();
+        } catch (eRelCg) {}
+      }
       modal.classList.remove("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
       try {
@@ -27350,11 +27502,7 @@ function initChat() {
         .join("");
     }
     function contactListFromApi() {
-      var d = window.__pokerLastContactsApiData;
-      if (!d || !Array.isArray(d.contacts)) return [];
-      return d.contacts.filter(function (c) {
-        return c && c.id && !c.isGroupChat && String(c.id).indexOf("group_") !== 0;
-      });
+      return pokerBuildGroupModalContactList();
     }
     function paintPicker(container, arr) {
       if (!container) return;
@@ -27394,6 +27542,11 @@ function initChat() {
       paintPicker(pickerAll, list);
       paintPicker(pickerFriends, fr);
     }
+    window.__pokerRefreshCreateGroupPickers = function () {
+      try {
+        renderPickers();
+      } catch (eRfCg) {}
+    };
     function setTabCreateGroup(tab) {
       var tabs = modal.querySelectorAll("[data-create-group-tab]");
       for (var ti = 0; ti < tabs.length; ti++) {
