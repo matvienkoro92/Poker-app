@@ -22087,6 +22087,9 @@ function initChat() {
 
   function loadContacts(opts) {
     opts = opts || {};
+    try {
+      window.__pokerReloadChatContacts = loadContacts;
+    } catch (eRelAssign) {}
     var onContactsLoaded = typeof opts.onLoaded === "function" ? opts.onLoaded : null;
     function fireContactsLoaded() {
       if (!onContactsLoaded) return;
@@ -22608,7 +22611,6 @@ function initChat() {
           }, 0);
         }
       });
-    window.__pokerReloadChatContacts = loadContacts;
   }
 
   function pokerChatPeerIdIsFriend(pid) {

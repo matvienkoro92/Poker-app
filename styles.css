@@ -7857,7 +7857,9 @@ img.chat-contact__avatar {
   width: 100%;
   max-width: 440px;
   max-height: min(88vh, 620px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -8007,8 +8009,8 @@ img.chat-contact__avatar {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 0;
-  flex: 1;
+  min-height: min(200px, 40vh);
+  flex: 1 1 auto;
 }
 .chat-create-group-modal__pane--hidden {
   display: none !important;
@@ -8026,6 +8028,7 @@ img.chat-contact__avatar {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: min(120px, 28vh);
   max-height: min(36vh, 240px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
