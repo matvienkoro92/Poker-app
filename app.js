@@ -24910,6 +24910,7 @@ function initChat() {
           window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatKbDockMonotonicUntil = 0;
           window.__pokerChatDockSmoothedPx = null;
+          window.__pokerChatDockCoverStable = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -25356,6 +25357,29 @@ function initChat() {
         }
         if (isChatThreadComposerKeyboardDom()) {
           /*
+           * iOS: при фокусе и на каждой букве vv даёт разный raw ih−vv — max() с baseline «прыгает» между двумя уровнями.
+           * Подрезаем взрыв vv относительно winLoss; затем не более ~26px за один sync (visualViewport часто бьёт пачкой).
+           */
+          if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
+            try {
+              var rawVvGap = Math.max(0, Math.round(ih - offsetTop - vvh));
+              var bSt = Number(window.__pokerChatInnerHBaseline) || 0;
+              var cSt = window.innerHeight || 0;
+              var winSt = bSt > 260 && cSt > 0 ? Math.max(0, Math.round(bSt - cSt)) : 0;
+              if (winSt > 70 && rawVvGap > winSt + 85) {
+                var capFromWin = Math.max(winSt + 32, winSt + Math.round((rawVvGap - winSt) * 0.2));
+                coverPxDock = Math.min(coverPxDock, capFromWin);
+              }
+              var prevSt = Number(window.__pokerChatDockCoverStable);
+              if (prevSt > 40) {
+                var stepMax = 26;
+                var dSt = coverPxDock - prevSt;
+                if (dSt > stepMax) coverPxDock = prevSt + stepMax;
+                else if (dSt < -stepMax) coverPxDock = prevSt - stepMax;
+              }
+            } catch (eDockStab) {}
+          }
+          /*
            * TG iOS / WKWebView: при наборе vv.height иногда кратковременно сильно занижен → ih - offsetTop - vvh
            * даёт сотни пикселей → fixed bottom огромный → полоса ввода в центре экрана над клавиатурой.
            * Потолок ~52% ih (с запасом под клавиатуру + accessory), не ниже 200px.
@@ -25365,6 +25389,11 @@ function initChat() {
             if (ihRefDock < 320) ihRefDock = ih;
             var coverDockCap = Math.min(520, Math.max(200, Math.round(ihRefDock * 0.52)));
             if (coverPxDock > coverDockCap) coverPxDock = coverDockCap;
+          }
+          if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
+            try {
+              window.__pokerChatDockCoverStable = coverPxDock;
+            } catch (eStSave) {}
           }
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
@@ -25424,6 +25453,7 @@ function initChat() {
         document.body.classList.add("chat-keyboard-open");
         try {
           window.__pokerChatDockSmoothedPx = null;
+          window.__pokerChatDockCoverStable = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {
