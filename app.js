@@ -20263,10 +20263,13 @@ function initChat() {
           messages = [];
         }
         var pending = window._pendingGeneralMessage;
-        if (pending && pending.id && !messages.some(function (m) { return m.id === pending.id; })) {
-          messages = messages.concat([pending]);
+        if (pending && pending.id) {
+          if (!messages.some(function (m) { return m.id === pending.id; })) {
+            messages = messages.concat([pending]);
+          } else {
+            window._pendingGeneralMessage = null;
+          }
         }
-        window._pendingGeneralMessage = null;
         messages = mergeOptimisticGeneralIntoMessages(messages);
         window._chatGeneralCache = {
           messages: messages,
@@ -23836,11 +23839,15 @@ function initChat() {
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
         var messages = data.messages || [];
         var pending = window._pendingPersonalMessage;
-        if (pending && pending.id && chatWithUserId === (window._pendingPersonalWith || "")) {
-          if (!messages.some(function (m) { return m.id === pending.id; })) messages = messages.concat([pending]);
+        var pendingPeer = window._pendingPersonalWith;
+        if (pending && pending.id && chatWithUserId && pendingPeer && peerChatIdsEqual(chatWithUserId, pendingPeer)) {
+          if (!messages.some(function (m) { return m.id === pending.id; })) {
+            messages = messages.concat([pending]);
+          } else {
+            window._pendingPersonalMessage = null;
+            window._pendingPersonalWith = null;
+          }
         }
-        window._pendingPersonalMessage = null;
-        window._pendingPersonalWith = null;
         messages = mergeOptimisticPersonalIntoMessages(messages);
         var isGrpThread =
           data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
