@@ -3333,6 +3333,9 @@ function runGazetteAndTasksInit() {
       }
     }
     var romanPlannerSwipeActive = null;
+    /** passive: false — иначе preventDefault на pointermove не гасит скролл во время горизонтального свайпа (iOS / часть WebView). */
+    var romanPlannerSwipeDocListenerOpts = { capture: true, passive: false };
+    var romanPlannerSwipeDocEndOpts = { capture: true, passive: true };
     function romanPlannerApplyOpenForClip(clip) {
       var track = clip.querySelector(".roman-task-planner__swipe-track");
       var front = clip.querySelector(".roman-task-planner__swipe-front");
@@ -3382,9 +3385,9 @@ function runGazetteAndTasksInit() {
     }
     function romanPlannerSwipeRemoveDocListeners() {
       if (!romanPlannerSwipeActive || !romanPlannerSwipeActive._docBound) return;
-      document.removeEventListener("pointermove", romanPlannerSwipeDocMove, true);
-      document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, true);
-      document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, true);
+      document.removeEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
+      document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+      document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
       if (romanPlannerSwipeActive.clip) {
         try {
           romanPlannerSwipeActive.clip.removeEventListener("lostpointercapture", romanPlannerSwipeLostCap);
@@ -3420,20 +3423,34 @@ function runGazetteAndTasksInit() {
       if (!st || !st.dragging || ev.pointerId !== st.pointerId) return;
       var dx = ev.clientX - st.startX;
       var dy = ev.clientY - st.startY;
+      var adx = Math.abs(dx);
+      var ady = Math.abs(dy);
       var isMouse = ev.pointerType === "mouse";
-      var horizSlack = isMouse ? 14 : 8;
-      var vertMin = isMouse ? 18 : 12;
-      if (Math.abs(dy) > Math.abs(dx) + horizSlack && Math.abs(dy) > vertMin) {
-        romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
-        st.dragging = false;
-        romanPlannerSwipeEnd(false);
-        return;
+      /** Пока палец не вышел из «мёртвой зоны», не трогаем скролл и не двигаем ряд — иначе preventDefault ломает вертикальный скролл списка. */
+      var slop = isMouse ? 5 : 12;
+      var tilt = isMouse ? 4 : 6;
+      if (!st.swipeAxisLocked) {
+        if (Math.max(adx, ady) < slop) return;
+        var vertWins = ady > adx + tilt;
+        var horizWins = adx > ady + tilt;
+        if (vertWins) {
+          romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
+          st.dragging = false;
+          romanPlannerSwipeEnd(false);
+          return;
+        }
+        if (horizWins) {
+          st.swipeAxisLocked = true;
+        } else {
+          romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
+          st.dragging = false;
+          romanPlannerSwipeEnd(false);
+          return;
+        }
       }
-      if (dx !== 0 || dy !== 0) {
-        try {
-          ev.preventDefault();
-        } catch (ePm) {}
-      }
+      try {
+        ev.preventDefault();
+      } catch (ePm) {}
       romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx + dx);
     }
     function romanPlannerSwipeDocEnd(ev) {
@@ -3453,9 +3470,11 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (ev.pointerType === "mouse" && ev.button !== 0) return;
       if (romanPlannerSwipeActive) return;
-      try {
-        ev.preventDefault();
-      } catch (ePd) {}
+      if (ev.pointerType !== "touch") {
+        try {
+          ev.preventDefault();
+        } catch (ePd) {}
+      }
       romanPlannerCloseAllSwipes(clip);
       var layout = romanPlannerApplyOpenForClip(clip);
       if (!layout) return;
@@ -3470,15 +3489,16 @@ function runGazetteAndTasksInit() {
         startY: ev.clientY,
         baseTx: romanPlannerSwipeGetTx(track),
         dragging: true,
+        swipeAxisLocked: false,
         _docBound: true,
       };
       try {
         clip.setPointerCapture(ev.pointerId);
       } catch (eCap) {}
       clip.addEventListener("lostpointercapture", romanPlannerSwipeLostCap);
-      document.addEventListener("pointermove", romanPlannerSwipeDocMove, true);
-      document.addEventListener("pointerup", romanPlannerSwipeDocEnd, true);
-      document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, true);
+      document.addEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
+      document.addEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+      document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
     }
     function initRomanPlannerSwipeRows() {
       if (!boardEl) return;
