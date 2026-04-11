@@ -24682,9 +24682,7 @@ function initChat() {
         }
       }
       /**
-       * Одна метрика «сколько пикселей снизу закрыто клавиатурой и системными панелями» (layout − visual).
-       * Не смешиваем с --chat-ios-accessory-inset: для композера в чате bottom = эта величина (см. applyChatComposerKeyboardPosition).
-       * iOS: если полоса под visualViewport мала, а окно явно сжато — добавляем «воображаемую» input accessory (~стрелки/Готово).
+       * Android / общий путь: нижняя перекрытая зона (клавиатура + системный UI под visualViewport).
        */
       function computeChatKeyboardObscuredBottomPx() {
         var ih = window.innerHeight || 0;
@@ -24726,17 +24724,36 @@ function initChat() {
         if (kbLikely && ih > 200 && obscured < 80) {
           obscured = Math.max(obscured, Math.min(400, Math.round(ih * 0.26)));
         }
-        if (isIosLikeForChatViewport() && kbLikely && vv && ih > 0) {
-          var belowVv = Math.max(0, Math.round(ih - ot - vvh));
-          var IMAG_IOS_ACCESSORY = 46;
-          if (belowVv < IMAG_IOS_ACCESSORY) {
-            obscured = Math.max(obscured, belowVv + IMAG_IOS_ACCESSORY);
+        return obscured;
+      }
+      /**
+       * iPhone/iPad WK: только layout vs visual (и TG viewport API) — без полов экрана и без монотонного «нарастания».
+       * Низ панели iOS (стрелки/Готово) + клавиатура уже в полосе (ih − offsetTop − vvh).
+       */
+      function computeChatKeyboardObscuredBottomPxIosComposer() {
+        var ih = window.innerHeight || 0;
+        var vv = window.visualViewport;
+        if (!ih || !vv) return 0;
+        var vvh = Number(vv.height) || 0;
+        var ot = Number(vv.offsetTop) || 0;
+        var obscured = Math.max(0, Math.round(ih - ot - vvh));
+        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tw) {
+          var tgvH = Number(tw.viewportHeight);
+          var tgvS = Number(tw.viewportStableHeight);
+          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 8) {
+            obscured = Math.max(obscured, Math.round(tgvS - tgvH));
           }
+        }
+        if (obscured < 24 && ot < 1 && vvh > 0 && vvh < ih * 0.84) {
+          obscured = Math.max(obscured, Math.round(ih - vvh));
         }
         return obscured;
       }
       /**
-       * Полоса ввода: только position:fixed; bottom = «закрыто снизу» − зазор. Класс chat-input-area--vv-dock отключает CSS-lift.
+       * Полоса ввода: position:fixed; bottom = закрыто_снизу + зазор над клавиатурой/панелью (не «минус», иначе залезание под панель).
+       * iOS: две позиции — в потоке или dock; dock = ровно lean + 5px над системной полосой.
        */
       function applyChatComposerKeyboardPosition() {
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -24744,7 +24761,8 @@ function initChat() {
           applyChatInputAreasVisualLift();
           return;
         }
-        var CHAT_GAP_PX = 8;
+        var CHAT_GAP_ABOVE_KEYBOARD_PX = 8;
+        var IOS_GAP_ABOVE_IOS_CHROME_PX = 5;
         var ih = window.innerHeight || 0;
         var iw = window.innerWidth || document.documentElement.clientWidth || 0;
         var vv = window.visualViewport;
@@ -24799,16 +24817,28 @@ function initChat() {
           applyChatInputAreasVisualLift();
           return;
         }
-        var rawObscured = computeChatKeyboardObscuredBottomPx();
-        try {
-          if (window.__pokerChatVvObscuredMaxPx == null || !isFinite(window.__pokerChatVvObscuredMaxPx)) {
-            window.__pokerChatVvObscuredMaxPx = 0;
-          }
-          window.__pokerChatVvObscuredMaxPx = Math.max(window.__pokerChatVvObscuredMaxPx, rawObscured);
-        } catch (eMx) {}
-        var capObscured = Math.min(520, Math.round(ih * 0.62));
-        var obscured = Math.min(window.__pokerChatVvObscuredMaxPx || rawObscured, capObscured);
-        var dockBottomPx = Math.max(CHAT_GAP_PX, Math.round(obscured - CHAT_GAP_PX));
+        var dockBottomPx;
+        if (isIosLikeForChatViewport()) {
+          var leanIos = computeChatKeyboardObscuredBottomPxIosComposer();
+          dockBottomPx = Math.max(
+            IOS_GAP_ABOVE_IOS_CHROME_PX,
+            Math.round(leanIos + IOS_GAP_ABOVE_IOS_CHROME_PX)
+          );
+        } else {
+          var rawObscured = computeChatKeyboardObscuredBottomPx();
+          try {
+            if (window.__pokerChatVvObscuredMaxPx == null || !isFinite(window.__pokerChatVvObscuredMaxPx)) {
+              window.__pokerChatVvObscuredMaxPx = 0;
+            }
+            window.__pokerChatVvObscuredMaxPx = Math.max(window.__pokerChatVvObscuredMaxPx, rawObscured);
+          } catch (eMx) {}
+          var capObscured = Math.min(520, Math.round(ih * 0.62));
+          var obscured = Math.min(window.__pokerChatVvObscuredMaxPx || rawObscured, capObscured);
+          dockBottomPx = Math.max(
+            CHAT_GAP_ABOVE_KEYBOARD_PX,
+            Math.round(obscured + CHAT_GAP_ABOVE_KEYBOARD_PX)
+          );
+        }
         if (gEl && !genVis) clearDockOne(gEl);
         if (pEl && !convVis) clearDockOne(pEl);
         if (genVis && gEl) dockOne(gEl, dockBottomPx);
