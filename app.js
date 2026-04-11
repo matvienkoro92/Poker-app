@@ -2926,11 +2926,10 @@ function runGazetteAndTasksInit() {
     var plannerClose = document.getElementById("romanTaskPlannerModalClose");
     var openBtn = document.getElementById("romanTaskPlannerOpenBtn");
     var boardEl = document.getElementById("romanTaskPlannerBoard");
-    var listActive = document.getElementById("romanTaskListActive");
-    var listDone = document.getElementById("romanTaskListDone");
+    var listAll = document.getElementById("romanTaskListAll");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
-    if (!plannerModal || !boardEl || !listActive || !listDone || !form || !input || !openBtn) return;
+    if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
     var PLANNER_COMPOSER_MIN_PX = 52;
     var PLANNER_COMPOSER_MAX_PX = 280;
     function resizePlannerComposer() {
@@ -2947,6 +2946,12 @@ function runGazetteAndTasksInit() {
     }
     var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
+    var PLANNER_SHARED_STORAGE_KEY = "poker_gazette_editor_planner_shared_v1";
+    var PLANNER_OLD_KEYS_TO_MIGRATE = [
+      LEGACY_PLANNER_STORAGE_KEY,
+      "poker_gazette_editor_planner_v1_roman1787443",
+      "poker_gazette_editor_planner_v1_roman1_matvienko",
+    ];
     function normUser() {
       var user =
         typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
@@ -2961,9 +2966,41 @@ function runGazetteAndTasksInit() {
       return !!u && !!PLANNER_ALLOWED_USERNAMES[u];
     }
     function plannerStorageKey() {
-      var u = normUser();
-      if (!u || !PLANNER_ALLOWED_USERNAMES[u]) return null;
-      return "poker_gazette_editor_planner_v1_" + u.replace(/[^a-z0-9_]/g, "_");
+      if (!isPlannerAllowedUser()) return null;
+      return PLANNER_SHARED_STORAGE_KEY;
+    }
+    function mergeRomanPlannerArraysFromKeys() {
+      var arrs = [];
+      for (var i = 0; i < PLANNER_OLD_KEYS_TO_MIGRATE.length; i++) {
+        try {
+          var r = localStorage.getItem(PLANNER_OLD_KEYS_TO_MIGRATE[i]);
+          if (!r) continue;
+          var a = JSON.parse(r);
+          if (Array.isArray(a) && a.length) arrs.push(a);
+        } catch (eK) {}
+      }
+      if (!arrs.length) return [];
+      var seen = {};
+      var out = [];
+      for (var j = 0; j < arrs.length; j++) {
+        var arr = arrs[j];
+        for (var k = 0; k < arr.length; k++) {
+          var t = arr[k];
+          if (!t || t.id == null) continue;
+          var id = String(t.id);
+          if (seen[id]) continue;
+          seen[id] = true;
+          out.push(t);
+        }
+      }
+      return out;
+    }
+    function cleanupRomanPlannerLegacyKeys() {
+      for (var ci = 0; ci < PLANNER_OLD_KEYS_TO_MIGRATE.length; ci++) {
+        try {
+          localStorage.removeItem(PLANNER_OLD_KEYS_TO_MIGRATE[ci]);
+        } catch (eRm) {}
+      }
     }
     function escHtml(s) {
       return String(s)
@@ -2977,14 +3014,17 @@ function runGazetteAndTasksInit() {
       if (!key) return [];
       try {
         var raw = localStorage.getItem(key);
-        if (!raw && normUser() === "roman1787443") {
-          var leg = localStorage.getItem(LEGACY_PLANNER_STORAGE_KEY);
-          if (leg) {
-            localStorage.setItem(key, leg);
-            raw = leg;
+        if (!raw) {
+          var merged = mergeRomanPlannerArraysFromKeys();
+          if (merged.length) {
+            try {
+              localStorage.setItem(key, JSON.stringify(merged));
+              cleanupRomanPlannerLegacyKeys();
+            } catch (eMig) {}
+            return merged;
           }
+          return [];
         }
-        if (!raw) return [];
         var arr = JSON.parse(raw);
         return Array.isArray(arr) ? arr : [];
       } catch (eLoad) {
@@ -3049,26 +3089,135 @@ function runGazetteAndTasksInit() {
             (atTopActive ? "Уже первая в списке" : "Поднять в начало — сейчас в работе") +
             '">Выполняется</button>'
           : "";
-      return (
-        '<li class="roman-task-planner__item' +
-        (columnDone ? " roman-task-planner__item--done" : "") +
-        '" data-roman-task-id="' +
-        escHtml(id) +
-        '">' +
-        '<div class="roman-task-planner__body">' +
-        '<div class="roman-task-planner__text">' +
-        escHtml(text) +
-        "</div>" +
-        '<div class="roman-task-planner__actions">' +
+      var actionsHtml =
         (columnDone ? uncompleteBtn : doingBtn + completeBtn) +
         '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
         escHtml(id) +
         '">Изменить</button>' +
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
         escHtml(id) +
-        '">Удалить</button>' +
-        "</div></div></li>"
+        '">Удалить</button>';
+      return (
+        '<li class="roman-task-planner__item' +
+        (columnDone ? " roman-task-planner__item--done" : "") +
+        '" data-roman-task-id="' +
+        escHtml(id) +
+        '">' +
+        '<div class="roman-task-planner__swipe-clip">' +
+        '<div class="roman-task-planner__swipe-track">' +
+        '<div class="roman-task-planner__swipe-front">' +
+        '<div class="roman-task-planner__body">' +
+        '<div class="roman-task-planner__text">' +
+        escHtml(text) +
+        '</div>' +
+        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Свайп влево</div>' +
+        "</div></div>" +
+        '<div class="roman-task-planner__swipe-actions">' +
+        actionsHtml +
+        "</div></div></div></li>"
       );
+    }
+    function romanPlannerCloseAllSwipes() {
+      if (!boardEl) return;
+      var tracks = boardEl.querySelectorAll(".roman-task-planner__swipe-track");
+      for (var i = 0; i < tracks.length; i++) {
+        tracks[i].style.transform = "";
+        tracks[i].classList.remove("roman-task-planner__swipe-track--open");
+      }
+    }
+    function initRomanPlannerSwipeRows() {
+      if (!boardEl) return;
+      var clips = boardEl.querySelectorAll(".roman-task-planner__swipe-clip");
+      for (var c = 0; c < clips.length; c++) {
+        var clip = clips[c];
+        if (clip.dataset.romanSwipeInit === "1") continue;
+        clip.dataset.romanSwipeInit = "1";
+        var track = clip.querySelector(".roman-task-planner__swipe-track");
+        var front = clip.querySelector(".roman-task-planner__swipe-front");
+        var actionsEl = clip.querySelector(".roman-task-planner__swipe-actions");
+        if (!track || !front) continue;
+        var openPx = 0;
+        function applyOpen() {
+          openPx = Math.max(0, Math.round(clip.offsetWidth * 0.28));
+          if (openPx < 72) openPx = 72;
+          var cw = clip.offsetWidth || 0;
+          if (cw > 0) {
+            track.style.width = cw + openPx + "px";
+            front.style.flex = "0 0 " + cw + "px";
+            if (actionsEl) actionsEl.style.flex = "0 0 " + openPx + "px";
+          }
+        }
+        applyOpen();
+        var startX = 0;
+        var startY = 0;
+        var baseTx = 0;
+        var dragging = false;
+        var pointerId = null;
+        function getTxFromTransform() {
+          var m = (track.style.transform || "").match(/translateX\((-?[0-9.]+)px\)/);
+          return m ? parseFloat(m[1], 10) || 0 : 0;
+        }
+        function setTx(px) {
+          var min = -openPx;
+          var max = 0;
+          var x = px;
+          if (x < min) x = min;
+          if (x > max) x = max;
+          track.style.transform = "translateX(" + x + "px)";
+        }
+        function onDown(ev) {
+          if (ev.pointerType === "mouse" && ev.button !== 0) return;
+          romanPlannerCloseAllSwipes();
+          applyOpen();
+          dragging = true;
+          pointerId = ev.pointerId;
+          try {
+            front.setPointerCapture(ev.pointerId);
+          } catch (eCap) {}
+          startX = ev.clientX;
+          startY = ev.clientY;
+          baseTx = getTxFromTransform();
+        }
+        function onMove(ev) {
+          if (!dragging || ev.pointerId !== pointerId) return;
+          var dx = ev.clientX - startX;
+          var dy = ev.clientY - startY;
+          if (Math.abs(dy) > Math.abs(dx) + 8 && Math.abs(dy) > 12) {
+            dragging = false;
+            try {
+              front.releasePointerCapture(pointerId);
+            } catch (eRel) {}
+            pointerId = null;
+            setTx(baseTx);
+            return;
+          }
+          setTx(baseTx + dx);
+        }
+        function snapOpenOrClosed() {
+          var cur = getTxFromTransform();
+          var threshold = -openPx * 0.35;
+          if (cur < threshold) {
+            track.classList.add("roman-task-planner__swipe-track--open");
+            setTx(-openPx);
+          } else {
+            track.classList.remove("roman-task-planner__swipe-track--open");
+            setTx(0);
+          }
+        }
+        function onUp(ev) {
+          if (!dragging || ev.pointerId !== pointerId) return;
+          dragging = false;
+          try {
+            front.releasePointerCapture(ev.pointerId);
+          } catch (eRel2) {}
+          pointerId = null;
+          snapOpenOrClosed();
+        }
+        front.addEventListener("pointerdown", onDown);
+        front.addEventListener("pointermove", onMove);
+        front.addEventListener("pointerup", onUp);
+        front.addEventListener("pointercancel", onUp);
+      }
     }
     function renderTasks() {
       var raw = loadTasks();
@@ -3078,16 +3227,33 @@ function runGazetteAndTasksInit() {
       var doneCol = sortTasksByCreatedAsc(raw.filter(function (x) {
         return !!x.done;
       }));
-      listActive.innerHTML = active.length
-        ? active.map(function (t, idx) {
-            return renderTaskRow(t, false, idx);
-          }).join("")
-        : '<li class="roman-task-planner__empty roman-task-planner__empty--column">Нет активных задач</li>';
-      listDone.innerHTML = doneCol.length
-        ? doneCol.map(function (t) {
-            return renderTaskRow(t, true);
-          }).join("")
-        : '<li class="roman-task-planner__empty roman-task-planner__empty--column">Нет выполненных</li>';
+      var parts = [];
+      parts.push(
+        '<li class="roman-task-planner__section-head" role="presentation">Активные</li>'
+      );
+      if (active.length) {
+        for (var ai = 0; ai < active.length; ai++) {
+          parts.push(renderTaskRow(active[ai], false, ai));
+        }
+      } else {
+        parts.push(
+          '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет активных задач</li>'
+        );
+      }
+      parts.push(
+        '<li class="roman-task-planner__section-head" role="presentation">Выполненные</li>'
+      );
+      if (doneCol.length) {
+        for (var di = 0; di < doneCol.length; di++) {
+          parts.push(renderTaskRow(doneCol[di], true));
+        }
+      } else {
+        parts.push(
+          '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет выполненных</li>'
+        );
+      }
+      listAll.innerHTML = parts.join("");
+      initRomanPlannerSwipeRows();
     }
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;

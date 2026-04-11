@@ -4693,6 +4693,108 @@ textarea.roman-task-planner__input {
   color: var(--muted, #94a3b8);
 }
 
+/* Планер: один список + свайп влево для кнопок */
+.roman-task-planner__board--stacked {
+  gap: 0;
+}
+@media (min-width: 360px) {
+  .roman-task-planner__board.roman-task-planner__board--stacked {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.roman-task-planner__list--stacked,
+.roman-task-planner-modal .roman-task-planner__list--stacked {
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-sizing: border-box;
+  max-height: min(48vh, 360px);
+}
+[data-theme="light"] .roman-task-planner__list--stacked,
+[data-theme="light"] .roman-task-planner-modal .roman-task-planner__list--stacked {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(44, 24, 16, 0.08);
+}
+.roman-task-planner__section-head {
+  list-style: none;
+  margin: 0;
+  padding: 10px 4px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: var(--muted, #94a3b8);
+}
+.roman-task-planner__section-head:first-child {
+  padding-top: 4px;
+}
+[data-theme="light"] .roman-task-planner__section-head {
+  color: #5c4033;
+}
+.roman-task-planner__empty--stacked {
+  list-style: none;
+  padding: 8px 6px 14px;
+  text-align: center;
+  border: none;
+}
+.roman-task-planner-modal .roman-task-planner__empty--stacked {
+  color: var(--muted, #94a3b8);
+}
+.roman-task-planner__swipe-clip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.roman-task-planner__swipe-track {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  will-change: transform;
+}
+.roman-task-planner__swipe-front {
+  box-sizing: border-box;
+  min-height: 44px;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.roman-task-planner__swipe-hint {
+  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.45;
+  letter-spacing: 0.02em;
+}
+.roman-task-planner__swipe-actions {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 8px 6px;
+  align-content: flex-start;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.22);
+  border-left: 1px solid rgba(148, 163, 184, 0.15);
+}
+[data-theme="light"] .roman-task-planner__swipe-actions {
+  background: rgba(44, 24, 16, 0.06);
+  border-left-color: rgba(44, 24, 16, 0.1);
+}
+.roman-task-planner-modal .roman-task-planner__swipe-actions .roman-task-planner__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+.roman-task-planner .roman-task-planner__swipe-actions .roman-task-planner__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
 /* Кнопка подписки в блоке новостей */
 .gazette-modal__subscribe-in-news {
