@@ -2785,8 +2785,8 @@ function runGazetteAndTasksInit() {
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
     if (!plannerModal || !boardEl || !listActive || !listDone || !form || !input || !openBtn) return;
-    var PLANNER_COMPOSER_MIN_PX = 44;
-    var PLANNER_COMPOSER_MAX_PX = 220;
+    var PLANNER_COMPOSER_MIN_PX = 52;
+    var PLANNER_COMPOSER_MAX_PX = 280;
     function resizePlannerComposer() {
       if (!input || input.tagName !== "TEXTAREA") return;
       input.style.overflowY = "hidden";
