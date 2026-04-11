@@ -870,6 +870,71 @@ function pokerChatPushUnsubscribeBrowser() {
     .catch(function () {});
 }
 
+var PROFILE_CHAT_PUSH_UI_CACHE_KEY = "poker_profile_chat_push_ui_v1";
+function pokerGetChatMemberIdForPushCache() {
+  try {
+    var _auth = window.__pokerTelegramAuth;
+    if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
+      var u = _auth.user;
+      var raw = String(u.id);
+      if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) return raw;
+      if (u.is_vk || u.vk) return "vk_" + raw;
+      return "tg_" + raw;
+    }
+  } catch (eA) {}
+  try {
+    var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user && wtg.initDataUnsafe.user.id != null) {
+      return "tg_" + String(wtg.initDataUnsafe.user.id);
+    }
+  } catch (eT) {}
+  if (typeof window.pokerResolveMyChatMemberId === "function") {
+    try {
+      var m = window.pokerResolveMyChatMemberId();
+      if (m) return String(m);
+    } catch (eR) {}
+  }
+  return "";
+}
+function pokerProfileChatPushReadUiCache() {
+  try {
+    var raw = localStorage.getItem(PROFILE_CHAT_PUSH_UI_CACHE_KEY);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    if (!o || typeof o !== "object") return null;
+    return o;
+  } catch (e) {
+    return null;
+  }
+}
+function pokerProfileChatPushWriteUiCache(memberId, notificationsEnabled, hasSubscription) {
+  try {
+    localStorage.setItem(
+      PROFILE_CHAT_PUSH_UI_CACHE_KEY,
+      JSON.stringify({
+        memberId: String(memberId || ""),
+        notificationsEnabled: !!notificationsEnabled,
+        hasSubscription: !!hasSubscription,
+        t: Date.now(),
+      })
+    );
+  } catch (e) {}
+}
+function pokerProfileChatPushClearUiCache() {
+  try {
+    localStorage.removeItem(PROFILE_CHAT_PUSH_UI_CACHE_KEY);
+  } catch (e) {}
+}
+function pokerProfileChatPushApplyCachedToggle(toggle) {
+  if (!toggle) return;
+  var me = pokerGetChatMemberIdForPushCache();
+  if (!me) return;
+  var c = pokerProfileChatPushReadUiCache();
+  if (!c || String(c.memberId) !== String(me)) return;
+  if (typeof c.t === "number" && Date.now() - c.t > 86400000 * 30) return;
+  toggle.checked = !!c.notificationsEnabled;
+}
+
 var profileChatPushBound = false;
 /** Пока идёт вкл/выкл пуша — не вызывать refreshState (иначе старый status сбрасывает галочку). */
 var profileChatPushApplying = false;
@@ -945,6 +1010,9 @@ function initProfileChatPush() {
         }
         toggle.disabled = false;
         toggle.checked = !!d.notificationsEnabled;
+        if (d.memberId) {
+          pokerProfileChatPushWriteUiCache(d.memberId, d.notificationsEnabled, d.hasSubscription);
+        }
         if (typeof Notification !== "undefined") {
           if (Notification.permission === "denied") {
             setHint("Уведомления заблокированы в настройках браузера.");
@@ -989,6 +1057,7 @@ function initProfileChatPush() {
           profileChatPushApplying = false;
           toggle.disabled = false;
           if (!r || !r.ok) toggle.checked = true;
+          else pokerProfileChatPushClearUiCache();
           refreshState();
         });
         return;
@@ -1062,6 +1131,7 @@ function initProfileChatPush() {
       });
     });
   }
+  pokerProfileChatPushApplyCachedToggle(toggle);
   refreshState();
 }
 
@@ -11444,6 +11514,9 @@ function pokerClearSessionsAndReloadForLogin() {
   try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
   try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
   try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
+  try {
+    pokerProfileChatPushClearUiCache();
+  } catch (ePushCache) {}
   try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
   try {
     delete window.__pokerChatDisplayName;
