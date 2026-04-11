@@ -14421,34 +14421,32 @@ function initRaffles() {
     return "Розыгрыш " + totalTickets + " призов: " + label + ". Итого сумма розыгрыша " + sumText + ".";
   }
 
-  function getMyUserId() {
-    if (myRaffleUserId) return myRaffleUserId;
+  /** Все варианты member id (tg/vk/guest) без одного «первого попавшегося» кэша — чтобы кнопка «Отменить участие» не терялась при гонке initData/PWA. */
+  function collectRaffleIdentityIds() {
+    var ids = [];
+    function add(s) {
+      if (s == null || s === "") return;
+      s = String(s).trim();
+      if (!s || ids.indexOf(s) !== -1) return;
+      ids.push(s);
+    }
     try {
       var uRes = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
-      if (uRes && uRes.id != null) {
-        myRaffleUserId = "tg_" + uRes.id;
-        return myRaffleUserId;
-      }
-    } catch (eUid) {}
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-      myRaffleUserId = "tg_" + tg.initDataUnsafe.user.id;
-      return myRaffleUserId;
+      if (uRes && uRes.id != null) add("tg_" + uRes.id);
+    } catch (e0) {}
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id != null) {
+      add("tg_" + tg.initDataUnsafe.user.id);
     }
     try {
       var recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-      if (recTg && recTg.user && recTg.user.id != null) {
-        myRaffleUserId = "tg_" + recTg.user.id;
-        return myRaffleUserId;
-      }
+      if (recTg && recTg.user && recTg.user.id != null) add("tg_" + recTg.user.id);
     } catch (eT) {}
     try {
       var recVk = typeof pokerReadPwaVkSessionRecord === "function" ? pokerReadPwaVkSessionRecord() : null;
-      if (recVk && recVk.user && recVk.user.id != null) {
-        myRaffleUserId = "vk_" + recVk.user.id;
-        return myRaffleUserId;
-      }
+      if (recVk && recVk.user && recVk.user.id != null) add("vk_" + recVk.user.id);
     } catch (eV) {}
-    return null;
+    if (myRaffleUserId) add(myRaffleUserId);
+    return ids;
   }
 
   function rafflesViewerApiReady() {
@@ -14524,12 +14522,13 @@ function initRaffles() {
       prizesHtml += "<div class=\"raffle-prize\">Группа " + (i + 1) + " (" + cntStr + " побед.): " + escapeHtml(raffleDisplayPrizeText(g.prize || "—")) + "</div>";
     });
     rafflePrizes.innerHTML = prizesHtml || "<p class=\"raffle-no-prizes\">Призы не указаны</p>";
-    var me = getMyUserId();
+    var raffleIds = collectRaffleIdentityIds();
     var iAmIn =
-      !!me &&
+      raffleIds.length > 0 &&
       raffle.participants &&
       raffle.participants.some(function (p) {
-        return String(p.userId || "") === String(me);
+        var uid = String(p.userId != null ? p.userId : "").trim();
+        return uid && raffleIds.indexOf(uid) !== -1;
       });
     var guestRaffleBlock = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
     var showRaffleGuestGate = !!(guestRaffleBlock && isActive && !iAmIn);
