@@ -298,8 +298,10 @@ function pokerReadPwaVkSessionToken() {
   }
 }
 
-function pokerSavePwaTgSession(token, userObj) {
-  var payload = JSON.stringify({ token: token, user: userObj });
+function pokerSavePwaTgSession(token, userObj, sessionExtra) {
+  var rec = { token: token, user: userObj };
+  if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
+  var payload = JSON.stringify(rec);
   var ok = false;
   try {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
@@ -3005,6 +3007,12 @@ function runGazetteAndTasksInit() {
       return u.replace(/^@+/, "").trim().toLowerCase();
     }
     function isPlannerAllowedUser() {
+      try {
+        var _ap = window.__pokerTelegramAuth;
+        if (_ap && _ap.gazettePlannerAccess === true) return true;
+        var _recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (_recTg && _recTg.gazettePlannerAccess === true) return true;
+      } catch (ePlAllow) {}
       var user = getPlannerTelegramUser();
       if (!user) return false;
       var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
@@ -3324,134 +3332,170 @@ function runGazetteAndTasksInit() {
         tr.classList.remove("roman-task-planner__swipe-track--open");
       }
     }
+    var romanPlannerSwipeActive = null;
+    function romanPlannerApplyOpenForClip(clip) {
+      var track = clip.querySelector(".roman-task-planner__swipe-track");
+      var front = clip.querySelector(".roman-task-planner__swipe-front");
+      var actionsEl = clip.querySelector(".roman-task-planner__swipe-actions");
+      if (!track || !front) return null;
+      var cw = clip.offsetWidth || 0;
+      var openPx = Math.max(0, Math.round(cw * 0.28));
+      if (openPx < 72) openPx = 72;
+      if (actionsEl && cw > 0) {
+        actionsEl.style.flex = "0 0 auto";
+        actionsEl.style.width = "max-content";
+        var aw = Math.ceil(actionsEl.getBoundingClientRect().width);
+        if (aw > openPx) openPx = aw;
+      }
+      if (cw > 0) {
+        track.style.width = cw + openPx + "px";
+        front.style.flex = "0 0 " + cw + "px";
+        if (actionsEl) {
+          actionsEl.style.width = "";
+          actionsEl.style.flex = "0 0 " + openPx + "px";
+        }
+      }
+      return { track: track, openPx: openPx };
+    }
+    function romanPlannerSwipeGetTx(track) {
+      var m = (track.style.transform || "").match(/translateX\((-?[0-9.]+)px\)/);
+      return m ? parseFloat(m[1], 10) || 0 : 0;
+    }
+    function romanPlannerSwipeSetTx(track, openPx, px) {
+      var min = -openPx;
+      var max = 0;
+      var x = px;
+      if (x < min) x = min;
+      if (x > max) x = max;
+      track.style.transform = "translateX(" + x + "px)";
+    }
+    function romanPlannerSwipeSnap(track, openPx) {
+      var cur = romanPlannerSwipeGetTx(track);
+      var threshold = -openPx * 0.35;
+      if (cur < threshold) {
+        track.classList.add("roman-task-planner__swipe-track--open");
+        romanPlannerSwipeSetTx(track, openPx, -openPx);
+      } else {
+        track.classList.remove("roman-task-planner__swipe-track--open");
+        romanPlannerSwipeSetTx(track, openPx, 0);
+      }
+    }
+    function romanPlannerSwipeRemoveDocListeners() {
+      if (!romanPlannerSwipeActive || !romanPlannerSwipeActive._docBound) return;
+      document.removeEventListener("pointermove", romanPlannerSwipeDocMove, true);
+      document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, true);
+      document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, true);
+      if (romanPlannerSwipeActive.clip) {
+        try {
+          romanPlannerSwipeActive.clip.removeEventListener("lostpointercapture", romanPlannerSwipeLostCap);
+        } catch (eRm) {}
+      }
+      romanPlannerSwipeActive._docBound = false;
+    }
+    function romanPlannerSwipeEnd(doSnap) {
+      var st = romanPlannerSwipeActive;
+      if (!st) return;
+      romanPlannerSwipeRemoveDocListeners();
+      var pid = st.pointerId;
+      var clip = st.clip;
+      var track = st.track;
+      var openPx = st.openPx;
+      romanPlannerSwipeActive = null;
+      if (clip != null && pid != null) {
+        try {
+          clip.releasePointerCapture(pid);
+        } catch (eRel) {}
+      }
+      if (doSnap && track) romanPlannerSwipeSnap(track, openPx);
+    }
+    function romanPlannerSwipeLostCap(evLost) {
+      var st = romanPlannerSwipeActive;
+      if (!st || !st.dragging) return;
+      if (st.pointerId != null && evLost.pointerId !== st.pointerId) return;
+      st.dragging = false;
+      romanPlannerSwipeEnd(true);
+    }
+    function romanPlannerSwipeDocMove(ev) {
+      var st = romanPlannerSwipeActive;
+      if (!st || !st.dragging || ev.pointerId !== st.pointerId) return;
+      var dx = ev.clientX - st.startX;
+      var dy = ev.clientY - st.startY;
+      var isMouse = ev.pointerType === "mouse";
+      var horizSlack = isMouse ? 14 : 8;
+      var vertMin = isMouse ? 18 : 12;
+      if (Math.abs(dy) > Math.abs(dx) + horizSlack && Math.abs(dy) > vertMin) {
+        romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
+        st.dragging = false;
+        romanPlannerSwipeEnd(false);
+        return;
+      }
+      if (dx !== 0 || dy !== 0) {
+        try {
+          ev.preventDefault();
+        } catch (ePm) {}
+      }
+      romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx + dx);
+    }
+    function romanPlannerSwipeDocEnd(ev) {
+      var st = romanPlannerSwipeActive;
+      if (!st || ev.pointerId !== st.pointerId) return;
+      if (!st.dragging) return;
+      st.dragging = false;
+      romanPlannerSwipeEnd(true);
+    }
+    function romanPlannerListPointerDown(ev) {
+      if (!listAll || !boardEl) return;
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var clip = t.closest(".roman-task-planner__swipe-clip");
+      if (!clip || !listAll.contains(clip)) return;
+      if (t.closest(".roman-task-planner__btn")) return;
+      if (t.closest(".roman-task-planner__edit-ta")) return;
+      if (ev.pointerType === "mouse" && ev.button !== 0) return;
+      if (romanPlannerSwipeActive) return;
+      try {
+        ev.preventDefault();
+      } catch (ePd) {}
+      romanPlannerCloseAllSwipes(clip);
+      var layout = romanPlannerApplyOpenForClip(clip);
+      if (!layout) return;
+      var track = layout.track;
+      var openPx = layout.openPx;
+      romanPlannerSwipeActive = {
+        clip: clip,
+        track: track,
+        openPx: openPx,
+        pointerId: ev.pointerId,
+        startX: ev.clientX,
+        startY: ev.clientY,
+        baseTx: romanPlannerSwipeGetTx(track),
+        dragging: true,
+        _docBound: true,
+      };
+      try {
+        clip.setPointerCapture(ev.pointerId);
+      } catch (eCap) {}
+      clip.addEventListener("lostpointercapture", romanPlannerSwipeLostCap);
+      document.addEventListener("pointermove", romanPlannerSwipeDocMove, true);
+      document.addEventListener("pointerup", romanPlannerSwipeDocEnd, true);
+      document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, true);
+    }
     function initRomanPlannerSwipeRows() {
       if (!boardEl) return;
+      if (listAll && listAll.dataset.romanPlannerSwipeDelegation !== "1") {
+        listAll.dataset.romanPlannerSwipeDelegation = "1";
+        listAll.addEventListener("pointerdown", romanPlannerListPointerDown);
+        listAll.addEventListener(
+          "dragstart",
+          function (eDg) {
+            if (eDg.target && eDg.target.closest && eDg.target.closest(".roman-task-planner__swipe-clip")) eDg.preventDefault();
+          },
+          true
+        );
+      }
       var clips = boardEl.querySelectorAll(".roman-task-planner__swipe-clip");
       for (var c = 0; c < clips.length; c++) {
-        var clip = clips[c];
-        if (clip.dataset.romanSwipeInit === "1") continue;
-        clip.dataset.romanSwipeInit = "1";
-        var track = clip.querySelector(".roman-task-planner__swipe-track");
-        var front = clip.querySelector(".roman-task-planner__swipe-front");
-        var actionsEl = clip.querySelector(".roman-task-planner__swipe-actions");
-        if (!track || !front) continue;
-        var openPx = 0;
-        function applyOpen() {
-          var cw = clip.offsetWidth || 0;
-          openPx = Math.max(0, Math.round(cw * 0.28));
-          if (openPx < 72) openPx = 72;
-          if (actionsEl && cw > 0) {
-            actionsEl.style.flex = "0 0 auto";
-            actionsEl.style.width = "max-content";
-            var aw = Math.ceil(actionsEl.getBoundingClientRect().width);
-            if (aw > openPx) openPx = aw;
-          }
-          if (cw > 0) {
-            track.style.width = cw + openPx + "px";
-            front.style.flex = "0 0 " + cw + "px";
-            if (actionsEl) {
-              actionsEl.style.width = "";
-              actionsEl.style.flex = "0 0 " + openPx + "px";
-            }
-          }
-        }
-        applyOpen();
-        var startX = 0;
-        var startY = 0;
-        var baseTx = 0;
-        var dragging = false;
-        var pointerId = null;
-        function getTxFromTransform() {
-          var m = (track.style.transform || "").match(/translateX\((-?[0-9.]+)px\)/);
-          return m ? parseFloat(m[1], 10) || 0 : 0;
-        }
-        function setTx(px) {
-          var min = -openPx;
-          var max = 0;
-          var x = px;
-          if (x < min) x = min;
-          if (x > max) x = max;
-          track.style.transform = "translateX(" + x + "px)";
-        }
-        function onDown(ev) {
-          if (ev.pointerType === "mouse" && ev.button !== 0) return;
-          if (ev.target && ev.target.closest) {
-            if (ev.target.closest(".roman-task-planner__btn")) return;
-            if (ev.target.closest(".roman-task-planner__edit-ta")) return;
-          }
-          try {
-            ev.preventDefault();
-          } catch (ePd) {}
-          romanPlannerCloseAllSwipes(clip);
-          applyOpen();
-          dragging = true;
-          pointerId = ev.pointerId;
-          try {
-            clip.setPointerCapture(ev.pointerId);
-          } catch (eCap) {}
-          startX = ev.clientX;
-          startY = ev.clientY;
-          baseTx = getTxFromTransform();
-        }
-        function onMove(ev) {
-          if (!dragging || ev.pointerId !== pointerId) return;
-          var dx = ev.clientX - startX;
-          var dy = ev.clientY - startY;
-          var isMouse = ev.pointerType === "mouse";
-          var horizSlack = isMouse ? 14 : 8;
-          var vertMin = isMouse ? 18 : 12;
-          if (Math.abs(dy) > Math.abs(dx) + horizSlack && Math.abs(dy) > vertMin) {
-            dragging = false;
-            try {
-              clip.releasePointerCapture(pointerId);
-            } catch (eRel) {}
-            pointerId = null;
-            setTx(baseTx);
-            return;
-          }
-          if (dx !== 0 || dy !== 0) {
-            try {
-              ev.preventDefault();
-            } catch (ePm) {}
-          }
-          setTx(baseTx + dx);
-        }
-        function snapOpenOrClosed() {
-          var cur = getTxFromTransform();
-          var threshold = -openPx * 0.35;
-          if (cur < threshold) {
-            track.classList.add("roman-task-planner__swipe-track--open");
-            setTx(-openPx);
-          } else {
-            track.classList.remove("roman-task-planner__swipe-track--open");
-            setTx(0);
-          }
-        }
-        function onUp(ev) {
-          if (!dragging || ev.pointerId !== pointerId) return;
-          dragging = false;
-          var pid = pointerId;
-          pointerId = null;
-          try {
-            clip.releasePointerCapture(pid);
-          } catch (eRel2) {}
-          snapOpenOrClosed();
-        }
-        function onLostCapture(evLost) {
-          if (!dragging) return;
-          if (pointerId != null && evLost.pointerId !== pointerId) return;
-          dragging = false;
-          pointerId = null;
-          snapOpenOrClosed();
-        }
-        clip.addEventListener("pointerdown", onDown);
-        clip.addEventListener("pointermove", onMove);
-        clip.addEventListener("pointerup", onUp);
-        clip.addEventListener("pointercancel", onUp);
-        clip.addEventListener("lostpointercapture", onLostCapture);
-        clip.addEventListener("dragstart", function (eDg) {
-          eDg.preventDefault();
-        });
+        romanPlannerApplyOpenForClip(clips[c]);
       }
     }
     function renderTasks() {
@@ -7290,9 +7334,18 @@ function getPokerResolvedTelegramUser() {
         .then(function (data) {
           if (data && data.ok && data.user && data.pwaSession) {
             var u = normalizeVerifiedUser(data.user, null);
-            if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
+            if (
+              !pokerSavePwaTgSession(
+                data.pwaSession,
+                data.user,
+                data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+              )
+            )
+              pwaSessionPersistenceWarning();
             pokerSavePwaGuestMode(false);
-            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            var _authPwaCode = { status: "verified", user: u, error: null };
+            if (data.gazettePlannerAccess === true) _authPwaCode.gazettePlannerAccess = true;
+            window.__pokerTelegramAuth = _authPwaCode;
             updateHeaderGreeting();
             showAuthorized(u);
             loadHeaderAvatar();
@@ -7606,9 +7659,18 @@ function getPokerResolvedTelegramUser() {
         var data = pack.data || {};
         if (res.ok && data.ok && data.user && data.pwaSession) {
           var u = normalizeVerifiedUser(data.user, null);
-          if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
+          if (
+            !pokerSavePwaTgSession(
+              data.pwaSession,
+              data.user,
+              data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+            )
+          )
+            pwaSessionPersistenceWarning();
           pokerSavePwaGuestMode(false);
-          window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+          var _authTgWidget = { status: "verified", user: u, error: null };
+          if (data.gazettePlannerAccess === true) _authTgWidget.gazettePlannerAccess = true;
+          window.__pokerTelegramAuth = _authTgWidget;
           updateHeaderGreeting();
           showAuthorized(u);
           loadHeaderAvatar();
@@ -7837,7 +7899,9 @@ function getPokerResolvedTelegramUser() {
       var so = pokerReadPwaTgSessionRecord();
       if (so && so.user && so.user.id != null && so.token) {
         var uP = normalizeVerifiedUser(so.user, null);
-        window.__pokerTelegramAuth = { status: "verified", user: uP, error: null };
+        var _authRestore = { status: "verified", user: uP, error: null };
+        if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
+        window.__pokerTelegramAuth = _authRestore;
         updateHeaderGreeting();
         showAuthorized(uP);
         loadHeaderAvatar();
@@ -7980,9 +8044,18 @@ function getPokerResolvedTelegramUser() {
           var data = pack.data || {};
           if (res.ok && data.ok && data.user) {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
-            window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+            var _authMini = { status: "verified", user: u, error: null };
+            if (data.gazettePlannerAccess === true) _authMini.gazettePlannerAccess = true;
+            window.__pokerTelegramAuth = _authMini;
             if (data.pwaSession && data.user) {
-              if (!pokerSavePwaTgSession(data.pwaSession, data.user)) pwaSessionPersistenceWarning();
+              if (
+                !pokerSavePwaTgSession(
+                  data.pwaSession,
+                  data.user,
+                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+                )
+              )
+                pwaSessionPersistenceWarning();
               pokerSavePwaGuestMode(false);
             }
             updateHeaderGreeting();

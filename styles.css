@@ -4396,6 +4396,15 @@ html.vpn-proxy-modal-open {
 [data-theme="light"] .roman-task-planner-modal .roman-task-planner__item:last-child {
   border-bottom-color: rgba(44, 24, 16, 0.1);
 }
+/* PWA/десктоп: активные карточки обязаны быть выше выполненных при пересечении hit-test (свайп не должен цеплять нижнюю строку). */
+.roman-task-planner-modal .roman-task-planner__item:not(.roman-task-planner__item--done) {
+  position: relative;
+  z-index: 4;
+}
+.roman-task-planner-modal .roman-task-planner__item--done {
+  position: relative;
+  z-index: 1;
+}
 .roman-task-planner-modal .roman-task-planner__text {
   line-height: 1.35;
   font-size: 14px;
