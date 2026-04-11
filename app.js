@@ -25381,9 +25381,8 @@ function initChat() {
         }
         if (isChatThreadComposerKeyboardDom()) {
           /*
-           * iOS: взрыв vv подрезаем относительно winLoss. Ограничение шага только на резкое уменьшение cover:
-           * при открытии клавиатуры cover растёт — порог +26px за кадр давал «ползущий» подъём строки 1–2 с;
-           * вверх применяем целевое значение сразу (как при стабильном наборе).
+           * iOS: взрыв vv подрезаем относительно winLoss. Пошаговое уменьшение cover убрано — давало 2 видимых шага
+           * «выше нормы → вниз → вниз». Верхняя граница от падения innerHeight: первые кадры vv часто раздувают cover.
            */
           if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
             try {
@@ -25391,15 +25390,17 @@ function initChat() {
               var bSt = Number(window.__pokerChatInnerHBaseline) || 0;
               var cSt = window.innerHeight || 0;
               var winSt = bSt > 260 && cSt > 0 ? Math.max(0, Math.round(bSt - cSt)) : 0;
-              if (winSt > 70 && rawVvGap > winSt + 85) {
+              if (winSt > 70 && rawVvGap > winSt + 55) {
                 var capFromWin = Math.max(winSt + 32, winSt + Math.round((rawVvGap - winSt) * 0.2));
                 coverPxDock = Math.min(coverPxDock, capFromWin);
               }
-              var prevSt = Number(window.__pokerChatDockCoverStable);
-              if (prevSt > 40) {
-                var stepMaxDown = 28;
-                var dSt = coverPxDock - prevSt;
-                if (dSt < -stepMaxDown) coverPxDock = prevSt - stepMaxDown;
+              if (winSt > 72) {
+                var gapKb = Math.round(getChatComposerKeyboardGapPx());
+                var slackTop =
+                  typeof isTelegramWebApp === "function" && isTelegramWebApp()
+                    ? Math.max(52, gapKb + 34)
+                    : Math.max(44, gapKb + 26);
+                if (coverPxDock > winSt + slackTop) coverPxDock = winSt + slackTop;
               }
             } catch (eDockStab) {}
           }
@@ -25490,30 +25491,23 @@ function initChat() {
           if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
         }
         var isIosChatKb = isIosLikeForChatViewport();
+        syncPwaChatVisualViewportInset();
+        scrollMessagesToBottom();
         requestAnimationFrame(function () {
           syncPwaChatVisualViewportInset();
           scrollMessagesToBottom();
-          requestAnimationFrame(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          });
         });
         if (isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
-          }, 120);
+          }, 200);
         } else {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
-          }, 80);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 280);
+          }, 100);
         }
-        syncPwaChatVisualViewportInset();
         /*
          * window.resize на iOS (в т.ч. PWA) часто бьёт раньше/между кадрами visualViewport — overlap на мгновение 0,
          * при iosBoost=0 для standalone inset обнуляется и поле остаётся под клавиатурой. Resize оставляем только под Android.
@@ -25561,7 +25555,7 @@ function initChat() {
                 try {
                   syncPwaChatVisualViewportInset();
                 } catch (eVvIos) {}
-              }, 130);
+              }, 220);
             };
             window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
           } else {
