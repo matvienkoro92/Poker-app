@@ -13917,6 +13917,10 @@ document.getElementById("plastererPlayAgainBtn")?.addEventListener("click", func
 
 // Розыгрыши: список, создание (админ), участие, жеребьёвка
 function initRaffles() {
+  if (initRaffles.__listenersBound === true) {
+    if (typeof initRaffles.__reload === "function") initRaffles.__reload();
+    return;
+  }
   var base = getApiBase();
   var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -15847,6 +15851,10 @@ function initRaffles() {
     });
   }
 
+  initRaffles.__listenersBound = true;
+  initRaffles.__reload = function () {
+    loadRaffles();
+  };
   loadRaffles();
 }
 
