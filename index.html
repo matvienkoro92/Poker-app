@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.480">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.481">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -5469,15 +5469,15 @@
             </div>
             <ul class="roman-task-planner__list" id="romanTaskList"></ul>
             <form class="roman-task-planner__add" id="romanTaskAddForm" novalidate>
-              <input
-                type="text"
+              <textarea
                 class="roman-task-planner__input"
                 id="romanTaskInput"
                 maxlength="500"
+                rows="1"
                 placeholder="Новая задача…"
                 autocomplete="off"
                 aria-label="Текст новой задачи"
-              />
+              ></textarea>
               <button type="submit" class="roman-task-planner__btn roman-task-planner__btn--primary">Добавить</button>
             </form>
           </section>
@@ -6032,7 +6032,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=595"></script>
+    <script defer src="./app.js?v=596"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

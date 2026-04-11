@@ -2783,6 +2783,20 @@ function runGazetteAndTasksInit() {
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
     if (!plannerModal || !listEl || !form || !input || !openBtn) return;
+    var PLANNER_COMPOSER_MIN_PX = 44;
+    var PLANNER_COMPOSER_MAX_PX = 220;
+    function resizePlannerComposer() {
+      if (!input || input.tagName !== "TEXTAREA") return;
+      input.style.overflowY = "hidden";
+      input.style.height = "auto";
+      var h = input.scrollHeight;
+      if (h > PLANNER_COMPOSER_MAX_PX) {
+        input.style.height = PLANNER_COMPOSER_MAX_PX + "px";
+        input.style.overflowY = "auto";
+      } else {
+        input.style.height = Math.max(h, PLANNER_COMPOSER_MIN_PX) + "px";
+      }
+    }
     var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
     function normUser() {
@@ -2898,6 +2912,14 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
       renderTasks();
       plannerModal.setAttribute("aria-hidden", "false");
+      try {
+        var raf = window.requestAnimationFrame || function (fn) {
+          setTimeout(fn, 0);
+        };
+        raf(function () {
+          resizePlannerComposer();
+        });
+      } catch (eRz) {}
     }
     function closePlannerModal() {
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
@@ -3004,6 +3026,9 @@ function runGazetteAndTasksInit() {
       syncVisibility();
     });
     window.__pokerSyncRomanTaskPlanner = syncVisibility;
+    input.addEventListener("input", function () {
+      resizePlannerComposer();
+    });
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       if (!isPlannerAllowedUser()) return;
@@ -3019,6 +3044,7 @@ function runGazetteAndTasksInit() {
       saveTasks(tasks);
       input.value = "";
       renderTasks();
+      resizePlannerComposer();
     });
     listEl.addEventListener("click", function (ev) {
       if (!isPlannerAllowedUser()) return;
@@ -3104,6 +3130,7 @@ function runGazetteAndTasksInit() {
       } catch (eFoc) {}
     });
     syncVisibility();
+    resizePlannerComposer();
   })();
 
   (function initPartnershipModal() {

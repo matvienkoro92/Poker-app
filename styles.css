@@ -4432,10 +4432,19 @@ html.vpn-proxy-modal-open {
   box-sizing: border-box;
   padding: 10px 12px;
   font-size: 14px;
+  line-height: 1.4;
   border: 1px solid rgba(44, 24, 16, 0.35);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.85);
   color: #2c1810;
+  min-height: 44px;
+  max-height: 220px;
+  resize: none;
+  overflow-y: hidden;
+  font-family: inherit;
+}
+textarea.roman-task-planner__input {
+  display: block;
 }
 .roman-task-planner__edit-ta {
   width: 100%;
