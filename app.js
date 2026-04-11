@@ -996,48 +996,69 @@ function initProfileChatPush() {
       profileChatPushRefreshGen++;
       profileChatPushApplying = true;
       toggle.disabled = true;
-      pokerChatPushSetServerEnabled(true).then(function (r) {
-        if (!r || !r.ok) {
-          toggle.checked = false;
-          profileChatPushApplying = false;
-          toggle.disabled = false;
-          refreshState();
-          return;
-        }
-        if (typeof Notification === "undefined") {
-          toggle.checked = false;
-          profileChatPushApplying = false;
-          toggle.disabled = false;
-          pokerChatPushSetServerEnabled(false);
-          refreshState();
-          return;
-        }
-        Notification.requestPermission().then(function (perm) {
-          if (perm !== "granted") {
-            toggle.checked = false;
-            pokerChatPushSetServerEnabled(false);
-            setHint(perm === "denied" ? "Браузер запретил уведомления." : "Без разрешения пуши недоступны.");
-            profileChatPushApplying = false;
-            toggle.disabled = false;
-            refreshState();
-            return;
-          }
-          pokerChatPushSubscribeToBrowser().then(function (subr) {
-            if (!subr || !subr.ok) {
+      /* requestPermission только в цепочке жеста: после await fetch Safari/Telegram часто дают «denied» без диалога. */
+      function finishOnFail(msg, rollbackServer) {
+        toggle.checked = false;
+        if (rollbackServer) pokerChatPushSetServerEnabled(false);
+        if (msg) setHint(msg);
+        profileChatPushApplying = false;
+        toggle.disabled = false;
+        refreshState();
+      }
+      function runEnableAndSubscribe() {
+        pokerChatPushSetServerEnabled(true)
+          .then(function (r) {
+            if (!r || !r.ok) {
               toggle.checked = false;
-              pokerChatPushSetServerEnabled(false);
-              setHint((subr && subr.error) || "Не удалось подписаться.");
+              profileChatPushApplying = false;
+              toggle.disabled = false;
+              refreshState();
+              return;
             }
+            pokerChatPushSubscribeToBrowser().then(function (subr) {
+              if (!subr || !subr.ok) {
+                toggle.checked = false;
+                pokerChatPushSetServerEnabled(false);
+                setHint((subr && subr.error) || "Не удалось подписаться.");
+              }
+              profileChatPushApplying = false;
+              toggle.disabled = false;
+              refreshState();
+            });
+          })
+          .catch(function () {
+            toggle.checked = false;
             profileChatPushApplying = false;
             toggle.disabled = false;
             refreshState();
           });
-        });
-      }).catch(function () {
-        toggle.checked = false;
-        profileChatPushApplying = false;
-        toggle.disabled = false;
-        refreshState();
+      }
+      if (typeof Notification === "undefined") {
+        finishOnFail(null, false);
+        return;
+      }
+      if (Notification.permission === "denied") {
+        finishOnFail(
+          "Уведомления для этого сайта уже отключены в браузере или в системе. Включите их в настройках и попробуйте снова.",
+          false
+        );
+        return;
+      }
+      if (Notification.permission === "granted") {
+        runEnableAndSubscribe();
+        return;
+      }
+      Notification.requestPermission().then(function (perm) {
+        if (perm !== "granted") {
+          finishOnFail(
+            perm === "denied"
+              ? "Разрешение не выдано (во встроенном браузере это бывает без запроса). Откройте приложение с экрана «Домой» или нажмите галочку ещё раз."
+              : "Без разрешения пуши недоступны.",
+            false
+          );
+          return;
+        }
+        runEnableAndSubscribe();
       });
     });
   }
