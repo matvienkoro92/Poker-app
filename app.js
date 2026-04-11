@@ -17596,16 +17596,60 @@ function initChat() {
       messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
     } catch (eS) {}
   }
-  function pokerNoteChatScrollForOpeningStick(el) {
+  /** Пока открыт диалог с «липким» низом — любой рост scrollHeight (картинки, вёрстка) снова уводит scrollTop от низа; подтягиваем. */
+  function pokerSnapChatOpeningStickToBottomIfActive(el, which) {
     if (!el || !el.__pokerChatOpeningStickBottom) return;
     try {
-      var st = el.scrollTop;
-      var prev = el.__pokerLastScrollTopForStick;
-      if (prev != null && st < prev - 2) {
-        el.__pokerChatOpeningStickBottom = false;
+      if (which === "general") {
+        if (chatActiveTab !== "general" || !generalView || generalView.classList.contains("chat-general-view--hidden")) return;
+      } else if (which === "personal") {
+        if (chatActiveTab !== "personal" || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
       }
-      el.__pokerLastScrollTopForStick = st;
-    } catch (eNoteStick) {}
+      el.scrollTop = el.scrollHeight;
+    } catch (eSnapStick) {}
+  }
+  /** Сброс «липкого» низа только по явному жесту: иначе сравнение scrollTop с предыдущим кадром ловило ложные срабатывания при ResizeObserver/картинках. */
+  function pokerBindOpeningStickClearOnUserIntent(el) {
+    if (!el || el.__pokerOpeningStickIntentBound) return;
+    try {
+      el.__pokerOpeningStickIntentBound = true;
+    } catch (eB) {}
+    el.addEventListener(
+      "wheel",
+      function (ev) {
+        if (!el.__pokerChatOpeningStickBottom) return;
+        var dy = ev.deltaY;
+        if (typeof dy === "number" && dy < -1) el.__pokerChatOpeningStickBottom = false;
+      },
+      { passive: true }
+    );
+    var ty0 = null;
+    el.addEventListener(
+      "touchstart",
+      function (ev) {
+        ty0 = ev.touches && ev.touches[0] ? ev.touches[0].clientY : null;
+      },
+      { passive: true }
+    );
+    el.addEventListener(
+      "touchmove",
+      function (ev) {
+        if (!el.__pokerChatOpeningStickBottom || ty0 == null) return;
+        var y = ev.touches && ev.touches[0] ? ev.touches[0].clientY : null;
+        if (y != null && y - ty0 > 14) {
+          el.__pokerChatOpeningStickBottom = false;
+          ty0 = null;
+        }
+      },
+      { passive: true }
+    );
+    el.addEventListener(
+      "touchend",
+      function () {
+        ty0 = null;
+      },
+      { passive: true }
+    );
   }
   function syncChatScrollBottomButtons() {
     try {
@@ -17645,12 +17689,6 @@ function initChat() {
     if (chatScrollBottomBtnRaf != null) return;
     chatScrollBottomBtnRaf = requestAnimationFrame(function () {
       chatScrollBottomBtnRaf = null;
-      try {
-        if (generalMessages) pokerNoteChatScrollForOpeningStick(generalMessages);
-      } catch (eNsg) {}
-      try {
-        if (messagesEl) pokerNoteChatScrollForOpeningStick(messagesEl);
-      } catch (eNsp) {}
       syncChatScrollBottomButtons();
     });
   }
@@ -17664,9 +17702,12 @@ function initChat() {
   if (messagesEl) {
     messagesEl.addEventListener("scroll", scheduleSyncChatScrollBottomButtons, { passive: true });
   }
+  if (generalMessages) pokerBindOpeningStickClearOnUserIntent(generalMessages);
+  if (messagesEl) pokerBindOpeningStickClearOnUserIntent(messagesEl);
   if (typeof ResizeObserver !== "undefined" && generalMessages) {
     try {
       var roG = new ResizeObserver(function () {
+        pokerSnapChatOpeningStickToBottomIfActive(generalMessages, "general");
         scheduleSyncChatScrollBottomButtons();
       });
       roG.observe(generalMessages);
@@ -17675,6 +17716,7 @@ function initChat() {
   if (typeof ResizeObserver !== "undefined" && messagesEl) {
     try {
       var roP = new ResizeObserver(function () {
+        pokerSnapChatOpeningStickToBottomIfActive(messagesEl, "personal");
         scheduleSyncChatScrollBottomButtons();
       });
       roP.observe(messagesEl);
@@ -21468,7 +21510,6 @@ function initChat() {
         scrollGeneralToBottomOnNextRender = false;
         try {
           generalMessages.__pokerChatOpeningStickBottom = true;
-          generalMessages.__pokerLastScrollTopForStick = generalMessages.scrollTop;
         } catch (eStickOG) {}
         pinChatMessagesToBottomImagesOnly(generalMessages);
         try {
@@ -23609,7 +23650,6 @@ function initChat() {
         scrollPersonalToBottomOnNextRender = false;
         try {
           messagesEl.__pokerChatOpeningStickBottom = true;
-          messagesEl.__pokerLastScrollTopForStick = messagesEl.scrollTop;
         } catch (eStickOP) {}
         pinChatMessagesToBottomImagesOnly(messagesEl);
         try {
