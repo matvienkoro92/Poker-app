@@ -6961,11 +6961,14 @@ img.chat-contact__avatar {
 .image-lightbox__img {
   position: relative;
   z-index: 1;
-  max-width: 100%;
+  display: block;
+  /* Явный прямоугольник + contain: иначе мелкие превью (аватарки) остаются в натуральном px. */
+  width: min(100%, calc(100vw - 96px));
+  height: min(62vh, calc(100vh - 200px));
+  max-width: min(100%, calc(100vw - 96px));
   max-height: min(62vh, calc(100vh - 200px));
-  width: auto;
-  height: auto;
   object-fit: contain;
+  object-position: center;
   border-radius: 0;
   pointer-events: none;
   flex-shrink: 0;
@@ -6976,8 +6979,10 @@ img.chat-contact__avatar {
   max-height: 100%;
 }
 .image-lightbox.image-lightbox--avatar-preview .image-lightbox__img {
+  width: min(96vw, calc(100vw - 24px));
+  height: min(92vh, calc(100dvh - 56px));
+  max-width: min(96vw, calc(100vw - 24px));
   max-height: min(92vh, calc(100dvh - 56px));
-  max-width: min(96vw, 100%);
 }
 .image-lightbox__caption {
   margin: 10px 0 0;

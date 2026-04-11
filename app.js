@@ -17584,10 +17584,28 @@ function initChat() {
         return;
       }
     } catch (eW) {}
-    if (!chatMessagesNearBottom(messagesScrollEl, CHAT_SCROLL_BOTTOM_NEAR_PX)) return;
+    if (!chatMessagesNearBottom(messagesScrollEl, CHAT_SCROLL_BOTTOM_NEAR_PX)) {
+      try {
+        if (messagesScrollEl.__pokerChatOpeningStickBottom) {
+          messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
+        }
+      } catch (eStickSnap) {}
+      return;
+    }
     try {
       messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
     } catch (eS) {}
+  }
+  function pokerNoteChatScrollForOpeningStick(el) {
+    if (!el || !el.__pokerChatOpeningStickBottom) return;
+    try {
+      var st = el.scrollTop;
+      var prev = el.__pokerLastScrollTopForStick;
+      if (prev != null && st < prev - 2) {
+        el.__pokerChatOpeningStickBottom = false;
+      }
+      el.__pokerLastScrollTopForStick = st;
+    } catch (eNoteStick) {}
   }
   function syncChatScrollBottomButtons() {
     try {
@@ -17627,6 +17645,12 @@ function initChat() {
     if (chatScrollBottomBtnRaf != null) return;
     chatScrollBottomBtnRaf = requestAnimationFrame(function () {
       chatScrollBottomBtnRaf = null;
+      try {
+        if (generalMessages) pokerNoteChatScrollForOpeningStick(generalMessages);
+      } catch (eNsg) {}
+      try {
+        if (messagesEl) pokerNoteChatScrollForOpeningStick(messagesEl);
+      } catch (eNsp) {}
       syncChatScrollBottomButtons();
     });
   }
@@ -21057,7 +21081,15 @@ function initChat() {
           im.removeEventListener("load", onImg);
           im.removeEventListener("error", onImg);
           requestAnimationFrame(function () {
-            snapChatMessagesToBottomIfPinned(el);
+            /* Открытие: scrollHeight растёт по load картинок, scrollTop не догоняет — snapIfPinned молчит.
+               Пока пользователь не отмотал вверх, __pokerChatOpeningStickBottom держит низ. */
+            try {
+              if (el.__pokerChatOpeningStickBottom) {
+                el.scrollTop = el.scrollHeight;
+              } else {
+                snapChatMessagesToBottomIfPinned(el);
+              }
+            } catch (eSnapImg) {}
           });
         }
         im.addEventListener("load", onImg);
@@ -21434,6 +21466,10 @@ function initChat() {
           generalMessages.scrollTop = generalMessages.scrollHeight;
         } catch (eScG1) {}
         scrollGeneralToBottomOnNextRender = false;
+        try {
+          generalMessages.__pokerChatOpeningStickBottom = true;
+          generalMessages.__pokerLastScrollTopForStick = generalMessages.scrollTop;
+        } catch (eStickOG) {}
         pinChatMessagesToBottomImagesOnly(generalMessages);
         try {
           if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
@@ -23571,6 +23607,10 @@ function initChat() {
           messagesEl.scrollTop = messagesEl.scrollHeight;
         } catch (eScP1) {}
         scrollPersonalToBottomOnNextRender = false;
+        try {
+          messagesEl.__pokerChatOpeningStickBottom = true;
+          messagesEl.__pokerLastScrollTopForStick = messagesEl.scrollTop;
+        } catch (eStickOP) {}
         pinChatMessagesToBottomImagesOnly(messagesEl);
         try {
           if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
