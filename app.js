@@ -2797,7 +2797,8 @@ function runGazetteAndTasksInit() {
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
     if (!section || !listEl || !form || !input) return;
-    var STORAGE_KEY = "poker_roman1787443_planner_v1";
+    var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
+    var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
     function normUser() {
       var user =
         typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
@@ -2807,8 +2808,14 @@ function runGazetteAndTasksInit() {
       var u = user && user.username ? String(user.username) : "";
       return u.replace(/^@+/, "").trim().toLowerCase();
     }
-    function isRoman() {
-      return normUser() === "roman1787443";
+    function isPlannerAllowedUser() {
+      var u = normUser();
+      return !!u && !!PLANNER_ALLOWED_USERNAMES[u];
+    }
+    function plannerStorageKey() {
+      var u = normUser();
+      if (!u || !PLANNER_ALLOWED_USERNAMES[u]) return null;
+      return "poker_gazette_editor_planner_v1_" + u.replace(/[^a-z0-9_]/g, "_");
     }
     function escHtml(s) {
       return String(s)
@@ -2818,8 +2825,17 @@ function runGazetteAndTasksInit() {
         .replace(/"/g, "&quot;");
     }
     function loadTasks() {
+      var key = plannerStorageKey();
+      if (!key) return [];
       try {
-        var raw = localStorage.getItem(STORAGE_KEY);
+        var raw = localStorage.getItem(key);
+        if (!raw && normUser() === "roman1787443") {
+          var leg = localStorage.getItem(LEGACY_PLANNER_STORAGE_KEY);
+          if (leg) {
+            localStorage.setItem(key, leg);
+            raw = leg;
+          }
+        }
         if (!raw) return [];
         var arr = JSON.parse(raw);
         return Array.isArray(arr) ? arr : [];
@@ -2828,8 +2844,10 @@ function runGazetteAndTasksInit() {
       }
     }
     function saveTasks(tasks) {
+      var key = plannerStorageKey();
+      if (!key) return;
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        localStorage.setItem(key, JSON.stringify(tasks));
       } catch (eSave) {}
     }
     function sortTasks(tasks) {
@@ -2891,7 +2909,7 @@ function runGazetteAndTasksInit() {
         .join("");
     }
     function syncVisibility() {
-      if (!isRoman()) {
+      if (!isPlannerAllowedUser()) {
         section.classList.add("roman-task-planner--hidden");
         return;
       }
@@ -2901,7 +2919,7 @@ function runGazetteAndTasksInit() {
     window.__pokerSyncRomanTaskPlanner = syncVisibility;
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
-      if (!isRoman()) return;
+      if (!isPlannerAllowedUser()) return;
       var text = input.value ? input.value.trim() : "";
       if (!text) return;
       var tasks = loadTasks();
@@ -2916,7 +2934,7 @@ function runGazetteAndTasksInit() {
       renderTasks();
     });
     listEl.addEventListener("click", function (ev) {
-      if (!isRoman()) return;
+      if (!isPlannerAllowedUser()) return;
       var t = ev.target;
       if (!t || !t.closest) return;
       var toggle = t.closest("[data-roman-task-toggle]");

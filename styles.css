@@ -4203,7 +4203,7 @@ html.vpn-proxy-modal-open {
   border-color: rgba(251, 191, 36, 0.5);
 }
 
-/* Планер задач @roman1787443 — под блоком подписки на первом экране газеты */
+/* Планер задач редакторов (@roman1787443, @roman1_matvienko) — под подпиской на первом экране газеты */
 .roman-task-planner {
   margin-top: 20px;
   padding: 14px 12px 16px;
