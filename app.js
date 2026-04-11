@@ -18393,10 +18393,13 @@ function initChat() {
   var chatDmFocusPingTimer = null;
   var chatDmFocusSessionHeld = false;
   var CHAT_DM_FOCUS_PING_MS = 22000;
-  /** Mini App / WebView часто держит visibilityState=visible в фоне; без hasFocus пинг залипает и пуши ЛС бесконечно режутся на сервере. */
+  /** Фон/передний план для dmFocusPing: иначе в Redis залипает «открыт тред» и сервер режет Web Push по ЛС. */
   function pokerChatDmFocusBrowserForegroundOk() {
     try {
       if (typeof document === "undefined" || document.visibilityState !== "visible") return false;
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      /* В Mini App надёжнее isActive, чем document.hasFocus() (часто ложный false — не шлём пинг и не сбрасываем peer; либо наоборот). */
+      if (tg && typeof tg.isActive === "boolean") return tg.isActive;
       if (typeof document.hasFocus === "function" && !document.hasFocus()) return false;
       return true;
     } catch (eFg) {
