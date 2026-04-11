@@ -37,6 +37,7 @@ const handlers = {
   "freeroll-reminder-subscribe": () => require(path.join(handlersDir, "freeroll-reminder-subscribe.js")),
   "gazette-subscribe": () => require(path.join(handlersDir, "gazette-subscribe.js")),
   "gazette-article-comments": () => require(path.join(handlersDir, "gazette-article-comments.js")),
+  "gazette-editor-planner": () => require(path.join(handlersDir, "gazette-editor-planner.js")),
   "rating-subscribe": () => require(path.join(handlersDir, "rating-subscribe.js")),
   "raffle-subscribe": () => require(path.join(handlersDir, "raffle-subscribe.js")),
   "gazette-notify": () => require(path.join(handlersDir, "gazette-notify.js")),

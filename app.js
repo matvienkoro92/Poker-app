@@ -2985,6 +2985,111 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser()) return null;
       return PLANNER_SHARED_STORAGE_KEY;
     }
+    var romanPlannerDirtySinceOpen = false;
+    var romanPlannerPushTimer = null;
+    var romanPlannerSaveGeneration = 0;
+    var romanPlannerPullInFlight = false;
+    var romanPlannerLiveSyncInterval = null;
+    var romanPlannerLastAmbientPullMs = 0;
+    function romanPlannerApiOk() {
+      if (!isPlannerAllowedUser()) return false;
+      if (typeof getApiBase !== "function" || !getApiBase()) return false;
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return false;
+      return true;
+    }
+    function romanPlannerApplyServerTasksIfClean(tasks) {
+      if (romanPlannerDirtySinceOpen) return;
+      var key = plannerStorageKey();
+      if (!key) return;
+      try {
+        localStorage.setItem(key, JSON.stringify(tasks));
+      } catch (eSet) {}
+      if (plannerModal.getAttribute("aria-hidden") === "false") renderTasks();
+    }
+    function romanPlannerPostFullList(tasks, onDone) {
+      if (!romanPlannerApiOk()) {
+        if (onDone) onDone(false);
+        return;
+      }
+      var base = getApiBase();
+      var body =
+        typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ tasks: tasks }) : { tasks: tasks };
+      fetch(base + "/api/gazette-editor-planner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          var ok = !!(data && data.ok);
+          if (ok && Array.isArray(data.tasks) && !romanPlannerDirtySinceOpen) {
+            try {
+              var k = plannerStorageKey();
+              if (k) localStorage.setItem(k, JSON.stringify(data.tasks));
+            } catch (eSync) {}
+            if (plannerModal.getAttribute("aria-hidden") === "false") renderTasks();
+          }
+          if (onDone) onDone(ok);
+        })
+        .catch(function () {
+          if (onDone) onDone(false);
+        });
+    }
+    function romanPlannerPullFromServer() {
+      if (!romanPlannerApiOk()) return;
+      if (romanPlannerPullInFlight) return;
+      romanPlannerPullInFlight = true;
+      var base = getApiBase();
+      var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+      fetch(base + "/api/gazette-editor-planner" + q, { cache: "no-store" })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (!data || !data.ok || data.offline) return;
+          var serverTasks = Array.isArray(data.tasks) ? data.tasks : [];
+          if (serverTasks.length === 0) {
+            var seed = loadTasks();
+            if (seed.length) {
+              romanPlannerPostFullList(seed, function () {});
+            }
+            return;
+          }
+          romanPlannerApplyServerTasksIfClean(serverTasks);
+        })
+        .catch(function () {})
+        .then(function () {
+          romanPlannerPullInFlight = false;
+        });
+    }
+    /** Повторный GET с паузой — при возврате во вкладку / Mini App, чтобы второе устройство подтянуло список. */
+    function romanPlannerPullAmbient() {
+      var now = Date.now();
+      if (now - romanPlannerLastAmbientPullMs < 1200) return;
+      romanPlannerLastAmbientPullMs = now;
+      romanPlannerPullFromServer();
+    }
+    function romanPlannerStopLiveSync() {
+      if (romanPlannerLiveSyncInterval != null) {
+        clearInterval(romanPlannerLiveSyncInterval);
+        romanPlannerLiveSyncInterval = null;
+      }
+    }
+    /** Пока модалка открыта — периодически синхронизировать с Redis (два телефона без смены вкладки). */
+    function romanPlannerStartLiveSync() {
+      romanPlannerStopLiveSync();
+      if (!romanPlannerApiOk()) return;
+      romanPlannerLiveSyncInterval = setInterval(function () {
+        if (!plannerModal || plannerModal.getAttribute("aria-hidden") !== "false") {
+          romanPlannerStopLiveSync();
+          return;
+        }
+        romanPlannerPullFromServer();
+      }, 18000);
+    }
     function mergeRomanPlannerArraysFromKeys() {
       var arrs = [];
       for (var i = 0; i < PLANNER_OLD_KEYS_TO_MIGRATE.length; i++) {
@@ -3083,6 +3188,18 @@ function runGazetteAndTasksInit() {
       try {
         localStorage.setItem(key, JSON.stringify(tasks));
       } catch (eSave) {}
+      romanPlannerDirtySinceOpen = true;
+      if (!romanPlannerApiOk()) return;
+      romanPlannerSaveGeneration++;
+      var gen = romanPlannerSaveGeneration;
+      var snapshot = tasks;
+      clearTimeout(romanPlannerPushTimer);
+      romanPlannerPushTimer = setTimeout(function () {
+        romanPlannerPushTimer = null;
+        romanPlannerPostFullList(snapshot, function (ok) {
+          if (ok && gen === romanPlannerSaveGeneration) romanPlannerDirtySinceOpen = false;
+        });
+      }, 450);
     }
     function sortTasksByCreatedAsc(arr) {
       var copy = arr.slice();
@@ -3342,8 +3459,11 @@ function runGazetteAndTasksInit() {
     }
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
+      romanPlannerDirtySinceOpen = false;
       renderTasks();
       plannerModal.setAttribute("aria-hidden", "false");
+      romanPlannerPullFromServer();
+      romanPlannerStartLiveSync();
       try {
         var raf = window.requestAnimationFrame || function (fn) {
           setTimeout(fn, 0);
@@ -3354,6 +3474,7 @@ function runGazetteAndTasksInit() {
       } catch (eRz) {}
     }
     function closePlannerModal() {
+      romanPlannerStopLiveSync();
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
       try {
         var ae = document.activeElement;
@@ -3375,8 +3496,25 @@ function runGazetteAndTasksInit() {
         return;
       }
       openBtn.classList.remove("welcome-planner-icon--hidden");
-      if (plannerModal.getAttribute("aria-hidden") === "false") renderTasks();
+      if (plannerModal.getAttribute("aria-hidden") === "false") {
+        renderTasks();
+        romanPlannerPullFromServer();
+        romanPlannerStartLiveSync();
+      }
     }
+    try {
+      document.addEventListener("visibilitychange", function () {
+        if (typeof document.visibilityState !== "undefined" && document.visibilityState !== "visible") return;
+        if (!plannerModal || plannerModal.getAttribute("aria-hidden") !== "false") return;
+        romanPlannerPullAmbient();
+      });
+    } catch (eVis) {}
+    try {
+      window.addEventListener("pageshow", function () {
+        if (!plannerModal || plannerModal.getAttribute("aria-hidden") !== "false") return;
+        romanPlannerPullAmbient();
+      });
+    } catch (ePs) {}
     openBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();

@@ -4770,6 +4770,8 @@ textarea.roman-task-planner__input {
 .roman-task-planner__swipe-front {
   box-sizing: border-box;
   min-height: 0;
+  position: relative;
+  z-index: 1;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -4793,6 +4795,11 @@ textarea.roman-task-planner__input {
   border-left: 1px solid rgba(148, 163, 184, 0.15);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* Пока ряд закрыт, кнопки не должны получать hit-test (иначе onDown в JS выходит по .roman-task-planner__btn и свайп с мыши не стартует). */
+  pointer-events: none;
+}
+.roman-task-planner__swipe-track--open .roman-task-planner__swipe-actions {
+  pointer-events: auto;
 }
 [data-theme="light"] .roman-task-planner__swipe-actions {
   background: rgba(44, 24, 16, 0.06);
