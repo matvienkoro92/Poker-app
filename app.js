@@ -13954,6 +13954,7 @@ function initRaffles() {
   var rafflesCompleted = document.getElementById("rafflesCompleted");
   var rafflesCompletedEmpty = document.getElementById("rafflesCompletedEmpty");
   var raffleCard = document.getElementById("raffleCard");
+  var raffleCardHeading = document.getElementById("raffleCardHeading");
   var raffleCompleteBtn = document.getElementById("raffleCompleteBtn");
   var raffleCancelBtn = document.getElementById("raffleCancelBtn");
   var raffleUpdateEndBtn = document.getElementById("raffleUpdateEndBtn");
@@ -14210,6 +14211,125 @@ function initRaffles() {
     return (n < 0 ? "-" : "") + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
   }
 
+
+  function pluralizeBackingTicketsForHeading(n) {
+    var v = Math.abs(n) % 100;
+    var d = v % 10;
+    if (v >= 11 && v <= 19) return "беккинг-билетов";
+    if (d === 1) return "беккинг-билет";
+    if (d >= 2 && d <= 4) return "беккинг-билета";
+    return "беккинг-билетов";
+  }
+
+  function parseRafflePrizeTournamentNameFromPrize(prizeStr) {
+    var s = String(prizeStr || "").trim();
+    var idx = s.indexOf(" — ");
+    if (idx === -1) idx = s.search(/\s[–—-]\s/);
+    if (idx === -1) return "";
+    return s.slice(idx).replace(/^\s[–—-]\s/, "").trim();
+  }
+
+  function isGenericRaffleTitleForHeading(s) {
+    var t = String(s || "").toLowerCase();
+    return t.indexOf("розыгрыш") !== -1 && (t.indexOf("беккинг") !== -1 || t.indexOf("билет") !== -1);
+  }
+
+  /** Заголовок карточки активного розыгрыша (беккинг-билеты / призы). */
+  function buildActiveRaffleCardHeading(raffle) {
+    if (!raffle) return "";
+    var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
+    var totalTickets = Math.max(0, parseInt(raffle.totalWinners, 10) || 0);
+    if (!totalTickets && groups.length) {
+      totalTickets = groups.reduce(function (s, g) {
+        return s + Math.max(0, parseInt(g.count, 10) || 0);
+      }, 0);
+    }
+    var totalPrize = getRaffleTotalPrize(raffle);
+    var sumText = totalPrize > 0 ? formatRaffleSum(totalPrize) : "—";
+    var rawTitle = (raffle.title || "").trim();
+    var ticketWord = pluralizeBackingTicketsForHeading(totalTickets || 0);
+
+    function tourPhraseFromNames(uniqueNames) {
+      if (uniqueNames.length >= 2) return "на турниры «" + uniqueNames.join("», «") + "»";
+      if (uniqueNames.length === 1) return "на турнир «" + uniqueNames[0] + "»";
+      if (rawTitle && !isGenericRaffleTitleForHeading(rawTitle)) return "на турнир «" + rawTitle + "»";
+      return "на турнир «турнир клуба»";
+    }
+
+    if (!groups.length) {
+      if (rawTitle) return "Розыгрыш: " + rawTitle + ". Итого сумма розыгрыша " + sumText + ".";
+      return "Розыгрыш. Итого сумма розыгрыша " + sumText + ".";
+    }
+
+    var rows = [];
+    for (var i = 0; i < groups.length; i++) {
+      var g = groups[i];
+      var c = Math.max(0, parseInt(g.count, 10) || 0);
+      var nom = parsePrizeValue(g.prize);
+      var tname = parseRafflePrizeTournamentNameFromPrize(g.prize || "");
+      rows.push({ count: c, nominal: nom, tournament: tname });
+    }
+
+    var uniqueNom = [];
+    for (var ni = 0; ni < rows.length; ni++) {
+      var nv = rows[ni].nominal;
+      if (nv > 0 && uniqueNom.indexOf(nv) === -1) uniqueNom.push(nv);
+    }
+
+    var uniqueNames = [];
+    for (var nj = 0; nj < rows.length; nj++) {
+      var tn = rows[nj].tournament;
+      if (tn && uniqueNames.indexOf(tn) === -1) uniqueNames.push(tn);
+    }
+
+    if (uniqueNom.length === 1) {
+      var price = uniqueNom[0];
+      var nomText = formatRaffleSum(price);
+      var tourPhrase = tourPhraseFromNames(uniqueNames);
+      return (
+        "Розыгрыш " +
+        totalTickets +
+        " " +
+        ticketWord +
+        " за " +
+        nomText +
+        " (цена билета) " +
+        tourPhrase +
+        ". Итого сумма розыгрыша " +
+        sumText +
+        "."
+      );
+    }
+
+    if (uniqueNom.length > 1) {
+      var mixParts = [];
+      for (var mk = 0; mk < rows.length; mk++) {
+        var r = rows[mk];
+        if (r.count > 0 && r.nominal > 0) mixParts.push(r.count + "×" + formatRaffleSum(r.nominal));
+      }
+      var mix = mixParts.join(", ");
+      var tourPhraseM = tourPhraseFromNames(uniqueNames);
+      return (
+        "Розыгрыш " +
+        totalTickets +
+        " " +
+        ticketWord +
+        ": " +
+        mix +
+        ". " +
+        tourPhraseM +
+        ". Итого сумма розыгрыша " +
+        sumText +
+        "."
+      );
+    }
+
+    var firstPrize = groups[0] && groups[0].prize ? String(groups[0].prize).trim() : "";
+    var prizeLine = firstPrize ? raffleDisplayPrizeText(firstPrize) : "";
+    var label = prizeLine || rawTitle || "приз";
+    return "Розыгрыш " + totalTickets + " призов: " + label + ". Итого сумма розыгрыша " + sumText + ".";
+  }
+
   function getMyUserId() {
     if (myRaffleUserId) return myRaffleUserId;
     try {
@@ -14254,6 +14374,7 @@ function initRaffles() {
     }
     currentRaffleId = raffle.id;
     currentRaffleData = raffle;
+    if (raffleCardHeading) raffleCardHeading.textContent = buildActiveRaffleCardHeading(raffle);
     var total = raffle.totalWinners || 0;
     var groups = raffle.groups || [];
     var totalPrize = getRaffleTotalPrize(raffle);

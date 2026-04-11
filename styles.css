@@ -14635,6 +14635,14 @@ a.tournament-day-share-btn {
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
 }
+.raffle-card__heading {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text);
+  font-style: normal;
+}
 .raffle-id-note {
   margin: 0 0 12px;
   padding-left: 20px;

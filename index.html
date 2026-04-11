@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.440">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.442">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -2496,6 +2496,7 @@
               <p class="raffle-empty raffle-empty--hidden" id="raffleEmpty">Нет активных розыгрышей.</p>
               <div class="raffle-current raffle-current--hidden" id="raffleCurrent">
                 <div class="raffle-card raffle-card--ticket" id="raffleCard">
+                  <h2 class="raffle-card__heading" id="raffleCardHeading"></h2>
                   <ul class="raffle-id-note" aria-label="Важно об ID">
                     <li>Проверьте ваш ID из Poker21 в профиле.</li>
                     <li>На него будет начисляться выигранный приз.</li>
@@ -5983,7 +5984,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=556"></script>
+    <script defer src="./app.js?v=558"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
