@@ -21454,10 +21454,10 @@ function initChat() {
     } catch (eSbG) {}
   }
 
-  /** Мышь/трекпад: long-press на mousedown ломает выделение текста; меню — через ПКМ (contextmenu). */
+  /** Мышь/трекпад: long-press на mousedown ломает выделение текста; меню — через ПКМ (contextmenu). Синхрон с CSS (pointer: fine), без hover — в PWA часто hover: none. */
   function pokerChatFinePointerLikeDesktop() {
     try {
-      return !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+      return !!(window.matchMedia && window.matchMedia("(pointer: fine)").matches);
     } catch (eFPD) {
       return false;
     }

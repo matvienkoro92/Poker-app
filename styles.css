@@ -6216,14 +6216,44 @@ html.vpn-proxy-modal-open {
   word-break: break-word;
 }
 .chat-msg__reply strong { color: var(--text); }
-/* Десктоп / PWA с мышью: фрагмент текста (на тач по-прежнему user-select: none у .chat-msg) */
-@media (hover: hover) and (pointer: fine) {
-  .chat-msg__text,
-  .chat-msg__reply,
-  .chat-msg__group-system-inner,
-  .chat-msg__document-link--view,
-  .chat-pinned-self .chat-msg__text,
-  .chat-pinned-self .chat-pinned-self__placeholder {
+/* Мышь/трекпад (в т.ч. PWA на ПК): выделение фрагмента. Без этого: (1) hover:none в standalone, (2) touch-action: pan-y на ленте режет drag-select в WebKit. */
+@media (pointer: fine) {
+  body[data-view="chat"] .chat-general-view .chat-messages,
+  body[data-view="chat"] .chat-container .chat-messages {
+    touch-action: auto;
+  }
+  body[data-view="chat"] .chat-msg,
+  body[data-view="chat"] .chat-pinned-self .chat-msg {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  body[data-view="chat"] .chat-msg__avatar,
+  body[data-view="chat"] .chat-msg__avatar-spacer,
+  body[data-view="chat"] .chat-msg__avatar--placeholder,
+  body[data-view="chat"] .chat-msg__reactions,
+  body[data-view="chat"] .chat-msg__reaction,
+  body[data-view="chat"] .chat-msg__ticks,
+  body[data-view="chat"] .chat-msg__name-btn,
+  body[data-view="chat"] .chat-msg__respect-row,
+  body[data-view="chat"] .chat-msg__footer,
+  body[data-view="chat"] .chat-msg__edit,
+  body[data-view="chat"] .chat-msg__delete,
+  body[data-view="chat"] .chat-msg__voice-wrap,
+  body[data-view="chat"] .chat-msg__voice-toolbar,
+  body[data-view="chat"] .chat-msg__document-actions,
+  body[data-view="chat"] .chat-msg__document-btn,
+  body[data-view="chat"] .chat-msg__image,
+  body[data-view="chat"] .chat-pinned-self__label {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  body[data-view="chat"] .chat-msg__text,
+  body[data-view="chat"] .chat-msg__reply,
+  body[data-view="chat"] .chat-msg__group-system-inner,
+  body[data-view="chat"] .chat-msg__document-link--view,
+  body[data-view="chat"] .chat-pinned-self .chat-msg__text,
+  body[data-view="chat"] .chat-pinned-self .chat-pinned-self__placeholder {
     -webkit-user-select: text;
     user-select: text;
   }
