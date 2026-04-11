@@ -4355,12 +4355,50 @@ html.vpn-proxy-modal-open {
   line-height: 1.35;
   color: #5c4033;
 }
+.roman-task-planner__board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 12px;
+}
+.roman-task-planner__column {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.roman-task-planner__column-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted, #94a3b8);
+}
+[data-theme="light"] .roman-task-planner__column-title {
+  color: #5c4033;
+}
+@media (min-width: 360px) {
+  .roman-task-planner__board {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
 .roman-task-planner__list {
   list-style: none;
-  margin: 0 0 12px;
+  margin: 0;
   padding: 0;
-  max-height: min(42vh, 320px);
+  max-height: min(28vh, 200px);
   overflow-y: auto;
+}
+.roman-task-planner__list--active,
+.roman-task-planner__list--done {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 4px 0;
+}
+[data-theme="light"] .roman-task-planner__list--active,
+[data-theme="light"] .roman-task-planner__list--done {
+  border-color: rgba(44, 24, 16, 0.12);
 }
 .roman-task-planner__item {
   display: flex;
@@ -4378,13 +4416,30 @@ html.vpn-proxy-modal-open {
   text-decoration: line-through;
   opacity: 0.65;
 }
-.roman-task-planner__check {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  accent-color: #7c2d12;
-  cursor: pointer;
+.roman-task-planner__btn--complete {
+  background: rgba(22, 163, 74, 0.18);
+  border-color: rgba(22, 163, 74, 0.45);
+  color: #166534;
+}
+[data-theme="light"] .roman-task-planner__btn--complete {
+  color: #14532d;
+}
+.roman-task-planner__btn--ghost {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.9;
+}
+.roman-task-planner-modal .roman-task-planner__btn--complete {
+  color: #4ade80;
+ border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.12);
+}
+.roman-task-planner-modal .roman-task-planner__btn--ghost {
+  color: var(--muted, #94a3b8);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+[data-theme="light"] .roman-task-planner-modal .roman-task-planner__btn--complete {
+  color: #14532d;
 }
 .roman-task-planner__body {
   flex: 1;
@@ -4470,6 +4525,15 @@ textarea.roman-task-planner__input {
   font-size: 12px;
   color: #5c4033;
   font-style: italic;
+}
+.roman-task-planner__empty--column {
+  list-style: none;
+  padding: 10px 8px;
+  text-align: center;
+  border: none;
+}
+.roman-task-planner-modal .roman-task-planner__empty--column {
+  color: var(--muted, #94a3b8);
 }
 
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */

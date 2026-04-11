@@ -2779,10 +2779,12 @@ function runGazetteAndTasksInit() {
     var plannerBackdrop = document.getElementById("romanTaskPlannerModalBackdrop");
     var plannerClose = document.getElementById("romanTaskPlannerModalClose");
     var openBtn = document.getElementById("romanTaskPlannerOpenBtn");
-    var listEl = document.getElementById("romanTaskList");
+    var boardEl = document.getElementById("romanTaskPlannerBoard");
+    var listActive = document.getElementById("romanTaskListActive");
+    var listDone = document.getElementById("romanTaskListDone");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
-    if (!plannerModal || !listEl || !form || !input || !openBtn) return;
+    if (!plannerModal || !boardEl || !listActive || !listDone || !form || !input || !openBtn) return;
     var PLANNER_COMPOSER_MIN_PX = 44;
     var PLANNER_COMPOSER_MAX_PX = 220;
     function resizePlannerComposer() {
@@ -2850,12 +2852,9 @@ function runGazetteAndTasksInit() {
         localStorage.setItem(key, JSON.stringify(tasks));
       } catch (eSave) {}
     }
-    function sortTasks(tasks) {
-      var copy = tasks.slice();
+    function sortTasksByCreatedAsc(arr) {
+      var copy = arr.slice();
       copy.sort(function (a, b) {
-        var da = a && a.done ? 1 : 0;
-        var db = b && b.done ? 1 : 0;
-        if (da !== db) return da - db;
         var ta = a && a.createdAt ? Number(a.createdAt) : 0;
         var tb = b && b.createdAt ? Number(b.createdAt) : 0;
         return ta - tb;
@@ -2869,44 +2868,56 @@ function runGazetteAndTasksInit() {
       }
       return -1;
     }
+    function renderTaskRow(t, columnDone) {
+      var id = t.id != null ? String(t.id) : "";
+      var text = t.text != null ? String(t.text) : "";
+      var completeBtn =
+        '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
+        escHtml(id) +
+        '">Выполнено</button>';
+      var uncompleteBtn =
+        '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-uncomplete="' +
+        escHtml(id) +
+        '">Вернуть</button>';
+      return (
+        '<li class="roman-task-planner__item' +
+        (columnDone ? " roman-task-planner__item--done" : "") +
+        '" data-roman-task-id="' +
+        escHtml(id) +
+        '">' +
+        '<div class="roman-task-planner__body">' +
+        '<div class="roman-task-planner__text">' +
+        escHtml(text) +
+        "</div>" +
+        '<div class="roman-task-planner__actions">' +
+        (columnDone ? uncompleteBtn : completeBtn) +
+        '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
+        escHtml(id) +
+        '">Изменить</button>' +
+        '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
+        escHtml(id) +
+        '">Удалить</button>' +
+        "</div></div></li>"
+      );
+    }
     function renderTasks() {
-      var tasks = sortTasks(loadTasks());
-      if (!tasks.length) {
-        listEl.innerHTML =
-          '<li class="roman-task-planner__empty">Пока нет задач — добавьте ниже.</li>';
-        return;
-      }
-      listEl.innerHTML = tasks
-        .map(function (t) {
-          var id = t.id != null ? String(t.id) : "";
-          var text = t.text != null ? String(t.text) : "";
-          var done = !!t.done;
-          return (
-            '<li class="roman-task-planner__item' +
-            (done ? " roman-task-planner__item--done" : "") +
-            '" data-roman-task-id="' +
-            escHtml(id) +
-            '">' +
-            '<input type="checkbox" class="roman-task-planner__check" data-roman-task-toggle="' +
-            escHtml(id) +
-            '"' +
-            (done ? " checked" : "") +
-            ' aria-label="Выполнено" />' +
-            '<div class="roman-task-planner__body">' +
-            '<div class="roman-task-planner__text">' +
-            escHtml(text) +
-            "</div>" +
-            '<div class="roman-task-planner__actions">' +
-            '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
-            escHtml(id) +
-            '">Изменить</button>' +
-            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
-            escHtml(id) +
-            '">Удалить</button>' +
-            "</div></div></li>"
-          );
-        })
-        .join("");
+      var raw = loadTasks();
+      var active = sortTasksByCreatedAsc(raw.filter(function (x) {
+        return !x.done;
+      }));
+      var doneCol = sortTasksByCreatedAsc(raw.filter(function (x) {
+        return !!x.done;
+      }));
+      listActive.innerHTML = active.length
+        ? active.map(function (t) {
+            return renderTaskRow(t, false);
+          }).join("")
+        : '<li class="roman-task-planner__empty roman-task-planner__empty--column">Нет активных задач</li>';
+      listDone.innerHTML = doneCol.length
+        ? doneCol.map(function (t) {
+            return renderTaskRow(t, true);
+          }).join("")
+        : '<li class="roman-task-planner__empty roman-task-planner__empty--column">Нет выполненных</li>';
     }
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
@@ -3046,18 +3057,30 @@ function runGazetteAndTasksInit() {
       renderTasks();
       resizePlannerComposer();
     });
-    listEl.addEventListener("click", function (ev) {
+    boardEl.addEventListener("click", function (ev) {
       if (!isPlannerAllowedUser()) return;
       var t = ev.target;
       if (!t || !t.closest) return;
-      var toggle = t.closest("[data-roman-task-toggle]");
-      if (toggle) {
-        var idT = toggle.getAttribute("data-roman-task-toggle");
-        var tasksT = loadTasks();
-        var ixT = findTaskById(tasksT, idT);
-        if (ixT >= 0) {
-          tasksT[ixT].done = !tasksT[ixT].done;
-          saveTasks(tasksT);
+      var completeBtn = t.closest("[data-roman-task-complete]");
+      if (completeBtn) {
+        var idC = completeBtn.getAttribute("data-roman-task-complete");
+        var tasksC = loadTasks();
+        var ixC = findTaskById(tasksC, idC);
+        if (ixC >= 0) {
+          tasksC[ixC].done = true;
+          saveTasks(tasksC);
+          renderTasks();
+        }
+        return;
+      }
+      var uncompleteBtn = t.closest("[data-roman-task-uncomplete]");
+      if (uncompleteBtn) {
+        var idU = uncompleteBtn.getAttribute("data-roman-task-uncomplete");
+        var tasksU = loadTasks();
+        var ixU = findTaskById(tasksU, idU);
+        if (ixU >= 0) {
+          tasksU[ixU].done = false;
+          saveTasks(tasksU);
           renderTasks();
         }
         return;
