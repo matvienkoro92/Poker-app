@@ -22677,6 +22677,7 @@ function initChat() {
             var cn = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
             return cn || c.name;
           };
+          var pinsSnapForSameList = pokerLoadChatDialogListPins();
           var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
             var btn = existing[i];
             if (!btn || btn.dataset.chatId !== c.id) return false;
@@ -22691,6 +22692,19 @@ function initChat() {
               var wantG = (c.avatar && String(c.avatar)) ? String(c.avatar).slice(0, 160) : "";
               if (haveG !== wantG) return false;
             }
+            var wantPinned = false;
+            for (var pxi = 0; pxi < pinsSnapForSameList.length; pxi++) {
+              if (peerChatIdsEqual(pinsSnapForSameList[pxi], c.id)) {
+                wantPinned = true;
+                break;
+              }
+            }
+            var havePinIcon = !!btn.querySelector(".chat-contact__pin-icon");
+            if (wantPinned !== havePinIcon) return false;
+            var wrapPin = btn.closest(".chat-contact-swipe");
+            var pinActBtn = wrapPin && wrapPin.querySelector(".chat-contact-swipe__pin");
+            if (!pinActBtn) return false;
+            if (wantPinned !== pinActBtn.classList.contains("chat-contact-swipe__pin--unpin")) return false;
             return true;
           });
           if (sameList && existing.length > 0) {
