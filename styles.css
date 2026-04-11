@@ -4748,6 +4748,18 @@ textarea.roman-task-planner__input {
   width: 100%;
   overflow: hidden;
   border-radius: 8px;
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.roman-task-planner__swipe-clip:active {
+  cursor: grabbing;
+}
+.roman-task-planner__swipe-clip .roman-task-planner__edit-ta {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
 }
 .roman-task-planner__swipe-track {
   display: flex;
@@ -4758,7 +4770,6 @@ textarea.roman-task-planner__input {
 .roman-task-planner__swipe-front {
   box-sizing: border-box;
   min-height: 0;
-  touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
 }

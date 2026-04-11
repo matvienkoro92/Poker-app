@@ -3018,6 +3018,35 @@ function runGazetteAndTasksInit() {
         } catch (eRm) {}
       }
     }
+    function mergeLegacyPlannerIntoList(list) {
+      var key = plannerStorageKey();
+      if (!key) return list;
+      var merged = mergeRomanPlannerArraysFromKeys();
+      if (!merged.length) return list;
+      var base = Array.isArray(list) ? list : [];
+      var byId = {};
+      for (var i = 0; i < base.length; i++) {
+        if (base[i] && base[i].id != null) byId[String(base[i].id)] = true;
+      }
+      var out = base.slice();
+      var added = false;
+      for (var j = 0; j < merged.length; j++) {
+        var t = merged[j];
+        if (!t || t.id == null) continue;
+        var id = String(t.id);
+        if (byId[id]) continue;
+        byId[id] = true;
+        out.push(t);
+        added = true;
+      }
+      if (added) {
+        try {
+          localStorage.setItem(key, JSON.stringify(out));
+          cleanupRomanPlannerLegacyKeys();
+        } catch (eMg) {}
+      }
+      return out;
+    }
     function escHtml(s) {
       return String(s)
         .replace(/&/g, "&amp;")
@@ -3042,7 +3071,8 @@ function runGazetteAndTasksInit() {
           return [];
         }
         var arr = JSON.parse(raw);
-        return Array.isArray(arr) ? arr : [];
+        var list = Array.isArray(arr) ? arr : [];
+        return mergeLegacyPlannerIntoList(list);
       } catch (eLoad) {
         return [];
       }
@@ -3126,19 +3156,22 @@ function runGazetteAndTasksInit() {
         '<div class="roman-task-planner__text">' +
         escHtml(text) +
         '</div>' +
-        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Свайп влево</div>' +
+        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Влево — действия · вправо — закрыть</div>' +
         "</div></div>" +
         '<div class="roman-task-planner__swipe-actions">' +
         actionsHtml +
         "</div></div></div></li>"
       );
     }
-    function romanPlannerCloseAllSwipes() {
+    function romanPlannerCloseAllSwipes(exceptClip) {
       if (!boardEl) return;
       var tracks = boardEl.querySelectorAll(".roman-task-planner__swipe-track");
       for (var i = 0; i < tracks.length; i++) {
-        tracks[i].style.transform = "";
-        tracks[i].classList.remove("roman-task-planner__swipe-track--open");
+        var tr = tracks[i];
+        var c = tr && tr.closest ? tr.closest(".roman-task-planner__swipe-clip") : null;
+        if (exceptClip && c === exceptClip) continue;
+        tr.style.transform = "";
+        tr.classList.remove("roman-task-planner__swipe-track--open");
       }
     }
     function initRomanPlannerSwipeRows() {
@@ -3192,12 +3225,19 @@ function runGazetteAndTasksInit() {
         }
         function onDown(ev) {
           if (ev.pointerType === "mouse" && ev.button !== 0) return;
-          romanPlannerCloseAllSwipes();
+          if (ev.target && ev.target.closest) {
+            if (ev.target.closest(".roman-task-planner__btn")) return;
+            if (ev.target.closest(".roman-task-planner__edit-ta")) return;
+          }
+          try {
+            ev.preventDefault();
+          } catch (ePd) {}
+          romanPlannerCloseAllSwipes(clip);
           applyOpen();
           dragging = true;
           pointerId = ev.pointerId;
           try {
-            front.setPointerCapture(ev.pointerId);
+            clip.setPointerCapture(ev.pointerId);
           } catch (eCap) {}
           startX = ev.clientX;
           startY = ev.clientY;
@@ -3207,14 +3247,22 @@ function runGazetteAndTasksInit() {
           if (!dragging || ev.pointerId !== pointerId) return;
           var dx = ev.clientX - startX;
           var dy = ev.clientY - startY;
-          if (Math.abs(dy) > Math.abs(dx) + 8 && Math.abs(dy) > 12) {
+          var isMouse = ev.pointerType === "mouse";
+          var horizSlack = isMouse ? 14 : 8;
+          var vertMin = isMouse ? 18 : 12;
+          if (Math.abs(dy) > Math.abs(dx) + horizSlack && Math.abs(dy) > vertMin) {
             dragging = false;
             try {
-              front.releasePointerCapture(pointerId);
+              clip.releasePointerCapture(pointerId);
             } catch (eRel) {}
             pointerId = null;
             setTx(baseTx);
             return;
+          }
+          if (dx !== 0 || dy !== 0) {
+            try {
+              ev.preventDefault();
+            } catch (ePm) {}
           }
           setTx(baseTx + dx);
         }
@@ -3232,16 +3280,28 @@ function runGazetteAndTasksInit() {
         function onUp(ev) {
           if (!dragging || ev.pointerId !== pointerId) return;
           dragging = false;
+          var pid = pointerId;
+          pointerId = null;
           try {
-            front.releasePointerCapture(ev.pointerId);
+            clip.releasePointerCapture(pid);
           } catch (eRel2) {}
+          snapOpenOrClosed();
+        }
+        function onLostCapture(evLost) {
+          if (!dragging) return;
+          if (pointerId != null && evLost.pointerId !== pointerId) return;
+          dragging = false;
           pointerId = null;
           snapOpenOrClosed();
         }
-        front.addEventListener("pointerdown", onDown);
-        front.addEventListener("pointermove", onMove);
-        front.addEventListener("pointerup", onUp);
-        front.addEventListener("pointercancel", onUp);
+        clip.addEventListener("pointerdown", onDown);
+        clip.addEventListener("pointermove", onMove);
+        clip.addEventListener("pointerup", onUp);
+        clip.addEventListener("pointercancel", onUp);
+        clip.addEventListener("lostpointercapture", onLostCapture);
+        clip.addEventListener("dragstart", function (eDg) {
+          eDg.preventDefault();
+        });
       }
     }
     function renderTasks() {
