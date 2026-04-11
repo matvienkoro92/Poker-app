@@ -4540,6 +4540,14 @@ html.vpn-proxy-modal-open {
   border-bottom: 1px solid rgba(44, 24, 16, 0.12);
   font-size: 13px;
   color: #2c1810;
+  position: relative;
+  z-index: 1;
+}
+.roman-task-planner__item:not(.roman-task-planner__item--done) {
+  z-index: 2;
+}
+.roman-task-planner__item--done {
+  z-index: 1;
 }
 .roman-task-planner__item:last-child {
   border-bottom: none;
@@ -4752,6 +4760,9 @@ textarea.roman-task-planner__input {
   cursor: grab;
   -webkit-user-select: none;
   user-select: none;
+  /* Изоляция слоя: иначе composited transform трека может перехватывать касания у нижней строки (свайп «активной» двигал «выполненную»). */
+  isolation: isolate;
+  contain: paint;
 }
 .roman-task-planner__swipe-clip:active {
   cursor: grabbing;
@@ -4770,8 +4781,6 @@ textarea.roman-task-planner__input {
 .roman-task-planner__swipe-front {
   box-sizing: border-box;
   min-height: 0;
-  position: relative;
-  z-index: 1;
   -webkit-user-select: none;
   user-select: none;
 }

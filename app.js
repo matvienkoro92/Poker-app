@@ -1205,6 +1205,39 @@ function initProfileChatPush() {
 
 (function initPwaServiceWorkerGlobal() {
   if (!("serviceWorker" in navigator)) return;
+  try {
+    navigator.serviceWorker.addEventListener("message", function (ev) {
+      var d = ev.data;
+      if (!d || !d.pokerChatPushSound) return;
+      var url = d.url || "";
+      if (!url) return;
+      try {
+        var a = new Audio(url);
+        a.volume = typeof d.volume === "number" ? d.volume : 0.88;
+        var p = a.play();
+        if (p && typeof p.catch === "function") p.catch(function () {});
+      } catch (ePlay) {}
+    });
+  } catch (eMsg) {}
+  /** Разблокировка звука после первого жеста (iOS PWA / Safari) — иначе play() из push может быть тихим. */
+  function pokerUnlockNotifyAudioFromGesture() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      ctx.resume().then(function () {
+        try {
+          ctx.close();
+        } catch (eC) {}
+      });
+    } catch (eA) {}
+    try {
+      document.removeEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, true);
+    } catch (eR) {}
+  }
+  try {
+    document.addEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, { capture: true, passive: true });
+  } catch (eP) {}
   navigator.serviceWorker.register("./sw.js").catch(function () {});
 })();
 

@@ -1,8 +1,17 @@
 /* PWA: installability + push; для GET /api/chat — stale-while-revalidate (ускоряет повторный холодный старт). */
 var POKER_CHAT_API_CACHE = "poker-chat-api-v1";
+var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v1";
+var POKER_CHAT_NOTIFY_WAV = "./assets/chat-push-notify.wav";
 
-self.addEventListener("install", function () {
+self.addEventListener("install", function (e) {
   self.skipWaiting();
+  e.waitUntil(
+    caches.open(POKER_PUSH_ASSETS_CACHE).then(function (cache) {
+      return cache.add(new Request(POKER_CHAT_NOTIFY_WAV, { cache: "reload" })).catch(function () {
+        return cache.add(POKER_CHAT_NOTIFY_WAV).catch(function () {});
+      });
+    })
+  );
 });
 self.addEventListener("activate", function (e) {
   e.waitUntil(self.clients.claim());
@@ -44,6 +53,19 @@ self.addEventListener("fetch", function (event) {
   } catch (eFetch) {}
 });
 
+function pokerSwNotifyClientsChatSound() {
+  var base = self.location.origin || "";
+  var url = base + "/assets/chat-push-notify.wav";
+  return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (cs) {
+    var i;
+    for (i = 0; i < cs.length; i++) {
+      try {
+        cs[i].postMessage({ pokerChatPushSound: true, url: url, volume: 0.88 });
+      } catch (ePost) {}
+    }
+  });
+}
+
 self.addEventListener("push", function (event) {
   var root = self.location.origin || "";
   var data = {
@@ -62,27 +84,35 @@ self.addEventListener("push", function (event) {
     }
   } catch (e1) {}
   var iconUrl = root + "/assets/logo-two-aces.png";
+  var notifOpts = {
+    body: data.body,
+    icon: iconUrl,
+    badge: iconUrl,
+    tag: data.tag || "poker-chat",
+    renotify: true,
+    silent: false,
+    vibrate: [180, 80, 120],
+    data: { openUrl: data.openUrl },
+  };
   event.waitUntil(
-    self.registration
-      .showNotification(data.title, {
-        body: data.body,
-        icon: iconUrl,
-        badge: iconUrl,
-        tag: data.tag || "poker-chat",
-        renotify: true,
-        data: { openUrl: data.openUrl },
-      })
-      .catch(function (eShow) {
-        try {
-          console.error("[sw] showNotification", eShow && eShow.message ? eShow.message : eShow);
-        } catch (eLog) {}
-        return self.registration.showNotification(data.title, {
-          body: data.body,
-          tag: data.tag || "poker-chat",
-          renotify: true,
-          data: { openUrl: data.openUrl },
-        });
-      })
+    Promise.all([
+      self.registration
+        .showNotification(data.title, notifOpts)
+        .catch(function (eShow) {
+          try {
+            console.error("[sw] showNotification", eShow && eShow.message ? eShow.message : eShow);
+          } catch (eLog) {}
+          return self.registration.showNotification(data.title, {
+            body: data.body,
+            tag: data.tag || "poker-chat",
+            renotify: true,
+            silent: false,
+            vibrate: [180, 80, 120],
+            data: { openUrl: data.openUrl },
+          });
+        }),
+      pokerSwNotifyClientsChatSound(),
+    ])
   );
 });
 
