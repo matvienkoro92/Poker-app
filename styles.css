@@ -9338,6 +9338,21 @@ button.chat-conv-group-add-btn[hidden] {
   height: 40px;
   position: relative;
 }
+.chat-conv-peer-avatar-wrap.chat-conv-peer-avatar-wrap--editable {
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.45);
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
+}
+.chat-conv-peer-avatar-wrap.chat-conv-peer-avatar-wrap--editable:hover {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.75);
+}
+.chat-conv-peer-avatar-wrap.chat-conv-peer-avatar-wrap--editable:active {
+  transform: scale(0.97);
+}
+[data-theme="light"] .chat-conv-peer-avatar-wrap.chat-conv-peer-avatar-wrap--editable {
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.5);
+}
 .chat-conv-peer-avatar {
   width: 40px;
   height: 40px;

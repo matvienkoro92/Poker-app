@@ -12443,8 +12443,29 @@ document.addEventListener("click", function (e) {
 
 var viewHandledInTouchend = false;
 
+/** Клик по UI голоса в чате: <audio class="chat-msg__voice"> (в т.ч. кнопка play внутри UA shadow) или обёртка .chat-msg__voice-wrap. */
+function pokerEventPathHasChatVoiceUi(e) {
+  try {
+    if (e && e.target && e.target.closest) {
+      if (e.target.closest(".chat-msg__voice-wrap")) return true;
+      if (e.target.closest("audio.chat-msg__voice")) return true;
+    }
+  } catch (e0) {}
+  try {
+    var path = typeof e.composedPath === "function" ? e.composedPath() : [];
+    for (var i = 0; i < path.length; i++) {
+      var n = path[i];
+      if (!n || !n.nodeName) continue;
+      if (n.nodeName === "AUDIO" && n.classList && n.classList.contains("chat-msg__voice")) return true;
+      if (n.classList && n.classList.contains("chat-msg__voice-wrap")) return true;
+    }
+  } catch (e1) {}
+  return false;
+}
+
 function handleViewLinkClick(e) {
   if (e.target && e.target.closest && e.target.closest("#chatDialogsView")) return;
+  if (pokerEventPathHasChatVoiceUi(e)) return;
   var hallTop15Link = e.target.closest("a[data-hall-top15]");
   if (hallTop15Link) {
     e.preventDefault();
@@ -17201,21 +17222,38 @@ function initChat() {
   var convTitle = document.getElementById("chatConvTitle");
   var convTitleId = document.getElementById("chatConvTitleId");
   var convGroupDescEl = document.getElementById("chatConvGroupDesc");
-  function applyConvGroupDescription(text) {
+  /** Описание группы не дублируем под шапкой чата — только в модалке «Информация о группе». */
+  function applyConvGroupDescription() {
     if (!convGroupDescEl) return;
-    var t = text != null ? String(text).trim() : "";
-    if (!t) {
-      convGroupDescEl.textContent = "";
-      convGroupDescEl.classList.add("chat-conv-group-desc--hidden");
-      convGroupDescEl.setAttribute("aria-hidden", "true");
-      return;
-    }
-    convGroupDescEl.textContent = t;
-    convGroupDescEl.classList.remove("chat-conv-group-desc--hidden");
-    convGroupDescEl.setAttribute("aria-hidden", "false");
+    convGroupDescEl.textContent = "";
+    convGroupDescEl.classList.add("chat-conv-group-desc--hidden");
+    convGroupDescEl.setAttribute("aria-hidden", "true");
   }
   var convPeerAvatar = document.getElementById("chatConvPeerAvatar");
   var convPeerAvatarPh = document.getElementById("chatConvPeerAvatarPh");
+  var convPeerAvatarWrap = document.getElementById("chatConvPeerAvatarWrap");
+  var convGroupAvatarFile = document.getElementById("chatConvGroupAvatarFile");
+  var convGroupCanChangeAvatar = false;
+  function syncConvGroupAvatarEditUi() {
+    if (!convPeerAvatarWrap) return;
+    var on = !!(
+      convGroupCanChangeAvatar &&
+      chatWithUserId &&
+      String(chatWithUserId).indexOf("group_") === 0
+    );
+    convPeerAvatarWrap.classList.toggle("chat-conv-peer-avatar-wrap--editable", on);
+    if (on) {
+      convPeerAvatarWrap.setAttribute("aria-hidden", "false");
+      convPeerAvatarWrap.setAttribute("aria-label", "Сменить аватар группы");
+      convPeerAvatarWrap.setAttribute("role", "button");
+      convPeerAvatarWrap.setAttribute("tabindex", "0");
+    } else {
+      convPeerAvatarWrap.setAttribute("aria-hidden", "true");
+      convPeerAvatarWrap.removeAttribute("aria-label");
+      convPeerAvatarWrap.setAttribute("role", "presentation");
+      convPeerAvatarWrap.setAttribute("tabindex", "-1");
+    }
+  }
   function applyConvPeerAvatarHeader(url, displayName) {
     if (!convPeerAvatar || !convPeerAvatarPh) return;
     var nm = displayName != null && String(displayName).trim() ? String(displayName).trim() : "";
@@ -17254,6 +17292,8 @@ function initChat() {
   }
   function clearConvPeerAvatarHeader() {
     chatWithPeerAvatarUrl = null;
+    convGroupCanChangeAvatar = false;
+    syncConvGroupAvatarEditUi();
     applyConvPeerAvatarHeader("", "");
     applyConvGroupDescription("");
   }
@@ -19001,6 +19041,11 @@ function initChat() {
       openClubChat();
       return;
     }
+    if (clubChatAccess === "revoked") {
+      if (tg && tg.showAlert) tg.showAlert("Доступ к главному чату отозван администратором.");
+      else if (typeof alert === "function") alert("Доступ к главному чату отозван администратором.");
+      return;
+    }
     if (clubChatAccess === "pending") {
       if (tg && tg.showAlert) tg.showAlert("Заявка на рассмотрении. Ожидайте решения администратора.");
       else if (typeof alert === "function") alert("Заявка на рассмотрении.");
@@ -19038,6 +19083,13 @@ function initChat() {
       .then(function (d) {
         if (d && d.ok) {
           clubChatAccess = d.clubChatAccess || "pending";
+          if (clubChatAccess === "revoked") {
+            if (tg && tg.showAlert) tg.showAlert("Доступ к главному чату отозван администратором.");
+            else if (typeof alert === "function") alert("Доступ к главному чату отозван администратором.");
+            loadContacts();
+            if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
+            return;
+          }
           if (tg && tg.showAlert) tg.showAlert("Заявка отправлена. После одобрения администратором чат откроется.");
           else if (typeof alert === "function") alert("Заявка отправлена.");
           loadContacts();
@@ -19070,7 +19122,9 @@ function initChat() {
     var msg =
       state === "pending"
         ? "Заявка на рассмотрении. После одобрения администратором здесь появятся сообщения."
-        : "Главный чат доступен по заявке. Вернитесь к списку чатов, нажмите «Главный чат» и подайте заявку.";
+        : state === "revoked"
+          ? "Доступ к главному чату отозван администратором."
+          : "Главный чат доступен по заявке. Вернитесь к списку чатов, нажмите «Главный чат» и подайте заявку.";
     generalMessages.innerHTML =
       '<div class="chat-general-gate"><p class="chat-empty">' + escapeHtml(msg) + "</p></div>";
   }
@@ -20017,7 +20071,8 @@ function initChat() {
           window.chatClubPendingReviewCount = 0;
         }
         var access = data.clubChatAccess != null ? data.clubChatAccess : "open";
-        var noGeneralAccess = !chatIsAdmin && (access === "need_apply" || access === "pending");
+        var noGeneralAccess =
+          !chatIsAdmin && (access === "need_apply" || access === "pending" || access === "revoked");
         var messages = data.messages || [];
         if (noGeneralAccess) {
           messages = [];
@@ -21297,7 +21352,7 @@ function initChat() {
       var startY = 0;
       function startTimer(e) {
         if (longPressTimer) return;
-        if (e && e.target && e.target.closest && e.target.closest(".chat-msg__voice-wrap")) return;
+        if (pokerEventPathHasChatVoiceUi(e)) return;
         if (e && e.touches && e.touches[0]) {
           startX = e.touches[0].clientX;
           startY = e.touches[0].clientY;
@@ -21893,6 +21948,8 @@ function initChat() {
     }
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    convGroupCanChangeAvatar = false;
+    syncConvGroupAvatarEditUi();
     var peerAvParam = peerAvatarUrlOpt != null && String(peerAvatarUrlOpt).trim() ? String(peerAvatarUrlOpt).trim() : "";
     var peerAvCache = "";
     if (isGroupConv) {
@@ -22022,6 +22079,10 @@ function initChat() {
     }
     if (clubChatAccess === "pending") {
       el.textContent = "Заявка на рассмотрении…";
+      return;
+    }
+    if (clubChatAccess === "revoked") {
+      el.textContent = "Доступ отозван";
       return;
     }
     if (!messages || messages.length === 0) {
@@ -23577,11 +23638,7 @@ function initChat() {
             convTitleId.textContent = titleP21 || "\u2014";
           }
         }
-        if (isGrpThread) {
-          applyConvGroupDescription(data.groupDescription != null ? String(data.groupDescription) : "");
-        } else {
-          applyConvGroupDescription("");
-        }
+        applyConvGroupDescription();
         var peerAvData = "";
         if (isGrpThread) {
           peerAvData = data.groupAvatar != null && String(data.groupAvatar).trim() ? String(data.groupAvatar).trim() : "";
@@ -23602,6 +23659,11 @@ function initChat() {
           }
         }
         if (isGrpThread) {
+          convGroupCanChangeAvatar =
+            data.iCanChangeGroupAvatar === true || data.iCanChangeGroupAvatar === false
+              ? !!data.iCanChangeGroupAvatar
+              : !!(data.isAdmin || data.iAmGroupCreator);
+          syncConvGroupAvatarEditUi();
           if (peerAvData) {
             chatWithPeerAvatarUrl = peerAvData;
             applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
@@ -23613,7 +23675,11 @@ function initChat() {
             }
             if (convPeerAvatar) convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
           }
-        } else if (peerAvData) {
+        } else {
+          convGroupCanChangeAvatar = false;
+          syncConvGroupAvatarEditUi();
+        }
+        if (!isGrpThread && peerAvData) {
           chatWithPeerAvatarUrl = peerAvData;
           applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
         }
@@ -25206,6 +25272,58 @@ function initChat() {
         }
       });
     }
+    if (convPeerAvatarWrap && convGroupAvatarFile) {
+      convPeerAvatarWrap.addEventListener("click", function (e) {
+        if (!convGroupCanChangeAvatar || !chatWithUserId || String(chatWithUserId).indexOf("group_") !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        convGroupAvatarFile.click();
+      });
+      convPeerAvatarWrap.addEventListener("keydown", function (e) {
+        if (!convGroupCanChangeAvatar) return;
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        convGroupAvatarFile.click();
+      });
+    }
+    if (convGroupAvatarFile) {
+      convGroupAvatarFile.addEventListener("change", function () {
+        var f = convGroupAvatarFile.files && convGroupAvatarFile.files[0];
+        var gidCv = chatWithUserId;
+        convGroupAvatarFile.value = "";
+        if (!f || !gidCv || String(gidCv).indexOf("group_") !== 0 || !convGroupCanChangeAvatar) return;
+        if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+        if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+          if (tg && tg.showAlert) tg.showAlert("Войдите, чтобы сменить аватар");
+          return;
+        }
+        resizeImage(f, 256, 256, 0.88)
+          .then(function (dataUrl) {
+            return fetch(base + "/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(
+                pokerApiAuthJsonBody({ action: "updateGroupAvatar", groupId: gidCv, avatar: dataUrl })
+              ),
+            }).then(function (r) {
+              return r.json();
+            });
+          })
+          .then(function (data) {
+            if (data && data.ok && data.groupAvatar) {
+              chatWithPeerAvatarUrl = data.groupAvatar;
+              applyConvPeerAvatarHeader(data.groupAvatar, chatWithUserName || "");
+              if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+              if (tg && tg.showToast) tg.showToast("Аватар обновлён");
+            } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+            else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+          })
+          .catch(function () {
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+            else if (typeof alert === "function") alert(POKER_NET_ERR);
+          });
+      });
+    }
     if (findByIdBtn && findByIdInput) {
       function findByIdAndOpen() {
         var raw = (findByIdInput.value || "").trim();
@@ -26740,6 +26858,7 @@ function initChat() {
     var modal = document.getElementById("chatGroupAddMembersModal");
     if (!modal) {
       window.__pokerOpenChatGroupAddMembers = function () {};
+      window.__pokerOpenGeneralChatInviteMembers = function () {};
       return;
     }
     var GROUP_MEMBERS_MAX_UI = 50;
@@ -26761,11 +26880,14 @@ function initChat() {
     var excludeKeysAm = Object.create(null);
     var slotsLeftAm = GROUP_MEMBERS_MAX_UI;
     var selectedMapAm = Object.create(null);
+    var groupAddModalTitleEl = document.getElementById("chatGroupAddMembersModalTitle");
+    var groupAddModalDefaultTitle = "Добавить участников";
     function closeModalAmFn() {
       modal.classList.add("chat-create-group-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
       targetGroupIdAm = "";
       if (btnSubmitAm) btnSubmitAm.disabled = false;
+      if (groupAddModalTitleEl) groupAddModalTitleEl.textContent = groupAddModalDefaultTitle;
     }
     function inGroupAlreadyAm(userId) {
       if (!userId) return true;
@@ -26978,6 +27100,46 @@ function initChat() {
           else if (typeof alert === "function") alert("Выберите хотя бы одного человека");
           return;
         }
+        if (targetGroupIdAm === "__general__") {
+          if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+          if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+            if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
+            return;
+          }
+          var linkGen =
+            typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
+          function doneGeneralInvite() {
+            btnSubmitAm.disabled = false;
+            closeModalAmFn();
+          }
+          if (!linkGen) {
+            if (tg && tg.showAlert) tg.showAlert("Не удалось сформировать ссылку");
+            return;
+          }
+          btnSubmitAm.disabled = true;
+          function afterGeneralCopy() {
+            if (ids.length === 1 && typeof window.chatOpenConvFromDialogs === "function") {
+              window.chatOpenConvFromDialogs(ids[0], selectedMapAm[ids[0]] || ids[0]);
+              if (tg && tg.showToast) tg.showToast("Вставьте ссылку из буфера в чат");
+              else if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована — вставьте её в открывшийся чат.");
+            } else {
+              if (tg && tg.showToast) tg.showToast("Ссылка скопирована — отправьте её выбранным контактам");
+              else if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована в буфер обмена.");
+            }
+            doneGeneralInvite();
+          }
+          if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+            navigator.clipboard
+              .writeText(linkGen)
+              .then(afterGeneralCopy)
+              .catch(function () {
+                afterGeneralCopy();
+              });
+          } else {
+            afterGeneralCopy();
+          }
+          return;
+        }
         if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
         if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
           if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
@@ -27038,6 +27200,7 @@ function initChat() {
         if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
         return;
       }
+      if (groupAddModalTitleEl) groupAddModalTitleEl.textContent = groupAddModalDefaultTitle;
       targetGroupIdAm = gid;
       selectedMapAm = Object.create(null);
       excludeKeysAm = Object.create(null);
@@ -27119,6 +27282,58 @@ function initChat() {
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     };
+    window.__pokerOpenGeneralChatInviteMembers = function () {
+      if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
+        return;
+      }
+      if (groupAddModalTitleEl) groupAddModalTitleEl.textContent = "Пригласить в общий чат";
+      targetGroupIdAm = "__general__";
+      selectedMapAm = Object.create(null);
+      excludeKeysAm = Object.create(null);
+      var gm =
+        window._chatGeneralCache && Array.isArray(window._chatGeneralCache.generalMembers)
+          ? window._chatGeneralCache.generalMembers
+          : [];
+      for (var gi = 0; gi < gm.length; gi++) {
+        var gmid = gm[gi] && gm[gi].id;
+        if (!gmid) continue;
+        var nk = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(gmid) : gmid;
+        excludeKeysAm[nk] = true;
+        try {
+          if (nk && nk !== gmid) excludeKeysAm[gmid] = true;
+        } catch (eGk) {}
+      }
+      slotsLeftAm = GROUP_MEMBERS_MAX_UI;
+      if (manualInpAm) manualInpAm.value = "";
+      if (manualHintAm) manualHintAm.textContent = "";
+      if (metaHintAm) {
+        metaHintAm.textContent =
+          "Кого ещё нет в общем чате. По готово ссылка скопируется; при одном контакте откроется личный чат.";
+      }
+      if (btnSubmitAm) btnSubmitAm.disabled = false;
+      setTabAmFn("all");
+      modal.classList.remove("chat-create-group-modal--hidden");
+      modal.setAttribute("aria-hidden", "false");
+      function paintGenInv() {
+        try {
+          renderPickersAm();
+          renderSelectedAm();
+        } catch (ePgi) {}
+      }
+      paintGenInv();
+      if (typeof window.__pokerReloadChatContacts === "function") {
+        try {
+          window.__pokerReloadChatContacts({ onLoaded: paintGenInv });
+        } catch (eRlGi) {}
+      }
+      try {
+        if (typeof window.__pokerFetchFriendsForGroupPick === "function") {
+          window.__pokerFetchFriendsForGroupPick(paintGenInv);
+        }
+      } catch (eFrGi) {}
+    };
   })();
 
   (function initChatGroupInfoModal() {
@@ -27149,6 +27364,8 @@ function initChat() {
     var addMembersBtnInfo = document.getElementById("chatGroupInfoAddMembersBtn");
     var openGroupId = "";
     var lastGroupInfoTitle = "";
+    /** Создатель или админ: можно POST updateGroupAvatar (название/описание — по-прежнему только админ). */
+    var groupInfoModalCanChangeAvatar = false;
     var dangerZone = document.getElementById("chatGroupInfoDanger");
     var deleteOpenBtn = document.getElementById("chatGroupInfoDeleteOpenBtn");
     var deletePanel = document.getElementById("chatGroupInfoDeletePanel");
@@ -27167,7 +27384,9 @@ function initChat() {
       openGroupInfoMode = "group";
       try {
         modal.classList.remove("chat-group-info-modal--can-manage");
+        modal.classList.remove("chat-group-info-modal--can-change-avatar");
       } catch (eCm) {}
+      groupInfoModalCanChangeAvatar = false;
       modal.classList.add("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
     }
@@ -27202,12 +27421,48 @@ function initChat() {
       if (m10 >= 2 && m10 <= 4) return String(k) + " участника";
       return String(k) + " участников";
     }
+    function mapGeneralMembersForModal(arr) {
+      return (arr || [])
+        .map(function (m) {
+          if (!m || !m.id) return null;
+          return {
+            id: m.id,
+            name: m.name || m.id,
+            avatar: m.avatar || null,
+            online: !!m.online,
+            isYou: !!m.isYou,
+            admin: !!m.admin,
+            isGroupCreator: false,
+            contactName: m.contactName,
+            telegramUsername: m.telegramUsername,
+            telegramDisplayName: m.telegramDisplayName,
+          };
+        })
+        .filter(Boolean);
+    }
+    function renderGeneralMembersModalFromList(raw) {
+      var mm = mapGeneralMembersForModal(raw);
+      renderGroup({
+        title: "Главный чат",
+        description: "Секретный чат участников клуба 2 туза",
+        members: mm,
+        iAmCreator: false,
+        iCanManageGroupMeta: false,
+        memberCount: mm.length,
+        avatar: null,
+        createdAt: null,
+      });
+    }
     function renderGroup(g) {
       if (!g) return;
       var t = g.title || "Группа";
       lastGroupInfoTitle = t;
       var creator = !!(g.iAmCreator);
       var canManageMeta = !!(g.iCanManageGroupMeta);
+      var canChangeGroupAvatar = !!(
+        g.iCanChangeGroupAvatar != null ? g.iCanChangeGroupAvatar : canManageMeta || creator
+      );
+      groupInfoModalCanChangeAvatar = canChangeGroupAvatar;
       if (creatorBadge) creatorBadge.hidden = !creator;
       if (canManageMeta) {
         if (titleEl) titleEl.hidden = true;
@@ -27301,7 +27556,16 @@ function initChat() {
                     escapeHtml(m.avatar) +
                     '" alt="" width="40" height="40" decoding="async" />'
                   : '<span class="chat-group-info-modal__member-av-ph">' + escapeHtml(avPh) + "</span>";
-              var showKick = creator && !m.isYou;
+              var showKickGeneral =
+                openGroupInfoMode === "general" &&
+                typeof chatIsAdmin !== "undefined" &&
+                chatIsAdmin &&
+                !m.admin &&
+                !m.isYou;
+              var showKick = (creator && !m.isYou) || showKickGeneral;
+              var kickLabel = openGroupInfoMode === "general" ? "Убрать" : "Исключить";
+              var kickAria =
+                openGroupInfoMode === "general" ? "Убрать из главного чата" : "Исключить из группы";
               var memberBtn =
                 '<button type="button" class="chat-group-info-modal__member" data-gi-user-id="' +
                 escapeHtml(m.id) +
@@ -27322,7 +27586,11 @@ function initChat() {
                   escapeHtml(m.id) +
                   '" data-gi-user-name="' +
                   escapeHtml(nmRaw) +
-                  '" aria-label="Исключить из группы">Исключить</button>'
+                  '" aria-label="' +
+                  escapeHtml(kickAria) +
+                  '">' +
+                  escapeHtml(kickLabel) +
+                  "</button>"
                 : "";
               return (
                 '<div class="chat-group-info-modal__member-row">' + memberBtn + kickBtn + "</div>"
@@ -27332,15 +27600,25 @@ function initChat() {
         }
       }
       if (avatarBtn) {
-        avatarBtn.disabled = !canManageMeta;
-        avatarBtn.setAttribute("aria-label", canManageMeta ? "Сменить аватар группы" : "Аватар группы");
+        avatarBtn.disabled = !canChangeGroupAvatar;
+        avatarBtn.setAttribute(
+          "aria-label",
+          canChangeGroupAvatar ? "Сменить аватар группы" : "Аватар группы"
+        );
       }
-      if (avatarEditHint) avatarEditHint.hidden = !canManageMeta;
+      if (avatarEditHint) {
+        avatarEditHint.hidden = !canChangeGroupAvatar;
+        if (canChangeGroupAvatar) {
+          avatarEditHint.textContent = canManageMeta
+            ? "Администратор клуба: нажмите на фото, чтобы загрузить новый аватар"
+            : "Создатель: нажмите на фото, чтобы сменить аватар группы";
+        }
+      }
       if (dangerZone) dangerZone.hidden = !canManageMeta;
       resetGroupDeleteUi();
       if (openGroupInfoMode === "general") {
         if (leaveWrap) leaveWrap.hidden = true;
-        if (addMembersBtnInfo) addMembersBtnInfo.hidden = true;
+        if (addMembersBtnInfo) addMembersBtnInfo.hidden = false;
         if (creatorBadge) creatorBadge.hidden = true;
         if (dangerZone) dangerZone.hidden = true;
         resetGroupDeleteUi();
@@ -27358,10 +27636,11 @@ function initChat() {
         }
         if (descViewEl) {
           descViewEl.textContent =
-            "Участники общего чата клуба. Онлайн — недавняя активность в приложении (не статус Telegram).";
+            "Секретный чат участников клуба 2 туза";
           descViewEl.classList.remove("chat-group-info-modal__desc-view-text--empty");
         }
         if (saveBtn) saveBtn.hidden = true;
+        groupInfoModalCanChangeAvatar = false;
         if (avatarBtn) {
           avatarBtn.disabled = true;
           avatarBtn.setAttribute("aria-label", "Главный чат");
@@ -27383,6 +27662,10 @@ function initChat() {
           "chat-group-info-modal--can-manage",
           openGroupInfoMode === "group" && !!canManageMeta
         );
+        modal.classList.toggle(
+          "chat-group-info-modal--can-change-avatar",
+          openGroupInfoMode === "group" && !!canChangeGroupAvatar
+        );
       } catch (eCm2) {}
     }
     window.__pokerOpenChatGroupInfo = function (groupId) {
@@ -27393,7 +27676,9 @@ function initChat() {
       lastGroupInfoTitle = "";
       try {
         modal.classList.remove("chat-group-info-modal--can-manage");
+        modal.classList.remove("chat-group-info-modal--can-change-avatar");
       } catch (eCmO) {}
+      groupInfoModalCanChangeAvatar = false;
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
       if (leaveWrap) leaveWrap.hidden = true;
@@ -27470,6 +27755,12 @@ function initChat() {
         else if (typeof alert === "function") alert(m2);
         return;
       }
+      if (typeof clubChatAccess !== "undefined" && clubChatAccess === "revoked") {
+        var mRev = "Доступ к главному чату отозван администратором.";
+        if (tgLoc && tgLoc.showAlert) tgLoc.showAlert(mRev);
+        else if (typeof alert === "function") alert(mRev);
+        return;
+      }
       openGroupInfoMode = "general";
       openGroupId = "";
       lastGroupInfoTitle = "Главный чат";
@@ -27479,7 +27770,7 @@ function initChat() {
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
       if (leaveWrap) leaveWrap.hidden = true;
-      if (addMembersBtnInfo) addMembersBtnInfo.hidden = true;
+      if (addMembersBtnInfo) addMembersBtnInfo.hidden = false;
       if (creatorBadge) creatorBadge.hidden = true;
       if (titleEl) {
         titleEl.hidden = false;
@@ -27495,7 +27786,7 @@ function initChat() {
       }
       if (descViewEl) {
         descViewEl.textContent =
-          "Участники общего чата клуба. Онлайн — недавняя активность в приложении (не статус Telegram).";
+          "Секретный чат участников клуба 2 туза";
         descViewEl.classList.remove("chat-group-info-modal__desc-view-text--empty");
       }
       if (saveBtn) saveBtn.hidden = true;
@@ -27506,36 +27797,6 @@ function initChat() {
         avatarBtn.setAttribute("aria-label", "Главный чат");
       }
       if (avatarEditHint) avatarEditHint.hidden = true;
-      function mapGeneralMembers(arr) {
-        return (arr || [])
-          .map(function (m) {
-            if (!m || !m.id) return null;
-            return {
-              id: m.id,
-              name: m.name || m.id,
-              avatar: m.avatar || null,
-              online: !!m.online,
-              isYou: !!m.isYou,
-              admin: !!m.admin,
-              isGroupCreator: false,
-            };
-          })
-          .filter(Boolean);
-      }
-      function showFromList(raw) {
-        var mm = mapGeneralMembers(raw);
-        renderGroup({
-          title: "Главный чат",
-          description:
-            "Участники общего чата. Онлайн — недавняя активность в приложении (не статус Telegram).",
-          members: mm,
-          iAmCreator: false,
-          iCanManageGroupMeta: false,
-          memberCount: mm.length,
-          avatar: null,
-          createdAt: null,
-        });
-      }
       modal.classList.remove("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "false");
       var cachedGm =
@@ -27543,7 +27804,7 @@ function initChat() {
           ? window._chatGeneralCache.generalMembers
           : null;
       if (cachedGm && cachedGm.length) {
-        showFromList(cachedGm);
+        renderGeneralMembersModalFromList(cachedGm);
         return;
       }
       if (membersEl) membersEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
@@ -27561,7 +27822,7 @@ function initChat() {
               if (data.participantsCount != null) window._chatGeneralCache.participantsCount = data.participantsCount;
               if (data.onlineCount != null) window._chatGeneralCache.onlineCount = data.onlineCount;
             }
-            showFromList(gm);
+            renderGeneralMembersModalFromList(gm);
             try {
               if (typeof syncClubChatRosterUi === "function") syncClubChatRosterUi();
             } catch (eSynM) {}
@@ -27630,7 +27891,7 @@ function initChat() {
                 if (peerChatIdsEqual(chatWithUserId, gidSv)) {
                   chatWithUserName = tOut;
                   if (typeof convTitle !== "undefined" && convTitle) convTitle.textContent = tOut;
-                  if (typeof applyConvGroupDescription === "function") applyConvGroupDescription(dOut);
+                  if (typeof applyConvGroupDescription === "function") applyConvGroupDescription();
                 }
               }
               if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
@@ -27657,12 +27918,14 @@ function initChat() {
         var f = avatarFile.files && avatarFile.files[0];
         var gidUp = openGroupId;
         if (!f || !gidUp) return;
-        if (typeof chatIsAdmin !== "undefined" && !chatIsAdmin) {
+        var canDoAvatarFile =
+          (typeof chatIsAdmin !== "undefined" && chatIsAdmin) || groupInfoModalCanChangeAvatar;
+        if (!canDoAvatarFile) {
           avatarFile.value = "";
           if (typeof tg !== "undefined" && tg && tg.showAlert) {
-            tg.showAlert("Только администратор клуба может менять аватар группы");
+            tg.showAlert("Менять аватар может только создатель группы или администратор клуба");
           } else if (typeof alert === "function") {
-            alert("Только администратор клуба может менять аватар группы");
+            alert("Менять аватар может только создатель группы или администратор клуба");
           }
           return;
         }
@@ -27869,7 +28132,12 @@ function initChat() {
       addMembersBtnInfo.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if (openGroupInfoMode === "general") return;
+        if (openGroupInfoMode === "general") {
+          if (typeof window.__pokerOpenGeneralChatInviteMembers === "function") {
+            window.__pokerOpenGeneralChatInviteMembers();
+          }
+          return;
+        }
         var gida = openGroupId;
         if (!gida) return;
         if (typeof window.__pokerOpenChatGroupAddMembers === "function") {
@@ -27899,16 +28167,69 @@ function initChat() {
           e.stopPropagation();
           var uidKick = kickB.getAttribute("data-gi-user-id");
           var nmKick = kickB.getAttribute("data-gi-user-name") || uidKick;
-          var gidKick = openGroupId;
-          if (!uidKick || !gidKick) return;
+          if (!uidKick) return;
           if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
           if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
             if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
             return;
           }
-          var msgKick = "Исключить «" + String(nmKick || uidKick).slice(0, 80) + "» из группы?";
+          var isGeneralKick = openGroupInfoMode === "general";
+          var gidKick = openGroupId;
+          if (!isGeneralKick && !gidKick) return;
+          var msgKick = isGeneralKick
+            ? "Убрать «" + String(nmKick || uidKick).slice(0, 80) + "» из главного чата?"
+            : "Исключить «" + String(nmKick || uidKick).slice(0, 80) + "» из группы?";
           function doKick() {
             kickB.disabled = true;
+            if (isGeneralKick) {
+              fetch(base + "/api/chat", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(pokerApiAuthJsonBody({ action: "clubChatRevoke", userId: uidKick })),
+              })
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function (data) {
+                  kickB.disabled = false;
+                  if (data && data.ok) {
+                    var qGr = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+                    fetch(base + "/api/chat" + qGr + "&mode=general&trackSeen=0")
+                      .then(function (r2) {
+                        return r2.json();
+                      })
+                      .then(function (d2) {
+                        if (openGroupInfoMode !== "general") return;
+                        if (d2 && d2.ok) {
+                          var gm2 = Array.isArray(d2.generalMembers) ? d2.generalMembers : [];
+                          if (window._chatGeneralCache && typeof window._chatGeneralCache === "object") {
+                            window._chatGeneralCache.generalMembers = gm2;
+                            if (d2.participantsCount != null) {
+                              window._chatGeneralCache.participantsCount = d2.participantsCount;
+                            }
+                            if (d2.onlineCount != null) {
+                              window._chatGeneralCache.onlineCount = d2.onlineCount;
+                            }
+                          }
+                          renderGeneralMembersModalFromList(gm2);
+                          try {
+                            if (typeof syncClubChatRosterUi === "function") syncClubChatRosterUi();
+                          } catch (eSynK) {}
+                        }
+                      })
+                      .catch(function () {});
+                    if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+                    if (tg && tg.showToast) tg.showToast("Участник убран из чата");
+                  } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+                  else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+                })
+                .catch(function () {
+                  kickB.disabled = false;
+                  if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+                  else if (typeof alert === "function") alert(POKER_NET_ERR);
+                });
+              return;
+            }
             fetch(base + "/api/chat", {
               method: "POST",
               headers: { "Content-Type": "application/json" },

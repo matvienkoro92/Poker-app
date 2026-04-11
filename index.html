@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.417">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.423">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1720,7 +1720,8 @@
                         </button>
                         <button type="button" class="chat-conv-group-add-btn" id="chatConvGroupAddMembersBtn" hidden aria-label="Добавить участников">+</button>
                       </div>
-                      <div class="chat-conv-peer-avatar-wrap" aria-hidden="true">
+                      <input type="file" id="chatConvGroupAvatarFile" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
+                      <div class="chat-conv-peer-avatar-wrap" id="chatConvPeerAvatarWrap" aria-hidden="true">
                         <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
                         <span id="chatConvPeerAvatarPh" class="chat-conv-peer-avatar chat-conv-peer-avatar--ph">?</span>
                       </div>
@@ -1945,7 +1946,7 @@
                     <img class="chat-group-info-modal__avatar chat-group-info-modal__avatar--hidden" id="chatGroupInfoAvatar" alt="" width="64" height="64" decoding="async" />
                     <span class="chat-group-info-modal__avatar-ph" id="chatGroupInfoAvatarPh">👥</span>
                   </button>
-                  <p class="chat-group-info-modal__avatar-edit-hint" id="chatGroupInfoAvatarEditHint" hidden>Администратор клуба: нажмите на фото, чтобы загрузить новый аватар</p>
+                  <p class="chat-group-info-modal__avatar-edit-hint" id="chatGroupInfoAvatarEditHint" hidden>Создатель или администратор клуба: нажмите на фото, чтобы сменить аватар группы</p>
                   <p class="chat-group-info-modal__creator-badge" id="chatGroupInfoCreatorBadge" hidden>Вы — создатель группы</p>
                   <h2 id="chatGroupInfoModalTitle" class="chat-group-info-modal__title">Группа</h2>
                   <label class="chat-group-info-modal__label chat-group-info-modal__title-edit-label" id="chatGroupInfoTitleLabel" hidden>Название
@@ -5980,7 +5981,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=533"></script>
+    <script defer src="./app.js?v=539"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
