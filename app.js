@@ -6197,13 +6197,8 @@ function getPokerResolvedTelegramUser() {
     function shortenPwaAuthHintForUi(raw, isError) {
       var s = raw != null ? String(raw).trim() : "";
       if (!isError || !s) return s;
-      if (
-        s.length > 90 ||
-        s.indexOf("сопоставлен") !== -1 ||
-        s.indexOf("мини-прилож") !== -1 ||
-        s.indexOf("приватност") !== -1 ||
-        s.indexOf("webhook") !== -1
-      ) {
+      /* Скрываем только старые многоабзацные тексты; ответы API оставляем читаемыми. */
+      if (s.indexOf("\n\n") !== -1 || s.length > 320) {
         return "Не удалось. Проверьте @username и шаги в инструкции выше.";
       }
       return s;
