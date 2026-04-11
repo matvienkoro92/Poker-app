@@ -1,11 +1,48 @@
-/* PWA: кэш не используем — только installability + push-уведомления о чате */
+/* PWA: installability + push; для GET /api/chat — stale-while-revalidate (ускоряет повторный холодный старт). */
+var POKER_CHAT_API_CACHE = "poker-chat-api-v1";
+
 self.addEventListener("install", function () {
   self.skipWaiting();
 });
 self.addEventListener("activate", function (e) {
   e.waitUntil(self.clients.claim());
 });
-self.addEventListener("fetch", function () {});
+
+function pokerSwChatApiStaleWhileRevalidate(request) {
+  return caches.open(POKER_CHAT_API_CACHE).then(function (cache) {
+    return cache.match(request).then(function (cached) {
+      var networkFetch = fetch(request)
+        .then(function (response) {
+          try {
+            if (response && response.status === 200 && response.type === "basic") {
+              cache.put(request, response.clone());
+            }
+          } catch (ePut) {}
+          return response;
+        })
+        .catch(function () {
+          return null;
+        });
+      if (cached) {
+        networkFetch.catch(function () {});
+        return cached;
+      }
+      return networkFetch.then(function (res) {
+        return res || Response.error();
+      });
+    });
+  });
+}
+
+self.addEventListener("fetch", function (event) {
+  if (event.request.method !== "GET") return;
+  try {
+    var u = new URL(event.request.url);
+    if (u.origin !== self.location.origin) return;
+    if (u.pathname.indexOf("/api/chat") !== 0) return;
+    event.respondWith(pokerSwChatApiStaleWhileRevalidate(event.request));
+  } catch (eFetch) {}
+});
 
 self.addEventListener("push", function (event) {
   var root = self.location.origin || "";

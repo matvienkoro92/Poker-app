@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.437">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.440">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1574,7 +1574,7 @@
                     <span class="chat-dialog-item__club-roster-meta" id="chatDialogClubRosterMeta" hidden>
                       Участников: <strong id="chatDialogClubParticipants">—</strong>
                     </span>
-                    <span class="chat-dialog-item__preview" id="chatDialogClubPreview">Загрузка…</span>
+                    <span class="chat-dialog-item__preview chat-dialog-item__preview--skeleton" id="chatDialogClubPreview" aria-busy="true" aria-label="Загрузка превью"></span>
                   </span>
                   <span class="chat-dialog-item__main-label">Чаты</span>
                   <span class="chat-dialog-item__unread" id="chatDialogClubUnread" aria-hidden="true"></span>
@@ -1637,7 +1637,7 @@
                 </div>
                 <div class="chat-contacts chat-contacts--in-dialogs" id="chatContacts">
                   <div class="chat-contacts-list-block">
-                    <p class="chat-empty">Загрузка...</p>
+                    <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка списка переписок"></p>
                   </div>
                 </div>
               </div>
@@ -1669,7 +1669,7 @@
               </div>
               <div class="chat-messages-wrap">
               <div class="chat-messages" id="chatGeneralMessages" role="log" aria-live="polite">
-                <p class="chat-empty">Загрузка...</p>
+                <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка сообщений"></p>
               </div>
               </div>
               <div class="chat-input-area" id="chatGeneralInputArea">
@@ -1732,7 +1732,7 @@
                 <div class="chat-container">
                   <div class="chat-messages-wrap">
                   <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
-                    <p class="chat-empty">Загрузка...</p>
+                    <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка сообщений"></p>
                   </div>
                   </div>
                   <div class="chat-input-area">
@@ -2400,6 +2400,7 @@
                         <option value="100" data-name="Tournament Rebuy">Tournament Rebuy — 100₽</option>
                         <option value="50" data-name="Magic Chest">Magic Chest — 50₽</option>
                         <option value="800" data-name="Rebuy (17:00)">Rebuy (17:00) — 800₽</option>
+                        <option value="500" data-name="Rebuy (19:00)">Rebuy (19:00) — 500₽</option>
                         <option value="1000" data-name="HOK Magic">HOK Magic — 1000₽</option>
                         <option value="300" data-name="MOK">MOK — 300₽</option>
                         <option value="200" data-name="Energetic Tournament">Energetic Tournament — 200₽</option>
@@ -4263,6 +4264,7 @@
                     <tr><td>Tournament Rebuy</td><td>100₽</td><td>R:100₽ / A:100₽</td><td>5 000₽</td><td>14:00</td></tr>
                     <tr><td>Magic Chest</td><td>50₽</td><td>R:50₽</td><td>3 000₽</td><td>16:00</td></tr>
                     <tr><td>Rebuy</td><td>800₽</td><td>R:800₽ / A:800₽</td><td>60 000₽</td><td>17:00</td></tr>
+                    <tr><td>Rebuy (19:00)</td><td>500₽</td><td>R:500₽ / A:500₽</td><td>30 000₽</td><td>19:00</td></tr>
                     <tr><td>HOK Magic</td><td>1 000₽</td><td>R:1 000₽</td><td>50 000₽</td><td>20:00</td></tr>
                     <tr><td>MOK</td><td>300₽</td><td>R:300₽</td><td>15 000₽</td><td>21:00</td></tr>
                     <tr><td>Energetic Tournament</td><td>200₽</td><td>R:200₽ / A:200₽</td><td>10 000₽</td><td>22:00</td></tr>
@@ -5981,7 +5983,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=553"></script>
+    <script defer src="./app.js?v=556"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

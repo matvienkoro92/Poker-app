@@ -26712,3 +26712,48 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
   }
 }
+
+/* Скелетоны первой отрисовки чата (без опоры только на :has в логике). */
+@keyframes poker-chat-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+.chat-empty--skeleton {
+  min-height: 1.15em;
+  max-width: 220px;
+  margin: 0.35rem 0;
+  border-radius: 8px;
+  color: transparent !important;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.14) 25%,
+    rgba(148, 163, 184, 0.28) 40%,
+    rgba(148, 163, 184, 0.14) 65%
+  );
+  background-size: 200% 100%;
+  animation: poker-chat-skeleton-shimmer 1.1s ease-in-out infinite;
+}
+.chat-dialog-item__preview--skeleton {
+  display: block;
+  min-height: 1em;
+  min-width: 120px;
+  max-width: 100%;
+  margin-top: 2px;
+  border-radius: 6px;
+  color: transparent !important;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.14) 25%,
+    rgba(148, 163, 184, 0.28) 40%,
+    rgba(148, 163, 184, 0.14) 65%
+  );
+  background-size: 200% 100%;
+  animation: poker-chat-skeleton-shimmer 1.1s ease-in-out infinite;
+}
