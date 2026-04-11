@@ -1199,7 +1199,7 @@ function getAssetUrl(relativePath) {
     syncGalleryNav();
   }
 
-  function openSingle(src, alt, caption) {
+  function openSingle(src, alt, caption, fromAvatar) {
     galleryList = null;
     galleryIndex = 0;
     lightboxImg.src = src;
@@ -1207,6 +1207,7 @@ function getAssetUrl(relativePath) {
     lightboxImg.alt = a ? a : "Увеличено";
     setLightboxCaption(caption);
     syncGalleryNav();
+    lightbox.classList.toggle("image-lightbox--avatar-preview", !!fromAvatar);
     lightbox.classList.add("image-lightbox--open");
     lightbox.setAttribute("aria-hidden", "false");
   }
@@ -1216,6 +1217,7 @@ function getAssetUrl(relativePath) {
       return x && x.src;
     });
     if (!arr.length) return;
+    lightbox.classList.remove("image-lightbox--avatar-preview");
     galleryList = arr;
     var si = startIndex == null || isNaN(Number(startIndex)) ? 0 : Number(startIndex);
     galleryIndex = Math.max(0, Math.min(si, arr.length - 1));
@@ -1240,6 +1242,7 @@ function getAssetUrl(relativePath) {
     galleryList = null;
     galleryIndex = 0;
     lightbox.classList.remove("image-lightbox--open");
+    lightbox.classList.remove("image-lightbox--avatar-preview");
     lightbox.setAttribute("aria-hidden", "true");
     lightboxImg.removeAttribute("src");
     setLightboxCaption("");
@@ -1270,6 +1273,19 @@ function getAssetUrl(relativePath) {
       stepGallery(1);
     });
   }
+  /* Аватар в строке диалога: capture — иначе клик уходит в .chat-contact и открывается чат вместо лайтбокса */
+  document.body.addEventListener(
+    "click",
+    function (e) {
+      var t = e.target;
+      if (!t || !t.classList || !t.classList.contains("chat-contact__avatar") || !t.src) return;
+      if (!t.closest || !t.closest(".chat-contact")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openSingle(t.src, t.alt, "", true);
+    },
+    true
+  );
   document.addEventListener("keydown", function (e) {
     if (!lightbox.classList.contains("image-lightbox--open")) return;
     if (e.key === "Escape") {
@@ -1367,13 +1383,18 @@ function getAssetUrl(relativePath) {
     }
     if (t.classList && t.classList.contains("chat-msg__avatar") && t.src) {
       e.preventDefault();
-      openSingle(t.src);
+      openSingle(t.src, t.alt, "", true);
+      return;
+    }
+    if (t.classList && t.classList.contains("chat-pinned-self__thumb") && t.src) {
+      e.preventDefault();
+      openSingle(t.src, t.alt, "", true);
       return;
     }
     if (t.classList && t.classList.contains("chat-contact__avatar") && t.src && !(t.closest && t.closest(".chat-contact"))) {
       e.preventDefault();
       e.stopPropagation();
-      openSingle(t.src);
+      openSingle(t.src, t.alt, "", true);
     }
   });
   document.body.addEventListener("click", function (e) {

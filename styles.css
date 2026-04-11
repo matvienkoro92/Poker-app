@@ -6908,6 +6908,9 @@ img.chat-msg__avatar,
 img.chat-contact__avatar {
   cursor: pointer;
 }
+.chat-pinned-self__thumb {
+  cursor: pointer;
+}
 .image-lightbox {
   position: fixed;
   inset: 0;
@@ -6966,6 +6969,15 @@ img.chat-contact__avatar {
   border-radius: 0;
   pointer-events: none;
   flex-shrink: 0;
+}
+/* Превью по клику на аватар в чате / списке: почти на весь экран */
+.image-lightbox.image-lightbox--avatar-preview .image-lightbox__figure {
+  max-width: calc(100% - 24px);
+  max-height: 100%;
+}
+.image-lightbox.image-lightbox--avatar-preview .image-lightbox__img {
+  max-height: min(92vh, calc(100dvh - 56px));
+  max-width: min(96vw, 100%);
 }
 .image-lightbox__caption {
   margin: 10px 0 0;
