@@ -105,8 +105,9 @@ body::-webkit-scrollbar,
   --block-dark: #fed7aa;
   --block-dark-gradient: linear-gradient(135deg, #fff0e0, #ffedd5);
   --chat-stats-bg: rgba(255, 237, 213, 0.6);
-  /* Как лента чата и --block-bg-solid: без отдельной «белой плашки» у строки ввода */
+  /* Полоса композера = градиент как у ленты (см. [data-theme=light] .chat-input-area); само поле — белое */
   --chat-input-field-bg: rgba(255, 237, 213, 0.82);
+  --chat-input-textarea-bg: #ffffff;
 }
 [data-theme="light"] .card {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
@@ -3116,6 +3117,12 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   box-shadow: none;
   background-color: var(--chat-input-field-bg);
   background-image: none;
+}
+/* Светлая тема: при открытой клавиатуре не заливать полосу цветом поля ввода — как у ленты */
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
+  background-color: transparent;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
 }
 /* JS: position:fixed + bottom — отключаем translate/margin из --chat-vv-inset, иначе двойной подъём и полоса под панелью iOS. */
 html.chat-keyboard-open .chat-general-view .chat-input-area.chat-input-area--vv-dock,
@@ -7089,7 +7096,7 @@ img.chat-contact__avatar {
 }
 [data-theme="light"] .view--active[data-view="chat"] .chat-input--textarea,
 [data-theme="light"] .view--active[data-view="chat"] input.chat-input:not(.chat-find-input) {
-  background: var(--chat-input-field-bg);
+  background: var(--chat-input-textarea-bg, #ffffff);
   border: 1px solid rgba(234, 88, 12, 0.38);
   color: var(--text);
 }

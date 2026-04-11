@@ -24471,6 +24471,7 @@ function initChat() {
           window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatKbDockMonotonicUntil = 0;
           window.__pokerChatDockSmoothedPx = null;
+          window.__pokerChatVvObscuredMaxPx = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -24681,53 +24682,55 @@ function initChat() {
         }
       }
       /**
-       * Высота зоны под веб-контентом (клавиатура + панель iOS над клавишами): от низа layout viewport до низа visualViewport.
-       * Одна метрика для fixed bottom — не дублировать --chat-ios-accessory-inset в bottom (иначе двойной зазор).
+       * Одна метрика «сколько пикселей снизу закрыто клавиатурой и системными панелями» (layout − visual).
+       * Не смешиваем с --chat-ios-accessory-inset: для композера в чате bottom = эта величина (см. applyChatComposerKeyboardPosition).
+       * iOS: если полоса под visualViewport мала, а окно явно сжато — добавляем «воображаемую» input accessory (~стрелки/Готово).
        */
-      function pokerMeasureChatObscuredBottomPx() {
+      function computeChatKeyboardObscuredBottomPx() {
         var ih = window.innerHeight || 0;
         var vv = window.visualViewport;
+        var vvh = vv ? Number(vv.height) || 0 : 0;
+        var ot = vv ? Number(vv.offsetTop) || 0 : 0;
         var obscured = 0;
-        var vvh = 0;
+        if (ih > 0 && vv) {
+          obscured = Math.max(0, Math.round(ih - ot - vvh));
+        } else if (ih > 0 && vvh > 0) {
+          obscured = Math.max(0, Math.round(ih - vvh));
+        }
         var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        var tgvH = 0;
-        var tgvS = 0;
         if (tg && tw) {
-          tgvH = Number(tw.viewportHeight);
-          tgvS = Number(tw.viewportStableHeight);
-          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10) {
+          var tgvH = Number(tw.viewportHeight);
+          var tgvS = Number(tw.viewportStableHeight);
+          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 8) {
             obscured = Math.max(obscured, Math.round(tgvS - tgvH));
           }
         }
-        if (vv && ih > 0) {
-          var ot = Number(vv.offsetTop) || 0;
-          vvh = Number(vv.height) || 0;
-          obscured = Math.max(obscured, Math.max(0, Math.round(ih - ot - vvh)));
-        }
-        var CHAT_VV_BOTTOM_FALLBACK_MIN = 88;
-        if (ih > 200 && obscured < CHAT_VV_BOTTOM_FALLBACK_MIN) {
-          var kbLikelyVv = vvh > 0 && vvh < ih * 0.92;
-          var kbLikelyTg = tg && tgvS > 0 && tgvH > 0 && tgvS > tgvH + 10;
-          if (kbLikelyVv || kbLikelyTg) {
-            obscured = Math.max(obscured, Math.min(400, Math.round(ih * 0.27)));
+        if (ih > 0 && vvh > 0) {
+          var vLoss = Math.round(ih - vvh);
+          if (vLoss > obscured + 8) {
+            obscured = Math.max(obscured, vLoss);
           }
         }
-        if (isIosLikeForChatViewport() && !tg) {
-          try {
-            var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
-            var curIh = window.innerHeight || 0;
-            if (baseIh > 260 && curIh > 0) {
-              var winLossIh = Math.round(baseIh - curIh);
-              if (winLossIh > 64) {
-                obscured = Math.max(obscured, Math.min(400, Math.round(winLossIh * 0.88)));
-              }
+        try {
+          var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
+          var curIh = window.innerHeight || 0;
+          if (baseIh > 260 && curIh > 0) {
+            var winLoss = Math.round(baseIh - curIh);
+            if (winLoss > 40) {
+              obscured = Math.max(obscured, Math.round(winLoss * 0.96));
             }
-          } catch (eIosM) {}
+          }
+        } catch (eBl) {}
+        var kbLikely = vvh > 0 && ih > 0 && vvh < ih * 0.9;
+        if (kbLikely && ih > 200 && obscured < 80) {
+          obscured = Math.max(obscured, Math.min(400, Math.round(ih * 0.26)));
         }
-        if (isIosLikeForChatViewport() && document.body.classList.contains("chat-keyboard-open")) {
-          if (vvh > 0 && vvh + 100 < ih && obscured < 100) {
-            obscured = Math.max(obscured, 100);
+        if (isIosLikeForChatViewport() && kbLikely && vv && ih > 0) {
+          var belowVv = Math.max(0, Math.round(ih - ot - vvh));
+          var IMAG_IOS_ACCESSORY = 46;
+          if (belowVv < IMAG_IOS_ACCESSORY) {
+            obscured = Math.max(obscured, belowVv + IMAG_IOS_ACCESSORY);
           }
         }
         return obscured;
@@ -24796,18 +24799,16 @@ function initChat() {
           applyChatInputAreasVisualLift();
           return;
         }
-        var obscured = pokerMeasureChatObscuredBottomPx();
-        var targetBottom = Math.max(CHAT_GAP_PX, obscured - CHAT_GAP_PX);
-        if (isIosLikeForChatViewport()) {
-          var prevS = window.__pokerChatDockSmoothedPx;
-          if (prevS != null && isFinite(prevS)) {
-            targetBottom = Math.round(prevS * 0.5 + targetBottom * 0.5);
+        var rawObscured = computeChatKeyboardObscuredBottomPx();
+        try {
+          if (window.__pokerChatVvObscuredMaxPx == null || !isFinite(window.__pokerChatVvObscuredMaxPx)) {
+            window.__pokerChatVvObscuredMaxPx = 0;
           }
-          window.__pokerChatDockSmoothedPx = targetBottom;
-        } else {
-          window.__pokerChatDockSmoothedPx = targetBottom;
-        }
-        var dockBottomPx = targetBottom;
+          window.__pokerChatVvObscuredMaxPx = Math.max(window.__pokerChatVvObscuredMaxPx, rawObscured);
+        } catch (eMx) {}
+        var capObscured = Math.min(520, Math.round(ih * 0.62));
+        var obscured = Math.min(window.__pokerChatVvObscuredMaxPx || rawObscured, capObscured);
+        var dockBottomPx = Math.max(CHAT_GAP_PX, Math.round(obscured - CHAT_GAP_PX));
         if (gEl && !genVis) clearDockOne(gEl);
         if (pEl && !convVis) clearDockOne(pEl);
         if (genVis && gEl) dockOne(gEl, dockBottomPx);
@@ -25037,6 +25038,7 @@ function initChat() {
         document.body.classList.add("chat-keyboard-open");
         try {
           window.__pokerChatDockSmoothedPx = null;
+          window.__pokerChatVvObscuredMaxPx = 0;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(true);
         } catch (eDockOn) {}
         if (shouldUseChatVisualViewportLift()) {
@@ -25064,36 +25066,16 @@ function initChat() {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
-          }, 90);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 320);
+          }, 120);
         } else {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
-          }, 50);
+          }, 80);
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
-          }, 150);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 400);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 600);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 1000);
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollMessagesToBottom();
-          }, 1600);
+          }, 280);
         }
         syncPwaChatVisualViewportInset();
         /*
@@ -25123,23 +25105,27 @@ function initChat() {
             window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           }
           if (isIosChatKb) {
-            /* scroll на iOS — не вешаем. resize: сразу rAF (пока клавиатура едет), плюс отложенный добор после стабилизации. */
+            /* Две позиции композера: без сглаживания и без частых пересчётов — coalesce в один кадр + один «добор» после конца анимации клавиатуры. */
+            var vvCoalesceRaf = null;
             viewportResizeScrollHandler = function () {
-              var rafNow = window.requestAnimationFrame || function (fn) {
-                setTimeout(fn, 0);
-              };
-              rafNow(function () {
-                try {
-                  syncPwaChatVisualViewportInset();
-                } catch (eVvIm) {}
-              });
+              if (!vvCoalesceRaf) {
+                var rafVv = window.requestAnimationFrame || function (fn) {
+                  setTimeout(fn, 0);
+                };
+                vvCoalesceRaf = rafVv(function () {
+                  vvCoalesceRaf = null;
+                  try {
+                    syncPwaChatVisualViewportInset();
+                  } catch (eVvIm) {}
+                });
+              }
               if (window.__pokerChatVvInsetDebounceTimer) clearTimeout(window.__pokerChatVvInsetDebounceTimer);
               window.__pokerChatVvInsetDebounceTimer = setTimeout(function () {
                 window.__pokerChatVvInsetDebounceTimer = null;
                 try {
                   syncPwaChatVisualViewportInset();
                 } catch (eVvIos) {}
-              }, 52);
+              }, 130);
             };
             window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
           } else {
