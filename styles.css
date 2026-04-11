@@ -8422,6 +8422,9 @@ img.chat-contact__avatar {
 .chat-group-info-modal__section-head .chat-group-info-modal__section-title {
   margin: 0;
 }
+button.chat-group-info-modal__add-members-icon-btn[hidden] {
+  display: none;
+}
 .chat-group-info-modal__add-members-icon-btn {
   flex-shrink: 0;
   width: 36px;
@@ -8461,6 +8464,45 @@ img.chat-contact__avatar {
   flex-direction: column;
   gap: 8px;
   padding: 2px 0 12px;
+}
+.chat-group-info-modal__member-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.chat-group-info-modal__member-row .chat-group-info-modal__member {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+.chat-group-info-modal__member-kick {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chat-group-info-modal__member-kick:hover,
+.chat-group-info-modal__member-kick:focus {
+  background: rgba(239, 68, 68, 0.2);
+  outline: none;
+}
+.chat-group-info-modal__member-kick:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+[data-theme="light"] .chat-group-info-modal__member-kick {
+  color: #b91c1c;
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(254, 226, 226, 0.9);
 }
 .chat-group-info-modal__member {
   display: flex;
@@ -8519,6 +8561,15 @@ img.chat-contact__avatar {
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: 0.01em;
+}
+.chat-group-info-modal__member-tg {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted, rgba(148, 163, 184, 0.95));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 .chat-group-info-modal__member-badges {
   font-size: 12px;
@@ -19056,10 +19107,13 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
 .chat-user-modal__friend-buttons {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
+  width: 100%;
 }
 .chat-user-modal__edit-friend-name {
+  flex: 1 1 0;
+  min-width: 0;
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 600;
@@ -19075,6 +19129,8 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   background: rgba(255, 255, 255, 0.08);
 }
 .chat-user-modal__remove-friend {
+  flex: 1 1 0;
+  min-width: 0;
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 600;
@@ -19097,8 +19153,11 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   background: rgba(185, 28, 28, 0.08);
 }
 .chat-user-modal__friend-btn {
-  padding: 8px 12px;
-  font-size: 13px;
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
   background: var(--block-bg-solid);

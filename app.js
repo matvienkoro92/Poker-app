@@ -21297,6 +21297,7 @@ function initChat() {
       var startY = 0;
       function startTimer(e) {
         if (longPressTimer) return;
+        if (e && e.target && e.target.closest && e.target.closest(".chat-msg__voice-wrap")) return;
         if (e && e.touches && e.touches[0]) {
           startX = e.touches[0].clientX;
           startY = e.touches[0].clientY;
@@ -26568,7 +26569,7 @@ function initChat() {
     });
   }
 
-  /** Состав главного чата клуба + личные контакты — для модалок «новая группа» / «добавить в группу» (без ЛС список был пуст). */
+  /** Те же люди, что во вкладке «Все» в списке чатов (+ строка диалогов/DOM и друзья из /api/friends для вкладки «Друзья»). Без состава главного чата клуба. */
   function pokerBuildGroupModalContactList() {
     var d = window.__pokerLastContactsApiData;
     if ((!d || !Array.isArray(d.contacts) || d.contacts.length === 0) && typeof pokerTryReadContactsCache === "function") {
@@ -26580,27 +26581,16 @@ function initChat() {
       } catch (eCc) {}
     }
     var contactsRaw = d && Array.isArray(d.contacts) ? d.contacts : [];
-    var contactsOnly = contactsRaw.filter(function (c) {
+    var contactsForListLike = contactsRaw.filter(function (c) {
+      return !chatContactIsDuplicateOfPinnedDialog(c);
+    });
+    contactsForListLike = pokerSortContactsByDialogListPins(contactsForListLike);
+    var contactsOnly = contactsForListLike.filter(function (c) {
       return c && c.id && !c.isGroupChat && String(c.id).indexOf("group_") !== 0;
     });
-    var club = d && Array.isArray(d.generalChatPickMembers) ? d.generalChatPickMembers : [];
     var byId = Object.create(null);
     var myId0 = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
     var i;
-    for (i = 0; i < club.length; i++) {
-      var m = club[i];
-      if (!m || !m.id) continue;
-      var id = String(m.id);
-      if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(id, myId0)) continue;
-      byId[id] = {
-        id: id,
-        name: m.name || id,
-        avatar: m.avatar != null ? m.avatar : null,
-        online: !!m.online,
-        admin: !!m.admin,
-        unreadCount: 0,
-      };
-    }
     for (i = 0; i < contactsOnly.length; i++) {
       var c = contactsOnly[i];
       var idc = String(c.id);
@@ -26611,75 +26601,6 @@ function initChat() {
         byId[idc] = c;
       }
     }
-    try {
-      var gmCache = window._chatGeneralCache && Array.isArray(window._chatGeneralCache.generalMembers)
-        ? window._chatGeneralCache.generalMembers
-        : [];
-      for (i = 0; i < gmCache.length; i++) {
-        var gmx = gmCache[i];
-        if (!gmx || !gmx.id || gmx.isYou) continue;
-        var gxid = String(gmx.id);
-        if (gxid.indexOf("group_") === 0) continue;
-        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(gxid, myId0)) continue;
-        if (byId[gxid]) continue;
-        byId[gxid] = {
-          id: gxid,
-          name: gmx.name || gxid,
-          avatar: gmx.avatar != null ? gmx.avatar : null,
-          online: !!gmx.online,
-          admin: !!gmx.admin,
-          unreadCount: 0,
-        };
-      }
-    } catch (eGmCache) {}
-    try {
-      for (var pmk in personalMessagesCache) {
-        if (!Object.prototype.hasOwnProperty.call(personalMessagesCache, pmk)) continue;
-        var pmsgs = personalMessagesCache[pmk];
-        if (!pmsgs || !pmsgs.length) continue;
-        var pnid = normalizePeerIdForChat(pmk);
-        if (!pnid || pnid.indexOf("group_") === 0 || pnid.indexOf("guest_") === 0) continue;
-        if (!(pnid.indexOf("tg_") === 0 || pnid.indexOf("vk_") === 0)) continue;
-        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(pnid, myId0)) continue;
-        if (byId[pnid]) continue;
-        byId[pnid] = {
-          id: pnid,
-          name: pnid,
-          avatar: null,
-          online: false,
-          admin: false,
-          unreadCount: 0,
-        };
-      }
-    } catch (ePm) {}
-    try {
-      var rawPd = localStorage.getItem(POKER_CHAT_PERSONAL_DISK_KEY);
-      if (rawPd) {
-        var packPd = JSON.parse(rawPd);
-        var fpPd = pokerChatContactsAuthFingerprint();
-        if (packPd && packPd.fp === fpPd && packPd.peers && typeof packPd.peers === "object") {
-          Object.keys(packPd.peers).forEach(function (diskPk) {
-            try {
-              var entD = packPd.peers[diskPk];
-              if (!entD || !Array.isArray(entD.messages) || !entD.messages.length) return;
-              var dnid = normalizePeerIdForChat(diskPk);
-              if (!dnid || dnid.indexOf("group_") === 0 || dnid.indexOf("guest_") === 0) return;
-              if (!(dnid.indexOf("tg_") === 0 || dnid.indexOf("vk_") === 0)) return;
-              if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(dnid, myId0)) return;
-              if (byId[dnid]) return;
-              byId[dnid] = {
-                id: dnid,
-                name: dnid,
-                avatar: null,
-                online: false,
-                admin: false,
-                unreadCount: 0,
-              };
-            } catch (eDk) {}
-          });
-        }
-      }
-    } catch (eDiskP) {}
     try {
       function mergeGroupPickDomPeer(idRaw, nameHint, onlineHint, adminHint) {
         if (!idRaw) return;
@@ -26810,52 +26731,9 @@ function initChat() {
       });
   };
 
-  /** Если mode=contacts без generalChatPickMembers / пустой кэш — подгружаем состав главного чата (trackSeen=0). */
+  /** Раньше подгружали состав главного чата, если пикер пуст — список «Все» в группе = список чатов, не ростер общего чата. Оставлен вызов для совместимости. */
   window.__pokerFetchGeneralRosterForGroupPickIfEmpty = function (done) {
-    try {
-      if (typeof pokerBuildGroupModalContactList !== "function") {
-        if (typeof done === "function") done();
-        return;
-      }
-      if (pokerBuildGroupModalContactList().length > 0) {
-        if (typeof done === "function") done();
-        return;
-      }
-      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-        if (typeof done === "function") done();
-        return;
-      }
-      if (window.__pokerGroupPickRosterFetchInFlight) {
-        if (typeof done === "function") done();
-        return;
-      }
-      window.__pokerGroupPickRosterFetchInFlight = true;
-      var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general&trackSeen=0";
-      fetch(url)
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (data) {
-          window.__pokerGroupPickRosterFetchInFlight = false;
-          if (data && data.ok && Array.isArray(data.generalMembers)) {
-            if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
-              window._chatGeneralCache = { messages: [], generalMembers: [] };
-            }
-            window._chatGeneralCache.generalMembers = data.generalMembers;
-            if (data.participantsCount != null) window._chatGeneralCache.participantsCount = data.participantsCount;
-            if (data.onlineCount != null) window._chatGeneralCache.onlineCount = data.onlineCount;
-          }
-        })
-        .catch(function () {
-          window.__pokerGroupPickRosterFetchInFlight = false;
-        })
-        .then(function () {
-          if (typeof done === "function") done();
-        });
-    } catch (eFr) {
-      window.__pokerGroupPickRosterFetchInFlight = false;
-      if (typeof done === "function") done();
-    }
+    if (typeof done === "function") done();
   };
 
   (function initChatGroupAddMembersModal() {
@@ -27391,34 +27269,63 @@ function initChat() {
           membersEl.innerHTML = mems
             .map(function (m) {
               if (!m || !m.id) return "";
-              var nmRaw = m.name || m.id;
-              var nm = escapeHtml(nmRaw);
+              var contactNm = m.contactName && String(m.contactName).trim();
+              var tgDisp = m.telegramDisplayName && String(m.telegramDisplayName).trim();
+              var tgUser = m.telegramUsername && String(m.telegramUsername).trim();
+              var nameLine = contactNm || tgDisp || "";
+              var tgLine = tgUser ? "@" + tgUser : "";
+              var nmRaw =
+                [nameLine, tgLine].filter(Boolean).join(" ") || (m.name && String(m.name)) || m.id;
+              var avPh = (nameLine || tgUser || nmRaw).charAt(0) || "?";
               var badges = [];
               if (m.isYou) badges.push("Вы");
               if (m.isGroupCreator) badges.push("Создатель");
               if (m.admin) badges.push("Админ");
+              var nameBlock = "";
+              if (nameLine) {
+                nameBlock += '<span class="chat-group-info-modal__member-name">' + escapeHtml(nameLine) + "</span>";
+              }
+              if (tgLine) {
+                nameBlock +=
+                  '<span class="chat-group-info-modal__member-tg">' + escapeHtml(tgLine) + "</span>";
+              }
+              if (!nameBlock) {
+                nameBlock =
+                  '<span class="chat-group-info-modal__member-name">' +
+                  escapeHtml((m.name && String(m.name)) || m.id) +
+                  "</span>";
+              }
               var av =
                 m.avatar
                   ? '<img class="chat-group-info-modal__member-av" src="' +
                     escapeHtml(m.avatar) +
                     '" alt="" width="40" height="40" decoding="async" />'
-                  : '<span class="chat-group-info-modal__member-av-ph">' + escapeHtml(nmRaw.charAt(0) || "?") + "</span>";
-              return (
+                  : '<span class="chat-group-info-modal__member-av-ph">' + escapeHtml(avPh) + "</span>";
+              var showKick = creator && !m.isYou;
+              var memberBtn =
                 '<button type="button" class="chat-group-info-modal__member" data-gi-user-id="' +
                 escapeHtml(m.id) +
                 '" data-gi-user-name="' +
                 escapeHtml(nmRaw) +
                 '">' +
                 av +
-                '<span class="chat-group-info-modal__member-main"><span class="chat-group-info-modal__member-name">' +
-                nm +
-                "</span>" +
+                '<span class="chat-group-info-modal__member-main">' +
+                nameBlock +
                 (badges.length
                   ? '<span class="chat-group-info-modal__member-badges">' + escapeHtml(badges.join(" · ")) + "</span>"
                   : "") +
                 '</span><span class="chat-group-info-modal__member-online' +
                 (m.online ? " chat-group-info-modal__member-online--on" : "") +
-                '" aria-hidden="true"></span></button>'
+                '" aria-hidden="true"></span></button>';
+              var kickBtn = showKick
+                ? '<button type="button" class="chat-group-info-modal__member-kick" data-gi-kick="1" data-gi-user-id="' +
+                  escapeHtml(m.id) +
+                  '" data-gi-user-name="' +
+                  escapeHtml(nmRaw) +
+                  '" aria-label="Исключить из группы">Исключить</button>'
+                : "";
+              return (
+                '<div class="chat-group-info-modal__member-row">' + memberBtn + kickBtn + "</div>"
               );
             })
             .join("");
@@ -27469,6 +27376,7 @@ function initChat() {
         }
       } else {
         if (leaveWrap) leaveWrap.hidden = false;
+        if (addMembersBtnInfo) addMembersBtnInfo.hidden = false;
       }
       try {
         modal.classList.toggle(
@@ -27489,6 +27397,7 @@ function initChat() {
       resetGroupDeleteUi();
       if (dangerZone) dangerZone.hidden = true;
       if (leaveWrap) leaveWrap.hidden = true;
+      if (addMembersBtnInfo) addMembersBtnInfo.hidden = false;
       if (creatorBadge) creatorBadge.hidden = true;
       if (titleEl) {
         titleEl.hidden = false;
@@ -27959,6 +27868,7 @@ function initChat() {
     if (addMembersBtnInfo) {
       addMembersBtnInfo.addEventListener("click", function (e) {
         e.preventDefault();
+        e.stopPropagation();
         if (openGroupInfoMode === "general") return;
         var gida = openGroupId;
         if (!gida) return;
@@ -27967,8 +27877,72 @@ function initChat() {
         }
       });
     }
+    function refetchGroupInfoMeta() {
+      var gid = openGroupId;
+      if (!gid || openGroupInfoMode !== "group") return;
+      var qMeta = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+      fetch(base + "/api/chat" + qMeta + "&with=" + encodeURIComponent(gid) + "&metaonly=1")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data && data.ok && data.group) renderGroup(data.group);
+        })
+        .catch(function () {});
+    }
     if (membersEl) {
       membersEl.addEventListener("click", function (e) {
+        var kickB =
+          e.target && e.target.closest ? e.target.closest(".chat-group-info-modal__member-kick[data-gi-user-id]") : null;
+        if (kickB && membersEl.contains(kickB)) {
+          e.preventDefault();
+          e.stopPropagation();
+          var uidKick = kickB.getAttribute("data-gi-user-id");
+          var nmKick = kickB.getAttribute("data-gi-user-name") || uidKick;
+          var gidKick = openGroupId;
+          if (!uidKick || !gidKick) return;
+          if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+          if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+            if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
+            return;
+          }
+          var msgKick = "Исключить «" + String(nmKick || uidKick).slice(0, 80) + "» из группы?";
+          function doKick() {
+            kickB.disabled = true;
+            fetch(base + "/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(
+                pokerApiAuthJsonBody({ action: "removeGroupMember", groupId: gidKick, memberId: uidKick })
+              ),
+            })
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (data) {
+                kickB.disabled = false;
+                if (data && data.ok) {
+                  refetchGroupInfoMeta();
+                  if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+                  if (tg && tg.showToast) tg.showToast("Участник исключён");
+                } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+                else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
+              })
+              .catch(function () {
+                kickB.disabled = false;
+                if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+                else if (typeof alert === "function") alert(POKER_NET_ERR);
+              });
+          }
+          if (tg && typeof tg.showConfirm === "function") {
+            tg.showConfirm(msgKick, function (ok) {
+              if (ok) doKick();
+            });
+          } else if (typeof confirm === "function" && confirm(msgKick)) {
+            doKick();
+          }
+          return;
+        }
         var b = e.target && e.target.closest ? e.target.closest(".chat-group-info-modal__member[data-gi-user-id]") : null;
         if (!b || !membersEl.contains(b)) return;
         e.preventDefault();
