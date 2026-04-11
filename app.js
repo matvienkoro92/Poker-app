@@ -19920,6 +19920,7 @@ function initChat() {
   /** Порядок плашек реакций (как в пикере; 🔥 первым). Синхронизировать с CHAT_REACTION_EMOJI_* в lib/api-handlers/chat.js */
   var CHAT_REACTION_DISPLAY_ORDER = [
     "🔥",
+    "✅",
     "👍",
     "👎",
     "❤️",
