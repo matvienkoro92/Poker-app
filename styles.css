@@ -4362,6 +4362,9 @@ html.vpn-proxy-modal-open {
   margin: 0;
   padding: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
 .roman-task-planner-modal .roman-task-planner__list--active,
 .roman-task-planner-modal .roman-task-planner__list--done {

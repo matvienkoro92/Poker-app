@@ -3388,10 +3388,11 @@ function runGazetteAndTasksInit() {
       document.removeEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
       document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
       document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
-      if (romanPlannerSwipeActive.clip) {
+      if (romanPlannerSwipeActive.clip && romanPlannerSwipeActive._lostCapBound) {
         try {
           romanPlannerSwipeActive.clip.removeEventListener("lostpointercapture", romanPlannerSwipeLostCap);
         } catch (eRm) {}
+        romanPlannerSwipeActive._lostCapBound = false;
       }
       romanPlannerSwipeActive._docBound = false;
     }
@@ -3403,8 +3404,9 @@ function runGazetteAndTasksInit() {
       var clip = st.clip;
       var track = st.track;
       var openPx = st.openPx;
+      var hadCapture = st.pointerCaptureSet;
       romanPlannerSwipeActive = null;
-      if (clip != null && pid != null) {
+      if (clip != null && pid != null && hadCapture) {
         try {
           clip.releasePointerCapture(pid);
         } catch (eRel) {}
@@ -3427,25 +3429,29 @@ function runGazetteAndTasksInit() {
       var ady = Math.abs(dy);
       var isMouse = ev.pointerType === "mouse";
       /** Пока палец не вышел из «мёртвой зоны», не трогаем скролл и не двигаем ряд — иначе preventDefault ломает вертикальный скролл списка. */
-      var slop = isMouse ? 5 : 12;
-      var tilt = isMouse ? 4 : 6;
+      var slop = isMouse ? 5 : 10;
+      var tilt = isMouse ? 4 : 5;
       if (!st.swipeAxisLocked) {
         if (Math.max(adx, ady) < slop) return;
-        var vertWins = ady > adx + tilt;
-        var horizWins = adx > ady + tilt;
-        if (vertWins) {
+        /** Только явная вертикаль уступает скроллу списка; иначе — горизонтальный свайп (диагональ «влево» не обрываем). */
+        if (ady > adx + tilt) {
           romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
           st.dragging = false;
           romanPlannerSwipeEnd(false);
           return;
         }
-        if (horizWins) {
-          st.swipeAxisLocked = true;
-        } else {
-          romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx);
-          st.dragging = false;
-          romanPlannerSwipeEnd(false);
-          return;
+        st.swipeAxisLocked = true;
+        if (!st.pointerCaptureSet) {
+          st.pointerCaptureSet = true;
+          try {
+            st.clip.setPointerCapture(ev.pointerId);
+          } catch (eCap) {}
+          if (!st._lostCapBound) {
+            st._lostCapBound = true;
+            try {
+              st.clip.addEventListener("lostpointercapture", romanPlannerSwipeLostCap);
+            } catch (eL) {}
+          }
         }
       }
       try {
@@ -3490,12 +3496,10 @@ function runGazetteAndTasksInit() {
         baseTx: romanPlannerSwipeGetTx(track),
         dragging: true,
         swipeAxisLocked: false,
+        pointerCaptureSet: false,
+        _lostCapBound: false,
         _docBound: true,
       };
-      try {
-        clip.setPointerCapture(ev.pointerId);
-      } catch (eCap) {}
-      clip.addEventListener("lostpointercapture", romanPlannerSwipeLostCap);
       document.addEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
       document.addEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
       document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
