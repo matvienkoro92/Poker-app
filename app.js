@@ -753,7 +753,17 @@ function pokerChatPushSubscribeToBrowser() {
                   if (!(data && data.ok)) {
                     return { ok: false, error: (data && data.error) || "subscribe_save_failed" };
                   }
-                  return pokerChatPushVerifySubscriptionAfterSave(base, 0);
+                  /* Сервер уже ответил ok на subscribe — не откатываем из‑за гонки status/hasSubscription. */
+                  pokerChatPushVerifySubscriptionAfterSave(base, 0).then(function (ver) {
+                    if (!ver || !ver.ok) {
+                      try {
+                        if (typeof console !== "undefined" && console.warn) {
+                          console.warn("[chat-push] subscribe сохранён, status ещё без HLEN (догонит)", ver);
+                        }
+                      } catch (eV) {}
+                    }
+                  });
+                  return { ok: true };
                 });
             });
           });
@@ -863,6 +873,8 @@ function pokerChatPushUnsubscribeBrowser() {
 var profileChatPushBound = false;
 /** Пока идёт вкл/выкл пуша — не вызывать refreshState (иначе старый status сбрасывает галочку). */
 var profileChatPushApplying = false;
+/** Инкремент при новом refresh / старте переключателя — отбрасываем устаревшие ответы fetch. */
+var profileChatPushRefreshGen = 0;
 function initProfileChatPush() {
   var row = document.getElementById("profileChatPushRow");
   var toggle = document.getElementById("profileChatPushToggle");
@@ -907,6 +919,8 @@ function initProfileChatPush() {
 
   function refreshState() {
     if (profileChatPushApplying) return;
+    profileChatPushRefreshGen++;
+    var myGen = profileChatPushRefreshGen;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base) return;
     fetch(base + "/api/chat-push-subscribe", {
@@ -918,6 +932,7 @@ function initProfileChatPush() {
         return r.json();
       })
       .then(function (d) {
+        if (profileChatPushApplying || myGen !== profileChatPushRefreshGen) return;
         if (!d || !d.ok) {
           setHint("Не удалось загрузить настройки.");
           return;
@@ -956,6 +971,7 @@ function initProfileChatPush() {
         }
       })
       .catch(function () {
+        if (profileChatPushApplying || myGen !== profileChatPushRefreshGen) return;
         setHint("Ошибка сети.");
       });
   }
@@ -965,6 +981,7 @@ function initProfileChatPush() {
     toggle.addEventListener("change", function () {
       var on = toggle.checked;
       if (!on) {
+        profileChatPushRefreshGen++;
         profileChatPushApplying = true;
         toggle.disabled = true;
         pokerChatPushUnsubscribeBrowser();
@@ -976,6 +993,7 @@ function initProfileChatPush() {
         });
         return;
       }
+      profileChatPushRefreshGen++;
       profileChatPushApplying = true;
       toggle.disabled = true;
       pokerChatPushSetServerEnabled(true).then(function (r) {
