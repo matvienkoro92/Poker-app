@@ -25381,8 +25381,9 @@ function initChat() {
         }
         if (isChatThreadComposerKeyboardDom()) {
           /*
-           * iOS: при фокусе и на каждой букве vv даёт разный raw ih−vv — max() с baseline «прыгает» между двумя уровнями.
-           * Подрезаем взрыв vv относительно winLoss; затем не более ~26px за один sync (visualViewport часто бьёт пачкой).
+           * iOS: взрыв vv подрезаем относительно winLoss. Ограничение шага только на резкое уменьшение cover:
+           * при открытии клавиатуры cover растёт — порог +26px за кадр давал «ползущий» подъём строки 1–2 с;
+           * вверх применяем целевое значение сразу (как при стабильном наборе).
            */
           if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
             try {
@@ -25396,10 +25397,9 @@ function initChat() {
               }
               var prevSt = Number(window.__pokerChatDockCoverStable);
               if (prevSt > 40) {
-                var stepMax = 26;
+                var stepMaxDown = 28;
                 var dSt = coverPxDock - prevSt;
-                if (dSt > stepMax) coverPxDock = prevSt + stepMax;
-                else if (dSt < -stepMax) coverPxDock = prevSt - stepMax;
+                if (dSt < -stepMaxDown) coverPxDock = prevSt - stepMaxDown;
               }
             } catch (eDockStab) {}
           }
