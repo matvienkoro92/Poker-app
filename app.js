@@ -668,11 +668,59 @@ function pokerChatPushSetServerEnabled(wantOn) {
     });
 }
 
+/** После POST subscribe статус иногда кратко отстаёт (Redis); несколько попыток перед откатом галочки. */
+function pokerChatPushVerifySubscriptionAfterSave(base, attempt) {
+  attempt = attempt || 0;
+  return fetch(base + "/api/chat-push-subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
+    cache: "no-store",
+  })
+    .then(function (rs) {
+      return rs.json().catch(function () {
+        return null;
+      });
+    })
+    .then(function (st) {
+      if (st && st.ok && st.hasSubscription) return { ok: true };
+      if (attempt < 8) {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            pokerChatPushVerifySubscriptionAfterSave(base, attempt + 1).then(resolve);
+          }, 100);
+        });
+      }
+      try {
+        if (typeof console !== "undefined" && console.warn) {
+          console.warn("[chat-push] subscribe ok но status.hasSubscription false после ожидания", st);
+        }
+      } catch (eSt) {}
+      return {
+        ok: false,
+        error:
+          "Сервер ответил на подписку, но не видит endpoint (пуш не сохранится). Проверьте домен API в приложении и повторите выкл/вкл.",
+      };
+    })
+    .catch(function () {
+      if (attempt < 8) {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            pokerChatPushVerifySubscriptionAfterSave(base, attempt + 1).then(resolve);
+          }, 100);
+        });
+      }
+      return { ok: false, error: "Не удалось проверить подписку на сервере." };
+    });
+}
+
+var pokerChatPushSubscribeInFlight = null;
 function pokerChatPushSubscribeToBrowser() {
+  if (pokerChatPushSubscribeInFlight) return pokerChatPushSubscribeInFlight;
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   if (!base || !pokerApiHasCredential()) return Promise.resolve({ ok: false, error: "auth" });
   if (!("serviceWorker" in navigator)) return Promise.resolve({ ok: false, error: "no_sw" });
-  return pokerFetchChatPushConfig()
+  var run = pokerFetchChatPushConfig()
     .then(function (cfg) {
       if (!cfg || !cfg.pushConfigured || !cfg.publicKey) return { ok: false, error: "not_configured" };
       var keyArr = pokerChatPushUrlBase64ToUint8Array(cfg.publicKey);
@@ -705,33 +753,7 @@ function pokerChatPushSubscribeToBrowser() {
                   if (!(data && data.ok)) {
                     return { ok: false, error: (data && data.error) || "subscribe_save_failed" };
                   }
-                  return fetch(base + "/api/chat-push-subscribe", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
-                    cache: "no-store",
-                  })
-                    .then(function (rs) {
-                      return rs.json().catch(function () {
-                        return null;
-                      });
-                    })
-                    .then(function (st) {
-                      if (st && st.ok && st.hasSubscription) return { ok: true };
-                      try {
-                        if (typeof console !== "undefined" && console.warn) {
-                          console.warn("[chat-push] subscribe ok но status.hasSubscription false", st);
-                        }
-                      } catch (eSt) {}
-                      return {
-                        ok: false,
-                        error:
-                          "Сервер ответил на подписку, но не видит endpoint (пуш не сохранится). Проверьте домен API в приложении и повторите выкл/вкл.",
-                      };
-                    })
-                    .catch(function () {
-                      return { ok: false, error: "Не удалось проверить подписку на сервере." };
-                    });
+                  return pokerChatPushVerifySubscriptionAfterSave(base, 0);
                 });
             });
           });
@@ -744,6 +766,10 @@ function pokerChatPushSubscribeToBrowser() {
       } catch (e2) {}
       return { ok: false, error: msg };
     });
+  pokerChatPushSubscribeInFlight = run.finally(function () {
+    pokerChatPushSubscribeInFlight = null;
+  });
+  return pokerChatPushSubscribeInFlight;
 }
 
 var pokerChatPushEnrollDebounce = null;
@@ -835,6 +861,8 @@ function pokerChatPushUnsubscribeBrowser() {
 }
 
 var profileChatPushBound = false;
+/** Пока идёт вкл/выкл пуша — не вызывать refreshState (иначе старый status сбрасывает галочку). */
+var profileChatPushApplying = false;
 function initProfileChatPush() {
   var row = document.getElementById("profileChatPushRow");
   var toggle = document.getElementById("profileChatPushToggle");
@@ -878,6 +906,7 @@ function initProfileChatPush() {
   row.setAttribute("aria-hidden", "false");
 
   function refreshState() {
+    if (profileChatPushApplying) return;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base) return;
     fetch(base + "/api/chat-push-subscribe", {
@@ -936,25 +965,30 @@ function initProfileChatPush() {
     toggle.addEventListener("change", function () {
       var on = toggle.checked;
       if (!on) {
+        profileChatPushApplying = true;
         toggle.disabled = true;
         pokerChatPushUnsubscribeBrowser();
         pokerChatPushSetServerEnabled(false).then(function (r) {
+          profileChatPushApplying = false;
           toggle.disabled = false;
           if (!r || !r.ok) toggle.checked = true;
           refreshState();
         });
         return;
       }
+      profileChatPushApplying = true;
       toggle.disabled = true;
       pokerChatPushSetServerEnabled(true).then(function (r) {
         if (!r || !r.ok) {
           toggle.checked = false;
+          profileChatPushApplying = false;
           toggle.disabled = false;
           refreshState();
           return;
         }
         if (typeof Notification === "undefined") {
           toggle.checked = false;
+          profileChatPushApplying = false;
           toggle.disabled = false;
           pokerChatPushSetServerEnabled(false);
           refreshState();
@@ -965,6 +999,7 @@ function initProfileChatPush() {
             toggle.checked = false;
             pokerChatPushSetServerEnabled(false);
             setHint(perm === "denied" ? "Браузер запретил уведомления." : "Без разрешения пуши недоступны.");
+            profileChatPushApplying = false;
             toggle.disabled = false;
             refreshState();
             return;
@@ -975,12 +1010,14 @@ function initProfileChatPush() {
               pokerChatPushSetServerEnabled(false);
               setHint((subr && subr.error) || "Не удалось подписаться.");
             }
+            profileChatPushApplying = false;
             toggle.disabled = false;
             refreshState();
           });
         });
       }).catch(function () {
         toggle.checked = false;
+        profileChatPushApplying = false;
         toggle.disabled = false;
         refreshState();
       });
