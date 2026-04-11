@@ -20531,9 +20531,18 @@ function initChat() {
         if (noGeneralAccess) {
           messages = [];
         }
+        var pendingEditG = window._pendingGeneralEdit;
+        if (pendingEditG && pendingEditG.id) {
+          var peId = String(pendingEditG.id);
+          messages = messages.map(function (mg) {
+            if (mg && String(mg.id) === peId) return pendingEditG;
+            return mg;
+          });
+          window._pendingGeneralEdit = null;
+        }
         var pending = window._pendingGeneralMessage;
         if (pending && pending.id) {
-          if (!messages.some(function (m) { return m.id === pending.id; })) {
+          if (!messages.some(function (m) { return String(m.id) === String(pending.id); })) {
             messages = messages.concat([pending]);
           } else {
             window._pendingGeneralMessage = null;
@@ -22173,22 +22182,44 @@ function initChat() {
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerApiAuthJsonBody({ action: "edit", messageId: chatEditMessageId, text: text })),
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        sendingGeneral = false;
-        setGeneralSendBusy(false);
-        if (d && d.ok) {
-          applyEditedMessageToDom(chatEditMessageId, text, "general");
-          clearChatEditUI();
-          loadGeneral();
-        } else if (tg && tg.showAlert) {
-          tg.showAlert((d && d.error) || "Ошибка");
-        }
-      }).catch(function () {
-        sendingGeneral = false;
-        setGeneralSendBusy(false);
-        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-      });
+        body: JSON.stringify(
+          pokerApiAuthJsonBody({ action: "edit", messageId: String(chatEditMessageId), text: text })
+        ),
+      })
+        .then(function (r) {
+          return r
+            .json()
+            .catch(function () {
+              return { ok: false, error: "Не удалось разобрать ответ сервера" };
+            })
+            .then(function (data) {
+              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+              if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "");
+              return { d: d, httpOk: r.ok };
+            });
+        })
+        .then(function (pack) {
+          sendingGeneral = false;
+          setGeneralSendBusy(false);
+          var d = pack.d;
+          if (d && d.ok) {
+            var srvMsg = d.message && typeof d.message === "object" ? d.message : null;
+            if (srvMsg && srvMsg.id) window._pendingGeneralEdit = srvMsg;
+            applyEditedMessageToDom(chatEditMessageId, (srvMsg && srvMsg.text) || text, "general");
+            clearChatEditUI();
+            loadGeneral();
+          } else {
+            var errG = (d && d.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(errG);
+            else if (typeof alert === "function") alert(errG);
+          }
+        })
+        .catch(function () {
+          sendingGeneral = false;
+          setGeneralSendBusy(false);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
+        });
       return;
     }
     if (sendingGeneral) {
@@ -24145,10 +24176,19 @@ function initChat() {
       if (data && data.ok) {
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
         var messages = data.messages || [];
+        var pendingEditP = window._pendingPersonalEditMessage;
+        if (pendingEditP && pendingEditP.id && chatWithUserId) {
+          var pePid = String(pendingEditP.id);
+          messages = messages.map(function (mp) {
+            if (mp && String(mp.id) === pePid) return pendingEditP;
+            return mp;
+          });
+          window._pendingPersonalEditMessage = null;
+        }
         var pending = window._pendingPersonalMessage;
         var pendingPeer = window._pendingPersonalWith;
         if (pending && pending.id && chatWithUserId && pendingPeer && peerChatIdsEqual(chatWithUserId, pendingPeer)) {
-          if (!messages.some(function (m) { return m.id === pending.id; })) {
+          if (!messages.some(function (m) { return String(m.id) === String(pending.id); })) {
             messages = messages.concat([pending]);
           } else {
             window._pendingPersonalMessage = null;
@@ -24443,22 +24483,49 @@ function initChat() {
       fetch(base + "/api/chat", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerApiAuthJsonBody({ action: "edit", messageId: chatEditMessageId, text: text, with: chatWithUserId })),
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        sendingPrivate = false;
-        setPersonalSendBusy(false);
-        if (d && d.ok) {
-          applyEditedMessageToDom(chatEditMessageId, text, "personal");
-          clearChatEditUI();
-          loadMessages();
-        } else if (tg && tg.showAlert) {
-          tg.showAlert((d && d.error) || "Ошибка");
-        }
-      }).catch(function () {
-        sendingPrivate = false;
-        setPersonalSendBusy(false);
-        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-      });
+        body: JSON.stringify(
+          pokerApiAuthJsonBody({
+            action: "edit",
+            messageId: String(chatEditMessageId),
+            text: text,
+            with: chatWithUserId,
+          })
+        ),
+      })
+        .then(function (r) {
+          return r
+            .json()
+            .catch(function () {
+              return { ok: false, error: "Не удалось разобрать ответ сервера" };
+            })
+            .then(function (data) {
+              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+              if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "");
+              return { d: d, httpOk: r.ok };
+            });
+        })
+        .then(function (pack) {
+          sendingPrivate = false;
+          setPersonalSendBusy(false);
+          var d = pack.d;
+          if (d && d.ok) {
+            var srvPm = d.message && typeof d.message === "object" ? d.message : null;
+            if (srvPm && srvPm.id) window._pendingPersonalEditMessage = srvPm;
+            applyEditedMessageToDom(chatEditMessageId, (srvPm && srvPm.text) || text, "personal");
+            clearChatEditUI();
+            loadMessages();
+          } else {
+            var errP = (d && d.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(errP);
+            else if (typeof alert === "function") alert(errP);
+          }
+        })
+        .catch(function () {
+          sendingPrivate = false;
+          setPersonalSendBusy(false);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
+        });
       return;
     }
     if ((!text && !personalImage && !personalVoice && !personalDocument) || !chatWithUserId || !pokerApiHasCredential() || sendingPrivate) {
@@ -29432,7 +29499,7 @@ function initChat() {
   })();
 
   /** Интервал опроса на экране «Чат» (мс). В фоне вкладки и вне чата — реже, меньше трафик Redis/API. */
-  var CHAT_POLL_MS = 2000;
+  var CHAT_POLL_MS = 3500;
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     var hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
@@ -29454,7 +29521,14 @@ function initChat() {
       return;
     }
 
-    if (typeof loadGeneral === "function") loadGeneral();
+    if (
+      chatActiveTab === "general" &&
+      generalView &&
+      !generalView.classList.contains("chat-general-view--hidden") &&
+      typeof loadGeneral === "function"
+    ) {
+      loadGeneral();
+    }
     if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
       if (t % 2 === 0) loadContacts();
@@ -29471,7 +29545,14 @@ function initChat() {
   document.addEventListener("visibilitychange", function pokerChatPollFlushOnVisible() {
     if (typeof document === "undefined" || document.visibilityState !== "visible") return;
     try {
-      if (typeof loadGeneral === "function") loadGeneral();
+      if (
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        typeof loadGeneral === "function"
+      ) {
+        loadGeneral();
+      }
       var guestV = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
       var credV = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
       if (credV && !guestV && typeof loadContacts === "function") loadContacts();
