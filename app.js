@@ -18686,6 +18686,10 @@ function initChat() {
     if (!a || !b) return false;
     return normalizePeerIdForChat(a) === normalizePeerIdForChat(b);
   }
+  /** id сообщения может быть числом 0 — нельзя проверять через if (m.id). */
+  function pokerChatMessageHasPersistedId(id) {
+    return id !== null && id !== undefined && id !== "";
+  }
   /** Закреплённые админы (Анна, Вика) — не дублировать в #chatContacts. */
   function chatContactIsDuplicateOfPinnedDialog(c) {
     if (!c || !c.id) return false;
@@ -20527,10 +20531,10 @@ function initChat() {
   function pokerGetSelfPin(source, peerId) {
     var b = pokerLoadSelfPinsBucket();
     var rec = b[pokerSelfPinStorageKey(source, peerId)];
-    return rec && rec.id ? rec : null;
+    return rec && pokerChatMessageHasPersistedId(rec.id) ? rec : null;
   }
   function pokerSetSelfPin(source, peerId, record) {
-    if (!record || !record.id) return;
+    if (!record || !pokerChatMessageHasPersistedId(record.id)) return;
     var b = pokerLoadSelfPinsBucket();
     b[pokerSelfPinStorageKey(source, peerId)] = record;
     pokerPersistSelfPinsBucket(b);
@@ -20542,7 +20546,7 @@ function initChat() {
   }
   function pokerMaybeClearSelfPinIfIdMissing(source, peerId, messages) {
     var pin = pokerGetSelfPin(source, peerId);
-    if (!pin || !pin.id) return;
+    if (!pin || !pokerChatMessageHasPersistedId(pin.id)) return;
     var list = messages || [];
     if (!list.some(function (m) {
       return m && String(m.id) === String(pin.id);
@@ -20551,7 +20555,7 @@ function initChat() {
     }
   }
   function pokerBuildSelfPinRecord(msg, el) {
-    if (!msg || !msg.id) return null;
+    if (!msg || !pokerChatMessageHasPersistedId(msg.id)) return null;
     var fromName = (msg.fromName || (msg.own ? resolveMyChatDisplayName() : "Игрок") || "Игрок").trim();
     var text = (msg.text != null ? String(msg.text) : "").trim();
     if (text.length > 400) text = text.slice(0, 400) + "…";
@@ -20576,7 +20580,7 @@ function initChat() {
     };
   }
   function pokerRenderSelfPinnedInnerHtml(pin, labelOpt, stubExtraClass) {
-    if (!pin || !pin.id) return "";
+    if (!pin || !pokerChatMessageHasPersistedId(pin.id)) return "";
     var label = typeof labelOpt === "string" && labelOpt.trim() ? labelOpt.trim() : "Закреплено для вас";
     var extraStub =
       stubExtraClass && String(stubExtraClass).trim() ? String(stubExtraClass).trim() + " " : "";
@@ -20712,7 +20716,7 @@ function initChat() {
     var gGlobalHost = document.getElementById("chatGeneralPinnedGlobal");
     if (gGlobalHost) {
       var gPinAll = window._chatGeneralCache && window._chatGeneralCache.generalPinned;
-      if (!gPinAll || !gPinAll.id) {
+      if (!gPinAll || !pokerChatMessageHasPersistedId(gPinAll.id)) {
         gGlobalHost.classList.remove("chat-pinned-self--visible");
         gGlobalHost.innerHTML = "";
         gGlobalHost.setAttribute("aria-hidden", "true");
@@ -20727,7 +20731,7 @@ function initChat() {
     var gHost = document.getElementById("chatGeneralPinnedSelf");
     if (gHost) {
       var gPin = pokerGetSelfPin("general", null);
-      if (!gPin || !gPin.id) {
+      if (!gPin || !pokerChatMessageHasPersistedId(gPin.id)) {
         gHost.classList.remove("chat-pinned-self--visible");
         gHost.innerHTML = "";
         gHost.setAttribute("aria-hidden", "true");
@@ -20750,7 +20754,7 @@ function initChat() {
     if (pHost) {
       var peerP = chatWithUserId;
       var pPin = peerP ? pokerGetSelfPin("personal", peerP) : null;
-      if (!pPin || !pPin.id || !peerP) {
+      if (!pPin || !pokerChatMessageHasPersistedId(pPin.id) || !peerP) {
         pHost.classList.remove("chat-pinned-self--visible");
         pHost.innerHTML = "";
         pHost.setAttribute("aria-hidden", "true");
@@ -21274,10 +21278,10 @@ function initChat() {
       var isOwn = !!(myIdRender && peerChatIdsEqual(m.from, myIdRender));
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
-      if (isOwn && m.id) {
+      if (isOwn && pokerChatMessageHasPersistedId(m.id)) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-own="true"';
         if (!m.image && !m.voice && !m.document && (m.text != null)) dataAttrs += ' data-msg-text="' + escapeHtml(String(m.text || "")) + '"';
-      } else if (!isOwn && m.id) {
+      } else if (!isOwn && pokerChatMessageHasPersistedId(m.id)) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
       if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
@@ -21325,7 +21329,7 @@ function initChat() {
       }
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtml = "";
-      if (m.id && m.reactions && typeof m.reactions === "object") {
+      if (pokerChatMessageHasPersistedId(m.id) && m.reactions && typeof m.reactions === "object") {
         var emKeysG = [];
         for (var em in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, em) && Array.isArray(m.reactions[em]) && m.reactions[em].length > 0) {
@@ -21340,7 +21344,7 @@ function initChat() {
         });
         reactionsHtml = pills.join("");
       }
-      var reactionsRow = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtml + '</span></div>' : "";
+      var reactionsRow = pokerChatMessageHasPersistedId(m.id) ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtml + '</span></div>' : "";
       var metaBlock = isFirstInGroup ? nameEl + adminBadge : "";
       var bodyClass =
         "chat-msg__body" +
@@ -21491,10 +21495,10 @@ function initChat() {
           item.style.display = canEdit ? "" : "none";
         });
         ctxMenu.querySelectorAll("[data-action=\"pin\"]").forEach(function (item) {
-          item.style.display = msg && msg.id ? "" : "none";
+          item.style.display = msg && pokerChatMessageHasPersistedId(msg.id) ? "" : "none";
         });
         ctxMenu.querySelectorAll("[data-action=\"pin-global\"]").forEach(function (item) {
-          item.style.display = source === "general" && chatIsAdmin && msg && msg.id ? "" : "none";
+          item.style.display = source === "general" && chatIsAdmin && msg && pokerChatMessageHasPersistedId(msg.id) ? "" : "none";
         });
         ctxMenu.querySelectorAll("[data-action=\"unpin\"]").forEach(function (item) {
           item.style.display = "none";
@@ -21669,7 +21673,7 @@ function initChat() {
         if (!m || !m.own) return;
         e.preventDefault();
         e.stopPropagation();
-        var msgId = m.id || null;
+        var msgId = pokerChatMessageHasPersistedId(m.id) ? m.id : null;
         var oldText = (m.msgText != null && m.msgText !== "") ? m.msgText : (m.text || "");
         var fromName = m.fromName || m.fromDtId || "Игрок";
         try { clearChatEditUI(); } catch (err) {}
@@ -21750,7 +21754,7 @@ function initChat() {
           }
           hideMenu();
         } else if (action === "edit" && msg.own && el) {
-          var msgId = msg.id || null;
+          var msgId = pokerChatMessageHasPersistedId(msg.id) ? msg.id : null;
           var oldTextRaw = (msg.msgText != null && msg.msgText !== "") ? msg.msgText : (msg.text || "");
           var fromName = msg.fromName || msg.fromDtId || "Игрок";
           try { clearChatEditUI(); } catch (eClear) {}
@@ -21774,7 +21778,7 @@ function initChat() {
               else loadMessages();
             }
           }).finally(function () { hideMenu(); });
-        } else if (action === "pin-global" && msg.id && src === "general" && chatIsAdmin) {
+        } else if (action === "pin-global" && pokerChatMessageHasPersistedId(msg.id) && src === "general" && chatIsAdmin) {
           fetch(base + "/api/chat", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -21786,7 +21790,7 @@ function initChat() {
             .then(function (d) {
               if (d && d.ok) {
                 try {
-                  if (d.generalPinned && typeof d.generalPinned === "object" && d.generalPinned.id) {
+                  if (d.generalPinned && typeof d.generalPinned === "object" && pokerChatMessageHasPersistedId(d.generalPinned.id)) {
                     if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
                       window._chatGeneralCache = { messages: [], generalMembers: [] };
                     }
@@ -21823,7 +21827,7 @@ function initChat() {
             .finally(function () {
               hideMenu();
             });
-        } else if (action === "pin" && msg.id && el) {
+        } else if (action === "pin" && pokerChatMessageHasPersistedId(msg.id) && el) {
           var peerPin = src === "personal" ? chatWithUserId : null;
           if (src === "personal" && !peerPin) {
             hideMenu();
@@ -22107,10 +22111,10 @@ function initChat() {
           if (httpOk && d && d.ok) {
             optimisticGeneralPayload = null;
             var msg = d.message;
-            if (msg && msg.id) {
+            if (msg && pokerChatMessageHasPersistedId(msg.id)) {
               window._pendingGeneralMessage = msg;
               var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null, generalMembers: [] };
-              if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return m.id === msg.id; })) {
+              if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return String(m.id) === String(msg.id); })) {
                 var msgs = cache.messages.concat([msg]);
                 window._chatGeneralCache = Object.assign({}, cache, { messages: msgs });
                 lastGeneralMessagesSig = null;
@@ -23376,10 +23380,10 @@ function initChat() {
       var isOwn = !!(myIdRenderP && peerChatIdsEqual(m.from, myIdRenderP));
       var cls = isOwn ? "chat-msg chat-msg--own" : "chat-msg chat-msg--other";
       var dataAttrs = "";
-      if (isOwn && m.id) {
+      if (isOwn && pokerChatMessageHasPersistedId(m.id)) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-own="true"';
         if (!m.image && !m.voice && !m.document && (m.text != null)) dataAttrs += ' data-msg-text="' + escapeHtml(String(m.text || "")) + '"';
-      } else if (!isOwn && m.id) {
+      } else if (!isOwn && pokerChatMessageHasPersistedId(m.id)) {
         dataAttrs = ' data-msg-id="' + escapeHtml(m.id) + '" data-msg-from="' + escapeHtml(m.from || "") + '" data-msg-from-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"';
       }
       if (m.__clientOptimistic) dataAttrs += ' data-optimistic="true"';
@@ -23438,7 +23442,7 @@ function initChat() {
       }
       var textBlock = (text || imgBlock || voiceBlock || documentBlock) ? '<div class="chat-msg__text">' + imgBlock + voiceBlock + documentBlock + text + '</div>' : "";
       var reactionsHtmlP = "";
-      if (m.id && m.reactions && typeof m.reactions === "object") {
+      if (pokerChatMessageHasPersistedId(m.id) && m.reactions && typeof m.reactions === "object") {
         var emKeysP = [];
         for (var emp in m.reactions) {
           if (Object.prototype.hasOwnProperty.call(m.reactions, emp) && Array.isArray(m.reactions[emp]) && m.reactions[emp].length > 0) {
@@ -23453,7 +23457,7 @@ function initChat() {
         });
         reactionsHtmlP = pillsP.join("");
       }
-      var reactionsRowP = m.id ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtmlP + '</span></div>' : "";
+      var reactionsRowP = pokerChatMessageHasPersistedId(m.id) ? '<div class="chat-msg__reactions-wrap"><span class="chat-msg__reactions">' + reactionsHtmlP + '</span></div>' : "";
       var metaBlockP = isFirstInGroup ? nameElP + adminBadge : "";
       var bodyClassP =
         "chat-msg__body" +
@@ -24361,7 +24365,7 @@ function initChat() {
           optimisticPersonalPayload = null;
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
           var msg = data.message;
-          if (msg && msg.id && chatWithUserId) {
+          if (msg && pokerChatMessageHasPersistedId(msg.id) && chatWithUserId) {
             window._pendingPersonalMessage = msg;
             window._pendingPersonalWith = chatWithUserId;
           }
