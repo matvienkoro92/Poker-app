@@ -2868,7 +2868,20 @@ function runGazetteAndTasksInit() {
       }
       return -1;
     }
-    function renderTaskRow(t, columnDone) {
+    function pinRomanTaskToTop(tasks, id) {
+      var active = sortTasksByCreatedAsc(
+        tasks.filter(function (x) {
+          return x && !x.done;
+        })
+      );
+      if (!active.length || String(active[0].id) === String(id)) return false;
+      var ix = findTaskById(tasks, id);
+      if (ix < 0 || tasks[ix].done) return false;
+      var minTs = active[0].createdAt != null ? Number(active[0].createdAt) : 0;
+      tasks[ix].createdAt = minTs - 1;
+      return true;
+    }
+    function renderTaskRow(t, columnDone, activeIndex) {
       var id = t.id != null ? String(t.id) : "";
       var text = t.text != null ? String(t.text) : "";
       var completeBtn =
@@ -2879,6 +2892,17 @@ function runGazetteAndTasksInit() {
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-uncomplete="' +
         escHtml(id) +
         '">Вернуть</button>';
+      var atTopActive = !columnDone && activeIndex === 0;
+      var doingBtn =
+        !columnDone && activeIndex != null
+          ? '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--doing"' +
+            (atTopActive ? " disabled" : "") +
+            ' data-roman-task-priority="' +
+            escHtml(id) +
+            '" title="' +
+            (atTopActive ? "Уже первая в списке" : "Поднять в начало — сейчас в работе") +
+            '">Выполняется</button>'
+          : "";
       return (
         '<li class="roman-task-planner__item' +
         (columnDone ? " roman-task-planner__item--done" : "") +
@@ -2890,7 +2914,7 @@ function runGazetteAndTasksInit() {
         escHtml(text) +
         "</div>" +
         '<div class="roman-task-planner__actions">' +
-        (columnDone ? uncompleteBtn : completeBtn) +
+        (columnDone ? uncompleteBtn : doingBtn + completeBtn) +
         '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
         escHtml(id) +
         '">Изменить</button>' +
@@ -2909,8 +2933,8 @@ function runGazetteAndTasksInit() {
         return !!x.done;
       }));
       listActive.innerHTML = active.length
-        ? active.map(function (t) {
-            return renderTaskRow(t, false);
+        ? active.map(function (t, idx) {
+            return renderTaskRow(t, false, idx);
           }).join("")
         : '<li class="roman-task-planner__empty roman-task-planner__empty--column">Нет активных задач</li>';
       listDone.innerHTML = doneCol.length
@@ -3061,6 +3085,16 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser()) return;
       var t = ev.target;
       if (!t || !t.closest) return;
+      var priorityBtn = t.closest("[data-roman-task-priority]");
+      if (priorityBtn && !priorityBtn.disabled) {
+        var idP = priorityBtn.getAttribute("data-roman-task-priority");
+        var tasksP = loadTasks();
+        if (pinRomanTaskToTop(tasksP, idP)) {
+          saveTasks(tasksP);
+          renderTasks();
+        }
+        return;
+      }
       var completeBtn = t.closest("[data-roman-task-complete]");
       if (completeBtn) {
         var idC = completeBtn.getAttribute("data-roman-task-complete");
