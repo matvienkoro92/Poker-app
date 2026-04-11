@@ -14042,8 +14042,7 @@ function initRaffles() {
   var raffleStatGroups = document.getElementById("raffleStatGroups");
   var raffleEnd = document.getElementById("raffleEnd");
   var rafflePrizes = document.getElementById("rafflePrizes");
-  var raffleJoinBtn = document.getElementById("raffleJoinBtn");
-  var raffleLeaveBtn = document.getElementById("raffleLeaveBtn");
+  var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
   var raffleGuestGate = document.getElementById("raffleGuestGate");
   var raffleGuestLoginBtn = document.getElementById("raffleGuestLoginBtn");
@@ -14094,11 +14093,6 @@ function initRaffles() {
     } else if (typeof alert === "function") {
       alert(message);
     }
-  }
-
-  function resetRaffleJoinLeaveLabels() {
-    if (raffleJoinBtn) raffleJoinBtn.textContent = "Участвовать";
-    if (raffleLeaveBtn) raffleLeaveBtn.textContent = "Отменить участие";
   }
 
   // Подписка на уведомления о новых розыгрышах
@@ -14543,16 +14537,24 @@ function initRaffles() {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
       raffleGuestGate.hidden = !showRaffleGuestGate;
     }
-    if (raffleJoinBtn) {
-      raffleJoinBtn.textContent = "Участвовать";
-      var hideJoin = !!iAmIn || raffle.status !== "active" || showRaffleGuestGate;
-      raffleJoinBtn.classList.toggle("raffle-join-btn--hidden", hideJoin);
-      raffleJoinBtn.disabled = raffle.status !== "active" || (endDate && endDate <= new Date());
-    }
-    if (raffleLeaveBtn) {
-      raffleLeaveBtn.textContent = "Отменить участие";
-      raffleLeaveBtn.classList.toggle("raffle-leave-btn--hidden", !iAmIn || raffle.status !== "active");
-      raffleLeaveBtn.disabled = raffle.status !== "active" || (endDate && endDate <= new Date());
+    if (raffleJoinToggleBtn) {
+      var showToggle = raffle.status === "active" && !showRaffleGuestGate;
+      raffleJoinToggleBtn.classList.toggle("raffle-join-toggle-btn--hidden", !showToggle);
+      if (!showToggle) {
+        raffleJoinToggleBtn.disabled = true;
+      } else {
+        var pastEnd = !!(endDate && endDate <= new Date());
+        raffleJoinToggleBtn.disabled = pastEnd;
+        if (iAmIn) {
+          raffleJoinToggleBtn.textContent = "Отменить участие";
+          raffleJoinToggleBtn.setAttribute("data-raffle-action", "leave");
+          raffleJoinToggleBtn.classList.add("raffle-join-toggle-btn--leave");
+        } else {
+          raffleJoinToggleBtn.textContent = "Участвовать";
+          raffleJoinToggleBtn.setAttribute("data-raffle-action", "join");
+          raffleJoinToggleBtn.classList.remove("raffle-join-toggle-btn--leave");
+        }
+      }
     }
     if (raffleJoinedMsg) raffleJoinedMsg.classList.toggle("raffle-joined-msg--hidden", !iAmIn);
     var parts = raffle.participants || [];
@@ -15894,10 +15896,43 @@ function initRaffles() {
     });
   }
 
-  if (raffleJoinBtn) {
-    raffleJoinBtn.addEventListener("click", function () {
+  if (raffleJoinToggleBtn) {
+    raffleJoinToggleBtn.addEventListener("click", function () {
       if (!currentRaffleId) {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
+        return;
+      }
+      var act = raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join";
+      if (act === "leave") {
+        if (!base || !rafflesViewerApiReady()) return;
+        raffleJoinToggleBtn.disabled = true;
+        raffleJoinToggleBtn.textContent = "Отмена…";
+        fetch(base + "/api/raffles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "leave", raffleId: currentRaffleId })),
+        })
+          .then(parseRaffleApiResponse)
+          .then(function (data) {
+            if (data && data.ok) {
+              if (data.raffle) renderRaffle(data.raffle);
+              else if (currentRaffleData) renderRaffle(currentRaffleData);
+              var leaveMsg = data.alreadyLeft ? "Вы не были в списке участников." : "Участие отменено.";
+              showRaffleFeedback(leaveMsg, "ok");
+            } else {
+              if (currentRaffleData) renderRaffle(currentRaffleData);
+              var eLeave = (data && data.error) || "Ошибка";
+              showRaffleFeedback(eLeave, "err");
+              if (tg && tg.showAlert) tg.showAlert(eLeave);
+              else if (typeof alert === "function") alert(eLeave);
+            }
+          })
+          .catch(function () {
+            if (currentRaffleData) renderRaffle(currentRaffleData);
+            showRaffleFeedback(POKER_NET_ERR, "err");
+            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+            else if (typeof alert === "function") alert(POKER_NET_ERR);
+          });
         return;
       }
       if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
@@ -15910,9 +15945,8 @@ function initRaffles() {
         else if (typeof alert === "function") alert("Нет доступа к серверу. Проверьте сеть.");
         return;
       }
-      raffleJoinBtn.disabled = true;
-      if (raffleLeaveBtn) raffleLeaveBtn.disabled = true;
-      raffleJoinBtn.textContent = "Отправка…";
+      raffleJoinToggleBtn.disabled = true;
+      raffleJoinToggleBtn.textContent = "Отправка…";
       var joinBody = {
         action: "join",
         raffleId: currentRaffleId,
@@ -15933,13 +15967,9 @@ function initRaffles() {
         .then(function (data) {
           if (data && data.ok) {
             if (data.raffle) renderRaffle(data.raffle);
-            else {
-              resetRaffleJoinLeaveLabels();
-              if (currentRaffleData) renderRaffle(currentRaffleData);
-            }
+            else if (currentRaffleData) renderRaffle(currentRaffleData);
             showRaffleFeedback(data.alreadyJoined ? "Вы уже участвуете." : "Вы участвуете в розыгрыше.", "ok");
           } else {
-            resetRaffleJoinLeaveLabels();
             if (currentRaffleData) renderRaffle(currentRaffleData);
             var err = (data && data.error) || "Ошибка";
             showRaffleFeedback(err, "err");
@@ -15967,50 +15997,9 @@ function initRaffles() {
           }
         })
         .catch(function () {
-          resetRaffleJoinLeaveLabels();
           if (currentRaffleData) renderRaffle(currentRaffleData);
           showRaffleFeedback(POKER_NET_ERR + " Попробуйте снова.", "err");
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR + " Перезайдите в мини-приложение и попробуйте снова.");
-          else if (typeof alert === "function") alert(POKER_NET_ERR);
-        });
-    });
-  }
-
-  if (raffleLeaveBtn) {
-    raffleLeaveBtn.addEventListener("click", function () {
-      if (!currentRaffleId || !base || !rafflesViewerApiReady()) return;
-      raffleLeaveBtn.disabled = true;
-      if (raffleJoinBtn) raffleJoinBtn.disabled = true;
-      raffleLeaveBtn.textContent = "Отмена…";
-      fetch(base + "/api/raffles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "leave", raffleId: currentRaffleId })),
-      })
-        .then(parseRaffleApiResponse)
-        .then(function (data) {
-          if (data && data.ok) {
-            if (data.raffle) renderRaffle(data.raffle);
-            else {
-              resetRaffleJoinLeaveLabels();
-              if (currentRaffleData) renderRaffle(currentRaffleData);
-            }
-            var leaveMsg = data.alreadyLeft ? "Вы не были в списке участников." : "Участие отменено.";
-            showRaffleFeedback(leaveMsg, "ok");
-          } else {
-            resetRaffleJoinLeaveLabels();
-            if (currentRaffleData) renderRaffle(currentRaffleData);
-            var eLeave = (data && data.error) || "Ошибка";
-            showRaffleFeedback(eLeave, "err");
-            if (tg && tg.showAlert) tg.showAlert(eLeave);
-            else if (typeof alert === "function") alert(eLeave);
-          }
-        })
-        .catch(function () {
-          resetRaffleJoinLeaveLabels();
-          if (currentRaffleData) renderRaffle(currentRaffleData);
-          showRaffleFeedback(POKER_NET_ERR, "err");
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           else if (typeof alert === "function") alert(POKER_NET_ERR);
         });
     });
