@@ -6156,7 +6156,6 @@ function getPokerResolvedTelegramUser() {
     var introHtml =
       '<div class="auth-banner__code-intro-wrap" role="note">' +
       '<p class="auth-banner__code-intro">Укажите ниже ваш <strong>@username</strong> из Телеграм.</p>' +
-      '<p class="auth-banner__code-intro">Клуб узнаёт ваш @username после захода в мини-приложение TWO ACES <strong>внутри Telegram</strong> или после сообщения боту клуба в личку (/start или любой текст), если на сервере настроен webhook. Если недавно меняли @username — снова зайдите в мини-приложение или напишите боту.</p>' +
       '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
       linkTme +
       ".</p>" +
@@ -6195,45 +6194,48 @@ function getPokerResolvedTelegramUser() {
     var base = getTelegramAuthApiBase();
     if (!base) return;
 
+    function shortenPwaAuthHintForUi(raw, isError) {
+      var s = raw != null ? String(raw).trim() : "";
+      if (!isError || !s) return s;
+      if (
+        s.length > 90 ||
+        s.indexOf("сопоставлен") !== -1 ||
+        s.indexOf("мини-прилож") !== -1 ||
+        s.indexOf("приватност") !== -1 ||
+        s.indexOf("webhook") !== -1
+      ) {
+        return "Не удалось. Проверьте @username и шаги в инструкции выше.";
+      }
+      return s;
+    }
     function setHint(text, isError) {
+      var display = shortenPwaAuthHintForUi(text, !!isError);
       if (!hint) {
-        if (isError && text && isPwaStandaloneAuth()) {
-          try { alert(text); } catch (eA) {}
+        if (isError && display && isPwaStandaloneAuth()) {
+          try {
+            alert(display);
+          } catch (eA) {}
         }
         return;
       }
       hint.innerHTML = "";
-      hint.textContent = text || "";
+      hint.textContent = display || "";
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
-      hint.classList.toggle("auth-banner__code-hint--hidden", !text);
+      hint.classList.toggle("auth-banner__code-hint--hidden", !display);
     }
     function showCodeSentToBotHint() {
       if (!hint) {
         if (isPwaStandaloneAuth()) {
           try {
-            alert(
-              "Код отправлен в бота. Если вы ещё не подписаны, сначала отправьте боту /start, и только потом отправляйте код ниже." +
-                (botUrl ? " Чат: " + botUrl : "")
-            );
+            alert("Код отправлен в Telegram.");
           } catch (eAl) {}
         }
         return;
       }
       hint.classList.remove("auth-banner__code-hint--hidden");
       hint.classList.remove("auth-banner__code-hint--error");
-      if (botUrl && botUser) {
-        hint.innerHTML =
-          "Код отправлен в бота. Чат с ботом: " +
-          '<a href="' +
-          botUrl +
-          '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' +
-          botUser +
-          "</a>. " +
-          "Если вы ещё не подписаны на бота, сначала отправьте в этот чат <strong>/start</strong>, и только потом отправляйте код в поле ниже.";
-      } else {
-        hint.innerHTML =
-          "Код отправлен в бота. Откройте чат с ботом клуба в Telegram. Если вы ещё не подписаны, сначала отправьте <strong>/start</strong>, и только потом отправляйте код в поле ниже.";
-      }
+      hint.innerHTML = "";
+      hint.textContent = "Код отправлен в Telegram.";
     }
     function normalizeUsernameInput() {
       var raw = userInput && userInput.value ? userInput.value : "";
