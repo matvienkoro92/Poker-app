@@ -17696,6 +17696,27 @@ function initChat() {
   }
   window.syncChatRespectDisplayForUser = syncChatRespectDisplayForUser;
 
+  function pokerFormatChatLastSeenRu(iso) {
+    if (!iso) return "";
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return (
+        "был онлайн " +
+        d.toLocaleString("ru-RU", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    } catch (eLs) {
+      return "";
+    }
+  }
+  window.pokerFormatChatLastSeenRu = pokerFormatChatLastSeenRu;
+
   var chatUserModalEl = document.getElementById("chatUserModal");
   var chatUserModalUserId = null;
   var chatUserModalUserName = null;
@@ -17720,6 +17741,7 @@ function initChat() {
     var modalRemoveFriend = document.getElementById("chatUserModalRemoveFriend");
     var modalFriendMsg = document.getElementById("chatUserModalFriendMsg");
     var modalLoginSub = document.getElementById("chatUserModalLoginSub");
+    var modalLastSeen = document.getElementById("chatUserModalLastSeen");
     var modalBackdrop = chatUserModalEl.querySelector(".chat-user-modal__backdrop");
     var modalClose = chatUserModalEl.querySelector(".chat-user-modal__close");
     var chatUserModalPeerLogin = "";
@@ -17840,6 +17862,10 @@ function initChat() {
         modalLoginSub.textContent = "";
         modalLoginSub.hidden = true;
       }
+      if (modalLastSeen) {
+        modalLastSeen.textContent = "";
+        modalLastSeen.hidden = true;
+      }
       if (modalEditFriendName) modalEditFriendName.style.display = "none";
       if (modalRemoveFriend) modalRemoveFriend.style.display = "none";
       if (modalTitle) modalTitle.textContent = userName;
@@ -17893,10 +17919,27 @@ function initChat() {
               modalAvatarPlaceholder.textContent = (titleDisp || "И")[0];
             }
             if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(!!data.isFriend, titleDisp);
+            if (modalLastSeen) {
+              if (data.chatOnline) {
+                modalLastSeen.textContent = "В сети";
+                modalLastSeen.hidden = false;
+              } else if (data.chatLastSeenAt) {
+                var lsTxt = pokerFormatChatLastSeenRu(data.chatLastSeenAt);
+                if (lsTxt) {
+                  modalLastSeen.textContent = lsTxt;
+                  modalLastSeen.hidden = false;
+                } else {
+                  modalLastSeen.hidden = true;
+                }
+              } else {
+                modalLastSeen.hidden = true;
+              }
+            }
           }
         })
         .catch(function () {
           if (modalPersonal) modalPersonal.textContent = "—";
+          if (modalLastSeen) modalLastSeen.hidden = true;
         });
       fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
@@ -22192,6 +22235,8 @@ function initChat() {
       lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
     } catch (e) {}
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam;
+    var contactsFetchGen = (window.__pokerContactsFetchGen || 0) + 1;
+    window.__pokerContactsFetchGen = contactsFetchGen;
     var contactsInstantFromCache = false;
     function applyContactsApiResponse(data, opts) {
       opts = opts || {};
@@ -22339,7 +22384,7 @@ function initChat() {
         } catch (ePkRf) {}
         if (showFriendsOnly) {
           contactsForList = contactsForList.filter(function (c) {
-            if (c && c.isGroupChat) return false;
+            if (c && c.isGroupChat) return true;
             return !!(friendSet[c.id] || friendSet[String(c.id)]);
           });
         }
@@ -22643,7 +22688,7 @@ function initChat() {
     }
     try {
       var c0 = pokerTryReadContactsCache();
-      if (c0) {
+      if (c0 && !window.__pokerLastContactsApiData) {
         contactsInstantFromCache = true;
         applyContactsApiResponse(c0);
         fireContactsLoaded();
@@ -22654,6 +22699,7 @@ function initChat() {
         return r.json();
       })
       .then(function (data) {
+        if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
         try {
           if (data && data.ok) pokerWriteContactsCache(data);
         } catch (eSav) {}
@@ -22661,6 +22707,7 @@ function initChat() {
         fireContactsLoaded();
       })
       .catch(function () {
+        if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
         if (!contactsInstantFromCache)
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
@@ -23030,7 +23077,47 @@ function initChat() {
       var next = i < messages.length - 1 ? messages[i + 1] : null;
       if (m && m.groupSystemEvent) {
         var dayDivSys = chatDayDividerHtmlBeforeMessage(prev, m);
-        var sysLine = escapeHtml(String(m.text || "").trim()) || "Событие в группе";
+        var sysLine;
+        if (
+          m.groupSystemEvent === "members_added" &&
+          m.groupSystemMembersAdded &&
+          Array.isArray(m.groupSystemMembersAdded.members) &&
+          m.groupSystemMembersAdded.members.length
+        ) {
+          var plMa = m.groupSystemMembersAdded;
+          var actorMa = plMa.actorLabel != null && String(plMa.actorLabel).trim() ? String(plMa.actorLabel).trim() : "";
+          var prefixHtmlMa = escapeHtml(actorMa || "Участник") + " добавил(а) в группу: ";
+          var sepJoinMa = '<span class="chat-msg__group-system-sep">, </span>';
+          var peerPartsMa = plMa.members
+            .map(function (mem) {
+              if (!mem || !mem.userId) return "";
+              var uidM = String(mem.userId);
+              var dispM =
+                mem.displayName != null && String(mem.displayName).trim()
+                  ? String(mem.displayName).trim()
+                  : uidM;
+              var tgM =
+                mem.telegramUsername != null && String(mem.telegramUsername).trim()
+                  ? String(mem.telegramUsername).trim().replace(/^@/, "")
+                  : "";
+              var innerM = escapeHtml(dispM);
+              if (tgM) innerM += ' <span class="chat-msg__group-system-tg">@' + escapeHtml(tgM) + "</span>";
+              return (
+                '<button type="button" class="chat-msg__group-system-peer chat-msg__name-btn" data-pm-id="' +
+                escapeHtml(uidM) +
+                '" data-pm-name="' +
+                escapeHtml(dispM) +
+                '">' +
+                innerM +
+                "</button>"
+              );
+            })
+            .filter(Boolean);
+          sysLine =
+            '<span class="chat-msg__group-system-prefix">' + prefixHtmlMa + "</span>" + peerPartsMa.join(sepJoinMa);
+        } else {
+          sysLine = escapeHtml(String(m.text || "").trim()) || "Событие в группе";
+        }
         return (
           dayDivSys +
           '<div class="chat-msg chat-msg--group-system" role="status"><div class="chat-msg__group-system-inner">' +
@@ -26720,6 +26807,38 @@ function initChat() {
       }
     }
     try {
+      var gcpRaw = d && Array.isArray(d.generalChatPickMembers) ? d.generalChatPickMembers : [];
+      for (var gcpi = 0; gcpi < gcpRaw.length; gcpi++) {
+        var gcm = gcpRaw[gcpi];
+        if (!gcm || !gcm.id) continue;
+        var gcid =
+          typeof normalizePeerIdForChat === "function"
+            ? normalizePeerIdForChat(String(gcm.id).trim())
+            : String(gcm.id).trim();
+        if (!gcid || gcid.indexOf("group_") === 0) continue;
+        if (gcid.indexOf("guest_") === 0) continue;
+        if (!(gcid.indexOf("tg_") === 0 || gcid.indexOf("vk_") === 0)) continue;
+        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(gcid, myId0)) continue;
+        var gcn =
+          gcm.name != null && String(gcm.name).trim() ? String(gcm.name).trim() : gcid;
+        if (byId[gcid]) {
+          if (gcm.online && !byId[gcid].online) byId[gcid].online = true;
+          if (gcm.avatar && !byId[gcid].avatar) byId[gcid].avatar = gcm.avatar;
+          if (gcn && byId[gcid].name === gcid && gcn !== gcid) byId[gcid].name = gcn;
+          if (gcm.admin) byId[gcid].admin = true;
+          continue;
+        }
+        byId[gcid] = {
+          id: gcid,
+          name: gcn,
+          avatar: gcm.avatar != null ? gcm.avatar : null,
+          online: !!gcm.online,
+          admin: !!gcm.admin,
+          unreadCount: 0,
+        };
+      }
+    } catch (eGcpick) {}
+    try {
       function mergeGroupPickDomPeer(idRaw, nameHint, onlineHint, adminHint) {
         if (!idRaw) return;
         var ids = normalizePeerIdForChat(String(idRaw).trim());
@@ -26849,9 +26968,30 @@ function initChat() {
       });
   };
 
-  /** Раньше подгружали состав главного чата, если пикер пуст — список «Все» в группе = список чатов, не ростер общего чата. Оставлен вызов для совместимости. */
+  /**
+   * Если пикер пуст, один раз перезапрашиваем mode=contacts (там же приходит generalChatPickMembers).
+   * Повторные вызовы подряд отключены, чтобы не зациклить сеть при открытой модалке.
+   */
   window.__pokerFetchGeneralRosterForGroupPickIfEmpty = function (done) {
-    if (typeof done === "function") done();
+    function runDone() {
+      if (typeof done === "function") {
+        try {
+          done();
+        } catch (eD) {}
+      }
+    }
+    if (window.__pokerGroupPickContactsRetryOnce === false) {
+      runDone();
+      return;
+    }
+    window.__pokerGroupPickContactsRetryOnce = false;
+    if (typeof window.__pokerReloadChatContacts === "function") {
+      try {
+        window.__pokerReloadChatContacts({ onLoaded: runDone });
+        return;
+      } catch (eRel) {}
+    }
+    runDone();
   };
 
   (function initChatGroupAddMembersModal() {
@@ -27193,6 +27333,7 @@ function initChat() {
     if (btnCloseAm) btnCloseAm.addEventListener("click", closeModalAmFn);
     if (btnCancelAm) btnCancelAm.addEventListener("click", closeModalAmFn);
     window.__pokerOpenChatGroupAddMembers = function (groupId) {
+      window.__pokerGroupPickContactsRetryOnce = true;
       var gid = groupId != null ? String(groupId).trim() : "";
       if (gid.indexOf("group_") !== 0) return;
       if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
@@ -27283,6 +27424,7 @@ function initChat() {
         });
     };
     window.__pokerOpenGeneralChatInviteMembers = function () {
+      window.__pokerGroupPickContactsRetryOnce = true;
       if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
       if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Войдите в аккаунт");
@@ -27436,6 +27578,7 @@ function initChat() {
             contactName: m.contactName,
             telegramUsername: m.telegramUsername,
             telegramDisplayName: m.telegramDisplayName,
+            lastSeenAt: m.lastSeenAt || null,
           };
         })
         .filter(Boolean);
@@ -27550,6 +27693,19 @@ function initChat() {
                   escapeHtml((m.name && String(m.name)) || m.id) +
                   "</span>";
               }
+              var lastSeenLine = "";
+              if (!m.online && m.lastSeenAt) {
+                var lsFn =
+                  typeof window.pokerFormatChatLastSeenRu === "function"
+                    ? window.pokerFormatChatLastSeenRu(m.lastSeenAt)
+                    : "";
+                if (lsFn) {
+                  lastSeenLine =
+                    '<span class="chat-group-info-modal__member-last-seen">' +
+                    escapeHtml(lsFn) +
+                    "</span>";
+                }
+              }
               var av =
                 m.avatar
                   ? '<img class="chat-group-info-modal__member-av" src="' +
@@ -27578,6 +27734,7 @@ function initChat() {
                 (badges.length
                   ? '<span class="chat-group-info-modal__member-badges">' + escapeHtml(badges.join(" · ")) + "</span>"
                   : "") +
+                (lastSeenLine ? lastSeenLine : "") +
                 '</span><span class="chat-group-info-modal__member-online' +
                 (m.online ? " chat-group-info-modal__member-online--on" : "") +
                 '" aria-hidden="true"></span></button>';
@@ -28328,6 +28485,7 @@ function initChat() {
       modal.setAttribute("aria-hidden", "true");
     }
     function openModal() {
+      window.__pokerGroupPickContactsRetryOnce = true;
       selectedMap = Object.create(null);
       resetGroupCreateAvatar();
       if (titleInp) titleInp.value = "";
@@ -28859,10 +29017,25 @@ function updateVisitorCounter() {
       recordTrackingLinkHit(ref);
     }
   })();
-  const apiUrl = base + "/api/visit?visitor_id=" + encodeURIComponent(visitorId);
-  const initData = tg && tg.initData ? tg.initData : null;
-  const fetchOpts = initData
-    ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ initData: initData }) }
+  var authLeading =
+    typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
+  const apiUrl =
+    base +
+    "/api/visit" +
+    (authLeading === "?" ? "?" : authLeading + "&") +
+    "visitor_id=" +
+    encodeURIComponent(visitorId);
+  const hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+  const fetchOpts = hasCred
+    ? {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          typeof pokerGuestOrAuthedPostBody === "function"
+            ? pokerGuestOrAuthedPostBody({ visitor_id: visitorId })
+            : { visitor_id: visitorId }
+        ),
+      }
     : { method: "GET" };
 
   function doFetch(retryCount) {
@@ -28929,7 +29102,13 @@ function fetchVisitorStatsOnly() {
     setDash();
     return;
   }
-  fetch(base + "/api/visit?stats=1")
+  var authLeadingSt =
+    typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
+  var statsUrl =
+    base +
+    "/api/visit" +
+    (authLeadingSt === "?" ? "?stats=1" : authLeadingSt + "&stats=1");
+  fetch(statsUrl)
     .then(function (res) {
       if (!res.ok) return Promise.reject(new Error("stats " + res.status));
       return res.json();
@@ -29094,6 +29273,8 @@ document.addEventListener("visibilitychange", function () {
     var reportBtn = document.getElementById("adminReportBtn");
     if (!wrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
     function showAdminUi() {
+      var footerStats = document.getElementById("footerVisitorStatsWrap");
+      if (footerStats) footerStats.removeAttribute("hidden");
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
@@ -29101,6 +29282,9 @@ document.addEventListener("visibilitychange", function () {
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
+      try {
+        if (typeof updateVisitorCounter === "function") updateVisitorCounter();
+      } catch (eVisAd) {}
     }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.

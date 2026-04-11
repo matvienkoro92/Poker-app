@@ -105,7 +105,8 @@ body::-webkit-scrollbar,
   --block-dark: #fed7aa;
   --block-dark-gradient: linear-gradient(135deg, #fff0e0, #ffedd5);
   --chat-stats-bg: rgba(255, 237, 213, 0.6);
-  --chat-input-field-bg: rgba(255, 255, 255, 0.94);
+  /* Как лента чата и --block-bg-solid: без отдельной «белой плашки» у строки ввода */
+  --chat-input-field-bg: rgba(255, 237, 213, 0.82);
 }
 [data-theme="light"] .card {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
@@ -2965,6 +2966,12 @@ body[data-view="cashout"] {
   background-color: var(--overscroll-canvas);
   background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
 }
+/* Полоса ввода: тот же градиент, что у ленты — без белой подложки */
+[data-theme="light"] .chat-general-view .chat-input-area,
+[data-theme="light"] .chat-container .chat-input-area {
+  background-color: transparent;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
+}
 .view--active[data-view="chat"] .chat-input-wrap,
 .view--active[data-view="chat"] .chat-input-area,
 .view--active[data-view="chat"] .chat-container {
@@ -5718,6 +5725,38 @@ html.vpn-proxy-modal-open {
   background: rgba(100, 116, 139, 0.12);
   color: #64748b;
 }
+.chat-msg__group-system-inner .chat-msg__group-system-prefix {
+  color: inherit;
+}
+.chat-msg__group-system-inner .chat-msg__group-system-sep {
+  color: inherit;
+  opacity: 0.85;
+  user-select: none;
+}
+.chat-msg__group-system-inner .chat-msg__group-system-peer.chat-msg__name-btn {
+  display: inline;
+  flex: none;
+  max-width: none;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  font-weight: 600;
+  color: var(--accent, #f97316);
+  text-align: center;
+  vertical-align: baseline;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chat-msg__group-system-inner .chat-msg__group-system-peer.chat-msg__name-btn:hover {
+  filter: brightness(1.08);
+}
+.chat-msg__group-system-inner .chat-msg__group-system-tg {
+  font-weight: 600;
+  opacity: 0.95;
+}
+[data-theme="light"] .chat-msg__group-system-inner .chat-msg__group-system-peer.chat-msg__name-btn {
+  color: #c2410c;
+}
 .chat-msg__meta-line {
   display: flex;
   align-items: center;
@@ -8426,6 +8465,8 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   display: none;
 }
 .chat-group-info-modal__add-members-icon-btn {
+  position: relative;
+  z-index: 2;
   flex-shrink: 0;
   width: 36px;
   height: 36px;
@@ -8577,6 +8618,16 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+.chat-group-info-modal__member-last-seen {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted, rgba(148, 163, 184, 0.9));
+  line-height: 1.25;
+  margin-top: 2px;
+}
+[data-theme="light"] .chat-group-info-modal__member-last-seen {
+  color: rgba(71, 85, 105, 0.88);
 }
 .chat-group-info-modal__member-online {
   width: 8px;
@@ -9285,6 +9336,8 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   order: 2;
 }
 .chat-conv-group-add-btn {
+  position: relative;
+  z-index: 2;
   flex-shrink: 0;
   width: 40px;
   min-width: 40px;
@@ -19061,6 +19114,16 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
 [data-theme="light"] .chat-user-modal__login-sub {
   color: rgba(71, 85, 105, 0.92);
 }
+.chat-user-modal__last-seen {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+[data-theme="light"] .chat-user-modal__last-seen {
+  color: rgba(71, 85, 105, 0.88);
+}
 .chat-user-modal__p21 {
   margin: 0 0 8px;
   font-size: 13px;
@@ -23025,30 +23088,19 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   color: var(--text);
 }
 
+.footer-visitors__stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.footer-visitors__stats[hidden] {
+  display: none !important;
+}
+
 .footer-visitors__version {
   white-space: nowrap;
   opacity: 0.92;
-}
-
-.footer-deep-links {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--text-muted);
-  text-align: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  justify-content: center;
-  align-items: center;
-}
-.footer-deep-links__a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.footer-deep-links__a:hover {
-  color: var(--text);
 }
 
 .footer-note {

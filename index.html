@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.423">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.429">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -728,14 +728,13 @@
               </div>
 
             <footer class="card__footer card__footer--home" id="homeFooter">
-              <p class="footer-visitors" aria-label="Статистика посещений и версия">
-                <span class="footer-visitors__total">Визитов: <strong id="visitorTotal">—</strong></span>
-                <span class="footer-visitors__unique">Уник.: <strong id="visitorUnique">—</strong></span>
-                <span class="footer-visitors__returning">Повтор.: <strong id="visitorReturning">—</strong></span>
+              <p class="footer-visitors" aria-label="Версия приложения и статистика (для администраторов)">
+                <span class="footer-visitors__stats" id="footerVisitorStatsWrap" hidden>
+                  <span class="footer-visitors__total">Визитов: <strong id="visitorTotal">—</strong></span>
+                  <span class="footer-visitors__unique">Уник.: <strong id="visitorUnique">—</strong></span>
+                  <span class="footer-visitors__returning">Повтор.: <strong id="visitorReturning">—</strong></span>
+                </span>
                 <span class="footer-visitors__version" id="homeFooterAppVersion"></span>
-              </p>
-              <p class="footer-deep-links">
-                <a href="#vpn-proxy" class="footer-deep-links__a">ВПН и прокси</a>
               </p>
               <p class="footer-note">
                 Клуб «Два туза». Играйте ответственно. 18+
@@ -5468,6 +5467,7 @@
             <div class="chat-user-modal__title-block">
               <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
               <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
+              <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
             </div>
           </div>
           <p class="chat-user-modal__intro">Эта информация видна другим пользователям</p>
@@ -5981,7 +5981,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=539"></script>
+    <script defer src="./app.js?v=545"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
