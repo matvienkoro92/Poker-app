@@ -6216,6 +6216,18 @@ html.vpn-proxy-modal-open {
   word-break: break-word;
 }
 .chat-msg__reply strong { color: var(--text); }
+/* Десктоп / PWA с мышью: фрагмент текста (на тач по-прежнему user-select: none у .chat-msg) */
+@media (hover: hover) and (pointer: fine) {
+  .chat-msg__text,
+  .chat-msg__reply,
+  .chat-msg__group-system-inner,
+  .chat-msg__document-link--view,
+  .chat-pinned-self .chat-msg__text,
+  .chat-pinned-self .chat-pinned-self__placeholder {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
 /* Подложка при открытом контекстном меню: затемнение, сообщение и меню поверх (z-index выше chat-input-area) */
 .chat-ctx-backdrop {
   position: fixed;

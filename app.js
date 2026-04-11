@@ -21454,6 +21454,14 @@ function initChat() {
     } catch (eSbG) {}
   }
 
+  /** Мышь/трекпад: long-press на mousedown ломает выделение текста; меню — через ПКМ (contextmenu). */
+  function pokerChatFinePointerLikeDesktop() {
+    try {
+      return !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+    } catch (eFPD) {
+      return false;
+    }
+  }
   function attachContextMenuForOthers(container, source, scrollParentOpt) {
     var scrollParent = scrollParentOpt || container;
     var ctxMenu = document.getElementById("chatContextMenu");
@@ -21644,9 +21652,11 @@ function initChat() {
       el.addEventListener("touchmove", onTouchMove, { passive: true });
       el.addEventListener("touchend", clearTimer);
       el.addEventListener("touchcancel", clearTimer);
-      el.addEventListener("mousedown", startTimer);
-      el.addEventListener("mouseup", clearTimer);
-      el.addEventListener("mouseleave", clearTimer);
+      if (!pokerChatFinePointerLikeDesktop()) {
+        el.addEventListener("mousedown", startTimer);
+        el.addEventListener("mouseup", clearTimer);
+        el.addEventListener("mouseleave", clearTimer);
+      }
       el.addEventListener("contextmenu", function (e) {
         e.preventDefault();
         onLongPress();
