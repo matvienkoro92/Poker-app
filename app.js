@@ -25340,7 +25340,8 @@ function initChat() {
             }
           } catch (eDockAnd) {}
         }
-        if (isIosLikeForChatViewport() && !tg) {
+        /* iOS: падение innerHeight относительно baseline — и для PWA, и для Telegram; иначе при глючном vv только max() раздувает cover */
+        if (isIosLikeForChatViewport()) {
           try {
             var baseId = Number(window.__pokerChatInnerHBaseline) || 0;
             var curId = window.innerHeight || 0;
@@ -25354,6 +25355,17 @@ function initChat() {
           coverPxDock = Math.max(coverPxDock, heightLoss);
         }
         if (isChatThreadComposerKeyboardDom()) {
+          /*
+           * TG iOS / WKWebView: при наборе vv.height иногда кратковременно сильно занижен → ih - offsetTop - vvh
+           * даёт сотни пикселей → fixed bottom огромный → полоса ввода в центре экрана над клавиатурой.
+           * Потолок ~52% ih (с запасом под клавиатуру + accessory), не ниже 200px.
+           */
+          if (!isChatPhysicalKeyboardContext() && ih > 280) {
+            var ihRefDock = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
+            if (ihRefDock < 320) ihRefDock = ih;
+            var coverDockCap = Math.min(520, Math.max(200, Math.round(ihRefDock * 0.52)));
+            if (coverPxDock > coverDockCap) coverPxDock = coverDockCap;
+          }
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
           applyChatThreadComposerKeyboardDockFromCover(coverPxDock);
