@@ -178,6 +178,42 @@ function getAppBaseUrlForLinks() {
   return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
 }
 
+/** Нормализация start_param / ?startapp= (декодирование, префикс startapp=). */
+function pokerNormalizeWebAppStartParam(raw) {
+  if (raw == null) return "";
+  var s = String(raw).trim();
+  if (!s) return "";
+  try {
+    s = decodeURIComponent(s.replace(/\+/g, " "));
+  } catch (eDec) {}
+  s = s.trim();
+  var m = s.match(/^startapp=([^&]+)$/i);
+  if (m && m[1]) {
+    var inner = m[1].trim();
+    try {
+      inner = decodeURIComponent(inner);
+    } catch (e2) {}
+    return String(inner).trim();
+  }
+  return s;
+}
+
+function pokerStartAppQueryFromUrlSearchParams(sp) {
+  if (!sp || typeof sp.get !== "function") return "";
+  var v = sp.get("startapp");
+  if (v != null && String(v).trim() !== "") return String(v).trim();
+  try {
+    var found = "";
+    sp.forEach(function (val, key) {
+      if (found) return;
+      if (key && String(key).toLowerCase() === "startapp") found = String(val || "").trim();
+    });
+    return found;
+  } catch (eFor) {
+    return "";
+  }
+}
+
 /** Установленное PWA / standalone: для Web Share вне Telegram Mini App */
 function pokerIsPwaStandaloneForShare() {
   try {
@@ -1350,7 +1386,7 @@ function getAssetUrl(relativePath) {
     try {
       var urlObj = new URL(link.href, window.location.href);
       var sp = new URLSearchParams(urlObj.search || "");
-      var startApp = sp.get("startapp");
+      var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       if (startApp === "raffles" && typeof setView === "function") {
         setView("raffles");
         return;
@@ -3238,6 +3274,7 @@ function runGazetteAndTasksInit() {
       startParam = params.get("start_param") || "";
     } catch (e) {}
   }
+  startParam = pokerNormalizeWebAppStartParam(startParam);
   function parseStreamsRoomIdFromStartParam(val) {
     if (!val) return null;
     val = String(val).trim();
@@ -3451,12 +3488,30 @@ function runGazetteAndTasksInit() {
   var qWithParam = "";
   try {
     var qsDeep = new URLSearchParams(typeof location !== "undefined" && location.search ? location.search : "");
-    qStartApp = (qsDeep.get("startapp") || "").trim();
+    qStartApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(qsDeep));
     qWithParam = (qsDeep.get("with") || "").trim();
   } catch (eQsDeep) {}
   var deepLinkParam = (startParam && String(startParam).trim()) || qStartApp;
   if (deepLinkParam) {
     pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
+  }
+  if (isTelegramWebApp()) {
+    setTimeout(function () {
+      try {
+        var tgR = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (!tgR) return;
+        var rawR = (tgR.initDataUnsafe && tgR.initDataUnsafe.start_param) || tgR.startParam || "";
+        if (!rawR && tgR.initData) {
+          var prR = new URLSearchParams(tgR.initData);
+          rawR = prR.get("start_param") || "";
+        }
+        var normR = pokerNormalizeWebAppStartParam(rawR);
+        if (normR !== "raffles") return;
+        var vNow = document.body && document.body.getAttribute("data-view");
+        if (vNow === "raffles") return;
+        pokerApplyStartAppDeepLink("raffles", { withPeer: qWithParam });
+      } catch (eTgRaffleRetry) {}
+    }, 220);
   }
   if (window.location.hash === "#streams") {
     setTimeout(function () {
@@ -15331,8 +15386,14 @@ function initRaffles() {
         tournamentName +
         "\n" +
         link;
+      var shareTitleRaw =
+        (typeof buildActiveRaffleCardHeading === "function" ? buildActiveRaffleCardHeading(raffle) : "") ||
+        raffleDisplayPrizeText((raffle.title || "").trim()) ||
+        "Розыгрыш — Два туза";
+      var shareTitle = String(shareTitleRaw).trim();
+      if (shareTitle.length > 200) shareTitle = shareTitle.slice(0, 199) + "…";
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-      pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
+      pokerTryPwaWebShare({ title: shareTitle, text: text, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
           return;
@@ -15448,10 +15509,17 @@ function initRaffles() {
       }
       window.__pokerRaffleCreateInFlight = true;
       createBtn.disabled = true;
+      var prevCreateBtnText = createBtn.textContent;
+      createBtn.textContent = "Создание…";
       var idemKey =
         typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
+      function raffleCreateResetUi() {
+        window.__pokerRaffleCreateInFlight = false;
+        createBtn.disabled = false;
+        createBtn.textContent = prevCreateBtnText;
+      }
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -15466,19 +15534,39 @@ function initRaffles() {
           })
         ),
       })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r
+            .json()
+            .catch(function () {
+              return { ok: false, error: "Не удалось разобрать ответ сервера" };
+            })
+            .then(function (data) {
+              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+              if (!r.ok && !d.error) {
+                d = Object.assign({}, d, { ok: false, error: "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "") });
+              }
+              return d;
+            });
+        })
         .then(function (data) {
-          window.__pokerRaffleCreateInFlight = false;
-          createBtn.disabled = false;
+          raffleCreateResetUi();
           if (data && data.ok && data.raffle) {
             createForm.classList.add("raffle-create-form--hidden");
             loadRaffles();
-            if (!data.idempotentReplay && tg && tg.showAlert) tg.showAlert("Розыгрыш создан");
-          } else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+            if (!data.idempotentReplay) {
+              if (tg && tg.showAlert) tg.showAlert("Розыгрыш создан");
+              else if (typeof alert === "function") alert("Розыгрыш создан");
+            }
+          } else {
+            var errMsg = (data && data.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(errMsg);
+            else if (typeof alert === "function") alert(errMsg);
+          }
         })
         .catch(function () {
-          window.__pokerRaffleCreateInFlight = false;
-          createBtn.disabled = false;
+          raffleCreateResetUi();
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
         });
     });
   }
@@ -15893,7 +15981,11 @@ function initRaffles() {
       var inviteBody =
         "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteBody);
-      pokerTryPwaWebShare({ text: inviteBody, url: link }).then(function (pwaOk) {
+      var headingEl = document.getElementById("raffleCardHeading");
+      var heroTitle = headingEl && headingEl.textContent ? String(headingEl.textContent).trim() : "";
+      if (heroTitle.length > 200) heroTitle = heroTitle.slice(0, 199) + "…";
+      if (!heroTitle) heroTitle = "Розыгрыши — клуб «Два туза»";
+      pokerTryPwaWebShare({ title: heroTitle, text: inviteBody, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
           return;
@@ -25792,7 +25884,7 @@ function initChat() {
         });
       }
     }
-    var CHAT_EMOJIS = ["😀","😃","😄","😁","😅","😂","🤣","😊","😇","🙂","😉","😍","🥰","😘","😗","😋","😛","😜","🤪","😎","🤩","🥳","👍","👎","👏","🙌","🤝","🙏","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","🔥","⭐","✨","💯","🎉","🎊","🤔","😐","😑","😶","🙄","😏","😣","😢","😭","😤","😡","🤬","😈","💀","👋","✌️","🤞","💪","🐶","🐱","🎲","♠️","♥️","♦️","♣️"];
+    var CHAT_EMOJIS = ["🔥","✅","😀","😃","😄","😁","😅","😂","🤣","😊","😇","🙂","😉","😍","🥰","😘","😗","😋","😛","😜","🤪","😎","🤩","🥳","👍","👎","👏","🙌","🤝","🙏","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","⭐","✨","💯","🎉","🎊","🤔","😐","😑","😶","🙄","😏","😣","😢","😭","😤","😡","🤬","😈","💀","👋","✌️","🤞","💪","🐶","🐱","🎲","♠️","♥️","♦️","♣️"];
     var chatEmojiPicker = document.getElementById("chatEmojiPicker");
     var chatEmojiPickerGrid = document.getElementById("chatEmojiPickerGrid");
     var chatGeneralEmojiBtn = document.getElementById("chatGeneralEmojiBtn");
