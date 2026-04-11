@@ -19404,12 +19404,22 @@ function initChat() {
             if (tg && tg.showAlert) tg.showAlert("Доступ к главному чату отозван администратором.");
             else if (typeof alert === "function") alert("Доступ к главному чату отозван администратором.");
             loadContacts();
+            if (typeof loadGeneral === "function") loadGeneral();
             if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
             return;
           }
           if (tg && tg.showAlert) tg.showAlert("Заявка отправлена. После одобрения администратором чат откроется.");
           else if (typeof alert === "function") alert("Заявка отправлена.");
+          try {
+            var chatViewOn = !!document.querySelector('[data-view="chat"].view--active');
+            var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
+            if (chatViewOn && chatActiveTab === "general" && genVis && generalMessages) {
+              if (typeof renderGeneralAccessGate === "function") renderGeneralAccessGate(clubChatAccess);
+              updateGeneralInputLocked(true);
+            }
+          } catch (eGateApply) {}
           loadContacts();
+          if (typeof loadGeneral === "function") loadGeneral();
           if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
         } else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
         else if (typeof alert === "function") alert((d && d.error) || "Ошибка");
@@ -19590,8 +19600,12 @@ function initChat() {
         return r.json();
       })
       .then(function (d) {
-        if (d && d.ok) openChatClubAccessModal();
-        else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+        if (d && d.ok) {
+          openChatClubAccessModal();
+          /* Модалка тянет clubChatManage; шапка/кэш общего чата (participantsCount, generalMembers) — только из mode=general */
+          if (typeof loadGeneral === "function") loadGeneral();
+          if (typeof loadContacts === "function") loadContacts();
+        } else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
       })
       .catch(function () {
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
@@ -20378,11 +20392,21 @@ function initChat() {
       generalView &&
       !generalView.classList.contains("chat-general-view--hidden");
     var trackSeenQs = userActuallyViewingGeneral ? "" : "&trackSeen=0";
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs;
+    var pollQs = "";
+    if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
+      pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
+    }
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs;
     var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
+      if (data && data.notModified === true && data.pollRev) {
+        return;
+      }
       if (data && data.ok) {
+        if (data.pollRev && typeof data.pollRev === "string") {
+          window.__pokerGeneralPollRev = data.pollRev;
+        }
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
         if (data.clubChatPendingReviewCount != null) {
@@ -29219,17 +29243,53 @@ function initChat() {
     }
   })();
 
+  /** Интервал опроса на экране «Чат» (мс). В фоне вкладки и вне чата — реже, меньше трафик Redis/API. */
+  var CHAT_POLL_MS = 2000;
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
-    loadGeneral();
-    if (chatWithUserId) loadMessages();
-    /* Бейдж таббара и иконки PWA: generalUnreadCount + сумма личных из mode=contacts — дергать не только
-       в списке диалогов, иначе на вкладке «общий»/главная цифра на ярлыке отстаёт от реальности. */
+    var hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
+    var chatViewOn = typeof document !== "undefined" && !!document.querySelector('[data-view="chat"].view--active');
+    window.__pokerChatPollTickN = (window.__pokerChatPollTickN || 0) + 1;
+    var t = window.__pokerChatPollTickN;
     var guestPoll = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
     var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
-    if (credPoll && !guestPoll) loadContacts();
-    else if (chatActiveTab === "admins" && adminsView && !adminsView.classList.contains("chat-admins-view--hidden")) loadAdminsOnline();
-  }, 10000);
+
+    if (hidden) {
+      if (t % 10 !== 0) return;
+      if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
+      return;
+    }
+
+    if (!chatViewOn) {
+      if (t % 2 !== 0) return;
+      if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
+      return;
+    }
+
+    if (typeof loadGeneral === "function") loadGeneral();
+    if (chatWithUserId && typeof loadMessages === "function") loadMessages();
+    if (credPoll && !guestPoll && typeof loadContacts === "function") {
+      if (t % 2 === 0) loadContacts();
+    } else if (
+      chatActiveTab === "admins" &&
+      adminsView &&
+      !adminsView.classList.contains("chat-admins-view--hidden") &&
+      typeof loadAdminsOnline === "function"
+    ) {
+      loadAdminsOnline();
+    }
+  }, CHAT_POLL_MS);
+
+  document.addEventListener("visibilitychange", function pokerChatPollFlushOnVisible() {
+    if (typeof document === "undefined" || document.visibilityState !== "visible") return;
+    try {
+      if (typeof loadGeneral === "function") loadGeneral();
+      var guestV = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+      var credV = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+      if (credV && !guestV && typeof loadContacts === "function") loadContacts();
+      if (chatWithUserId && typeof loadMessages === "function") loadMessages();
+    } catch (eVisPoll) {}
+  });
 
   window.__pokerRefreshChatUnreadForPwaBadge = function () {
     try {
