@@ -16985,7 +16985,7 @@ window.chatClubPendingReviewCount = 0;
 var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
-var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v4";
+var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v5";
 var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
 function pokerGetChatContactsListFilter() {
   try {
@@ -20107,7 +20107,9 @@ function initChat() {
       !generalView.classList.contains("chat-general-view--hidden");
     var trackSeenQs = userActuallyViewingGeneral ? "" : "&trackSeen=0";
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs;
+    var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
     fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
+      if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
@@ -21532,7 +21534,18 @@ function initChat() {
               return r.json();
             })
             .then(function (d) {
-              if (d && d.ok) loadGeneral();
+              if (d && d.ok) {
+                try {
+                  if (d.generalPinned && typeof d.generalPinned === "object" && d.generalPinned.id) {
+                    if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
+                      window._chatGeneralCache = { messages: [], generalMembers: [] };
+                    }
+                    window._chatGeneralCache.generalPinned = d.generalPinned;
+                    refreshChatSelfPinBars();
+                  }
+                } catch (ePinOpt) {}
+                loadGeneral();
+              }
             })
             .finally(function () {
               hideMenu();
@@ -21547,7 +21560,15 @@ function initChat() {
               return r.json();
             })
             .then(function (d) {
-              if (d && d.ok) loadGeneral();
+              if (d && d.ok) {
+                try {
+                  if (window._chatGeneralCache && typeof window._chatGeneralCache === "object") {
+                    window._chatGeneralCache.generalPinned = null;
+                  }
+                  refreshChatSelfPinBars();
+                } catch (eUnOpt) {}
+                loadGeneral();
+              }
             })
             .finally(function () {
               hideMenu();
@@ -24629,6 +24650,45 @@ function initChat() {
         var cv = convView && !convView.classList.contains("chat-conv-view--hidden");
         return !!(gen || cv);
       }
+      /** Зазор от верхнего края клавиатуры до нижнего края панели ввода: iOS 20px, Android 4px. */
+      function getChatComposerKeyboardGapPx() {
+        return isIosLikeForChatViewport() ? 20 : 4;
+      }
+      /**
+       * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
+       * bottom = coverPx + getChatComposerKeyboardGapPx().
+       */
+      function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
+        var g = document.getElementById("chatGeneralInputArea");
+        var p = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
+        if (!document.body.classList.contains("chat-keyboard-open") || isChatPhysicalKeyboardContext()) {
+          stripChatInputAreaTransforms();
+          return;
+        }
+        if (!isChatThreadComposerKeyboardDom()) {
+          stripChatInputAreaTransforms();
+          return;
+        }
+        var gap = getChatComposerKeyboardGapPx();
+        var bottomPx = Math.max(gap, Math.round(Number(coverPx) || 0) + gap);
+        stripChatInputAreaTransforms();
+        var target = null;
+        if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
+          target = g;
+        } else if (chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
+          target = p;
+        }
+        if (!target) return;
+        target.classList.add("chat-input-area--vv-dock");
+        target.style.setProperty("position", "fixed", "");
+        target.style.setProperty("left", "0", "");
+        target.style.setProperty("right", "0", "");
+        target.style.setProperty("width", "100%", "");
+        target.style.setProperty("max-width", "100%", "");
+        target.style.setProperty("box-sizing", "border-box", "");
+        target.style.setProperty("z-index", "120", "");
+        target.style.setProperty("bottom", bottomPx + "px", "");
+      }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!document.body.classList.contains("chat-keyboard-open")) {
@@ -24671,7 +24731,9 @@ function initChat() {
             if (isChatThreadComposerKeyboardDom()) {
               doc.style.setProperty("--chat-vv-inset", "0px");
               doc.style.removeProperty("--chat-ios-accessory-inset");
-              stripChatInputAreaTransforms();
+              var coverNv =
+                baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
+              applyChatThreadComposerKeyboardDockFromCover(coverNv);
             } else {
               doc.style.setProperty("--chat-vv-inset", insetFb + "px");
               if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
@@ -24816,10 +24878,42 @@ function initChat() {
             }
           }
         }
+        var coverPxDock = Math.max(0, Math.round(ih - offsetTop - vvh));
+        coverPxDock = Math.max(coverPxDock, overlap);
+        if (tg && tw) {
+          var tgvHd = Number(tw.viewportHeight);
+          var tgvSd = Number(tw.viewportStableHeight);
+          if (tgvSd > 0 && tgvHd > 0 && tgvSd > tgvHd + 8) {
+            coverPxDock = Math.max(coverPxDock, Math.round(tgvSd - tgvHd));
+          }
+        }
+        if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0 && !isIosLikeForChatViewport()) {
+          try {
+            var baseHd = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curHd = window.innerHeight || 0;
+            if (baseHd > 260 && curHd > 0) {
+              var winLossD = Math.round(baseHd - curHd);
+              if (winLossD > 48) coverPxDock = Math.max(coverPxDock, winLossD);
+            }
+          } catch (eDockAnd) {}
+        }
+        if (isIosLikeForChatViewport() && !tg) {
+          try {
+            var baseId = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curId = window.innerHeight || 0;
+            if (baseId > 260 && curId > 0) {
+              var winLossId = Math.round(baseId - curId);
+              if (winLossId > 48) coverPxDock = Math.max(coverPxDock, winLossId);
+            }
+          } catch (eDockIos) {}
+        }
+        if (chatComposerEl && document.activeElement === chatComposerEl && coverPxDock < 72 && ih > 0 && vvh > 0) {
+          coverPxDock = Math.max(coverPxDock, heightLoss);
+        }
         if (isChatThreadComposerKeyboardDom()) {
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
-          stripChatInputAreaTransforms();
+          applyChatThreadComposerKeyboardDockFromCover(coverPxDock);
         } else {
           doc.style.setProperty("--chat-vv-inset", inset + "px");
           applyChatIosAccessoryInsetFromViewport();
@@ -26592,7 +26686,7 @@ function initChat() {
     });
   }
 
-  /** Те же люди, что во вкладке «Все» в списке чатов (+ строка диалогов/DOM и друзья из /api/friends для вкладки «Друзья»). Без состава главного чата клуба. */
+  /** Участники группы: только личные собеседники (Redis chat_partners), как во вкладке «Все» без «друзей без переписки» и без ростера общего чата. + DOM при отсутствии chatPartnerIds в кэше (legacy). */
   function pokerBuildGroupModalContactList() {
     var d = window.__pokerLastContactsApiData;
     if ((!d || !Array.isArray(d.contacts) || d.contacts.length === 0) && typeof pokerTryReadContactsCache === "function") {
@@ -26602,6 +26696,18 @@ function initChat() {
           d = cCached;
         }
       } catch (eCc) {}
+    }
+    var partnerAllow = null;
+    if (d && Array.isArray(d.chatPartnerIds)) {
+      partnerAllow = Object.create(null);
+      for (var pai = 0; pai < d.chatPartnerIds.length; pai++) {
+        var pav = d.chatPartnerIds[pai];
+        if (pav == null || pav === "") continue;
+        var ps = String(pav);
+        var pvn = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(ps.trim()) : ps.trim();
+        partnerAllow[pvn] = true;
+        partnerAllow[ps] = true;
+      }
     }
     var contactsRaw = d && Array.isArray(d.contacts) ? d.contacts : [];
     var contactsForListLike = contactsRaw.filter(function (c) {
@@ -26618,44 +26724,16 @@ function initChat() {
       var c = contactsOnly[i];
       var idc = String(c.id);
       if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(idc, myId0)) continue;
+      if (partnerAllow) {
+        var idcN = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(idc) : idc;
+        if (!partnerAllow[idcN] && !partnerAllow[idc]) continue;
+      }
       if (byId[idc]) {
         byId[idc] = Object.assign({}, byId[idc], c);
       } else {
         byId[idc] = c;
       }
     }
-    try {
-      var gcpRaw = d && Array.isArray(d.generalChatPickMembers) ? d.generalChatPickMembers : [];
-      for (var gcpi = 0; gcpi < gcpRaw.length; gcpi++) {
-        var gcm = gcpRaw[gcpi];
-        if (!gcm || !gcm.id) continue;
-        var gcid =
-          typeof normalizePeerIdForChat === "function"
-            ? normalizePeerIdForChat(String(gcm.id).trim())
-            : String(gcm.id).trim();
-        if (!gcid || gcid.indexOf("group_") === 0) continue;
-        if (gcid.indexOf("guest_") === 0) continue;
-        if (!(gcid.indexOf("tg_") === 0 || gcid.indexOf("vk_") === 0)) continue;
-        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(gcid, myId0)) continue;
-        var gcn =
-          gcm.name != null && String(gcm.name).trim() ? String(gcm.name).trim() : gcid;
-        if (byId[gcid]) {
-          if (gcm.online && !byId[gcid].online) byId[gcid].online = true;
-          if (gcm.avatar && !byId[gcid].avatar) byId[gcid].avatar = gcm.avatar;
-          if (gcn && byId[gcid].name === gcid && gcn !== gcid) byId[gcid].name = gcn;
-          if (gcm.admin) byId[gcid].admin = true;
-          continue;
-        }
-        byId[gcid] = {
-          id: gcid,
-          name: gcn,
-          avatar: gcm.avatar != null ? gcm.avatar : null,
-          online: !!gcm.online,
-          admin: !!gcm.admin,
-          unreadCount: 0,
-        };
-      }
-    } catch (eGcpick) {}
     try {
       function mergeGroupPickDomPeer(idRaw, nameHint, onlineHint, adminHint) {
         if (!idRaw) return;
@@ -26664,6 +26742,10 @@ function initChat() {
         if (ids.indexOf("guest_") === 0) return;
         if (!(ids.indexOf("tg_") === 0 || ids.indexOf("vk_") === 0)) return;
         if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(ids, myId0)) return;
+        if (partnerAllow) {
+          var idsN = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(ids) : ids;
+          if (!partnerAllow[idsN] && !partnerAllow[ids]) return;
+        }
         if (byId[ids]) return;
         byId[ids] = {
           id: ids,
@@ -26705,35 +26787,6 @@ function initChat() {
         }
       }
     } catch (eDomGp) {}
-    try {
-      var fPick = window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
-        ? window.__pokerFriendsPickCache.friends
-        : [];
-      for (var ffi = 0; ffi < fPick.length; ffi++) {
-        var frow = fPick[ffi];
-        if (!frow || !frow.userId) continue;
-        var fuid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(String(frow.userId)) : String(frow.userId);
-        if (!fuid || fuid.indexOf("group_") === 0 || fuid.indexOf("guest_") === 0) continue;
-        if (myId0 && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(fuid, myId0)) continue;
-        if (byId[fuid]) continue;
-        var fDisp =
-          frow.contactName != null && String(frow.contactName).trim()
-            ? String(frow.contactName).trim()
-            : frow.userName || fuid;
-        var fEnt = {
-          id: fuid,
-          name: fDisp,
-          avatar: null,
-          online: false,
-          admin: false,
-          unreadCount: 0,
-        };
-        if (frow.contactName != null && String(frow.contactName).trim()) {
-          fEnt.contactName = String(frow.contactName).trim();
-        }
-        byId[fuid] = fEnt;
-      }
-    } catch (eFpick) {}
     var out = [];
     for (var k in byId) {
       if (Object.prototype.hasOwnProperty.call(byId, k)) out.push(byId[k]);
@@ -26746,6 +26799,34 @@ function initChat() {
       return na.localeCompare(nb, "ru");
     });
     return out;
+  }
+
+  /** true, если id в списке личных собеседников (chatPartnerIds из mode=contacts). Если поля ещё нет (старый кэш) — не блокируем UI, сервер всё равно проверит. */
+  function pokerPeerIsInMyChatPartnerList(peerIdRaw) {
+    if (peerIdRaw == null || peerIdRaw === "") return false;
+    var d = window.__pokerLastContactsApiData;
+    if ((!d || !Array.isArray(d.chatPartnerIds)) && typeof pokerTryReadContactsCache === "function") {
+      try {
+        var cPr = pokerTryReadContactsCache();
+        if (cPr && cPr.ok && Array.isArray(cPr.chatPartnerIds)) d = cPr;
+      } catch (ePr) {}
+    }
+    if (!d || !Array.isArray(d.chatPartnerIds)) return true;
+    var norm =
+      typeof normalizePeerIdForChat === "function"
+        ? normalizePeerIdForChat(String(peerIdRaw).trim())
+        : String(peerIdRaw).trim();
+    for (var pi = 0; pi < d.chatPartnerIds.length; pi++) {
+      var p = d.chatPartnerIds[pi];
+      if (p == null || p === "") continue;
+      var pn =
+        typeof normalizePeerIdForChat === "function"
+          ? normalizePeerIdForChat(String(p).trim())
+          : String(p).trim();
+      if (pn === norm) return true;
+      if (typeof peerChatIdsEqual === "function" && peerChatIdsEqual(pn, norm)) return true;
+    }
+    return false;
   }
 
   /**
@@ -26787,7 +26868,7 @@ function initChat() {
   };
 
   /**
-   * Если пикер пуст, один раз перезапрашиваем mode=contacts (там же приходит generalChatPickMembers).
+   * Если пикер пуст, один раз перезапрашиваем mode=contacts (обновятся chatPartnerIds и контакты).
    * Повторные вызовы подряд отключены, чтобы не зациклить сеть при открытой модалке.
    */
   window.__pokerFetchGeneralRosterForGroupPickIfEmpty = function (done) {
@@ -26862,7 +26943,7 @@ function initChat() {
       });
       if (!usable.length) {
         container.innerHTML =
-          '<p class="chat-create-group-modal__empty">Некого добавить из этого списка — попробуйте «Вручную»</p>';
+          '<p class="chat-create-group-modal__empty">Некого добавить из личных диалогов — попробуйте «Вручную» (только если с человеком уже была переписка в чате клуба)</p>';
         return;
       }
       container.innerHTML = usable
@@ -27027,6 +27108,10 @@ function initChat() {
             }
             if (inGroupAlreadyAm(uid)) {
               manualHintAm.textContent = "Уже в группе";
+              return;
+            }
+            if (typeof pokerPeerIsInMyChatPartnerList === "function" && !pokerPeerIsInMyChatPartnerList(uid)) {
+              manualHintAm.textContent = "Можно добавить только того, с кем был личный диалог в чате клуба";
               return;
             }
             selectedMapAm[uid] = unm;
@@ -28389,7 +28474,7 @@ function initChat() {
       if (!container) return;
       if (!arr.length) {
         container.innerHTML =
-          '<p class="chat-create-group-modal__empty">Нет контактов. Добавьте людей вручную или пообщайтесь в клубе.</p>';
+          '<p class="chat-create-group-modal__empty">Нет личных диалогов. Сначала напишите человеку в чате клуба — он появится здесь и во вкладке «Все».</p>';
         return;
       }
       container.innerHTML = arr
@@ -28521,6 +28606,10 @@ function initChat() {
             var myIdX = resolveMyChatMemberId();
             if (myIdX && peerChatIdsEqual(uid, myIdX)) {
               manualHint.textContent = "Нельзя добавить себя";
+              return;
+            }
+            if (typeof pokerPeerIsInMyChatPartnerList === "function" && !pokerPeerIsInMyChatPartnerList(uid)) {
+              manualHint.textContent = "Можно добавить только того, с кем был личный диалог в чате клуба";
               return;
             }
             selectedMap[uid] = unm;
