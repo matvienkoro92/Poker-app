@@ -2245,7 +2245,6 @@ function runGazetteAndTasksInit() {
     }
     modal.setAttribute("aria-hidden", "false");
     markGazetteRead();
-    if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
   }
   window.openGazette = openGazette;
   function closeGazette() {
@@ -2730,13 +2729,12 @@ function runGazetteAndTasksInit() {
         blurTimer = setTimeout(function () {
           blurTimer = null;
           var active = document.activeElement;
-          var kbField =
+          if (
             active &&
             active.classList &&
-            (active.classList.contains("gazette-article-comments__textarea") ||
-              active.classList.contains("roman-task-planner__input") ||
-              active.classList.contains("roman-task-planner__edit-ta"));
-          if (kbField && modal.contains(active)) {
+            active.classList.contains("gazette-article-comments__textarea") &&
+            modal.contains(active)
+          ) {
             return;
           }
           try {
@@ -2753,15 +2751,7 @@ function runGazetteAndTasksInit() {
         "focusin",
         function (ev) {
           var t = ev.target;
-          if (
-            !t ||
-            !t.classList ||
-            (!t.classList.contains("gazette-article-comments__textarea") &&
-              !t.classList.contains("roman-task-planner__input") &&
-              !t.classList.contains("roman-task-planner__edit-ta"))
-          ) {
-            return;
-          }
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
           if (!modal.contains(t)) return;
           try {
             document.documentElement.classList.add("gazette-comment-keyboard");
@@ -2773,15 +2763,7 @@ function runGazetteAndTasksInit() {
         "focusout",
         function (ev) {
           var t = ev.target;
-          if (
-            !t ||
-            !t.classList ||
-            (!t.classList.contains("gazette-article-comments__textarea") &&
-              !t.classList.contains("roman-task-planner__input") &&
-              !t.classList.contains("roman-task-planner__edit-ta"))
-          ) {
-            return;
-          }
+          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
           if (!modal.contains(t)) return;
           scheduleFinalizeGazetteKb();
         },
@@ -2790,13 +2772,17 @@ function runGazetteAndTasksInit() {
     })();
     window.__pokerGazetteReloadCommentFeed = loadGazetteCommentsFeed;
   })();
+  }
 
   (function initRomanGazetteTaskPlanner() {
-    var section = document.getElementById("romanTaskPlanner");
+    var plannerModal = document.getElementById("romanTaskPlannerModal");
+    var plannerBackdrop = document.getElementById("romanTaskPlannerModalBackdrop");
+    var plannerClose = document.getElementById("romanTaskPlannerModalClose");
+    var openBtn = document.getElementById("romanTaskPlannerOpenBtn");
     var listEl = document.getElementById("romanTaskList");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
-    if (!section || !listEl || !form || !input) return;
+    if (!plannerModal || !listEl || !form || !input || !openBtn) return;
     var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
     function normUser() {
@@ -2908,14 +2894,115 @@ function runGazetteAndTasksInit() {
         })
         .join("");
     }
+    function openPlannerModal() {
+      if (!isPlannerAllowedUser() || !plannerModal) return;
+      renderTasks();
+      plannerModal.setAttribute("aria-hidden", "false");
+    }
+    function closePlannerModal() {
+      if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
+      try {
+        var ae = document.activeElement;
+        if (ae && plannerModal && plannerModal.contains(ae) && ae.blur) ae.blur();
+      } catch (eB) {}
+      try {
+        document.documentElement.classList.remove("gazette-comment-keyboard");
+      } catch (eGk) {}
+      try {
+        if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+          window.__pokerFinalizeChatKeyboardDismiss();
+        }
+      } catch (eKb) {}
+    }
     function syncVisibility() {
       if (!isPlannerAllowedUser()) {
-        section.classList.add("roman-task-planner--hidden");
+        openBtn.classList.add("welcome-planner-icon--hidden");
+        closePlannerModal();
         return;
       }
-      section.classList.remove("roman-task-planner--hidden");
-      renderTasks();
+      openBtn.classList.remove("welcome-planner-icon--hidden");
+      if (plannerModal.getAttribute("aria-hidden") === "false") renderTasks();
     }
+    openBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isPlannerAllowedUser()) return;
+      openPlannerModal();
+    });
+    if (plannerBackdrop) {
+      plannerBackdrop.addEventListener("click", function () {
+        closePlannerModal();
+      });
+    }
+    if (plannerClose) {
+      plannerClose.addEventListener("click", function () {
+        closePlannerModal();
+      });
+    }
+    (function bindPlannerModalKeyboardRepair() {
+      if (!plannerModal) return;
+      var blurTimer = null;
+      function scheduleFinalizePlannerKb() {
+        clearTimeout(blurTimer);
+        blurTimer = setTimeout(function () {
+          blurTimer = null;
+          var active = document.activeElement;
+          var kbField =
+            active &&
+            active.classList &&
+            (active.classList.contains("roman-task-planner__input") ||
+              active.classList.contains("roman-task-planner__edit-ta"));
+          if (kbField && plannerModal.contains(active)) return;
+          try {
+            document.documentElement.classList.remove("gazette-comment-keyboard");
+          } catch (eRm) {}
+          try {
+            if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+              window.__pokerFinalizeChatKeyboardDismiss();
+            }
+          } catch (eFin) {}
+        }, 120);
+      }
+      plannerModal.addEventListener(
+        "focusin",
+        function (ev) {
+          var t = ev.target;
+          if (
+            !t ||
+            !t.classList ||
+            (!t.classList.contains("roman-task-planner__input") &&
+              !t.classList.contains("roman-task-planner__edit-ta"))
+          ) {
+            return;
+          }
+          if (!plannerModal.contains(t)) return;
+          try {
+            document.documentElement.classList.add("gazette-comment-keyboard");
+          } catch (eIn) {}
+        },
+        true
+      );
+      plannerModal.addEventListener(
+        "focusout",
+        function (ev) {
+          var t = ev.target;
+          if (
+            !t ||
+            !t.classList ||
+            (!t.classList.contains("roman-task-planner__input") &&
+              !t.classList.contains("roman-task-planner__edit-ta"))
+          ) {
+            return;
+          }
+          if (!plannerModal.contains(t)) return;
+          scheduleFinalizePlannerKb();
+        },
+        true
+      );
+    })();
+    window.addEventListener("poker-telegram-auth", function () {
+      syncVisibility();
+    });
     window.__pokerSyncRomanTaskPlanner = syncVisibility;
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
@@ -3018,7 +3105,6 @@ function runGazetteAndTasksInit() {
     });
     syncVisibility();
   })();
-  }
 
   (function initPartnershipModal() {
     var modal = document.getElementById("partnershipModal");
