@@ -2245,6 +2245,7 @@ function runGazetteAndTasksInit() {
     }
     modal.setAttribute("aria-hidden", "false");
     markGazetteRead();
+    if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
   }
   window.openGazette = openGazette;
   function closeGazette() {
@@ -2729,12 +2730,13 @@ function runGazetteAndTasksInit() {
         blurTimer = setTimeout(function () {
           blurTimer = null;
           var active = document.activeElement;
-          if (
+          var kbField =
             active &&
             active.classList &&
-            active.classList.contains("gazette-article-comments__textarea") &&
-            modal.contains(active)
-          ) {
+            (active.classList.contains("gazette-article-comments__textarea") ||
+              active.classList.contains("roman-task-planner__input") ||
+              active.classList.contains("roman-task-planner__edit-ta"));
+          if (kbField && modal.contains(active)) {
             return;
           }
           try {
@@ -2751,7 +2753,15 @@ function runGazetteAndTasksInit() {
         "focusin",
         function (ev) {
           var t = ev.target;
-          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (
+            !t ||
+            !t.classList ||
+            (!t.classList.contains("gazette-article-comments__textarea") &&
+              !t.classList.contains("roman-task-planner__input") &&
+              !t.classList.contains("roman-task-planner__edit-ta"))
+          ) {
+            return;
+          }
           if (!modal.contains(t)) return;
           try {
             document.documentElement.classList.add("gazette-comment-keyboard");
@@ -2763,7 +2773,15 @@ function runGazetteAndTasksInit() {
         "focusout",
         function (ev) {
           var t = ev.target;
-          if (!t || !t.classList || !t.classList.contains("gazette-article-comments__textarea")) return;
+          if (
+            !t ||
+            !t.classList ||
+            (!t.classList.contains("gazette-article-comments__textarea") &&
+              !t.classList.contains("roman-task-planner__input") &&
+              !t.classList.contains("roman-task-planner__edit-ta"))
+          ) {
+            return;
+          }
           if (!modal.contains(t)) return;
           scheduleFinalizeGazetteKb();
         },
@@ -2771,6 +2789,216 @@ function runGazetteAndTasksInit() {
       );
     })();
     window.__pokerGazetteReloadCommentFeed = loadGazetteCommentsFeed;
+  })();
+
+  (function initRomanGazetteTaskPlanner() {
+    var section = document.getElementById("romanTaskPlanner");
+    var listEl = document.getElementById("romanTaskList");
+    var form = document.getElementById("romanTaskAddForm");
+    var input = document.getElementById("romanTaskInput");
+    if (!section || !listEl || !form || !input) return;
+    var STORAGE_KEY = "poker_roman1787443_planner_v1";
+    function normUser() {
+      var user =
+        typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (!user && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+        user = window.Telegram.WebApp.initDataUnsafe.user;
+      }
+      var u = user && user.username ? String(user.username) : "";
+      return u.replace(/^@+/, "").trim().toLowerCase();
+    }
+    function isRoman() {
+      return normUser() === "roman1787443";
+    }
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+    function loadTasks() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        var arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (eLoad) {
+        return [];
+      }
+    }
+    function saveTasks(tasks) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      } catch (eSave) {}
+    }
+    function sortTasks(tasks) {
+      var copy = tasks.slice();
+      copy.sort(function (a, b) {
+        var da = a && a.done ? 1 : 0;
+        var db = b && b.done ? 1 : 0;
+        if (da !== db) return da - db;
+        var ta = a && a.createdAt ? Number(a.createdAt) : 0;
+        var tb = b && b.createdAt ? Number(b.createdAt) : 0;
+        return ta - tb;
+      });
+      return copy;
+    }
+    function findTaskById(tasks, id) {
+      var sid = String(id);
+      for (var i = 0; i < tasks.length; i++) {
+        if (tasks[i] && String(tasks[i].id) === sid) return i;
+      }
+      return -1;
+    }
+    function renderTasks() {
+      var tasks = sortTasks(loadTasks());
+      if (!tasks.length) {
+        listEl.innerHTML =
+          '<li class="roman-task-planner__empty">Пока нет задач — добавьте ниже.</li>';
+        return;
+      }
+      listEl.innerHTML = tasks
+        .map(function (t) {
+          var id = t.id != null ? String(t.id) : "";
+          var text = t.text != null ? String(t.text) : "";
+          var done = !!t.done;
+          return (
+            '<li class="roman-task-planner__item' +
+            (done ? " roman-task-planner__item--done" : "") +
+            '" data-roman-task-id="' +
+            escHtml(id) +
+            '">' +
+            '<input type="checkbox" class="roman-task-planner__check" data-roman-task-toggle="' +
+            escHtml(id) +
+            '"' +
+            (done ? " checked" : "") +
+            ' aria-label="Выполнено" />' +
+            '<div class="roman-task-planner__body">' +
+            '<div class="roman-task-planner__text">' +
+            escHtml(text) +
+            "</div>" +
+            '<div class="roman-task-planner__actions">' +
+            '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
+            escHtml(id) +
+            '">Изменить</button>' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
+            escHtml(id) +
+            '">Удалить</button>' +
+            "</div></div></li>"
+          );
+        })
+        .join("");
+    }
+    function syncVisibility() {
+      if (!isRoman()) {
+        section.classList.add("roman-task-planner--hidden");
+        return;
+      }
+      section.classList.remove("roman-task-planner--hidden");
+      renderTasks();
+    }
+    window.__pokerSyncRomanTaskPlanner = syncVisibility;
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (!isRoman()) return;
+      var text = input.value ? input.value.trim() : "";
+      if (!text) return;
+      var tasks = loadTasks();
+      tasks.push({
+        id: "t_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9),
+        text: text,
+        done: false,
+        createdAt: Date.now(),
+      });
+      saveTasks(tasks);
+      input.value = "";
+      renderTasks();
+    });
+    listEl.addEventListener("click", function (ev) {
+      if (!isRoman()) return;
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var toggle = t.closest("[data-roman-task-toggle]");
+      if (toggle) {
+        var idT = toggle.getAttribute("data-roman-task-toggle");
+        var tasksT = loadTasks();
+        var ixT = findTaskById(tasksT, idT);
+        if (ixT >= 0) {
+          tasksT[ixT].done = !tasksT[ixT].done;
+          saveTasks(tasksT);
+          renderTasks();
+        }
+        return;
+      }
+      var del = t.closest("[data-roman-task-delete]");
+      if (del) {
+        var idD = del.getAttribute("data-roman-task-delete");
+        if (!confirm("Удалить задачу?")) return;
+        var tasksD = loadTasks();
+        var ixD = findTaskById(tasksD, idD);
+        if (ixD >= 0) {
+          tasksD.splice(ixD, 1);
+          saveTasks(tasksD);
+          renderTasks();
+        }
+        return;
+      }
+      var saveB = t.closest("[data-roman-task-save]");
+      if (saveB) {
+        var idS = saveB.getAttribute("data-roman-task-save");
+        var liS = saveB.closest(".roman-task-planner__item");
+        var taS = liS && liS.querySelector(".roman-task-planner__edit-ta");
+        var newText = taS && taS.value ? taS.value.trim() : "";
+        if (!newText) {
+          var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg0 && tg0.showAlert) tg0.showAlert("Введите текст задачи.");
+          else alert("Введите текст задачи.");
+          return;
+        }
+        var tasksS = loadTasks();
+        var ixS = findTaskById(tasksS, idS);
+        if (ixS >= 0) {
+          tasksS[ixS].text = newText;
+          saveTasks(tasksS);
+          renderTasks();
+        }
+        return;
+      }
+      var cancelB = t.closest("[data-roman-task-cancel]");
+      if (cancelB) {
+        renderTasks();
+        return;
+      }
+      var edit = t.closest("[data-roman-task-edit]");
+      if (!edit) return;
+      var idE = edit.getAttribute("data-roman-task-edit");
+      var li = edit.closest(".roman-task-planner__item");
+      if (!li || li.getAttribute("data-roman-editing") === "1") return;
+      var tasksE = loadTasks();
+      var ixE = findTaskById(tasksE, idE);
+      if (ixE < 0) return;
+      var body = li.querySelector(".roman-task-planner__body");
+      if (!body) return;
+      li.setAttribute("data-roman-editing", "1");
+      var cur = tasksE[ixE].text != null ? String(tasksE[ixE].text) : "";
+      body.innerHTML =
+        '<textarea class="roman-task-planner__edit-ta" maxlength="500" aria-label="Редактирование задачи"></textarea>' +
+        '<div class="roman-task-planner__edit-actions">' +
+        '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--primary" data-roman-task-save="' +
+        escHtml(idE) +
+        '">Сохранить</button>' +
+        '<button type="button" class="roman-task-planner__btn" data-roman-task-cancel="' +
+        escHtml(idE) +
+        '">Отмена</button>' +
+        "</div>";
+      var taEd = body.querySelector(".roman-task-planner__edit-ta");
+      if (taEd) taEd.value = cur;
+      try {
+        taEd.focus();
+      } catch (eFoc) {}
+    });
+    syncVisibility();
   })();
   }
 

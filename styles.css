@@ -4202,6 +4202,145 @@ html.vpn-proxy-modal-open {
   background: rgba(251, 191, 36, 0.28);
   border-color: rgba(251, 191, 36, 0.5);
 }
+
+/* Планер задач @roman1787443 — под блоком подписки на первом экране газеты */
+.roman-task-planner {
+  margin-top: 20px;
+  padding: 14px 12px 16px;
+  border: 2px dashed rgba(44, 24, 16, 0.45);
+  background: rgba(255, 252, 245, 0.35);
+  text-align: left;
+  box-sizing: border-box;
+}
+.roman-task-planner--hidden {
+  display: none !important;
+}
+.roman-task-planner__head {
+  margin-bottom: 10px;
+}
+.roman-task-planner__title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #2c1810;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.roman-task-planner__hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #5c4033;
+}
+.roman-task-planner__list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: min(42vh, 320px);
+  overflow-y: auto;
+}
+.roman-task-planner__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(44, 24, 16, 0.12);
+  font-size: 13px;
+  color: #2c1810;
+}
+.roman-task-planner__item:last-child {
+  border-bottom: none;
+}
+.roman-task-planner__item--done .roman-task-planner__text {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+.roman-task-planner__check {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #7c2d12;
+  cursor: pointer;
+}
+.roman-task-planner__body {
+  flex: 1;
+  min-width: 0;
+}
+.roman-task-planner__text {
+  line-height: 1.35;
+  word-break: break-word;
+}
+.roman-task-planner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.roman-task-planner__btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(44, 24, 16, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+  color: #2c1810;
+  cursor: pointer;
+}
+.roman-task-planner__btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.roman-task-planner__btn--primary {
+  background: rgba(124, 45, 18, 0.12);
+  border-color: rgba(124, 45, 18, 0.45);
+}
+.roman-task-planner__btn--danger {
+  border-color: rgba(185, 28, 28, 0.45);
+  color: #991b1b;
+}
+.roman-task-planner__add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.roman-task-planner__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid rgba(44, 24, 16, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #2c1810;
+}
+.roman-task-planner__edit-ta {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid rgba(44, 24, 16, 0.35);
+  border-radius: 8px;
+  min-height: 64px;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.9);
+  color: #2c1810;
+}
+.roman-task-planner__edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.roman-task-planner__empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12px;
+  color: #5c4033;
+  font-style: italic;
+}
+
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
 /* Кнопка подписки в блоке новостей */
 .gazette-modal__subscribe-in-news {

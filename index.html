@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.476">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.477">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4950,6 +4950,25 @@
                 <p class="gazette-admin-hint" id="gazetteNotifySubsHint"></p>
               </div>
             </div>
+            <section class="roman-task-planner roman-task-planner--hidden" id="romanTaskPlanner" aria-label="Планер задач">
+              <div class="roman-task-planner__head">
+                <h3 class="roman-task-planner__title">Планер задач</h3>
+                <p class="roman-task-planner__hint">Только для @roman1787443. Список хранится в этом браузере.</p>
+              </div>
+              <ul class="roman-task-planner__list" id="romanTaskList"></ul>
+              <form class="roman-task-planner__add" id="romanTaskAddForm" novalidate>
+                <input
+                  type="text"
+                  class="roman-task-planner__input"
+                  id="romanTaskInput"
+                  maxlength="500"
+                  placeholder="Новая задача…"
+                  autocomplete="off"
+                  aria-label="Текст новой задачи"
+                />
+                <button type="submit" class="roman-task-planner__btn roman-task-planner__btn--primary">Добавить</button>
+              </form>
+            </section>
           </div>
           <!-- Страница: Горячие новости -->
           <div class="gazette-modal__content gazette-modal__content--news" id="gazetteModalNews" hidden>
@@ -5987,7 +6006,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=591"></script>
+    <script defer src="./app.js?v=592"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
