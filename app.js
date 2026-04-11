@@ -17746,6 +17746,16 @@ function initChat() {
   var chatDmFocusPingTimer = null;
   var chatDmFocusSessionHeld = false;
   var CHAT_DM_FOCUS_PING_MS = 22000;
+  /** Mini App / WebView часто держит visibilityState=visible в фоне; без hasFocus пинг залипает и пуши ЛС бесконечно режутся на сервере. */
+  function pokerChatDmFocusBrowserForegroundOk() {
+    try {
+      if (typeof document === "undefined" || document.visibilityState !== "visible") return false;
+      if (typeof document.hasFocus === "function" && !document.hasFocus()) return false;
+      return true;
+    } catch (eFg) {
+      return false;
+    }
+  }
   function postChatDmFocusPing(peerId) {
     if (!peerId || typeof fetch !== "function") return;
     if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
@@ -17778,10 +17788,10 @@ function initChat() {
     try {
       viewChat = document.body && document.body.getAttribute("data-view") === "chat";
     } catch (eVw) {}
-    var visOk = typeof document !== "undefined" && document.visibilityState === "visible";
     var convOpen = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
     var peer = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-    var shouldPing = viewChat && visOk && chatActiveTab === "personal" && convOpen && !!peer;
+    var shouldPing =
+      viewChat && pokerChatDmFocusBrowserForegroundOk() && chatActiveTab === "personal" && convOpen && !!peer;
     if (!shouldPing) {
       stopChatDmFocusSession();
       return;
@@ -17794,10 +17804,10 @@ function initChat() {
         try {
           v2 = document.body && document.body.getAttribute("data-view") === "chat";
         } catch (eV2) {}
-        var vis2 = typeof document !== "undefined" && document.visibilityState === "visible";
+        var fg2 = pokerChatDmFocusBrowserForegroundOk();
         var co2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
         var p2 = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-        if (!v2 || !vis2 || chatActiveTab !== "personal" || !co2 || !p2) {
+        if (!v2 || !fg2 || chatActiveTab !== "personal" || !co2 || !p2) {
           stopChatDmFocusSession();
           return;
         }
@@ -24476,6 +24486,23 @@ function initChat() {
         if (typeof window.pokerUpdateChatDmFocusFromUiState === "function") window.pokerUpdateChatDmFocusFromUiState();
       } catch (eVisDm) {}
     });
+    try {
+      window.addEventListener("blur", function () {
+        try {
+          if (typeof window.pokerUpdateChatDmFocusFromUiState === "function") window.pokerUpdateChatDmFocusFromUiState();
+        } catch (eBl) {}
+      });
+      window.addEventListener("focus", function () {
+        try {
+          if (typeof window.pokerUpdateChatDmFocusFromUiState === "function") window.pokerUpdateChatDmFocusFromUiState();
+        } catch (eFo) {}
+      });
+      window.addEventListener("pagehide", function () {
+        try {
+          if (typeof window.__pokerStopChatDmFocusSession === "function") window.__pokerStopChatDmFocusSession();
+        } catch (ePh) {}
+      });
+    } catch (eWinDm) {}
     (function schedulePrefetchChatContactsCache() {
       var idle = window.requestIdleCallback || function (cb) {
         setTimeout(cb, 120);
