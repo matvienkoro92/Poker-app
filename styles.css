@@ -3084,22 +3084,20 @@ html.chat-keyboard-open body[data-view="chat"] .chat-contacts {
   padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
   box-sizing: border-box;
 }
-/* Layout viewport ≠ visualViewport при клавиатуре — сдвигаем блок ввода над клавиатурой (--chat-vv-inset из JS). Без .chat-vv-lift: достаточно chat-keyboard-open + переменных. */
+/* Подъём композера по --chat-vv-inset отключён — позиция при клавиатуре переделывается в JS. */
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
-  /* translate не меняет геометрию во flex — под «поднятым» блоком остаётся пустота с фоном ленты; margin компенсирует. */
-  --chat-input-lift: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px));
-  transform: translate3d(0, calc(-1 * var(--chat-input-lift)), 0);
-  margin-bottom: calc(-1 * var(--chat-input-lift));
-  will-change: transform;
+  --chat-input-lift: 0px;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
 }
-/* Тот же подъём без .app:has() — в части WK/Telegram :has на предке даёт пустой матч, поле не сдвигается. */
 html.chat-keyboard-open body.chat-keyboard-open[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
-  --chat-input-lift: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px));
-  transform: translate3d(0, calc(-1 * var(--chat-input-lift)), 0) !important;
-  margin-bottom: calc(-1 * var(--chat-input-lift)) !important;
-  will-change: transform;
+  --chat-input-lift: 0px;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
 }
 /* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю (!important ломает залипший слой) */
 body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
@@ -3110,7 +3108,7 @@ body:not(.chat-keyboard-open) .chat-container .chat-input-area {
 }
 /* Клавиатура открыта: тот же фон, что у поля — иначе вокруг textarea остаётся «свой» цвет, а отступы полосы светлеют.
  * Не тянуть env(safe-area-inset-bottom) сюда: при открытой клавиатуре iOS часто всё равно отдаёт ~34px «домой».
- * padding-bottom: 0 — без зазора между строкой ввода и системной input accessory (стрелки / Готово); подъём даёт --chat-vv-inset. */
+ * padding-bottom: 0 при открытой клавиатуре — без лишнего safe-area под полем. */
 html.chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
 html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
   padding-bottom: 0;

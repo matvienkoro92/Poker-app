@@ -18859,6 +18859,9 @@ function initChat() {
       if (adminsView) adminsView.classList.add("chat-admins-view--hidden");
       window.chatGeneralUnread = false;
       scrollGeneralToBottomOnNextRender = true;
+      try {
+        pokerHydrateChatSnapshotsFromDisk();
+      } catch (eHydTabG) {}
       /* scrollTop до renderGeneralMessages даёт ложный max (старый/пустой DOM) и дёрганье после fetch */
       paintGeneralFromMemoryBeforeFetch();
       loadGeneral();
@@ -20742,56 +20745,7 @@ function initChat() {
     var suit = n <= 13 ? "треф" : n <= 26 ? "бубны" : n <= 39 ? "черви" : "пики";
     return cardName + " " + suit;
   }
-  /** Первый показ ленты: обёртка остаётся скрытой, пока высота стабильна и img в сообщениях декодированы — иначе после снятия маски лента «отъезжает» вверх и snap на load даёт скачок. */
-  function finishChatMessagesOpenSettle(messagesEl, msgWrap) {
-    if (!messagesEl) return;
-    if (!msgWrap || !msgWrap.classList) {
-      pinChatMessagesToBottomImagesOnly(messagesEl);
-      return;
-    }
-    pinChatMessagesToBottomImagesOnly(messagesEl);
-    var raf = requestAnimationFrame || function (fn) {
-      setTimeout(fn, 16);
-    };
-    var deadline = Date.now() + 650;
-    var stable = 0;
-    var lastH = -1;
-    function anyMsgImageIncomplete() {
-      var imgs = messagesEl.querySelectorAll("img.chat-msg__image");
-      for (var i = 0; i < imgs.length; i++) {
-        if (!imgs[i].complete) return true;
-      }
-      return false;
-    }
-    function tick() {
-      try {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      } catch (eT) {}
-      var h = messagesEl.scrollHeight;
-      if (h === lastH) stable++;
-      else {
-        stable = 0;
-        lastH = h;
-      }
-      var incomplete = anyMsgImageIncomplete();
-      var timedOut = Date.now() >= deadline;
-      if ((stable >= 2 && !incomplete) || (stable >= 2 && timedOut) || timedOut) {
-        try {
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-        } catch (eF) {}
-        msgWrap.classList.remove("chat-messages-wrap--settling");
-        try {
-          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
-            window.__pokerScheduleSyncChatScrollBottomButtons();
-          }
-        } catch (eSbSettle) {}
-        return;
-      }
-      raf(tick);
-    }
-    raf(tick);
-  }
-  /** Только догрузка картинок — без тройного snap (первый вход в чат). */
+  /** Догрузка img: лёгкий snap по load/error (без скрытия ленты и ожидания стабилизации высоты). */
   function pinChatMessagesToBottomImagesOnly(el) {
     if (!el) return;
     var imgs = el.querySelectorAll("img.chat-msg__image");
@@ -21152,16 +21106,12 @@ function initChat() {
       var dayDividerG = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerG + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
     }).join("");
-    /* Маску ставим до innerHTML: иначе один кадр с текстом, затем opacity:0 — «мигание». */
-    if (openingForceBottomG && generalMsgWrapEarly && generalMsgWrapEarly.classList) {
-      generalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
-    } else if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
+    if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
       generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
     }
     var prevScrollTop = generalMessages.scrollTop;
     var prevScrollHeight = generalMessages.scrollHeight;
     var wasNearBottom = prevScrollHeight - prevScrollTop - generalMessages.clientHeight < 80;
-    var generalMsgWrap = generalMsgWrapEarly;
     generalMessages.innerHTML = html;
     function restoreScroll(clearScrollFlag) {
       var maxScroll = generalMessages.scrollHeight - generalMessages.clientHeight;
@@ -21172,15 +21122,27 @@ function initChat() {
         generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
       }
     }
-    /* Первый заход: обёртка уже settling до innerHTML; здесь только скролл и снятие маски после стабилизации высоты. */
     if (openingForceBottomG) {
+      try {
+        generalMessages.scrollTop = generalMessages.scrollHeight;
+      } catch (eScG0) {}
       var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenG(function () {
-        rafOpenG(function () {
-          applyChatMsgTallTextTimeBelowLayout(generalMessages);
+        applyChatMsgTallTextTimeBelowLayout(generalMessages);
+        try {
           generalMessages.scrollTop = generalMessages.scrollHeight;
-          scrollGeneralToBottomOnNextRender = false;
-          finishChatMessagesOpenSettle(generalMessages, generalMsgWrap);
+        } catch (eScG1) {}
+        scrollGeneralToBottomOnNextRender = false;
+        pinChatMessagesToBottomImagesOnly(generalMessages);
+        try {
+          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
+            window.__pokerScheduleSyncChatScrollBottomButtons();
+          }
+        } catch (eSbG) {}
+        rafOpenG(function () {
+          try {
+            generalMessages.scrollTop = generalMessages.scrollHeight;
+          } catch (eScG2) {}
         });
       });
     } else {
@@ -21838,7 +21800,7 @@ function initChat() {
         /* Не блокировать POST: в TG WKWebView innerHTML/append иногда падает — лента подтянется через mergeOptimistic + loadGeneral. */
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
       }
-      /* Не ставим scrollGeneralToBottomOnNextRender: он включает chat-messages-wrap--settling (opacity:0) — при отправке лента «пропадает» на кадры. Скролл вниз даёт pinChatMessagesToBottom и render без settling при wasNearBottom. */
+      /* Не ставим scrollGeneralToBottomOnNextRender при отправке — лишний полный render; скролл вниз даёт pinChatMessagesToBottom. */
       try {
         if (generalMessages && typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(generalMessages, true);
         if (generalMessages) try { void generalMessages.offsetHeight; } catch (eFlushG) {}
@@ -21991,6 +21953,9 @@ function initChat() {
     }
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    try {
+      pokerHydrateChatSnapshotsFromDisk();
+    } catch (eHydCv) {}
     convGroupCanChangeAvatar = false;
     syncConvGroupAvatarEditUi();
     var peerAvParam = peerAvatarUrlOpt != null && String(peerAvatarUrlOpt).trim() ? String(peerAvatarUrlOpt).trim() : "";
@@ -23229,15 +23194,12 @@ function initChat() {
       var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerP + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + bodyMainHtmlP + reactionsRowP + '</div></div></div>';
     }).join("");
-    if (openingForceBottomP && personalMsgWrapEarly && personalMsgWrapEarly.classList) {
-      personalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
-    } else if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
+    if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
       personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
     }
     var prevScrollTopP = messagesEl.scrollTop;
     var prevScrollHeightP = messagesEl.scrollHeight;
     var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
-    var personalMsgWrap = personalMsgWrapEarly;
     messagesEl.innerHTML = html;
     function restoreScrollP(clearScrollFlag) {
       var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
@@ -23249,13 +23211,26 @@ function initChat() {
       }
     }
     if (openingForceBottomP) {
+      try {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      } catch (eScP0) {}
       var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
       rafOpenP(function () {
-        rafOpenP(function () {
-          applyChatMsgTallTextTimeBelowLayout(messagesEl);
+        applyChatMsgTallTextTimeBelowLayout(messagesEl);
+        try {
           messagesEl.scrollTop = messagesEl.scrollHeight;
-          scrollPersonalToBottomOnNextRender = false;
-          finishChatMessagesOpenSettle(messagesEl, personalMsgWrap);
+        } catch (eScP1) {}
+        scrollPersonalToBottomOnNextRender = false;
+        pinChatMessagesToBottomImagesOnly(messagesEl);
+        try {
+          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
+            window.__pokerScheduleSyncChatScrollBottomButtons();
+          }
+        } catch (eSbP) {}
+        rafOpenP(function () {
+          try {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          } catch (eScP2) {}
         });
       });
     } else {
@@ -24471,7 +24446,6 @@ function initChat() {
           window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatKbDockMonotonicUntil = 0;
           window.__pokerChatDockSmoothedPx = null;
-          window.__pokerChatVvObscuredMaxPx = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -24636,215 +24610,24 @@ function initChat() {
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
       }
 
-      /** Вкл/выкл режим «только fixed bottom» без CSS-transform (общий чат / личка). */
+      /** Раньше: fixed bottom + класс vv-dock. Снятие класса и инлайна при закрытии клавиатуры. */
       function pokerSetChatComposerDockClass(on) {
+        if (on) return;
         try {
           var g = document.getElementById("chatGeneralInputArea");
           var p = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
-          if (g) g.classList.toggle("chat-input-area--vv-dock", !!on);
-          if (p) p.classList.toggle("chat-input-area--vv-dock", !!on);
+          if (g) g.classList.remove("chat-input-area--vv-dock");
+          if (p) p.classList.remove("chat-input-area--vv-dock");
         } catch (eDockCls) {}
       }
-      /**
-       * Fallback без visualViewport: только translate по CSS-переменным (flex/overflow часто «съедают» подъём).
-       */
-      function applyChatInputAreasVisualLift() {
-        if (!document.body.classList.contains("chat-keyboard-open")) return;
-        var doc = document.documentElement;
-        var cs = window.getComputedStyle(doc);
-        var vvPx = parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0;
-        var accPx = parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0;
-        var lift = Math.max(0, Math.round(vvPx + accPx));
-        var ih = window.innerHeight || 0;
-        var capLift = Math.min(520, Math.round(ih * 0.55));
-        var inChat = String(document.body.getAttribute("data-view") || "") === "chat";
-        /* Тот же мягкий пол, что и у fixed bottom (без vv / старые WebView). */
-        if (inChat && ih > 200) {
-          var floorTf = Math.min(400, Math.round(ih * 0.27));
-          if (lift < floorTf) lift = Math.min(capLift, floorTf);
-        }
-        var tr = "translate3d(0, " + -lift + "px, 0)";
-        if (generalView && !generalView.classList.contains("chat-general-view--hidden")) {
-          var gEl = document.getElementById("chatGeneralInputArea");
-          if (gEl && gEl.style) {
-            gEl.style.setProperty("transform", tr, "important");
-            gEl.style.setProperty("-webkit-transform", tr, "important");
-            gEl.style.setProperty("will-change", "transform", "important");
-          }
-        }
-        if (convView && !convView.classList.contains("chat-conv-view--hidden")) {
-          var pEl = convView.querySelector && convView.querySelector(".chat-container .chat-input-area");
-          if (pEl && pEl.style) {
-            pEl.style.setProperty("transform", tr, "important");
-            pEl.style.setProperty("-webkit-transform", tr, "important");
-            pEl.style.setProperty("will-change", "transform", "important");
-          }
-        }
-      }
-      /**
-       * Android / общий путь: нижняя перекрытая зона (клавиатура + системный UI под visualViewport).
-       */
-      function computeChatKeyboardObscuredBottomPx() {
-        var ih = window.innerHeight || 0;
-        var vv = window.visualViewport;
-        var vvh = vv ? Number(vv.height) || 0 : 0;
-        var ot = vv ? Number(vv.offsetTop) || 0 : 0;
-        var obscured = 0;
-        if (ih > 0 && vv) {
-          obscured = Math.max(0, Math.round(ih - ot - vvh));
-        } else if (ih > 0 && vvh > 0) {
-          obscured = Math.max(0, Math.round(ih - vvh));
-        }
-        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tw) {
-          var tgvH = Number(tw.viewportHeight);
-          var tgvS = Number(tw.viewportStableHeight);
-          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 8) {
-            obscured = Math.max(obscured, Math.round(tgvS - tgvH));
-          }
-        }
-        if (ih > 0 && vvh > 0) {
-          var vLoss = Math.round(ih - vvh);
-          if (vLoss > obscured + 8) {
-            obscured = Math.max(obscured, vLoss);
-          }
-        }
-        try {
-          var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
-          var curIh = window.innerHeight || 0;
-          if (baseIh > 260 && curIh > 0) {
-            var winLoss = Math.round(baseIh - curIh);
-            if (winLoss > 40) {
-              obscured = Math.max(obscured, Math.round(winLoss * 0.96));
-            }
-          }
-        } catch (eBl) {}
-        var kbLikely = vvh > 0 && ih > 0 && vvh < ih * 0.9;
-        if (kbLikely && ih > 200 && obscured < 80) {
-          obscured = Math.max(obscured, Math.min(400, Math.round(ih * 0.26)));
-        }
-        return obscured;
-      }
-      /**
-       * iPhone/iPad WK: только layout vs visual (и TG viewport API) — без полов экрана и без монотонного «нарастания».
-       * Низ панели iOS (стрелки/Готово) + клавиатура уже в полосе (ih − offsetTop − vvh).
-       */
-      function computeChatKeyboardObscuredBottomPxIosComposer() {
-        var ih = window.innerHeight || 0;
-        var vv = window.visualViewport;
-        if (!ih || !vv) return 0;
-        var vvh = Number(vv.height) || 0;
-        var ot = Number(vv.offsetTop) || 0;
-        var obscured = Math.max(0, Math.round(ih - ot - vvh));
-        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tw) {
-          var tgvH = Number(tw.viewportHeight);
-          var tgvS = Number(tw.viewportStableHeight);
-          if (tgvS > 0 && tgvH > 0 && tgvS > tgvH + 8) {
-            obscured = Math.max(obscured, Math.round(tgvS - tgvH));
-          }
-        }
-        if (obscured < 24 && ot < 1 && vvh > 0 && vvh < ih * 0.84) {
-          obscured = Math.max(obscured, Math.round(ih - vvh));
-        }
-        return obscured;
-      }
-      /**
-       * Полоса ввода: position:fixed; bottom = закрыто_снизу + зазор над клавиатурой/панелью (не «минус», иначе залезание под панель).
-       * iOS: две позиции — в потоке или dock; dock = ровно lean + 5px над системной полосой.
-       */
-      function applyChatComposerKeyboardPosition() {
-        if (!document.body.classList.contains("chat-keyboard-open")) return;
-        if (String(document.body.getAttribute("data-view") || "") !== "chat") {
-          applyChatInputAreasVisualLift();
-          return;
-        }
-        var CHAT_GAP_ABOVE_KEYBOARD_PX = 8;
-        var IOS_GAP_ABOVE_IOS_CHROME_PX = 5;
-        var ih = window.innerHeight || 0;
-        var iw = window.innerWidth || document.documentElement.clientWidth || 0;
-        var vv = window.visualViewport;
-        var gEl = document.getElementById("chatGeneralInputArea");
-        var pEl = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
-        var genVis = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
-        var convVis = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-        function clearDockOne(el) {
-          if (!el || !el.style) return;
-          el.style.removeProperty("position");
-          el.style.removeProperty("left");
-          el.style.removeProperty("width");
-          el.style.removeProperty("right");
-          el.style.removeProperty("bottom");
-          el.style.removeProperty("top");
-          el.style.removeProperty("z-index");
-          el.style.removeProperty("max-width");
-          el.style.removeProperty("box-sizing");
-          el.style.removeProperty("transform");
-          el.style.removeProperty("-webkit-transform");
-          el.style.removeProperty("will-change");
-          el.style.removeProperty("margin-bottom");
-        }
-        function dockOne(el, dockBottomPx) {
-          if (!el || !el.style) return;
-          var appEl = document.getElementById("app");
-          var leftPx = 0;
-          var widthPx = Math.max(260, iw);
-          try {
-            if (appEl && appEl.getBoundingClientRect) {
-              var br = appEl.getBoundingClientRect();
-              leftPx = Math.max(0, Math.round(br.left));
-              widthPx = Math.max(260, Math.round(br.width));
-            }
-          } catch (eBr) {}
-          var b = Math.max(0, Math.round(dockBottomPx));
-          el.style.setProperty("position", "fixed", "important");
-          el.style.setProperty("left", leftPx + "px", "important");
-          el.style.setProperty("width", widthPx + "px", "important");
-          el.style.setProperty("right", "auto", "important");
-          el.style.setProperty("bottom", b + "px", "important");
-          el.style.setProperty("z-index", "10040", "important");
-          el.style.setProperty("transform", "none", "important");
-          el.style.setProperty("-webkit-transform", "none", "important");
-          el.style.setProperty("margin-bottom", "0", "important");
-          el.style.setProperty("max-width", "none", "important");
-          el.style.setProperty("box-sizing", "border-box", "important");
-        }
-        if (!vv || ih <= 0) {
-          if (gEl) clearDockOne(gEl);
-          if (pEl) clearDockOne(pEl);
-          applyChatInputAreasVisualLift();
-          return;
-        }
-        var dockBottomPx;
-        if (isIosLikeForChatViewport()) {
-          var leanIos = computeChatKeyboardObscuredBottomPxIosComposer();
-          dockBottomPx = Math.max(
-            IOS_GAP_ABOVE_IOS_CHROME_PX,
-            Math.round(leanIos + IOS_GAP_ABOVE_IOS_CHROME_PX)
-          );
-        } else {
-          var rawObscured = computeChatKeyboardObscuredBottomPx();
-          try {
-            if (window.__pokerChatVvObscuredMaxPx == null || !isFinite(window.__pokerChatVvObscuredMaxPx)) {
-              window.__pokerChatVvObscuredMaxPx = 0;
-            }
-            window.__pokerChatVvObscuredMaxPx = Math.max(window.__pokerChatVvObscuredMaxPx, rawObscured);
-          } catch (eMx) {}
-          var capObscured = Math.min(520, Math.round(ih * 0.62));
-          var obscured = Math.min(window.__pokerChatVvObscuredMaxPx || rawObscured, capObscured);
-          dockBottomPx = Math.max(
-            CHAT_GAP_ABOVE_KEYBOARD_PX,
-            Math.round(obscured + CHAT_GAP_ABOVE_KEYBOARD_PX)
-          );
-        }
-        if (gEl && !genVis) clearDockOne(gEl);
-        if (pEl && !convVis) clearDockOne(pEl);
-        if (genVis && gEl) dockOne(gEl, dockBottomPx);
-        else if (gEl) clearDockOne(gEl);
-        if (convVis && pEl) dockOne(pEl, dockBottomPx);
-        else if (pEl) clearDockOne(pEl);
+      function applyChatInputAreasVisualLift() {}
+      /** Фокус в общем/личном треде: не тянуть --chat-vv-inset для «подъёма» композера (переделывается отдельно). */
+      function isChatThreadComposerKeyboardDom() {
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+        if (!chatComposerEl || document.activeElement !== chatComposerEl) return false;
+        var gen = generalView && !generalView.classList.contains("chat-general-view--hidden");
+        var cv = convView && !convView.classList.contains("chat-conv-view--hidden");
+        return !!(gen || cv);
       }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
@@ -24861,7 +24644,21 @@ function initChat() {
         /* Раньше при !visualViewport сразу снимали переменные — при открытой клавиатуре поле оставалось под клавишами. */
         if (!window.visualViewport) {
           var dvNoVv = String(document.body.getAttribute("data-view") || "");
-          if (dvNoVv === "chat" || dvNoVv === "profile") {
+          if (dvNoVv === "profile") {
+            var ihFbP = window.innerHeight || 0;
+            var capFbP = Math.min(520, Math.round(ihFbP * 0.55));
+            var baseFbP = Number(window.__pokerChatInnerHBaseline) || 0;
+            var lossFbP = baseFbP > 260 && ihFbP > 0 ? Math.max(0, Math.round(baseFbP - ihFbP)) : 0;
+            var insetFbP = Math.min(capFbP, Math.max(140, Math.round(lossFbP * 0.92)));
+            if (insetFbP < 170) insetFbP = Math.min(capFbP, Math.max(insetFbP, Math.round(ihFbP * 0.36)));
+            if (chatComposerEl && document.activeElement === chatComposerEl) {
+              insetFbP = Math.min(capFbP, Math.max(insetFbP, Math.round(ihFbP * 0.38)));
+            }
+            doc.style.setProperty("--chat-vv-inset", insetFbP + "px");
+            if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
+            else doc.style.removeProperty("--chat-ios-accessory-inset");
+            updateChatMessagesKeyboardPad();
+          } else if (dvNoVv === "chat") {
             var ihFb = window.innerHeight || 0;
             var capFb = Math.min(520, Math.round(ihFb * 0.55));
             var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -24871,10 +24668,15 @@ function initChat() {
             if (chatComposerEl && document.activeElement === chatComposerEl) {
               insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.38)));
             }
-            doc.style.setProperty("--chat-vv-inset", insetFb + "px");
-            if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
-            else doc.style.removeProperty("--chat-ios-accessory-inset");
-            applyChatComposerKeyboardPosition();
+            if (isChatThreadComposerKeyboardDom()) {
+              doc.style.setProperty("--chat-vv-inset", "0px");
+              doc.style.removeProperty("--chat-ios-accessory-inset");
+              stripChatInputAreaTransforms();
+            } else {
+              doc.style.setProperty("--chat-vv-inset", insetFb + "px");
+              if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
+              else doc.style.removeProperty("--chat-ios-accessory-inset");
+            }
             updateChatMessagesKeyboardPad();
           }
           return;
@@ -25014,9 +24816,14 @@ function initChat() {
             }
           }
         }
-        doc.style.setProperty("--chat-vv-inset", inset + "px");
-        applyChatIosAccessoryInsetFromViewport();
-        applyChatComposerKeyboardPosition();
+        if (isChatThreadComposerKeyboardDom()) {
+          doc.style.setProperty("--chat-vv-inset", "0px");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          stripChatInputAreaTransforms();
+        } else {
+          doc.style.setProperty("--chat-vv-inset", inset + "px");
+          applyChatIosAccessoryInsetFromViewport();
+        }
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
       window.__pokerSyncPwaChatVisualViewportInset = syncPwaChatVisualViewportInset;
@@ -25068,12 +24875,8 @@ function initChat() {
         document.body.classList.add("chat-keyboard-open");
         try {
           window.__pokerChatDockSmoothedPx = null;
-          window.__pokerChatVvObscuredMaxPx = 0;
-          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(true);
+          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
-        if (shouldUseChatVisualViewportLift()) {
-          document.documentElement.classList.add("chat-vv-lift");
-        }
         function scrollMessagesToBottom() {
           updateChatMessagesKeyboardPad();
           var se = document.scrollingElement;
@@ -26087,7 +25890,6 @@ function initChat() {
             };
             rafI(function () {
               try {
-                applyChatComposerKeyboardPosition();
                 updateChatMessagesKeyboardPad();
               } catch (eSynI) {}
             });
