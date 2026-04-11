@@ -8456,6 +8456,19 @@ img.chat-contact__avatar {
   margin-right: auto;
   box-sizing: border-box;
 }
+.chat-group-info-modal__save-feedback {
+  margin: 8px auto 0;
+  min-height: 1.2em;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(52, 211, 153, 0.95);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.35;
+}
+.chat-group-info-modal__save-feedback:empty {
+  display: none;
+}
 .chat-group-info-modal__avatar {
   width: 100%;
   height: 100%;

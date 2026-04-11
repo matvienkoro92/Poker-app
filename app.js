@@ -27988,6 +27988,9 @@ function initChat() {
     var descViewWrap = document.getElementById("chatGroupInfoDescViewWrap");
     var descViewEl = document.getElementById("chatGroupInfoDescView");
     var saveBtn = document.getElementById("chatGroupInfoSaveProfileBtn");
+    var saveFeedbackEl = document.getElementById("chatGroupInfoSaveFeedback");
+    var saveProfileBtnDefaultText = "Сохранить изменения";
+    var saveFeedbackClearTimer = null;
     var membersEl = document.getElementById("chatGroupInfoMembers");
     var addMembersBtnInfo = document.getElementById("chatGroupInfoAddMembersBtn");
     var openGroupId = "";
@@ -28015,8 +28018,62 @@ function initChat() {
         modal.classList.remove("chat-group-info-modal--can-change-avatar");
       } catch (eCm) {}
       groupInfoModalCanChangeAvatar = false;
+      if (saveFeedbackClearTimer) {
+        try {
+          clearTimeout(saveFeedbackClearTimer);
+        } catch (eClrFb) {}
+        saveFeedbackClearTimer = null;
+      }
+      if (saveFeedbackEl) saveFeedbackEl.textContent = "";
+      if (saveBtn) {
+        try {
+          saveBtn.textContent = saveProfileBtnDefaultText;
+          saveBtn.removeAttribute("aria-busy");
+          saveBtn.disabled = false;
+        } catch (eSbRst) {}
+      }
       modal.classList.add("chat-group-info-modal--hidden");
       modal.setAttribute("aria-hidden", "true");
+    }
+    function applySavedGroupMetaToModal(tOut, dOut) {
+      var tStr = tOut != null ? String(tOut).trim() : "";
+      var dRaw = dOut != null ? String(dOut) : "";
+      if (tStr) lastGroupInfoTitle = tStr;
+      if (titleInput && tStr) titleInput.value = tStr;
+      if (descTa) descTa.value = dRaw;
+      if (titleEl && !titleEl.hidden) titleEl.textContent = tStr || titleEl.textContent || "Группа";
+      if (descViewEl) {
+        var dvTrim = dRaw.trim();
+        descViewEl.textContent = dvTrim || "Без описания";
+        descViewEl.classList.toggle("chat-group-info-modal__desc-view-text--empty", !dvTrim);
+      }
+    }
+    function showGroupInfoSaveOkFeedback() {
+      var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tw && tw.HapticFeedback && typeof tw.HapticFeedback.notificationOccurred === "function") {
+        try {
+          tw.HapticFeedback.notificationOccurred("success");
+        } catch (eH) {}
+      }
+      var toasted = false;
+      if (tw && tw.showToast) {
+        try {
+          tw.showToast("Сохранено");
+          toasted = true;
+        } catch (eTst) {}
+      }
+      if (!toasted && saveFeedbackEl) {
+        saveFeedbackEl.textContent = "Сохранено";
+        if (saveFeedbackClearTimer) {
+          try {
+            clearTimeout(saveFeedbackClearTimer);
+          } catch (eT0) {}
+        }
+        saveFeedbackClearTimer = setTimeout(function () {
+          saveFeedbackClearTimer = null;
+          if (saveFeedbackEl) saveFeedbackEl.textContent = "";
+        }, 3200);
+      }
     }
     function setGroupAvatar(url, title) {
       if (!avImg) return;
@@ -28507,7 +28564,13 @@ function initChat() {
           return;
         }
         var descSv = String(descTa.value || "");
+        applySavedGroupMetaToModal(titleSv, descSv);
         saveBtn.disabled = true;
+        try {
+          saveBtn.setAttribute("aria-busy", "true");
+        } catch (eAb) {}
+        saveBtn.textContent = "Сохранение…";
+        if (saveFeedbackEl) saveFeedbackEl.textContent = "";
         fetch(base + "/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -28525,11 +28588,15 @@ function initChat() {
           })
           .then(function (data) {
             saveBtn.disabled = false;
+            try {
+              saveBtn.removeAttribute("aria-busy");
+            } catch (eAb2) {}
+            saveBtn.textContent = saveProfileBtnDefaultText;
             if (data && data.ok) {
               var tOut = data.title != null ? String(data.title).trim() : titleSv;
               var dOut = data.description != null ? String(data.description) : descSv;
-              lastGroupInfoTitle = tOut || lastGroupInfoTitle;
-              if (descTa) descTa.value = dOut;
+              applySavedGroupMetaToModal(tOut, dOut);
+              showGroupInfoSaveOkFeedback();
               if (typeof chatWithUserId !== "undefined" && chatWithUserId && typeof peerChatIdsEqual === "function") {
                 if (peerChatIdsEqual(chatWithUserId, gidSv)) {
                   chatWithUserName = tOut;
@@ -28538,12 +28605,15 @@ function initChat() {
                 }
               }
               if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
-              if (typeof tg !== "undefined" && tg && tg.showToast) tg.showToast("Сохранено");
             } else if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
             else if (typeof alert === "function") alert((data && data.error) || "Ошибка");
           })
           .catch(function () {
             saveBtn.disabled = false;
+            try {
+              saveBtn.removeAttribute("aria-busy");
+            } catch (eAb3) {}
+            saveBtn.textContent = saveProfileBtnDefaultText;
             if (typeof tg !== "undefined" && tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
             else if (typeof alert === "function") alert(POKER_NET_ERR);
           });
