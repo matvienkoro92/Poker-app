@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.471">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.472">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -2518,6 +2518,7 @@
                     </div>
                     <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary" id="raffleInviteFriendInlineBtn">Позвать друга</button>
                   </div>
+                  <p class="raffle-action-feedback raffle-action-feedback--hidden" id="raffleActionFeedback" role="status" aria-live="polite"></p>
                   <div class="raffle-admin-actions raffle-admin-actions--hidden" id="raffleAdminActions" aria-hidden="true">
                     <button type="button" class="raffle-complete-btn" id="raffleCompleteBtn">Завершить розыгрыш (админ)</button>
                     <button type="button" class="raffle-cancel-btn" id="raffleCancelBtn">Отменить розыгрыш (админ)</button>
@@ -5987,7 +5988,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=586"></script>
+    <script defer src="./app.js?v=587"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
