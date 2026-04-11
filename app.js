@@ -2945,6 +2945,12 @@ function runGazetteAndTasksInit() {
       }
     }
     var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
+    /**
+     * Доступ по числовому Telegram id, если username в WebApp пустой (скрыт в настройках).
+     * 388008256 — @roman1_matvienko (см. TELEGRAM_ADMIN / чат). Для @Roman1787443 при необходимости
+     * добавьте его user id из @userinfobot в этот объект.
+     */
+    var PLANNER_ALLOWED_TELEGRAM_IDS = { 388008256: true };
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
     var PLANNER_SHARED_STORAGE_KEY = "poker_gazette_editor_planner_shared_v1";
     var PLANNER_OLD_KEYS_TO_MIGRATE = [
@@ -2952,18 +2958,28 @@ function runGazetteAndTasksInit() {
       "poker_gazette_editor_planner_v1_roman1787443",
       "poker_gazette_editor_planner_v1_roman1_matvienko",
     ];
-    function normUser() {
+    function getPlannerTelegramUser() {
       var user =
         typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
       if (!user && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
         user = window.Telegram.WebApp.initDataUnsafe.user;
       }
+      return user || null;
+    }
+    function normUser() {
+      var user = getPlannerTelegramUser();
       var u = user && user.username ? String(user.username) : "";
       return u.replace(/^@+/, "").trim().toLowerCase();
     }
     function isPlannerAllowedUser() {
-      var u = normUser();
-      return !!u && !!PLANNER_ALLOWED_USERNAMES[u];
+      var user = getPlannerTelegramUser();
+      if (!user) return false;
+      var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (u && PLANNER_ALLOWED_USERNAMES[u]) return true;
+      if (user.id == null) return false;
+      var idNum = Number(user.id);
+      if (isNaN(idNum)) return false;
+      return !!PLANNER_ALLOWED_TELEGRAM_IDS[idNum];
     }
     function plannerStorageKey() {
       if (!isPlannerAllowedUser()) return null;
@@ -3138,13 +3154,22 @@ function runGazetteAndTasksInit() {
         if (!track || !front) continue;
         var openPx = 0;
         function applyOpen() {
-          openPx = Math.max(0, Math.round(clip.offsetWidth * 0.28));
-          if (openPx < 72) openPx = 72;
           var cw = clip.offsetWidth || 0;
+          openPx = Math.max(0, Math.round(cw * 0.28));
+          if (openPx < 72) openPx = 72;
+          if (actionsEl && cw > 0) {
+            actionsEl.style.flex = "0 0 auto";
+            actionsEl.style.width = "max-content";
+            var aw = Math.ceil(actionsEl.getBoundingClientRect().width);
+            if (aw > openPx) openPx = aw;
+          }
           if (cw > 0) {
             track.style.width = cw + openPx + "px";
             front.style.flex = "0 0 " + cw + "px";
-            if (actionsEl) actionsEl.style.flex = "0 0 " + openPx + "px";
+            if (actionsEl) {
+              actionsEl.style.width = "";
+              actionsEl.style.flex = "0 0 " + openPx + "px";
+            }
           }
         }
         applyOpen();
