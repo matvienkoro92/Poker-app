@@ -27022,9 +27022,10 @@ function initChat() {
         var cv = convView && !convView.classList.contains("chat-conv-view--hidden");
         return !!(gen || cv);
       }
-      /** Зазор от верхнего края клавиатуры до нижнего края панели ввода: iOS 20px, Android 4px. */
+      /** Зазор между панелью ввода и зоной клавиатуры / input accessory (TMA iOS — визуально ~4px). */
       function getChatComposerKeyboardGapPx() {
-        return isIosLikeForChatViewport() ? 20 : 4;
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return 4;
+        return isIosLikeForChatViewport() ? 12 : 4;
       }
       /**
        * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
@@ -27043,6 +27044,13 @@ function initChat() {
         }
         var gap = getChatComposerKeyboardGapPx();
         var bottomPx = Math.max(gap, Math.round(Number(coverPx) || 0) + gap);
+        try {
+          var ihLim = window.innerHeight || 0;
+          if (ihLim > 280) {
+            var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
+            if (bottomPx > bottomMax) bottomPx = bottomMax;
+          }
+        } catch (eBm) {}
         stripChatInputAreaTransforms();
         var target = null;
         if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
@@ -27302,7 +27310,7 @@ function initChat() {
                 var gapKb = Math.round(getChatComposerKeyboardGapPx());
                 var slackTop =
                   typeof isTelegramWebApp === "function" && isTelegramWebApp()
-                    ? Math.max(52, gapKb + 34)
+                    ? Math.max(36, gapKb + 28)
                     : Math.max(44, gapKb + 26);
                 if (coverPxDock > winSt + slackTop) coverPxDock = winSt + slackTop;
               }
@@ -27316,7 +27324,27 @@ function initChat() {
           if (!isChatPhysicalKeyboardContext() && ih > 280) {
             var ihRefDock = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
             if (ihRefDock < 320) ihRefDock = ih;
-            var coverDockCap = Math.min(520, Math.max(200, Math.round(ihRefDock * 0.52)));
+            var twCap = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            var tgKbHint = 0;
+            if (tg && twCap) {
+              var tghC = Number(twCap.viewportHeight);
+              var tgsC = Number(twCap.viewportStableHeight);
+              if (tgsC > 0 && tghC > 0 && tgsC > tghC + 12) {
+                tgKbHint = Math.round(tgsC - tghC);
+              }
+            }
+            var winLossDock =
+              Number(window.__pokerChatInnerHBaseline) > 260 && ih > 0
+                ? Math.max(0, Math.round(Number(window.__pokerChatInnerHBaseline) - ih))
+                : 0;
+            var pctCap = isIosLikeForChatViewport() ? 0.36 : 0.4;
+            var coverDockCap = Math.min(340, Math.max(140, Math.round(ihRefDock * pctCap)));
+            if (tgKbHint > 48) {
+              coverDockCap = Math.min(coverDockCap, Math.max(140, tgKbHint + 32));
+            }
+            if (winLossDock > 64) {
+              coverDockCap = Math.min(coverDockCap, Math.max(140, winLossDock + 36));
+            }
             if (coverPxDock > coverDockCap) coverPxDock = coverDockCap;
           }
           if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
