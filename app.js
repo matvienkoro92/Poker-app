@@ -276,6 +276,17 @@ function pokerOpenTelegramShareUrlOnly(url) {
   return false;
 }
 
+/**
+ * Диалог t.me/share/url: в query `url` должна быть полная ссылка на мини‑апп с ?startapp=…
+ * Если оставить url пустым и вставить ссылку только в text — у получателя часто открывается главная, без раздела.
+ */
+function pokerBuildTelegramShareUrlDialog(link, textOpt) {
+  var u = link != null ? String(link).trim() : "";
+  if (!u) return "";
+  var t = textOpt != null ? String(textOpt) : "";
+  return "https://t.me/share/url?url=" + encodeURIComponent(u) + "&text=" + encodeURIComponent(t);
+}
+
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 /** PWA: сессия после OAuth ВКонтакте */
@@ -2542,7 +2553,7 @@ function runGazetteAndTasksInit() {
         var headlineEl = article && article.querySelector(".gazette-modal__headline");
         var headline = headlineEl ? headlineEl.textContent.trim() : "";
         var shareText = headline.length > 0 ? headline : "Новая новость в газете «Вестник Два туза»";
-        var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareText + "\n" + link);
+        var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
         pokerTryPwaWebShare({ text: shareText + "\n" + link, url: link }).then(function (pwaOk) {
           if (pwaOk) {
             if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
@@ -5302,7 +5313,11 @@ function runGazetteAndTasksInit() {
         if (!linkSh) return;
         var shareBody =
           "Подборка ВПН и прокси от игроков клуба «Два туза»:\n" + linkSh;
-        var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareBody);
+        var shareCaption = "Подборка ВПН и прокси от игроков клуба «Два туза».";
+        var shareUrl =
+          typeof pokerBuildTelegramShareUrlDialog === "function"
+            ? pokerBuildTelegramShareUrlDialog(linkSh, shareCaption)
+            : "";
         pokerTryPwaWebShare({ text: shareBody, url: linkSh }).then(function (pwaOk) {
           if (pwaOk) {
             if (typeof recordShareButtonClick === "function") recordShareButtonClick("vpn_proxy_modal");
@@ -9869,7 +9884,8 @@ function hallFameOpenTelegramShareForSection(section) {
   }
   var intro = HALL_FAME_SHARE_INTRO[section] || "Зал славы «Два туза»";
   var text = intro + "\n\n" + url;
-  var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+  var shareUrl =
+    typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(url, intro) : "";
   if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
   pokerTryPwaWebShare({ title: intro, text: text, url: url }).then(function (pwaOk) {
     if (pwaOk) return;
@@ -11192,9 +11208,10 @@ function initWinterRatingPlayerModal() {
         return;
       }
       var totalStr = modal._winterPlayerModalTotalStr || "0";
-      var shareText = "Игрок " + nick + " уже выиграл " + totalStr + ". Посмотрите отчет по турнирам - " + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareText);
-      pokerTryPwaWebShare({ text: shareText, url: link }).then(function (pwaOk) {
+      var shareText = "Игрок " + nick + " уже выиграл " + totalStr + ". Посмотрите отчет по турнирам.";
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
+      pokerTryPwaWebShare({ text: shareText + "\n" + link, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
           return;
@@ -14463,9 +14480,10 @@ function closeDailyPredictionModal() {
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("daily_prediction") : "";
       var shortText = "Моё покерное предсказание на сегодня:";
       if (prediction) shortText += "\n\n" + prediction;
-      shortText += "\n\nПосмотрите своё предсказание здесь —\n" + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shortText);
-      pokerTryPwaWebShare({ text: shortText, url: link }).then(function (pwaOk) {
+      shortText += "\n\nПосмотрите своё предсказание здесь.";
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shortText) : "";
+      pokerTryPwaWebShare({ text: shortText + "\n\n" + link, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("daily_prediction");
           return;
@@ -16777,17 +16795,17 @@ function initRaffles() {
         " беккинг-билетов на сумму " +
         (totalPrize || 0) +
         "₽ на " +
-        tournamentName +
-        "\n" +
-        link;
+        tournamentName;
+      var textWithLink = text + "\n" + link;
       var shareTitleRaw =
         (typeof buildActiveRaffleCardHeading === "function" ? buildActiveRaffleCardHeading(raffle) : "") ||
         raffleDisplayPrizeText((raffle.title || "").trim()) ||
         "Розыгрыш — Два туза";
       var shareTitle = String(shareTitleRaw).trim();
       if (shareTitle.length > 200) shareTitle = shareTitle.slice(0, 199) + "…";
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
-      pokerTryPwaWebShare({ title: shareTitle, text: text, url: link }).then(function (pwaOk) {
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, text) : "";
+      pokerTryPwaWebShare({ title: shareTitle, text: textWithLink, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
           return;
@@ -17386,13 +17404,15 @@ function initRaffles() {
         return;
       }
       var inviteBody =
-        "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteBody);
+        "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)";
+      var inviteBodyWithLink = inviteBody + "\n" + link;
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, inviteBody) : "";
       var headingEl = document.getElementById("raffleCardHeading");
       var heroTitle = headingEl && headingEl.textContent ? String(headingEl.textContent).trim() : "";
       if (heroTitle.length > 200) heroTitle = heroTitle.slice(0, 199) + "…";
       if (!heroTitle) heroTitle = "Розыгрыши — клуб «Два туза»";
-      pokerTryPwaWebShare({ title: heroTitle, text: inviteBody, url: link }).then(function (pwaOk) {
+      pokerTryPwaWebShare({ title: heroTitle, text: inviteBodyWithLink, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
           return;
@@ -17450,7 +17470,8 @@ function initRaffles() {
         return;
       }
       var inviteFull = shareInviteText + "\n" + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteFull);
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareInviteText) : "";
       pokerTryPwaWebShare({ text: inviteFull, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
@@ -17509,7 +17530,8 @@ function initRaffles() {
         return;
       }
       var inviteFull = shareInviteText + "\n" + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteFull);
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareInviteText) : "";
       pokerTryPwaWebShare({ text: inviteFull, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_invite");
@@ -18037,7 +18059,10 @@ function syncVideoLessonsModalScrollLock() {
       var linkInv = coachReviewsDeepLink();
       if (!linkInv) return;
       var reviewsFull = coachReviewsShareText + "\n" + linkInv;
-      var shareUrlInv = "https://t.me/share/url?url=&text=" + encodeURIComponent(reviewsFull);
+      var shareUrlInv =
+        typeof pokerBuildTelegramShareUrlDialog === "function"
+          ? pokerBuildTelegramShareUrlDialog(linkInv, coachReviewsShareText)
+          : "";
       pokerTryPwaWebShare({ text: reviewsFull, url: linkInv }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews");
@@ -28356,7 +28381,9 @@ function initChat() {
         return;
       }
       var text = "Заходи в общий чат клуба «Два туза» в приложении:\n" + link;
-      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+      var shareCaption = "Заходи в общий чат клуба «Два туза» в приложении:";
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareCaption) : "";
       pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
         if (pwaOk) {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
@@ -33926,13 +33953,24 @@ function handleTournamentDayShare() {
     var time = (share.time || "18:00").trim();
     var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("schedule") : "";
     var text;
+    var textForDialog;
     if (name === "Фриролл" && guarantee) {
+      textForDialog =
+        "Привет, сегодня Фриролл на " + guarantee + " в Poker21. Скачать можно здесь:";
       text =
         "Привет, сегодня Фриролл на " +
         guarantee +
         " в Poker21. Скачать можно здесь:\n" +
         link;
     } else {
+      textForDialog =
+        "Привет, сегодня " +
+        name +
+        " в " +
+        time +
+        " в Poker21." +
+        (guarantee ? " Призовой фонд " + guarantee + "." : "") +
+        " Скачать можно здесь:";
       text =
         "Привет, сегодня " +
         name +
@@ -33943,7 +33981,8 @@ function handleTournamentDayShare() {
         " Скачать можно здесь:\n" +
         link;
     }
-    var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+    var shareUrl =
+      typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, textForDialog) : "";
     pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
       if (pwaOk) {
         if (typeof recordShareButtonClick === "function") recordShareButtonClick("tournament_day");
