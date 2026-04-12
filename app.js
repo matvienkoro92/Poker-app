@@ -18901,6 +18901,8 @@ function pokerHydrateChatSnapshotsFromDisk() {
       var ent = packP.peers[k];
       if (!ent || !Array.isArray(ent.messages) || !ent.messages.length) return;
       if (personalMessagesCache[k] && personalMessagesCache[k].length) return;
+      var metaB = personalMessagesCacheMeta[k];
+      if (metaB && metaB.bust) return;
       personalMessagesCache[k] = ent.messages.slice();
       personalMessagesCacheMeta[k] = { ts: ent.t || 0 };
     });
@@ -20656,6 +20658,9 @@ function initChat() {
         pokerHydrateChatSnapshotsFromDisk();
       } catch (eHydTabG) {}
       /* scrollTop до renderGeneralMessages даёт ложный max (старый/пустой DOM) и дёрганье после fetch */
+      try {
+        window.__pokerGeneralPollRev = "";
+      } catch (ePollTabG) {}
       paintGeneralFromMemoryBeforeFetch();
       loadGeneral();
     } else if (tab === "personal") {
@@ -20866,6 +20871,11 @@ function initChat() {
     }
 
     openClubChatShell();
+    /* Без сброса pollRev следующий loadGeneral может вернуть notModified без тела — превью в списке уже
+       обновлено полным ответом, а лента ещё на старом кэше до следующего полного запроса. */
+    try {
+      window.__pokerGeneralPollRev = "";
+    } catch (ePollOpen) {}
     paintGeneralFromMemoryBeforeFetch();
     loadGeneral();
   }
@@ -24154,7 +24164,7 @@ function initChat() {
           if (credF) pokerSyncChatContactsFilterTabs();
         }
         try {
-          if (!fromFilterOnly && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
+          if (!fromFilterOnly && pokerApiHasCredential()) {
             var nextUC = {};
             for (var ui = 0; ui < data.contacts.length; ui++) {
               var c0 = data.contacts[ui];
@@ -24176,11 +24186,14 @@ function initChat() {
                 if (pu == null || isNaN(pu)) pu = 0;
                 if (ucN > pu && (!chatWithUserId || !peerChatIdsEqual(uk, chatWithUserId))) {
                   anyIncOther = true;
-                  break;
+                  try {
+                    delete personalMessagesCache[uk];
+                    personalMessagesCacheMeta[uk] = { ts: 0, bust: true };
+                  } catch (eInvPeer) {}
                 }
               }
               window.__pokerChatContactsUnreadSnap = nextUC;
-              if (anyIncOther) pokerPlayChatMessageNotificationSound();
+              if (anyIncOther && pokerReadChatMessageSoundEnabled()) pokerPlayChatMessageNotificationSound();
             }
           }
         } catch (eContSound) {}
