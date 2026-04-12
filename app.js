@@ -15822,10 +15822,22 @@ function initRaffles() {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  /** Текст строки: имя + (@tg_login) для tg_ из API + « — » + P21. */
+  function raffleParticipantDisplayLine(p) {
+    var namePart = escapeHtml(p.name);
+    var uid0 = String(p.userId != null ? p.userId : "").trim();
+    var un =
+      p.telegramUsername != null ? String(p.telegramUsername).trim().replace(/^@+/g, "") : "";
+    if (un && uid0.indexOf("tg_") === 0) {
+      namePart += " (@" + escapeHtml(un) + ")";
+    }
+    return namePart + " — " + escapeHtml(p.p21Id);
+  }
+
   /** Строка участника: клик открывает карточку профиля (tg_/vk_). */
   function raffleParticipantLineHtml(p) {
     var uid = String(p.userId != null ? p.userId : "").trim();
-    var line = escapeHtml(p.name) + " — " + escapeHtml(p.p21Id);
+    var line = raffleParticipantDisplayLine(p);
     if (!uid || (uid.indexOf("tg_") !== 0 && uid.indexOf("vk_") !== 0)) {
       return "<li class=\"raffle-participants-item\">" + line + "</li>";
     }
@@ -15853,7 +15865,7 @@ function initRaffles() {
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
-    var textInner = escapeHtml(w.name) + " — " + escapeHtml(w.p21Id);
+    var textInner = raffleParticipantDisplayLine(w);
     var profileOpen =
       uidRaw && (uidRaw.indexOf("tg_") === 0 || uidRaw.indexOf("vk_") === 0)
         ? "<button type=\"button\" class=\"raffle-participants__profile-btn raffle-winner-row__profile\" data-user-id=\"" +
@@ -26988,6 +27000,7 @@ function initChat() {
           window.__pokerChatKbDockMonotonicUntil = 0;
           window.__pokerChatDockSmoothedPx = null;
           window.__pokerChatDockCoverStable = null;
+          window.__pokerChatTgKeyboardCoverLast = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -27454,29 +27467,60 @@ function initChat() {
           /*
            * TMA: высоту перекрытия берём из viewportStableHeight − viewportHeight (Bot API), без max(overlap, winLoss…),
            * иначе cover раздувается — полоса ввода «висит» с большим зазором над клавиатурой.
-           * Доп. подрезка: если vv даёт заметно меньший зазор — берём его (TG иногда завышает stable−height).
+           * На анимации клавиатуры ts и th кратко сближаются — ранний return пропадал, срабатывал legacy с раздутым
+           * coverPxDock. Держим последний хороший cover и приоритет lastGood над сырым vv на эти кадры.
+           * Подрезка TG только если vv заметно меньше (TG завысил), не подменяем на завышенный vv.
            */
           var twTma = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
           var isTma = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           if (isTma && twTma && !isChatPhysicalKeyboardContext()) {
             var thM = Number(twTma.viewportHeight);
             var tsM = Number(twTma.viewportStableHeight);
+            var vvMraw = Math.max(0, Math.round(ih - offsetTop - vvh));
+            var vvM = Math.min(vvMraw, Math.round(ih * 0.55));
+            var tgDiffRaw = 0;
+            if (tsM > 0 && thM > 0 && tsM > thM + 2) {
+              tgDiffRaw = Math.round(tsM - thM);
+            }
             var coverTma = 0;
             var haveTma = false;
-            if (tsM > 0 && thM > 0 && tsM > thM + 5) {
-              coverTma = Math.round(tsM - thM);
-              haveTma = coverTma >= 28;
-            }
-            var vvM = Math.max(0, Math.round(ih - offsetTop - vvh));
-            if (!haveTma && vvM >= 40) {
-              coverTma = vvM;
+            if (tgDiffRaw >= 28) {
+              coverTma = tgDiffRaw;
               haveTma = true;
-            } else if (haveTma && vvM > 48 && coverTma > vvM + 18) {
-              coverTma = vvM;
+            } else {
+              var lastK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+              if (document.body.classList.contains("chat-keyboard-open") && lastK >= 28) {
+                coverTma = lastK;
+                haveTma = true;
+              } else if (vvM >= 40) {
+                coverTma = vvM;
+                haveTma = true;
+              }
+            }
+            if (haveTma && tgDiffRaw >= 28 && vvMraw > 48 && coverTma > vvMraw + 18 && vvMraw >= 72) {
+              coverTma = vvMraw;
+            }
+            if (!haveTma) {
+              var baseEm = Number(window.__pokerChatInnerHBaseline) || 0;
+              var curEm = window.innerHeight || 0;
+              var winStEm = baseEm > 260 && curEm > 0 ? Math.max(0, Math.round(baseEm - curEm)) : 0;
+              var gapKbEm = Math.round(getChatComposerKeyboardGapPx());
+              if (winStEm > 50) {
+                coverTma = Math.min(Math.max(28, winStEm + Math.max(6, gapKbEm)), Math.round(ih * 0.5));
+                haveTma = true;
+              } else if (vvMraw >= 32) {
+                coverTma = Math.min(vvMraw, Math.round(ih * 0.5));
+                haveTma = coverTma >= 28;
+              }
             }
             if (haveTma) {
+              var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+              if (prevK >= 28 && coverTma > prevK + 45) {
+                coverTma = Math.min(coverTma, prevK + 32);
+              }
               var capTma = Math.min(520, Math.max(120, Math.round(ih * 0.56)));
               if (coverTma > capTma) coverTma = capTma;
+              window.__pokerChatTgKeyboardCoverLast = coverTma;
               doc.style.setProperty("--chat-vv-inset", "0px");
               doc.style.removeProperty("--chat-ios-accessory-inset");
               applyChatThreadComposerKeyboardDockFromCover(coverTma);
@@ -27604,6 +27648,7 @@ function initChat() {
           window.__pokerChatDockSmoothedPx = null;
           window.__pokerChatDockCoverStable = null;
           window.__pokerChatLastAppliedDockBottom = null;
+          window.__pokerChatTgKeyboardCoverLast = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {
