@@ -205,20 +205,54 @@ function pokerNormalizeWebAppStartParam(raw) {
 /**
  * Параметр ссылки ?startapp= / startattach: в hash приходит как tgWebAppStartParam (см. launch parameters Mini App).
  * Раньше читали только initDataUnsafe.start_param — на части клиентов он пустой, открывалась главная.
+ * Дополнительно: query страницы, фрагмент после «?» в hash, initParams._path (если клиент отдал только «путь» без =).
  */
 function pokerReadTelegramLaunchStartParam() {
+  function startParamFromQueryChunk(chunk) {
+    if (chunk == null) return "";
+    try {
+      var q = String(chunk).replace(/^\?/, "").trim();
+      if (!q) return "";
+      var sp = new URLSearchParams(q);
+      var v = sp.get("tgWebAppStartParam");
+      if (v != null && String(v).trim() !== "") return String(v).trim();
+      v = pokerStartAppQueryFromUrlSearchParams(sp);
+      return v ? String(v).trim() : "";
+    } catch (eQ) {
+      return "";
+    }
+  }
   try {
     if (window.Telegram && window.Telegram.WebView && window.Telegram.WebView.initParams) {
-      var lp = window.Telegram.WebView.initParams.tgWebAppStartParam;
+      var ip = window.Telegram.WebView.initParams;
+      var lp = ip.tgWebAppStartParam;
       if (lp != null && String(lp).trim() !== "") return String(lp).trim();
+      var pathV = ip._path;
+      if (pathV != null && String(pathV).trim() !== "") {
+        var pv = String(pathV).trim();
+        if (
+          pv.length >= 1 &&
+          pv.length <= 160 &&
+          /^[a-zA-Z0-9_.-]+$/.test(pv) &&
+          !/^tgWebApp/i.test(pv)
+        ) {
+          return pv;
+        }
+      }
     }
   } catch (eLp) {}
   try {
+    var searchRaw = typeof location !== "undefined" && location.search ? String(location.search) : "";
+    var fromSearch = startParamFromQueryChunk(searchRaw);
+    if (fromSearch) return fromSearch;
+  } catch (eS) {}
+  try {
     var h = typeof location !== "undefined" && location.hash ? String(location.hash).replace(/^#/, "") : "";
     if (h) {
-      var sp = new URLSearchParams(h);
-      var vH = sp.get("tgWebAppStartParam");
-      if (vH != null && String(vH).trim() !== "") return String(vH).trim();
+      var qi = h.indexOf("?");
+      var forParams = qi >= 0 ? h.slice(qi + 1) : h.indexOf("=") >= 0 ? h : "";
+      var fromHash = startParamFromQueryChunk(forParams);
+      if (fromHash) return fromHash;
     }
   } catch (eH) {}
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -4740,17 +4774,27 @@ function runGazetteAndTasksInit() {
     qWithParam = (qsDeep.get("with") || "").trim();
   } catch (eQsDeep) {}
   var deepLinkParam = (startParam && String(startParam).trim()) || qStartApp;
+  var hadDeepLinkAtInit = !!deepLinkParam;
   if (deepLinkParam) {
     pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
   }
   if (isTelegramWebApp()) {
     setTimeout(function () {
       try {
-        var normR = pokerNormalizeWebAppStartParam(pokerReadTelegramLaunchStartParam());
-        if (normR !== "raffles") return;
-        var vNow = document.body && document.body.getAttribute("data-view");
-        if (vNow === "raffles") return;
-        pokerApplyStartAppDeepLink("raffles", { withPeer: qWithParam });
+        var normLate = pokerNormalizeWebAppStartParam(pokerReadTelegramLaunchStartParam());
+        var qsLate = new URLSearchParams(typeof location !== "undefined" && location.search ? location.search : "");
+        var qStartLate = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(qsLate));
+        var qWithLate = (qsLate.get("with") || "").trim();
+        var deepLate = (normLate && String(normLate).trim()) || qStartLate;
+        if (deepLate && !hadDeepLinkAtInit) {
+          pokerApplyStartAppDeepLink(deepLate, { withPeer: qWithLate });
+          return;
+        }
+        if (normLate === "raffles") {
+          var vNow = document.body && document.body.getAttribute("data-view");
+          if (vNow === "raffles") return;
+          pokerApplyStartAppDeepLink("raffles", { withPeer: qWithParam });
+        }
       } catch (eTgRaffleRetry) {}
     }, 220);
   }
