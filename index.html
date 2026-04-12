@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.513">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.515">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -2585,6 +2585,10 @@
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Научиться играть</h1>
             <p class="learn-play-hub__desc">Бесплатные видео-уроки по темам от тренера клуба.</p>
+            <div class="raffles-hero__share-row video-lessons__share-row learn-play-hub__share-row">
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="learnPlayHubInviteFriendBtn" aria-label="Отправить другу ссылку на раздел «Научиться играть»">Поделиться</button>
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="learnPlayHubCopyLinkBtn" aria-label="Скопировать ссылку на раздел «Научиться играть»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+            </div>
             <div class="learn-play-hub__buttons">
               <a href="#" class="feature feature--link feature--app learn-play-hub__btn learn-play-hub__btn--video-lessons" data-view-target="video-lessons">
                 <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🎬</span></div>
@@ -6117,7 +6121,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=627"></script>
+    <script defer src="./app.js?v=629"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

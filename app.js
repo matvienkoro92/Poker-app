@@ -147,10 +147,7 @@ function isTelegramWebApp() {
   return !!(window.Telegram && window.Telegram.WebApp);
 }
 
-/**
- * Если в Mini App не задан data-telegram-app-url, шаринг не должен уходить на HTTPS сайт —
- * используем тот же канонический t.me, что в index.html / бэкенде.
- */
+/** Каноническая ссылка Mini App в Telegram (шаринг и ?startapp= — только с этим базисом, не с HTTPS сайта). */
 var POKER_DEFAULT_TELEGRAM_MINI_APP_URL = "https://t.me/Poker_dvatuza_bot/DvaTuza";
 
 /**
@@ -172,15 +169,11 @@ function getWebsiteOriginBaseForLinks() {
 
 /**
  * Базовый URL для ссылок "в это же приложение" (добавляйте ?startapp=…).
- * - В Telegram Mini App — `data-telegram-app-url` (t.me).
- * - В браузере / PWA — канонический URL сайта (не застывший t.me); ?startapp= обрабатывается при открытии той же установки / вкладки.
+ * - В Telegram Mini App — всегда канонический t.me (`POKER_DEFAULT_TELEGRAM_MINI_APP_URL`), не origin страницы.
+ * - В браузере / PWA — канонический URL сайта; ?startapp= открывается в той же вкладке / PWA.
  */
 function getAppBaseUrlForLinks() {
-  var appEl = document.getElementById("app");
-  var telegramAppUrl = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
-  telegramAppUrl = String(telegramAppUrl).trim();
-  if (isTelegramWebApp() && telegramAppUrl) return telegramAppUrl.replace(/\/$/, "");
-  if (isTelegramWebApp() && !telegramAppUrl) {
+  if (isTelegramWebApp()) {
     return String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "").replace(/\/$/, "");
   }
   var web = getWebsiteOriginBaseForLinks();
@@ -4641,6 +4634,24 @@ function runGazetteAndTasksInit() {
       }, 0);
       return;
     }
+    if (startParam === "club_charter") {
+      setTimeout(function () {
+        if (typeof window.openClubCharterModal === "function") window.openClubCharterModal();
+      }, 0);
+      return;
+    }
+    if (startParam === "vpn_proxy" || startParam === "vpn_proxy_vpn") {
+      setTimeout(function () {
+        if (typeof window.openVpnProxyModal === "function") window.openVpnProxyModal({ tab: "vpn" });
+      }, 0);
+      return;
+    }
+    if (startParam === "vpn_proxy_proxy" || startParam === "vpn_proxy_tab_proxy") {
+      setTimeout(function () {
+        if (typeof window.openVpnProxyModal === "function") window.openVpnProxyModal({ tab: "proxy" });
+      }, 0);
+      return;
+    }
     if (startParam === "stream") {
       setTimeout(function () {
         if (typeof setView === "function") setView("streams");
@@ -4833,6 +4844,10 @@ function runGazetteAndTasksInit() {
       return "Устав клуба «Два туза»";
     }
     function getCharterShareLink() {
+      if (isTelegramWebApp() && typeof buildMiniAppStartLink === "function") {
+        var tgl = buildMiniAppStartLink("club_charter");
+        if (tgl) return tgl;
+      }
       var base = "";
       try {
         if (typeof getAppBaseUrlForLinks === "function") base = String(getAppBaseUrlForLinks());
@@ -5162,6 +5177,10 @@ function runGazetteAndTasksInit() {
     }
     function vpnProxyShareAbsoluteUrl() {
       try {
+        if (isTelegramWebApp() && typeof buildMiniAppStartLink === "function") {
+          var hTg = vpnProxyCurrentHash();
+          return buildMiniAppStartLink(hTg === VPN_PROXY_HASH_PROXY ? "vpn_proxy_proxy" : "vpn_proxy");
+        }
         var base = String(getAppBaseUrlForLinks() || "")
           .trim()
           .replace(/\/+$/, "");
@@ -13263,7 +13282,11 @@ function getStreamsAppUrl() {
   return getAppBaseUrlForLinks();
 }
 
-/** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
+/**
+ * Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»).
+ * В Telegram Mini App базис всегда `POKER_DEFAULT_TELEGRAM_MINI_APP_URL`; примеры startParam:
+ * raffles, club_chat, learn_play_hub, video_lessons, news / news_N, hall_fame_*, rating_*, streams / streams_123456, …
+ */
 function buildMiniAppStartLink(startParam) {
   var appUrl = String(getAppBaseUrlForLinks() || "")
     .trim()
@@ -13363,7 +13386,10 @@ function initStreams() {
     if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
   }
 
-  var directAppUrl = window.location.origin + window.location.pathname + (window.location.search || "") + "#streams";
+  var directAppUrl =
+    isTelegramWebApp() && typeof buildMiniAppStartLink === "function"
+      ? buildMiniAppStartLink("streams")
+      : window.location.origin + window.location.pathname + (window.location.search || "") + "#streams";
   if (browserLinkInput) browserLinkInput.value = directAppUrl;
 
   function streamsShowAlert(msg) {
@@ -13558,10 +13584,11 @@ function initStreams() {
   if (openBrowserBtn) {
     openBrowserBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var urlOpen = browserLinkInput && browserLinkInput.value ? browserLinkInput.value : directAppUrl;
       if (tg && tg.openLink) {
-        tg.openLink(directAppUrl);
+        tg.openLink(urlOpen);
       } else {
-        window.open(directAppUrl, "_blank", "noopener");
+        window.open(urlOpen, "_blank", "noopener");
       }
     });
   }
@@ -13648,6 +13675,7 @@ function initStreams() {
         peer.on("open", function () {
           var link = buildMiniAppStartLink("streams_" + roomId);
           if (shareLinkInput) shareLinkInput.value = link;
+          if (browserLinkInput && isTelegramWebApp()) browserLinkInput.value = link;
           if (roomInput) roomInput.placeholder = roomId;
           previewVideo.srcObject = streamsBroadcastStream;
           previewWrap.classList.remove("streams-preview-wrap--hidden");
@@ -17443,6 +17471,65 @@ function initRaffles() {
         if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
         else window.open(shareUrl, "_blank");
         if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+      });
+    });
+  }
+})();
+
+// Хаб «Научиться играть»: ?startapp=learn_play_hub (тот же t.me, что и остальные разделы)
+(function initLearnPlayHubShare() {
+  function learnPlayHubSectionLink() {
+    return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("learn_play_hub") : "";
+  }
+  var shareInviteText = "Бесплатные материалы «Научиться играть» в приложении клуба «Два туза»:";
+  var copyBtn = document.getElementById("learnPlayHubCopyLinkBtn");
+  if (copyBtn && copyBtn.getAttribute("data-share-bound") !== "1") {
+    copyBtn.setAttribute("data-share-bound", "1");
+    copyBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var link = learnPlayHubSectionLink();
+      if (!link) return;
+      var msg = "Скопирована ссылка на раздел «Научиться играть». Отправьте её другу.";
+      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert(msg);
+          else alert("Ссылка скопирована.");
+        }).catch(function () {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+          else alert("Ссылка: " + link);
+        });
+      } else {
+        var tg2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg2 && tg2.showAlert) tg2.showAlert("Ссылка: " + link);
+        else alert("Ссылка: " + link);
+      }
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_copy");
+    });
+  }
+  var inviteBtn = document.getElementById("learnPlayHubInviteFriendBtn");
+  if (inviteBtn && inviteBtn.getAttribute("data-share-bound") !== "1") {
+    inviteBtn.setAttribute("data-share-bound", "1");
+    inviteBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var link = learnPlayHubSectionLink();
+      if (!link) return;
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_invite");
+        return;
+      }
+      var inviteFull = shareInviteText + "\n" + link;
+      var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteFull);
+      pokerTryPwaWebShare({ text: inviteFull, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_invite");
+          return;
+        }
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+        else window.open(shareUrl, "_blank");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_invite");
       });
     });
   }
