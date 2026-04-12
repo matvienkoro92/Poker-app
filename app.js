@@ -3112,13 +3112,19 @@ function runGazetteAndTasksInit() {
         input.style.height = Math.max(h, PLANNER_COMPOSER_MIN_PX) + "px";
       }
     }
-    var PLANNER_ALLOWED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
+    /** Общий планер двух Романов. */
+    var PLANNER_ROMAN_SHARED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
+    /** Отдельный список задач (не общий с Романами). */
+    var PLANNER_SOLO_USERNAMES = { polyapineapple: true };
     /**
      * Доступ по числовому Telegram id, если username в WebApp пустой (скрыт в настройках).
      * 388008256 — @roman1_matvienko (см. TELEGRAM_ADMIN / чат). Для @Roman1787443 при необходимости
      * добавьте его user id из @userinfobot в этот объект.
+     * Для @polyapineapple при скрытом username задайте тот же id, что в env GAZETTE_EDITOR_PLANNER_POLY_TELEGRAM_ID на сервере.
      */
     var PLANNER_ALLOWED_TELEGRAM_IDS = { 388008256: true };
+    /** Числовой id Telegram для @polyapineapple, если username скрыт (должен совпадать с серверным env). */
+    var PLANNER_POLY_TELEGRAM_ID = null;
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
     var PLANNER_SHARED_STORAGE_KEY = "poker_gazette_editor_planner_shared_v1";
     var PLANNER_OLD_KEYS_TO_MIGRATE = [
@@ -3134,10 +3140,46 @@ function runGazetteAndTasksInit() {
       }
       return user || null;
     }
+    function plannerAuthUsernameLower() {
+      try {
+        var _ap = window.__pokerTelegramAuth;
+        if (_ap && _ap.user && _ap.user.username != null) {
+          return String(_ap.user.username).replace(/^@+/, "").trim().toLowerCase();
+        }
+      } catch (eAu) {}
+      try {
+        var _rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (_rec && _rec.user && _rec.user.username != null) {
+          return String(_rec.user.username).replace(/^@+/, "").trim().toLowerCase();
+        }
+      } catch (eRec) {}
+      return "";
+    }
     function normUser() {
       var user = getPlannerTelegramUser();
       var u = user && user.username ? String(user.username) : "";
-      return u.replace(/^@+/, "").trim().toLowerCase();
+      var n = u.replace(/^@+/, "").trim().toLowerCase();
+      if (n) return n;
+      return plannerAuthUsernameLower();
+    }
+    function isPlannerSoloUser() {
+      var u = normUser();
+      if (u && PLANNER_SOLO_USERNAMES[u]) return true;
+      var user = getPlannerTelegramUser();
+      if (user && user.id != null && PLANNER_POLY_TELEGRAM_ID != null) {
+        if (Number(user.id) === PLANNER_POLY_TELEGRAM_ID) return true;
+      }
+      try {
+        var _ap = window.__pokerTelegramAuth;
+        if (_ap && _ap.user && _ap.user.id != null && PLANNER_POLY_TELEGRAM_ID != null) {
+          if (Number(_ap.user.id) === PLANNER_POLY_TELEGRAM_ID) return true;
+        }
+        var _recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (_recTg && _recTg.user && _recTg.user.id != null && PLANNER_POLY_TELEGRAM_ID != null) {
+          if (Number(_recTg.user.id) === PLANNER_POLY_TELEGRAM_ID) return true;
+        }
+      } catch (eSo) {}
+      return false;
     }
     function isPlannerAllowedUser() {
       try {
@@ -3146,18 +3188,45 @@ function runGazetteAndTasksInit() {
         var _recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
         if (_recTg && _recTg.gazettePlannerAccess === true) return true;
       } catch (ePlAllow) {}
+      var ua = plannerAuthUsernameLower();
+      if (ua && (PLANNER_SOLO_USERNAMES[ua] || PLANNER_ROMAN_SHARED_USERNAMES[ua])) return true;
       var user = getPlannerTelegramUser();
       if (!user) return false;
       var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
-      if (u && PLANNER_ALLOWED_USERNAMES[u]) return true;
+      if (u && PLANNER_SOLO_USERNAMES[u]) return true;
+      if (u && PLANNER_ROMAN_SHARED_USERNAMES[u]) return true;
       if (user.id == null) return false;
       var idNum = Number(user.id);
       if (isNaN(idNum)) return false;
+      if (PLANNER_POLY_TELEGRAM_ID != null && idNum === PLANNER_POLY_TELEGRAM_ID) return true;
       return !!PLANNER_ALLOWED_TELEGRAM_IDS[idNum];
     }
     function plannerStorageKey() {
       if (!isPlannerAllowedUser()) return null;
+      if (isPlannerSoloUser()) {
+        var u = normUser();
+        if ((!u || !PLANNER_SOLO_USERNAMES[u]) && PLANNER_POLY_TELEGRAM_ID != null) {
+          var userK = getPlannerTelegramUser();
+          var idK = userK && userK.id != null ? Number(userK.id) : NaN;
+          if (idK === PLANNER_POLY_TELEGRAM_ID) u = "polyapineapple";
+        }
+        if (!u || !PLANNER_SOLO_USERNAMES[u]) u = plannerAuthUsernameLower();
+        if (u && PLANNER_SOLO_USERNAMES[u]) return "poker_gazette_editor_planner_solo_" + u + "_v1";
+        return "poker_gazette_editor_planner_solo_polyapineapple_v1";
+      }
       return PLANNER_SHARED_STORAGE_KEY;
+    }
+    function updatePlannerHintText() {
+      var el = document.getElementById("romanTaskPlannerHint");
+      if (!el) return;
+      if (!isPlannerAllowedUser()) return;
+      if (isPlannerSoloUser()) {
+        el.textContent =
+          "Ваш личный список задач (отдельно от списка Романов). Синхронизация с сервером, пока открыт планер (~18 с) и при возврате в приложение. Локально хранится копия для офлайна.";
+        return;
+      }
+      el.textContent =
+        "Общий список для @roman1787443 и @roman1_matvienko на сервере для всех устройств; пока открыт планер, список обновляется (~18 с) и при возврате в приложение. Локально хранится копия для офлайна.";
     }
     var romanPlannerDirtySinceOpen = false;
     var romanPlannerPushTimer = null;
@@ -3299,7 +3368,7 @@ function runGazetteAndTasksInit() {
     }
     function mergeLegacyPlannerIntoList(list) {
       var key = plannerStorageKey();
-      if (!key) return list;
+      if (!key || key !== PLANNER_SHARED_STORAGE_KEY) return list;
       var merged = mergeRomanPlannerArraysFromKeys();
       if (!merged.length) return list;
       var base = Array.isArray(list) ? list : [];
@@ -3339,13 +3408,15 @@ function runGazetteAndTasksInit() {
       try {
         var raw = localStorage.getItem(key);
         if (!raw) {
-          var merged = mergeRomanPlannerArraysFromKeys();
-          if (merged.length) {
-            try {
-              localStorage.setItem(key, JSON.stringify(merged));
-              cleanupRomanPlannerLegacyKeys();
-            } catch (eMig) {}
-            return merged;
+          if (key === PLANNER_SHARED_STORAGE_KEY) {
+            var merged = mergeRomanPlannerArraysFromKeys();
+            if (merged.length) {
+              try {
+                localStorage.setItem(key, JSON.stringify(merged));
+                cleanupRomanPlannerLegacyKeys();
+              } catch (eMig) {}
+              return merged;
+            }
           }
           return [];
         }
@@ -3818,6 +3889,7 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
       romanPlannerDirtySinceOpen = false;
       plannerTab = readPlannerTabStorage();
+      updatePlannerHintText();
       renderTasks();
       plannerModal.setAttribute("aria-hidden", "false");
       romanPlannerPullFromServer();
@@ -3855,6 +3927,7 @@ function runGazetteAndTasksInit() {
       }
       openBtn.classList.remove("welcome-planner-icon--hidden");
       if (plannerModal.getAttribute("aria-hidden") === "false") {
+        updatePlannerHintText();
         renderTasks();
         romanPlannerPullFromServer();
         romanPlannerStartLiveSync();
@@ -4134,6 +4207,7 @@ function runGazetteAndTasksInit() {
       } catch (eFoc) {}
     });
     syncVisibility();
+    updatePlannerHintText();
     resizePlannerComposer();
   })();
 
