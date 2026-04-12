@@ -13246,9 +13246,20 @@ function getStreamsAppUrl() {
 
 /** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
 function buildMiniAppStartLink(startParam) {
-  var appUrl = String(getAppBaseUrlForLinks() || "")
-    .trim()
-    .replace(/\/+$/, "");
+  var appUrl = "";
+  if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+    try {
+      var appEl = document.getElementById("app");
+      var tgRaw = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
+      appUrl = String(tgRaw).trim().replace(/\/+$/, "");
+    } catch (eTg) {}
+    if (!appUrl) return "";
+  } else {
+    appUrl = String(getAppBaseUrlForLinks() || "")
+      .trim()
+      .replace(/\/+$/, "");
+  }
+  if (!appUrl) return "";
   var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
   var needSlash = sep === "?" && /^https?:\/\/[^/?#]+$/i.test(appUrl);
   return (
