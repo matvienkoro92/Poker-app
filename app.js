@@ -8992,10 +8992,14 @@ function getPokerChatTelegramAuthState() {
   }
 }
 
+/** Сообщение при попытке писать в чат без входа (браузер / PWA). */
+var POKER_CHAT_NEED_AUTH_PWA_MSG =
+  "Чтобы общаться в чатах, сначала авторизуйтесь.\n1. Добавьте ярлык на экран «Домой» (из Safari или Google Chrome).\n2. Зайдите с ярлыка и авторизуйтесь.";
+
 function pokerNotifyChatVerificationRequired() {
   var msg = isTelegramWebApp()
     ? "Чтобы общаться в чатах, сначала войдите: откройте Mini App из бота Telegram."
-    : "Чтобы общаться в чатах, сначала войдите через Telegram — на главной нажмите «Войти через Telegram».";
+    : POKER_CHAT_NEED_AUTH_PWA_MSG;
   var w = window.Telegram && window.Telegram.WebApp;
   if (w && w.showAlert) w.showAlert(msg);
   else if (typeof alert === "function") alert(msg);
@@ -20578,15 +20582,31 @@ function initChat() {
     if (st !== "ok") {
       openClubChatShell();
       updateGeneralInputLocked(true);
-      var gateMsg =
-        st === "pending"
-          ? "Выполняется проверка входа через Telegram. Подождите несколько секунд и снова откройте «Главный чат» или вернитесь на главную."
-          : "Чтобы общаться в чатах, нужно сначала войти: на главной нажмите «Войти через Telegram» или откройте приложение из бота.";
+      var gateBlockInner;
+      if (st === "pending") {
+        gateBlockInner =
+          '<p class="chat-empty">' +
+          escapeHtml(
+            "Выполняется проверка входа через Telegram. Подождите несколько секунд и снова откройте «Главный чат» или вернитесь на главную."
+          ) +
+          "</p>";
+      } else if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+        gateBlockInner =
+          '<p class="chat-empty">' +
+          escapeHtml("Чтобы общаться в чатах, сначала войдите: откройте Mini App из бота Telegram.") +
+          "</p>";
+      } else {
+        gateBlockInner = POKER_CHAT_NEED_AUTH_PWA_MSG.split("\n")
+          .map(function (line) {
+            return '<p class="chat-empty">' + escapeHtml(line) + "</p>";
+          })
+          .join("");
+      }
       if (generalMessages) {
         var wrapNeedLogin = generalMessages.parentElement;
         if (wrapNeedLogin && wrapNeedLogin.classList) wrapNeedLogin.classList.remove("chat-messages-wrap--settling");
         generalMessages.innerHTML =
-          '<div class="chat-general-gate chat-general-gate--need-login"><p class="chat-empty">' + escapeHtml(gateMsg) + "</p></div>";
+          '<div class="chat-general-gate chat-general-gate--need-login">' + gateBlockInner + "</div>";
       }
       if (st === "pending") {
         if (typeof pokerNotifyChatAuthPending === "function") pokerNotifyChatAuthPending();
