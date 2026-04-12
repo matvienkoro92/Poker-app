@@ -15689,6 +15689,26 @@ a.tournament-day-share-btn {
 .raffle-participants-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); }
 .raffle-participants-chance { margin: 0 0 8px; font-size: 12px; color: var(--text-muted); }
 .raffle-participants { margin: 0 0 12px; padding-left: 20px; font-size: 13px; color: var(--text); }
+.raffle-participants-item { list-style: disc; }
+.raffle-participants__profile-btn {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.raffle-participants__profile-btn:hover,
+.raffle-participants__profile-btn:focus-visible {
+  color: var(--accent-2, #fb923c);
+  outline: none;
+}
 .raffle-participants-empty { color: var(--text-muted); list-style: none; margin-left: -20px; }
 .raffle-winners-wrap--hidden { display: none; }
 .raffle-winners-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--accent-2); }
@@ -15703,6 +15723,11 @@ a.tournament-day-share-btn {
   flex-wrap: wrap;
 }
 .raffle-winner-row__text { flex: 1; min-width: 0; }
+.raffle-winner-row__profile.raffle-participants__profile-btn {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
 .raffle-winner-status {
   font-weight: 600;
   min-width: 1.2em;

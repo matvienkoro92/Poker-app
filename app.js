@@ -15822,6 +15822,24 @@ function initRaffles() {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  /** Строка участника: клик открывает карточку профиля (tg_/vk_). */
+  function raffleParticipantLineHtml(p) {
+    var uid = String(p.userId != null ? p.userId : "").trim();
+    var line = escapeHtml(p.name) + " — " + escapeHtml(p.p21Id);
+    if (!uid || (uid.indexOf("tg_") !== 0 && uid.indexOf("vk_") !== 0)) {
+      return "<li class=\"raffle-participants-item\">" + line + "</li>";
+    }
+    return (
+      "<li class=\"raffle-participants-item\"><button type=\"button\" class=\"raffle-participants__profile-btn\" data-user-id=\"" +
+      escapeHtml(uid) +
+      "\" data-user-name=\"" +
+      escapeHtml(p.name || "") +
+      "\">" +
+      line +
+      "</button></li>"
+    );
+  }
+
   /** Подмена старого «билет» на «беккинг-билет» при отображении (для данных из БД до переименования). */
   function raffleDisplayPrizeText(s) {
     if (s == null || typeof s !== "string") return s;
@@ -15830,20 +15848,58 @@ function initRaffles() {
   }
 
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin) {
-    var uid = (w.userId || "").replace(/"/g, "&quot;");
+    var uidRaw = String(w.userId != null ? w.userId : "").trim();
+    var uidAttr = escapeHtml(uidRaw);
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
-    var text = escapeHtml(w.name) + " — " + escapeHtml(w.p21Id);
+    var textInner = escapeHtml(w.name) + " — " + escapeHtml(w.p21Id);
+    var profileOpen =
+      uidRaw && (uidRaw.indexOf("tg_") === 0 || uidRaw.indexOf("vk_") === 0)
+        ? "<button type=\"button\" class=\"raffle-participants__profile-btn raffle-winner-row__profile\" data-user-id=\"" +
+          uidAttr +
+          "\" data-user-name=\"" +
+          escapeHtml(w.name || "") +
+          "\">" +
+          textInner +
+          "</button>"
+        : "<span class=\"raffle-winner-row__text\">" + textInner + "</span>";
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
-      return "<li class=\"raffle-winner-row\"><span class=\"raffle-winner-row__text\">" + text + "</span>" +
-        "<span class=\"raffle-winner-status " + statusClass + "\">" + statusIcon + "</span>" +
-        "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" + okActive + "\" data-raffle-id=\"" + escapeHtml(raffleId) + "\" data-winner-user-id=\"" + uid + "\" title=\"Подтвердить\">✓</button>" +
-        "<button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--fail" + failActive + "\" data-raffle-id=\"" + escapeHtml(raffleId) + "\" data-winner-user-id=\"" + uid + "\" title=\"Отклонить\">✗</button></span></li>";
+      return (
+        "<li class=\"raffle-winner-row\">" +
+        profileOpen +
+        "<span class=\"raffle-winner-status " +
+        statusClass +
+        "\">" +
+        statusIcon +
+        "</span>" +
+        "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" +
+        okActive +
+        "\" data-raffle-id=\"" +
+        escapeHtml(raffleId) +
+        "\" data-winner-user-id=\"" +
+        uidAttr +
+        "\" title=\"Подтвердить\">✓</button>" +
+        "<button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--fail" +
+        failActive +
+        "\" data-raffle-id=\"" +
+        escapeHtml(raffleId) +
+        "\" data-winner-user-id=\"" +
+        uidAttr +
+        "\" title=\"Отклонить\">✗</button></span></li>"
+      );
     }
-    return "<li class=\"raffle-winner-row\"><span class=\"raffle-winner-row__text\">" + text + "</span><span class=\"raffle-winner-status " + statusClass + "\">" + statusIcon + "</span></li>";
+    return (
+      "<li class=\"raffle-winner-row\">" +
+      profileOpen +
+      "<span class=\"raffle-winner-status " +
+      statusClass +
+      "\">" +
+      statusIcon +
+      "</span></li>"
+    );
   }
 
   function setRaffleWinnerStatus(rid, wid, btnIsOk, currentStatus, onDone) {
@@ -16166,9 +16222,12 @@ function initRaffles() {
       raffleParticipantsChance.textContent = chancePct;
       raffleParticipantsChance.style.display = chancePct ? "" : "none";
     }
-    raffleParticipants.innerHTML = parts.length === 0
-      ? "<li class=\"raffle-participants-empty\">Пока никого</li>"
-      : parts.map(function (p) { return "<li>" + escapeHtml(p.name) + " — " + escapeHtml(p.p21Id) + "</li>"; }).join("");
+    raffleParticipants.innerHTML =
+      parts.length === 0
+        ? "<li class=\"raffle-participants-empty\">Пока никого</li>"
+        : parts.map(function (p) {
+            return raffleParticipantLineHtml(p);
+          }).join("");
     if (raffle.status === "drawn" && raffle.winners && raffle.winners.length > 0) {
       raffleWinnersWrap.classList.remove("raffle-winners-wrap--hidden");
       var byGroup = {};
@@ -17606,6 +17665,26 @@ function initRaffles() {
         });
     });
   }
+
+  (function bindRaffleParticipantProfileOpens() {
+    if (initRaffles.__profileOpenDelegate) return;
+    var root = document.querySelector('.view[data-view="raffles"]');
+    if (!root) return;
+    initRaffles.__profileOpenDelegate = true;
+    root.addEventListener("click", function (e) {
+      if (e.target.closest(".raffle-winner-btn")) return;
+      var btn = e.target.closest(".raffle-participants__profile-btn");
+      if (!btn || !root.contains(btn)) return;
+      e.preventDefault();
+      var id = btn.getAttribute("data-user-id");
+      var nm = (btn.getAttribute("data-user-name") || "").trim() || id;
+      if (!id || typeof window.openChatUserModalById !== "function") return;
+      try {
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      } catch (eEx) {}
+      window.openChatUserModalById(id, nm, null);
+    });
+  })();
 
   initRaffles.__listenersBound = true;
   initRaffles.__reload = function () {
