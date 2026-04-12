@@ -148,6 +148,12 @@ function isTelegramWebApp() {
 }
 
 /**
+ * Если в Mini App не задан data-telegram-app-url, шаринг не должен уходить на HTTPS сайт —
+ * используем тот же канонический t.me, что в index.html / бэкенде.
+ */
+var POKER_DEFAULT_TELEGRAM_MINI_APP_URL = "https://t.me/Poker_dvatuza_bot/DvaTuza";
+
+/**
  * Канонический HTTPS-базис для шаринга вне Mini App: совпадает с start_url PWA (/) и даёт ?startapp= на корне.
  */
 function getWebsiteOriginBaseForLinks() {
@@ -172,7 +178,11 @@ function getWebsiteOriginBaseForLinks() {
 function getAppBaseUrlForLinks() {
   var appEl = document.getElementById("app");
   var telegramAppUrl = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
-  if (isTelegramWebApp() && telegramAppUrl) return String(telegramAppUrl).replace(/\/$/, "");
+  telegramAppUrl = String(telegramAppUrl).trim();
+  if (isTelegramWebApp() && telegramAppUrl) return telegramAppUrl.replace(/\/$/, "");
+  if (isTelegramWebApp() && !telegramAppUrl) {
+    return String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "").replace(/\/$/, "");
+  }
   var web = getWebsiteOriginBaseForLinks();
   if (web) return web;
   return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
@@ -2530,6 +2540,10 @@ function runGazetteAndTasksInit() {
           : buildMiniAppStartLink("news");
       var isTelegramShare = shareBtn.classList && shareBtn.classList.contains("gazette-modal__share-telegram");
       if (isTelegramShare) {
+        if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
+          return;
+        }
         var article = shareBtn.closest && shareBtn.closest("article");
         var headlineEl = article && article.querySelector(".gazette-modal__headline");
         var headline = headlineEl ? headlineEl.textContent.trim() : "";
@@ -5971,7 +5985,6 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
   if (shareBtn) {
     shareBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appUrl = getAppBaseUrlForLinks();
       var type = currentModalLinkType === "current"
         ? "rating_top_current"
         : currentModalLinkType === "mar"
@@ -5979,7 +5992,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
           : currentModalLinkType === "feb"
             ? "rating_top_february"
             : "rating_top_past";
-      var link = appUrl + "?startapp=" + type;
+      var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(type) : "";
       var msg = type === "rating_top_current"
         ? "Ссылка скопирована. Отправьте другу — откроется блок «Топы текущей недели»."
         : "Ссылка скопирована. Отправьте другу — откроется этот топ.";
@@ -11136,10 +11149,10 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
-      var link = appUrl + "?startapp=" + startApp + encodeURIComponent(nick);
+      var link =
+        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function () {
           var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -11161,10 +11174,15 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
-      var link = appUrl + "?startapp=" + startApp + encodeURIComponent(nick);
+      var link =
+        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
+      if (!link) return;
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
+        return;
+      }
       var totalStr = modal._winterPlayerModalTotalStr || "0";
       var shareText = "Игрок " + nick + " уже выиграл " + totalStr + ". Посмотрите отчет по турнирам - " + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(shareText);
@@ -11452,10 +11470,9 @@ function initWinterRating() {
       e.preventDefault();
       e.stopPropagation();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appUrl = getAppBaseUrlForLinks();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
       var startApp = isSpring ? "spring_rating_date_" + String(dateStr).replace(/\./g, "_") : "rating_" + String(dateStr).replace(/\./g, "_");
-      var link = appUrl + "?startapp=" + startApp;
+      var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp) : "";
       var msg = "Ссылка скопирована. Отправьте другу — откроется рейтинг за " + dateStr + ".";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
@@ -11476,8 +11493,10 @@ function initWinterRating() {
       if (!shareBtn || !shareBtn.dataset.springLeague) return;
       e.preventDefault();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var appUrl = getAppBaseUrlForLinks();
-      var link = appUrl + "?startapp=spring_rating_league_" + shareBtn.dataset.springLeague;
+      var link =
+        typeof buildMiniAppStartLink === "function"
+          ? buildMiniAppStartLink("spring_rating_league_" + shareBtn.dataset.springLeague)
+          : "";
       var msg = shareBtn.dataset.springLeague === "1" ? "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 1." : "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 2.";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function () {
@@ -13246,19 +13265,9 @@ function getStreamsAppUrl() {
 
 /** Ссылка на мини‑апп с startapp (если в base URL уже есть «?», добавляем «&»). */
 function buildMiniAppStartLink(startParam) {
-  var appUrl = "";
-  if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
-    try {
-      var appEl = document.getElementById("app");
-      var tgRaw = (appEl && appEl.getAttribute && appEl.getAttribute("data-telegram-app-url")) || "";
-      appUrl = String(tgRaw).trim().replace(/\/+$/, "");
-    } catch (eTg) {}
-    if (!appUrl) return "";
-  } else {
-    appUrl = String(getAppBaseUrlForLinks() || "")
-      .trim()
-      .replace(/\/+$/, "");
-  }
+  var appUrl = String(getAppBaseUrlForLinks() || "")
+    .trim()
+    .replace(/\/+$/, "");
   if (!appUrl) return "";
   var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
   var needSlash = sep === "?" && /^https?:\/\/[^/?#]+$/i.test(appUrl);
@@ -14433,8 +14442,8 @@ function closeDailyPredictionModal() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var predictionTextEl = document.getElementById("dailyPredictionText");
       var prediction = predictionTextEl ? predictionTextEl.textContent.trim() : "";
-      var appUrl = getAppBaseUrlForLinks();
-      var link = appUrl + "?startapp=daily_prediction";
+      var link =
+        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("daily_prediction") : "";
       var shortText = "Моё покерное предсказание на сегодня:";
       if (prediction) shortText += "\n\n" + prediction;
       shortText += "\n\nПосмотрите своё предсказание здесь —\n" + link;
@@ -17419,6 +17428,10 @@ function initRaffles() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = videoLessonsSectionLink();
       if (!link) return;
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_hero");
+        return;
+      }
       var inviteFull = shareInviteText + "\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteFull);
       pokerTryPwaWebShare({ text: inviteFull, url: link }).then(function (pwaOk) {
@@ -28249,6 +28262,10 @@ function initChat() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
       if (!link) return;
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_invite_friend");
+        return;
+      }
       var text = "Заходи в общий чат клуба «Два туза» в приложении:\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
       pokerTryPwaWebShare({ text: text, url: link }).then(function (pwaOk) {
@@ -33818,8 +33835,7 @@ function handleTournamentDayShare() {
     var name = (share.name || "").trim() || "турнир клуба";
     var guarantee = (share.guarantee || "").trim();
     var time = (share.time || "18:00").trim();
-    var appUrl = getAppBaseUrlForLinks();
-    var link = appUrl + "?startapp=schedule";
+    var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("schedule") : "";
     var text;
     if (name === "Фриролл" && guarantee) {
       text =
