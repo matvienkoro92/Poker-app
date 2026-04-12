@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.520">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.522">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -5554,6 +5554,20 @@
               <h2 class="roman-task-planner-modal__title" id="romanTaskPlannerModalTitle">Планер задач</h2>
               <p class="roman-task-planner__hint">Для @roman1787443 и @roman1_matvienko — один список на сервере для всех устройств; пока открыт планер, список обновляется сам (~18 с) и при возврате в приложение. Локально хранится копия для офлайна.</p>
             </div>
+            <div class="roman-task-planner__tabs" role="tablist" aria-label="Разделы планера">
+              <button
+                type="button"
+                class="roman-task-planner__tab roman-task-planner__tab--active"
+                role="tab"
+                id="romanPlannerTabTasks"
+                aria-selected="true"
+              >
+                Задачи
+              </button>
+              <button type="button" class="roman-task-planner__tab" role="tab" id="romanPlannerTabDone" aria-selected="false">
+                Выполненные
+              </button>
+            </div>
             <div class="roman-task-planner__board roman-task-planner__board--stacked" id="romanTaskPlannerBoard">
               <ul class="roman-task-planner__list roman-task-planner__list--stacked" id="romanTaskListAll"></ul>
             </div>
@@ -6121,7 +6135,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=634"></script>
+    <script defer src="./app.js?v=636"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

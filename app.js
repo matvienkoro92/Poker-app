@@ -3070,6 +3070,34 @@ function runGazetteAndTasksInit() {
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
     if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
+    var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
+    function readPlannerTabStorage() {
+      try {
+        var s = sessionStorage.getItem(PLANNER_TAB_STORAGE_KEY);
+        if (s === "done" || s === "tasks") return s;
+      } catch (eRd) {}
+      return "tasks";
+    }
+    var plannerTab = readPlannerTabStorage();
+    function writePlannerTabStorage(v) {
+      try {
+        sessionStorage.setItem(PLANNER_TAB_STORAGE_KEY, v);
+      } catch (eWr) {}
+    }
+    var tabTasksBtn = document.getElementById("romanPlannerTabTasks");
+    var tabDoneBtn = document.getElementById("romanPlannerTabDone");
+    function setPlannerTabUi() {
+      var isTasks = plannerTab === "tasks";
+      if (tabTasksBtn) {
+        tabTasksBtn.classList.toggle("roman-task-planner__tab--active", isTasks);
+        tabTasksBtn.setAttribute("aria-selected", isTasks ? "true" : "false");
+      }
+      if (tabDoneBtn) {
+        tabDoneBtn.classList.toggle("roman-task-planner__tab--active", !isTasks);
+        tabDoneBtn.setAttribute("aria-selected", isTasks ? "false" : "true");
+      }
+      if (form) form.classList.toggle("roman-task-planner__add--hidden", !isTasks);
+    }
     var PLANNER_COMPOSER_MIN_PX = 52;
     var PLANNER_COMPOSER_MAX_PX = 280;
     function resizePlannerComposer() {
@@ -3356,6 +3384,21 @@ function runGazetteAndTasksInit() {
       });
       return copy;
     }
+    function sortActivePlannerTasks(arr) {
+      var copy = arr.slice();
+      copy.sort(function (a, b) {
+        var ia = a && a.important ? 1 : 0;
+        var ib = b && b.important ? 1 : 0;
+        if (ia !== ib) return ib - ia;
+        var da = a && a.doing ? 1 : 0;
+        var db = b && b.doing ? 1 : 0;
+        if (da !== db) return db - da;
+        var ta = a && a.createdAt ? Number(a.createdAt) : 0;
+        var tb = b && b.createdAt ? Number(b.createdAt) : 0;
+        return ta - tb;
+      });
+      return copy;
+    }
     function findTaskById(tasks, id) {
       var sid = String(id);
       for (var i = 0; i < tasks.length; i++) {
@@ -3363,22 +3406,11 @@ function runGazetteAndTasksInit() {
       }
       return -1;
     }
-    function pinRomanTaskToTop(tasks, id) {
-      var active = sortTasksByCreatedAsc(
-        tasks.filter(function (x) {
-          return x && !x.done;
-        })
-      );
-      if (!active.length || String(active[0].id) === String(id)) return false;
-      var ix = findTaskById(tasks, id);
-      if (ix < 0 || tasks[ix].done) return false;
-      var minTs = active[0].createdAt != null ? Number(active[0].createdAt) : 0;
-      tasks[ix].createdAt = minTs - 1;
-      return true;
-    }
-    function renderTaskRow(t, columnDone, activeIndex) {
+    function renderTaskRow(t, columnDone) {
       var id = t.id != null ? String(t.id) : "";
       var text = t.text != null ? String(t.text) : "";
+      var important = !!(t && t.important);
+      var doing = !!(t && t.doing);
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
@@ -3387,28 +3419,55 @@ function runGazetteAndTasksInit() {
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-uncomplete="' +
         escHtml(id) +
         '">Вернуть</button>';
-      var atTopActive = !columnDone && activeIndex === 0;
-      var doingBtn =
-        !columnDone && activeIndex != null
-          ? '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--doing"' +
-            (atTopActive ? " disabled" : "") +
-            ' data-roman-task-priority="' +
+      var badges = "";
+      if (important && !columnDone) {
+        badges += '<span class="roman-task-planner__badge roman-task-planner__badge--important">Важно</span>';
+      }
+      if (doing && !columnDone) {
+        badges += '<span class="roman-task-planner__badge roman-task-planner__badge--doing">Выполняется</span>';
+      }
+      var badgesRow = badges ? '<div class="roman-task-planner__meta-badges">' + badges + "</div>" : "";
+      var statusBtns = "";
+      if (!columnDone) {
+        if (doing) {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-doing="' +
             escHtml(id) +
-            '" title="' +
-            (atTopActive ? "Уже первая в списке" : "Поднять в начало — сейчас в работе") +
-            '">Выполняется</button>'
-          : "";
+            '">Снять «Выполняется»</button>';
+        } else {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--doing" data-roman-task-set-doing="' +
+            escHtml(id) +
+            '">Выполняется</button>';
+        }
+        if (important) {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-important="' +
+            escHtml(id) +
+            '">Снять «Важно»</button>';
+        } else {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--important" data-roman-task-set-important="' +
+            escHtml(id) +
+            '">Важно</button>';
+        }
+      }
       var actionsHtml =
-        (columnDone ? uncompleteBtn : doingBtn + completeBtn) +
+        (columnDone ? uncompleteBtn : statusBtns + completeBtn) +
         '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
         escHtml(id) +
         '">Изменить</button>' +
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
         escHtml(id) +
         '">Удалить</button>';
-      return (
-        '<li class="roman-task-planner__item' +
+      var itemClass =
+        "roman-task-planner__item" +
         (columnDone ? " roman-task-planner__item--done" : "") +
+        (important && !columnDone ? " roman-task-planner__item--flag-important" : "") +
+        (doing && !columnDone ? " roman-task-planner__item--in-progress" : "");
+      return (
+        '<li class="' +
+        itemClass +
         '" data-roman-task-id="' +
         escHtml(id) +
         '">' +
@@ -3416,6 +3475,7 @@ function runGazetteAndTasksInit() {
         '<div class="roman-task-planner__swipe-track">' +
         '<div class="roman-task-planner__swipe-front">' +
         '<div class="roman-task-planner__body">' +
+        badgesRow +
         '<div class="roman-task-planner__text">' +
         escHtml(text) +
         '</div>' +
@@ -3721,37 +3781,35 @@ function runGazetteAndTasksInit() {
       }
     }
     function renderTasks() {
+      setPlannerTabUi();
       var raw = loadTasks();
-      var active = sortTasksByCreatedAsc(raw.filter(function (x) {
+      var active = sortActivePlannerTasks(raw.filter(function (x) {
         return !x.done;
       }));
       var doneCol = sortTasksByCreatedAsc(raw.filter(function (x) {
         return !!x.done;
       }));
       var parts = [];
-      parts.push(
-        '<li class="roman-task-planner__section-head" role="presentation">Активные</li>'
-      );
-      if (active.length) {
-        for (var ai = 0; ai < active.length; ai++) {
-          parts.push(renderTaskRow(active[ai], false, ai));
+      if (plannerTab === "tasks") {
+        if (active.length) {
+          for (var ai = 0; ai < active.length; ai++) {
+            parts.push(renderTaskRow(active[ai], false));
+          }
+        } else {
+          parts.push(
+            '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет задач</li>'
+          );
         }
       } else {
-        parts.push(
-          '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет активных задач</li>'
-        );
-      }
-      parts.push(
-        '<li class="roman-task-planner__section-head" role="presentation">Выполненные</li>'
-      );
-      if (doneCol.length) {
-        for (var di = 0; di < doneCol.length; di++) {
-          parts.push(renderTaskRow(doneCol[di], true));
+        if (doneCol.length) {
+          for (var di = 0; di < doneCol.length; di++) {
+            parts.push(renderTaskRow(doneCol[di], true));
+          }
+        } else {
+          parts.push(
+            '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет выполненных</li>'
+          );
         }
-      } else {
-        parts.push(
-          '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет выполненных</li>'
-        );
       }
       listAll.innerHTML = parts.join("");
       initRomanPlannerSwipeRows();
@@ -3759,6 +3817,7 @@ function runGazetteAndTasksInit() {
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
       romanPlannerDirtySinceOpen = false;
+      plannerTab = readPlannerTabStorage();
       renderTasks();
       plannerModal.setAttribute("aria-hidden", "false");
       romanPlannerPullFromServer();
@@ -3814,6 +3873,20 @@ function runGazetteAndTasksInit() {
         romanPlannerPullAmbient();
       });
     } catch (ePs) {}
+    if (tabTasksBtn) {
+      tabTasksBtn.addEventListener("click", function () {
+        plannerTab = "tasks";
+        writePlannerTabStorage("tasks");
+        renderTasks();
+      });
+    }
+    if (tabDoneBtn) {
+      tabDoneBtn.addEventListener("click", function () {
+        plannerTab = "done";
+        writePlannerTabStorage("done");
+        renderTasks();
+      });
+    }
     openBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -3908,6 +3981,8 @@ function runGazetteAndTasksInit() {
         id: "t_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9),
         text: text,
         done: false,
+        doing: false,
+        important: false,
         createdAt: Date.now(),
       });
       saveTasks(tasks);
@@ -3919,12 +3994,50 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser()) return;
       var t = ev.target;
       if (!t || !t.closest) return;
-      var priorityBtn = t.closest("[data-roman-task-priority]");
-      if (priorityBtn && !priorityBtn.disabled) {
-        var idP = priorityBtn.getAttribute("data-roman-task-priority");
-        var tasksP = loadTasks();
-        if (pinRomanTaskToTop(tasksP, idP)) {
-          saveTasks(tasksP);
+      var setDoing = t.closest("[data-roman-task-set-doing]");
+      if (setDoing) {
+        var idSd = setDoing.getAttribute("data-roman-task-set-doing");
+        var tasksSd = loadTasks();
+        var ixSd = findTaskById(tasksSd, idSd);
+        if (ixSd >= 0 && !tasksSd[ixSd].done) {
+          tasksSd[ixSd].doing = true;
+          saveTasks(tasksSd);
+          renderTasks();
+        }
+        return;
+      }
+      var clearDoing = t.closest("[data-roman-task-clear-doing]");
+      if (clearDoing) {
+        var idCd = clearDoing.getAttribute("data-roman-task-clear-doing");
+        var tasksCd = loadTasks();
+        var ixCd = findTaskById(tasksCd, idCd);
+        if (ixCd >= 0) {
+          tasksCd[ixCd].doing = false;
+          saveTasks(tasksCd);
+          renderTasks();
+        }
+        return;
+      }
+      var setImp = t.closest("[data-roman-task-set-important]");
+      if (setImp) {
+        var idSi = setImp.getAttribute("data-roman-task-set-important");
+        var tasksSi = loadTasks();
+        var ixSi = findTaskById(tasksSi, idSi);
+        if (ixSi >= 0 && !tasksSi[ixSi].done) {
+          tasksSi[ixSi].important = true;
+          saveTasks(tasksSi);
+          renderTasks();
+        }
+        return;
+      }
+      var clearImp = t.closest("[data-roman-task-clear-important]");
+      if (clearImp) {
+        var idCi = clearImp.getAttribute("data-roman-task-clear-important");
+        var tasksCi = loadTasks();
+        var ixCi = findTaskById(tasksCi, idCi);
+        if (ixCi >= 0) {
+          tasksCi[ixCi].important = false;
+          saveTasks(tasksCi);
           renderTasks();
         }
         return;
@@ -17468,7 +17581,7 @@ function initRaffles() {
         return;
       }
       var inviteBody =
-        "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)";
+        "Клуб «Два туза» снова разыгрывает беккинг-билеты на турниры бесплатно. Заходи и участвуй!";
       var inviteBodyWithLink = inviteBody + "\n" + link;
       var shareUrl =
         typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, inviteBody) : "";

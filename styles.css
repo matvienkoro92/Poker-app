@@ -4558,6 +4558,115 @@ html.vpn-proxy-modal-open {
   line-height: 1.35;
   color: #5c4033;
 }
+.roman-task-planner__tabs {
+  display: flex;
+  gap: 0;
+  margin: 0 0 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(44, 24, 16, 0.18);
+  background: rgba(255, 255, 255, 0.35);
+}
+.roman-task-planner-modal .roman-task-planner__tabs {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.35);
+}
+.roman-task-planner__tab {
+  flex: 1 1 50%;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.roman-task-planner-modal .roman-task-planner__tab {
+  color: rgba(226, 232, 240, 0.75);
+}
+.roman-task-planner__tab--active {
+  background: rgba(124, 45, 18, 0.14);
+  color: #7c2d12;
+}
+.roman-task-planner-modal .roman-task-planner__tab--active {
+  background: rgba(251, 191, 36, 0.18);
+  color: #fde68a;
+}
+[data-theme="light"] .roman-task-planner__tab--active {
+  background: rgba(124, 45, 18, 0.12);
+  color: #7c2d12;
+}
+[data-theme="light"] .roman-task-planner-modal .roman-task-planner__tab--active {
+  color: #92400e;
+  background: rgba(251, 191, 36, 0.22);
+}
+.roman-task-planner__add--hidden {
+  display: none !important;
+}
+.roman-task-planner__meta-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.roman-task-planner__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  line-height: 1.3;
+}
+.roman-task-planner__badge--important {
+  background: rgba(217, 119, 6, 0.22);
+  border: 1px solid rgba(217, 119, 6, 0.45);
+  color: #c2410c;
+}
+.roman-task-planner-modal .roman-task-planner__badge--important {
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.45);
+  background: rgba(251, 146, 60, 0.14);
+}
+.roman-task-planner__badge--doing {
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #1d4ed8;
+}
+.roman-task-planner-modal .roman-task-planner__badge--doing {
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.4);
+  background: rgba(59, 130, 246, 0.12);
+}
+.roman-task-planner__item--flag-important:not(.roman-task-planner__item--done) {
+  border-left: 3px solid rgba(217, 119, 6, 0.75);
+  padding-left: 9px;
+}
+.roman-task-planner-modal .roman-task-planner__item--flag-important:not(.roman-task-planner__item--done) {
+  border-left-color: rgba(251, 191, 36, 0.65);
+}
+.roman-task-planner__item--in-progress:not(.roman-task-planner__item--done) {
+  background: rgba(59, 130, 246, 0.06);
+}
+.roman-task-planner-modal .roman-task-planner__item--in-progress:not(.roman-task-planner__item--done) {
+  background: rgba(59, 130, 246, 0.1);
+}
+.roman-task-planner__btn--important {
+  background: rgba(217, 119, 6, 0.14);
+  border-color: rgba(217, 119, 6, 0.45);
+  color: #c2410c;
+}
+.roman-task-planner-modal .roman-task-planner__btn--important {
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.45);
+  background: rgba(251, 146, 60, 0.12);
+}
+[data-theme="light"] .roman-task-planner-modal .roman-task-planner__btn--important {
+  color: #9a3412;
+}
 .roman-task-planner__board {
   display: flex;
   flex-direction: column;
