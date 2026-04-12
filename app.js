@@ -169,16 +169,17 @@ function getWebsiteOriginBaseForLinks() {
 
 /**
  * Базовый URL для ссылок "в это же приложение" (добавляйте ?startapp=…).
- * - В Telegram Mini App — всегда канонический t.me (`POKER_DEFAULT_TELEGRAM_MINI_APP_URL`), не origin страницы.
- * - В браузере / PWA — канонический URL сайта; ?startapp= открывается в той же вкладке / PWA.
+ * - По умолчанию — канонический t.me (`POKER_DEFAULT_TELEGRAM_MINI_APP_URL`), не HTTPS сайта (шаринг и приглашения).
+ * - Только в установленной PWA (standalone) — origin сайта, чтобы ?startapp= открывался в той же сессии PWA.
  */
 function getAppBaseUrlForLinks() {
-  if (isTelegramWebApp()) {
-    return String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "").replace(/\/$/, "");
-  }
-  var web = getWebsiteOriginBaseForLinks();
-  if (web) return web;
-  return String(window.location.origin + window.location.pathname).replace(/\/$/, "");
+  try {
+    if (typeof pokerIsPwaStandaloneForShare === "function" && pokerIsPwaStandaloneForShare()) {
+      var web = getWebsiteOriginBaseForLinks();
+      if (web) return web;
+    }
+  } catch (ePwaBase) {}
+  return String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "").replace(/\/$/, "");
 }
 
 /** Нормализация start_param / ?startapp= (декодирование, префикс startapp=). */
@@ -4844,21 +4845,17 @@ function runGazetteAndTasksInit() {
       return "Устав клуба «Два туза»";
     }
     function getCharterShareLink() {
-      if (isTelegramWebApp() && typeof buildMiniAppStartLink === "function") {
+      if (typeof buildMiniAppStartLink === "function") {
         var tgl = buildMiniAppStartLink("club_charter");
         if (tgl) return tgl;
       }
-      var base = "";
-      try {
-        if (typeof getAppBaseUrlForLinks === "function") base = String(getAppBaseUrlForLinks());
-      } catch (eShare) {}
-      if (!base) {
-        try {
-          var loc = window.location;
-          if (loc) base = String(loc.origin + loc.pathname).replace(/\/$/, "");
-        } catch (eBase) {}
-      }
-      return base ? base + CLUB_CHARTER_HASH : "";
+      var fb = String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "")
+        .trim()
+        .replace(/\/+$/, "");
+      if (!fb) return "";
+      var sep = fb.indexOf("?") >= 0 ? "&" : "?";
+      var needSlash = sep === "?" && /^https?:\/\/[^/?#]+$/i.test(fb);
+      return fb + (needSlash ? "/" : "") + sep + "startapp=" + encodeURIComponent("club_charter");
     }
     function notifyUser(text) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -5177,20 +5174,12 @@ function runGazetteAndTasksInit() {
     }
     function vpnProxyShareAbsoluteUrl() {
       try {
-        if (isTelegramWebApp() && typeof buildMiniAppStartLink === "function") {
+        if (typeof buildMiniAppStartLink === "function") {
           var hTg = vpnProxyCurrentHash();
           return buildMiniAppStartLink(hTg === VPN_PROXY_HASH_PROXY ? "vpn_proxy_proxy" : "vpn_proxy");
         }
-        var base = String(getAppBaseUrlForLinks() || "")
-          .trim()
-          .replace(/\/+$/, "");
-        if (!base) return "";
-        var h = vpnProxyCurrentHash();
-        if (/^https?:\/\/[^/?#]+$/i.test(base)) return base + "/" + h;
-        return base + h;
-      } catch (eU) {
-        return "";
-      }
+      } catch (eU) {}
+      return "";
     }
     function setVpnProxyTab(which) {
       var isVpn = which === "vpn";
@@ -13387,7 +13376,7 @@ function initStreams() {
   }
 
   var directAppUrl =
-    isTelegramWebApp() && typeof buildMiniAppStartLink === "function"
+    typeof buildMiniAppStartLink === "function"
       ? buildMiniAppStartLink("streams")
       : window.location.origin + window.location.pathname + (window.location.search || "") + "#streams";
   if (browserLinkInput) browserLinkInput.value = directAppUrl;
