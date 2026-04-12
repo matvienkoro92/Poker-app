@@ -26639,10 +26639,20 @@ function initChat() {
        * Без fixed — lift по переменным (translate в потоке).
        */
       function updateChatMessagesKeyboardPad() {
-        clearChatMessagesKeyboardPad();
         if (!document.body.classList.contains("chat-keyboard-open")) return;
+        var box0 = getVisibleMessagesEl();
+        if (!box0) return;
+        /* До смены padding: иначе после роста pad расстояние до низа > CHAT_SCROLL_BOTTOM_NEAR_PX и snap «у низа» не сработает. */
+        var nearBeforeLift = false;
+        try {
+          if (!isChatPhysicalKeyboardContext()) {
+            nearBeforeLift = chatMessagesNearBottom(box0, CHAT_SCROLL_BOTTOM_NEAR_PX);
+          }
+        } catch (eNear0) {}
+        clearChatMessagesKeyboardPad();
         var box = getVisibleMessagesEl();
         if (!box) return;
+        if (!document.body.classList.contains("chat-keyboard-open")) return;
         var gap = Math.max(3, Math.round(13 / 3));
         var barEl = null;
         try {
@@ -26661,6 +26671,29 @@ function initChat() {
             if (barFixed) {
               bh = barEl.offsetHeight || 72;
               btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
+              /* TMA/WK: иногда bottom ещё 0 на кадре — берём перекрытие из TG API или visualViewport. */
+              if (btm < 8 && !isChatPhysicalKeyboardContext()) {
+                try {
+                  if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+                    var twPad = window.Telegram && window.Telegram.WebApp;
+                    if (twPad && twPad.viewportStableHeight != null && twPad.viewportHeight != null) {
+                      var tsPad = Number(twPad.viewportStableHeight);
+                      var thPad = Number(twPad.viewportHeight);
+                      if (tsPad > 0 && thPad > 0 && tsPad > thPad + 5) {
+                        var kbdPad = Math.round(tsPad - thPad);
+                        if (kbdPad > 32) btm = kbdPad;
+                      }
+                    }
+                  }
+                  if (btm < 8 && window.visualViewport) {
+                    var ihPad = window.innerHeight || 0;
+                    var vvPad = Number(window.visualViewport.height) || 0;
+                    var otPad = Number(window.visualViewport.offsetTop) || 0;
+                    var covPad = Math.max(0, Math.round(ihPad - otPad - vvPad));
+                    if (covPad > 32) btm = covPad;
+                  }
+                } catch (eBtmFb) {}
+              }
             }
           }
         } catch (eBarPad) {}
@@ -26704,6 +26737,20 @@ function initChat() {
             window.__pokerScheduleSyncChatScrollBottomButtons();
           }
         } catch (eSbKb) {}
+        /* Поднять ленту над композером/клавиатурой (не десктоп): после pad иначе «у низа» ложно ломается и низ остаётся под полем. */
+        if (!isChatPhysicalKeyboardContext() && nearBeforeLift) {
+          var rafLift = window.requestAnimationFrame || function (fn) {
+            setTimeout(fn, 0);
+          };
+          rafLift(function () {
+            rafLift(function () {
+              try {
+                var bx = getVisibleMessagesEl();
+                if (bx) bx.scrollTop = bx.scrollHeight;
+              } catch (eLift) {}
+            });
+          });
+        }
       }
       function scrollDocumentToZero() {
         var se = document.scrollingElement;
