@@ -3336,6 +3336,9 @@ function runGazetteAndTasksInit() {
     /** passive: false — иначе preventDefault на pointermove не гасит скролл во время горизонтального свайпа (iOS / часть WebView). */
     var romanPlannerSwipeDocListenerOpts = { capture: true, passive: false };
     var romanPlannerSwipeDocEndOpts = { capture: true, passive: true };
+    /** Touch: в части WebView (TG / iOS) pointermove для касания не идёт, пока скроллит родитель — ведём жест через touch*. */
+    var romanPlannerSwipeTouchDocMoveOpts = { capture: true, passive: false };
+    var romanPlannerSwipeTouchDocEndOpts = { capture: true, passive: true };
     function romanPlannerApplyOpenForClip(clip) {
       var track = clip.querySelector(".roman-task-planner__swipe-track");
       var front = clip.querySelector(".roman-task-planner__swipe-front");
@@ -3385,16 +3388,24 @@ function runGazetteAndTasksInit() {
     }
     function romanPlannerSwipeRemoveDocListeners() {
       if (!romanPlannerSwipeActive || !romanPlannerSwipeActive._docBound) return;
-      document.removeEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
-      document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
-      document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
-      if (romanPlannerSwipeActive.clip && romanPlannerSwipeActive._lostCapBound) {
-        try {
-          romanPlannerSwipeActive.clip.removeEventListener("lostpointercapture", romanPlannerSwipeLostCap);
-        } catch (eRm) {}
-        romanPlannerSwipeActive._lostCapBound = false;
+      var st = romanPlannerSwipeActive;
+      if (st._touchDocBound) {
+        document.removeEventListener("touchmove", romanPlannerSwipeTouchDocMove, romanPlannerSwipeTouchDocMoveOpts);
+        document.removeEventListener("touchend", romanPlannerSwipeTouchDocEnd, romanPlannerSwipeTouchDocEndOpts);
+        document.removeEventListener("touchcancel", romanPlannerSwipeTouchDocEnd, romanPlannerSwipeTouchDocEndOpts);
+        st._touchDocBound = false;
+      } else {
+        document.removeEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
+        document.removeEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+        document.removeEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
       }
-      romanPlannerSwipeActive._docBound = false;
+      if (st.clip && st._lostCapBound) {
+        try {
+          st.clip.removeEventListener("lostpointercapture", romanPlannerSwipeLostCap);
+        } catch (eRm) {}
+        st._lostCapBound = false;
+      }
+      st._docBound = false;
     }
     function romanPlannerSwipeEnd(doSnap) {
       var st = romanPlannerSwipeActive;
@@ -3415,22 +3426,42 @@ function runGazetteAndTasksInit() {
     }
     function romanPlannerSwipeLostCap(evLost) {
       var st = romanPlannerSwipeActive;
-      if (!st || !st.dragging) return;
-      if (st.pointerId != null && evLost.pointerId !== st.pointerId) return;
+      if (!st || !st.dragging || st.pointerId == null) return;
+      if (evLost.pointerId !== st.pointerId) return;
       st.dragging = false;
       romanPlannerSwipeEnd(true);
     }
-    function romanPlannerSwipeDocMove(ev) {
+    function romanPlannerSwipeFindTouch(ev, id) {
+      var i;
+      for (i = 0; i < ev.touches.length; i++) {
+        if (ev.touches[i].identifier === id) return ev.touches[i];
+      }
+      return null;
+    }
+    function romanPlannerSwipeFindTouchChanged(ev, id) {
+      var i;
+      for (i = 0; i < ev.changedTouches.length; i++) {
+        if (ev.changedTouches[i].identifier === id) return ev.changedTouches[i];
+      }
+      return null;
+    }
+    /**
+     * @param {number} clientX
+     * @param {number} clientY
+     * @param {Event} evPrevent — для preventDefault и setPointerCapture (PointerEvent); у TouchEvent capture не нужен.
+     * @param {boolean} isMouse
+     */
+    function romanPlannerSwipeApplyMove(clientX, clientY, evPrevent, isMouse) {
       var st = romanPlannerSwipeActive;
-      if (!st || !st.dragging || ev.pointerId !== st.pointerId) return;
-      var dx = ev.clientX - st.startX;
-      var dy = ev.clientY - st.startY;
+      if (!st || !st.dragging) return;
+      var dx = clientX - st.startX;
+      var dy = clientY - st.startY;
       var adx = Math.abs(dx);
       var ady = Math.abs(dy);
-      var isMouse = ev.pointerType === "mouse";
       /** Пока палец не вышел из «мёртвой зоны», не трогаем скролл и не двигаем ряд — иначе preventDefault ломает вертикальный скролл списка. */
       var slop = isMouse ? 5 : 10;
-      var tilt = isMouse ? 4 : 5;
+      /** На тачскрине чуть шире допуск по диагонали — иначе вертикальный скролл списка часто «перебивает» свайп. */
+      var tilt = isMouse ? 4 : 6;
       if (!st.swipeAxisLocked) {
         if (Math.max(adx, ady) < slop) return;
         /** Только явная вертикаль уступает скроллу списка; иначе — горизонтальный свайп (диагональ «влево» не обрываем). */
@@ -3441,10 +3472,10 @@ function runGazetteAndTasksInit() {
           return;
         }
         st.swipeAxisLocked = true;
-        if (!st.pointerCaptureSet) {
+        if (!st.pointerCaptureSet && st.pointerId != null && evPrevent && typeof evPrevent.pointerId === "number") {
           st.pointerCaptureSet = true;
           try {
-            st.clip.setPointerCapture(ev.pointerId);
+            st.clip.setPointerCapture(evPrevent.pointerId);
           } catch (eCap) {}
           if (!st._lostCapBound) {
             st._lostCapBound = true;
@@ -3455,9 +3486,22 @@ function runGazetteAndTasksInit() {
         }
       }
       try {
-        ev.preventDefault();
+        evPrevent.preventDefault();
       } catch (ePm) {}
       romanPlannerSwipeSetTx(st.track, st.openPx, st.baseTx + dx);
+    }
+    function romanPlannerSwipeDocMove(ev) {
+      var st = romanPlannerSwipeActive;
+      if (!st || !st.dragging || ev.pointerId !== st.pointerId) return;
+      var isMouse = ev.pointerType === "mouse";
+      romanPlannerSwipeApplyMove(ev.clientX, ev.clientY, ev, isMouse);
+    }
+    function romanPlannerSwipeTouchDocMove(ev) {
+      var st = romanPlannerSwipeActive;
+      if (!st || !st.dragging || st.touchId == null) return;
+      var touch = romanPlannerSwipeFindTouch(ev, st.touchId);
+      if (!touch) return;
+      romanPlannerSwipeApplyMove(touch.clientX, touch.clientY, ev, false);
     }
     function romanPlannerSwipeDocEnd(ev) {
       var st = romanPlannerSwipeActive;
@@ -3465,6 +3509,61 @@ function runGazetteAndTasksInit() {
       if (!st.dragging) return;
       st.dragging = false;
       romanPlannerSwipeEnd(true);
+    }
+    function romanPlannerSwipeTouchDocEnd(ev) {
+      var st = romanPlannerSwipeActive;
+      if (!st || st.touchId == null) return;
+      if (!romanPlannerSwipeFindTouchChanged(ev, st.touchId)) return;
+      if (!st.dragging) return;
+      st.dragging = false;
+      romanPlannerSwipeEnd(true);
+    }
+    function romanPlannerSwipeStartOnClip(clip, clientX, clientY, pointerId, touchId) {
+      romanPlannerCloseAllSwipes(clip);
+      var layout = romanPlannerApplyOpenForClip(clip);
+      if (!layout) return false;
+      var track = layout.track;
+      var openPx = layout.openPx;
+      var useTouch = touchId != null;
+      romanPlannerSwipeActive = {
+        clip: clip,
+        track: track,
+        openPx: openPx,
+        pointerId: pointerId,
+        touchId: touchId,
+        startX: clientX,
+        startY: clientY,
+        baseTx: romanPlannerSwipeGetTx(track),
+        dragging: true,
+        swipeAxisLocked: false,
+        pointerCaptureSet: false,
+        _lostCapBound: false,
+        _docBound: true,
+        _touchDocBound: useTouch,
+      };
+      if (useTouch) {
+        document.addEventListener("touchmove", romanPlannerSwipeTouchDocMove, romanPlannerSwipeTouchDocMoveOpts);
+        document.addEventListener("touchend", romanPlannerSwipeTouchDocEnd, romanPlannerSwipeTouchDocEndOpts);
+        document.addEventListener("touchcancel", romanPlannerSwipeTouchDocEnd, romanPlannerSwipeTouchDocEndOpts);
+      } else {
+        document.addEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
+        document.addEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+        document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+      }
+      return true;
+    }
+    function romanPlannerListTouchStart(ev) {
+      if (!listAll || !boardEl) return;
+      if (ev.touches.length !== 1) return;
+      var touch = ev.touches[0];
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var clip = t.closest(".roman-task-planner__swipe-clip");
+      if (!clip || !listAll.contains(clip)) return;
+      if (t.closest(".roman-task-planner__btn")) return;
+      if (t.closest(".roman-task-planner__edit-ta")) return;
+      if (romanPlannerSwipeActive) return;
+      romanPlannerSwipeStartOnClip(clip, touch.clientX, touch.clientY, null, touch.identifier);
     }
     function romanPlannerListPointerDown(ev) {
       if (!listAll || !boardEl) return;
@@ -3476,38 +3575,18 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (ev.pointerType === "mouse" && ev.button !== 0) return;
       if (romanPlannerSwipeActive) return;
-      if (ev.pointerType !== "touch") {
-        try {
-          ev.preventDefault();
-        } catch (ePd) {}
-      }
-      romanPlannerCloseAllSwipes(clip);
-      var layout = romanPlannerApplyOpenForClip(clip);
-      if (!layout) return;
-      var track = layout.track;
-      var openPx = layout.openPx;
-      romanPlannerSwipeActive = {
-        clip: clip,
-        track: track,
-        openPx: openPx,
-        pointerId: ev.pointerId,
-        startX: ev.clientX,
-        startY: ev.clientY,
-        baseTx: romanPlannerSwipeGetTx(track),
-        dragging: true,
-        swipeAxisLocked: false,
-        pointerCaptureSet: false,
-        _lostCapBound: false,
-        _docBound: true,
-      };
-      document.addEventListener("pointermove", romanPlannerSwipeDocMove, romanPlannerSwipeDocListenerOpts);
-      document.addEventListener("pointerup", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
-      document.addEventListener("pointercancel", romanPlannerSwipeDocEnd, romanPlannerSwipeDocEndOpts);
+      /** Касание уже обработано touchstart (там touchmove с passive:false). */
+      if (ev.pointerType === "touch") return;
+      try {
+        ev.preventDefault();
+      } catch (ePd) {}
+      romanPlannerSwipeStartOnClip(clip, ev.clientX, ev.clientY, ev.pointerId, null);
     }
     function initRomanPlannerSwipeRows() {
       if (!boardEl) return;
       if (listAll && listAll.dataset.romanPlannerSwipeDelegation !== "1") {
         listAll.dataset.romanPlannerSwipeDelegation = "1";
+        listAll.addEventListener("touchstart", romanPlannerListTouchStart, { capture: true, passive: true });
         listAll.addEventListener("pointerdown", romanPlannerListPointerDown);
         listAll.addEventListener(
           "dragstart",
@@ -33293,6 +33372,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
 
 /** Среда 18:00 МСК: бай-ин 0, гарантия 1M — только карточка «Следующий фриролл» на главной (в таблицу расписания не выносим). */
 var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 000 000₽" };
+/** Пн / Вт / Чт 17:00 МСК, X-poker: вход 0, приз 100 000₽. */
+var NEXT_HOME_XPOKER_FREEROLL = { name: "Фриролл X-poker", buyin: "0₽", guarantee: "100 000₽" };
+/** 17:00 МСК = 14:00 UTC; конец регистрации — через 3 ч (как у слота 18:00→21:00 МСК). */
+var XPOKER_FREEROLL_START_UTC_HOUR = 14;
+var XPOKER_FREEROLL_END_REG_UTC_HOUR = 17;
 
 /** Короткое имя дня недели по календарю Москвы для момента utcMs (Date или число). */
 function pokerMskWeekdayShortAt(utcMs) {
@@ -33350,26 +33434,54 @@ function updateTournamentDayBlock() {
     dt.setUTCDate(dt.getUTCDate() + add);
     return { y: dt.getUTCFullYear(), m: dt.getUTCMonth(), d: dt.getUTCDate() };
   }
-  /** Слот фриролла в заданный день недели (МСК), та же логика старта / конца рег, что у турнира дня. */
-  function getNextWeekdayFreerollSlot(now, targetDow, tInfo) {
+  /**
+   * Слот фриролла в заданный день недели (МСК), та же логика старта / конца рег, что у турнира дня.
+   * @param {{ startUtcHour?: number, endRegUtcHour?: number }} [hourOpts] — часы UTC; по умолчанию 18:00 / 21:00 МСК.
+   */
+  function getNextWeekdayFreerollSlot(now, targetDow, tInfo, hourOpts) {
+    hourOpts = hourOpts || {};
+    var startUtcH = hourOpts.startUtcHour != null ? hourOpts.startUtcHour : MSK_START_UTC_HOUR;
+    var endRegUtcH = hourOpts.endRegUtcHour != null ? hourOpts.endRegUtcHour : MSK_END_REG_UTC_HOUR;
     var p = getMskDateParts();
     var mskDow = getMskDayOfWeek();
     var offset = (targetDow - mskDow + 7) % 7;
     var day = addDaysToYmd(p.y, p.m, p.d, offset);
-    var startSlot = new Date(Date.UTC(day.y, day.m, day.d, MSK_START_UTC_HOUR, 0, 0, 0));
-    var endRegSlot = new Date(Date.UTC(day.y, day.m, day.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    var startSlot = new Date(Date.UTC(day.y, day.m, day.d, startUtcH, 0, 0, 0));
+    var endRegSlot = new Date(Date.UTC(day.y, day.m, day.d, endRegUtcH, 0, 0, 0));
     if (now < startSlot) return { t: tInfo, target: startSlot, label: "" };
     if (now < endRegSlot) return { t: tInfo, target: endRegSlot, label: "до конца рег " };
     var nextDay = addDaysToYmd(day.y, day.m, day.d, 7);
-    var nextStart = new Date(Date.UTC(nextDay.y, nextDay.m, nextDay.d, MSK_START_UTC_HOUR, 0, 0, 0));
+    var nextStart = new Date(Date.UTC(nextDay.y, nextDay.m, nextDay.d, startUtcH, 0, 0, 0));
     return { t: tInfo, target: nextStart, label: "" };
   }
-  /** Карточка «Следующий фриролл»: чередование ближайшего среды (1M) и ближайшей субботы (100k из турнира дня). */
+  /** Карточка «Следующий фриролл»: ближайший из среды 1M, субботы 100k, пн/вт/чт X-poker 17:00. */
   function getNextFreerollState(now) {
-    var wed = getNextWeekdayFreerollSlot(now, 3, NEXT_HOME_FREEROLL);
-    var sat = getNextWeekdayFreerollSlot(now, 6, TOURNAMENT_OF_DAY_BY_WEEKDAY[6]);
-    if (wed.target.getTime() <= sat.target.getTime()) return wed;
-    return sat;
+    var xpH = { startUtcHour: XPOKER_FREEROLL_START_UTC_HOUR, endRegUtcHour: XPOKER_FREEROLL_END_REG_UTC_HOUR };
+    var slots = [
+      getNextWeekdayFreerollSlot(now, 3, NEXT_HOME_FREEROLL),
+      getNextWeekdayFreerollSlot(now, 6, TOURNAMENT_OF_DAY_BY_WEEKDAY[6]),
+      getNextWeekdayFreerollSlot(now, 1, NEXT_HOME_XPOKER_FREEROLL, xpH),
+      getNextWeekdayFreerollSlot(now, 2, NEXT_HOME_XPOKER_FREEROLL, xpH),
+      getNextWeekdayFreerollSlot(now, 4, NEXT_HOME_XPOKER_FREEROLL, xpH)
+    ];
+    var best = slots[0];
+    var si;
+    for (si = 1; si < slots.length; si++) {
+      if (slots[si].target.getTime() < best.target.getTime()) best = slots[si];
+    }
+    return best;
+  }
+  function formatMskHmForDate(utcDate) {
+    try {
+      return new Intl.DateTimeFormat("ru-RU", {
+        timeZone: "Europe/Moscow",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(utcDate);
+    } catch (eFmt) {
+      return "18:00";
+    }
   }
   function formatTimer() {
     var n = new Date();
@@ -33437,7 +33549,8 @@ function updateTournamentDayBlock() {
       frTime.textContent = frTimerStr;
       var frWeekTime = document.getElementById("freerollHomeWeekTime");
       if (frWeekTime && frState.target) {
-        frWeekTime.textContent = pokerMskWeekdayShortAt(frState.target.getTime()) + ", 18:00 МСК";
+        frWeekTime.textContent =
+          pokerMskWeekdayShortAt(frState.target.getTime()) + ", " + formatMskHmForDate(frState.target) + " МСК";
       }
     }
     var scheduleTrophyImg = document.getElementById("scheduleTournamentDayTrophyImg");
