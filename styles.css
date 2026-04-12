@@ -2736,6 +2736,36 @@ body.pwa-auth-gated #app {
 .logo--link:hover {
   opacity: 0.9;
 }
+button.logo.logo--welcome {
+  font: inherit;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  max-width: 100%;
+}
+button.logo.logo--welcome:hover {
+  opacity: 0.9;
+}
+button.logo.logo--welcome:focus-visible {
+  outline: 2px solid var(--accent, #38bdf8);
+  outline-offset: 2px;
+}
+.club-welcome-modal {
+  z-index: 1001;
+}
+.club-welcome-modal__body p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.club-welcome-modal__body p:last-child {
+  margin-bottom: 0;
+}
 
 .logo__image {
   width: 42px;
@@ -3190,6 +3220,35 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
 
 .welcome-title-row .title--welcome {
   margin: 0;
+}
+.welcome-home-title-shell {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: inherit;
+  border: none;
+  background: none;
+}
+button.welcome-home-title-btn.title {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  max-width: 100%;
+}
+button.welcome-home-title-btn.title:focus-visible {
+  outline: 2px solid var(--accent, #38bdf8);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+button.welcome-home-title-btn.title:hover {
+  opacity: 0.92;
 }
 
 .welcome-title-row__actions-stack {

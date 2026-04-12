@@ -254,6 +254,24 @@ function pokerTryPwaWebShare(payload) {
   });
 }
 
+/** Telegram Mini App: диалог «Поделиться» только с URL (без текста) — deep link в раздел мини‑аппа. */
+function pokerOpenTelegramShareUrlOnly(url) {
+  var u = url != null ? String(url).trim() : "";
+  if (!u) return false;
+  var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (!tg) return false;
+  var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(u) + "&text=";
+  if (typeof tg.openTelegramLink === "function") {
+    tg.openTelegramLink(shareUrl);
+    return true;
+  }
+  if (typeof tg.openLink === "function") {
+    tg.openLink(shareUrl);
+    return true;
+  }
+  return false;
+}
+
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 /** PWA: сессия после OAuth ВКонтакте */
@@ -3377,13 +3395,27 @@ function runGazetteAndTasksInit() {
     }
     function romanPlannerSwipeSnap(track, openPx) {
       var cur = romanPlannerSwipeGetTx(track);
-      var threshold = -openPx * 0.35;
-      if (cur < threshold) {
-        track.classList.add("roman-task-planner__swipe-track--open");
-        romanPlannerSwipeSetTx(track, openPx, -openPx);
+      var frac = 0.35;
+      var wasOpen = track.classList.contains("roman-task-planner__swipe-track--open");
+      if (wasOpen) {
+        /* Уже открыто: закрываем, если увели полосу правее чем (1−frac) пути к 0 — иначе тот же порог, что «влево», ломал свайп вправо. */
+        var closeThreshold = -openPx * (1 - frac);
+        if (cur > closeThreshold) {
+          track.classList.remove("roman-task-planner__swipe-track--open");
+          romanPlannerSwipeSetTx(track, openPx, 0);
+        } else {
+          track.classList.add("roman-task-planner__swipe-track--open");
+          romanPlannerSwipeSetTx(track, openPx, -openPx);
+        }
       } else {
-        track.classList.remove("roman-task-planner__swipe-track--open");
-        romanPlannerSwipeSetTx(track, openPx, 0);
+        var openThreshold = -openPx * frac;
+        if (cur < openThreshold) {
+          track.classList.add("roman-task-planner__swipe-track--open");
+          romanPlannerSwipeSetTx(track, openPx, -openPx);
+        } else {
+          track.classList.remove("roman-task-planner__swipe-track--open");
+          romanPlannerSwipeSetTx(track, openPx, 0);
+        }
       }
     }
     function romanPlannerSwipeRemoveDocListeners() {
@@ -4759,6 +4791,9 @@ function runGazetteAndTasksInit() {
       try {
         if (typeof window.closeVpnProxyModal === "function") window.closeVpnProxyModal();
       } catch (eVpnClose) {}
+      try {
+        if (typeof window.closeClubWelcomeModal === "function") window.closeClubWelcomeModal();
+      } catch (eWelClose) {}
       lockCharterBehindScroll();
       modal.setAttribute("aria-hidden", "false");
       setCharterTab("raffle");
@@ -4884,6 +4919,86 @@ function runGazetteAndTasksInit() {
     setTimeout(function () {
       if (window.location.hash === CLUB_CHARTER_HASH) openCharter({ skipHistory: true });
     }, 0);
+  })();
+
+  (function initClubWelcomeModal() {
+    var modal = document.getElementById("clubWelcomeModal");
+    var openBtn = document.getElementById("headerClubWelcomeBtn");
+    var closeBtn = document.getElementById("clubWelcomeModalClose");
+    var backdrop = document.getElementById("clubWelcomeModalBackdrop");
+    var paper = modal && modal.querySelector(".club-welcome-modal__paper");
+    var welcomeLockY = 0;
+    var welcomeBehindLocked = false;
+    function lockWelcomeBehindScroll() {
+      if (welcomeBehindLocked) return;
+      welcomeLockY =
+        window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop) || 0;
+      welcomeBehindLocked = true;
+      try {
+        document.documentElement.classList.add("club-charter-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "hidden";
+          b.style.position = "fixed";
+          b.style.top = "-" + welcomeLockY + "px";
+          b.style.left = "0";
+          b.style.right = "0";
+          b.style.width = "100%";
+        }
+      } catch (eLock) {}
+    }
+    function unlockWelcomeBehindScroll() {
+      if (!welcomeBehindLocked) return;
+      welcomeBehindLocked = false;
+      try {
+        document.documentElement.classList.remove("club-charter-modal-open");
+        var b = document.body;
+        if (b) {
+          b.style.overflow = "";
+          b.style.position = "";
+          b.style.top = "";
+          b.style.left = "";
+          b.style.right = "";
+          b.style.width = "";
+        }
+        window.scrollTo(0, welcomeLockY);
+      } catch (eUnlock) {}
+    }
+    if (!modal) return;
+    function openWelcome() {
+      try {
+        if (typeof window.closeClubCharterModal === "function") window.closeClubCharterModal();
+      } catch (eC) {}
+      try {
+        if (typeof window.closeVpnProxyModal === "function") window.closeVpnProxyModal();
+      } catch (eV) {}
+      lockWelcomeBehindScroll();
+      modal.setAttribute("aria-hidden", "false");
+      if (paper) paper.scrollTop = 0;
+    }
+    function closeWelcome() {
+      modal.setAttribute("aria-hidden", "true");
+      unlockWelcomeBehindScroll();
+    }
+    window.closeClubWelcomeModal = closeWelcome;
+    window.openClubWelcomeModal = openWelcome;
+    function bindWelcomeOpen(el) {
+      if (!el) return;
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (window.__touchWasScroll && window.__touchWasScroll()) return;
+        openWelcome();
+      });
+    }
+    bindWelcomeOpen(openBtn);
+    bindWelcomeOpen(document.getElementById("homeWelcomeTitleBtn"));
+    if (closeBtn) closeBtn.addEventListener("click", closeWelcome);
+    if (backdrop) backdrop.addEventListener("click", closeWelcome);
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (!modal || modal.getAttribute("aria-hidden") !== "false") return;
+      closeWelcome();
+    });
   })();
 
   (function initVpnProxyModal() {
@@ -5069,6 +5184,9 @@ function runGazetteAndTasksInit() {
       try {
         if (typeof window.closeClubCharterModal === "function") window.closeClubCharterModal();
       } catch (eCh) {}
+      try {
+        if (typeof window.closeClubWelcomeModal === "function") window.closeClubWelcomeModal();
+      } catch (eWel) {}
       var tab = opts.tab === "proxy" ? "proxy" : "vpn";
       lockBehind();
       modal.setAttribute("aria-hidden", "false");
@@ -9823,7 +9941,15 @@ function updateChatNavDot() {
 
 function updateRaffleBadge(hasActive) {
   var badge = document.getElementById("raffleActiveBadge");
-  if (badge) badge.classList.toggle("feature__badge--hidden", !hasActive);
+  if (badge) {
+    badge.classList.toggle("feature__badge--hidden", !hasActive);
+    badge.setAttribute("aria-hidden", hasActive ? "false" : "true");
+  }
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("poker_raffle_active_badge", hasActive ? "1" : "0");
+    }
+  } catch (eRaffleHint) {}
   var cache = (typeof window !== "undefined" && window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.activeRaffle) ? window._rafflesCache.data.activeRaffle : null;
   var hasTournamentDayTickets = false;
   if (cache) {
@@ -16604,6 +16730,10 @@ function initRaffles() {
       var totalPrize = getRaffleTotalPrize(raffle);
       var tournamentName = raffleDisplayPrizeText((raffle.title || (groups[0] && groups[0].prize) || "").trim()) || "турнир клуба";
       var link = buildMiniAppStartLink("raffles");
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
+        return;
+      }
       var text =
         "Разыгрываем " +
         (total || 0) +
@@ -17189,6 +17319,10 @@ function initRaffles() {
     rafflesCopyLinkBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+        return;
+      }
       var msg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function () {
@@ -17210,6 +17344,10 @@ function initRaffles() {
     rafflesInviteFriendBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
+      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
+        return;
+      }
       var inviteBody =
         "Привет бро, клуб Два туза снова разыгрывает беккинг-билеты на турниры бесплатно, заходи участвуй)\n" + link;
       var shareUrl = "https://t.me/share/url?url=&text=" + encodeURIComponent(inviteBody);

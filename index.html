@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.504">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.511">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=426" />
+    <link rel="stylesheet" href="./styles.css?v=430" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -437,11 +437,12 @@
           <p class="auth-banner__hint" id="authBannerHint" style="display: none;">В index.html у тега с id="app" задайте атрибут data-telegram-app-url="https://t.me/имя_вашего_бота"</p>
         </div>
         <header class="card__header">
-          <a
-            href="https://t.me/+snBngKmXYa1mYjky"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="logo logo--link"
+          <button
+            type="button"
+            class="logo logo--welcome"
+            id="headerClubWelcomeBtn"
+            title="О клубе «Два туза»"
+            aria-label="О клубе «Два туза»"
           >
             <img
               src="./assets/logo-two-aces.png"
@@ -460,7 +461,7 @@
               </div>
               <div class="logo__subtitle">Poker Club</div>
             </div>
-          </a>
+          </button>
           <div class="header-actions">
             <span class="header-greeting-wrap">
               <span class="header-greeting" id="headerGreeting">Привет!</span>
@@ -511,7 +512,16 @@
             <div class="home-welcome-outline">
             <div class="welcome-title-row">
               <div class="welcome-title-wrap">
-                <h1 class="title title--welcome">Добро пожаловать!</h1>
+                <h1 class="welcome-home-title-shell">
+                  <button
+                    type="button"
+                    class="title title--welcome welcome-home-title-btn"
+                    id="homeWelcomeTitleBtn"
+                    aria-label="О клубе «Два туза»: добро пожаловать"
+                  >
+                    Добро пожаловать!
+                  </button>
+                </h1>
               </div>
               <div class="welcome-title-row__actions-stack">
                 <div class="welcome-title-row__actions">
@@ -594,6 +604,17 @@
                   <span class="home-mini-icon__label">Розыгрыши</span>
                 </a>
               </div>
+              <script>
+                (function () {
+                  try {
+                    var b = document.getElementById("raffleActiveBadge");
+                    if (b && localStorage.getItem("poker_raffle_active_badge") === "1") {
+                      b.classList.remove("feature__badge--hidden");
+                      b.setAttribute("aria-hidden", "false");
+                    }
+                  } catch (e) {}
+                })();
+              </script>
             </div>
             <div class="features features--home-rating-on-border">
               <div class="features-row features-row--full features-row--spring-promo-stack">
@@ -4765,6 +4786,24 @@
           </div>
         </div>
       </div>
+      <div class="club-charter-modal club-welcome-modal" id="clubWelcomeModal" role="dialog" aria-modal="true" aria-labelledby="clubWelcomeModalTitle" aria-hidden="true">
+        <div class="club-charter-modal__backdrop" id="clubWelcomeModalBackdrop"></div>
+        <div class="club-charter-modal__sheet">
+          <button type="button" class="club-charter-modal__close" id="clubWelcomeModalClose" aria-label="Закрыть">×</button>
+          <div class="club-charter-modal__paper club-welcome-modal__paper">
+            <h2 class="club-charter-modal__title" id="clubWelcomeModalTitle">Добро пожаловать</h2>
+            <div class="club-welcome-modal__body">
+              <p>Добро пожаловать в покерный онлайн клуб.</p>
+              <p>
+                🤝 Два туза — это проверенный надежный клуб, которому уже 8 лет (с 2018го). Тысячи игроков общаются, дружат, встречаются, ходят на закрытые турниры в офлайне и встречаются в казино.
+              </p>
+              <p>
+                Ознакомьтесь с залом славы, чатом, рейтингом игроков и расписанием турниров и фриролов. Мы играем круглосуточно, каждый день, уже 8 лет. Станьте частью нашей команды, нашей покерной семьи и удачи в игре!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="club-charter-modal" id="clubCharterModal" role="dialog" aria-modal="true" aria-labelledby="clubCharterModalTitle" aria-hidden="true">
         <div class="club-charter-modal__backdrop" id="clubCharterModalBackdrop"></div>
         <div class="club-charter-modal__sheet">
@@ -6078,7 +6117,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=618"></script>
+    <script defer src="./app.js?v=625"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
