@@ -202,6 +202,40 @@ function pokerNormalizeWebAppStartParam(raw) {
   return s;
 }
 
+/**
+ * Параметр ссылки ?startapp= / startattach: в hash приходит как tgWebAppStartParam (см. launch parameters Mini App).
+ * Раньше читали только initDataUnsafe.start_param — на части клиентов он пустой, открывалась главная.
+ */
+function pokerReadTelegramLaunchStartParam() {
+  try {
+    if (window.Telegram && window.Telegram.WebView && window.Telegram.WebView.initParams) {
+      var lp = window.Telegram.WebView.initParams.tgWebAppStartParam;
+      if (lp != null && String(lp).trim() !== "") return String(lp).trim();
+    }
+  } catch (eLp) {}
+  try {
+    var h = typeof location !== "undefined" && location.hash ? String(location.hash).replace(/^#/, "") : "";
+    if (h) {
+      var sp = new URLSearchParams(h);
+      var vH = sp.get("tgWebAppStartParam");
+      if (vH != null && String(vH).trim() !== "") return String(vH).trim();
+    }
+  } catch (eH) {}
+  var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param != null && String(tg.initDataUnsafe.start_param).trim() !== "") {
+    return String(tg.initDataUnsafe.start_param).trim();
+  }
+  if (tg && tg.initData) {
+    try {
+      var params = new URLSearchParams(tg.initData);
+      var spData = params.get("start_param");
+      if (spData != null && String(spData).trim() !== "") return String(spData).trim();
+    } catch (eId) {}
+  }
+  if (tg && tg.startParam != null && String(tg.startParam).trim() !== "") return String(tg.startParam).trim();
+  return "";
+}
+
 function pokerStartAppQueryFromUrlSearchParams(sp) {
   if (!sp || typeof sp.get !== "function") return "";
   var v = sp.get("startapp");
@@ -4469,14 +4503,7 @@ function runGazetteAndTasksInit() {
     }
   })();
 
-  var tg = window.Telegram && window.Telegram.WebApp;
-  var startParam = tg && (tg.initDataUnsafe && tg.initDataUnsafe.start_param || tg.startParam || "");
-  if (!startParam && typeof tg === "object" && tg.initData) {
-    try {
-      var params = new URLSearchParams(tg.initData);
-      startParam = params.get("start_param") || "";
-    } catch (e) {}
-  }
+  var startParam = pokerReadTelegramLaunchStartParam();
   startParam = pokerNormalizeWebAppStartParam(startParam);
   function parseStreamsRoomIdFromStartParam(val) {
     if (!val) return null;
@@ -4719,14 +4746,7 @@ function runGazetteAndTasksInit() {
   if (isTelegramWebApp()) {
     setTimeout(function () {
       try {
-        var tgR = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (!tgR) return;
-        var rawR = (tgR.initDataUnsafe && tgR.initDataUnsafe.start_param) || tgR.startParam || "";
-        if (!rawR && tgR.initData) {
-          var prR = new URLSearchParams(tgR.initData);
-          rawR = prR.get("start_param") || "";
-        }
-        var normR = pokerNormalizeWebAppStartParam(rawR);
+        var normR = pokerNormalizeWebAppStartParam(pokerReadTelegramLaunchStartParam());
         if (normR !== "raffles") return;
         var vNow = document.body && document.body.getAttribute("data-view");
         if (vNow === "raffles") return;
@@ -31060,13 +31080,17 @@ function getApiBase() {
 /** Код ссылки вида ref_xxxxxxxx (8 hex) из Telegram start_param или ?startapp= / ?ref= */
 function getPokerTrackingRefFromEnv() {
   try {
-    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "";
-    if (!sp && tg && tg.initData) {
-      try {
-        var p = new URLSearchParams(tg.initData);
-        sp = p.get("start_param") || "";
-      } catch (e1) {}
+    var sp =
+      typeof pokerReadTelegramLaunchStartParam === "function" ? pokerReadTelegramLaunchStartParam() : "";
+    if (!sp) {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "";
+      if (!sp && tg && tg.initData) {
+        try {
+          var p = new URLSearchParams(tg.initData);
+          sp = p.get("start_param") || "";
+        } catch (e1) {}
+      }
     }
     if (sp && /^ref_[a-f0-9]{8}$/i.test(String(sp).trim())) return String(sp).trim().toLowerCase();
     if (typeof location !== "undefined" && location.search) {
