@@ -3183,6 +3183,7 @@ function runGazetteAndTasksInit() {
     var listAll = document.getElementById("romanTaskListAll");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
+    var plannerTotalValueEl = document.getElementById("romanTaskPlannerTotalValue");
     if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
     var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
     function readPlannerTabStorage() {
@@ -3706,30 +3707,6 @@ function runGazetteAndTasksInit() {
       var text = t.text != null ? String(t.text) : "";
       var important = !!(t && t.important);
       var doing = !!(t && t.doing);
-      var idxRow = "";
-      if (displayNum != null && displayNum > 0) {
-        idxRow =
-          '<div class="roman-task-planner__idx-row">' +
-          '<span class="roman-task-planner__num">' +
-          displayNum +
-          ".</span>";
-        if (!columnDone && reorderOpts) {
-          idxRow +=
-            '<span class="roman-task-planner__reorder">' +
-            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-up="' +
-            escHtml(id) +
-            '"' +
-            (reorderOpts.canUp ? "" : " disabled") +
-            ' aria-label="Выше в списке">↑</button>' +
-            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-down="' +
-            escHtml(id) +
-            '"' +
-            (reorderOpts.canDown ? "" : " disabled") +
-            ' aria-label="Ниже в списке">↓</button>' +
-            "</span>";
-        }
-        idxRow += "</div>";
-      }
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
@@ -3745,7 +3722,49 @@ function runGazetteAndTasksInit() {
       if (doing && !columnDone) {
         badges += '<span class="roman-task-planner__badge roman-task-planner__badge--doing">Выполняется</span>';
       }
-      var badgesRow = badges ? '<div class="roman-task-planner__meta-badges">' + badges + "</div>" : "";
+      var badgesRow = "";
+      if (badges) badgesRow = '<div class="roman-task-planner__meta-badges">' + badges + "</div>";
+      var swipeHint =
+        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Влево — действия · вправо — закрыть</div>';
+      var reorderBtns =
+        !columnDone && reorderOpts
+          ? '<div class="roman-task-planner__reorder-col">' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-up="' +
+            escHtml(id) +
+            '"' +
+            (reorderOpts.canUp ? "" : " disabled") +
+            ' aria-label="Выше в списке">↑</button>' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-down="' +
+            escHtml(id) +
+            '"' +
+            (reorderOpts.canDown ? "" : " disabled") +
+            ' aria-label="Ниже в списке">↓</button>' +
+            "</div>"
+          : "";
+      var bodyContent = "";
+      if (displayNum != null && displayNum > 0) {
+        bodyContent =
+          '<div class="roman-task-planner__body-row">' +
+          '<span class="roman-task-planner__num-cell" aria-label="Номер в списке">' +
+          displayNum +
+          ".</span>" +
+          '<div class="roman-task-planner__main-col">' +
+          badgesRow +
+          '<div class="roman-task-planner__text">' +
+          escHtml(text) +
+          "</div>" +
+          swipeHint +
+          "</div>" +
+          reorderBtns +
+          "</div>";
+      } else {
+        bodyContent =
+          badgesRow +
+          '<div class="roman-task-planner__text">' +
+          escHtml(text) +
+          "</div>" +
+          swipeHint;
+      }
       var statusBtns = "";
       if (!columnDone) {
         if (doing) {
@@ -3794,12 +3813,7 @@ function runGazetteAndTasksInit() {
         '<div class="roman-task-planner__swipe-track">' +
         '<div class="roman-task-planner__swipe-front">' +
         '<div class="roman-task-planner__body">' +
-        idxRow +
-        badgesRow +
-        '<div class="roman-task-planner__text">' +
-        escHtml(text) +
-        '</div>' +
-        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Влево — действия · вправо — закрыть</div>' +
+        bodyContent +
         "</div></div>" +
         '<div class="roman-task-planner__swipe-actions">' +
         actionsHtml +
@@ -4103,6 +4117,7 @@ function runGazetteAndTasksInit() {
     function renderTasks() {
       setPlannerTabUi();
       var raw = loadTasks();
+      if (plannerTotalValueEl) plannerTotalValueEl.textContent = String(raw.length);
       var activeRaw = raw.filter(function (x) {
         return !x.done;
       });
@@ -6657,11 +6672,20 @@ function pokerApplyAppTopPadding() {
     (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
     !!(window.navigator && window.navigator.standalone);
   if (standalone) {
+    root.classList.remove("app--telegram-miniapp");
     root.classList.remove("app--tg-content-inset");
     root.style.removeProperty("--app-top-from-tg");
     root.style.removeProperty("--app-extra-top-for-ui");
     return;
   }
+  try {
+    var twMini = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (twMini && twMini.initData && String(twMini.initData).trim() !== "") {
+      root.classList.add("app--telegram-miniapp");
+    } else {
+      root.classList.remove("app--telegram-miniapp");
+    }
+  } catch (eTgMini) {}
   var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (
     tw &&
@@ -27292,6 +27316,23 @@ function initChat() {
         }
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
+      /** PWA/WK: pokerPulseChatFixedViewportHeightAfterKeyboard или гонка кадров оставляют height/min-height на html/body — «отступ» снизу и весь экран сжат до смены раздела */
+      function pokerStripForcedViewportShellHeights() {
+        try {
+          var b = document.body;
+          var rootEl = document.documentElement;
+          if (b && b.style) {
+            b.style.removeProperty("height");
+            b.style.removeProperty("min-height");
+            b.style.removeProperty("max-height");
+          }
+          if (rootEl && rootEl.style) {
+            rootEl.style.removeProperty("height");
+            rootEl.style.removeProperty("min-height");
+            rootEl.style.removeProperty("max-height");
+          }
+        } catch (eSh) {}
+      }
       function stripChatInputAreaTransforms() {
         try {
           document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
@@ -27352,6 +27393,7 @@ function initChat() {
           doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
         stripChatInputAreaTransforms();
+        pokerStripForcedViewportShellHeights();
         clearChatMessagesKeyboardPad();
         try {
           var ihBaseUp = window.innerHeight || 0;
@@ -27372,6 +27414,7 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eRm) {}
         stripChatInputAreaTransforms();
+        pokerStripForcedViewportShellHeights();
         try {
           if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
         } catch (eScr0) {}
@@ -27389,6 +27432,16 @@ function initChat() {
           if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
         } catch (ePulKb) {}
         try {
+          [100, 320].forEach(function (ms) {
+            setTimeout(function () {
+              try {
+                if (document.body.classList.contains("chat-keyboard-open")) return;
+              } catch (eKbChk) {}
+              pokerStripForcedViewportShellHeights();
+            }, ms);
+          });
+        } catch (ePulStrip) {}
+        try {
           if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
         } catch (eRe) {}
         try {
@@ -27403,6 +27456,7 @@ function initChat() {
           };
           raf(function () {
             stripChatInputAreaTransforms();
+            pokerStripForcedViewportShellHeights();
             try {
               doc.style.removeProperty("--chat-vv-inset");
               doc.style.removeProperty("--chat-ios-accessory-inset");
@@ -27440,6 +27494,7 @@ function initChat() {
               if (typeof pokerPulseChatFixedViewportHeightAfterKeyboard === "function") pokerPulseChatFixedViewportHeightAfterKeyboard();
             } catch (ePulD) {}
             stripChatInputAreaTransforms();
+            pokerStripForcedViewportShellHeights();
             try {
               if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
             } catch (eTbD) {}
@@ -27852,9 +27907,9 @@ function initChat() {
               var baseEm = Number(window.__pokerChatInnerHBaseline) || 0;
               var curEm = window.innerHeight || 0;
               var winStEm = baseEm > 260 && curEm > 0 ? Math.max(0, Math.round(baseEm - curEm)) : 0;
-              var gapKbEm = Math.round(getChatComposerKeyboardGapPx());
               if (winStEm > 50) {
-                coverTma = Math.min(Math.max(28, winStEm + Math.max(6, gapKbEm)), Math.round(ih * 0.5));
+                /* Зазор до клавиатуры уже в applyChatThreadComposerKeyboardDockFromCover (+ getChatComposerKeyboardGapPx) — не дублировать здесь */
+                coverTma = Math.min(Math.max(28, winStEm), Math.round(ih * 0.5));
                 haveTma = true;
               } else if (vvMraw >= 32) {
                 coverTma = Math.min(vvMraw, Math.round(ih * 0.5));
@@ -28115,7 +28170,8 @@ function initChat() {
           var vvh = Number(vv.height) || 0;
           var loss = Math.max(0, Math.round(ih - vvh));
           var ratio = ih > 0 ? vvh / ih : 1;
-          return loss < 64 && ratio > 0.88;
+          /* iOS PWA: пороги жёстче ломали blur-cleanup — finalize откладывался, залипали fixed-композер и высота shell */
+          return loss < 120 && ratio > 0.78;
         } catch (ePwaBf) {
           return false;
         }
@@ -28141,9 +28197,14 @@ function initChat() {
             var vvh = Number(vv.height) || 0;
             var offsetTop = Number(vv.offsetTop) || 0;
             var heightLoss = Math.max(0, Math.round(ih - vvh));
-            if (heightLoss > 72) return false;
+            var pwaShell =
+              (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
+              (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
+            if (!pwaShell && heightLoss > 72) return false;
+            if (pwaShell && heightLoss > 118) return false;
             var ratio = ih > 0 ? vvh / ih : 1;
-            if (ratio > 0 && ratio < 0.84) return false;
+            if (!pwaShell && ratio > 0 && ratio < 0.84) return false;
+            if (pwaShell && ratio > 0 && ratio < 0.76) return false;
             if (offsetTop > 16 && heightLoss > 20) return false;
             /* TG: иногда innerHeight совпадает с vv.height при открытой клавиатуре — сверяем с базовой высотой окна. */
             var baseLineVv = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -28156,7 +28217,7 @@ function initChat() {
                 (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
                 (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
               var vvRatio = ih > 0 && vvh > 0 ? vvh / ih : 0;
-              if (!(pwaLike && vvRatio > 0.87)) return false;
+              if (!(pwaLike && vvRatio > 0.84)) return false;
             }
             return true;
           }
@@ -28254,6 +28315,15 @@ function initChat() {
             }
           } catch (eKbFs) {}
         }, 3200);
+        /* PWA: повтор без shouldDefer — иначе при «залипшем» activeElement finalize не вызывался до смены экрана */
+        [550, 1100].forEach(function (ms) {
+          setTimeout(function () {
+            try {
+              if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
+              finalizeChatKeyboardDismiss();
+            } catch (ePwaFin) {}
+          }, ms);
+        });
       }
       if (chatComposerEl) {
         chatComposerEl.addEventListener(

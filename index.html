@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.545">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.549">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -5550,6 +5550,10 @@
             ×
           </button>
           <section class="roman-task-planner roman-task-planner--in-modal" aria-label="Планер задач">
+            <p class="roman-task-planner__total" id="romanTaskPlannerTotal" aria-live="polite">
+              <span class="roman-task-planner__total-label">Всего задач</span>
+              <span class="roman-task-planner__total-value" id="romanTaskPlannerTotalValue">0</span>
+            </p>
             <div class="roman-task-planner__head">
               <h2 class="roman-task-planner-modal__title" id="romanTaskPlannerModalTitle">Планер задач</h2>
               <p class="roman-task-planner__hint" id="romanTaskPlannerHint">Планер задач редакторов: общий список или личный — подсказка обновится после входа.</p>
@@ -6153,7 +6157,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=659"></script>
+    <script defer src="./app.js?v=663"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
