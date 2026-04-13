@@ -557,7 +557,8 @@ function pokerApiAuthQuery(lead) {
   return lead + "initData=";
 }
 
-/** URL для <img> в чате: приватный Vercel Blob не открывается в браузере — грузим через /api/chat-image. */
+/** URL для <img> в чате. Вложения кладутся в Blob с access:public (lib/chat-image-blob.js) — прямой HTTPS открывается в WebView.
+ * Прокси /api/chat-image?…&initData=… раздувал query (лимит длины в Mini App) и давал битую картинку после смены с data: на URL. */
 function pokerChatDisplayImageSrc(raw) {
   if (raw == null || raw === "") return raw;
   var s = String(raw).trim();
@@ -570,10 +571,7 @@ function pokerChatDisplayImageSrc(raw) {
     return s;
   }
   if (!/blob\.vercel-storage\.com$/i.test(hostname)) return s;
-  var apb = typeof getApiBase === "function" ? getApiBase() : "";
-  if (!apb) return s;
-  var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-  return apb + "/api/chat-image" + q + "src=" + encodeURIComponent(s);
+  return s;
 }
 
 function pokerApiAuthJsonBody(extra) {
@@ -19056,8 +19054,11 @@ function pokerChatRunAfterPaint(fn) {
 var personalMessagesCache = {};
 var personalMessagesCacheMeta = {};
 var personalPrefetchInFlight = {};
-var PERSONAL_PREFETCH_TTL_MS = 45000;
-var PERSONAL_PREFETCH_BATCH = 8;
+var PERSONAL_PREFETCH_TTL_MS = 90000;
+var PERSONAL_PREFETCH_BATCH = 4;
+/** Не запускать волну prefetch диалогов чаще (mode=contacts дергается часто — иначе N× полный GET «съедает» bandwidth). */
+var PERSONAL_PREFETCH_COOLDOWN_MS = 90000;
+var personalPrefetchLastBulkAt = 0;
 var chatWithUserName = null;
 var chatWithPeerAvatarUrl = null;
 /* "dialogs" = список чатов; иначе loadGeneral() перерисовывал скрытый общий чат и сбрасывал scroll */
@@ -24464,6 +24465,9 @@ function initChat() {
 
   function prefetchTopPersonalDialogs(contacts) {
     if (!Array.isArray(contacts) || contacts.length === 0) return;
+    var nowPf = Date.now();
+    if (personalPrefetchLastBulkAt && nowPf - personalPrefetchLastBulkAt < PERSONAL_PREFETCH_COOLDOWN_MS) return;
+    personalPrefetchLastBulkAt = nowPf;
     var picked = [];
     for (var i = 0; i < contacts.length && picked.length < PERSONAL_PREFETCH_BATCH; i++) {
       var id = contacts[i] && contacts[i].id ? String(contacts[i].id) : "";
@@ -31578,13 +31582,13 @@ function initChat() {
     var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
 
     if (hidden) {
-      if (t % 10 !== 0) return;
+      if (t % 20 !== 0) return;
       if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
       return;
     }
 
     if (!chatViewOn) {
-      if (t % 2 !== 0) return;
+      if (t % 4 !== 0) return;
       if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
       return;
     }
@@ -31599,7 +31603,7 @@ function initChat() {
     }
     if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
-      if (t % 2 === 0) loadContacts();
+      if (t % 4 === 0) loadContacts();
     } else if (
       chatActiveTab === "admins" &&
       adminsView &&
