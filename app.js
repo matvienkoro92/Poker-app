@@ -27178,10 +27178,22 @@ function initChat() {
             if (barFixed) {
               bh = barEl.offsetHeight || 72;
               btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
-              /* TMA/WK: иногда bottom ещё 0 на кадре — берём перекрытие из TG API или visualViewport. */
-              if (btm < 8 && !isChatPhysicalKeyboardContext()) {
+              /*
+               * TMA + fixed-композер: padding ленты совпадает с bottom из applyChatThreadComposerKeyboardDockFromCover (__pokerChatThreadDockBottomCssPx).
+               * Иначе getComputedStyle даёт 0 на кадре или подмешивается сырой vv — лента и строка дёргаются разными величинами.
+               */
+              var dockPxStore = Number(window.__pokerChatThreadDockBottomCssPx);
+              var isTmaPad = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+              if (
+                isTmaPad &&
+                barEl.classList.contains("chat-input-area--vv-dock") &&
+                dockPxStore >= 8
+              ) {
+                btm = dockPxStore;
+              } else if (btm < 8 && !isChatPhysicalKeyboardContext()) {
+                /* TMA/WK: иногда bottom ещё 0 на кадре — TG API; сырой vv не подмешиваем в Mini App (глючные кадры vvh). */
                 try {
-                  if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+                  if (isTmaPad) {
                     var twPad = window.Telegram && window.Telegram.WebApp;
                     if (twPad && twPad.viewportStableHeight != null && twPad.viewportHeight != null) {
                       var tsPad = Number(twPad.viewportStableHeight);
@@ -27191,13 +27203,25 @@ function initChat() {
                         if (kbdPad > 32) btm = kbdPad;
                       }
                     }
-                  }
-                  if (btm < 8 && window.visualViewport) {
-                    var ihPad = window.innerHeight || 0;
-                    var vvPad = Number(window.visualViewport.height) || 0;
-                    var otPad = Number(window.visualViewport.offsetTop) || 0;
-                    var covPad = Math.max(0, Math.round(ihPad - otPad - vvPad));
-                    if (covPad > 32) btm = covPad;
+                  } else {
+                    if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+                      var twPad2 = window.Telegram && window.Telegram.WebApp;
+                      if (twPad2 && twPad2.viewportStableHeight != null && twPad2.viewportHeight != null) {
+                        var tsP2 = Number(twPad2.viewportStableHeight);
+                        var thP2 = Number(twPad2.viewportHeight);
+                        if (tsP2 > 0 && thP2 > 0 && tsP2 > thP2 + 5) {
+                          var kbdP2 = Math.round(tsP2 - thP2);
+                          if (kbdP2 > 32) btm = kbdP2;
+                        }
+                      }
+                    }
+                    if (btm < 8 && window.visualViewport) {
+                      var ihPad = window.innerHeight || 0;
+                      var vvPad = Number(window.visualViewport.height) || 0;
+                      var otPad = Number(window.visualViewport.offsetTop) || 0;
+                      var covPad = Math.max(0, Math.round(ihPad - otPad - vvPad));
+                      if (covPad > 32) btm = covPad;
+                    }
                   }
                 } catch (eBtmFb) {}
               }
@@ -27450,6 +27474,8 @@ function initChat() {
           window.__pokerChatDockCoverStable = null;
           window.__pokerChatTgKeyboardCoverLast = null;
           window.__pokerChatTgDockCandSmoothed = null;
+          window.__pokerChatThreadDockBottomCssPx = null;
+          window.__pokerChatTmaDockBottomEma = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -27751,6 +27777,27 @@ function initChat() {
             window.__pokerChatLastAppliedDockBottom = bottomPx;
           }
         } catch (eStabB) {}
+        try {
+          var isTgEma = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+          var iosEma = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
+          if (isTgEma && iosEma) {
+            var emaP = Number(window.__pokerChatTmaDockBottomEma);
+            if (!(emaP > 0) || isNaN(emaP)) {
+              window.__pokerChatTmaDockBottomEma = bottomPx;
+            } else {
+              var aE = 0.5;
+              var emaN = emaP * (1 - aE) + bottomPx * aE;
+              if (bottomPx - emaP > 52) emaN = bottomPx;
+              if (emaP - bottomPx > 68) emaN = bottomPx;
+              window.__pokerChatTmaDockBottomEma = emaN;
+              bottomPx = Math.round(emaN);
+            }
+            window.__pokerChatLastAppliedDockBottom = bottomPx;
+          }
+        } catch (eEmaDock) {}
+        try {
+          window.__pokerChatThreadDockBottomCssPx = bottomPx;
+        } catch (eDockPx) {}
         stripChatInputAreaTransforms();
         var target = null;
         if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
@@ -28014,18 +28061,25 @@ function initChat() {
             var vvMUse = tmaSanitizeVvKeyboardGapPx(vvMraw, ih, tgDiffRaw, winLossTma);
             var coverTma = 0;
             var haveTma = false;
-            if (tgDiffRaw >= 28) {
+            /* Один стабильный приоритет: TG → падение innerHeight → last → vv (последний резерв). */
+            if (tgDiffRaw >= 26) {
               coverTma = tgDiffRaw;
-              if (vvMUse >= 30 && coverTma > vvMUse + 24) {
-                coverTma = Math.max(vvMUse, Math.round(tgDiffRaw * 0.72));
+              if (winLossTma > 44 && coverTma > winLossTma + 40) {
+                coverTma = Math.max(winLossTma + 4, Math.round(tgDiffRaw * 0.84));
               }
+              if (vvMUse >= 28 && coverTma > vvMUse + 28) {
+                coverTma = Math.max(vvMUse + 4, Math.round(tgDiffRaw * 0.78));
+              }
+              haveTma = true;
+            } else if (winLossTma >= 52) {
+              coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
               haveTma = true;
             } else {
               var lastK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
               if (document.body.classList.contains("chat-keyboard-open") && lastK >= 28) {
                 coverTma = lastK;
                 haveTma = true;
-              } else if (vvMUse >= 28 && vvMUse <= Math.round(ih * 0.4)) {
+              } else if (vvMUse >= 30 && vvMUse <= Math.round(ih * 0.38)) {
                 coverTma = vvMUse;
                 haveTma = true;
               }
@@ -28033,21 +28087,8 @@ function initChat() {
             if (haveTma && vvMUse >= 36 && coverTma > vvMUse + 20) {
               coverTma = Math.min(coverTma, vvMUse + 16);
             }
-            if (haveTma && tgDiffRaw >= 28 && vvMUse > 48 && coverTma > vvMUse + 18 && vvMUse >= 72) {
+            if (haveTma && tgDiffRaw >= 26 && vvMUse > 48 && coverTma > vvMUse + 18 && vvMUse >= 72) {
               coverTma = vvMUse;
-            }
-            if (!haveTma) {
-              var baseEm = Number(window.__pokerChatInnerHBaseline) || 0;
-              var curEm = window.innerHeight || 0;
-              var winStEm = baseEm > 260 && curEm > 0 ? Math.max(0, Math.round(baseEm - curEm)) : 0;
-              if (winStEm > 50) {
-                /* Зазор до клавиатуры уже в applyChatThreadComposerKeyboardDockFromCover (+ getChatComposerKeyboardGapPx) — не дублировать здесь */
-                coverTma = Math.min(Math.max(28, winStEm), Math.round(ih * 0.38));
-                haveTma = true;
-              } else if (vvMUse >= 32) {
-                coverTma = Math.min(vvMUse, Math.round(ih * 0.38));
-                haveTma = coverTma >= 28;
-              }
             }
             if (haveTma) {
               var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
@@ -28200,6 +28241,8 @@ function initChat() {
           window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatTgKeyboardCoverLast = null;
           window.__pokerChatTgDockCandSmoothed = null;
+          window.__pokerChatThreadDockBottomCssPx = null;
+          window.__pokerChatTmaDockBottomEma = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {
