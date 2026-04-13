@@ -3011,7 +3011,6 @@ body[data-view="cashout"] {
 .view--active[data-view="chat"] .chat-input-area {
   padding-left: var(--chat-side-pad, 3px);
   padding-right: var(--chat-side-pad, 3px);
-  padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
 }
 /* Лента чата: таббар скрыт — 65px не нужен (иначе пустая полоса над футером TG / домашней зоной).
    Без :has(): надёжнее в WKWebView / Telegram iOS. */
@@ -10087,7 +10086,8 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   flex-shrink: 0;
   position: relative;
   z-index: 5;
-  padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  /* Таббар в треде скрыт — не дублировать ~65px «под меню» (PWA/TG после клавиатуры). Safe-area — достаточно. */
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
@@ -10575,7 +10575,7 @@ button.chat-conv-group-add-btn[hidden] {
   flex-shrink: 0;
   position: relative;
   z-index: 5;
-  padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }

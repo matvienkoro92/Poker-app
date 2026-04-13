@@ -27635,10 +27635,30 @@ function initChat() {
         var bottomPx = coverNum + gap;
         try {
           var ihLim = window.innerHeight || 0;
-          var tgSkipBottomCap = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-          if (ihLim > 280 && !tgSkipBottomCap) {
+          var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+          var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
+          /*
+           * Telegram iOS: WebApp.viewportHeight уже отражает область над клавиатурой, а stable−height даёт «потерю» как в полноэкранном layout.
+           * Двойной учёт → огромный bottom и полоса ввода в середине экрана (как в PWA опираемся на visualViewport).
+           */
+          if (isTgDock && iosDock && ihLim > 200 && window.visualViewport) {
+            var vvH = Number(window.visualViewport.height) || 0;
+            var vvOt = Number(window.visualViewport.offsetTop) || 0;
+            var vvOverlap = Math.max(0, Math.round(ihLim - vvOt - vvH));
+            /* Потолок ниже, чем у PWA: в TMA нельзя отождествлять stable−viewport с CSS bottom — иначе сотни px «воздуха». */
+            var hardMaxTg = Math.min(248, Math.max(88, Math.round(ihLim * 0.31)));
+            if (vvOverlap >= 24) {
+              bottomPx = Math.min(bottomPx, vvOverlap + gap + 10);
+            } else if (vvOverlap < 22 && coverNum > 72) {
+              bottomPx = Math.min(bottomPx, Math.round(coverNum * 0.52 + gap), hardMaxTg);
+            }
+            bottomPx = Math.min(bottomPx, hardMaxTg);
+          } else if (ihLim > 280 && !isTgDock) {
             var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
             if (bottomPx > bottomMax) bottomPx = bottomMax;
+          } else if (ihLim > 200 && isTgDock && !iosDock) {
+            var bottomMaxAnd = Math.min(380, Math.max(160, Math.round(ihLim * 0.44)));
+            if (bottomPx > bottomMaxAnd) bottomPx = bottomMaxAnd;
           }
         } catch (eBm) {}
         try {
@@ -27912,6 +27932,9 @@ function initChat() {
             var haveTma = false;
             if (tgDiffRaw >= 28) {
               coverTma = tgDiffRaw;
+              if (vvMraw >= 30 && coverTma > vvMraw + 24) {
+                coverTma = Math.max(vvMraw, Math.round(tgDiffRaw * 0.72));
+              }
               haveTma = true;
             } else {
               var lastK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
@@ -27922,6 +27945,9 @@ function initChat() {
                 coverTma = vvM;
                 haveTma = true;
               }
+            }
+            if (haveTma && vvMraw >= 36 && coverTma > vvMraw + 20) {
+              coverTma = Math.min(coverTma, vvMraw + 16);
             }
             if (haveTma && tgDiffRaw >= 28 && vvMraw > 48 && coverTma > vvMraw + 18 && vvMraw >= 72) {
               coverTma = vvMraw;
@@ -27944,7 +27970,7 @@ function initChat() {
               if (prevK >= 28 && coverTma > prevK + 45) {
                 coverTma = Math.min(coverTma, prevK + 32);
               }
-              var capTma = Math.min(520, Math.max(120, Math.round(ih * 0.56)));
+              var capTma = Math.min(268, Math.max(96, Math.round(ih * 0.34)));
               if (coverTma > capTma) coverTma = capTma;
               window.__pokerChatTgKeyboardCoverLast = coverTma;
               doc.style.setProperty("--chat-vv-inset", "0px");
