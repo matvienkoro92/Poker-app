@@ -7065,6 +7065,48 @@ function pokerPulseChatFixedViewportHeightAfterKeyboard() {
         } catch (eR) {}
       });
     });
+    /*
+     * Первый кадр после blur: innerHeight ещё «клавиатурный» — повторяем короткий пульс (тот же touchLike, что выше).
+     */
+    if (touchLike) {
+      [140, 420].forEach(function (ms) {
+        setTimeout(function () {
+          try {
+            if (!document.body || document.body.getAttribute("data-view") !== "chat") return;
+            if (document.body.classList.contains("chat-keyboard-open")) return;
+            var gvP = document.getElementById("chatGeneralView");
+            var cvP = document.getElementById("chatConvView");
+            var threadP =
+              !!(gvP && !gvP.classList.contains("chat-general-view--hidden")) ||
+              !!(cvP && !cvP.classList.contains("chat-conv-view--hidden"));
+            if (!threadP) return;
+            var ihP = window.innerHeight || 0;
+            if (ihP < 240) return;
+            var bP = document.body;
+            var hP = document.documentElement;
+            bP.style.setProperty("height", ihP + "px");
+            bP.style.setProperty("min-height", ihP + "px");
+            bP.style.setProperty("max-height", ihP + "px");
+            hP.style.setProperty("height", ihP + "px");
+            hP.style.setProperty("min-height", ihP + "px");
+            hP.style.setProperty("max-height", ihP + "px");
+            var rafP = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 16);
+            };
+            rafP(function () {
+              try {
+                bP.style.removeProperty("height");
+                bP.style.removeProperty("min-height");
+                bP.style.removeProperty("max-height");
+                hP.style.removeProperty("height");
+                hP.style.removeProperty("min-height");
+                hP.style.removeProperty("max-height");
+              } catch (eRp) {}
+            });
+          } catch (ePl2) {}
+        }, ms);
+      });
+    }
   } catch (ePulse) {}
 }
 
@@ -27657,21 +27699,24 @@ function initChat() {
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           /*
-           * Telegram iOS: WebApp.viewportHeight уже отражает область над клавиатурой, а stable−height даёт «потерю» как в полноэкранном layout.
-           * Двойной учёт → огромный bottom и полоса ввода в середине экрана (как в PWA опираемся на visualViewport).
+           * Telegram iOS: одна оценка перекрытия снизу — max(visualViewport, stableHeight−viewportHeight, cover из sync).
+           * Раньше ветка cover*0.52 при «тихом» vv занижала bottom; двойной min с vv давал полосу в середине экрана.
            */
           if (isTgDock && iosDock && ihLim > 200 && window.visualViewport) {
             var vvH = Number(window.visualViewport.height) || 0;
             var vvOt = Number(window.visualViewport.offsetTop) || 0;
             var vvOverlap = Math.max(0, Math.round(ihLim - vvOt - vvH));
-            /* Потолок ниже, чем у PWA: в TMA нельзя отождествлять stable−viewport с CSS bottom — иначе сотни px «воздуха». */
-            var hardMaxTg = Math.min(248, Math.max(88, Math.round(ihLim * 0.31)));
-            if (vvOverlap >= 24) {
-              bottomPx = Math.min(bottomPx, vvOverlap + gap + 10);
-            } else if (vvOverlap < 22 && coverNum > 72) {
-              bottomPx = Math.min(bottomPx, Math.round(coverNum * 0.52 + gap), hardMaxTg);
+            var twDock = window.Telegram && window.Telegram.WebApp;
+            var tgKbDock = 0;
+            if (twDock && twDock.viewportStableHeight != null && twDock.viewportHeight != null) {
+              var tsD = Number(twDock.viewportStableHeight);
+              var thD = Number(twDock.viewportHeight);
+              if (tsD > 0 && thD > 0 && tsD > thD + 6) tgKbDock = Math.round(tsD - thD);
             }
-            bottomPx = Math.min(bottomPx, hardMaxTg);
+            var hardMaxTg = Math.min(300, Math.max(92, Math.round(ihLim * 0.36)));
+            var mergedDock = Math.max(vvOverlap, tgKbDock, coverNum);
+            bottomPx = Math.min(hardMaxTg, mergedDock + gap);
+            if (bottomPx < gap + 24 && mergedDock > 18) bottomPx = Math.min(hardMaxTg, mergedDock + gap);
           } else if (ihLim > 280 && !isTgDock) {
             var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
             if (bottomPx > bottomMax) bottomPx = bottomMax;
