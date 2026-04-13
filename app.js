@@ -557,8 +557,7 @@ function pokerApiAuthQuery(lead) {
   return lead + "initData=";
 }
 
-/** URL для <img> в чате. Вложения кладутся в Blob с access:public (lib/chat-image-blob.js) — прямой HTTPS открывается в WebView.
- * Прокси /api/chat-image?…&initData=… раздувал query (лимит длины в Mini App) и давал битую картинку после смены с data: на URL. */
+/** URL для <img> в чате. Vercel Blob: в Mini App прямой HTTPS (прокси с initData раздувает URL); в PWA standalone прямой URL часто не грузится — короткий pwaSession/pwaVkSession в /api/chat-image. */
 function pokerChatDisplayImageSrc(raw) {
   if (raw == null || raw === "") return raw;
   var s = String(raw).trim();
@@ -571,6 +570,20 @@ function pokerChatDisplayImageSrc(raw) {
     return s;
   }
   if (!/blob\.vercel-storage\.com$/i.test(hostname)) return s;
+  try {
+    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
+      var pwaTok =
+        (typeof pokerReadPwaTgSessionToken === "function" && pokerReadPwaTgSessionToken()) ||
+        (typeof pokerReadPwaVkSessionToken === "function" && pokerReadPwaVkSessionToken());
+      if (pwaTok) {
+        var apb = typeof getApiBase === "function" ? getApiBase() : "";
+        if (apb) {
+          var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+          return apb + "/api/chat-image" + q + "src=" + encodeURIComponent(s);
+        }
+      }
+    }
+  } catch (ePwaImg) {}
   return s;
 }
 
@@ -31570,8 +31583,8 @@ function initChat() {
     }
   })();
 
-  /** Интервал опроса на экране «Чат» (мс). В фоне вкладки и вне чата — реже, меньше трафик Redis/API. */
-  var CHAT_POLL_MS = 3500;
+  /** Интервал опроса (мс). После облегчения mode=contacts можно чаще тикать: notModified даёт короткий ответ. */
+  var CHAT_POLL_MS = 2500;
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     var hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
@@ -31582,13 +31595,13 @@ function initChat() {
     var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
 
     if (hidden) {
-      if (t % 20 !== 0) return;
+      if (t % 16 !== 0) return;
       if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
       return;
     }
 
     if (!chatViewOn) {
-      if (t % 4 !== 0) return;
+      if (t % 3 !== 0) return;
       if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
       return;
     }
@@ -31603,7 +31616,7 @@ function initChat() {
     }
     if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
-      if (t % 4 === 0) loadContacts();
+      if (t % 2 === 0) loadContacts();
     } else if (
       chatActiveTab === "admins" &&
       adminsView &&
