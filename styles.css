@@ -4572,10 +4572,11 @@ html.vpn-proxy-modal-open {
   background: rgba(15, 23, 42, 0.35);
 }
 .roman-task-planner__tab {
-  flex: 1 1 50%;
+  flex: 1 1 0;
+  min-width: 0;
   margin: 0;
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 10px 8px;
+  font-size: 12px;
   font-weight: 700;
   border: none;
   background: transparent;

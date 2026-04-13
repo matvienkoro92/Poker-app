@@ -3104,9 +3104,10 @@ function runGazetteAndTasksInit() {
     function readPlannerTabStorage() {
       try {
         var s = sessionStorage.getItem(PLANNER_TAB_STORAGE_KEY);
-        if (s === "done" || s === "tasks") return s;
+        if (s === "important" || s === "normal" || s === "done") return s;
+        if (s === "tasks") return "important";
       } catch (eRd) {}
-      return "tasks";
+      return "important";
     }
     var plannerTab = readPlannerTabStorage();
     function writePlannerTabStorage(v) {
@@ -3114,27 +3115,36 @@ function runGazetteAndTasksInit() {
         sessionStorage.setItem(PLANNER_TAB_STORAGE_KEY, v);
       } catch (eWr) {}
     }
-    var tabTasksBtn = document.getElementById("romanPlannerTabTasks");
+    var tabImportantBtn = document.getElementById("romanPlannerTabImportant");
+    var tabNormalBtn = document.getElementById("romanPlannerTabNormal");
     var tabDoneBtn = document.getElementById("romanPlannerTabDone");
     function setPlannerTabUi() {
-      var isTasks = plannerTab === "tasks";
-      if (tabTasksBtn) {
-        tabTasksBtn.classList.toggle("roman-task-planner__tab--active", isTasks);
-        tabTasksBtn.setAttribute("aria-selected", isTasks ? "true" : "false");
+      var isDone = plannerTab === "done";
+      var showAddForm = !isDone;
+      if (tabImportantBtn) {
+        tabImportantBtn.classList.toggle("roman-task-planner__tab--active", plannerTab === "important");
+        tabImportantBtn.setAttribute("aria-selected", plannerTab === "important" ? "true" : "false");
+      }
+      if (tabNormalBtn) {
+        tabNormalBtn.classList.toggle("roman-task-planner__tab--active", plannerTab === "normal");
+        tabNormalBtn.setAttribute("aria-selected", plannerTab === "normal" ? "true" : "false");
       }
       if (tabDoneBtn) {
-        tabDoneBtn.classList.toggle("roman-task-planner__tab--active", !isTasks);
-        tabDoneBtn.setAttribute("aria-selected", isTasks ? "false" : "true");
+        tabDoneBtn.classList.toggle("roman-task-planner__tab--active", isDone);
+        tabDoneBtn.setAttribute("aria-selected", isDone ? "true" : "false");
       }
-      if (form) form.classList.toggle("roman-task-planner__add--hidden", !isTasks);
+      if (form) form.classList.toggle("roman-task-planner__add--hidden", !showAddForm);
     }
     var PLANNER_COMPOSER_MIN_PX = 52;
     var PLANNER_COMPOSER_MAX_PX = 280;
     function resizePlannerComposer() {
       if (!input || input.tagName !== "TEXTAREA") return;
+      /* TG/iOS WebView: height:auto + scrollHeight часто даёт лишнюю «вторую строку»; схлопываем перед замером. */
       input.style.overflowY = "hidden";
-      input.style.height = "auto";
+      input.style.minHeight = "0";
+      input.style.height = "0";
       var h = input.scrollHeight;
+      input.style.minHeight = "";
       if (h > PLANNER_COMPOSER_MAX_PX) {
         input.style.height = PLANNER_COMPOSER_MAX_PX + "px";
         input.style.overflowY = "auto";
@@ -3890,15 +3900,31 @@ function runGazetteAndTasksInit() {
       var doneCol = sortTasksByCreatedAsc(raw.filter(function (x) {
         return !!x.done;
       }));
+      var importantActive = active.filter(function (x) {
+        return !!x.important;
+      });
+      var normalActive = active.filter(function (x) {
+        return !x.important;
+      });
       var parts = [];
-      if (plannerTab === "tasks") {
-        if (active.length) {
-          for (var ai = 0; ai < active.length; ai++) {
-            parts.push(renderTaskRow(active[ai], false));
+      if (plannerTab === "important") {
+        if (importantActive.length) {
+          for (var ai = 0; ai < importantActive.length; ai++) {
+            parts.push(renderTaskRow(importantActive[ai], false));
           }
         } else {
           parts.push(
-            '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет задач</li>'
+            '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет важных задач</li>'
+          );
+        }
+      } else if (plannerTab === "normal") {
+        if (normalActive.length) {
+          for (var ni = 0; ni < normalActive.length; ni++) {
+            parts.push(renderTaskRow(normalActive[ni], false));
+          }
+        } else {
+          parts.push(
+            '<li class="roman-task-planner__empty roman-task-planner__empty--stacked">Нет неважных задач</li>'
           );
         }
       } else {
@@ -3976,10 +4002,17 @@ function runGazetteAndTasksInit() {
         romanPlannerPullAmbient();
       });
     } catch (ePs) {}
-    if (tabTasksBtn) {
-      tabTasksBtn.addEventListener("click", function () {
-        plannerTab = "tasks";
-        writePlannerTabStorage("tasks");
+    if (tabImportantBtn) {
+      tabImportantBtn.addEventListener("click", function () {
+        plannerTab = "important";
+        writePlannerTabStorage("important");
+        renderTasks();
+      });
+    }
+    if (tabNormalBtn) {
+      tabNormalBtn.addEventListener("click", function () {
+        plannerTab = "normal";
+        writePlannerTabStorage("normal");
         renderTasks();
       });
     }
@@ -19290,8 +19323,7 @@ function pokerHydrateChatSnapshotsFromDisk() {
       var ent = packP.peers[k];
       if (!ent || !Array.isArray(ent.messages) || !ent.messages.length) return;
       if (personalMessagesCache[k] && personalMessagesCache[k].length) return;
-      var metaB = personalMessagesCacheMeta[k];
-      if (metaB && metaB.bust) return;
+      /* bust снимает только RAM после нового непрочитанного — диск всё ещё даёт быстрый первый кадр, loadMessages перезапишет. */
       personalMessagesCache[k] = ent.messages.slice();
       personalMessagesCacheMeta[k] = { ts: ent.t || 0 };
     });
@@ -27814,6 +27846,22 @@ function initChat() {
         if (id === "chatFindByIdInputDialogs" || id === "chatFindByIdInput") return true;
         return false;
       }
+      /** PWA: WK оставляет фокус на textarea при закрытой клавиатуре; по visualViewport видно, что клавиатуры нет — не блокировать finalize. */
+      function pokerPwaBlurProceedDespiteDomFocus() {
+        try {
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
+          var vv = window.visualViewport;
+          var ih = window.innerHeight || 0;
+          if (!vv || ih < 240) return false;
+          var vvh = Number(vv.height) || 0;
+          var loss = Math.max(0, Math.round(ih - vvh));
+          var ratio = ih > 0 ? vvh / ih : 1;
+          return loss < 64 && ratio > 0.88;
+        } catch (ePwaBf) {
+          return false;
+        }
+      }
       /**
        * iOS TG/WK: после отправки или скрытия клавиатуры document.activeElement иногда остаётся на композере,
        * хотя клавиатура уже закрыта — тогда отложенные finalize отменялись и залипали fixed/bottom + таббар.
@@ -27853,6 +27901,7 @@ function initChat() {
       }
       function shouldDeferChatKeyboardFinalizeForFocus() {
         if (!isAnyChatKeyboardChromeFocus(document.activeElement)) return false;
+        if (pokerPwaBlurProceedDespiteDomFocus()) return false;
         return !isChatKeyboardLayoutEffectivelyClosed();
       }
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
@@ -27870,7 +27919,9 @@ function initChat() {
         }
         function runBlurCleanup() {
           var active = document.activeElement;
-          if (isAnyChatKeyboardChromeFocus(active) && !isChatKeyboardLayoutEffectivelyClosed()) return;
+          var deferBlur = isAnyChatKeyboardChromeFocus(active) && !isChatKeyboardLayoutEffectivelyClosed();
+          if (deferBlur && pokerPwaBlurProceedDespiteDomFocus()) deferBlur = false;
+          if (deferBlur) return;
           var el = getVisibleMessagesEl();
           var anchorFromBottom = 0;
           if (el) {
@@ -27923,6 +27974,13 @@ function initChat() {
           if (shouldDeferChatKeyboardFinalizeForFocus()) return;
           finalizeChatKeyboardDismiss();
         }, 2200);
+        setTimeout(function () {
+          try {
+            if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
+              finalizeChatKeyboardDismiss();
+            }
+          } catch (eKbFs) {}
+        }, 3200);
       }
       if (chatComposerEl) {
         chatComposerEl.addEventListener(
@@ -28741,10 +28799,19 @@ function initChat() {
     }
     function resizeChatTextarea(ta) {
       if (!ta || ta.nodeName !== "TEXTAREA") return;
-      ta.style.height = "auto";
       var max = 140;
-      var h = Math.min(ta.scrollHeight, max);
-      ta.style.height = h + "px";
+      /* См. resizePlannerComposer: WebView Telegram / iOS завышает scrollHeight после height:auto. */
+      ta.style.overflowY = "hidden";
+      ta.style.minHeight = "0";
+      ta.style.height = "0";
+      var h = ta.scrollHeight;
+      ta.style.minHeight = "";
+      if (h > max) {
+        ta.style.height = max + "px";
+        ta.style.overflowY = "auto";
+      } else {
+        ta.style.height = h + "px";
+      }
     }
     if (chatComposerEl) {
       chatComposerEl.addEventListener("input", function () {
@@ -29185,6 +29252,18 @@ function initChat() {
           btn._chatTapPtrId = e.pointerId;
           btn._chatTapStartX = e.clientX;
           btn._chatTapStartY = e.clientY;
+          try {
+            if (typeof prefetchPersonalMessages === "function") {
+              var preId = null;
+              if (btn.classList.contains("chat-contact") && btn.dataset.chatId && btn.getAttribute("data-chat-group") !== "1") {
+                preId = String(btn.dataset.chatId);
+              } else {
+                var duPre = btn.getAttribute("data-chat-user-id");
+                if (duPre && !btn.classList.contains("chat-dialog-item--club")) preId = String(duPre);
+              }
+              if (preId && preId.indexOf("group_") !== 0) prefetchPersonalMessages(preId);
+            }
+          } catch (eWarmTap) {}
           if (dialogRowEligibleForPlayerPreview(btn)) {
             if (btn._dialogPreviewLpTimer) {
               clearTimeout(btn._dialogPreviewLpTimer);

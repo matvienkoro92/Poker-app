@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.540">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.543">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -5559,12 +5559,30 @@
                 type="button"
                 class="roman-task-planner__tab roman-task-planner__tab--active"
                 role="tab"
-                id="romanPlannerTabTasks"
+                id="romanPlannerTabImportant"
                 aria-selected="true"
+                aria-controls="romanTaskListAll"
               >
-                Задачи
+                Важные
               </button>
-              <button type="button" class="roman-task-planner__tab" role="tab" id="romanPlannerTabDone" aria-selected="false">
+              <button
+                type="button"
+                class="roman-task-planner__tab"
+                role="tab"
+                id="romanPlannerTabNormal"
+                aria-selected="false"
+                aria-controls="romanTaskListAll"
+              >
+                Не важные
+              </button>
+              <button
+                type="button"
+                class="roman-task-planner__tab"
+                role="tab"
+                id="romanPlannerTabDone"
+                aria-selected="false"
+                aria-controls="romanTaskListAll"
+              >
                 Выполненные
               </button>
             </div>
@@ -6135,7 +6153,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=654"></script>
+    <script defer src="./app.js?v=657"></script>
     <script defer src="./winter-rating-data.js?v=124"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
