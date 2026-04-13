@@ -4,6 +4,7 @@
   "private": true,
   "description": "Приветственная страница покерного клуба Poker21 для Telegram Mini App.",
   "dependencies": {
+    "@vercel/blob": "^2.3.3",
     "web-push": "^3.6.7"
   },
   "scripts": {
@@ -14,4 +15,3 @@
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
   }
 }
-
