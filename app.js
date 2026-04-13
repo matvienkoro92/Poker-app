@@ -26008,6 +26008,7 @@ function initChat() {
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
     var loadForPeer = chatWithUserId;
+    var loadPersonalSeq = (window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1);
     var pollQs = "";
     if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
       pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
@@ -26016,6 +26017,7 @@ function initChat() {
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
+      if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
       if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
       if (data && data.notModified === true && data.pollRev) {
         if (typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
@@ -26191,6 +26193,7 @@ function initChat() {
       }
     })
       .catch(function () {
+        if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
         if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
         if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
           messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
@@ -26426,6 +26429,8 @@ function initChat() {
       time: new Date().toISOString(),
     };
     sendingPrivate = true;
+    /* Пока POST в полёте, ответ GET, начатый до отправки, не должен перерисовывать ленту без нового сообщения — иначе оптимистичное фото исчезает до loadMessages после ответа. */
+    window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1;
     setPersonalSendBusy(true);
     try {
       appendOptimisticPersonalMessage(optText, optImage, optVoice, optDocument, optReply);
