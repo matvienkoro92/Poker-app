@@ -3221,6 +3221,7 @@ function runGazetteAndTasksInit() {
     }
     var PLANNER_COMPOSER_MIN_PX = 52;
     var PLANNER_COMPOSER_MAX_PX = 280;
+    var PLANNER_ORDER_STEP = 1000;
     function resizePlannerComposer() {
       if (!input || input.tagName !== "TEXTAREA") return;
       if (typeof pokerAutosizeTextarea === "function") {
@@ -3530,6 +3531,7 @@ function runGazetteAndTasksInit() {
             var merged = mergeRomanPlannerArraysFromKeys();
             if (merged.length) {
               try {
+                ensurePlannerOrdersMutateTasks(merged);
                 localStorage.setItem(key, JSON.stringify(merged));
                 cleanupRomanPlannerLegacyKeys();
               } catch (eMig) {}
@@ -3540,7 +3542,13 @@ function runGazetteAndTasksInit() {
         }
         var arr = JSON.parse(raw);
         var list = Array.isArray(arr) ? arr : [];
-        return mergeLegacyPlannerIntoList(list);
+        list = mergeLegacyPlannerIntoList(list);
+        if (ensurePlannerOrdersMutateTasks(list)) {
+          try {
+            localStorage.setItem(key, JSON.stringify(list));
+          } catch (eOrd) {}
+        }
+        return list;
       } catch (eLoad) {
         return [];
       }
@@ -3573,12 +3581,13 @@ function runGazetteAndTasksInit() {
       });
       return copy;
     }
-    function sortActivePlannerTasks(arr) {
+    /** Порядок внутри вкладки «Важные» / «Не важные»: plannerOrder, затем «Выполняется», затем дата. */
+    function sortBucketActiveTasks(arr) {
       var copy = arr.slice();
       copy.sort(function (a, b) {
-        var ia = a && a.important ? 1 : 0;
-        var ib = b && b.important ? 1 : 0;
-        if (ia !== ib) return ib - ia;
+        var oa = a && a.plannerOrder != null && !isNaN(Number(a.plannerOrder)) ? Number(a.plannerOrder) : Number.MAX_SAFE_INTEGER;
+        var ob = b && b.plannerOrder != null && !isNaN(Number(b.plannerOrder)) ? Number(b.plannerOrder) : Number.MAX_SAFE_INTEGER;
+        if (oa !== ob) return oa - ob;
         var da = a && a.doing ? 1 : 0;
         var db = b && b.doing ? 1 : 0;
         if (da !== db) return db - da;
@@ -3588,6 +3597,103 @@ function runGazetteAndTasksInit() {
       });
       return copy;
     }
+    function ensurePlannerOrdersMutateTasks(tasks) {
+      if (!Array.isArray(tasks)) return false;
+      var changed = false;
+      function fix(pred) {
+        var sub = [];
+        for (var i = 0; i < tasks.length; i++) {
+          var t = tasks[i];
+          if (!t || t.done) continue;
+          if (!pred(t)) continue;
+          sub.push(t);
+        }
+        if (!sub.length) return;
+        var missing = false;
+        for (var k = 0; k < sub.length; k++) {
+          var po = sub[k].plannerOrder;
+          if (po == null || isNaN(Number(po))) {
+            missing = true;
+            break;
+          }
+        }
+        if (!missing) return;
+        sub.sort(function (a, b) {
+          var da = a && a.doing ? 1 : 0;
+          var db = b && b.doing ? 1 : 0;
+          if (da !== db) return db - da;
+          return (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
+        });
+        for (var j = 0; j < sub.length; j++) {
+          var want = j * PLANNER_ORDER_STEP;
+          if (Number(sub[j].plannerOrder) !== want) {
+            sub[j].plannerOrder = want;
+            changed = true;
+          }
+        }
+      }
+      fix(function (t) {
+        return !!t.important;
+      });
+      fix(function (t) {
+        return !t.important;
+      });
+      return changed;
+    }
+    function nextPlannerOrderInBucket(tasks, wantImportant) {
+      var max = 0;
+      for (var i = 0; i < tasks.length; i++) {
+        var t = tasks[i];
+        if (!t || t.done) continue;
+        if (!!t.important !== !!wantImportant) continue;
+        var o = Number(t.plannerOrder);
+        if (!isNaN(o) && o > max) max = o;
+      }
+      return max + PLANNER_ORDER_STEP;
+    }
+    function movePlannerTaskInList(taskId, delta) {
+      var tid = taskId != null ? String(taskId) : "";
+      if (!tid || (delta !== -1 && delta !== 1)) return;
+      if (plannerTab !== "important" && plannerTab !== "normal") return;
+      var tasks = loadTasks();
+      ensurePlannerOrdersMutateTasks(tasks);
+      var pred =
+        plannerTab === "important"
+          ? function (t) {
+              return t && !t.done && !!t.important;
+            }
+          : function (t) {
+              return t && !t.done && !t.important;
+            };
+      var bucket = [];
+      for (var i = 0; i < tasks.length; i++) {
+        if (pred(tasks[i])) bucket.push(tasks[i]);
+      }
+      bucket = sortBucketActiveTasks(bucket);
+      var idx = -1;
+      for (var j = 0; j < bucket.length; j++) {
+        if (bucket[j] && String(bucket[j].id) === tid) {
+          idx = j;
+          break;
+        }
+      }
+      if (idx < 0) return;
+      var j2 = idx + delta;
+      if (j2 < 0 || j2 >= bucket.length) return;
+      var a = bucket[idx];
+      var b = bucket[j2];
+      var oa = Number(a.plannerOrder);
+      var ob = Number(b.plannerOrder);
+      if (isNaN(oa) || isNaN(ob)) {
+        ensurePlannerOrdersMutateTasks(tasks);
+        oa = Number(a.plannerOrder);
+        ob = Number(b.plannerOrder);
+      }
+      a.plannerOrder = ob;
+      b.plannerOrder = oa;
+      saveTasks(tasks);
+      renderTasks();
+    }
     function findTaskById(tasks, id) {
       var sid = String(id);
       for (var i = 0; i < tasks.length; i++) {
@@ -3595,11 +3701,35 @@ function runGazetteAndTasksInit() {
       }
       return -1;
     }
-    function renderTaskRow(t, columnDone) {
+    function renderTaskRow(t, columnDone, displayNum, reorderOpts) {
       var id = t.id != null ? String(t.id) : "";
       var text = t.text != null ? String(t.text) : "";
       var important = !!(t && t.important);
       var doing = !!(t && t.doing);
+      var idxRow = "";
+      if (displayNum != null && displayNum > 0) {
+        idxRow =
+          '<div class="roman-task-planner__idx-row">' +
+          '<span class="roman-task-planner__num">' +
+          displayNum +
+          ".</span>";
+        if (!columnDone && reorderOpts) {
+          idxRow +=
+            '<span class="roman-task-planner__reorder">' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-up="' +
+            escHtml(id) +
+            '"' +
+            (reorderOpts.canUp ? "" : " disabled") +
+            ' aria-label="Выше в списке">↑</button>' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder" data-roman-task-move-down="' +
+            escHtml(id) +
+            '"' +
+            (reorderOpts.canDown ? "" : " disabled") +
+            ' aria-label="Ниже в списке">↓</button>' +
+            "</span>";
+        }
+        idxRow += "</div>";
+      }
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
@@ -3664,6 +3794,7 @@ function runGazetteAndTasksInit() {
         '<div class="roman-task-planner__swipe-track">' +
         '<div class="roman-task-planner__swipe-front">' +
         '<div class="roman-task-planner__body">' +
+        idxRow +
         badgesRow +
         '<div class="roman-task-planner__text">' +
         escHtml(text) +
@@ -3972,23 +4103,32 @@ function runGazetteAndTasksInit() {
     function renderTasks() {
       setPlannerTabUi();
       var raw = loadTasks();
-      var active = sortActivePlannerTasks(raw.filter(function (x) {
+      var activeRaw = raw.filter(function (x) {
         return !x.done;
-      }));
+      });
+      var importantActive = sortBucketActiveTasks(
+        activeRaw.filter(function (x) {
+          return !!x.important;
+        })
+      );
+      var normalActive = sortBucketActiveTasks(
+        activeRaw.filter(function (x) {
+          return !x.important;
+        })
+      );
       var doneCol = sortTasksByCreatedAsc(raw.filter(function (x) {
         return !!x.done;
       }));
-      var importantActive = active.filter(function (x) {
-        return !!x.important;
-      });
-      var normalActive = active.filter(function (x) {
-        return !x.important;
-      });
       var parts = [];
       if (plannerTab === "important") {
         if (importantActive.length) {
           for (var ai = 0; ai < importantActive.length; ai++) {
-            parts.push(renderTaskRow(importantActive[ai], false));
+            parts.push(
+              renderTaskRow(importantActive[ai], false, ai + 1, {
+                canUp: ai > 0,
+                canDown: ai < importantActive.length - 1,
+              })
+            );
           }
         } else {
           parts.push(
@@ -3998,7 +4138,12 @@ function runGazetteAndTasksInit() {
       } else if (plannerTab === "normal") {
         if (normalActive.length) {
           for (var ni = 0; ni < normalActive.length; ni++) {
-            parts.push(renderTaskRow(normalActive[ni], false));
+            parts.push(
+              renderTaskRow(normalActive[ni], false, ni + 1, {
+                canUp: ni > 0,
+                canDown: ni < normalActive.length - 1,
+              })
+            );
           }
         } else {
           parts.push(
@@ -4008,7 +4153,7 @@ function runGazetteAndTasksInit() {
       } else {
         if (doneCol.length) {
           for (var di = 0; di < doneCol.length; di++) {
-            parts.push(renderTaskRow(doneCol[di], true));
+            parts.push(renderTaskRow(doneCol[di], true, di + 1, null));
           }
         } else {
           parts.push(
@@ -4198,6 +4343,7 @@ function runGazetteAndTasksInit() {
         doing: false,
         important: false,
         createdAt: Date.now(),
+        plannerOrder: nextPlannerOrderInBucket(tasks, false),
       });
       saveTasks(tasks);
       input.value = "";
@@ -4239,6 +4385,7 @@ function runGazetteAndTasksInit() {
         var ixSi = findTaskById(tasksSi, idSi);
         if (ixSi >= 0 && !tasksSi[ixSi].done) {
           tasksSi[ixSi].important = true;
+          tasksSi[ixSi].plannerOrder = nextPlannerOrderInBucket(tasksSi, true);
           saveTasks(tasksSi);
           renderTasks();
         }
@@ -4251,9 +4398,24 @@ function runGazetteAndTasksInit() {
         var ixCi = findTaskById(tasksCi, idCi);
         if (ixCi >= 0) {
           tasksCi[ixCi].important = false;
+          tasksCi[ixCi].plannerOrder = nextPlannerOrderInBucket(tasksCi, false);
           saveTasks(tasksCi);
           renderTasks();
         }
+        return;
+      }
+      var moveUpEl = t.closest("[data-roman-task-move-up]");
+      if (moveUpEl) {
+        if (moveUpEl.disabled) return;
+        var idMu = moveUpEl.getAttribute("data-roman-task-move-up");
+        movePlannerTaskInList(idMu, -1);
+        return;
+      }
+      var moveDownEl = t.closest("[data-roman-task-move-down]");
+      if (moveDownEl) {
+        if (moveDownEl.disabled) return;
+        var idMd = moveDownEl.getAttribute("data-roman-task-move-down");
+        movePlannerTaskInList(idMd, 1);
         return;
       }
       var completeBtn = t.closest("[data-roman-task-complete]");
@@ -4275,6 +4437,7 @@ function runGazetteAndTasksInit() {
         var ixU = findTaskById(tasksU, idU);
         if (ixU >= 0) {
           tasksU[ixU].done = false;
+          tasksU[ixU].plannerOrder = nextPlannerOrderInBucket(tasksU, !!tasksU[ixU].important);
           saveTasks(tasksU);
           renderTasks();
         }
