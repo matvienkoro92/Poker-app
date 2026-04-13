@@ -27807,6 +27807,70 @@ function initChat() {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
       }
+      /**
+       * Telegram Mini App: общий/личный тред с фокусом на композере — отдельный конвейер без visualViewport.
+       * Высота перекрытия: viewportStableHeight − viewportHeight; резервы winLoss / lastGood; dock + pad.
+       */
+      function syncTelegramMiniAppChatThreadKeyboard() {
+        if (typeof isTelegramWebApp !== "function" || !isTelegramWebApp()) return false;
+        if (typeof isChatThreadComposerKeyboardDom !== "function" || !isChatThreadComposerKeyboardDom()) return false;
+        if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
+        var twTma = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (!twTma) return false;
+        var doc = document.documentElement;
+        var ih = window.innerHeight || 0;
+        if (!ih) return true;
+        var baseLhTma = Number(window.__pokerChatInnerHBaseline) || 0;
+        var winLossTma = baseLhTma > 260 && ih > 0 ? Math.max(0, Math.round(baseLhTma - ih)) : 0;
+        var thM = Number(twTma.viewportHeight);
+        var tsM = Number(twTma.viewportStableHeight);
+        var tgDiffRaw = 0;
+        if (tsM > 0 && thM > 0 && tsM > thM + 3) {
+          tgDiffRaw = Math.round(tsM - thM);
+        }
+        var coverTma = 0;
+        var haveTma = false;
+        if (tgDiffRaw >= 24) {
+          coverTma = tgDiffRaw;
+          if (winLossTma > 48 && coverTma > winLossTma + 50) {
+            coverTma = Math.max(winLossTma + 8, Math.round(tgDiffRaw * 0.88));
+          }
+          haveTma = true;
+        } else if (winLossTma >= 52) {
+          coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
+          haveTma = true;
+        } else {
+          var lastK0 = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+          if (document.body.classList.contains("chat-keyboard-open") && lastK0 >= 28) {
+            coverTma = lastK0;
+            haveTma = true;
+          }
+        }
+        if (haveTma) {
+          var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+          if (prevK >= 28 && coverTma > prevK + 45) {
+            coverTma = Math.min(coverTma, prevK + 32);
+          }
+          var capTma = Math.min(268, Math.max(96, Math.round(ih * 0.34)));
+          if (coverTma > capTma) coverTma = capTma;
+          window.__pokerChatTgKeyboardCoverLast = coverTma;
+          doc.style.setProperty("--chat-vv-inset", "0px");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          applyChatThreadComposerKeyboardDockFromCover(coverTma);
+          if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+          return true;
+        }
+        var fbTma = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+        if (fbTma < 24 && tgDiffRaw >= 20) fbTma = tgDiffRaw;
+        if (fbTma < 24 && winLossTma >= 44) fbTma = Math.min(winLossTma, Math.round(ih * 0.38));
+        var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
+        fbTma = Math.max(0, Math.min(capFb, fbTma));
+        doc.style.setProperty("--chat-vv-inset", "0px");
+        doc.style.removeProperty("--chat-ios-accessory-inset");
+        applyChatThreadComposerKeyboardDockFromCover(fbTma);
+        if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+        return true;
+      }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!document.body.classList.contains("chat-keyboard-open")) {
@@ -27819,6 +27883,9 @@ function initChat() {
           stripChatInputAreaTransforms();
           return;
         }
+        try {
+          if (syncTelegramMiniAppChatThreadKeyboard()) return;
+        } catch (eTmaSync) {}
         /* Раньше при !visualViewport сразу снимали переменные — при открытой клавиатуре поле оставалось под клавишами. */
         if (!window.visualViewport) {
           var dvNoVv = String(document.body.getAttribute("data-view") || "");
@@ -28030,72 +28097,7 @@ function initChat() {
           coverPxDock = Math.max(coverPxDock, heightLoss);
         }
         if (isChatThreadComposerKeyboardDom()) {
-          /*
-           * TMA: высоту перекрытия берём из viewportStableHeight − viewportHeight (Bot API), без max(overlap, winLoss…),
-           * иначе cover раздувается — полоса ввода «висит» с большим зазором над клавиатурой.
-           * На анимации клавиатуры ts и th кратко сближаются — ранний return пропадал, срабатывал legacy с раздутым
-           * coverPxDock. Держим последний хороший cover и приоритет lastGood над сырым vv на эти кадры.
-           * Подрезка TG только если vv заметно меньше (TG завысил), не подменяем на завышенный vv.
-           */
-          var twTma = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          var isTma = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-          if (isTma && twTma && !isChatPhysicalKeyboardContext()) {
-            /*
-             * Только Bot API: viewportStableHeight − viewportHeight. Сырой visualViewport на iOS TMA даёт
-             * мусорные кадры — любая сверка с ih−offsetTop−vvh снова вносит дёрганье.
-             * Резерв: падение innerHeight, затем lastGood. Событие Telegram viewportChanged подключается отдельно.
-             */
-            var baseLhTma = Number(window.__pokerChatInnerHBaseline) || 0;
-            var winLossTma = baseLhTma > 260 && ih > 0 ? Math.max(0, Math.round(baseLhTma - ih)) : 0;
-            var thM = Number(twTma.viewportHeight);
-            var tsM = Number(twTma.viewportStableHeight);
-            var tgDiffRaw = 0;
-            if (tsM > 0 && thM > 0 && tsM > thM + 3) {
-              tgDiffRaw = Math.round(tsM - thM);
-            }
-            var coverTma = 0;
-            var haveTma = false;
-            if (tgDiffRaw >= 24) {
-              coverTma = tgDiffRaw;
-              if (winLossTma > 48 && coverTma > winLossTma + 50) {
-                coverTma = Math.max(winLossTma + 8, Math.round(tgDiffRaw * 0.88));
-              }
-              haveTma = true;
-            } else if (winLossTma >= 52) {
-              coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
-              haveTma = true;
-            } else {
-              var lastK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-              if (document.body.classList.contains("chat-keyboard-open") && lastK >= 28) {
-                coverTma = lastK;
-                haveTma = true;
-              }
-            }
-            if (haveTma) {
-              var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-              if (prevK >= 28 && coverTma > prevK + 45) {
-                coverTma = Math.min(coverTma, prevK + 32);
-              }
-              var capTma = Math.min(268, Math.max(96, Math.round(ih * 0.34)));
-              if (coverTma > capTma) coverTma = capTma;
-              window.__pokerChatTgKeyboardCoverLast = coverTma;
-              doc.style.setProperty("--chat-vv-inset", "0px");
-              doc.style.removeProperty("--chat-ios-accessory-inset");
-              applyChatThreadComposerKeyboardDockFromCover(coverTma);
-              if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
-              return;
-            }
-            var fbTma = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-            if (fbTma < 24 && tgDiffRaw >= 20) fbTma = tgDiffRaw;
-            if (fbTma < 24 && winLossTma >= 44) fbTma = Math.min(winLossTma, Math.round(ih * 0.38));
-            var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
-            fbTma = Math.max(0, Math.min(capFb, fbTma));
-            doc.style.setProperty("--chat-vv-inset", "0px");
-            doc.style.removeProperty("--chat-ios-accessory-inset");
-            applyChatThreadComposerKeyboardDockFromCover(fbTma);
-            if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
-            return;
-          }
+          /* TMA + тред: syncTelegramMiniAppChatThreadKeyboard() в начале sync — без дубля здесь. */
           /*
            * iOS: взрыв vv подрезаем относительно winLoss. Пошаговое уменьшение cover убрано — давало 2 видимых шага
            * «выше нормы → вниз → вниз». Верхняя граница от падения innerHeight: первые кадры vv часто раздувают cover.
