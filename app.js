@@ -3183,7 +3183,6 @@ function runGazetteAndTasksInit() {
     var listAll = document.getElementById("romanTaskListAll");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
-    var plannerTotalValueEl = document.getElementById("romanTaskPlannerTotalValue");
     if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
     var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
     function readPlannerTabStorage() {
@@ -3336,17 +3335,39 @@ function runGazetteAndTasksInit() {
       }
       return PLANNER_SHARED_STORAGE_KEY;
     }
-    function updatePlannerHintText() {
+    function updatePlannerHintText(rawOpt) {
       var el = document.getElementById("romanTaskPlannerHint");
       if (!el) return;
-      if (!isPlannerAllowedUser()) return;
-      if (isPlannerSoloUser()) {
+      if (!isPlannerAllowedUser()) {
         el.textContent =
-          "Ваш личный список задач (отдельно от списка Романов). Синхронизация с сервером, пока открыт планер (~18 с) и при возврате в приложение. Локально хранится копия для офлайна.";
+          "Планер задач редакторов: общий список или личный — подсказка обновится после входа.";
         return;
       }
+      var raw = rawOpt != null ? rawOpt : loadTasks();
+      if (!Array.isArray(raw)) raw = [];
+      var total = raw.length;
+      var imp = 0;
+      var norm = 0;
+      var doneC = 0;
+      for (var hi = 0; hi < raw.length; hi++) {
+        var t = raw[hi];
+        if (!t) continue;
+        if (t.done) {
+          doneC++;
+          continue;
+        }
+        if (t.important) imp++;
+        else norm++;
+      }
       el.textContent =
-        "Общий список для @roman1787443 и @roman1_matvienko на сервере для всех устройств; пока открыт планер, список обновляется (~18 с) и при возврате в приложение. Локально хранится копия для офлайна.";
+        "Всего задач: " +
+        total +
+        " · Важные: " +
+        imp +
+        " · Не важные: " +
+        norm +
+        " · Выполненные: " +
+        doneC;
     }
     var romanPlannerDirtySinceOpen = false;
     var romanPlannerPushTimer = null;
@@ -4117,7 +4138,6 @@ function runGazetteAndTasksInit() {
     function renderTasks() {
       setPlannerTabUi();
       var raw = loadTasks();
-      if (plannerTotalValueEl) plannerTotalValueEl.textContent = String(raw.length);
       var activeRaw = raw.filter(function (x) {
         return !x.done;
       });
@@ -4178,12 +4198,12 @@ function runGazetteAndTasksInit() {
       }
       listAll.innerHTML = parts.join("");
       initRomanPlannerSwipeRows();
+      updatePlannerHintText(raw);
     }
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
       romanPlannerDirtySinceOpen = false;
       plannerTab = readPlannerTabStorage();
-      updatePlannerHintText();
       renderTasks();
       plannerModal.setAttribute("aria-hidden", "false");
       romanPlannerPullFromServer();
@@ -4221,7 +4241,6 @@ function runGazetteAndTasksInit() {
       }
       openBtn.classList.remove("welcome-planner-icon--hidden");
       if (plannerModal.getAttribute("aria-hidden") === "false") {
-        updatePlannerHintText();
         renderTasks();
         romanPlannerPullFromServer();
         romanPlannerStartLiveSync();
