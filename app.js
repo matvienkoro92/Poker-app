@@ -22309,7 +22309,7 @@ function initChat() {
     }
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs;
     var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
-    fetch(url).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
+    fetch(url, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
       if (data && data.notModified === true && data.pollRev) {
         return;
@@ -24976,7 +24976,7 @@ function initChat() {
         fireContactsLoaded();
       }
     } catch (eInst) {}
-    fetch(url)
+    fetch(url, { cache: "no-store" })
       .then(function (r) {
         return r.json();
       })
@@ -25277,7 +25277,7 @@ function initChat() {
   function loadAdminsOnline() {
     if (!adminsView || !pokerApiHasCredential()) return;
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=adminOnline";
-    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+    fetch(url, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.onlineAdminIds)) return;
       var onlineSet = new Set(data.onlineAdminIds);
       adminsView.querySelectorAll(".chat-manager-btn[data-chat-user-id]").forEach(function (btn) {
@@ -25899,7 +25899,7 @@ function initChat() {
     } catch (eSyncPrev0) {}
     var url =
       base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
-    fetch(url)
+    fetch(url, { cache: "no-store" })
       .then(function (r) {
         return r.json().catch(function () {
           return { ok: false, error: "Ошибка ответа" };
@@ -25984,7 +25984,7 @@ function initChat() {
     if (!chatWithUserId || !messagesEl) return;
     var loadForPeer = chatWithUserId;
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer);
-    fetch(url)
+    fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
       if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;

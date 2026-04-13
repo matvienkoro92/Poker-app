@@ -49,6 +49,16 @@ self.addEventListener("fetch", function (event) {
     var u = new URL(event.request.url);
     if (u.origin !== self.location.origin) return;
     if (u.pathname.indexOf("/api/chat") !== 0) return;
+    /* fetch(..., { cache: "no-store" }) — не отдаём устаревший Cache Storage: иначе после тапа по пушу
+ лента/личкарисуются из старого ответа, а фоновый revalidate не дергает UI (задержка ~интервал опроса). */
+    var cmode = "";
+    try {
+      cmode = event.request.cache;
+    } catch (eC) {}
+    if (cmode === "no-store" || cmode === "reload") {
+      event.respondWith(fetch(event.request));
+      return;
+    }
     event.respondWith(pokerSwChatApiStaleWhileRevalidate(event.request));
   } catch (eFetch) {}
 });
