@@ -27449,6 +27449,7 @@ function initChat() {
           window.__pokerChatDockSmoothedPx = null;
           window.__pokerChatDockCoverStable = null;
           window.__pokerChatTgKeyboardCoverLast = null;
+          window.__pokerChatTgDockCandSmoothed = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -27713,10 +27714,20 @@ function initChat() {
               var thD = Number(twDock.viewportHeight);
               if (tsD > 0 && thD > 0 && tsD > thD + 6) tgKbDock = Math.round(tsD - thD);
             }
-            var hardMaxTg = Math.min(300, Math.max(92, Math.round(ihLim * 0.36)));
-            var mergedDock = Math.max(vvOverlap, tgKbDock, coverNum);
-            bottomPx = Math.min(hardMaxTg, mergedDock + gap);
-            if (bottomPx < gap + 24 && mergedDock > 18) bottomPx = Math.min(hardMaxTg, mergedDock + gap);
+            var hardMaxTg = Math.min(288, Math.max(92, Math.round(ihLim * 0.35)));
+            /*
+             * Не брать max(vv, tg, cover) — на iOS TMA кадры чередуются, источники расходятся, bottom «прыгает».
+             * Приоритет: стабильный Bot API → vv → cover; затем лёгкое сглаживание.
+             */
+            var rawCand;
+            if (tgKbDock >= 32) rawCand = tgKbDock;
+            else if (vvOverlap >= 30) rawCand = vvOverlap;
+            else rawCand = Math.max(0, coverNum, tgKbDock, vvOverlap);
+            var prevSm = Number(window.__pokerChatTgDockCandSmoothed);
+            var smoothCand =
+              !(prevSm > 12) || isNaN(prevSm) ? rawCand : Math.round(prevSm * 0.38 + rawCand * 0.62);
+            window.__pokerChatTgDockCandSmoothed = smoothCand;
+            bottomPx = Math.min(hardMaxTg, smoothCand + gap);
           } else if (ihLim > 280 && !isTgDock) {
             var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
             if (bottomPx > bottomMax) bottomPx = bottomMax;
@@ -27727,7 +27738,14 @@ function initChat() {
         } catch (eBm) {}
         try {
           var prevB = window.__pokerChatLastAppliedDockBottom;
-          if (prevB != null && prevB > 0 && Math.abs(bottomPx - prevB) < 2) {
+          var dockEps =
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+              ? 8
+              : 2;
+          if (prevB != null && prevB > 0 && Math.abs(bottomPx - prevB) < dockEps) {
             bottomPx = prevB;
           } else {
             window.__pokerChatLastAppliedDockBottom = bottomPx;
@@ -28165,6 +28183,7 @@ function initChat() {
           window.__pokerChatDockCoverStable = null;
           window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatTgKeyboardCoverLast = null;
+          window.__pokerChatTgDockCandSmoothed = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {

@@ -661,33 +661,6 @@ body[data-view="chat"] {
   max-height: 100dvh;
   overflow: hidden;
 }
-/*
- * iOS PWA / Telegram iOS: после закрытия клавиатуры 100dvh иногда остаётся «укороченным» относительно layout —
- * снизу полоса фона, строка ввода визуально не у физического низа. Пока html без chat-keyboard-open — тянем высоту
- * к large viewport / fill-available (как у экранов вне чата в html.poker-ios-pwa:not(.app-view-chat)).
- */
-html.poker-ios-pwa.app-view-chat:not(.chat-keyboard-open),
-html.app--telegram-miniapp.app-view-chat:not(.chat-keyboard-open) {
-  min-height: 100vh;
-  min-height: 100lvh;
-  min-height: -webkit-fill-available;
-  height: 100vh;
-  height: 100lvh;
-  height: -webkit-fill-available;
-  max-height: none;
-}
-html.poker-ios-pwa.app-view-chat:not(.chat-keyboard-open) body[data-view="chat"],
-html.poker-ios-pwa.app-view-chat:not(.chat-keyboard-open) body:has(.view--active[data-view="chat"]),
-html.app--telegram-miniapp.app-view-chat:not(.chat-keyboard-open) body[data-view="chat"],
-html.app--telegram-miniapp.app-view-chat:not(.chat-keyboard-open) body:has(.view--active[data-view="chat"]) {
-  min-height: 100vh;
-  min-height: 100lvh;
-  min-height: -webkit-fill-available;
-  height: 100vh;
-  height: 100lvh;
-  height: -webkit-fill-available;
-  max-height: none;
-}
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;
