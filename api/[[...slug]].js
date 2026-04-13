@@ -19,6 +19,7 @@ const handlers = {
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),
+  "chat-image": () => require(path.join(handlersDir, "chat-image.js")),
   "chat-push-subscribe": () => require(path.join(handlersDir, "chat-push-subscribe.js")),
   "chat-push-broadcast": () => require(path.join(handlersDir, "chat-push-broadcast.js")),
   "chat-push-admin-send": () => require(path.join(handlersDir, "chat-push-admin-send.js")),

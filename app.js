@@ -557,6 +557,25 @@ function pokerApiAuthQuery(lead) {
   return lead + "initData=";
 }
 
+/** URL для <img> в чате: приватный Vercel Blob не открывается в браузере — грузим через /api/chat-image. */
+function pokerChatDisplayImageSrc(raw) {
+  if (raw == null || raw === "") return raw;
+  var s = String(raw).trim();
+  if (s.indexOf("data:") === 0) return s;
+  if (s.indexOf("http://") !== 0 && s.indexOf("https://") !== 0) return s;
+  var hostname = "";
+  try {
+    hostname = new URL(s).hostname || "";
+  } catch (e) {
+    return s;
+  }
+  if (!/blob\.vercel-storage\.com$/i.test(hostname)) return s;
+  var apb = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!apb) return s;
+  var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+  return apb + "/api/chat-image" + q + "src=" + encodeURIComponent(s);
+}
+
 function pokerApiAuthJsonBody(extra) {
   var o = Object.assign({}, extra || {});
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -22569,7 +22588,7 @@ function initChat() {
         (textCol ? "" : " chat-pinned-self__media-row--thumb-only") +
         '">' +
         '<div class="chat-pinned-self__thumb-wrap"><img class="chat-pinned-self__thumb" src="' +
-        escapeHtml(pinThumbSrc) +
+        escapeHtml(pokerChatDisplayImageSrc(pinThumbSrc)) +
         '" alt="" loading="lazy" decoding="async" /></div>' +
         textCol +
         "</div>";
@@ -23261,7 +23280,7 @@ function initChat() {
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
       var imgBlock = m.image
-        ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
+        ? '<img class="chat-msg__image" src="' + escapeHtml(pokerChatDisplayImageSrc(m.image)) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
       var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var voiceOnlyG = chatMsgVoiceOnlyNoCaption(m);
@@ -23889,7 +23908,7 @@ function initChat() {
     if (image) {
       textContent =
         '<img class="chat-msg__image" src="' +
-        escapeHtml(image) +
+        escapeHtml(pokerChatDisplayImageSrc(image)) +
         '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
     } else if (voice) {
       textContent = chatVoiceMessageHtml(voice, {
@@ -23941,7 +23960,7 @@ function initChat() {
         var im = document.createElement("img");
         im.className = "chat-msg__image";
         im.alt = "Картинка";
-        im.src = image;
+        im.src = pokerChatDisplayImageSrc(image) || image;
         textWrap.appendChild(im);
       } else if (voice && typeof voice === "string") {
         appendChatVoiceToTextWrap(textWrap, voice, {
@@ -25432,7 +25451,7 @@ function initChat() {
       var time = m.time ? new Date(m.time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
       var text = chatMessageBodyHtml(m);
       var imgBlock = m.image
-        ? '<img class="chat-msg__image" src="' + escapeHtml(m.image) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
+        ? '<img class="chat-msg__image" src="' + escapeHtml(pokerChatDisplayImageSrc(m.image)) + '" alt="Картинка"' + chatMsgImageAttrs(i, messages.length) + " />"
         : "";
       var editedBadge = m.edited ? '<span class="chat-msg__edited">(отредактировано)</span>' : "";
       var ticksEarlyP = personalReceiptHtml(m, isOwn);
@@ -25699,7 +25718,7 @@ function initChat() {
         var text = chatMessageBodyHtml(m);
         var imgBlock = m.image
           ? '<img class="chat-msg__image" src="' +
-            escapeHtml(m.image) +
+            escapeHtml(pokerChatDisplayImageSrc(m.image)) +
             '" alt="Картинка"' +
             chatMsgImageAttrs(i, slice.length) +
             " />"
@@ -26213,7 +26232,7 @@ function initChat() {
       if (image) {
         textContent =
           '<img class="chat-msg__image" src="' +
-          escapeHtml(String(image)) +
+          escapeHtml(pokerChatDisplayImageSrc(String(image))) +
           '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
       }
       else if (voice) {
@@ -26267,7 +26286,7 @@ function initChat() {
           var imP = document.createElement("img");
           imP.className = "chat-msg__image";
           imP.alt = "Картинка";
-          imP.src = image;
+          imP.src = pokerChatDisplayImageSrc(image) || image;
           twP.appendChild(imP);
           var bmImg = document.createElement("div");
           bmImg.className = "chat-msg__body-main chat-msg__body-main--with-image";
