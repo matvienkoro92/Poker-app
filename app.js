@@ -99,6 +99,84 @@ function pokerFetchRetry(url, init, opts) {
   return run(0);
 }
 
+/**
+ * Автовысота textarea. Варианты, с которыми боремся в Telegram / iOS WKWebView:
+ * - height:auto + scrollHeight у самого поля — часто +1 «фантомная» строка;
+ * - height:0 + scrollHeight — лучше, но на части WebView всё ещё завышает;
+ * - скрытый div с той же шириной колонки текста, font/line-height/padding/border — стабильный замер переносов;
+ * - в Mini App дополнительный замер в requestAnimationFrame — догоняет ширину после раскладки/клавиатуры.
+ */
+function pokerAutosizeTextarea(ta, opts) {
+  opts = opts || {};
+  var maxH = opts.maxHeight != null && opts.maxHeight > 0 ? opts.maxHeight : 140;
+  var minH = opts.minHeight != null && opts.minHeight > 0 ? opts.minHeight : 0;
+  if (!ta || ta.nodeName !== "TEXTAREA") return;
+  var win = ta.ownerDocument.defaultView || window;
+  var doc = ta.ownerDocument;
+  var mirrorId = "poker-textarea-autosize-mirror";
+  var mirror = doc.getElementById(mirrorId);
+  if (!mirror) {
+    mirror = doc.createElement("div");
+    mirror.id = mirrorId;
+    mirror.setAttribute("aria-hidden", "true");
+    mirror.style.cssText =
+      "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;z-index:-9999;" +
+      "overflow:hidden;white-space:pre-wrap;box-sizing:border-box;";
+    doc.body.appendChild(mirror);
+  }
+  function measureApply() {
+    var cs = win.getComputedStyle(ta);
+    mirror.style.width = Math.max(1, ta.offsetWidth) + "px";
+    mirror.style.boxSizing = cs.boxSizing || "border-box";
+    mirror.style.padding = cs.padding;
+    mirror.style.border = cs.border;
+    var fSh = cs.font != null ? String(cs.font).trim() : "";
+    if (fSh) mirror.style.font = cs.font;
+    else {
+      mirror.style.fontSize = cs.fontSize;
+      mirror.style.fontFamily = cs.fontFamily;
+      mirror.style.fontWeight = cs.fontWeight;
+      mirror.style.fontStyle = cs.fontStyle;
+    }
+    mirror.style.lineHeight = cs.lineHeight;
+    mirror.style.direction = cs.direction;
+    mirror.style.letterSpacing = cs.letterSpacing;
+    mirror.style.textTransform = cs.textTransform;
+    mirror.style.wordBreak = cs.wordBreak;
+    mirror.style.overflowWrap = cs.overflowWrap;
+    try {
+      mirror.style.tabSize = cs.tabSize;
+    } catch (eTs) {}
+    var val = ta.value;
+    if (!val) {
+      mirror.textContent = "\u00a0";
+    } else if (val.slice(-1) === "\n") {
+      mirror.textContent = val + "\u00a0";
+    } else {
+      mirror.textContent = val;
+    }
+    var h = mirror.scrollHeight;
+    if (!(h > 0) || !isFinite(h)) h = minH;
+    if (minH > 0 && h < minH) h = minH;
+    ta.style.overflowY = "hidden";
+    if (h > maxH) {
+      ta.style.height = maxH + "px";
+      ta.style.overflowY = "auto";
+    } else {
+      ta.style.height = h + "px";
+    }
+  }
+  measureApply();
+  if (win.Telegram && win.Telegram.WebApp) {
+    var raf = win.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    raf(function () {
+      measureApply();
+    });
+  }
+}
+
 /** Оверлей загрузки: показать ошибку сети и кнопку «Повторить» (если оверлей ещё виден). Возвращает true, если панель переключена. */
 function pokerTryBootOverlayNetworkError(message) {
   try {
@@ -570,19 +648,25 @@ function pokerChatDisplayImageSrc(raw) {
     return s;
   }
   if (!/blob\.vercel-storage\.com$/i.test(hostname)) return s;
+  /*
+   * Прокси /api/chat-image: в PWA прямой blob URL часто 403/пусто в <img>.
+   * Важно: pokerApiAuthQuery("?") даёт «?pwaSession=…» — второй параметр только с «&src=», иначе получается
+   * «?pwaSession=TOKENsrc=…», сервер не авторизует и не находит src — картинки «пропадают» после перезахода.
+   * Прокси включаем для любой сохранённой pwaSession/pwaVkSession (не только display-mode: standalone).
+   */
   try {
-    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
-      var pwaTok =
-        (typeof pokerReadPwaTgSessionToken === "function" && pokerReadPwaTgSessionToken()) ||
-        (typeof pokerReadPwaVkSessionToken === "function" && pokerReadPwaVkSessionToken());
-      if (pwaTok) {
-        var apb = typeof getApiBase === "function" ? getApiBase() : "";
-        if (apb) {
-          var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-          return apb + "/api/chat-image" + q + "src=" + encodeURIComponent(s);
-        }
-      }
+    var apb = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!apb) return s;
+    var authQs = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("") : "";
+    if (!authQs) return s;
+    var pwaAuth =
+      authQs.indexOf("pwaSession=") === 0 ||
+      authQs.indexOf("pwaVkSession=") === 0;
+    if (!pwaAuth) {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) return s;
+      return s;
     }
+    return apb + "/api/chat-image?" + authQs + "&src=" + encodeURIComponent(s);
   } catch (ePwaImg) {}
   return s;
 }
@@ -3139,17 +3223,11 @@ function runGazetteAndTasksInit() {
     var PLANNER_COMPOSER_MAX_PX = 280;
     function resizePlannerComposer() {
       if (!input || input.tagName !== "TEXTAREA") return;
-      /* TG/iOS WebView: height:auto + scrollHeight часто даёт лишнюю «вторую строку»; схлопываем перед замером. */
-      input.style.overflowY = "hidden";
-      input.style.minHeight = "0";
-      input.style.height = "0";
-      var h = input.scrollHeight;
-      input.style.minHeight = "";
-      if (h > PLANNER_COMPOSER_MAX_PX) {
-        input.style.height = PLANNER_COMPOSER_MAX_PX + "px";
-        input.style.overflowY = "auto";
-      } else {
-        input.style.height = Math.max(h, PLANNER_COMPOSER_MIN_PX) + "px";
+      if (typeof pokerAutosizeTextarea === "function") {
+        pokerAutosizeTextarea(input, {
+          maxHeight: PLANNER_COMPOSER_MAX_PX,
+          minHeight: PLANNER_COMPOSER_MIN_PX,
+        });
       }
     }
     /** Общий планер двух Романов. */
@@ -27113,6 +27191,13 @@ function initChat() {
         stripChatInputAreaTransforms();
         clearChatMessagesKeyboardPad();
         try {
+          var ihBaseUp = window.innerHeight || 0;
+          if (ihBaseUp > 240) {
+            var prevBl = Number(window.__pokerChatInnerHBaseline) || 0;
+            window.__pokerChatInnerHBaseline = Math.max(prevBl, ihBaseUp);
+          }
+        } catch (eBlUp) {}
+        try {
           var taKbDone = document.getElementById("chatSharedComposer");
           if (taKbDone && typeof resizeChatTextarea === "function") resizeChatTextarea(taKbDone);
         } catch (eTaKb) {}
@@ -27231,6 +27316,16 @@ function initChat() {
             document.documentElement.style.removeProperty("--chat-vv-inset");
             document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
             stripChatInputAreaTransforms();
+            try {
+              clearChatMessagesKeyboardPad();
+            } catch (ePadVv) {}
+            try {
+              var ihVvUp = window.innerHeight || 0;
+              if (ihVvUp > 240) {
+                var prevVvB = Number(window.__pokerChatInnerHBaseline) || 0;
+                window.__pokerChatInnerHBaseline = Math.max(prevVvB, ihVvUp);
+              }
+            } catch (eVvBl) {}
             try {
               if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
             } catch (eScVv) {}
@@ -27889,11 +27984,26 @@ function initChat() {
             if (offsetTop > 16 && heightLoss > 20) return false;
             /* TG: иногда innerHeight совпадает с vv.height при открытой клавиатуре — сверяем с базовой высотой окна. */
             var baseLineVv = Number(window.__pokerChatInnerHBaseline) || 0;
-            if (baseLineVv > 260 && ih > 0 && ih < baseLineVv - 64) return false;
+            if (baseLineVv > 260 && ih > 0 && ih < baseLineVv - 64) {
+              /*
+               * Установленная PWA (iOS/Android WK): после blur innerHeight иногда долго ниже «доклавиатурного» baseline,
+               * хотя visualViewport уже почти на весь экран — откладывается finalize, залипает fixed + bottom у композера и отступ снизу.
+               */
+              var pwaLike =
+                (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
+                (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
+              var vvRatio = ih > 0 && vvh > 0 ? vvh / ih : 0;
+              if (!(pwaLike && vvRatio > 0.87)) return false;
+            }
             return true;
           }
           var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
-          if (baseFb > 260 && ih > 0 && ih < baseFb - 80) return false;
+          if (baseFb > 260 && ih > 0 && ih < baseFb - 80) {
+            var pwaLikeFb =
+              (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
+              (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
+            if (!pwaLikeFb) return false;
+          }
           return true;
         } catch (eClsKb) {
           return true;
@@ -28798,19 +28908,8 @@ function initChat() {
       sendBtn.classList.toggle("chat-send-btn--mic", !hasContent);
     }
     function resizeChatTextarea(ta) {
-      if (!ta || ta.nodeName !== "TEXTAREA") return;
-      var max = 140;
-      /* См. resizePlannerComposer: WebView Telegram / iOS завышает scrollHeight после height:auto. */
-      ta.style.overflowY = "hidden";
-      ta.style.minHeight = "0";
-      ta.style.height = "0";
-      var h = ta.scrollHeight;
-      ta.style.minHeight = "";
-      if (h > max) {
-        ta.style.height = max + "px";
-        ta.style.overflowY = "auto";
-      } else {
-        ta.style.height = h + "px";
+      if (typeof pokerAutosizeTextarea === "function") {
+        pokerAutosizeTextarea(ta, { maxHeight: 140, minHeight: 44 });
       }
     }
     if (chatComposerEl) {
