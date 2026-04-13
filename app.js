@@ -27704,28 +27704,6 @@ function initChat() {
         return isIosLikeForChatViewport() ? 12 : 4;
       }
       /**
-       * TMA: нижняя «щель» layout − visualViewport = ih − offsetTop − vvh.
-       * На отдельных кадрах vvh кратковременно занижен → сырой зазор раздувается (рывок композера вверх).
-       * Подрезаем по независимым сигналам: viewportStableHeight − viewportHeight и base innerHeight − current.
-       */
-      function tmaSanitizeVvKeyboardGapPx(vvRaw, ih, tgDiff, winLossIh) {
-        var x = Math.max(0, Math.round(Number(vvRaw) || 0));
-        if (!(ih > 200)) return x;
-        var absCap = Math.min(340, Math.round(ih * 0.42));
-        if (x > absCap) x = absCap;
-        var tgD = Math.round(Number(tgDiff) || 0);
-        if (tgD >= 28) {
-          var tgCap = Math.min(absCap, Math.round(tgD * 1.12) + 24);
-          if (x > tgCap) x = tgCap;
-        }
-        var wl = Math.round(Number(winLossIh) || 0);
-        if (wl > 48) {
-          var wCap = Math.min(absCap, wl + 36);
-          if (x > wCap) x = wCap;
-        }
-        return x;
-      }
-      /**
        * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
@@ -28062,26 +28040,25 @@ function initChat() {
           var twTma = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
           var isTma = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           if (isTma && twTma && !isChatPhysicalKeyboardContext()) {
+            /*
+             * Только Bot API: viewportStableHeight − viewportHeight. Сырой visualViewport на iOS TMA даёт
+             * мусорные кадры — любая сверка с ih−offsetTop−vvh снова вносит дёрганье.
+             * Резерв: падение innerHeight, затем lastGood. Событие Telegram viewportChanged подключается отдельно.
+             */
             var baseLhTma = Number(window.__pokerChatInnerHBaseline) || 0;
             var winLossTma = baseLhTma > 260 && ih > 0 ? Math.max(0, Math.round(baseLhTma - ih)) : 0;
             var thM = Number(twTma.viewportHeight);
             var tsM = Number(twTma.viewportStableHeight);
-            var vvMraw = Math.max(0, Math.round(ih - offsetTop - vvh));
             var tgDiffRaw = 0;
-            if (tsM > 0 && thM > 0 && tsM > thM + 2) {
+            if (tsM > 0 && thM > 0 && tsM > thM + 3) {
               tgDiffRaw = Math.round(tsM - thM);
             }
-            var vvMUse = tmaSanitizeVvKeyboardGapPx(vvMraw, ih, tgDiffRaw, winLossTma);
             var coverTma = 0;
             var haveTma = false;
-            /* Один стабильный приоритет: TG → падение innerHeight → last → vv (последний резерв). */
-            if (tgDiffRaw >= 26) {
+            if (tgDiffRaw >= 24) {
               coverTma = tgDiffRaw;
-              if (winLossTma > 44 && coverTma > winLossTma + 40) {
-                coverTma = Math.max(winLossTma + 4, Math.round(tgDiffRaw * 0.84));
-              }
-              if (vvMUse >= 28 && coverTma > vvMUse + 28) {
-                coverTma = Math.max(vvMUse + 4, Math.round(tgDiffRaw * 0.78));
+              if (winLossTma > 48 && coverTma > winLossTma + 50) {
+                coverTma = Math.max(winLossTma + 8, Math.round(tgDiffRaw * 0.88));
               }
               haveTma = true;
             } else if (winLossTma >= 52) {
@@ -28092,16 +28069,7 @@ function initChat() {
               if (document.body.classList.contains("chat-keyboard-open") && lastK >= 28) {
                 coverTma = lastK;
                 haveTma = true;
-              } else if (vvMUse >= 30 && vvMUse <= Math.round(ih * 0.38)) {
-                coverTma = vvMUse;
-                haveTma = true;
               }
-            }
-            if (haveTma && vvMUse >= 36 && coverTma > vvMUse + 20) {
-              coverTma = Math.min(coverTma, vvMUse + 16);
-            }
-            if (haveTma && tgDiffRaw >= 26 && vvMUse > 48 && coverTma > vvMUse + 18 && vvMUse >= 72) {
-              coverTma = vvMUse;
             }
             if (haveTma) {
               var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
@@ -28117,13 +28085,9 @@ function initChat() {
               if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
               return;
             }
-            /*
-             * Критично: не проваливаться в coverPxDock ниже — там max(winLoss, overlap, …) и на следующем кадре TG
-             * (tgDiffRaw «молчит») строка резко уезжает вверх. Только lastGood / vv / tgDiff, с потолком.
-             */
             var fbTma = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-            if (fbTma < 24 && tgDiffRaw >= 22) fbTma = tgDiffRaw;
-            if (fbTma < 24 && vvMUse >= 22) fbTma = Math.min(vvMUse, Math.round(ih * 0.4));
+            if (fbTma < 24 && tgDiffRaw >= 20) fbTma = tgDiffRaw;
+            if (fbTma < 24 && winLossTma >= 44) fbTma = Math.min(winLossTma, Math.round(ih * 0.38));
             var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
             fbTma = Math.max(0, Math.min(capFb, fbTma));
             doc.style.setProperty("--chat-vv-inset", "0px");
@@ -28202,6 +28166,20 @@ function initChat() {
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
       }
       window.__pokerSyncPwaChatVisualViewportInset = syncPwaChatVisualViewportInset;
+      try {
+        if (!window.__pokerChatTmaViewportEvAttached) {
+          var twVp = window.Telegram && window.Telegram.WebApp;
+          if (twVp && typeof twVp.onEvent === "function") {
+            window.__pokerChatTmaViewportEvAttached = true;
+            twVp.onEvent("viewportChanged", function () {
+              try {
+                if (!document.body.classList.contains("chat-keyboard-open")) return;
+                syncPwaChatVisualViewportInset();
+              } catch (eVpCh) {}
+            });
+          }
+        }
+      } catch (eVpAtt) {}
       var viewportResizeScrollHandler = null;
       var chatWindowResizeHandler = null;
       window.__pokerChatDetachVisualViewportListeners = function () {
