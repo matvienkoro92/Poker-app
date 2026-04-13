@@ -27450,6 +27450,7 @@ function initChat() {
           window.__pokerChatDockCoverStable = null;
           window.__pokerChatTgKeyboardCoverLast = null;
           window.__pokerChatTgDockCandSmoothed = null;
+          window.__pokerChatTgCoverSpikeGuard = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
@@ -27678,6 +27679,23 @@ function initChat() {
         return isIosLikeForChatViewport() ? 12 : 4;
       }
       /**
+       * TMA iOS: без «живого» tgDiff на кадре vv иногда раздувает cover — строка дёргается вверх.
+       * Сжимаем скачок вверх, если Bot API не подтверждает рост клавиатуры.
+       */
+      function clampTgThreadCoverSpike(coverIn, tgDiffRaw, ihLoc) {
+        var c = Math.max(0, Math.round(Number(coverIn) || 0));
+        var ih0 = ihLoc > 200 ? ihLoc : window.innerHeight || 0;
+        var capL = Math.min(268, Math.max(88, Math.round(ih0 * 0.34)));
+        if (c > capL) c = capL;
+        var prev = Number(window.__pokerChatTgCoverSpikeGuard) || 0;
+        var tgD = Math.round(Number(tgDiffRaw) || 0);
+        if (prev >= 36 && tgD < 22 && c > prev + 26) {
+          c = Math.min(c, prev + 14);
+        }
+        window.__pokerChatTgCoverSpikeGuard = c;
+        return c;
+      }
+      /**
        * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
@@ -27700,34 +27718,12 @@ function initChat() {
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           /*
-           * Telegram iOS: одна оценка перекрытия снизу — max(visualViewport, stableHeight−viewportHeight, cover из sync).
-           * Раньше ветка cover*0.52 при «тихом» vv занижала bottom; двойной min с vv давал полосу в середине экрана.
+           * Telegram iOS: не пересчитывать bottom из живого vv/tg здесь — syncPwaChatVisualViewportInset уже выбрал cover.
+           * Второй пересчёт + сглаживание давали заметный «второй рывок» строки вверх.
            */
-          if (isTgDock && iosDock && ihLim > 200 && window.visualViewport) {
-            var vvH = Number(window.visualViewport.height) || 0;
-            var vvOt = Number(window.visualViewport.offsetTop) || 0;
-            var vvOverlap = Math.max(0, Math.round(ihLim - vvOt - vvH));
-            var twDock = window.Telegram && window.Telegram.WebApp;
-            var tgKbDock = 0;
-            if (twDock && twDock.viewportStableHeight != null && twDock.viewportHeight != null) {
-              var tsD = Number(twDock.viewportStableHeight);
-              var thD = Number(twDock.viewportHeight);
-              if (tsD > 0 && thD > 0 && tsD > thD + 6) tgKbDock = Math.round(tsD - thD);
-            }
+          if (isTgDock && iosDock && ihLim > 200) {
             var hardMaxTg = Math.min(288, Math.max(92, Math.round(ihLim * 0.35)));
-            /*
-             * Не брать max(vv, tg, cover) — на iOS TMA кадры чередуются, источники расходятся, bottom «прыгает».
-             * Приоритет: стабильный Bot API → vv → cover; затем лёгкое сглаживание.
-             */
-            var rawCand;
-            if (tgKbDock >= 32) rawCand = tgKbDock;
-            else if (vvOverlap >= 30) rawCand = vvOverlap;
-            else rawCand = Math.max(0, coverNum, tgKbDock, vvOverlap);
-            var prevSm = Number(window.__pokerChatTgDockCandSmoothed);
-            var smoothCand =
-              !(prevSm > 12) || isNaN(prevSm) ? rawCand : Math.round(prevSm * 0.38 + rawCand * 0.62);
-            window.__pokerChatTgDockCandSmoothed = smoothCand;
-            bottomPx = Math.min(hardMaxTg, smoothCand + gap);
+            bottomPx = Math.min(hardMaxTg, coverNum + gap);
           } else if (ihLim > 280 && !isTgDock) {
             var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
             if (bottomPx > bottomMax) bottomPx = bottomMax;
@@ -27813,7 +27809,20 @@ function initChat() {
               doc.style.removeProperty("--chat-ios-accessory-inset");
               var coverNv =
                 baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
-              applyChatThreadComposerKeyboardDockFromCover(coverNv);
+              var tgDRawNv = 0;
+              try {
+                var twNv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+                if (twNv && twNv.viewportStableHeight != null && twNv.viewportHeight != null) {
+                  var tsNv = Number(twNv.viewportStableHeight);
+                  var thNv = Number(twNv.viewportHeight);
+                  if (tsNv > 0 && thNv > 0 && tsNv > thNv + 2) tgDRawNv = Math.round(tsNv - thNv);
+                }
+              } catch (eTgNv) {}
+              var coverDockNv = coverNv;
+              if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+                coverDockNv = clampTgThreadCoverSpike(coverNv, tgDRawNv, ihFb);
+              }
+              applyChatThreadComposerKeyboardDockFromCover(coverDockNv);
             } else {
               doc.style.setProperty("--chat-vv-inset", insetFb + "px");
               if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
@@ -28023,8 +28032,8 @@ function initChat() {
               if (document.body.classList.contains("chat-keyboard-open") && lastK >= 28) {
                 coverTma = lastK;
                 haveTma = true;
-              } else if (vvM >= 40) {
-                coverTma = vvM;
+              } else if (vvMraw >= 28 && vvMraw <= Math.round(ih * 0.4)) {
+                coverTma = vvMraw;
                 haveTma = true;
               }
             }
@@ -28040,10 +28049,10 @@ function initChat() {
               var winStEm = baseEm > 260 && curEm > 0 ? Math.max(0, Math.round(baseEm - curEm)) : 0;
               if (winStEm > 50) {
                 /* Зазор до клавиатуры уже в applyChatThreadComposerKeyboardDockFromCover (+ getChatComposerKeyboardGapPx) — не дублировать здесь */
-                coverTma = Math.min(Math.max(28, winStEm), Math.round(ih * 0.5));
+                coverTma = Math.min(Math.max(28, winStEm), Math.round(ih * 0.38));
                 haveTma = true;
               } else if (vvMraw >= 32) {
-                coverTma = Math.min(vvMraw, Math.round(ih * 0.5));
+                coverTma = Math.min(vvMraw, Math.round(ih * 0.38));
                 haveTma = coverTma >= 28;
               }
             }
@@ -28054,6 +28063,7 @@ function initChat() {
               }
               var capTma = Math.min(268, Math.max(96, Math.round(ih * 0.34)));
               if (coverTma > capTma) coverTma = capTma;
+              coverTma = clampTgThreadCoverSpike(coverTma, tgDiffRaw, ih);
               window.__pokerChatTgKeyboardCoverLast = coverTma;
               doc.style.setProperty("--chat-vv-inset", "0px");
               doc.style.removeProperty("--chat-ios-accessory-inset");
@@ -28070,6 +28080,7 @@ function initChat() {
             if (fbTma < 24 && vvMraw >= 22) fbTma = Math.min(vvMraw, Math.round(ih * 0.4));
             var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
             fbTma = Math.max(0, Math.min(capFb, fbTma));
+            fbTma = clampTgThreadCoverSpike(fbTma, tgDiffRaw, ih);
             doc.style.setProperty("--chat-vv-inset", "0px");
             doc.style.removeProperty("--chat-ios-accessory-inset");
             applyChatThreadComposerKeyboardDockFromCover(fbTma);
@@ -28198,6 +28209,7 @@ function initChat() {
           window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatTgKeyboardCoverLast = null;
           window.__pokerChatTgDockCandSmoothed = null;
+          window.__pokerChatTgCoverSpikeGuard = null;
           if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {
