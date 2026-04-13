@@ -28061,6 +28061,20 @@ function initChat() {
               if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
               return;
             }
+            /*
+             * Критично: не проваливаться в coverPxDock ниже — там max(winLoss, overlap, …) и на следующем кадре TG
+             * (tgDiffRaw «молчит») строка резко уезжает вверх. Только lastGood / vv / tgDiff, с потолком.
+             */
+            var fbTma = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+            if (fbTma < 24 && tgDiffRaw >= 22) fbTma = tgDiffRaw;
+            if (fbTma < 24 && vvMraw >= 22) fbTma = Math.min(vvMraw, Math.round(ih * 0.4));
+            var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
+            fbTma = Math.max(0, Math.min(capFb, fbTma));
+            doc.style.setProperty("--chat-vv-inset", "0px");
+            doc.style.removeProperty("--chat-ios-accessory-inset");
+            applyChatThreadComposerKeyboardDockFromCover(fbTma);
+            if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+            return;
           }
           /*
            * iOS: взрыв vv подрезаем относительно winLoss. Пошаговое уменьшение cover убрано — давало 2 видимых шага
