@@ -27847,6 +27847,19 @@ function initChat() {
           }
         }
         if (haveTma) {
+          /*
+           * TG viewportStableHeight − viewportHeight часто выше реального «подъёма» окна: WK уже сжал layout,
+           * строка сначала ок у клавиатуры, затем второй кадр даёт завышенный cover → рывок вверх.
+           * Сверху — как у coverPxDock в syncPwa: не больше падения innerHeight + зазор (без дубля с API).
+           */
+          if (winLossTma >= 52) {
+            try {
+              var gapKbTma = Math.round(getChatComposerKeyboardGapPx());
+              var slackTmaWin = Math.max(36, gapKbTma + 28);
+              var capFromWinLoss = winLossTma + slackTmaWin;
+              if (coverTma > capFromWinLoss) coverTma = capFromWinLoss;
+            } catch (eCapWin) {}
+          }
           var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
           if (prevK >= 28 && coverTma > prevK + 45) {
             coverTma = Math.min(coverTma, prevK + 32);
@@ -27865,6 +27878,13 @@ function initChat() {
         if (fbTma < 24 && winLossTma >= 44) fbTma = Math.min(winLossTma, Math.round(ih * 0.38));
         var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
         fbTma = Math.max(0, Math.min(capFb, fbTma));
+        if (winLossTma >= 52) {
+          try {
+            var gapKbFb = Math.round(getChatComposerKeyboardGapPx());
+            var slackFbWin = Math.max(36, gapKbFb + 28);
+            fbTma = Math.min(fbTma, winLossTma + slackFbWin);
+          } catch (eFbWin) {}
+        }
         doc.style.setProperty("--chat-vv-inset", "0px");
         doc.style.removeProperty("--chat-ios-accessory-inset");
         applyChatThreadComposerKeyboardDockFromCover(fbTma);
