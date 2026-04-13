@@ -24248,6 +24248,12 @@ function initChat() {
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
     try {
+      if (!window.__pokerPersonalPollFor || !peerChatIdsEqual(window.__pokerPersonalPollFor, userId)) {
+        window.__pokerPersonalPollFor = userId;
+        window.__pokerPersonalPollRev = "";
+      }
+    } catch (ePrPoll) {}
+    try {
       pokerHydrateChatSnapshotsFromDisk();
     } catch (eHydCv) {}
     convGroupCanChangeAvatar = false;
@@ -25983,12 +25989,23 @@ function initChat() {
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
     var loadForPeer = chatWithUserId;
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer);
+    var pollQs = "";
+    if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
+      pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
+    }
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + pollQs;
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
       if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
+      if (data && data.notModified === true && data.pollRev) {
+        if (typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
+        return;
+      }
       if (data && data.ok) {
+        if (data.pollRev && typeof data.pollRev === "string") {
+          window.__pokerPersonalPollRev = data.pollRev;
+        }
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
         var messages = data.messages || [];
         var pendingEditP = window._pendingPersonalEditMessage;
