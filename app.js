@@ -6966,13 +6966,13 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
           var raf = window.requestAnimationFrame || function (fn) {
             setTimeout(fn, 16);
           };
-          raf(function () {
             raf(function () {
-              try {
-                document.body.style.removeProperty("minHeight");
-              } catch (eMh) {}
+              raf(function () {
+                try {
+                  document.body.style.removeProperty("min-height");
+                } catch (eMh) {}
+              });
             });
-          });
         }
       }
     } catch (eBody) {}
@@ -27325,12 +27325,25 @@ function initChat() {
             b.style.removeProperty("height");
             b.style.removeProperty("min-height");
             b.style.removeProperty("max-height");
+            b.style.removeProperty("padding-bottom");
+            b.style.removeProperty("padding-top");
           }
           if (rootEl && rootEl.style) {
             rootEl.style.removeProperty("height");
             rootEl.style.removeProperty("min-height");
             rootEl.style.removeProperty("max-height");
+            rootEl.style.removeProperty("padding-bottom");
+            rootEl.style.removeProperty("padding-top");
           }
+          try {
+            var appShell = document.getElementById("app");
+            if (appShell && appShell.style) {
+              appShell.style.removeProperty("padding-bottom");
+              appShell.style.removeProperty("padding-top");
+              appShell.style.removeProperty("transform");
+              appShell.style.removeProperty("margin-bottom");
+            }
+          } catch (eAppSh) {}
         } catch (eSh) {}
       }
       function stripChatInputAreaTransforms() {
@@ -27350,6 +27363,8 @@ function initChat() {
             node.style.removeProperty("will-change");
             /* applyChatInputAreasVisualLift задавал margin-bottom с !important — без снятия перебивает CSS после dismiss, строка «исчезает». */
             node.style.removeProperty("margin-bottom");
+            node.style.removeProperty("padding-bottom");
+            node.style.removeProperty("padding-top");
             node.style.removeProperty("position");
             node.style.removeProperty("left");
             node.style.removeProperty("width");
@@ -27392,6 +27407,14 @@ function initChat() {
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
+        try {
+          if (document.body && document.body.getAttribute("data-view") === "chat") {
+            doc.style.removeProperty("--app-bottom-tabbar-pad");
+            if (typeof pokerApplyBottomTabbarPad !== "undefined" && pokerApplyBottomTabbarPad) {
+              pokerApplyBottomTabbarPad._lastPad = null;
+            }
+          }
+        } catch (eTbRoot) {}
         stripChatInputAreaTransforms();
         pokerStripForcedViewportShellHeights();
         clearChatMessagesKeyboardPad();
