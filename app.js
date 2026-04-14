@@ -10183,6 +10183,7 @@ function setView(viewName, navOpts) {
     }
     if (pokerTasksView) pokerTasksView.classList.remove("poker-tasks--task-visible");
     if (typeof window.refreshMttStats === "function") window.refreshMttStats();
+    initClubTasksPlanner();
   }
   var headerGreeting = document.getElementById("headerGreeting");
   var headerSwitcherWrap = document.getElementById("headerChatSwitcherWrap");
@@ -19410,6 +19411,136 @@ function initEquilator() {
 }
 
 // Чат: общий + личные сообщения
+var TASKS_STORAGE_KEY = "poker_tasks_board_v1";
+var clubTasksPlannerInited = false;
+
+function getClubTasksPlannerItems() {
+  try {
+    var raw = localStorage.getItem(TASKS_STORAGE_KEY);
+    var list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveClubTasksPlannerItems(tasks) {
+  try {
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks || []));
+  } catch (e) {}
+}
+
+function clubTasksPlannerEscape(text) {
+  if (text == null) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function clubTasksPlannerStatusLabel(status) {
+  if (status === "important") return "Важно";
+  if (status === "doing") return "В работе";
+  if (status === "done") return "Готово";
+  return "Надо сделать";
+}
+
+function renderClubTasksPlanner() {
+  var tasks = getClubTasksPlannerItems();
+  var statuses = ["important", "todo", "doing", "done"];
+  var lists = {
+    important: document.getElementById("tasksListImportant"),
+    todo: document.getElementById("tasksListTodo"),
+    doing: document.getElementById("tasksListDoing"),
+    done: document.getElementById("tasksListDone")
+  };
+  var counters = {
+    important: document.getElementById("tasksCountImportant"),
+    todo: document.getElementById("tasksCountTodo"),
+    doing: document.getElementById("tasksCountDoing"),
+    done: document.getElementById("tasksCountDone")
+  };
+
+  statuses.forEach(function (status) {
+    var listEl = lists[status];
+    var countEl = counters[status];
+    if (!listEl) return;
+    var filtered = tasks.filter(function (task) { return task.status === status; });
+    if (countEl) countEl.textContent = String(filtered.length);
+    if (!filtered.length) {
+      listEl.innerHTML = '<p class="tasks-column__empty">Пока пусто.</p>';
+      return;
+    }
+    listEl.innerHTML = filtered.map(function (task) {
+      var created = task.createdAt ? new Date(task.createdAt) : null;
+      var createdStr = created && !isNaN(created.getTime()) ? created.toLocaleString("ru-RU") : "";
+      var actions = [];
+      if (task.status !== "important") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="important">В важное</button>');
+      if (task.status !== "todo") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="todo">В надо сделать</button>');
+      if (task.status !== "doing") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="doing">В работу</button>');
+      if (task.status !== "done") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="done">Готово</button>');
+      actions.push('<button type="button" class="tasks-task__delete" data-task-action="delete" data-task-id="' + clubTasksPlannerEscape(task.id) + '">Удалить</button>');
+      return '<article class="tasks-task' + (task.status === "important" ? ' tasks-task--important' : '') + '">' +
+        '<div class="tasks-task__text">' + clubTasksPlannerEscape(task.text) + '</div>' +
+        '<div class="tasks-task__meta">' + clubTasksPlannerStatusLabel(task.status) + (createdStr ? " • " + clubTasksPlannerEscape(createdStr) : "") + '</div>' +
+        '<div class="tasks-task__controls">' + actions.join("") + '</div>' +
+      '</article>';
+    }).join("");
+  });
+}
+
+function initClubTasksPlanner() {
+  var form = document.getElementById("tasksCreateForm");
+  var input = document.getElementById("tasksCreateInput");
+  var importantCheckbox = document.getElementById("tasksImportantCheckbox");
+  var board = document.getElementById("tasksBoard");
+  if (!form || !input || !importantCheckbox || !board) return;
+
+  renderClubTasksPlanner();
+  if (clubTasksPlannerInited) return;
+  clubTasksPlannerInited = true;
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = (input.value || "").trim();
+    if (!text) return;
+    var tasks = getClubTasksPlannerItems();
+    tasks.unshift({
+      id: "task_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+      text: text,
+      status: importantCheckbox.checked ? "important" : "todo",
+      createdAt: new Date().toISOString()
+    });
+    saveClubTasksPlannerItems(tasks);
+    input.value = "";
+    importantCheckbox.checked = false;
+    renderClubTasksPlanner();
+  });
+
+  board.addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest("[data-task-action]") : null;
+    if (!btn) return;
+    var action = btn.getAttribute("data-task-action");
+    var taskId = btn.getAttribute("data-task-id");
+    if (!taskId) return;
+    var tasks = getClubTasksPlannerItems();
+    var idx = tasks.findIndex(function (task) { return task.id === taskId; });
+    if (idx === -1) return;
+    if (action === "delete") {
+      tasks.splice(idx, 1);
+      saveClubTasksPlannerItems(tasks);
+      renderClubTasksPlanner();
+      return;
+    }
+    if (action === "move") {
+      tasks[idx].status = btn.getAttribute("data-task-status") || "todo";
+      saveClubTasksPlannerItems(tasks);
+      renderClubTasksPlanner();
+    }
+  });
+}
+
 var chatPollInterval = null;
 var chatIsEditingMessage = false;
 window.chatGeneralUnread = false;

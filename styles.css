@@ -14769,6 +14769,218 @@ a.tournament-day-share-btn {
   background: rgba(255, 237, 213, 0.5);
   border-color: rgba(249, 115, 22, 0.3);
 }
+.poker-tasks__planner {
+  margin-top: 18px;
+}
+
+.tasks-board {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tasks-board__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-board__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-board__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.tasks-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.tasks-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-create-label,
+.tasks-column__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-create-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg, rgba(15, 23, 42, 0.06));
+  color: var(--text);
+  font: inherit;
+}
+
+.tasks-important-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-create-btn,
+.tasks-task__action,
+.tasks-task__delete {
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tasks-create-btn {
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #fff7ed;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.22);
+}
+
+.tasks-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.tasks-column {
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.tasks-column--important {
+  border-color: rgba(245, 158, 11, 0.45);
+  background:
+    linear-gradient(180deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.04)),
+    var(--card-bg);
+}
+
+.tasks-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tasks-column__count {
+  min-width: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tasks-column__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.tasks-column__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tasks-task {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.07);
+}
+
+.tasks-task--important {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.tasks-task__text {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.tasks-task__meta {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.tasks-task__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tasks-task__action {
+  padding: 8px 10px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text);
+}
+
+.tasks-task__delete {
+  padding: 8px 10px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .tasks-create-form,
+[data-theme="dark"] .tasks-column {
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.34);
+}
+
+[data-theme="dark"] .tasks-create-input {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="dark"] .tasks-task {
+  background: rgba(15, 23, 42, 0.56);
+}
+
+@media (min-width: 860px) {
+  .tasks-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .poker-streak-header--mtt {
   flex-direction: column;
   align-items: stretch;

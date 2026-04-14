@@ -2623,6 +2623,63 @@
                   </table>
                 </div>
               </div>
+              <section class="tasks-board poker-tasks__planner" id="tasksBoard" aria-labelledby="tasksBoardTitle">
+                <div class="tasks-board__head">
+                  <h2 class="tasks-board__title" id="tasksBoardTitle">Планер задач клуба</h2>
+                  <p class="tasks-board__hint">Новые важные задачи можно сразу отправлять в отдельную колонку.</p>
+                </div>
+                <form class="tasks-create-form" id="tasksCreateForm">
+                  <label class="tasks-create-field">
+                    <span class="tasks-create-label">Новая задача</span>
+                    <input
+                      type="text"
+                      class="tasks-create-input"
+                      id="tasksCreateInput"
+                      maxlength="140"
+                      placeholder="Например: проверить структуру турниров Sunday Deep"
+                    />
+                  </label>
+                  <label class="tasks-important-toggle" for="tasksImportantCheckbox">
+                    <input type="checkbox" id="tasksImportantCheckbox" />
+                    <span>Важно</span>
+                  </label>
+                  <button type="submit" class="tasks-create-btn">Добавить</button>
+                </form>
+
+                <div class="tasks-columns">
+                  <section class="tasks-column tasks-column--important" data-tasks-status="important">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Важно</h3>
+                      <span class="tasks-column__count" id="tasksCountImportant">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListImportant"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="todo">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Надо сделать</h3>
+                      <span class="tasks-column__count" id="tasksCountTodo">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListTodo"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="doing">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">В работе</h3>
+                      <span class="tasks-column__count" id="tasksCountDoing">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListDoing"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="done">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Готово</h3>
+                      <span class="tasks-column__count" id="tasksCountDone">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListDone"></div>
+                  </section>
+                </div>
+              </section>
             </div>
             <div class="poker-streak-screen poker-streak-screen--hidden" id="pokerStreakScreen">
               <button type="button" class="poker-streak-screen__back" id="pokerStreakBackBtn" aria-label="Назад">←</button>
@@ -6209,4 +6266,3 @@
     </script>
   </body>
 </html>
-
