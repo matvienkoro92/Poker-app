@@ -27311,9 +27311,11 @@ function initChat() {
         var barFixed = false;
         var bh = 0;
         var btm = 0;
+        var tmaFlowPad = false;
         try {
           if (barEl) {
-            barFixed = window.getComputedStyle(barEl).position === "fixed";
+            tmaFlowPad = isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom();
+            barFixed = !tmaFlowPad && window.getComputedStyle(barEl).position === "fixed";
             if (barFixed) {
               bh = barEl.offsetHeight || 72;
               btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
@@ -27364,6 +27366,9 @@ function initChat() {
                   }
                 } catch (eBtmFb) {}
               }
+            } else if (tmaFlowPad) {
+              bh = barEl.offsetHeight || 72;
+              btm = 0;
             }
           }
         } catch (eBarPad) {}
@@ -27371,6 +27376,9 @@ function initChat() {
         if (barFixed) {
           pad = Math.round(bh + btm + gap);
           if (pad < 28) pad = 28;
+        } else if (tmaFlowPad) {
+          pad = Math.round(bh + gap + 8);
+          if (pad < 44) pad = 44;
         } else {
           var cs = getComputedStyle(document.documentElement);
           var lift = (parseFloat(cs.getPropertyValue("--chat-vv-inset")) || 0) + (parseFloat(cs.getPropertyValue("--chat-ios-accessory-inset")) || 0);
@@ -28059,6 +28067,18 @@ function initChat() {
           } catch (eTk1) {}
           return;
         }
+        if (isTelegramMiniAppChatThreadIos()) {
+          stripChatInputAreaTransforms();
+          try {
+            window.__pokerChatThreadDockBottomCssPx = 0;
+            window.__pokerChatLastAppliedDockBottom = 0;
+            window.__pokerChatTmaDockTabKey = null;
+          } catch (eTmaFlow) {}
+          try {
+            updateTelegramMiniAppChatThreadDebugOverlay("apply-flow", { cover: 0, bottom: 0 });
+          } catch (eDbgFlow) {}
+          return;
+        }
         var gap = getChatComposerKeyboardGapPx();
         var coverNum = Math.max(0, Math.round(Number(coverPx) || 0));
         var bottomPx = coverNum + gap;
@@ -28209,12 +28229,20 @@ function initChat() {
         var tgIosThread = isTelegramMiniAppChatThreadIos();
         var focusAgeTma = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
         var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+        if (tgIosThread) {
+          window.__pokerChatTgKeyboardCoverLast = 0;
+          doc.style.setProperty("--chat-vv-inset", "0px");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          try {
+            updateTelegramMiniAppChatThreadDebugOverlay("tma-flow", { cover: 0, bottom: 0 });
+          } catch (eDbgFlowSync) {}
+          applyChatThreadComposerKeyboardDockFromCover(0);
+          if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+          return true;
+        }
         var coverTma = 0;
         var haveTma = false;
-        if (tgIosThread) {
-          coverTma = clampTelegramMiniAppIosThreadCover(ih, winLossTma, tgDiffRaw, prevK, focusAgeTma);
-          haveTma = coverTma >= 18;
-        } else if (winLossTma >= 52) {
+        if (winLossTma >= 52) {
           coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
           haveTma = true;
         } else if (tgDiffRaw >= 24) {
