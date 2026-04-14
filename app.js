@@ -3183,6 +3183,7 @@ function runGazetteAndTasksInit() {
     var listAll = document.getElementById("romanTaskListAll");
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
+    var importantCheckbox = document.getElementById("romanTaskImportantCheckbox");
     if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
     var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
     function readPlannerTabStorage() {
@@ -4369,18 +4370,25 @@ function runGazetteAndTasksInit() {
       if (!isPlannerAllowedUser()) return;
       var text = input.value ? input.value.trim() : "";
       if (!text) return;
+      var wantImportant = !!(importantCheckbox && importantCheckbox.checked);
       var tasks = loadTasks();
       tasks.push({
         id: "t_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9),
         text: text,
         done: false,
         doing: false,
-        important: false,
+        important: wantImportant,
         createdAt: Date.now(),
-        plannerOrder: nextPlannerOrderInBucket(tasks, false),
+        plannerOrder: nextPlannerOrderInBucket(tasks, wantImportant),
       });
       saveTasks(tasks);
       input.value = "";
+      if (importantCheckbox) importantCheckbox.checked = false;
+      if (wantImportant && plannerTab !== "important") {
+        plannerTab = "important";
+        writePlannerTabStorage("important");
+        setPlannerTabUi();
+      }
       renderTasks();
       resizePlannerComposer();
     });

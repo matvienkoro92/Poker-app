@@ -4567,6 +4567,10 @@ html.vpn-proxy-modal-open {
   color: #2c1810;
   border-color: rgba(44, 24, 16, 0.35);
 }
+[data-theme="light"] .roman-task-planner__toggle {
+  background: rgba(251, 191, 36, 0.18);
+  color: #9a3412;
+}
 .roman-task-planner {
   margin-top: 0;
   padding: 0;
@@ -4901,6 +4905,22 @@ html.vpn-proxy-modal-open {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.roman-task-planner__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.14);
+  color: #7c2d12;
+  font-size: 13px;
+  font-weight: 700;
+}
+.roman-task-planner__toggle input {
+  margin: 0;
+  accent-color: #d97706;
 }
 .roman-task-planner__input {
   width: 100%;
