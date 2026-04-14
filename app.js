@@ -28445,18 +28445,28 @@ function initChat() {
           if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
         }
         var isIosChatKb = isIosLikeForChatViewport();
-        syncPwaChatVisualViewportInset();
-        scrollMessagesToBottom();
-        requestAnimationFrame(function () {
-          syncPwaChatVisualViewportInset();
-          scrollMessagesToBottom();
-        });
-        var skipIosKbExtraDelay =
+        var isTmaThreadFocus =
           typeof isTelegramWebApp === "function" &&
           isTelegramWebApp() &&
           typeof isChatThreadComposerKeyboardDom === "function" &&
           isChatThreadComposerKeyboardDom();
-        if (isIosChatKb && !skipIosKbExtraDelay) {
+        syncPwaChatVisualViewportInset();
+        scrollMessagesToBottom();
+        if (!isTmaThreadFocus) {
+          requestAnimationFrame(function () {
+            syncPwaChatVisualViewportInset();
+            scrollMessagesToBottom();
+          });
+        }
+        if (isTmaThreadFocus) {
+          setTimeout(function () {
+            try {
+              if (!document.body.classList.contains("chat-keyboard-open")) return;
+              syncTelegramMiniAppChatThreadKeyboard();
+              scrollMessagesToBottom();
+            } catch (eTmaFocusSettle) {}
+          }, 120);
+        } else if (isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollMessagesToBottom();
@@ -28488,7 +28498,7 @@ function initChat() {
           } catch (eWr0b) {}
           chatWindowResizeHandler = null;
         }
-        if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
+        if (!isTmaThreadFocus && typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
           if (viewportResizeScrollHandler) {
             window.visualViewport.removeEventListener("resize", viewportResizeScrollHandler);
             window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
