@@ -27843,6 +27843,16 @@ function initChat() {
         if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return 5;
         return isIosLikeForChatViewport() ? 12 : 4;
       }
+      function isTelegramMiniAppChatThreadIos() {
+        return (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport() &&
+          typeof isChatPhysicalKeyboardContext === "function" &&
+          !isChatPhysicalKeyboardContext()
+        );
+      }
       /**
        * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
        * bottom = coverPx + getChatComposerKeyboardGapPx().
@@ -27989,16 +27999,26 @@ function initChat() {
         if (tsM > 0 && thM > 0 && tsM > thM + 3) {
           tgDiffRaw = Math.round(tsM - thM);
         }
+        var tgIosThread = isTelegramMiniAppChatThreadIos();
+        var focusAgeTma = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
         var coverTma = 0;
         var haveTma = false;
-        if (tgDiffRaw >= 24) {
+        if (tgIosThread) {
+          if (winLossTma >= 24) {
+            coverTma = winLossTma;
+            haveTma = true;
+          } else if (tgDiffRaw >= 28) {
+            coverTma = Math.round(tgDiffRaw * 0.72);
+            haveTma = true;
+          }
+        } else if (winLossTma >= 52) {
+          coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
+          haveTma = true;
+        } else if (tgDiffRaw >= 24) {
           coverTma = tgDiffRaw;
           if (winLossTma > 48 && coverTma > winLossTma + 50) {
             coverTma = Math.max(winLossTma + 8, Math.round(tgDiffRaw * 0.88));
           }
-          haveTma = true;
-        } else if (winLossTma >= 52) {
-          coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
           haveTma = true;
         } else {
           var lastK0 = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
@@ -28008,13 +28028,12 @@ function initChat() {
           }
         }
         if (haveTma) {
-          var focusAgeTma = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           /*
            * TG viewportStableHeight − viewportHeight часто выше реального «подъёма» окна: WK уже сжал layout,
            * строка сначала ок у клавиатуры, затем второй кадр даёт завышенный cover → рывок вверх.
            * Сверху — как у coverPxDock в syncPwa: не больше падения innerHeight + зазор (без дубля с API).
            */
-          if (winLossTma >= 52) {
+          if (!tgIosThread && winLossTma >= 52) {
             try {
               var gapKbTma = Math.round(getChatComposerKeyboardGapPx());
               var slackTmaWin = Math.max(36, gapKbTma + 28);
@@ -28023,25 +28042,26 @@ function initChat() {
             } catch (eCapWin) {}
           }
           var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-          if (
-            typeof isIosLikeForChatViewport === "function" &&
-            isIosLikeForChatViewport() &&
-            focusAgeTma > 0 &&
-            focusAgeTma < 720
-          ) {
+          if (tgIosThread && focusAgeTma > 0 && focusAgeTma < 900) {
             if (winLossTma >= 24) {
               var earlySlackTma = Math.max(18, Math.round(getChatComposerKeyboardGapPx()) + 10);
               coverTma = Math.min(coverTma, winLossTma + earlySlackTma);
             }
-            if (prevK >= 28 && coverTma > prevK + 16) {
-              coverTma = prevK + 16;
+            if (prevK >= 20 && coverTma > prevK + 10) {
+              coverTma = prevK + 10;
             }
           }
-          if (prevK >= 28 && coverTma > prevK + 45) {
+          if (tgIosThread) {
+            var capIosTma = Math.min(220, Math.max(72, Math.round(ih * 0.28)));
+            coverTma = Math.min(coverTma, capIosTma);
+          } else if (prevK >= 28 && coverTma > prevK + 45) {
             coverTma = Math.min(coverTma, prevK + 32);
           }
-          var capTma = Math.min(268, Math.max(96, Math.round(ih * 0.34)));
+          var capTma = tgIosThread
+            ? Math.min(220, Math.max(72, Math.round(ih * 0.28)))
+            : Math.min(268, Math.max(96, Math.round(ih * 0.34)));
           if (coverTma > capTma) coverTma = capTma;
+          if (coverTma < 0) coverTma = 0;
           window.__pokerChatTgKeyboardCoverLast = coverTma;
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
@@ -28372,6 +28392,10 @@ function initChat() {
             twVp.onEvent("viewportChanged", function () {
               try {
                 if (!document.body.classList.contains("chat-keyboard-open")) return;
+                if (isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom()) {
+                  syncTelegramMiniAppChatThreadKeyboard();
+                  return;
+                }
                 syncPwaChatVisualViewportInset();
               } catch (eVpCh) {}
             });
@@ -28450,7 +28474,8 @@ function initChat() {
           isTelegramWebApp() &&
           typeof isChatThreadComposerKeyboardDom === "function" &&
           isChatThreadComposerKeyboardDom();
-        syncPwaChatVisualViewportInset();
+        if (isTmaThreadFocus) syncTelegramMiniAppChatThreadKeyboard();
+        else syncPwaChatVisualViewportInset();
         scrollMessagesToBottom();
         if (!isTmaThreadFocus) {
           requestAnimationFrame(function () {
