@@ -19801,10 +19801,13 @@ function initChat() {
   var personalView = document.getElementById("chatPersonalView");
   var adminsView = document.getElementById("chatAdminsView");
   var generalMessages = document.getElementById("chatGeneralMessages");
-  var chatComposerEl = document.getElementById("chatSharedComposer");
+  var chatSharedComposerEl = document.getElementById("chatSharedComposer");
+  var chatComposerEl = chatSharedComposerEl;
   var chatGeneralComposerMount = document.getElementById("chatGeneralComposerMount");
   var chatPersonalComposerMount = document.getElementById("chatPersonalComposerMount");
   var chatComposerPool = document.getElementById("chatComposerPool");
+  var chatGeneralComposerEl = null;
+  var chatPersonalComposerEl = null;
   var chatComposerDrafts = { general: "", personal: "" };
   var chatComposerMounted = "detached";
   var generalSendBtn = document.getElementById("chatGeneralSendBtn");
@@ -19906,6 +19909,30 @@ function initChat() {
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
+  function shouldUseDedicatedTelegramIosChatComposer() {
+    return typeof isTelegramWebApp === "function" && isTelegramWebApp() && isIosLikeForChatViewport();
+  }
+  function createDedicatedChatComposer(id, placeholder, ariaLabel) {
+    if (!chatSharedComposerEl) return null;
+    var ta = chatSharedComposerEl.cloneNode(false);
+    ta.id = id;
+    ta.value = "";
+    ta.placeholder = placeholder || "";
+    if (ariaLabel) ta.setAttribute("aria-label", ariaLabel);
+    else ta.removeAttribute("aria-label");
+    ta.removeAttribute("tabindex");
+    return ta;
+  }
+  if (shouldUseDedicatedTelegramIosChatComposer()) {
+    chatGeneralComposerEl = createDedicatedChatComposer("chatGeneralComposer", "Сообщение в общий чат...", "Сообщение в общий чат");
+    chatPersonalComposerEl = createDedicatedChatComposer("chatPersonalComposer", "Сообщение...", "");
+    if (chatGeneralComposerEl && chatGeneralComposerMount && !chatGeneralComposerMount.contains(chatGeneralComposerEl)) {
+      chatGeneralComposerMount.appendChild(chatGeneralComposerEl);
+    }
+    if (chatPersonalComposerEl && chatPersonalComposerMount && !chatPersonalComposerMount.contains(chatPersonalComposerEl)) {
+      chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
+    }
+  }
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
   var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
@@ -20141,28 +20168,71 @@ function initChat() {
     return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
   }
   function mountChatComposer(mode) {
-    if (!chatComposerEl || !chatComposerPool) return;
+    if (!chatSharedComposerEl || !chatComposerPool) return;
     mode = mode || "detached";
     var nextMounted = mode === "general" || mode === "personal" ? mode : "detached";
+    var useDedicated = shouldUseDedicatedTelegramIosChatComposer() && chatGeneralComposerEl && chatPersonalComposerEl;
+    if (useDedicated) {
+      flushChatComposerToDrafts();
+      chatComposerMounted = nextMounted;
+      if (nextMounted === "general") {
+        chatComposerEl = chatGeneralComposerEl;
+        chatComposerEl.placeholder = "Сообщение в общий чат...";
+        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
+        chatComposerEl.value = chatComposerDrafts.general || "";
+        chatComposerEl.disabled = false;
+        chatComposerEl.removeAttribute("tabindex");
+        chatPersonalComposerEl.setAttribute("tabindex", "-1");
+      } else if (nextMounted === "personal") {
+        chatComposerEl = chatPersonalComposerEl;
+        chatComposerEl.placeholder = "Сообщение...";
+        chatComposerEl.removeAttribute("aria-label");
+        chatComposerEl.value = chatComposerDrafts.personal || "";
+        chatComposerEl.disabled = false;
+        chatComposerEl.removeAttribute("tabindex");
+        chatGeneralComposerEl.setAttribute("tabindex", "-1");
+      } else {
+        chatComposerEl = chatSharedComposerEl;
+        chatSharedComposerEl.value = "";
+        chatSharedComposerEl.placeholder = "";
+        chatSharedComposerEl.blur();
+        chatSharedComposerEl.disabled = false;
+        chatSharedComposerEl.setAttribute("tabindex", "-1");
+        chatGeneralComposerEl.setAttribute("tabindex", "-1");
+        chatPersonalComposerEl.setAttribute("tabindex", "-1");
+      }
+      try {
+        if (nextMounted === "general" && typeof resizeChatTextarea === "function") resizeChatTextarea(chatGeneralComposerEl);
+        if (nextMounted === "personal" && typeof resizeChatTextarea === "function") resizeChatTextarea(chatPersonalComposerEl);
+      } catch (eRtDed) {}
+      try {
+        if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+      } catch (eGd) {}
+      try {
+        if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+      } catch (ePd) {}
+      return;
+    }
+    chatComposerEl = chatSharedComposerEl;
     var contained =
       nextMounted === "detached"
-        ? chatComposerPool.contains(chatComposerEl)
+        ? chatComposerPool.contains(chatSharedComposerEl)
         : nextMounted === "general"
-          ? chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)
-          : chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl);
+          ? chatGeneralComposerMount && chatGeneralComposerMount.contains(chatSharedComposerEl)
+          : chatPersonalComposerMount && chatPersonalComposerMount.contains(chatSharedComposerEl);
     var same = nextMounted === chatComposerMounted && contained;
     if (!same) {
       flushChatComposerToDrafts();
       chatComposerMounted = nextMounted;
       if (nextMounted === "general" && chatGeneralComposerMount) {
-        chatGeneralComposerMount.appendChild(chatComposerEl);
+        chatGeneralComposerMount.appendChild(chatSharedComposerEl);
         chatComposerEl.placeholder = "Сообщение в общий чат...";
         chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
         chatComposerEl.value = chatComposerDrafts.general || "";
         chatComposerEl.disabled = false;
         chatComposerEl.removeAttribute("tabindex");
       } else if (nextMounted === "personal" && chatPersonalComposerMount) {
-        chatPersonalComposerMount.appendChild(chatComposerEl);
+        chatPersonalComposerMount.appendChild(chatSharedComposerEl);
         chatComposerEl.placeholder = "Сообщение...";
         chatComposerEl.removeAttribute("aria-label");
         chatComposerEl.value = chatComposerDrafts.personal || "";
@@ -20170,7 +20240,7 @@ function initChat() {
         chatComposerEl.removeAttribute("tabindex");
       } else {
         chatComposerMounted = "detached";
-        chatComposerPool.appendChild(chatComposerEl);
+        chatComposerPool.appendChild(chatSharedComposerEl);
         chatComposerEl.value = "";
         chatComposerEl.placeholder = "";
         chatComposerEl.blur();
@@ -29053,10 +29123,13 @@ function initChat() {
           }, ms);
         });
       }
-      if (chatComposerEl) {
-        chatComposerEl.addEventListener(
+      function bindChatComposerKeyboardEvents(ta) {
+        if (!ta || ta.__pokerChatKeyboardEventsBound) return;
+        ta.__pokerChatKeyboardEventsBound = true;
+        ta.addEventListener(
           "touchstart",
           function () {
+            chatComposerEl = ta;
             try {
               var ihTs = window.innerHeight || 0;
               if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
@@ -29064,9 +29137,16 @@ function initChat() {
           },
           { passive: true }
         );
-        chatComposerEl.addEventListener("focus", onChatInputFocus);
-        chatComposerEl.addEventListener("blur", onChatInputBlur);
+        ta.addEventListener("focus", function () {
+          chatComposerEl = ta;
+          onChatInputFocus();
+        });
+        ta.addEventListener("blur", function () {
+          chatComposerEl = ta;
+          onChatInputBlur();
+        });
       }
+      [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerKeyboardEvents);
     })();
     window.chatRefresh = function () {
       /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
@@ -29873,10 +29953,13 @@ function initChat() {
         pokerAutosizeTextarea(ta, { maxHeight: 140, minHeight: 44 });
       }
     }
-    if (chatComposerEl) {
-      chatComposerEl.addEventListener("input", function () {
+    function bindChatComposerInputEvents(ta) {
+      if (!ta || ta.__pokerChatInputEventsBound) return;
+      ta.__pokerChatInputEventsBound = true;
+      ta.addEventListener("input", function () {
+        chatComposerEl = ta;
         flushChatComposerToDrafts();
-        resizeChatTextarea(chatComposerEl);
+        resizeChatTextarea(ta);
         try {
           if (document.body.classList.contains("chat-keyboard-open")) {
             var rafI = window.requestAnimationFrame || function (fn) {
@@ -29892,35 +29975,40 @@ function initChat() {
         updateGeneralSendBtnIcon();
         updatePersonalSendBtnIcon();
         try {
-          var rawV = chatComposerEl.value || "";
+          var rawV = ta.value || "";
           var trimmedV = rawV.trim();
           var modalOpen = chatTemplatesModal && chatTemplatesModal.getAttribute("aria-hidden") === "false";
           if (!modalOpen && trimmedV === "/") {
-            chatComposerEl.value = "";
+            ta.value = "";
             flushChatComposerToDrafts();
             updateGeneralSendBtnIcon();
             updatePersonalSendBtnIcon();
-            resizeChatTextarea(chatComposerEl);
+            resizeChatTextarea(ta);
             if (chatComposerMounted === "general") showTemplatesMenu("general");
             else if (chatComposerMounted === "personal") showTemplatesMenu("personal");
           }
         } catch (err) {}
       });
-      chatComposerEl.addEventListener("focus", function () { resizeChatTextarea(chatComposerEl); });
-      chatComposerEl.addEventListener("change", function () {
+      ta.addEventListener("focus", function () {
+        chatComposerEl = ta;
+        resizeChatTextarea(ta);
+      });
+      ta.addEventListener("change", function () {
+        chatComposerEl = ta;
         flushChatComposerToDrafts();
         updateGeneralSendBtnIcon();
         updatePersonalSendBtnIcon();
       });
-      chatComposerEl.addEventListener("keydown", function (e) {
+      ta.addEventListener("keydown", function (e) {
+        chatComposerEl = ta;
         if (e.key !== "Enter" || e.shiftKey) return;
         try {
-          if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
+          if (chatPersonalComposerMount && chatPersonalComposerMount.contains(ta)) {
             e.preventDefault();
             sendMessage();
             return;
           }
-          if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
+          if (chatGeneralComposerMount && chatGeneralComposerMount.contains(ta)) {
             e.preventDefault();
             sendGeneral();
             return;
@@ -29934,8 +30022,9 @@ function initChat() {
           sendGeneral();
         }
       });
-      resizeChatTextarea(chatComposerEl);
+      resizeChatTextarea(ta);
     }
+    [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerInputEvents);
     updateGeneralSendBtnIcon();
     var generalReplyCancel = document.querySelector("#chatGeneralReplyPreview .chat-reply-preview__cancel");
     if (generalReplyCancel) generalReplyCancel.addEventListener("click", function () {
