@@ -27904,6 +27904,51 @@ function initChat() {
         }
         return session;
       }
+      function shouldShowTelegramMiniAppChatThreadDebugOverlay() {
+        return isTelegramMiniAppChatThreadIos();
+      }
+      function ensureTelegramMiniAppChatThreadDebugOverlay() {
+        if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) return null;
+        var existing = document.getElementById("chatTmaKeyboardDebug");
+        if (existing) return existing;
+        var el = document.createElement("div");
+        el.id = "chatTmaKeyboardDebug";
+        el.className = "chat-tma-keyboard-debug";
+        el.setAttribute("aria-hidden", "true");
+        document.body.appendChild(el);
+        return el;
+      }
+      function hideTelegramMiniAppChatThreadDebugOverlay() {
+        var existing = document.getElementById("chatTmaKeyboardDebug");
+        if (existing) existing.classList.remove("chat-tma-keyboard-debug--visible");
+      }
+      function updateTelegramMiniAppChatThreadDebugOverlay(source, extra) {
+        if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) {
+          hideTelegramMiniAppChatThreadDebugOverlay();
+          return;
+        }
+        var el = ensureTelegramMiniAppChatThreadDebugOverlay();
+        if (!el) return;
+        var twDbg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        var vvDbg = window.visualViewport || null;
+        var ihDbg = window.innerHeight || 0;
+        var baseDbg = Number(window.__pokerChatInnerHBaseline) || 0;
+        var winLossDbg = baseDbg > 260 && ihDbg > 0 ? Math.max(0, Math.round(baseDbg - ihDbg)) : 0;
+        var focusAgeDbg = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+        var payload = extra && typeof extra === "object" ? extra : {};
+        var lines = [
+          "src " + String(source || "-"),
+          "age " + focusAgeDbg + "ms",
+          "ih " + ihDbg + " base " + baseDbg + " loss " + winLossDbg,
+          "tg vh " + (twDbg ? Number(twDbg.viewportHeight) || 0 : 0) + " vs " + (twDbg ? Number(twDbg.viewportStableHeight) || 0 : 0),
+          "vv h " + (vvDbg ? Number(vvDbg.height) || 0 : 0) + " top " + (vvDbg ? Number(vvDbg.offsetTop) || 0 : 0),
+          "cover " + (payload.cover != null ? payload.cover : Number(window.__pokerChatTgKeyboardCoverLast) || 0),
+          "bottom " + (payload.bottom != null ? payload.bottom : Number(window.__pokerChatThreadDockBottomCssPx) || 0),
+          "tab " + (window.__pokerChatTmaDockTabKey || "-")
+        ];
+        el.textContent = lines.join("\n");
+        el.classList.add("chat-tma-keyboard-debug--visible");
+      }
       function computeTelegramMiniAppIosThreadCover(ih, winLossTma, tgDiffRaw, prevCover, focusAgeMs) {
         var session = getTelegramMiniAppChatThreadFocusSession();
         var cap = Math.min(176, Math.max(64, Math.round(ih * 0.235)));
@@ -28083,6 +28128,9 @@ function initChat() {
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
         } catch (eDockPx) {}
+        try {
+          updateTelegramMiniAppChatThreadDebugOverlay("apply", { cover: coverNum, bottom: bottomPx });
+        } catch (eDbgApply) {}
         /*
          * Каждый sync вызывал stripChatInputAreaTransforms: снимались position/bottom и класс vv-dock — на кадр полоса
          * теряла fixed и визуально «прыгала». В TMA+iOS при том же табе обновляем только bottom.
@@ -28210,6 +28258,9 @@ function initChat() {
           if (coverTma > capTma) coverTma = capTma;
           if (coverTma < 0) coverTma = 0;
           window.__pokerChatTgKeyboardCoverLast = coverTma;
+          try {
+            updateTelegramMiniAppChatThreadDebugOverlay("tma-sync", { cover: coverTma });
+          } catch (eDbgSync) {}
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
           applyChatThreadComposerKeyboardDockFromCover(coverTma);
@@ -28228,6 +28279,9 @@ function initChat() {
             fbTma = Math.min(fbTma, winLossTma + slackFbWin);
           } catch (eFbWin) {}
         }
+        try {
+          updateTelegramMiniAppChatThreadDebugOverlay("tma-fallback", { cover: fbTma });
+        } catch (eDbgFb) {}
         doc.style.setProperty("--chat-vv-inset", "0px");
         doc.style.removeProperty("--chat-ios-accessory-inset");
         applyChatThreadComposerKeyboardDockFromCover(fbTma);
@@ -28237,6 +28291,7 @@ function initChat() {
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
         if (!document.body.classList.contains("chat-keyboard-open")) {
+          hideTelegramMiniAppChatThreadDebugOverlay();
           doc.style.removeProperty("--chat-vv-inset");
           doc.style.removeProperty("--chat-ios-accessory-inset");
           try {
@@ -28589,6 +28644,9 @@ function initChat() {
           resetChatKeyboardDockRuntimeState();
           window.__pokerChatKeyboardFocusAtMs = Date.now();
         } catch (eDockOn) {}
+        try {
+          updateTelegramMiniAppChatThreadDebugOverlay("focus");
+        } catch (eDbgFocus) {}
         var isIosChatKb = isIosLikeForChatViewport();
         var isTmaThreadFocus =
           typeof isTelegramWebApp === "function" &&
@@ -28803,6 +28861,7 @@ function initChat() {
       }
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
+        hideTelegramMiniAppChatThreadDebugOverlay();
         if (chatWindowResizeHandler) {
           try {
             window.removeEventListener("resize", chatWindowResizeHandler);

@@ -3164,6 +3164,28 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
   will-change: auto;
   --chat-input-lift: 0px !important;
 }
+.chat-tma-keyboard-debug {
+  position: fixed;
+  right: 8px;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  z-index: 10050;
+  max-width: min(68vw, 260px);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #d1fae5;
+  font: 11px/1.35 "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, -8px, 0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.chat-tma-keyboard-debug--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
 .chat-switcher-row {
   display: flex;
   justify-content: center;
