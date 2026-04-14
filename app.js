@@ -27585,7 +27585,7 @@ function initChat() {
             node.style.removeProperty("transform");
             node.style.removeProperty("-webkit-transform");
             node.style.removeProperty("will-change");
-            /* applyChatInputAreasVisualLift задавал margin-bottom с !important — без снятия перебивает CSS после dismiss, строка «исчезает». */
+            /* Старые inline-смещения после клавиатуры перебивали CSS после dismiss, поэтому чистим margin-bottom явно. */
             node.style.removeProperty("margin-bottom");
             node.style.removeProperty("padding-bottom");
             node.style.removeProperty("padding-top");
@@ -27604,24 +27604,30 @@ function initChat() {
           });
         } catch (eSt) {}
       }
-      function finalizeChatKeyboardDismiss() {
+      function clearChatComposerDockClass() {
+        try {
+          var g = document.getElementById("chatGeneralInputArea");
+          var p = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
+          if (g) g.classList.remove("chat-input-area--vv-dock");
+          if (p) p.classList.remove("chat-input-area--vv-dock");
+        } catch (eDockCls) {}
+      }
+      function resetChatKeyboardDockRuntimeState() {
         try {
           window.__pokerChatKeyboardFocusAtMs = 0;
-          window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatLastAppliedDockBottom = null;
-          window.__pokerChatKbDockMonotonicUntil = 0;
-          window.__pokerChatDockSmoothedPx = null;
-          window.__pokerChatDockCoverStable = null;
           window.__pokerChatTgKeyboardCoverLast = null;
-          window.__pokerChatTgDockCandSmoothed = null;
           window.__pokerChatThreadDockBottomCssPx = null;
           window.__pokerChatTmaDockTabKey = null;
-          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
+          clearChatComposerDockClass();
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
             window.__pokerChatVvInsetDebounceTimer = null;
           }
-        } catch (eClrDock) {}
+        } catch (eDockReset) {}
+      }
+      function finalizeChatKeyboardDismiss() {
+        resetChatKeyboardDockRuntimeState();
         try {
           if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
             window.__pokerChatDetachVisualViewportListeners();
@@ -27819,17 +27825,6 @@ function initChat() {
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
       }
 
-      /** Раньше: fixed bottom + класс vv-dock. Снятие класса и инлайна при закрытии клавиатуры. */
-      function pokerSetChatComposerDockClass(on) {
-        if (on) return;
-        try {
-          var g = document.getElementById("chatGeneralInputArea");
-          var p = convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null;
-          if (g) g.classList.remove("chat-input-area--vv-dock");
-          if (p) p.classList.remove("chat-input-area--vv-dock");
-        } catch (eDockCls) {}
-      }
-      function applyChatInputAreasVisualLift() {}
       /** Фокус в общем/личном треде: не тянуть --chat-vv-inset для «подъёма» композера (переделывается отдельно). */
       function isChatThreadComposerKeyboardDom() {
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
@@ -28369,11 +28364,6 @@ function initChat() {
             }
             if (coverPxDock > coverDockCap) coverPxDock = coverDockCap;
           }
-          if (isIosLikeForChatViewport() && !isChatPhysicalKeyboardContext()) {
-            try {
-              window.__pokerChatDockCoverStable = coverPxDock;
-            } catch (eStSave) {}
-          }
           doc.style.setProperty("--chat-vv-inset", "0px");
           doc.style.removeProperty("--chat-ios-accessory-inset");
           applyChatThreadComposerKeyboardDockFromCover(coverPxDock);
@@ -28433,7 +28423,6 @@ function initChat() {
         try {
           var ihFocus = window.innerHeight || 0;
           if (ihFocus > 200) window.__pokerChatInnerHBaseline = ihFocus;
-          window.__pokerChatKeyboardFocusAtMs = Date.now();
         } catch (eBl) {}
         if (isChatPhysicalKeyboardContext()) {
           var elDesk = getVisibleMessagesEl();
@@ -28450,14 +28439,8 @@ function initChat() {
         document.documentElement.classList.add("chat-keyboard-open");
         document.body.classList.add("chat-keyboard-open");
         try {
-          window.__pokerChatDockSmoothedPx = null;
-          window.__pokerChatDockCoverStable = null;
-          window.__pokerChatLastAppliedDockBottom = null;
-          window.__pokerChatTgKeyboardCoverLast = null;
-          window.__pokerChatTgDockCandSmoothed = null;
-          window.__pokerChatThreadDockBottomCssPx = null;
-          window.__pokerChatTmaDockTabKey = null;
-          if (typeof pokerSetChatComposerDockClass === "function") pokerSetChatComposerDockClass(false);
+          resetChatKeyboardDockRuntimeState();
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
         } catch (eDockOn) {}
         function scrollMessagesToBottom() {
           updateChatMessagesKeyboardPad();
