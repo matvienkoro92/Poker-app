@@ -27401,6 +27401,14 @@ function initChat() {
             } catch (ePhPad) {}
           }
         }
+        try {
+          window.__pokerChatMessagesKeyboardPadLast = pad;
+          updateTelegramMiniAppChatThreadDebugOverlay("pad", {
+            pad: pad,
+            bottom: btm,
+            cover: Number(window.__pokerChatTgKeyboardCoverLast) || 0
+          });
+        } catch (eDbgPad) {}
         box.style.paddingBottom = pad + "px";
         try {
           if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
@@ -27944,6 +27952,7 @@ function initChat() {
           "vv h " + (vvDbg ? Number(vvDbg.height) || 0 : 0) + " top " + (vvDbg ? Number(vvDbg.offsetTop) || 0 : 0),
           "cover " + (payload.cover != null ? payload.cover : Number(window.__pokerChatTgKeyboardCoverLast) || 0),
           "bottom " + (payload.bottom != null ? payload.bottom : Number(window.__pokerChatThreadDockBottomCssPx) || 0),
+          "pad " + (payload.pad != null ? payload.pad : Number(window.__pokerChatMessagesKeyboardPadLast) || 0),
           "tab " + (window.__pokerChatTmaDockTabKey || "-")
         ];
         el.textContent = lines.join("\n");
