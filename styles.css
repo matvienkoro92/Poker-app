@@ -8125,6 +8125,10 @@ img.chat-contact__avatar {
   padding: 10px 40px 10px 14px;
   border-radius: 22px;
 }
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
+  font-size: 16px;
+  line-height: 1.35;
+}
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
 }
