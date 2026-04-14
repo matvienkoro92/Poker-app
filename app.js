@@ -27660,12 +27660,20 @@ function initChat() {
       }
       function setChatKeyboardOpenClasses(open) {
         try {
+          var tmaFlowOpen = open && isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom();
           if (open) {
             document.documentElement.classList.add("chat-keyboard-open");
             document.body.classList.add("chat-keyboard-open");
+            if (tmaFlowOpen) {
+              document.documentElement.classList.add("chat-keyboard-open--tma-flow");
+              document.body.classList.add("chat-keyboard-open--tma-flow");
+            } else {
+              document.documentElement.classList.remove("chat-keyboard-open--tma-flow");
+              document.body.classList.remove("chat-keyboard-open--tma-flow");
+            }
           } else {
-            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-            document.body.classList.remove("chat-keyboard-open");
+            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
+            document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
           }
         } catch (eKbCls) {}
       }
