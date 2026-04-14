@@ -27606,6 +27606,7 @@ function initChat() {
       }
       function finalizeChatKeyboardDismiss() {
         try {
+          window.__pokerChatKeyboardFocusAtMs = 0;
           window.__pokerChatLastDockBottomPx = null;
           window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatKbDockMonotonicUntil = 0;
@@ -27870,6 +27871,7 @@ function initChat() {
           var ihLim = window.innerHeight || 0;
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
+          var focusAgeDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           /*
            * Telegram iOS: не пересчитывать bottom из живого vv/tg здесь — syncPwaChatVisualViewportInset уже выбрал cover.
            * Второй пересчёт + сглаживание давали заметный «второй рывок» строки вверх.
@@ -27877,6 +27879,13 @@ function initChat() {
           if (isTgDock && iosDock && ihLim > 200) {
             var hardMaxTg = Math.min(288, Math.max(92, Math.round(ihLim * 0.35)));
             bottomPx = Math.min(hardMaxTg, coverNum + gap);
+            if (focusAgeDock > 0 && focusAgeDock < 720) {
+              var baseDock = Number(window.__pokerChatInnerHBaseline) || 0;
+              var winLossDockFocus = baseDock > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDock - ihLim)) : 0;
+              if (winLossDockFocus >= 24) {
+                bottomPx = Math.min(bottomPx, Math.max(78, winLossDockFocus + Math.max(18, gap + 10)));
+              }
+            }
           } else if (ihLim > 280 && !isTgDock) {
             var bottomMax = Math.min(380, Math.max(200, Math.round(ihLim * 0.4)));
             if (bottomPx > bottomMax) bottomPx = bottomMax;
@@ -27894,6 +27903,19 @@ function initChat() {
             isIosLikeForChatViewport()
               ? 12
               : 2;
+          if (
+            prevB != null &&
+            prevB > 0 &&
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+          ) {
+            var focusAgeGrow = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            if (focusAgeGrow > 0 && focusAgeGrow < 720 && bottomPx > prevB + 12) {
+              bottomPx = prevB + 12;
+            }
+          }
           if (prevB != null && prevB > 0 && Math.abs(bottomPx - prevB) < dockEps) {
             bottomPx = prevB;
           } else {
@@ -27986,6 +28008,7 @@ function initChat() {
           }
         }
         if (haveTma) {
+          var focusAgeTma = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           /*
            * TG viewportStableHeight − viewportHeight часто выше реального «подъёма» окна: WK уже сжал layout,
            * строка сначала ок у клавиатуры, затем второй кадр даёт завышенный cover → рывок вверх.
@@ -28000,6 +28023,20 @@ function initChat() {
             } catch (eCapWin) {}
           }
           var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
+          if (
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport() &&
+            focusAgeTma > 0 &&
+            focusAgeTma < 720
+          ) {
+            if (winLossTma >= 24) {
+              var earlySlackTma = Math.max(18, Math.round(getChatComposerKeyboardGapPx()) + 10);
+              coverTma = Math.min(coverTma, winLossTma + earlySlackTma);
+            }
+            if (prevK >= 28 && coverTma > prevK + 16) {
+              coverTma = prevK + 16;
+            }
+          }
           if (prevK >= 28 && coverTma > prevK + 45) {
             coverTma = Math.min(coverTma, prevK + 32);
           }
@@ -28372,6 +28409,7 @@ function initChat() {
         try {
           var ihFocus = window.innerHeight || 0;
           if (ihFocus > 200) window.__pokerChatInnerHBaseline = ihFocus;
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
         } catch (eBl) {}
         if (isChatPhysicalKeyboardContext()) {
           var elDesk = getVisibleMessagesEl();
