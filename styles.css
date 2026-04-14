@@ -10646,6 +10646,10 @@ button.chat-conv-group-add-btn[hidden] {
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
+html.app--telegram-miniapp .chat-general-view .chat-input-area,
+html.app--telegram-miniapp .chat-container .chat-input-area {
+  padding-bottom: 12px;
+}
 .chat-msg__delete {
   padding: 4px 8px;
   font-size: 14px;
