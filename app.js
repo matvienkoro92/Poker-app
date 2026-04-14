@@ -27690,6 +27690,67 @@ function initChat() {
           if (visibleMessages) visibleMessages.scrollTop = visibleMessages.scrollHeight;
         } catch (eMsgSc) {}
       }
+      function detachTelegramMiniAppChatThreadRootScrollLock() {
+        try {
+          if (window.__pokerChatTmaRootScrollLockTimer) {
+            clearTimeout(window.__pokerChatTmaRootScrollLockTimer);
+            window.__pokerChatTmaRootScrollLockTimer = null;
+          }
+        } catch (eTmaRtTm) {}
+        try {
+          if (window.__pokerChatTmaRootScrollLockRaf) {
+            (window.cancelAnimationFrame || clearTimeout)(window.__pokerChatTmaRootScrollLockRaf);
+            window.__pokerChatTmaRootScrollLockRaf = null;
+          }
+        } catch (eTmaRtRaf) {}
+        try {
+          if (window.__pokerChatTmaRootScrollLockHandler) {
+            window.removeEventListener("scroll", window.__pokerChatTmaRootScrollLockHandler, true);
+            if (window.visualViewport && window.visualViewport.removeEventListener) {
+              window.visualViewport.removeEventListener("scroll", window.__pokerChatTmaRootScrollLockHandler, true);
+            }
+            window.__pokerChatTmaRootScrollLockHandler = null;
+          }
+        } catch (eTmaRtOff) {}
+      }
+      function attachTelegramMiniAppChatThreadRootScrollLock() {
+        if (!isTelegramMiniAppChatThreadIos() || !isChatThreadComposerKeyboardDom()) return;
+        detachTelegramMiniAppChatThreadRootScrollLock();
+        var lockTick = function () {
+          try {
+            var se = document.scrollingElement;
+            if (se && se.scrollTop !== 0) se.scrollTop = 0;
+            if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
+            if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
+          } catch (eTmaLock) {}
+        };
+        window.__pokerChatTmaRootScrollLockHandler = function () {
+          lockTick();
+        };
+        try {
+          window.addEventListener("scroll", window.__pokerChatTmaRootScrollLockHandler, { passive: true, capture: true });
+        } catch (eTmaWinOn) {}
+        try {
+          if (window.visualViewport && window.visualViewport.addEventListener) {
+            window.visualViewport.addEventListener("scroll", window.__pokerChatTmaRootScrollLockHandler, { passive: true, capture: true });
+          }
+        } catch (eTmaVvOn) {}
+        lockTick();
+        var raf = window.requestAnimationFrame || function (fn) {
+          return setTimeout(fn, 16);
+        };
+        var runLockBurst = function (remaining) {
+          if (remaining <= 0) return;
+          window.__pokerChatTmaRootScrollLockRaf = raf(function () {
+            lockTick();
+            runLockBurst(remaining - 1);
+          });
+        };
+        runLockBurst(18);
+        window.__pokerChatTmaRootScrollLockTimer = setTimeout(function () {
+          detachTelegramMiniAppChatThreadRootScrollLock();
+        }, 1800);
+      }
       function scheduleChatKeyboardPostDismissPasses(delays) {
         if (!Array.isArray(delays)) return;
         delays.forEach(function (ms) {
@@ -28704,6 +28765,7 @@ function initChat() {
             clearChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
           } catch (eTmaClr) {}
+          attachTelegramMiniAppChatThreadRootScrollLock();
           try {
             updateTelegramMiniAppChatThreadDebugOverlay("focus-passive", { cover: 0, bottom: 0, pad: 0 });
           } catch (eDbgPassive) {}
@@ -28910,6 +28972,7 @@ function initChat() {
           isIosLikeForChatViewport();
         if (isTmaThreadBlur) {
           hideTelegramMiniAppChatThreadDebugOverlay();
+          detachTelegramMiniAppChatThreadRootScrollLock();
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
