@@ -28430,6 +28430,21 @@ function initChat() {
       function hideTelegramMiniAppChatThreadDebugOverlay() {
         var existing = document.getElementById("chatTmaKeyboardDebug");
         if (existing) existing.classList.remove("chat-tma-keyboard-debug--visible");
+        try {
+          var genMetaHide = document.getElementById("chatGeneralHeaderRosterMeta");
+          if (genMetaHide && genMetaHide.getAttribute("data-debug-owned") === "1") {
+            genMetaHide.textContent = "";
+            genMetaHide.hidden = true;
+            genMetaHide.removeAttribute("data-debug-owned");
+          }
+        } catch (eDbgMetaHide) {}
+        try {
+          var convIdHide = document.getElementById("chatConvTitleId");
+          if (convIdHide && convIdHide.getAttribute("data-debug-owned") === "1") {
+            convIdHide.textContent = "—";
+            convIdHide.removeAttribute("data-debug-owned");
+          }
+        } catch (eDbgConvHide) {}
       }
       function updateTelegramMiniAppChatThreadDebugOverlay(source, extra) {
         if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) {
@@ -28460,6 +28475,23 @@ function initChat() {
         ];
         el.textContent = lines.join("\n");
         el.classList.add("chat-tma-keyboard-debug--visible");
+        try {
+          var compact = "DBG " + String(source || "-") + " ov:" + (payload.overlayTop != null ? payload.overlayTop : "-") + " prev:" + (payload.prevTop != null ? payload.prevTop : "-") + " vv:" + (vvDbg ? Math.round(Number(vvDbg.height) || 0) : 0) + "/" + (vvDbg ? Math.round(Number(vvDbg.offsetTop) || 0) : 0);
+          if (chatActiveTab === "general") {
+            var genMeta = document.getElementById("chatGeneralHeaderRosterMeta");
+            if (genMeta) {
+              genMeta.textContent = compact;
+              genMeta.hidden = false;
+              genMeta.setAttribute("data-debug-owned", "1");
+            }
+          } else if (chatActiveTab === "personal") {
+            var convId = document.getElementById("chatConvTitleId");
+            if (convId) {
+              convId.textContent = compact;
+              convId.setAttribute("data-debug-owned", "1");
+            }
+          }
+        } catch (eDbgHdr) {}
       }
       function computeTelegramMiniAppIosThreadCover(ih, winLossTma, tgDiffRaw, prevCover, focusAgeMs) {
         var session = getTelegramMiniAppChatThreadFocusSession();
