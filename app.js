@@ -19891,6 +19891,8 @@ function initChat() {
   var chatKeyboardDebugLog = [];
   var chatKeyboardDebugPanel = null;
   var chatKeyboardDebugObserver = null;
+  var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
+  var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
   var chatComposerDrafts = { general: "", personal: "" };
   var chatComposerMounted = "detached";
   var chatTmaIosComposerOverlayHost = null;
@@ -20058,11 +20060,17 @@ function initChat() {
     if (!shouldShowChatKeyboardDebugPanel()) return;
     var area = getActiveChatInputArea();
     if (!area) return;
-    if (!chatKeyboardDebugPanel || !chatKeyboardDebugPanel.isConnected) {
-      chatKeyboardDebugPanel = document.createElement("pre");
-      chatKeyboardDebugPanel.className = "chat-keyboard-debug";
+    if (area === chatGeneralInputArea && chatGeneralKeyboardDebugEl) {
+      chatKeyboardDebugPanel = chatGeneralKeyboardDebugEl;
+    } else if (area === chatPersonalInputArea && chatPersonalKeyboardDebugEl) {
+      chatKeyboardDebugPanel = chatPersonalKeyboardDebugEl;
+    } else {
+      if (!chatKeyboardDebugPanel || !chatKeyboardDebugPanel.isConnected) {
+        chatKeyboardDebugPanel = document.createElement("pre");
+        chatKeyboardDebugPanel.className = "chat-keyboard-debug";
+      }
+      if (!area.contains(chatKeyboardDebugPanel)) area.insertBefore(chatKeyboardDebugPanel, area.firstChild || null);
     }
-    if (!area.contains(chatKeyboardDebugPanel)) area.insertBefore(chatKeyboardDebugPanel, area.firstChild || null);
     var snap = getChatKeyboardDebugSnapshot();
     var tail = chatKeyboardDebugLog.slice(-6);
     var lines = [];
@@ -20091,6 +20099,18 @@ function initChat() {
     tail.forEach(function (item) {
       lines.push(item);
     });
+    if (chatGeneralKeyboardDebugEl) {
+      chatGeneralKeyboardDebugEl.classList.add("chat-keyboard-debug--hidden");
+      chatGeneralKeyboardDebugEl.setAttribute("aria-hidden", "true");
+    }
+    if (chatPersonalKeyboardDebugEl) {
+      chatPersonalKeyboardDebugEl.classList.add("chat-keyboard-debug--hidden");
+      chatPersonalKeyboardDebugEl.setAttribute("aria-hidden", "true");
+    }
+    if (chatKeyboardDebugPanel) {
+      chatKeyboardDebugPanel.classList.remove("chat-keyboard-debug--hidden");
+      chatKeyboardDebugPanel.setAttribute("aria-hidden", "false");
+    }
     chatKeyboardDebugPanel.textContent = lines.join("\n");
   }
   function logChatKeyboardDebug(source, extra) {
