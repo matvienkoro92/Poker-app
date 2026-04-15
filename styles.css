@@ -3326,17 +3326,20 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
 }
 .chat-tma-keyboard-debug {
   position: fixed;
-  right: 8px;
-  top: calc(env(safe-area-inset-top, 0px) + 132px);
+  left: 8px;
+  right: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 104px);
+  top: auto;
   z-index: 10050;
-  max-width: min(68vw, 260px);
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.82);
-  color: #d1fae5;
-  font: 11px/1.35 "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  max-width: min(82vw, 320px);
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(6, 10, 18, 0.92);
+  border: 1px solid rgba(251, 146, 60, 0.55);
+  color: #fde68a;
+  font: 12px/1.4 "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
   white-space: pre-wrap;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
   pointer-events: none;
   opacity: 0;
   transform: translate3d(0, -8px, 0);
