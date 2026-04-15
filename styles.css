@@ -731,6 +731,21 @@ html.chat-tma-ios-composer-focus .chat-container .chat-input-area {
   padding-bottom: 0 !important;
   margin-bottom: 0 !important;
 }
+html.chat-tma-ios-composer-focus .chat-general-view .chat-input-area,
+html.chat-tma-ios-composer-focus .chat-container .chat-input-area {
+  position: fixed !important;
+  left: env(safe-area-inset-left, 0px) !important;
+  right: env(safe-area-inset-right, 0px) !important;
+  bottom: 0 !important;
+  z-index: 140 !important;
+  width: auto !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+html.chat-tma-ios-composer-focus .chat-general-view .chat-messages,
+html.chat-tma-ios-composer-focus .chat-conv-view .chat-container .chat-messages {
+  padding-bottom: 78px !important;
+}
 html.chat-tma-ios-composer-focus .bottom-nav {
   transform: translate3d(0, 100%, 0) !important;
   opacity: 0 !important;
