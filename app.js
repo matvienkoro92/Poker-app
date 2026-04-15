@@ -19832,6 +19832,8 @@ function initChat() {
   var chatTmaIosComposerOverlayActiveKey = null;
   var chatTmaIosComposerOverlayViewportHandler = null;
   var chatTmaIosComposerOverlayViewportRaf = null;
+  var chatTmaIosComposerOverlayLastTop = null;
+  var chatTmaIosComposerOverlayLastInnerHeight = 0;
   var chatTmaIosComposerPortalStates = {
     general: chatGeneralInputArea
       ? { key: "general", area: chatGeneralInputArea, spacer: null, portaled: false }
@@ -20013,6 +20015,8 @@ function initChat() {
       host.style.removeProperty("top");
       host.style.removeProperty("height");
       host.style.removeProperty("bottom");
+      chatTmaIosComposerOverlayLastTop = null;
+      chatTmaIosComposerOverlayLastInnerHeight = 0;
     } catch (eTmaOverlayPosClr) {}
   }
   function syncTelegramIosChatComposerOverlayViewportPosition() {
@@ -20043,6 +20047,30 @@ function initChat() {
       }
       var visibleBottom = vvTop + vvHeight;
       var topPx = Math.max(0, Math.round(visibleBottom - hostH));
+      try {
+        var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+        var ihNow = window.innerHeight || 0;
+        var prevTop = chatTmaIosComposerOverlayLastTop;
+        var prevIh = chatTmaIosComposerOverlayLastInnerHeight || ihNow;
+        var ihDelta = Math.abs(prevIh - ihNow);
+        if (prevTop != null && focusAge > 80 && focusAge < 1400) {
+          /*
+           * Telegram iOS даёт поздний кривой vv-кадр уже после правильной посадки composer:
+           * визуально строка сначала встаёт правильно, потом резко уезжает выше.
+           * Если innerHeight почти не изменился, не позволяем второму кадру увести overlay ещё выше.
+           */
+          if (topPx < prevTop - 8 && ihDelta < 18) {
+            topPx = prevTop;
+          } else if (topPx < prevTop - 4 && ihDelta < 10) {
+            topPx = prevTop - 2;
+          }
+          if (topPx > prevTop + 22 && focusAge < 420) {
+            topPx = prevTop + 22;
+          }
+        }
+        chatTmaIosComposerOverlayLastTop = topPx;
+        chatTmaIosComposerOverlayLastInnerHeight = ihNow;
+      } catch (eTmaOverlayClamp) {}
       host.style.top = topPx + "px";
       host.style.height = hostH + "px";
       host.style.bottom = "auto";
