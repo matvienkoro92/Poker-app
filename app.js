@@ -22618,7 +22618,7 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = "0";
+        genHeader.style.top = isTelegramWebApp() ? "calc(var(--app-top-from-tg, 48px) + 8px)" : "0";
         genHeader.style.left = "0";
         genHeader.style.right = "0";
         genHeader.style.transform = "none";
@@ -22662,7 +22662,7 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = "0";
+          genHeader.style.top = isTelegramWebApp() ? "calc(var(--app-top-from-tg, 48px) + 8px)" : "0";
           genHeader.style.left = "0";
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
@@ -29902,7 +29902,6 @@ function initChat() {
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         if (isTelegramMiniAppChatThreadIos()) {
-          setTelegramIosKeyboardRootLock(true);
           attachTelegramIosChatInputAreaDockGuard();
         }
         updateChatKeyboardInnerHeightBaseline();
@@ -30135,9 +30134,6 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         logChatKeyboardDebug("blur");
-        if (isTelegramMiniAppChatThreadIos()) {
-          setTelegramIosKeyboardRootLock(false);
-        }
         if (isTelegramMiniAppChatThreadIos()) {
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
