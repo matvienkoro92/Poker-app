@@ -8827,9 +8827,6 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal
   overflow: hidden;
   margin-top: 0;
 }
-html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list-wrap {
-  margin-bottom: var(--app-bottom-tabbar-pad);
-}
 .chat-dialogs-list {
   position: absolute;
   top: 0;
@@ -8851,6 +8848,11 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list-wrap {
   /* Единая рамка «Все / Друзья» + список контактов */
   --chat-contacts-rail-border: color-mix(in srgb, var(--accent) 26%, var(--border-subtle));
   --chat-contacts-rail-border-top: color-mix(in srgb, var(--accent) 38%, var(--border-subtle));
+}
+html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
+  bottom: var(--app-bottom-tabbar-pad);
+  padding-bottom: 0;
+  scroll-padding-bottom: 0;
 }
 .chat-dialogs-block {
   background: var(--block-bg);
