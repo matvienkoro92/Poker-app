@@ -29257,9 +29257,19 @@ function initChat() {
         return isIosLikeForChatViewport() ? 12 : 4;
       }
       function isTelegramMiniAppChatThreadIos() {
+        var tgLike = false;
+        try {
+          tgLike =
+            (typeof isTelegramWebApp === "function" && isTelegramWebApp()) ||
+            (document.documentElement &&
+              document.documentElement.classList &&
+              document.documentElement.classList.contains("app--telegram-miniapp")) ||
+            (document.body &&
+              document.body.classList &&
+              document.body.classList.contains("app--telegram-miniapp"));
+        } catch (eTgLike) {}
         return (
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
+          !!tgLike &&
           typeof isIosLikeForChatViewport === "function" &&
           isIosLikeForChatViewport() &&
           typeof isChatPhysicalKeyboardContext === "function" &&
