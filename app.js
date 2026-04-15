@@ -16013,6 +16013,7 @@ function initRaffles() {
   var adminWrap = document.getElementById("rafflesAdminWrap");
   var raffleAdminActions = document.getElementById("raffleAdminActions");
   var createToggle = document.getElementById("rafflesCreateToggle");
+  var duplicateLastBtn = document.getElementById("rafflesDuplicateLastBtn");
   var createForm = document.getElementById("raffleCreateForm");
   var raffleTypeTickets = document.getElementById("raffleTypeTickets");
   var raffleTypeOther = document.getElementById("raffleTypeOther");
@@ -17557,6 +17558,68 @@ function initRaffles() {
     createToggle.addEventListener("click", function () {
       createForm.classList.toggle("raffle-create-form--hidden");
       if (!createForm.classList.contains("raffle-create-form--hidden")) switchRaffleCreatePanel();
+    });
+  }
+  if (duplicateLastBtn) {
+    duplicateLastBtn.addEventListener("click", function () {
+      if (window.__pokerRaffleCreateInFlight) return;
+      window.__pokerRaffleCreateInFlight = true;
+      duplicateLastBtn.disabled = true;
+      var prevDuplicateText = duplicateLastBtn.textContent;
+      duplicateLastBtn.textContent = "Повторяем…";
+      var idemKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
+      function raffleDuplicateResetUi() {
+        window.__pokerRaffleCreateInFlight = false;
+        duplicateLastBtn.disabled = false;
+        duplicateLastBtn.textContent = prevDuplicateText;
+      }
+      fetch(base + "/api/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          pokerGuestOrAuthedPostBody({
+            action: "duplicateLast",
+            createIdempotencyKey: idemKey,
+          })
+        ),
+      })
+        .then(function (r) {
+          return r
+            .json()
+            .catch(function () {
+              return { ok: false, error: "Не удалось разобрать ответ сервера" };
+            })
+            .then(function (data) {
+              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+              if (!r.ok && !d.error) {
+                d = Object.assign({}, d, { ok: false, error: "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "") });
+              }
+              return d;
+            });
+        })
+        .then(function (data) {
+          raffleDuplicateResetUi();
+          if (data && data.ok && data.raffle) {
+            if (createForm) createForm.classList.add("raffle-create-form--hidden");
+            loadRaffles();
+            if (!data.idempotentReplay) {
+              if (tg && tg.showAlert) tg.showAlert("Розыгрыш повторён");
+              else if (typeof alert === "function") alert("Розыгрыш повторён");
+            }
+          } else {
+            var errMsg = (data && data.error) || "Ошибка";
+            if (tg && tg.showAlert) tg.showAlert(errMsg);
+            else if (typeof alert === "function") alert(errMsg);
+          }
+        })
+        .catch(function () {
+          raffleDuplicateResetUi();
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else if (typeof alert === "function") alert(POKER_NET_ERR);
+        });
     });
   }
   if (raffleTypeTickets) raffleTypeTickets.addEventListener("change", switchRaffleCreatePanel);

@@ -15899,6 +15899,17 @@ a.tournament-day-share-btn {
   font-weight: 600;
   cursor: pointer;
 }
+.raffles-admin-actions--top {
+  margin-bottom: 12px;
+}
+.raffles-admin-actions--top .raffles-create-toggle {
+  margin-bottom: 0;
+}
+.raffles-create-toggle--ghost {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: var(--border-subtle);
+  color: var(--text);
+}
 .raffle-create-form--hidden { display: none; }
 .raffle-create-form {
   margin-bottom: 20px;
