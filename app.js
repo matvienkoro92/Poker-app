@@ -20818,6 +20818,30 @@ function initChat() {
       }
     });
   }
+  function bindTelegramIosComposeOverlayGate(area, mode) {
+    if (!area || area.__pokerIosOverlayGateBound) return;
+    area.__pokerIosOverlayGateBound = true;
+    function gateOpen(event) {
+      if (!shouldUseTelegramIosComposeOverlay()) return;
+      if (chatIosComposeOverlay && !chatIosComposeOverlay.classList.contains("chat-ios-compose-overlay--hidden")) return;
+      var target = event && event.target ? event.target : null;
+      if (target && target.closest) {
+        if (target.closest(".chat-attach-btn, .chat-emoji-btn, .chat-send-btn, .chat-voice-preview, .chat-image-preview, .chat-reply-preview, .chat-scroll-bottom-btn")) {
+          return;
+        }
+      }
+      if (openTelegramIosComposeOverlay(mode)) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    }
+    area.addEventListener("touchstart", gateOpen, { passive: false, capture: true });
+    area.addEventListener("click", gateOpen, true);
+  }
+  bindTelegramIosComposeOverlayGate(chatGeneralInputArea, "general");
+  bindTelegramIosComposeOverlayGate(chatPersonalInputArea, "personal");
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
   var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
