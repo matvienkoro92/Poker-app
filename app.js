@@ -27748,6 +27748,17 @@ function initChat() {
           }
         } catch (eBase) {}
       }
+      function setNativeTelegramIosComposerFocusClasses(active) {
+        try {
+          if (active) {
+            document.documentElement.classList.add("chat-tma-ios-composer-focus");
+            document.body.classList.add("chat-tma-ios-composer-focus");
+          } else {
+            document.documentElement.classList.remove("chat-tma-ios-composer-focus");
+            document.body.classList.remove("chat-tma-ios-composer-focus");
+          }
+        } catch (eTmaNativeCls) {}
+      }
       function setChatKeyboardOpenClasses(open) {
         try {
           if (open && shouldUseNativeTelegramIosChatComposerFlow()) {
@@ -27881,6 +27892,7 @@ function initChat() {
         });
       }
       function finalizeChatKeyboardDismiss() {
+        setNativeTelegramIosComposerFocusClasses(false);
         resetChatKeyboardDockRuntimeState();
         try {
           if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
@@ -28868,6 +28880,7 @@ function initChat() {
             resetChatKeyboardDockRuntimeState();
             window.__pokerChatKeyboardFocusAtMs = Date.now();
           } catch (eTmaPassive) {}
+          setNativeTelegramIosComposerFocusClasses(true);
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
@@ -29084,6 +29097,7 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         if (isTelegramMiniAppChatThreadIos()) {
+          setNativeTelegramIosComposerFocusClasses(false);
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
           try {
