@@ -28410,7 +28410,9 @@ function initChat() {
         el.id = "chatTmaKeyboardDebug";
         el.className = "chat-tma-keyboard-debug";
         el.setAttribute("aria-hidden", "true");
-        document.body.appendChild(el);
+        var host = ensureTelegramIosChatComposerOverlayHost();
+        if (host) host.appendChild(el);
+        else document.body.appendChild(el);
         return el;
       }
       function hideTelegramMiniAppChatThreadDebugOverlay() {

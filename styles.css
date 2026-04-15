@@ -3325,21 +3325,21 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
   --chat-input-lift: 0px !important;
 }
 .chat-tma-keyboard-debug {
-  position: fixed;
+  position: absolute;
   left: 8px;
   right: auto;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 104px);
+  bottom: calc(100% + 8px);
   top: auto;
-  z-index: 10050;
+  z-index: 3;
   max-width: min(82vw, 320px);
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(6, 10, 18, 0.92);
-  border: 1px solid rgba(251, 146, 60, 0.55);
-  color: #fde68a;
+  background: rgba(6, 10, 18, 0.96);
+  border: 2px solid rgba(251, 146, 60, 0.85);
+  color: #fff7b3;
   font: 12px/1.4 "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
   white-space: pre-wrap;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   pointer-events: none;
   opacity: 0;
   transform: translate3d(0, -8px, 0);
