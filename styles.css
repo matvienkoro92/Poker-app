@@ -8181,6 +8181,30 @@ html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area--tma-minimal-block {
   gap: 6px;
 }
+html.app--telegram-miniapp.chat-tma-ios-shell-native,
+html.app--telegram-miniapp.chat-tma-ios-shell-native body {
+  min-height: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+html.app--telegram-miniapp.chat-tma-ios-shell-native #app.app,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .app,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .card,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .card__content,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .view--active[data-view="chat"] {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+html.app--telegram-miniapp.chat-tma-ios-shell-native .chat-general-view,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .chat-conv-view,
+html.app--telegram-miniapp.chat-tma-ios-shell-native .chat-container {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+}
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block {
   display: flex;
   align-items: flex-end;

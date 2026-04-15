@@ -27915,6 +27915,8 @@ function initChat() {
         try {
           document.documentElement.classList.toggle("chat-tma-ios-composer-minimal", !!active);
           document.body.classList.toggle("chat-tma-ios-composer-minimal", !!active);
+          document.documentElement.classList.toggle("chat-tma-ios-shell-native", !!active);
+          document.body.classList.toggle("chat-tma-ios-shell-native", !!active);
         } catch (eTmaNativeCls) {}
       }
       function setChatKeyboardOpenClasses(open) {
