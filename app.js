@@ -28024,9 +28024,21 @@ function initChat() {
       }
 
       /** Фокус в общем/личном треде: не тянуть --chat-vv-inset для «подъёма» композера (переделывается отдельно). */
-      function isChatThreadComposerKeyboardDom() {
+      function isChatThreadComposerKeyboardDom(focusTarget) {
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
-        if (!chatComposerEl || document.activeElement !== chatComposerEl) return false;
+        var target = focusTarget || document.activeElement;
+        if (!target) return false;
+        var isComposerTarget = false;
+        try {
+          isComposerTarget =
+            target === chatComposerEl ||
+            target === chatSharedComposerEl ||
+            target === chatGeneralComposerEl ||
+            target === chatPersonalComposerEl ||
+            (!!chatGeneralComposerMount && chatGeneralComposerMount.contains(target)) ||
+            (!!chatPersonalComposerMount && chatPersonalComposerMount.contains(target));
+        } catch (eTgt) {}
+        if (!isComposerTarget) return false;
         var gen = generalView && !generalView.classList.contains("chat-general-view--hidden");
         var cv = convView && !convView.classList.contains("chat-conv-view--hidden");
         return !!(gen || cv);
@@ -28802,7 +28814,7 @@ function initChat() {
           chatWindowResizeHandler = null;
         }
       };
-      function onChatInputFocus() {
+      function onChatInputFocus(focusTarget) {
         updateChatKeyboardInnerHeightBaseline();
         if (isChatPhysicalKeyboardContext()) {
           var elDesk = getVisibleMessagesEl();
@@ -28819,7 +28831,7 @@ function initChat() {
           typeof isTelegramWebApp === "function" &&
           isTelegramWebApp() &&
           typeof isChatThreadComposerKeyboardDom === "function" &&
-          isChatThreadComposerKeyboardDom();
+          isChatThreadComposerKeyboardDom(focusTarget);
         if (isTmaThreadFocus) {
           try {
             resetChatKeyboardDockRuntimeState();
@@ -29139,7 +29151,7 @@ function initChat() {
         );
         ta.addEventListener("focus", function () {
           chatComposerEl = ta;
-          onChatInputFocus();
+          onChatInputFocus(ta);
         });
         ta.addEventListener("blur", function () {
           chatComposerEl = ta;
