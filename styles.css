@@ -681,6 +681,26 @@ html.app--telegram-miniapp:has(body[data-view="chat"]) {
   min-height: 100% !important;
   height: 100% !important;
 }
+html.app--telegram-miniapp.app-view-chat #app.app,
+html.app--telegram-miniapp:has(body[data-view="chat"]) #app.app,
+html.app--telegram-miniapp #app.app:has(.view--active[data-view="chat"]) {
+  min-height: 100% !important;
+  height: 100% !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+html.app--telegram-miniapp .card:has(.view--active[data-view="chat"]) {
+  height: 100%;
+  max-height: none;
+}
+html.app--telegram-miniapp .card:has(.view--active[data-view="chat"]) .card__content,
+html.app--telegram-miniapp .view--active[data-view="chat"] {
+  height: 100%;
+}
+html.app--telegram-miniapp .chat-general-view .chat-messages,
+html.app--telegram-miniapp .chat-conv-view .chat-container .chat-messages {
+  padding-bottom: 8px;
+}
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;

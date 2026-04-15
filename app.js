@@ -27584,6 +27584,7 @@ function initChat() {
       }
       window.__pokerIsChatPhysicalKeyboardContext = isChatPhysicalKeyboardContext;
       function shouldUseChatVisualViewportLift() {
+        if (shouldUseNativeTelegramIosChatComposerFlow()) return false;
         if (!window.visualViewport) return false;
         if (pokerPwaStandaloneForKeyboardInset() || isIosLikeForChatViewport()) return true;
         /* Android Chrome / PWA */
@@ -27749,6 +27750,11 @@ function initChat() {
       }
       function setChatKeyboardOpenClasses(open) {
         try {
+          if (open && shouldUseNativeTelegramIosChatComposerFlow()) {
+            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
+            document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+            return;
+          }
           var tmaFlowOpen = open && isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom();
           if (open) {
             document.documentElement.classList.add("chat-keyboard-open");
@@ -29070,6 +29076,7 @@ function initChat() {
         }
       }
       function shouldDeferChatKeyboardFinalizeForFocus() {
+        if (shouldUseNativeTelegramIosChatComposerFlow()) return false;
         if (!isAnyChatKeyboardChromeFocus(document.activeElement)) return false;
         if (pokerPwaBlurProceedDespiteDomFocus()) return false;
         return !isChatKeyboardLayoutEffectivelyClosed();
