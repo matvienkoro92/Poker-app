@@ -753,6 +753,20 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
   transform: none !important;
   margin: 0 !important;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header {
+  padding-top: max(10px, calc(var(--app-top-from-tg, 48px) + 8px)) !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
+  padding-top: max(10px, calc(var(--app-top-from-tg, 48px) + 8px)) !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__toolbar-back,
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__title-btn,
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__segments,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-peer-title-chip,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-group-add-btn {
+  margin-top: 0 !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view {
   --chat-general-floating-toolbar-h: 0px !important;
 }
