@@ -834,17 +834,6 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea
   word-break: break-word;
   overflow: hidden;
 }
-.chat-keyboard-debug--hidden {
-  display: none !important;
-}
-.chat-runtime-marker {
-  margin: 0 0 4px;
-  padding: 4px 8px;
-  font: 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: #fff;
-  background: #dc2626;
-  border-radius: 8px;
-}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__toolbar-back,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__title-btn,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__segments,

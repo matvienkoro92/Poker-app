@@ -20099,16 +20099,7 @@ function initChat() {
     tail.forEach(function (item) {
       lines.push(item);
     });
-    if (chatGeneralKeyboardDebugEl) {
-      chatGeneralKeyboardDebugEl.classList.add("chat-keyboard-debug--hidden");
-      chatGeneralKeyboardDebugEl.setAttribute("aria-hidden", "true");
-    }
-    if (chatPersonalKeyboardDebugEl) {
-      chatPersonalKeyboardDebugEl.classList.add("chat-keyboard-debug--hidden");
-      chatPersonalKeyboardDebugEl.setAttribute("aria-hidden", "true");
-    }
     if (chatKeyboardDebugPanel) {
-      chatKeyboardDebugPanel.classList.remove("chat-keyboard-debug--hidden");
       chatKeyboardDebugPanel.setAttribute("aria-hidden", "false");
     }
     chatKeyboardDebugPanel.textContent = lines.join("\n");
