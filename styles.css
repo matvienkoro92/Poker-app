@@ -765,6 +765,31 @@ html.chat-tma-ios-composer-focus .bottom-nav {
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
+#chatTmaIosComposerOverlay .chat-input-wrap {
+  align-items: flex-end;
+  min-height: 44px;
+}
+#chatTmaIosComposerOverlay .chat-composer-mount {
+  align-items: flex-end;
+}
+#chatTmaIosComposerOverlay .chat-composer-mount .chat-input--textarea {
+  display: block;
+  margin: 0;
+  overflow-anchor: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+#chatTmaIosComposerOverlay .chat-attach-wrap,
+#chatTmaIosComposerOverlay .chat-composer-actions {
+  align-self: flex-end;
+  margin-bottom: 4px;
+}
+#chatTmaIosComposerOverlay .chat-send-btn--icon {
+  align-self: flex-end;
+}
+#chatTmaIosComposerOverlay .chat-emoji-btn {
+  bottom: 4px;
+}
 html.chat-tma-ios-composer-focus #chatTmaIosComposerOverlay {
   bottom: 0 !important;
 }
