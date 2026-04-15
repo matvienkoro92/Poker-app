@@ -8850,7 +8850,7 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal
   --chat-contacts-rail-border-top: color-mix(in srgb, var(--accent) 38%, var(--border-subtle));
 }
 html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
-  bottom: calc(var(--app-bottom-tabbar-pad) - var(--app-tabbar-content-gap));
+  bottom: calc(var(--app-bottom-tabbar-pad) - var(--app-tabbar-content-gap) - 8px);
   padding-bottom: 0;
   scroll-padding-bottom: 0;
 }
