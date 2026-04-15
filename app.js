@@ -6749,6 +6749,18 @@ function pokerApplyAppTopPadding() {
 }
 
 var pokerTelegramChatUiGuardTimer = null;
+function pokerEnsureStyleProperty(el, prop, value, priority) {
+  try {
+    if (!el || !prop) return;
+    var current = "";
+    try {
+      current = String(el.style.getPropertyValue(prop) || "").trim();
+    } catch (eCur) {}
+    var want = String(value == null ? "" : value).trim();
+    if (current === want) return;
+    el.style.setProperty(prop, want, priority || "");
+  } catch (eSetProp) {}
+}
 function pokerEnsureTelegramChatUiGuard() {
   try {
     if (pokerTelegramChatUiGuardTimer != null) return;
@@ -6756,34 +6768,35 @@ function pokerEnsureTelegramChatUiGuard() {
       try {
         if (!document || !document.body) return;
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+        if (document.body.classList.contains("chat-keyboard-open")) return;
         var header = document.querySelector(".chat-general-header");
         var wrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
         if (header) {
-          header.style.setProperty("top", "80px", "important");
-          header.style.setProperty("left", "0", "important");
-          header.style.setProperty("right", "0", "important");
-          header.style.setProperty("transform", "none", "important");
-          header.style.setProperty("width", "100%", "important");
-          header.style.setProperty("max-width", "none", "important");
+          pokerEnsureStyleProperty(header, "top", "80px", "important");
+          pokerEnsureStyleProperty(header, "left", "0px", "important");
+          pokerEnsureStyleProperty(header, "right", "0px", "important");
+          pokerEnsureStyleProperty(header, "transform", "none", "important");
+          pokerEnsureStyleProperty(header, "width", "100%", "important");
+          pokerEnsureStyleProperty(header, "max-width", "none", "important");
         }
         if (wrap) {
-          wrap.style.setProperty("margin-top", "182px", "important");
+          pokerEnsureStyleProperty(wrap, "margin-top", "182px", "important");
         }
         var convTop = document.querySelector("#chatConvView .chat-conv-top");
         var convWrap = document.querySelector("#chatConvView .chat-container .chat-messages-wrap");
         if (convTop) {
-          convTop.style.setProperty("top", "80px", "important");
-          convTop.style.setProperty("left", "0", "important");
-          convTop.style.setProperty("right", "0", "important");
-          convTop.style.setProperty("transform", "none", "important");
-          convTop.style.setProperty("width", "100%", "important");
-          convTop.style.setProperty("max-width", "none", "important");
+          pokerEnsureStyleProperty(convTop, "top", "80px", "important");
+          pokerEnsureStyleProperty(convTop, "left", "0px", "important");
+          pokerEnsureStyleProperty(convTop, "right", "0px", "important");
+          pokerEnsureStyleProperty(convTop, "transform", "none", "important");
+          pokerEnsureStyleProperty(convTop, "width", "100%", "important");
+          pokerEnsureStyleProperty(convTop, "max-width", "none", "important");
         }
         if (convWrap) {
-          convWrap.style.setProperty("margin-top", "182px", "important");
+          pokerEnsureStyleProperty(convWrap, "margin-top", "182px", "important");
         }
       } catch (eTgChatGuardTick) {}
-    }, 120);
+    }, 420);
   } catch (eTgChatGuard) {}
 }
 pokerEnsureTelegramChatUiGuard();
