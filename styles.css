@@ -27887,6 +27887,11 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 html.poker-ios-pwa .bottom-nav {
   padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
 }
+html.poker-ios-pwa.app-view-chat .bottom-nav,
+html.poker-ios-pwa body[data-view="chat"] .bottom-nav,
+html.poker-ios-pwa #app.app:has(.view--active[data-view="chat"]) ~ .bottom-nav {
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+}
 /* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
 html.app--tg-bottom-nav-inset .bottom-nav {
   padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
