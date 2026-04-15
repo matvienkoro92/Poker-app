@@ -25828,6 +25828,17 @@ function initChat() {
     if (voicePrevP) voicePrevP.classList.remove("chat-voice-preview--visible");
     if (listView) listView.classList.add("chat-list-view--hidden");
     if (convView) convView.classList.remove("chat-conv-view--hidden");
+    try {
+      var convTop = document.querySelector("#chatConvView .chat-conv-top");
+      if (convTop) {
+        convTop.style.top = "80px";
+        convTop.style.left = "0";
+        convTop.style.right = "0";
+        convTop.style.transform = "none";
+        convTop.style.width = "100%";
+        convTop.style.maxWidth = "none";
+      }
+    } catch (eConvTopLayout) {}
     updateChatHeaderStats();
     scrollPersonalToBottomOnNextRender = true;
     if (messagesEl) {
