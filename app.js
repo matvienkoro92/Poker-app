@@ -22659,6 +22659,20 @@ function initChat() {
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
+  function isTelegramChatUiContext() {
+    try {
+      if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return true;
+    } catch (eTgHdrCtxFn) {}
+    try {
+      return !!(
+        document &&
+        document.documentElement &&
+        document.documentElement.classList &&
+        document.documentElement.classList.contains("app--telegram-miniapp")
+      );
+    } catch (eTgHdrCtxCls) {}
+    return false;
+  }
   var telegramChatHeaderSyncTimer = null;
   var telegramChatHeaderSyncRaf = null;
   function stopTelegramChatHeaderSync() {
@@ -22677,7 +22691,7 @@ function initChat() {
   }
   function applyTelegramChatHeaderTopNow() {
     try {
-      if (!document.documentElement.classList.contains("app--telegram-miniapp")) return;
+      if (!isTelegramChatUiContext()) return;
       if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
       var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
       if (genHeader) {
@@ -22697,7 +22711,7 @@ function initChat() {
   }
   function startTelegramChatHeaderSync() {
     try {
-      if (!document.documentElement.classList.contains("app--telegram-miniapp")) return;
+      if (!isTelegramChatUiContext()) return;
       stopTelegramChatHeaderSync();
       applyTelegramChatHeaderTopNow();
       telegramChatHeaderSyncTimer = setInterval(applyTelegramChatHeaderTopNow, 120);
@@ -22716,7 +22730,7 @@ function initChat() {
   function openClubChat() {
     function applyClubGeneralHeaderLayout() {
       try {
-        if (document.documentElement.classList.contains("app--telegram-miniapp")) {
+        if (isTelegramChatUiContext()) {
           applyTelegramChatHeaderTopNow();
         } else {
           var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
