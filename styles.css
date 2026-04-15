@@ -661,6 +661,26 @@ body[data-view="chat"] {
   max-height: 100dvh;
   overflow: hidden;
 }
+/* Telegram iOS: fixed body под чатом провоцирует скачок нижней полосы при focus/keyboard.
+   В этом режиме оставляем экран чатa полноэкранным, но без fixed-body. */
+html.app--telegram-miniapp body[data-view="chat"],
+html.app--telegram-miniapp body:has(.view--active[data-view="chat"]) {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  min-height: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+html.app--telegram-miniapp.app-view-chat,
+html.app--telegram-miniapp:has(body[data-view="chat"]) {
+  min-height: 100% !important;
+  height: 100% !important;
+}
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;
