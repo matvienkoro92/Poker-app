@@ -29070,17 +29070,6 @@ function initChat() {
       }
       function shouldDisableTelegramIosChatKeyboardDock(target) {
         if (!isTelegramMiniAppChatThreadIos()) return false;
-        try {
-          if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
-          var node = target || document.activeElement || chatComposerEl || chatSharedComposerEl || chatGeneralComposerEl || chatPersonalComposerEl;
-          if (!node) return true;
-          if (node === chatComposerEl || node === chatSharedComposerEl || node === chatGeneralComposerEl || node === chatPersonalComposerEl) return true;
-          if (node.closest && node.closest(".chat-input-area")) return true;
-          var tag = String(node.tagName || "").toUpperCase();
-          if (tag === "TEXTAREA" || tag === "INPUT") return true;
-        } catch (eTmaNoDock) {
-          return true;
-        }
         return true;
       }
       function shouldUseNativeTelegramIosChatComposerFlow(focusTarget) {
