@@ -6907,6 +6907,59 @@ function pokerFlushBottomNavAndViewportAfterChatChrome() {
   } catch (eRaf) {}
 }
 
+function pokerResetChatDialogsViewportArtifacts() {
+  try {
+    var root = document.documentElement;
+    var body = document.body;
+    var nodes = [
+      body,
+      document.getElementById("app"),
+      document.querySelector(".app"),
+      document.querySelector(".card"),
+      document.querySelector(".card__content"),
+      document.getElementById("chatDialogsView"),
+      document.querySelector("#chatGeneralView .chat-messages-wrap"),
+      document.querySelector("#chatConvView .chat-container .chat-messages-wrap"),
+      document.querySelector(".chat-dialogs-list-wrap"),
+      document.querySelector(".chat-dialogs-list"),
+      document.querySelector(".chat-contacts"),
+      document.querySelector(".chat-list-view")
+    ];
+    nodes.forEach(function (el) {
+      if (!el || !el.style) return;
+      try {
+        el.style.removeProperty("height");
+        el.style.removeProperty("min-height");
+        el.style.removeProperty("max-height");
+        el.style.removeProperty("padding-bottom");
+        el.style.removeProperty("margin-bottom");
+        el.style.removeProperty("bottom");
+        el.style.removeProperty("top");
+        el.style.removeProperty("transform");
+      } catch (eNodeReset) {}
+    });
+    try {
+      if (body && body.style) {
+        body.style.removeProperty("min-height");
+        body.style.removeProperty("height");
+        body.style.removeProperty("max-height");
+      }
+    } catch (eBodyReset) {}
+    try {
+      if (root && root.style) {
+        root.style.removeProperty("--chat-vv-inset");
+        root.style.removeProperty("--chat-ios-accessory-inset");
+      }
+    } catch (eRootReset) {}
+    try {
+      if (typeof pokerApplyBottomTabbarPad === "function") {
+        pokerApplyBottomTabbarPad._lastPad = null;
+        pokerApplyBottomTabbarPad();
+      }
+    } catch (ePadReset) {}
+  } catch (eResetChatDialogs) {}
+}
+
 /**
  * Telegram Mini App (Bot API 8+): на iOS нижний отступ надёжнее брать из contentSafeAreaInset/safeAreaInset,
  * иначе env(safe-area-inset-bottom) + раскладка WebView дают лишнюю полосу под таббаром. Standalone PWA не трогаем.
@@ -22602,6 +22655,9 @@ function initChat() {
     try {
       if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
     } catch (eDlgScr) {}
+    try {
+      pokerResetChatDialogsViewportArtifacts();
+    } catch (eDlgReset) {}
     chatActiveTab = "dialogs";
     chatWithUserId = null;
     chatWithUserName = null;
@@ -22679,10 +22735,23 @@ function initChat() {
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
           genHeader.style.width = "100%";
-          genHeader.style.maxWidth = "none";
-        }
-      } catch (err) {}
-    }
+        genHeader.style.maxWidth = "none";
+      }
+    } catch (err) {}
+    try {
+      var rafDlg = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+      rafDlg(function () {
+        try {
+          pokerResetChatDialogsViewportArtifacts();
+        } catch (eDlgResetRaf1) {}
+        rafDlg(function () {
+          try {
+            pokerResetChatDialogsViewportArtifacts();
+          } catch (eDlgResetRaf2) {}
+        });
+      });
+    } catch (eDlgResetRaf) {}
+  }
     function openClubChatShell() {
       try {
         updateGeneralInputLocked(false);
