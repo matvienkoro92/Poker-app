@@ -27938,10 +27938,26 @@ function initChat() {
               node.style.setProperty("height", "auto", "important");
               node.style.setProperty("min-height", "0", "important");
               node.style.setProperty("max-height", "none", "important");
+              node.style.setProperty("overflow", "visible", "important");
+              node.style.setProperty("position", "static", "important");
+              node.style.setProperty("inset", "auto", "important");
+              node.style.setProperty("top", "auto", "important");
+              node.style.setProperty("right", "auto", "important");
+              node.style.setProperty("bottom", "auto", "important");
+              node.style.setProperty("left", "auto", "important");
+              node.style.setProperty("flex-basis", "auto", "important");
             } else {
               node.style.removeProperty("height");
               node.style.removeProperty("min-height");
               node.style.removeProperty("max-height");
+              node.style.removeProperty("overflow");
+              node.style.removeProperty("position");
+              node.style.removeProperty("inset");
+              node.style.removeProperty("top");
+              node.style.removeProperty("right");
+              node.style.removeProperty("bottom");
+              node.style.removeProperty("left");
+              node.style.removeProperty("flex-basis");
             }
           });
         } catch (eTmaShellInline) {}
