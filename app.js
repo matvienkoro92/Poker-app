@@ -29152,8 +29152,6 @@ function initChat() {
             resetChatKeyboardDockRuntimeState();
             window.__pokerChatKeyboardFocusAtMs = Date.now();
           } catch (eTmaPassive) {}
-          detachTelegramIosChatComposerOverlayViewportSync();
-          syncTelegramIosChatComposerOverlayMount();
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
@@ -29367,11 +29365,11 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         if (isTelegramMiniAppChatThreadIos()) {
-          detachTelegramIosChatComposerOverlayViewportSync();
-          syncTelegramIosChatComposerOverlayMount();
-          setNativeTelegramIosComposerFocusClasses(false);
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
+          try {
+            resetChatKeyboardDockRuntimeState();
+          } catch (eTmaBlurReset) {}
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
