@@ -20013,7 +20013,7 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    return typeof isTelegramWebApp === "function" && isTelegramWebApp();
+    return !!(chatGeneralKeyboardDebugEl || chatPersonalKeyboardDebugEl);
   }
   function isChatKeyboardDebugTarget(node) {
     try {
