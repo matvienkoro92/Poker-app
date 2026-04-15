@@ -22618,12 +22618,21 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = isTelegramWebApp() ? "calc(var(--app-top-from-tg, 48px) + 8px)" : "0";
-        genHeader.style.left = "0";
-        genHeader.style.right = "0";
-        genHeader.style.transform = "none";
-        genHeader.style.width = "100%";
-        genHeader.style.maxWidth = "none";
+        if (isTelegramWebApp()) {
+          genHeader.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+          genHeader.style.setProperty("left", "0", "important");
+          genHeader.style.setProperty("right", "0", "important");
+          genHeader.style.setProperty("transform", "none", "important");
+          genHeader.style.setProperty("width", "100%", "important");
+          genHeader.style.setProperty("max-width", "none", "important");
+        } else {
+          genHeader.style.top = "0";
+          genHeader.style.left = "0";
+          genHeader.style.right = "0";
+          genHeader.style.transform = "none";
+          genHeader.style.width = "100%";
+          genHeader.style.maxWidth = "none";
+        }
       }
     } catch (err) {}
     loadContacts();
@@ -22662,12 +22671,21 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = isTelegramWebApp() ? "calc(var(--app-top-from-tg, 48px) + 8px)" : "0";
-          genHeader.style.left = "0";
-          genHeader.style.right = "0";
-          genHeader.style.transform = "none";
-          genHeader.style.width = "100%";
-          genHeader.style.maxWidth = "none";
+          if (isTelegramWebApp()) {
+            genHeader.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+            genHeader.style.setProperty("left", "0", "important");
+            genHeader.style.setProperty("right", "0", "important");
+            genHeader.style.setProperty("transform", "none", "important");
+            genHeader.style.setProperty("width", "100%", "important");
+            genHeader.style.setProperty("max-width", "none", "important");
+          } else {
+            genHeader.style.top = "0";
+            genHeader.style.left = "0";
+            genHeader.style.right = "0";
+            genHeader.style.transform = "none";
+            genHeader.style.width = "100%";
+            genHeader.style.maxWidth = "none";
+          }
         }
       } catch (err) {}
     }
@@ -29933,8 +29951,14 @@ function initChat() {
           } catch (eTmaClr) {}
           try {
             var visibleMessagesNative = getVisibleMessagesEl();
-            if (visibleMessagesNative && chatMessagesNearBottom(visibleMessagesNative, CHAT_SCROLL_BOTTOM_NEAR_PX)) {
-              visibleMessagesNative.scrollTop = visibleMessagesNative.scrollHeight;
+            var shouldPinNative = !!(visibleMessagesNative && chatMessagesNearBottom(visibleMessagesNative, CHAT_SCROLL_BOTTOM_NEAR_PX));
+            if (shouldPinNative && visibleMessagesNative) {
+              setTimeout(function () {
+                try {
+                  if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
+                  visibleMessagesNative.scrollTop = visibleMessagesNative.scrollHeight;
+                } catch (eTmaNativeScrollLater) {}
+              }, 260);
             }
           } catch (eTmaNativeScroll) {}
           return;
