@@ -22721,18 +22721,26 @@ function initChat() {
       if (!isTelegramChatUiContext()) return;
       if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
       var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
+      var genWrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
       if (genHeader) {
         genHeader.style.setProperty("top", "80px", "important");
         genHeader.style.setProperty("left", "0", "important");
         genHeader.style.setProperty("right", "0", "important");
         genHeader.style.setProperty("transform", "none", "important");
       }
+      if (genWrap) {
+        genWrap.style.setProperty("margin-top", "182px", "important");
+      }
       var convTop = document.querySelector("#chatConvView .chat-conv-top");
+      var convWrap = document.querySelector("#chatConvView .chat-container .chat-messages-wrap");
       if (convTop) {
         convTop.style.setProperty("top", "80px", "important");
         convTop.style.setProperty("left", "0", "important");
         convTop.style.setProperty("right", "0", "important");
         convTop.style.setProperty("transform", "none", "important");
+      }
+      if (convWrap) {
+        convWrap.style.setProperty("margin-top", "182px", "important");
       }
     } catch (eTgHdrNow) {}
   }
@@ -22772,6 +22780,7 @@ function initChat() {
           applyTelegramChatHeaderTopNow();
         } else {
           var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
+          var genWrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
           if (genHeader) {
             genHeader.style.top = "0";
             genHeader.style.left = "0";
@@ -22780,7 +22789,11 @@ function initChat() {
             genHeader.style.width = "100%";
             genHeader.style.maxWidth = "none";
           }
+          if (genWrap) {
+            genWrap.style.removeProperty("margin-top");
+          }
           var convTop = document.querySelector("#chatConvView .chat-conv-top");
+          var convWrap = document.querySelector("#chatConvView .chat-container .chat-messages-wrap");
           if (convTop) {
             convTop.style.top = "0";
             convTop.style.left = "0";
@@ -22788,6 +22801,9 @@ function initChat() {
             convTop.style.transform = "none";
             convTop.style.width = "100%";
             convTop.style.maxWidth = "none";
+          }
+          if (convWrap) {
+            convWrap.style.removeProperty("margin-top");
           }
         }
       } catch (err) {}
