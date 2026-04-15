@@ -30120,6 +30120,19 @@ function initChat() {
       sendBtn.classList.toggle("chat-send-btn--mic", !hasContent);
     }
     function resizeChatTextarea(ta) {
+      if (
+        ta &&
+        typeof shouldUseNativeTelegramIosChatComposerFlow === "function" &&
+        shouldUseNativeTelegramIosChatComposerFlow(ta)
+      ) {
+        try {
+          ta.style.height = "44px";
+          ta.style.minHeight = "44px";
+          ta.style.maxHeight = "44px";
+          ta.style.overflowY = "hidden";
+        } catch (eTmaFreezeTa) {}
+        return;
+      }
       if (typeof pokerAutosizeTextarea === "function") {
         pokerAutosizeTextarea(ta, { maxHeight: 140, minHeight: 44 });
       }

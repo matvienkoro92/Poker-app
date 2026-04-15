@@ -8147,6 +8147,19 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea
   font-size: 16px;
   line-height: 1.35;
 }
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap {
+  align-items: flex-end;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-actions,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-send-btn--icon {
+  align-self: flex-end;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
+  min-height: 44px;
+  max-height: 44px;
+  height: 44px;
+  overflow-y: hidden;
+}
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
 }
