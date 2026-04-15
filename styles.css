@@ -752,6 +752,13 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
   box-sizing: border-box !important;
   scroll-padding-top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px)) !important;
 }
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px) !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  scroll-padding-bottom: 0 !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
@@ -783,6 +790,37 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner 
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner {
   padding-top: 4px !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  bottom: auto !important;
+  top: auto !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block {
+  min-height: 44px !important;
+  height: auto !important;
+  align-items: center !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-actions,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-send-btn--icon,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__action {
+  align-self: center !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
+  min-height: 44px !important;
+  max-height: 44px !important;
+  height: 44px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  box-sizing: border-box !important;
+  overflow-y: hidden !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__toolbar-back,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__title-btn,
