@@ -22620,7 +22620,7 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = isTelegramWebApp() ? "auto" : "0";
+        genHeader.style.top = "80px";
         genHeader.style.left = "0";
         genHeader.style.right = "0";
         genHeader.style.transform = "none";
@@ -22664,7 +22664,7 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = isTelegramWebApp() ? "auto" : "0";
+          genHeader.style.top = "80px";
           genHeader.style.left = "0";
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
