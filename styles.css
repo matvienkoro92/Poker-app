@@ -3471,6 +3471,21 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
   will-change: auto;
   --chat-input-lift: 0px !important;
 }
+body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock,
+.view--active[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+.view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  z-index: auto !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
