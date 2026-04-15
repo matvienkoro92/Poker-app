@@ -28651,6 +28651,42 @@ function initChat() {
           }
         } catch (eDockReset) {}
       }
+      function scrubTelegramIosChatInputAreaDock(node) {
+        if (!node || !shouldDisableTelegramIosChatKeyboardDock()) return;
+        try {
+          node.classList.remove("chat-input-area--vv-dock");
+        } catch (eDockClsScrub) {}
+        try {
+          if (node.style) {
+            node.style.removeProperty("position");
+            node.style.removeProperty("left");
+            node.style.removeProperty("right");
+            node.style.removeProperty("top");
+            node.style.removeProperty("bottom");
+            node.style.removeProperty("width");
+            node.style.removeProperty("max-width");
+            node.style.removeProperty("box-sizing");
+            node.style.removeProperty("z-index");
+          }
+        } catch (eDockStyleScrub) {}
+      }
+      function attachTelegramIosChatInputAreaDockGuard() {
+        if (!shouldDisableTelegramIosChatKeyboardDock() || window.__pokerTelegramIosChatDockGuardAttached) return;
+        window.__pokerTelegramIosChatDockGuardAttached = true;
+        var guardNodes = [
+          document.getElementById("chatGeneralInputArea"),
+          document.getElementById("chatPersonalInputArea") || (convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null)
+        ].filter(Boolean);
+        guardNodes.forEach(function (node) {
+          scrubTelegramIosChatInputAreaDock(node);
+          try {
+            var obs = new MutationObserver(function () {
+              scrubTelegramIosChatInputAreaDock(node);
+            });
+            obs.observe(node, { attributes: true, attributeFilter: ["class", "style"] });
+          } catch (eDockObs) {}
+        });
+      }
       function updateChatKeyboardInnerHeightBaseline() {
         try {
           var ihNow = window.innerHeight || 0;
@@ -29869,6 +29905,7 @@ function initChat() {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         if (isTelegramMiniAppChatThreadIos()) {
           setTelegramIosKeyboardRootLock(true);
+          attachTelegramIosChatInputAreaDockGuard();
         }
         updateChatKeyboardInnerHeightBaseline();
         if (isChatPhysicalKeyboardContext()) {
