@@ -692,6 +692,38 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-container {
   overflow: visible !important;
   flex-basis: auto !important;
 }
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock #app.app,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock .app,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock .card,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock .card__content,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock .view--active[data-view="chat"],
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock .view--active[data-view="keyboard-lab"] {
+  overflow: hidden !important;
+}
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .card,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .card__content,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .card,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .card__content {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-conv-view,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-container,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .keyboard-lab {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .keyboard-lab__stream {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
   flex: 1 1 auto !important;
@@ -24834,6 +24866,7 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   gap: 10px;
   overflow: auto;
   padding-bottom: 8px;
+  overscroll-behavior: contain;
 }
 .keyboard-lab__bubble {
   max-width: 92%;

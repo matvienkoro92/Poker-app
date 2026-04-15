@@ -9855,6 +9855,11 @@ function pokerTryConsumePendingManagerFromCashout() {
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   var restoreScrollOnEnter = navOpts.fromBack === true;
+  try {
+    if (viewName !== "chat" && viewName !== "keyboard-lab") {
+      setTelegramIosKeyboardRootLock(false);
+    }
+  } catch (eTgKbUnlockView) {}
   /* Чаты всегда открываются (нижнее меню). Верификация — pokerEnsure на диалогах/отправке. */
   var prevView = "";
   try {
@@ -14673,6 +14678,78 @@ document.addEventListener("click", function (e) {
   if (page) setDownloadPage(page);
 });
 
+var telegramIosKeyboardRootLockActive = false;
+var telegramIosKeyboardRootLockRaf = null;
+function isTelegramIosKeyboardRootLockCapable() {
+  try {
+    return typeof isTelegramWebApp === "function" && isTelegramWebApp() && typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
+  } catch (eTgKbCap) {
+    return false;
+  }
+}
+function getTelegramIosKeyboardRootLockScrollPorts() {
+  var ports = [];
+  try {
+    var docScroller = document.scrollingElement || document.documentElement || document.body;
+    if (docScroller) ports.push(docScroller);
+  } catch (eTgKbDoc) {}
+  try {
+    var activeView = document.querySelector(".view--active[data-view]");
+    var cardContent = activeView && activeView.closest ? activeView.closest(".card__content") : null;
+    if (cardContent) ports.push(cardContent);
+  } catch (eTgKbCard) {}
+  return ports;
+}
+function syncTelegramIosKeyboardRootLockScroll() {
+  if (!telegramIosKeyboardRootLockActive) return;
+  try {
+    window.scrollTo(0, 0);
+  } catch (eTgKbWin) {}
+  getTelegramIosKeyboardRootLockScrollPorts().forEach(function (node) {
+    try {
+      if (!node) return;
+      node.scrollTop = 0;
+      node.scrollLeft = 0;
+    } catch (eTgKbNode) {}
+  });
+}
+function scheduleTelegramIosKeyboardRootLockSync() {
+  if (!telegramIosKeyboardRootLockActive || telegramIosKeyboardRootLockRaf != null) return;
+  var raf = window.requestAnimationFrame || function (fn) {
+    return setTimeout(fn, 0);
+  };
+  telegramIosKeyboardRootLockRaf = raf(function () {
+    telegramIosKeyboardRootLockRaf = null;
+    syncTelegramIosKeyboardRootLockScroll();
+  });
+}
+function setTelegramIosKeyboardRootLock(active) {
+  if (!isTelegramIosKeyboardRootLockCapable()) return;
+  telegramIosKeyboardRootLockActive = !!active;
+  document.documentElement.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
+  document.body.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
+  if (telegramIosKeyboardRootLockActive) {
+    syncTelegramIosKeyboardRootLockScroll();
+    setTimeout(syncTelegramIosKeyboardRootLockScroll, 40);
+    setTimeout(syncTelegramIosKeyboardRootLockScroll, 140);
+    setTimeout(syncTelegramIosKeyboardRootLockScroll, 320);
+  } else {
+    if (telegramIosKeyboardRootLockRaf != null) {
+      var caf = window.cancelAnimationFrame || clearTimeout;
+      caf(telegramIosKeyboardRootLockRaf);
+      telegramIosKeyboardRootLockRaf = null;
+    }
+  }
+}
+window.addEventListener("scroll", function () {
+  if (!telegramIosKeyboardRootLockActive) return;
+  scheduleTelegramIosKeyboardRootLockSync();
+}, true);
+window.addEventListener("resize", function () {
+  if (!telegramIosKeyboardRootLockActive) return;
+  scheduleTelegramIosKeyboardRootLockSync();
+});
+
 (function initKeyboardLab() {
   var view = document.getElementById("keyboardLabView");
   var metricsEl = document.getElementById("keyboardLabMetrics");
@@ -14738,10 +14815,12 @@ document.addEventListener("click", function (e) {
     keyboardLabUpdateMetrics("input");
   });
   textareaEl.addEventListener("focus", function () {
+    setTelegramIosKeyboardRootLock(true);
     keyboardLabEnsureTicker();
     keyboardLabUpdateMetrics("focus");
   });
   textareaEl.addEventListener("blur", function () {
+    setTelegramIosKeyboardRootLock(false);
     keyboardLabUpdateMetrics("blur");
   });
   textareaEl.addEventListener("touchstart", function () {
@@ -29622,6 +29701,9 @@ function initChat() {
       };
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
+        if (isTelegramMiniAppChatThreadIos()) {
+          setTelegramIosKeyboardRootLock(true);
+        }
         updateChatKeyboardInnerHeightBaseline();
         if (isChatPhysicalKeyboardContext()) {
           var elDesk = getVisibleMessagesEl();
@@ -29852,6 +29934,9 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         logChatKeyboardDebug("blur");
+        if (isTelegramMiniAppChatThreadIos()) {
+          setTelegramIosKeyboardRootLock(false);
+        }
         if (isTelegramMiniAppChatThreadIos()) {
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
