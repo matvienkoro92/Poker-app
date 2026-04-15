@@ -935,16 +935,13 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-containe
   padding-top: 0 !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap {
   margin-top: 182px !important;
   padding-top: 0 !important;
 }
 body[data-view="chat"] .chat-general-view .chat-messages-wrap,
-body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
-.view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
-.view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+.view--active[data-view="chat"] .chat-general-view .chat-messages-wrap {
   margin-top: 182px !important;
   padding-top: 0 !important;
 }
