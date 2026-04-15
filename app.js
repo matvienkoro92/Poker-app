@@ -19891,6 +19891,7 @@ function initChat() {
   var chatKeyboardDebugLog = [];
   var chatKeyboardDebugPanel = null;
   var chatKeyboardDebugObserver = null;
+  var chatKeyboardDebugFocusBound = false;
   var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
   var chatComposerDrafts = { general: "", personal: "" };
@@ -20012,6 +20013,49 @@ function initChat() {
   function shouldShowChatKeyboardDebugPanel() {
     return typeof isTelegramWebApp === "function" && isTelegramWebApp();
   }
+  function isChatKeyboardDebugTarget(node) {
+    try {
+      if (!node || !node.closest) return false;
+      return !!node.closest(
+        ".chat-input-area, .chat-input-wrap, .chat-tma-ios-minimal-block, .chat-messages, .chat-messages-wrap, .chat-general-view, .chat-conv-view, .chat-container"
+      );
+    } catch (eDbgTarget) {
+      return false;
+    }
+  }
+  function getChatKeyboardDebugNodeLabel(node) {
+    try {
+      if (!node) return "none";
+      var id = node.id ? "#" + node.id : "";
+      var cls = "";
+      if (node.classList && node.classList.length) cls = "." + Array.prototype.slice.call(node.classList, 0, 3).join(".");
+      return String((node.tagName || "node").toLowerCase()) + id + cls;
+    } catch (eDbgLabel) {
+      return "node";
+    }
+  }
+  function getChatKeyboardDebugRenderedInfo(area, wrap, ta, msgs) {
+    try {
+      var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
+      var wrapRect = wrap && wrap.getBoundingClientRect ? wrap.getBoundingClientRect() : null;
+      var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
+      return {
+        areaTop: areaRect ? Math.round(areaRect.top) : 0,
+        areaH: areaRect ? Math.round(areaRect.height) : 0,
+        wrapTop: wrapRect ? Math.round(wrapRect.top) : 0,
+        wrapH: wrapRect ? Math.round(wrapRect.height) : 0,
+        taTop: taRect ? Math.round(taRect.top) : 0,
+        taH: taRect ? Math.round(taRect.height) : 0,
+        msgPad: msgs && msgs.style ? String(msgs.style.paddingBottom || "") : "",
+        msgScroll: msgs ? Math.round(msgs.scrollTop || 0) : 0,
+        areaPos: area ? String(getComputedStyle(area).position || "") : "",
+        areaBottom: area ? String(getComputedStyle(area).bottom || "") : "",
+        areaTransform: area ? String(getComputedStyle(area).transform || "") : ""
+      };
+    } catch (eDbgGeom) {
+      return null;
+    }
+  }
   function getActiveChatInputArea() {
     if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
       return chatGeneralInputArea || null;
@@ -20024,31 +20068,50 @@ function initChat() {
   function getChatKeyboardDebugSnapshot() {
     try {
       var area = getActiveChatInputArea();
+      if (!area) {
+        area =
+          (chatGeneralInputArea && !chatGeneralInputArea.closest(".chat-general-view--hidden") && chatGeneralInputArea) ||
+          (chatPersonalInputArea && !chatPersonalInputArea.closest(".chat-conv-view--hidden") && chatPersonalInputArea) ||
+          chatGeneralInputArea ||
+          chatPersonalInputArea ||
+          null;
+      }
       var wrap = area && area.querySelector ? area.querySelector(".chat-input-wrap, .chat-tma-ios-minimal-block") : null;
-      var ta = chatComposerEl || (area && area.querySelector ? area.querySelector("textarea") : null);
-      var msgs = getVisibleMessagesEl && typeof getVisibleMessagesEl === "function" ? getVisibleMessagesEl() : null;
+      var ta =
+        (area && area.querySelector ? area.querySelector("textarea") : null) ||
+        chatGeneralComposerEl ||
+        chatPersonalComposerEl ||
+        chatComposerEl ||
+        null;
+      var msgs = null;
+      if (area && area === chatGeneralInputArea) msgs = generalMessages || null;
+      else if (area && area === chatPersonalInputArea) msgs = messagesEl || null;
+      else if (getVisibleMessagesEl && typeof getVisibleMessagesEl === "function") msgs = getVisibleMessagesEl() || null;
       var vv = window.visualViewport || null;
       var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
-      var wrapRect = wrap && wrap.getBoundingClientRect ? wrap.getBoundingClientRect() : null;
-      var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
+      var active = document.activeElement || null;
+      var geom = getChatKeyboardDebugRenderedInfo(area, wrap, ta, msgs) || {};
       return {
         ih: window.innerHeight || 0,
         vvh: vv ? Math.round(Number(vv.height) || 0) : 0,
         vvTop: vv ? Math.round(Number(vv.offsetTop) || 0) : 0,
         tgVh: tw ? Math.round(Number(tw.viewportHeight) || 0) : 0,
         tgVs: tw ? Math.round(Number(tw.viewportStableHeight) || 0) : 0,
-        areaTop: areaRect ? Math.round(areaRect.top) : 0,
-        areaH: areaRect ? Math.round(areaRect.height) : 0,
-        wrapTop: wrapRect ? Math.round(wrapRect.top) : 0,
-        wrapH: wrapRect ? Math.round(wrapRect.height) : 0,
-        taTop: taRect ? Math.round(taRect.top) : 0,
-        taH: taRect ? Math.round(taRect.height) : 0,
-        msgPad: msgs && msgs.style ? String(msgs.style.paddingBottom || "") : "",
-        msgScroll: msgs ? Math.round(msgs.scrollTop || 0) : 0,
-        areaPos: area ? String(getComputedStyle(area).position || "") : "",
-        areaBottom: area ? String(getComputedStyle(area).bottom || "") : "",
-        areaTransform: area ? String(getComputedStyle(area).transform || "") : "",
+        areaTop: geom.areaTop || 0,
+        areaH: geom.areaH || 0,
+        wrapTop: geom.wrapTop || 0,
+        wrapH: geom.wrapH || 0,
+        taTop: geom.taTop || 0,
+        taH: geom.taH || 0,
+        msgPad: geom.msgPad || "",
+        msgScroll: geom.msgScroll || 0,
+        areaPos: geom.areaPos || "",
+        areaBottom: geom.areaBottom || "",
+        areaTransform: geom.areaTransform || "",
+        active: getChatKeyboardDebugNodeLabel(active),
+        areaNode: getChatKeyboardDebugNodeLabel(area),
+        wrapNode: getChatKeyboardDebugNodeLabel(wrap),
+        taNode: getChatKeyboardDebugNodeLabel(ta),
         htmlKb: document.documentElement.classList.contains("chat-keyboard-open") ? 1 : 0,
         bodyKb: document.body.classList.contains("chat-keyboard-open") ? 1 : 0
       };
@@ -20058,19 +20121,6 @@ function initChat() {
   }
   function renderChatKeyboardDebugPanel() {
     if (!shouldShowChatKeyboardDebugPanel()) return;
-    var area = getActiveChatInputArea();
-    if (!area) return;
-    if (area === chatGeneralInputArea && chatGeneralKeyboardDebugEl) {
-      chatKeyboardDebugPanel = chatGeneralKeyboardDebugEl;
-    } else if (area === chatPersonalInputArea && chatPersonalKeyboardDebugEl) {
-      chatKeyboardDebugPanel = chatPersonalKeyboardDebugEl;
-    } else {
-      if (!chatKeyboardDebugPanel || !chatKeyboardDebugPanel.isConnected) {
-        chatKeyboardDebugPanel = document.createElement("pre");
-        chatKeyboardDebugPanel.className = "chat-keyboard-debug";
-      }
-      if (!area.contains(chatKeyboardDebugPanel)) area.insertBefore(chatKeyboardDebugPanel, area.firstChild || null);
-    }
     var snap = getChatKeyboardDebugSnapshot();
     var tail = chatKeyboardDebugLog.slice(-6);
     var lines = [];
@@ -20095,14 +20145,21 @@ function initChat() {
         "tr:" + snap.areaTransform +
           " kb:" + snap.htmlKb + "/" + snap.bodyKb
       );
+      lines.push(
+        "act:" + snap.active
+      );
+      lines.push(
+        "areaN:" + snap.areaNode
+      );
     }
     tail.forEach(function (item) {
       lines.push(item);
     });
-    if (chatKeyboardDebugPanel) {
-      chatKeyboardDebugPanel.setAttribute("aria-hidden", "false");
-    }
-    chatKeyboardDebugPanel.textContent = lines.join("\n");
+    [chatGeneralKeyboardDebugEl, chatPersonalKeyboardDebugEl].forEach(function (panel) {
+      if (!panel) return;
+      panel.setAttribute("aria-hidden", "false");
+      panel.textContent = lines.join("\n");
+    });
   }
   function logChatKeyboardDebug(source, extra) {
     if (!shouldShowChatKeyboardDebugPanel()) return;
@@ -20130,16 +20187,55 @@ function initChat() {
         var parts = [];
         records.forEach(function (rec) {
           if (!rec || !rec.target) return;
-          var id = rec.target.id || rec.target.className || rec.target.tagName || "?";
+          if (!isChatKeyboardDebugTarget(rec.target)) return;
+          var id = getChatKeyboardDebugNodeLabel(rec.target);
           parts.push(id + ":" + rec.attributeName);
         });
-        logChatKeyboardDebug("mut", parts.join(","));
+        if (parts.length) logChatKeyboardDebug("mut", parts.join(","));
       });
-      [document.documentElement, document.body, chatGeneralInputArea, chatPersonalInputArea, generalMessages, messagesEl].forEach(function (node) {
+      [
+        document.documentElement,
+        document.body,
+        document.querySelector('.view[data-view="chat"]'),
+        chatGeneralInputArea,
+        chatPersonalInputArea,
+        generalView,
+        convView,
+        generalMessages,
+        messagesEl
+      ].forEach(function (node) {
         if (!node || !chatKeyboardDebugObserver) return;
-        chatKeyboardDebugObserver.observe(node, { attributes: true, attributeFilter: ["class", "style"] });
+        chatKeyboardDebugObserver.observe(node, {
+          attributes: true,
+          attributeFilter: ["class", "style"],
+          childList: true,
+          subtree: true
+        });
       });
     } catch (eDbgObs) {}
+    try {
+      if (!chatKeyboardDebugFocusBound) {
+        chatKeyboardDebugFocusBound = true;
+        document.addEventListener(
+          "focusin",
+          function (event) {
+            var target = event && event.target ? event.target : null;
+            if (!isChatKeyboardDebugTarget(target) && !(target && target.closest && target.closest('.view[data-view="chat"]'))) return;
+            logChatKeyboardDebug("focusin*", getChatKeyboardDebugNodeLabel(target));
+          },
+          true
+        );
+        document.addEventListener(
+          "focusout",
+          function (event) {
+            var target = event && event.target ? event.target : null;
+            if (!isChatKeyboardDebugTarget(target) && !(target && target.closest && target.closest('.view[data-view="chat"]'))) return;
+            logChatKeyboardDebug("focusout*", getChatKeyboardDebugNodeLabel(target));
+          },
+          true
+        );
+      }
+    } catch (eDbgFocusBind) {}
     try {
       if (window.visualViewport && window.visualViewport.addEventListener && !window.__pokerChatKeyboardDebugVvBound) {
         window.__pokerChatKeyboardDebugVvBound = true;
