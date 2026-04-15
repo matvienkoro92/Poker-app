@@ -9858,6 +9858,7 @@ function setView(viewName, navOpts) {
   try {
     if (viewName !== "chat" && viewName !== "keyboard-lab") {
       setTelegramIosKeyboardRootLock(false);
+      if (typeof stopTelegramChatHeaderSync === "function") stopTelegramChatHeaderSync();
     }
   } catch (eTgKbUnlockView) {}
   /* Чаты всегда открываются (нижнее меню). Верификация — pokerEnsure на диалогах/отправке. */
@@ -22658,19 +22659,68 @@ function initChat() {
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
+  var telegramChatHeaderSyncTimer = null;
+  var telegramChatHeaderSyncRaf = null;
+  function stopTelegramChatHeaderSync() {
+    try {
+      if (telegramChatHeaderSyncTimer) {
+        clearInterval(telegramChatHeaderSyncTimer);
+        telegramChatHeaderSyncTimer = null;
+      }
+    } catch (eTgHdrTimer) {}
+    try {
+      if (telegramChatHeaderSyncRaf != null) {
+        (window.cancelAnimationFrame || clearTimeout)(telegramChatHeaderSyncRaf);
+        telegramChatHeaderSyncRaf = null;
+      }
+    } catch (eTgHdrRaf) {}
+  }
+  function applyTelegramChatHeaderTopNow() {
+    try {
+      if (!document.documentElement.classList.contains("app--telegram-miniapp")) return;
+      if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
+      var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
+      if (genHeader) {
+        genHeader.style.setProperty("top", "80px", "important");
+        genHeader.style.setProperty("left", "0", "important");
+        genHeader.style.setProperty("right", "0", "important");
+        genHeader.style.setProperty("transform", "none", "important");
+      }
+      var convTop = document.querySelector("#chatConvView .chat-conv-top");
+      if (convTop) {
+        convTop.style.setProperty("top", "80px", "important");
+        convTop.style.setProperty("left", "0", "important");
+        convTop.style.setProperty("right", "0", "important");
+        convTop.style.setProperty("transform", "none", "important");
+      }
+    } catch (eTgHdrNow) {}
+  }
+  function startTelegramChatHeaderSync() {
+    try {
+      if (!document.documentElement.classList.contains("app--telegram-miniapp")) return;
+      stopTelegramChatHeaderSync();
+      applyTelegramChatHeaderTopNow();
+      telegramChatHeaderSyncTimer = setInterval(applyTelegramChatHeaderTopNow, 120);
+      setTimeout(stopTelegramChatHeaderSync, 2800);
+      var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+      var burst = function (remaining) {
+        if (remaining <= 0) return;
+        telegramChatHeaderSyncRaf = raf(function () {
+          applyTelegramChatHeaderTopNow();
+          burst(remaining - 1);
+        });
+      };
+      burst(24);
+    } catch (eTgHdrStart) {}
+  }
   function openClubChat() {
     function applyClubGeneralHeaderLayout() {
       try {
-        var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
-        if (genHeader) {
-          if (document.documentElement.classList.contains("app--telegram-miniapp")) {
-            genHeader.style.setProperty("top", "80px", "important");
-            genHeader.style.setProperty("left", "0", "important");
-            genHeader.style.setProperty("right", "0", "important");
-            genHeader.style.setProperty("transform", "none", "important");
-            genHeader.style.setProperty("width", "100%", "important");
-            genHeader.style.setProperty("max-width", "none", "important");
-          } else {
+        if (document.documentElement.classList.contains("app--telegram-miniapp")) {
+          applyTelegramChatHeaderTopNow();
+        } else {
+          var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
+          if (genHeader) {
             genHeader.style.top = "0";
             genHeader.style.left = "0";
             genHeader.style.right = "0";
@@ -22678,17 +22728,8 @@ function initChat() {
             genHeader.style.width = "100%";
             genHeader.style.maxWidth = "none";
           }
-        }
-        var convTop = document.querySelector("#chatConvView .chat-conv-top");
-        if (convTop) {
-          if (document.documentElement.classList.contains("app--telegram-miniapp")) {
-            convTop.style.setProperty("top", "80px", "important");
-            convTop.style.setProperty("left", "0", "important");
-            convTop.style.setProperty("right", "0", "important");
-            convTop.style.setProperty("transform", "none", "important");
-            convTop.style.setProperty("width", "100%", "important");
-            convTop.style.setProperty("max-width", "none", "important");
-          } else {
+          var convTop = document.querySelector("#chatConvView .chat-conv-top");
+          if (convTop) {
             convTop.style.top = "0";
             convTop.style.left = "0";
             convTop.style.right = "0";
@@ -22715,7 +22756,8 @@ function initChat() {
       scrollGeneralToBottomOnNextRender = true;
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
-      [80, 220, 420, 900].forEach(function (ms) {
+      startTelegramChatHeaderSync();
+      [80, 220, 420, 900, 1500, 2200].forEach(function (ms) {
         setTimeout(applyClubGeneralHeaderLayout, ms);
       });
       mountChatComposer("general");
