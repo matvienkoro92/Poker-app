@@ -27911,12 +27911,48 @@ function initChat() {
           }
         } catch (eBase) {}
       }
+      function setTelegramIosShellFocusOverrides(active) {
+        try {
+          var nodes = [];
+          if (document.documentElement) nodes.push(document.documentElement);
+          if (document.body) nodes.push(document.body);
+          var appShell = document.getElementById("app");
+          if (appShell) nodes.push(appShell);
+          var appRoot = document.querySelector ? document.querySelector(".app") : null;
+          if (appRoot) nodes.push(appRoot);
+          var activeView = document.querySelector ? document.querySelector('.view--active[data-view="chat"]') : null;
+          if (activeView) nodes.push(activeView);
+          var activeCard = activeView && activeView.closest ? activeView.closest(".card") : null;
+          if (activeCard) nodes.push(activeCard);
+          var activeCardContent = activeView && activeView.closest ? activeView.closest(".card__content") : null;
+          if (activeCardContent) nodes.push(activeCardContent);
+          var generalShell = generalView && !generalView.classList.contains("chat-general-view--hidden") ? generalView : null;
+          var convShell = convView && !convView.classList.contains("chat-conv-view--hidden") ? convView : null;
+          if (generalShell) nodes.push(generalShell);
+          if (convShell) nodes.push(convShell);
+          var containerShell = convShell && convShell.querySelector ? convShell.querySelector(".chat-container") : null;
+          if (containerShell) nodes.push(containerShell);
+          nodes.forEach(function (node) {
+            if (!node || !node.style) return;
+            if (active) {
+              node.style.setProperty("height", "auto", "important");
+              node.style.setProperty("min-height", "0", "important");
+              node.style.setProperty("max-height", "none", "important");
+            } else {
+              node.style.removeProperty("height");
+              node.style.removeProperty("min-height");
+              node.style.removeProperty("max-height");
+            }
+          });
+        } catch (eTmaShellInline) {}
+      }
       function setNativeTelegramIosComposerFocusClasses(active) {
         try {
           document.documentElement.classList.toggle("chat-tma-ios-composer-minimal", !!active);
           document.body.classList.toggle("chat-tma-ios-composer-minimal", !!active);
           document.documentElement.classList.toggle("chat-tma-ios-shell-native", !!active);
           document.body.classList.toggle("chat-tma-ios-shell-native", !!active);
+          setTelegramIosShellFocusOverrides(!!active);
         } catch (eTmaNativeCls) {}
       }
       function setChatKeyboardOpenClasses(open) {
