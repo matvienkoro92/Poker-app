@@ -19892,6 +19892,8 @@ function initChat() {
   var chatKeyboardDebugPanel = null;
   var chatKeyboardDebugObserver = null;
   var chatKeyboardDebugFocusBound = false;
+  var chatKeyboardDebugTickerStarted = false;
+  var chatKeyboardDebugLastSnapshotKey = "";
   var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
   var chatComposerDrafts = { general: "", personal: "" };
@@ -20177,6 +20179,46 @@ function initChat() {
     } catch (eDbgLog) {}
     renderChatKeyboardDebugPanel();
   }
+  function pumpChatKeyboardDebugSnapshot(source) {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    try {
+      var snap = getChatKeyboardDebugSnapshot();
+      if (!snap) return;
+      var key = [
+        snap.ih,
+        snap.vvh,
+        snap.vvTop,
+        snap.tgVh,
+        snap.tgVs,
+        snap.areaTop,
+        snap.areaH,
+        snap.wrapTop,
+        snap.wrapH,
+        snap.taTop,
+        snap.taH,
+        snap.msgPad,
+        snap.msgScroll,
+        snap.areaPos,
+        snap.areaBottom,
+        snap.areaTransform,
+        snap.active,
+        snap.areaNode
+      ].join("|");
+      if (key !== chatKeyboardDebugLastSnapshotKey) {
+        chatKeyboardDebugLastSnapshotKey = key;
+        chatKeyboardDebugLog.push(
+          String(source || "tick") +
+            " ih=" + snap.ih +
+            " vv=" + snap.vvh + "/" + snap.vvTop +
+            " area=" + snap.areaTop + "+" + snap.areaH +
+            " ta=" + snap.taTop + "+" + snap.taH +
+            " act=" + snap.active
+        );
+        if (chatKeyboardDebugLog.length > 40) chatKeyboardDebugLog = chatKeyboardDebugLog.slice(-40);
+      }
+    } catch (eDbgPump) {}
+    renderChatKeyboardDebugPanel();
+  }
   function installChatKeyboardDebugObservers() {
     if (!shouldShowChatKeyboardDebugPanel()) return;
     try {
@@ -20234,6 +20276,23 @@ function initChat() {
           },
           true
         );
+        document.addEventListener(
+          "touchstart",
+          function (event) {
+            var target = event && event.target ? event.target : null;
+            if (!target) return;
+            if (!isChatKeyboardDebugTarget(target) && !(target.closest && target.closest('.view[data-view="chat"]'))) return;
+            logChatKeyboardDebug("touch*", getChatKeyboardDebugNodeLabel(target));
+          },
+          true
+        );
+        document.addEventListener(
+          "selectionchange",
+          function () {
+            pumpChatKeyboardDebugSnapshot("sel*");
+          },
+          true
+        );
       }
     } catch (eDbgFocusBind) {}
     try {
@@ -20258,6 +20317,14 @@ function initChat() {
         }, true);
       }
     } catch (eDbgWin) {}
+    try {
+      if (!chatKeyboardDebugTickerStarted) {
+        chatKeyboardDebugTickerStarted = true;
+        window.setInterval(function () {
+          pumpChatKeyboardDebugSnapshot("tick");
+        }, 180);
+      }
+    } catch (eDbgTicker) {}
   }
   installChatKeyboardDebugObservers();
   renderChatKeyboardDebugPanel();
