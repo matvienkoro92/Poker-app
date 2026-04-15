@@ -934,6 +934,13 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-containe
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+  margin-top: 182px !important;
+  padding-top: 0 !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-list-view,
 html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-list,
 html.app--telegram-miniapp body[data-view="chat"] .chat-contacts {
