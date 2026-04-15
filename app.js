@@ -22618,8 +22618,8 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        if (isTelegramWebApp()) {
-          genHeader.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+        if (document.documentElement.classList.contains("app--telegram-miniapp")) {
+          genHeader.style.setProperty("top", "80px", "important");
           genHeader.style.setProperty("left", "0", "important");
           genHeader.style.setProperty("right", "0", "important");
           genHeader.style.setProperty("transform", "none", "important");
@@ -22648,18 +22648,10 @@ function initChat() {
       refreshChatSelfPinBars();
     } catch (ePinDlg) {}
     try {
-      if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+      if (!document.documentElement.classList.contains("app--telegram-miniapp") && typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+        pokerFlushBottomNavAndViewportAfterChatChrome();
+      }
     } catch (eDlgFlush) {}
-    try {
-      setTimeout(function () {
-        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-      }, 120);
-    } catch (eDlgFlush2) {}
-    try {
-      setTimeout(function () {
-        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-      }, 320);
-    } catch (eDlgFlush3) {}
     try {
       pokerUpdateChatDmFocusFromUiState();
     } catch (eDmDlg) {}
@@ -22671,8 +22663,8 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          if (isTelegramWebApp()) {
-            genHeader.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+          if (document.documentElement.classList.contains("app--telegram-miniapp")) {
+            genHeader.style.setProperty("top", "80px", "important");
             genHeader.style.setProperty("left", "0", "important");
             genHeader.style.setProperty("right", "0", "important");
             genHeader.style.setProperty("transform", "none", "important");
@@ -22689,8 +22681,8 @@ function initChat() {
         }
         var convTop = document.querySelector("#chatConvView .chat-conv-top");
         if (convTop) {
-          if (isTelegramWebApp()) {
-            convTop.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+          if (document.documentElement.classList.contains("app--telegram-miniapp")) {
+            convTop.style.setProperty("top", "80px", "important");
             convTop.style.setProperty("left", "0", "important");
             convTop.style.setProperty("right", "0", "important");
             convTop.style.setProperty("transform", "none", "important");
@@ -22723,7 +22715,7 @@ function initChat() {
       scrollGeneralToBottomOnNextRender = true;
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
-      [80, 220, 420].forEach(function (ms) {
+      [80, 220, 420, 900].forEach(function (ms) {
         setTimeout(applyClubGeneralHeaderLayout, ms);
       });
       mountChatComposer("general");
@@ -29031,14 +29023,10 @@ function initChat() {
         } catch (eRaf) {}
         scheduleChatKeyboardPostDismissPasses([80, 220, 520]);
         try {
-          if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+          if (!isTelegramMiniAppChatThreadIos() && typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+            pokerFlushBottomNavAndViewportAfterChatChrome();
+          }
         } catch (eFlushKb) {}
-        try {
-          setTimeout(function () {
-            if (document.body.classList.contains("chat-keyboard-open")) return;
-            if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-          }, 180);
-        } catch (eFlushKb2) {}
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
@@ -29088,7 +29076,9 @@ function initChat() {
               if (twP && typeof twP.expand === "function") twP.expand();
             } catch (eEx) {}
             try {
-              if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
+              if (!isTelegramMiniAppChatThreadIos() && typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+                pokerFlushBottomNavAndViewportAfterChatChrome();
+              }
             } catch (eFlVv) {}
           }, 110);
         }

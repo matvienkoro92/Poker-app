@@ -855,7 +855,7 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner 
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header {
   position: absolute !important;
-  top: calc(var(--app-top-from-tg, 48px) + 8px) !important;
+  top: 80px !important;
   left: 0 !important;
   right: 0 !important;
   inset: auto !important;
@@ -864,7 +864,7 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header 
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top {
   position: absolute !important;
-  top: calc(var(--app-top-from-tg, 48px) + 8px) !important;
+  top: 80px !important;
   left: 0 !important;
   right: 0 !important;
   inset: auto !important;
