@@ -22675,6 +22675,7 @@ function initChat() {
   }
   var telegramChatHeaderSyncTimer = null;
   var telegramChatHeaderSyncRaf = null;
+  var telegramChatHeaderObserver = null;
   function stopTelegramChatHeaderSync() {
     try {
       if (telegramChatHeaderSyncTimer) {
@@ -22688,6 +22689,12 @@ function initChat() {
         telegramChatHeaderSyncRaf = null;
       }
     } catch (eTgHdrRaf) {}
+    try {
+      if (telegramChatHeaderObserver) {
+        telegramChatHeaderObserver.disconnect();
+        telegramChatHeaderObserver = null;
+      }
+    } catch (eTgHdrObsOff) {}
   }
   function applyTelegramChatHeaderTopNow() {
     try {
@@ -22714,6 +22721,18 @@ function initChat() {
       if (!isTelegramChatUiContext()) return;
       stopTelegramChatHeaderSync();
       applyTelegramChatHeaderTopNow();
+      try {
+        var headerTarget = document.querySelector("#chatGeneralView .chat-general-header") || document.querySelector("#chatConvView .chat-conv-top");
+        if (headerTarget && typeof MutationObserver !== "undefined") {
+          telegramChatHeaderObserver = new MutationObserver(function () {
+            applyTelegramChatHeaderTopNow();
+          });
+          telegramChatHeaderObserver.observe(headerTarget, {
+            attributes: true,
+            attributeFilter: ["style", "class"]
+          });
+        }
+      } catch (eTgHdrObsOn) {}
       telegramChatHeaderSyncTimer = setInterval(applyTelegramChatHeaderTopNow, 120);
       setTimeout(stopTelegramChatHeaderSync, 2800);
       var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
