@@ -676,6 +676,39 @@ html.app--telegram-miniapp body:has(.view--active[data-view="chat"]) {
   max-height: none !important;
   overflow: hidden !important;
 }
+html.app--telegram-miniapp body[data-view="chat"] #app.app,
+html.app--telegram-miniapp body[data-view="chat"] .app,
+html.app--telegram-miniapp body[data-view="chat"] .card,
+html.app--telegram-miniapp body[data-view="chat"] .card__content,
+html.app--telegram-miniapp body[data-view="chat"] .view--active[data-view="chat"],
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view,
+html.app--telegram-miniapp body[data-view="chat"] .chat-container {
+  position: static !important;
+  inset: auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  flex-basis: auto !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
 html.app--telegram-miniapp.app-view-chat,
 html.app--telegram-miniapp:has(body[data-view="chat"]) {
   min-height: 100% !important;
