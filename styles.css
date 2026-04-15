@@ -822,6 +822,18 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea
   box-sizing: border-box !important;
   overflow-y: hidden !important;
 }
+.chat-keyboard-debug {
+  margin: 0 0 4px;
+  padding: 6px 8px;
+  font: 10px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #f8fafc;
+  background: rgba(185, 28, 28, 0.86);
+  border: 1px solid rgba(254, 202, 202, 0.4);
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__toolbar-back,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__title-btn,
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__segments,

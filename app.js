@@ -19888,6 +19888,9 @@ function initChat() {
   var chatPersonalInputArea = document.getElementById("chatPersonalInputArea");
   var chatGeneralComposerEl = null;
   var chatPersonalComposerEl = null;
+  var chatKeyboardDebugLog = [];
+  var chatKeyboardDebugPanel = null;
+  var chatKeyboardDebugObserver = null;
   var chatComposerDrafts = { general: "", personal: "" };
   var chatComposerMounted = "detached";
   var chatTmaIosComposerOverlayHost = null;
@@ -20004,6 +20007,153 @@ function initChat() {
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
+  function shouldShowChatKeyboardDebugPanel() {
+    return typeof isTelegramWebApp === "function" && isTelegramWebApp();
+  }
+  function getActiveChatInputArea() {
+    if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
+      return chatGeneralInputArea || null;
+    }
+    if (chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")) {
+      return chatPersonalInputArea || null;
+    }
+    return null;
+  }
+  function getChatKeyboardDebugSnapshot() {
+    try {
+      var area = getActiveChatInputArea();
+      var wrap = area && area.querySelector ? area.querySelector(".chat-input-wrap, .chat-tma-ios-minimal-block") : null;
+      var ta = chatComposerEl || (area && area.querySelector ? area.querySelector("textarea") : null);
+      var msgs = getVisibleMessagesEl && typeof getVisibleMessagesEl === "function" ? getVisibleMessagesEl() : null;
+      var vv = window.visualViewport || null;
+      var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
+      var wrapRect = wrap && wrap.getBoundingClientRect ? wrap.getBoundingClientRect() : null;
+      var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
+      return {
+        ih: window.innerHeight || 0,
+        vvh: vv ? Math.round(Number(vv.height) || 0) : 0,
+        vvTop: vv ? Math.round(Number(vv.offsetTop) || 0) : 0,
+        tgVh: tw ? Math.round(Number(tw.viewportHeight) || 0) : 0,
+        tgVs: tw ? Math.round(Number(tw.viewportStableHeight) || 0) : 0,
+        areaTop: areaRect ? Math.round(areaRect.top) : 0,
+        areaH: areaRect ? Math.round(areaRect.height) : 0,
+        wrapTop: wrapRect ? Math.round(wrapRect.top) : 0,
+        wrapH: wrapRect ? Math.round(wrapRect.height) : 0,
+        taTop: taRect ? Math.round(taRect.top) : 0,
+        taH: taRect ? Math.round(taRect.height) : 0,
+        msgPad: msgs && msgs.style ? String(msgs.style.paddingBottom || "") : "",
+        msgScroll: msgs ? Math.round(msgs.scrollTop || 0) : 0,
+        areaPos: area ? String(getComputedStyle(area).position || "") : "",
+        areaBottom: area ? String(getComputedStyle(area).bottom || "") : "",
+        areaTransform: area ? String(getComputedStyle(area).transform || "") : "",
+        htmlKb: document.documentElement.classList.contains("chat-keyboard-open") ? 1 : 0,
+        bodyKb: document.body.classList.contains("chat-keyboard-open") ? 1 : 0
+      };
+    } catch (eDbgSnap) {
+      return null;
+    }
+  }
+  function renderChatKeyboardDebugPanel() {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    var area = getActiveChatInputArea();
+    if (!area) return;
+    if (!chatKeyboardDebugPanel || !chatKeyboardDebugPanel.isConnected) {
+      chatKeyboardDebugPanel = document.createElement("pre");
+      chatKeyboardDebugPanel.className = "chat-keyboard-debug";
+    }
+    if (!area.contains(chatKeyboardDebugPanel)) area.insertBefore(chatKeyboardDebugPanel, area.firstChild || null);
+    var snap = getChatKeyboardDebugSnapshot();
+    var tail = chatKeyboardDebugLog.slice(-6);
+    var lines = [];
+    if (snap) {
+      lines.push(
+        "ih:" + snap.ih +
+          " vv:" + snap.vvh + "/" + snap.vvTop +
+          " tg:" + snap.tgVh + "/" + snap.tgVs
+      );
+      lines.push(
+        "area:" + snap.areaTop + "+" + snap.areaH +
+          " wrap:" + snap.wrapTop + "+" + snap.wrapH +
+          " ta:" + snap.taTop + "+" + snap.taH
+      );
+      lines.push(
+        "pos:" + snap.areaPos +
+          " bottom:" + snap.areaBottom +
+          " pad:" + snap.msgPad +
+          " scr:" + snap.msgScroll
+      );
+      lines.push(
+        "tr:" + snap.areaTransform +
+          " kb:" + snap.htmlKb + "/" + snap.bodyKb
+      );
+    }
+    tail.forEach(function (item) {
+      lines.push(item);
+    });
+    chatKeyboardDebugPanel.textContent = lines.join("\n");
+  }
+  function logChatKeyboardDebug(source, extra) {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    try {
+      var snap = getChatKeyboardDebugSnapshot() || {};
+      var line =
+        String(source || "evt") +
+        " ih=" + (snap.ih || 0) +
+        " vv=" + (snap.vvh || 0) + "/" + (snap.vvTop || 0) +
+        " area=" + (snap.areaTop || 0) + "+" + (snap.areaH || 0) +
+        " ta=" + (snap.taTop || 0) + "+" + (snap.taH || 0);
+      if (extra) line += " " + extra;
+      chatKeyboardDebugLog.push(line);
+      if (chatKeyboardDebugLog.length > 40) chatKeyboardDebugLog = chatKeyboardDebugLog.slice(-40);
+    } catch (eDbgLog) {}
+    renderChatKeyboardDebugPanel();
+  }
+  function installChatKeyboardDebugObservers() {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    try {
+      if (chatKeyboardDebugObserver) chatKeyboardDebugObserver.disconnect();
+    } catch (eDbgObsOff) {}
+    try {
+      chatKeyboardDebugObserver = new MutationObserver(function (records) {
+        var parts = [];
+        records.forEach(function (rec) {
+          if (!rec || !rec.target) return;
+          var id = rec.target.id || rec.target.className || rec.target.tagName || "?";
+          parts.push(id + ":" + rec.attributeName);
+        });
+        logChatKeyboardDebug("mut", parts.join(","));
+      });
+      [document.documentElement, document.body, chatGeneralInputArea, chatPersonalInputArea, generalMessages, messagesEl].forEach(function (node) {
+        if (!node || !chatKeyboardDebugObserver) return;
+        chatKeyboardDebugObserver.observe(node, { attributes: true, attributeFilter: ["class", "style"] });
+      });
+    } catch (eDbgObs) {}
+    try {
+      if (window.visualViewport && window.visualViewport.addEventListener && !window.__pokerChatKeyboardDebugVvBound) {
+        window.__pokerChatKeyboardDebugVvBound = true;
+        window.visualViewport.addEventListener("resize", function () {
+          logChatKeyboardDebug("vv-resize");
+        });
+        window.visualViewport.addEventListener("scroll", function () {
+          logChatKeyboardDebug("vv-scroll");
+        });
+      }
+    } catch (eDbgVv) {}
+    try {
+      if (!window.__pokerChatKeyboardDebugWinBound) {
+        window.__pokerChatKeyboardDebugWinBound = true;
+        window.addEventListener("resize", function () {
+          logChatKeyboardDebug("win-resize");
+        });
+        window.addEventListener("scroll", function () {
+          logChatKeyboardDebug("win-scroll");
+        }, true);
+      }
+    } catch (eDbgWin) {}
+  }
+  installChatKeyboardDebugObservers();
+  renderChatKeyboardDebugPanel();
   function ensureTelegramIosChatComposerOverlayHost() {
     return null;
   }
@@ -27596,12 +27746,15 @@ function initChat() {
        * Без fixed — lift по переменным (translate в потоке).
        */
       function updateChatMessagesKeyboardPad() {
+        logChatKeyboardDebug("pad-enter");
         if (isPassiveTelegramIosChatThread()) {
           clearChatMessagesKeyboardPad();
+          logChatKeyboardDebug("pad-passive");
           return;
         }
         if (shouldUseNativeTelegramIosChatComposerFlow()) {
           clearChatMessagesKeyboardPad();
+          logChatKeyboardDebug("pad-native");
           return;
         }
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -27737,6 +27890,7 @@ function initChat() {
           });
         } catch (eDbgPad) {}
         box.style.paddingBottom = pad + "px";
+        logChatKeyboardDebug("pad-set", "pad=" + pad + " btm=" + btm + " fixed=" + (barFixed ? 1 : 0));
         try {
           if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
             window.__pokerScheduleSyncChatScrollBottomButtons();
@@ -27764,6 +27918,7 @@ function initChat() {
         if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
       }
       function setChatKeyboardOpen(open) {
+        logChatKeyboardDebug(open ? "kb-open" : "kb-close");
         if (isPassiveTelegramIosChatThread()) {
           document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
           document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
@@ -28703,6 +28858,7 @@ function initChat() {
        * Высота перекрытия: viewportStableHeight − viewportHeight; резервы winLoss / lastGood; dock + pad.
        */
       function syncTelegramMiniAppChatThreadKeyboard() {
+        logChatKeyboardDebug("tma-sync-enter");
         if (isPassiveTelegramIosChatThread()) {
           var docPassive = document.documentElement;
           docPassive.style.setProperty("--chat-vv-inset", "0px");
@@ -28829,6 +28985,7 @@ function initChat() {
         return true;
       }
       function syncPwaChatVisualViewportInset() {
+        logChatKeyboardDebug("vv-sync-enter");
         var doc = document.documentElement;
         if (isPassiveTelegramIosChatThread()) {
           hideTelegramMiniAppChatThreadDebugOverlay();
@@ -29184,6 +29341,7 @@ function initChat() {
         }
       };
       function onChatInputFocus(focusTarget) {
+        logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         updateChatKeyboardInnerHeightBaseline();
         if (isChatPhysicalKeyboardContext()) {
           var elDesk = getVisibleMessagesEl();
@@ -29413,6 +29571,7 @@ function initChat() {
       }
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
+        logChatKeyboardDebug("blur");
         if (isTelegramMiniAppChatThreadIos()) {
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
