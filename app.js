@@ -22687,6 +22687,24 @@ function initChat() {
             genHeader.style.maxWidth = "none";
           }
         }
+        var convTop = document.querySelector("#chatConvView .chat-conv-top");
+        if (convTop) {
+          if (isTelegramWebApp()) {
+            convTop.style.setProperty("top", "calc(var(--app-top-from-tg, 48px) + 8px)", "important");
+            convTop.style.setProperty("left", "0", "important");
+            convTop.style.setProperty("right", "0", "important");
+            convTop.style.setProperty("transform", "none", "important");
+            convTop.style.setProperty("width", "100%", "important");
+            convTop.style.setProperty("max-width", "none", "important");
+          } else {
+            convTop.style.top = "0";
+            convTop.style.left = "0";
+            convTop.style.right = "0";
+            convTop.style.transform = "none";
+            convTop.style.width = "100%";
+            convTop.style.maxWidth = "none";
+          }
+        }
       } catch (err) {}
     }
     function openClubChatShell() {
@@ -22705,6 +22723,9 @@ function initChat() {
       scrollGeneralToBottomOnNextRender = true;
       updateChatHeaderStats();
       applyClubGeneralHeaderLayout();
+      [80, 220, 420].forEach(function (ms) {
+        setTimeout(applyClubGeneralHeaderLayout, ms);
+      });
       mountChatComposer("general");
       syncChatInertForIosAccessory();
       try {
@@ -29950,16 +29971,7 @@ function initChat() {
             stripChatInputAreaTransforms();
           } catch (eTmaClr) {}
           try {
-            var visibleMessagesNative = getVisibleMessagesEl();
-            var shouldPinNative = !!(visibleMessagesNative && chatMessagesNearBottom(visibleMessagesNative, CHAT_SCROLL_BOTTOM_NEAR_PX));
-            if (shouldPinNative && visibleMessagesNative) {
-              setTimeout(function () {
-                try {
-                  if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
-                  visibleMessagesNative.scrollTop = visibleMessagesNative.scrollHeight;
-                } catch (eTmaNativeScrollLater) {}
-              }, 260);
-            }
+            /* Telegram iOS: не автоскроллить ленту на focus — это даёт заметный рывок во время анимации клавиатуры. */
           } catch (eTmaNativeScroll) {}
           return;
         }
