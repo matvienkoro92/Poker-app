@@ -167,7 +167,22 @@ function pokerAutosizeTextarea(ta, opts) {
     }
   }
   measureApply();
-  if (win.Telegram && win.Telegram.WebApp) {
+  var skipTelegramChatRemeasure = false;
+  try {
+    skipTelegramChatRemeasure =
+      !!(
+        win.Telegram &&
+        win.Telegram.WebApp &&
+        doc &&
+        doc.documentElement &&
+        doc.documentElement.classList &&
+        doc.documentElement.classList.contains("app--telegram-miniapp") &&
+        ta &&
+        typeof ta.closest === "function" &&
+        ta.closest('.view[data-view="chat"]')
+      );
+  } catch (eSkipRaf) {}
+  if (win.Telegram && win.Telegram.WebApp && !skipTelegramChatRemeasure) {
     var raf = win.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
     };
@@ -27355,6 +27370,10 @@ function initChat() {
        * Без fixed — lift по переменным (translate в потоке).
        */
       function updateChatMessagesKeyboardPad() {
+        if (shouldUseNativeTelegramIosChatComposerFlow()) {
+          clearChatMessagesKeyboardPad();
+          return;
+        }
         if (!document.body.classList.contains("chat-keyboard-open")) return;
         var box0 = getVisibleMessagesEl();
         if (!box0) return;
@@ -28058,6 +28077,9 @@ function initChat() {
           !isChatPhysicalKeyboardContext()
         );
       }
+      function shouldUseNativeTelegramIosChatComposerFlow(focusTarget) {
+        return isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom(focusTarget);
+      }
       function getTelegramMiniAppChatThreadFocusSession() {
         var session = window.__pokerChatTmaThreadFocusSession;
         if (!session || typeof session !== "object") {
@@ -28478,6 +28500,14 @@ function initChat() {
       }
       function syncPwaChatVisualViewportInset() {
         var doc = document.documentElement;
+        if (shouldUseNativeTelegramIosChatComposerFlow()) {
+          hideTelegramMiniAppChatThreadDebugOverlay();
+          doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          clearChatMessagesKeyboardPad();
+          stripChatInputAreaTransforms();
+          return;
+        }
         if (!document.body.classList.contains("chat-keyboard-open")) {
           hideTelegramMiniAppChatThreadDebugOverlay();
           doc.style.removeProperty("--chat-vv-inset");
@@ -28827,12 +28857,7 @@ function initChat() {
           }
           return;
         }
-        var isTmaThreadFocus =
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
-          typeof isChatThreadComposerKeyboardDom === "function" &&
-          isChatThreadComposerKeyboardDom(focusTarget);
-        if (isTmaThreadFocus) {
+        if (shouldUseNativeTelegramIosChatComposerFlow(focusTarget)) {
           try {
             resetChatKeyboardDockRuntimeState();
             window.__pokerChatKeyboardFocusAtMs = Date.now();
@@ -28847,11 +28872,15 @@ function initChat() {
             clearChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
           } catch (eTmaClr) {}
-          attachTelegramMiniAppChatThreadRootScrollLock();
           try {
-            updateTelegramMiniAppChatThreadDebugOverlay("focus-passive", { cover: 0, bottom: 0, pad: 0 });
+            hideTelegramMiniAppChatThreadDebugOverlay();
           } catch (eDbgPassive) {}
-          scrollVisibleChatMessagesToBottom();
+          try {
+            var visibleMessagesNative = getVisibleMessagesEl();
+            if (visibleMessagesNative && chatMessagesNearBottom(visibleMessagesNative, CHAT_SCROLL_BOTTOM_NEAR_PX)) {
+              visibleMessagesNative.scrollTop = visibleMessagesNative.scrollHeight;
+            }
+          } catch (eTmaNativeScroll) {}
           return;
         }
         setChatKeyboardOpenClasses(true);
@@ -29047,12 +29076,7 @@ function initChat() {
       }
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
-        var isTmaThreadBlur =
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
-          typeof isIosLikeForChatViewport === "function" &&
-          isIosLikeForChatViewport();
-        if (isTmaThreadBlur) {
+        if (isTelegramMiniAppChatThreadIos()) {
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
           try {
@@ -29973,7 +29997,7 @@ function initChat() {
         flushChatComposerToDrafts();
         resizeChatTextarea(ta);
         try {
-          if (document.body.classList.contains("chat-keyboard-open")) {
+          if (document.body.classList.contains("chat-keyboard-open") && !shouldUseNativeTelegramIosChatComposerFlow(ta)) {
             var rafI = window.requestAnimationFrame || function (fn) {
               setTimeout(fn, 16);
             };
