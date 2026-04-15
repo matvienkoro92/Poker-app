@@ -14757,9 +14757,7 @@ function setTelegramIosKeyboardRootLock(active) {
   document.body.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
   if (telegramIosKeyboardRootLockActive) {
     syncTelegramIosKeyboardRootLockScroll();
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 40);
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 140);
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 320);
+    setTimeout(syncTelegramIosKeyboardRootLockScroll, 90);
   } else {
     document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
     document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
@@ -22620,7 +22618,7 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = isTelegramWebApp() ? "auto" : "0";
+        genHeader.style.top = "0";
         genHeader.style.left = "0";
         genHeader.style.right = "0";
         genHeader.style.transform = "none";
@@ -22664,7 +22662,7 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = isTelegramWebApp() ? "auto" : "0";
+          genHeader.style.top = "0";
           genHeader.style.left = "0";
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
