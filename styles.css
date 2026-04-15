@@ -24761,6 +24761,9 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   flex-wrap: wrap;
   gap: 8px;
 }
+.footer-admin-visitors--lab {
+  justify-content: center;
+}
 .footer-admin-visitors--hidden {
   display: none !important;
 }
@@ -24776,6 +24779,116 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .footer-admin-visitors__btn:hover {
   color: var(--text);
   background: var(--bg-elevated);
+}
+
+.keyboard-lab {
+  min-height: calc(100dvh - 110px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 35%),
+    linear-gradient(180deg, #11182c 0%, #0b1220 100%);
+}
+.keyboard-lab__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.keyboard-lab__eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+.keyboard-lab__title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  color: #f8fafc;
+}
+.keyboard-lab__subtitle {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.keyboard-lab__metrics {
+  border-radius: 14px;
+  padding: 10px 12px;
+  font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #fef2f2;
+  background: rgba(127, 29, 29, 0.78);
+  border: 1px solid rgba(254, 202, 202, 0.22);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.keyboard-lab__stream {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+  padding-bottom: 8px;
+}
+.keyboard-lab__bubble {
+  max-width: 92%;
+  border-radius: 18px;
+  padding: 12px 14px;
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.92);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+.keyboard-lab__bubble--peer {
+  align-self: flex-start;
+}
+.keyboard-lab__bubble--self {
+  align-self: flex-end;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.92), rgba(29, 78, 216, 0.92));
+}
+.keyboard-lab__bubble--system {
+  align-self: center;
+  background: rgba(51, 65, 85, 0.9);
+  color: #f8fafc;
+}
+.keyboard-lab__composer {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 10px;
+  align-items: end;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  box-shadow: 0 18px 40px rgba(2, 8, 23, 0.45);
+}
+.keyboard-lab__textarea {
+  width: 100%;
+  min-height: 44px;
+  max-height: 120px;
+  resize: none;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.84);
+  color: #f8fafc;
+  padding: 11px 14px;
+  font: 16px/1.35 inherit;
+  box-sizing: border-box;
+  overflow-y: hidden;
+}
+.keyboard-lab__send {
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fb923c, #f97316);
+  color: #fff7ed;
+  font-size: 22px;
 }
 
 /* Админ: просмотры раздела (внизу каждого .view) */

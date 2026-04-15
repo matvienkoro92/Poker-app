@@ -14673,6 +14673,112 @@ document.addEventListener("click", function (e) {
   if (page) setDownloadPage(page);
 });
 
+(function initKeyboardLab() {
+  var view = document.getElementById("keyboardLabView");
+  var metricsEl = document.getElementById("keyboardLabMetrics");
+  var streamEl = document.getElementById("keyboardLabStream");
+  var textareaEl = document.getElementById("keyboardLabTextarea");
+  var composerEl = document.getElementById("keyboardLabComposer");
+  var sendBtnEl = document.getElementById("keyboardLabSendBtn");
+  if (!view || !metricsEl || !streamEl || !textareaEl || !composerEl || !sendBtnEl) return;
+  var ticker = null;
+  function keyboardLabActiveLabel() {
+    var active = document.activeElement;
+    if (!active) return "none";
+    var id = active.id ? "#" + active.id : "";
+    var cls = active.classList && active.classList.length ? "." + Array.prototype.slice.call(active.classList, 0, 2).join(".") : "";
+    return String((active.tagName || "node").toLowerCase()) + id + cls;
+  }
+  function keyboardLabUpdateMetrics(source) {
+    try {
+      var vv = window.visualViewport || null;
+      var taRect = textareaEl.getBoundingClientRect();
+      var composerRect = composerEl.getBoundingClientRect();
+      var viewRect = view.getBoundingClientRect();
+      var shell = document.getElementById("app");
+      var shellRect = shell && shell.getBoundingClientRect ? shell.getBoundingClientRect() : null;
+      var scrollEl = document.scrollingElement || document.documentElement || document.body;
+      metricsEl.textContent = [
+        "src: " + String(source || "tick"),
+        "ih: " + (window.innerHeight || 0) +
+          " vv: " + (vv ? Math.round(Number(vv.height) || 0) : 0) + "/" + (vv ? Math.round(Number(vv.offsetTop) || 0) : 0),
+        "view: " + Math.round(viewRect.top) + "+" + Math.round(viewRect.height),
+        "cmp: " + Math.round(composerRect.top) + "+" + Math.round(composerRect.height) +
+          " ta: " + Math.round(taRect.top) + "+" + Math.round(taRect.height),
+        "shell: " + (shellRect ? Math.round(shellRect.top) + "+" + Math.round(shellRect.height) : "n/a"),
+        "scroll: " + Math.round((scrollEl && scrollEl.scrollTop) || 0) +
+          " active: " + keyboardLabActiveLabel()
+      ].join("\n");
+    } catch (eKbLabMetrics) {
+      metricsEl.textContent = "keyboard-lab metrics error";
+    }
+  }
+  function keyboardLabEnsureTicker() {
+    if (ticker) return;
+    ticker = window.setInterval(function () {
+      keyboardLabUpdateMetrics("tick");
+    }, 180);
+  }
+  function keyboardLabAppendBubble(text) {
+    if (!text) return;
+    var bubble = document.createElement("div");
+    bubble.className = "keyboard-lab__bubble keyboard-lab__bubble--self";
+    bubble.textContent = text;
+    streamEl.appendChild(bubble);
+    streamEl.scrollTop = streamEl.scrollHeight;
+  }
+  function keyboardLabAutosize() {
+    textareaEl.style.height = "44px";
+    var next = Math.max(44, Math.min(120, textareaEl.scrollHeight || 44));
+    textareaEl.style.height = next + "px";
+    keyboardLabUpdateMetrics("autosize");
+  }
+  textareaEl.addEventListener("input", function () {
+    keyboardLabAutosize();
+    keyboardLabUpdateMetrics("input");
+  });
+  textareaEl.addEventListener("focus", function () {
+    keyboardLabEnsureTicker();
+    keyboardLabUpdateMetrics("focus");
+  });
+  textareaEl.addEventListener("blur", function () {
+    keyboardLabUpdateMetrics("blur");
+  });
+  textareaEl.addEventListener("touchstart", function () {
+    keyboardLabEnsureTicker();
+    keyboardLabUpdateMetrics("touch");
+  }, { passive: true });
+  sendBtnEl.addEventListener("click", function () {
+    var value = (textareaEl.value || "").trim();
+    if (!value) return;
+    keyboardLabAppendBubble(value);
+    textareaEl.value = "";
+    keyboardLabAutosize();
+    keyboardLabUpdateMetrics("send");
+  });
+  view.addEventListener("click", function (e) {
+    if (e.target === view || e.target === streamEl) keyboardLabUpdateMetrics("view-click");
+  });
+  if (window.visualViewport && window.visualViewport.addEventListener) {
+    window.visualViewport.addEventListener("resize", function () {
+      keyboardLabEnsureTicker();
+      keyboardLabUpdateMetrics("vv-resize");
+    });
+    window.visualViewport.addEventListener("scroll", function () {
+      keyboardLabEnsureTicker();
+      keyboardLabUpdateMetrics("vv-scroll");
+    });
+  }
+  window.addEventListener("resize", function () {
+    keyboardLabUpdateMetrics("win-resize");
+  });
+  window.addEventListener("scroll", function () {
+    keyboardLabUpdateMetrics("win-scroll");
+  }, true);
+  keyboardLabAutosize();
+  keyboardLabUpdateMetrics("init");
+})();
+
 document.addEventListener("click", function (e) {
   var hereBtn = e.target && e.target.closest ? e.target.closest(".cashout-manager-btn--here[data-cashout-chat-user-id]") : null;
   if (hereBtn) {
