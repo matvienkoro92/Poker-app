@@ -661,6 +661,35 @@ body[data-view="chat"] {
   max-height: 100dvh;
   overflow: hidden;
 }
+html.poker-ios-pwa.app-view-chat,
+html.poker-ios-pwa:has(body[data-view="chat"]) {
+  min-height: 100vh;
+  height: 100vh;
+  min-height: -webkit-fill-available;
+  height: -webkit-fill-available;
+  min-height: 100lvh;
+  height: 100lvh;
+}
+html.poker-ios-pwa body[data-view="chat"] {
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  min-height: -webkit-fill-available;
+  height: -webkit-fill-available;
+  max-height: -webkit-fill-available;
+  min-height: 100lvh;
+  height: 100lvh;
+  max-height: 100lvh;
+}
+html.poker-ios-pwa body[data-view="chat"] #app.app,
+html.poker-ios-pwa body[data-view="chat"] .app,
+html.poker-ios-pwa body[data-view="chat"] .card,
+html.poker-ios-pwa body[data-view="chat"] .card__content,
+html.poker-ios-pwa body[data-view="chat"] .view--active[data-view="chat"] {
+  min-height: 100%;
+  height: 100%;
+  max-height: 100%;
+}
 /* Telegram iOS: fixed body под чатом провоцирует скачок нижней полосы при focus/keyboard.
    В этом режиме оставляем экран чатa полноэкранным, но без fixed-body. */
 html.app--telegram-miniapp body[data-view="chat"],
