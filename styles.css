@@ -740,6 +740,7 @@ html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .cha
   background: rgba(15, 23, 42, 0.98) !important;
   box-shadow: 0 -8px 24px rgba(2, 8, 23, 0.36) !important;
   z-index: 120 !important;
+  transform: translateY(var(--tg-ios-root-scroll-offset, 0px)) !important;
 }
 html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .keyboard-lab {
   padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
@@ -750,6 +751,7 @@ html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-la
   right: 12px !important;
   bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
   z-index: 140 !important;
+  transform: translateY(var(--tg-ios-root-scroll-offset, 0px)) !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {

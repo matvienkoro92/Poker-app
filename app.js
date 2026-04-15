@@ -14700,6 +14700,32 @@ function getTelegramIosKeyboardRootLockScrollPorts() {
   } catch (eTgKbCard) {}
   return ports;
 }
+function getTelegramIosKeyboardRootShiftPx() {
+  var maxShift = 0;
+  getTelegramIosKeyboardRootLockScrollPorts().forEach(function (node) {
+    try {
+      if (!node) return;
+      var top = Math.max(Number(node.scrollTop) || 0, Number(node.scrollY) || 0);
+      if (top > maxShift) maxShift = top;
+    } catch (eTgKbShiftNode) {}
+  });
+  try {
+    var app = document.getElementById("app");
+    if (app && app.getBoundingClientRect) {
+      var rect = app.getBoundingClientRect();
+      var drift = Math.max(0, Math.round(-rect.top || 0));
+      if (drift > maxShift) maxShift = drift;
+    }
+  } catch (eTgKbShiftApp) {}
+  return Math.round(maxShift || 0);
+}
+function syncTelegramIosKeyboardRootLockOffsetVar() {
+  try {
+    var shiftPx = telegramIosKeyboardRootLockActive ? getTelegramIosKeyboardRootShiftPx() : 0;
+    document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", shiftPx + "px");
+    document.body.style.setProperty("--tg-ios-root-scroll-offset", shiftPx + "px");
+  } catch (eTgKbOffset) {}
+}
 function syncTelegramIosKeyboardRootLockScroll() {
   if (!telegramIosKeyboardRootLockActive) return;
   try {
@@ -14712,6 +14738,7 @@ function syncTelegramIosKeyboardRootLockScroll() {
       node.scrollLeft = 0;
     } catch (eTgKbNode) {}
   });
+  syncTelegramIosKeyboardRootLockOffsetVar();
 }
 function scheduleTelegramIosKeyboardRootLockSync() {
   if (!telegramIosKeyboardRootLockActive || telegramIosKeyboardRootLockRaf != null) return;
@@ -14734,6 +14761,8 @@ function setTelegramIosKeyboardRootLock(active) {
     setTimeout(syncTelegramIosKeyboardRootLockScroll, 140);
     setTimeout(syncTelegramIosKeyboardRootLockScroll, 320);
   } else {
+    document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
+    document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
     if (telegramIosKeyboardRootLockRaf != null) {
       var caf = window.cancelAnimationFrame || clearTimeout;
       caf(telegramIosKeyboardRootLockRaf);
