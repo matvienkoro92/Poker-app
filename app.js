@@ -6756,14 +6756,6 @@ function pokerEnsureTelegramChatUiGuard() {
       try {
         if (!document || !document.body) return;
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
-        var isIosLike =
-          typeof isIosLikeForChatViewport === "function" &&
-          isIosLikeForChatViewport();
-        var standalone =
-          (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-          (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
-          !!(window.navigator && window.navigator.standalone);
-        if (!isIosLike || standalone) return;
         var header = document.querySelector(".chat-general-header");
         var wrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
         if (header) {
