@@ -8827,6 +8827,9 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal
   overflow: hidden;
   margin-top: 0;
 }
+html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list-wrap {
+  margin-bottom: var(--app-bottom-tabbar-pad);
+}
 .chat-dialogs-list {
   position: absolute;
   top: 0;
