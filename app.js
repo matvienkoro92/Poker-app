@@ -22691,6 +22691,24 @@ function initChat() {
         document.documentElement.classList.contains("app--telegram-miniapp")
       );
     } catch (eTgHdrCtxCls) {}
+    try {
+      var isIosLike =
+        typeof isIosLikeForChatViewport === "function" &&
+        isIosLikeForChatViewport();
+      var standalone =
+        (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
+        !!(window.navigator && window.navigator.standalone);
+      if (
+        isIosLike &&
+        !standalone &&
+        document &&
+        document.body &&
+        String(document.body.getAttribute("data-view") || "") === "chat"
+      ) {
+        return true;
+      }
+    } catch (eTgHdrCtxIos) {}
     return false;
   }
   var telegramChatHeaderSyncTimer = null;
