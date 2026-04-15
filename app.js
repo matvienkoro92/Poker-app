@@ -20110,6 +20110,15 @@ function initChat() {
   var chatKeyboardDebugLastSnapshotKey = "";
   var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
+  var chatIosComposeOverlay = document.getElementById("chatIosComposeOverlay");
+  var chatIosComposeOverlayBackdrop = document.getElementById("chatIosComposeOverlayBackdrop");
+  var chatIosComposeOverlayClose = document.getElementById("chatIosComposeOverlayClose");
+  var chatIosComposeOverlayCancel = document.getElementById("chatIosComposeOverlayCancel");
+  var chatIosComposeOverlaySend = document.getElementById("chatIosComposeOverlaySend");
+  var chatIosComposeOverlayTextarea = document.getElementById("chatIosComposeOverlayTextarea");
+  var chatIosComposeOverlayTitle = document.getElementById("chatIosComposeOverlayTitle");
+  var chatIosComposeOverlayMode = "";
+  var chatIosComposeOverlayOpening = false;
   var chatComposerDrafts = { general: "", personal: "" };
   var chatComposerMounted = "detached";
   var chatTmaIosComposerOverlayHost = null;
@@ -20709,6 +20718,105 @@ function initChat() {
     }
     ensureTelegramIosMinimalComposerBlock(chatGeneralInputArea, chatGeneralComposerMount, generalSendBtn);
     ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
+  }
+  function shouldUseTelegramIosComposeOverlay() {
+    try {
+      return shouldUseDedicatedTelegramIosChatComposer() && !!chatIosComposeOverlay && !!chatIosComposeOverlayTextarea;
+    } catch (eTgIosOverlay) {
+      return false;
+    }
+  }
+  function closeTelegramIosComposeOverlay(opts) {
+    if (!chatIosComposeOverlay) return;
+    opts = opts || {};
+    chatIosComposeOverlay.classList.add("chat-ios-compose-overlay--hidden");
+    chatIosComposeOverlay.setAttribute("aria-hidden", "true");
+    if (chatIosComposeOverlayTextarea) {
+      if (!opts.keepDraft) {
+        if (chatIosComposeOverlayMode === "general") chatComposerDrafts.general = String(chatIosComposeOverlayTextarea.value || "");
+        else if (chatIosComposeOverlayMode === "personal") chatComposerDrafts.personal = String(chatIosComposeOverlayTextarea.value || "");
+      }
+      try { chatIosComposeOverlayTextarea.blur(); } catch (eBlurOv) {}
+    }
+    if (chatIosComposeOverlayMode === "general" && chatGeneralInputArea) {
+      chatGeneralInputArea.classList.remove("chat-input-area--ios-overlay-gate");
+    } else if (chatIosComposeOverlayMode === "personal" && chatPersonalInputArea) {
+      chatPersonalInputArea.classList.remove("chat-input-area--ios-overlay-gate");
+    }
+    chatIosComposeOverlayMode = "";
+    chatIosComposeOverlayOpening = false;
+    setTelegramIosKeyboardRootLock(false);
+  }
+  function openTelegramIosComposeOverlay(mode) {
+    if (!shouldUseTelegramIosComposeOverlay()) return false;
+    if (mode !== "general" && mode !== "personal") return false;
+    chatIosComposeOverlayMode = mode;
+    chatIosComposeOverlayOpening = true;
+    if (chatIosComposeOverlayTitle) {
+      chatIosComposeOverlayTitle.textContent = mode === "general" ? "Сообщение в общий чат" : "Сообщение собеседнику";
+    }
+    var currentDraft = mode === "general" ? getChatGeneralText() : getChatPersonalText();
+    if (chatIosComposeOverlayTextarea) {
+      chatIosComposeOverlayTextarea.value = currentDraft || "";
+    }
+    if (mode === "general" && chatGeneralInputArea) {
+      chatGeneralInputArea.classList.add("chat-input-area--ios-overlay-gate");
+    } else if (mode === "personal" && chatPersonalInputArea) {
+      chatPersonalInputArea.classList.add("chat-input-area--ios-overlay-gate");
+    }
+    chatIosComposeOverlay.classList.remove("chat-ios-compose-overlay--hidden");
+    chatIosComposeOverlay.setAttribute("aria-hidden", "false");
+    setTelegramIosKeyboardRootLock(true);
+    setTimeout(function () {
+      chatIosComposeOverlayOpening = false;
+      try {
+        if (chatIosComposeOverlayTextarea) chatIosComposeOverlayTextarea.focus();
+      } catch (eFocusOverlay) {}
+    }, 30);
+    return true;
+  }
+  function submitTelegramIosComposeOverlay() {
+    if (!chatIosComposeOverlayMode || !chatIosComposeOverlayTextarea) return;
+    var text = String(chatIosComposeOverlayTextarea.value || "");
+    if (chatIosComposeOverlayMode === "general") {
+      chatComposerDrafts.general = text;
+      if (chatGeneralComposerEl) chatGeneralComposerEl.value = text;
+      if (chatComposerMounted === "general" && chatComposerEl) chatComposerEl.value = text;
+      closeTelegramIosComposeOverlay({ keepDraft: true });
+      sendGeneral(text);
+      return;
+    }
+    if (chatIosComposeOverlayMode === "personal") {
+      chatComposerDrafts.personal = text;
+      if (chatPersonalComposerEl) chatPersonalComposerEl.value = text;
+      if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = text;
+      closeTelegramIosComposeOverlay({ keepDraft: true });
+      sendMessage(text);
+    }
+  }
+  [chatIosComposeOverlayBackdrop, chatIosComposeOverlayClose, chatIosComposeOverlayCancel].forEach(function (btn) {
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      closeTelegramIosComposeOverlay();
+    });
+  });
+  if (chatIosComposeOverlaySend) {
+    chatIosComposeOverlaySend.addEventListener("click", function () {
+      submitTelegramIosComposeOverlay();
+    });
+  }
+  if (chatIosComposeOverlayTextarea) {
+    chatIosComposeOverlayTextarea.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeTelegramIosComposeOverlay();
+        return;
+      }
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        submitTelegramIosComposeOverlay();
+      }
+    });
   }
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
@@ -30058,17 +30166,35 @@ function initChat() {
         ta.__pokerChatKeyboardEventsBound = true;
         ta.addEventListener(
           "touchstart",
-          function () {
+          function (event) {
             chatComposerEl = ta;
+            if (shouldUseTelegramIosComposeOverlay() && !chatIosComposeOverlayOpening) {
+              var modeTouch = ta === chatGeneralComposerEl ? "general" : ta === chatPersonalComposerEl ? "personal" : chatActiveTab;
+              if (openTelegramIosComposeOverlay(modeTouch === "general" ? "general" : "personal")) {
+                if (event) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                try { ta.blur(); } catch (eTgOvBlur) {}
+                return;
+              }
+            }
             try {
               var ihTs = window.innerHeight || 0;
               if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
             } catch (eTsBl) {}
           },
-          { passive: true }
+          { passive: false }
         );
         ta.addEventListener("focus", function () {
           chatComposerEl = ta;
+          if (shouldUseTelegramIosComposeOverlay() && !chatIosComposeOverlayOpening) {
+            var modeFocus = ta === chatGeneralComposerEl ? "general" : ta === chatPersonalComposerEl ? "personal" : chatActiveTab;
+            if (openTelegramIosComposeOverlay(modeFocus === "general" ? "general" : "personal")) {
+              try { ta.blur(); } catch (eTgOvBlur2) {}
+              return;
+            }
+          }
           onChatInputFocus(ta);
         });
         ta.addEventListener("blur", function () {

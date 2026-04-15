@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.641">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.642">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=469" />
+    <link rel="stylesheet" href="./styles.css?v=470" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1729,7 +1729,7 @@
               </div>
               </div>
               <div class="chat-input-area" id="chatGeneralInputArea">
-                <pre class="chat-keyboard-debug" id="chatGeneralKeyboardDebug" aria-hidden="false">DBG live 1.641</pre>
+                <pre class="chat-keyboard-debug" id="chatGeneralKeyboardDebug" aria-hidden="false">DBG live 1.642</pre>
                 <div class="chat-reply-preview" id="chatGeneralReplyPreview">
                   <div class="chat-reply-preview__text"></div>
                   <button type="button" class="chat-reply-preview__cancel" title="Отменить ответ">✕</button>
@@ -1793,7 +1793,7 @@
                   </div>
                   </div>
                   <div class="chat-input-area" id="chatPersonalInputArea">
-                    <pre class="chat-keyboard-debug" id="chatPersonalKeyboardDebug" aria-hidden="false">DBG live 1.641</pre>
+                    <pre class="chat-keyboard-debug" id="chatPersonalKeyboardDebug" aria-hidden="false">DBG live 1.642</pre>
                     <div class="chat-reply-preview" id="chatPersonalReplyPreview">
                       <div class="chat-reply-preview__text"></div>
                       <button type="button" class="chat-reply-preview__cancel" title="Отменить ответ">✕</button>
@@ -1827,6 +1827,23 @@
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-ios-compose-overlay chat-ios-compose-overlay--hidden" id="chatIosComposeOverlay" aria-hidden="true">
+              <div class="chat-ios-compose-overlay__backdrop" id="chatIosComposeOverlayBackdrop"></div>
+              <div class="chat-ios-compose-overlay__sheet">
+                <div class="chat-ios-compose-overlay__head">
+                  <div class="chat-ios-compose-overlay__title-wrap">
+                    <span class="chat-ios-compose-overlay__eyebrow">Telegram iPhone</span>
+                    <strong class="chat-ios-compose-overlay__title" id="chatIosComposeOverlayTitle">Новое сообщение</strong>
+                  </div>
+                  <button type="button" class="chat-ios-compose-overlay__close" id="chatIosComposeOverlayClose" aria-label="Закрыть">×</button>
+                </div>
+                <textarea class="chat-ios-compose-overlay__textarea" id="chatIosComposeOverlayTextarea" rows="4" maxlength="4096" placeholder="Введите сообщение"></textarea>
+                <div class="chat-ios-compose-overlay__actions">
+                  <button type="button" class="chat-ios-compose-overlay__cancel" id="chatIosComposeOverlayCancel">Отмена</button>
+                  <button type="button" class="chat-ios-compose-overlay__send" id="chatIosComposeOverlaySend">Отправить</button>
                 </div>
               </div>
             </div>
