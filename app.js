@@ -19830,6 +19830,8 @@ function initChat() {
   var chatTmaIosComposerOverlayHost = null;
   var chatTmaIosComposerOverlaySyncQueued = false;
   var chatTmaIosComposerOverlayActiveKey = null;
+  var chatTmaIosComposerOverlayViewportHandler = null;
+  var chatTmaIosComposerOverlayViewportRaf = null;
   var chatTmaIosComposerPortalStates = {
     general: chatGeneralInputArea
       ? { key: "general", area: chatGeneralInputArea, spacer: null, portaled: false }
@@ -20004,6 +20006,90 @@ function initChat() {
       }
     } catch (eTmaOverlayCls) {}
   }
+  function clearTelegramIosChatComposerOverlayViewportPosition() {
+    try {
+      var host = ensureTelegramIosChatComposerOverlayHost();
+      if (!host || !host.style) return;
+      host.style.removeProperty("top");
+      host.style.removeProperty("height");
+      host.style.removeProperty("bottom");
+    } catch (eTmaOverlayPosClr) {}
+  }
+  function syncTelegramIosChatComposerOverlayViewportPosition() {
+    try {
+      var host = ensureTelegramIosChatComposerOverlayHost();
+      var activeKey = chatTmaIosComposerOverlayActiveKey;
+      var activeState = activeKey ? chatTmaIosComposerPortalStates[activeKey] : null;
+      if (!host || !activeState || !activeState.area || !document.body.classList.contains("chat-tma-ios-composer-focus")) {
+        clearTelegramIosChatComposerOverlayViewportPosition();
+        return;
+      }
+      var area = activeState.area;
+      var hostH = Math.max(56, Math.round(area.offsetHeight || 0));
+      var vv = window.visualViewport || null;
+      if (!vv) {
+        host.style.removeProperty("top");
+        host.style.removeProperty("height");
+        host.style.bottom = "0px";
+        return;
+      }
+      var vvTop = Number(vv.offsetTop) || 0;
+      var vvHeight = Number(vv.height) || 0;
+      if (vvHeight <= 0) {
+        host.style.removeProperty("top");
+        host.style.removeProperty("height");
+        host.style.bottom = "0px";
+        return;
+      }
+      var visibleBottom = vvTop + vvHeight;
+      var topPx = Math.max(0, Math.round(visibleBottom - hostH));
+      host.style.top = topPx + "px";
+      host.style.height = hostH + "px";
+      host.style.bottom = "auto";
+    } catch (eTmaOverlayPos) {}
+  }
+  function scheduleTelegramIosChatComposerOverlayViewportPositionSync() {
+    if (chatTmaIosComposerOverlayViewportRaf != null) return;
+    var raf = window.requestAnimationFrame || function (fn) {
+      return setTimeout(fn, 0);
+    };
+    chatTmaIosComposerOverlayViewportRaf = raf(function () {
+      chatTmaIosComposerOverlayViewportRaf = null;
+      syncTelegramIosChatComposerOverlayViewportPosition();
+    });
+  }
+  function detachTelegramIosChatComposerOverlayViewportSync() {
+    try {
+      if (chatTmaIosComposerOverlayViewportRaf != null) {
+        (window.cancelAnimationFrame || clearTimeout)(chatTmaIosComposerOverlayViewportRaf);
+        chatTmaIosComposerOverlayViewportRaf = null;
+      }
+    } catch (eTmaOverlayRafOff) {}
+    try {
+      if (chatTmaIosComposerOverlayViewportHandler && window.visualViewport && window.visualViewport.removeEventListener) {
+        window.visualViewport.removeEventListener("resize", chatTmaIosComposerOverlayViewportHandler);
+        window.visualViewport.removeEventListener("scroll", chatTmaIosComposerOverlayViewportHandler);
+      }
+      chatTmaIosComposerOverlayViewportHandler = null;
+    } catch (eTmaOverlayVvOff) {}
+    clearTelegramIosChatComposerOverlayViewportPosition();
+  }
+  function attachTelegramIosChatComposerOverlayViewportSync() {
+    if (!isTelegramMiniAppChatThreadIos()) return;
+    detachTelegramIosChatComposerOverlayViewportSync();
+    if (!(window.visualViewport && window.visualViewport.addEventListener)) {
+      syncTelegramIosChatComposerOverlayViewportPosition();
+      return;
+    }
+    chatTmaIosComposerOverlayViewportHandler = function () {
+      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
+    };
+    try {
+      window.visualViewport.addEventListener("resize", chatTmaIosComposerOverlayViewportHandler, { passive: true });
+      window.visualViewport.addEventListener("scroll", chatTmaIosComposerOverlayViewportHandler, { passive: true });
+    } catch (eTmaOverlayVvOn) {}
+    scheduleTelegramIosChatComposerOverlayViewportPositionSync();
+  }
   function getTelegramIosChatComposerOverlayTargetKey() {
     if (String(document.body.getAttribute("data-view") || "") !== "chat") return null;
     if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
@@ -20049,6 +20135,7 @@ function initChat() {
       if (!document.body.classList.contains("chat-tma-ios-composer-focus")) {
         setChatKeyboardOpenClasses(false);
       }
+      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
     } catch (eTmaOverlayMount) {}
   }
   function scheduleTelegramIosChatComposerOverlaySync() {
@@ -20067,7 +20154,10 @@ function initChat() {
     var state = null;
     if (chatTmaIosComposerPortalStates.general && area === chatTmaIosComposerPortalStates.general.area) state = chatTmaIosComposerPortalStates.general;
     if (chatTmaIosComposerPortalStates.personal && area === chatTmaIosComposerPortalStates.personal.area) state = chatTmaIosComposerPortalStates.personal;
-    if (state) syncTelegramIosChatComposerSpacerHeight(state);
+    if (state) {
+      syncTelegramIosChatComposerSpacerHeight(state);
+      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
+    }
   }
   try {
     if (typeof ResizeObserver !== "undefined") {
@@ -29041,6 +29131,7 @@ function initChat() {
           } catch (eTmaPassive) {}
           scheduleTelegramIosChatComposerOverlaySync();
           setNativeTelegramIosComposerFocusClasses(true);
+          attachTelegramIosChatComposerOverlayViewportSync();
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
@@ -29257,6 +29348,7 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         if (isTelegramMiniAppChatThreadIos()) {
+          detachTelegramIosChatComposerOverlayViewportSync();
           scheduleTelegramIosChatComposerOverlaySync();
           setNativeTelegramIosComposerFocusClasses(false);
           hideTelegramMiniAppChatThreadDebugOverlay();
@@ -29274,6 +29366,7 @@ function initChat() {
           return;
         }
         hideTelegramMiniAppChatThreadDebugOverlay();
+        detachTelegramIosChatComposerOverlayViewportSync();
         if (chatWindowResizeHandler) {
           try {
             window.removeEventListener("resize", chatWindowResizeHandler);

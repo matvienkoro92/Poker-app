@@ -751,6 +751,7 @@ html.chat-tma-ios-composer-focus .bottom-nav {
   margin: 0;
   box-sizing: border-box;
   pointer-events: none;
+  will-change: top;
 }
 #chatTmaIosComposerOverlay.chat-tma-ios-composer-overlay--active {
   display: block;
