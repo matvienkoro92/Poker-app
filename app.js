@@ -28027,11 +28027,12 @@ function initChat() {
       }
       function setNativeTelegramIosComposerFocusClasses(active) {
         try {
-          document.documentElement.classList.toggle("chat-tma-ios-composer-minimal", !!active);
-          document.body.classList.toggle("chat-tma-ios-composer-minimal", !!active);
-          document.documentElement.classList.toggle("chat-tma-ios-shell-native", !!active);
-          document.body.classList.toggle("chat-tma-ios-shell-native", !!active);
-          setTelegramIosShellFocusOverrides(!!active);
+          var enabled = !!active && !shouldUseNativeTelegramIosChatComposerFlow();
+          document.documentElement.classList.toggle("chat-tma-ios-composer-minimal", enabled);
+          document.body.classList.toggle("chat-tma-ios-composer-minimal", enabled);
+          document.documentElement.classList.toggle("chat-tma-ios-shell-native", enabled);
+          document.body.classList.toggle("chat-tma-ios-shell-native", enabled);
+          setTelegramIosShellFocusOverrides(enabled);
         } catch (eTmaNativeCls) {}
       }
       function setChatKeyboardOpenClasses(open) {
@@ -29139,7 +29140,6 @@ function initChat() {
           } catch (eTmaPassive) {}
           detachTelegramIosChatComposerOverlayViewportSync();
           syncTelegramIosChatComposerOverlayMount();
-          setNativeTelegramIosComposerFocusClasses(true);
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
