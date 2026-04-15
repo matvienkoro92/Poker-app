@@ -19942,19 +19942,7 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function ensureTelegramIosChatComposerOverlayHost() {
-    if (chatTmaIosComposerOverlayHost && document.body && document.body.contains(chatTmaIosComposerOverlayHost)) {
-      return chatTmaIosComposerOverlayHost;
-    }
-    if (!document.body) return null;
-    var host = document.getElementById("chatTmaIosComposerOverlay");
-    if (!host) {
-      host = document.createElement("div");
-      host.id = "chatTmaIosComposerOverlay";
-      host.setAttribute("aria-hidden", "true");
-      document.body.appendChild(host);
-    }
-    chatTmaIosComposerOverlayHost = host;
-    return host;
+    return null;
   }
   function syncTelegramIosChatComposerSpacerHeight(state) {
     if (!state || !state.spacer || !state.area) return;
@@ -19965,24 +19953,7 @@ function initChat() {
     } catch (eTmaSpacerH) {}
   }
   function portalTelegramIosChatComposerState(state) {
-    if (!state || !state.area) return;
-    var host = ensureTelegramIosChatComposerOverlayHost();
-    if (!host) return;
-    if (!state.spacer) {
-      var spacer = document.createElement("div");
-      spacer.className = "chat-tma-ios-composer-spacer";
-      spacer.setAttribute("aria-hidden", "true");
-      state.spacer = spacer;
-    }
-    if (!state.portaled) {
-      try {
-        if (state.area.parentNode) state.area.parentNode.insertBefore(state.spacer, state.area);
-      } catch (eTmaSpacerInsert) {}
-      state.portaled = true;
-    }
-    if (!host.contains(state.area)) host.appendChild(state.area);
-    state.area.setAttribute("data-chat-overlay-mode", state.key);
-    syncTelegramIosChatComposerSpacerHeight(state);
+    restoreTelegramIosChatComposerState(state);
   }
   function restoreTelegramIosChatComposerState(state) {
     if (!state || !state.area || !state.portaled) return;
@@ -19999,93 +19970,18 @@ function initChat() {
   }
   function setTelegramIosChatComposerOverlayClasses(active) {
     try {
-      document.documentElement.classList.toggle("chat-tma-ios-composer-overlay-active", !!active);
-      document.body.classList.toggle("chat-tma-ios-composer-overlay-active", !!active);
-      var host = ensureTelegramIosChatComposerOverlayHost();
-      if (host) {
-        host.classList.toggle("chat-tma-ios-composer-overlay--active", !!active);
-        host.setAttribute("aria-hidden", active ? "false" : "true");
-      }
+      document.documentElement.classList.remove("chat-tma-ios-composer-overlay-active");
+      document.body.classList.remove("chat-tma-ios-composer-overlay-active");
+      var host = document.getElementById("chatTmaIosComposerOverlay");
+      if (host && host.parentNode) host.parentNode.removeChild(host);
     } catch (eTmaOverlayCls) {}
   }
   function clearTelegramIosChatComposerOverlayViewportPosition() {
-    try {
-      var host = ensureTelegramIosChatComposerOverlayHost();
-      if (!host || !host.style) return;
-      host.style.removeProperty("top");
-      host.style.removeProperty("height");
-      host.style.removeProperty("bottom");
-      chatTmaIosComposerOverlayLastTop = null;
-      chatTmaIosComposerOverlayLastInnerHeight = 0;
-    } catch (eTmaOverlayPosClr) {}
+    chatTmaIosComposerOverlayLastTop = null;
+    chatTmaIosComposerOverlayLastInnerHeight = 0;
   }
   function syncTelegramIosChatComposerOverlayViewportPosition() {
-    try {
-      var host = ensureTelegramIosChatComposerOverlayHost();
-      var activeKey = chatTmaIosComposerOverlayActiveKey;
-      var activeState = activeKey ? chatTmaIosComposerPortalStates[activeKey] : null;
-      if (!host || !activeState || !activeState.area || !document.body.classList.contains("chat-tma-ios-composer-focus")) {
-        clearTelegramIosChatComposerOverlayViewportPosition();
-        return;
-      }
-      var area = activeState.area;
-      var hostH = Math.max(56, Math.round(area.offsetHeight || 0));
-      var vv = window.visualViewport || null;
-      if (!vv) {
-        host.style.removeProperty("top");
-        host.style.removeProperty("height");
-        host.style.bottom = "0px";
-        return;
-      }
-      var vvTop = Number(vv.offsetTop) || 0;
-      var vvHeight = Number(vv.height) || 0;
-      if (vvHeight <= 0) {
-        host.style.removeProperty("top");
-        host.style.removeProperty("height");
-        host.style.bottom = "0px";
-        return;
-      }
-      var visibleBottom = vvTop + vvHeight;
-      var prevTopForDebug = chatTmaIosComposerOverlayLastTop;
-      var topPx = Math.max(0, Math.round(visibleBottom - hostH));
-      try {
-        var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-        var ihNow = window.innerHeight || 0;
-        var prevTop = chatTmaIosComposerOverlayLastTop;
-        var prevIh = chatTmaIosComposerOverlayLastInnerHeight || ihNow;
-        var ihDelta = Math.abs(prevIh - ihNow);
-        if (prevTop != null && focusAge > 80 && focusAge < 1400) {
-          /*
-           * Telegram iOS даёт поздний кривой vv-кадр уже после правильной посадки composer:
-           * визуально строка сначала встаёт правильно, потом резко уезжает выше.
-           * Если innerHeight почти не изменился, не позволяем второму кадру увести overlay ещё выше.
-           */
-          if (topPx < prevTop - 8 && ihDelta < 18) {
-            topPx = prevTop;
-          } else if (topPx < prevTop - 4 && ihDelta < 10) {
-            topPx = prevTop - 2;
-          }
-          if (topPx > prevTop + 22 && focusAge < 420) {
-            topPx = prevTop + 22;
-          }
-        }
-        chatTmaIosComposerOverlayLastTop = topPx;
-        chatTmaIosComposerOverlayLastInnerHeight = ihNow;
-      } catch (eTmaOverlayClamp) {}
-      host.style.top = topPx + "px";
-      host.style.height = hostH + "px";
-      host.style.bottom = "auto";
-      try {
-        var taDbg = area.querySelector ? area.querySelector("textarea.chat-input--textarea") : null;
-        updateTelegramMiniAppChatThreadDebugOverlay("overlay-vv", {
-          overlayTop: topPx,
-          prevTop: prevTopForDebug,
-          overlayHeight: hostH,
-          areaHeight: Math.round(area.offsetHeight || 0),
-          textareaHeight: taDbg ? Math.round(taDbg.offsetHeight || 0) : 0
-        });
-      } catch (eTmaOverlayDbg) {}
-    } catch (eTmaOverlayPos) {}
+    clearTelegramIosChatComposerOverlayViewportPosition();
   }
   function scheduleTelegramIosChatComposerOverlayViewportPositionSync() {
     if (chatTmaIosComposerOverlayViewportRaf != null) return;
@@ -20104,30 +20000,11 @@ function initChat() {
         chatTmaIosComposerOverlayViewportRaf = null;
       }
     } catch (eTmaOverlayRafOff) {}
-    try {
-      if (chatTmaIosComposerOverlayViewportHandler && window.visualViewport && window.visualViewport.removeEventListener) {
-        window.visualViewport.removeEventListener("resize", chatTmaIosComposerOverlayViewportHandler);
-        window.visualViewport.removeEventListener("scroll", chatTmaIosComposerOverlayViewportHandler);
-      }
-      chatTmaIosComposerOverlayViewportHandler = null;
-    } catch (eTmaOverlayVvOff) {}
+    chatTmaIosComposerOverlayViewportHandler = null;
     clearTelegramIosChatComposerOverlayViewportPosition();
   }
   function attachTelegramIosChatComposerOverlayViewportSync() {
-    if (!isTelegramMiniAppChatThreadIos()) return;
     detachTelegramIosChatComposerOverlayViewportSync();
-    if (!(window.visualViewport && window.visualViewport.addEventListener)) {
-      syncTelegramIosChatComposerOverlayViewportPosition();
-      return;
-    }
-    chatTmaIosComposerOverlayViewportHandler = function () {
-      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
-    };
-    try {
-      window.visualViewport.addEventListener("resize", chatTmaIosComposerOverlayViewportHandler, { passive: true });
-      window.visualViewport.addEventListener("scroll", chatTmaIosComposerOverlayViewportHandler, { passive: true });
-    } catch (eTmaOverlayVvOn) {}
-    scheduleTelegramIosChatComposerOverlayViewportPositionSync();
   }
   function getTelegramIosChatComposerOverlayTargetKey() {
     if (String(document.body.getAttribute("data-view") || "") !== "chat") return null;
@@ -20146,35 +20023,15 @@ function initChat() {
     return null;
   }
   function syncTelegramIosChatComposerOverlayMount() {
-    if (!shouldUseDedicatedTelegramIosChatComposer() || !isTelegramMiniAppChatThreadIos()) {
-      restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.general);
-      restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.personal);
-      chatTmaIosComposerOverlayActiveKey = null;
-      setTelegramIosChatComposerOverlayClasses(false);
-      return;
-    }
-    var nextKey = getTelegramIosChatComposerOverlayTargetKey();
-    var nextState = nextKey ? chatTmaIosComposerPortalStates[nextKey] : null;
-    var otherKey = nextKey === "general" ? "personal" : "general";
-    restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates[otherKey]);
-    if (!nextState) {
-      restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.general);
-      restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.personal);
-      chatTmaIosComposerOverlayActiveKey = null;
-      setTelegramIosChatComposerOverlayClasses(false);
-      return;
-    }
-    portalTelegramIosChatComposerState(nextState);
-    chatTmaIosComposerOverlayActiveKey = nextKey;
-    setTelegramIosChatComposerOverlayClasses(true);
+    restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.general);
+    restoreTelegramIosChatComposerState(chatTmaIosComposerPortalStates.personal);
+    chatTmaIosComposerOverlayActiveKey = null;
+    setTelegramIosChatComposerOverlayClasses(false);
     try {
       clearChatMessagesKeyboardPad();
       clearChatComposerDockClass();
       stripChatInputAreaTransforms();
-      if (!document.body.classList.contains("chat-tma-ios-composer-focus")) {
-        setChatKeyboardOpenClasses(false);
-      }
-      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
+      setChatKeyboardOpenClasses(false);
     } catch (eTmaOverlayMount) {}
   }
   function scheduleTelegramIosChatComposerOverlaySync() {
@@ -20188,16 +20045,7 @@ function initChat() {
       syncTelegramIosChatComposerOverlayMount();
     });
   }
-  function syncTelegramIosChatComposerOverlayFromArea(area) {
-    if (!area) return;
-    var state = null;
-    if (chatTmaIosComposerPortalStates.general && area === chatTmaIosComposerPortalStates.general.area) state = chatTmaIosComposerPortalStates.general;
-    if (chatTmaIosComposerPortalStates.personal && area === chatTmaIosComposerPortalStates.personal.area) state = chatTmaIosComposerPortalStates.personal;
-    if (state) {
-      syncTelegramIosChatComposerSpacerHeight(state);
-      scheduleTelegramIosChatComposerOverlayViewportPositionSync();
-    }
-  }
+  function syncTelegramIosChatComposerOverlayFromArea(area) {}
   try {
     if (typeof ResizeObserver !== "undefined") {
       var tmaComposerOverlayResizeObserver = new ResizeObserver(function (entries) {
@@ -27965,7 +27813,7 @@ function initChat() {
       }
       function stripChatInputAreaTransforms() {
         try {
-          document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area, #chatTmaIosComposerOverlay .chat-input-area").forEach(function (node) {
+          document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
             if (!node || !node.style) return;
             /* Явный ноль + reflow — иначе на части WK/TG слой остаётся сдвинутым, снизу «лишнее» место. */
             node.style.setProperty("transform", "translate3d(0, 0, 0)", "");
@@ -28037,14 +27885,8 @@ function initChat() {
       }
       function setNativeTelegramIosComposerFocusClasses(active) {
         try {
-          scheduleTelegramIosChatComposerOverlaySync();
-          if (active) {
-            document.documentElement.classList.add("chat-tma-ios-composer-focus");
-            document.body.classList.add("chat-tma-ios-composer-focus");
-          } else {
-            document.documentElement.classList.remove("chat-tma-ios-composer-focus");
-            document.body.classList.remove("chat-tma-ios-composer-focus");
-          }
+          document.documentElement.classList.remove("chat-tma-ios-composer-focus");
+          document.body.classList.remove("chat-tma-ios-composer-focus");
         } catch (eTmaNativeCls) {}
       }
       function setChatKeyboardOpenClasses(open) {
@@ -28400,36 +28242,14 @@ function initChat() {
         return session;
       }
       function shouldShowTelegramMiniAppChatThreadDebugOverlay() {
-        return isTelegramMiniAppChatThreadIos();
+        return false;
       }
       function ensureTelegramMiniAppChatThreadDebugOverlay() {
-        if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) return null;
-        var existing = document.getElementById("chatTmaKeyboardDebug");
-        var activeKey = chatTmaIosComposerOverlayActiveKey;
-        var activeState = activeKey ? chatTmaIosComposerPortalStates[activeKey] : null;
-        if (existing) {
-          try {
-            if (activeState && activeState.area && existing.parentNode !== activeState.area) {
-              activeState.area.insertBefore(existing, activeState.area.firstChild || null);
-            }
-          } catch (eDbgMove) {}
-          return existing;
-        }
-        var el = document.createElement("div");
-        el.id = "chatTmaKeyboardDebug";
-        el.className = "chat-tma-keyboard-debug";
-        el.setAttribute("aria-hidden", "true");
-        if (activeState && activeState.area) activeState.area.insertBefore(el, activeState.area.firstChild || null);
-        else {
-          var host = ensureTelegramIosChatComposerOverlayHost();
-          if (host) host.appendChild(el);
-          else document.body.appendChild(el);
-        }
-        return el;
+        return null;
       }
       function hideTelegramMiniAppChatThreadDebugOverlay() {
         var existing = document.getElementById("chatTmaKeyboardDebug");
-        if (existing) existing.classList.remove("chat-tma-keyboard-debug--visible");
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
         try {
           var genMetaHide = document.getElementById("chatGeneralHeaderRosterMeta");
           if (genMetaHide && genMetaHide.getAttribute("data-debug-owned") === "1") {
@@ -28447,51 +28267,7 @@ function initChat() {
         } catch (eDbgConvHide) {}
       }
       function updateTelegramMiniAppChatThreadDebugOverlay(source, extra) {
-        if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) {
-          hideTelegramMiniAppChatThreadDebugOverlay();
-          return;
-        }
-        var el = ensureTelegramMiniAppChatThreadDebugOverlay();
-        if (!el) return;
-        var twDbg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        var vvDbg = window.visualViewport || null;
-        var ihDbg = window.innerHeight || 0;
-        var baseDbg = Number(window.__pokerChatInnerHBaseline) || 0;
-        var winLossDbg = baseDbg > 260 && ihDbg > 0 ? Math.max(0, Math.round(baseDbg - ihDbg)) : 0;
-        var focusAgeDbg = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-        var payload = extra && typeof extra === "object" ? extra : {};
-        var lines = [
-          "src " + String(source || "-"),
-          "age " + focusAgeDbg + "ms",
-          "ih " + ihDbg + " base " + baseDbg + " loss " + winLossDbg,
-          "tg vh " + (twDbg ? Number(twDbg.viewportHeight) || 0 : 0) + " vs " + (twDbg ? Number(twDbg.viewportStableHeight) || 0 : 0),
-          "vv h " + (vvDbg ? Number(vvDbg.height) || 0 : 0) + " top " + (vvDbg ? Number(vvDbg.offsetTop) || 0 : 0),
-          "cover " + (payload.cover != null ? payload.cover : Number(window.__pokerChatTgKeyboardCoverLast) || 0),
-          "bottom " + (payload.bottom != null ? payload.bottom : Number(window.__pokerChatThreadDockBottomCssPx) || 0),
-          "pad " + (payload.pad != null ? payload.pad : Number(window.__pokerChatMessagesKeyboardPadLast) || 0),
-          "ovTop " + (payload.overlayTop != null ? payload.overlayTop : "-") + " prev " + (payload.prevTop != null ? payload.prevTop : "-"),
-          "ovH " + (payload.overlayHeight != null ? payload.overlayHeight : "-") + " area " + (payload.areaHeight != null ? payload.areaHeight : "-") + " ta " + (payload.textareaHeight != null ? payload.textareaHeight : "-"),
-          "tab " + (window.__pokerChatTmaDockTabKey || "-")
-        ];
-        el.textContent = lines.join("\n");
-        el.classList.add("chat-tma-keyboard-debug--visible");
-        try {
-          var compact = "DBG " + String(source || "-") + " ov:" + (payload.overlayTop != null ? payload.overlayTop : "-") + " prev:" + (payload.prevTop != null ? payload.prevTop : "-") + " vv:" + (vvDbg ? Math.round(Number(vvDbg.height) || 0) : 0) + "/" + (vvDbg ? Math.round(Number(vvDbg.offsetTop) || 0) : 0);
-          if (chatActiveTab === "general") {
-            var genMeta = document.getElementById("chatGeneralHeaderRosterMeta");
-            if (genMeta) {
-              genMeta.textContent = compact;
-              genMeta.hidden = false;
-              genMeta.setAttribute("data-debug-owned", "1");
-            }
-          } else if (chatActiveTab === "personal") {
-            var convId = document.getElementById("chatConvTitleId");
-            if (convId) {
-              convId.textContent = compact;
-              convId.setAttribute("data-debug-owned", "1");
-            }
-          }
-        } catch (eDbgHdr) {}
+        hideTelegramMiniAppChatThreadDebugOverlay();
       }
       function computeTelegramMiniAppIosThreadCover(ih, winLossTma, tgDiffRaw, prevCover, focusAgeMs) {
         var session = getTelegramMiniAppChatThreadFocusSession();
@@ -29216,9 +28992,9 @@ function initChat() {
             resetChatKeyboardDockRuntimeState();
             window.__pokerChatKeyboardFocusAtMs = Date.now();
           } catch (eTmaPassive) {}
-          scheduleTelegramIosChatComposerOverlaySync();
+          detachTelegramIosChatComposerOverlayViewportSync();
+          syncTelegramIosChatComposerOverlayMount();
           setNativeTelegramIosComposerFocusClasses(true);
-          attachTelegramIosChatComposerOverlayViewportSync();
           try {
             if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
               window.__pokerChatDetachVisualViewportListeners();
@@ -29229,9 +29005,6 @@ function initChat() {
             clearChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
           } catch (eTmaClr) {}
-          try {
-            hideTelegramMiniAppChatThreadDebugOverlay();
-          } catch (eDbgPassive) {}
           try {
             var visibleMessagesNative = getVisibleMessagesEl();
             if (visibleMessagesNative && chatMessagesNearBottom(visibleMessagesNative, CHAT_SCROLL_BOTTOM_NEAR_PX)) {
@@ -29436,7 +29209,7 @@ function initChat() {
       function onChatInputBlur() {
         if (isTelegramMiniAppChatThreadIos()) {
           detachTelegramIosChatComposerOverlayViewportSync();
-          scheduleTelegramIosChatComposerOverlaySync();
+          syncTelegramIosChatComposerOverlayMount();
           setNativeTelegramIosComposerFocusClasses(false);
           hideTelegramMiniAppChatThreadDebugOverlay();
           detachTelegramMiniAppChatThreadRootScrollLock();
