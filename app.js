@@ -20046,6 +20046,7 @@ function initChat() {
         return;
       }
       var visibleBottom = vvTop + vvHeight;
+      var prevTopForDebug = chatTmaIosComposerOverlayLastTop;
       var topPx = Math.max(0, Math.round(visibleBottom - hostH));
       try {
         var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
@@ -20074,6 +20075,16 @@ function initChat() {
       host.style.top = topPx + "px";
       host.style.height = hostH + "px";
       host.style.bottom = "auto";
+      try {
+        var taDbg = area.querySelector ? area.querySelector("textarea.chat-input--textarea") : null;
+        updateTelegramMiniAppChatThreadDebugOverlay("overlay-vv", {
+          overlayTop: topPx,
+          prevTop: prevTopForDebug,
+          overlayHeight: hostH,
+          areaHeight: Math.round(area.offsetHeight || 0),
+          textareaHeight: taDbg ? Math.round(taDbg.offsetHeight || 0) : 0
+        });
+      } catch (eTmaOverlayDbg) {}
     } catch (eTmaOverlayPos) {}
   }
   function scheduleTelegramIosChatComposerOverlayViewportPositionSync() {
@@ -28429,6 +28440,8 @@ function initChat() {
           "cover " + (payload.cover != null ? payload.cover : Number(window.__pokerChatTgKeyboardCoverLast) || 0),
           "bottom " + (payload.bottom != null ? payload.bottom : Number(window.__pokerChatThreadDockBottomCssPx) || 0),
           "pad " + (payload.pad != null ? payload.pad : Number(window.__pokerChatMessagesKeyboardPadLast) || 0),
+          "ovTop " + (payload.overlayTop != null ? payload.overlayTop : "-") + " prev " + (payload.prevTop != null ? payload.prevTop : "-"),
+          "ovH " + (payload.overlayHeight != null ? payload.overlayHeight : "-") + " area " + (payload.areaHeight != null ? payload.areaHeight : "-") + " ta " + (payload.textareaHeight != null ? payload.textareaHeight : "-"),
           "tab " + (window.__pokerChatTmaDockTabKey || "-")
         ];
         el.textContent = lines.join("\n");

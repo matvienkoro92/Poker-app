@@ -3327,7 +3327,7 @@ html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-doc
 .chat-tma-keyboard-debug {
   position: fixed;
   right: 8px;
-  top: calc(env(safe-area-inset-top, 0px) + 104px);
+  top: calc(env(safe-area-inset-top, 0px) + 132px);
   z-index: 10050;
   max-width: min(68vw, 260px);
   padding: 8px 10px;
