@@ -29015,11 +29015,33 @@ function initChat() {
         } catch (eFlushKb2) {}
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
+      function forcePwaChatKeyboardCleanupIfClosed() {
+        try {
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          if (!document.body.classList.contains("chat-keyboard-open")) return false;
+          var pwaLike =
+            (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
+            (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
+          if (!pwaLike) return false;
+          if (!isChatKeyboardLayoutEffectivelyClosed()) return false;
+          finalizeChatKeyboardDismiss();
+          try {
+            if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+              pokerFlushBottomNavAndViewportAfterChatChrome();
+            }
+          } catch (eForceFl) {}
+          return true;
+        } catch (eForcePwaKb) {
+          return false;
+        }
+      }
+      window.__pokerForcePwaChatKeyboardCleanupIfClosed = forcePwaChatKeyboardCleanupIfClosed;
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
       if (!window.__pokerChatVvPostKeyboardCleanupAttached && window.visualViewport && window.visualViewport.addEventListener) {
         window.__pokerChatVvPostKeyboardCleanupAttached = true;
         var vvPostKbTimer = null;
         function onVvAfterKeyboardMaybeClosed() {
+          if (forcePwaChatKeyboardCleanupIfClosed()) return;
           if (document.body.classList.contains("chat-keyboard-open")) return;
           var ih = window.innerHeight || 0;
           var vvh = Number(window.visualViewport.height) || 0;
@@ -29068,6 +29090,15 @@ function initChat() {
         }
         window.visualViewport.addEventListener("resize", onVvAfterKeyboardMaybeClosed);
       }
+      window.addEventListener(
+        "focus",
+        function () {
+          try {
+            forcePwaChatKeyboardCleanupIfClosed();
+          } catch (ePwaFocusCleanup) {}
+        },
+        true
+      );
 
       /** Фокус в общем/личном треде: не тянуть --chat-vv-inset для «подъёма» композера (переделывается отдельно). */
       function isChatThreadComposerKeyboardDom(focusTarget) {
