@@ -20060,6 +20060,32 @@ function initChat() {
   function shouldUseDedicatedTelegramIosChatComposer() {
     return typeof isTelegramWebApp === "function" && isTelegramWebApp() && isIosLikeForChatViewport();
   }
+  function ensureTelegramIosMinimalComposerBlock(area, mount, sendButton) {
+    if (!area || !mount || !sendButton) return;
+    var shell = area.querySelector(".chat-tma-ios-minimal-block");
+    if (!shell) {
+      shell = document.createElement("div");
+      shell.className = "chat-tma-ios-minimal-block";
+      area.appendChild(shell);
+    }
+    var composerSlot = shell.querySelector(".chat-tma-ios-minimal-block__composer");
+    if (!composerSlot) {
+      composerSlot = document.createElement("div");
+      composerSlot.className = "chat-tma-ios-minimal-block__composer";
+      shell.appendChild(composerSlot);
+    }
+    var actionSlot = shell.querySelector(".chat-tma-ios-minimal-block__action");
+    if (!actionSlot) {
+      actionSlot = document.createElement("div");
+      actionSlot.className = "chat-tma-ios-minimal-block__action";
+      shell.appendChild(actionSlot);
+    }
+    if (!composerSlot.contains(mount)) composerSlot.appendChild(mount);
+    if (!actionSlot.contains(sendButton)) actionSlot.appendChild(sendButton);
+    area.classList.add("chat-input-area--tma-minimal-block");
+    var legacyWrap = area.querySelector(".chat-input-wrap");
+    if (legacyWrap) legacyWrap.classList.add("chat-input-wrap--tma-hidden");
+  }
   function createDedicatedChatComposer(id, placeholder, ariaLabel) {
     if (!chatSharedComposerEl) return null;
     var ta = chatSharedComposerEl.cloneNode(false);
@@ -20080,6 +20106,8 @@ function initChat() {
     if (chatPersonalComposerEl && chatPersonalComposerMount && !chatPersonalComposerMount.contains(chatPersonalComposerEl)) {
       chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
     }
+    ensureTelegramIosMinimalComposerBlock(chatGeneralInputArea, chatGeneralComposerMount, generalSendBtn);
+    ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
   }
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");

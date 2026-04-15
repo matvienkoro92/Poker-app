@@ -7355,6 +7355,9 @@ textarea.roman-task-planner__input {
   padding-left: 0;
   position: relative;
 }
+.chat-input-wrap--tma-hidden {
+  display: none !important;
+}
 .chat-templates-hint {
   margin-top: 2px;
   font-size: 10px;
@@ -8174,6 +8177,34 @@ html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view
 }
 html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-input--textarea {
   padding-right: 14px;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area--tma-minimal-block {
+  gap: 6px;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__composer {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__composer .chat-composer-mount {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__action {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__action .chat-send-btn--icon {
+  align-self: flex-end;
 }
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
