@@ -705,6 +705,10 @@ html.chat-tma-ios-composer-focus,
 html.chat-tma-ios-composer-focus body {
   overflow: hidden !important;
 }
+html.chat-tma-ios-composer-overlay-active,
+html.chat-tma-ios-composer-overlay-active body {
+  overflow-x: hidden !important;
+}
 html.chat-tma-ios-composer-focus #app.app,
 html.chat-tma-ios-composer-focus .app,
 html.chat-tma-ios-composer-focus .card,
@@ -726,31 +730,49 @@ html.chat-tma-ios-composer-focus .chat-conv-view .chat-container .chat-messages 
   scroll-padding-bottom: 0 !important;
   overscroll-behavior: none !important;
 }
-html.chat-tma-ios-composer-focus .chat-general-view .chat-input-area,
-html.chat-tma-ios-composer-focus .chat-container .chat-input-area {
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-}
-html.chat-tma-ios-composer-focus .chat-general-view .chat-input-area,
-html.chat-tma-ios-composer-focus .chat-container .chat-input-area {
-  position: fixed !important;
-  left: env(safe-area-inset-left, 0px) !important;
-  right: env(safe-area-inset-right, 0px) !important;
-  bottom: 0 !important;
-  z-index: 140 !important;
-  width: auto !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
-}
 html.chat-tma-ios-composer-focus .chat-general-view .chat-messages,
 html.chat-tma-ios-composer-focus .chat-conv-view .chat-container .chat-messages {
-  padding-bottom: 78px !important;
+  padding-bottom: 0 !important;
 }
 html.chat-tma-ios-composer-focus .bottom-nav {
   transform: translate3d(0, 100%, 0) !important;
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
+}
+#chatTmaIosComposerOverlay {
+  position: fixed;
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  bottom: 0;
+  z-index: 140;
+  display: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+#chatTmaIosComposerOverlay.chat-tma-ios-composer-overlay--active {
+  display: block;
+}
+#chatTmaIosComposerOverlay .chat-input-area {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding-bottom: 12px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  background-color: var(--chat-input-field-bg);
+  background-image: none;
+}
+html.chat-tma-ios-composer-focus #chatTmaIosComposerOverlay {
+  bottom: 0 !important;
+}
+.chat-tma-ios-composer-spacer {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 56px;
+  pointer-events: none;
 }
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
