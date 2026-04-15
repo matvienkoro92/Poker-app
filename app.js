@@ -20013,7 +20013,7 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    return !!(chatGeneralKeyboardDebugEl || chatPersonalKeyboardDebugEl);
+    return false;
   }
   function isChatKeyboardDebugTarget(node) {
     try {
