@@ -11752,6 +11752,16 @@ body[data-view="chat"]
     background: rgba(30, 41, 59, 0.88);
   }
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header {
+  margin-top: calc(var(--app-top-from-tg, 48px) + 8px) !important;
+  padding-top: 4px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top {
+  margin-top: calc(var(--app-top-from-tg, 48px) + 8px) !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
+  padding-top: 4px !important;
+}
 .chat-title--small { margin-bottom: 6px; font-size: 17px; }
 .chat-conv-header {
   display: flex;
