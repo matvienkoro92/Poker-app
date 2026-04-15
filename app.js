@@ -30167,6 +30167,14 @@ function initChat() {
       sendBtn.classList.toggle("chat-send-btn--mic", !hasContent);
     }
     function resizeChatTextarea(ta) {
+      if (ta && shouldUseNativeTelegramIosChatComposerFlow(ta)) {
+        var val = ta.value != null ? String(ta.value) : "";
+        if (!val.length) {
+          ta.style.height = "44px";
+          ta.style.overflowY = "hidden";
+          return;
+        }
+      }
       if (typeof pokerAutosizeTextarea === "function") {
         pokerAutosizeTextarea(ta, { maxHeight: 140, minHeight: 44 });
       }
@@ -30209,7 +30217,12 @@ function initChat() {
       });
       ta.addEventListener("focus", function () {
         chatComposerEl = ta;
-        resizeChatTextarea(ta);
+        if (!shouldUseNativeTelegramIosChatComposerFlow(ta)) {
+          resizeChatTextarea(ta);
+        } else {
+          ta.style.height = "44px";
+          ta.style.overflowY = "hidden";
+        }
       });
       ta.addEventListener("change", function () {
         chatComposerEl = ta;

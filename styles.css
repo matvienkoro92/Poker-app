@@ -703,32 +703,7 @@ html.app--telegram-miniapp .chat-conv-view .chat-container .chat-messages {
 }
 html.chat-tma-ios-composer-focus,
 html.chat-tma-ios-composer-focus body {
-  overflow: hidden !important;
-}
-html.chat-tma-ios-composer-overlay-active,
-html.chat-tma-ios-composer-overlay-active body {
-  overflow-x: hidden !important;
-}
-html.chat-tma-ios-composer-focus #app.app,
-html.chat-tma-ios-composer-focus .app,
-html.chat-tma-ios-composer-focus .card,
-html.chat-tma-ios-composer-focus .card__content,
-html.chat-tma-ios-composer-focus .view--active[data-view="chat"],
-html.chat-tma-ios-composer-focus .chat-general-view,
-html.chat-tma-ios-composer-focus .chat-personal-view,
-html.chat-tma-ios-composer-focus .chat-conv-view,
-html.chat-tma-ios-composer-focus .chat-container,
-html.chat-tma-ios-composer-focus .chat-messages-wrap {
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-  scroll-padding-bottom: 0 !important;
-}
-html.chat-tma-ios-composer-focus .chat-general-view .chat-messages,
-html.chat-tma-ios-composer-focus .chat-conv-view .chat-container .chat-messages {
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-  scroll-padding-bottom: 0 !important;
-  overscroll-behavior: none !important;
+  overflow: visible !important;
 }
 html.chat-tma-ios-composer-focus .chat-general-view .chat-messages,
 html.chat-tma-ios-composer-focus .chat-conv-view .chat-container .chat-messages {
@@ -751,6 +726,8 @@ html.chat-tma-ios-composer-focus .bottom-nav {
   margin: 0;
   box-sizing: border-box;
   pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 #chatTmaIosComposerOverlay.chat-tma-ios-composer-overlay--active {
   display: block;
@@ -764,6 +741,8 @@ html.chat-tma-ios-composer-focus .bottom-nav {
   pointer-events: auto;
   background-color: var(--chat-input-field-bg);
   background-image: none;
+  transform: none !important;
+  will-change: auto !important;
 }
 html.chat-tma-ios-composer-focus #chatTmaIosComposerOverlay {
   bottom: 0 !important;
