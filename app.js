@@ -28372,7 +28372,21 @@ function initChat() {
         );
       }
       function shouldUseNativeTelegramIosChatComposerFlow(focusTarget) {
-        return isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom(focusTarget);
+        if (!isTelegramMiniAppChatThreadIos()) return false;
+        if (isChatThreadComposerKeyboardDom(focusTarget)) return true;
+        try {
+          if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var genVisible = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
+          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+          if (!genVisible && !convVisible) return false;
+          var active = focusTarget || document.activeElement;
+          if (!active) return true;
+          if (active === chatComposerEl || active === chatSharedComposerEl || active === chatGeneralComposerEl || active === chatPersonalComposerEl) return true;
+          if (active.closest && active.closest(".chat-input-area")) return true;
+          var tag = String(active.tagName || "").toUpperCase();
+          if (tag === "TEXTAREA" || tag === "INPUT") return true;
+        } catch (eTmaNativeFlow) {}
+        return true;
       }
       function getTelegramMiniAppChatThreadFocusSession() {
         var session = window.__pokerChatTmaThreadFocusSession;

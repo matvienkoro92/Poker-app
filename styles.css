@@ -744,6 +744,14 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view {
   box-sizing: border-box !important;
   scroll-padding-top: calc(var(--app-top-from-tg, 48px) + 10px) !important;
 }
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
+  gap: 0 !important;
+  margin-top: 0 !important;
+  padding-top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px)) !important;
+  box-sizing: border-box !important;
+  scroll-padding-top: max(58px, calc(env(safe-area-inset-top, 0px) + 46px)) !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
@@ -759,6 +767,21 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-general-header {
   padding-top: 4px !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top-inner {
+  padding-top: 4px !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner {
   padding-top: 4px !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-header__toolbar-back,
