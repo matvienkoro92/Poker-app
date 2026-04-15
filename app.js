@@ -28405,14 +28405,26 @@ function initChat() {
       function ensureTelegramMiniAppChatThreadDebugOverlay() {
         if (!shouldShowTelegramMiniAppChatThreadDebugOverlay()) return null;
         var existing = document.getElementById("chatTmaKeyboardDebug");
-        if (existing) return existing;
+        var activeKey = chatTmaIosComposerOverlayActiveKey;
+        var activeState = activeKey ? chatTmaIosComposerPortalStates[activeKey] : null;
+        if (existing) {
+          try {
+            if (activeState && activeState.area && existing.parentNode !== activeState.area) {
+              activeState.area.insertBefore(existing, activeState.area.firstChild || null);
+            }
+          } catch (eDbgMove) {}
+          return existing;
+        }
         var el = document.createElement("div");
         el.id = "chatTmaKeyboardDebug";
         el.className = "chat-tma-keyboard-debug";
         el.setAttribute("aria-hidden", "true");
-        var host = ensureTelegramIosChatComposerOverlayHost();
-        if (host) host.appendChild(el);
-        else document.body.appendChild(el);
+        if (activeState && activeState.area) activeState.area.insertBefore(el, activeState.area.firstChild || null);
+        else {
+          var host = ensureTelegramIosChatComposerOverlayHost();
+          if (host) host.appendChild(el);
+          else document.body.appendChild(el);
+        }
         return el;
       }
       function hideTelegramMiniAppChatThreadDebugOverlay() {
