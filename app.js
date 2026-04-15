@@ -22754,7 +22754,6 @@ function initChat() {
         }
       } catch (eTgHdrObsOn) {}
       telegramChatHeaderSyncTimer = setInterval(applyTelegramChatHeaderTopNow, 120);
-      setTimeout(stopTelegramChatHeaderSync, 2800);
       var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
       var burst = function (remaining) {
         if (remaining <= 0) return;
