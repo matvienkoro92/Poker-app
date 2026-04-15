@@ -27885,8 +27885,8 @@ function initChat() {
       }
       function setNativeTelegramIosComposerFocusClasses(active) {
         try {
-          document.documentElement.classList.remove("chat-tma-ios-composer-focus");
-          document.body.classList.remove("chat-tma-ios-composer-focus");
+          document.documentElement.classList.toggle("chat-tma-ios-composer-minimal", !!active);
+          document.body.classList.toggle("chat-tma-ios-composer-minimal", !!active);
         } catch (eTmaNativeCls) {}
       }
       function setChatKeyboardOpenClasses(open) {

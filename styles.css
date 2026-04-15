@@ -8160,6 +8160,21 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea
   height: 44px;
   overflow-y: hidden;
 }
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-attach-wrap,
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-emoji-btn,
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-scroll-bottom-btn {
+  display: none !important;
+}
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-input-wrap {
+  gap: 8px;
+}
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-composer-actions {
+  width: 36px;
+  min-width: 36px;
+}
+html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-input--textarea {
+  padding-right: 14px;
+}
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
 }
