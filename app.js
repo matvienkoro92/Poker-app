@@ -6748,6 +6748,54 @@ function pokerApplyAppTopPadding() {
   root.style.setProperty("--app-extra-top-for-ui", "12px");
 }
 
+var pokerTelegramChatUiGuardTimer = null;
+function pokerEnsureTelegramChatUiGuard() {
+  try {
+    if (pokerTelegramChatUiGuardTimer != null) return;
+    pokerTelegramChatUiGuardTimer = setInterval(function () {
+      try {
+        if (!document || !document.body) return;
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+        var isIosLike =
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport();
+        var standalone =
+          (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
+          !!(window.navigator && window.navigator.standalone);
+        if (!isIosLike || standalone) return;
+        var header = document.querySelector(".chat-general-header");
+        var wrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
+        if (header) {
+          header.style.setProperty("top", "80px", "important");
+          header.style.setProperty("left", "0", "important");
+          header.style.setProperty("right", "0", "important");
+          header.style.setProperty("transform", "none", "important");
+          header.style.setProperty("width", "100%", "important");
+          header.style.setProperty("max-width", "none", "important");
+        }
+        if (wrap) {
+          wrap.style.setProperty("margin-top", "182px", "important");
+        }
+        var convTop = document.querySelector("#chatConvView .chat-conv-top");
+        var convWrap = document.querySelector("#chatConvView .chat-container .chat-messages-wrap");
+        if (convTop) {
+          convTop.style.setProperty("top", "80px", "important");
+          convTop.style.setProperty("left", "0", "important");
+          convTop.style.setProperty("right", "0", "important");
+          convTop.style.setProperty("transform", "none", "important");
+          convTop.style.setProperty("width", "100%", "important");
+          convTop.style.setProperty("max-width", "none", "important");
+        }
+        if (convWrap) {
+          convWrap.style.setProperty("margin-top", "182px", "important");
+        }
+      } catch (eTgChatGuardTick) {}
+    }, 120);
+  } catch (eTgChatGuard) {}
+}
+pokerEnsureTelegramChatUiGuard();
+
 /**
  * Запас под фиксированный .bottom-nav: реальная высота из layout (локальный Chrome, TG/WebView).
  * Чистый CSS (env safe-area) на десктопе даёт 0 снизу — панель перекрывала «Игры и приложения».
