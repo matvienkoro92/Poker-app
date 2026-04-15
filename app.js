@@ -9943,6 +9943,26 @@ function setView(viewName, navOpts) {
       } catch (eFlLv2) {}
     }, 380);
   }
+  if (viewName === "chat") {
+    try {
+      var rafChatHdr = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+      rafChatHdr(function () {
+        try {
+          if (typeof startTelegramChatHeaderSync === "function") startTelegramChatHeaderSync();
+        } catch (eChatHdr0) {}
+      });
+      setTimeout(function () {
+        try {
+          if (typeof startTelegramChatHeaderSync === "function") startTelegramChatHeaderSync();
+        } catch (eChatHdr1) {}
+      }, 120);
+      setTimeout(function () {
+        try {
+          if (typeof startTelegramChatHeaderSync === "function") startTelegramChatHeaderSync();
+        } catch (eChatHdr2) {}
+      }, 420);
+    } catch (eChatHdrBoot) {}
+  }
   if (prevView && prevView !== viewName) {
     viewScrollMemory[prevView] = getMainDocumentScrollY();
   }
