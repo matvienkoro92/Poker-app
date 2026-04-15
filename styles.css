@@ -941,6 +941,13 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat
   margin-top: 182px !important;
   padding-top: 0 !important;
 }
+body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+.view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
+.view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+  margin-top: 182px !important;
+  padding-top: 0 !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-list-view,
 html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-list,
 html.app--telegram-miniapp body[data-view="chat"] .chat-contacts {
@@ -10703,6 +10710,10 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   border: none;
   box-shadow: none;
   pointer-events: auto;
+}
+body[data-view="chat"] .chat-conv-top-inner,
+.view--active[data-view="chat"] .chat-conv-top-inner {
+  background: rgba(15, 23, 42, 0.16);
 }
 /* Имя/ID сразу справа от «Назад», плашка тянется как заголовок в общем чате */
 .chat-conv-view .chat-conv-top-inner {

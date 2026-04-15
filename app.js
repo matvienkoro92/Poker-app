@@ -6762,42 +6762,7 @@ function pokerEnsureStyleProperty(el, prop, value, priority) {
   } catch (eSetProp) {}
 }
 function pokerEnsureTelegramChatUiGuard() {
-  try {
-    if (pokerTelegramChatUiGuardTimer != null) return;
-    pokerTelegramChatUiGuardTimer = setInterval(function () {
-      try {
-        if (!document || !document.body) return;
-        if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
-        if (document.body.classList.contains("chat-keyboard-open")) return;
-        var header = document.querySelector(".chat-general-header");
-        var wrap = document.querySelector("#chatGeneralView .chat-messages-wrap");
-        if (header) {
-          pokerEnsureStyleProperty(header, "top", "80px", "important");
-          pokerEnsureStyleProperty(header, "left", "0px", "important");
-          pokerEnsureStyleProperty(header, "right", "0px", "important");
-          pokerEnsureStyleProperty(header, "transform", "none", "important");
-          pokerEnsureStyleProperty(header, "width", "100%", "important");
-          pokerEnsureStyleProperty(header, "max-width", "none", "important");
-        }
-        if (wrap) {
-          pokerEnsureStyleProperty(wrap, "margin-top", "182px", "important");
-        }
-        var convTop = document.querySelector("#chatConvView .chat-conv-top");
-        var convWrap = document.querySelector("#chatConvView .chat-container .chat-messages-wrap");
-        if (convTop) {
-          pokerEnsureStyleProperty(convTop, "top", "80px", "important");
-          pokerEnsureStyleProperty(convTop, "left", "0px", "important");
-          pokerEnsureStyleProperty(convTop, "right", "0px", "important");
-          pokerEnsureStyleProperty(convTop, "transform", "none", "important");
-          pokerEnsureStyleProperty(convTop, "width", "100%", "important");
-          pokerEnsureStyleProperty(convTop, "max-width", "none", "important");
-        }
-        if (convWrap) {
-          pokerEnsureStyleProperty(convWrap, "margin-top", "182px", "important");
-        }
-      } catch (eTgChatGuardTick) {}
-    }, 420);
-  } catch (eTgChatGuard) {}
+  return;
 }
 pokerEnsureTelegramChatUiGuard();
 
