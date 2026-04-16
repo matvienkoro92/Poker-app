@@ -8553,9 +8553,28 @@ function getPokerResolvedTelegramUser() {
     var closeBtn = document.getElementById("siteHomeInstructionModalClose");
     var backdrop = document.getElementById("siteHomeInstructionModalBackdrop");
     var shareBtn = document.getElementById("siteHomeInstructionShareBtn");
+    var tabIphone = document.getElementById("siteHomeInstructionTabIphone");
+    var tabAndroid = document.getElementById("siteHomeInstructionTabAndroid");
+    var panelIphone = document.getElementById("siteHomeInstructionPanelIphone");
+    var panelAndroid = document.getElementById("siteHomeInstructionPanelAndroid");
     if (!modal || !openBtn || !closeBtn || !backdrop) return;
 
+    function setTab(name) {
+      var iphoneOn = name !== "android";
+      if (tabIphone) {
+        tabIphone.classList.toggle("club-charter-modal__menu-item--active", iphoneOn);
+        tabIphone.setAttribute("aria-selected", iphoneOn ? "true" : "false");
+      }
+      if (tabAndroid) {
+        tabAndroid.classList.toggle("club-charter-modal__menu-item--active", !iphoneOn);
+        tabAndroid.setAttribute("aria-selected", iphoneOn ? "false" : "true");
+      }
+      if (panelIphone) panelIphone.hidden = !iphoneOn;
+      if (panelAndroid) panelAndroid.hidden = iphoneOn;
+    }
+
     function openModal() {
+      setTab("iphone");
       modal.setAttribute("aria-hidden", "false");
       document.documentElement.classList.add("club-charter-modal-open");
     }
@@ -8577,6 +8596,8 @@ function getPokerResolvedTelegramUser() {
         if (topShareBtn && typeof topShareBtn.click === "function") topShareBtn.click();
       });
     }
+    if (tabIphone) tabIphone.addEventListener("click", function () { setTab("iphone"); });
+    if (tabAndroid) tabAndroid.addEventListener("click", function () { setTab("android"); });
     closeBtn.addEventListener("click", closeModal);
     backdrop.addEventListener("click", closeModal);
     document.addEventListener("keydown", function (e) {

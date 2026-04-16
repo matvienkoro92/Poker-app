@@ -3008,11 +3008,27 @@ body.pwa-auth-gated #app {
   gap: 12px;
   color: #2a2118;
 }
+.site-home-instruction-modal__tabs {
+  margin-bottom: 14px;
+}
+.site-home-instruction-modal__panels {
+  display: block;
+}
+.site-home-instruction-modal__panel[hidden] {
+  display: none !important;
+}
 .site-home-instruction-modal__body p {
   margin: 0;
   font-size: 15px;
   line-height: 1.45;
   color: #2a2118;
+}
+.site-home-instruction-modal__image {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 33, 24, 0.14);
+  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.12);
 }
 .site-home-instruction-modal .club-charter-modal__paper,
 .site-home-instruction-modal .club-charter-modal__kicker,

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.692">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.693">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=511" />
+    <link rel="stylesheet" href="./styles.css?v=512" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -500,7 +500,7 @@
                 <span class="pwa-install-btn__icon" aria-hidden="true">📲</span>
               </button>
               <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Как войти" aria-label="Как войти" hidden>
-                <span class="site-home-instruction-btn__icon" aria-hidden="true">🚪</span>
+                <span class="site-home-instruction-btn__icon" aria-hidden="true">📲</span>
               </button>
             </div>
             <div class="auth-user auth-user--hidden" id="authUser" aria-live="polite">
@@ -5067,12 +5067,28 @@
             <p class="club-charter-modal__kicker">Веб-версия</p>
             <h2 class="club-charter-modal__title" id="siteHomeInstructionModalTitle">Что бы авторизоваться</h2>
             <div class="club-charter-modal__rule" aria-hidden="true"></div>
-            <div class="site-home-instruction-modal__body">
-              <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram site-home-instruction-modal__share-btn" id="siteHomeInstructionShareBtn" aria-label="Поделиться сайтом">Поделиться</button>
-              <p>✅ Проверьте что сайт открыт через браузер Гуглхром или Сафари.</p>
-              <p>✅ Нажмите «Поделиться» <span aria-hidden="true">📲</span>.</p>
-              <p>✅ Добавьте ярлык на рабочий стол (кнопка «Добавить на экран домой»).</p>
-              <p>✅ Авторизируйтесь и разрешите уведомления.</p>
+            <nav class="club-charter-modal__menu site-home-instruction-modal__tabs" role="tablist" aria-label="Инструкция по устройствам">
+              <button type="button" class="club-charter-modal__menu-item club-charter-modal__menu-item--active" role="tab" id="siteHomeInstructionTabIphone" aria-selected="true" aria-controls="siteHomeInstructionPanelIphone">iPhone</button>
+              <button type="button" class="club-charter-modal__menu-item" role="tab" id="siteHomeInstructionTabAndroid" aria-selected="false" aria-controls="siteHomeInstructionPanelAndroid">Android</button>
+            </nav>
+            <div class="site-home-instruction-modal__panels">
+              <section id="siteHomeInstructionPanelIphone" class="site-home-instruction-modal__panel" role="tabpanel" aria-labelledby="siteHomeInstructionTabIphone">
+                <div class="site-home-instruction-modal__body">
+                  <button type="button" class="gazette-modal__share-btn gazette-modal__share-telegram site-home-instruction-modal__share-btn" id="siteHomeInstructionShareBtn" aria-label="Поделиться сайтом">Поделиться</button>
+                  <p>✅ Проверьте что сайт открыт через браузер Safari или Google (не телегармм-браузер).</p>
+                  <p>✅ Нажмите поделиться внизу экрана.</p>
+                  <img src="./assets/site-auth-iphone-share.jpeg" alt="Кнопка поделиться в Safari внизу экрана" class="site-home-instruction-modal__image" loading="lazy" decoding="async" />
+                  <p>✅ Нажмите на «Добавить на экран домой», чтобы добавить ярлык на рабочий стол.</p>
+                  <img src="./assets/site-auth-iphone-add-home.jpeg" alt="Пункт добавить на экран домой в меню поделиться" class="site-home-instruction-modal__image" loading="lazy" decoding="async" />
+                  <img src="./assets/site-auth-iphone-home-icon.jpeg" alt="Ярлык сайта на рабочем столе iPhone" class="site-home-instruction-modal__image" loading="lazy" decoding="async" />
+                  <p>✅ Заходите в приложение с рабочего стола, авторизируйтесь и разрешите уведомления.</p>
+                </div>
+              </section>
+              <section id="siteHomeInstructionPanelAndroid" class="site-home-instruction-modal__panel" role="tabpanel" aria-labelledby="siteHomeInstructionTabAndroid" hidden>
+                <div class="site-home-instruction-modal__body">
+                  <p>Инструкция для Android будет добавлена следующим шагом.</p>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -6322,7 +6338,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=797"></script>
+    <script defer src="./app.js?v=798"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
