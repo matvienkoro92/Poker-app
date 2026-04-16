@@ -3035,9 +3035,6 @@ body.pwa-auth-gated #app {
 .site-home-instruction-modal .club-charter-modal__title {
   color: #2a2118;
 }
-.site-home-instruction-modal__share-btn {
-  align-self: flex-start;
-}
 html.site-home-header-mode #vpnProxyOpenBtn,
 html.site-home-header-mode #radioToggle,
 html.site-home-header-mode #themeToggle,

@@ -8552,7 +8552,6 @@ function getPokerResolvedTelegramUser() {
     var openBtn = document.getElementById("siteHomeInstructionBtn");
     var closeBtn = document.getElementById("siteHomeInstructionModalClose");
     var backdrop = document.getElementById("siteHomeInstructionModalBackdrop");
-    var shareBtn = document.getElementById("siteHomeInstructionShareBtn");
     var tabIphone = document.getElementById("siteHomeInstructionTabIphone");
     var tabAndroid = document.getElementById("siteHomeInstructionTabAndroid");
     var panelIphone = document.getElementById("siteHomeInstructionPanelIphone");
@@ -8590,12 +8589,6 @@ function getPokerResolvedTelegramUser() {
       if (openBtn.hidden) return;
       openModal();
     });
-    if (shareBtn) {
-      shareBtn.addEventListener("click", function () {
-        var topShareBtn = document.getElementById("pwaInstallBtn");
-        if (topShareBtn && typeof topShareBtn.click === "function") topShareBtn.click();
-      });
-    }
     if (tabIphone) tabIphone.addEventListener("click", function () { setTab("iphone"); });
     if (tabAndroid) tabAndroid.addEventListener("click", function () { setTab("android"); });
     closeBtn.addEventListener("click", closeModal);
