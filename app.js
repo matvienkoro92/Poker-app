@@ -8510,7 +8510,7 @@ function getPokerResolvedTelegramUser() {
     if (!el) return;
     syncSiteHomeInstructionMode();
     if (isSiteHomeInstructionMode()) {
-      el.textContent = "Привет, гость, авторизуйтесь";
+      el.textContent = "Авторизуйтесь";
       return;
     }
     var u = null;
@@ -8552,6 +8552,7 @@ function getPokerResolvedTelegramUser() {
     var openBtn = document.getElementById("siteHomeInstructionBtn");
     var closeBtn = document.getElementById("siteHomeInstructionModalClose");
     var backdrop = document.getElementById("siteHomeInstructionModalBackdrop");
+    var shareBtn = document.getElementById("siteHomeInstructionShareBtn");
     if (!modal || !openBtn || !closeBtn || !backdrop) return;
 
     function openModal() {
@@ -8570,6 +8571,12 @@ function getPokerResolvedTelegramUser() {
       if (openBtn.hidden) return;
       openModal();
     });
+    if (shareBtn) {
+      shareBtn.addEventListener("click", function () {
+        var topShareBtn = document.getElementById("pwaInstallBtn");
+        if (topShareBtn && typeof topShareBtn.click === "function") topShareBtn.click();
+      });
+    }
     closeBtn.addEventListener("click", closeModal);
     backdrop.addEventListener("click", closeModal);
     document.addEventListener("keydown", function (e) {

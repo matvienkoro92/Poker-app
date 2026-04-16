@@ -2916,17 +2916,18 @@ body.pwa-auth-gated #app {
   font-size: 13px;
   font-weight: 500;
   color: var(--text);
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 140px;
+  text-align: right;
 }
 .header-greeting__arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: 14px;
+  color: var(--text);
   line-height: 1;
   transform: translateY(1px);
 }
@@ -3010,37 +3011,36 @@ body.pwa-auth-gated #app {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  color: #2a2118;
 }
 .site-home-instruction-modal__body p {
   margin: 0;
   font-size: 15px;
   line-height: 1.45;
-  color: var(--text);
+  color: #2a2118;
+}
+.site-home-instruction-modal .club-charter-modal__paper,
+.site-home-instruction-modal .club-charter-modal__kicker,
+.site-home-instruction-modal .club-charter-modal__title {
+  color: #2a2118;
+}
+.site-home-instruction-modal__share-btn {
+  align-self: flex-start;
 }
 html.site-home-header-mode #vpnProxyOpenBtn,
 html.site-home-header-mode #radioToggle,
-html.site-home-header-mode #themeToggle {
+html.site-home-header-mode #themeToggle,
+html.site-home-header-mode #pwaInstallBtn {
   display: none !important;
 }
 html.site-home-header-mode #siteHomeInstructionBtn {
   display: flex !important;
 }
 html.site-home-header-mode .header-greeting-wrap {
-  max-width: 210px;
+  max-width: 170px;
 }
 html.site-home-header-mode .header-greeting {
-  max-width: 210px;
-  white-space: normal;
-  text-align: right;
-}
-html.site-home-header-mode .pwa-install-btn {
-  min-width: 40px;
-  width: 40px;
-  padding: 0;
-  justify-content: center;
-}
-html.site-home-header-mode .pwa-install-btn__label {
-  display: none;
+  max-width: 170px;
 }
 @media (max-width: 480px) {
   .pwa-install-btn__label { display: none; }
@@ -3051,10 +3051,10 @@ html.site-home-header-mode .pwa-install-btn__label {
     height: 58px;
   }
   html.site-home-header-mode .header-greeting-wrap {
-    max-width: 170px;
+    max-width: 138px;
   }
   html.site-home-header-mode .header-greeting {
-    max-width: 170px;
+    max-width: 138px;
     font-size: 12px;
   }
 }
