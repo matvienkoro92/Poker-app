@@ -1497,7 +1497,6 @@ function initProfileChatPush() {
   }
   function nativeShare() {
     if (typeof navigator.share !== "function") return Promise.resolve(false);
-    if (isIos()) return Promise.resolve(false);
     var link = getAppUrl();
     return navigator.share({
       title: "Клуб Два туза — Poker Club",
@@ -1508,6 +1507,9 @@ function initProfileChatPush() {
   function showMsg(msg) {
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
+  }
+  function isWebsiteShareMode() {
+    return !isStandalone() && !(window.Telegram && window.Telegram.WebApp);
   }
   if (isStandalone()) return;
   window.addEventListener("beforeinstallprompt", function (e) {
@@ -1520,6 +1522,18 @@ function initProfileChatPush() {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     function doShareAndCopy() {
       return copyShareLink().then(function () { return nativeShare(); });
+    }
+    if (isWebsiteShareMode()) {
+      doShareAndCopy().then(function (shared) {
+        if (shared) showMsg("Поделились!");
+        else {
+          copyShareLink().then(function (ok) {
+            if (ok) showMsg("Ссылка скопирована. Отправьте другу.");
+            else showMsg("Не удалось открыть меню «Поделиться».");
+          });
+        }
+      });
+      return;
     }
     if (installPrompt) {
       installPrompt.prompt();
