@@ -24924,6 +24924,12 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   filter: brightness(0.97);
 }
 
+.footer-meta-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
 .footer-visitors {
   margin: 0;
   font-size: 11px;
@@ -24932,7 +24938,8 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  justify-content: center;
+  justify-content: flex-end;
+  text-align: right;
 }
 .footer-visitors__total strong,
 .footer-visitors__unique strong,
@@ -24960,6 +24967,20 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   font-size: 10px;
   line-height: 1.4;
   color: var(--text-muted);
+  flex: 1;
+}
+@media (max-width: 640px) {
+  .footer-meta-line {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .footer-note {
+    max-width: 68%;
+  }
+  .footer-visitors {
+    max-width: 32%;
+    gap: 6px;
+  }
 }
 
 .footer-admin-visitors {

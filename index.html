@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.690">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.691">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=509" />
+    <link rel="stylesheet" href="./styles.css?v=510" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -765,22 +765,24 @@
               </div>
 
             <footer class="card__footer card__footer--home" id="homeFooter">
-              <p class="footer-visitors" aria-label="Версия приложения и статистика (для администраторов)">
-                <span class="footer-visitors__stats" id="footerVisitorStatsWrap" hidden>
-                  <span class="footer-visitors__total">Визитов: <strong id="visitorTotal">—</strong></span>
-                  <span class="footer-visitors__unique">Уник.: <strong id="visitorUnique">—</strong></span>
-                  <span class="footer-visitors__returning">Повтор.: <strong id="visitorReturning">—</strong></span>
-                </span>
-                <span class="footer-visitors__version" id="homeFooterAppVersion"></span>
-              </p>
-              <p class="footer-note">
-                Клуб «Два туза». Играйте ответственно. 18+
-              </p>
+              <div class="footer-meta-line" aria-label="Информация о клубе и версия приложения">
+                <p class="footer-note">
+                  Клуб «Два туза». Работаем с 2018г. Играйте ответственно.
+                </p>
+                <p class="footer-visitors" aria-label="Версия приложения и статистика (для администраторов)">
+                  <span class="footer-visitors__stats" id="footerVisitorStatsWrap" hidden>
+                    <span class="footer-visitors__total">Визитов: <strong id="visitorTotal">—</strong></span>
+                    <span class="footer-visitors__unique">Уник.: <strong id="visitorUnique">—</strong></span>
+                    <span class="footer-visitors__returning">Повтор.: <strong id="visitorReturning">—</strong></span>
+                  </span>
+                  <span class="footer-visitors__version" id="homeFooterAppVersion"></span>
+                </p>
+              </div>
               <p class="footer-admin-visitors footer-admin-visitors--hidden" id="footerAdminVisitorsWrap">
                 <button type="button" class="footer-admin-visitors__btn" id="adminVisitorsBtn">Посетители</button>
                 <button type="button" class="footer-admin-visitors__btn footer-admin-visitors__btn--secondary" id="adminBroadcastReportsBtn">Отчёт о рассылках</button>
               </p>
-              <p class="footer-admin-visitors footer-admin-visitors--lab">
+              <p class="footer-admin-visitors footer-admin-visitors--lab footer-admin-visitors--hidden" id="footerKeyboardLabWrap">
                 <button type="button" class="footer-admin-visitors__btn footer-admin-visitors__btn--secondary" data-view-target="keyboard-lab" id="keyboardLabOpenBtn">Keyboard Lab</button>
               </p>
             </footer>
@@ -6321,7 +6323,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=795"></script>
+    <script defer src="./app.js?v=796"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

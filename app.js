@@ -34659,14 +34659,16 @@ document.addEventListener("visibilitychange", function () {
 
   function checkAdminAndShowVisitorsButton() {
     var wrap = document.getElementById("footerAdminVisitorsWrap");
+    var keyboardLabWrap = document.getElementById("footerKeyboardLabWrap");
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
-    if (!wrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
+    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
     function showAdminUi() {
       var footerStats = document.getElementById("footerVisitorStatsWrap");
       if (footerStats) footerStats.removeAttribute("hidden");
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
+      if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
