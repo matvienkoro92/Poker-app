@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.696">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.697">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=515" />
+    <link rel="stylesheet" href="./styles.css?v=516" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1625,7 +1625,7 @@
                     <button type="button" class="chat-find-new-group-btn" id="chatNewGroupBtn" aria-label="Создать групповой чат" title="Новый групповой чат">+</button>
                   </div>
                 </div>
-                <div class="chat-dialogs-block">
+                <div class="chat-dialogs-block" id="chatDialogsPrimaryBlock">
                 <button type="button" class="chat-dialog-item chat-dialog-item--club" data-chat-type="club" id="chatDialogClub" tabindex="-1">
                   <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" width="52" height="52" decoding="sync" fetchpriority="high" loading="eager" />
                   <span class="chat-dialog-item__club-wrap">
@@ -1669,6 +1669,10 @@
                   </span>
                   <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_1897001087" aria-hidden="true"></span>
                 </button>
+                </div>
+                <div class="chat-guest-cta" id="chatDialogsGuestGate" hidden>
+                  <p class="chat-empty chat-empty--guest-msg">Чаты доступны только авторизированным пользователям.</p>
+                  <button type="button" class="profile-exit-btn" id="chatDialogsGuestAuthBtn">Авторизоваться</button>
                 </div>
                 <div
                   class="chat-contacts-filter chat-contacts-filter--hidden"
@@ -6346,7 +6350,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=801"></script>
+    <script defer src="./app.js?v=802"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

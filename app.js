@@ -20306,6 +20306,9 @@ function pokerHydrateChatSnapshotsFromDisk() {
 
 function initChat() {
   var dialogsView = document.getElementById("chatDialogsView");
+  var dialogsGuestGate = document.getElementById("chatDialogsGuestGate");
+  var dialogsGuestAuthBtn = document.getElementById("chatDialogsGuestAuthBtn");
+  var dialogsPrimaryBlock = document.getElementById("chatDialogsPrimaryBlock");
   var generalView = document.getElementById("chatGeneralView");
   var personalView = document.getElementById("chatPersonalView");
   var adminsView = document.getElementById("chatAdminsView");
@@ -20360,6 +20363,7 @@ function initChat() {
   var findByIdInput = document.getElementById("chatFindByIdInput");
   var findByIdBtn = document.getElementById("chatFindByIdBtn");
   var findByIdInputDialogs = document.getElementById("chatFindByIdInputDialogs");
+  var chatNewGroupBtn = document.getElementById("chatNewGroupBtn");
   var backBtn = document.getElementById("chatBackBtn");
   var chatGeneralBackBtn = document.getElementById("chatGeneralBackBtn");
   var chatDialogClub = document.getElementById("chatDialogClub");
@@ -20441,6 +20445,42 @@ function initChat() {
     applyConvPeerAvatarHeader("", "");
     applyConvGroupDescription("");
   }
+  function isWebsiteGuestChatGateMode() {
+    var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var isStandaloneMode =
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf("android-app://") === 0;
+    return !hasSession && !isTelegramMini && !isStandaloneMode;
+  }
+  function syncChatWebsiteGuestGate() {
+    var guestMode = isWebsiteGuestChatGateMode();
+    var contactsFilter = document.getElementById("chatContactsFilter");
+    var findWrap = findByIdInputDialogs ? findByIdInputDialogs.closest(".chat-find-by-id") : null;
+    if (dialogsGuestGate) dialogsGuestGate.hidden = !guestMode;
+    if (dialogsPrimaryBlock) dialogsPrimaryBlock.classList.toggle("profile-guest-hidden", guestMode);
+    if (contactsFilter) contactsFilter.classList.toggle("profile-guest-hidden", guestMode);
+    if (contactsEl) contactsEl.classList.toggle("profile-guest-hidden", guestMode);
+    if (findWrap) findWrap.classList.toggle("profile-guest-hidden", guestMode);
+    if (chatNewGroupBtn) chatNewGroupBtn.classList.toggle("profile-guest-hidden", guestMode);
+    if (!guestMode) return false;
+    if (contactsEl) {
+      contactsEl.innerHTML = "";
+    }
+    return true;
+  }
+  if (dialogsGuestAuthBtn && dialogsGuestAuthBtn.dataset.bound !== "1") {
+    dialogsGuestAuthBtn.dataset.bound = "1";
+    dialogsGuestAuthBtn.addEventListener("click", function () {
+      if (typeof window.__pokerOpenSiteHomeInstructionModal === "function") {
+        window.__pokerOpenSiteHomeInstructionModal();
+      }
+    });
+  }
+  try {
+    syncChatWebsiteGuestGate();
+  } catch (eGuestGateInit) {}
   var CHAT_ADMIN_IDS = ["tg_2144406710", "tg_1897001087"];
   var messagesEl = document.getElementById("chatMessages");
   var sendBtn = document.getElementById("chatSendBtn");
@@ -26267,8 +26307,13 @@ function initChat() {
     var contactsFetchGen = (window.__pokerContactsFetchGen || 0) + 1;
     window.__pokerContactsFetchGen = contactsFetchGen;
     var contactsInstantFromCache = false;
-    function applyContactsApiResponse(data, opts) {
-      opts = opts || {};
+  function applyContactsApiResponse(data, opts) {
+    if (syncChatWebsiteGuestGate()) {
+      updateDialogUnreadBadges();
+      updateChatNavDot();
+      return;
+    }
+    opts = opts || {};
       var fromFilterOnly = !!opts.fromFilterOnly;
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
