@@ -2985,27 +2985,22 @@ body.pwa-auth-gated #app {
   font-size: 11px;
 }
 .site-home-instruction-btn {
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
-  padding: 6px 4px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
   border-radius: 14px;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 1.05;
 }
 .site-home-instruction-btn__icon {
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1;
 }
 .site-home-instruction-btn__label {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text);
+  display: none;
 }
 .site-home-instruction-modal__body {
   display: flex;
@@ -3046,9 +3041,9 @@ html.site-home-header-mode .header-greeting {
   .pwa-install-btn__label { display: none; }
   .pwa-install-btn { padding: 0; min-width: 40px; justify-content: center; }
   .site-home-instruction-btn {
-    width: 58px;
-    min-width: 58px;
-    height: 58px;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
   }
   html.site-home-header-mode .header-greeting-wrap {
     max-width: 138px;
