@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.688">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.689">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=507" />
+    <link rel="stylesheet" href="./styles.css?v=508" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -465,6 +465,7 @@
           <div class="header-actions">
             <span class="header-greeting-wrap">
               <span class="header-greeting" id="headerGreeting">Привет!</span>
+              <span class="header-greeting__arrow" id="headerGreetingArrow" aria-hidden="true">▾</span>
             </span>
             <div class="header-actions__row">
               <button type="button" class="welcome-admin-report-btn header-admin-report--hidden" id="adminReportBtn" title="Отчёт за смену" aria-label="Отчёт за смену">
@@ -497,6 +498,10 @@
               </button>
               <button type="button" class="pwa-install-btn theme-toggle" id="pwaInstallBtn" title="Поделиться и добавить на экран" aria-label="Поделиться и добавить на экран" hidden>
                 <span class="pwa-install-btn__icon" aria-hidden="true">📲</span>
+              </button>
+              <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Инструкция по авторизации" aria-label="Инструкция по авторизации" hidden>
+                <span class="site-home-instruction-btn__icon" aria-hidden="true">🪛</span>
+                <span class="site-home-instruction-btn__label">Инструкция</span>
               </button>
             </div>
             <div class="auth-user auth-user--hidden" id="authUser" aria-live="polite">
@@ -5053,6 +5058,23 @@
           </div>
         </div>
       </div>
+      <div class="club-charter-modal site-home-instruction-modal" id="siteHomeInstructionModal" role="dialog" aria-modal="true" aria-labelledby="siteHomeInstructionModalTitle" aria-hidden="true">
+        <div class="club-charter-modal__backdrop" id="siteHomeInstructionModalBackdrop"></div>
+        <div class="club-charter-modal__sheet">
+          <button type="button" class="club-charter-modal__close" id="siteHomeInstructionModalClose" aria-label="Закрыть">×</button>
+          <div class="club-charter-modal__paper">
+            <p class="club-charter-modal__kicker">Веб-версия</p>
+            <h2 class="club-charter-modal__title" id="siteHomeInstructionModalTitle">Что бы авторизоваться</h2>
+            <div class="club-charter-modal__rule" aria-hidden="true"></div>
+            <div class="site-home-instruction-modal__body">
+              <p>✅ Проверьте что сайт открыт через браузер Гуглхром или Сафари.</p>
+              <p>✅ Нажмите «Поделиться» <span aria-hidden="true">📲</span>.</p>
+              <p>✅ Добавьте ярлык на рабочий стол (кнопка «Добавить на экран домой»).</p>
+              <p>✅ Авторизируйтесь и разрешите уведомления.</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="gazette-modal" id="gazetteModal" role="dialog" aria-modal="true" aria-labelledby="gazetteModalTitle" aria-label="Газета Вестник Два туза" aria-hidden="true">
         <div class="gazette-modal__backdrop" id="gazetteModalBackdrop"></div>
         <div class="gazette-modal__paper">
@@ -6298,7 +6320,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=793"></script>
+    <script defer src="./app.js?v=794"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

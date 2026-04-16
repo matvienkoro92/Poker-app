@@ -8508,6 +8508,11 @@ function getPokerResolvedTelegramUser() {
   function updateHeaderGreeting() {
     var el = document.getElementById("headerGreeting");
     if (!el) return;
+    syncSiteHomeInstructionMode();
+    if (isSiteHomeInstructionMode()) {
+      el.textContent = "Привет, гость, авторизуйтесь";
+      return;
+    }
     var u = null;
     var auth = window.__pokerTelegramAuth;
     if (auth && (auth.status === "invalid" || auth.status === "network")) {
@@ -8520,6 +8525,58 @@ function getPokerResolvedTelegramUser() {
     var dn = telegramUserDisplayName(u);
     el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
   }
+
+  function isSiteHomeInstructionMode() {
+    var isStandaloneMode =
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf("android-app://") === 0;
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var bodyView = document.body && document.body.getAttribute("data-view");
+    return !isStandaloneMode && !isTelegramMini && bodyView === "home";
+  }
+
+  function syncSiteHomeInstructionMode() {
+    var root = document.documentElement;
+    var isSiteMode = isSiteHomeInstructionMode();
+    var instructionBtn = document.getElementById("siteHomeInstructionBtn");
+    var greetingArrow = document.getElementById("headerGreetingArrow");
+    if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
+    if (instructionBtn) instructionBtn.hidden = !isSiteMode;
+    if (greetingArrow) greetingArrow.hidden = !isSiteMode;
+  }
+  window.__pokerSyncSiteHomeInstructionMode = syncSiteHomeInstructionMode;
+
+  function initSiteHomeInstructionModal() {
+    var modal = document.getElementById("siteHomeInstructionModal");
+    var openBtn = document.getElementById("siteHomeInstructionBtn");
+    var closeBtn = document.getElementById("siteHomeInstructionModalClose");
+    var backdrop = document.getElementById("siteHomeInstructionModalBackdrop");
+    if (!modal || !openBtn || !closeBtn || !backdrop) return;
+
+    function openModal() {
+      modal.setAttribute("aria-hidden", "false");
+      document.documentElement.classList.add("club-charter-modal-open");
+    }
+
+    function closeModal() {
+      modal.setAttribute("aria-hidden", "true");
+      if (!document.querySelector('.club-charter-modal[aria-hidden="false"]')) {
+        document.documentElement.classList.remove("club-charter-modal-open");
+      }
+    }
+
+    openBtn.addEventListener("click", function () {
+      if (openBtn.hidden) return;
+      openModal();
+    });
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", closeModal);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal();
+    });
+  }
+  window.__pokerInitSiteHomeInstructionModal = initSiteHomeInstructionModal;
 
   function setBannerVerifying() {
     if (!isPwaStandaloneAuth()) {
@@ -9873,6 +9930,20 @@ function tryChillRadioPlay() {
   if (p && typeof p.then === "function") p.catch(function () {});
 }
 
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", function () {
+    try {
+      if (typeof window.__pokerInitSiteHomeInstructionModal === "function") window.__pokerInitSiteHomeInstructionModal();
+      if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
+    } catch (eSiteHomeInit) {}
+  });
+} else {
+  try {
+    if (typeof window.__pokerInitSiteHomeInstructionModal === "function") window.__pokerInitSiteHomeInstructionModal();
+    if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
+  } catch (eSiteHomeInitNow) {}
+}
+
 /** Состояние верификации Telegram для доступа к чату (см. __pokerTelegramAuth в initTelegramAuth) */
 function getPokerChatTelegramAuthState() {
   try {
@@ -10034,6 +10105,9 @@ function setView(viewName, navOpts) {
       }
     } catch (eHof) {}
   }
+  try {
+    if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
+  } catch (eSiteHomeHdrView) {}
   /* После data-view: иначе при выходе из чата ensure видел data-view=chat и выходил раньше времени */
   if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
   if (prevView === "chat" && viewName !== "chat") {
