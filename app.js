@@ -20386,6 +20386,12 @@ function initChat() {
   var convPeerAvatarWrap = document.getElementById("chatConvPeerAvatarWrap");
   var convGroupAvatarFile = document.getElementById("chatConvGroupAvatarFile");
   var convGroupCanChangeAvatar = false;
+  function getInlineChatHeaderTopOffsetPx() {
+    try {
+      if (typeof isPwaStandaloneMode === "function" && isPwaStandaloneMode()) return "0px";
+    } catch (ePwaHeadTop) {}
+    return "80px";
+  }
   function syncConvGroupAvatarEditUi() {
     if (!convPeerAvatarWrap) return;
     var on = !!(
@@ -22888,7 +22894,7 @@ function initChat() {
     try {
       var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
       if (genHeader) {
-        genHeader.style.top = "80px";
+        genHeader.style.top = getInlineChatHeaderTopOffsetPx();
         genHeader.style.left = "0";
         genHeader.style.right = "0";
         genHeader.style.transform = "none";
@@ -22932,7 +22938,7 @@ function initChat() {
       try {
         var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
         if (genHeader) {
-          genHeader.style.top = "80px";
+          genHeader.style.top = getInlineChatHeaderTopOffsetPx();
           genHeader.style.left = "0";
           genHeader.style.right = "0";
           genHeader.style.transform = "none";
@@ -26112,7 +26118,7 @@ function initChat() {
     try {
       var convTop = document.querySelector("#chatConvView .chat-conv-top");
       if (convTop) {
-        convTop.style.top = "80px";
+        convTop.style.top = getInlineChatHeaderTopOffsetPx();
         convTop.style.left = "0";
         convTop.style.right = "0";
         convTop.style.transform = "none";
