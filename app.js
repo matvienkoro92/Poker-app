@@ -30158,6 +30158,23 @@ function initChat() {
           coverPxDock = Math.max(coverPxDock, heightLoss);
         }
         if (isChatThreadComposerKeyboardDom()) {
+          /*
+           * iOS PWA: в standalone/WK visualViewport и innerHeight иногда схлопываются вместе,
+           * raw cover остаётся около 0, хотя inset выше уже распознал открытую клавиатуру.
+           * Для thread-composer используем этот inset как страховку, иначе полоса не поднимается вовсе.
+           */
+          if (
+            !tg &&
+            isIosLikeForChatViewport() &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            chatComposerEl &&
+            document.activeElement === chatComposerEl
+          ) {
+            var pwaThreadDockFloor = Math.max(0, Math.round(inset));
+            if (pwaThreadDockFloor >= 96 && coverPxDock < pwaThreadDockFloor) {
+              coverPxDock = pwaThreadDockFloor;
+            }
+          }
           /* TMA + тред: syncTelegramMiniAppChatThreadKeyboard() в начале sync — без дубля здесь. */
           /*
            * iOS: взрыв vv подрезаем относительно winLoss. Пошаговое уменьшение cover убрано — давало 2 видимых шага
