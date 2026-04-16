@@ -8507,8 +8507,11 @@ function getPokerResolvedTelegramUser() {
 
   function updateHeaderGreeting() {
     var el = document.getElementById("headerGreeting");
-    if (!el) return;
     syncSiteHomeInstructionMode();
+    if (typeof window.__pokerSyncProfileGuestWebsiteMode === "function") {
+      window.__pokerSyncProfileGuestWebsiteMode();
+    }
+    if (!el) return;
     if (isSiteHomeInstructionMode()) {
       el.textContent = "Авторизуйтесь";
       return;
@@ -8596,8 +8599,41 @@ function getPokerResolvedTelegramUser() {
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal();
     });
+    window.__pokerOpenSiteHomeInstructionModal = openModal;
   }
   window.__pokerInitSiteHomeInstructionModal = initSiteHomeInstructionModal;
+
+  function isWebsiteGuestProfileMode() {
+    var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var isStandaloneMode =
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf("android-app://") === 0;
+    return !hasSession && !isTelegramMini && !isStandaloneMode;
+  }
+
+  function syncProfileGuestWebsiteMode() {
+    var chatRow = document.getElementById("profileChatNameRow");
+    var saveWrap = document.getElementById("profileChatNameSaveWrap");
+    var guestWrap = document.getElementById("profileGuestAuthWrap");
+    var guestBtn = document.getElementById("profileGuestAuthBtn");
+    var personalSection = document.getElementById("profilePersonalSection");
+    var guestMode = isWebsiteGuestProfileMode();
+    if (chatRow) chatRow.classList.toggle("profile-guest-hidden", guestMode);
+    if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", guestMode);
+    if (personalSection) personalSection.classList.toggle("profile-guest-hidden", guestMode);
+    if (guestWrap) guestWrap.hidden = !guestMode;
+    if (guestBtn && guestBtn.dataset.bound !== "1") {
+      guestBtn.dataset.bound = "1";
+      guestBtn.addEventListener("click", function () {
+        if (typeof window.__pokerOpenSiteHomeInstructionModal === "function") {
+          window.__pokerOpenSiteHomeInstructionModal();
+        }
+      });
+    }
+  }
+  window.__pokerSyncProfileGuestWebsiteMode = syncProfileGuestWebsiteMode;
 
   function setBannerVerifying() {
     if (!isPwaStandaloneAuth()) {
@@ -9956,12 +9992,14 @@ if (document.readyState === "loading") {
     try {
       if (typeof window.__pokerInitSiteHomeInstructionModal === "function") window.__pokerInitSiteHomeInstructionModal();
       if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
+      if (typeof window.__pokerSyncProfileGuestWebsiteMode === "function") window.__pokerSyncProfileGuestWebsiteMode();
     } catch (eSiteHomeInit) {}
   });
 } else {
   try {
     if (typeof window.__pokerInitSiteHomeInstructionModal === "function") window.__pokerInitSiteHomeInstructionModal();
     if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
+    if (typeof window.__pokerSyncProfileGuestWebsiteMode === "function") window.__pokerSyncProfileGuestWebsiteMode();
   } catch (eSiteHomeInitNow) {}
 }
 
@@ -10119,6 +10157,11 @@ function setView(viewName, navOpts) {
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
+    try {
+      if (typeof window.__pokerSyncProfileGuestWebsiteMode === "function") {
+        window.__pokerSyncProfileGuestWebsiteMode();
+      }
+    } catch (eProfileGuestSync) {}
     try {
       if (viewName !== "home" && prevView === "home") {
         var olH = document.querySelector(".view[data-view=\"home\"] .home-welcome-outline");

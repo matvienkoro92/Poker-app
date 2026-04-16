@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.695">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v8" data-app-version="1.696">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=514" />
+    <link rel="stylesheet" href="./styles.css?v=515" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4204,7 +4204,7 @@
               <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
             </div>
             <div class="profile-chat-name">
-              <div class="profile-chat-name__row">
+              <div class="profile-chat-name__row" id="profileChatNameRow">
                 <div class="profile-chat-name__cell">
                   <p class="profile-chat-name__field-caption">Введите ваше имя</p>
                   <input
@@ -4234,9 +4234,12 @@
                   />
                 </div>
               </div>
-              <div class="profile-chat-name__save-wrap">
+              <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
                 <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
+              </div>
+              <div class="profile-chat-name__guest-cta" id="profileGuestAuthWrap" hidden>
+                <button type="button" class="profile-chat-name__guest-btn" id="profileGuestAuthBtn">Авторизоваться</button>
               </div>
             </div>
             <section class="profile-friends">
@@ -4301,7 +4304,7 @@
                   </div>
                 </div>
               </section>
-              <section class="profile-personal">
+              <section class="profile-personal" id="profilePersonalSection">
                 <textarea id="profilePersonalInput" class="profile-personal__textarea" rows="4" maxlength="500" placeholder="Нотс про себя" aria-label="Нотс про себя"></textarea>
                 <div class="profile-personal__actions">
                   <button type="button" class="profile-personal__save-btn" id="profilePersonalSaveBtn">Сохранить</button>
@@ -6343,7 +6346,7 @@
     <script defer src="./telegram-web-app.js?v=1"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=800"></script>
+    <script defer src="./app.js?v=801"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

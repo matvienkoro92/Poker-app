@@ -26424,6 +26424,30 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   text-align: center;
   max-width: 100%;
 }
+.profile-chat-name__guest-cta {
+  width: 100%;
+  margin-top: 14px;
+}
+.profile-chat-name__guest-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--btn-on-accent);
+  background: linear-gradient(180deg, rgba(255, 144, 36, 0.98), rgba(255, 108, 24, 0.98));
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(255, 122, 26, 0.22);
+  cursor: pointer;
+}
+.profile-chat-name__guest-btn:hover {
+  filter: brightness(1.05);
+}
+.profile-guest-hidden {
+  display: none !important;
+}
 .profile-visible-to-others__p21-row {
   display: flex;
   flex-wrap: wrap;
