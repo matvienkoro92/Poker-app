@@ -8605,12 +8605,16 @@ function getPokerResolvedTelegramUser() {
 
   function isWebsiteGuestProfileMode() {
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    var isPwaGuest = false;
+    try {
+      isPwaGuest = !!pokerReadPwaGuestMode();
+    } catch (ePwaGuestProfile) {}
     var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    return !hasSession && !isTelegramMini && !isStandaloneMode;
+    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest;
   }
 
   function syncProfileGuestWebsiteMode() {
@@ -20447,12 +20451,16 @@ function initChat() {
   }
   function isWebsiteGuestChatGateMode() {
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    var isPwaGuest = false;
+    try {
+      isPwaGuest = !!pokerReadPwaGuestMode();
+    } catch (ePwaGuestChat) {}
     var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    return !hasSession && !isTelegramMini && !isStandaloneMode;
+    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest;
   }
   function syncChatWebsiteGuestGate() {
     var guestMode = isWebsiteGuestChatGateMode();
