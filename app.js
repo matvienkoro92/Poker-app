@@ -10176,6 +10176,20 @@ function setView(viewName, navOpts) {
   try {
     if (typeof window.__pokerSyncSiteHomeInstructionMode === "function") window.__pokerSyncSiteHomeInstructionMode();
   } catch (eSiteHomeHdrView) {}
+  try {
+    if (viewName === "chat") {
+      var guestChatGate = document.getElementById("chatDialogsGuestGate");
+      if (
+        guestChatGate &&
+        document.documentElement &&
+        document.documentElement.classList &&
+        (document.documentElement.classList.contains("poker-ios-pwa") ||
+          document.documentElement.classList.contains("poker-android-pwa"))
+      ) {
+        guestChatGate.hidden = true;
+      }
+    }
+  } catch (eGuestGatePwaHide) {}
   /* После data-view: иначе при выходе из чата ensure видел data-view=chat и выходил раньше времени */
   if (viewName !== "chat") pokerEnsureUnlockedDocumentScrollForNonChat();
   if (prevView === "chat" && viewName !== "chat") {

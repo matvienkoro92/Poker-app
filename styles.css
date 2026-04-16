@@ -6818,6 +6818,10 @@ textarea.roman-task-planner__input {
   margin-left: 0;
   flex-shrink: 0;
 }
+html.poker-ios-pwa #chatDialogsGuestGate,
+html.poker-android-pwa #chatDialogsGuestGate {
+  display: none !important;
+}
 .chat-day-divider {
   display: flex;
   align-items: center;
