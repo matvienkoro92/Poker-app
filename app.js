@@ -20402,6 +20402,16 @@ function initChat() {
   var convGroupCanChangeAvatar = false;
   function getInlineChatHeaderTopOffsetPx() {
     try {
+      var root = document.documentElement;
+      if (
+        root &&
+        root.classList &&
+        (root.classList.contains("poker-ios-pwa") || root.classList.contains("poker-android-pwa"))
+      ) {
+        return "0px";
+      }
+    } catch (ePwaHeaderClassTop) {}
+    try {
       if (typeof isPwaStandaloneMode === "function" && isPwaStandaloneMode()) return "0px";
     } catch (ePwaHeadTop) {}
     return "80px";
