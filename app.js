@@ -20461,12 +20461,22 @@ function initChat() {
     try {
       isPwaGuest = !!pokerReadPwaGuestMode();
     } catch (ePwaGuestChat) {}
+    var isPwaLike = false;
+    try {
+      isPwaLike =
+        !!(
+          document.documentElement &&
+          document.documentElement.classList &&
+          (document.documentElement.classList.contains("poker-ios-pwa") ||
+            document.documentElement.classList.contains("poker-android-pwa"))
+        );
+    } catch (ePwaLikeChat) {}
     var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest;
+    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest && !isPwaLike;
   }
   function syncChatWebsiteGuestGate() {
     var guestMode = isWebsiteGuestChatGateMode();
