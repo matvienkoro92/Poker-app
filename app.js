@@ -29020,6 +29020,18 @@ function initChat() {
         if (barFixed) {
           pad = Math.round(bh + btm + gap);
           if (pad < 28) pad = 28;
+          try {
+            var isPwaIosPad =
+              typeof isTelegramWebApp === "function" &&
+              !isTelegramWebApp() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport();
+            if (isPwaIosPad) {
+              pad = Math.max(28, Math.round(bh + 6));
+            }
+          } catch (ePwaPadCap) {}
         } else if (tmaFlowPad) {
           pad = Math.round(bh + gap + 8);
           if (pad < 44) pad = 44;
@@ -29069,7 +29081,18 @@ function initChat() {
           }
         } catch (eSbKb) {}
         /* Поднять ленту над композером/клавиатурой (не десктоп): после pad иначе «у низа» ложно ломается и низ остаётся под полем. */
-        if (!isChatPhysicalKeyboardContext() && nearBeforeLift) {
+        var shouldSnapAfterLift = !isChatPhysicalKeyboardContext() && nearBeforeLift;
+        try {
+          var isPwaIosNear =
+            typeof isTelegramWebApp === "function" &&
+            !isTelegramWebApp() &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport();
+          if (isPwaIosNear) shouldSnapAfterLift = false;
+        } catch (ePwaNear) {}
+        if (shouldSnapAfterLift) {
           var rafLift = window.requestAnimationFrame || function (fn) {
             setTimeout(fn, 0);
           };
