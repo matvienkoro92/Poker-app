@@ -29198,6 +29198,40 @@ function initChat() {
         }
         doc.style.setProperty("--chat-ios-accessory-inset", acc + "px");
       }
+      function getPwaChatThreadAccessoryInsetPx() {
+        try {
+          if (
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp()
+          ) return 0;
+          if (!isIosLikeForChatViewport()) return 0;
+          if (!pokerPwaStandaloneForKeyboardInset()) return 0;
+          if (!document.body.classList.contains("chat-keyboard-open")) return 0;
+          if (!isChatThreadComposerKeyboardDom()) return 0;
+          var vv = window.visualViewport || null;
+          var ih = window.innerHeight || 0;
+          var acc = 0;
+          if (vv && ih > 0) {
+            var vvh = Number(vv.height) || 0;
+            var offsetTop = Number(vv.offsetTop) || 0;
+            var belowVv = Math.max(0, Math.round(ih - offsetTop - vvh));
+            if (belowVv >= 8) {
+              acc = Math.min(92, Math.round(Math.min(belowVv, 130) * 0.94));
+            } else if (ih > 0 && vvh > 0 && ih - vvh > 55) {
+              acc = 44;
+            }
+          }
+          if (acc < 34) {
+            var baseIh = Number(window.__pokerChatInnerHBaseline) || 0;
+            var curIh = window.innerHeight || 0;
+            var winLoss = baseIh > 260 && curIh > 0 ? Math.max(0, Math.round(baseIh - curIh)) : 0;
+            if (winLoss > 96) acc = 42;
+          }
+          return Math.max(0, acc);
+        } catch (ePwaAcc) {
+          return 0;
+        }
+      }
       /** PWA/WK: pokerPulseChatFixedViewportHeightAfterKeyboard или гонка кадров оставляют height/min-height на html/body — «отступ» снизу и весь экран сжат до смены раздела */
       function pokerStripForcedViewportShellHeights() {
         try {
@@ -29968,7 +30002,12 @@ function initChat() {
         var gap = getChatComposerKeyboardGapPx();
         var coverNum = Math.max(0, Math.round(Number(coverPx) || 0));
         var bottomPx = coverNum + gap;
+        var pwaAccessoryInset = 0;
         var prevB = null;
+        try {
+          pwaAccessoryInset = getPwaChatThreadAccessoryInsetPx();
+          if (pwaAccessoryInset > 0) bottomPx += pwaAccessoryInset;
+        } catch (ePwaDockAcc) {}
         try {
           var ihLim = window.innerHeight || 0;
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
