@@ -29882,7 +29882,15 @@ function initChat() {
           isIosLikeForChatViewport() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
           pokerPwaStandaloneForKeyboardInset()
-        ) return -30;
+        ) {
+          var rootStyle = null;
+          var safeBottom = 0;
+          try {
+            rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+            safeBottom = Math.max(0, Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0));
+          } catch (eSafeBottom) {}
+          return -safeBottom;
+        }
         return 0;
       }
       function isTelegramMiniAppChatThreadIos() {
