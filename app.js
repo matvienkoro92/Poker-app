@@ -8529,14 +8529,29 @@ function getPokerResolvedTelegramUser() {
     el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
   }
 
+  function hasResolvedHomeAuthUser() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip")) return true;
+    } catch (eAuthHome) {}
+    try {
+      var tgNow = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgNow && tgNow.initDataUnsafe && tgNow.initDataUnsafe.user) return true;
+    } catch (eTgHome) {}
+    try {
+      if (pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken()) return true;
+    } catch (eSessionHome) {}
+    return false;
+  }
+
   function isSiteHomeInstructionMode() {
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var hasResolvedAuth = hasResolvedHomeAuthUser();
     var bodyView = document.body && document.body.getAttribute("data-view");
-    return !isStandaloneMode && !isTelegramMini && bodyView === "home";
+    return !isStandaloneMode && !hasResolvedAuth && bodyView === "home";
   }
 
   function syncSiteHomeInstructionMode() {
@@ -8609,12 +8624,12 @@ function getPokerResolvedTelegramUser() {
     try {
       isPwaGuest = !!pokerReadPwaGuestMode();
     } catch (ePwaGuestProfile) {}
-    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest;
+    var hasResolvedAuth = hasResolvedHomeAuthUser();
+    return !hasSession && !hasResolvedAuth && !isStandaloneMode && !isPwaGuest;
   }
 
   function syncProfileGuestWebsiteMode() {
@@ -9618,16 +9633,20 @@ function pokerEnsureUnlockedDocumentScrollForNonChat() {
   try {
     var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
     if (view === "chat") return;
-    document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+    if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+      window.__pokerClearChatKeyboardViewportState();
+    } else {
+      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
+      document.documentElement.style.removeProperty("--chat-vv-inset");
+      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+      if (document.body) document.body.classList.remove("chat-keyboard-open");
+    }
     if (document.body) {
-      document.body.classList.remove("chat-keyboard-open");
       pokerClearBodyDocumentScrollLockInline();
     }
     if (document.documentElement && document.documentElement.style && document.documentElement.style.overflow === "hidden") {
       document.documentElement.style.overflow = "";
     }
-    document.documentElement.style.removeProperty("--chat-vv-inset");
-    document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
   } catch (eDocUnlock) {}
 }
 
@@ -10093,10 +10112,9 @@ function setView(viewName, navOpts) {
       if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
         window.__pokerFinalizeChatKeyboardDismiss();
       } else {
-        document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-        document.body.classList.remove("chat-keyboard-open");
-        document.documentElement.style.removeProperty("--chat-vv-inset");
-        document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+        if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+          window.__pokerClearChatKeyboardViewportState();
+        }
         if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
           window.__pokerChatDetachVisualViewportListeners();
         }
@@ -22884,10 +22902,9 @@ function initChat() {
       if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
         window.__pokerFinalizeChatKeyboardDismiss();
       } else {
-        document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-        document.body.classList.remove("chat-keyboard-open");
-        document.documentElement.style.removeProperty("--chat-vv-inset");
-        document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+        if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+          window.__pokerClearChatKeyboardViewportState();
+        }
         if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
           window.__pokerChatDetachVisualViewportListeners();
         }
@@ -27155,11 +27172,9 @@ function initChat() {
     if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
       window.__pokerFinalizeChatKeyboardDismiss();
     } else {
-      document.documentElement.classList.remove("chat-keyboard-open");
-      document.body.classList.remove("chat-keyboard-open");
-      document.documentElement.classList.remove("chat-vv-lift");
-      document.documentElement.style.removeProperty("--chat-vv-inset");
-      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+      if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+        window.__pokerClearChatKeyboardViewportState();
+      }
     }
   }
 
@@ -28774,11 +28789,31 @@ function initChat() {
         if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
         if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
       }
+      function clearChatKeyboardViewportState(options) {
+        var opts = options || {};
+        var doc = document.documentElement;
+        try {
+          doc.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
+        } catch (eDocCls) {}
+        try {
+          document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+        } catch (eBodyCls) {}
+        if (opts.keepInsets) return;
+        try {
+          doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+        } catch (eDocVars) {}
+      }
+      window.__pokerClearChatKeyboardViewportState = clearChatKeyboardViewportState;
       function setChatKeyboardOpen(open) {
         logChatKeyboardDebug(open ? "kb-open" : "kb-close");
+        if (typeof setChatKeyboardOpenClasses === "function") {
+          setChatKeyboardOpenClasses(open);
+          scrollDocumentToZero();
+          return;
+        }
         if (isPassiveTelegramIosChatThread()) {
-          document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
-          document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+          clearChatKeyboardViewportState();
           scrollDocumentToZero();
           return;
         }
@@ -28788,8 +28823,7 @@ function initChat() {
           document.documentElement.classList.add("chat-keyboard-open");
           document.body.classList.add("chat-keyboard-open");
         } else {
-          document.documentElement.classList.remove("chat-keyboard-open");
-          document.body.classList.remove("chat-keyboard-open");
+          clearChatKeyboardViewportState({ keepInsets: true });
         }
         scrollDocumentToZero();
         if (el && savedScroll > 0) {
@@ -29097,8 +29131,7 @@ function initChat() {
       function setChatKeyboardOpenClasses(open) {
         try {
           if (open && shouldUseNativeTelegramIosChatComposerFlow()) {
-            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
-            document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+            clearChatKeyboardViewportState({ keepInsets: true });
             return;
           }
           var tmaFlowOpen = open && isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom();
@@ -29113,8 +29146,7 @@ function initChat() {
               document.body.classList.remove("chat-keyboard-open--tma-flow");
             }
           } else {
-            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
-            document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+            clearChatKeyboardViewportState({ keepInsets: true });
           }
         } catch (eKbCls) {}
       }
@@ -29235,11 +29267,11 @@ function initChat() {
           }
         } catch (eDet) {}
         var doc = document.documentElement;
-        try {
-          setChatKeyboardOpenClasses(false);
-          /* Сначала явный 0 — сброс кэша calc()/композитинга; remove на следующем кадре. */
-          doc.style.setProperty("--chat-vv-inset", "0px");
-          doc.style.setProperty("--chat-ios-accessory-inset", "0px");
+          try {
+            setChatKeyboardOpenClasses(false);
+            /* Сначала явный 0 — сброс кэша calc()/композитинга; remove на следующем кадре. */
+            doc.style.setProperty("--chat-vv-inset", "0px");
+            doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
         try {
           if (document.body && document.body.getAttribute("data-view") === "chat") {
@@ -29261,8 +29293,7 @@ function initChat() {
           syncPwaChatVisualViewportInset();
         } catch (eSync) {}
         try {
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
+          clearChatKeyboardViewportState();
         } catch (eRm) {}
         stripChatInputAreaTransforms();
         pokerStripForcedViewportShellHeights();
@@ -29761,7 +29792,7 @@ function initChat() {
           window.__pokerChatTmaDockTabKey === tabKey;
         try {
           if (lightTma && window.getComputedStyle(target0).position === "fixed") {
-            target0.style.setProperty("bottom", bottomPx + "px", "");
+            target0.style.setProperty("bottom", bottomPx + "px", "important");
             window.__pokerChatThreadDockBottomCssPx = bottomPx;
             return;
           }
@@ -29770,14 +29801,14 @@ function initChat() {
         var target = target0;
         if (!target) return;
         target.classList.add("chat-input-area--vv-dock");
-        target.style.setProperty("position", "fixed", "");
-        target.style.setProperty("left", "0", "");
-        target.style.setProperty("right", "0", "");
-        target.style.setProperty("width", "100%", "");
-        target.style.setProperty("max-width", "100%", "");
-        target.style.setProperty("box-sizing", "border-box", "");
-        target.style.setProperty("z-index", "120", "");
-        target.style.setProperty("bottom", bottomPx + "px", "");
+        target.style.setProperty("position", "fixed", "important");
+        target.style.setProperty("left", "0", "important");
+        target.style.setProperty("right", "0", "important");
+        target.style.setProperty("width", "100%", "important");
+        target.style.setProperty("max-width", "100%", "important");
+        target.style.setProperty("box-sizing", "border-box", "important");
+        target.style.setProperty("z-index", "120", "important");
+        target.style.setProperty("bottom", bottomPx + "px", "important");
         try {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
