@@ -6916,7 +6916,7 @@ function pokerApplyTelegramTopClearance() {
     }
   }
   if (instructionSheet) {
-    instructionSheet.style.marginTop = "56px";
+    instructionSheet.style.marginTop = "40px";
     instructionSheet.style.maxHeight = "calc(100dvh - 84px)";
   }
   if (instructionClose) {

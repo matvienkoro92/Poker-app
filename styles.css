@@ -3190,7 +3190,7 @@ html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__she
 html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet {
   width: min(920px, calc(100vw - 16px));
   max-height: calc(100vh - 108px);
-  margin-top: 76px;
+  margin-top: 40px;
 }
 html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__close,
 html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__close {
