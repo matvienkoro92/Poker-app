@@ -30133,8 +30133,13 @@ function initChat() {
           if (prevB != null && prevB > 0 && isPwaIosDock) {
             var focusAgePwaDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
             if (focusAgePwaDock > 0 && focusAgePwaDock < 900) {
-              var minBottomPwa = Math.max(0, prevB - 2);
+              var minBottomPwa = Math.max(0, prevB - 1);
+              var maxBottomPwa = prevB + 1;
               if (bottomPx < minBottomPwa) bottomPx = minBottomPwa;
+              if (bottomPx > maxBottomPwa) bottomPx = maxBottomPwa;
+            }
+            if (focusAgePwaDock > 0 && focusAgePwaDock < 1400 && Math.abs(bottomPx - prevB) < 4) {
+              bottomPx = prevB;
             }
           }
           if (
