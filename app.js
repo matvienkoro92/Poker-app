@@ -26621,6 +26621,27 @@ function initChat() {
     el.textContent = snippet ? name + ": " + snippet : name;
   }
 
+  function updateClubChatPreviewText(previewText) {
+    var el = document.getElementById("chatDialogClubPreview");
+    if (!el) return;
+    el.classList.remove("chat-dialog-item__preview--skeleton");
+    el.removeAttribute("aria-busy");
+    if (clubChatAccess === "need_apply") {
+      el.textContent = "Нажмите, чтобы подать заявку";
+      return;
+    }
+    if (clubChatAccess === "pending") {
+      el.textContent = "Заявка на рассмотрении…";
+      return;
+    }
+    if (clubChatAccess === "revoked") {
+      el.textContent = "Доступ отозван";
+      return;
+    }
+    var txt = previewText != null ? String(previewText).trim() : "";
+    el.textContent = txt || "Нет сообщений";
+  }
+
   function shouldUsePersonalCache(userId) {
     if (!userId) return false;
     var cache = personalMessagesCache[userId];
@@ -26918,6 +26939,9 @@ function initChat() {
           try {
             syncClubChatRosterUi();
           } catch (eRosterContacts) {}
+        }
+        if (data.generalChatPreview != null && typeof updateClubChatPreviewText === "function") {
+          updateClubChatPreviewText(data.generalChatPreview);
         }
         if (contactsForList.length === 0) {
           contactsEl.innerHTML =
