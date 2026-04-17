@@ -5427,9 +5427,29 @@ function runGazetteAndTasksInit() {
       } catch (eLocClr) {}
     } catch (eClrPush) {}
   }
+  function pokerOpenChatFromCurrentUrlIfAny() {
+    try {
+      if (typeof location === "undefined" || !location.search) return false;
+      var sp = new URLSearchParams(String(location.search || ""));
+      var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
+      var withPeer = (sp.get("with") || "").trim();
+      if (startApp === "club_chat" && typeof window.openClubChat === "function") {
+        pokerClearPushChatTarget();
+        window.openClubChat();
+        return true;
+      }
+      if (startApp === "club_chat_dm" && withPeer && typeof window.chatOpenConvFromDialogs === "function") {
+        pokerClearPushChatTarget();
+        window.chatOpenConvFromDialogs(withPeer, withPeer);
+        return true;
+      }
+    } catch (eCurPushUrl) {}
+    return false;
+  }
   window.__pokerApplyStartAppDeepLink = pokerApplyStartAppDeepLink;
   window.__pokerFlushPendingChatDeepLink = function () {
     try {
+      if (pokerOpenChatFromCurrentUrlIfAny()) return true;
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
         pokerClearPushChatTarget();
@@ -5474,6 +5494,7 @@ function runGazetteAndTasksInit() {
   };
   window.__pokerReplayStoredPushChatTarget = function () {
     try {
+      if (pokerOpenChatFromCurrentUrlIfAny()) return true;
       var rawStored = pokerReadPushChatTarget();
       if (!rawStored) return false;
       window.__pokerOpenChatFromPushUrl(rawStored);
