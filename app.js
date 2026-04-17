@@ -30598,7 +30598,14 @@ function initChat() {
             chatComposerEl &&
             document.activeElement === chatComposerEl
           ) {
+            var focusAgePwaFloor = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            var baseFloorIh = Number(window.__pokerChatInnerHBaseline) || 0;
+            var winLossFloor = baseFloorIh > 260 && ih > 0 ? Math.max(0, Math.round(baseFloorIh - ih)) : 0;
             var pwaThreadDockFloor = Math.max(0, Math.round(inset));
+            if (focusAgePwaFloor > 0 && focusAgePwaFloor < 420) {
+              if (winLossFloor > 32) pwaThreadDockFloor = Math.max(0, Math.round(winLossFloor));
+              else pwaThreadDockFloor = Math.max(0, Math.round(Math.min(inset, heightLoss)));
+            }
             if (pwaThreadDockFloor >= 96 && coverPxDock < pwaThreadDockFloor) {
               coverPxDock = pwaThreadDockFloor;
             }
