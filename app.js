@@ -30059,6 +30059,13 @@ function initChat() {
         } catch (eBm) {}
         try {
           prevB = window.__pokerChatLastAppliedDockBottom;
+          var isPwaIosDock =
+            typeof isTelegramWebApp === "function" &&
+            !isTelegramWebApp() &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport();
           var dockEps =
             typeof isTelegramWebApp === "function" &&
             isTelegramWebApp() &&
@@ -30066,6 +30073,13 @@ function initChat() {
             isIosLikeForChatViewport()
               ? 12
               : 2;
+          if (prevB != null && prevB > 0 && isPwaIosDock) {
+            var focusAgePwaDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            if (focusAgePwaDock > 0 && focusAgePwaDock < 900) {
+              var minBottomPwa = Math.max(0, prevB - 2);
+              if (bottomPx < minBottomPwa) bottomPx = minBottomPwa;
+            }
+          }
           if (
             prevB != null &&
             prevB > 0 &&
