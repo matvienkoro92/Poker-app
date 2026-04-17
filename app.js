@@ -6810,6 +6810,56 @@ function pokerApplyAppTopPadding() {
   root.style.setProperty("--app-extra-top-for-ui", "12px");
 }
 
+function pokerApplyTelegramTopClearance() {
+  var root = document.documentElement;
+  var body = document.body;
+  var isTelegramMini = !!(
+    root &&
+    root.classList &&
+    root.classList.contains("app--telegram-miniapp")
+  );
+  var appEl = document.getElementById("app");
+  var homeCard = document.querySelector('.card:has(.view--active[data-view="home"])');
+  var homeHeader = homeCard ? homeCard.querySelector(".card__header") : null;
+  var homeOutline = document.querySelector('.view--active[data-view="home"] .home-welcome-outline');
+  if (!isTelegramMini) {
+    if (appEl) appEl.style.removeProperty("padding-top");
+    if (homeCard) {
+      homeCard.style.removeProperty("margin-top");
+      homeCard.style.removeProperty("padding-top");
+    }
+    if (homeHeader) homeHeader.style.removeProperty("padding-top");
+    if (homeOutline) {
+      homeOutline.style.removeProperty("margin-top");
+      homeOutline.style.removeProperty("padding-top");
+    }
+    return;
+  }
+  var tgTop = 0;
+  try {
+    tgTop = parseInt(
+      root.style.getPropertyValue("--app-top-from-tg") ||
+      getComputedStyle(root).getPropertyValue("--app-top-from-tg") ||
+      "0",
+      10
+    ) || 0;
+  } catch (eTgTop) {}
+  var clearance = Math.max(76, tgTop + 28);
+  if (appEl) appEl.style.paddingTop = clearance + "px";
+  var viewName = body && body.getAttribute ? body.getAttribute("data-view") : "";
+  if (viewName === "home") {
+    if (homeCard) {
+      homeCard.style.marginTop = "10px";
+      homeCard.style.paddingTop = "30px";
+    }
+    if (homeHeader) homeHeader.style.paddingTop = "12px";
+    if (homeOutline) {
+      homeOutline.style.marginTop = "10px";
+      homeOutline.style.paddingTop = "20px";
+    }
+  }
+}
+
 /**
  * Запас под фиксированный .bottom-nav: реальная высота из layout (локальный Chrome, TG/WebView).
  * Чистый CSS (env safe-area) на десктопе даёт 0 снизу — панель перекрывала «Игры и приложения».
@@ -7566,6 +7616,7 @@ if (tg) {
       /* Пока isStateStable === false, inset часто «раздувается» — потом лишний отступ сверху */
       if (!(e && e.isStateStable === false) && typeof pokerApplyAppTopPadding === "function") {
         pokerApplyAppTopPadding();
+        if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
       }
       if (!(e && e.isStateStable === false) && typeof pokerSyncBottomNavTelegramInset === "function") {
         pokerSyncBottomNavTelegramInset();
@@ -7620,6 +7671,7 @@ if (tg) {
 }
 
 pokerApplyAppTopPadding();
+if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
 pokerSyncBottomNavTelegramInset();
 setTimeout(pokerSyncBottomNavTelegramInset, 0);
 setTimeout(pokerSyncBottomNavTelegramInset, 120);
@@ -7632,6 +7684,7 @@ setTimeout(pokerSyncBottomNavTelegramInset, 400);
   raf(function () {
     raf(function () {
       if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+      if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
     });
   });
 })();
@@ -10605,6 +10658,9 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
+  try {
+    if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
+  } catch (eTgClear) {}
   if (viewName === "hall-of-fame") {
     var rafHall = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
