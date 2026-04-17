@@ -6819,6 +6819,8 @@ function pokerApplyTelegramTopClearance() {
     root.classList.contains("app--telegram-miniapp")
   );
   var appEl = document.getElementById("app");
+  var mainHeaderBtn = document.getElementById("headerClubWelcomeBtn");
+  var mainHeader = mainHeaderBtn && mainHeaderBtn.closest ? mainHeaderBtn.closest(".card__header") : null;
   var viewName = body && body.getAttribute ? body.getAttribute("data-view") : "";
   var activeView = viewName ? document.querySelector('.view--active[data-view="' + viewName + '"]') : null;
   var activeCard = activeView && activeView.closest ? activeView.closest(".card") : null;
@@ -6828,6 +6830,9 @@ function pokerApplyTelegramTopClearance() {
   var homeHeader = homeCard ? homeCard.querySelector(".card__header") : null;
   var homeOutline = homeView ? homeView.querySelector(".home-welcome-outline") : null;
   var allHeaders = document.querySelectorAll(".card__header");
+  var instructionModal = document.getElementById("siteHomeInstructionModal");
+  var instructionSheet = instructionModal ? instructionModal.querySelector(".club-charter-modal__sheet") : null;
+  var instructionClose = instructionModal ? instructionModal.querySelector(".club-charter-modal__close") : null;
   if (!isTelegramMini) {
     if (appEl) appEl.style.removeProperty("padding-top");
     if (allHeaders && allHeaders.length) {
@@ -6840,6 +6845,11 @@ function pokerApplyTelegramTopClearance() {
     if (activeCard) {
       activeCard.style.removeProperty("margin-top");
       activeCard.style.removeProperty("padding-top");
+    }
+    if (mainHeader) {
+      mainHeader.style.removeProperty("margin-top");
+      mainHeader.style.removeProperty("margin-bottom");
+      mainHeader.style.removeProperty("padding-top");
     }
     if (homeCard) {
       homeCard.style.removeProperty("margin-top");
@@ -6854,6 +6864,14 @@ function pokerApplyTelegramTopClearance() {
     if (homeOutline) {
       homeOutline.style.removeProperty("margin-top");
       homeOutline.style.removeProperty("padding-top");
+    }
+    if (instructionSheet) {
+      instructionSheet.style.removeProperty("margin-top");
+      instructionSheet.style.removeProperty("max-height");
+    }
+    if (instructionClose) {
+      instructionClose.style.removeProperty("top");
+      instructionClose.style.removeProperty("right");
     }
     return;
   }
@@ -6873,6 +6891,11 @@ function pokerApplyTelegramTopClearance() {
     activeHeader.style.marginBottom = "12px";
     activeHeader.style.transform = "translateY(0)";
   }
+  if (mainHeader && viewName === "home") {
+    mainHeader.style.marginTop = "46px";
+    mainHeader.style.marginBottom = "14px";
+    mainHeader.style.paddingTop = "0";
+  }
   if (activeCard && viewName !== "chat") {
     activeCard.style.marginTop = "0";
     activeCard.style.paddingTop = "0";
@@ -6891,6 +6914,14 @@ function pokerApplyTelegramTopClearance() {
       homeOutline.style.marginTop = "0";
       homeOutline.style.paddingTop = "6px";
     }
+  }
+  if (instructionSheet) {
+    instructionSheet.style.marginTop = "56px";
+    instructionSheet.style.maxHeight = "calc(100dvh - 84px)";
+  }
+  if (instructionClose) {
+    instructionClose.style.top = "68px";
+    instructionClose.style.right = "12px";
   }
 }
 
@@ -8748,6 +8779,9 @@ function getPokerResolvedTelegramUser() {
       setTab("iphone");
       modal.setAttribute("aria-hidden", "false");
       document.documentElement.classList.add("club-charter-modal-open");
+      try {
+        if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
+      } catch (eTgInstructionOpen) {}
     }
 
     function closeModal() {
