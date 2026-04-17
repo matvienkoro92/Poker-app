@@ -30807,7 +30807,7 @@ function initChat() {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollVisibleChatMessagesToBottom();
-          }, isIosPwaChatKb ? 120 : 200);
+          }, isIosPwaChatKb ? 0 : 200);
         } else if (!isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
