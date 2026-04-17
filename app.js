@@ -30101,17 +30101,10 @@ function initChat() {
             /*
              * iOS PWA: WKWebView обычно уже поднимает layout viewport вместе с клавиатурой.
              * Если ещё и добавлять высоту клавиатуры в fixed bottom, композер «улетает» сильно вверх.
-             * Здесь докуем строку почти к текущему низу viewport, только с маленьким визуальным зазором.
+             * Здесь докуем строку почти к текущему низу viewport, с постоянным маленьким зазором.
+             * Так мы убираем дёргания от повторных пересчётов coverPx во время анимации клавиатуры.
              */
-            bottomPx = Math.min(bottomPx, Math.max(2, gap));
-          }
-          if (isPwaIosDockFinal && ihLim > 220) {
-            var baseDockPwa = Number(window.__pokerChatInnerHBaseline) || 0;
-            var winLossDockPwa = baseDockPwa > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDockPwa - ihLim)) : 0;
-            if (winLossDockPwa > 32) {
-              var pwaBottomCap = winLossDockPwa + (focusAgeDock > 0 && focusAgeDock < 420 ? 2 : 4);
-              if (bottomPx > pwaBottomCap) bottomPx = pwaBottomCap;
-            }
+            bottomPx = 2;
           }
         } catch (eBm) {}
         try {
