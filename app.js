@@ -29030,9 +29030,9 @@ function initChat() {
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport();
             if (isPwaIosPad) {
-              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 14));
+              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 28));
             } else {
-              pad = Math.max(pad, Math.round(bh + screenSafeBottomPad + 10));
+              pad = Math.max(pad, Math.round(bh + screenSafeBottomPad + 24));
             }
           } catch (ePwaPadCap) {}
         } else if (tmaFlowPad) {
