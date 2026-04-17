@@ -24001,6 +24001,9 @@ function initChat() {
   }
   var lastGeneralMessagesSig = null;
   var lastPersonalMessagesSig = null;
+  var chatRenderFrameGeneral = 0;
+  var chatRenderFramePersonal = 0;
+  var CHAT_RENDER_TAIL_SIG_LIMIT = 8;
   /** Порядок ключей объекта и элементов массивов реакций с бэкенда не гарантирован; JSON.stringify тогда «плавает» → сигнатура ленты меняется без реальных изменений и весь список перерисовывается (мерцание). */
   function stableReactionsSignaturePart(reactions) {
     if (!reactions || typeof reactions !== "object" || Array.isArray(reactions)) return "";
@@ -24036,6 +24039,68 @@ function initChat() {
       return (m.id || "") + ":" + stableReactionsSignaturePart(r);
     }).join(";");
     return messages.length + "-" + (last.id || "") + "-" + (last.time || "") + "-" + reactionsPart;
+  }
+  function chatMessagesTailSignature(messages, limit) {
+    var list = Array.isArray(messages) ? messages : [];
+    if (!list.length) return "";
+    var take = Math.max(1, parseInt(String(limit), 10) || CHAT_RENDER_TAIL_SIG_LIMIT);
+    var tail = list.slice(Math.max(0, list.length - take));
+    return tail.map(function (m) {
+      var r = m && m.reactions && typeof m.reactions === "object" && !Array.isArray(m.reactions) ? m.reactions : {};
+      return (m && m.id ? String(m.id) : "") + ":" + stableReactionsSignaturePart(r);
+    }).join(";");
+  }
+  function generalRenderSignature(messages, isPartial) {
+    if (!messages || !messages.length) return "";
+    if (!isPartial) return generalMessagesSignature(messages);
+    var last = messages[messages.length - 1];
+    return "tail:" + messages.length + "-" + (last.id || "") + "-" + (last.time || "") + "-" + chatMessagesTailSignature(messages, CHAT_RENDER_TAIL_SIG_LIMIT);
+  }
+  function personalRenderSignature(peerId, messages, isPartial) {
+    var peer = peerId != null ? String(peerId) : "";
+    if (!messages || !messages.length) return peer + "-0";
+    if (!isPartial) {
+      var reactionsPart = messages.map(function (m) {
+        var r = m && m.reactions && typeof m.reactions === "object" && !Array.isArray(m.reactions) ? m.reactions : {};
+        return (m && m.id ? String(m.id) : "") + ":" + stableReactionsSignaturePart(r);
+      }).join(";");
+      var last = messages[messages.length - 1];
+      return peer + "-" + messages.length + "-" + (last.id || "") + "-" + (last.time || "") + "-" + reactionsPart;
+    }
+    var lastP = messages[messages.length - 1];
+    return peer + "-tail-" + messages.length + "-" + (lastP.id || "") + "-" + (lastP.time || "") + "-" + chatMessagesTailSignature(messages, CHAT_RENDER_TAIL_SIG_LIMIT);
+  }
+  function scheduleGeneralRender(messages, sig) {
+    if (chatRenderFrameGeneral) {
+      try { cancelAnimationFrame(chatRenderFrameGeneral); } catch (eCancelG) {}
+      chatRenderFrameGeneral = 0;
+    }
+    var run = function () {
+      chatRenderFrameGeneral = 0;
+      lastGeneralMessagesSig = sig;
+      renderGeneralMessages(messages);
+    };
+    if (typeof requestAnimationFrame === "function") {
+      chatRenderFrameGeneral = requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 0);
+    }
+  }
+  function schedulePersonalRender(messages, sig) {
+    if (chatRenderFramePersonal) {
+      try { cancelAnimationFrame(chatRenderFramePersonal); } catch (eCancelP) {}
+      chatRenderFramePersonal = 0;
+    }
+    var run = function () {
+      chatRenderFramePersonal = 0;
+      lastPersonalMessagesSig = sig;
+      renderMessages(messages);
+    };
+    if (typeof requestAnimationFrame === "function") {
+      chatRenderFramePersonal = requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 0);
+    }
   }
   function renderLoadOlderButtonHtml(source) {
     var label = "Загрузить ещё";
@@ -24730,10 +24795,9 @@ function initChat() {
             updateGeneralInputLocked(true);
           } else {
             updateGeneralInputLocked(false);
-            var sig = generalMessagesSignature(messages);
+            var sig = generalRenderSignature(messages, data.partial === true);
             if (scrollGeneralToBottomOnNextRender || sig !== lastGeneralMessagesSig) {
-              if (sig !== lastGeneralMessagesSig) lastGeneralMessagesSig = sig;
-              renderGeneralMessages(messages);
+              scheduleGeneralRender(messages, sig);
             }
           }
         } else if (!noGeneralAccess) {
@@ -28601,19 +28665,14 @@ function initChat() {
           window.chatPersonalUnreadCount = 0;
         }
         if (Array.isArray(messages) && !chatIsEditingMessage) {
-          var reactionsPartP = messages.map(function (m) {
-            var r = m.reactions && typeof m.reactions === "object" && !Array.isArray(m.reactions) ? m.reactions : {};
-            return (m.id || "") + ":" + stableReactionsSignaturePart(r);
-          }).join(";");
-          var sig = (chatWithUserId || "") + "-" + (messages.length) + "-" + (messages.length ? (messages[messages.length - 1].id || "") + "-" + (messages[messages.length - 1].time || "") : "") + "-" + reactionsPartP;
+          var sig = personalRenderSignature(chatWithUserId || "", messages, data.partial === true);
           if (sig !== lastPersonalMessagesSig) {
-            lastPersonalMessagesSig = sig;
             personalMessagesCache[chatWithUserId] = messages.slice();
             personalMessagesCacheMeta[chatWithUserId] = { ts: Date.now() };
             try {
               pokerWritePersonalPeerSnapshotToDisk(chatWithUserId, personalMessagesCache[chatWithUserId]);
             } catch (eSnapP) {}
-            renderMessages(messages);
+            schedulePersonalRender(messages, sig);
           }
         }
         scheduleChatPostRenderSync(function () {
