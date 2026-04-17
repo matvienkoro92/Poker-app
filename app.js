@@ -6819,16 +6819,38 @@ function pokerApplyTelegramTopClearance() {
     root.classList.contains("app--telegram-miniapp")
   );
   var appEl = document.getElementById("app");
-  var homeCard = document.querySelector('.card:has(.view--active[data-view="home"])');
+  var viewName = body && body.getAttribute ? body.getAttribute("data-view") : "";
+  var activeView = viewName ? document.querySelector('.view--active[data-view="' + viewName + '"]') : null;
+  var activeCard = activeView && activeView.closest ? activeView.closest(".card") : null;
+  var activeHeader = activeCard ? activeCard.querySelector(".card__header") : document.querySelector(".card__header");
+  var homeView = document.querySelector('.view--active[data-view="home"]');
+  var homeCard = homeView && homeView.closest ? homeView.closest(".card") : null;
   var homeHeader = homeCard ? homeCard.querySelector(".card__header") : null;
-  var homeOutline = document.querySelector('.view--active[data-view="home"] .home-welcome-outline');
+  var homeOutline = homeView ? homeView.querySelector(".home-welcome-outline") : null;
+  var allHeaders = document.querySelectorAll(".card__header");
   if (!isTelegramMini) {
     if (appEl) appEl.style.removeProperty("padding-top");
+    if (allHeaders && allHeaders.length) {
+      allHeaders.forEach(function (header) {
+        header.style.removeProperty("margin-top");
+        header.style.removeProperty("margin-bottom");
+        header.style.removeProperty("transform");
+      });
+    }
+    if (activeCard) {
+      activeCard.style.removeProperty("margin-top");
+      activeCard.style.removeProperty("padding-top");
+    }
     if (homeCard) {
       homeCard.style.removeProperty("margin-top");
       homeCard.style.removeProperty("padding-top");
     }
-    if (homeHeader) homeHeader.style.removeProperty("padding-top");
+    if (homeHeader) {
+      homeHeader.style.removeProperty("padding-top");
+      homeHeader.style.removeProperty("margin-top");
+      homeHeader.style.removeProperty("margin-bottom");
+      homeHeader.style.removeProperty("transform");
+    }
     if (homeOutline) {
       homeOutline.style.removeProperty("margin-top");
       homeOutline.style.removeProperty("padding-top");
@@ -6846,16 +6868,28 @@ function pokerApplyTelegramTopClearance() {
   } catch (eTgTop) {}
   var clearance = Math.max(76, tgTop + 28);
   if (appEl) appEl.style.paddingTop = clearance + "px";
-  var viewName = body && body.getAttribute ? body.getAttribute("data-view") : "";
+  if (activeHeader && viewName !== "chat") {
+    activeHeader.style.marginTop = "38px";
+    activeHeader.style.marginBottom = "12px";
+    activeHeader.style.transform = "translateY(0)";
+  }
+  if (activeCard && viewName !== "chat") {
+    activeCard.style.marginTop = "0";
+    activeCard.style.paddingTop = "0";
+  }
   if (viewName === "home") {
     if (homeCard) {
-      homeCard.style.marginTop = "10px";
-      homeCard.style.paddingTop = "30px";
+      homeCard.style.marginTop = "0";
+      homeCard.style.paddingTop = "0";
     }
-    if (homeHeader) homeHeader.style.paddingTop = "12px";
+    if (homeHeader) {
+      homeHeader.style.paddingTop = "0";
+      homeHeader.style.marginTop = "42px";
+      homeHeader.style.marginBottom = "14px";
+    }
     if (homeOutline) {
-      homeOutline.style.marginTop = "10px";
-      homeOutline.style.paddingTop = "20px";
+      homeOutline.style.marginTop = "0";
+      homeOutline.style.paddingTop = "6px";
     }
   }
 }
