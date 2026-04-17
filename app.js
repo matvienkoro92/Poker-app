@@ -20615,10 +20615,17 @@ function initChat() {
   function forceHideChatGuestGateForTelegram() {
     var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
     if (!isTelegramMini) return false;
+    var isGuestTelegram = false;
+    try {
+      isGuestTelegram = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    } catch (eGuestTelegram) {}
+    if (isGuestTelegram) return false;
     try {
       if (dialogsGuestGate) {
         dialogsGuestGate.hidden = true;
         dialogsGuestGate.style.display = "none";
+        if (dialogsGuestGate.parentNode) dialogsGuestGate.parentNode.removeChild(dialogsGuestGate);
+        dialogsGuestGate = null;
       }
     } catch (eDlgGateHide) {}
     try {
@@ -20628,6 +20635,7 @@ function initChat() {
         for (i = 0; i < guestBlocks.length; i++) {
           guestBlocks[i].hidden = true;
           guestBlocks[i].style.display = "none";
+          if (guestBlocks[i].parentNode) guestBlocks[i].parentNode.removeChild(guestBlocks[i]);
         }
       }
     } catch (eContactsGateHide) {}
