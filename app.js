@@ -29795,7 +29795,7 @@ function initChat() {
       /** Зазор между низом полосы ввода и верхом клавиатуры (TMA — ровно 5px по UX). */
       function getChatComposerKeyboardGapPx() {
         if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return 5;
-        return isIosLikeForChatViewport() ? 12 : 4;
+        return isIosLikeForChatViewport() ? 6 : 4;
       }
       function isTelegramMiniAppChatThreadIos() {
         return (
@@ -30084,7 +30084,7 @@ function initChat() {
           }
         } catch (eStabB) {}
         if (pwaAccessoryInset > 0) {
-          bottomPx += pwaAccessoryInset;
+          bottomPx += Math.min(18, pwaAccessoryInset);
         }
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
@@ -30103,22 +30103,33 @@ function initChat() {
           tabKey = "p";
         }
         var target0 = tabKey === "g" ? g : tabKey === "p" ? p : null;
-        var lightTma =
+        var reuseFixedDock =
           !!tabKey &&
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
-          typeof isIosLikeForChatViewport === "function" &&
-          isIosLikeForChatViewport() &&
           target0 &&
           target0.classList.contains("chat-input-area--vv-dock") &&
-          window.__pokerChatTmaDockTabKey === tabKey;
+          window.getComputedStyle(target0).position === "fixed" &&
+          (
+            (
+              typeof isTelegramWebApp === "function" &&
+              isTelegramWebApp() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport() &&
+              window.__pokerChatTmaDockTabKey === tabKey
+            ) ||
+            (
+              typeof isTelegramWebApp === "function" &&
+              !isTelegramWebApp() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset()
+            )
+          );
         try {
-          if (lightTma && window.getComputedStyle(target0).position === "fixed") {
+          if (reuseFixedDock) {
             target0.style.setProperty("bottom", bottomPx + "px", "important");
             window.__pokerChatThreadDockBottomCssPx = bottomPx;
             return;
           }
-        } catch (eLightTma) {}
+        } catch (eLightDock) {}
         stripChatInputAreaTransforms();
         var target = target0;
         if (!target) return;
