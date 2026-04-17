@@ -7430,10 +7430,7 @@ function pokerPulseShellHeightToInnerHeightForProfile() {
 function pokerFlushViewportAfterProfileFieldBlur() {
   if (!document.body || document.body.getAttribute("data-view") !== "profile") return;
   try {
-    document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-    document.body.classList.remove("chat-keyboard-open");
-    document.documentElement.style.removeProperty("--chat-vv-inset");
-    document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+    if (typeof window.__pokerClearChatKeyboardViewportState === "function") window.__pokerClearChatKeyboardViewportState();
   } catch (eKbProf) {}
   try {
     if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
@@ -9831,14 +9828,7 @@ function pokerEnsureUnlockedDocumentScrollForNonChat() {
   try {
     var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
     if (view === "chat") return;
-    if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
-      window.__pokerClearChatKeyboardViewportState();
-    } else {
-      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-      document.documentElement.style.removeProperty("--chat-vv-inset");
-      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
-      if (document.body) document.body.classList.remove("chat-keyboard-open");
-    }
+    if (typeof window.__pokerClearChatKeyboardViewportState === "function") window.__pokerClearChatKeyboardViewportState();
     if (document.body) {
       pokerClearBodyDocumentScrollLockInline();
     }
@@ -10495,10 +10485,7 @@ function setView(viewName, navOpts) {
   }
   if (viewName === "chat") {
     try {
-      document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-      document.body.classList.remove("chat-keyboard-open");
-      document.documentElement.style.removeProperty("--chat-vv-inset");
-      document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+      if (typeof window.__pokerClearChatKeyboardViewportState === "function") window.__pokerClearChatKeyboardViewportState();
     } catch (eChatKbCls) {}
     /* Один expand вместо burst: повторы дергали viewportChanged/padding и таббар подпрыгивал */
     if (prevView !== "chat" && typeof window.tryTelegramWebAppExpand === "function") {
@@ -29350,6 +29337,12 @@ function initChat() {
         } catch (eBase) {}
       }
       function setTelegramIosShellFocusOverrides(active) {
+        var shouldTouchTelegramShell =
+          active ||
+          !!window.__pokerTelegramIosShellFocusOverridesActive ||
+          isTelegramMiniAppChatThreadIos() ||
+          shouldUseNativeTelegramIosChatComposerFlow();
+        if (!shouldTouchTelegramShell) return;
         try {
           var nodes = [];
           if (document.documentElement) nodes.push(document.documentElement);
@@ -29398,6 +29391,7 @@ function initChat() {
               node.style.removeProperty("flex-basis");
             }
           });
+          window.__pokerTelegramIosShellFocusOverridesActive = !!active;
         } catch (eTmaShellInline) {}
       }
       function setNativeTelegramIosComposerFocusClasses(active) {
@@ -30226,35 +30220,82 @@ function initChat() {
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
         return true;
       }
-      function syncPwaChatVisualViewportInset() {
-        logChatKeyboardDebug("vv-sync-enter");
+      function resetChatVisualViewportState(options) {
+        var opts = options || {};
         var doc = document.documentElement;
-        if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
-          hideTelegramMiniAppChatThreadDebugOverlay();
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          clearChatMessagesKeyboardPad();
-          stripChatInputAreaTransforms();
-          setChatKeyboardOpenClasses(false);
-          return;
-        }
-        if (shouldUseNativeTelegramIosChatComposerFlow()) {
-          hideTelegramMiniAppChatThreadDebugOverlay();
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          clearChatMessagesKeyboardPad();
-          stripChatInputAreaTransforms();
-          return;
-        }
-        if (!document.body.classList.contains("chat-keyboard-open")) {
-          hideTelegramMiniAppChatThreadDebugOverlay();
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
+        hideTelegramMiniAppChatThreadDebugOverlay();
+        doc.style.removeProperty("--chat-vv-inset");
+        doc.style.removeProperty("--chat-ios-accessory-inset");
+        if (opts.clearPad) clearChatMessagesKeyboardPad();
+        if (opts.stripComposer) stripChatInputAreaTransforms();
+        if (opts.closeKeyboardState) setChatKeyboardOpenClasses(false);
+        if (opts.updateBaseline) {
           try {
             var hIdle = window.innerHeight || 0;
             if (hIdle > 200) window.__pokerChatInnerHBaseline = hIdle;
           } catch (eIdleH) {}
-          stripChatInputAreaTransforms();
+        }
+      }
+      function applyChatVisualViewportFallbackWithoutVv(doc) {
+        var dvNoVv = String(document.body.getAttribute("data-view") || "");
+        var ihFb = window.innerHeight || 0;
+        var capFb = Math.min(520, Math.round(ihFb * 0.55));
+        var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
+        var lossFb = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
+        var insetFb = Math.min(capFb, Math.max(140, Math.round(lossFb * 0.92)));
+        if (insetFb < 170) insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.36)));
+        if (chatComposerEl && document.activeElement === chatComposerEl) {
+          insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.38)));
+        }
+        if (dvNoVv === "profile") {
+          doc.style.setProperty("--chat-vv-inset", insetFb + "px");
+          if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
+          else doc.style.removeProperty("--chat-ios-accessory-inset");
+          updateChatMessagesKeyboardPad();
+          return;
+        }
+        if (dvNoVv === "chat") {
+          if (isChatThreadComposerKeyboardDom()) {
+            doc.style.setProperty("--chat-vv-inset", "0px");
+            doc.style.removeProperty("--chat-ios-accessory-inset");
+            var coverNv = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
+            applyChatThreadComposerKeyboardDockFromCover(coverNv);
+          } else {
+            doc.style.setProperty("--chat-vv-inset", insetFb + "px");
+            if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
+            else doc.style.removeProperty("--chat-ios-accessory-inset");
+          }
+          updateChatMessagesKeyboardPad();
+        }
+      }
+      function computeChatVisualViewportMetrics() {
+        var vv = window.visualViewport;
+        var vvh = Number(vv.height) || 0;
+        var ih = window.innerHeight || 0;
+        var offsetTop = Number(vv.offsetTop) || 0;
+        var heightLoss = Math.max(0, Math.round(ih - vvh));
+        var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
+        if (overlap < 20 && heightLoss > overlap + 6) {
+          overlap = Math.max(overlap, Math.round(heightLoss - Math.max(0, offsetTop)));
+        }
+        if (overlap < 8 && vvh + 24 < ih) {
+          overlap = Math.max(overlap, heightLoss);
+        }
+        return { vv: vv, vvh: vvh, ih: ih, offsetTop: offsetTop, heightLoss: heightLoss, overlap: overlap };
+      }
+      function syncPwaChatVisualViewportInset() {
+        logChatKeyboardDebug("vv-sync-enter");
+        var doc = document.documentElement;
+        if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
+          resetChatVisualViewportState({ clearPad: true, stripComposer: true, closeKeyboardState: true });
+          return;
+        }
+        if (shouldUseNativeTelegramIosChatComposerFlow()) {
+          resetChatVisualViewportState({ clearPad: true, stripComposer: true });
+          return;
+        }
+        if (!document.body.classList.contains("chat-keyboard-open")) {
+          resetChatVisualViewportState({ stripComposer: true, updateBaseline: true });
           return;
         }
         try {
@@ -30262,67 +30303,21 @@ function initChat() {
         } catch (eTmaSync) {}
         /* Раньше при !visualViewport сразу снимали переменные — при открытой клавиатуре поле оставалось под клавишами. */
         if (!window.visualViewport) {
-          var dvNoVv = String(document.body.getAttribute("data-view") || "");
-          if (dvNoVv === "profile") {
-            var ihFbP = window.innerHeight || 0;
-            var capFbP = Math.min(520, Math.round(ihFbP * 0.55));
-            var baseFbP = Number(window.__pokerChatInnerHBaseline) || 0;
-            var lossFbP = baseFbP > 260 && ihFbP > 0 ? Math.max(0, Math.round(baseFbP - ihFbP)) : 0;
-            var insetFbP = Math.min(capFbP, Math.max(140, Math.round(lossFbP * 0.92)));
-            if (insetFbP < 170) insetFbP = Math.min(capFbP, Math.max(insetFbP, Math.round(ihFbP * 0.36)));
-            if (chatComposerEl && document.activeElement === chatComposerEl) {
-              insetFbP = Math.min(capFbP, Math.max(insetFbP, Math.round(ihFbP * 0.38)));
-            }
-            doc.style.setProperty("--chat-vv-inset", insetFbP + "px");
-            if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
-            else doc.style.removeProperty("--chat-ios-accessory-inset");
-            updateChatMessagesKeyboardPad();
-          } else if (dvNoVv === "chat") {
-            var ihFb = window.innerHeight || 0;
-            var capFb = Math.min(520, Math.round(ihFb * 0.55));
-            var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
-            var lossFb = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
-            var insetFb = Math.min(capFb, Math.max(140, Math.round(lossFb * 0.92)));
-            if (insetFb < 170) insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.36)));
-            if (chatComposerEl && document.activeElement === chatComposerEl) {
-              insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.38)));
-            }
-            if (isChatThreadComposerKeyboardDom()) {
-              doc.style.setProperty("--chat-vv-inset", "0px");
-              doc.style.removeProperty("--chat-ios-accessory-inset");
-              var coverNv =
-                baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
-              applyChatThreadComposerKeyboardDockFromCover(coverNv);
-            } else {
-              doc.style.setProperty("--chat-vv-inset", insetFb + "px");
-              if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
-              else doc.style.removeProperty("--chat-ios-accessory-inset");
-            }
-            updateChatMessagesKeyboardPad();
-          }
+          applyChatVisualViewportFallbackWithoutVv(doc);
           return;
         }
         if (!shouldUseChatVisualViewportLift()) {
-          doc.style.removeProperty("--chat-vv-inset");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          stripChatInputAreaTransforms();
+          resetChatVisualViewportState({ stripComposer: true });
           return;
         }
-        var vv = window.visualViewport;
-        var vvh = Number(vv.height) || 0;
-        var ih = window.innerHeight || 0;
+        var metrics = computeChatVisualViewportMetrics();
+        var vv = metrics.vv;
+        var vvh = metrics.vvh;
+        var ih = metrics.ih;
         if (!ih) return;
-        var offsetTop = Number(vv.offsetTop) || 0;
-        /* Перекрытие снизу: расстояние от низа layout viewport до низа visualViewport (клавиши / панель) */
-        var heightLoss = Math.max(0, Math.round(ih - vvh));
-        var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
-        /* Первые кадры анимации клавиатуры offsetTop/height иногда не согласованы — не занижаем overlap */
-        if (overlap < 20 && heightLoss > overlap + 6) {
-          overlap = Math.max(overlap, Math.round(heightLoss - Math.max(0, offsetTop)));
-        }
-        if (overlap < 8 && vvh + 24 < ih) {
-          overlap = Math.max(overlap, heightLoss);
-        }
+        var offsetTop = metrics.offsetTop;
+        var heightLoss = metrics.heightLoss;
+        var overlap = metrics.overlap;
         var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
@@ -31193,10 +31188,9 @@ function initChat() {
           if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
             window.__pokerFinalizeChatKeyboardDismiss();
           } else {
-            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-            document.body.classList.remove("chat-keyboard-open");
-            document.documentElement.style.removeProperty("--chat-vv-inset");
-            document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+            if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+              window.__pokerClearChatKeyboardViewportState();
+            }
             if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
               pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
             }
@@ -32458,10 +32452,9 @@ function initChat() {
         if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
           window.__pokerFinalizeChatKeyboardDismiss();
         } else {
-          document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift");
-          document.body.classList.remove("chat-keyboard-open");
-          document.documentElement.style.removeProperty("--chat-vv-inset");
-          document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+          if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
+            window.__pokerClearChatKeyboardViewportState();
+          }
           if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
         }
       } catch (eDlgFin) {}
