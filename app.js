@@ -8670,10 +8670,12 @@ function getPokerResolvedTelegramUser() {
       }
     }
 
-    openBtn.addEventListener("click", function () {
-      if (openBtn.hidden) return;
+    function handleOpenInstructionModal(e) {
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
       openModal();
-    });
+    }
+    openBtn.onclick = handleOpenInstructionModal;
+    openBtn.addEventListener("click", handleOpenInstructionModal);
     if (tabIphone) tabIphone.addEventListener("click", function () { setTab("iphone"); });
     if (tabAndroid) tabAndroid.addEventListener("click", function () { setTab("android"); });
     closeBtn.addEventListener("click", closeModal);
