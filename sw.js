@@ -163,8 +163,14 @@ self.addEventListener("notificationclick", function (event) {
       for (i = 0; i < windowClients.length; i++) {
         var c = windowClients[i];
         if (c.url.indexOf(self.location.origin) === 0) {
+          try {
+            c.postMessage({ pokerChatOpenUrl: raw });
+          } catch (ePostOpen) {}
           if (typeof c.navigate === "function") {
             return c.navigate(targetUrl).then(function () {
+              try {
+                c.postMessage({ pokerChatOpenUrl: raw });
+              } catch (ePostNav) {}
               return c.focus();
             }).catch(function () {
               return clients.openWindow(targetUrl);

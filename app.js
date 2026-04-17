@@ -1487,6 +1487,11 @@ function initProfileChatPush() {
           window.__pokerHandleIncomingChatPush(d);
         } catch (ePushUi) {}
       }
+      if (d.pokerChatOpenUrl && typeof window.__pokerOpenChatFromPushUrl === "function") {
+        try {
+          window.__pokerOpenChatFromPushUrl(d.pokerChatOpenUrl);
+        } catch (ePushOpen) {}
+      }
     });
   } catch (eMsg) {}
   /** Разблокировка звука после первого жеста (iOS PWA / Safari) — иначе play() из push может быть тихим. */
@@ -5384,6 +5389,17 @@ function runGazetteAndTasksInit() {
       }, 0);
     }
   }
+  window.__pokerApplyStartAppDeepLink = pokerApplyStartAppDeepLink;
+  window.__pokerOpenChatFromPushUrl = function (rawUrl) {
+    try {
+      var urlObj = new URL(String(rawUrl || "").trim() || "./?startapp=club_chat", window.location.href);
+      var sp = new URLSearchParams(urlObj.search || "");
+      var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
+      var withPeer = (sp.get("with") || "").trim();
+      if (!startApp) return;
+      pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
+    } catch (ePushDeep) {}
+  };
   var qStartApp = "";
   var qWithParam = "";
   try {
