@@ -584,11 +584,17 @@ html.app--tg-content-inset .app {
 html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) {
   margin-top: 8px;
 }
+html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) .card__header {
+  margin-top: 32px !important;
+  margin-bottom: 8px !important;
+}
 html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) {
   padding-top: 28px;
 }
 html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) .card__header {
   padding-top: 10px;
+  margin-top: 36px !important;
+  margin-bottom: 12px !important;
 }
 /* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
 html.app-view-chat,
