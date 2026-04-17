@@ -29874,7 +29874,17 @@ function initChat() {
         ) return 2;
         return isIosLikeForChatViewport() ? 6 : 4;
       }
+      function getChatScreenSafeAreaBottomPx() {
+        var rootStyle = null;
+        var safeBottom = 0;
+        try {
+          rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+          safeBottom = Math.max(0, Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0));
+        } catch (eSafeBottomRead) {}
+        return safeBottom;
+      }
       function getChatComposerMandatoryBottomOffsetPx() {
+        var safeBottom = getChatScreenSafeAreaBottomPx();
         if (
           typeof isTelegramWebApp === "function" &&
           !isTelegramWebApp() &&
@@ -29882,16 +29892,8 @@ function initChat() {
           isIosLikeForChatViewport() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
           pokerPwaStandaloneForKeyboardInset()
-        ) {
-          var rootStyle = null;
-          var safeBottom = 0;
-          try {
-            rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
-            safeBottom = Math.max(0, Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0));
-          } catch (eSafeBottom) {}
-          return -safeBottom;
-        }
-        return 0;
+        ) return -safeBottom;
+        return safeBottom;
       }
       function isTelegramMiniAppChatThreadIos() {
         return (
@@ -30225,6 +30227,10 @@ function initChat() {
           } catch (ePwaAccCap) {}
           bottomPx += Math.min(4, pwaAccessoryInset);
         }
+        try {
+          var mandatoryBottomOffset = getChatComposerMandatoryBottomOffsetPx();
+          if (mandatoryBottomOffset >= 0 && bottomPx < mandatoryBottomOffset) bottomPx = mandatoryBottomOffset;
+        } catch (eMandatoryBottom) {}
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
         } catch (eDockPx) {}
