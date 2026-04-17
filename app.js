@@ -29874,6 +29874,17 @@ function initChat() {
         ) return 2;
         return isIosLikeForChatViewport() ? 6 : 4;
       }
+      function getChatComposerMandatoryBottomOffsetPx() {
+        if (
+          typeof isTelegramWebApp === "function" &&
+          !isTelegramWebApp() &&
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset()
+        ) return -30;
+        return 0;
+      }
       function isTelegramMiniAppChatThreadIos() {
         return (
           typeof isTelegramWebApp === "function" &&
@@ -30127,7 +30138,7 @@ function initChat() {
              * Здесь докуем строку почти к текущему низу viewport, с постоянным маленьким зазором.
              * Так мы убираем дёргания от повторных пересчётов coverPx во время анимации клавиатуры.
              */
-            bottomPx = -30;
+            bottomPx = getChatComposerMandatoryBottomOffsetPx();
           }
         } catch (eBm) {}
         try {
