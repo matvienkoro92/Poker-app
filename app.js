@@ -10669,6 +10669,8 @@ function setView(viewName, navOpts) {
         var pdlNav = window.__pendingOpenChatPersonalFromDeepLink;
         window.__pendingOpenChatPersonalFromDeepLink = null;
         window.chatOpenConvFromDialogs(pdlNav.userId, pdlNav.userName || pdlNav.userId, pdlNav.peerP21Id || undefined);
+      } else if (typeof window.__pokerReplayStoredPushChatTarget === "function" && window.__pokerReplayStoredPushChatTarget()) {
+        /* target из push восстановлен после cold start / гонки setView */
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
