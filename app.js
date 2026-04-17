@@ -8618,9 +8618,16 @@ function getPokerResolvedTelegramUser() {
     var isTelegramMode = isTelegramHomeInstructionMode();
     var showInstructionBtn = isSiteMode || isTelegramMode;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
+    var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
     if (instructionBtn) instructionBtn.hidden = !showInstructionBtn;
+    if (pwaInstallBtn && isTelegramMode) {
+      pwaInstallBtn.hidden = true;
+      pwaInstallBtn.style.display = "none";
+    } else if (pwaInstallBtn) {
+      pwaInstallBtn.style.removeProperty("display");
+    }
     if (greetingArrow) greetingArrow.hidden = !isSiteMode;
   }
   window.__pokerSyncSiteHomeInstructionMode = syncSiteHomeInstructionMode;
