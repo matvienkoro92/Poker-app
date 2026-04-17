@@ -3050,6 +3050,18 @@ body.pwa-auth-gated #app {
 .site-home-instruction-modal .club-charter-modal__title {
   color: #2a2118;
 }
+html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet,
+html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet {
+  width: min(920px, calc(100vw - 16px));
+  max-height: calc(100vh - 108px);
+  margin-top: 76px;
+}
+html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__close,
+html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__close {
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+}
 html.site-home-header-mode #vpnProxyOpenBtn,
 html.site-home-header-mode #radioToggle,
 html.site-home-header-mode #themeToggle,
