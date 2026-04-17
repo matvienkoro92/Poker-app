@@ -30035,6 +30035,11 @@ function initChat() {
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           var focusAgeDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+          var isPwaIosEarlyDock =
+            !isTgDock &&
+            iosDock &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset();
           /*
            * Telegram iOS: не пересчитывать bottom из живого vv/tg здесь — syncPwaChatVisualViewportInset уже выбрал cover.
            * Второй пересчёт + сглаживание давали заметный «второй рывок» строки вверх.
@@ -30055,6 +30060,14 @@ function initChat() {
           } else if (ihLim > 200 && isTgDock && !iosDock) {
             var bottomMaxAnd = Math.min(380, Math.max(160, Math.round(ihLim * 0.44)));
             if (bottomPx > bottomMaxAnd) bottomPx = bottomMaxAnd;
+          }
+          if (isPwaIosEarlyDock && ihLim > 220 && focusAgeDock > 0 && focusAgeDock < 320) {
+            var baseDockPwa = Number(window.__pokerChatInnerHBaseline) || 0;
+            var winLossDockPwa = baseDockPwa > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDockPwa - ihLim)) : 0;
+            var earlyCapPwa = winLossDockPwa > 32
+              ? Math.max(76, winLossDockPwa + Math.max(8, gap + 4))
+              : Math.max(84, Math.round(ihLim * 0.18));
+            if (bottomPx > earlyCapPwa) bottomPx = earlyCapPwa;
           }
         } catch (eBm) {}
         try {
@@ -30116,6 +30129,19 @@ function initChat() {
           }
         } catch (eStabB) {}
         if (pwaAccessoryInset > 0) {
+          try {
+            var focusAgeAcc = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            var isPwaIosAcc =
+              typeof isTelegramWebApp === "function" &&
+              !isTelegramWebApp() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport();
+            if (isPwaIosAcc && focusAgeAcc > 0 && focusAgeAcc < 320) {
+              pwaAccessoryInset = Math.min(8, pwaAccessoryInset);
+            }
+          } catch (ePwaAccClamp) {}
           bottomPx += Math.min(18, pwaAccessoryInset);
         }
         try {
