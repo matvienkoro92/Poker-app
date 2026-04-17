@@ -30785,17 +30785,29 @@ function initChat() {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
         var isIosChatKb = isIosLikeForChatViewport();
-        syncPwaChatVisualViewportInset();
-        scrollVisibleChatMessagesToBottom();
-        requestAnimationFrame(function () {
+        var isIosPwaChatKb =
+          isIosChatKb &&
+          typeof isTelegramWebApp === "function" &&
+          !isTelegramWebApp() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset();
+        if (!isIosPwaChatKb) {
           syncPwaChatVisualViewportInset();
           scrollVisibleChatMessagesToBottom();
-        });
+          requestAnimationFrame(function () {
+            syncPwaChatVisualViewportInset();
+            scrollVisibleChatMessagesToBottom();
+          });
+        } else {
+          requestAnimationFrame(function () {
+            scrollVisibleChatMessagesToBottom();
+          });
+        }
         if (isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollVisibleChatMessagesToBottom();
-          }, 200);
+          }, isIosPwaChatKb ? 120 : 200);
         } else if (!isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
