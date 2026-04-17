@@ -30066,6 +30066,11 @@ function initChat() {
           var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           var focusAgeDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+          var isPwaIosDockFinal =
+            !isTgDock &&
+            iosDock &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset();
           /*
            * Telegram iOS: не пересчитывать bottom из живого vv/tg здесь — syncPwaChatVisualViewportInset уже выбрал cover.
            * Второй пересчёт + сглаживание давали заметный «второй рывок» строки вверх.
@@ -30086,6 +30091,14 @@ function initChat() {
           } else if (ihLim > 200 && isTgDock && !iosDock) {
             var bottomMaxAnd = Math.min(380, Math.max(160, Math.round(ihLim * 0.44)));
             if (bottomPx > bottomMaxAnd) bottomPx = bottomMaxAnd;
+          }
+          if (isPwaIosDockFinal && ihLim > 220) {
+            var baseDockPwa = Number(window.__pokerChatInnerHBaseline) || 0;
+            var winLossDockPwa = baseDockPwa > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDockPwa - ihLim)) : 0;
+            if (winLossDockPwa > 32) {
+              var pwaBottomCap = winLossDockPwa + (focusAgeDock > 0 && focusAgeDock < 420 ? 8 : 10);
+              if (bottomPx > pwaBottomCap) bottomPx = pwaBottomCap;
+            }
           }
         } catch (eBm) {}
         try {
@@ -30147,7 +30160,17 @@ function initChat() {
           }
         } catch (eStabB) {}
         if (pwaAccessoryInset > 0) {
-          bottomPx += Math.min(18, pwaAccessoryInset);
+          try {
+            var isPwaIosAcc =
+              typeof isTelegramWebApp === "function" &&
+              !isTelegramWebApp() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport();
+            if (isPwaIosAcc) pwaAccessoryInset = Math.min(6, pwaAccessoryInset);
+          } catch (ePwaAccCap) {}
+          bottomPx += Math.min(12, pwaAccessoryInset);
         }
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
