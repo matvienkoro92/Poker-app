@@ -617,6 +617,28 @@ function pwaSessionPersistenceWarning() {
 /** Режим гостя только на время сессии вкладки (без записи в storage). */
 function pokerReadPwaGuestMode() {
   try {
+    var resolvedUser =
+      typeof getPokerResolvedTelegramUser === "function"
+        ? getPokerResolvedTelegramUser()
+        : null;
+    if (
+      resolvedUser &&
+      ((resolvedUser.username && String(resolvedUser.username).trim()) ||
+        (resolvedUser.first_name && String(resolvedUser.first_name).trim()) ||
+        (resolvedUser.last_name && String(resolvedUser.last_name).trim()))
+    ) {
+      try {
+        var authResolved = window.__pokerTelegramAuth;
+        if (authResolved && authResolved.status === "guest") {
+          window.__pokerTelegramAuth = {
+            status: "verified",
+            user: resolvedUser,
+            error: null
+          };
+        }
+      } catch (eUpgradeGuest) {}
+      return false;
+    }
     var auth = window.__pokerTelegramAuth;
     return !!(auth && auth.status === "guest");
   } catch (e) {
