@@ -3785,7 +3785,8 @@ html.poker-ios-pwa body[data-view="chat"] .chat-general-view .chat-input-area.ch
 html.poker-ios-pwa body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock {
   transform: none !important;
   margin-bottom: 0 !important;
-  will-change: auto;
+  will-change: bottom;
+  transition: bottom 0.18s cubic-bezier(0.22, 0.8, 0.24, 1);
 }
 html.app--telegram-miniapp.chat-tma-ios-shell-native .view--active[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
 html.app--telegram-miniapp.chat-tma-ios-shell-native .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock,
