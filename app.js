@@ -5390,6 +5390,24 @@ function runGazetteAndTasksInit() {
     }
   }
   window.__pokerApplyStartAppDeepLink = pokerApplyStartAppDeepLink;
+  window.__pokerFlushPendingChatDeepLink = function () {
+    try {
+      if (window.__pendingOpenClubChatGeneral) {
+        window.__pendingOpenClubChatGeneral = false;
+        if (typeof window.openClubChat === "function") {
+          window.openClubChat();
+          return true;
+        }
+      }
+      if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
+        var pdlNow = window.__pendingOpenChatPersonalFromDeepLink;
+        window.__pendingOpenChatPersonalFromDeepLink = null;
+        window.chatOpenConvFromDialogs(pdlNow.userId, pdlNow.userName || pdlNow.userId, pdlNow.peerP21Id || undefined);
+        return true;
+      }
+    } catch (eFlushDeep) {}
+    return false;
+  };
   window.__pokerOpenChatFromPushUrl = function (rawUrl) {
     try {
       var urlObj = new URL(String(rawUrl || "").trim() || "./?startapp=club_chat", window.location.href);
@@ -5398,6 +5416,19 @@ function runGazetteAndTasksInit() {
       var withPeer = (sp.get("with") || "").trim();
       if (!startApp) return;
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
+      setTimeout(function () {
+        try {
+          if (typeof setView === "function") setView("chat");
+        } catch (ePushView) {}
+        try {
+          if (typeof window.__pokerFlushPendingChatDeepLink === "function") window.__pokerFlushPendingChatDeepLink();
+        } catch (ePushFlush1) {}
+        setTimeout(function () {
+          try {
+            if (typeof window.__pokerFlushPendingChatDeepLink === "function") window.__pokerFlushPendingChatDeepLink();
+          } catch (ePushFlush2) {}
+        }, 180);
+      }, 0);
     } catch (ePushDeep) {}
   };
   var qStartApp = "";
@@ -23218,6 +23249,11 @@ function initChat() {
     } catch (eDmTab) {}
   }
   function showDialogs() {
+    try {
+      if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
+        return;
+      }
+    } catch (eDlgPending) {}
     /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
        таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
     try {
