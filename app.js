@@ -7490,6 +7490,29 @@ function initProfileKeyboardViewportCleanup() {
   if (!profileRoot || profileRoot.getAttribute("data-kb-vv-bound") === "1") return;
   profileRoot.setAttribute("data-kb-vv-bound", "1");
   var flushTimer = null;
+  function ensureProfileFieldVisible(target, behavior) {
+    if (!target) return;
+    try {
+      if (document.activeElement !== target) return;
+      target.scrollIntoView({ block: "center", inline: "nearest", behavior: behavior || "auto" });
+    } catch (eScrollMid) {}
+    try {
+      var rect = target.getBoundingClientRect();
+      var vv = window.visualViewport || null;
+      var viewportH = vv ? Number(vv.height) || 0 : window.innerHeight || 0;
+      var safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--chat-ios-accessory-inset")) || 0;
+      var desiredBottom = viewportH - safeBottom - 28;
+      if (viewportH > 120 && rect.bottom > desiredBottom) {
+        var delta = rect.bottom - desiredBottom;
+        var scroller =
+          document.querySelector('body[data-view="profile"] #app.app .card .card__content') ||
+          document.scrollingElement ||
+          document.documentElement;
+        if (scroller && typeof scroller.scrollBy === "function") scroller.scrollBy({ top: delta, behavior: "auto" });
+        else if (scroller) scroller.scrollTop += delta;
+      }
+    } catch (eScrollAdj) {}
+  }
   function scheduleFlush() {
     if (flushTimer) clearTimeout(flushTimer);
     flushTimer = setTimeout(function () {
@@ -7528,15 +7551,23 @@ function initProfileKeyboardViewportCleanup() {
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           try {
-            if (document.activeElement === t) {
-              t.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
-            }
+            ensureProfileFieldVisible(t, "smooth");
           } catch (eSi) {}
           try {
             if (typeof window.__pokerSyncPwaChatVisualViewportInset === "function") {
               window.__pokerSyncPwaChatVisualViewportInset();
             }
           } catch (eSyncP) {}
+          [120, 260].forEach(function (ms) {
+            setTimeout(function () {
+              try {
+                if (typeof window.__pokerSyncPwaChatVisualViewportInset === "function") {
+                  window.__pokerSyncPwaChatVisualViewportInset();
+                }
+              } catch (eSyncP2) {}
+              ensureProfileFieldVisible(t, "auto");
+            }, ms);
+          });
         });
       });
     },

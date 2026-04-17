@@ -28013,6 +28013,8 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   border-radius: 8px;
   box-sizing: border-box;
   resize: vertical;
+  scroll-margin-top: 20px;
+  scroll-margin-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + env(safe-area-inset-bottom, 0px) + 32px);
 }
 .profile-personal__textarea::placeholder {
   color: var(--text-muted);
