@@ -24074,6 +24074,65 @@ function initChat() {
   /** Пока POST в полёте, любая перезагрузка ленты с сервера снова рисует исходный список — без этого optimistic пропадает до ответа API. */
   var optimisticGeneralPayload = null;
   var optimisticPersonalPayload = null;
+  var incomingPushGeneralPayload = null;
+  var incomingPushPersonalPayloadByPeer = {};
+  function chatPushPlaceholderFromPayload(payload) {
+    if (!payload || typeof payload !== "object") return null;
+    var bodyRaw = payload.body != null ? String(payload.body).trim() : "";
+    if (!bodyRaw) return null;
+    var senderLabel = "";
+    var textRaw = bodyRaw;
+    var colonIdx = bodyRaw.indexOf(": ");
+    if (colonIdx > 0) {
+      senderLabel = bodyRaw.slice(0, colonIdx).trim();
+      textRaw = bodyRaw.slice(colonIdx + 2).trim();
+    }
+    if (!textRaw) textRaw = "Новое сообщение";
+    return {
+      id: "push_" + String(Date.now()) + "_" + Math.random().toString(36).slice(2, 8),
+      fromName: senderLabel || "Игрок",
+      text: textRaw,
+      time: new Date().toISOString(),
+      __pushPlaceholder: true,
+    };
+  }
+  function mergeIncomingPushGeneralIntoMessages(messages) {
+    messages = messages || [];
+    var ph = incomingPushGeneralPayload;
+    if (!ph) return messages;
+    var phTime = ph.time ? new Date(ph.time).getTime() : 0;
+    var hasReal = messages.some(function (m) {
+      if (!m || m.__pushPlaceholder) return false;
+      var mt = m.time ? new Date(m.time).getTime() : 0;
+      if (ph.text && String(m.text || "").trim() !== String(ph.text || "").trim()) return false;
+      if (ph.fromName && String(m.fromName || "").trim() !== String(ph.fromName || "").trim()) return false;
+      return !isNaN(mt) && !isNaN(phTime) ? Math.abs(mt - phTime) < 180000 : true;
+    });
+    if (hasReal) {
+      incomingPushGeneralPayload = null;
+      return messages;
+    }
+    return messages.concat([ph]);
+  }
+  function mergeIncomingPushPersonalIntoMessages(messages, peerId) {
+    messages = messages || [];
+    var key = peerId != null ? String(peerId) : "";
+    var ph = key ? incomingPushPersonalPayloadByPeer[key] : null;
+    if (!ph) return messages;
+    var phTime = ph.time ? new Date(ph.time).getTime() : 0;
+    var hasReal = messages.some(function (m) {
+      if (!m || m.__pushPlaceholder) return false;
+      var mt = m.time ? new Date(m.time).getTime() : 0;
+      if (ph.text && String(m.text || "").trim() !== String(ph.text || "").trim()) return false;
+      if (ph.fromName && String(m.fromName || "").trim() !== String(ph.fromName || "").trim()) return false;
+      return !isNaN(mt) && !isNaN(phTime) ? Math.abs(mt - phTime) < 180000 : true;
+    });
+    if (hasReal) {
+      delete incomingPushPersonalPayloadByPeer[key];
+      return messages;
+    }
+    return messages.concat([ph]);
+  }
   function mergeOptimisticGeneralIntoMessages(messages) {
     messages = messages || [];
     if (!optimisticGeneralPayload || !sendingGeneral) return messages;
@@ -24585,6 +24644,7 @@ function initChat() {
           }
         }
         messages = mergeOptimisticGeneralIntoMessages(messages);
+        messages = mergeIncomingPushGeneralIntoMessages(messages);
         var prevGeneralCache =
           window._chatGeneralCache && typeof window._chatGeneralCache === "object" ? window._chatGeneralCache : {};
         var prevGeneralMessages = Array.isArray(prevGeneralCache.messages) ? prevGeneralCache.messages : [];
@@ -28413,6 +28473,7 @@ function initChat() {
           }
         }
         messages = mergeOptimisticPersonalIntoMessages(messages);
+        messages = mergeIncomingPushPersonalIntoMessages(messages, loadForPeer);
         var isGrpThread =
           data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
         if (isGrpThread && data.groupTitle && convTitle) {
@@ -35244,6 +35305,40 @@ function initChat() {
     try {
       if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
       if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+      try {
+        var rawUrl = payload && payload.openUrl ? String(payload.openUrl) : "./?startapp=club_chat";
+        var urlObj = new URL(rawUrl, window.location.href);
+        var sp = new URLSearchParams(urlObj.search || "");
+        var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
+        var withPeer = (sp.get("with") || "").trim();
+        var pushPlaceholder = chatPushPlaceholderFromPayload(payload);
+        var chatViewActiveNow = !!document.querySelector('[data-view="chat"].view--active');
+        if (pushPlaceholder && chatViewActiveNow && startApp === "club_chat") {
+          incomingPushGeneralPayload = pushPlaceholder;
+          if (
+            chatActiveTab === "general" &&
+            generalView &&
+            !generalView.classList.contains("chat-general-view--hidden") &&
+            window._chatGeneralCache &&
+            Array.isArray(window._chatGeneralCache.messages)
+          ) {
+            renderGeneralMessages(mergeIncomingPushGeneralIntoMessages(window._chatGeneralCache.messages.slice()));
+          }
+        } else if (pushPlaceholder && chatViewActiveNow && startApp === "club_chat_dm" && withPeer) {
+          incomingPushPersonalPayloadByPeer[withPeer] = Object.assign({}, pushPlaceholder, {
+            from: withPeer,
+          });
+          if (
+            chatWithUserId &&
+            peerChatIdsEqual(chatWithUserId, withPeer) &&
+            convView &&
+            !convView.classList.contains("chat-conv-view--hidden")
+          ) {
+            var cacheNow = personalMessagesCache[withPeer] && Array.isArray(personalMessagesCache[withPeer]) ? personalMessagesCache[withPeer] : [];
+            renderMessages(mergeIncomingPushPersonalIntoMessages(cacheNow.slice(), withPeer));
+          }
+        }
+      } catch (ePushPlaceholder) {}
       var now = Date.now();
       window.__pokerLastIncomingChatPushAt = now;
       pokerChatRequestPollBurst("general");
