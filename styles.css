@@ -3050,6 +3050,112 @@ body.pwa-auth-gated #app {
 .site-home-instruction-modal .club-charter-modal__title {
   color: #2a2118;
 }
+html.app--telegram-miniapp,
+html.poker-telegram-miniapp {
+  --tg-modal-top-safe: calc(env(safe-area-inset-top, 0px) + 56px);
+}
+html.app--telegram-miniapp :is(
+  .club-charter-modal,
+  .gazette-modal,
+  .roman-task-planner-modal,
+  .video-lessons__coach-modal,
+  .winter-rating-player-modal,
+  .spring-rating-info-modal,
+  .daily-prediction-modal,
+  .autumn-rating-2025-modal,
+  .summer-rating-2024-modal,
+  .summer-rating-2025-modal,
+  .spring-rating-2024-modal,
+  .chat-dialog-preview-modal,
+  .chat-user-modal,
+  .chat-templates-modal,
+  .winter-rating-week-top-modal,
+  .winter-rating-date-modal,
+  .visitors-admin-modal,
+  .share-stats-admin-modal,
+  .respect-voters-modal,
+  .friends-list-modal,
+  .chat-club-access-modal,
+  .image-lightbox,
+  .pdf-viewer
+),
+html.poker-telegram-miniapp :is(
+  .club-charter-modal,
+  .gazette-modal,
+  .roman-task-planner-modal,
+  .video-lessons__coach-modal,
+  .winter-rating-player-modal,
+  .spring-rating-info-modal,
+  .daily-prediction-modal,
+  .autumn-rating-2025-modal,
+  .summer-rating-2024-modal,
+  .summer-rating-2025-modal,
+  .spring-rating-2024-modal,
+  .chat-dialog-preview-modal,
+  .chat-user-modal,
+  .chat-templates-modal,
+  .winter-rating-week-top-modal,
+  .winter-rating-date-modal,
+  .visitors-admin-modal,
+  .share-stats-admin-modal,
+  .respect-voters-modal,
+  .friends-list-modal,
+  .chat-club-access-modal,
+  .image-lightbox,
+  .pdf-viewer
+) {
+  padding-top: var(--tg-modal-top-safe) !important;
+  box-sizing: border-box;
+}
+html.app--telegram-miniapp :is(
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .pdf-viewer__close
+),
+html.poker-telegram-miniapp :is(
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .pdf-viewer__close
+) {
+  top: calc(var(--tg-modal-top-safe) + 8px) !important;
+  right: max(12px, env(safe-area-inset-right, 0px)) !important;
+}
 html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet,
 html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet {
   width: min(920px, calc(100vw - 16px));
