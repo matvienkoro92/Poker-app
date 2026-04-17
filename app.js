@@ -30006,7 +30006,6 @@ function initChat() {
         var prevB = null;
         try {
           pwaAccessoryInset = getPwaChatThreadAccessoryInsetPx();
-          if (pwaAccessoryInset > 0) bottomPx += pwaAccessoryInset;
         } catch (ePwaDockAcc) {}
         try {
           var ihLim = window.innerHeight || 0;
@@ -30079,6 +30078,9 @@ function initChat() {
             window.__pokerChatLastAppliedDockBottom = bottomPx;
           }
         } catch (eStabB) {}
+        if (pwaAccessoryInset > 0) {
+          bottomPx += pwaAccessoryInset;
+        }
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
         } catch (eDockPx) {}
@@ -30546,6 +30548,18 @@ function initChat() {
                 if (coverPxDock > winSt + slackTop) coverPxDock = winSt + slackTop;
               }
             } catch (eDockStab) {}
+          }
+          if (
+            !tg &&
+            isIosLikeForChatViewport() &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            chatComposerEl &&
+            document.activeElement === chatComposerEl
+          ) {
+            try {
+              var pwaMinCover = Math.max(0, Math.round(inset - getPwaChatThreadAccessoryInsetPx()));
+              if (pwaMinCover >= 72 && coverPxDock < pwaMinCover) coverPxDock = pwaMinCover;
+            } catch (ePwaCoverFloor) {}
           }
           /*
            * TG iOS / WKWebView: при наборе vv.height иногда кратковременно сильно занижен → ih - offsetTop - vvh
