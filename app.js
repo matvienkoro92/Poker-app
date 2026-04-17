@@ -10227,11 +10227,13 @@ function setView(viewName, navOpts) {
   try {
     if (viewName === "chat") {
       var guestChatGate = document.getElementById("chatDialogsGuestGate");
+      var isTelegramMiniView = !!(window.Telegram && window.Telegram.WebApp);
       if (
         guestChatGate &&
         document.documentElement &&
         document.documentElement.classList &&
-        (document.documentElement.classList.contains("poker-ios-pwa") ||
+        (isTelegramMiniView ||
+          document.documentElement.classList.contains("poker-ios-pwa") ||
           document.documentElement.classList.contains("poker-android-pwa"))
       ) {
         guestChatGate.hidden = true;
