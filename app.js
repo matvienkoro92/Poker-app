@@ -20545,12 +20545,40 @@ function initChat() {
             document.documentElement.classList.contains("poker-android-pwa"))
         );
     } catch (ePwaLikeChat) {}
-    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var hasTelegramIdentity = false;
+    try {
+      var resolvedUser =
+        typeof getPokerResolvedTelegramUser === "function"
+          ? getPokerResolvedTelegramUser()
+          : null;
+      if (
+        resolvedUser &&
+        ((resolvedUser.username && String(resolvedUser.username).trim()) ||
+          (resolvedUser.first_name && String(resolvedUser.first_name).trim()) ||
+          (resolvedUser.last_name && String(resolvedUser.last_name).trim()))
+      ) {
+        hasTelegramIdentity = true;
+      }
+    } catch (eResolvedChatUser) {}
+    try {
+      if (!hasTelegramIdentity) {
+        var tgChat = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        var tgUser = tgChat && tgChat.initDataUnsafe ? tgChat.initDataUnsafe.user : null;
+        if (
+          tgUser &&
+          ((tgUser.username && String(tgUser.username).trim()) ||
+            (tgUser.first_name && String(tgUser.first_name).trim()) ||
+            (tgUser.last_name && String(tgUser.last_name).trim()))
+        ) {
+          hasTelegramIdentity = true;
+        }
+      }
+    } catch (eTelegramChatUser) {}
     var isStandaloneMode =
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
-    return !hasSession && !isTelegramMini && !isStandaloneMode && !isPwaGuest && !isPwaLike;
+    return !hasSession && !hasTelegramIdentity && !isStandaloneMode && !isPwaGuest && !isPwaLike;
   }
   function syncChatWebsiteGuestGate() {
     var guestMode = isWebsiteGuestChatGateMode();
