@@ -97,6 +97,22 @@ function pokerSwNotifyClientsChatPush(data) {
   });
 }
 
+function pokerSwNotifyClientsPushRepair(data) {
+  var payload = data && typeof data === "object" ? data : {};
+  return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (cs) {
+    var i;
+    for (i = 0; i < cs.length; i++) {
+      try {
+        cs[i].postMessage({
+          pokerChatPushRepair: true,
+          reason: payload.reason || "subscription_changed",
+          at: Date.now(),
+        });
+      } catch (ePostRepair) {}
+    }
+  });
+}
+
 self.addEventListener("push", function (event) {
   var root = self.location.origin || "";
   var data = {
@@ -160,28 +176,46 @@ self.addEventListener("notificationclick", function (event) {
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windowClients) {
       var i;
+      var chosen = null;
       for (i = 0; i < windowClients.length; i++) {
         var c = windowClients[i];
         if (c.url.indexOf(self.location.origin) === 0) {
-          try {
-            c.postMessage({ pokerChatOpenUrl: raw });
-          } catch (ePostOpen) {}
-          if (typeof c.navigate === "function") {
-            return c.navigate(targetUrl).then(function () {
-              try {
-                c.postMessage({ pokerChatOpenUrl: raw });
-              } catch (ePostNav) {}
-              return c.focus();
-            }).catch(function () {
-              return clients.openWindow(targetUrl);
-            });
+          if (!chosen) chosen = c;
+          if (c.visibilityState === "visible" || c.focused) {
+            chosen = c;
+            break;
           }
-          return c.focus().then(function () {
-            return clients.openWindow(targetUrl);
+        }
+      }
+      if (chosen) {
+        try {
+          chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
+        } catch (ePostOpen) {}
+        if (typeof chosen.navigate === "function") {
+          return chosen.navigate(targetUrl).then(function () {
+            try {
+              chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
+            } catch (ePostNav) {}
+            return chosen.focus();
+          }).catch(function () {
+            return chosen.focus();
           });
         }
+        return chosen.focus().then(function () {
+          try {
+            chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
+          } catch (ePostFocus) {}
+        }).catch(function () {
+          if (clients.openWindow) return clients.openWindow(targetUrl);
+        });
       }
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
+  );
+});
+
+self.addEventListener("pushsubscriptionchange", function (event) {
+  event.waitUntil(
+    pokerSwNotifyClientsPushRepair({ reason: "pushsubscriptionchange" }).catch(function () {})
   );
 });
