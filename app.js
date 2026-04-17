@@ -20552,6 +20552,8 @@ function initChat() {
     applyConvGroupDescription("");
   }
   function isWebsiteGuestChatGateMode() {
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    if (isTelegramMini) return false;
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
     var isPwaGuest = false;
     try {
@@ -26415,6 +26417,7 @@ function initChat() {
       } catch (eFireLc) {}
     }
     if (!contactsEl) return;
+    var isTelegramMiniChat = !!(window.Telegram && window.Telegram.WebApp);
     var hasResolvedTelegramIdentityForChat = false;
     try {
       var chatResolvedUser =
@@ -26430,7 +26433,7 @@ function initChat() {
         hasResolvedTelegramIdentityForChat = true;
       }
     } catch (eChatResolvedIdentity) {}
-    if (!hasResolvedTelegramIdentityForChat && typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+    if (!isTelegramMiniChat && !hasResolvedTelegramIdentityForChat && typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
       window.__pokerChatContactsUnreadSoundPrimed = false;
       window.__pokerChatContactsUnreadSnap = {};
       window.chatPersonalUnreadTotalFromContacts = 0;
