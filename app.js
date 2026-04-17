@@ -34905,8 +34905,8 @@ function initChat() {
     }
   })();
 
-  /** Интервал опроса (мс). После облегчения mode=contacts можно чаще тикать: notModified даёт короткий ответ. */
-  var CHAT_POLL_MS = 2500;
+  /** Интервал опроса (мс): открытый чат ~5s, список диалогов ~15s, фон ~60s. */
+  var CHAT_POLL_MS = 5000;
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     var hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
@@ -34917,7 +34917,7 @@ function initChat() {
     var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
 
     if (hidden) {
-      if (t % 16 !== 0) return;
+      if (t % 12 !== 0) return;
       if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
       return;
     }
@@ -34938,7 +34938,7 @@ function initChat() {
     }
     if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
-      if (t % 2 === 0) loadContacts();
+      if (t % 3 === 0) loadContacts();
     } else if (
       chatActiveTab === "admins" &&
       adminsView &&
