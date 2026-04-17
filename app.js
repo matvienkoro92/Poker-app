@@ -29021,6 +29021,7 @@ function initChat() {
           pad = Math.round(bh + btm + gap);
           if (pad < 28) pad = 28;
           try {
+            var screenSafeBottomPad = getChatScreenSafeAreaBottomPx();
             var isPwaIosPad =
               typeof isTelegramWebApp === "function" &&
               !isTelegramWebApp() &&
@@ -29029,7 +29030,9 @@ function initChat() {
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport();
             if (isPwaIosPad) {
-              pad = Math.max(28, Math.round(bh + 6));
+              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 14));
+            } else {
+              pad = Math.max(pad, Math.round(bh + screenSafeBottomPad + 10));
             }
           } catch (ePwaPadCap) {}
         } else if (tmaFlowPad) {
