@@ -8734,7 +8734,7 @@ function getPokerResolvedTelegramUser() {
     var root = document.documentElement;
     var isSiteMode = isSiteHomeInstructionMode();
     var isTelegramMode = isTelegramHomeInstructionMode();
-    var showInstructionBtn = isTelegramMode;
+    var showInstructionBtn = isSiteMode || isTelegramMode;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
