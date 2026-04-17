@@ -35114,29 +35114,35 @@ function initChat() {
       if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
       if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
       var now = Date.now();
-      var lastAt = Number(window.__pokerLastIncomingChatPushAt) || 0;
-      if (lastAt && now - lastAt < 700) return;
       window.__pokerLastIncomingChatPushAt = now;
       pokerChatRequestPollBurst("general");
       pokerChatRequestPollBurst("personal");
       pokerChatRequestPollBurst("contacts");
-      if (typeof loadContacts === "function") loadContacts();
-      if (
-        chatActiveTab === "general" &&
-        generalView &&
-        !generalView.classList.contains("chat-general-view--hidden") &&
-        typeof loadGeneral === "function"
-      ) {
-        loadGeneral();
-      }
-      if (
-        chatWithUserId &&
-        convView &&
-        !convView.classList.contains("chat-conv-view--hidden") &&
-        typeof loadMessages === "function"
-      ) {
-        loadMessages();
-      }
+      if (window.__pokerChatPushRefetchTimer) return;
+      window.__pokerChatPushRefetchTimer = setTimeout(function () {
+        window.__pokerChatPushRefetchTimer = 0;
+        try {
+          if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
+          if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+          if (typeof loadContacts === "function") loadContacts();
+          if (
+            chatActiveTab === "general" &&
+            generalView &&
+            !generalView.classList.contains("chat-general-view--hidden") &&
+            typeof loadGeneral === "function"
+          ) {
+            loadGeneral();
+          }
+          if (
+            chatWithUserId &&
+            convView &&
+            !convView.classList.contains("chat-conv-view--hidden") &&
+            typeof loadMessages === "function"
+          ) {
+            loadMessages();
+          }
+        } catch (eChatPushFlush) {}
+      }, 120);
     } catch (eChatPushRefetch) {}
   };
 
