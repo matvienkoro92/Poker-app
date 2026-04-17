@@ -24473,7 +24473,22 @@ function initChat() {
     if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
       pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
     }
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs;
+    var generalCacheBeforeReq =
+      window._chatGeneralCache && Array.isArray(window._chatGeneralCache.messages) ? window._chatGeneralCache.messages : [];
+    var useGeneralDiff =
+      Date.now() < (chatBurstUntilByScope.general || 0) &&
+      generalCacheBeforeReq.length > 0;
+    var diffQs = "";
+    if (useGeneralDiff) {
+      var lastGeneralMsg = generalCacheBeforeReq[generalCacheBeforeReq.length - 1];
+      if (lastGeneralMsg && lastGeneralMsg.id != null && lastGeneralMsg.id !== "") {
+        diffQs += "&afterId=" + encodeURIComponent(String(lastGeneralMsg.id));
+      }
+      if (lastGeneralMsg && lastGeneralMsg.time) {
+        diffQs += "&afterTime=" + encodeURIComponent(String(lastGeneralMsg.time));
+      }
+    }
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs + diffQs;
     var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
     fetch(url, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
@@ -24495,6 +24510,9 @@ function initChat() {
         var noGeneralAccess =
           !chatIsAdmin && (access === "need_apply" || access === "pending" || access === "revoked");
         var messages = data.messages || [];
+        if (data.partial === true && generalCacheBeforeReq.length) {
+          messages = generalCacheBeforeReq.concat(messages || []);
+        }
         if (noGeneralAccess) {
           messages = [];
         }
@@ -28212,7 +28230,24 @@ function initChat() {
     if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
       pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
     }
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + pollQs;
+    var personalCacheBeforeReq =
+      loadForPeer && personalMessagesCache[loadForPeer] && Array.isArray(personalMessagesCache[loadForPeer])
+        ? personalMessagesCache[loadForPeer]
+        : [];
+    var usePersonalDiff =
+      Date.now() < (chatBurstUntilByScope.personal || 0) &&
+      personalCacheBeforeReq.length > 0;
+    var diffQs = "";
+    if (usePersonalDiff) {
+      var lastPersonalMsg = personalCacheBeforeReq[personalCacheBeforeReq.length - 1];
+      if (lastPersonalMsg && lastPersonalMsg.id != null && lastPersonalMsg.id !== "") {
+        diffQs += "&afterId=" + encodeURIComponent(String(lastPersonalMsg.id));
+      }
+      if (lastPersonalMsg && lastPersonalMsg.time) {
+        diffQs += "&afterTime=" + encodeURIComponent(String(lastPersonalMsg.time));
+      }
+    }
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + pollQs + diffQs;
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
@@ -28235,6 +28270,9 @@ function initChat() {
           ? String(prevPersonalMessages[prevPersonalMessages.length - 1].id || "") + "|" + String(prevPersonalMessages[prevPersonalMessages.length - 1].time || "")
           : "";
         var messages = data.messages || [];
+        if (data.partial === true && personalCacheBeforeReq.length) {
+          messages = personalCacheBeforeReq.concat(messages || []);
+        }
         var pendingEditP = window._pendingPersonalEditMessage;
         if (pendingEditP && pendingEditP.id && chatWithUserId) {
           var pePid = String(pendingEditP.id);
