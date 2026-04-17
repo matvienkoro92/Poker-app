@@ -23078,6 +23078,26 @@ function initChat() {
   window.lastGeneralStats = "";
   window.lastListStats = "";
   window.lastConvStats = "";
+  function setTextContentIfChanged(el, txt) {
+    if (!el) return;
+    var next = txt != null ? String(txt) : "";
+    if (el.textContent !== next) el.textContent = next;
+  }
+  function scheduleChatPostRenderSync(fn) {
+    if (typeof fn !== "function") return;
+    var run = function () {
+      try {
+        fn();
+      } catch (ePostRender) {}
+    };
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(function () {
+        setTimeout(run, 0);
+      });
+      return;
+    }
+    setTimeout(run, 0);
+  }
   function updateChatHeaderStats() {
     var el = document.getElementById("chatHeaderStats");
     if (!el) return;
@@ -23086,7 +23106,7 @@ function initChat() {
     else if (chatActiveTab === "admins") txt = "Админы";
     else if (chatWithUserId && convView && !convView.classList.contains("chat-conv-view--hidden")) txt = window.lastConvStats || "";
     else txt = window.lastListStats || "";
-    if (el.textContent !== txt) el.textContent = txt;
+    setTextContentIfChanged(el, txt);
   }
   function closeSwitcherDropdown() {}
   /** iOS WKWebView: навигация между полями над клавиатурой. Один textarea переносится mountChatComposer; inert на поддеревьях чата при списке диалогов / общем / переписке. */
@@ -24635,10 +24655,6 @@ function initChat() {
         /* Вне экрана «главный чат» не трогаем chatGeneralUnread* — только mode=contacts. */
         var total = data.participantsCount != null ? data.participantsCount : "—";
         window.lastGeneralStats = total !== "—" ? String(total) + " уч" : "";
-        updateChatHeaderStats();
-        try {
-          syncClubChatRosterUi();
-        } catch (eRosterG) {}
         /* Не трогаем DOM общего чата, пока экран скрыт — иначе scrollTop обнуляется и при входе лента «сверху». */
         if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible && !chatIsEditingMessage) {
           if (noGeneralAccess) {
@@ -24656,9 +24672,15 @@ function initChat() {
         } else if (!noGeneralAccess) {
           updateGeneralInputLocked(false);
         }
-        updateUnreadDots();
-        if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
-        if (typeof updateClubChatPreview === "function") updateClubChatPreview(messages);
+        scheduleChatPostRenderSync(function () {
+          updateChatHeaderStats();
+          try {
+            syncClubChatRosterUi();
+          } catch (eRosterG) {}
+          updateUnreadDots();
+          if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
+          if (typeof updateClubChatPreview === "function") updateClubChatPreview(messages);
+        });
       } else if (
         chatActiveTab === "general" &&
         generalView &&
@@ -26619,19 +26641,19 @@ function initChat() {
     el.classList.remove("chat-dialog-item__preview--skeleton");
     el.removeAttribute("aria-busy");
     if (clubChatAccess === "need_apply") {
-      el.textContent = "Нажмите, чтобы подать заявку";
+      setTextContentIfChanged(el, "Нажмите, чтобы подать заявку");
       return;
     }
     if (clubChatAccess === "pending") {
-      el.textContent = "Заявка на рассмотрении…";
+      setTextContentIfChanged(el, "Заявка на рассмотрении…");
       return;
     }
     if (clubChatAccess === "revoked") {
-      el.textContent = "Доступ отозван";
+      setTextContentIfChanged(el, "Доступ отозван");
       return;
     }
     if (!messages || messages.length === 0) {
-      el.textContent = "Нет сообщений";
+      setTextContentIfChanged(el, "Нет сообщений");
       return;
     }
     var last = messages[messages.length - 1];
@@ -26642,7 +26664,7 @@ function initChat() {
     else if (last.document) snippet = "[Документ]";
     else if (last.text) snippet = String(last.text).trim().replace(/\s+/g, " ").slice(0, 50);
     if (snippet && snippet.length >= 50) snippet += "…";
-    el.textContent = snippet ? name + ": " + snippet : name;
+    setTextContentIfChanged(el, snippet ? name + ": " + snippet : name);
   }
 
   function updateClubChatPreviewText(previewText) {
@@ -26651,19 +26673,19 @@ function initChat() {
     el.classList.remove("chat-dialog-item__preview--skeleton");
     el.removeAttribute("aria-busy");
     if (clubChatAccess === "need_apply") {
-      el.textContent = "Нажмите, чтобы подать заявку";
+      setTextContentIfChanged(el, "Нажмите, чтобы подать заявку");
       return;
     }
     if (clubChatAccess === "pending") {
-      el.textContent = "Заявка на рассмотрении…";
+      setTextContentIfChanged(el, "Заявка на рассмотрении…");
       return;
     }
     if (clubChatAccess === "revoked") {
-      el.textContent = "Доступ отозван";
+      setTextContentIfChanged(el, "Доступ отозван");
       return;
     }
     var txt = previewText != null ? String(previewText).trim() : "";
-    el.textContent = txt || "Нет сообщений";
+    setTextContentIfChanged(el, txt || "Нет сообщений");
   }
 
   function shouldUsePersonalCache(userId) {
@@ -28346,24 +28368,22 @@ function initChat() {
         if (isGrpThread && data.groupTitle && convTitle) {
           var gt = String(data.groupTitle).trim();
           if (gt) {
-            convTitle.textContent = gt;
+            setTextContentIfChanged(convTitle, gt);
             chatWithUserName = gt;
           }
         }
         var pt = data.participantsCount != null ? data.participantsCount : "—";
         var ol = data.onlineCount != null ? data.onlineCount : "—";
         window.lastConvStats = pt + " уч · " + ol + " онл";
-        updateChatHeaderStats();
         if (convTitleId) {
           if (isGrpThread) {
-            convTitleId.textContent = pt !== "—" ? String(pt) + " уч." : "\u2014";
+            setTextContentIfChanged(convTitleId, pt !== "—" ? String(pt) + " уч." : "\u2014");
           } else {
             var titleP21 =
               data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
-            convTitleId.textContent = titleP21 || "\u2014";
+            setTextContentIfChanged(convTitleId, titleP21 || "\u2014");
           }
         }
-        applyConvGroupDescription();
         var peerAvData = "";
         if (isGrpThread) {
           peerAvData = data.groupAvatar != null && String(data.groupAvatar).trim() ? String(data.groupAvatar).trim() : "";
@@ -28485,7 +28505,11 @@ function initChat() {
             renderMessages(messages);
           }
         }
-        updateUnreadDots();
+        scheduleChatPostRenderSync(function () {
+          updateChatHeaderStats();
+          applyConvGroupDescription();
+          updateUnreadDots();
+        });
       } else if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
         messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
       }
