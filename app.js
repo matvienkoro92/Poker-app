@@ -1470,15 +1470,23 @@ function initProfileChatPush() {
   try {
     navigator.serviceWorker.addEventListener("message", function (ev) {
       var d = ev.data;
-      if (!d || !d.pokerChatPushSound) return;
-      var url = d.url || "";
-      if (!url) return;
-      try {
-        var a = new Audio(url);
-        a.volume = typeof d.volume === "number" ? d.volume : 0.88;
-        var p = a.play();
-        if (p && typeof p.catch === "function") p.catch(function () {});
-      } catch (ePlay) {}
+      if (!d) return;
+      if (d.pokerChatPushSound) {
+        var url = d.url || "";
+        if (url) {
+          try {
+            var a = new Audio(url);
+            a.volume = typeof d.volume === "number" ? d.volume : 0.88;
+            var p = a.play();
+            if (p && typeof p.catch === "function") p.catch(function () {});
+          } catch (ePlay) {}
+        }
+      }
+      if (d.pokerChatPushEvent && typeof window.__pokerHandleIncomingChatPush === "function") {
+        try {
+          window.__pokerHandleIncomingChatPush(d);
+        } catch (ePushUi) {}
+      }
     });
   } catch (eMsg) {}
   /** Разблокировка звука после первого жеста (iOS PWA / Safari) — иначе play() из push может быть тихим. */
@@ -35100,6 +35108,37 @@ function initChat() {
       if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     } catch (eVisPoll) {}
   });
+
+  window.__pokerHandleIncomingChatPush = function (payload) {
+    try {
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return;
+      if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+      var now = Date.now();
+      var lastAt = Number(window.__pokerLastIncomingChatPushAt) || 0;
+      if (lastAt && now - lastAt < 700) return;
+      window.__pokerLastIncomingChatPushAt = now;
+      pokerChatRequestPollBurst("general");
+      pokerChatRequestPollBurst("personal");
+      pokerChatRequestPollBurst("contacts");
+      if (typeof loadContacts === "function") loadContacts();
+      if (
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        typeof loadGeneral === "function"
+      ) {
+        loadGeneral();
+      }
+      if (
+        chatWithUserId &&
+        convView &&
+        !convView.classList.contains("chat-conv-view--hidden") &&
+        typeof loadMessages === "function"
+      ) {
+        loadMessages();
+      }
+    } catch (eChatPushRefetch) {}
+  };
 
   window.__pokerRefreshChatUnreadForPwaBadge = function () {
     try {

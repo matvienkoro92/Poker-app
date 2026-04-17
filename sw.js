@@ -78,6 +78,25 @@ function pokerSwNotifyClientsChatSound() {
   });
 }
 
+function pokerSwNotifyClientsChatPush(data) {
+  var payload = data && typeof data === "object" ? data : {};
+  return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (cs) {
+    var i;
+    for (i = 0; i < cs.length; i++) {
+      try {
+        cs[i].postMessage({
+          pokerChatPushEvent: true,
+          openUrl: payload.openUrl || "./?startapp=club_chat",
+          tag: payload.tag || "poker-chat",
+          title: payload.title || "Два туза",
+          body: payload.body || "Новое сообщение в чате",
+          at: Date.now(),
+        });
+      } catch (ePost) {}
+    }
+  });
+}
+
 self.addEventListener("push", function (event) {
   var root = self.location.origin || "";
   var data = {
@@ -124,6 +143,7 @@ self.addEventListener("push", function (event) {
           });
         }),
       pokerSwNotifyClientsChatSound(),
+      pokerSwNotifyClientsChatPush(data),
     ])
   );
 });
