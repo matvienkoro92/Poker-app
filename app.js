@@ -838,6 +838,14 @@ function pokerChatPushClientSupported() {
   return true;
 }
 
+(function syncTelegramMiniAppRootClass() {
+  try {
+    var root = document.documentElement;
+    if (!root || !root.classList) return;
+    root.classList.toggle("poker-telegram-miniapp", !!(window.Telegram && window.Telegram.WebApp));
+  } catch (e) {}
+})();
+
 /** iOS / iPadOS: в обычном WebView (Telegram, Safari вне «Домой») веб-пуш недоступен — подписка в Redis не сохранится. */
 function pokerChatPushIosNeedsStandalonePwa() {
   try {
@@ -20604,7 +20612,29 @@ function initChat() {
       document.referrer.indexOf("android-app://") === 0;
     return !hasSession && !hasTelegramIdentity && !isStandaloneMode && !isPwaGuest && !isPwaLike;
   }
+  function forceHideChatGuestGateForTelegram() {
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    if (!isTelegramMini) return false;
+    try {
+      if (dialogsGuestGate) {
+        dialogsGuestGate.hidden = true;
+        dialogsGuestGate.style.display = "none";
+      }
+    } catch (eDlgGateHide) {}
+    try {
+      if (contactsEl) {
+        var guestBlocks = contactsEl.querySelectorAll(".chat-guest-cta");
+        var i;
+        for (i = 0; i < guestBlocks.length; i++) {
+          guestBlocks[i].hidden = true;
+          guestBlocks[i].style.display = "none";
+        }
+      }
+    } catch (eContactsGateHide) {}
+    return true;
+  }
   function syncChatWebsiteGuestGate() {
+    if (forceHideChatGuestGateForTelegram()) return false;
     var guestMode = isWebsiteGuestChatGateMode();
     var contactsFilter = document.getElementById("chatContactsFilter");
     var findWrap = findByIdInputDialogs ? findByIdInputDialogs.closest(".chat-find-by-id") : null;
@@ -26418,6 +26448,9 @@ function initChat() {
     }
     if (!contactsEl) return;
     var isTelegramMiniChat = !!(window.Telegram && window.Telegram.WebApp);
+    if (isTelegramMiniChat) {
+      forceHideChatGuestGateForTelegram();
+    }
     var hasResolvedTelegramIdentityForChat = false;
     try {
       var chatResolvedUser =
