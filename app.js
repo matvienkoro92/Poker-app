@@ -29537,7 +29537,7 @@ function initChat() {
       function scheduleChatKeyboardPostDismissPasses(delays) {
         if (!Array.isArray(delays)) return;
         delays.forEach(function (ms) {
-          setTimeout(function () {
+          var timerId = setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
             try {
               if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
@@ -29566,9 +29566,27 @@ function initChat() {
               if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
             } catch (eR2) {}
           }, ms);
+          try {
+            if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
+            window.__pokerChatDismissTimers.push(timerId);
+          } catch (eDismissTrack) {}
         });
       }
+      function clearPendingChatKeyboardDismissTimers() {
+        try {
+          var timers = window.__pokerChatDismissTimers;
+          if (!Array.isArray(timers)) {
+            window.__pokerChatDismissTimers = [];
+            return;
+          }
+          timers.forEach(function (id) {
+            try { clearTimeout(id); } catch (eClrTm) {}
+          });
+          window.__pokerChatDismissTimers = [];
+        } catch (eDismissClear) {}
+      }
       function finalizeChatKeyboardDismiss() {
+        clearPendingChatKeyboardDismissTimers();
         try {
           window.__pokerChatKeyboardOpeningUntil = 0;
         } catch (eOpenReset) {}
@@ -30706,6 +30724,7 @@ function initChat() {
         }
         setChatKeyboardOpenClasses(true);
         try {
+          clearPendingChatKeyboardDismissTimers();
           resetChatKeyboardDockRuntimeState();
           window.__pokerChatKeyboardFocusAtMs = Date.now();
           window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
@@ -30971,29 +30990,53 @@ function initChat() {
             });
           }
         }
-        setTimeout(runBlurCleanup, 0);
+        try {
+          if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
+          window.__pokerChatDismissTimers.push(setTimeout(runBlurCleanup, 0));
+        } catch (eBlurTimer0) {
+          setTimeout(runBlurCleanup, 0);
+        }
         /* iOS: blur и visualViewport обновляются не синхронно — повторяем сброс, иначе поле ввода «остаётся выше». */
         [90, 280, 520, 880, 1350, 2200].forEach(function (ms) {
-          setTimeout(function () {
+          var timerId = setTimeout(function () {
             if (shouldDeferChatKeyboardFinalizeForFocus()) return;
             finalizeChatKeyboardDismiss();
           }, ms);
-        });
-        setTimeout(function () {
           try {
-            if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
-              finalizeChatKeyboardDismiss();
-            }
-          } catch (eKbFs) {}
-        }, 3200);
+            if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
+            window.__pokerChatDismissTimers.push(timerId);
+          } catch (eBlurTimerN) {}
+        });
+        try {
+          if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
+          window.__pokerChatDismissTimers.push(setTimeout(function () {
+            try {
+              if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
+                finalizeChatKeyboardDismiss();
+              }
+            } catch (eKbFs) {}
+          }, 3200));
+        } catch (eBlurTimerLong) {
+          setTimeout(function () {
+            try {
+              if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
+                finalizeChatKeyboardDismiss();
+              }
+            } catch (eKbFs) {}
+          }, 3200);
+        }
         /* PWA: повтор без shouldDefer — иначе при «залипшем» activeElement finalize не вызывался до смены экрана */
         [550, 1100].forEach(function (ms) {
-          setTimeout(function () {
+          var timerId = setTimeout(function () {
             try {
               if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
               finalizeChatKeyboardDismiss();
             } catch (ePwaFin) {}
           }, ms);
+          try {
+            if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
+            window.__pokerChatDismissTimers.push(timerId);
+          } catch (ePwaTimer) {}
         });
       }
       function bindChatComposerKeyboardEvents(ta) {
