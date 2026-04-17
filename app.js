@@ -1477,6 +1477,9 @@ function initProfileChatPush() {
   var btn = document.getElementById("pwaInstallBtn");
   if (!btn) return;
   var installPrompt = null;
+  function isTelegramMini() {
+    return !!(window.Telegram && window.Telegram.WebApp);
+  }
   function isStandalone() {
     return window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true ||
@@ -1511,13 +1514,28 @@ function initProfileChatPush() {
   function isWebsiteShareMode() {
     return !isStandalone() && !(window.Telegram && window.Telegram.WebApp);
   }
+  function syncPwaInstallBtnVisibility() {
+    if (isTelegramMini()) {
+      btn.hidden = true;
+      return;
+    }
+    if (isStandalone()) {
+      btn.hidden = true;
+      return;
+    }
+    if (installPrompt || isIos() || (typeof navigator.share === "function")) {
+      btn.hidden = false;
+      return;
+    }
+    btn.hidden = true;
+  }
   if (isStandalone()) return;
   window.addEventListener("beforeinstallprompt", function (e) {
     e.preventDefault();
     installPrompt = e;
-    btn.removeAttribute("hidden");
+    syncPwaInstallBtnVisibility();
   });
-  if (isIos() || (typeof navigator.share === "function")) btn.removeAttribute("hidden");
+  syncPwaInstallBtnVisibility();
   btn.addEventListener("click", function () {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     function doShareAndCopy() {
@@ -8554,13 +8572,25 @@ function getPokerResolvedTelegramUser() {
     return !isStandaloneMode && !hasResolvedAuth && bodyView === "home";
   }
 
+  function isTelegramHomeInstructionMode() {
+    var isStandaloneMode =
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf("android-app://") === 0;
+    var isTelegramMini = !!(window.Telegram && window.Telegram.WebApp);
+    var bodyView = document.body && document.body.getAttribute("data-view");
+    return !isStandaloneMode && isTelegramMini && bodyView === "home";
+  }
+
   function syncSiteHomeInstructionMode() {
     var root = document.documentElement;
     var isSiteMode = isSiteHomeInstructionMode();
+    var isTelegramMode = isTelegramHomeInstructionMode();
+    var showInstructionBtn = isSiteMode || isTelegramMode;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
-    if (instructionBtn) instructionBtn.hidden = !isSiteMode;
+    if (instructionBtn) instructionBtn.hidden = !showInstructionBtn;
     if (greetingArrow) greetingArrow.hidden = !isSiteMode;
   }
   window.__pokerSyncSiteHomeInstructionMode = syncSiteHomeInstructionMode;
