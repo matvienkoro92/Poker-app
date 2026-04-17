@@ -5389,11 +5389,50 @@ function runGazetteAndTasksInit() {
       }, 0);
     }
   }
+  var POKER_PUSH_CHAT_TARGET_KEY = "poker_push_chat_target_v1";
+  function pokerStorePushChatTarget(rawUrl) {
+    try {
+      var value = rawUrl != null ? String(rawUrl).trim() : "";
+      if (!value) return;
+      try {
+        sessionStorage.setItem(POKER_PUSH_CHAT_TARGET_KEY, value);
+      } catch (eSessPush) {}
+      try {
+        localStorage.setItem(POKER_PUSH_CHAT_TARGET_KEY, value);
+      } catch (eLocPush) {}
+    } catch (eStorePush) {}
+  }
+  function pokerReadPushChatTarget() {
+    try {
+      var v = "";
+      try {
+        v = sessionStorage.getItem(POKER_PUSH_CHAT_TARGET_KEY) || "";
+      } catch (eSessRead) {}
+      if (!v) {
+        try {
+          v = localStorage.getItem(POKER_PUSH_CHAT_TARGET_KEY) || "";
+        } catch (eLocRead) {}
+      }
+      return v ? String(v).trim() : "";
+    } catch (eReadPush) {}
+    return "";
+  }
+  function pokerClearPushChatTarget() {
+    try {
+      try {
+        sessionStorage.removeItem(POKER_PUSH_CHAT_TARGET_KEY);
+      } catch (eSessClr) {}
+      try {
+        localStorage.removeItem(POKER_PUSH_CHAT_TARGET_KEY);
+      } catch (eLocClr) {}
+    } catch (eClrPush) {}
+  }
   window.__pokerApplyStartAppDeepLink = pokerApplyStartAppDeepLink;
   window.__pokerFlushPendingChatDeepLink = function () {
     try {
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
+        pokerClearPushChatTarget();
         if (typeof window.openClubChat === "function") {
           window.openClubChat();
           return true;
@@ -5402,6 +5441,7 @@ function runGazetteAndTasksInit() {
       if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
         var pdlNow = window.__pendingOpenChatPersonalFromDeepLink;
         window.__pendingOpenChatPersonalFromDeepLink = null;
+        pokerClearPushChatTarget();
         window.chatOpenConvFromDialogs(pdlNow.userId, pdlNow.userName || pdlNow.userId, pdlNow.peerP21Id || undefined);
         return true;
       }
@@ -5415,6 +5455,7 @@ function runGazetteAndTasksInit() {
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
       if (!startApp) return;
+      pokerStorePushChatTarget(rawUrl);
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
       setTimeout(function () {
         try {
@@ -5430,6 +5471,15 @@ function runGazetteAndTasksInit() {
         }, 180);
       }, 0);
     } catch (ePushDeep) {}
+  };
+  window.__pokerReplayStoredPushChatTarget = function () {
+    try {
+      var rawStored = pokerReadPushChatTarget();
+      if (!rawStored) return false;
+      window.__pokerOpenChatFromPushUrl(rawStored);
+      return true;
+    } catch (eReplayPush) {}
+    return false;
   };
   var qStartApp = "";
   var qWithParam = "";
@@ -23195,6 +23245,13 @@ function initChat() {
       showDialogs();
       return;
     }
+    if (tab === "personal" || tab === "general") {
+      try {
+        if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
+          return;
+        }
+      } catch (eTabPending) {}
+    }
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (tab === "general") {
       if (generalView) { generalView.classList.remove("chat-general-view--hidden"); generalView.style.display = ""; }
@@ -32657,6 +32714,11 @@ function initChat() {
     window.__pendingOpenClubChatGeneral = false;
     window.__openClubChatAfterNextContacts = true;
   }
+  try {
+    if (!window.__pendingOpenChatPersonalFromDeepLink && !window.__pendingOpenClubChatGeneral) {
+      if (typeof window.__pokerReplayStoredPushChatTarget === "function") window.__pokerReplayStoredPushChatTarget();
+    }
+  } catch (eReplayInitChat) {}
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
     var pdl = window.__pendingOpenChatPersonalFromDeepLink;
     window.__pendingOpenChatPersonalFromDeepLink = null;
