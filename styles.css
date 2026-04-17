@@ -838,7 +838,7 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-containe
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
-  padding-bottom: 0 !important;
+  padding-bottom: max(12px, var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px))) !important;
   margin-bottom: 0 !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .bottom-nav,
@@ -925,7 +925,7 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner 
 }
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
-  padding-bottom: 0 !important;
+  padding-bottom: max(12px, var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px))) !important;
   margin-bottom: 0 !important;
   min-height: 0 !important;
   height: auto !important;
