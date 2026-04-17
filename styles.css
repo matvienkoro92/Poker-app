@@ -581,6 +581,15 @@ html.app--tg-content-inset .app {
   padding: 4px 0;
   margin: 0 0 -10px;
 }
+html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) {
+  margin-top: 8px;
+}
+html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) {
+  padding-top: 28px;
+}
+html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) .card__header {
+  padding-top: 10px;
+}
 /* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
 html.app-view-chat,
 body.app-view-chat,
@@ -1756,6 +1765,11 @@ html.app-view-home .home-welcome-outline {
   --home-outline-pad-left: 18px;
   /* Снизу: зазор 30px до блока «Следующий фриролл» задаёт margin-top у .tournament-day-home-dual */
   padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
+}
+html.app--telegram-miniapp .app.app--view-home .home-welcome-outline,
+html.app--telegram-miniapp.app-view-home .home-welcome-outline {
+  margin-top: 8px;
+  padding-top: 18px;
 }
 /* «Рейтинг весны»: после «Зал славы», уже не absolute — 20px от низа hero-row до верха кнопки */
 html.app-view-home .home-welcome-outline .features--home-rating-on-border,
