@@ -29844,6 +29844,11 @@ function initChat() {
       /** Зазор между низом полосы ввода и верхом клавиатуры (TMA — ровно 5px по UX). */
       function getChatComposerKeyboardGapPx() {
         if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return 5;
+        if (
+          isIosLikeForChatViewport() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset()
+        ) return 2;
         return isIosLikeForChatViewport() ? 6 : 4;
       }
       function isTelegramMiniAppChatThreadIos() {
@@ -30096,7 +30101,7 @@ function initChat() {
             var baseDockPwa = Number(window.__pokerChatInnerHBaseline) || 0;
             var winLossDockPwa = baseDockPwa > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDockPwa - ihLim)) : 0;
             if (winLossDockPwa > 32) {
-              var pwaBottomCap = winLossDockPwa + (focusAgeDock > 0 && focusAgeDock < 420 ? 8 : 10);
+              var pwaBottomCap = winLossDockPwa + (focusAgeDock > 0 && focusAgeDock < 420 ? 2 : 4);
               if (bottomPx > pwaBottomCap) bottomPx = pwaBottomCap;
             }
           }
@@ -30168,9 +30173,9 @@ function initChat() {
               pokerPwaStandaloneForKeyboardInset() &&
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport();
-            if (isPwaIosAcc) pwaAccessoryInset = Math.min(6, pwaAccessoryInset);
+            if (isPwaIosAcc) pwaAccessoryInset = Math.min(2, pwaAccessoryInset);
           } catch (ePwaAccCap) {}
-          bottomPx += Math.min(12, pwaAccessoryInset);
+          bottomPx += Math.min(4, pwaAccessoryInset);
         }
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
