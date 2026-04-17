@@ -20354,6 +20354,8 @@ function pokerChatRunAfterPaint(fn) {
 }
 var personalMessagesCache = {};
 var personalMessagesCacheMeta = {};
+var personalHasMoreBeforeByPeer = {};
+var generalHasMoreBefore = false;
 var personalPrefetchInFlight = {};
 var PERSONAL_PREFETCH_TTL_MS = 90000;
 var PERSONAL_PREFETCH_BATCH = 4;
@@ -24035,6 +24037,10 @@ function initChat() {
     }).join(";");
     return messages.length + "-" + (last.id || "") + "-" + (last.time || "") + "-" + reactionsPart;
   }
+  function renderLoadOlderButtonHtml(source) {
+    var label = "Загрузить ещё";
+    return '<div class="chat-load-older"><button type="button" class="chat-load-older__btn" data-chat-load-older="' + escapeHtml(source) + '">' + label + "</button></div>";
+  }
 
   /** Сразу показать последний известный общий чат из памяти/disk до ответа /api/chat — без «пустого» ожидания. */
   function paintGeneralFromMemoryBeforeFetch() {
@@ -24539,7 +24545,8 @@ function initChat() {
       if (data && data.notModified === true && data.pollRev) {
         return;
       }
-      if (data && data.ok) {
+        if (data && data.ok) {
+        generalHasMoreBefore = !!data.hasMoreBefore;
         if (data.pollRev && typeof data.pollRev === "string") {
           window.__pokerGeneralPollRev = data.pollRev;
         }
@@ -24706,6 +24713,34 @@ function initChat() {
       }
     });
   }
+  window.__pokerLoadOlderGeneralMessages = function () {
+    try {
+      var cache = window._chatGeneralCache && Array.isArray(window._chatGeneralCache.messages) ? window._chatGeneralCache.messages : [];
+      if (!cache.length) return;
+      var oldest = cache[0];
+      var prevTop = generalMessages ? generalMessages.scrollTop : 0;
+      var prevHeight = generalMessages ? generalMessages.scrollHeight : 0;
+      var q = "&mode=general&beforeId=" + encodeURIComponent(String(oldest.id || "")) + "&beforeTime=" + encodeURIComponent(String(oldest.time || ""));
+      fetch(base + "/api/chat" + pokerApiAuthQuery("?") + q, { cache: "no-store" })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
+        .then(function (data) {
+          if (!data || !data.ok || !Array.isArray(data.messages) || !data.messages.length) {
+            generalHasMoreBefore = !!(data && data.hasMoreBefore);
+            if (typeof renderGeneralMessages === "function") renderGeneralMessages(cache);
+            return;
+          }
+          generalHasMoreBefore = !!data.hasMoreBefore;
+          var merged = data.messages.concat(cache);
+          window._chatGeneralCache = Object.assign({}, window._chatGeneralCache || {}, { messages: merged });
+          renderGeneralMessages(merged);
+          requestAnimationFrame(function () {
+            try {
+              if (generalMessages) generalMessages.scrollTop = Math.max(0, generalMessages.scrollHeight - prevHeight + prevTop);
+            } catch (eScrollOldG) {}
+          });
+        });
+    } catch (eOlderGen) {}
+  };
 
   var generalReplyTo = null;
   var personalReplyTo = null;
@@ -25484,7 +25519,7 @@ function initChat() {
       return;
     }
     var myIdRender = resolveMyChatMemberId();
-    var html = messages.map(function (m, i) {
+    var bodyHtml = messages.map(function (m, i) {
       var prev = i > 0 ? messages[i - 1] : null;
       var next = i < messages.length - 1 ? messages[i + 1] : null;
       var sameUser = function (a, b) {
@@ -25580,6 +25615,7 @@ function initChat() {
       var dayDividerG = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerG + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '">' + cornerDelBtn + '<div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
     }).join("");
+    var html = (generalHasMoreBefore ? renderLoadOlderButtonHtml("general") : "") + bodyHtml;
     if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
       generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
     }
@@ -25633,6 +25669,11 @@ function initChat() {
       });
     }
     bindChatMsgNameProfileButtons(generalMessages);
+    generalMessages.querySelectorAll("[data-chat-load-older=\"general\"]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (typeof window.__pokerLoadOlderGeneralMessages === "function") window.__pokerLoadOlderGeneralMessages();
+      });
+    });
     generalMessages.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
       row.addEventListener("click", function () {
         var id = row.dataset.userId;
@@ -27638,6 +27679,8 @@ function initChat() {
       } catch (eSbPE) {}
       return;
     }
+    var activePeerForRender = chatWithUserId ? String(chatWithUserId) : "";
+    var hasMoreBeforePersonal = !!(activePeerForRender && personalHasMoreBeforeByPeer[activePeerForRender]);
     function personalReceiptHtml(m, isOwn) {
       if (!isOwn) return "";
       // Пытаемся определить статус по любым известным полям из API.
@@ -27666,7 +27709,7 @@ function initChat() {
       return '<div class="' + cls + '" aria-hidden="true">' + text + "</div>";
     }
     var myIdRenderP = resolveMyChatMemberId();
-    var html = messages.map(function (m, i) {
+    var bodyHtml = messages.map(function (m, i) {
       var prev = i > 0 ? messages[i - 1] : null;
       var next = i < messages.length - 1 ? messages[i + 1] : null;
       if (m && m.groupSystemEvent) {
@@ -27823,6 +27866,7 @@ function initChat() {
       var dayDividerP = chatDayDividerHtmlBeforeMessage(prev, m);
       return dayDividerP + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClassP + '">' + cornerDelBtnP + '<div class="chat-msg__meta">' + metaBlockP + '</div>' + replyBlock + bodyMainHtmlP + reactionsRowP + '</div></div></div>';
     }).join("");
+    var html = (hasMoreBeforePersonal ? renderLoadOlderButtonHtml("personal") : "") + bodyHtml;
     if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
       personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
     }
@@ -27890,6 +27934,11 @@ function initChat() {
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.ok) loadMessages();
         });
+      });
+    });
+    messagesEl.querySelectorAll("[data-chat-load-older=\"personal\"]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (typeof window.__pokerLoadOlderPersonalMessages === "function") window.__pokerLoadOlderPersonalMessages();
       });
     });
     messagesEl.querySelectorAll(".chat-msg__edit").forEach(function (btn) {
@@ -28328,6 +28377,7 @@ function initChat() {
         return;
       }
       if (data && data.ok) {
+        personalHasMoreBeforeByPeer[loadForPeer] = !!data.hasMoreBefore;
         if (data.pollRev && typeof data.pollRev === "string") {
           window.__pokerPersonalPollRev = data.pollRev;
         }
@@ -28522,6 +28572,47 @@ function initChat() {
         }
       });
   }
+  window.__pokerLoadOlderPersonalMessages = function () {
+    try {
+      if (!chatWithUserId || !messagesEl) return;
+      var peerId = String(chatWithUserId);
+      var cache = personalMessagesCache[peerId] && Array.isArray(personalMessagesCache[peerId]) ? personalMessagesCache[peerId] : [];
+      if (!cache.length) return;
+      var oldest = cache[0];
+      var prevTop = messagesEl.scrollTop;
+      var prevHeight = messagesEl.scrollHeight;
+      var urlOlder =
+        base +
+        "/api/chat" +
+        pokerApiAuthQuery("?") +
+        "&with=" +
+        encodeURIComponent(peerId) +
+        "&beforeId=" +
+        encodeURIComponent(String(oldest.id || "")) +
+        "&beforeTime=" +
+        encodeURIComponent(String(oldest.time || ""));
+      fetch(urlOlder, { cache: "no-store" })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
+        .then(function (data) {
+          if (!peerChatIdsEqual(chatWithUserId, peerId)) return;
+          if (!data || !data.ok || !Array.isArray(data.messages) || !data.messages.length) {
+            personalHasMoreBeforeByPeer[peerId] = !!(data && data.hasMoreBefore);
+            if (typeof renderMessages === "function") renderMessages(cache);
+            return;
+          }
+          personalHasMoreBeforeByPeer[peerId] = !!data.hasMoreBefore;
+          var merged = data.messages.concat(cache);
+          personalMessagesCache[peerId] = merged.slice();
+          personalMessagesCacheMeta[peerId] = { ts: Date.now() };
+          renderMessages(merged);
+          requestAnimationFrame(function () {
+            try {
+              if (messagesEl) messagesEl.scrollTop = Math.max(0, messagesEl.scrollHeight - prevHeight + prevTop);
+            } catch (eScrollOldP) {}
+          });
+        });
+    } catch (eOlderP) {}
+  };
 
   var sendingPrivate = false;
   function appendOptimisticPersonalMessage(text, image, voice, docAttachment, replyTo) {
