@@ -8732,6 +8732,10 @@ function getPokerResolvedTelegramUser() {
 
   function syncSiteHomeInstructionMode() {
     var root = document.documentElement;
+    var isStandaloneMode =
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true ||
+      document.referrer.indexOf("android-app://") === 0;
     var isSiteMode = isSiteHomeInstructionMode();
     var isTelegramMode = isTelegramHomeInstructionMode();
     var showInstructionBtn = isSiteMode || isTelegramMode;
@@ -8739,7 +8743,11 @@ function getPokerResolvedTelegramUser() {
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
-    if (instructionBtn) instructionBtn.hidden = !showInstructionBtn;
+    if (instructionBtn) {
+      instructionBtn.hidden = !showInstructionBtn || isStandaloneMode;
+      if (isStandaloneMode) instructionBtn.style.display = "none";
+      else instructionBtn.style.removeProperty("display");
+    }
     if (pwaInstallBtn && isTelegramMode) {
       pwaInstallBtn.hidden = true;
       pwaInstallBtn.style.display = "none";

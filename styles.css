@@ -479,7 +479,8 @@ html.app--tg-content-inset .app {
   }
   /* В установленном приложении кнопка справа от темы («на экран / поделиться») не нужна */
   #pwaInstallBtn,
-  .pwa-install-btn {
+  .pwa-install-btn,
+  #siteHomeInstructionBtn {
     display: none !important;
   }
 }
