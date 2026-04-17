@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v11" data-app-version="1.712">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v12" data-app-version="1.713">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1670,10 +1670,6 @@
                   <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_1897001087" aria-hidden="true"></span>
                 </button>
                 </div>
-                <div class="chat-guest-cta" id="chatDialogsGuestGate" hidden>
-                  <p class="chat-empty chat-empty--guest-msg">Чаты доступны только авторизированным пользователям.</p>
-                  <button type="button" class="profile-exit-btn" id="chatDialogsGuestAuthBtn">Авторизоваться</button>
-                </div>
                 <div
                   class="chat-contacts-filter chat-contacts-filter--hidden"
                   id="chatContactsFilter"
@@ -1715,7 +1711,7 @@
                 <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники">
                   <span class="chat-general-header__title-main">Главный чат</span>
                   <span class="chat-general-header__title-sub" id="chatGeneralHeaderRosterMeta" hidden></span>
-                  <span class="chat-general-header__title-sub" id="chatBuildMarker">build 1.712</span>
+                  <span class="chat-general-header__title-sub" id="chatBuildMarker">build 1.713</span>
                 </button>
                 <div class="chat-general-header__segments" role="toolbar" aria-label="Действия в общем чате">
                   <button type="button" class="chat-general-invite-friend-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralInviteFriendBtn" title="Пригласить в общий чат" aria-label="Поделиться ссылкой на общий чат">
@@ -6348,10 +6344,10 @@
     </div>
 
     <!-- defer: параллельная загрузка; порядок сохранён. Telegram SDK — локально: иначе в РФ без VPN первый defer ждёт telegram.org и блокирует весь остальной JS. Обновлять: curl -o telegram-web-app.js https://telegram.org/js/telegram-web-app.js -->
-    <script defer src="./telegram-web-app.js?v=4"></script>
+    <script defer src="./telegram-web-app.js?v=5"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=814"></script>
+    <script defer src="./app.js?v=815"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
