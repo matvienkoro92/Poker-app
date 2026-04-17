@@ -30858,6 +30858,12 @@ function initChat() {
             var pwaShell =
               (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
               (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
+            if (pwaShell && String(document.body.getAttribute("data-view") || "") === "chat" && isChatThreadComposerKeyboardDom()) {
+              var baseLinePwa = Number(window.__pokerChatInnerHBaseline) || 0;
+              var winLossPwa = baseLinePwa > 260 && ih > 0 ? Math.max(0, Math.round(baseLinePwa - ih)) : 0;
+              var dockBottomPwa = Number(window.__pokerChatThreadDockBottomCssPx) || 0;
+              if (winLossPwa > 36 || heightLoss > 90 || dockBottomPwa > 24) return false;
+            }
             if (!pwaShell && heightLoss > 72) return false;
             if (pwaShell && heightLoss > 118) return false;
             var ratio = ih > 0 ? vvh / ih : 1;
