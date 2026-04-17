@@ -26415,7 +26415,22 @@ function initChat() {
       } catch (eFireLc) {}
     }
     if (!contactsEl) return;
-    if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+    var hasResolvedTelegramIdentityForChat = false;
+    try {
+      var chatResolvedUser =
+        typeof getPokerResolvedTelegramUser === "function"
+          ? getPokerResolvedTelegramUser()
+          : null;
+      if (
+        chatResolvedUser &&
+        ((chatResolvedUser.username && String(chatResolvedUser.username).trim()) ||
+          (chatResolvedUser.first_name && String(chatResolvedUser.first_name).trim()) ||
+          (chatResolvedUser.last_name && String(chatResolvedUser.last_name).trim()))
+      ) {
+        hasResolvedTelegramIdentityForChat = true;
+      }
+    } catch (eChatResolvedIdentity) {}
+    if (!hasResolvedTelegramIdentityForChat && typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
       window.__pokerChatContactsUnreadSoundPrimed = false;
       window.__pokerChatContactsUnreadSnap = {};
       window.chatPersonalUnreadTotalFromContacts = 0;
