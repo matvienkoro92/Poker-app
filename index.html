@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v14" data-app-version="1.715">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v15" data-app-version="1.716">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -495,9 +495,6 @@
               <button type="button" class="theme-toggle" id="themeToggle" title="Сменить тему" aria-label="Сменить тему">
                 <span class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true">🌙</span>
                 <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
-              </button>
-              <button type="button" class="pwa-install-btn theme-toggle" id="pwaInstallBtn" title="Поделиться и добавить на экран" aria-label="Поделиться и добавить на экран" hidden>
-                <span class="pwa-install-btn__icon" aria-hidden="true">📲</span>
               </button>
               <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Как войти" aria-label="Как войти" hidden>
                 <span class="site-home-instruction-btn__icon" aria-hidden="true">📲</span>
@@ -1711,7 +1708,7 @@
                 <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники">
                   <span class="chat-general-header__title-main">Главный чат</span>
                   <span class="chat-general-header__title-sub" id="chatGeneralHeaderRosterMeta" hidden></span>
-                  <span class="chat-general-header__title-sub" id="chatBuildMarker">build 1.715</span>
+                  <span class="chat-general-header__title-sub" id="chatBuildMarker">build 1.716</span>
                 </button>
                 <div class="chat-general-header__segments" role="toolbar" aria-label="Действия в общем чате">
                   <button type="button" class="chat-general-invite-friend-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralInviteFriendBtn" title="Пригласить в общий чат" aria-label="Поделиться ссылкой на общий чат">
@@ -6344,10 +6341,10 @@
     </div>
 
     <!-- defer: параллельная загрузка; порядок сохранён. Telegram SDK — локально: иначе в РФ без VPN первый defer ждёт telegram.org и блокирует весь остальной JS. Обновлять: curl -o telegram-web-app.js https://telegram.org/js/telegram-web-app.js -->
-    <script defer src="./telegram-web-app.js?v=7"></script>
+    <script defer src="./telegram-web-app.js?v=8"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=817"></script>
+    <script defer src="./app.js?v=818"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
