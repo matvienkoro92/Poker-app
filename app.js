@@ -24416,6 +24416,42 @@ function initChat() {
       });
   });
 
+  var CHAT_POLL_TICK_MS = 1000;
+  var CHAT_OPEN_IDLE_MS = 5000;
+  var CHAT_OPEN_BURST_MS = 1000;
+  var CHAT_DIALOGS_IDLE_MS = 15000;
+  var CHAT_HIDDEN_IDLE_MS = 60000;
+  var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
+  var chatBurstUntilByScope = { general: 0, personal: 0 };
+  var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
+
+  function pokerChatRequestPollBurst(scope, durationMs) {
+    var key = scope === "general" ? "general" : "personal";
+    var dur = Number(durationMs);
+    if (!isFinite(dur) || dur <= 0) dur = CHAT_ACTIVITY_BURST_WINDOW_MS;
+    chatBurstUntilByScope[key] = Date.now() + dur;
+  }
+
+  function pokerChatPollIntervalForScope(scope) {
+    var now = Date.now();
+    if (scope === "contacts") return CHAT_DIALOGS_IDLE_MS;
+    if (scope === "admins") return CHAT_OPEN_IDLE_MS;
+    if (scope === "general" || scope === "personal") {
+      return now < (chatBurstUntilByScope[scope] || 0) ? CHAT_OPEN_BURST_MS : CHAT_OPEN_IDLE_MS;
+    }
+    return CHAT_OPEN_IDLE_MS;
+  }
+
+  function pokerChatShouldRunPoll(scope, nowMs) {
+    var key = String(scope || "");
+    var now = Number(nowMs) || Date.now();
+    var interval = pokerChatPollIntervalForScope(key);
+    var last = chatLastPollAt[key] || 0;
+    if (now - last < interval) return false;
+    chatLastPollAt[key] = now;
+    return true;
+  }
+
   function loadGeneral() {
     var genVisEarly = generalView && !generalView.classList.contains("chat-general-view--hidden");
     if (typeof getPokerChatTelegramAuthState === "function" && chatActiveTab === "general" && genVisEarly) {
@@ -24482,9 +24518,16 @@ function initChat() {
         messages = mergeOptimisticGeneralIntoMessages(messages);
         var prevGeneralCache =
           window._chatGeneralCache && typeof window._chatGeneralCache === "object" ? window._chatGeneralCache : {};
+        var prevGeneralMessages = Array.isArray(prevGeneralCache.messages) ? prevGeneralCache.messages : [];
+        var prevGeneralLatest = prevGeneralMessages.length
+          ? String(prevGeneralMessages[prevGeneralMessages.length - 1].id || "") + "|" + String(prevGeneralMessages[prevGeneralMessages.length - 1].time || "")
+          : "";
         var nextGeneralMembers = Array.isArray(data.generalMembers)
           ? data.generalMembers
           : (Array.isArray(prevGeneralCache.generalMembers) ? prevGeneralCache.generalMembers : []);
+        var nextGeneralLatest = messages.length
+          ? String(messages[messages.length - 1].id || "") + "|" + String(messages[messages.length - 1].time || "")
+          : "";
         window._chatGeneralCache = {
           messages: messages,
           participantsCount: data.participantsCount,
@@ -24502,6 +24545,9 @@ function initChat() {
         try {
           refreshChatSelfPinBars();
         } catch (ePinLoadG) {}
+        if (nextGeneralLatest && nextGeneralLatest !== prevGeneralLatest) {
+          pokerChatRequestPollBurst("general");
+        }
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
@@ -26264,6 +26310,7 @@ function initChat() {
           if (!httpOk && !d.error) d.error = "Ошибка отправки";
           if (httpOk && d && d.ok) {
             optimisticGeneralPayload = null;
+            pokerChatRequestPollBurst("general");
             var msg = d.message;
             if (msg && pokerChatMessageHasPersistedId(msg.id)) {
               window._pendingGeneralMessage = msg;
@@ -28180,6 +28227,13 @@ function initChat() {
           window.__pokerPersonalPollRev = data.pollRev;
         }
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
+        var prevPersonalMessages =
+          chatWithUserId && personalMessagesCache[chatWithUserId] && Array.isArray(personalMessagesCache[chatWithUserId])
+            ? personalMessagesCache[chatWithUserId]
+            : [];
+        var prevPersonalLatest = prevPersonalMessages.length
+          ? String(prevPersonalMessages[prevPersonalMessages.length - 1].id || "") + "|" + String(prevPersonalMessages[prevPersonalMessages.length - 1].time || "")
+          : "";
         var messages = data.messages || [];
         var pendingEditP = window._pendingPersonalEditMessage;
         if (pendingEditP && pendingEditP.id && chatWithUserId) {
@@ -28269,6 +28323,12 @@ function initChat() {
           applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
         }
         var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
+        var nextPersonalLatest = messages.length
+          ? String(messages[messages.length - 1].id || "") + "|" + String(messages[messages.length - 1].time || "")
+          : "";
+        if (nextPersonalLatest && nextPersonalLatest !== prevPersonalLatest) {
+          pokerChatRequestPollBurst("personal");
+        }
         var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
         var peerLvKey = chatWithUserId ? normalizePeerIdForChat(chatWithUserId) : "";
         var lastView = peerLvKey && lastViewedPersonal[peerLvKey] != null ? lastViewedPersonal[peerLvKey] : "";
@@ -28642,6 +28702,7 @@ function initChat() {
         hideProgress();
         if (data && data.ok) {
           optimisticPersonalPayload = null;
+          pokerChatRequestPollBurst("personal");
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
           var msg = data.message;
           if (msg && pokerChatMessageHasPersistedId(msg.id) && chatWithUserId) {
@@ -34910,26 +34971,30 @@ function initChat() {
     }
   })();
 
-  /** Интервал опроса (мс): открытый чат ~5s, список диалогов ~15s, фон ~60s. */
-  var CHAT_POLL_MS = 5000;
+  /** Базовый тик таймера: сеть ходит только по динамическим интервалам ниже. */
+  var CHAT_POLL_MS = CHAT_POLL_TICK_MS;
   if (chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(function () {
     var hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
     var chatViewOn = typeof document !== "undefined" && !!document.querySelector('[data-view="chat"].view--active');
-    window.__pokerChatPollTickN = (window.__pokerChatPollTickN || 0) + 1;
-    var t = window.__pokerChatPollTickN;
     var guestPoll = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
     var credPoll = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    var nowPoll = Date.now();
 
     if (hidden) {
-      if (t % 12 !== 0) return;
-      if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
+      if (credPoll && !guestPoll && typeof loadContacts === "function") {
+        if (!chatLastPollAt.contacts || nowPoll - chatLastPollAt.contacts >= CHAT_HIDDEN_IDLE_MS) {
+          chatLastPollAt.contacts = nowPoll;
+          loadContacts();
+        }
+      }
       return;
     }
 
     if (!chatViewOn) {
-      if (t % 3 !== 0) return;
-      if (credPoll && !guestPoll && typeof loadContacts === "function") loadContacts();
+      if (credPoll && !guestPoll && typeof loadContacts === "function" && pokerChatShouldRunPoll("contacts", nowPoll)) {
+        loadContacts();
+      }
       return;
     }
 
@@ -34937,18 +35002,20 @@ function initChat() {
       chatActiveTab === "general" &&
       generalView &&
       !generalView.classList.contains("chat-general-view--hidden") &&
-      typeof loadGeneral === "function"
+      typeof loadGeneral === "function" &&
+      pokerChatShouldRunPoll("general", nowPoll)
     ) {
       loadGeneral();
     }
-    if (chatWithUserId && typeof loadMessages === "function") loadMessages();
+    if (chatWithUserId && typeof loadMessages === "function" && pokerChatShouldRunPoll("personal", nowPoll)) loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
-      if (t % 3 === 0) loadContacts();
+      if (pokerChatShouldRunPoll("contacts", nowPoll)) loadContacts();
     } else if (
       chatActiveTab === "admins" &&
       adminsView &&
       !adminsView.classList.contains("chat-admins-view--hidden") &&
-      typeof loadAdminsOnline === "function"
+      typeof loadAdminsOnline === "function" &&
+      pokerChatShouldRunPoll("admins", nowPoll)
     ) {
       loadAdminsOnline();
     }
