@@ -29569,6 +29569,9 @@ function initChat() {
         });
       }
       function finalizeChatKeyboardDismiss() {
+        try {
+          window.__pokerChatKeyboardOpeningUntil = 0;
+        } catch (eOpenReset) {}
         setNativeTelegramIosComposerFocusClasses(false);
         resetChatKeyboardDockRuntimeState();
         try {
@@ -29686,6 +29689,8 @@ function initChat() {
         try {
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
           if (!document.body.classList.contains("chat-keyboard-open")) return false;
+          var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+          if (openingUntil > Date.now()) return false;
           var pwaLike =
             (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
             (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
@@ -30692,6 +30697,7 @@ function initChat() {
         try {
           resetChatKeyboardDockRuntimeState();
           window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
         } catch (eDockOn) {}
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
