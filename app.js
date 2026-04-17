@@ -24480,12 +24480,17 @@ function initChat() {
           }
         }
         messages = mergeOptimisticGeneralIntoMessages(messages);
+        var prevGeneralCache =
+          window._chatGeneralCache && typeof window._chatGeneralCache === "object" ? window._chatGeneralCache : {};
+        var nextGeneralMembers = Array.isArray(data.generalMembers)
+          ? data.generalMembers
+          : (Array.isArray(prevGeneralCache.generalMembers) ? prevGeneralCache.generalMembers : []);
         window._chatGeneralCache = {
           messages: messages,
           participantsCount: data.participantsCount,
           onlineCount: data.onlineCount,
           generalPinned: data.generalPinned != null ? data.generalPinned : null,
-          generalMembers: Array.isArray(data.generalMembers) ? data.generalMembers : [],
+          generalMembers: nextGeneralMembers,
         };
         if (!noGeneralAccess) {
           try {
@@ -34027,7 +34032,7 @@ function initChat() {
       }
       if (membersEl) membersEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
       var qG = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-      fetch(base + "/api/chat" + qG + "&mode=general&trackSeen=0")
+      fetch(base + "/api/chat" + qG + "&mode=general&trackSeen=0&includeRoster=1")
         .then(function (r) {
           return r.json();
         })
@@ -34425,7 +34430,7 @@ function initChat() {
                   kickB.disabled = false;
                   if (data && data.ok) {
                     var qGr = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-                    fetch(base + "/api/chat" + qGr + "&mode=general&trackSeen=0")
+                    fetch(base + "/api/chat" + qGr + "&mode=general&trackSeen=0&includeRoster=1")
                       .then(function (r2) {
                         return r2.json();
                       })
