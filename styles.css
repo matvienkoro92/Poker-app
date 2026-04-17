@@ -419,6 +419,16 @@ body {
   justify-content: flex-start;
   overflow: hidden;
 }
+html.app--telegram-miniapp {
+  --tg-ui-top-clearance: max(
+    64px,
+    calc(env(safe-area-inset-top, 0px) + 52px),
+    calc(var(--app-top-from-tg, 48px) + 12px)
+  );
+}
+html.app--telegram-miniapp .app {
+  padding-top: var(--tg-ui-top-clearance) !important;
+}
 /*
  * Внутренний скролл в .card__content (главная, скачать, депозит, рейтинг весны, розыгрыши, профиль, зал славы):
  * нижний запас под таббар — padding-bottom у .card__content (см. scrollport выше); padding-bottom .app
@@ -456,7 +466,7 @@ html.app-view-raffles-html-scroll #app.app {
  * Не смешивать с env(safe-area-inset-top) в max() — иначе после viewportChanged появляется лишний «второй» зазор.
  */
 html.app--tg-content-inset .app {
-  padding-top: max(12px, var(--app-top-from-tg, 48px));
+  padding-top: var(--tg-ui-top-clearance, max(12px, var(--app-top-from-tg, 48px))) !important;
 }
 @media (display-mode: standalone), (display-mode: fullscreen) {
   :root {
