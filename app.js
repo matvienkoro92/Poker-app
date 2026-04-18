@@ -5473,6 +5473,39 @@ function runGazetteAndTasksInit() {
       } catch (eLocClr) {}
     } catch (eClrPush) {}
   }
+  function pokerFindChatContactByPeerId(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return null;
+    var data = window.__pokerLastContactsApiData;
+    if ((!data || !Array.isArray(data.contacts) || data.contacts.length === 0) && typeof pokerTryReadContactsCache === "function") {
+      try {
+        var cached = pokerTryReadContactsCache();
+        if (cached && cached.ok && Array.isArray(cached.contacts)) data = cached;
+      } catch (eCtFind) {}
+    }
+    if (!data || !Array.isArray(data.contacts)) return null;
+    for (var i = 0; i < data.contacts.length; i++) {
+      var c = data.contacts[i];
+      if (!c || !c.id) continue;
+      if (peerChatIdsEqual(c.id, pid)) return c;
+    }
+    return null;
+  }
+  function pokerOpenResolvedChatPeer(peerId, fallbackName) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
+    var found = pokerFindChatContactByPeerId(pid);
+    if (found) {
+      window.chatOpenConvFromDialogs(
+        found.id,
+        found.contactName || found.name || fallbackName || found.id,
+        found.p21Id != null ? found.p21Id : undefined,
+        found.avatar || undefined
+      );
+      return true;
+    }
+    return false;
+  }
   function pokerOpenChatFromCurrentUrlIfAny() {
     try {
       if (typeof location === "undefined" || !location.search) return false;
@@ -5484,9 +5517,25 @@ function runGazetteAndTasksInit() {
         window.openClubChat();
         return true;
       }
-      if (startApp === "club_chat_dm" && withPeer && typeof window.chatOpenConvFromDialogs === "function") {
-        pokerClearPushChatTarget();
-        window.chatOpenConvFromDialogs(withPeer, withPeer);
+      if (startApp === "club_chat_dm" && withPeer) {
+        if (pokerOpenResolvedChatPeer(withPeer, withPeer)) {
+          pokerClearPushChatTarget();
+          return true;
+        }
+        window.__pendingOpenChatPersonalFromDeepLink = {
+          userId: withPeer,
+          userName: withPeer,
+        };
+        if (typeof loadContacts === "function") {
+          loadContacts({
+            onLoaded: function () {
+              try {
+                if (typeof window.__pokerFlushPendingChatDeepLink === "function") window.__pokerFlushPendingChatDeepLink();
+              } catch (ePushReloadDm) {}
+            },
+          });
+        }
+        if (typeof setView === "function") setView("chat");
         return true;
       }
     } catch (eCurPushUrl) {}
@@ -5506,10 +5555,11 @@ function runGazetteAndTasksInit() {
       }
       if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
         var pdlNow = window.__pendingOpenChatPersonalFromDeepLink;
-        window.__pendingOpenChatPersonalFromDeepLink = null;
-        pokerClearPushChatTarget();
-        window.chatOpenConvFromDialogs(pdlNow.userId, pdlNow.userName || pdlNow.userId, pdlNow.peerP21Id || undefined);
-        return true;
+        if (pokerOpenResolvedChatPeer(pdlNow.userId, pdlNow.userName || pdlNow.userId)) {
+          window.__pendingOpenChatPersonalFromDeepLink = null;
+          pokerClearPushChatTarget();
+          return true;
+        }
       }
     } catch (eFlushDeep) {}
     return false;
@@ -18271,6 +18321,7 @@ function initRaffles() {
     if (isTickets) {
       setupTournamentDaySelect();
       buildTicketGroupInputs();
+      syncSingleTicketCustomInputs();
       updateRaffleCreateTotal();
     } else {
       buildGroupInputs();
@@ -18278,6 +18329,31 @@ function initRaffles() {
   }
 
   var raffleTicketTournamentWrap = document.getElementById("raffleTicketTournamentWrap");
+  var raffleTicketCustomFields = document.getElementById("raffleTicketCustomFields");
+  var raffleTicketCustomName = document.getElementById("raffleTicketCustomName");
+  var raffleTicketCustomPrice = document.getElementById("raffleTicketCustomPrice");
+  function ensureSingleTicketCustomFields() {
+    if (raffleTicketCustomFields && raffleTicketCustomName && raffleTicketCustomPrice) return;
+    if (!raffleTicketTournamentWrap) return;
+    var wrap = document.createElement("div");
+    wrap.id = "raffleTicketCustomFields";
+    wrap.style.display = "none";
+    wrap.innerHTML =
+      '<label class="randomizer-label">' +
+      '<span class="randomizer-label__text">Название турнира:</span>' +
+      '<input type="text" id="raffleTicketCustomName" class="randomizer-input" maxlength="120" placeholder="Например, Sunday Million" />' +
+      "</label>" +
+      '<label class="randomizer-label">' +
+      '<span class="randomizer-label__text">Цена билета:</span>' +
+      '<input type="number" id="raffleTicketCustomPrice" class="randomizer-input" min="0" step="0.01" inputmode="decimal" placeholder="Например, 550" />' +
+      "</label>";
+    raffleTicketTournamentWrap.appendChild(wrap);
+    raffleTicketCustomFields = document.getElementById("raffleTicketCustomFields");
+    raffleTicketCustomName = document.getElementById("raffleTicketCustomName");
+    raffleTicketCustomPrice = document.getElementById("raffleTicketCustomPrice");
+    if (raffleTicketCustomName) raffleTicketCustomName.addEventListener("input", updateRaffleCreateTotal);
+    if (raffleTicketCustomPrice) raffleTicketCustomPrice.addEventListener("input", updateRaffleCreateTotal);
+  }
   function buildTicketGroupInputs() {
     if (!raffleTicketGroupCount || !raffleTicketWinnersWrap || !raffleTicketGroups) return;
     var n = Math.max(1, Math.min(10, parseInt(raffleTicketGroupCount.value, 10) || 1));
@@ -18299,11 +18375,30 @@ function initRaffles() {
         tournamentSelect.setAttribute("aria-label", "Турнир для группы " + (i + 1));
       }
       var selectHtml = tournamentSelect ? tournamentSelect.outerHTML : "<select class=\"randomizer-input raffle-tournament-select raffle-ticket-group-tournament\" data-group-index=\"" + i + "\" aria-label=\"Турнир для группы " + (i + 1) + "\"><option value=\"\">— Выберите турнир —</option></select>";
-      div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " (<span class=\"raffle-ticket-group-winners-num\" data-group-index=\"" + i + "\">1</span> побед.) — турнир:</span>" + selectHtml + "</label><label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span><input type=\"number\" class=\"raffle-ticket-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>";
+      div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " (<span class=\"raffle-ticket-group-winners-num\" data-group-index=\"" + i + "\">1</span> побед.) — турнир:</span>" + selectHtml + "</label><label class=\"randomizer-label raffle-ticket-group-custom-name-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">название турнира:</span><input type=\"text\" class=\"raffle-ticket-group-custom-name randomizer-input\" maxlength=\"120\" data-group-index=\"" + i + "\" placeholder=\"Например, Sunday Million\" /></label><label class=\"randomizer-label raffle-ticket-group-custom-price-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">цена билета:</span><input type=\"number\" class=\"raffle-ticket-group-custom-price randomizer-input\" min=\"0\" step=\"0.01\" inputmode=\"decimal\" data-group-index=\"" + i + "\" placeholder=\"Например, 550\" /></label><label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span><input type=\"number\" class=\"raffle-ticket-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>";
       raffleTicketGroups.appendChild(div);
     }
+    syncTicketGroupCustomInputs();
     updateRaffleCreateTotal();
     updateTicketGroupWinnersLabels();
+  }
+
+  function syncSingleTicketCustomInputs() {
+    ensureSingleTicketCustomFields();
+    if (!raffleTicketTournamentSelect || !raffleTicketCustomFields) return;
+    raffleTicketCustomFields.style.display = raffleTicketTournamentSelect.value === "custom" ? "" : "none";
+  }
+
+  function syncTicketGroupCustomInputs() {
+    if (!raffleTicketGroups) return;
+    raffleTicketGroups.querySelectorAll(".raffle-ticket-group-row").forEach(function (row) {
+      var groupSelect = row.querySelector(".raffle-ticket-group-tournament");
+      var isCustom = !!(groupSelect && groupSelect.value === "custom");
+      var nameWrap = row.querySelector(".raffle-ticket-group-custom-name-wrap");
+      var priceWrap = row.querySelector(".raffle-ticket-group-custom-price-wrap");
+      if (nameWrap) nameWrap.style.display = isCustom ? "" : "none";
+      if (priceWrap) priceWrap.style.display = isCustom ? "" : "none";
+    });
   }
 
   function updateTicketGroupWinnersLabels() {
@@ -18327,6 +18422,8 @@ function initRaffles() {
       var buyin = 0;
       if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value && raffleTicketTournamentSelect.value !== "custom") {
         buyin = parseFloat(raffleTicketTournamentSelect.value) || 0;
+      } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom" && raffleTicketCustomPrice && raffleTicketCustomPrice.value) {
+        buyin = parseFloat(raffleTicketCustomPrice.value) || 0;
       }
       total = c * buyin;
       if (c > 0 && buyin >= 0) parts.push(c + " × " + (buyin % 1 === 0 ? buyin : buyin.toFixed(2)) + " ₽");
@@ -18339,6 +18436,9 @@ function initRaffles() {
         var buyin = 0;
         if (groupSelect && groupSelect.value && groupSelect.value !== "custom") {
           buyin = parseFloat(groupSelect.value) || 0;
+        } else if (groupSelect && groupSelect.value === "custom") {
+          var customPrice = rows[i].querySelector(".raffle-ticket-group-custom-price");
+          if (customPrice && customPrice.value) buyin = parseFloat(customPrice.value) || 0;
         }
         total += cnt * buyin;
         if (cnt > 0 && buyin >= 0) parts.push(cnt + " × " + (buyin % 1 === 0 ? buyin : buyin.toFixed(2)) + " ₽");
@@ -18486,18 +18586,28 @@ function initRaffles() {
   }
   if (raffleTypeTickets) raffleTypeTickets.addEventListener("change", switchRaffleCreatePanel);
   if (raffleTypeOther) raffleTypeOther.addEventListener("change", switchRaffleCreatePanel);
-  if (raffleTicketTournamentSelect) raffleTicketTournamentSelect.addEventListener("change", updateRaffleCreateTotal);
+  if (raffleTicketTournamentSelect) raffleTicketTournamentSelect.addEventListener("change", function () {
+    syncSingleTicketCustomInputs();
+    updateRaffleCreateTotal();
+  });
   if (raffleTicketGroupCount) raffleTicketGroupCount.addEventListener("change", buildTicketGroupInputs);
   if (raffleTicketGroupCount) raffleTicketGroupCount.addEventListener("input", buildTicketGroupInputs);
   if (raffleTicketWinnersCount) raffleTicketWinnersCount.addEventListener("input", updateRaffleCreateTotal);
+  if (raffleTicketCustomName) raffleTicketCustomName.addEventListener("input", updateRaffleCreateTotal);
+  if (raffleTicketCustomPrice) raffleTicketCustomPrice.addEventListener("input", updateRaffleCreateTotal);
   if (raffleTicketGroups) {
     raffleTicketGroups.addEventListener("input", function (e) {
-      if (e.target && e.target.classList.contains("raffle-ticket-group-count")) {
+      if (e.target && (e.target.classList.contains("raffle-ticket-group-count") || e.target.classList.contains("raffle-ticket-group-custom-name") || e.target.classList.contains("raffle-ticket-group-custom-price"))) {
         updateTicketGroupWinnersLabels();
         updateRaffleCreateTotal();
       }
     });
-    raffleTicketGroups.addEventListener("change", function (e) { if (e.target && e.target.classList.contains("raffle-ticket-group-tournament")) updateRaffleCreateTotal(); });
+    raffleTicketGroups.addEventListener("change", function (e) {
+      if (e.target && e.target.classList.contains("raffle-ticket-group-tournament")) {
+        syncTicketGroupCustomInputs();
+        updateRaffleCreateTotal();
+      }
+    });
   }
   if (groupCountInput && raffleGroupsEl) {
     groupCountInput.addEventListener("change", buildGroupInputs);
@@ -18529,9 +18639,13 @@ function initRaffles() {
           var singleBuyin = 0;
           if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value && raffleTicketTournamentSelect.value !== "custom") {
             singleBuyin = parseFloat(raffleTicketTournamentSelect.value) || 0;
+          } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom" && raffleTicketCustomPrice && raffleTicketCustomPrice.value) {
+            singleBuyin = parseFloat(raffleTicketCustomPrice.value) || 0;
           }
           var singleTournamentName = "";
-          if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.selectedIndex >= 0) {
+          if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom") {
+            singleTournamentName = raffleTicketCustomName ? raffleTicketCustomName.value.trim() : "";
+          } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.selectedIndex >= 0) {
             var singleOpt = raffleTicketTournamentSelect.options[raffleTicketTournamentSelect.selectedIndex];
             singleTournamentName = (singleOpt && (singleOpt.getAttribute("data-name") || singleOpt.textContent || "").trim()) || "";
           }
@@ -18547,9 +18661,15 @@ function initRaffles() {
             var groupBuyin = 0;
             if (groupSelect && groupSelect.value && groupSelect.value !== "custom") {
               groupBuyin = parseFloat(groupSelect.value) || 0;
+            } else if (groupSelect && groupSelect.value === "custom") {
+              var groupCustomPrice = rows[i].querySelector(".raffle-ticket-group-custom-price");
+              if (groupCustomPrice && groupCustomPrice.value) groupBuyin = parseFloat(groupCustomPrice.value) || 0;
             }
             var groupTournamentName = "";
-            if (groupSelect && groupSelect.selectedIndex >= 0) {
+            if (groupSelect && groupSelect.value === "custom") {
+              var groupCustomName = rows[i].querySelector(".raffle-ticket-group-custom-name");
+              groupTournamentName = groupCustomName ? groupCustomName.value.trim() : "";
+            } else if (groupSelect && groupSelect.selectedIndex >= 0) {
               var groupOpt = groupSelect.options[groupSelect.selectedIndex];
               groupTournamentName = (groupOpt && (groupOpt.getAttribute("data-name") || groupOpt.textContent || "").trim()) || "";
             }

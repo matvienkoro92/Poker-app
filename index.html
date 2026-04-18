@@ -2500,6 +2500,16 @@
                       <option value="custom">Свой вариант (ввести вручную)</option>
                     </select>
                   </label>
+                  <div id="raffleTicketCustomFields" style="display:none;">
+                    <label class="randomizer-label">
+                      <span class="randomizer-label__text">Название турнира:</span>
+                      <input type="text" id="raffleTicketCustomName" class="randomizer-input" maxlength="120" placeholder="Например, Sunday Million" />
+                    </label>
+                    <label class="randomizer-label">
+                      <span class="randomizer-label__text">Цена билета:</span>
+                      <input type="number" id="raffleTicketCustomPrice" class="randomizer-input" min="0" step="0.01" inputmode="decimal" placeholder="Например, 550" />
+                    </label>
+                  </div>
                   </div>
                   <div class="raffle-ticket-winners-wrap raffle-ticket-winners-wrap--single" id="raffleTicketWinnersWrap">
                     <label class="randomizer-label raffle-ticket-single-winners" id="raffleTicketSingleWinnersLabel">

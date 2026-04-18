@@ -191,16 +191,6 @@ self.addEventListener("notificationclick", function (event) {
         try {
           chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
         } catch (ePostOpen) {}
-        if (typeof chosen.navigate === "function") {
-          return chosen.navigate(targetUrl).then(function () {
-            try {
-              chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
-            } catch (ePostNav) {}
-            return chosen.focus();
-          }).catch(function () {
-            return chosen.focus();
-          });
-        }
         return chosen.focus().then(function () {
           try {
             chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
