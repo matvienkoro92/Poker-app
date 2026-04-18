@@ -23994,6 +23994,45 @@ function initChat() {
   }
   function setTab(tab) {
     pokerPushOpenTraceTransition("setTab-call", String(tab || ""));
+    if (tab === "dialogs") {
+      try {
+        var pendingDialogsDirect = window.__pendingOpenChatPersonalFromDeepLink;
+        var pendingDialogsPeer =
+          pendingDialogsDirect && pendingDialogsDirect.userId != null
+            ? String(pendingDialogsDirect.userId).trim()
+            : "";
+        if (pendingDialogsPeer) {
+          pokerPushOpenDebug("setTab-dialogs-pending-blocked", pendingDialogsPeer);
+          window.__pokerForcePushDmPeer = normalizePeerIdForChat(pendingDialogsPeer);
+          window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+          window.__pokerForceAllowPendingPushConvOpen = true;
+          try {
+            if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" &&
+                window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
+              return;
+            }
+            if (typeof pokerOpenResolvedChatPeer === "function" &&
+                pokerOpenResolvedChatPeer(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
+              return;
+            }
+            if (typeof pokerOpenChatPeerDirectFallback === "function" &&
+                pokerOpenChatPeerDirectFallback(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
+              return;
+            }
+            if (typeof pokerOpenPendingPushDmWithoutContacts === "function" &&
+                pokerOpenPendingPushDmWithoutContacts(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
+              return;
+            }
+            if (typeof pokerOpenPushDmHard === "function") {
+              pokerOpenPushDmHard(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer);
+              return;
+            }
+          } finally {
+            window.__pokerForceAllowPendingPushConvOpen = false;
+          }
+        }
+      } catch (eSetTabDialogsPending) {}
+    }
     chatActiveTab = tab;
     closeSwitcherDropdown();
     /* Раньше setTab("dialogs") только прятал dialogsView первой строкой — список диалогов не показывался; chatRefresh дополнял showDialogs(), что ломало общий/админ таб после setTab("general"). */
