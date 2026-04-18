@@ -5686,6 +5686,7 @@ function runGazetteAndTasksInit() {
     } catch (eEnsurePendingDm) {}
     return false;
   }
+  window.__pokerEnsureOpenPendingChatPersonalFromDeepLink = pokerEnsureOpenPendingChatPersonalFromDeepLink;
   function pokerOpenChatFromCurrentUrlIfAny() {
     try {
       if (typeof location === "undefined" || !location.search) return false;
@@ -5755,7 +5756,9 @@ function runGazetteAndTasksInit() {
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
       if (startApp === "club_chat_dm" && withPeer) {
         try {
-          pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+            window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
         } catch (ePushOpenDmEnsure) {}
       }
       setTimeout(function () {
@@ -11194,7 +11197,9 @@ function setView(viewName, navOpts) {
                 return;
               }
               if (window.__pendingOpenChatPersonalFromDeepLink && typeof pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
-                pokerEnsureOpenPendingChatPersonalFromDeepLink();
+                if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+                  window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
+                }
               }
             } catch (eChatPostRefreshOpen) {}
           }, 0);
