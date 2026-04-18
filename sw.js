@@ -173,6 +173,13 @@ self.addEventListener("notificationclick", function (event) {
   } catch (e2) {
     targetUrl = self.location.origin + "/?startapp=club_chat";
   }
+  function notifyClient(client) {
+    if (!client) return Promise.resolve();
+    try {
+      client.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
+    } catch (ePostFocus) {}
+    return Promise.resolve();
+  }
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windowClients) {
       var i;
@@ -189,14 +196,19 @@ self.addEventListener("notificationclick", function (event) {
       }
       if (chosen) {
         return chosen.focus().then(function () {
-          try {
-            chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
-          } catch (ePostFocus) {}
+          return notifyClient(chosen);
         }).catch(function () {
-          if (clients.openWindow) return clients.openWindow(targetUrl);
+          if (!clients.openWindow) return;
+          return clients.openWindow(targetUrl).then(function (openedClient) {
+            return notifyClient(openedClient);
+          });
         });
       }
-      if (clients.openWindow) return clients.openWindow(targetUrl);
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl).then(function (openedClient) {
+          return notifyClient(openedClient);
+        });
+      }
     })
   );
 });
