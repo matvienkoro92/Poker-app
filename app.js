@@ -10931,17 +10931,12 @@ function setView(viewName, navOpts) {
           pokerPushOpenStateDebug("setView-chat-open-pending", pendingPeerSetView || "");
           if (
             pendingPeerSetView &&
-            typeof window.__pokerOpenPushDmImmediate === "function" &&
-            typeof normalizePeerIdForChat === "function"
-          ) {
-            window.__pokerForcePushDmPeer = normalizePeerIdForChat(pendingPeerSetView);
-            window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
-            window.__pokerForceAllowPendingPushConvOpen = true;
-            window.__pokerOpenPushDmImmediate(
-              normalizePeerIdForChat(pendingPeerSetView),
+            typeof pokerOpenChatPeerDirectFallback === "function" &&
+            pokerOpenChatPeerDirectFallback(
+              pendingPeerSetView,
               pendingDmSetView.userName || pendingPeerSetView
-            );
-            window.__pokerForceAllowPendingPushConvOpen = false;
+            )
+          ) {
             window.__pendingOpenChatPersonalFromDeepLink = null;
           } else {
             pokerEnsureOpenPendingChatPersonalFromDeepLink();
