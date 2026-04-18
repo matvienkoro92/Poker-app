@@ -5666,6 +5666,11 @@ function runGazetteAndTasksInit() {
         window.__pokerLastPushOpenUrl = String(rawUrl || "");
         window.__pokerLastPushOpenAt = Date.now();
       } catch (ePushMark) {}
+      try {
+        if (typeof history !== "undefined" && history && typeof history.replaceState === "function") {
+          history.replaceState(history.state, "", urlObj.href);
+        }
+      } catch (ePushHistory) {}
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
       if (startApp === "club_chat_dm" && withPeer) {
         try {

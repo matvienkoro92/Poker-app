@@ -178,6 +178,12 @@ self.addEventListener("notificationclick", function (event) {
       setTimeout(resolve, ms);
     });
   }
+  function navigateClient(client) {
+    if (!client || typeof client.navigate !== "function") return Promise.resolve(client);
+    return client.navigate(targetUrl).catch(function () {
+      return client;
+    });
+  }
   function notifyClient(client) {
     if (!client) return Promise.resolve();
     try {
@@ -187,7 +193,10 @@ self.addEventListener("notificationclick", function (event) {
   }
   function notifyClientRobust(client) {
     if (!client) return Promise.resolve();
-    return notifyClient(client)
+    return navigateClient(client)
+      .then(function (navigatedClient) {
+        return notifyClient(navigatedClient || client);
+      })
       .then(function () { return waitMs(450); })
       .then(function () { return notifyClient(client); })
       .catch(function () {});
