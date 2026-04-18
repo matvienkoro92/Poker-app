@@ -10997,13 +10997,17 @@ function setView(viewName, navOpts) {
           ) {
             window.__pendingOpenChatPersonalFromDeepLink = null;
           } else {
-            pokerEnsureOpenPendingChatPersonalFromDeepLink();
+            if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+              window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
+            }
           }
         } catch (eSetViewOpenPending) {
           try {
             window.__pokerForceAllowPendingPushConvOpen = false;
           } catch (eSetViewForceReset) {}
-          pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+            window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
         }
       } else if (window.__pendingOpenChatPersonalFromDeepLink) {
         try {
