@@ -74,28 +74,8 @@ function pokerCanShowPushDebugOverlay() {
 function pokerPushDebugRenderOverlay() {
   try {
     if (typeof document === "undefined" || !document.body) return;
-    if (!pokerCanShowPushDebugOverlay()) {
-      var hiddenEl = document.getElementById("pokerPushDebugOverlay");
-      if (hiddenEl && hiddenEl.parentNode) hiddenEl.parentNode.removeChild(hiddenEl);
-      return;
-    }
-    var trail = window.__pokerPushOpenDebugTrail || [];
-    if (!trail.length) return;
-    var el = document.getElementById("pokerPushDebugOverlay");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "pokerPushDebugOverlay";
-      el.style.cssText =
-        "position:fixed;left:10px;right:10px;bottom:88px;z-index:99999;padding:8px 10px;border-radius:12px;background:rgba(12,18,34,.92);color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;white-space:pre-wrap;";
-      document.body.appendChild(el);
-    }
-    el.textContent = trail.slice(-8).map(function (x) { return x.msg; }).join("\n");
-    clearTimeout(window.__pokerPushDebugOverlayTimer || 0);
-    window.__pokerPushDebugOverlayTimer = setTimeout(function () {
-      try {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      } catch (eDbgHide) {}
-    }, 15000);
+    var hiddenEl = document.getElementById("pokerPushDebugOverlay");
+    if (hiddenEl && hiddenEl.parentNode) hiddenEl.parentNode.removeChild(hiddenEl);
   } catch (eDbgRender) {}
 }
 
