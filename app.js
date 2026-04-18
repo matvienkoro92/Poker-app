@@ -5641,26 +5641,18 @@ function runGazetteAndTasksInit() {
   }
   function pokerOpenResolvedChatPeer(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
-    if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
+    if (!pid || typeof pokerOpenPushDmHard !== "function") return false;
     var found = pokerFindChatContactByPeerId(pid);
     if (found) {
       try {
         pokerPushOpenDebug("openConv-resolved", pid);
       } catch (eOpenResolvedDbg) {}
-      try {
-        window.__pokerForcePushDmPeer = normalizePeerIdForChat(found.id);
-        window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
-        window.__pokerForceAllowPendingPushConvOpen = true;
-        window.chatOpenConvFromDialogs(
-          found.id,
-          found.contactName || found.name || fallbackName || found.id,
+      return pokerOpenPushDmHard(
+        found.id,
+        found.contactName || found.name || fallbackName || found.id,
           found.p21Id != null ? found.p21Id : undefined,
           found.avatar || undefined
-        );
-      } finally {
-        window.__pokerForceAllowPendingPushConvOpen = false;
-      }
-      return true;
+      );
     }
     return false;
   }
@@ -5783,17 +5775,13 @@ function runGazetteAndTasksInit() {
     if (!pid) return false;
     try {
       pokerPushOpenDebug("openConv-direct", pid);
-      window.__pokerForcePushDmPeer = normalizePeerIdForChat(pid);
-      window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
-      window.__pokerForceAllowPendingPushConvOpen = true;
-      if (typeof window.chatOpenConvFromDialogs === "function") {
-        window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      if (typeof pokerOpenPushDmHard === "function") {
+        if (!pokerOpenPushDmHard(normalizePeerIdForChat(pid), fallbackName || pid)) return false;
       } else if (typeof window.__pokerOpenPushDmImmediate === "function") {
         window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
       } else {
         return false;
       }
-      window.__pokerForceAllowPendingPushConvOpen = false;
       try {
         clearTimeout(window.__pokerPushDmOpenRetryTimer || 0);
       } catch (eRetryClr) {}
@@ -5803,26 +5791,22 @@ function runGazetteAndTasksInit() {
           var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
           if (convVisible && samePeer) return;
           pokerPushOpenDebug("openConv-retry", pid);
-          window.__pokerForceAllowPendingPushConvOpen = true;
-          if (typeof window.chatOpenConvFromDialogs === "function") {
-            window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          if (typeof pokerOpenPushDmHard === "function") {
+            pokerOpenPushDmHard(normalizePeerIdForChat(pid), fallbackName || pid);
           } else if (typeof window.__pokerOpenPushDmImmediate === "function") {
             window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
           }
-          window.__pokerForceAllowPendingPushConvOpen = false;
           setTimeout(function () {
             try {
               var convVisible2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
               var samePeer2 = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
               if (convVisible2 && samePeer2) return;
               pokerPushOpenDebug("openConv-retry2", pid);
-              window.__pokerForceAllowPendingPushConvOpen = true;
-              if (typeof window.chatOpenConvFromDialogs === "function") {
-                window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+              if (typeof pokerOpenPushDmHard === "function") {
+                pokerOpenPushDmHard(normalizePeerIdForChat(pid), fallbackName || pid);
               } else if (typeof window.__pokerOpenPushDmImmediate === "function") {
                 window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
               }
-              window.__pokerForceAllowPendingPushConvOpen = false;
             } catch (eRetry2) {}
           }, 700);
         } catch (eRetry1) {}
@@ -5833,22 +5817,14 @@ function runGazetteAndTasksInit() {
   }
   function pokerOpenPendingPushDmWithoutContacts(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
-    if (
-      !pid ||
-      (typeof window.chatOpenConvFromDialogs !== "function" &&
-        typeof window.__pokerOpenPushDmImmediate !== "function")
-    ) return false;
+    if (!pid || (typeof pokerOpenPushDmHard !== "function" && typeof window.__pokerOpenPushDmImmediate !== "function")) return false;
     try {
       pokerPushOpenDebug("openPendingNoContacts", pid);
-      window.__pokerForcePushDmPeer = normalizePeerIdForChat(pid);
-      window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
-      window.__pokerForceAllowPendingPushConvOpen = true;
-      if (typeof window.chatOpenConvFromDialogs === "function") {
-        window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      if (typeof pokerOpenPushDmHard === "function") {
+        if (!pokerOpenPushDmHard(normalizePeerIdForChat(pid), fallbackName || pid)) return false;
       } else {
         window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
       }
-      window.__pokerForceAllowPendingPushConvOpen = false;
       try {
         clearTimeout(window.__pokerPushDmNoContactsRetryTimer || 0);
       } catch (eNoContactsClr) {}
@@ -5858,20 +5834,15 @@ function runGazetteAndTasksInit() {
           var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
           if (convVisible && samePeer) return;
           pokerPushOpenDebug("openPendingNoContacts-retry", pid);
-          window.__pokerForceAllowPendingPushConvOpen = true;
-          if (typeof window.chatOpenConvFromDialogs === "function") {
-            window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          if (typeof pokerOpenPushDmHard === "function") {
+            pokerOpenPushDmHard(normalizePeerIdForChat(pid), fallbackName || pid);
           } else {
             window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
           }
-          window.__pokerForceAllowPendingPushConvOpen = false;
         } catch (eNoContactsRetry) {}
       }, 400);
       return true;
     } catch (eOpenNoContacts) {
-      try {
-        window.__pokerForceAllowPendingPushConvOpen = false;
-      } catch (eOpenNoContactsReset) {}
     }
     return false;
   }
