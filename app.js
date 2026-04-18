@@ -47,6 +47,35 @@ var POKER_NET_ERR =
 /** Таймаут одного HTTP-запроса (мс): обрывает «зависшие» соединения без смены Wi‑Fi/LTE. */
 var POKER_FETCH_TIMEOUT_MS = 20000;
 
+function pokerPushOpenDebug(step, extra) {
+  try {
+    var msg = "[push-open] " + String(step || "");
+    if (extra != null && String(extra).trim() !== "") msg += " :: " + String(extra).trim();
+    window.__pokerPushOpenDebugTrail = window.__pokerPushOpenDebugTrail || [];
+    window.__pokerPushOpenDebugTrail.push({ t: Date.now(), msg: msg });
+    if (window.__pokerPushOpenDebugTrail.length > 10) window.__pokerPushOpenDebugTrail.shift();
+    try {
+      sessionStorage.setItem("poker_push_open_debug_last", JSON.stringify(window.__pokerPushOpenDebugTrail));
+    } catch (eDbgStore) {}
+    if (typeof document === "undefined" || !document.body) return;
+    var el = document.getElementById("pokerPushDebugOverlay");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "pokerPushDebugOverlay";
+      el.style.cssText =
+        "position:fixed;left:10px;right:10px;bottom:88px;z-index:99999;padding:8px 10px;border-radius:12px;background:rgba(12,18,34,.92);color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;white-space:pre-wrap;";
+      document.body.appendChild(el);
+    }
+    el.textContent = window.__pokerPushOpenDebugTrail.slice(-4).map(function (x) { return x.msg; }).join("\n");
+    clearTimeout(window.__pokerPushDebugOverlayTimer || 0);
+    window.__pokerPushDebugOverlayTimer = setTimeout(function () {
+      try {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      } catch (eDbgHide) {}
+    }, 12000);
+  } catch (eDbg) {}
+}
+
 /**
  * fetch с таймаутом (AbortController). Не дублирует signal из init — перезапись signal.
  */
@@ -1528,6 +1557,7 @@ function initProfileChatPush() {
       }
       if (d.pokerChatOpenUrl && typeof window.__pokerOpenChatFromPushUrl === "function") {
         try {
+          pokerPushOpenDebug("sw-message", d.pokerChatOpenUrl);
           window.__pokerOpenChatFromPushUrl(d.pokerChatOpenUrl);
         } catch (ePushOpen) {}
       }
@@ -5491,6 +5521,7 @@ function runGazetteAndTasksInit() {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
     try {
+      pokerPushOpenDebug("openConv-direct", pid);
       window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
       return true;
     } catch (eOpenPeerFallback) {}
@@ -5502,6 +5533,7 @@ function runGazetteAndTasksInit() {
       if (!pending) return false;
       var peerId = pending.userId != null ? String(pending.userId).trim() : "";
       if (!peerId) return false;
+      pokerPushOpenDebug("pending-dm", peerId);
       if (window.chatListenersAttached && typeof window.chatOpenConvFromDialogs === "function") {
         if (pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
           window.__pendingOpenChatPersonalFromDeepLink = null;
@@ -5586,6 +5618,7 @@ function runGazetteAndTasksInit() {
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
       if (!startApp) return;
+      pokerPushOpenDebug("push-url", startApp + (withPeer ? " with=" + withPeer : ""));
       try {
         window.__pokerLastPushOpenUrl = String(rawUrl || "");
         window.__pokerLastPushOpenAt = Date.now();
@@ -33172,6 +33205,7 @@ function initChat() {
     window.__openClubChatAfterNextContacts = true;
   }
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
+    pokerPushOpenDebug("initChat-branch", window.__pendingOpenChatPersonalFromDeepLink.userId || "");
     var pdlInit = window.__pendingOpenChatPersonalFromDeepLink;
     if (
       pdlInit &&
