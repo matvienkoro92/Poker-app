@@ -5617,13 +5617,29 @@ function runGazetteAndTasksInit() {
     var activePeer = pokerGetActivePushDmTarget();
     if (!activePeer) return false;
     pokerPushOpenDebug("dialogs-guard-reroute", activePeer);
+    try {
+      if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+      if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
+      if (generalView) {
+        generalView.classList.add("chat-general-view--hidden");
+        generalView.style.display = "none";
+      }
+      if (personalView) personalView.classList.remove("chat-personal-view--hidden");
+      if (listView) listView.classList.add("chat-list-view--hidden");
+      if (convView) convView.classList.remove("chat-conv-view--hidden");
+      chatActiveTab = "personal";
+      if (!chatWithUserId) chatWithUserId = normalizePeerIdForChat(activePeer);
+      if (!chatWithUserName) chatWithUserName = activePeer;
+      updateChatHeaderStats();
+      updateUnreadDots();
+    } catch (eGuardShell) {}
     if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
       if (window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) return true;
     }
     if (typeof pokerOpenChatPeerDirectFallback === "function") {
-      return pokerOpenChatPeerDirectFallback(activePeer, activePeer);
+      pokerOpenChatPeerDirectFallback(activePeer, activePeer);
     }
-    return false;
+    return true;
   }
   function pokerOpenChatPeerDirectFallback(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
