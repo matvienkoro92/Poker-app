@@ -46,6 +46,42 @@ var POKER_NET_ERR =
 
 /** Таймаут одного HTTP-запроса (мс): обрывает «зависшие» соединения без смены Wi‑Fi/LTE. */
 var POKER_FETCH_TIMEOUT_MS = 20000;
+var POKER_PUSH_DEBUG_SESSION_KEY = "poker_push_open_debug_last";
+
+function pokerPushDebugRenderOverlay() {
+  try {
+    if (typeof document === "undefined" || !document.body) return;
+    var trail = window.__pokerPushOpenDebugTrail || [];
+    if (!trail.length) return;
+    var el = document.getElementById("pokerPushDebugOverlay");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "pokerPushDebugOverlay";
+      el.style.cssText =
+        "position:fixed;left:10px;right:10px;bottom:88px;z-index:99999;padding:8px 10px;border-radius:12px;background:rgba(12,18,34,.92);color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;white-space:pre-wrap;";
+      document.body.appendChild(el);
+    }
+    el.textContent = trail.slice(-8).map(function (x) { return x.msg; }).join("\n");
+    clearTimeout(window.__pokerPushDebugOverlayTimer || 0);
+    window.__pokerPushDebugOverlayTimer = setTimeout(function () {
+      try {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      } catch (eDbgHide) {}
+    }, 15000);
+  } catch (eDbgRender) {}
+}
+
+function pokerRestorePushDebugTrail() {
+  try {
+    if (window.__pokerPushOpenDebugTrail && window.__pokerPushOpenDebugTrail.length) return;
+    var raw = sessionStorage.getItem(POKER_PUSH_DEBUG_SESSION_KEY);
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return;
+    window.__pokerPushOpenDebugTrail = parsed.slice(-8);
+    pokerPushDebugRenderOverlay();
+  } catch (eDbgRestore) {}
+}
 
 function pokerPushOpenDebug(step, extra) {
   try {
@@ -55,24 +91,12 @@ function pokerPushOpenDebug(step, extra) {
     window.__pokerPushOpenDebugTrail.push({ t: Date.now(), msg: msg });
     if (window.__pokerPushOpenDebugTrail.length > 10) window.__pokerPushOpenDebugTrail.shift();
     try {
-      sessionStorage.setItem("poker_push_open_debug_last", JSON.stringify(window.__pokerPushOpenDebugTrail));
+      sessionStorage.setItem(POKER_PUSH_DEBUG_SESSION_KEY, JSON.stringify(window.__pokerPushOpenDebugTrail));
     } catch (eDbgStore) {}
-    if (typeof document === "undefined" || !document.body) return;
-    var el = document.getElementById("pokerPushDebugOverlay");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "pokerPushDebugOverlay";
-      el.style.cssText =
-        "position:fixed;left:10px;right:10px;bottom:88px;z-index:99999;padding:8px 10px;border-radius:12px;background:rgba(12,18,34,.92);color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;white-space:pre-wrap;";
-      document.body.appendChild(el);
-    }
-    el.textContent = window.__pokerPushOpenDebugTrail.slice(-8).map(function (x) { return x.msg; }).join("\n");
-    clearTimeout(window.__pokerPushDebugOverlayTimer || 0);
-    window.__pokerPushDebugOverlayTimer = setTimeout(function () {
-      try {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      } catch (eDbgHide) {}
-    }, 12000);
+    try {
+      if (typeof console !== "undefined" && console.log) console.log("[DM-OPEN-TRACE]", msg);
+    } catch (eDbgConsole) {}
+    pokerPushDebugRenderOverlay();
   } catch (eDbg) {}
 }
 
@@ -100,6 +124,12 @@ function pokerPushOpenStateDebug(step, extra) {
     if (extra != null && String(extra).trim() !== "") bits.push(String(extra).trim());
     pokerPushOpenDebug(step, bits.join(" | "));
   } catch (eDbgState) {}
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", pokerRestorePushDebugTrail);
+} else {
+  pokerRestorePushDebugTrail();
 }
 
 /**
@@ -1623,16 +1653,7 @@ function initProfileChatPush() {
   try {
     document.addEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, { capture: true, passive: true });
   } catch (eP) {}
-  navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(function (reg) {
-    try {
-      if (reg && typeof reg.update === "function") {
-        setTimeout(function () {
-          try {
-            reg.update();
-          } catch (eRegUpd) {}
-        }, 250);
-      }
-    } catch (eRegUpdWrap) {}
+  navigator.serviceWorker.register("./sw.js").then(function (reg) {
     try {
       if (reg && reg.waiting) {
         setTimeout(function () {
