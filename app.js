@@ -28215,7 +28215,6 @@ function initChat() {
 
   function prefetchPersonalMessages(userId) {
     if (!userId || !pokerApiHasCredential()) return;
-    if (String(userId).indexOf("group_") === 0) return;
     if (chatWithUserId && peerChatIdsEqual(chatWithUserId, userId)) return;
     if (personalPrefetchInFlight[userId]) return;
     if (shouldUsePersonalCache(userId)) return;
@@ -28245,7 +28244,7 @@ function initChat() {
     var picked = [];
     for (var i = 0; i < contacts.length && picked.length < PERSONAL_PREFETCH_BATCH; i++) {
       var id = contacts[i] && contacts[i].id ? String(contacts[i].id) : "";
-      if (!id || id.indexOf("group_") === 0) continue;
+      if (!id) continue;
       if (chatWithUserId && peerChatIdsEqual(chatWithUserId, id)) continue;
       picked.push(id);
     }
@@ -29706,6 +29705,7 @@ function initChat() {
   function loadMessages() {
     if (!chatWithUserId || !messagesEl) return;
     var loadForPeer = chatWithUserId;
+    var isGroupLoad = loadForPeer && String(loadForPeer).indexOf("group_") === 0;
     var loadPersonalSeq = (window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1);
     var pollQs = "";
     if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
@@ -29728,7 +29728,8 @@ function initChat() {
         diffQs += "&afterTime=" + encodeURIComponent(String(lastPersonalMsg.time));
       }
     }
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + pollQs + diffQs;
+    var fastGroupQs = isGroupLoad ? "&skipPresence=1" : "";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + pollQs + diffQs;
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
@@ -30488,7 +30489,7 @@ function initChat() {
       if (!Object.prototype.hasOwnProperty.call(personalMessagesCache, pk)) continue;
       if (idx >= 20) break;
       var pid = String(pk);
-      if (!pid || pid.indexOf("group_") === 0) continue;
+      if (!pid) continue;
       if (chatWithUserId && peerChatIdsEqual(chatWithUserId, pid)) continue;
       (function (idWarm, delayMs) {
         setTimeout(function () {
@@ -34290,13 +34291,13 @@ function initChat() {
           try {
             if (typeof prefetchPersonalMessages === "function") {
               var preId = null;
-              if (btn.classList.contains("chat-contact") && btn.dataset.chatId && btn.getAttribute("data-chat-group") !== "1") {
+              if (btn.classList.contains("chat-contact") && btn.dataset.chatId) {
                 preId = String(btn.dataset.chatId);
               } else {
                 var duPre = btn.getAttribute("data-chat-user-id");
                 if (duPre && !btn.classList.contains("chat-dialog-item--club")) preId = String(duPre);
               }
-              if (preId && preId.indexOf("group_") !== 0) prefetchPersonalMessages(preId);
+              if (preId) prefetchPersonalMessages(preId);
             }
           } catch (eWarmTap) {}
           if (dialogRowEligibleForPlayerPreview(btn)) {
