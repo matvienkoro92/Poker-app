@@ -5704,12 +5704,53 @@ function runGazetteAndTasksInit() {
           metaOnly: true,
           onLoaded: function () {
             try {
-              pokerHydrateOpenDmHeaderFromContacts(pid);
+              if (pokerHydrateOpenDmHeaderFromContacts(pid)) return;
+              if (typeof pokerHydrateOpenDmHeaderFromProfile === "function") pokerHydrateOpenDmHeaderFromProfile(pid);
             } catch (eHdrHydrateLoaded) {}
           },
         });
       } catch (eHdrHydrateLoad) {}
     }, 80);
+  }
+  function pokerHydrateOpenDmHeaderFromProfile(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return false;
+    fetch(base + "/api/users?userId=" + encodeURIComponent(pid) + pokerApiAuthQuery("&"))
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false }; });
+      })
+      .then(function (data) {
+        try {
+          if (!data || !data.ok) return;
+          if (!chatWithUserId || !peerChatIdsEqual(chatWithUserId, pid)) return;
+          var profileName =
+            data.contactName != null && String(data.contactName).trim()
+              ? String(data.contactName).trim()
+              : data.chatDisplayName != null && String(data.chatDisplayName).trim()
+                ? String(data.chatDisplayName).trim()
+                : data.userName != null && String(data.userName).trim()
+                  ? String(data.userName).trim()
+                  : "";
+          if (profileName) {
+            chatWithUserName = profileName;
+            if (convTitle) setTextContentIfChanged(convTitle, profileName);
+          }
+          if (convTitleId) {
+            var profileP21 = data.p21Id != null && String(data.p21Id).trim() ? String(data.p21Id).trim() : "\u2014";
+            setTextContentIfChanged(convTitleId, profileP21);
+          }
+          var profileAvatar = data.avatar != null && String(data.avatar).trim() ? String(data.avatar).trim() : "";
+          if (profileAvatar) {
+            chatWithPeerAvatarUrl = profileAvatar;
+            applyConvPeerAvatarHeader(profileAvatar, chatWithUserName || profileName || pid);
+          } else if (profileName) {
+            applyConvPeerAvatarHeader("", profileName);
+          }
+          pokerPushOpenDebug("header-profile-hydrated", pid);
+        } catch (eHdrProfileApply) {}
+      })
+      .catch(function () {});
+    return true;
   }
   function pokerSchedulePendingPushDmContactsReload(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
