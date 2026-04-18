@@ -5743,6 +5743,11 @@ function runGazetteAndTasksInit() {
         window.__pokerLastPushOpenAt = Date.now();
       } catch (ePushMark) {}
       try {
+        if (startApp === "club_chat" || startApp === "club_chat_dm") {
+          window.__pokerPushNeedsFullChatBootstrap = true;
+        }
+      } catch (ePushBootstrapMark) {}
+      try {
         if (typeof history !== "undefined" && history && typeof history.replaceState === "function") {
           history.replaceState(history.state, "", urlObj.href);
         }
@@ -11142,6 +11147,30 @@ function setView(viewName, navOpts) {
     try {
       pokerTryConsumePendingManagerFromCashout();
     } catch (eCashoutMgr) {}
+    try {
+      if (window.__pokerPushNeedsFullChatBootstrap) {
+        pokerPushOpenStateDebug("setView-chat-full-bootstrap", "");
+        window.__pokerPushNeedsFullChatBootstrap = false;
+        try {
+          window.__pokerContactsMetaPollRev = null;
+          window.__pokerGeneralPollRev = "";
+          window.__pokerPersonalPollRev = "";
+        } catch (eChatBootstrapRevReset) {}
+        setTimeout(function () {
+          try {
+            if (typeof loadContacts === "function") loadContacts();
+          } catch (eChatBootstrapContacts) {}
+          try {
+            if (typeof loadGeneral === "function") loadGeneral();
+          } catch (eChatBootstrapGeneral) {}
+          try {
+            if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
+              window.__pokerScheduleChatBootstrapFetch();
+            }
+          } catch (eChatBootstrapFetch) {}
+        }, 0);
+      }
+    } catch (eChatBootstrapWrap) {}
     try {
       if (window.__pendingOpenChatPersonalFromDeepLink) {
         var pendingAfterChatRefresh = window.__pendingOpenChatPersonalFromDeepLink;
