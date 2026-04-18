@@ -1623,7 +1623,16 @@ function initProfileChatPush() {
   try {
     document.addEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, { capture: true, passive: true });
   } catch (eP) {}
-  navigator.serviceWorker.register("./sw.js").then(function (reg) {
+  navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(function (reg) {
+    try {
+      if (reg && typeof reg.update === "function") {
+        setTimeout(function () {
+          try {
+            reg.update();
+          } catch (eRegUpd) {}
+        }, 250);
+      }
+    } catch (eRegUpdWrap) {}
     try {
       if (reg && reg.waiting) {
         setTimeout(function () {
