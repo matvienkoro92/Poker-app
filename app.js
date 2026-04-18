@@ -24091,6 +24091,20 @@ function initChat() {
     } catch (eShowDialogsDbg0) {}
     var pendingPeerDialogsCommit = "";
     try {
+      var pendingDirectDlg = window.__pendingOpenChatPersonalFromDeepLink;
+      var pendingDirectPeerDlg =
+        pendingDirectDlg && pendingDirectDlg.userId != null ? String(pendingDirectDlg.userId).trim() : "";
+      if (pendingDirectPeerDlg) {
+        window.__pokerLastShowDialogsReason = "pending-direct";
+        pokerPushOpenDebug("showDialogs-direct-blocked", pendingDirectPeerDlg);
+        chatActiveTab = "personal";
+        if (!chatWithUserId) chatWithUserId = normalizePeerIdForChat(pendingDirectPeerDlg);
+        if (!chatWithUserName) chatWithUserName = pendingDirectDlg.userName || pendingDirectPeerDlg;
+        if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" &&
+            window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
+          return;
+        }
+      }
       var pendingPeerDlgHard = pokerGetActivePushDmTarget();
       pendingPeerDialogsCommit = pendingPeerDlgHard || "";
       window.__pokerLastShowDialogsReason = pendingPeerDlgHard ? "pending-hard" : "";
@@ -32928,6 +32942,21 @@ function initChat() {
     window.chatRefresh = function () {
       pokerPushOpenTraceTransition("chatRefresh-enter", "");
       try {
+        var directPendingRefresh = window.__pendingOpenChatPersonalFromDeepLink;
+        var directPendingPeerRefresh =
+          directPendingRefresh && directPendingRefresh.userId != null
+            ? String(directPendingRefresh.userId).trim()
+            : "";
+        if (directPendingPeerRefresh) {
+          pokerPushOpenDebug("chatRefresh-direct-pending", directPendingPeerRefresh);
+          chatActiveTab = "personal";
+          window.__pokerForcePushDmPeer = normalizePeerIdForChat(directPendingPeerRefresh);
+          window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+          if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" &&
+              window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
+            return;
+          }
+        }
         var hardPendingPeer = typeof pokerGetActivePushDmTarget === "function" ? pokerGetActivePushDmTarget() : "";
         if (hardPendingPeer) {
           pokerPushOpenDebug("chatRefresh-hard-reroute", hardPendingPeer);
