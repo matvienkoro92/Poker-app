@@ -33172,7 +33172,20 @@ function initChat() {
     window.__openClubChatAfterNextContacts = true;
   }
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
-    pokerEnsureOpenPendingChatPersonalFromDeepLink();
+    var pdlInit = window.__pendingOpenChatPersonalFromDeepLink;
+    if (
+      pdlInit &&
+      pdlInit.userId &&
+      typeof pokerOpenChatPeerDirectFallback === "function" &&
+      pokerOpenChatPeerDirectFallback(pdlInit.userId, pdlInit.userName || pdlInit.userId)
+    ) {
+      window.__pendingOpenChatPersonalFromDeepLink = null;
+      try {
+        if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
+      } catch (ePdlInitMeta) {}
+    } else {
+      pokerEnsureOpenPendingChatPersonalFromDeepLink();
+    }
   } else if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
