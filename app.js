@@ -23586,6 +23586,19 @@ function initChat() {
   }
   function showDialogs() {
     try {
+      var forcedPeerDlg = window.__pokerForcePushDmPeer;
+      var forcedUntilDlg = Number(window.__pokerForcePushDmPeerUntil || 0);
+      if (
+        forcedPeerDlg &&
+        forcedUntilDlg > Date.now() &&
+        typeof window.chatOpenConvFromDialogs === "function"
+      ) {
+        pokerPushOpenDebug("showDialogs-blocked", forcedPeerDlg);
+        window.chatOpenConvFromDialogs(forcedPeerDlg, forcedPeerDlg);
+        return;
+      }
+    } catch (eForceDialogs) {}
+    try {
       if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
         return;
       }
