@@ -1062,6 +1062,7 @@ function pokerChatPushVerifySubscriptionAfterSave(base, attempt) {
 }
 
 var pokerChatPushSubscribeInFlight = null;
+var POKER_CHAT_PUSH_REPAIR_THROTTLE_KEY = "poker_chat_push_repair_last";
 function pokerChatPushSubscribeToBrowser() {
   if (pokerChatPushSubscribeInFlight) return pokerChatPushSubscribeInFlight;
   var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -1241,6 +1242,41 @@ function pokerChatPushForceRepair(reason) {
         } catch (eLogRepair) {}
       });
     });
+  });
+}
+
+function pokerChatPushMaybeForceRepairThrottled(reason, minIntervalMs) {
+  minIntervalMs = typeof minIntervalMs === "number" && minIntervalMs > 0 ? minIntervalMs : 12 * 60 * 60 * 1000;
+  if (!pokerChatPushClientSupported() || !pokerApiHasCredential()) return;
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  var now = Date.now();
+  try {
+    var last = parseInt(localStorage.getItem(POKER_CHAT_PUSH_REPAIR_THROTTLE_KEY) || "0", 10);
+    if (last && now - last < minIntervalMs) return;
+  } catch (eRepairRead) {}
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base) return;
+  pokerFetchChatPushConfig().then(function (cfg) {
+    if (!cfg || !cfg.pushConfigured) return;
+    fetch(base + "/api/chat-push-subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
+      cache: "no-store",
+    })
+      .then(function (r) {
+        return r.json().catch(function () {
+          return null;
+        });
+      })
+      .then(function (st) {
+        if (!st || !st.ok || !st.notificationsEnabled) return;
+        try {
+          localStorage.setItem(POKER_CHAT_PUSH_REPAIR_THROTTLE_KEY, String(now));
+        } catch (eRepairWrite) {}
+        pokerChatPushForceRepair(reason || "throttled_boot_repair");
+      })
+      .catch(function () {});
   });
 }
 
@@ -1663,6 +1699,11 @@ function initProfileChatPush() {
         }, 800);
       }
     } catch (eWait) {}
+    setTimeout(function () {
+      try {
+        pokerChatPushMaybeForceRepairThrottled("boot_register_ready", 12 * 60 * 60 * 1000);
+      } catch (eBootRepair) {}
+    }, 1800);
     return reg;
   }).catch(function () {});
 })();
@@ -36930,6 +36971,11 @@ document.addEventListener("visibilitychange", function () {
     try {
       if (typeof pokerChatPushSyncIfNeeded === "function") pokerChatPushSyncIfNeeded();
     } catch (eVis2) {}
+    try {
+      if (typeof pokerChatPushMaybeForceRepairThrottled === "function") {
+        pokerChatPushMaybeForceRepairThrottled("visible_resume", 12 * 60 * 60 * 1000);
+      }
+    } catch (eVisRepair) {}
     try {
       var pwaFg =
         typeof window !== "undefined" &&
