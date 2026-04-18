@@ -10783,9 +10783,7 @@ function setView(viewName, navOpts) {
         if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
         else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
-        if (!pokerEnsureOpenPendingChatPersonalFromDeepLink() && typeof window.chatShowDialogs === "function") {
-          window.chatShowDialogs();
-        }
+        pokerEnsureOpenPendingChatPersonalFromDeepLink();
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -24789,6 +24787,47 @@ function initChat() {
     if (ogp.replyTo) synP.replyTo = ogp.replyTo;
     return messages.concat([synP]);
   }
+  function dedupePersonalMessagesForRender(messages) {
+    messages = Array.isArray(messages) ? messages : [];
+    var out = [];
+    var seenId = Object.create(null);
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i];
+      if (!m) continue;
+      var persistedId = pokerChatMessageHasPersistedId(m.id) ? String(m.id) : "";
+      if (persistedId) {
+        if (seenId[persistedId]) continue;
+        seenId[persistedId] = true;
+        out.push(m);
+        continue;
+      }
+      var duplicateIdx = -1;
+      var mt = m.time ? new Date(m.time).getTime() : NaN;
+      for (var j = out.length - 1; j >= 0 && j >= out.length - 12; j--) {
+        var prev = out[j];
+        if (!prev || pokerChatMessageHasPersistedId(prev.id)) continue;
+        if (!peerChatIdsEqual(prev.from || "", m.from || "")) continue;
+        var pmt = prev.time ? new Date(prev.time).getTime() : NaN;
+        var sameText = String(prev.text || "").trim() === String(m.text || "").trim();
+        var sameKind =
+          (!!prev.image === !!m.image) &&
+          (!!prev.voice === !!m.voice) &&
+          (!!prev.document === !!m.document);
+        var closeByTime = !isNaN(mt) && !isNaN(pmt) ? Math.abs(mt - pmt) < 5000 : sameText;
+        if (sameText && sameKind && closeByTime) {
+          duplicateIdx = j;
+          break;
+        }
+      }
+      if (duplicateIdx >= 0) {
+        var prevMsg = out[duplicateIdx];
+        if (prevMsg.__clientOptimistic && !m.__clientOptimistic) out[duplicateIdx] = m;
+        continue;
+      }
+      out.push(m);
+    }
+    return out;
+  }
   function updateUnreadDots() {
     updateChatNavDot();
   }
@@ -28966,6 +29005,7 @@ function initChat() {
         }
         messages = mergeOptimisticPersonalIntoMessages(messages);
         messages = mergeIncomingPushPersonalIntoMessages(messages, loadForPeer);
+        messages = dedupePersonalMessagesForRender(messages);
         var isGrpThread =
           data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
         if (isGrpThread && data.groupTitle && convTitle) {
@@ -33090,7 +33130,7 @@ function initChat() {
     window.__openClubChatAfterNextContacts = true;
   }
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
-    if (!pokerEnsureOpenPendingChatPersonalFromDeepLink()) showDialogs();
+    pokerEnsureOpenPendingChatPersonalFromDeepLink();
   } else if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
