@@ -5519,13 +5519,19 @@ function runGazetteAndTasksInit() {
   }
   function pokerOpenChatPeerDirectFallback(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
-    if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
+    if (!pid) return false;
     try {
       pokerPushOpenDebug("openConv-direct", pid);
       window.__pokerForcePushDmPeer = normalizePeerIdForChat(pid);
       window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
       window.__pokerForceAllowPendingPushConvOpen = true;
-      window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      if (typeof window.__pokerOpenPushDmImmediate === "function") {
+        window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
+      } else if (typeof window.chatOpenConvFromDialogs === "function") {
+        window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      } else {
+        return false;
+      }
       window.__pokerForceAllowPendingPushConvOpen = false;
       try {
         clearTimeout(window.__pokerPushDmOpenRetryTimer || 0);
@@ -5537,7 +5543,11 @@ function runGazetteAndTasksInit() {
           if (convVisible && samePeer) return;
           pokerPushOpenDebug("openConv-retry", pid);
           window.__pokerForceAllowPendingPushConvOpen = true;
-          window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          if (typeof window.__pokerOpenPushDmImmediate === "function") {
+            window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
+          } else if (typeof window.chatOpenConvFromDialogs === "function") {
+            window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          }
           window.__pokerForceAllowPendingPushConvOpen = false;
           setTimeout(function () {
             try {
@@ -5546,7 +5556,11 @@ function runGazetteAndTasksInit() {
               if (convVisible2 && samePeer2) return;
               pokerPushOpenDebug("openConv-retry2", pid);
               window.__pokerForceAllowPendingPushConvOpen = true;
-              window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+              if (typeof window.__pokerOpenPushDmImmediate === "function") {
+                window.__pokerOpenPushDmImmediate(normalizePeerIdForChat(pid), fallbackName || pid);
+              } else if (typeof window.chatOpenConvFromDialogs === "function") {
+                window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+              }
               window.__pokerForceAllowPendingPushConvOpen = false;
             } catch (eRetry2) {}
           }, 700);
@@ -23764,6 +23778,50 @@ function initChat() {
     paintGeneralFromMemoryBeforeFetch();
     loadGeneral();
   }
+  function openPushDmImmediate(userId, userName, peerP21Id, peerAvatarOpt) {
+    var uid = userId != null ? String(userId).trim() : "";
+    if (!uid) return;
+    if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+    if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
+    if (generalView) {
+      generalView.classList.add("chat-general-view--hidden");
+      generalView.style.display = "none";
+    }
+    if (personalView) personalView.classList.remove("chat-personal-view--hidden");
+    if (listView) listView.classList.add("chat-list-view--hidden");
+    if (convView) convView.classList.remove("chat-conv-view--hidden");
+    chatActiveTab = "personal";
+    chatWithUserId = uid;
+    chatWithUserName = userName || uid;
+    if (convTitle) convTitle.textContent = chatWithUserName;
+    if (convTitleId) convTitleId.textContent = peerP21Id != null && String(peerP21Id).trim() ? String(peerP21Id).trim() : "\u2014";
+    if (peerAvatarOpt != null && String(peerAvatarOpt).trim()) {
+      chatWithPeerAvatarUrl = String(peerAvatarOpt).trim();
+      applyConvPeerAvatarHeader(chatWithPeerAvatarUrl, chatWithUserName);
+    } else {
+      chatWithPeerAvatarUrl = null;
+      applyConvPeerAvatarHeader("", chatWithUserName);
+    }
+    syncChatConvGroupAddMembersBtn();
+    scrollPersonalToBottomOnNextRender = true;
+    if (messagesEl && (!personalMessagesCache[uid] || !personalMessagesCache[uid].length)) {
+      messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
+      messagesEl.scrollTop = 0;
+    }
+    mountChatComposer("personal");
+    syncChatInertForIosAccessory();
+    updateChatHeaderStats();
+    updateUnreadDots();
+    try {
+      pokerUpdateChatDmFocusFromUiState();
+    } catch (ePushImmFocus) {}
+    try {
+      scheduleSyncChatScrollBottomButtons();
+    } catch (ePushImmScroll) {}
+    if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+      loadMessages();
+    }
+  }
   function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt) {
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
@@ -23791,6 +23849,7 @@ function initChat() {
   window.chatSetTab = setTab;
   window.chatShowDialogs = showDialogs;
   window.chatOpenConvFromDialogs = openConvFromDialogs;
+  window.__pokerOpenPushDmImmediate = openPushDmImmediate;
   window.openClubChat = openClubChat;
 
   function tryOpenClubChatFromDialogs() {
