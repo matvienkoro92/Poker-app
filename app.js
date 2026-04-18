@@ -5607,12 +5607,19 @@ function runGazetteAndTasksInit() {
       try {
         pokerPushOpenDebug("openConv-resolved", pid);
       } catch (eOpenResolvedDbg) {}
-      window.chatOpenConvFromDialogs(
-        found.id,
-        found.contactName || found.name || fallbackName || found.id,
-        found.p21Id != null ? found.p21Id : undefined,
-        found.avatar || undefined
-      );
+      try {
+        window.__pokerForcePushDmPeer = normalizePeerIdForChat(found.id);
+        window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+        window.__pokerForceAllowPendingPushConvOpen = true;
+        window.chatOpenConvFromDialogs(
+          found.id,
+          found.contactName || found.name || fallbackName || found.id,
+          found.p21Id != null ? found.p21Id : undefined,
+          found.avatar || undefined
+        );
+      } finally {
+        window.__pokerForceAllowPendingPushConvOpen = false;
+      }
       return true;
     }
     return false;
