@@ -36367,6 +36367,26 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (typeof window.chatRefresh === "function") window.chatRefresh();
     if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
     if (typeof pokerMaybeAutoEnrollChatPush === "function") pokerMaybeAutoEnrollChatPush();
+    if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.__pokerOpenChatFromPushUrl === "function") {
+      pokerPushOpenDebug("auth-verified-retry", window.__pendingOpenChatPersonalFromDeepLink.userId || "");
+      try {
+        if (typeof setView === "function") setView("chat");
+      } catch (eAuthPushView) {}
+      setTimeout(function () {
+        try {
+          if (window.__pendingOpenChatPersonalFromDeepLink) {
+            pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
+        } catch (eAuthPushOpen1) {}
+      }, 60);
+      setTimeout(function () {
+        try {
+          if (window.__pendingOpenChatPersonalFromDeepLink) {
+            pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
+        } catch (eAuthPushOpen2) {}
+      }, 420);
+    }
   } catch (eVis) {}
 });
 
