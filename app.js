@@ -23919,6 +23919,15 @@ function initChat() {
       loadGeneral();
     } else if (tab === "personal") {
       if (!chatWithUserId) {
+        try {
+          var pendingPersonalPeer = pokerGetActivePushDmTarget();
+          if (pendingPersonalPeer) {
+            chatWithUserId = normalizePeerIdForChat(pendingPersonalPeer);
+            if (!chatWithUserName) chatWithUserName = pendingPersonalPeer;
+          }
+        } catch (eTabPersonalPending) {}
+      }
+      if (!chatWithUserId) {
         showDialogs();
         updateChatHeaderStats();
         updateUnreadDots();
@@ -23959,6 +23968,11 @@ function initChat() {
       pokerPushOpenStateDebug("showDialogs-enter", "");
     } catch (eShowDialogsDbg0) {}
     try {
+      var pendingPeerDlgHard = pokerGetActivePushDmTarget();
+      if (pendingPeerDlgHard) {
+        pokerPushOpenDebug("showDialogs-hard-blocked", pendingPeerDlgHard);
+        if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) return;
+      }
       var forcedPeerDlg = window.__pokerForcePushDmPeer;
       var forcedUntilDlg = Number(window.__pokerForcePushDmPeerUntil || 0);
       if (
@@ -27818,6 +27832,11 @@ function initChat() {
       pokerPushOpenStateDebug("showList-enter", "");
     } catch (eShowListDbg0) {}
     try {
+      var pendingPeerListHard = pokerGetActivePushDmTarget();
+      if (pendingPeerListHard) {
+        pokerPushOpenDebug("showList-hard-blocked", pendingPeerListHard);
+        if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) return;
+      }
       var forcedPeer = window.__pokerForcePushDmPeer;
       var forcedUntil = Number(window.__pokerForcePushDmPeerUntil || 0);
       if (
