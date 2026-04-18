@@ -5523,6 +5523,27 @@ function runGazetteAndTasksInit() {
     try {
       pokerPushOpenDebug("openConv-direct", pid);
       window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      try {
+        clearTimeout(window.__pokerPushDmOpenRetryTimer || 0);
+      } catch (eRetryClr) {}
+      window.__pokerPushDmOpenRetryTimer = setTimeout(function retryPushDmOpen() {
+        try {
+          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+          var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
+          if (convVisible && samePeer) return;
+          pokerPushOpenDebug("openConv-retry", pid);
+          window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          setTimeout(function () {
+            try {
+              var convVisible2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+              var samePeer2 = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
+              if (convVisible2 && samePeer2) return;
+              pokerPushOpenDebug("openConv-retry2", pid);
+              window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+            } catch (eRetry2) {}
+          }, 700);
+        } catch (eRetry1) {}
+      }, 350);
       return true;
     } catch (eOpenPeerFallback) {}
     return false;
