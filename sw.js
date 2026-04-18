@@ -173,12 +173,43 @@ self.addEventListener("notificationclick", function (event) {
   } catch (e2) {
     targetUrl = self.location.origin + "/?startapp=club_chat";
   }
+  function waitMs(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
   function notifyClient(client) {
     if (!client) return Promise.resolve();
     try {
       client.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
     } catch (ePostFocus) {}
     return Promise.resolve();
+  }
+  function notifyClientRobust(client) {
+    if (!client) return Promise.resolve();
+    return notifyClient(client)
+      .then(function () { return waitMs(450); })
+      .then(function () { return notifyClient(client); })
+      .catch(function () {});
+  }
+  function reopenAndNotifyTarget() {
+    if (!clients.openWindow) return Promise.resolve();
+    return clients.openWindow(targetUrl).then(function (openedClient) {
+      if (openedClient) {
+        return notifyClientRobust(openedClient);
+      }
+      return waitMs(700).then(function () {
+        return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (retryClients) {
+          var i;
+          for (i = 0; i < retryClients.length; i++) {
+            var rc = retryClients[i];
+            if (rc && rc.url && rc.url.indexOf(self.location.origin) === 0) {
+              return notifyClientRobust(rc);
+            }
+          }
+        });
+      });
+    });
   }
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windowClients) {
@@ -196,19 +227,12 @@ self.addEventListener("notificationclick", function (event) {
       }
       if (chosen) {
         return chosen.focus().then(function () {
-          return notifyClient(chosen);
+          return notifyClientRobust(chosen);
         }).catch(function () {
-          if (!clients.openWindow) return;
-          return clients.openWindow(targetUrl).then(function (openedClient) {
-            return notifyClient(openedClient);
-          });
+          return reopenAndNotifyTarget();
         });
       }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl).then(function (openedClient) {
-          return notifyClient(openedClient);
-        });
-      }
+      return reopenAndNotifyTarget();
     })
   );
 });
