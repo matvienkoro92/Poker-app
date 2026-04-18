@@ -46,152 +46,18 @@ var POKER_NET_ERR =
 
 /** Таймаут одного HTTP-запроса (мс): обрывает «зависшие» соединения без смены Wi‑Fi/LTE. */
 var POKER_FETCH_TIMEOUT_MS = 20000;
-var POKER_PUSH_DEBUG_SESSION_KEY = "poker_push_open_debug_last";
 
-function pokerCanShowPushDebugOverlay() {
-  try {
-    if (typeof chatIsAdmin !== "undefined" && chatIsAdmin) return true;
-  } catch (eAdminOverlay) {}
-  try {
-    var auth = window.__pokerTelegramAuth;
-    var authUsername =
-      auth && auth.user && auth.user.username != null
-        ? String(auth.user.username).replace(/^@+/, "").trim().toLowerCase()
-        : "";
-    if (authUsername === "roman1787443") return true;
-  } catch (eAuthOverlay) {}
-  try {
-    var resolvedUser = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
-    var resolvedUsername =
-      resolvedUser && resolvedUser.username != null
-        ? String(resolvedUser.username).replace(/^@+/, "").trim().toLowerCase()
-        : "";
-    if (resolvedUsername === "roman1787443") return true;
-  } catch (eResolvedOverlay) {}
-  return false;
-}
+function pokerPushOpenDebug(step, extra) {}
 
-function pokerPushDebugRenderOverlay() {
-  try {
-    if (typeof document === "undefined" || !document.body) return;
-    var hiddenEl = document.getElementById("pokerPushDebugOverlay");
-    if (hiddenEl && hiddenEl.parentNode) hiddenEl.parentNode.removeChild(hiddenEl);
-  } catch (eDbgRender) {}
-}
-
-function pokerRestorePushDebugTrail() {
-  try {
-    if (window.__pokerPushOpenDebugTrail && window.__pokerPushOpenDebugTrail.length) return;
-    var raw = sessionStorage.getItem(POKER_PUSH_DEBUG_SESSION_KEY);
-    if (!raw) return;
-    var parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || !parsed.length) return;
-    window.__pokerPushOpenDebugTrail = parsed.slice(-8);
-    pokerPushDebugRenderOverlay();
-  } catch (eDbgRestore) {}
-}
-
-function pokerPushOpenDebug(step, extra) {
-  try {
-    var msg = "[push-open] " + String(step || "");
-    if (extra != null && String(extra).trim() !== "") msg += " :: " + String(extra).trim();
-    window.__pokerPushOpenDebugTrail = window.__pokerPushOpenDebugTrail || [];
-    window.__pokerPushOpenDebugTrail.push({ t: Date.now(), msg: msg });
-    if (window.__pokerPushOpenDebugTrail.length > 10) window.__pokerPushOpenDebugTrail.shift();
-    try {
-      sessionStorage.setItem(POKER_PUSH_DEBUG_SESSION_KEY, JSON.stringify(window.__pokerPushOpenDebugTrail));
-    } catch (eDbgStore) {}
-    try {
-      if (typeof console !== "undefined" && console.log) console.log("[DM-OPEN-TRACE]", msg);
-    } catch (eDbgConsole) {}
-    pokerPushDebugRenderOverlay();
-  } catch (eDbg) {}
-}
-
-function pokerPushOpenSetCaller(label) {
-  try {
-    window.__pokerPushOpenCallerLabel = label ? String(label) : "";
-    window.__pokerPushOpenCallerAt = Date.now();
-  } catch (eDbgCallerSet) {}
-}
+function pokerPushOpenSetCaller(label) {}
 
 function pokerPushOpenConsumeCaller() {
-  try {
-    var label = window.__pokerPushOpenCallerLabel ? String(window.__pokerPushOpenCallerLabel) : "";
-    var at = Number(window.__pokerPushOpenCallerAt || 0);
-    window.__pokerPushOpenCallerLabel = "";
-    window.__pokerPushOpenCallerAt = 0;
-    if (!label) return "";
-    if (at > 0) {
-      var ageMs = Date.now() - at;
-      if (ageMs >= 0) label += "@" + String(ageMs) + "ms";
-    }
-    return label;
-  } catch (eDbgCallerGet) {
-    return "";
-  }
+  return "";
 }
 
-function pokerPushOpenStateDebug(step, extra) {
-  try {
-    var activeView = "";
-    try {
-      activeView = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    } catch (eAv) {}
-    var convVisible = !!(typeof convView !== "undefined" && convView && !convView.classList.contains("chat-conv-view--hidden"));
-    var dialogsVisible = !!(typeof dialogsView !== "undefined" && dialogsView && !dialogsView.classList.contains("chat-dialogs-view--hidden"));
-    var generalVisible = !!(typeof generalView !== "undefined" && generalView && !generalView.classList.contains("chat-general-view--hidden"));
-    var personalVisible = !!(typeof personalView !== "undefined" && personalView && !personalView.classList.contains("chat-personal-view--hidden"));
-    var listVisible = !!(typeof listView !== "undefined" && listView && !listView.classList.contains("chat-list-view--hidden"));
-    var pendingPeer = window.__pendingOpenChatPersonalFromDeepLink && window.__pendingOpenChatPersonalFromDeepLink.userId
-      ? String(window.__pendingOpenChatPersonalFromDeepLink.userId)
-      : "";
-    var pendingName = window.__pendingOpenChatPersonalFromDeepLink && window.__pendingOpenChatPersonalFromDeepLink.userName
-      ? String(window.__pendingOpenChatPersonalFromDeepLink.userName)
-      : "";
-    var pendingAt = window.__pendingOpenChatPersonalFromDeepLink && window.__pendingOpenChatPersonalFromDeepLink.ts
-      ? Number(window.__pendingOpenChatPersonalFromDeepLink.ts)
-      : 0;
-    var forcedPeer = window.__pokerForcePushDmPeer ? String(window.__pokerForcePushDmPeer) : "";
-    var forcedUntil = Number(window.__pokerForcePushDmPeerUntil || 0);
-    var forcedLeft = forcedUntil > 0 ? Math.max(0, forcedUntil - Date.now()) : 0;
-    var showDialogsCaller = window.__pokerLastShowDialogsCaller ? String(window.__pokerLastShowDialogsCaller) : "";
-    var showDialogsReason = window.__pokerLastShowDialogsReason ? String(window.__pokerLastShowDialogsReason) : "";
-    var pendingAge = pendingAt > 0 ? Math.max(0, Date.now() - pendingAt) : 0;
-    var bits = [
-      "view=" + (activeView || "-"),
-      "tab=" + (typeof chatActiveTab !== "undefined" && chatActiveTab ? chatActiveTab : "-"),
-      "with=" + (typeof chatWithUserId !== "undefined" && chatWithUserId ? String(chatWithUserId) : "-"),
-      "pending=" + (pendingPeer || "-"),
-      "pendingName=" + (pendingName || "-"),
-      "pendingAge=" + (pendingAge ? String(pendingAge) + "ms" : "0"),
-      "forced=" + (forcedPeer || "-"),
-      "forceLeft=" + (forcedLeft ? String(forcedLeft) + "ms" : "0"),
-      "conv=" + (convVisible ? "1" : "0"),
-      "dialogs=" + (dialogsVisible ? "1" : "0"),
-      "general=" + (generalVisible ? "1" : "0"),
-      "personal=" + (personalVisible ? "1" : "0"),
-      "list=" + (listVisible ? "1" : "0"),
-      "normalOpen=" + (typeof window.chatOpenConvFromDialogs === "function" ? "1" : "0"),
-      "flush=" + (typeof window.__pokerFlushPendingChatDeepLink === "function" ? "1" : "0"),
-      "caller=" + (showDialogsCaller || "-"),
-      "reason=" + (showDialogsReason || "-")
-    ];
-    if (extra != null && String(extra).trim() !== "") bits.push(String(extra).trim());
-    pokerPushOpenDebug(step, bits.join(" | "));
-  } catch (eDbgState) {}
-}
-function pokerPushOpenTraceTransition(step, extra) {
-  try {
-    pokerPushOpenStateDebug(step, extra);
-  } catch (eDbgTransition) {}
-}
+function pokerPushOpenStateDebug(step, extra) {}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", pokerRestorePushDebugTrail);
-} else {
-  pokerRestorePushDebugTrail();
-}
+function pokerPushOpenTraceTransition(step, extra) {}
 
 /**
  * fetch с таймаутом (AbortController). Не дублирует signal из init — перезапись signal.
