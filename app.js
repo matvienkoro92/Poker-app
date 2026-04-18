@@ -5462,9 +5462,6 @@ function runGazetteAndTasksInit() {
       try {
         sessionStorage.setItem(POKER_PUSH_CHAT_TARGET_KEY, value);
       } catch (eSessPush) {}
-      try {
-        localStorage.setItem(POKER_PUSH_CHAT_TARGET_KEY, value);
-      } catch (eLocPush) {}
     } catch (eStorePush) {}
   }
   function pokerReadPushChatTarget() {
@@ -5473,11 +5470,6 @@ function runGazetteAndTasksInit() {
       try {
         v = sessionStorage.getItem(POKER_PUSH_CHAT_TARGET_KEY) || "";
       } catch (eSessRead) {}
-      if (!v) {
-        try {
-          v = localStorage.getItem(POKER_PUSH_CHAT_TARGET_KEY) || "";
-        } catch (eLocRead) {}
-      }
       return v ? String(v).trim() : "";
     } catch (eReadPush) {}
     return "";
@@ -5487,9 +5479,6 @@ function runGazetteAndTasksInit() {
       try {
         sessionStorage.removeItem(POKER_PUSH_CHAT_TARGET_KEY);
       } catch (eSessClr) {}
-      try {
-        localStorage.removeItem(POKER_PUSH_CHAT_TARGET_KEY);
-      } catch (eLocClr) {}
     } catch (eClrPush) {}
   }
   function pokerFindChatContactByPeerId(peerId) {
