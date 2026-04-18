@@ -5689,6 +5689,39 @@ function runGazetteAndTasksInit() {
     }
     return true;
   }
+  function pokerOpenPushDmHard(peerId, fallbackName, peerP21Id, peerAvatarOpt) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid || typeof showConv !== "function") return false;
+    try {
+      pokerPushOpenDebug("openConv-hard", pid);
+      window.__pokerForcePushDmPeer = normalizePeerIdForChat(pid);
+      window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+      window.__pokerForceAllowPendingPushConvOpen = true;
+      if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+      if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
+      if (generalView) {
+        generalView.classList.add("chat-general-view--hidden");
+        generalView.style.display = "none";
+      }
+      if (personalView) personalView.classList.remove("chat-personal-view--hidden");
+      if (listView) listView.classList.add("chat-list-view--hidden");
+      if (convView) convView.classList.remove("chat-conv-view--hidden");
+      chatActiveTab = "personal";
+      chatWithUserId = normalizePeerIdForChat(pid);
+      chatWithUserName = fallbackName || pid;
+      showConv(
+        normalizePeerIdForChat(pid),
+        fallbackName || pid,
+        peerP21Id != null ? peerP21Id : undefined,
+        peerAvatarOpt || undefined
+      );
+      return true;
+    } catch (eOpenHard) {}
+    finally {
+      window.__pokerForceAllowPendingPushConvOpen = false;
+    }
+    return false;
+  }
   function pokerOpenChatPeerDirectFallback(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid) return false;
@@ -5793,6 +5826,15 @@ function runGazetteAndTasksInit() {
       var peerId = pending.userId != null ? String(pending.userId).trim() : "";
       if (!peerId) return false;
       pokerPushOpenDebug("pending-dm", peerId);
+      if (
+        typeof pokerOpenPushDmHard === "function" &&
+        pokerOpenPushDmHard(peerId, pending.userName || peerId, pending.peerP21Id, pending.avatar || pending.peerAvatar)
+      ) {
+        try {
+          pokerSchedulePendingPushDmContactsReload(peerId, pending.userName || peerId);
+        } catch (ePendingHardBg) {}
+        return true;
+      }
       if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId)) {
         window.__pendingOpenChatPersonalFromDeepLink = null;
         return true;
