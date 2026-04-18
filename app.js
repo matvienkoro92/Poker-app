@@ -32332,6 +32332,21 @@ function initChat() {
       [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerKeyboardEvents);
     })();
     window.chatRefresh = function () {
+      try {
+        if (window.__pendingOpenClubChatGeneral) {
+          if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
+            return;
+          }
+        }
+        if (window.__pendingOpenChatPersonalFromDeepLink) {
+          if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
+            return;
+          }
+          if (typeof pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" && pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
+            return;
+          }
+        }
+      } catch (eChatRefreshPending) {}
       /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
       setTab(chatActiveTab);
       if (chatWithUserId) showConv(chatWithUserId, chatWithUserName, undefined, chatWithPeerAvatarUrl);
