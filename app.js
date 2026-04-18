@@ -1625,6 +1625,16 @@ function initProfileChatPush() {
   } catch (eP) {}
   navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then(function (reg) {
     try {
+      setTimeout(function () {
+        try {
+          pokerChatPushSyncIfNeeded();
+        } catch (eRegSync) {}
+        try {
+          pokerMaybeAutoEnrollChatPushInner();
+        } catch (eRegEnroll) {}
+      }, 150);
+    } catch (eRegSyncWrap) {}
+    try {
       if (reg && typeof reg.update === "function") {
         setTimeout(function () {
           try {
