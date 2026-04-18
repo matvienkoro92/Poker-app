@@ -23962,6 +23962,25 @@ function initChat() {
     } catch (ePushImmDbg0) {}
     var uid = userId != null ? String(userId).trim() : "";
     if (!uid) return;
+    function ensurePushDmShellStable() {
+      try {
+        if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+        if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
+        if (generalView) {
+          generalView.classList.add("chat-general-view--hidden");
+          generalView.style.display = "none";
+        }
+        if (personalView) personalView.classList.remove("chat-personal-view--hidden");
+        if (listView) listView.classList.add("chat-list-view--hidden");
+        if (convView) convView.classList.remove("chat-conv-view--hidden");
+        chatActiveTab = "personal";
+        chatWithUserId = uid;
+        chatWithUserName = userName || uid;
+        updateChatHeaderStats();
+        updateUnreadDots();
+        syncChatInertForIosAccessory();
+      } catch (ePushDmStable) {}
+    }
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (generalView) {
@@ -24002,6 +24021,20 @@ function initChat() {
     if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
       loadMessages();
     }
+    [120, 420, 900].forEach(function (ms) {
+      setTimeout(function () {
+        try {
+          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+          var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, uid));
+          if (convVisible && samePeer) return;
+          pokerPushOpenDebug("openPushDmImmediate-stabilize", uid + " @" + ms);
+          ensurePushDmShellStable();
+          if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+            loadMessages();
+          }
+        } catch (ePushImmStabilize) {}
+      }, ms);
+    });
     try {
       pokerPushOpenStateDebug("openPushDmImmediate-done", String(uid || ""));
     } catch (ePushImmDbg1) {}
