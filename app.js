@@ -5454,33 +5454,6 @@ function runGazetteAndTasksInit() {
       }, 0);
     }
   }
-  var POKER_PUSH_CHAT_TARGET_KEY = "poker_push_chat_target_v1";
-  function pokerStorePushChatTarget(rawUrl) {
-    try {
-      var value = rawUrl != null ? String(rawUrl).trim() : "";
-      if (!value) return;
-      try {
-        sessionStorage.setItem(POKER_PUSH_CHAT_TARGET_KEY, value);
-      } catch (eSessPush) {}
-    } catch (eStorePush) {}
-  }
-  function pokerReadPushChatTarget() {
-    try {
-      var v = "";
-      try {
-        v = sessionStorage.getItem(POKER_PUSH_CHAT_TARGET_KEY) || "";
-      } catch (eSessRead) {}
-      return v ? String(v).trim() : "";
-    } catch (eReadPush) {}
-    return "";
-  }
-  function pokerClearPushChatTarget() {
-    try {
-      try {
-        sessionStorage.removeItem(POKER_PUSH_CHAT_TARGET_KEY);
-      } catch (eSessClr) {}
-    } catch (eClrPush) {}
-  }
   function pokerFindChatContactByPeerId(peerId) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid) return null;
@@ -5531,7 +5504,6 @@ function runGazetteAndTasksInit() {
       if (!peerId) return false;
       if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId)) {
         window.__pendingOpenChatPersonalFromDeepLink = null;
-        pokerClearPushChatTarget();
         return true;
       }
       if (typeof loadContacts === "function" && !window.__pokerPendingChatDeepLinkContactsLoading) {
@@ -5542,7 +5514,6 @@ function runGazetteAndTasksInit() {
             try {
               if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId) || pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
                 window.__pendingOpenChatPersonalFromDeepLink = null;
-                pokerClearPushChatTarget();
               }
             } catch (ePendingDmLoaded) {}
           },
@@ -5550,7 +5521,6 @@ function runGazetteAndTasksInit() {
       }
       if (pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
         window.__pendingOpenChatPersonalFromDeepLink = null;
-        pokerClearPushChatTarget();
         return true;
       }
     } catch (eEnsurePendingDm) {}
@@ -5563,13 +5533,11 @@ function runGazetteAndTasksInit() {
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
       if (startApp === "club_chat" && typeof window.openClubChat === "function") {
-        pokerClearPushChatTarget();
         window.openClubChat();
         return true;
       }
       if (startApp === "club_chat_dm" && withPeer) {
         if (pokerOpenResolvedChatPeer(withPeer, withPeer)) {
-          pokerClearPushChatTarget();
           return true;
         }
         window.__pendingOpenChatPersonalFromDeepLink = {
@@ -5589,7 +5557,6 @@ function runGazetteAndTasksInit() {
       if (pokerOpenChatFromCurrentUrlIfAny()) return true;
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
-        pokerClearPushChatTarget();
         if (typeof window.openClubChat === "function") {
           window.openClubChat();
           return true;
@@ -5610,7 +5577,6 @@ function runGazetteAndTasksInit() {
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
       if (!startApp) return;
-      pokerStorePushChatTarget(rawUrl);
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
       if (startApp === "club_chat_dm" && withPeer) {
         try {
@@ -5631,16 +5597,6 @@ function runGazetteAndTasksInit() {
         }, 180);
       }, 0);
     } catch (ePushDeep) {}
-  };
-  window.__pokerReplayStoredPushChatTarget = function () {
-    try {
-      if (pokerOpenChatFromCurrentUrlIfAny()) return true;
-      var rawStored = pokerReadPushChatTarget();
-      if (!rawStored) return false;
-      window.__pokerOpenChatFromPushUrl(rawStored);
-      return true;
-    } catch (eReplayPush) {}
-    return false;
   };
   var qStartApp = "";
   var qWithParam = "";
@@ -10830,8 +10786,6 @@ function setView(viewName, navOpts) {
         var pdlNav = window.__pendingOpenChatPersonalFromDeepLink;
         window.__pendingOpenChatPersonalFromDeepLink = null;
         window.chatOpenConvFromDialogs(pdlNav.userId, pdlNav.userName || pdlNav.userId, pdlNav.peerP21Id || undefined);
-      } else if (typeof window.__pokerReplayStoredPushChatTarget === "function" && window.__pokerReplayStoredPushChatTarget()) {
-        /* target из push восстановлен после cold start / гонки setView */
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -33135,11 +33089,6 @@ function initChat() {
     window.__pendingOpenClubChatGeneral = false;
     window.__openClubChatAfterNextContacts = true;
   }
-  try {
-    if (!window.__pendingOpenChatPersonalFromDeepLink && !window.__pendingOpenClubChatGeneral) {
-      if (typeof window.__pokerReplayStoredPushChatTarget === "function") window.__pokerReplayStoredPushChatTarget();
-    }
-  } catch (eReplayInitChat) {}
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
     var pdl = window.__pendingOpenChatPersonalFromDeepLink;
     window.__pendingOpenChatPersonalFromDeepLink = null;
