@@ -24040,8 +24040,10 @@ function initChat() {
     try {
       pokerPushOpenStateDebug("showDialogs-enter", "");
     } catch (eShowDialogsDbg0) {}
+    var pendingPeerDialogsCommit = "";
     try {
       var pendingPeerDlgHard = pokerGetActivePushDmTarget();
+      pendingPeerDialogsCommit = pendingPeerDlgHard || "";
       if (pendingPeerDlgHard) {
         pokerPushOpenDebug("showDialogs-hard-blocked", pendingPeerDlgHard);
         if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) return;
@@ -24063,6 +24065,10 @@ function initChat() {
         return;
       }
     } catch (eDlgPending) {}
+    if (pendingPeerDialogsCommit) {
+      pokerPushOpenDebug("showDialogs-commit-blocked", pendingPeerDialogsCommit);
+      return;
+    }
     /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
        таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
     try {
