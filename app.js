@@ -5576,6 +5576,33 @@ function runGazetteAndTasksInit() {
     }
     return false;
   }
+  function pokerPendingPushDmNeedsContacts(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return false;
+    return !pokerFindChatContactByPeerId(pid);
+  }
+  function pokerSchedulePendingPushDmContactsReload(peerId, fallbackName) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid || typeof loadContacts !== "function") return;
+    if (window.__pokerPendingChatDeepLinkContactsLoading) return;
+    window.__pokerPendingChatDeepLinkContactsLoading = true;
+    loadContacts({
+      metaOnly: !pokerPendingPushDmNeedsContacts(pid),
+      onLoaded: function () {
+        window.__pokerPendingChatDeepLinkContactsLoading = false;
+        try {
+          if (!window.__pendingOpenChatPersonalFromDeepLink) return;
+          if (pokerOpenResolvedChatPeer(pid, fallbackName || pid)) {
+            window.__pendingOpenChatPersonalFromDeepLink = null;
+            return;
+          }
+          if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+            window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
+        } catch (ePendingReload) {}
+      },
+    });
+  }
   function pokerOpenChatPeerDirectFallback(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid) return false;
@@ -5674,37 +5701,25 @@ function runGazetteAndTasksInit() {
       }
       if (typeof window.__pokerOpenPushDmImmediate === "function") {
         if (pokerOpenPendingPushDmWithoutContacts(peerId, pending.userName || peerId)) {
-          window.__pendingOpenChatPersonalFromDeepLink = null;
           try {
-            if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
+            pokerSchedulePendingPushDmContactsReload(peerId, pending.userName || peerId);
           } catch (ePendingDmNoContactsBg) {}
           return true;
         }
       }
       if (window.chatListenersAttached && typeof window.chatOpenConvFromDialogs === "function") {
         if (pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
-          window.__pendingOpenChatPersonalFromDeepLink = null;
           try {
-            if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
+            pokerSchedulePendingPushDmContactsReload(peerId, pending.userName || peerId);
           } catch (ePendingDmContactsBg) {}
           return true;
         }
       }
-      if (!window.chatListenersAttached && typeof loadContacts === "function" && !window.__pokerPendingChatDeepLinkContactsLoading) {
-        window.__pokerPendingChatDeepLinkContactsLoading = true;
-        loadContacts({
-          onLoaded: function () {
-            window.__pokerPendingChatDeepLinkContactsLoading = false;
-            try {
-              if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId) || pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
-                window.__pendingOpenChatPersonalFromDeepLink = null;
-              }
-            } catch (ePendingDmLoaded) {}
-          },
-        });
+      if (!window.chatListenersAttached) {
+        pokerSchedulePendingPushDmContactsReload(peerId, pending.userName || peerId);
       }
       if (pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
-        window.__pendingOpenChatPersonalFromDeepLink = null;
+        pokerSchedulePendingPushDmContactsReload(peerId, pending.userName || peerId);
         return true;
       }
     } catch (eEnsurePendingDm) {}
@@ -33687,9 +33702,8 @@ function initChat() {
       typeof pokerOpenChatPeerDirectFallback === "function" &&
       pokerOpenChatPeerDirectFallback(pdlInit.userId, pdlInit.userName || pdlInit.userId)
     ) {
-      window.__pendingOpenChatPersonalFromDeepLink = null;
       try {
-        if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
+        pokerSchedulePendingPushDmContactsReload(pdlInit.userId, pdlInit.userName || pdlInit.userId);
       } catch (ePdlInitMeta) {}
     } else {
       if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
