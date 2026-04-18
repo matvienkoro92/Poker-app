@@ -5535,6 +5535,16 @@ function runGazetteAndTasksInit() {
     } catch (eEnsurePendingDm) {}
     return false;
   }
+  function pokerHasFreshPushOpenRequest() {
+    try {
+      return !!(
+        window.__pokerLastPushOpenUrl &&
+        window.__pokerLastPushOpenAt &&
+        Date.now() - window.__pokerLastPushOpenAt < 15000
+      );
+    } catch (eFreshPush) {}
+    return false;
+  }
   function pokerOpenChatFromCurrentUrlIfAny() {
     try {
       if (typeof location === "undefined" || !location.search) return false;
@@ -10786,10 +10796,18 @@ function setView(viewName, navOpts) {
       } catch (eRafDm) {}
     }
     if (!window.chatListenersAttached && typeof initChat === "function") {
-      var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
-      idleChat(function () {
-        if (!window.chatListenersAttached && typeof initChat === "function") initChat();
-      });
+      var needImmediateChatInit =
+        !!window.__pendingOpenClubChatGeneral ||
+        !!window.__pendingOpenChatPersonalFromDeepLink ||
+        pokerHasFreshPushOpenRequest();
+      if (needImmediateChatInit) {
+        initChat();
+      } else {
+        var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
+        idleChat(function () {
+          if (!window.chatListenersAttached && typeof initChat === "function") initChat();
+        });
+      }
     } else if (window.chatListenersAttached) {
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
@@ -10797,12 +10815,7 @@ function setView(viewName, navOpts) {
         else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
         pokerEnsureOpenPendingChatPersonalFromDeepLink();
-      } else if (
-        window.__pokerLastPushOpenUrl &&
-        window.__pokerLastPushOpenAt &&
-        Date.now() - window.__pokerLastPushOpenAt < 15000 &&
-        typeof window.__pokerOpenChatFromPushUrl === "function"
-      ) {
+      } else if (pokerHasFreshPushOpenRequest() && typeof window.__pokerOpenChatFromPushUrl === "function") {
         window.__pokerOpenChatFromPushUrl(window.__pokerLastPushOpenUrl);
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
@@ -33184,6 +33197,8 @@ function initChat() {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
     openConvFromDialogs(pcm.userId, pcm.userName || "Менеджер");
+  } else if (pokerHasFreshPushOpenRequest() && typeof window.__pokerOpenChatFromPushUrl === "function") {
+    window.__pokerOpenChatFromPushUrl(window.__pokerLastPushOpenUrl);
   } else {
     showDialogs();
   }
