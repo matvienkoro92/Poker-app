@@ -5577,6 +5577,10 @@ function runGazetteAndTasksInit() {
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
       if (!startApp) return;
+      try {
+        window.__pokerLastPushOpenUrl = String(rawUrl || "");
+        window.__pokerLastPushOpenAt = Date.now();
+      } catch (ePushMark) {}
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
       if (startApp === "club_chat_dm" && withPeer) {
         try {
@@ -10784,6 +10788,13 @@ function setView(viewName, navOpts) {
         else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
         pokerEnsureOpenPendingChatPersonalFromDeepLink();
+      } else if (
+        window.__pokerLastPushOpenUrl &&
+        window.__pokerLastPushOpenAt &&
+        Date.now() - window.__pokerLastPushOpenAt < 15000 &&
+        typeof window.__pokerOpenChatFromPushUrl === "function"
+      ) {
+        window.__pokerOpenChatFromPushUrl(window.__pokerLastPushOpenUrl);
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -24796,6 +24807,25 @@ function initChat() {
       if (!m) continue;
       var persistedId = pokerChatMessageHasPersistedId(m.id) ? String(m.id) : "";
       if (persistedId) {
+        var optimisticDupIdx = -1;
+        var mtPersisted = m.time ? new Date(m.time).getTime() : NaN;
+        for (var oi = out.length - 1; oi >= 0 && oi >= out.length - 12; oi--) {
+          var prevOpt = out[oi];
+          if (!prevOpt || pokerChatMessageHasPersistedId(prevOpt.id)) continue;
+          if (!peerChatIdsEqual(prevOpt.from || "", m.from || "")) continue;
+          var optTime = prevOpt.time ? new Date(prevOpt.time).getTime() : NaN;
+          var sameTextPersisted = String(prevOpt.text || "").trim() === String(m.text || "").trim();
+          var sameKindPersisted =
+            (!!prevOpt.image === !!m.image) &&
+            (!!prevOpt.voice === !!m.voice) &&
+            (!!prevOpt.document === !!m.document);
+          var closePersisted = !isNaN(mtPersisted) && !isNaN(optTime) ? Math.abs(mtPersisted - optTime) < 15000 : sameTextPersisted;
+          if (sameTextPersisted && sameKindPersisted && closePersisted) {
+            optimisticDupIdx = oi;
+            break;
+          }
+        }
+        if (optimisticDupIdx >= 0) out.splice(optimisticDupIdx, 1);
         if (seenId[persistedId]) continue;
         seenId[persistedId] = true;
         out.push(m);

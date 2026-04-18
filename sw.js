@@ -188,9 +188,6 @@ self.addEventListener("notificationclick", function (event) {
         }
       }
       if (chosen) {
-        try {
-          chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
-        } catch (ePostOpen) {}
         return chosen.focus().then(function () {
           try {
             chosen.postMessage({ pokerChatOpenUrl: raw, pokerChatOpenUrlAbsolute: targetUrl });
