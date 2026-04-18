@@ -66,7 +66,7 @@ function pokerPushOpenDebug(step, extra) {
         "position:fixed;left:10px;right:10px;bottom:88px;z-index:99999;padding:8px 10px;border-radius:12px;background:rgba(12,18,34,.92);color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;white-space:pre-wrap;";
       document.body.appendChild(el);
     }
-    el.textContent = window.__pokerPushOpenDebugTrail.slice(-4).map(function (x) { return x.msg; }).join("\n");
+    el.textContent = window.__pokerPushOpenDebugTrail.slice(-8).map(function (x) { return x.msg; }).join("\n");
     clearTimeout(window.__pokerPushDebugOverlayTimer || 0);
     window.__pokerPushDebugOverlayTimer = setTimeout(function () {
       try {
@@ -74,6 +74,32 @@ function pokerPushOpenDebug(step, extra) {
       } catch (eDbgHide) {}
     }, 12000);
   } catch (eDbg) {}
+}
+
+function pokerPushOpenStateDebug(step, extra) {
+  try {
+    var activeView = "";
+    try {
+      activeView = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    } catch (eAv) {}
+    var convVisible = !!(typeof convView !== "undefined" && convView && !convView.classList.contains("chat-conv-view--hidden"));
+    var dialogsVisible = !!(typeof dialogsView !== "undefined" && dialogsView && !dialogsView.classList.contains("chat-dialogs-view--hidden"));
+    var pendingPeer = window.__pendingOpenChatPersonalFromDeepLink && window.__pendingOpenChatPersonalFromDeepLink.userId
+      ? String(window.__pendingOpenChatPersonalFromDeepLink.userId)
+      : "";
+    var forcedPeer = window.__pokerForcePushDmPeer ? String(window.__pokerForcePushDmPeer) : "";
+    var bits = [
+      "view=" + (activeView || "-"),
+      "tab=" + (typeof chatActiveTab !== "undefined" && chatActiveTab ? chatActiveTab : "-"),
+      "with=" + (typeof chatWithUserId !== "undefined" && chatWithUserId ? String(chatWithUserId) : "-"),
+      "pending=" + (pendingPeer || "-"),
+      "forced=" + (forcedPeer || "-"),
+      "conv=" + (convVisible ? "1" : "0"),
+      "dialogs=" + (dialogsVisible ? "1" : "0")
+    ];
+    if (extra != null && String(extra).trim() !== "") bits.push(String(extra).trim());
+    pokerPushOpenDebug(step, bits.join(" | "));
+  } catch (eDbgState) {}
 }
 
 /**
@@ -10621,6 +10647,9 @@ function pokerTryConsumePendingManagerFromCashout() {
 
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
+  try {
+    pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
+  } catch (eSetViewDbg0) {}
   var restoreScrollOnEnter = navOpts.fromBack === true;
   try {
     if (viewName !== "chat" && viewName !== "keyboard-lab") {
@@ -10832,6 +10861,9 @@ function setView(viewName, navOpts) {
   }
   if (viewName === "chat") {
     try {
+      pokerPushOpenStateDebug("setView-chat-branch", "");
+    } catch (eSetViewDbg1) {}
+    try {
       if (typeof window.__pokerClearChatKeyboardViewportState === "function") window.__pokerClearChatKeyboardViewportState();
     } catch (eChatKbCls) {}
     /* Один expand вместо burst: повторы дергали viewportChanged/padding и таббар подпрыгивал */
@@ -10867,11 +10899,17 @@ function setView(viewName, navOpts) {
       } catch (eRafDm) {}
     }
     if (!window.chatListenersAttached && typeof initChat === "function") {
+      try {
+        pokerPushOpenStateDebug("setView-chat-initChat", "listeners=0");
+      } catch (eSetViewDbg2) {}
       var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idleChat(function () {
         if (!window.chatListenersAttached && typeof initChat === "function") initChat();
       });
     } else if (window.chatListenersAttached) {
+      try {
+        pokerPushOpenStateDebug("setView-chat-refresh-path", "listeners=1");
+      } catch (eSetViewDbg3) {}
       if (window.__pendingOpenClubChatGeneral) {
         window.__pendingOpenClubChatGeneral = false;
         if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
@@ -23586,6 +23624,9 @@ function initChat() {
   }
   function showDialogs() {
     try {
+      pokerPushOpenStateDebug("showDialogs-enter", "");
+    } catch (eShowDialogsDbg0) {}
+    try {
       var forcedPeerDlg = window.__pokerForcePushDmPeer;
       var forcedUntilDlg = Number(window.__pokerForcePushDmPeerUntil || 0);
       if (
@@ -23797,6 +23838,9 @@ function initChat() {
     loadGeneral();
   }
   function openPushDmImmediate(userId, userName, peerP21Id, peerAvatarOpt) {
+    try {
+      pokerPushOpenStateDebug("openPushDmImmediate-enter", String(userId || ""));
+    } catch (ePushImmDbg0) {}
     var uid = userId != null ? String(userId).trim() : "";
     if (!uid) return;
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
@@ -23839,8 +23883,14 @@ function initChat() {
     if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
       loadMessages();
     }
+    try {
+      pokerPushOpenStateDebug("openPushDmImmediate-done", String(uid || ""));
+    } catch (ePushImmDbg1) {}
   }
   function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt) {
+    try {
+      pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
+    } catch (eOpenConvDbg0) {}
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
     if (generalView) generalView.classList.add("chat-general-view--hidden");
@@ -23855,6 +23905,9 @@ function initChat() {
     chatWithUserName = userName || userId;
     setTab("personal");
     showConv(userId, userName || userId, peerP21Id, peerAvatarOpt);
+    try {
+      pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
+    } catch (eOpenConvDbg1) {}
     if (window.__pendingDepositMessage && chatComposerEl) {
       chatComposerDrafts.personal = String(window.__pendingDepositMessage);
       chatComposerEl.value = chatComposerDrafts.personal;
@@ -27379,6 +27432,9 @@ function initChat() {
   }
 
   function showList() {
+    try {
+      pokerPushOpenStateDebug("showList-enter", "");
+    } catch (eShowListDbg0) {}
     try {
       var forcedPeer = window.__pokerForcePushDmPeer;
       var forcedUntil = Number(window.__pokerForcePushDmPeerUntil || 0);
