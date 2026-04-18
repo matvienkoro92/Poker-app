@@ -11142,6 +11142,36 @@ function setView(viewName, navOpts) {
     try {
       pokerTryConsumePendingManagerFromCashout();
     } catch (eCashoutMgr) {}
+    try {
+      if (window.__pendingOpenChatPersonalFromDeepLink) {
+        var pendingAfterChatRefresh = window.__pendingOpenChatPersonalFromDeepLink;
+        var pendingAfterChatPeer =
+          pendingAfterChatRefresh && pendingAfterChatRefresh.userId != null
+            ? String(pendingAfterChatRefresh.userId).trim()
+            : "";
+        if (pendingAfterChatPeer) {
+          setTimeout(function () {
+            try {
+              pokerPushOpenStateDebug("setView-chat-post-refresh-open", pendingAfterChatPeer);
+              if (
+                window.__pendingOpenChatPersonalFromDeepLink &&
+                typeof pokerOpenPendingPushDmWithoutContacts === "function" &&
+                pokerOpenPendingPushDmWithoutContacts(
+                  pendingAfterChatPeer,
+                  pendingAfterChatRefresh.userName || pendingAfterChatPeer
+                )
+              ) {
+                window.__pendingOpenChatPersonalFromDeepLink = null;
+                return;
+              }
+              if (window.__pendingOpenChatPersonalFromDeepLink && typeof pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+                pokerEnsureOpenPendingChatPersonalFromDeepLink();
+              }
+            } catch (eChatPostRefreshOpen) {}
+          }, 0);
+        }
+      }
+    } catch (eChatPostRefreshWrap) {}
   } else if (viewName === "winter-rating") {
     document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-spring-rating");
     document.documentElement.classList.add("app-view-winter-rating");
