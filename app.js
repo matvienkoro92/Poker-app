@@ -25514,21 +25514,40 @@ function initChat() {
       var persistedId = pokerChatMessageHasPersistedId(m.id) ? String(m.id) : "";
       if (persistedId) {
         var optimisticDupIdx = -1;
+        var persistedDupIdx = -1;
         var mtPersisted = m.time ? new Date(m.time).getTime() : NaN;
         for (var oi = out.length - 1; oi >= 0 && oi >= out.length - 12; oi--) {
           var prevOpt = out[oi];
-          if (!prevOpt || pokerChatMessageHasPersistedId(prevOpt.id)) continue;
-          if (!peerChatIdsEqual(prevOpt.from || "", m.from || "")) continue;
+          if (!prevOpt || !peerChatIdsEqual(prevOpt.from || "", m.from || "")) continue;
           var optTime = prevOpt.time ? new Date(prevOpt.time).getTime() : NaN;
           var sameTextPersisted = String(prevOpt.text || "").trim() === String(m.text || "").trim();
           var sameKindPersisted =
             (!!prevOpt.image === !!m.image) &&
             (!!prevOpt.voice === !!m.voice) &&
             (!!prevOpt.document === !!m.document);
+          var sameReplyPersisted =
+            String((prevOpt.replyTo && prevOpt.replyTo.id) || "") === String((m.replyTo && m.replyTo.id) || "");
           var closePersisted = !isNaN(mtPersisted) && !isNaN(optTime) ? Math.abs(mtPersisted - optTime) < 15000 : sameTextPersisted;
-          if (sameTextPersisted && sameKindPersisted && closePersisted) {
-            optimisticDupIdx = oi;
+          if (!(sameTextPersisted && sameKindPersisted && sameReplyPersisted && closePersisted)) continue;
+          if (pokerChatMessageHasPersistedId(prevOpt.id)) {
+            persistedDupIdx = oi;
             break;
+          }
+          optimisticDupIdx = oi;
+          break;
+        }
+        if (persistedDupIdx >= 0) {
+          var prevPersisted = out[persistedDupIdx];
+          var prevPersistedTime = prevPersisted && prevPersisted.time ? new Date(prevPersisted.time).getTime() : NaN;
+          var closeOwnPersisted =
+            peerChatIdsEqual(prevPersisted && prevPersisted.from || "", resolveMyChatMemberId() || "") &&
+            !isNaN(mtPersisted) &&
+            !isNaN(prevPersistedTime) &&
+            Math.abs(mtPersisted - prevPersistedTime) < 4000;
+          if (closeOwnPersisted) {
+            out[persistedDupIdx] = m;
+            seenId[persistedId] = true;
+            continue;
           }
         }
         if (optimisticDupIdx >= 0) out.splice(optimisticDupIdx, 1);
