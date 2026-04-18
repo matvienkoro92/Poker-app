@@ -48,9 +48,37 @@ var POKER_NET_ERR =
 var POKER_FETCH_TIMEOUT_MS = 20000;
 var POKER_PUSH_DEBUG_SESSION_KEY = "poker_push_open_debug_last";
 
+function pokerCanShowPushDebugOverlay() {
+  try {
+    if (typeof chatIsAdmin !== "undefined" && chatIsAdmin) return true;
+  } catch (eAdminOverlay) {}
+  try {
+    var auth = window.__pokerTelegramAuth;
+    var authUsername =
+      auth && auth.user && auth.user.username != null
+        ? String(auth.user.username).replace(/^@+/, "").trim().toLowerCase()
+        : "";
+    if (authUsername === "roman1787443") return true;
+  } catch (eAuthOverlay) {}
+  try {
+    var resolvedUser = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+    var resolvedUsername =
+      resolvedUser && resolvedUser.username != null
+        ? String(resolvedUser.username).replace(/^@+/, "").trim().toLowerCase()
+        : "";
+    if (resolvedUsername === "roman1787443") return true;
+  } catch (eResolvedOverlay) {}
+  return false;
+}
+
 function pokerPushDebugRenderOverlay() {
   try {
     if (typeof document === "undefined" || !document.body) return;
+    if (!pokerCanShowPushDebugOverlay()) {
+      var hiddenEl = document.getElementById("pokerPushDebugOverlay");
+      if (hiddenEl && hiddenEl.parentNode) hiddenEl.parentNode.removeChild(hiddenEl);
+      return;
+    }
     var trail = window.__pokerPushOpenDebugTrail || [];
     if (!trail.length) return;
     var el = document.getElementById("pokerPushDebugOverlay");
