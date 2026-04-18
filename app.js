@@ -1105,18 +1105,37 @@ function pokerChatPushSyncIfNeeded() {
   if (!base) return;
   pokerFetchChatPushConfig().then(function (cfg) {
     if (!cfg || !cfg.pushConfigured) return;
-    fetch(base + "/api/chat-push-subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
-    })
-      .then(function (r) {
-        return r.json();
+    navigator.serviceWorker.ready
+      .then(function (reg) {
+        return Promise.all([
+          fetch(base + "/api/chat-push-subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
+          })
+            .then(function (r) {
+              return r.json().catch(function () {
+                return null;
+              });
+            })
+            .catch(function () {
+              return null;
+            }),
+          reg.pushManager.getSubscription().catch(function () {
+            return null;
+          }),
+        ]);
       })
-      .then(function (d) {
-        if (!d || !d.ok || !d.notificationsEnabled || d.hasSubscription) return;
-        pokerChatPushSubscribeToBrowser().catch(function () {});
-      });
+      .then(function (pair) {
+        var d = pair && pair[0] ? pair[0] : null;
+        var browserSub = pair && pair[1] ? pair[1] : null;
+        if (!d || !d.ok || !d.notificationsEnabled) return;
+        var serverHas = !!d.hasSubscription;
+        var browserHas = !!(browserSub && browserSub.endpoint);
+        if (serverHas && browserHas) return;
+        pokerChatPushForceRepair("sync_mismatch");
+      })
+      .catch(function () {});
   });
 }
 
