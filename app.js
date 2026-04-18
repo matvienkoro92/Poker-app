@@ -29949,6 +29949,32 @@ function initChat() {
             setTextContentIfChanged(convTitle, gt);
             chatWithUserName = gt;
           }
+        } else if (!isGrpThread) {
+          var titleName =
+            data.contactName != null && String(data.contactName).trim()
+              ? String(data.contactName).trim()
+              : data.chatDisplayName != null && String(data.chatDisplayName).trim()
+                ? String(data.chatDisplayName).trim()
+                : data.userName != null && String(data.userName).trim()
+                  ? String(data.userName).trim()
+                  : "";
+          if (!titleName && messages.length && chatWithUserId) {
+            var myIdName = resolveMyChatMemberId();
+            for (var ni = messages.length - 1; ni >= 0; ni--) {
+              var nm = messages[ni];
+              if (!nm || !nm.from) continue;
+              if (myIdName && peerChatIdsEqual(nm.from, myIdName)) continue;
+              if (!peerChatIdsEqual(nm.from, chatWithUserId)) continue;
+              if (nm.fromName && String(nm.fromName).trim()) {
+                titleName = String(nm.fromName).trim();
+                break;
+              }
+            }
+          }
+          if (titleName) {
+            chatWithUserName = titleName;
+            if (convTitle) setTextContentIfChanged(convTitle, titleName);
+          }
         }
         var pt = data.participantsCount != null ? data.participantsCount : "—";
         var ol = data.onlineCount != null ? data.onlineCount : "—";
