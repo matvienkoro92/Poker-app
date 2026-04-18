@@ -24038,8 +24038,17 @@ function initChat() {
     } else if (tab === "personal") {
       if (!chatWithUserId) {
         try {
+          var pendingPersonalDirect = window.__pendingOpenChatPersonalFromDeepLink;
+          var pendingPersonalDirectPeer =
+            pendingPersonalDirect && pendingPersonalDirect.userId != null
+              ? String(pendingPersonalDirect.userId).trim()
+              : "";
+          if (pendingPersonalDirectPeer) {
+            chatWithUserId = normalizePeerIdForChat(pendingPersonalDirectPeer);
+            if (!chatWithUserName) chatWithUserName = pendingPersonalDirect.userName || pendingPersonalDirectPeer;
+          }
           var pendingPersonalPeer = pokerGetActivePushDmTarget();
-          if (pendingPersonalPeer) {
+          if (!chatWithUserId && pendingPersonalPeer) {
             chatWithUserId = normalizePeerIdForChat(pendingPersonalPeer);
             if (!chatWithUserName) chatWithUserName = pendingPersonalPeer;
           }
@@ -24047,6 +24056,25 @@ function initChat() {
       }
       if (!chatWithUserId) {
         pokerPushOpenTraceTransition("setTab-personal-no-with", "");
+        try {
+          var pendingPersonalRetry = window.__pendingOpenChatPersonalFromDeepLink;
+          var pendingPersonalRetryPeer =
+            pendingPersonalRetry && pendingPersonalRetry.userId != null
+              ? String(pendingPersonalRetry.userId).trim()
+              : "";
+          if (pendingPersonalRetryPeer) {
+            pokerPushOpenDebug("setTab-personal-direct-reroute", pendingPersonalRetryPeer);
+            if (typeof pokerOpenPushDmHard === "function" &&
+                pokerOpenPushDmHard(
+                  pendingPersonalRetryPeer,
+                  pendingPersonalRetry.userName || pendingPersonalRetryPeer,
+                  pendingPersonalRetry.peerP21Id,
+                  pendingPersonalRetry.avatar || pendingPersonalRetry.peerAvatar
+                )) {
+              return;
+            }
+          }
+        } catch (eTabPersonalDirectReroute) {}
         pokerPushOpenSetCaller("setTab:personal-no-with");
         showDialogs();
         updateChatHeaderStats();
