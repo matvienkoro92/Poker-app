@@ -5661,6 +5661,56 @@ function runGazetteAndTasksInit() {
     if (!pid) return false;
     return !pokerFindChatContactByPeerId(pid);
   }
+  function pokerHydrateOpenDmHeaderFromContacts(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return false;
+    var found = pokerFindChatContactByPeerId(pid);
+    if (!found) return false;
+    try {
+      var resolvedName = found.contactName || found.name || "";
+      if (resolvedName) {
+        chatWithUserName = resolvedName;
+        if (convTitle) setTextContentIfChanged(convTitle, resolvedName);
+      }
+      if (convTitleId) {
+        var resolvedP21 = found.p21Id != null && String(found.p21Id).trim() ? String(found.p21Id).trim() : "\u2014";
+        setTextContentIfChanged(convTitleId, resolvedP21);
+      }
+      var resolvedAvatar = found.avatar != null && String(found.avatar).trim() ? String(found.avatar).trim() : "";
+      if (resolvedAvatar) {
+        chatWithPeerAvatarUrl = resolvedAvatar;
+        applyConvPeerAvatarHeader(resolvedAvatar, chatWithUserName || resolvedName || pid);
+      } else if (chatWithUserName || resolvedName) {
+        applyConvPeerAvatarHeader("", chatWithUserName || resolvedName || pid);
+      }
+      pokerPushOpenDebug("header-hydrated", pid);
+      return true;
+    } catch (eHdrHydrate) {}
+    return false;
+  }
+  function pokerSchedulePushDmHeaderHydrate(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid || typeof loadContacts !== "function") return;
+    try {
+      if (pokerHydrateOpenDmHeaderFromContacts(pid)) return;
+    } catch (eHdrHydrateCache) {}
+    try {
+      clearTimeout(window.__pokerPushDmHeaderHydrateTimer || 0);
+    } catch (eHdrHydrateClr) {}
+    window.__pokerPushDmHeaderHydrateTimer = setTimeout(function () {
+      try {
+        if (pokerHydrateOpenDmHeaderFromContacts(pid)) return;
+        loadContacts({
+          metaOnly: true,
+          onLoaded: function () {
+            try {
+              pokerHydrateOpenDmHeaderFromContacts(pid);
+            } catch (eHdrHydrateLoaded) {}
+          },
+        });
+      } catch (eHdrHydrateLoad) {}
+    }, 80);
+  }
   function pokerSchedulePendingPushDmContactsReload(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid || typeof loadContacts !== "function") return;
@@ -5747,6 +5797,9 @@ function runGazetteAndTasksInit() {
         peerP21Id != null ? peerP21Id : undefined,
         peerAvatarOpt || undefined
       );
+      try {
+        pokerSchedulePushDmHeaderHydrate(pid);
+      } catch (ePushHdrHydrate) {}
       return true;
     } catch (eOpenHard) {}
     finally {
