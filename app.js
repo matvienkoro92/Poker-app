@@ -32884,6 +32884,11 @@ function initChat() {
             if (typeof pokerOpenPendingPushDmWithoutContacts === "function" && pokerOpenPendingPushDmWithoutContacts(hardPendingPeer, hardPendingPeer)) {
               return;
             }
+            if (typeof pokerOpenPushDmHard === "function") {
+              pokerOpenPushDmHard(hardPendingPeer, hardPendingPeer);
+            }
+            pokerPushOpenDebug("chatRefresh-hard-stop", hardPendingPeer);
+            return;
           } finally {
             window.__pokerForceAllowPendingPushConvOpen = false;
           }
