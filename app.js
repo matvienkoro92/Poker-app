@@ -21453,6 +21453,40 @@ function initChat() {
   var convPeerAvatarWrap = document.getElementById("chatConvPeerAvatarWrap");
   var convGroupAvatarFile = document.getElementById("chatConvGroupAvatarFile");
   var convGroupCanChangeAvatar = false;
+  (function initPushDmViewMutationTrace() {
+    try {
+      if (window.__pokerPushDmViewMutationTraceBound) return;
+      window.__pokerPushDmViewMutationTraceBound = true;
+      var traceTargets = [
+        { key: "dialogsView", el: dialogsView },
+        { key: "generalView", el: generalView },
+        { key: "personalView", el: personalView },
+        { key: "listView", el: listView },
+        { key: "convView", el: convView },
+      ];
+      var describeEl = function (entry) {
+        if (!entry || !entry.el) return "";
+        var el = entry.el;
+        var cls = el.className != null ? String(el.className).trim().replace(/\s+/g, " ") : "";
+        var ds = el.style && el.style.display != null ? String(el.style.display) : "";
+        return entry.key + "{class=" + (cls || "-") + ",display=" + (ds || "-") + "}";
+      };
+      var observer = new MutationObserver(function () {
+        try {
+          if (typeof pokerCanShowPushDebugOverlay === "function" && !pokerCanShowPushDebugOverlay()) return;
+          if (!pokerGetActivePushDmTarget() && !(window.__pokerPushOpenDebugTrail && window.__pokerPushOpenDebugTrail.length)) return;
+          pokerPushOpenDebug(
+            "view-mutation",
+            traceTargets.map(describeEl).filter(Boolean).join(" | ")
+          );
+        } catch (eMutLog) {}
+      });
+      traceTargets.forEach(function (entry) {
+        if (!entry.el) return;
+        observer.observe(entry.el, { attributes: true, attributeFilter: ["class", "style"] });
+      });
+    } catch (eMutInit) {}
+  })();
   function getInlineChatHeaderTopOffsetPx() {
     try {
       var root = document.documentElement;
