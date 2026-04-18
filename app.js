@@ -5502,11 +5502,20 @@ function runGazetteAndTasksInit() {
       if (!pending) return false;
       var peerId = pending.userId != null ? String(pending.userId).trim() : "";
       if (!peerId) return false;
+      if (window.chatListenersAttached && typeof window.chatOpenConvFromDialogs === "function") {
+        if (pokerOpenChatPeerDirectFallback(peerId, pending.userName || peerId)) {
+          window.__pendingOpenChatPersonalFromDeepLink = null;
+          try {
+            if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
+          } catch (ePendingDmContactsBg) {}
+          return true;
+        }
+      }
       if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId)) {
         window.__pendingOpenChatPersonalFromDeepLink = null;
         return true;
       }
-      if (typeof loadContacts === "function" && !window.__pokerPendingChatDeepLinkContactsLoading) {
+      if (!window.chatListenersAttached && typeof loadContacts === "function" && !window.__pokerPendingChatDeepLinkContactsLoading) {
         window.__pokerPendingChatDeepLinkContactsLoading = true;
         loadContacts({
           onLoaded: function () {
@@ -29036,6 +29045,16 @@ function initChat() {
         messages = mergeOptimisticPersonalIntoMessages(messages);
         messages = mergeIncomingPushPersonalIntoMessages(messages, loadForPeer);
         messages = dedupePersonalMessagesForRender(messages);
+        if (
+          window._pendingPersonalMessage &&
+          window._pendingPersonalWith &&
+          peerChatIdsEqual(window._pendingPersonalWith, loadForPeer) &&
+          pokerChatMessageHasPersistedId(window._pendingPersonalMessage.id) &&
+          messages.some(function (m) { return pokerChatMessageHasPersistedId(m.id) && String(m.id) === String(window._pendingPersonalMessage.id); })
+        ) {
+          window._pendingPersonalMessage = null;
+          window._pendingPersonalWith = null;
+        }
         var isGrpThread =
           data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
         if (isGrpThread && data.groupTitle && convTitle) {
