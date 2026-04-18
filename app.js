@@ -32625,6 +32625,17 @@ function initChat() {
     })();
     window.chatRefresh = function () {
       try {
+        var forcedPeerRefresh = window.__pokerForcePushDmPeer;
+        var forcedUntilRefresh = Number(window.__pokerForcePushDmPeerUntil || 0);
+        if (
+          forcedPeerRefresh &&
+          forcedUntilRefresh > Date.now() &&
+          typeof pokerOpenPendingPushDmWithoutContacts === "function"
+        ) {
+          pokerPushOpenDebug("chatRefresh-blocked", forcedPeerRefresh);
+          pokerOpenPendingPushDmWithoutContacts(forcedPeerRefresh, forcedPeerRefresh);
+          return;
+        }
         if (window.__pendingOpenClubChatGeneral) {
           if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
             return;
