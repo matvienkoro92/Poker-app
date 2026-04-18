@@ -32790,6 +32790,26 @@ function initChat() {
     })();
     window.chatRefresh = function () {
       try {
+        var hardPendingPeer = typeof pokerGetActivePushDmTarget === "function" ? pokerGetActivePushDmTarget() : "";
+        if (hardPendingPeer) {
+          pokerPushOpenDebug("chatRefresh-hard-reroute", hardPendingPeer);
+          window.__pokerForcePushDmPeer = normalizePeerIdForChat(hardPendingPeer);
+          window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+          window.__pokerForceAllowPendingPushConvOpen = true;
+          try {
+            if (typeof pokerOpenResolvedChatPeer === "function" && pokerOpenResolvedChatPeer(hardPendingPeer, hardPendingPeer)) {
+              return;
+            }
+            if (typeof pokerOpenChatPeerDirectFallback === "function" && pokerOpenChatPeerDirectFallback(hardPendingPeer, hardPendingPeer)) {
+              return;
+            }
+            if (typeof pokerOpenPendingPushDmWithoutContacts === "function" && pokerOpenPendingPushDmWithoutContacts(hardPendingPeer, hardPendingPeer)) {
+              return;
+            }
+          } finally {
+            window.__pokerForceAllowPendingPushConvOpen = false;
+          }
+        }
         var forcedPeerRefresh = window.__pokerForcePushDmPeer;
         var forcedUntilRefresh = Number(window.__pokerForcePushDmPeerUntil || 0);
         if (
