@@ -10915,7 +10915,34 @@ function setView(viewName, navOpts) {
         if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
         else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
-        pokerEnsureOpenPendingChatPersonalFromDeepLink();
+        try {
+          var pendingDmSetView = window.__pendingOpenChatPersonalFromDeepLink;
+          var pendingPeerSetView =
+            pendingDmSetView && pendingDmSetView.userId != null ? String(pendingDmSetView.userId).trim() : "";
+          pokerPushOpenStateDebug("setView-chat-open-pending", pendingPeerSetView || "");
+          if (
+            pendingPeerSetView &&
+            typeof window.__pokerOpenPushDmImmediate === "function" &&
+            typeof normalizePeerIdForChat === "function"
+          ) {
+            window.__pokerForcePushDmPeer = normalizePeerIdForChat(pendingPeerSetView);
+            window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
+            window.__pokerForceAllowPendingPushConvOpen = true;
+            window.__pokerOpenPushDmImmediate(
+              normalizePeerIdForChat(pendingPeerSetView),
+              pendingDmSetView.userName || pendingPeerSetView
+            );
+            window.__pokerForceAllowPendingPushConvOpen = false;
+            window.__pendingOpenChatPersonalFromDeepLink = null;
+          } else {
+            pokerEnsureOpenPendingChatPersonalFromDeepLink();
+          }
+        } catch (eSetViewOpenPending) {
+          try {
+            window.__pokerForceAllowPendingPushConvOpen = false;
+          } catch (eSetViewForceReset) {}
+          pokerEnsureOpenPendingChatPersonalFromDeepLink();
+        }
       } else if (window.__pendingOpenChatPersonalFromDeepLink) {
         try {
           pokerPushOpenStateDebug(
