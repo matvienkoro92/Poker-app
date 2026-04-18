@@ -10783,9 +10783,9 @@ function setView(viewName, navOpts) {
         if (typeof window.tryOpenClubChatFromDialogs === "function") window.tryOpenClubChatFromDialogs();
         else if (typeof window.openClubChat === "function") window.openClubChat();
       } else if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.chatOpenConvFromDialogs === "function") {
-        var pdlNav = window.__pendingOpenChatPersonalFromDeepLink;
-        window.__pendingOpenChatPersonalFromDeepLink = null;
-        window.chatOpenConvFromDialogs(pdlNav.userId, pdlNav.userName || pdlNav.userId, pdlNav.peerP21Id || undefined);
+        if (!pokerEnsureOpenPendingChatPersonalFromDeepLink() && typeof window.chatShowDialogs === "function") {
+          window.chatShowDialogs();
+        }
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -33090,9 +33090,7 @@ function initChat() {
     window.__openClubChatAfterNextContacts = true;
   }
   if (window.__pendingOpenChatPersonalFromDeepLink && typeof openConvFromDialogs === "function") {
-    var pdl = window.__pendingOpenChatPersonalFromDeepLink;
-    window.__pendingOpenChatPersonalFromDeepLink = null;
-    openConvFromDialogs(pdl.userId, pdl.userName || pdl.userId, pdl.peerP21Id || undefined);
+    if (!pokerEnsureOpenPendingChatPersonalFromDeepLink()) showDialogs();
   } else if (window.__pendingOpenManagerFromCashout && typeof openConvFromDialogs === "function") {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
