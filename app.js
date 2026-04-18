@@ -5522,7 +5522,9 @@ function runGazetteAndTasksInit() {
     if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
     try {
       pokerPushOpenDebug("openConv-direct", pid);
+      window.__pokerForceAllowPendingPushConvOpen = true;
       window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+      window.__pokerForceAllowPendingPushConvOpen = false;
       try {
         clearTimeout(window.__pokerPushDmOpenRetryTimer || 0);
       } catch (eRetryClr) {}
@@ -5532,14 +5534,18 @@ function runGazetteAndTasksInit() {
           var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
           if (convVisible && samePeer) return;
           pokerPushOpenDebug("openConv-retry", pid);
+          window.__pokerForceAllowPendingPushConvOpen = true;
           window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+          window.__pokerForceAllowPendingPushConvOpen = false;
           setTimeout(function () {
             try {
               var convVisible2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
               var samePeer2 = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, pid));
               if (convVisible2 && samePeer2) return;
               pokerPushOpenDebug("openConv-retry2", pid);
+              window.__pokerForceAllowPendingPushConvOpen = true;
               window.chatOpenConvFromDialogs(normalizePeerIdForChat(pid), fallbackName || pid);
+              window.__pokerForceAllowPendingPushConvOpen = false;
             } catch (eRetry2) {}
           }, 700);
         } catch (eRetry1) {}
@@ -27312,7 +27318,8 @@ function initChat() {
   }
 
   function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt) {
-    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+    var allowPendingPushOpen = !!window.__pokerForceAllowPendingPushConvOpen;
+    if (!allowPendingPushOpen && typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
     var isGroupConv = userId && String(userId).indexOf("group_") === 0;
     if (myOpen && userId && !isGroupConv && peerChatIdsEqual(userId, myOpen)) {
