@@ -5563,6 +5563,9 @@ function runGazetteAndTasksInit() {
     if (!pid || typeof window.chatOpenConvFromDialogs !== "function") return false;
     var found = pokerFindChatContactByPeerId(pid);
     if (found) {
+      try {
+        pokerPushOpenDebug("openConv-resolved", pid);
+      } catch (eOpenResolvedDbg) {}
       window.chatOpenConvFromDialogs(
         found.id,
         found.contactName || found.name || fallbackName || found.id,
@@ -5665,6 +5668,10 @@ function runGazetteAndTasksInit() {
       var peerId = pending.userId != null ? String(pending.userId).trim() : "";
       if (!peerId) return false;
       pokerPushOpenDebug("pending-dm", peerId);
+      if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId)) {
+        window.__pendingOpenChatPersonalFromDeepLink = null;
+        return true;
+      }
       if (typeof window.__pokerOpenPushDmImmediate === "function") {
         if (pokerOpenPendingPushDmWithoutContacts(peerId, pending.userName || peerId)) {
           window.__pendingOpenChatPersonalFromDeepLink = null;
@@ -5682,10 +5689,6 @@ function runGazetteAndTasksInit() {
           } catch (ePendingDmContactsBg) {}
           return true;
         }
-      }
-      if (pokerOpenResolvedChatPeer(peerId, pending.userName || peerId)) {
-        window.__pendingOpenChatPersonalFromDeepLink = null;
-        return true;
       }
       if (!window.chatListenersAttached && typeof loadContacts === "function" && !window.__pokerPendingChatDeepLinkContactsLoading) {
         window.__pokerPendingChatDeepLinkContactsLoading = true;
@@ -11006,6 +11009,15 @@ function setView(viewName, navOpts) {
           pokerPushOpenStateDebug("setView-chat-open-pending", pendingPeerSetView || "");
           if (
             pendingPeerSetView &&
+            typeof pokerOpenResolvedChatPeer === "function" &&
+            pokerOpenResolvedChatPeer(
+              pendingPeerSetView,
+              pendingDmSetView.userName || pendingPeerSetView
+            )
+          ) {
+            window.__pendingOpenChatPersonalFromDeepLink = null;
+          } else if (
+            pendingPeerSetView &&
             typeof pokerOpenPendingPushDmWithoutContacts === "function" &&
             pokerOpenPendingPushDmWithoutContacts(
               pendingPeerSetView,
@@ -11215,6 +11227,17 @@ function setView(viewName, navOpts) {
           setTimeout(function () {
             try {
               pokerPushOpenStateDebug("setView-chat-post-refresh-open", pendingAfterChatPeer);
+              if (
+                window.__pendingOpenChatPersonalFromDeepLink &&
+                typeof pokerOpenResolvedChatPeer === "function" &&
+                pokerOpenResolvedChatPeer(
+                  pendingAfterChatPeer,
+                  pendingAfterChatRefresh.userName || pendingAfterChatPeer
+                )
+              ) {
+                window.__pendingOpenChatPersonalFromDeepLink = null;
+                return;
+              }
               if (
                 window.__pendingOpenChatPersonalFromDeepLink &&
                 typeof pokerOpenPendingPushDmWithoutContacts === "function" &&
