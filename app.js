@@ -37134,6 +37134,13 @@ document.addEventListener("visibilitychange", function () {
   function ensureBars() {
     if (window.__pokerSectionViewBarsDone) return;
     window.__pokerSectionViewBarsDone = true;
+    var appVersion = "";
+    try {
+      appVersion =
+        document && document.documentElement && document.documentElement.getAttribute
+          ? String(document.documentElement.getAttribute("data-app-version") || "").trim()
+          : "";
+    } catch (eVer) {}
     document.querySelectorAll(".view[data-view]").forEach(function (view) {
       var name = view.getAttribute("data-view");
       if (!name || view.querySelector(".admin-section-views")) return;
@@ -37143,7 +37150,9 @@ document.addEventListener("visibilitychange", function () {
       bar.setAttribute("aria-hidden", "true");
       var inner = document.createElement("span");
       inner.className = "admin-section-views__text";
-      inner.innerHTML = "Просмотры: <strong class=\"admin-section-views__count\">—</strong>";
+      inner.innerHTML =
+        "Просмотры: <strong class=\"admin-section-views__count\">—</strong>" +
+        (appVersion ? " · Версия: <strong class=\"admin-section-views__version\">" + escapeHtml(appVersion) + "</strong>" : "");
       bar.appendChild(inner);
       view.appendChild(bar);
     });
