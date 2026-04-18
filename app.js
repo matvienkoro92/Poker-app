@@ -5603,6 +5603,28 @@ function runGazetteAndTasksInit() {
       },
     });
   }
+  function pokerGetActivePushDmTarget() {
+    var pending = window.__pendingOpenChatPersonalFromDeepLink;
+    if (pending && pending.userId != null && String(pending.userId).trim()) {
+      return String(pending.userId).trim();
+    }
+    var forcedPeer = window.__pokerForcePushDmPeer ? String(window.__pokerForcePushDmPeer).trim() : "";
+    var forcedUntil = Number(window.__pokerForcePushDmPeerUntil || 0);
+    if (forcedPeer && forcedUntil > Date.now()) return forcedPeer;
+    return "";
+  }
+  function pokerGuardDefaultDialogsOpen() {
+    var activePeer = pokerGetActivePushDmTarget();
+    if (!activePeer) return false;
+    pokerPushOpenDebug("dialogs-guard-reroute", activePeer);
+    if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
+      if (window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) return true;
+    }
+    if (typeof pokerOpenChatPeerDirectFallback === "function") {
+      return pokerOpenChatPeerDirectFallback(activePeer, activePeer);
+    }
+    return false;
+  }
   function pokerOpenChatPeerDirectFallback(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid) return false;
@@ -11088,6 +11110,7 @@ function setView(viewName, navOpts) {
           );
         } catch (eSetViewDbg4) {}
         window.__pokerPendingChatDeepLinkNeedsLateFlush = true;
+      } else if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) {
       } else if (typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
@@ -33735,6 +33758,7 @@ function initChat() {
     var pcm = window.__pendingOpenManagerFromCashout;
     window.__pendingOpenManagerFromCashout = null;
     openConvFromDialogs(pcm.userId, pcm.userName || "Менеджер");
+  } else if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) {
   } else {
     showDialogs();
   }
