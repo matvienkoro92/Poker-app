@@ -125,6 +125,11 @@ function pokerPushOpenStateDebug(step, extra) {
     pokerPushOpenDebug(step, bits.join(" | "));
   } catch (eDbgState) {}
 }
+function pokerPushOpenTraceTransition(step, extra) {
+  try {
+    pokerPushOpenStateDebug(step, extra);
+  } catch (eDbgTransition) {}
+}
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", pokerRestorePushDebugTrail);
@@ -23953,6 +23958,7 @@ function initChat() {
     } catch (eInert) {}
   }
   function setTab(tab) {
+    pokerPushOpenTraceTransition("setTab-call", String(tab || ""));
     chatActiveTab = tab;
     closeSwitcherDropdown();
     /* Раньше setTab("dialogs") только прятал dialogsView первой строкой — список диалогов не показывался; chatRefresh дополнял showDialogs(), что ломало общий/админ таб после setTab("general"). */
@@ -23994,6 +24000,7 @@ function initChat() {
         } catch (eTabPersonalPending) {}
       }
       if (!chatWithUserId) {
+        pokerPushOpenTraceTransition("setTab-personal-no-with", "");
         showDialogs();
         updateChatHeaderStats();
         updateUnreadDots();
@@ -24059,6 +24066,7 @@ function initChat() {
     /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
        таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
     try {
+      pokerPushOpenTraceTransition("showDialogs-commit", "");
       if (chatComposerEl && typeof chatComposerEl.blur === "function") chatComposerEl.blur();
       var findDlgBlur = document.getElementById("chatFindByIdInputDialogs");
       if (findDlgBlur && typeof findDlgBlur.blur === "function") findDlgBlur.blur();
@@ -27915,6 +27923,7 @@ function initChat() {
         return;
       }
     } catch (eForceList) {}
+    pokerPushOpenTraceTransition("showList-commit", "");
     chatWithUserId = null;
     if (convTitle) convTitle.textContent = "";
     if (convTitleId) convTitleId.textContent = "\u2014";
@@ -27933,6 +27942,7 @@ function initChat() {
   }
 
   function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt) {
+    pokerPushOpenTraceTransition("showConv-enter", String(userId || ""));
     var allowPendingPushOpen = !!window.__pokerForceAllowPendingPushConvOpen;
     if (!allowPendingPushOpen && typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
@@ -28049,6 +28059,7 @@ function initChat() {
       }
     }
     loadMessages();
+    pokerPushOpenTraceTransition("showConv-after-load", String(userId || ""));
     mountChatComposer("personal");
     syncChatInertForIosAccessory();
     try {
@@ -32855,6 +32866,7 @@ function initChat() {
       [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerKeyboardEvents);
     })();
     window.chatRefresh = function () {
+      pokerPushOpenTraceTransition("chatRefresh-enter", "");
       try {
         var hardPendingPeer = typeof pokerGetActivePushDmTarget === "function" ? pokerGetActivePushDmTarget() : "";
         if (hardPendingPeer) {
@@ -32905,8 +32917,10 @@ function initChat() {
         }
       } catch (eChatRefreshPending) {}
       /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
+      pokerPushOpenTraceTransition("chatRefresh-before-setTab", String(chatActiveTab || ""));
       setTab(chatActiveTab);
       if (chatWithUserId) showConv(chatWithUserId, chatWithUserName, undefined, chatWithPeerAvatarUrl);
+      pokerPushOpenTraceTransition("chatRefresh-after-show", "");
       var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
       if (
         chatActiveTab === "general" &&
