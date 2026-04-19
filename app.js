@@ -39628,13 +39628,6 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
 var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 000 000₽" };
 /** Пн / Вт / Чт 17:00 МСК, X-poker: вход 0, приз 100 000₽. */
 var NEXT_HOME_XPOKER_FREEROLL = { name: "Фриролл X-poker", buyin: "0₽", guarantee: "100 000₽" };
-var HOME_FREEROLL_SCHEDULE = [
-  { day: "Пн", title: "Фриролл X-poker", meta: "Вход 0₽ · Приз 100 000₽", time: "17:00 МСК" },
-  { day: "Вт", title: "Фриролл X-poker", meta: "Вход 0₽ · Приз 100 000₽", time: "17:00 МСК" },
-  { day: "Ср", title: "Главный фриролл", meta: "Вход 0₽ · Приз 1 000 000₽", time: "18:00 МСК" },
-  { day: "Чт", title: "Фриролл X-poker", meta: "Вход 0₽ · Приз 100 000₽", time: "17:00 МСК" },
-  { day: "Сб", title: "Фриролл", meta: "Бесплатно · R:250₽ / A:500₽ · Приз 100 000₽", time: "18:00 МСК" }
-];
 /** 17:00 МСК = 14:00 UTC; конец регистрации — через 3 ч (как у слота 18:00→21:00 МСК). */
 var XPOKER_FREEROLL_START_UTC_HOUR = 14;
 var XPOKER_FREEROLL_END_REG_UTC_HOUR = 17;
@@ -39647,25 +39640,7 @@ function pokerMskWeekdayShortAt(utcMs) {
   return ru ? ru.charAt(0).toUpperCase() + ru.slice(1) : "—";
 }
 
-function renderHomeFreerollSchedule() {
-  var el = document.getElementById("freerollHomeScheduleList");
-  if (!el) return;
-  el.innerHTML = HOME_FREEROLL_SCHEDULE.map(function (item) {
-    return (
-      '<div class="home-freeroll-schedule__row">' +
-      '<span class="home-freeroll-schedule__day">' + escapeHtml(item.day) + "</span>" +
-      '<span class="home-freeroll-schedule__main">' +
-      '<span class="home-freeroll-schedule__title">' + escapeHtml(item.title) + "</span>" +
-      '<span class="home-freeroll-schedule__meta">' + escapeHtml(item.meta) + "</span>" +
-      "</span>" +
-      '<span class="home-freeroll-schedule__time">' + escapeHtml(item.time) + "</span>" +
-      "</div>"
-    );
-  }).join("");
-}
-
 function updateTournamentDayBlock() {
-  renderHomeFreerollSchedule();
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);
   var timerLabelEls = [document.getElementById("tournamentDayTimerLabel"), document.getElementById("scheduleTournamentDayTimerLabel")].filter(Boolean);
