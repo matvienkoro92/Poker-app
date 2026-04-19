@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.859">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.860">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -646,6 +646,9 @@
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
                       <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
+                      <div class="tournament-day-block__countdown tournament-day-block__countdown--freeroll">
+                        <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
+                      </div>
                     </div>
                     <div class="feature__desc tournament-day-block__meta">
                       <div class="home-freeroll-schedule" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
@@ -681,6 +684,10 @@
                         <div class="tournament-day-block__stat">
                           <span class="tournament-day-block__stat-label">Время</span>
                           <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="tournamentDayHomeWeekTime">—, 18:00 МСК</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                          <span class="tournament-day-block__stat-label">Площадка</span>
+                          <span class="tournament-day-block__stat-value">Poker21</span>
                         </div>
                       </div>
                       <div class="tournament-day-block__countdown">
