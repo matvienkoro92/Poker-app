@@ -21444,6 +21444,11 @@ function initChat() {
     try {
       if (typeof isPwaStandaloneMode === "function" && isPwaStandaloneMode()) return "0px";
     } catch (ePwaHeadTop) {}
+    try {
+      if (typeof window.__pokerIsChatPhysicalKeyboardContext === "function" && window.__pokerIsChatPhysicalKeyboardContext()) {
+        return "0px";
+      }
+    } catch (eDeskHeadTop) {}
     return "80px";
   }
   function syncConvGroupAvatarEditUi() {
