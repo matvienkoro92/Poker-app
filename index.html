@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.851">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.852">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -648,23 +648,7 @@
                       <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
                     </div>
                     <div class="feature__desc tournament-day-block__meta">
-                      <div class="tournament-day-block__stats">
-                        <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Приз</span>
-                          <span class="tournament-day-block__stat-value" id="freerollHomeGuarantee">—</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Вход</span>
-                          <span class="tournament-day-block__stat-value" id="freerollHomeBuyin">0₽</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Время</span>
-                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="freerollHomeWeekTime">Ср, 18:00 МСК</span>
-                        </div>
-                      </div>
-                      <div class="tournament-day-block__countdown">
-                        <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
-                      </div>
+                      <div class="home-freeroll-schedule" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
                     </div>
                   </div>
                 </a>
