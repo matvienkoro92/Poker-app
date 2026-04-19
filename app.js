@@ -31005,8 +31005,18 @@ function initChat() {
         } catch (eBarPad) {}
         var pad;
         if (barFixed) {
-          pad = Math.round(bh + btm + gap);
-          if (pad < 28) pad = 28;
+          var isThreadComposerDock =
+            typeof isChatThreadComposerKeyboardDom === "function" &&
+            isChatThreadComposerKeyboardDom() &&
+            typeof isTelegramMiniAppChatThreadIos === "function" &&
+            isTelegramMiniAppChatThreadIos();
+          if (isThreadComposerDock) {
+            pad = Math.round(bh + gap + 10);
+            if (pad < 44) pad = 44;
+          } else {
+            pad = Math.round(bh + btm + gap);
+            if (pad < 28) pad = 28;
+          }
           try {
             var screenSafeBottomPad = getChatScreenSafeAreaBottomPx();
             var isPwaIosPad =
@@ -31018,6 +31028,8 @@ function initChat() {
               isIosLikeForChatViewport();
             if (isPwaIosPad) {
               pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 28));
+            } else if (isThreadComposerDock) {
+              pad = Math.max(pad, Math.round(bh + 14));
             } else {
               pad = Math.max(pad, Math.round(bh + screenSafeBottomPad + 24));
             }
