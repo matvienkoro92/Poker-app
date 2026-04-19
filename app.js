@@ -31433,6 +31433,16 @@ function initChat() {
       window.__pokerClearChatKeyboardViewportState = clearChatKeyboardViewportState;
       function setChatKeyboardOpen(open) {
         logChatKeyboardDebug(open ? "kb-open" : "kb-close");
+        if (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          document.body &&
+          String(document.body.getAttribute("data-view") || "") === "chat"
+        ) {
+          clearChatKeyboardViewportState();
+          scrollDocumentToZero();
+          return;
+        }
         if (typeof setChatKeyboardOpenClasses === "function") {
           setChatKeyboardOpenClasses(open);
           scrollDocumentToZero();
@@ -33603,8 +33613,8 @@ function initChat() {
         if (e.key === "Enter") { e.preventDefault(); findByIdAndOpen(); }
       });
     }
-    if (findByIdInput) {
-      findByIdInput.addEventListener("focus", function () {
+      if (findByIdInput) {
+        findByIdInput.addEventListener("focus", function () {
         if (
           typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
           window.__pokerIsChatPhysicalKeyboardContext()
@@ -33614,8 +33624,10 @@ function initChat() {
         if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
           window.__pokerActivateChatKeyboardViewport();
         } else {
-          document.documentElement.classList.add("chat-keyboard-open");
-          document.body.classList.add("chat-keyboard-open");
+          if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+            document.documentElement.classList.add("chat-keyboard-open");
+            document.body.classList.add("chat-keyboard-open");
+          }
         }
         try {
           findByIdInput.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -34893,8 +34905,10 @@ function initChat() {
       if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
         window.__pokerActivateChatKeyboardViewport();
       } else {
-        document.documentElement.classList.add("chat-keyboard-open");
-        document.body.classList.add("chat-keyboard-open");
+        if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+          document.documentElement.classList.add("chat-keyboard-open");
+          document.body.classList.add("chat-keyboard-open");
+        }
       }
       try {
         findByIdInputDialogs.scrollIntoView({ block: "nearest", behavior: "smooth" });
