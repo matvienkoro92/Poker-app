@@ -21143,7 +21143,10 @@ var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v5";
 var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
 function pokerGetChatContactsListFilter() {
   try {
-    return sessionStorage.getItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY) === "friends" ? "friends" : "all";
+    var raw = sessionStorage.getItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY);
+    if (raw === "friends") return "friends";
+    if (raw === "groups") return "groups";
+    return "all";
   } catch (eF) {
     return "all";
   }
@@ -21154,13 +21157,13 @@ function pokerSyncChatContactsFilterTabs() {
   var mode = pokerGetChatContactsListFilter();
   wrap.querySelectorAll(".chat-contacts-filter__tab").forEach(function (btn) {
     var f = btn.getAttribute("data-filter");
-    var active = f === "friends" ? mode === "friends" : mode !== "friends";
+    var active = f === mode;
     btn.classList.toggle("chat-contacts-filter__tab--active", !!active);
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
   try {
     var primaryBlock = document.getElementById("chatDialogsPrimaryBlock");
-    if (primaryBlock) primaryBlock.classList.toggle("chat-dialogs-block--hidden-by-filter", mode === "friends");
+    if (primaryBlock) primaryBlock.classList.toggle("chat-dialogs-block--hidden-by-filter", mode !== "all");
   } catch (ePrimFilter) {}
 }
 
@@ -28525,7 +28528,9 @@ function initChat() {
           return !chatContactIsDuplicateOfPinnedDialog(c);
         });
         contactsForList = pokerSortContactsByDialogListPins(contactsForList);
-        var showFriendsOnly = pokerGetChatContactsListFilter() === "friends";
+        var contactsFilterMode = pokerGetChatContactsListFilter();
+        var showFriendsOnly = contactsFilterMode === "friends";
+        var showGroupsOnly = contactsFilterMode === "groups";
         var friendSet = {};
         if (data.friendIds && Array.isArray(data.friendIds)) {
           for (var fi = 0; fi < data.friendIds.length; fi++) {
@@ -28600,8 +28605,16 @@ function initChat() {
         } catch (ePkRf) {}
         if (showFriendsOnly) {
           contactsForList = contactsForList.filter(function (c) {
-            if (c && c.isGroupChat) return true;
+            if (c && c.isGroupChat) return false;
             return !!(friendSet[c.id] || friendSet[String(c.id)]);
+          });
+        } else if (showGroupsOnly) {
+          contactsForList = contactsForList.filter(function (c) {
+            return !!(c && c.isGroupChat);
+          });
+        } else {
+          contactsForList = contactsForList.filter(function (c) {
+            return !(c && c.isGroupChat);
           });
         }
         window.chatAdminUnread = data.adminUnread || {};
@@ -28627,9 +28640,12 @@ function initChat() {
           updateClubChatPreviewText(data.generalChatPreview);
         }
         if (contactsForList.length === 0) {
+          var emptyText = "Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.";
+          if (showGroupsOnly) emptyText = "Здесь будут ваши групповые чаты.";
+          else if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block">' +
-            '<p class="chat-empty">Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.</p>' +
+            '<p class="chat-empty">' + escapeHtml(emptyText) + "</p>" +
             "</div>";
           updateDialogUnreadBadges();
           updateChatNavDot();
@@ -28899,17 +28915,17 @@ function initChat() {
     if (!contactsEl._chatContactsFilterBound) {
       contactsEl._chatContactsFilterBound = true;
       var filterWrapEl = document.getElementById("chatContactsFilter");
-      if (filterWrapEl) {
+          if (filterWrapEl) {
         filterWrapEl.addEventListener("click", function (e) {
           var tb =
             e.target && e.target.closest ? e.target.closest(".chat-contacts-filter__tab") : null;
           if (!tb || !filterWrapEl.contains(tb)) return;
           var fv = tb.getAttribute("data-filter");
-          if (fv !== "friends" && fv !== "all") return;
+          if (fv !== "friends" && fv !== "all" && fv !== "groups") return;
           try {
             sessionStorage.setItem(
               POKER_CHAT_CONTACTS_LIST_FILTER_KEY,
-              fv === "friends" ? "friends" : "all"
+              fv === "friends" ? "friends" : fv === "groups" ? "groups" : "all"
             );
           } catch (eStF) {}
           pokerSyncChatContactsFilterTabs();

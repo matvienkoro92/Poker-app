@@ -9296,7 +9296,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   display: none !important;
 }
 .chat-contacts-filter__tab {
-  flex: 1;
+  flex: 1 1 0;
   margin: 0;
   padding: 10px 12px;
   font-size: 13px;
@@ -9314,6 +9314,20 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
     background 0.18s ease,
     border-color 0.18s ease,
     box-shadow 0.18s ease;
+}
+.chat-contacts-filter__tab[data-filter="all"] {
+  flex: 0 0 80%;
+}
+.chat-contacts-filter__tab[data-filter="friends"] {
+  flex: 0 0 10%;
+}
+.chat-contacts-filter__tab[data-filter="groups"] {
+  flex: 0 0 10%;
+}
+.chat-contacts-filter__tab--groups {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 12px;
 }
 .chat-contacts-filter__tab:hover:not(.chat-contacts-filter__tab--active) {
   color: var(--text);
