@@ -29293,6 +29293,69 @@ function initChat() {
         var title = document.createElement("strong");
         title.textContent = "chat-friend-action";
         title.setAttribute("style", "font:600 12px/1.2 monospace;color:#9fe870;");
+        var actions = document.createElement("div");
+        actions.setAttribute(
+          "style",
+          [
+            "display:flex",
+            "align-items:center",
+            "gap:6px"
+          ].join(";")
+        );
+        var copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.textContent = "Copy";
+        copyBtn.setAttribute(
+          "style",
+          [
+            "border:0",
+            "border-radius:8px",
+            "padding:4px 8px",
+            "background:#1f2937",
+            "color:#fff",
+            "font:600 11px/1 monospace"
+          ].join(";")
+        );
+        copyBtn.addEventListener("click", function () {
+          try {
+            var l = document.getElementById("chatFriendDebugOverlayList");
+            var rows = l ? Array.prototype.slice.call(l.children || []) : [];
+            var text = rows
+              .map(function (node) {
+                return node && node.textContent ? String(node.textContent) : "";
+              })
+              .filter(Boolean)
+              .join("\n\n");
+            if (!text) return;
+            var done = function (ok) {
+              copyBtn.textContent = ok ? "Copied" : "Copy failed";
+              setTimeout(function () {
+                copyBtn.textContent = "Copy";
+              }, 1200);
+            };
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+              navigator.clipboard.writeText(text).then(function () {
+                done(true);
+              }).catch(function () {
+                done(false);
+              });
+              return;
+            }
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "readonly");
+            ta.setAttribute("style", "position:fixed;left:-9999px;top:-9999px;opacity:0;");
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            var copied = false;
+            try {
+              copied = document.execCommand("copy");
+            } catch (eCopyExec) {}
+            document.body.removeChild(ta);
+            done(!!copied);
+          } catch (eCopyDbg) {}
+        });
         var clearBtn = document.createElement("button");
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
@@ -29315,7 +29378,9 @@ function initChat() {
         list.id = "chatFriendDebugOverlayList";
         list.setAttribute("style", "display:flex;flex-direction:column;gap:6px;");
         head.appendChild(title);
-        head.appendChild(clearBtn);
+        actions.appendChild(copyBtn);
+        actions.appendChild(clearBtn);
+        head.appendChild(actions);
         overlay.appendChild(head);
         overlay.appendChild(list);
         document.body.appendChild(overlay);
