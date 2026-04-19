@@ -34277,8 +34277,13 @@ function initChat() {
     function resizeChatTextarea(ta) {
       if (
         ta &&
-        typeof shouldUseNativeTelegramIosChatComposerFlow === "function" &&
-        shouldUseNativeTelegramIosChatComposerFlow(ta)
+        (
+          (typeof isTelegramWebApp === "function" && isTelegramWebApp()) ||
+          (
+            typeof shouldUseNativeTelegramIosChatComposerFlow === "function" &&
+            shouldUseNativeTelegramIosChatComposerFlow(ta)
+          )
+        )
       ) {
         try {
           ta.style.height = "44px";
