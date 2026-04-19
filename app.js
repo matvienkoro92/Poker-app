@@ -39758,7 +39758,12 @@ function initHomeFreerollModal() {
       var roomPage = playBtn.dataset.roomPage || "poker21";
       closeHomeFreerollModal();
       if (typeof setView === "function") setView("download");
-      if (typeof setDownloadPage === "function") setDownloadPage(roomPage);
+      if (typeof setDownloadPage === "function") {
+        setDownloadPage(roomPage);
+        requestAnimationFrame(function () {
+          setDownloadPage(roomPage);
+        });
+      }
     });
   }
 }
