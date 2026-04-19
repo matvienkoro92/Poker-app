@@ -31766,6 +31766,12 @@ function initChat() {
       function setChatKeyboardOpenClasses(open) {
         try {
           if (enforceTelegramChatDefaultComposerState()) return;
+          if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+            clearChatKeyboardViewportState({ keepInsets: true });
+            clearChatMessagesKeyboardPad();
+            stripChatInputAreaTransforms();
+            return;
+          }
           if (open) {
             document.documentElement.classList.add("chat-keyboard-open");
             document.body.classList.add("chat-keyboard-open");
@@ -31777,16 +31783,19 @@ function initChat() {
         } catch (eKbCls) {}
       }
       function scrollVisibleChatMessagesToBottom() {
+        var isTelegramChat = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         updateChatMessagesKeyboardPad();
-        try {
-          var se = document.scrollingElement;
-          if (se && se.scrollTop !== 0) se.scrollTop = 0;
-          if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
-          if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
-        } catch (eDocSc) {}
+        if (!isTelegramChat) {
+          try {
+            var se = document.scrollingElement;
+            if (se && se.scrollTop !== 0) se.scrollTop = 0;
+            if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
+            if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
+          } catch (eDocSc) {}
+        }
         try {
           var visibleMessages = getVisibleMessagesEl();
-          if (visibleMessages) visibleMessages.scrollTop = visibleMessages.scrollHeight;
+          if (visibleMessages && !isTelegramChat) visibleMessages.scrollTop = visibleMessages.scrollHeight;
         } catch (eMsgSc) {}
       }
       function detachTelegramMiniAppChatThreadRootScrollLock() {
@@ -32896,6 +32905,25 @@ function initChat() {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         collectChatOverscrollSnapshot("focus:start", focusTarget);
         if (enforceTelegramChatDefaultComposerState()) return;
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          try {
+            clearPendingChatKeyboardDismissTimers();
+            resetChatKeyboardDockRuntimeState();
+            window.__pokerChatKeyboardFocusAtMs = Date.now();
+          } catch (eTgFocusReset) {}
+          try {
+            if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+              window.__pokerChatDetachVisualViewportListeners();
+            }
+          } catch (eTgFocusDet) {}
+          try {
+            setChatKeyboardOpenClasses(false);
+            clearChatMessagesKeyboardPad();
+            stripChatInputAreaTransforms();
+          } catch (eTgFocusClear) {}
+          collectChatOverscrollSnapshot("focus:telegram-native", focusTarget);
+          return;
+        }
         try {
           if (typeof attachTelegramMiniAppChatThreadRootScrollLock === "function") {
             attachTelegramMiniAppChatThreadRootScrollLock();
@@ -32980,26 +33008,29 @@ function initChat() {
         } catch (ePwaSettleFlag) {
           window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
         }
+        var isTelegramChatFocus = typeof isTelegramWebApp === "function" && isTelegramWebApp();
         if (!isIosPwaChatKb) {
           syncPwaChatVisualViewportInset();
-          scrollVisibleChatMessagesToBottom();
-          requestAnimationFrame(function () {
-            syncPwaChatVisualViewportInset();
+          if (!isTelegramChatFocus) {
             scrollVisibleChatMessagesToBottom();
-          });
+            requestAnimationFrame(function () {
+              syncPwaChatVisualViewportInset();
+              scrollVisibleChatMessagesToBottom();
+            });
+          }
         }
         if (isIosChatKb) {
           if (isIosPwaChatKb) {
             setTimeout(function () {
               syncPwaChatVisualViewportInset();
             }, 0);
-          } else {
+          } else if (!isTelegramChatFocus) {
             setTimeout(function () {
               syncPwaChatVisualViewportInset();
               scrollVisibleChatMessagesToBottom();
             }, 200);
           }
-        } else if (!isIosChatKb) {
+        } else if (!isIosChatKb && !isTelegramChatFocus) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
             scrollVisibleChatMessagesToBottom();
@@ -33065,7 +33096,7 @@ function initChat() {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
                   try {
-                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard) {
+                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard && !(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
                       var settleBox = getVisibleMessagesEl();
                       if (settleBox) settleBox.scrollTop = settleBox.scrollHeight;
                       var settleRaf = window.requestAnimationFrame || function (fn) {
