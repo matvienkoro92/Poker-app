@@ -32648,6 +32648,7 @@ function initChat() {
       }
       function applyChatVisualViewportFallbackWithoutVv(doc) {
         var dvNoVv = String(document.body.getAttribute("data-view") || "");
+        var isTelegramChat = typeof isTelegramWebApp === "function" && isTelegramWebApp() && dvNoVv === "chat";
         var useThreadDockFallback =
           isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
         var ihFb = window.innerHeight || 0;
@@ -32667,6 +32668,13 @@ function initChat() {
           return;
         }
         if (dvNoVv === "chat") {
+          if (isTelegramChat) {
+            doc.style.setProperty("--chat-vv-inset", "0px");
+            doc.style.setProperty("--chat-ios-accessory-inset", "0px");
+            stripChatInputAreaTransforms();
+            updateChatMessagesKeyboardPad();
+            return;
+          }
           if (useThreadDockFallback) {
             doc.style.setProperty("--chat-vv-inset", "0px");
             doc.style.removeProperty("--chat-ios-accessory-inset");
@@ -32708,6 +32716,17 @@ function initChat() {
         }
         if (!document.body.classList.contains("chat-keyboard-open")) {
           resetChatVisualViewportState({ stripComposer: true, updateBaseline: true });
+          return;
+        }
+        if (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          String(document.body.getAttribute("data-view") || "") === "chat"
+        ) {
+          doc.style.setProperty("--chat-vv-inset", "0px");
+          doc.style.setProperty("--chat-ios-accessory-inset", "0px");
+          stripChatInputAreaTransforms();
+          updateChatMessagesKeyboardPad();
           return;
         }
         try {
