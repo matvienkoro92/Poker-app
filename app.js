@@ -32020,6 +32020,46 @@ function initChat() {
           detachTelegramMiniAppChatThreadRootScrollLock();
         }, 1800);
       }
+      function repairChatFocusViewportOverscroll(focusTarget) {
+        try {
+          if (
+            typeof isTelegramWebApp !== "function" ||
+            !isTelegramWebApp() ||
+            typeof isIosLikeForChatViewport !== "function" ||
+            !isIosLikeForChatViewport() ||
+            typeof isChatThreadComposerKeyboardDom !== "function" ||
+            !isChatThreadComposerKeyboardDom(focusTarget)
+          ) {
+            return;
+          }
+          var vv = window.visualViewport || null;
+          var se = document.scrollingElement || document.documentElement || document.body;
+          var pageTop = vv ? Math.max(Number(vv.pageTop) || 0, Number(vv.offsetTop) || 0) : 0;
+          var docTop = se ? Number(se.scrollTop) || 0 : 0;
+          if (pageTop < 24 && docTop < 24) return;
+          try {
+            if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
+          } catch (eKbScrollWin) {}
+          try {
+            if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
+          } catch (eKbScrollDoc) {}
+          try {
+            if (typeof pokerRepairIosStuckVisualViewportOffset === "function") {
+              pokerRepairIosStuckVisualViewportOffset();
+            }
+          } catch (eKbRepair) {}
+          try {
+            if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
+              pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
+            }
+          } catch (eKbNuke) {}
+          try {
+            if (typeof attachTelegramMiniAppChatThreadRootScrollLock === "function") {
+              attachTelegramMiniAppChatThreadRootScrollLock();
+            }
+          } catch (eKbRelock) {}
+        } catch (eKbRepairWrap) {}
+      }
       function scheduleChatKeyboardPostDismissPasses(delays) {
         if (!Array.isArray(delays)) return;
         delays.forEach(function (ms) {
@@ -33396,6 +33436,9 @@ function initChat() {
                   try {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIm) {}
+                  try {
+                    repairChatFocusViewportOverscroll(focusTarget);
+                  } catch (eVvRepairRaf) {}
                   collectChatOverscrollSnapshot("vv:raf", focusTarget);
                 });
               }
@@ -33412,6 +33455,9 @@ function initChat() {
                   try {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
+                  try {
+                    repairChatFocusViewportOverscroll(focusTarget);
+                  } catch (eVvRepairDeb) {}
                   collectChatOverscrollSnapshot("vv:debounced", focusTarget);
                 }, 220);
               }
@@ -33431,6 +33477,9 @@ function initChat() {
                 try {
                   syncPwaChatVisualViewportInset();
                 } catch (eVvSyn) {}
+                try {
+                  repairChatFocusViewportOverscroll(focusTarget);
+                } catch (eVvRepair) {}
                 collectChatOverscrollSnapshot("vv:raf", focusTarget);
               });
             };
