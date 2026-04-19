@@ -33427,6 +33427,12 @@ function initChat() {
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
+        try {
+          window.__pokerChatPwaSettleToBottomAfterKeyboard =
+            !!(isIosPwaChatKb && getVisibleMessagesEl() && chatMessagesNearBottom(getVisibleMessagesEl(), CHAT_SCROLL_BOTTOM_NEAR_PX));
+        } catch (ePwaSettleFlag) {
+          window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
+        }
         requestAnimationFrame(function () {
           collectChatOverscrollSnapshot("focus:raf1", focusTarget);
           requestAnimationFrame(function () {
@@ -33531,6 +33537,13 @@ function initChat() {
                   try {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
+                  try {
+                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard) {
+                      var settleBox = getVisibleMessagesEl();
+                      if (settleBox) settleBox.scrollTop = settleBox.scrollHeight;
+                    }
+                    window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
+                  } catch (eVvSettleBottom) {}
                   try {
                     repairChatFocusViewportOverscroll(focusTarget);
                   } catch (eVvRepairDeb) {}
