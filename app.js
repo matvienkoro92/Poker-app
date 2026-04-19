@@ -37786,6 +37786,11 @@ document.addEventListener("visibilitychange", function () {
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
+    function showKeyboardLabOnly() {
+      if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
+      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
+      if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
+    }
     function showAdminUi() {
       var footerStats = document.getElementById("footerVisitorStatsWrap");
       if (footerStats) footerStats.removeAttribute("hidden");
@@ -37812,8 +37817,7 @@ document.addEventListener("visibilitychange", function () {
       }
     } catch (e) {}
     if (pokerShouldShowHomeTopVersionForSpecialUser()) {
-      if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
-      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
+      showKeyboardLabOnly();
     }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
