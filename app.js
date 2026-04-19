@@ -29331,6 +29331,14 @@ function initChat() {
         copyBtn.type = "button";
         copyBtn.textContent = "Copy";
         copyBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
+        var preserveComposerFocus = function (ev) {
+          try {
+            if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+          } catch (ePreserveFocus) {}
+        };
+        copyBtn.addEventListener("pointerdown", preserveComposerFocus);
+        copyBtn.addEventListener("mousedown", preserveComposerFocus);
+        copyBtn.addEventListener("touchstart", preserveComposerFocus, { passive: false });
         copyBtn.addEventListener("click", function () {
           try {
             var l = document.getElementById("chatOverscrollDebugOverlayList");
@@ -29348,6 +29356,9 @@ function initChat() {
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
         clearBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
+        clearBtn.addEventListener("pointerdown", preserveComposerFocus);
+        clearBtn.addEventListener("mousedown", preserveComposerFocus);
+        clearBtn.addEventListener("touchstart", preserveComposerFocus, { passive: false });
         clearBtn.addEventListener("click", function () {
           var l = document.getElementById("chatOverscrollDebugOverlayList");
           if (l) l.innerHTML = "";
