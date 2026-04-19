@@ -9214,6 +9214,10 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-dialogs-list .chat-contacts {
   margin-top: 0;
 }
+.chat-dialogs-list > #chatDialogsPrimaryBlock {
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
 /* Верхняя часть единой оболочки: сегмент «Все / Друзья» */
 .chat-dialogs-list > .chat-contacts-filter {
   margin-top: 5px;
@@ -9243,6 +9247,10 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   overflow: hidden;
   box-sizing: border-box;
   margin-top: 0;
+}
+.chat-dialogs-list > #chatDialogsPrimaryBlock:not(.chat-dialogs-block--hidden-by-filter) + .chat-contacts .chat-contacts-list-block {
+  border-top: none;
+  border-radius: 0 0 12px 12px;
 }
 [data-theme="light"] .chat-dialogs-list .chat-contacts .chat-contacts-list-block {
   background: color-mix(in srgb, var(--block-bg-solid) 98%, #fff 2%);
