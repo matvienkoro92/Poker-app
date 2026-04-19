@@ -21277,9 +21277,13 @@ function pokerApplyLocalFriendToFriendsPickCache(targetUserId, contactName) {
 }
 
 function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
+  var friendDebugLog =
+    typeof window !== "undefined" && typeof window.__pokerDebugChatFriendAction === "function"
+      ? window.__pokerDebugChatFriendAction
+      : function () {};
   var uid = targetUserId != null ? String(targetUserId) : "";
   try {
-    pokerDebugChatFriendAction("removeLocal:start", {
+    friendDebugLog("removeLocal:start", {
       targetUserId: targetUserId != null ? String(targetUserId) : "",
       uid: uid,
       hasLastContactsData: !!window.__pokerLastContactsApiData,
@@ -21301,7 +21305,7 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   var set = window.__pokerChatFriendIdsSet || {};
   try {
     delete set[uid];
-    pokerDebugChatFriendAction("removeLocal:deletedDirectKey", {
+    friendDebugLog("removeLocal:deletedDirectKey", {
       uid: uid,
       hadDirectKeyBefore: !!set[uid],
     });
@@ -21309,7 +21313,7 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   try {
     var nxUid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(uid) : uid;
     if (nxUid) delete set[nxUid];
-    pokerDebugChatFriendAction("removeLocal:normalizedKey", {
+    friendDebugLog("removeLocal:normalizedKey", {
       uid: uid,
       normalizedUid: nxUid || "",
       sameAsUid: nxUid === uid,
@@ -21323,13 +21327,13 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
       data.friendIds = data.friendIds.filter(function (fid) {
         return !peerChatIdsEqual(fid, uid);
       });
-      pokerDebugChatFriendAction("removeLocal:friendIdsFiltered", {
+      friendDebugLog("removeLocal:friendIdsFiltered", {
         uid: uid,
         beforeFriendIdsCount: beforeFriendIdsCount,
         afterFriendIdsCount: data.friendIds.length,
       });
     } catch (eFrFriendIds) {
-      pokerDebugChatFriendAction("removeLocal:friendIdsFilterError", {
+      friendDebugLog("removeLocal:friendIdsFilterError", {
         uid: uid,
         error: eFrFriendIds && eFrFriendIds.message ? eFrFriendIds.message : String(eFrFriendIds || ""),
       });
@@ -21346,13 +21350,13 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
         matchedContactId = String(row.id);
         break;
       }
-      pokerDebugChatFriendAction("removeLocal:contactsPatched", {
+      friendDebugLog("removeLocal:contactsPatched", {
         uid: uid,
         contactsCount: data.contacts.length,
         matchedContactId: matchedContactId,
       });
     } catch (eFrContacts) {
-      pokerDebugChatFriendAction("removeLocal:contactsPatchError", {
+      friendDebugLog("removeLocal:contactsPatchError", {
         uid: uid,
         error: eFrContacts && eFrContacts.message ? eFrContacts.message : String(eFrContacts || ""),
       });
@@ -21367,14 +21371,14 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
         return row && row.userId != null ? !peerChatIdsEqual(row.userId, uid) : true;
       });
       cache.ts = Date.now();
-      pokerDebugChatFriendAction("removeLocal:friendsPickFiltered", {
+      friendDebugLog("removeLocal:friendsPickFiltered", {
         uid: uid,
         beforePickCount: beforePickCount,
         afterPickCount: cache.friends.length,
       });
     }
   } catch (eFrPickDel) {
-    pokerDebugChatFriendAction("removeLocal:friendsPickFilterError", {
+    friendDebugLog("removeLocal:friendsPickFilterError", {
       uid: uid,
       error: eFrPickDel && eFrPickDel.message ? eFrPickDel.message : String(eFrPickDel || ""),
     });
@@ -21383,12 +21387,12 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
     if (typeof pokerUpdateFriendsCountLabels === "function" && data && Array.isArray(data.friendIds)) {
       pokerUpdateFriendsCountLabels(data.friendIds.length);
     }
-    pokerDebugChatFriendAction("removeLocal:friendsCountUpdated", {
+    friendDebugLog("removeLocal:friendsCountUpdated", {
       uid: uid,
       friendIdsCount: data && Array.isArray(data.friendIds) ? data.friendIds.length : null,
     });
   } catch (eFrLblDel) {
-    pokerDebugChatFriendAction("removeLocal:friendsCountUpdateError", {
+    friendDebugLog("removeLocal:friendsCountUpdateError", {
       uid: uid,
       error: eFrLblDel && eFrLblDel.message ? eFrLblDel.message : String(eFrLblDel || ""),
     });
@@ -21396,25 +21400,25 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   try {
     if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
       window.__pokerForceRerenderChatContactsFromCache();
-      pokerDebugChatFriendAction("removeLocal:rerenderFromCache", {
+      friendDebugLog("removeLocal:rerenderFromCache", {
         uid: uid,
         rerenderMode: "forceRerenderChatContactsFromCache",
       });
     } else if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
       window.__pokerApplyContactsApiResponse(data, { forceRerender: true });
-      pokerDebugChatFriendAction("removeLocal:rerenderFromApply", {
+      friendDebugLog("removeLocal:rerenderFromApply", {
         uid: uid,
         rerenderMode: "applyContactsApiResponse",
       });
     }
   } catch (eFrApplyDel) {
-    pokerDebugChatFriendAction("removeLocal:rerenderError", {
+    friendDebugLog("removeLocal:rerenderError", {
       uid: uid,
       error: eFrApplyDel && eFrApplyDel.message ? eFrApplyDel.message : String(eFrApplyDel || ""),
     });
   }
   try {
-    pokerDebugChatFriendAction("removeLocal:done", {
+    friendDebugLog("removeLocal:done", {
       uid: uid,
       isFriendAfterRemove:
         typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(uid) : false,
@@ -29414,6 +29418,9 @@ function initChat() {
       overlay.scrollTop = overlay.scrollHeight;
     } catch (eDbgOverlay) {}
   }
+  try {
+    window.__pokerDebugChatFriendAction = pokerDebugChatFriendAction;
+  } catch (eDbgExpose) {}
   function syncChatDialogPreviewAddFriendBtn() {
     var btn = document.getElementById("chatDialogPreviewAddFriendBtn");
     var modal = document.getElementById("chatDialogPreviewModal");
