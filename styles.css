@@ -9226,7 +9226,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-dialogs-list > .chat-contacts-filter {
   margin-top: 5px;
   width: 100%;
-  padding: 5px 5px 0;
+  padding: 0;
   min-height: 0;
   border-radius: 14px 14px 0 0;
   border: 1px solid var(--chat-contacts-rail-border);
@@ -9301,7 +9301,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   flex-shrink: 0;
   width: 100%;
   min-width: 0;
-  gap: 4px;
+  gap: 0;
   margin: 0;
   padding: 0;
   min-height: 0;
@@ -9315,6 +9315,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-contacts-filter__tab {
   min-width: 0;
   margin: 0;
+  min-height: 42px;
   padding: 10px 8px;
   font-size: 12px;
   font-weight: 600;
@@ -9325,9 +9326,9 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   text-overflow: ellipsis;
   text-align: center;
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--block-bg-solid) 65%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
-  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 24%, var(--block-bg-solid));
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -9336,10 +9337,18 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 }
+.chat-contacts-filter__tab:first-child {
+  border-top-left-radius: 14px;
+}
+.chat-contacts-filter__tab:last-child {
+  border-top-right-radius: 14px;
+}
+.chat-contacts-filter__tab + .chat-contacts-filter__tab {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.1));
+}
 .chat-contacts-filter__tab:hover:not(.chat-contacts-filter__tab--active) {
   color: var(--text);
-  background: color-mix(in srgb, var(--block-bg-solid) 82%, var(--accent-soft));
-  border-color: color-mix(in srgb, var(--accent) 22%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 34%, var(--block-bg-solid));
 }
 .chat-contacts-filter__tab--active {
   color: var(--btn-on-accent);
@@ -9349,7 +9358,6 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
     var(--accent) 48%,
     color-mix(in srgb, var(--accent) 92%, #000 8%) 100%
   );
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
   box-shadow:
     0 2px 10px color-mix(in srgb, var(--accent) 32%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
