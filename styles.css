@@ -3501,8 +3501,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:not(.chat-input-area--vv-dock),
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:not(.chat-input-area--vv-dock),
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
@@ -3535,27 +3535,6 @@ html.poker-ios-pwa body[data-view="chat"] .chat-conv-view .chat-container .chat-
   transform: none !important;
   margin-bottom: 0 !important;
   will-change: auto;
-}
-html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-general-view .chat-input-area:not(.chat-input-area--vv-dock),
-html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  top: auto !important;
-  width: auto !important;
-  max-width: none !important;
-  z-index: 5 !important;
-  margin-bottom: 0 !important;
-  transform: none !important;
-  --chat-input-lift: 0px !important;
-}
-html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
-html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
-  padding-bottom: 0 !important;
-  scroll-padding-bottom: 0 !important;
 }
 .chat-switcher-row {
   display: flex;
@@ -28912,114 +28891,4 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   background: linear-gradient(180deg, #fb923c, #f97316);
   color: #fff7ed;
   font-weight: 700;
-}
-/* Telegram chat parity with PWA: выравниваем ленту, диалоги и композер по PWA-правилам.
-   Шапку Telegram не трогаем. В Telegram нет отдельной iOS accessory bar над клавиатурой. */
-html.app--telegram-miniapp body[data-view="chat"],
-html.app--telegram-miniapp body:has(.view--active[data-view="chat"]),
-html.app--telegram-miniapp.app-view-chat,
-html.app--telegram-miniapp:has(body[data-view="chat"]) {
-  --chat-ios-accessory-inset: 0px !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-view,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-dialogs-view {
-  padding-left: var(--chat-side-pad, 3px) !important;
-  padding-right: var(--chat-side-pad, 3px) !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-list,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-dialogs-list {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-list-view,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-list-view {
-  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
-  overflow-y: scroll !important;
-  overflow-x: hidden !important;
-  padding-left: var(--chat-side-pad, 3px) !important;
-  padding-right: var(--chat-side-pad, 3px) !important;
-  padding-bottom: 0 !important;
-  scroll-padding-bottom: 0 !important;
-  box-sizing: border-box !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
-  display: grid !important;
-  grid-template-rows: minmax(0, 1fr) auto !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
-  gap: 4px !important;
-  padding-top: var(--chat-composer-edge-gap, 2px) !important;
-  padding-right: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
-  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
-  padding-left: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
-  background-color: var(--chat-input-field-bg) !important;
-  background-image: none !important;
-  box-sizing: border-box !important;
-  align-self: end !important;
-  position: relative !important;
-  inset: auto !important;
-  flex: 0 0 auto !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-input-wrap,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap,
-html.app--telegram-miniapp body[data-view="chat"] .chat-tma-ios-minimal-block,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-composer-actions,
-html.app--telegram-miniapp body[data-view="chat"] .chat-send-btn--icon,
-html.app--telegram-miniapp body[data-view="chat"] .chat-tma-ios-minimal-block__action,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-actions,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-send-btn--icon,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-tma-ios-minimal-block__action {
-  align-self: center !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-input--textarea,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
-  min-height: 44px !important;
-  max-height: 140px !important;
-  height: auto !important;
-  overflow-y: auto !important;
-  padding: 10px 40px 10px 14px !important;
-  line-height: 1.4 !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-input-area--ios-overlay-gate .chat-input-wrap,
-html.app--telegram-miniapp body[data-view="chat"] .chat-input-area--ios-overlay-gate .chat-tma-ios-minimal-block,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area--ios-overlay-gate .chat-input-wrap,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area--ios-overlay-gate .chat-tma-ios-minimal-block {
-  opacity: 1 !important;
 }
