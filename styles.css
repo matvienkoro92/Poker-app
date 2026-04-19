@@ -7846,8 +7846,10 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-input-wrap,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-input-wrap,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap,
 html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap {
-  gap: 4px !important;
+  gap: 0 !important;
   align-items: center !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 36px !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-composer-mount,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-composer-mount,
@@ -7855,6 +7857,60 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-mount,
 html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-composer-mount {
   display: flex !important;
   align-items: center !important;
+  min-width: 0 !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-input-area,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-input-area {
+  padding-top: 0 !important;
+  padding-bottom: 6px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-attach-wrap,
+html.app--telegram-miniapp body[data-view="chat"] .chat-emoji-btn,
+html.app--telegram-miniapp body[data-view="chat"] .chat-scroll-bottom-btn,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-attach-wrap,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-emoji-btn,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-scroll-bottom-btn,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-attach-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-emoji-btn,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-scroll-bottom-btn,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-attach-wrap,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-emoji-btn,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-scroll-bottom-btn {
+  display: none !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-composer-actions,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-composer-actions,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-actions,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-composer-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  min-width: 36px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-send-btn,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-send-btn,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-send-btn,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-send-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-input--textarea,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-input--textarea,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
+  padding-right: 14px !important;
+  border-radius: 14px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-container,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-container,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-container,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-container {
+  gap: 0 !important;
 }
 .chat-voice-btn {
   flex-shrink: 0;
