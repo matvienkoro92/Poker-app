@@ -21207,6 +21207,73 @@ function pokerRefreshFriendsCountFromApi() {
     })
     .catch(function () {});
 }
+
+function pokerApplyLocalFriendToChatContacts(targetUserId, contactName) {
+  var uid = targetUserId != null ? String(targetUserId) : "";
+  if (!uid) return;
+  window.__pokerChatFriendIdsSet = window.__pokerChatFriendIdsSet || {};
+  window.__pokerChatFriendIdsSet[uid] = true;
+  try {
+    var nxUid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(uid) : uid;
+    if (nxUid && nxUid !== uid) window.__pokerChatFriendIdsSet[nxUid] = true;
+  } catch (eFrNorm) {}
+  var data = window.__pokerLastContactsApiData;
+  if (data && Array.isArray(data.friendIds)) {
+    var hasId = false;
+    for (var fi = 0; fi < data.friendIds.length; fi++) {
+      if (peerChatIdsEqual(data.friendIds[fi], uid)) {
+        hasId = true;
+        break;
+      }
+    }
+    if (!hasId) data.friendIds.push(uid);
+  }
+  if (data && Array.isArray(data.contacts)) {
+    for (var ci = 0; ci < data.contacts.length; ci++) {
+      var row = data.contacts[ci];
+      if (!row || row.id == null || !peerChatIdsEqual(row.id, uid)) continue;
+      if (contactName != null) row.contactName = String(contactName).trim();
+      break;
+    }
+  }
+  try {
+    if (typeof pokerApplyLocalFriendToFriendsPickCache === "function") pokerApplyLocalFriendToFriendsPickCache(uid, contactName);
+  } catch (eFrCache) {}
+  try {
+    if (typeof pokerUpdateFriendsCountLabels === "function" && data && Array.isArray(data.friendIds)) {
+      pokerUpdateFriendsCountLabels(data.friendIds.length);
+    }
+  } catch (eFrLbl) {}
+  try {
+    if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
+      window.__pokerApplyContactsApiResponse(data);
+    }
+  } catch (eFrApply) {}
+}
+
+function pokerApplyLocalFriendToFriendsPickCache(targetUserId, contactName) {
+  var uid = targetUserId != null ? String(targetUserId) : "";
+  if (!uid) return;
+  var cache = window.__pokerFriendsPickCache;
+  if (!cache || !Array.isArray(cache.friends)) return;
+  var found = false;
+  for (var i = 0; i < cache.friends.length; i++) {
+    var row = cache.friends[i];
+    if (!row || !row.userId || !peerChatIdsEqual(row.userId, uid)) continue;
+    if (contactName != null) row.contactName = String(contactName).trim();
+    found = true;
+    break;
+  }
+  if (!found) {
+    cache.friends.push({
+      userId: uid,
+      contactName: contactName != null ? String(contactName).trim() : "",
+      username: "",
+    });
+  }
+  cache.ts = Date.now();
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
@@ -29070,8 +29137,7 @@ function initChat() {
       })
       .then(function (d) {
         if (d && d.ok) {
-          window.__pokerChatFriendIdsSet = window.__pokerChatFriendIdsSet || {};
-          window.__pokerChatFriendIdsSet[String(targetUserId)] = true;
+          pokerApplyLocalFriendToChatContacts(targetUserId, contactName);
           if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
           if (typeof window.chatRefresh === "function") window.chatRefresh();
           syncChatDialogPreviewAddFriendBtn();

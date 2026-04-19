@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.863">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.865">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -646,7 +646,7 @@
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
                       <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
-                      <div class="tournament-day-block__countdown tournament-day-block__countdown--freeroll">
+                      <div class="tournament-day-block__countdown">
                         <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
                       </div>
                     </div>
@@ -670,6 +670,9 @@
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
                       <h2 class="tournament-day-block__home-heading">Турнир дня</h2>
+                      <div class="tournament-day-block__countdown">
+                        <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
+                      </div>
                     </div>
                     <div class="feature__desc tournament-day-block__meta">
                       <div class="tournament-day-block__stats">
@@ -689,9 +692,6 @@
                           <span class="tournament-day-block__stat-label">Площадка</span>
                           <span class="tournament-day-block__stat-value">Poker21</span>
                         </div>
-                      </div>
-                      <div class="tournament-day-block__countdown">
-                        <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
                       </div>
                     </div>
                   </div>
