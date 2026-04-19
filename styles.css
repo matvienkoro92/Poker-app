@@ -3398,24 +3398,12 @@ body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
   /* Как в треде: без transition — иначе на iPhone TG/WK после закрытия клавиатуры таббар и viewport «ломают» низ (полоса под панелью). */
   transition: none !important;
 }
-body.chat-keyboard-open.chat-keyboard-open--tma-flow:has(.view--active[data-view="chat"]) .bottom-nav {
-  transform: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
-}
 /* На случай если transform таббара не сработал в WebView — весь #app выше нижнего меню */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) #app.app {
   z-index: 1002;
 }
-body.chat-keyboard-open.chat-keyboard-open--tma-flow:has(.view--active[data-view="chat"]) #app.app {
-  z-index: auto;
-}
 body.chat-keyboard-open .card__header {
   display: none !important;
-}
-body.chat-keyboard-open.chat-keyboard-open--tma-flow .card__header {
-  display: flex !important;
 }
 /* Внутри общего чата или личного чата: скрываем верхнее и нижнее меню */
 .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .card__header,
@@ -3449,9 +3437,6 @@ html.app--tg-content-inset
  * С клавиатурой safe-area снизу дублирует «воздух» над системной панелью — достаточно 0. */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
   padding-bottom: 0;
-}
-body.chat-keyboard-open.chat-keyboard-open--tma-flow:has(.view--active[data-view="chat"]) .app {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 /* Профиль: таббар как в чате — не перекрывает поля при клавиатуре */
 body.chat-keyboard-open:has(.view--active[data-view="profile"]) .bottom-nav {
