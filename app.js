@@ -21278,51 +21278,148 @@ function pokerApplyLocalFriendToFriendsPickCache(targetUserId, contactName) {
 
 function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   var uid = targetUserId != null ? String(targetUserId) : "";
+  try {
+    pokerDebugChatFriendAction("removeLocal:start", {
+      targetUserId: targetUserId != null ? String(targetUserId) : "",
+      uid: uid,
+      hasLastContactsData: !!window.__pokerLastContactsApiData,
+      friendIdsCount:
+        window.__pokerLastContactsApiData && Array.isArray(window.__pokerLastContactsApiData.friendIds)
+          ? window.__pokerLastContactsApiData.friendIds.length
+          : null,
+      contactsCount:
+        window.__pokerLastContactsApiData && Array.isArray(window.__pokerLastContactsApiData.contacts)
+          ? window.__pokerLastContactsApiData.contacts.length
+          : null,
+      friendsPickCount:
+        window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
+          ? window.__pokerFriendsPickCache.friends.length
+          : null,
+    });
+  } catch (eFrDbgStart) {}
   if (!uid) return;
   var set = window.__pokerChatFriendIdsSet || {};
   try {
     delete set[uid];
+    pokerDebugChatFriendAction("removeLocal:deletedDirectKey", {
+      uid: uid,
+      hadDirectKeyBefore: !!set[uid],
+    });
   } catch (eFrDel) {}
   try {
     var nxUid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(uid) : uid;
     if (nxUid) delete set[nxUid];
+    pokerDebugChatFriendAction("removeLocal:normalizedKey", {
+      uid: uid,
+      normalizedUid: nxUid || "",
+      sameAsUid: nxUid === uid,
+    });
   } catch (eFrNormDel) {}
   window.__pokerChatFriendIdsSet = set;
   var data = window.__pokerLastContactsApiData;
   if (data && Array.isArray(data.friendIds)) {
-    data.friendIds = data.friendIds.filter(function (fid) {
-      return !peerChatIdsEqual(fid, uid);
-    });
+    try {
+      var beforeFriendIdsCount = data.friendIds.length;
+      data.friendIds = data.friendIds.filter(function (fid) {
+        return !peerChatIdsEqual(fid, uid);
+      });
+      pokerDebugChatFriendAction("removeLocal:friendIdsFiltered", {
+        uid: uid,
+        beforeFriendIdsCount: beforeFriendIdsCount,
+        afterFriendIdsCount: data.friendIds.length,
+      });
+    } catch (eFrFriendIds) {
+      pokerDebugChatFriendAction("removeLocal:friendIdsFilterError", {
+        uid: uid,
+        error: eFrFriendIds && eFrFriendIds.message ? eFrFriendIds.message : String(eFrFriendIds || ""),
+      });
+      throw eFrFriendIds;
+    }
   }
   if (data && Array.isArray(data.contacts)) {
-    for (var ci = 0; ci < data.contacts.length; ci++) {
-      var row = data.contacts[ci];
-      if (!row || row.id == null || !peerChatIdsEqual(row.id, uid)) continue;
-      row.contactName = "";
-      break;
+    try {
+      var matchedContactId = "";
+      for (var ci = 0; ci < data.contacts.length; ci++) {
+        var row = data.contacts[ci];
+        if (!row || row.id == null || !peerChatIdsEqual(row.id, uid)) continue;
+        row.contactName = "";
+        matchedContactId = String(row.id);
+        break;
+      }
+      pokerDebugChatFriendAction("removeLocal:contactsPatched", {
+        uid: uid,
+        contactsCount: data.contacts.length,
+        matchedContactId: matchedContactId,
+      });
+    } catch (eFrContacts) {
+      pokerDebugChatFriendAction("removeLocal:contactsPatchError", {
+        uid: uid,
+        error: eFrContacts && eFrContacts.message ? eFrContacts.message : String(eFrContacts || ""),
+      });
+      throw eFrContacts;
     }
   }
   try {
     var cache = window.__pokerFriendsPickCache;
     if (cache && Array.isArray(cache.friends)) {
+      var beforePickCount = cache.friends.length;
       cache.friends = cache.friends.filter(function (row) {
         return row && row.userId != null ? !peerChatIdsEqual(row.userId, uid) : true;
       });
       cache.ts = Date.now();
+      pokerDebugChatFriendAction("removeLocal:friendsPickFiltered", {
+        uid: uid,
+        beforePickCount: beforePickCount,
+        afterPickCount: cache.friends.length,
+      });
     }
-  } catch (eFrPickDel) {}
+  } catch (eFrPickDel) {
+    pokerDebugChatFriendAction("removeLocal:friendsPickFilterError", {
+      uid: uid,
+      error: eFrPickDel && eFrPickDel.message ? eFrPickDel.message : String(eFrPickDel || ""),
+    });
+  }
   try {
     if (typeof pokerUpdateFriendsCountLabels === "function" && data && Array.isArray(data.friendIds)) {
       pokerUpdateFriendsCountLabels(data.friendIds.length);
     }
-  } catch (eFrLblDel) {}
+    pokerDebugChatFriendAction("removeLocal:friendsCountUpdated", {
+      uid: uid,
+      friendIdsCount: data && Array.isArray(data.friendIds) ? data.friendIds.length : null,
+    });
+  } catch (eFrLblDel) {
+    pokerDebugChatFriendAction("removeLocal:friendsCountUpdateError", {
+      uid: uid,
+      error: eFrLblDel && eFrLblDel.message ? eFrLblDel.message : String(eFrLblDel || ""),
+    });
+  }
   try {
     if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
       window.__pokerForceRerenderChatContactsFromCache();
+      pokerDebugChatFriendAction("removeLocal:rerenderFromCache", {
+        uid: uid,
+        rerenderMode: "forceRerenderChatContactsFromCache",
+      });
     } else if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
       window.__pokerApplyContactsApiResponse(data, { forceRerender: true });
+      pokerDebugChatFriendAction("removeLocal:rerenderFromApply", {
+        uid: uid,
+        rerenderMode: "applyContactsApiResponse",
+      });
     }
-  } catch (eFrApplyDel) {}
+  } catch (eFrApplyDel) {
+    pokerDebugChatFriendAction("removeLocal:rerenderError", {
+      uid: uid,
+      error: eFrApplyDel && eFrApplyDel.message ? eFrApplyDel.message : String(eFrApplyDel || ""),
+    });
+  }
+  try {
+    pokerDebugChatFriendAction("removeLocal:done", {
+      uid: uid,
+      isFriendAfterRemove:
+        typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(uid) : false,
+    });
+  } catch (eFrDbgDone) {}
 }
 
 function pokerChatContactsAuthFingerprint() {
