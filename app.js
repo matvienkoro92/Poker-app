@@ -32127,13 +32127,13 @@ function initChat() {
            * Второй пересчёт + сглаживание давали заметный «второй рывок» строки вверх.
            */
           if (isTgDock && iosDock && ihLim > 200) {
-            var hardMaxTg = Math.min(288, Math.max(92, Math.round(ihLim * 0.35)));
+            var hardMaxTg = Math.min(148, Math.max(74, Math.round(ihLim * 0.18)));
             bottomPx = Math.min(hardMaxTg, coverNum + gap);
             if (focusAgeDock > 0 && focusAgeDock < 720) {
               var baseDock = Number(window.__pokerChatInnerHBaseline) || 0;
               var winLossDockFocus = baseDock > 260 && ihLim > 0 ? Math.max(0, Math.round(baseDock - ihLim)) : 0;
               if (winLossDockFocus >= 24) {
-                bottomPx = Math.min(bottomPx, Math.max(78, winLossDockFocus + Math.max(18, gap + 10)));
+                bottomPx = Math.min(bottomPx, Math.max(74, Math.min(136, winLossDockFocus + Math.max(10, gap + 4))));
               }
             }
           } else if (ihLim > 280 && !isTgDock) {
