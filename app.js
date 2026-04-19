@@ -31507,7 +31507,7 @@ function initChat() {
             if (isPwaIosPad) {
               /* На iOS PWA при открытой клавиатуре последнее сообщение должно подниматься выше строки ввода,
                * иначе его нижняя часть остаётся перекрыта полем. Даём больший стабильный запас, не меняя сам подъём composer. */
-              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 52));
+              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 80));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
