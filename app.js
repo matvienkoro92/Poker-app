@@ -22581,52 +22581,6 @@ function initChat() {
       { passive: true }
     );
   }
-  function pokerBindKeyboardBottomOverscrollGuard(el) {
-    if (!el || el.__pokerKeyboardBottomOverscrollGuardBound) return;
-    try {
-      el.__pokerKeyboardBottomOverscrollGuardBound = true;
-    } catch (eKbGuardFlag) {}
-    var startY = null;
-    el.addEventListener(
-      "touchstart",
-      function (ev) {
-        var t = ev.touches && ev.touches[0] ? ev.touches[0] : null;
-        startY = t ? t.clientY : null;
-      },
-      { passive: true }
-    );
-    el.addEventListener(
-      "touchmove",
-      function (ev) {
-        if (!document.body.classList.contains("chat-keyboard-open")) return;
-        var t = ev.touches && ev.touches[0] ? ev.touches[0] : null;
-        if (!t || startY == null) return;
-        var dy = t.clientY - startY;
-        /* Палец идёт вверх => пользователь пытается прокрутить ленту ещё ниже, уже после последнего сообщения. */
-        if (dy >= -6) return;
-        if (!chatMessagesNearBottom(el, 6)) return;
-        try {
-          el.scrollTop = el.scrollHeight;
-        } catch (eKbGuardSnap) {}
-        ev.preventDefault();
-      },
-      { passive: false }
-    );
-    el.addEventListener(
-      "touchend",
-      function () {
-        startY = null;
-      },
-      { passive: true }
-    );
-    el.addEventListener(
-      "touchcancel",
-      function () {
-        startY = null;
-      },
-      { passive: true }
-    );
-  }
   function syncChatScrollBottomButtons() {
     try {
       if (
@@ -22673,11 +22627,9 @@ function initChat() {
     window.__pokerScheduleSyncChatScrollBottomButtons = scheduleSyncChatScrollBottomButtons;
   } catch (eSbWin) {}
   if (generalMessages) {
-    pokerBindKeyboardBottomOverscrollGuard(generalMessages);
     generalMessages.addEventListener("scroll", scheduleSyncChatScrollBottomButtons, { passive: true });
   }
   if (messagesEl) {
-    pokerBindKeyboardBottomOverscrollGuard(messagesEl);
     messagesEl.addEventListener("scroll", scheduleSyncChatScrollBottomButtons, { passive: true });
   }
   if (generalMessages) pokerBindOpeningStickClearOnUserIntent(generalMessages);
@@ -31553,7 +31505,9 @@ function initChat() {
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport();
             if (isPwaIosPad) {
-              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 28));
+              /* На iOS PWA при открытой клавиатуре последнее сообщение должно подниматься выше строки ввода,
+               * иначе его нижняя часть остаётся перекрыта полем. Даём больший стабильный запас, не меняя сам подъём composer. */
+              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 52));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
