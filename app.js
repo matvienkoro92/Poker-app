@@ -32324,8 +32324,13 @@ function initChat() {
           isIosLikeForChatViewport() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
           pokerPwaStandaloneForKeyboardInset()
-        ) return -safeBottom;
-        return safeBottom;
+        ) {
+          /* Отрицательный bottom (-safe area) провоцировал первый плохой кадр при focus:
+           * строка уезжала вниз ещё до vv-sync, а затем WK/WebView уже сам прокручивал документ вверх/вниз.
+           * Для thread composer нижняя граница должна быть неотрицательной. */
+          return 0;
+        }
+        return Math.max(0, safeBottom);
       }
       function isTelegramMiniAppChatThreadIos() {
         return (
