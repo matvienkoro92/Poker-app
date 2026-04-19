@@ -31981,6 +31981,15 @@ function initChat() {
         } catch (eTmaRtOff) {}
       }
       function attachTelegramMiniAppChatThreadRootScrollLock() {
+        var allowPwaIosRootLock =
+          typeof isChatThreadComposerKeyboardDom === "function" &&
+          isChatThreadComposerKeyboardDom() &&
+          typeof isTelegramWebApp === "function" &&
+          !isTelegramWebApp() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset() &&
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport();
         var allowTgIosRootLock =
           typeof isChatThreadComposerKeyboardDom === "function" &&
           isChatThreadComposerKeyboardDom() &&
@@ -31993,7 +32002,7 @@ function initChat() {
               isIosLikeForChatViewport()
             )
           );
-        if (!allowTgIosRootLock) return;
+        if (!allowTgIosRootLock && !allowPwaIosRootLock) return;
         detachTelegramMiniAppChatThreadRootScrollLock();
         var lockTick = function () {
           try {
@@ -32034,12 +32043,29 @@ function initChat() {
       function repairChatFocusViewportOverscroll(focusTarget) {
         try {
           if (
-            typeof isTelegramWebApp !== "function" ||
-            !isTelegramWebApp() ||
-            typeof isIosLikeForChatViewport !== "function" ||
-            !isIosLikeForChatViewport() ||
             typeof isChatThreadComposerKeyboardDom !== "function" ||
             !isChatThreadComposerKeyboardDom(focusTarget)
+          ) {
+            return;
+          }
+          var isTgIosFocusPath =
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport();
+          var isPwaIosFocusPath =
+            typeof isTelegramWebApp === "function" &&
+            !isTelegramWebApp() &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport();
+          if (!isTgIosFocusPath && !isPwaIosFocusPath) {
+            return;
+          }
+          if (
+            typeof isIosLikeForChatViewport !== "function" ||
+            !isIosLikeForChatViewport()
           ) {
             return;
           }
