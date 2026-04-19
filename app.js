@@ -22680,7 +22680,7 @@ function initChat() {
       }
       return;
     }
-    if (title) setTextContentIfChanged(title, "Главный чат (" + String(t) + " уч.)");
+    if (title) setTextContentIfChanged(title, "Главный чат. " + String(t) + " участника.");
     if (sub) {
       sub.textContent = "Участников: " + String(t);
       sub.hidden = false;

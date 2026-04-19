@@ -9511,6 +9511,9 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-dialog-item__title-row .chat-dialog-item__label {
   flex: 0 1 auto;
 }
+.chat-dialog-item--club .chat-dialog-item__title-row .chat-dialog-item__label {
+  font-size: 14px;
+}
 /* Админ: число необработанных заявок в главный чат */
 .chat-dialog-item__pending-review-badge {
   display: none;
