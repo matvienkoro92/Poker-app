@@ -29276,16 +29276,24 @@ function initChat() {
   }
   function pokerDebugChatFriendAction(stage, payload) {
     try {
-      if (!window || !window.console || typeof window.console.log !== "function") return;
-      console.log("[chat-friend-action]", stage, payload || {});
-    } catch (eDbgFriend) {}
+      var oldOverlay = document.getElementById("chatFriendDebugOverlay");
+      if (oldOverlay && oldOverlay.parentNode) oldOverlay.parentNode.removeChild(oldOverlay);
+    } catch (eDbgCleanup) {}
+  }
+  try {
+    window.__pokerDebugChatFriendAction = pokerDebugChatFriendAction;
+  } catch (eDbgExpose) {}
+  try {
+    window.__pokerPeerChatIdsEqual = peerChatIdsEqual;
+  } catch (ePeerExpose) {}
+  function pokerDebugChatOverscroll(stage, payload) {
     try {
       if (!document || !document.body) return;
-      var overlay = document.getElementById("chatFriendDebugOverlay");
-      var list = document.getElementById("chatFriendDebugOverlayList");
+      var overlay = document.getElementById("chatOverscrollDebugOverlay");
+      var list = document.getElementById("chatOverscrollDebugOverlayList");
       if (!overlay) {
         overlay = document.createElement("div");
-        overlay.id = "chatFriendDebugOverlay";
+        overlay.id = "chatOverscrollDebugOverlay";
         overlay.setAttribute(
           "style",
           [
@@ -29309,106 +29317,43 @@ function initChat() {
           ].join(";")
         );
         var head = document.createElement("div");
-        head.setAttribute(
-          "style",
-          [
-            "display:flex",
-            "align-items:center",
-            "justify-content:space-between",
-            "gap:8px",
-            "margin-bottom:8px"
-          ].join(";")
-        );
+        head.setAttribute("style", "display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;");
         var title = document.createElement("strong");
-        title.textContent = "chat-friend-action";
-        title.setAttribute("style", "font:600 12px/1.2 monospace;color:#9fe870;");
+        title.textContent = "chat-overscroll";
+        title.setAttribute("style", "font:600 12px/1.2 monospace;color:#7dd3fc;");
         var actions = document.createElement("div");
-        actions.setAttribute(
-          "style",
-          [
-            "display:flex",
-            "align-items:center",
-            "gap:6px"
-          ].join(";")
-        );
+        actions.setAttribute("style", "display:flex;align-items:center;gap:6px;");
         var copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.textContent = "Copy";
-        copyBtn.setAttribute(
-          "style",
-          [
-            "border:0",
-            "border-radius:8px",
-            "padding:4px 8px",
-            "background:#1f2937",
-            "color:#fff",
-            "font:600 11px/1 monospace"
-          ].join(";")
-        );
+        copyBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
         copyBtn.addEventListener("click", function () {
           try {
-            var l = document.getElementById("chatFriendDebugOverlayList");
+            var l = document.getElementById("chatOverscrollDebugOverlayList");
             var rows = l ? Array.prototype.slice.call(l.children || []) : [];
-            var text = rows
-              .map(function (node) {
-                return node && node.textContent ? String(node.textContent) : "";
-              })
-              .filter(Boolean)
-              .join("\n\n");
+            var text = rows.map(function (node) {
+              return node && node.textContent ? String(node.textContent) : "";
+            }).filter(Boolean).join("\n\n");
             if (!text) return;
-            var done = function (ok) {
-              copyBtn.textContent = ok ? "Copied" : "Copy failed";
-              setTimeout(function () {
-                copyBtn.textContent = "Copy";
-              }, 1200);
-            };
             if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-              navigator.clipboard.writeText(text).then(function () {
-                done(true);
-              }).catch(function () {
-                done(false);
-              });
-              return;
+              navigator.clipboard.writeText(text);
             }
-            var ta = document.createElement("textarea");
-            ta.value = text;
-            ta.setAttribute("readonly", "readonly");
-            ta.setAttribute("style", "position:fixed;left:-9999px;top:-9999px;opacity:0;");
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            var copied = false;
-            try {
-              copied = document.execCommand("copy");
-            } catch (eCopyExec) {}
-            document.body.removeChild(ta);
-            done(!!copied);
-          } catch (eCopyDbg) {}
+          } catch (eKbCopy) {}
         });
         var clearBtn = document.createElement("button");
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
-        clearBtn.setAttribute(
-          "style",
-          [
-            "border:0",
-            "border-radius:8px",
-            "padding:4px 8px",
-            "background:#1f2937",
-            "color:#fff",
-            "font:600 11px/1 monospace"
-          ].join(";")
-        );
+        clearBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
         clearBtn.addEventListener("click", function () {
-          var l = document.getElementById("chatFriendDebugOverlayList");
+          var l = document.getElementById("chatOverscrollDebugOverlayList");
           if (l) l.innerHTML = "";
         });
         list = document.createElement("div");
-        list.id = "chatFriendDebugOverlayList";
+        list.id = "chatOverscrollDebugOverlayList";
         list.setAttribute("style", "display:flex;flex-direction:column;gap:6px;");
-        head.appendChild(title);
         actions.appendChild(copyBtn);
         actions.appendChild(clearBtn);
+        head.appendChild(title);
         head.appendChild(actions);
         overlay.appendChild(head);
         overlay.appendChild(list);
@@ -29416,39 +29361,64 @@ function initChat() {
       }
       if (!list) return;
       var row = document.createElement("div");
-      row.setAttribute(
-        "style",
-        [
-          "padding:6px 8px",
-          "border-radius:10px",
-          "background:rgba(255,255,255,0.06)",
-          "border:1px solid rgba(255,255,255,0.08)"
-        ].join(";")
-      );
+      row.setAttribute("style", "padding:6px 8px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08)");
       var timeLabel = "";
       try {
         timeLabel = new Date().toLocaleTimeString();
-      } catch (eDbgTime) {}
+      } catch (eDbgTimeKb) {}
       var text = "";
       try {
         text = JSON.stringify(payload || {}, null, 2);
-      } catch (eDbgJson) {
+      } catch (eDbgJsonKb) {
         text = String(payload || "");
       }
       row.textContent = (timeLabel ? "[" + timeLabel + "] " : "") + stage + "\n" + text;
       list.appendChild(row);
-      while (list.children.length > 12) {
-        list.removeChild(list.firstChild);
-      }
+      while (list.children.length > 14) list.removeChild(list.firstChild);
       overlay.scrollTop = overlay.scrollHeight;
-    } catch (eDbgOverlay) {}
+    } catch (eDbgKbOverlay) {}
   }
-  try {
-    window.__pokerDebugChatFriendAction = pokerDebugChatFriendAction;
-  } catch (eDbgExpose) {}
-  try {
-    window.__pokerPeerChatIdsEqual = peerChatIdsEqual;
-  } catch (ePeerExpose) {}
+  function collectChatOverscrollSnapshot(stage, focusTarget, extra) {
+    try {
+      var vv = window.visualViewport || null;
+      var scrollingEl = document.scrollingElement || document.documentElement || document.body;
+      var generalInputArea = document.getElementById("chatGeneralInputArea");
+      var personalInputArea = document.getElementById("chatPersonalInputArea") || (convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null);
+      var visibleInputArea =
+        personalInputArea && !personalInputArea.closest(".chat-conv-view--hidden")
+          ? personalInputArea
+          : generalInputArea;
+      var rect = visibleInputArea && visibleInputArea.getBoundingClientRect ? visibleInputArea.getBoundingClientRect() : null;
+      pokerDebugChatOverscroll(stage, Object.assign({
+        focusTargetId: focusTarget && focusTarget.id ? focusTarget.id : "",
+        activeElementId: document.activeElement && document.activeElement.id ? document.activeElement.id : "",
+        bodyView: document.body ? document.body.getAttribute("data-view") || "" : "",
+        innerHeight: window.innerHeight || 0,
+        innerWidth: window.innerWidth || 0,
+        vvHeight: vv ? Number(vv.height) || 0 : 0,
+        vvOffsetTop: vv ? Number(vv.offsetTop) || 0 : 0,
+        vvPageTop: vv ? Number(vv.pageTop) || 0 : 0,
+        docScrollTop: scrollingEl ? Number(scrollingEl.scrollTop) || 0 : 0,
+        bodyScrollTop: document.body ? Number(document.body.scrollTop) || 0 : 0,
+        docElScrollTop: document.documentElement ? Number(document.documentElement.scrollTop) || 0 : 0,
+        keyboardOpen: !!(document.body && document.body.classList.contains("chat-keyboard-open")),
+        tmaFlow: !!(document.body && document.body.classList.contains("chat-keyboard-open--tma-flow")),
+        chatVvInset:
+          document.documentElement && document.documentElement.style
+            ? document.documentElement.style.getPropertyValue("--chat-vv-inset") || ""
+            : "",
+        chatAccessoryInset:
+          document.documentElement && document.documentElement.style
+            ? document.documentElement.style.getPropertyValue("--chat-ios-accessory-inset") || ""
+            : "",
+        inputAreaTop: rect ? Math.round(rect.top) : null,
+        inputAreaBottom: rect ? Math.round(rect.bottom) : null,
+        inputAreaHeight: rect ? Math.round(rect.height) : null,
+        inputAreaTransform: visibleInputArea && visibleInputArea.style ? visibleInputArea.style.transform || "" : "",
+        inputAreaBottomStyle: visibleInputArea && visibleInputArea.style ? visibleInputArea.style.bottom || "" : ""
+      }, extra || {}));
+    } catch (eCollectKb) {}
+  }
   function syncChatDialogPreviewAddFriendBtn() {
     var btn = document.getElementById("chatDialogPreviewAddFriendBtn");
     var modal = document.getElementById("chatDialogPreviewModal");
@@ -33253,6 +33223,7 @@ function initChat() {
       };
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
+        collectChatOverscrollSnapshot("focus:start", focusTarget);
         if (isTelegramMiniAppChatThreadIos()) {
           setTelegramIosKeyboardRootLock(true);
           attachTelegramIosChatInputAreaDockGuard();
@@ -33267,6 +33238,7 @@ function initChat() {
               } catch (eSc) {}
             });
           }
+          collectChatOverscrollSnapshot("focus:physicalKeyboard", focusTarget);
           return;
         }
         if (shouldDisableTelegramIosChatKeyboardDock(focusTarget) || shouldUseNativeTelegramIosChatComposerFlow(focusTarget)) {
@@ -33290,6 +33262,7 @@ function initChat() {
               visibleMessagesNative.scrollTop = visibleMessagesNative.scrollHeight;
             }
           } catch (eTmaNativeScroll) {}
+          collectChatOverscrollSnapshot("focus:nativeTgFlow", focusTarget);
           return;
         }
         setChatKeyboardOpenClasses(true);
@@ -33302,6 +33275,21 @@ function initChat() {
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
+        requestAnimationFrame(function () {
+          collectChatOverscrollSnapshot("focus:raf1", focusTarget);
+          requestAnimationFrame(function () {
+            collectChatOverscrollSnapshot("focus:raf2", focusTarget);
+          });
+        });
+        setTimeout(function () {
+          collectChatOverscrollSnapshot("focus:t+120", focusTarget);
+        }, 120);
+        setTimeout(function () {
+          collectChatOverscrollSnapshot("focus:t+320", focusTarget);
+        }, 320);
+        setTimeout(function () {
+          collectChatOverscrollSnapshot("focus:t+700", focusTarget);
+        }, 700);
         var isIosChatKb = isIosLikeForChatViewport();
         var isIosPwaChatKb =
           isIosChatKb &&
@@ -33362,6 +33350,7 @@ function initChat() {
             /* Две позиции композера: без сглаживания и без частых пересчётов — coalesce в один кадр + один «добор» после конца анимации клавиатуры. */
             var vvCoalesceRaf = null;
             viewportResizeScrollHandler = function () {
+              collectChatOverscrollSnapshot("vv:event", focusTarget);
               if (!vvCoalesceRaf) {
                 var rafVv = window.requestAnimationFrame || function (fn) {
                   setTimeout(fn, 0);
@@ -33371,6 +33360,7 @@ function initChat() {
                   try {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIm) {}
+                  collectChatOverscrollSnapshot("vv:raf", focusTarget);
                 });
               }
               var skipVv220 =
@@ -33386,6 +33376,7 @@ function initChat() {
                   try {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
+                  collectChatOverscrollSnapshot("vv:debounced", focusTarget);
                 }, 220);
               }
             };
@@ -33393,6 +33384,7 @@ function initChat() {
           } else {
             var vvSyncPending = false;
             viewportResizeScrollHandler = function () {
+              collectChatOverscrollSnapshot("vv:event", focusTarget);
               if (vvSyncPending) return;
               vvSyncPending = true;
               var raf = window.requestAnimationFrame || function (fn) {
@@ -33403,6 +33395,7 @@ function initChat() {
                 try {
                   syncPwaChatVisualViewportInset();
                 } catch (eVvSyn) {}
+                collectChatOverscrollSnapshot("vv:raf", focusTarget);
               });
             };
             window.visualViewport.addEventListener("resize", viewportResizeScrollHandler);
