@@ -1837,16 +1837,19 @@ function getAssetUrl(relativePath) {
       stepGallery(1);
     });
   }
-  /* Аватар в строке диалога: capture — иначе клик уходит в .chat-contact и открывается чат вместо лайтбокса */
+  /* В списке чатов клик по аватарке должен открывать сам диалог, а не лайтбокс. */
   document.body.addEventListener(
     "click",
     function (e) {
       var t = e.target;
       if (!t || !t.classList || !t.classList.contains("chat-contact__avatar") || !t.src) return;
       if (!t.closest || !t.closest(".chat-contact")) return;
-      e.preventDefault();
-      e.stopPropagation();
-      openSingle(t.src, t.alt, "", true);
+      var rowBtn = t.closest(".chat-contact");
+      if (rowBtn && typeof rowBtn.click === "function") {
+        e.preventDefault();
+        e.stopPropagation();
+        rowBtn.click();
+      }
     },
     true
   );
