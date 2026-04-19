@@ -39629,11 +39629,11 @@ var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 
 /** Пн / Вт / Чт 17:00 МСК, X-poker: вход 0, приз 100 000₽. */
 var NEXT_HOME_XPOKER_FREEROLL = { name: "Фриролл X-poker", buyin: "0₽", guarantee: "100 000₽" };
 var HOME_FREEROLL_SCHEDULE = [
-  { day: "Пн", title: "Фриролл", meta: "0₽ · X-poker · 100 000₽", time: "17:00 МСК" },
-  { day: "Вт", title: "Фриролл", meta: "0₽ · X-poker · 100 000₽", time: "17:00 МСК" },
-  { day: "Ср", title: "Фриролл", meta: "0₽ · Poker21 · 1 000 000₽", time: "18:00 МСК" },
-  { day: "Чт", title: "Фриролл", meta: "0₽ · X-poker · 100 000₽", time: "17:00 МСК" },
-  { day: "Сб", title: "Фриролл", meta: "0₽ · Poker21 · 100 000₽", time: "18:00 МСК" }
+  { day: "Пн", dow: 1, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Вт", dow: 2, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Ср", dow: 3, title: "0₽", meta: "Приз 1 000 000₽", time: "18:00 МСК", hour: 18, minute: 0 },
+  { day: "Чт", dow: 4, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Сб", dow: 6, title: "0₽", meta: "Приз 100 000₽", time: "18:00 МСК", hour: 18, minute: 0 }
 ];
 /** 17:00 МСК = 14:00 UTC; конец регистрации — через 3 ч (как у слота 18:00→21:00 МСК). */
 var XPOKER_FREEROLL_START_UTC_HOUR = 14;
@@ -39651,9 +39651,36 @@ function renderHomeFreerollSchedule() {
   var el = document.getElementById("freerollHomeScheduleList");
   if (!el) return;
   el.innerHTML = "";
+  var nextIndex = -1;
+  try {
+    var now = new Date();
+    var dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    var nowDow = dowMap[new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" })];
+    var nowHm = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Moscow",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(now).split(":");
+    var nowMinutes = Number(nowHm[0]) * 60 + Number(nowHm[1]);
+    var bestDelta = Infinity;
+    HOME_FREEROLL_SCHEDULE.forEach(function (item, idx) {
+      var dayDelta = (item.dow - nowDow + 7) % 7;
+      var itemMinutes = item.hour * 60 + item.minute;
+      var totalDelta = dayDelta * 1440 + (itemMinutes - nowMinutes);
+      if (totalDelta < 0) totalDelta += 7 * 1440;
+      if (totalDelta < bestDelta) {
+        bestDelta = totalDelta;
+        nextIndex = idx;
+      }
+    });
+  } catch (eNextFreeroll) {}
   HOME_FREEROLL_SCHEDULE.forEach(function (item) {
     var row = document.createElement("div");
     row.className = "home-freeroll-schedule__row";
+    if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
+      row.classList.add("home-freeroll-schedule__row--next");
+    }
     var day = document.createElement("span");
     day.className = "home-freeroll-schedule__day";
     day.textContent = item.day;
@@ -39662,17 +39689,19 @@ function renderHomeFreerollSchedule() {
     var title = document.createElement("span");
     title.className = "home-freeroll-schedule__title";
     title.textContent = item.title;
+    if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
+      var badge = document.createElement("span");
+      badge.className = "home-freeroll-schedule__title-badge";
+      badge.textContent = "следующий";
+      title.appendChild(badge);
+    }
     var meta = document.createElement("span");
     meta.className = "home-freeroll-schedule__meta";
     meta.textContent = item.meta;
-    var time = document.createElement("span");
-    time.className = "home-freeroll-schedule__time";
-    time.textContent = item.time;
     main.appendChild(title);
     main.appendChild(meta);
     row.appendChild(day);
     row.appendChild(main);
-    row.appendChild(time);
     el.appendChild(row);
   });
 }
