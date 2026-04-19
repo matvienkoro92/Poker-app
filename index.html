@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.836">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.837">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -550,6 +550,7 @@
             <p class="subtitle">
               Закрытый покерный онлайн-клуб для своих.
             </p>
+            <p class="home-admin-version home-admin-version--hidden" id="homeAdminVersionTop" aria-label="Версия приложения для администраторов"></p>
 
             <div class="hero-row">
               <div class="hero">
@@ -6378,6 +6379,8 @@
         if (pwa) pwa.textContent = label;
         var home = document.getElementById("homeFooterAppVersion");
         if (home) home.textContent = label;
+        var homeAdmin = document.getElementById("homeAdminVersionTop");
+        if (homeAdmin) homeAdmin.textContent = label;
         var chatBuild = document.getElementById("chatBuildMarker");
         if (chatBuild) chatBuild.textContent = "build " + v;
       })();

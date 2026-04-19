@@ -37412,10 +37412,14 @@ document.addEventListener("visibilitychange", function () {
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
+    var homeFooterVersion = document.getElementById("homeFooterAppVersion");
+    var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
     function showAdminUi() {
       var footerStats = document.getElementById("footerVisitorStatsWrap");
       if (footerStats) footerStats.removeAttribute("hidden");
+      if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
+      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
