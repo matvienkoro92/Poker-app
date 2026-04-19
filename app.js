@@ -29298,13 +29298,13 @@ function initChat() {
           "style",
           [
             "position:fixed",
-            "left:8px",
             "right:8px",
             "bottom:8px",
             "z-index:2147483647",
+            "width:min(320px,calc(100vw - 16px))",
             "max-height:42vh",
-            "overflow:auto",
-            "padding:10px 10px 12px",
+            "overflow:hidden",
+            "padding:8px",
             "border-radius:14px",
             "background:rgba(7,10,16,0.92)",
             "border:1px solid rgba(255,255,255,0.16)",
@@ -29323,6 +29323,10 @@ function initChat() {
         title.setAttribute("style", "font:600 12px/1.2 monospace;color:#7dd3fc;");
         var actions = document.createElement("div");
         actions.setAttribute("style", "display:flex;align-items:center;gap:6px;");
+        var toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.textContent = "Open";
+        toggleBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
         var copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.textContent = "Copy";
@@ -29350,7 +29354,16 @@ function initChat() {
         });
         list = document.createElement("div");
         list.id = "chatOverscrollDebugOverlayList";
-        list.setAttribute("style", "display:flex;flex-direction:column;gap:6px;");
+        list.setAttribute("style", "display:none;flex-direction:column;gap:6px;max-height:calc(42vh - 40px);overflow:auto;");
+        overlay.dataset.expanded = "0";
+        toggleBtn.addEventListener("click", function () {
+          var expanded = overlay.dataset.expanded === "1";
+          overlay.dataset.expanded = expanded ? "0" : "1";
+          list.style.display = expanded ? "none" : "flex";
+          overlay.style.overflow = expanded ? "hidden" : "auto";
+          toggleBtn.textContent = expanded ? "Open" : "Hide";
+        });
+        actions.appendChild(toggleBtn);
         actions.appendChild(copyBtn);
         actions.appendChild(clearBtn);
         head.appendChild(title);
