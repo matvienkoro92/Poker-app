@@ -39629,11 +39629,11 @@ var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 
 /** Пн / Вт / Чт 17:00 МСК, X-poker: вход 0, приз 100 000₽. */
 var NEXT_HOME_XPOKER_FREEROLL = { name: "Фриролл X-poker", buyin: "0₽", guarantee: "100 000₽" };
 var HOME_FREEROLL_SCHEDULE = [
-  { day: "Пн", dow: 1, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Вт", dow: 2, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Ср", dow: 3, title: "0₽", meta: "Приз 1 000 000₽", time: "18:00 МСК", hour: 18, minute: 0 },
-  { day: "Чт", dow: 4, title: "0₽", meta: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Сб", dow: 6, title: "0₽", meta: "Приз 100 000₽", time: "18:00 МСК", hour: 18, minute: 0 }
+  { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Вт", dow: 2, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0 },
+  { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0 }
 ];
 /** 17:00 МСК = 14:00 UTC; конец регистрации — через 3 ч (как у слота 18:00→21:00 МСК). */
 var XPOKER_FREEROLL_START_UTC_HOUR = 14;
@@ -39689,12 +39689,6 @@ function renderHomeFreerollSchedule() {
     var title = document.createElement("span");
     title.className = "home-freeroll-schedule__title";
     title.textContent = item.title;
-    if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
-      var badge = document.createElement("span");
-      badge.className = "home-freeroll-schedule__title-badge";
-      badge.textContent = "следующий";
-      title.appendChild(badge);
-    }
     var meta = document.createElement("span");
     meta.className = "home-freeroll-schedule__meta";
     meta.textContent = item.meta;
