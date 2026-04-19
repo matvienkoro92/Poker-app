@@ -29283,6 +29283,7 @@ function initChat() {
       function (e) {
         var frB = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__friend") : null;
         if (!frB || !contactsEl.contains(frB)) return;
+        if (frB.classList && frB.classList.contains("chat-contact-swipe__friend--remove")) return;
         e.preventDefault();
         e.stopPropagation();
         var wrap = frB.closest(".chat-contact-swipe");
