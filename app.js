@@ -28893,9 +28893,21 @@ function initChat() {
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
           var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
+          var chatListRowNormalizedName = function (value) {
+            return String(value || "").trim().replace(/^@+/, "").toLowerCase();
+          };
+          var chatListRowAlias = function (c, isFriendContact) {
+            if (!isFriendContact || !c) return "";
+            var alias = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
+            if (!alias) return "";
+            var baseName = c.name != null ? String(c.name).trim() : "";
+            if (chatListRowNormalizedName(alias) === chatListRowNormalizedName(baseName)) return "";
+            return alias;
+          };
           var chatListRowDisplayTitle = function (c) {
-            var cn = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
-            return cn || c.name;
+            var isFriendContact = !!(c && !c.isGroupChat && (friendSet[c.id] || friendSet[String(c.id)]));
+            var alias = chatListRowAlias(c, isFriendContact);
+            return alias || c.name;
           };
           var pinsSnapForSameList = pokerLoadChatDialogListPins();
           var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
@@ -29015,7 +29027,8 @@ function initChat() {
             var unreadNum = c.unreadCount > 0 ? (c.unreadCount > 99 ? "99+" : String(c.unreadCount)) : "";
             var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
             var displayTitle = chatListRowDisplayTitle(c);
-            var hasAlias = c.contactName != null && String(c.contactName).trim() !== "";
+            var effectiveAlias = chatListRowAlias(c, isFriendContact);
+            var hasAlias = effectiveAlias !== "";
             var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
             var nameBlockInner;
             if (isGroupRow) {
@@ -29026,7 +29039,7 @@ function initChat() {
                   '<span class="chat-contact__name-stack chat-contact__name-stack--friend">' +
                   '<span class="chat-contact__friend-name-nick">' +
                   '<span class="chat-contact__label chat-contact__label--primary">' +
-                  escapeHtml(String(c.contactName).trim()) +
+                  escapeHtml(effectiveAlias) +
                   "</span>" +
                   '<span class="chat-contact__friend-nick">' +
                   escapeHtml(c.name) +
@@ -29038,7 +29051,7 @@ function initChat() {
               nameBlockInner =
                 '<span class="chat-contact__name-stack">' +
                 '<span class="chat-contact__label chat-contact__label--primary">' +
-                escapeHtml(String(c.contactName).trim()) +
+                escapeHtml(effectiveAlias) +
                 '</span>' +
                 '<span class="chat-contact__login-sub">' +
                 escapeHtml(c.name) +
