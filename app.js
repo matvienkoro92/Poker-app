@@ -31188,6 +31188,10 @@ function initChat() {
        */
       function updateChatMessagesKeyboardPad() {
         logChatKeyboardDebug("pad-enter");
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          clearChatMessagesKeyboardPad();
+          return;
+        }
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isPassiveTelegramIosChatThread()) {
           clearChatMessagesKeyboardPad();
