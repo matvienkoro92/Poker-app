@@ -31520,7 +31520,7 @@ function initChat() {
                   }
                 }
               } catch (ePwaRectPad) {}
-              pad = Math.max(28, Math.round(pwaComposerLift + gap + Math.max(24, screenSafeBottomPad * 0.6)));
+              pad = Math.max(28, Math.round(pwaComposerLift + gap + Math.max(14, screenSafeBottomPad * 0.35)));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
