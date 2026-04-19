@@ -5485,6 +5485,24 @@ function runGazetteAndTasksInit() {
     }
     return null;
   }
+  function pokerResolveChatPeerLabel(peerId, fallbackName) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    var fallback = fallbackName != null ? String(fallbackName).trim() : "";
+    if (!pid) return fallback;
+    try {
+      var found = pokerFindChatContactByPeerId(pid);
+      if (found) {
+        var contactLabel = found.contactName != null && String(found.contactName).trim() ? String(found.contactName).trim() : "";
+        var baseLabel = found.name != null && String(found.name).trim() ? String(found.name).trim() : "";
+        if (contactLabel) return contactLabel;
+        if (baseLabel) return baseLabel;
+      }
+      if (chatWithUserId && peerChatIdsEqual(chatWithUserId, pid) && chatWithUserName && String(chatWithUserName).trim()) {
+        return String(chatWithUserName).trim();
+      }
+    } catch (ePeerLbl) {}
+    return fallback || pid;
+  }
   function pokerOpenResolvedChatPeer(peerId, fallbackName) {
     var pid = peerId != null ? String(peerId).trim() : "";
     if (!pid || typeof pokerOpenPushDmHard !== "function") return false;
@@ -25451,7 +25469,7 @@ function initChat() {
       if (!m || m.__pushPlaceholder) return false;
       var mt = m.time ? new Date(m.time).getTime() : 0;
       if (ph.text && String(m.text || "").trim() !== String(ph.text || "").trim()) return false;
-      if (ph.fromName && String(m.fromName || "").trim() !== String(ph.fromName || "").trim()) return false;
+      if (ph.from && m.from && !peerChatIdsEqual(ph.from, m.from)) return false;
       return !isNaN(mt) && !isNaN(phTime) ? Math.abs(mt - phTime) < 180000 : true;
     });
     if (hasReal) {
@@ -36846,8 +36864,10 @@ function initChat() {
             renderGeneralMessages(mergeIncomingPushGeneralIntoMessages(window._chatGeneralCache.messages.slice()));
           }
         } else if (pushPlaceholder && chatViewActiveNow && isDmPush) {
+          var resolvedPushDmName = pokerResolveChatPeerLabel(withPeer, pushPlaceholder.fromName || withPeer);
           incomingPushPersonalPayloadByPeer[withPeer] = Object.assign({}, pushPlaceholder, {
             from: withPeer,
+            fromName: resolvedPushDmName,
           });
           if (
             chatWithUserId &&
