@@ -33427,12 +33427,6 @@ function initChat() {
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
-        try {
-          window.__pokerChatPwaSettleToBottomAfterKeyboard =
-            !!(isIosPwaChatKb && getVisibleMessagesEl() && chatMessagesNearBottom(getVisibleMessagesEl(), CHAT_SCROLL_BOTTOM_NEAR_PX));
-        } catch (ePwaSettleFlag) {
-          window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
-        }
         requestAnimationFrame(function () {
           collectChatOverscrollSnapshot("focus:raf1", focusTarget);
           requestAnimationFrame(function () {
@@ -33455,6 +33449,12 @@ function initChat() {
           !isTelegramWebApp() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
           pokerPwaStandaloneForKeyboardInset();
+        try {
+          window.__pokerChatPwaSettleToBottomAfterKeyboard =
+            !!(isIosPwaChatKb && getVisibleMessagesEl() && chatMessagesNearBottom(getVisibleMessagesEl(), CHAT_SCROLL_BOTTOM_NEAR_PX));
+        } catch (ePwaSettleFlag) {
+          window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
+        }
         if (!isIosPwaChatKb) {
           syncPwaChatVisualViewportInset();
           scrollVisibleChatMessagesToBottom();
@@ -33541,6 +33541,17 @@ function initChat() {
                     if (window.__pokerChatPwaSettleToBottomAfterKeyboard) {
                       var settleBox = getVisibleMessagesEl();
                       if (settleBox) settleBox.scrollTop = settleBox.scrollHeight;
+                      var settleRaf = window.requestAnimationFrame || function (fn) {
+                        setTimeout(fn, 16);
+                      };
+                      settleRaf(function () {
+                        settleRaf(function () {
+                          try {
+                            var settleBoxLate = getVisibleMessagesEl();
+                            if (settleBoxLate) settleBoxLate.scrollTop = settleBoxLate.scrollHeight;
+                          } catch (eVvSettleBottomLate) {}
+                        });
+                      });
                     }
                     window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
                   } catch (eVvSettleBottom) {}
