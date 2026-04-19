@@ -3542,9 +3542,20 @@ html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-conv-
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
+  top: auto !important;
   width: auto !important;
   max-width: none !important;
   z-index: 5 !important;
+  margin-bottom: 0 !important;
+  transform: none !important;
+  --chat-input-lift: 0px !important;
+}
+html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp.chat-keyboard-open body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-bottom: 0 !important;
+  scroll-padding-bottom: 0 !important;
 }
 .chat-switcher-row {
   display: flex;

@@ -31182,6 +31182,14 @@ function initChat() {
        */
       function updateChatMessagesKeyboardPad() {
         logChatKeyboardDebug("pad-enter");
+        if (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          String(document.body.getAttribute("data-view") || "") === "chat"
+        ) {
+          clearChatMessagesKeyboardPad();
+          return;
+        }
         if (isPassiveTelegramIosChatThread()) {
           clearChatMessagesKeyboardPad();
           logChatKeyboardDebug("pad-passive");
@@ -31482,6 +31490,12 @@ function initChat() {
       }
       window.__pokerIsChatPhysicalKeyboardContext = isChatPhysicalKeyboardContext;
       function shouldUseChatVisualViewportLift() {
+        if (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          document.body &&
+          String(document.body.getAttribute("data-view") || "") === "chat"
+        ) return false;
         if (isPassiveTelegramIosChatThread()) return false;
         if (shouldUseNativeTelegramIosChatComposerFlow()) return false;
         if (!window.visualViewport) return false;
@@ -32871,6 +32885,16 @@ function initChat() {
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         collectChatOverscrollSnapshot("focus:start", focusTarget);
+        if (
+          typeof isTelegramWebApp === "function" &&
+          isTelegramWebApp() &&
+          String(document.body.getAttribute("data-view") || "") === "chat"
+        ) {
+          setChatKeyboardOpenClasses(true);
+          clearChatMessagesKeyboardPad();
+          stripChatInputAreaTransforms();
+          return;
+        }
         try {
           if (typeof attachTelegramMiniAppChatThreadRootScrollLock === "function") {
             attachTelegramMiniAppChatThreadRootScrollLock();
