@@ -32388,6 +32388,15 @@ function initChat() {
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          stripChatInputAreaTransforms();
+          try {
+            window.__pokerChatThreadDockBottomCssPx = 0;
+            window.__pokerChatLastAppliedDockBottom = 0;
+            window.__pokerChatTmaDockTabKey = null;
+          } catch (eTgDockOff) {}
+          return;
+        }
         if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
           stripChatInputAreaTransforms();
           try {
@@ -32639,6 +32648,8 @@ function initChat() {
       }
       function applyChatVisualViewportFallbackWithoutVv(doc) {
         var dvNoVv = String(document.body.getAttribute("data-view") || "");
+        var useThreadDockFallback =
+          isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
         var ihFb = window.innerHeight || 0;
         var capFb = Math.min(520, Math.round(ihFb * 0.55));
         var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -32656,7 +32667,7 @@ function initChat() {
           return;
         }
         if (dvNoVv === "chat") {
-          if (isChatThreadComposerKeyboardDom()) {
+          if (useThreadDockFallback) {
             doc.style.setProperty("--chat-vv-inset", "0px");
             doc.style.removeProperty("--chat-ios-accessory-inset");
             var coverNv = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
@@ -32721,6 +32732,8 @@ function initChat() {
         var overlap = metrics.overlap;
         var tg = false;
         var tw = null;
+        var useThreadDock =
+          isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
         /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
         if (tg && tw) {
           var tgvH = Number(tw.viewportHeight);
@@ -32866,7 +32879,7 @@ function initChat() {
         if (chatComposerEl && document.activeElement === chatComposerEl && coverPxDock < 72 && ih > 0 && vvh > 0) {
           coverPxDock = Math.max(coverPxDock, heightLoss);
         }
-        if (isChatThreadComposerKeyboardDom()) {
+        if (useThreadDock) {
           /*
            * iOS PWA: в standalone/WK visualViewport и innerHeight иногда схлопываются вместе,
            * raw cover остаётся около 0, хотя inset выше уже распознал открытую клавиатуру.
