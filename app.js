@@ -26018,13 +26018,15 @@ function initChat() {
   var CHAT_OPEN_IDLE_MS = 5000;
   var CHAT_OPEN_BURST_MS = 1000;
   var CHAT_DIALOGS_IDLE_MS = 15000;
+  var CHAT_DIALOGS_ACTIVE_IDLE_MS = 4000;
+  var CHAT_DIALOGS_BURST_MS = 1000;
   var CHAT_HIDDEN_IDLE_MS = 60000;
   var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
-  var chatBurstUntilByScope = { general: 0, personal: 0 };
+  var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
   var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
 
   function pokerChatRequestPollBurst(scope, durationMs) {
-    var key = scope === "general" ? "general" : "personal";
+    var key = scope === "general" || scope === "personal" || scope === "contacts" ? scope : "personal";
     var dur = Number(durationMs);
     if (!isFinite(dur) || dur <= 0) dur = CHAT_ACTIVITY_BURST_WINDOW_MS;
     chatBurstUntilByScope[key] = Date.now() + dur;
@@ -26032,7 +26034,16 @@ function initChat() {
 
   function pokerChatPollIntervalForScope(scope) {
     var now = Date.now();
-    if (scope === "contacts") return CHAT_DIALOGS_IDLE_MS;
+    if (scope === "contacts") {
+      var dialogsVisible = !!(
+        typeof document !== "undefined" &&
+        document.querySelector('[data-view="chat"].view--active') &&
+        dialogsView &&
+        !dialogsView.classList.contains("chat-dialogs-view--hidden")
+      );
+      if (now < (chatBurstUntilByScope.contacts || 0)) return CHAT_DIALOGS_BURST_MS;
+      return dialogsVisible ? CHAT_DIALOGS_ACTIVE_IDLE_MS : CHAT_DIALOGS_IDLE_MS;
+    }
     if (scope === "admins") return CHAT_OPEN_IDLE_MS;
     if (scope === "general" || scope === "personal") {
       return now < (chatBurstUntilByScope[scope] || 0) ? CHAT_OPEN_BURST_MS : CHAT_OPEN_IDLE_MS;
