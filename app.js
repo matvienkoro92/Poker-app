@@ -33257,16 +33257,18 @@ function initChat() {
             syncPwaChatVisualViewportInset();
             scrollVisibleChatMessagesToBottom();
           });
-        } else {
-          requestAnimationFrame(function () {
-            scrollVisibleChatMessagesToBottom();
-          });
         }
         if (isIosChatKb) {
-          setTimeout(function () {
-            syncPwaChatVisualViewportInset();
-            scrollVisibleChatMessagesToBottom();
-          }, isIosPwaChatKb ? 0 : 200);
+          if (isIosPwaChatKb) {
+            setTimeout(function () {
+              syncPwaChatVisualViewportInset();
+            }, 0);
+          } else {
+            setTimeout(function () {
+              syncPwaChatVisualViewportInset();
+              scrollVisibleChatMessagesToBottom();
+            }, 200);
+          }
         } else if (!isIosChatKb) {
           setTimeout(function () {
             syncPwaChatVisualViewportInset();
