@@ -15956,6 +15956,16 @@ function scheduleTelegramIosKeyboardRootLockSync() {
   });
 }
 function setTelegramIosKeyboardRootLock(active) {
+  try {
+    if (document.body && String(document.body.getAttribute("data-view") || "") === "chat") {
+      telegramIosKeyboardRootLockActive = false;
+      document.documentElement.classList.remove("tg-ios-keyboard-root-lock");
+      document.body.classList.remove("tg-ios-keyboard-root-lock");
+      document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
+      document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
+      return;
+    }
+  } catch (eTgChatRootLock) {}
   if (!isTelegramIosKeyboardRootLockCapable()) return;
   telegramIosKeyboardRootLockActive = !!active;
   document.documentElement.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
