@@ -21245,10 +21245,10 @@ function pokerApplyLocalFriendToChatContacts(targetUserId, contactName) {
     }
   } catch (eFrLbl) {}
   try {
-    if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
-      var contactsRootAdd = document.querySelector(".chat-contacts");
-      if (contactsRootAdd) contactsRootAdd.innerHTML = "";
-      window.__pokerApplyContactsApiResponse(data);
+    if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
+      window.__pokerForceRerenderChatContactsFromCache();
+    } else if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
+      window.__pokerApplyContactsApiResponse(data, { forceRerender: true });
     }
   } catch (eFrApply) {}
 }
@@ -21317,10 +21317,10 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
     }
   } catch (eFrLblDel) {}
   try {
-    if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
-      var contactsRootDel = document.querySelector(".chat-contacts");
-      if (contactsRootDel) contactsRootDel.innerHTML = "";
-      window.__pokerApplyContactsApiResponse(data);
+    if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
+      window.__pokerForceRerenderChatContactsFromCache();
+    } else if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
+      window.__pokerApplyContactsApiResponse(data, { forceRerender: true });
     }
   } catch (eFrApplyDel) {}
 }
@@ -28594,6 +28594,7 @@ function initChat() {
     }
     opts = opts || {};
       var fromFilterOnly = !!opts.fromFilterOnly;
+      var forceRerender = !!opts.forceRerender;
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
         if (data.clubChatAccess) clubChatAccess = data.clubChatAccess;
@@ -28813,7 +28814,7 @@ function initChat() {
             if (wantPinned !== pinActBtn.classList.contains("chat-contact-swipe__pin--unpin")) return false;
             return true;
           });
-          if (sameList && existing.length > 0) {
+          if (!forceRerender && sameList && existing.length > 0) {
             contactsForList.forEach(function (c, i) {
               var btn = existing[i];
               if (!btn) return;
@@ -29042,6 +29043,18 @@ function initChat() {
     try {
       window.__pokerApplyContactsApiResponse = applyContactsApiResponse;
     } catch (eExposeContactsApply) {}
+    try {
+      window.__pokerForceRerenderChatContactsFromCache = function () {
+        var cachedData = window.__pokerLastContactsApiData;
+        if (!cachedData || typeof window.__pokerApplyContactsApiResponse !== "function") return;
+        setTimeout(function () {
+          try {
+            if (contactsEl) contactsEl.innerHTML = "";
+            window.__pokerApplyContactsApiResponse(cachedData, { forceRerender: true });
+          } catch (eForceRe) {}
+        }, 0);
+      };
+    } catch (eExposeContactsForce) {}
     if (!contactsEl._chatContactsFilterBound) {
       contactsEl._chatContactsFilterBound = true;
       var filterWrapEl = document.getElementById("chatContactsFilter");
