@@ -29331,14 +29331,27 @@ function initChat() {
         copyBtn.type = "button";
         copyBtn.textContent = "Copy";
         copyBtn.setAttribute("style", "border:0;border-radius:8px;padding:4px 8px;background:#1f2937;color:#fff;font:600 11px/1 monospace");
+        var overscrollActiveInput = null;
         var preserveComposerFocus = function (ev) {
           try {
+            var ae = document.activeElement;
+            overscrollActiveInput =
+              ae && (ae.tagName === "TEXTAREA" || (ae.tagName === "INPUT" && ae.type !== "button" && ae.type !== "submit"))
+                ? ae
+                : null;
             if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
           } catch (ePreserveFocus) {}
         };
         copyBtn.addEventListener("pointerdown", preserveComposerFocus);
         copyBtn.addEventListener("mousedown", preserveComposerFocus);
         copyBtn.addEventListener("touchstart", preserveComposerFocus, { passive: false });
+        var restoreComposerFocus = function () {
+          try {
+            if (overscrollActiveInput && typeof overscrollActiveInput.focus === "function") {
+              overscrollActiveInput.focus({ preventScroll: true });
+            }
+          } catch (eRestoreFocus) {}
+        };
         copyBtn.addEventListener("click", function () {
           try {
             var l = document.getElementById("chatOverscrollDebugOverlayList");
@@ -29347,9 +29360,34 @@ function initChat() {
               return node && node.textContent ? String(node.textContent) : "";
             }).filter(Boolean).join("\n\n");
             if (!text) return;
+            var done = function (ok) {
+              copyBtn.textContent = ok ? "Copied" : "Copy failed";
+              setTimeout(function () {
+                copyBtn.textContent = "Copy";
+                restoreComposerFocus();
+              }, 900);
+            };
             if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-              navigator.clipboard.writeText(text);
+              navigator.clipboard.writeText(text).then(function () {
+                done(true);
+              }).catch(function () {
+                done(false);
+              });
+              return;
             }
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "readonly");
+            ta.setAttribute("style", "position:fixed;left:-9999px;top:-9999px;opacity:0;");
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            var copied = false;
+            try {
+              copied = document.execCommand("copy");
+            } catch (eCopyExec) {}
+            document.body.removeChild(ta);
+            done(!!copied);
           } catch (eKbCopy) {}
         });
         var clearBtn = document.createElement("button");
@@ -29362,6 +29400,7 @@ function initChat() {
         clearBtn.addEventListener("click", function () {
           var l = document.getElementById("chatOverscrollDebugOverlayList");
           if (l) l.innerHTML = "";
+          restoreComposerFocus();
         });
         list = document.createElement("div");
         list.id = "chatOverscrollDebugOverlayList";
