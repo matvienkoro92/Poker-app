@@ -29610,8 +29610,36 @@ function initChat() {
           base: base || "",
         });
         if (!cid) return;
-        closeOtherSwipePanels(null);
-        pokerRemoveLocalFriendFromChatContacts(cid);
+        pokerDebugChatFriendAction("click:remove:beforeCloseOtherPanels", {
+          chatId: cid || "",
+        });
+        try {
+          closeOtherSwipePanels(null);
+          pokerDebugChatFriendAction("click:remove:afterCloseOtherPanels", {
+            chatId: cid || "",
+          });
+        } catch (eClosePanels) {
+          pokerDebugChatFriendAction("click:remove:closeOtherPanelsError", {
+            chatId: cid || "",
+            error: eClosePanels && eClosePanels.message ? eClosePanels.message : String(eClosePanels || ""),
+          });
+          throw eClosePanels;
+        }
+        pokerDebugChatFriendAction("click:remove:beforeRemoveLocal", {
+          chatId: cid || "",
+        });
+        try {
+          pokerRemoveLocalFriendFromChatContacts(cid);
+          pokerDebugChatFriendAction("click:remove:afterRemoveLocal", {
+            chatId: cid || "",
+          });
+        } catch (eRemoveLocal) {
+          pokerDebugChatFriendAction("click:remove:removeLocalError", {
+            chatId: cid || "",
+            error: eRemoveLocal && eRemoveLocal.message ? eRemoveLocal.message : String(eRemoveLocal || ""),
+          });
+          throw eRemoveLocal;
+        }
         pokerDebugChatFriendAction("click:remove:afterOptimistic", {
           chatId: cid || "",
           isFriendAfterOptimistic:
