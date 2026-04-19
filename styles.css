@@ -9218,6 +9218,10 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   border-radius: 12px 12px 0 0;
   border-bottom: none;
 }
+.chat-dialogs-list > .chat-contacts-filter:not(.chat-contacts-filter--hidden) + #chatDialogsPrimaryBlock {
+  border-top: none;
+  border-radius: 0;
+}
 /* Верхняя часть единой оболочки: сегмент «Все / Друзья» */
 .chat-dialogs-list > .chat-contacts-filter {
   margin-top: 5px;
