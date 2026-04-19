@@ -29153,6 +29153,104 @@ function initChat() {
       if (!window || !window.console || typeof window.console.log !== "function") return;
       console.log("[chat-friend-action]", stage, payload || {});
     } catch (eDbgFriend) {}
+    try {
+      if (!document || !document.body) return;
+      var overlay = document.getElementById("chatFriendDebugOverlay");
+      var list = document.getElementById("chatFriendDebugOverlayList");
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "chatFriendDebugOverlay";
+        overlay.setAttribute(
+          "style",
+          [
+            "position:fixed",
+            "left:8px",
+            "right:8px",
+            "bottom:8px",
+            "z-index:2147483647",
+            "max-height:42vh",
+            "overflow:auto",
+            "padding:10px 10px 12px",
+            "border-radius:14px",
+            "background:rgba(7,10,16,0.92)",
+            "border:1px solid rgba(255,255,255,0.16)",
+            "box-shadow:0 14px 40px rgba(0,0,0,0.42)",
+            "backdrop-filter:blur(8px)",
+            "font:12px/1.35 monospace",
+            "color:#f5f7fb",
+            "white-space:pre-wrap",
+            "word-break:break-word"
+          ].join(";")
+        );
+        var head = document.createElement("div");
+        head.setAttribute(
+          "style",
+          [
+            "display:flex",
+            "align-items:center",
+            "justify-content:space-between",
+            "gap:8px",
+            "margin-bottom:8px"
+          ].join(";")
+        );
+        var title = document.createElement("strong");
+        title.textContent = "chat-friend-action";
+        title.setAttribute("style", "font:600 12px/1.2 monospace;color:#9fe870;");
+        var clearBtn = document.createElement("button");
+        clearBtn.type = "button";
+        clearBtn.textContent = "Clear";
+        clearBtn.setAttribute(
+          "style",
+          [
+            "border:0",
+            "border-radius:8px",
+            "padding:4px 8px",
+            "background:#1f2937",
+            "color:#fff",
+            "font:600 11px/1 monospace"
+          ].join(";")
+        );
+        clearBtn.addEventListener("click", function () {
+          var l = document.getElementById("chatFriendDebugOverlayList");
+          if (l) l.innerHTML = "";
+        });
+        list = document.createElement("div");
+        list.id = "chatFriendDebugOverlayList";
+        list.setAttribute("style", "display:flex;flex-direction:column;gap:6px;");
+        head.appendChild(title);
+        head.appendChild(clearBtn);
+        overlay.appendChild(head);
+        overlay.appendChild(list);
+        document.body.appendChild(overlay);
+      }
+      if (!list) return;
+      var row = document.createElement("div");
+      row.setAttribute(
+        "style",
+        [
+          "padding:6px 8px",
+          "border-radius:10px",
+          "background:rgba(255,255,255,0.06)",
+          "border:1px solid rgba(255,255,255,0.08)"
+        ].join(";")
+      );
+      var timeLabel = "";
+      try {
+        timeLabel = new Date().toLocaleTimeString();
+      } catch (eDbgTime) {}
+      var text = "";
+      try {
+        text = JSON.stringify(payload || {}, null, 2);
+      } catch (eDbgJson) {
+        text = String(payload || "");
+      }
+      row.textContent = (timeLabel ? "[" + timeLabel + "] " : "") + stage + "\n" + text;
+      list.appendChild(row);
+      while (list.children.length > 12) {
+        list.removeChild(list.firstChild);
+      }
+      overlay.scrollTop = overlay.scrollHeight;
+    } catch (eDbgOverlay) {}
   }
   function syncChatDialogPreviewAddFriendBtn() {
     var btn = document.getElementById("chatDialogPreviewAddFriendBtn");
