@@ -28992,7 +28992,7 @@ function initChat() {
             var swipeFriendBtn = isFriendContact
               ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--remove" tabindex="-1" data-chat-swipe-remove-friend="1" aria-label="Удалить из друзей" title="Удалить из друзей"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">−</span></button>'
               : '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>';
-            var swipeWrapClass = "chat-contact-swipe" + (!isFriendContact ? " chat-contact-swipe--wide-actions" : "");
+            var swipeWrapClass = "chat-contact-swipe chat-contact-swipe--wide-actions";
             return (
               '<div class="' +
               swipeWrapClass +
