@@ -31577,40 +31577,28 @@ function initChat() {
         } catch (eSbKb) {}
         /* Поднять ленту над композером/клавиатурой (не десктоп): после pad иначе «у низа» ложно ломается и низ остаётся под полем. */
         var shouldSnapAfterLift = !isChatPhysicalKeyboardContext() && nearBeforeLift;
-        var pwaIosNear = false;
         try {
-          pwaIosNear =
+          var pwaIosNear =
             typeof isTelegramWebApp === "function" &&
             !isTelegramWebApp() &&
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport();
+          if (pwaIosNear) shouldSnapAfterLift = false;
         } catch (ePwaNear) {}
         if (shouldSnapAfterLift) {
-          if (pwaIosNear) {
-            try {
-              clearTimeout(window.__pokerChatPwaKeyboardLiftSnapTimer);
-            } catch (eLiftTimerClear) {}
-            window.__pokerChatPwaKeyboardLiftSnapTimer = setTimeout(function () {
+          var rafLift = window.requestAnimationFrame || function (fn) {
+            setTimeout(fn, 0);
+          };
+          rafLift(function () {
+            rafLift(function () {
               try {
                 var bx = getVisibleMessagesEl();
                 if (bx) bx.scrollTop = bx.scrollHeight;
               } catch (eLift) {}
-            }, 140);
-          } else {
-            var rafLift = window.requestAnimationFrame || function (fn) {
-              setTimeout(fn, 0);
-            };
-            rafLift(function () {
-              rafLift(function () {
-                try {
-                  var bx = getVisibleMessagesEl();
-                  if (bx) bx.scrollTop = bx.scrollHeight;
-                } catch (eLift) {}
-              });
             });
-          }
+          });
         }
       }
       function scrollDocumentToZero() {
