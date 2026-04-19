@@ -31315,7 +31315,7 @@ function initChat() {
                   }
                 }
               } catch (ePwaRectPad) {}
-              pad = Math.max(28, Math.round(pwaComposerLift + gap + Math.max(5, screenSafeBottomPad * 0.1)));
+              pad = Math.max(28, Math.round(pwaComposerLift + gap + Math.max(5, screenSafeBottomPad * 0.1) - 7));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
