@@ -31514,6 +31514,10 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
+        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          doc.style.removeProperty("--chat-ios-accessory-inset");
+          return;
+        }
         if (!isIosLikeForChatViewport() || !window.visualViewport) {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
@@ -32247,48 +32251,16 @@ function initChat() {
         return Math.max(0, safeBottom);
       }
       function isTelegramMiniAppChatThreadIos() {
-        return (
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
-          typeof isIosLikeForChatViewport === "function" &&
-          isIosLikeForChatViewport() &&
-          typeof isChatPhysicalKeyboardContext === "function" &&
-          !isChatPhysicalKeyboardContext()
-        );
+        return false;
       }
       function isPassiveTelegramIosChatThread() {
-        if (!isTelegramMiniAppChatThreadIos()) return false;
-        try {
-          if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
-          var genVisible = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
-          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-          return !!(genVisible || convVisible);
-        } catch (eTmaPassiveThread) {
-          return false;
-        }
+        return false;
       }
       function shouldDisableTelegramIosChatKeyboardDock(target) {
-        if (!isTelegramMiniAppChatThreadIos()) return false;
-        return true;
+        return false;
       }
       function shouldUseNativeTelegramIosChatComposerFlow(focusTarget) {
-        if (shouldDisableTelegramIosChatKeyboardDock(focusTarget)) return true;
-        if (!isTelegramMiniAppChatThreadIos()) return false;
-        if (isPassiveTelegramIosChatThread()) return true;
-        if (isChatThreadComposerKeyboardDom(focusTarget)) return true;
-        try {
-          if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
-          var genVisible = !!(generalView && !generalView.classList.contains("chat-general-view--hidden"));
-          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-          if (!genVisible && !convVisible) return false;
-          var active = focusTarget || document.activeElement;
-          if (!active) return true;
-          if (active === chatComposerEl || active === chatSharedComposerEl || active === chatGeneralComposerEl || active === chatPersonalComposerEl) return true;
-          if (active.closest && active.closest(".chat-input-area")) return true;
-          var tag = String(active.tagName || "").toUpperCase();
-          if (tag === "TEXTAREA" || tag === "INPUT") return true;
-        } catch (eTmaNativeFlow) {}
-        return true;
+        return false;
       }
       function getTelegramMiniAppChatThreadFocusSession() {
         var session = window.__pokerChatTmaThreadFocusSession;
@@ -32647,131 +32619,7 @@ function initChat() {
        * Высота перекрытия: viewportStableHeight − viewportHeight; резервы winLoss / lastGood; dock + pad.
        */
       function syncTelegramMiniAppChatThreadKeyboard() {
-        logChatKeyboardDebug("tma-sync-enter");
-        if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
-          var docPassive = document.documentElement;
-          docPassive.style.setProperty("--chat-vv-inset", "0px");
-          docPassive.style.removeProperty("--chat-ios-accessory-inset");
-          applyChatThreadComposerKeyboardDockFromCover(0);
-          clearChatMessagesKeyboardPad();
-          return true;
-        }
-        if (typeof isTelegramWebApp !== "function" || !isTelegramWebApp()) return false;
-        if (typeof isChatThreadComposerKeyboardDom !== "function" || !isChatThreadComposerKeyboardDom()) return false;
-        if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
-        var twTma = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (!twTma) return false;
-        var doc = document.documentElement;
-        var ih = window.innerHeight || 0;
-        if (!ih) return true;
-        var lastIh = Number(window.__pokerChatTmaThreadLastInnerHeight) || 0;
-        window.__pokerChatTmaThreadLastInnerHeight = ih;
-        var baseLhTma = Number(window.__pokerChatInnerHBaseline) || 0;
-        var winLossTma = baseLhTma > 260 && ih > 0 ? Math.max(0, Math.round(baseLhTma - ih)) : 0;
-        var thM = Number(twTma.viewportHeight);
-        var tsM = Number(twTma.viewportStableHeight);
-        var tgDiffRaw = 0;
-        if (tsM > 0 && thM > 0 && tsM > thM + 3) {
-          tgDiffRaw = Math.round(tsM - thM);
-        }
-        var tgIosThread = isTelegramMiniAppChatThreadIos();
-        var focusAgeTma = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-        var prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-        if (tgIosThread) {
-          window.__pokerChatTgKeyboardCoverLast = 0;
-          doc.style.setProperty("--chat-vv-inset", "0px");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          try {
-            updateTelegramMiniAppChatThreadDebugOverlay("tma-flow", { cover: 0, bottom: 0 });
-          } catch (eDbgFlowSync) {}
-          applyChatThreadComposerKeyboardDockFromCover(0);
-          if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
-          return true;
-        }
-        var coverTma = 0;
-        var haveTma = false;
-        if (winLossTma >= 52) {
-          coverTma = Math.min(winLossTma, Math.round(ih * 0.38));
-          haveTma = true;
-        } else if (tgDiffRaw >= 24) {
-          coverTma = tgDiffRaw;
-          if (winLossTma > 48 && coverTma > winLossTma + 50) {
-            coverTma = Math.max(winLossTma + 8, Math.round(tgDiffRaw * 0.88));
-          }
-          haveTma = true;
-        } else {
-          var lastK0 = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-          if (document.body.classList.contains("chat-keyboard-open") && lastK0 >= 28) {
-            coverTma = lastK0;
-            haveTma = true;
-          }
-        }
-        if (haveTma) {
-          /*
-           * TG viewportStableHeight − viewportHeight часто выше реального «подъёма» окна: WK уже сжал layout,
-           * строка сначала ок у клавиатуры, затем второй кадр даёт завышенный cover → рывок вверх.
-           * Сверху — как у coverPxDock в syncPwa: не больше падения innerHeight + зазор (без дубля с API).
-           */
-          if (!tgIosThread && winLossTma >= 52) {
-            try {
-              var gapKbTma = Math.round(getChatComposerKeyboardGapPx());
-              var slackTmaWin = Math.max(36, gapKbTma + 28);
-              var capFromWinLoss = winLossTma + slackTmaWin;
-              if (coverTma > capFromWinLoss) coverTma = capFromWinLoss;
-            } catch (eCapWin) {}
-          }
-          prevK = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-          if (tgIosThread && focusAgeTma > 0 && focusAgeTma < 900 && winLossTma >= 24) {
-            var earlySlackTma = Math.max(16, Math.round(getChatComposerKeyboardGapPx()) + 8);
-            coverTma = Math.min(coverTma, winLossTma + earlySlackTma);
-          }
-          if (tgIosThread) {
-            var capIosTma = Math.min(220, Math.max(72, Math.round(ih * 0.28)));
-            coverTma = Math.min(coverTma, capIosTma);
-            if (lastIh > 0 && Math.abs(lastIh - ih) < 6 && prevK >= 18) {
-              var minTmaSteady = Math.max(0, prevK - 3);
-              var maxTmaSteady = prevK + 4;
-              if (coverTma < minTmaSteady) coverTma = minTmaSteady;
-              if (coverTma > maxTmaSteady) coverTma = maxTmaSteady;
-            }
-          } else if (prevK >= 28 && coverTma > prevK + 45) {
-            coverTma = Math.min(coverTma, prevK + 32);
-          }
-          var capTma = tgIosThread
-            ? Math.min(220, Math.max(72, Math.round(ih * 0.28)))
-            : Math.min(268, Math.max(96, Math.round(ih * 0.34)));
-          if (coverTma > capTma) coverTma = capTma;
-          if (coverTma < 0) coverTma = 0;
-          window.__pokerChatTgKeyboardCoverLast = coverTma;
-          try {
-            updateTelegramMiniAppChatThreadDebugOverlay("tma-sync", { cover: coverTma });
-          } catch (eDbgSync) {}
-          doc.style.setProperty("--chat-vv-inset", "0px");
-          doc.style.removeProperty("--chat-ios-accessory-inset");
-          applyChatThreadComposerKeyboardDockFromCover(coverTma);
-          if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
-          return true;
-        }
-        var fbTma = Number(window.__pokerChatTgKeyboardCoverLast) || 0;
-        if (fbTma < 24 && tgDiffRaw >= 20) fbTma = tgDiffRaw;
-        if (fbTma < 24 && winLossTma >= 44) fbTma = Math.min(winLossTma, Math.round(ih * 0.38));
-        var capFb = Math.min(268, Math.max(88, Math.round(ih * 0.34)));
-        fbTma = Math.max(0, Math.min(capFb, fbTma));
-        if (winLossTma >= 52) {
-          try {
-            var gapKbFb = Math.round(getChatComposerKeyboardGapPx());
-            var slackFbWin = Math.max(36, gapKbFb + 28);
-            fbTma = Math.min(fbTma, winLossTma + slackFbWin);
-          } catch (eFbWin) {}
-        }
-        try {
-          updateTelegramMiniAppChatThreadDebugOverlay("tma-fallback", { cover: fbTma });
-        } catch (eDbgFb) {}
-        doc.style.setProperty("--chat-vv-inset", "0px");
-        doc.style.removeProperty("--chat-ios-accessory-inset");
-        applyChatThreadComposerKeyboardDockFromCover(fbTma);
-        if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
-        return true;
+        return false;
       }
       function resetChatVisualViewportState(options) {
         var opts = options || {};
@@ -32871,8 +32719,8 @@ function initChat() {
         var offsetTop = metrics.offsetTop;
         var heightLoss = metrics.heightLoss;
         var overlap = metrics.overlap;
-        var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
-        var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        var tg = false;
+        var tw = null;
         /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
         if (tg && tw) {
           var tgvH = Number(tw.viewportHeight);
