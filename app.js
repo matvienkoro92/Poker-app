@@ -14038,6 +14038,15 @@ function pokerHideRomanTelegramUsername(username) {
   return u === "roman1787443";
 }
 
+function pokerShouldShowHomeTopVersionForSpecialUser() {
+  var user =
+    typeof getPokerResolvedTelegramUser === "function"
+      ? getPokerResolvedTelegramUser()
+      : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+  var username = user && user.username ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+  return username === "roman1787443";
+}
+
 function updateProfileUserName() {
   var el = document.getElementById("profileUserName");
   if (!el) return;
@@ -37440,6 +37449,10 @@ document.addEventListener("visibilitychange", function () {
         return;
       }
     } catch (e) {}
+    if (pokerShouldShowHomeTopVersionForSpecialUser()) {
+      if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
+      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
+    }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
