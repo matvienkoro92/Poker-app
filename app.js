@@ -21246,6 +21246,8 @@ function pokerApplyLocalFriendToChatContacts(targetUserId, contactName) {
   } catch (eFrLbl) {}
   try {
     if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
+      var contactsRootAdd = document.querySelector(".chat-contacts");
+      if (contactsRootAdd) contactsRootAdd.innerHTML = "";
       window.__pokerApplyContactsApiResponse(data);
     }
   } catch (eFrApply) {}
@@ -21316,6 +21318,8 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   } catch (eFrLblDel) {}
   try {
     if (data && typeof window.__pokerApplyContactsApiResponse === "function") {
+      var contactsRootDel = document.querySelector(".chat-contacts");
+      if (contactsRootDel) contactsRootDel.innerHTML = "";
       window.__pokerApplyContactsApiResponse(data);
     }
   } catch (eFrApplyDel) {}
