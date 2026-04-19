@@ -31505,9 +31505,22 @@ function initChat() {
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport();
             if (isPwaIosPad) {
-              /* На iOS PWA при открытой клавиатуре последнее сообщение должно подниматься выше строки ввода,
-               * иначе его нижняя часть остаётся перекрыта полем. Даём больший стабильный запас, не меняя сам подъём composer. */
-              pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 80));
+              /* Для iOS PWA считаем запас от реальной видимой строки ввода, а не от клавиатурного cover:
+               * иначе снизу появляется лишний резерв и последнее сообщение не доезжает до нужной позиции. */
+              var pwaViewportHeight = window.innerHeight || 0;
+              var pwaComposerLift = bh;
+              try {
+                if (barEl && barEl.getBoundingClientRect) {
+                  var pwaRect = barEl.getBoundingClientRect();
+                  if (pwaRect && isFinite(pwaRect.top) && isFinite(pwaRect.bottom)) {
+                    var pwaVisibleBottom = Math.min(pwaViewportHeight || pwaRect.bottom, pwaRect.bottom);
+                    var pwaVisibleTop = Math.max(0, pwaRect.top);
+                    var pwaOccupied = Math.max(0, pwaVisibleBottom - pwaVisibleTop);
+                    if (pwaOccupied > 0) pwaComposerLift = pwaOccupied;
+                  }
+                }
+              } catch (ePwaRectPad) {}
+              pad = Math.max(28, Math.round(pwaComposerLift + gap + Math.max(8, screenSafeBottomPad * 0.35)));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
@@ -31572,7 +31585,7 @@ function initChat() {
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport();
-          if (isPwaIosNear) shouldSnapAfterLift = false;
+          if (isPwaIosNear) shouldSnapAfterLift = nearBeforeLift;
         } catch (ePwaNear) {}
         if (shouldSnapAfterLift) {
           var rafLift = window.requestAnimationFrame || function (fn) {
