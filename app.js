@@ -22453,6 +22453,31 @@ function initChat() {
     if (chatComposerMounted === "personal") return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
     return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
   }
+  function shouldAutoFocusChatComposerOnDesktop() {
+    try {
+      if (typeof window.__pokerIsChatPhysicalKeyboardContext === "function") {
+        return !!window.__pokerIsChatPhysicalKeyboardContext();
+      }
+    } catch (ePkCtx) {}
+    try {
+      if ((navigator.maxTouchPoints || 0) > 0) return false;
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "")) return false;
+    } catch (eAfUa) {}
+    return true;
+  }
+  function focusChatComposerForDesktop() {
+    if (!chatComposerEl || !shouldAutoFocusChatComposerOnDesktop()) return;
+    setTimeout(function () {
+      try {
+        if (!chatComposerEl || chatComposerMounted === "detached" || chatComposerEl.disabled) return;
+        if (chatComposerEl.focus) chatComposerEl.focus({ preventScroll: true });
+      } catch (eFocusDesk1) {
+        try {
+          if (chatComposerEl && chatComposerEl.focus) chatComposerEl.focus();
+        } catch (eFocusDesk2) {}
+      }
+    }, 0);
+  }
   function mountChatComposer(mode) {
     if (!chatSharedComposerEl || !chatComposerPool) return;
     mode = mode || "detached";
@@ -22557,6 +22582,7 @@ function initChat() {
       if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
     } catch (eP) {}
     scheduleTelegramIosChatComposerOverlaySync();
+    if (nextMounted === "general" || nextMounted === "personal") focusChatComposerForDesktop();
   }
 
   function setGeneralSendBusy(busy) {
@@ -27839,20 +27865,24 @@ function initChat() {
           chatComposerEl.value = "";
           try { resizeChatTextarea(chatComposerEl); } catch (e) {}
           try { updateGeneralSendBtnIcon(); } catch (e) {}
-          setTimeout(function () {
-            try { chatComposerEl.blur(); } catch (e) {}
-          }, 50);
-          setTimeout(function () {
-            try {
-              if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
-                  !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
-                return;
-              }
-              if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
-                window.__pokerFinalizeChatKeyboardDismiss();
-              }
-            } catch (eKbSend) {}
-          }, 220);
+          if (shouldAutoFocusChatComposerOnDesktop()) {
+            focusChatComposerForDesktop();
+          } else {
+            setTimeout(function () {
+              try { chatComposerEl.blur(); } catch (e) {}
+            }, 50);
+            setTimeout(function () {
+              try {
+                if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+                    !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
+                  return;
+                }
+                if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+                  window.__pokerFinalizeChatKeyboardDismiss();
+                }
+              } catch (eKbSend) {}
+            }, 220);
+          }
         }
         generalReplyTo = null;
         generalImage = null;
@@ -30316,20 +30346,24 @@ function initChat() {
         chatComposerEl.value = "";
         try { resizeChatTextarea(chatComposerEl); } catch (e) {}
         try { updatePersonalSendBtnIcon(); } catch (e) {}
-        setTimeout(function () {
-          try { chatComposerEl.blur(); } catch (e) {}
-        }, 50);
-        setTimeout(function () {
-          try {
-            if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
-                !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
-              return;
-            }
-            if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
-              window.__pokerFinalizeChatKeyboardDismiss();
-            }
-          } catch (eKbSendP) {}
-        }, 220);
+        if (shouldAutoFocusChatComposerOnDesktop()) {
+          focusChatComposerForDesktop();
+        } else {
+          setTimeout(function () {
+            try { chatComposerEl.blur(); } catch (e) {}
+          }, 50);
+          setTimeout(function () {
+            try {
+              if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+                  !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
+                return;
+              }
+              if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+                window.__pokerFinalizeChatKeyboardDismiss();
+              }
+            } catch (eKbSendP) {}
+          }, 220);
+        }
       }
       personalReplyTo = null;
       personalImage = null;
