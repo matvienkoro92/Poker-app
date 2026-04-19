@@ -21154,7 +21154,6 @@ function pokerGetChatContactsListFilter() {
   try {
     var raw = sessionStorage.getItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY);
     if (raw === "friends") return "friends";
-    if (raw === "groups") return "groups";
     return "all";
   } catch (eF) {
     return "all";
@@ -28539,7 +28538,6 @@ function initChat() {
         contactsForList = pokerSortContactsByDialogListPins(contactsForList);
         var contactsFilterMode = pokerGetChatContactsListFilter();
         var showFriendsOnly = contactsFilterMode === "friends";
-        var showGroupsOnly = contactsFilterMode === "groups";
         var friendSet = {};
         if (data.friendIds && Array.isArray(data.friendIds)) {
           for (var fi = 0; fi < data.friendIds.length; fi++) {
@@ -28617,14 +28615,6 @@ function initChat() {
             if (c && c.isGroupChat) return false;
             return !!(friendSet[c.id] || friendSet[String(c.id)]);
           });
-        } else if (showGroupsOnly) {
-          contactsForList = contactsForList.filter(function (c) {
-            return !!(c && c.isGroupChat);
-          });
-        } else {
-          contactsForList = contactsForList.filter(function (c) {
-            return !(c && c.isGroupChat);
-          });
         }
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
@@ -28650,8 +28640,7 @@ function initChat() {
         }
         if (contactsForList.length === 0) {
           var emptyText = "Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.";
-          if (showGroupsOnly) emptyText = "Здесь будут ваши групповые чаты.";
-          else if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";
+          if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block">' +
             '<p class="chat-empty">' + escapeHtml(emptyText) + "</p>" +
@@ -28930,12 +28919,9 @@ function initChat() {
             e.target && e.target.closest ? e.target.closest(".chat-contacts-filter__tab") : null;
           if (!tb || !filterWrapEl.contains(tb)) return;
           var fv = tb.getAttribute("data-filter");
-          if (fv !== "friends" && fv !== "all" && fv !== "groups") return;
+          if (fv !== "friends" && fv !== "all") return;
           try {
-            sessionStorage.setItem(
-              POKER_CHAT_CONTACTS_LIST_FILTER_KEY,
-              fv === "friends" ? "friends" : fv === "groups" ? "groups" : "all"
-            );
+            sessionStorage.setItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY, fv === "friends" ? "friends" : "all");
           } catch (eStF) {}
           pokerSyncChatContactsFilterTabs();
           if (window.__pokerLastContactsApiData) {
