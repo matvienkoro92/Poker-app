@@ -22659,11 +22659,11 @@ function initChat() {
   /* учётные данные чата: pokerApiAuth* (Mini App initData или PWA pwaSession) */
 
   function syncClubChatRosterUi() {
-    var meta = document.getElementById("chatDialogClubRosterMeta");
+    var title = document.getElementById("chatDialogClubTitle");
     var sub = document.getElementById("chatGeneralHeaderRosterMeta");
     var access = clubChatAccess;
     if (access === "need_apply" || access === "pending") {
-      if (meta) meta.hidden = true;
+      if (title) setTextContentIfChanged(title, "Главный чат");
       if (sub) {
         sub.hidden = true;
         sub.textContent = "";
@@ -22673,18 +22673,14 @@ function initChat() {
     var c = window._chatGeneralCache;
     var t = c && c.participantsCount != null ? c.participantsCount : null;
     if (t == null) {
-      if (meta) meta.hidden = true;
+      if (title) setTextContentIfChanged(title, "Главный чат");
       if (sub) {
         sub.hidden = true;
         sub.textContent = "";
       }
       return;
     }
-    if (meta) {
-      var pEl = document.getElementById("chatDialogClubParticipants");
-      if (pEl) pEl.textContent = String(t);
-      meta.hidden = false;
-    }
+    if (title) setTextContentIfChanged(title, "Главный чат (" + String(t) + " уч.)");
     if (sub) {
       sub.textContent = "Участников: " + String(t);
       sub.hidden = false;

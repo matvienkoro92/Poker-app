@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.844">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.845">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1652,18 +1652,14 @@
                 </div>
                 <div class="chat-dialogs-block" id="chatDialogsPrimaryBlock">
                 <button type="button" class="chat-dialog-item chat-dialog-item--club" data-chat-type="club" id="chatDialogClub" tabindex="-1">
-                  <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" width="52" height="52" decoding="sync" fetchpriority="high" loading="eager" />
+                  <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" width="40" height="40" decoding="sync" fetchpriority="high" loading="eager" />
                   <span class="chat-dialog-item__club-wrap">
                     <span class="chat-dialog-item__title-row">
-                      <span class="chat-dialog-item__label">Главный чат</span>
+                      <span class="chat-dialog-item__label" id="chatDialogClubTitle">Главный чат</span>
                       <span class="chat-dialog-item__pending-review-badge" id="chatDialogClubPendingBadge" aria-hidden="true"></span>
-                    </span>
-                    <span class="chat-dialog-item__club-roster-meta" id="chatDialogClubRosterMeta" hidden>
-                      Участников: <strong id="chatDialogClubParticipants">—</strong>
                     </span>
                     <span class="chat-dialog-item__preview chat-dialog-item__preview--skeleton" id="chatDialogClubPreview" aria-busy="true" aria-label="Загрузка превью"></span>
                   </span>
-                  <span class="chat-dialog-item__main-label">Чаты</span>
                   <span class="chat-dialog-item__unread" id="chatDialogClubUnread" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="chat-dialog-item" data-chat-user-id="tg_2144406710" data-chat-user-name="Анна" data-chat-hours="06:00–18:00 мск" data-shift-start="6" data-shift-end="18" tabindex="-1">
