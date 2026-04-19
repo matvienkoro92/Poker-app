@@ -808,7 +808,10 @@ html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="chat"] .cha
   bottom: auto !important;
   top: auto !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding-top: var(--chat-composer-edge-gap, 2px) !important;
+  padding-right: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-left: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
   background: transparent !important;
   box-shadow: none !important;
   z-index: auto !important;
@@ -819,9 +822,9 @@ html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-la
 }
 html.app--telegram-miniapp.tg-ios-keyboard-root-lock body[data-view="keyboard-lab"] .keyboard-lab__composer {
   position: fixed !important;
-  left: 12px !important;
-  right: 12px !important;
-  bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  left: calc(env(safe-area-inset-left, 0px) + 12px + var(--chat-composer-edge-gap, 2px)) !important;
+  right: calc(env(safe-area-inset-right, 0px) + 12px + var(--chat-composer-edge-gap, 2px)) !important;
+  bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + var(--chat-composer-edge-gap, 2px)) !important;
   z-index: 140 !important;
   transform: translateY(var(--tg-ios-root-scroll-offset, 0px)) !important;
 }
@@ -839,7 +842,10 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-containe
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
-  padding-bottom: max(12px, var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px))) !important;
+  padding-top: var(--chat-composer-edge-gap, 2px) !important;
+  padding-right: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-bottom: max(12px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-left: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
   margin-bottom: 0 !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .bottom-nav,
@@ -926,7 +932,10 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top-inner 
 }
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
-  padding-bottom: max(12px, var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px))) !important;
+  padding-top: var(--chat-composer-edge-gap, 2px) !important;
+  padding-right: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-bottom: max(12px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + var(--chat-composer-edge-gap, 2px))) !important;
+  padding-left: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
   margin-bottom: 0 !important;
   min-height: 0 !important;
   height: auto !important;
