@@ -28953,6 +28953,26 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat
   scroll-padding-bottom: 0 !important;
   box-sizing: border-box !important;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
@@ -28965,6 +28985,10 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat
   background-color: var(--chat-input-field-bg) !important;
   background-image: none !important;
   box-sizing: border-box !important;
+  align-self: end !important;
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-input-wrap,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap,
