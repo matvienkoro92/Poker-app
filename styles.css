@@ -3459,8 +3459,8 @@ html.chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area
   background-color: var(--chat-input-field-bg);
   background-image: none;
 }
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:not(.chat-input-area--vv-dock),
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:not(.chat-input-area--vv-dock),
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
@@ -3475,7 +3475,11 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp) body[data-view
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
   position: relative !important;
   left: auto !important;
   right: auto !important;
