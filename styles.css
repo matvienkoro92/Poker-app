@@ -9218,7 +9218,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-dialogs-list > .chat-contacts-filter {
   margin-top: 5px;
   width: 100%;
-  padding: 5px;
+  padding: 5px 5px 0;
   min-height: 0;
   border-radius: 14px 14px 0 0;
   border: 1px solid var(--chat-contacts-rail-border);
@@ -9242,6 +9242,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
   overflow: hidden;
   box-sizing: border-box;
+  margin-top: 0;
 }
 [data-theme="light"] .chat-dialogs-list .chat-contacts .chat-contacts-list-block {
   background: color-mix(in srgb, var(--block-bg-solid) 98%, #fff 2%);
@@ -9366,8 +9367,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   width: 100%;
 }
 .chat-dialog-item:hover { background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.40); }
-.chat-dialog-item--pinned,
-.chat-dialog-item--club { border-color: rgba(251, 146, 60, 0.35); background: rgba(249, 115, 22, 0.10); }
+.chat-dialog-item--pinned { border-color: rgba(251, 146, 60, 0.35); background: rgba(249, 115, 22, 0.10); }
 .chat-dialog-item__icon { font-size: 20px; flex-shrink: 0; }
 .chat-dialog-item__avatar {
   width: 40px;
