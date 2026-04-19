@@ -28921,6 +28921,9 @@ function initChat() {
         }
       }
     }
+    try {
+      window.__pokerApplyContactsApiResponse = applyContactsApiResponse;
+    } catch (eExposeContactsApply) {}
     if (!contactsEl._chatContactsFilterBound) {
       contactsEl._chatContactsFilterBound = true;
       var filterWrapEl = document.getElementById("chatContactsFilter");
@@ -29144,7 +29147,12 @@ function initChat() {
         var removing = pokerContactIsDialogListPinned(cid);
         pokerToggleChatDialogListPin(cid, removing);
         closeOtherSwipePanels(null);
-        loadContacts();
+        try {
+          if (window.__pokerLastContactsApiData && typeof window.__pokerApplyContactsApiResponse === "function") {
+            window.__pokerApplyContactsApiResponse(window.__pokerLastContactsApiData);
+          }
+        } catch (ePinApplyFast) {}
+        if (typeof loadContacts === "function") loadContacts({ metaOnly: true });
       },
       true
     );
@@ -36916,6 +36924,16 @@ function initChat() {
       if (startApp === "club_chat") pokerChatRequestPollBurst("general");
       else if (startApp === "club_chat_dm") pokerChatRequestPollBurst("personal");
       pokerChatRequestPollBurst("contacts");
+      try {
+        var dialogsListVisibleNow = !!(
+          chatViewActiveNow &&
+          dialogsView &&
+          !dialogsView.classList.contains("chat-dialogs-view--hidden") &&
+          listView &&
+          !listView.classList.contains("chat-list-view--hidden")
+        );
+        if (dialogsListVisibleNow && typeof loadContacts === "function") loadContacts({ metaOnly: true });
+      } catch (ePushDialogsRefresh) {}
       if (window.__pokerChatPushRefetchTimer) return;
       window.__pokerChatPushRefetchTimer = setTimeout(function () {
         window.__pokerChatPushRefetchTimer = 0;
