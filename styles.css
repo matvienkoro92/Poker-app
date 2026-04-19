@@ -9315,8 +9315,8 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
 .chat-contacts-filter__tab {
   min-width: 0;
   margin: 0;
-  min-height: 42px;
-  padding: 10px 8px;
+  min-height: 36px;
+  padding: 7px 8px;
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
