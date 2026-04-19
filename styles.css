@@ -11822,6 +11822,58 @@ body[data-view="chat"]
 .chat-general-header .chat-general-copy-link-btn.chat-general-header__segment:hover {
   border: none;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-header,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-header,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-header,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-header {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  pointer-events: auto !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-top,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-top,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-top {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  pointer-events: auto !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
+  --chat-general-floating-toolbar-h: 0px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: 6px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view > .chat-general-pinned-stack,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view > .chat-general-pinned-stack,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view > .chat-general-pinned-stack,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view > .chat-general-pinned-stack,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view > .chat-pinned-self,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view > .chat-pinned-self,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .chat-pinned-self,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .chat-pinned-self {
+  margin-top: 0 !important;
+}
 [data-theme="dark"] .chat-general-header__segments {
   border-color: rgba(255, 255, 255, 0.22);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);

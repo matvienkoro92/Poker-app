@@ -22327,9 +22327,10 @@ function initChat() {
     }
   } catch (eTmaRo) {}
   function shouldUseDedicatedTelegramIosChatComposer() {
-    return false;
+    return typeof isTelegramWebApp === "function" && isTelegramWebApp();
   }
   function ensureTelegramIosMinimalComposerBlock(area, mount, sendButton) {
+    if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return;
     if (!area || !mount || !sendButton) return;
     var shell = area.querySelector(".chat-tma-ios-minimal-block");
     if (!shell) {
