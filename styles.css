@@ -7818,6 +7818,44 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   color: #fca5a5;
   cursor: pointer;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-input-area,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-input-area {
+  gap: 0 !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-reply-preview,
+html.app--telegram-miniapp body[data-view="chat"] .chat-image-preview,
+html.app--telegram-miniapp body[data-view="chat"] .chat-voice-preview,
+html.app--telegram-miniapp body[data-view="chat"] .chat-upload-progress,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-reply-preview,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-image-preview,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-voice-preview,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-upload-progress,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-reply-preview,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-image-preview,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-voice-preview,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-upload-progress,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-reply-preview,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-image-preview,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-voice-preview,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-upload-progress {
+  display: none !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-input-wrap,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-input-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-input-wrap {
+  gap: 4px !important;
+  align-items: center !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-composer-mount,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-composer-mount,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-composer-mount,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-composer-mount {
+  display: flex !important;
+  align-items: center !important;
+}
 .chat-voice-btn {
   flex-shrink: 0;
   width: 36px;

@@ -22474,6 +22474,7 @@ function initChat() {
     });
   }
   function bindTelegramIosComposeOverlayGate(area, mode) {
+    if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return;
     if (!area || area.__pokerIosOverlayGateBound) return;
     area.__pokerIosOverlayGateBound = true;
     function gateOpen(event) {
