@@ -9190,6 +9190,9 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   overflow: hidden;
   flex-shrink: 0;
 }
+.chat-dialogs-block--hidden-by-filter {
+  display: none !important;
+}
 .chat-dialogs-block .chat-dialog-item {
   border-radius: 0;
   border: none;

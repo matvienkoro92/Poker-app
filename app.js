@@ -21158,6 +21158,10 @@ function pokerSyncChatContactsFilterTabs() {
     btn.classList.toggle("chat-contacts-filter__tab--active", !!active);
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
+  try {
+    var primaryBlock = document.getElementById("chatDialogsPrimaryBlock");
+    if (primaryBlock) primaryBlock.classList.toggle("chat-dialogs-block--hidden-by-filter", mode === "friends");
+  } catch (ePrimFilter) {}
 }
 
 /** Подписи «Друзья (N)» на кнопке профиля и вкладке списка чатов. count === null — без скобок (нет авторизации). */
