@@ -22327,7 +22327,7 @@ function initChat() {
     }
   } catch (eTmaRo) {}
   function shouldUseDedicatedTelegramIosChatComposer() {
-    return typeof isTelegramWebApp === "function" && isTelegramWebApp() && isIosLikeForChatViewport();
+    return false;
   }
   function ensureTelegramIosMinimalComposerBlock(area, mount, sendButton) {
     if (!area || !mount || !sendButton) return;
@@ -22379,11 +22379,7 @@ function initChat() {
     ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
   }
   function shouldUseTelegramIosComposeOverlay() {
-    try {
-      return shouldUseDedicatedTelegramIosChatComposer() && !!chatIosComposeOverlay && !!chatIosComposeOverlayTextarea;
-    } catch (eTgIosOverlay) {
-      return false;
-    }
+    return false;
   }
   function closeTelegramIosComposeOverlay(opts) {
     if (!chatIosComposeOverlay) return;
