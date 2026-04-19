@@ -33115,7 +33115,24 @@ function initChat() {
           doc.style.setProperty("--chat-vv-inset", inset + "px");
           applyChatIosAccessoryInsetFromViewport();
         }
-        if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+        if (document.body.classList.contains("chat-keyboard-open")) {
+          var deferPwaPadUpdate = false;
+          try {
+            var isPwaPadDuringLift =
+              typeof isTelegramWebApp === "function" &&
+              !isTelegramWebApp() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport();
+            var openingUntilPad = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+            if (isPwaPadDuringLift && openingUntilPad > Date.now()) {
+              var lastPad = Number(window.__pokerChatMessagesKeyboardPadLast) || 0;
+              deferPwaPadUpdate = lastPad > 0;
+            }
+          } catch (eDeferPwaPad) {}
+          if (!deferPwaPadUpdate) updateChatMessagesKeyboardPad();
+        }
       }
       window.__pokerSyncPwaChatVisualViewportInset = syncPwaChatVisualViewportInset;
       try {
