@@ -31733,6 +31733,16 @@ function initChat() {
       }
       function setChatKeyboardOpenClasses(open) {
         try {
+          var isTelegramChatKeyboardContext =
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp() &&
+            document.body &&
+            String(document.body.getAttribute("data-view") || "") === "chat";
+          if (isTelegramChatKeyboardContext) {
+            document.documentElement.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
+            document.body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+            return;
+          }
           if (open) {
             document.documentElement.classList.add("chat-keyboard-open");
             document.body.classList.add("chat-keyboard-open");
@@ -32890,7 +32900,7 @@ function initChat() {
           isTelegramWebApp() &&
           String(document.body.getAttribute("data-view") || "") === "chat"
         ) {
-          setChatKeyboardOpenClasses(true);
+          clearChatKeyboardViewportState();
           clearChatMessagesKeyboardPad();
           stripChatInputAreaTransforms();
           return;
