@@ -39939,11 +39939,11 @@ function updateTournamentDayBlock() {
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");
     var frTime = document.getElementById("freerollHomeTimer");
-    if (frGuar && frLab && frTime) {
+    if (frLab && frTime) {
       var frState = getNextFreerollState(n);
       var frT = frState.t;
       if (frBuy) frBuy.textContent = frT.buyin || "0₽";
-      frGuar.textContent = frT.guarantee;
+      if (frGuar) frGuar.textContent = frT.guarantee;
       frLab.textContent = frState.label ? frState.label : "Старт через: ";
       var frDiff = frState.target - n;
       var frTimerStr =
