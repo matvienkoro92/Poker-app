@@ -39650,47 +39650,26 @@ function pokerMskWeekdayShortAt(utcMs) {
 function renderHomeFreerollSchedule() {
   var el = document.getElementById("freerollHomeScheduleList");
   if (!el) return;
-  el.innerHTML = "";
-  HOME_FREEROLL_SCHEDULE.forEach(function (item) {
-    var row = document.createElement("div");
-    row.className = "home-freeroll-schedule__row";
-
-    var day = document.createElement("span");
-    day.className = "home-freeroll-schedule__day";
-    day.textContent = item.day;
-
-    var main = document.createElement("span");
-    main.className = "home-freeroll-schedule__main";
-
-    var title = document.createElement("span");
-    title.className = "home-freeroll-schedule__title";
-    title.textContent = item.title;
-
-    var meta = document.createElement("span");
-    meta.className = "home-freeroll-schedule__meta";
-    meta.textContent = item.meta;
-
-    var time = document.createElement("span");
-    time.className = "home-freeroll-schedule__time";
-    time.textContent = item.time;
-
-    main.appendChild(title);
-    main.appendChild(meta);
-    row.appendChild(day);
-    row.appendChild(main);
-    row.appendChild(time);
-    el.appendChild(row);
-  });
+  el.innerHTML = HOME_FREEROLL_SCHEDULE.map(function (item) {
+    return (
+      '<div class="home-freeroll-schedule__row">' +
+      '<span class="home-freeroll-schedule__day">' + escapeHtml(item.day) + "</span>" +
+      '<span class="home-freeroll-schedule__main">' +
+      '<span class="home-freeroll-schedule__title">' + escapeHtml(item.title) + "</span>" +
+      '<span class="home-freeroll-schedule__meta">' + escapeHtml(item.meta) + "</span>" +
+      "</span>" +
+      '<span class="home-freeroll-schedule__time">' + escapeHtml(item.time) + "</span>" +
+      "</div>"
+    );
+  }).join("");
 }
 
 function updateTournamentDayBlock() {
+  renderHomeFreerollSchedule();
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);
   var timerLabelEls = [document.getElementById("tournamentDayTimerLabel"), document.getElementById("scheduleTournamentDayTimerLabel")].filter(Boolean);
   var timerEls = [document.getElementById("tournamentDayTimer"), document.getElementById("scheduleTournamentDayTimer")].filter(Boolean);
-  try {
-    renderHomeFreerollSchedule();
-  } catch (eHomeFreerolls) {}
   if (buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
   var MSK_START_UTC_HOUR = 15;
   var MSK_END_REG_UTC_HOUR = 18;
