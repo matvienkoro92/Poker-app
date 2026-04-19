@@ -29148,6 +29148,12 @@ function initChat() {
     } catch (eR) {}
     return false;
   }
+  function pokerDebugChatFriendAction(stage, payload) {
+    try {
+      if (!window || !window.console || typeof window.console.log !== "function") return;
+      console.log("[chat-friend-action]", stage, payload || {});
+    } catch (eDbgFriend) {}
+  }
   function syncChatDialogPreviewAddFriendBtn() {
     var btn = document.getElementById("chatDialogPreviewAddFriendBtn");
     var modal = document.getElementById("chatDialogPreviewModal");
@@ -29169,7 +29175,25 @@ function initChat() {
     if (!cant) btn.disabled = false;
   }
   function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
+    pokerDebugChatFriendAction("addFriendWithPrompt:start", {
+      targetUserId: targetUserId || "",
+      nameHint: nameHint || "",
+      hasBase: !!base,
+      base: base || "",
+      hasAuthFn: typeof pokerApiHasCredential === "function",
+      hasCredential:
+        typeof pokerApiHasCredential === "function" ? !!pokerApiHasCredential() : false,
+      isAlreadyFriend: typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
+    });
     if (!targetUserId || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      pokerDebugChatFriendAction("addFriendWithPrompt:blocked", {
+        targetUserId: targetUserId || "",
+        hasTargetUserId: !!targetUserId,
+        hasBase: !!base,
+        hasAuthFn: typeof pokerApiHasCredential === "function",
+        hasCredential:
+          typeof pokerApiHasCredential === "function" ? !!pokerApiHasCredential() : false,
+      });
       if (typeof onDone === "function") onDone();
       return;
     }
@@ -29186,13 +29210,33 @@ function initChat() {
     } catch (ePr) {
       prompted = defaultContact;
     }
+    pokerDebugChatFriendAction("addFriendWithPrompt:promptResult", {
+      targetUserId: targetUserId || "",
+      defaultContact: defaultContact,
+      promptedIsNull: prompted === null,
+      promptedValue: prompted === null ? null : String(prompted),
+    });
     if (prompted === null) {
       if (typeof onDone === "function") onDone();
       return;
     }
     var contactName = String(prompted).trim();
+    pokerDebugChatFriendAction("addFriendWithPrompt:beforeOptimistic", {
+      targetUserId: targetUserId || "",
+      contactName: contactName,
+      isFriendBeforeOptimistic:
+        typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
+    });
     pokerApplyLocalFriendToChatContacts(targetUserId, contactName);
     syncChatDialogPreviewAddFriendBtn();
+    pokerDebugChatFriendAction("addFriendWithPrompt:request", {
+      targetUserId: targetUserId || "",
+      requestUrl: base + "/api/friends",
+      body: {
+        targetUserId: targetUserId,
+        contactName: contactName,
+      },
+    });
     fetch(base + "/api/friends", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -29202,6 +29246,13 @@ function initChat() {
         return r.json();
       })
       .then(function (d) {
+        pokerDebugChatFriendAction("addFriendWithPrompt:response", {
+          targetUserId: targetUserId || "",
+          ok: !!(d && d.ok),
+          response: d || null,
+          isFriendAfterResponse:
+            typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
+        });
         if (d && d.ok) {
           if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
           if (typeof window.chatRefresh === "function") window.chatRefresh();
@@ -29213,11 +29264,20 @@ function initChat() {
         }
       })
       .catch(function () {
+        pokerDebugChatFriendAction("addFriendWithPrompt:error", {
+          targetUserId: targetUserId || "",
+          requestUrl: base + "/api/friends",
+        });
         pokerRemoveLocalFriendFromChatContacts(targetUserId);
         syncChatDialogPreviewAddFriendBtn();
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       })
       .finally(function () {
+        pokerDebugChatFriendAction("addFriendWithPrompt:finally", {
+          targetUserId: targetUserId || "",
+          isFriendAtFinally:
+            typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
+        });
         if (typeof onDone === "function") onDone();
       });
   }
@@ -29295,14 +29355,33 @@ function initChat() {
       "click",
       function (e) {
         var frB = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__friend") : null;
+        pokerDebugChatFriendAction("click:add:received", {
+          targetClassName: e.target && e.target.className ? String(e.target.className) : "",
+          foundButton: !!frB,
+          buttonClassName: frB && frB.className ? String(frB.className) : "",
+          contactsContainsButton: !!(frB && contactsEl.contains(frB)),
+        });
         if (!frB || !contactsEl.contains(frB)) return;
-        if (frB.classList && frB.classList.contains("chat-contact-swipe__friend--remove")) return;
+        if (frB.classList && frB.classList.contains("chat-contact-swipe__friend--remove")) {
+          pokerDebugChatFriendAction("click:add:skipRemoveButton", {
+            buttonClassName: frB.className ? String(frB.className) : "",
+          });
+          return;
+        }
         e.preventDefault();
         e.stopPropagation();
         var wrap = frB.closest(".chat-contact-swipe");
         var cbtn = wrap && wrap.querySelector(".chat-contact");
         var cid = cbtn && cbtn.dataset.chatId;
         var cnm = cbtn && cbtn.getAttribute("data-chat-name");
+        pokerDebugChatFriendAction("click:add:resolved", {
+          chatId: cid || "",
+          chatName: cnm || "",
+          isFriendNow: cbtn && cbtn.getAttribute("data-chat-friend") === "1",
+          wrapClassName: wrap && wrap.className ? String(wrap.className) : "",
+          contactButtonFound: !!cbtn,
+          chatGroup: cbtn && cbtn.getAttribute ? cbtn.getAttribute("data-chat-group") : "",
+        });
         if (!cid) return;
         closeOtherSwipePanels(null);
         if (typeof pokerChatAddFriendWithPrompt === "function") pokerChatAddFriendWithPrompt(cid, cnm || "", null);
@@ -29313,6 +29392,12 @@ function initChat() {
       "click",
       function (e) {
         var rmB = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__friend--remove") : null;
+        pokerDebugChatFriendAction("click:remove:received", {
+          targetClassName: e.target && e.target.className ? String(e.target.className) : "",
+          foundButton: !!rmB,
+          buttonClassName: rmB && rmB.className ? String(rmB.className) : "",
+          contactsContainsButton: !!(rmB && contactsEl.contains(rmB)),
+        });
         if (!rmB || !contactsEl.contains(rmB)) return;
         e.preventDefault();
         e.stopPropagation();
@@ -29320,9 +29405,24 @@ function initChat() {
         var cbtn = wrap && wrap.querySelector(".chat-contact");
         var cid = cbtn && cbtn.dataset.chatId;
         var prevName = cbtn && cbtn.getAttribute("data-chat-name");
+        pokerDebugChatFriendAction("click:remove:resolved", {
+          chatId: cid || "",
+          prevName: prevName || "",
+          isFriendNow: cbtn && cbtn.getAttribute("data-chat-friend") === "1",
+          wrapClassName: wrap && wrap.className ? String(wrap.className) : "",
+          contactButtonFound: !!cbtn,
+          hasBase: !!base,
+          base: base || "",
+        });
         if (!cid) return;
         closeOtherSwipePanels(null);
         pokerRemoveLocalFriendFromChatContacts(cid);
+        pokerDebugChatFriendAction("click:remove:afterOptimistic", {
+          chatId: cid || "",
+          isFriendAfterOptimistic:
+            typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(cid) : false,
+          requestUrl: base + "/api/friends",
+        });
         fetch(base + "/api/friends", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -29332,6 +29432,13 @@ function initChat() {
             return r.json();
           })
           .then(function (d) {
+            pokerDebugChatFriendAction("click:remove:response", {
+              chatId: cid || "",
+              ok: !!(d && d.ok),
+              response: d || null,
+              isFriendAfterResponse:
+                typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(cid) : false,
+            });
             if (d && d.ok) {
               if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
               if (typeof window.chatRefresh === "function") window.chatRefresh();
@@ -29341,6 +29448,10 @@ function initChat() {
             }
           })
           .catch(function () {
+            pokerDebugChatFriendAction("click:remove:error", {
+              chatId: cid || "",
+              requestUrl: base + "/api/friends",
+            });
             pokerApplyLocalFriendToChatContacts(cid, prevName || "");
             if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
