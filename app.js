@@ -15886,11 +15886,7 @@ document.addEventListener("click", function (e) {
 var telegramIosKeyboardRootLockActive = false;
 var telegramIosKeyboardRootLockRaf = null;
 function isTelegramIosKeyboardRootLockCapable() {
-  try {
-    return typeof isTelegramWebApp === "function" && isTelegramWebApp() && typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
-  } catch (eTgKbCap) {
-    return false;
-  }
+  return false;
 }
 function getTelegramIosKeyboardRootLockScrollPorts() {
   var ports = [];
@@ -15956,33 +15952,15 @@ function scheduleTelegramIosKeyboardRootLockSync() {
   });
 }
 function setTelegramIosKeyboardRootLock(active) {
-  try {
-    if (document.body && String(document.body.getAttribute("data-view") || "") === "chat") {
-      telegramIosKeyboardRootLockActive = false;
-      document.documentElement.classList.remove("tg-ios-keyboard-root-lock");
-      document.body.classList.remove("tg-ios-keyboard-root-lock");
-      document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
-      document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
-      return;
-    }
-  } catch (eTgChatRootLock) {}
-  if (!isTelegramIosKeyboardRootLockCapable()) return;
-  telegramIosKeyboardRootLockActive = !!active;
-  document.documentElement.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
-  document.body.classList.toggle("tg-ios-keyboard-root-lock", telegramIosKeyboardRootLockActive);
-  if (telegramIosKeyboardRootLockActive) {
-    syncTelegramIosKeyboardRootLockScroll();
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 40);
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 140);
-    setTimeout(syncTelegramIosKeyboardRootLockScroll, 320);
-  } else {
-    document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
-    document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
-    if (telegramIosKeyboardRootLockRaf != null) {
-      var caf = window.cancelAnimationFrame || clearTimeout;
-      caf(telegramIosKeyboardRootLockRaf);
-      telegramIosKeyboardRootLockRaf = null;
-    }
+  telegramIosKeyboardRootLockActive = false;
+  document.documentElement.classList.remove("tg-ios-keyboard-root-lock");
+  document.body.classList.remove("tg-ios-keyboard-root-lock");
+  document.documentElement.style.setProperty("--tg-ios-root-scroll-offset", "0px");
+  document.body.style.setProperty("--tg-ios-root-scroll-offset", "0px");
+  if (telegramIosKeyboardRootLockRaf != null) {
+    var caf = window.cancelAnimationFrame || clearTimeout;
+    caf(telegramIosKeyboardRootLockRaf);
+    telegramIosKeyboardRootLockRaf = null;
   }
 }
 window.addEventListener("scroll", function () {
@@ -16059,12 +16037,10 @@ window.addEventListener("resize", function () {
     keyboardLabUpdateMetrics("input");
   });
   textareaEl.addEventListener("focus", function () {
-    setTelegramIosKeyboardRootLock(true);
     keyboardLabEnsureTicker();
     keyboardLabUpdateMetrics("focus");
   });
   textareaEl.addEventListener("blur", function () {
-    setTelegramIosKeyboardRootLock(false);
     keyboardLabUpdateMetrics("blur");
   });
   textareaEl.addEventListener("touchstart", function () {
