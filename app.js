@@ -29178,6 +29178,8 @@ function initChat() {
       return;
     }
     var contactName = String(prompted).trim();
+    pokerApplyLocalFriendToChatContacts(targetUserId, contactName);
+    syncChatDialogPreviewAddFriendBtn();
     fetch(base + "/api/friends", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -29188,15 +29190,18 @@ function initChat() {
       })
       .then(function (d) {
         if (d && d.ok) {
-          pokerApplyLocalFriendToChatContacts(targetUserId, contactName);
           if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
           if (typeof window.chatRefresh === "function") window.chatRefresh();
           syncChatDialogPreviewAddFriendBtn();
         } else if (tg && tg.showAlert) {
+          pokerRemoveLocalFriendFromChatContacts(targetUserId);
+          syncChatDialogPreviewAddFriendBtn();
           tg.showAlert((d && d.error) || "Ошибка");
         }
       })
       .catch(function () {
+        pokerRemoveLocalFriendFromChatContacts(targetUserId);
+        syncChatDialogPreviewAddFriendBtn();
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
       })
       .finally(function () {
@@ -29300,8 +29305,10 @@ function initChat() {
         var wrap = rmB.closest(".chat-contact-swipe");
         var cbtn = wrap && wrap.querySelector(".chat-contact");
         var cid = cbtn && cbtn.dataset.chatId;
+        var prevName = cbtn && cbtn.getAttribute("data-chat-name");
         if (!cid) return;
         closeOtherSwipePanels(null);
+        pokerRemoveLocalFriendFromChatContacts(cid);
         fetch(base + "/api/friends", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -29312,14 +29319,15 @@ function initChat() {
           })
           .then(function (d) {
             if (d && d.ok) {
-              pokerRemoveLocalFriendFromChatContacts(cid);
               if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
               if (typeof window.chatRefresh === "function") window.chatRefresh();
             } else if (tg && tg.showAlert) {
+              pokerApplyLocalFriendToChatContacts(cid, prevName || "");
               tg.showAlert((d && d.error) || "Ошибка");
             }
           })
           .catch(function () {
+            pokerApplyLocalFriendToChatContacts(cid, prevName || "");
             if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       },
