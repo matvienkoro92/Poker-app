@@ -31192,6 +31192,7 @@ function initChat() {
        */
       function updateChatMessagesKeyboardPad() {
         logChatKeyboardDebug("pad-enter");
+        if (enforceTelegramChatDefaultComposerState()) return;
         if (isPassiveTelegramIosChatThread()) {
           clearChatMessagesKeyboardPad();
           logChatKeyboardDebug("pad-passive");
@@ -31431,15 +31432,44 @@ function initChat() {
         } catch (eDocVars) {}
       }
       window.__pokerClearChatKeyboardViewportState = clearChatKeyboardViewportState;
+      function isTelegramChatDefaultMode() {
+        try {
+          return (
+            typeof isTelegramWebApp === "function" &&
+            isTelegramWebApp() &&
+            document.body &&
+            String(document.body.getAttribute("data-view") || "") === "chat"
+          );
+        } catch (eTgChatDefault) {
+          return false;
+        }
+      }
+      function enforceTelegramChatDefaultComposerState() {
+        if (!isTelegramChatDefaultMode()) return false;
+        try {
+          clearChatKeyboardViewportState();
+        } catch (eTgDefKb) {}
+        try {
+          clearChatMessagesKeyboardPad();
+        } catch (eTgDefPad) {}
+        try {
+          stripChatInputAreaTransforms();
+        } catch (eTgDefTf) {}
+        try {
+          resetChatKeyboardDockRuntimeState();
+        } catch (eTgDefDock) {}
+        try {
+          var root = document.documentElement;
+          if (root && root.style) {
+            root.style.removeProperty("--chat-vv-inset");
+            root.style.removeProperty("--chat-ios-accessory-inset");
+          }
+        } catch (eTgDefVars) {}
+        return true;
+      }
       function setChatKeyboardOpen(open) {
         logChatKeyboardDebug(open ? "kb-open" : "kb-close");
-        if (
-          typeof isTelegramWebApp === "function" &&
-          isTelegramWebApp() &&
-          document.body &&
-          String(document.body.getAttribute("data-view") || "") === "chat"
-        ) {
-          clearChatKeyboardViewportState();
+        if (enforceTelegramChatDefaultComposerState()) {
           scrollDocumentToZero();
           return;
         }
@@ -31739,6 +31769,7 @@ function initChat() {
       }
       function setChatKeyboardOpenClasses(open) {
         try {
+          if (enforceTelegramChatDefaultComposerState()) return;
           if (open) {
             document.documentElement.classList.add("chat-keyboard-open");
             document.body.classList.add("chat-keyboard-open");
@@ -32223,6 +32254,7 @@ function initChat() {
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
+        if (enforceTelegramChatDefaultComposerState()) return;
         if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
           stripChatInputAreaTransforms();
           try {
@@ -32482,6 +32514,7 @@ function initChat() {
         }
       }
       function applyChatVisualViewportFallbackWithoutVv(doc) {
+        if (enforceTelegramChatDefaultComposerState()) return;
         var dvNoVv = String(document.body.getAttribute("data-view") || "");
         var useThreadDockFallback =
           isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
@@ -32533,6 +32566,7 @@ function initChat() {
       function syncPwaChatVisualViewportInset() {
         logChatKeyboardDebug("vv-sync-enter");
         var doc = document.documentElement;
+        if (enforceTelegramChatDefaultComposerState()) return;
         if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
           resetChatVisualViewportState({ clearPad: true, stripComposer: true, closeKeyboardState: true });
           return;
@@ -32865,6 +32899,7 @@ function initChat() {
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         collectChatOverscrollSnapshot("focus:start", focusTarget);
+        if (enforceTelegramChatDefaultComposerState()) return;
         try {
           if (typeof attachTelegramMiniAppChatThreadRootScrollLock === "function") {
             attachTelegramMiniAppChatThreadRootScrollLock();
