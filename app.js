@@ -31564,16 +31564,6 @@ function initChat() {
         } catch (eSbKb) {}
         /* Поднять ленту над композером/клавиатурой (не десктоп): после pad иначе «у низа» ложно ломается и низ остаётся под полем. */
         var shouldSnapAfterLift = !isChatPhysicalKeyboardContext() && nearBeforeLift;
-        try {
-          var isPwaIosNear =
-            typeof isTelegramWebApp === "function" &&
-            !isTelegramWebApp() &&
-            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
-            pokerPwaStandaloneForKeyboardInset() &&
-            typeof isIosLikeForChatViewport === "function" &&
-            isIosLikeForChatViewport();
-          if (isPwaIosNear) shouldSnapAfterLift = false;
-        } catch (ePwaNear) {}
         if (shouldSnapAfterLift) {
           var rafLift = window.requestAnimationFrame || function (fn) {
             setTimeout(fn, 0);
