@@ -31970,10 +31970,23 @@ function initChat() {
         } catch (eTmaRtOff) {}
       }
       function attachTelegramMiniAppChatThreadRootScrollLock() {
-        if (!isTelegramMiniAppChatThreadIos() || !isChatThreadComposerKeyboardDom()) return;
+        var allowTgIosRootLock =
+          typeof isChatThreadComposerKeyboardDom === "function" &&
+          isChatThreadComposerKeyboardDom() &&
+          (
+            isTelegramMiniAppChatThreadIos() ||
+            (
+              typeof isTelegramWebApp === "function" &&
+              isTelegramWebApp() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport()
+            )
+          );
+        if (!allowTgIosRootLock) return;
         detachTelegramMiniAppChatThreadRootScrollLock();
         var lockTick = function () {
           try {
+            if (typeof window.scrollTo === "function") window.scrollTo(0, 0);
             var se = document.scrollingElement;
             if (se && se.scrollTop !== 0) se.scrollTop = 0;
             if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
@@ -33237,6 +33250,11 @@ function initChat() {
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         collectChatOverscrollSnapshot("focus:start", focusTarget);
+        try {
+          if (typeof attachTelegramMiniAppChatThreadRootScrollLock === "function") {
+            attachTelegramMiniAppChatThreadRootScrollLock();
+          }
+        } catch (eRootLockOnFocus) {}
         if (isTelegramMiniAppChatThreadIos()) {
           setTelegramIosKeyboardRootLock(true);
           attachTelegramIosChatInputAreaDockGuard();
