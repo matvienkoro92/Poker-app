@@ -31011,8 +31011,8 @@ function initChat() {
             typeof isTelegramMiniAppChatThreadIos === "function" &&
             isTelegramMiniAppChatThreadIos();
           if (isThreadComposerDock) {
-            pad = Math.round(bh + gap + 10);
-            if (pad < 44) pad = 44;
+            pad = Math.round(bh + gap);
+            if (pad < 28) pad = 28;
           } else {
             pad = Math.round(bh + btm + gap);
             if (pad < 28) pad = 28;
@@ -31029,7 +31029,7 @@ function initChat() {
             if (isPwaIosPad) {
               pad = Math.max(28, Math.round(bh + screenSafeBottomPad + 28));
             } else if (isThreadComposerDock) {
-              pad = Math.max(pad, Math.round(bh + 14));
+              pad = Math.max(28, Math.round(bh + gap));
             } else {
               pad = Math.max(pad, Math.round(bh + screenSafeBottomPad + 24));
             }
