@@ -12447,6 +12447,12 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-top {
 .chat-contact-swipe__friend:active {
   background: rgba(0, 0, 0, 0.12);
 }
+.chat-contact-swipe__friend--remove {
+  background: rgba(127, 29, 29, 0.22);
+}
+.chat-contact-swipe__friend--remove:active {
+  background: rgba(127, 29, 29, 0.32);
+}
 .chat-contact-swipe__panel {
   position: relative;
   z-index: 1;
