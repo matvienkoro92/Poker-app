@@ -9500,6 +9500,9 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   align-items: flex-start;
   gap: 2px;
 }
+.chat-dialog-item--club .chat-dialog-item__label-wrap {
+  align-items: flex-start;
+}
 .chat-dialog-item__title-row {
   display: inline-flex;
   align-items: center;

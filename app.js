@@ -22660,10 +22660,12 @@ function initChat() {
 
   function syncClubChatRosterUi() {
     var title = document.getElementById("chatDialogClubTitle");
+    var titleMeta = document.getElementById("chatDialogClubParticipantsMeta");
     var sub = document.getElementById("chatGeneralHeaderRosterMeta");
     var access = clubChatAccess;
     if (access === "need_apply" || access === "pending") {
       if (title) setTextContentIfChanged(title, "Главный чат");
+      if (titleMeta) setTextContentIfChanged(titleMeta, "");
       if (sub) {
         sub.hidden = true;
         sub.textContent = "";
@@ -22674,13 +22676,15 @@ function initChat() {
     var t = c && c.participantsCount != null ? c.participantsCount : null;
     if (t == null) {
       if (title) setTextContentIfChanged(title, "Главный чат");
+      if (titleMeta) setTextContentIfChanged(titleMeta, "");
       if (sub) {
         sub.hidden = true;
         sub.textContent = "";
       }
       return;
     }
-    if (title) setTextContentIfChanged(title, "Главный чат. " + String(t) + " участника.");
+    if (title) setTextContentIfChanged(title, "Главный чат");
+    if (titleMeta) setTextContentIfChanged(titleMeta, String(t) + " участника");
     if (sub) {
       sub.textContent = "Участников: " + String(t);
       sub.hidden = false;
