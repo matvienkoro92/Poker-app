@@ -787,50 +787,6 @@ html.app--telegram-miniapp body[data-view="chat"] .chat-conv-peer-title-chip,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-group-add-btn {
   margin-top: 0 !important;
 }
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view {
-  --chat-general-floating-toolbar-h: 0px !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view {
-  --chat-general-floating-toolbar-h: 0px !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view > .chat-general-pinned-stack,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view > .chat-pinned-self,
-html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-html.app--telegram-miniapp body[data-view="chat"] .chat-list-view,
-html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-list,
-html.app--telegram-miniapp body[data-view="chat"] .chat-contacts {
-  scroll-padding-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-html.app--telegram-miniapp.app-view-chat,
-html.app--telegram-miniapp:has(body[data-view="chat"]) {
-  min-height: 100% !important;
-  height: 100% !important;
-}
-html.app--telegram-miniapp.app-view-chat #app.app,
-html.app--telegram-miniapp:has(body[data-view="chat"]) #app.app,
-html.app--telegram-miniapp #app.app:has(.view--active[data-view="chat"]) {
-  min-height: 100% !important;
-  height: 100% !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-html.app--telegram-miniapp .card:has(.view--active[data-view="chat"]) {
-  height: 100%;
-  max-height: none;
-}
-html.app--telegram-miniapp .card:has(.view--active[data-view="chat"]) .card__content,
-html.app--telegram-miniapp .view--active[data-view="chat"] {
-  height: 100%;
-}
-html.app--telegram-miniapp .chat-general-view .chat-messages,
-html.app--telegram-miniapp .chat-conv-view .chat-container .chat-messages {
-  padding-bottom: 8px;
-}
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;
@@ -3421,11 +3377,6 @@ html.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat
 html.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
 }
-/* Telegram Mini App: WKWebView уже сдвигает layout при IME — лишние +10px к padding-top «выдергивают» ленту относительно композера */
-html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages,
-html.app--telegram-miniapp.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
-  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
-}
 html.chat-keyboard-open .view--active[data-view="chat"] .chat-general-view .chat-messages > .chat-msg:last-child,
 html.chat-keyboard-open .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages > .chat-msg:last-child {
   margin-bottom: max(88px, calc(56px + env(safe-area-inset-bottom, 0px))) !important;
@@ -3437,12 +3388,6 @@ html.chat-keyboard-open {
 }
 html.chat-keyboard-open body {
   overflow: hidden !important;
-}
-html.app--telegram-miniapp.chat-keyboard-open.chat-keyboard-open--tma-flow {
-  overflow: visible !important;
-}
-html.app--telegram-miniapp.chat-keyboard-open.chat-keyboard-open--tma-flow body {
-  overflow: visible !important;
 }
 /* Клавиатура в чате (включая поиск в списке диалогов): таббар перекрывал поле ввода в PWA — скрываем всегда */
 body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
@@ -3605,36 +3550,6 @@ html.poker-ios-pwa body[data-view="chat"] .chat-conv-view .chat-container .chat-
   transform: none !important;
   margin-bottom: 0 !important;
   will-change: auto;
-}
-html.app--telegram-miniapp.chat-tma-ios-shell-native .view--active[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
-html.app--telegram-miniapp.chat-tma-ios-shell-native .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock,
-html.app--telegram-miniapp.chat-tma-ios-shell-native body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
-html.app--telegram-miniapp.chat-tma-ios-shell-native body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  width: auto !important;
-  max-width: none !important;
-  z-index: auto !important;
-  transform: none !important;
-}
-html.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-general-view .chat-input-area,
-html.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-container .chat-input-area {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  width: auto !important;
-  max-width: none !important;
-  z-index: auto !important;
-}
-html.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
-html.tg-ios-keyboard-root-lock body[data-view="chat"] .chat-container .chat-input-area.chat-input-area--vv-dock {
-  position: relative !important;
-  bottom: auto !important;
 }
 .chat-switcher-row {
   display: flex;
@@ -8565,15 +8480,6 @@ img.chat-contact__avatar {
   padding: 10px 40px 10px 14px;
   border-radius: 22px;
 }
-html.app--telegram-miniapp .view--active[data-view="chat"] .chat-input--textarea {
-  font-size: 16px;
-  line-height: 1.35;
-}
-html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-attach-wrap,
-html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-emoji-btn,
-html.app--telegram-miniapp.chat-tma-ios-composer-minimal .view--active[data-view="chat"] .chat-scroll-bottom-btn {
-  display: none !important;
-}
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
 }
@@ -11115,10 +11021,6 @@ button.chat-conv-group-add-btn[hidden] {
   padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + var(--chat-composer-edge-gap, 2px)));
   background-color: var(--chat-input-field-bg);
   background-image: none;
-}
-html.app--telegram-miniapp .chat-general-view .chat-input-area,
-html.app--telegram-miniapp .chat-container .chat-input-area {
-  padding-bottom: calc(12px + var(--chat-composer-edge-gap, 2px));
 }
 .chat-msg__delete {
   padding: 4px 8px;
@@ -29005,11 +28907,6 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   color: #fff7ed;
   font-weight: 700;
 }
-html.app--telegram-miniapp .chat-input-area--ios-overlay-gate .chat-input-wrap,
-html.app--telegram-miniapp .chat-input-area--ios-overlay-gate .chat-tma-ios-minimal-block {
-  opacity: 0.82;
-}
-
 /* Telegram chat parity with PWA: выравниваем ленту, диалоги и композер по PWA-правилам.
    Шапку Telegram не трогаем. В Telegram нет отдельной iOS accessory bar над клавиатурой. */
 html.app--telegram-miniapp body[data-view="chat"],
