@@ -13774,6 +13774,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   gap: 8px;
   align-items: center;
   padding: 6px 10px;
+  cursor: pointer;
 }
 .home-freeroll-schedule__row + .home-freeroll-schedule__row {
   border-top: 1px solid rgba(148, 163, 184, 0.16);
@@ -13808,11 +13809,106 @@ html.app-view-home .feature--rating-spring-promo:hover,
   content: "";
 }
 .home-freeroll-schedule__row--next {
-  background: rgba(249, 115, 22, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.22);
+  background: rgba(249, 115, 22, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.38);
 }
 .home-freeroll-schedule__row--next .home-freeroll-schedule__day {
-  color: #fdba74;
+  color: #ffedd5;
+}
+.home-freeroll-schedule__row:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.75);
+  outline-offset: -2px;
+}
+.home-freeroll-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+}
+.home-freeroll-modal--hidden {
+  display: none !important;
+}
+.home-freeroll-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(6px);
+}
+.home-freeroll-modal__panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.96));
+  box-shadow: 0 18px 60px rgba(2, 6, 23, 0.45);
+  box-sizing: border-box;
+}
+.home-freeroll-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.home-freeroll-modal__day {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fb923c;
+}
+.home-freeroll-modal__title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #fff7ed;
+}
+.home-freeroll-modal__meta {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fde68a;
+}
+.home-freeroll-modal__desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+.home-freeroll-modal__actions {
+  margin-top: 16px;
+}
+.home-freeroll-modal__play {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+[data-theme="light"] .home-freeroll-schedule__row--next {
+  background: rgba(249, 115, 22, 0.16);
+}
+[data-theme="light"] .home-freeroll-modal__panel {
+  background: linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.96));
+  border-color: rgba(249, 115, 22, 0.3);
+}
+[data-theme="light"] .home-freeroll-modal__title {
+  color: #7c2d12;
+}
+[data-theme="light"] .home-freeroll-modal__desc {
+  color: #334155;
 }
 
 .schedule-freeroll-name {

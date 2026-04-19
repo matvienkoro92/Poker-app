@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.855">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v29" data-app-version="1.856">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -6349,6 +6349,20 @@
       <button type="button" class="winter-rating-lightbox__prev" aria-label="Предыдущий скрин">‹</button>
       <button type="button" class="winter-rating-lightbox__next" aria-label="Следующий скрин">›</button>
       <span class="winter-rating-lightbox__counter" aria-live="polite"></span>
+    </div>
+
+    <div class="home-freeroll-modal home-freeroll-modal--hidden" id="homeFreerollModal" aria-hidden="true">
+      <div class="home-freeroll-modal__backdrop" data-home-freeroll-close="1"></div>
+      <div class="home-freeroll-modal__panel" role="dialog" aria-labelledby="homeFreerollModalTitle">
+        <button type="button" class="home-freeroll-modal__close" data-home-freeroll-close="1" aria-label="Закрыть">×</button>
+        <p class="home-freeroll-modal__day" id="homeFreerollModalDay">—</p>
+        <h3 class="home-freeroll-modal__title" id="homeFreerollModalTitle">Фриролл</h3>
+        <p class="home-freeroll-modal__meta" id="homeFreerollModalMeta">—</p>
+        <p class="home-freeroll-modal__desc" id="homeFreerollModalDesc">—</p>
+        <div class="home-freeroll-modal__actions">
+          <button type="button" class="home-freeroll-modal__play" id="homeFreerollModalPlayBtn">Сыграть</button>
+        </div>
+      </div>
     </div>
 
     <div id="chatClubAccessModal" class="chat-club-access-modal chat-club-access-modal--hidden" aria-hidden="true">

@@ -39629,11 +39629,11 @@ var NEXT_HOME_FREEROLL = { name: "Фриролл", buyin: "0₽", guarantee: "1 
 /** Пн / Вт / Чт 17:00 МСК, X-poker: вход 0, приз 100 000₽. */
 var NEXT_HOME_XPOKER_FREEROLL = { name: "Фриролл X-poker", buyin: "0₽", guarantee: "100 000₽" };
 var HOME_FREEROLL_SCHEDULE = [
-  { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Вт", dow: 2, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0 },
-  { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0 }
+  { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Вт", dow: 2, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Главный недельный фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, гарантия 1 000 000₽." },
+  { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, призовой фонд 100 000₽." }
 ];
 /** 17:00 МСК = 14:00 UTC; конец регистрации — через 3 ч (как у слота 18:00→21:00 МСК). */
 var XPOKER_FREEROLL_START_UTC_HOUR = 14;
@@ -39678,6 +39678,8 @@ function renderHomeFreerollSchedule() {
   HOME_FREEROLL_SCHEDULE.forEach(function (item) {
     var row = document.createElement("div");
     row.className = "home-freeroll-schedule__row";
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
     if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
       row.classList.add("home-freeroll-schedule__row--next");
     }
@@ -39696,12 +39698,70 @@ function renderHomeFreerollSchedule() {
     main.appendChild(meta);
     row.appendChild(day);
     row.appendChild(main);
+    row.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openHomeFreerollModal(item);
+    });
+    row.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openHomeFreerollModal(item);
+      }
+    });
     el.appendChild(row);
   });
 }
 
+function openHomeFreerollModal(item) {
+  var modal = document.getElementById("homeFreerollModal");
+  if (!modal || !item) return;
+  var dayEl = document.getElementById("homeFreerollModalDay");
+  var titleEl = document.getElementById("homeFreerollModalTitle");
+  var metaEl = document.getElementById("homeFreerollModalMeta");
+  var descEl = document.getElementById("homeFreerollModalDesc");
+  var playBtn = document.getElementById("homeFreerollModalPlayBtn");
+  if (dayEl) dayEl.textContent = item.day;
+  if (titleEl) titleEl.textContent = "Фриролл";
+  if (metaEl) metaEl.textContent = item.title + " · " + item.time + " · " + item.room;
+  if (descEl) descEl.textContent = item.desc || "";
+  if (playBtn) playBtn.dataset.roomPage = item.roomPage || "poker21";
+  modal.classList.remove("home-freeroll-modal--hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeHomeFreerollModal() {
+  var modal = document.getElementById("homeFreerollModal");
+  if (!modal) return;
+  modal.classList.add("home-freeroll-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function initHomeFreerollModal() {
+  var modal = document.getElementById("homeFreerollModal");
+  var playBtn = document.getElementById("homeFreerollModalPlayBtn");
+  if (!modal || modal.__initedHomeFreeroll) return;
+  modal.__initedHomeFreeroll = true;
+  modal.addEventListener("click", function (e) {
+    var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-freeroll-close]") : null;
+    if (closeBtn) {
+      e.preventDefault();
+      closeHomeFreerollModal();
+    }
+  });
+  if (playBtn) {
+    playBtn.addEventListener("click", function () {
+      var roomPage = playBtn.dataset.roomPage || "poker21";
+      closeHomeFreerollModal();
+      if (typeof setView === "function") setView("download");
+      if (typeof setDownloadPage === "function") setDownloadPage(roomPage);
+    });
+  }
+}
+
 function updateTournamentDayBlock() {
   try {
+    initHomeFreerollModal();
     renderHomeFreerollSchedule();
   } catch (eHomeFreerolls) {}
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
