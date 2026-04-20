@@ -15997,16 +15997,44 @@ window.addEventListener("resize", function () {
       var shell = document.getElementById("app");
       var shellRect = shell && shell.getBoundingClientRect ? shell.getBoundingClientRect() : null;
       var scrollEl = document.scrollingElement || document.documentElement || document.body;
+      var bodyRect = document.body && document.body.getBoundingClientRect ? document.body.getBoundingClientRect() : null;
+      var docRect = document.documentElement && document.documentElement.getBoundingClientRect ? document.documentElement.getBoundingClientRect() : null;
+      var safeBottom = 0;
+      var chatSafeBottom = 0;
+      var rootStyle = null;
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      try {
+        rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+        safeBottom = Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("padding-bottom")) || 0);
+        chatSafeBottom = Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0);
+      } catch (eKbLabCss) {}
       metricsEl.textContent = [
         "src: " + String(source || "tick"),
         "ih: " + (window.innerHeight || 0) +
-          " vv: " + (vv ? Math.round(Number(vv.height) || 0) : 0) + "/" + (vv ? Math.round(Number(vv.offsetTop) || 0) : 0),
+          " iw: " + (window.innerWidth || 0),
+        "vv: " +
+          (vv ? Math.round(Number(vv.height) || 0) : 0) + "/" +
+          (vv ? Math.round(Number(vv.offsetTop) || 0) : 0) + "/" +
+          (vv ? Math.round(Number(vv.pageTop) || 0) : 0) + "/" +
+          (vv ? Math.round(Number(vv.scale) || 0) : 0),
         "view: " + Math.round(viewRect.top) + "+" + Math.round(viewRect.height),
         "cmp: " + Math.round(composerRect.top) + "+" + Math.round(composerRect.height) +
           " ta: " + Math.round(taRect.top) + "+" + Math.round(taRect.height),
         "shell: " + (shellRect ? Math.round(shellRect.top) + "+" + Math.round(shellRect.height) : "n/a"),
-        "scroll: " + Math.round((scrollEl && scrollEl.scrollTop) || 0) +
-          " active: " + keyboardLabActiveLabel()
+        "body/doc: " +
+          (bodyRect ? Math.round(bodyRect.top) + "+" + Math.round(bodyRect.height) : "n/a") +
+          " / " +
+          (docRect ? Math.round(docRect.top) + "+" + Math.round(docRect.height) : "n/a"),
+        "scroll: " +
+          Math.round((scrollEl && scrollEl.scrollTop) || 0) +
+          " winY: " + Math.round(window.scrollY || 0),
+        "tg: " +
+          (tg ? "1" : "0") +
+          " vh/vsh: " +
+          (tg ? Math.round(Number(tg.viewportHeight) || 0) : 0) + "/" +
+          (tg ? Math.round(Number(tg.viewportStableHeight) || 0) : 0),
+        "css: safe=" + safeBottom + " chatSafe=" + chatSafeBottom,
+        "active: " + keyboardLabActiveLabel()
       ].join("\n");
     } catch (eKbLabMetrics) {
       metricsEl.textContent = "keyboard-lab metrics error";
