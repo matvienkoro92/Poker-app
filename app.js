@@ -32219,6 +32219,100 @@ function initChat() {
       function shouldUseNativeTelegramIosChatComposerFlow(focusTarget) {
         return false;
       }
+      function getTelegramChatRootShiftPx() {
+        var shift = 0;
+        try {
+          shift = Math.max(shift, Math.round(window.scrollY || 0));
+        } catch (eTgShiftWin) {}
+        try {
+          var scrollEl = document.scrollingElement || document.documentElement || document.body;
+          shift = Math.max(shift, Math.round((scrollEl && scrollEl.scrollTop) || 0));
+        } catch (eTgShiftDoc) {}
+        try {
+          var appEl = document.getElementById("app");
+          if (appEl && appEl.getBoundingClientRect) {
+            var appRect = appEl.getBoundingClientRect();
+            shift = Math.max(shift, Math.round(Math.max(0, -(appRect.top || 0))));
+          }
+        } catch (eTgShiftApp) {}
+        try {
+          if (document.body && document.body.getBoundingClientRect) {
+            var bodyRect = document.body.getBoundingClientRect();
+            shift = Math.max(shift, Math.round(Math.max(0, -(bodyRect.top || 0))));
+          }
+        } catch (eTgShiftBody) {}
+        return Math.max(0, shift);
+      }
+      function clearTelegramChatRootShiftCompensation() {
+        [generalView, convView].forEach(function (node) {
+          if (!node || !node.style) return;
+          try {
+            node.style.removeProperty("transform");
+            node.style.removeProperty("will-change");
+          } catch (eTgShiftClear) {}
+        });
+        window.__pokerTelegramChatRootShiftCompensationActive = false;
+      }
+      function applyTelegramChatRootShiftCompensation() {
+        if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+          clearTelegramChatRootShiftCompensation();
+          return;
+        }
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") {
+          clearTelegramChatRootShiftCompensation();
+          return;
+        }
+        var shiftPx = getTelegramChatRootShiftPx();
+        var target =
+          chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden")
+            ? convView
+            : generalView && !generalView.classList.contains("chat-general-view--hidden")
+              ? generalView
+              : null;
+        [generalView, convView].forEach(function (node) {
+          if (!node || !node.style) return;
+          if (node === target && shiftPx > 8) {
+            try {
+              node.style.setProperty("transform", "translateY(" + shiftPx + "px)", "important");
+              node.style.setProperty("will-change", "transform");
+            } catch (eTgShiftApply) {}
+          } else {
+            try {
+              node.style.removeProperty("transform");
+              node.style.removeProperty("will-change");
+            } catch (eTgShiftIdle) {}
+          }
+        });
+        window.__pokerTelegramChatRootShiftCompensationActive = !!(target && shiftPx > 8);
+      }
+      function ensureTelegramChatRootShiftCompensationBindings() {
+        if (window.__pokerTelegramChatRootShiftCompensationBound) return;
+        window.__pokerTelegramChatRootShiftCompensationBound = true;
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (!window.__pokerTelegramChatRootShiftCompensationActive) return;
+            applyTelegramChatRootShiftCompensation();
+          },
+          true
+        );
+        window.addEventListener("resize", function () {
+          if (!window.__pokerTelegramChatRootShiftCompensationActive) return;
+          applyTelegramChatRootShiftCompensation();
+        });
+        try {
+          if (window.visualViewport && window.visualViewport.addEventListener) {
+            window.visualViewport.addEventListener("resize", function () {
+              if (!window.__pokerTelegramChatRootShiftCompensationActive) return;
+              applyTelegramChatRootShiftCompensation();
+            });
+            window.visualViewport.addEventListener("scroll", function () {
+              if (!window.__pokerTelegramChatRootShiftCompensationActive) return;
+              applyTelegramChatRootShiftCompensation();
+            });
+          }
+        } catch (eTgShiftBindVv) {}
+      }
       function getTelegramMiniAppChatThreadFocusSession() {
         var session = window.__pokerChatTmaThreadFocusSession;
         if (!session || typeof session !== "object") {
@@ -33007,6 +33101,12 @@ function initChat() {
             clearChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
           } catch (eTgFocusClear) {}
+          try {
+            ensureTelegramChatRootShiftCompensationBindings();
+            applyTelegramChatRootShiftCompensation();
+            setTimeout(applyTelegramChatRootShiftCompensation, 60);
+            setTimeout(applyTelegramChatRootShiftCompensation, 180);
+          } catch (eTgShiftFocus) {}
           collectChatOverscrollSnapshot("focus:telegram-native", focusTarget);
           return;
         }
@@ -33329,6 +33429,9 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         logChatKeyboardDebug("blur");
+        try {
+          clearTelegramChatRootShiftCompensation();
+        } catch (eTgShiftBlur) {}
         if (isTelegramMiniAppChatThreadIos()) {
           setTelegramIosKeyboardRootLock(false);
         }
