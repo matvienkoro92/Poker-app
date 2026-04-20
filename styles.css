@@ -11928,6 +11928,37 @@ html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view,
 html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view {
   --chat-general-floating-toolbar-h: 0px !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages-wrap {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  min-height: 0 !important;
+  max-height: none !important;
+  overscroll-behavior-y: contain !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages,

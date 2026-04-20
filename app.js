@@ -21899,7 +21899,11 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    return false;
+    try {
+      return typeof isTelegramWebApp === "function" && isTelegramWebApp();
+    } catch (eDbgFlag) {
+      return false;
+    }
   }
   function isChatKeyboardDebugTarget(node) {
     try {
@@ -21978,13 +21982,37 @@ function initChat() {
       var vv = window.visualViewport || null;
       var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       var active = document.activeElement || null;
+      var appEl = document.getElementById("app");
+      var appRect = appEl && appEl.getBoundingClientRect ? appEl.getBoundingClientRect() : null;
+      var bodyRect = document.body && document.body.getBoundingClientRect ? document.body.getBoundingClientRect() : null;
+      var docRect = document.documentElement && document.documentElement.getBoundingClientRect ? document.documentElement.getBoundingClientRect() : null;
+      var container =
+        area && area.closest
+          ? area.closest(".chat-container, .chat-general-view, .chat-dialogs-view")
+          : null;
+      var containerRect = container && container.getBoundingClientRect ? container.getBoundingClientRect() : null;
+      var safeBottom = 0;
+      try {
+        var rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+        safeBottom = Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0);
+      } catch (eDbgSafe) {}
       var geom = getChatKeyboardDebugRenderedInfo(area, wrap, ta, msgs) || {};
       return {
         ih: window.innerHeight || 0,
+        iw: window.innerWidth || 0,
         vvh: vv ? Math.round(Number(vv.height) || 0) : 0,
         vvTop: vv ? Math.round(Number(vv.offsetTop) || 0) : 0,
+        vvPageTop: vv ? Math.round(Number(vv.pageTop) || 0) : 0,
         tgVh: tw ? Math.round(Number(tw.viewportHeight) || 0) : 0,
         tgVs: tw ? Math.round(Number(tw.viewportStableHeight) || 0) : 0,
+        appTop: appRect ? Math.round(appRect.top) : 0,
+        appH: appRect ? Math.round(appRect.height) : 0,
+        bodyTop: bodyRect ? Math.round(bodyRect.top) : 0,
+        bodyH: bodyRect ? Math.round(bodyRect.height) : 0,
+        docTop: docRect ? Math.round(docRect.top) : 0,
+        docH: docRect ? Math.round(docRect.height) : 0,
+        contTop: containerRect ? Math.round(containerRect.top) : 0,
+        contH: containerRect ? Math.round(containerRect.height) : 0,
         areaTop: geom.areaTop || 0,
         areaH: geom.areaH || 0,
         wrapTop: geom.wrapTop || 0,
@@ -21996,8 +22024,11 @@ function initChat() {
         areaPos: geom.areaPos || "",
         areaBottom: geom.areaBottom || "",
         areaTransform: geom.areaTransform || "",
+        safeBottom: safeBottom,
+        winY: Math.round(window.scrollY || 0),
         active: getChatKeyboardDebugNodeLabel(active),
         areaNode: getChatKeyboardDebugNodeLabel(area),
+        containerNode: getChatKeyboardDebugNodeLabel(container),
         wrapNode: getChatKeyboardDebugNodeLabel(wrap),
         taNode: getChatKeyboardDebugNodeLabel(ta),
         htmlKb: document.documentElement.classList.contains("chat-keyboard-open") ? 1 : 0,
@@ -22014,11 +22045,17 @@ function initChat() {
     var lines = [];
     if (snap) {
       lines.push(
-        "ih:" + snap.ih +
-          " vv:" + snap.vvh + "/" + snap.vvTop +
+        "ih:" + snap.ih + " iw:" + snap.iw +
+          " vv:" + snap.vvh + "/" + snap.vvTop + "/" + snap.vvPageTop +
           " tg:" + snap.tgVh + "/" + snap.tgVs
       );
       lines.push(
+        "app:" + snap.appTop + "+" + snap.appH +
+          " body:" + snap.bodyTop + "+" + snap.bodyH +
+          " doc:" + snap.docTop + "+" + snap.docH
+      );
+      lines.push(
+        "cont:" + snap.contTop + "+" + snap.contH +
         "area:" + snap.areaTop + "+" + snap.areaH +
           " wrap:" + snap.wrapTop + "+" + snap.wrapH +
           " ta:" + snap.taTop + "+" + snap.taH
@@ -22027,11 +22064,13 @@ function initChat() {
         "pos:" + snap.areaPos +
           " bottom:" + snap.areaBottom +
           " pad:" + snap.msgPad +
-          " scr:" + snap.msgScroll
+          " scr:" + snap.msgScroll +
+          " winY:" + snap.winY
       );
       lines.push(
         "tr:" + snap.areaTransform +
-          " kb:" + snap.htmlKb + "/" + snap.bodyKb
+          " kb:" + snap.htmlKb + "/" + snap.bodyKb +
+          " safe:" + snap.safeBottom
       );
       lines.push(
         "act:" + snap.active
@@ -22039,12 +22078,16 @@ function initChat() {
       lines.push(
         "areaN:" + snap.areaNode
       );
+      lines.push(
+        "contN:" + snap.containerNode
+      );
     }
     tail.forEach(function (item) {
       lines.push(item);
     });
     [chatGeneralKeyboardDebugEl, chatPersonalKeyboardDebugEl].forEach(function (panel) {
       if (!panel) return;
+      panel.hidden = false;
       panel.setAttribute("aria-hidden", "false");
       panel.textContent = lines.join("\n");
     });
