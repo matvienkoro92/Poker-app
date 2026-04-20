@@ -5353,12 +5353,14 @@ textarea.roman-task-planner__input {
 }
 .roman-task-planner__list--stacked,
 .roman-task-planner-modal .roman-task-planner__list--stacked {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 8px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(148, 163, 184, 0.12);
   box-sizing: border-box;
-  max-height: min(48vh, 360px);
+  max-height: none;
 }
 [data-theme="light"] .roman-task-planner__list--stacked,
 [data-theme="light"] .roman-task-planner-modal .roman-task-planner__list--stacked {
