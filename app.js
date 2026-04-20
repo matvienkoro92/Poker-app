@@ -22354,6 +22354,24 @@ function initChat() {
     }
     ensureTelegramIosMinimalComposerBlock(chatGeneralInputArea, chatGeneralComposerMount, generalSendBtn);
     ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
+    try {
+      if (chatComposerPool) {
+        chatComposerPool.setAttribute("hidden", "hidden");
+        chatComposerPool.setAttribute("aria-hidden", "true");
+      }
+      if (chatSharedComposerEl) {
+        chatSharedComposerEl.value = "";
+        chatSharedComposerEl.blur();
+        chatSharedComposerEl.disabled = true;
+        chatSharedComposerEl.setAttribute("tabindex", "-1");
+      }
+    } catch (eTgDedicatedPool) {}
+  }
+  function getDirectTelegramChatComposer(mode) {
+    if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) return null;
+    if (mode === "general") return chatGeneralComposerEl || null;
+    if (mode === "personal") return chatPersonalComposerEl || null;
+    return null;
   }
   function shouldUseTelegramIosComposeOverlay() {
     return false;
@@ -22674,6 +22692,13 @@ function initChat() {
   }
 
   function flushChatComposerToDrafts() {
+    var directGeneralComposer = getDirectTelegramChatComposer("general");
+    var directPersonalComposer = getDirectTelegramChatComposer("personal");
+    if (directGeneralComposer || directPersonalComposer) {
+      if (directGeneralComposer) chatComposerDrafts.general = directGeneralComposer.value != null ? String(directGeneralComposer.value) : "";
+      if (directPersonalComposer) chatComposerDrafts.personal = directPersonalComposer.value != null ? String(directPersonalComposer.value) : "";
+      return;
+    }
     if (!chatComposerEl) return;
     try {
       if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
@@ -22690,6 +22715,8 @@ function initChat() {
   }
   /** Текст для отправки: сначала реальный родитель textarea в DOM (флажок chatComposerMounted иногда рассинхронен с mount). */
   function getChatGeneralText() {
+    var directComposer = getDirectTelegramChatComposer("general");
+    if (directComposer) return directComposer.value != null ? String(directComposer.value) : "";
     if (!chatComposerEl) return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
     try {
       if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
@@ -22700,6 +22727,8 @@ function initChat() {
     return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
   }
   function getChatPersonalText() {
+    var directComposer = getDirectTelegramChatComposer("personal");
+    if (directComposer) return directComposer.value != null ? String(directComposer.value) : "";
     if (!chatComposerEl) return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
     try {
       if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
@@ -22750,6 +22779,8 @@ function initChat() {
         chatComposerEl.disabled = false;
         chatComposerEl.removeAttribute("tabindex");
         chatPersonalComposerEl.setAttribute("tabindex", "-1");
+        chatSharedComposerEl.setAttribute("tabindex", "-1");
+        chatSharedComposerEl.disabled = true;
       } else if (nextMounted === "personal") {
         chatComposerEl = chatPersonalComposerEl;
         chatComposerEl.placeholder = "Сообщение...";
@@ -22758,12 +22789,14 @@ function initChat() {
         chatComposerEl.disabled = false;
         chatComposerEl.removeAttribute("tabindex");
         chatGeneralComposerEl.setAttribute("tabindex", "-1");
+        chatSharedComposerEl.setAttribute("tabindex", "-1");
+        chatSharedComposerEl.disabled = true;
       } else {
-        chatComposerEl = chatSharedComposerEl;
+        chatComposerEl = chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
         chatSharedComposerEl.value = "";
         chatSharedComposerEl.placeholder = "";
         chatSharedComposerEl.blur();
-        chatSharedComposerEl.disabled = false;
+        chatSharedComposerEl.disabled = true;
         chatSharedComposerEl.setAttribute("tabindex", "-1");
         chatGeneralComposerEl.setAttribute("tabindex", "-1");
         chatPersonalComposerEl.setAttribute("tabindex", "-1");
