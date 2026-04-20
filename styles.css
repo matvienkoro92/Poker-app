@@ -745,6 +745,25 @@ html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top-inner {
   word-break: break-word;
   overflow: hidden;
 }
+html.app--telegram-miniapp .chat-keyboard-debug,
+html.poker-telegram-miniapp .chat-keyboard-debug {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 52px);
+  left: 8px;
+  right: 8px;
+  z-index: 10050;
+  margin: 0;
+  max-height: min(34vh, 220px);
+  overflow: auto;
+  pointer-events: none;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+html.app--telegram-miniapp #chatGeneralKeyboardDebug,
+html.poker-telegram-miniapp #chatGeneralKeyboardDebug,
+html.app--telegram-miniapp #chatPersonalKeyboardDebug,
+html.poker-telegram-miniapp #chatPersonalKeyboardDebug {
+  border-radius: 12px;
+}
 /* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
 html.app-view-chat .bottom-nav {
   position: fixed;
