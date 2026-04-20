@@ -758,6 +758,10 @@ html.poker-telegram-miniapp .chat-keyboard-debug {
   pointer-events: none;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
+html.app--telegram-miniapp .chat-keyboard-debug--floating,
+html.poker-telegram-miniapp .chat-keyboard-debug--floating {
+  display: block !important;
+}
 html.app--telegram-miniapp #chatGeneralKeyboardDebug,
 html.poker-telegram-miniapp #chatGeneralKeyboardDebug,
 html.app--telegram-miniapp #chatPersonalKeyboardDebug,

@@ -21641,6 +21641,20 @@ function initChat() {
   var chatKeyboardDebugLastSnapshotKey = "";
   var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
+  function ensureChatKeyboardDebugFloatingPanel() {
+    if (chatKeyboardDebugPanel && chatKeyboardDebugPanel.parentNode) return chatKeyboardDebugPanel;
+    if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) return null;
+    try {
+      chatKeyboardDebugPanel = document.createElement("div");
+      chatKeyboardDebugPanel.id = "chatKeyboardDebugFloatingPanel";
+      chatKeyboardDebugPanel.className = "chat-keyboard-debug chat-keyboard-debug--floating";
+      chatKeyboardDebugPanel.setAttribute("aria-hidden", "false");
+      document.body.appendChild(chatKeyboardDebugPanel);
+      return chatKeyboardDebugPanel;
+    } catch (eDbgFloatCreate) {
+      return null;
+    }
+  }
   var chatIosComposeOverlay = document.getElementById("chatIosComposeOverlay");
   var chatIosComposeOverlayBackdrop = document.getElementById("chatIosComposeOverlayBackdrop");
   var chatIosComposeOverlayClose = document.getElementById("chatIosComposeOverlayClose");
@@ -22085,6 +22099,12 @@ function initChat() {
     tail.forEach(function (item) {
       lines.push(item);
     });
+    var floatingPanel = ensureChatKeyboardDebugFloatingPanel();
+    if (floatingPanel) {
+      floatingPanel.textContent = lines.join("\n");
+      floatingPanel.hidden = false;
+      floatingPanel.setAttribute("aria-hidden", "false");
+    }
     [chatGeneralKeyboardDebugEl, chatPersonalKeyboardDebugEl].forEach(function (panel) {
       if (!panel) return;
       panel.hidden = false;
