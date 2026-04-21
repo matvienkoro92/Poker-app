@@ -11969,12 +11969,12 @@ html.poker-telegram-miniapp body[data-view="chat"]::before {
   height: calc(env(safe-area-inset-top, 0px) + 160px);
   background: var(--overscroll-canvas);
   pointer-events: none;
-  z-index: 0;
+  z-index: 10020;
 }
 html.app--telegram-miniapp body[data-view="chat"] #app.app,
 html.poker-telegram-miniapp body[data-view="chat"] #app.app {
   position: relative;
-  z-index: 1;
+  z-index: 10021;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view,
