@@ -22909,7 +22909,7 @@ function initChat() {
     if (!chatSharedComposerEl || !chatComposerPool) return;
     mode = mode || "detached";
     var nextMounted = mode === "general" || mode === "personal" ? mode : "detached";
-    var useDedicated = shouldUseDedicatedTelegramIosChatComposer() && ensureTelegramDedicatedChatComposers();
+    var useDedicated = (nextMounted === "general" || nextMounted === "personal") && ensureTelegramDedicatedChatComposers();
     if (useDedicated) {
       flushChatComposerToDrafts();
       chatComposerMounted = nextMounted;
@@ -31732,6 +31732,10 @@ function initChat() {
       }
       function setChatKeyboardOpen(open) {
         logChatKeyboardDebug(open ? "kb-open" : "kb-close");
+        if (open && hardDisableChatComposerViewportLift(document.activeElement, "kb:hard-disabled")) {
+          scrollDocumentToZero();
+          return;
+        }
         if (enforceTelegramChatDefaultComposerState()) {
           scrollDocumentToZero();
           return;
@@ -32351,6 +32355,63 @@ function initChat() {
         var cv = convView && !convView.classList.contains("chat-conv-view--hidden");
         return !!(gen || cv);
       }
+      function isHardDisabledChatComposerFlowTarget(focusTarget) {
+        if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+        var target = focusTarget || document.activeElement;
+        if (!target) return false;
+        try {
+          if (target === chatGeneralComposerEl || target === chatPersonalComposerEl) return true;
+          var activeArea =
+            chatActiveTab === "personal"
+              ? document.getElementById("chatPersonalInputArea") || (convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null)
+              : document.getElementById("chatGeneralInputArea");
+          if (activeArea && activeArea.contains && activeArea.contains(target)) return true;
+        } catch (eHardChatTarget) {}
+        return false;
+      }
+      function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
+        if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
+        try {
+          clearPendingChatKeyboardDismissTimers();
+          resetChatKeyboardDockRuntimeState();
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = 0;
+        } catch (eHardTgReset) {}
+        try {
+          window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
+        } catch (eHardSettle) {}
+        try {
+          if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
+            window.__pokerChatDetachVisualViewportListeners();
+          }
+        } catch (eHardDetach) {}
+        try {
+          setChatKeyboardOpenClasses(false);
+          clearChatMessagesKeyboardPad();
+          hardResetTelegramChatMessagesKeyboardPad();
+          stripChatInputAreaTransforms();
+        } catch (eHardClear) {}
+        try {
+          clearTelegramChatRootShiftCompensation();
+          ensureTelegramChatRootShiftCompensationBindings();
+          applyTelegramChatRootShiftCompensation();
+          setTimeout(applyTelegramChatRootShiftCompensation, 60);
+          setTimeout(applyTelegramChatRootShiftCompensation, 180);
+        } catch (eHardShift) {}
+        try {
+          if (chatSharedComposerEl) {
+            chatSharedComposerEl.blur();
+            chatSharedComposerEl.disabled = true;
+            chatSharedComposerEl.hidden = true;
+            chatSharedComposerEl.setAttribute("tabindex", "-1");
+            chatSharedComposerEl.setAttribute("aria-hidden", "true");
+            chatSharedComposerEl.style.setProperty("display", "none", "important");
+            chatSharedComposerEl.style.setProperty("pointer-events", "none", "important");
+          }
+        } catch (eHardShared) {}
+        collectChatOverscrollSnapshot(stageLabel || "focus:hard-disabled", focusTarget);
+        return true;
+      }
       /** Зазор между низом полосы ввода и верхом клавиатуры (TMA — ровно 5px по UX). */
       function getChatComposerKeyboardGapPx() {
         if (isTelegramChatRuntime()) return 5;
@@ -32433,7 +32494,11 @@ function initChat() {
         window.__pokerTelegramChatRootShiftCompensationActive = false;
       }
       function applyTelegramChatRootShiftCompensation() {
-        if (!isTelegramChatRuntime()) {
+        var hardChatTarget = false;
+        try {
+          hardChatTarget = isHardDisabledChatComposerFlowTarget();
+        } catch (eHardShiftTarget) {}
+        if (!isTelegramChatRuntime() && !hardChatTarget) {
           clearTelegramChatRootShiftCompensation();
           return;
         }
@@ -32619,6 +32684,7 @@ function initChat() {
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
         collectChatOverscrollSnapshot("dock:enter", { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
+        if (hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime()) {
           stripChatInputAreaTransforms();
@@ -32929,6 +32995,10 @@ function initChat() {
         logChatKeyboardDebug("vv-sync-enter");
         collectChatOverscrollSnapshot("vv:enter");
         var doc = document.documentElement;
+        if (hardDisableChatComposerViewportLift(document.activeElement, "vv:hard-disabled")) {
+          logChatKeyboardDebug("vv-sync-hard-disabled");
+          return;
+        }
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime()) {
           clearChatMessagesKeyboardPad();
@@ -33278,6 +33348,7 @@ function initChat() {
       function onChatInputFocus(focusTarget) {
         logChatKeyboardDebug("focus", focusTarget && focusTarget.id ? focusTarget.id : "");
         collectChatOverscrollSnapshot("focus:start", focusTarget);
+        if (hardDisableChatComposerViewportLift(focusTarget, "focus:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime()) {
           try {
@@ -33447,6 +33518,7 @@ function initChat() {
             var vvCoalesceRaf = null;
             viewportResizeScrollHandler = function () {
               collectChatOverscrollSnapshot("vv:event", focusTarget);
+              if (hardDisableChatComposerViewportLift(focusTarget, "vv:event-hard-disabled")) return;
               if (!vvCoalesceRaf) {
                 var rafVv = window.requestAnimationFrame || function (fn) {
                   setTimeout(fn, 0);
@@ -33467,6 +33539,7 @@ function initChat() {
                 document.body.classList.contains("chat-keyboard-open") &&
                 typeof isChatThreadComposerKeyboardDom === "function" &&
                 isChatThreadComposerKeyboardDom();
+              if (!skipVv220 && isHardDisabledChatComposerFlowTarget(focusTarget)) skipVv220 = true;
               if (!skipVv220) {
                 if (window.__pokerChatVvInsetDebounceTimer) clearTimeout(window.__pokerChatVvInsetDebounceTimer);
                 window.__pokerChatVvInsetDebounceTimer = setTimeout(function () {
@@ -33504,6 +33577,7 @@ function initChat() {
             var vvSyncPending = false;
             viewportResizeScrollHandler = function () {
               collectChatOverscrollSnapshot("vv:event", focusTarget);
+              if (hardDisableChatComposerViewportLift(focusTarget, "vv:event-hard-disabled")) return;
               if (vvSyncPending) return;
               vvSyncPending = true;
               var raf = window.requestAnimationFrame || function (fn) {
