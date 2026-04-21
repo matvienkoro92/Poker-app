@@ -25653,6 +25653,14 @@ function initChat() {
     }
     return true;
   }
+  function chatMessagesDomHasOptimisticNode(rootEl) {
+    if (!rootEl || !rootEl.querySelector) return false;
+    try {
+      return !!rootEl.querySelector('.chat-msg[data-optimistic="true"]');
+    } catch (eChatOptDom) {
+      return false;
+    }
+  }
   function buildGeneralMessagesBodyHtml(messages) {
     var myIdRender = resolveMyChatMemberId();
     return (messages || []).map(function (m, i) {
@@ -26799,6 +26807,9 @@ function initChat() {
               if (
                 data.partial === true &&
                 generalMessages &&
+                !chatMessagesDomHasOptimisticNode(generalMessages) &&
+                !optimisticGeneralPayload &&
+                !(window._pendingGeneralMessage && window._pendingGeneralMessage.id) &&
                 canFastAppendMessages(prevGeneralMessages, messages)
               ) {
                 fastAppendedGeneral = fastAppendChatMessages(
@@ -30921,6 +30932,9 @@ function initChat() {
             if (
               data.partial === true &&
               messagesEl &&
+              !chatMessagesDomHasOptimisticNode(messagesEl) &&
+              !optimisticPersonalPayload &&
+              !(window._pendingPersonalMessage && window._pendingPersonalMessage.id) &&
               canFastAppendMessages(prevPersonalMessages, messages)
             ) {
               fastAppendedPersonal = fastAppendChatMessages(
@@ -31420,6 +31434,8 @@ function initChat() {
     var pendingBg = window._pendingGeneralMessage;
     if (pendingBg && pendingBg.id && !messages.some(function (m) { return m.id === pendingBg.id; })) {
       messages = messages.concat([pendingBg]);
+    } else if (pendingBg && pendingBg.id) {
+      window._pendingGeneralMessage = null;
     }
     messages = mergeOptimisticGeneralIntoMessages(messages);
     window._chatGeneralCache = {
