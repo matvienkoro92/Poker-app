@@ -21643,7 +21643,6 @@ function initChat() {
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
   function ensureChatKeyboardDebugFloatingPanel() {
     if (chatKeyboardDebugPanel && chatKeyboardDebugPanel.parentNode) return chatKeyboardDebugPanel;
-    if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) return null;
     try {
       chatKeyboardDebugPanel = document.createElement("div");
       chatKeyboardDebugPanel.id = "chatKeyboardDebugFloatingPanel";
@@ -21913,11 +21912,7 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    try {
-      return typeof isTelegramWebApp === "function" && isTelegramWebApp();
-    } catch (eDbgFlag) {
-      return false;
-    }
+    return String(document.body.getAttribute("data-view") || "") === "chat";
   }
   function isChatKeyboardDebugTarget(node) {
     try {
@@ -22277,6 +22272,14 @@ function initChat() {
   }
   installChatKeyboardDebugObservers();
   renderChatKeyboardDebugPanel();
+  try {
+    var bootPanel = ensureChatKeyboardDebugFloatingPanel();
+    if (bootPanel) {
+      bootPanel.hidden = false;
+      bootPanel.setAttribute("aria-hidden", "false");
+      bootPanel.textContent = "chat debug booting...";
+    }
+  } catch (eDbgBoot) {}
   function ensureTelegramIosChatComposerOverlayHost() {
     return null;
   }
