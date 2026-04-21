@@ -9016,6 +9016,7 @@ function getPokerResolvedTelegramUser() {
     var hint = wrap.querySelector("#authPwaCodeHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
+    var TG_LOGIN_LAST_KEY = "poker_auth_last_tg_username";
 
     function shortenPwaAuthHintForUi(raw, isError) {
       var s = raw != null ? String(raw).trim() : "";
@@ -9059,6 +9060,24 @@ function getPokerResolvedTelegramUser() {
       var raw = userInput && userInput.value ? userInput.value : "";
       return String(raw).trim().replace(/^@+/, "").toLowerCase();
     }
+    function readLastUsername() {
+      try {
+        var raw = typeof localStorage !== "undefined" ? localStorage.getItem(TG_LOGIN_LAST_KEY) : "";
+        raw = String(raw || "").trim().replace(/^@+/, "").toLowerCase();
+        return /^[a-z0-9_]{5,32}$/.test(raw) ? raw : "";
+      } catch (eLastUser) {
+        return "";
+      }
+    }
+    function saveLastUsername(username) {
+      try {
+        if (typeof localStorage === "undefined") return;
+        var v = String(username || "").trim().replace(/^@+/, "").toLowerCase();
+        if (v) localStorage.setItem(TG_LOGIN_LAST_KEY, v);
+      } catch (eSaveUser) {}
+    }
+    var lastUsername = readLastUsername();
+    if (userInput && lastUsername) userInput.value = "@" + lastUsername;
 
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
@@ -9082,6 +9101,7 @@ function getPokerResolvedTelegramUser() {
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
           .then(function (data) {
             if (data && data.ok) {
+              saveLastUsername(username);
               showCodeSentToBotHint();
               if (codeInput && codeInput.focus) codeInput.focus();
             } else {
@@ -9128,6 +9148,7 @@ function getPokerResolvedTelegramUser() {
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
         .then(function (data) {
           if (data && data.ok && data.user && data.pwaSession) {
+            saveLastUsername(username);
             var u = normalizeVerifiedUser(data.user, null);
             if (
               !pokerSavePwaTgSession(
@@ -9327,12 +9348,32 @@ function getPokerResolvedTelegramUser() {
     var hint = wrap.querySelector("#authPwaEmailHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
+    var EMAIL_LAST_KEY = "poker_auth_last_email";
 
     function setEmailHint(text, isError) {
       if (!hint) return;
       hint.textContent = text || "";
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
       hint.classList.toggle("auth-banner__code-hint--hidden", !text);
+    }
+    function normalizeEmailInput() {
+      return String(emailInput && emailInput.value ? emailInput.value : "").trim().toLowerCase();
+    }
+    function readLastEmail() {
+      try {
+        var raw = typeof localStorage !== "undefined" ? localStorage.getItem(EMAIL_LAST_KEY) : "";
+        raw = String(raw || "").trim().toLowerCase();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw) ? raw : "";
+      } catch (eLastEmail) {
+        return "";
+      }
+    }
+    function saveLastEmail(email) {
+      try {
+        if (typeof localStorage === "undefined") return;
+        var v = String(email || "").trim().toLowerCase();
+        if (v) localStorage.setItem(EMAIL_LAST_KEY, v);
+      } catch (eSaveEmail) {}
     }
     function getEmailDtIdHint() {
       try {
@@ -9349,6 +9390,8 @@ function getPokerResolvedTelegramUser() {
         remountPwaStandaloneEnterScreen();
       });
     }
+    var lastEmail = readLastEmail();
+    if (emailInput && lastEmail) emailInput.value = lastEmail;
     if (codeInput) {
       codeInput.addEventListener("input", function () {
         codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
@@ -9356,7 +9399,7 @@ function getPokerResolvedTelegramUser() {
     }
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
-        var email = String(emailInput && emailInput.value ? emailInput.value : "").trim();
+        var email = normalizeEmailInput();
         setEmailHint("Отправляем код…", false);
         fetch(base + "/api/auth-email", {
           method: "POST",
@@ -9366,6 +9409,7 @@ function getPokerResolvedTelegramUser() {
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
             var okMsg = "Код отправлен на почту.";
+            if (data && data.ok) saveLastEmail(email);
             if (data && data.ok && data.mode === "register") okMsg = "Код отправлен на почту. После подтверждения создадим новый аккаунт.";
             if (data && data.ok && data.mode === "login") okMsg = "Код отправлен на почту для входа.";
             setEmailHint(data && data.ok ? okMsg : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
@@ -9377,7 +9421,7 @@ function getPokerResolvedTelegramUser() {
     }
     if (verifyBtn) {
       verifyBtn.addEventListener("click", function () {
-        var email = String(emailInput && emailInput.value ? emailInput.value : "").trim();
+        var email = normalizeEmailInput();
         var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
         setEmailHint("Проверяем код…", false);
         fetch(base + "/api/auth-email", {
@@ -9391,6 +9435,7 @@ function getPokerResolvedTelegramUser() {
           .then(function (pack) {
             var data = pack.data || {};
             if (pack.res.ok && data.ok && data.user && data.pwaSession) {
+              saveLastEmail(email);
               var u = normalizeVerifiedUser(data.user, null);
               try {
                 if (data.dtId) {
