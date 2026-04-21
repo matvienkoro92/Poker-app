@@ -27489,6 +27489,71 @@ function initChat() {
       })(imgs[ii]);
     }
   }
+  function settleChatOpeningMediaLayout(el, wrapEl, onDone) {
+    if (!el) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+    var doneCalled = false;
+    function finish() {
+      if (doneCalled) return;
+      doneCalled = true;
+      try {
+        if (wrapEl && wrapEl.classList) wrapEl.classList.remove("chat-messages-wrap--settling");
+      } catch (eWrapDone) {}
+      try {
+        if (typeof onDone === "function") onDone();
+      } catch (eDoneCb) {}
+    }
+    var imgs = [];
+    try {
+      imgs = Array.prototype.slice.call(el.querySelectorAll("img.chat-msg__image"));
+    } catch (eImgs) {
+      finish();
+      return;
+    }
+    if (!imgs.length) {
+      finish();
+      return;
+    }
+    var pending = 0;
+    function markReady() {
+      pending -= 1;
+      if (pending <= 0) finish();
+    }
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      if (im.complete && im.naturalHeight) continue;
+      pending += 1;
+      (function (imgNode) {
+        var settled = false;
+        function doneOne() {
+          if (settled) return;
+          settled = true;
+          try {
+            imgNode.removeEventListener("load", onLoad);
+            imgNode.removeEventListener("error", onLoad);
+          } catch (eImgOff) {}
+          markReady();
+        }
+        function onLoad() {
+          var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+          raf(doneOne);
+        }
+        try {
+          imgNode.addEventListener("load", onLoad);
+          imgNode.addEventListener("error", onLoad);
+        } catch (eImgOn) {
+          doneOne();
+        }
+      })(im);
+    }
+    if (!pending) {
+      finish();
+      return;
+    }
+    setTimeout(finish, 260);
+  }
   /** Удерживаем низ ленты: после lazy-картинок / перерасчёта вёрстки scrollTop иначе «отстаёт» и лента прыгает вверх. */
   function pinChatMessagesToBottom(el, aggressive) {
     if (!el) return;
@@ -27754,6 +27819,11 @@ function initChat() {
     }
     if (openingForceBottomG) {
       try {
+        if (generalMsgWrapEarly && generalMsgWrapEarly.classList && /chat-msg__image/.test(bodyHtml)) {
+          generalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
+        }
+      } catch (eSettleGFlag) {}
+      try {
         generalMessages.scrollTop = generalMessages.scrollHeight;
       } catch (eScG0) {}
       var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
@@ -27772,10 +27842,15 @@ function initChat() {
             window.__pokerScheduleSyncChatScrollBottomButtons();
           }
         } catch (eSbG) {}
-        rafOpenG(function () {
+        settleChatOpeningMediaLayout(generalMessages, generalMsgWrapEarly, function () {
           try {
             generalMessages.scrollTop = generalMessages.scrollHeight;
           } catch (eScG2) {}
+        });
+        rafOpenG(function () {
+          try {
+            generalMessages.scrollTop = generalMessages.scrollHeight;
+          } catch (eScG3) {}
         });
       });
     } else {
@@ -30244,6 +30319,11 @@ function initChat() {
     }
     if (openingForceBottomP) {
       try {
+        if (personalMsgWrapEarly && personalMsgWrapEarly.classList && /chat-msg__image/.test(bodyHtml)) {
+          personalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
+        }
+      } catch (eSettlePFlag) {}
+      try {
         messagesEl.scrollTop = messagesEl.scrollHeight;
       } catch (eScP0) {}
       var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
@@ -30262,10 +30342,15 @@ function initChat() {
             window.__pokerScheduleSyncChatScrollBottomButtons();
           }
         } catch (eSbP) {}
-        rafOpenP(function () {
+        settleChatOpeningMediaLayout(messagesEl, personalMsgWrapEarly, function () {
           try {
             messagesEl.scrollTop = messagesEl.scrollHeight;
           } catch (eScP2) {}
+        });
+        rafOpenP(function () {
+          try {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          } catch (eScP3) {}
         });
       });
     } else {
