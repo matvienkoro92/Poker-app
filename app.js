@@ -24405,6 +24405,10 @@ function initChat() {
   window.lastGeneralStats = "";
   window.lastListStats = "";
   window.lastConvStats = "";
+  window.__pokerChatNetworkOnline = !(typeof navigator !== "undefined" && navigator.onLine === false);
+  var chatPeerTypingActive = false;
+  var chatTypingLastSentAt = 0;
+  var chatTypingStopTimer = 0;
   function setTextContentIfChanged(el, txt) {
     if (!el) return;
     var next = txt != null ? String(txt) : "";
@@ -24428,12 +24432,50 @@ function initChat() {
   function updateChatHeaderStats() {
     var el = document.getElementById("chatHeaderStats");
     if (!el) return;
+    if (window.__pokerChatNetworkOnline === false) {
+      setTextContentIfChanged(el, "Нет сети");
+      return;
+    }
     var txt = "";
     if (chatActiveTab === "general") txt = window.lastGeneralStats || "";
     else if (chatActiveTab === "admins") txt = "Админы";
     else if (chatWithUserId && convView && !convView.classList.contains("chat-conv-view--hidden")) txt = window.lastConvStats || "";
     else txt = window.lastListStats || "";
     setTextContentIfChanged(el, txt);
+  }
+  function updateConvTypingUi() {
+    if (!convTitleId) return;
+    if (chatActiveTab !== "personal" || !chatWithUserId || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
+    if (String(chatWithUserId).indexOf("group_") === 0) return;
+    if (chatPeerTypingActive) {
+      setTextContentIfChanged(convTitleId, "печатает…");
+    }
+  }
+  function pokerChatSendTypingState(active) {
+    var on = !!active;
+    if (!chatWithUserId || String(chatWithUserId).indexOf("group_") === 0) return;
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var now = Date.now();
+    if (on && now - chatTypingLastSentAt < 2500) return;
+    chatTypingLastSentAt = now;
+    fetch(base + "/api/chat", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+        pokerApiAuthJsonBody({
+          action: "typing",
+          with: chatWithUserId,
+          active: on ? 1 : 0,
+        })
+      ),
+    }).catch(function () {});
+  }
+  function pokerChatScheduleTypingStop() {
+    if (chatTypingStopTimer) clearTimeout(chatTypingStopTimer);
+    chatTypingStopTimer = setTimeout(function () {
+      chatTypingStopTimer = 0;
+      pokerChatSendTypingState(false);
+    }, 3200);
   }
   function closeSwitcherDropdown() {}
   /** iOS WKWebView: навигация между полями над клавиатурой. Один textarea переносится mountChatComposer; inert на поддеревьях чата при списке диалогов / общем / переписке. */
@@ -24713,6 +24755,7 @@ function initChat() {
     } catch (eDlgReset) {}
     chatActiveTab = "dialogs";
     chatWithUserId = null;
+    chatPeerTypingActive = false;
     chatWithUserName = null;
     if (convTitle) convTitle.textContent = "";
     if (convTitleId) convTitleId.textContent = "\u2014";
@@ -24917,6 +24960,7 @@ function initChat() {
     chatActiveTab = "personal";
     chatWithUserId = uid;
     chatWithUserName = userName || uid;
+    chatPeerTypingActive = false;
     if (convTitle) convTitle.textContent = chatWithUserName;
     if (convTitleId) convTitleId.textContent = peerP21Id != null && String(peerP21Id).trim() ? String(peerP21Id).trim() : "\u2014";
     if (peerAvatarOpt != null && String(peerAvatarOpt).trim()) {
@@ -24980,6 +25024,7 @@ function initChat() {
     // Поэтому сначала выставляем нужные поля, затем фиксируем таб и грузим сообщения.
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    chatPeerTypingActive = false;
     setTab("personal");
     showConv(userId, userName || userId, peerP21Id, peerAvatarOpt);
     try {
@@ -26671,8 +26716,8 @@ function initChat() {
   var CHAT_LONG_POLL_TIMEOUT_MS = 18000;
   var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
   var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
-  var chatLongPollTimers = { general: 0, personal: 0 };
-  var chatLongPollTokens = { general: 0, personal: 0 };
+  var chatLongPollTimers = { general: 0, personal: 0, contacts: 0 };
+  var chatLongPollTokens = { general: 0, personal: 0, contacts: 0 };
 
   function pokerChatRequestPollBurst(scope, durationMs) {
     var key = scope === "general" || scope === "personal" || scope === "contacts" ? scope : "personal";
@@ -26732,11 +26777,18 @@ function initChat() {
         pokerApiHasCredential()
       );
     }
+    if (scope === "contacts") {
+      return !!(
+        typeof pokerApiHasCredential === "function" &&
+        pokerApiHasCredential() &&
+        document.querySelector('[data-view="chat"].view--active')
+      );
+    }
     return false;
   }
 
   function pokerChatStopLongPoll(scope) {
-    var key = scope === "general" ? "general" : "personal";
+    var key = scope === "general" || scope === "contacts" ? scope : "personal";
     chatLongPollTokens[key] = (chatLongPollTokens[key] || 0) + 1;
     if (chatLongPollTimers[key]) {
       clearTimeout(chatLongPollTimers[key]);
@@ -26745,7 +26797,7 @@ function initChat() {
   }
 
   function pokerChatScheduleLongPoll(scope, delayMs) {
-    var key = scope === "general" ? "general" : "personal";
+    var key = scope === "general" || scope === "contacts" ? scope : "personal";
     pokerChatStopLongPoll(key);
     if (!pokerChatCanRunLongPoll(key)) return;
     var token = chatLongPollTokens[key];
@@ -26753,6 +26805,7 @@ function initChat() {
       if (token !== chatLongPollTokens[key]) return;
       if (!pokerChatCanRunLongPoll(key)) return;
       if (key === "general") loadGeneral({ waitForChange: true });
+      else if (key === "contacts") loadContacts({ metaOnly: true, waitForChange: true });
       else loadMessages({ waitForChange: true });
     }, Math.max(0, Number(delayMs) || 0));
   }
@@ -26762,6 +26815,8 @@ function initChat() {
     else pokerChatStopLongPoll("general");
     if (pokerChatCanRunLongPoll("personal")) pokerChatScheduleLongPoll("personal", 0);
     else pokerChatStopLongPoll("personal");
+    if (pokerChatCanRunLongPoll("contacts")) pokerChatScheduleLongPoll("contacts", 0);
+    else pokerChatStopLongPoll("contacts");
   }
 
   function pokerChatRecordTrace(stage, data) {
@@ -29226,6 +29281,9 @@ function initChat() {
     if (opts.metaOnly && window.__pokerContactsMetaPollRev) {
       extra += "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
     }
+    if (opts.metaOnly && opts.waitForChange && window.__pokerContactsMetaPollRev) {
+      extra += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
+    }
     return base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam + extra;
   }
 
@@ -29849,6 +29907,10 @@ function initChat() {
         if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
         if (metaOnly && data && data.notModified === true && data.pollRev) {
           if (typeof data.pollRev === "string") window.__pokerContactsMetaPollRev = data.pollRev;
+          if (data.trace && data.trace.serverNowMs) {
+            pokerChatRecordTrace("contacts-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited });
+          }
+          if (opts.waitForChange) pokerChatScheduleLongPoll("contacts", 0);
           fireContactsLoaded();
           return;
         }
@@ -29876,6 +29938,13 @@ function initChat() {
           if (data && data.ok) pokerWriteContactsCache(data);
         } catch (eSav) {}
         applyContactsApiResponse(data);
+        if (opts.waitForChange && metaOnly) pokerChatScheduleLongPoll("contacts", 0);
+        if (data && data.trace && data.trace.serverNowMs && data.ok && metaOnly) {
+          pokerChatRecordTrace("contacts-delivery", {
+            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+            rows: Array.isArray(data.contacts) ? data.contacts.length : 0,
+          });
+        }
         fireContactsLoaded();
       })
       .catch(function () {
@@ -29883,6 +29952,7 @@ function initChat() {
         if (!contactsInstantFromCache)
           contactsEl.innerHTML =
             '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
+        if (opts.waitForChange && metaOnly) pokerChatScheduleLongPoll("contacts", 1200);
         fireContactsLoaded();
         if (window.__openClubChatAfterNextContacts) {
           window.__openClubChatAfterNextContacts = false;
@@ -30990,6 +31060,7 @@ function initChat() {
           window.__pokerPersonalPollRev = data.pollRev;
         }
         if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
+        chatPeerTypingActive = !!data.peerTyping;
         var prevPersonalMessages =
           chatWithUserId && personalMessagesCache[chatWithUserId] && Array.isArray(personalMessagesCache[chatWithUserId])
             ? personalMessagesCache[chatWithUserId]
@@ -31085,6 +31156,7 @@ function initChat() {
             var titleP21 =
               data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
             setTextContentIfChanged(convTitleId, titleP21 || "\u2014");
+            updateConvTypingUi();
           }
         }
         var peerAvData = "";
@@ -31544,6 +31616,11 @@ function initChat() {
       from: resolveMyChatMemberId(),
       time: new Date().toISOString(),
     };
+    if (chatTypingStopTimer) {
+      clearTimeout(chatTypingStopTimer);
+      chatTypingStopTimer = 0;
+    }
+    pokerChatSendTypingState(false);
     sendingPrivate = true;
     /* Пока POST в полёте, ответ GET, начатый до отправки, не должен перерисовывать ленту без нового сообщения — иначе оптимистичное фото исчезает до loadMessages после ответа. */
     window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1;
@@ -35341,6 +35418,18 @@ function initChat() {
         } catch (ePadSyn) {}
         updateGeneralSendBtnIcon();
         updatePersonalSendBtnIcon();
+        if (isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") {
+          if ((ta.value || "").trim()) {
+            pokerChatSendTypingState(true);
+            pokerChatScheduleTypingStop();
+          } else {
+            if (chatTypingStopTimer) {
+              clearTimeout(chatTypingStopTimer);
+              chatTypingStopTimer = 0;
+            }
+            pokerChatSendTypingState(false);
+          }
+        }
         try {
           var rawV = ta.value || "";
           var trimmedV = rawV.trim();
@@ -35359,12 +35448,25 @@ function initChat() {
       ta.addEventListener("focus", function () {
         chatComposerEl = ta;
         resizeChatTextarea(ta);
+        if ((isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") && (ta.value || "").trim()) {
+          pokerChatSendTypingState(true);
+          pokerChatScheduleTypingStop();
+        }
       });
       ta.addEventListener("change", function () {
         chatComposerEl = ta;
         flushChatComposerToDrafts();
         updateGeneralSendBtnIcon();
         updatePersonalSendBtnIcon();
+      });
+      ta.addEventListener("blur", function () {
+        if (isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") {
+          if (chatTypingStopTimer) {
+            clearTimeout(chatTypingStopTimer);
+            chatTypingStopTimer = 0;
+          }
+          pokerChatSendTypingState(false);
+        }
       });
       ta.addEventListener("keydown", function (e) {
         chatComposerEl = ta;
@@ -38225,7 +38327,7 @@ function initChat() {
     }
 
     if (!chatViewOn) {
-      if (credPoll && !guestPoll && typeof loadContacts === "function" && pokerChatShouldRunPoll("contacts", nowPoll)) {
+      if (credPoll && !guestPoll && typeof loadContacts === "function" && !pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) {
         loadContacts({ metaOnly: true });
       }
       return;
@@ -38243,7 +38345,7 @@ function initChat() {
     }
     if (chatWithUserId && typeof loadMessages === "function" && !pokerChatCanRunLongPoll("personal") && pokerChatShouldRunPoll("personal", nowPoll)) loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
-      if (pokerChatShouldRunPoll("contacts", nowPoll)) loadContacts({ metaOnly: true });
+      if (!pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) loadContacts({ metaOnly: true });
     } else if (
       chatActiveTab === "admins" &&
       adminsView &&
@@ -38260,6 +38362,7 @@ function initChat() {
     if (document.visibilityState !== "visible") {
       pokerChatStopLongPoll("general");
       pokerChatStopLongPoll("personal");
+      pokerChatStopLongPoll("contacts");
       return;
     }
     try {
@@ -38277,6 +38380,18 @@ function initChat() {
       if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     } catch (eVisPoll) {}
     pokerChatRefreshLongPollTargets();
+  });
+  window.addEventListener("online", function () {
+    window.__pokerChatNetworkOnline = true;
+    updateChatHeaderStats();
+    pokerChatRefreshLongPollTargets();
+  });
+  window.addEventListener("offline", function () {
+    window.__pokerChatNetworkOnline = false;
+    pokerChatStopLongPoll("general");
+    pokerChatStopLongPoll("personal");
+    pokerChatStopLongPoll("contacts");
+    updateChatHeaderStats();
   });
 
   window.__pokerHandleIncomingChatPush = function (payload) {
