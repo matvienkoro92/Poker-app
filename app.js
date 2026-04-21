@@ -24623,6 +24623,7 @@ function initChat() {
     try {
       pokerUpdateChatDmFocusFromUiState();
     } catch (eDmTab) {}
+    pokerChatRefreshLongPollTargets();
   }
   function showDialogs() {
     var callerLabel = pokerPushOpenConsumeCaller();
@@ -24769,6 +24770,7 @@ function initChat() {
     try {
       pokerUpdateChatDmFocusFromUiState();
     } catch (eDmDlg) {}
+    pokerChatRefreshLongPollTargets();
   }
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
@@ -24823,6 +24825,7 @@ function initChat() {
       try {
         pokerUpdateChatDmFocusFromUiState();
       } catch (eDmClub) {}
+      pokerChatRefreshLongPollTargets();
     }
 
     var st = typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState() : "ok";
@@ -24931,6 +24934,7 @@ function initChat() {
     try {
       pokerUpdateChatDmFocusFromUiState();
     } catch (ePushImmFocus) {}
+    pokerChatRefreshLongPollTargets();
     try {
       scheduleSyncChatScrollBottomButtons();
     } catch (ePushImmScroll) {}
@@ -24976,6 +24980,7 @@ function initChat() {
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
     } catch (eOpenConvDbg1) {}
+    pokerChatRefreshLongPollTargets();
     if (window.__pendingDepositMessage && chatComposerEl) {
       chatComposerDrafts.personal = String(window.__pendingDepositMessage);
       chatComposerEl.value = chatComposerDrafts.personal;
@@ -26657,8 +26662,11 @@ function initChat() {
   var CHAT_DIALOGS_BURST_MS = 1000;
   var CHAT_HIDDEN_IDLE_MS = 60000;
   var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
+  var CHAT_LONG_POLL_TIMEOUT_MS = 18000;
   var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
   var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
+  var chatLongPollTimers = { general: 0, personal: 0 };
+  var chatLongPollTokens = { general: 0, personal: 0 };
 
   function pokerChatRequestPollBurst(scope, durationMs) {
     var key = scope === "general" || scope === "personal" || scope === "contacts" ? scope : "personal";
@@ -26696,7 +26704,70 @@ function initChat() {
     return true;
   }
 
-  function loadGeneral() {
+  function pokerChatCanRunLongPoll(scope) {
+    if (typeof document === "undefined" || document.visibilityState !== "visible") return false;
+    if (!document.querySelector('[data-view="chat"].view--active')) return false;
+    if (scope === "general") {
+      return !!(
+        chatActiveTab === "general" &&
+        generalView &&
+        !generalView.classList.contains("chat-general-view--hidden") &&
+        typeof pokerApiHasCredential === "function" &&
+        pokerApiHasCredential()
+      );
+    }
+    if (scope === "personal") {
+      return !!(
+        chatActiveTab === "personal" &&
+        chatWithUserId &&
+        convView &&
+        !convView.classList.contains("chat-conv-view--hidden") &&
+        typeof pokerApiHasCredential === "function" &&
+        pokerApiHasCredential()
+      );
+    }
+    return false;
+  }
+
+  function pokerChatStopLongPoll(scope) {
+    var key = scope === "general" ? "general" : "personal";
+    chatLongPollTokens[key] = (chatLongPollTokens[key] || 0) + 1;
+    if (chatLongPollTimers[key]) {
+      clearTimeout(chatLongPollTimers[key]);
+      chatLongPollTimers[key] = 0;
+    }
+  }
+
+  function pokerChatScheduleLongPoll(scope, delayMs) {
+    var key = scope === "general" ? "general" : "personal";
+    pokerChatStopLongPoll(key);
+    if (!pokerChatCanRunLongPoll(key)) return;
+    var token = chatLongPollTokens[key];
+    chatLongPollTimers[key] = setTimeout(function () {
+      if (token !== chatLongPollTokens[key]) return;
+      if (!pokerChatCanRunLongPoll(key)) return;
+      if (key === "general") loadGeneral({ waitForChange: true });
+      else loadMessages({ waitForChange: true });
+    }, Math.max(0, Number(delayMs) || 0));
+  }
+
+  function pokerChatRefreshLongPollTargets() {
+    if (pokerChatCanRunLongPoll("general")) pokerChatScheduleLongPoll("general", 0);
+    else pokerChatStopLongPoll("general");
+    if (pokerChatCanRunLongPoll("personal")) pokerChatScheduleLongPoll("personal", 0);
+    else pokerChatStopLongPoll("personal");
+  }
+
+  function pokerChatRecordTrace(stage, data) {
+    try {
+      var payload = data && typeof data === "object" ? data : {};
+      window.__pokerChatPerfLast = Object.assign({ stage: String(stage || ""), at: Date.now() }, payload);
+      if (typeof console !== "undefined" && console.info) console.info("[chat-perf]", window.__pokerChatPerfLast);
+    } catch (eChatPerf) {}
+  }
+
+  function loadGeneral(opts) {
+    opts = opts || {};
     var genVisEarly = generalView && !generalView.classList.contains("chat-general-view--hidden");
     if (typeof getPokerChatTelegramAuthState === "function" && chatActiveTab === "general" && genVisEarly) {
       if (getPokerChatTelegramAuthState() !== "ok") {
@@ -26716,6 +26787,9 @@ function initChat() {
     var pollQs = "";
     if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
       pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
+    }
+    if (opts.waitForChange && pollQs) {
+      pollQs += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
     }
     var generalCacheBeforeReq =
       window._chatGeneralCache && Array.isArray(window._chatGeneralCache.messages) ? window._chatGeneralCache.messages : [];
@@ -26737,6 +26811,10 @@ function initChat() {
     fetch(url, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
       if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
       if (data && data.notModified === true && data.pollRev) {
+        if (data.trace && data.trace.serverNowMs) {
+          pokerChatRecordTrace("general-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited });
+        }
+        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 0);
         return;
       }
         if (data && data.ok) {
@@ -26906,6 +26984,15 @@ function initChat() {
           if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
           if (typeof updateClubChatPreview === "function") updateClubChatPreview(messages);
         });
+        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 0);
+        if (data.trace && data.trace.serverNowMs && messages.length) {
+          var lastMsgG = messages[messages.length - 1];
+          pokerChatRecordTrace("general-delivery", {
+            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+            msgAgeMs: lastMsgG && lastMsgG.time ? Math.max(0, Date.now() - Date.parse(String(lastMsgG.time))) : null,
+            partial: !!data.partial,
+          });
+        }
       } else if (
         chatActiveTab === "general" &&
         generalView &&
@@ -26916,6 +27003,7 @@ function initChat() {
         if (wrapErr && wrapErr.classList) wrapErr.classList.remove("chat-messages-wrap--settling");
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
         updateGeneralInputLocked(false);
+        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
       }
     }).catch(function () {
       if (
@@ -26929,6 +27017,7 @@ function initChat() {
         generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>";
         updateGeneralInputLocked(false);
       }
+      if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
     });
   }
   window.__pokerLoadOlderGeneralMessages = function () {
@@ -28667,8 +28756,15 @@ function initChat() {
           var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
           if (!httpOk && !d.error) d.error = "Ошибка отправки";
           if (httpOk && d && d.ok) {
+            if (d.trace && d.trace.serverNowMs) {
+              pokerChatRecordTrace("general-send-ack", {
+                ackMs: Math.max(0, Date.now() - Number(d.trace.serverNowMs || 0)),
+                messageId: d.message && d.message.id ? String(d.message.id) : "",
+              });
+            }
             optimisticGeneralPayload = null;
             pokerChatRequestPollBurst("general");
+            pokerChatRefreshLongPollTargets();
             var msg = d.message;
             if (msg && pokerChatMessageHasPersistedId(msg.id)) {
               window._pendingGeneralMessage = msg;
@@ -30835,7 +30931,8 @@ function initChat() {
     }
   })();
 
-  function loadMessages() {
+  function loadMessages(opts) {
+    opts = opts || {};
     if (!chatWithUserId || !messagesEl) return;
     var loadForPeer = chatWithUserId;
     var isGroupLoad = loadForPeer && String(loadForPeer).indexOf("group_") === 0;
@@ -30843,6 +30940,9 @@ function initChat() {
     var pollQs = "";
     if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
       pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
+    }
+    if (opts.waitForChange && pollQs) {
+      pollQs += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
     }
     var personalCacheBeforeReq =
       loadForPeer && personalMessagesCache[loadForPeer] && Array.isArray(personalMessagesCache[loadForPeer])
@@ -30870,6 +30970,10 @@ function initChat() {
       if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
       if (data && data.notModified === true && data.pollRev) {
         if (typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
+        if (data.trace && data.trace.serverNowMs) {
+          pokerChatRecordTrace("personal-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited, peer: loadForPeer });
+        }
+        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 0);
         return;
       }
       if (data && data.ok) {
@@ -31118,8 +31222,19 @@ function initChat() {
           applyConvGroupDescription();
           updateUnreadDots();
         });
+        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 0);
+        if (data.trace && data.trace.serverNowMs && messages.length) {
+          var lastMsgP = messages[messages.length - 1];
+          pokerChatRecordTrace("personal-delivery", {
+            peer: loadForPeer,
+            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+            msgAgeMs: lastMsgP && lastMsgP.time ? Math.max(0, Date.now() - Date.parse(String(lastMsgP.time))) : null,
+            partial: !!data.partial,
+          });
+        }
       } else if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
         messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
+        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
       }
     })
       .catch(function () {
@@ -31128,6 +31243,7 @@ function initChat() {
         if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
           messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
         }
+        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
       });
   }
   window.__pokerLoadOlderPersonalMessages = function () {
@@ -31485,8 +31601,16 @@ function initChat() {
         setPersonalSendBusy(false);
         hideProgress();
         if (data && data.ok) {
+          if (data.trace && data.trace.serverNowMs) {
+            pokerChatRecordTrace("personal-send-ack", {
+              ackMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+              peer: chatWithUserId || "",
+              messageId: data.message && data.message.id ? String(data.message.id) : "",
+            });
+          }
           optimisticPersonalPayload = null;
           pokerChatRequestPollBurst("personal");
+          pokerChatRefreshLongPollTargets();
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
           var msg = data.message;
           if (msg && pokerChatMessageHasPersistedId(msg.id) && chatWithUserId) {
@@ -38104,11 +38228,12 @@ function initChat() {
       generalView &&
       !generalView.classList.contains("chat-general-view--hidden") &&
       typeof loadGeneral === "function" &&
+      !pokerChatCanRunLongPoll("general") &&
       pokerChatShouldRunPoll("general", nowPoll)
     ) {
       loadGeneral();
     }
-    if (chatWithUserId && typeof loadMessages === "function" && pokerChatShouldRunPoll("personal", nowPoll)) loadMessages();
+    if (chatWithUserId && typeof loadMessages === "function" && !pokerChatCanRunLongPoll("personal") && pokerChatShouldRunPoll("personal", nowPoll)) loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
       if (pokerChatShouldRunPoll("contacts", nowPoll)) loadContacts({ metaOnly: true });
     } else if (
@@ -38123,7 +38248,12 @@ function initChat() {
   }, CHAT_POLL_MS);
 
   document.addEventListener("visibilitychange", function pokerChatPollFlushOnVisible() {
-    if (typeof document === "undefined" || document.visibilityState !== "visible") return;
+    if (typeof document === "undefined") return;
+    if (document.visibilityState !== "visible") {
+      pokerChatStopLongPoll("general");
+      pokerChatStopLongPoll("personal");
+      return;
+    }
     try {
       if (
         chatActiveTab === "general" &&
@@ -38138,6 +38268,7 @@ function initChat() {
       if (credV && !guestV && typeof loadContacts === "function") loadContacts({ metaOnly: true });
       if (chatWithUserId && typeof loadMessages === "function") loadMessages();
     } catch (eVisPoll) {}
+    pokerChatRefreshLongPollTargets();
   });
 
   window.__pokerHandleIncomingChatPush = function (payload) {
@@ -38184,9 +38315,14 @@ function initChat() {
       } catch (ePushPlaceholder) {}
       var now = Date.now();
       window.__pokerLastIncomingChatPushAt = now;
+      pokerChatRecordTrace("push-incoming", {
+        startApp: startApp || "",
+        peer: withPeer || "",
+      });
       if (startApp === "club_chat") pokerChatRequestPollBurst("general");
       else if (startApp === "club_chat_dm") pokerChatRequestPollBurst("personal");
       pokerChatRequestPollBurst("contacts");
+      pokerChatRefreshLongPollTargets();
       try {
         var dialogsListVisibleNow = !!(
           chatViewActiveNow &&
