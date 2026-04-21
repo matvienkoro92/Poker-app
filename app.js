@@ -856,6 +856,23 @@ function pokerReadLastMemberIdHint() {
     return "";
   }
 }
+function pokerMaybeRememberMemberIdFromUser(user) {
+  try {
+    if (!user || user.id == null) return;
+    if (user.memberId != null && String(user.memberId).trim() !== "") {
+      pokerRememberLastMemberId(String(user.memberId).trim());
+      return;
+    }
+    var raw = String(user.id).trim();
+    if (!raw) return;
+    if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) {
+      pokerRememberLastMemberId(raw);
+      return;
+    }
+    if (user.is_vk || user.vk) pokerRememberLastMemberId("vk_" + raw);
+    else pokerRememberLastMemberId("tg_" + raw);
+  } catch (e) {}
+}
 
 function pokerIsPwaDisplayStandalone() {
   try {
@@ -8761,6 +8778,7 @@ function getPokerResolvedTelegramUser() {
           if (!pokerSavePwaVkSession(data.pwaVkSession, data.user)) pwaSessionPersistenceWarning();
           pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+          pokerMaybeRememberMemberIdFromUser(u);
           updateHeaderGreeting();
           showAuthorized(u);
           loadHeaderAvatar();
@@ -9486,6 +9504,7 @@ function getPokerResolvedTelegramUser() {
               }
               pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+              pokerMaybeRememberMemberIdFromUser(u);
               updateHeaderGreeting();
               showAuthorized(u);
               loadHeaderAvatar();
@@ -9879,6 +9898,7 @@ function getPokerResolvedTelegramUser() {
           var _authTgWidget = { status: "verified", user: u, error: null };
           if (data.gazettePlannerAccess === true) _authTgWidget.gazettePlannerAccess = true;
           window.__pokerTelegramAuth = _authTgWidget;
+          pokerMaybeRememberMemberIdFromUser(u);
           updateHeaderGreeting();
           showAuthorized(u);
           loadHeaderAvatar();
@@ -10110,6 +10130,7 @@ function getPokerResolvedTelegramUser() {
         var _authRestore = { status: "verified", user: uP, error: null };
         if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
         window.__pokerTelegramAuth = _authRestore;
+        pokerMaybeRememberMemberIdFromUser(uP);
         updateHeaderGreeting();
         showAuthorized(uP);
         loadHeaderAvatar();
@@ -10252,6 +10273,7 @@ function getPokerResolvedTelegramUser() {
             var _authMini = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authMini.gazettePlannerAccess = true;
             window.__pokerTelegramAuth = _authMini;
+            pokerMaybeRememberMemberIdFromUser(u);
             if (data.pwaSession && data.user) {
               if (
                 !pokerSavePwaTgSession(
@@ -10286,6 +10308,7 @@ function getPokerResolvedTelegramUser() {
             var uDev = normalizeVerifiedUser(null, userUnsafe);
             window.__pokerTelegramAuth = { status: "dev_skip", user: uDev, error: "server_config" };
             if (uDev) {
+              pokerMaybeRememberMemberIdFromUser(uDev);
               updateHeaderGreeting();
               showAuthorized(uDev);
               hideBootOverlay();
