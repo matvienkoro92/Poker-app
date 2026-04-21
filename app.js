@@ -25982,6 +25982,88 @@ function initChat() {
     if (ogp.replyTo) synP.replyTo = ogp.replyTo;
     return messages.concat([synP]);
   }
+  function dedupeGeneralMessagesForRender(messages) {
+    messages = Array.isArray(messages) ? messages : [];
+    var out = [];
+    var seenId = Object.create(null);
+    var myId = resolveMyChatMemberId();
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i];
+      if (!m) continue;
+      var persistedId = pokerChatMessageHasPersistedId(m.id) ? String(m.id) : "";
+      if (persistedId) {
+        var optimisticDupIdx = -1;
+        var persistedDupIdx = -1;
+        var mtPersisted = m.time ? new Date(m.time).getTime() : NaN;
+        for (var oi = out.length - 1; oi >= 0 && oi >= out.length - 12; oi--) {
+          var prevOpt = out[oi];
+          if (!prevOpt || !peerChatIdsEqual(prevOpt.from || "", m.from || "")) continue;
+          var optTime = prevOpt.time ? new Date(prevOpt.time).getTime() : NaN;
+          var sameTextPersisted = String(prevOpt.text || "").trim() === String(m.text || "").trim();
+          var sameKindPersisted =
+            (!!prevOpt.image === !!m.image) &&
+            (!!prevOpt.voice === !!m.voice) &&
+            (!!prevOpt.document === !!m.document);
+          var sameReplyPersisted =
+            String((prevOpt.replyTo && prevOpt.replyTo.id) || "") === String((m.replyTo && m.replyTo.id) || "");
+          var closePersisted = !isNaN(mtPersisted) && !isNaN(optTime) ? Math.abs(mtPersisted - optTime) < 15000 : sameTextPersisted;
+          if (!(sameTextPersisted && sameKindPersisted && sameReplyPersisted && closePersisted)) continue;
+          if (pokerChatMessageHasPersistedId(prevOpt.id)) {
+            persistedDupIdx = oi;
+            break;
+          }
+          optimisticDupIdx = oi;
+          break;
+        }
+        if (persistedDupIdx >= 0) {
+          var prevPersisted = out[persistedDupIdx];
+          var prevPersistedTime = prevPersisted && prevPersisted.time ? new Date(prevPersisted.time).getTime() : NaN;
+          var closeOwnPersisted =
+            peerChatIdsEqual(prevPersisted && prevPersisted.from || "", myId || "") &&
+            !isNaN(mtPersisted) &&
+            !isNaN(prevPersistedTime) &&
+            Math.abs(mtPersisted - prevPersistedTime) < 4000;
+          if (closeOwnPersisted) {
+            out[persistedDupIdx] = m;
+            seenId[persistedId] = true;
+            continue;
+          }
+        }
+        if (optimisticDupIdx >= 0) out.splice(optimisticDupIdx, 1);
+        if (seenId[persistedId]) continue;
+        seenId[persistedId] = true;
+        out.push(m);
+        continue;
+      }
+      var duplicateIdx = -1;
+      var mt = m.time ? new Date(m.time).getTime() : NaN;
+      for (var j = out.length - 1; j >= 0 && j >= out.length - 12; j--) {
+        var prev = out[j];
+        if (!prev || pokerChatMessageHasPersistedId(prev.id)) continue;
+        if (!peerChatIdsEqual(prev.from || "", m.from || "")) continue;
+        var pmt = prev.time ? new Date(prev.time).getTime() : NaN;
+        var sameText = String(prev.text || "").trim() === String(m.text || "").trim();
+        var sameKind =
+          (!!prev.image === !!m.image) &&
+          (!!prev.voice === !!m.voice) &&
+          (!!prev.document === !!m.document);
+        var sameReply =
+          String((prev.replyTo && prev.replyTo.id) || "") === String((m.replyTo && m.replyTo.id) || "");
+        var closeByTime = !isNaN(mt) && !isNaN(pmt) ? Math.abs(mt - pmt) < 5000 : sameText;
+        if (sameText && sameKind && sameReply && closeByTime) {
+          duplicateIdx = j;
+          break;
+        }
+      }
+      if (duplicateIdx >= 0) {
+        var prevMsg = out[duplicateIdx];
+        if (prevMsg.__clientOptimistic && !m.__clientOptimistic) out[duplicateIdx] = m;
+        continue;
+      }
+      out.push(m);
+    }
+    return out;
+  }
   function dedupePersonalMessagesForRender(messages) {
     messages = Array.isArray(messages) ? messages : [];
     var out = [];
@@ -26046,8 +26128,10 @@ function initChat() {
           (!!prev.image === !!m.image) &&
           (!!prev.voice === !!m.voice) &&
           (!!prev.document === !!m.document);
+        var sameReply =
+          String((prev.replyTo && prev.replyTo.id) || "") === String((m.replyTo && m.replyTo.id) || "");
         var closeByTime = !isNaN(mt) && !isNaN(pmt) ? Math.abs(mt - pmt) < 5000 : sameText;
-        if (sameText && sameKind && closeByTime) {
+        if (sameText && sameKind && sameReply && closeByTime) {
           duplicateIdx = j;
           break;
         }
@@ -26559,6 +26643,7 @@ function initChat() {
         }
         messages = mergeOptimisticGeneralIntoMessages(messages);
         messages = mergeIncomingPushGeneralIntoMessages(messages);
+        messages = dedupeGeneralMessagesForRender(messages);
         var prevGeneralCache =
           window._chatGeneralCache && typeof window._chatGeneralCache === "object" ? window._chatGeneralCache : {};
         var prevGeneralMessages = Array.isArray(prevGeneralCache.messages) ? prevGeneralCache.messages : [];
