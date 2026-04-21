@@ -32364,10 +32364,17 @@ function initChat() {
       function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
         if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
         var directComposer = null;
+        var shouldSnapToLatest = false;
         try {
           directComposer = getDirectChatComposer(chatActiveTab);
           if (!directComposer) directComposer = getDirectChatComposer(chatActiveTab === "personal" ? "general" : "personal");
         } catch (eHardDirectFind) {}
+        try {
+          var focusMessagesEl = getVisibleMessagesEl();
+          if (focusMessagesEl) {
+            shouldSnapToLatest = chatMessagesNearBottom(focusMessagesEl, Math.max(CHAT_SCROLL_BOTTOM_NEAR_PX, 240));
+          }
+        } catch (eHardNearBottom) {}
         try {
           if (directComposer && focusTarget === chatSharedComposerEl) {
             var carried = chatSharedComposerEl && chatSharedComposerEl.value != null ? String(chatSharedComposerEl.value) : "";
@@ -32437,6 +32444,25 @@ function initChat() {
             }
           }
         } catch (eHardDirect) {}
+        try {
+          if (shouldSnapToLatest) {
+            var settleToLatest = function () {
+              try {
+                var focusMessagesLate = getVisibleMessagesEl();
+                if (focusMessagesLate) focusMessagesLate.scrollTop = focusMessagesLate.scrollHeight;
+              } catch (eHardScrollLate) {}
+            };
+            var rafSnap = window.requestAnimationFrame || function (fn) {
+              setTimeout(fn, 16);
+            };
+            setTimeout(settleToLatest, 0);
+            setTimeout(settleToLatest, 120);
+            rafSnap(function () {
+              settleToLatest();
+              rafSnap(settleToLatest);
+            });
+          }
+        } catch (eHardScroll) {}
         collectChatOverscrollSnapshot(stageLabel || "focus:hard-disabled", focusTarget);
         return true;
       }
