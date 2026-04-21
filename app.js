@@ -32017,7 +32017,10 @@ function initChat() {
         clearChatMessagesKeyboardPad();
         updateChatKeyboardInnerHeightBaseline();
         try {
-          var taKbDone = document.getElementById("chatSharedComposer");
+          var taKbDone =
+            typeof isTelegramWebApp === "function" && isTelegramWebApp()
+              ? (chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl)
+              : document.getElementById("chatSharedComposer");
           if (taKbDone && typeof resizeChatTextarea === "function") resizeChatTextarea(taKbDone);
         } catch (eTaKb) {}
         try {
@@ -33627,7 +33630,13 @@ function initChat() {
           onChatInputBlur();
         });
       }
-      [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerKeyboardEvents);
+    (function () {
+      var chatComposerKeyboardTargets =
+        typeof isTelegramWebApp === "function" && isTelegramWebApp()
+          ? [chatGeneralComposerEl, chatPersonalComposerEl]
+          : [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl];
+      chatComposerKeyboardTargets.forEach(bindChatComposerKeyboardEvents);
+    })();
     })();
     window.chatRefresh = function () {
       pokerPushOpenTraceTransition("chatRefresh-enter", "");
@@ -34597,7 +34606,13 @@ function initChat() {
       });
       resizeChatTextarea(ta);
     }
-    [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl].forEach(bindChatComposerInputEvents);
+    (function () {
+      var chatComposerInputTargets =
+        typeof isTelegramWebApp === "function" && isTelegramWebApp()
+          ? [chatGeneralComposerEl, chatPersonalComposerEl]
+          : [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl];
+      chatComposerInputTargets.forEach(bindChatComposerInputEvents);
+    })();
     updateGeneralSendBtnIcon();
     var generalReplyCancel = document.querySelector("#chatGeneralReplyPreview .chat-reply-preview__cancel");
     if (generalReplyCancel) generalReplyCancel.addEventListener("click", function () {
