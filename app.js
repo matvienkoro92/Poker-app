@@ -32560,6 +32560,7 @@ function initChat() {
         return !!(gen || cv);
       }
       function isHardDisabledChatComposerFlowTarget(focusTarget) {
+        if (!isTelegramChatRuntime()) return false;
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
         var target = focusTarget || document.activeElement;
         if (!target) return false;
@@ -32575,6 +32576,7 @@ function initChat() {
         return false;
       }
       function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
+        if (!isTelegramChatRuntime()) return false;
         if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
         var directComposer = null;
         var shouldSnapToLatest = false;
