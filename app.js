@@ -26062,6 +26062,7 @@ function initChat() {
   function mergeOptimisticGeneralIntoMessages(messages) {
     messages = messages || [];
     if (!optimisticGeneralPayload || !sendingGeneral) return messages;
+    if (optimisticGeneralPayload.__domAppended) return messages;
     var myId = resolveMyChatMemberId();
     if (!myId || !optimisticGeneralPayload.from || !peerChatIdsEqual(optimisticGeneralPayload.from, myId)) return messages;
     var og = optimisticGeneralPayload;
@@ -28702,12 +28703,14 @@ function initChat() {
         replyTo: body.replyTo || null,
         from: resolveMyChatMemberId(),
         time: new Date().toISOString(),
+        __domAppended: false,
       };
       sendingGeneral = true;
       sendingGeneralSince = Date.now();
       setGeneralSendBusy(true);
       try {
         appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
+        if (optimisticGeneralPayload) optimisticGeneralPayload.__domAppended = true;
       } catch (e) {
         /* Не блокировать POST: в TG WKWebView innerHTML/append иногда падает — лента подтянется через mergeOptimistic + loadGeneral. */
         if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
