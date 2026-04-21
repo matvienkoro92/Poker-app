@@ -34907,10 +34907,11 @@ function initChat() {
       resizeChatTextarea(ta);
     }
     (function () {
-      var chatComposerInputTargets =
-        isTelegramChatRuntime()
-          ? [chatGeneralComposerEl, chatPersonalComposerEl]
-          : [chatSharedComposerEl, chatGeneralComposerEl, chatPersonalComposerEl];
+      var chatComposerInputTargets = [
+        chatSharedComposerEl,
+        chatGeneralComposerEl,
+        chatPersonalComposerEl
+      ];
       chatComposerInputTargets.forEach(bindChatComposerInputEvents);
     })();
     updateGeneralSendBtnIcon();
