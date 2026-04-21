@@ -22505,9 +22505,12 @@ function initChat() {
     ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
   }
   function getDirectTelegramChatComposer(mode) {
-    if (!isTelegramChatRuntime()) return null;
-    if (mode === "general") return chatGeneralComposerEl || null;
-    if (mode === "personal") return chatPersonalComposerEl || null;
+    if (mode === "general") {
+      return chatGeneralComposerEl || null;
+    }
+    if (mode === "personal") {
+      return chatPersonalComposerEl || null;
+    }
     return null;
   }
   function getDirectChatComposer(mode) {
