@@ -9461,6 +9461,9 @@ function getPokerResolvedTelegramUser() {
                 window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
               } catch (eEv) {}
               try {
+                pokerClearUiCachesAfterAuthSwitch();
+              } catch (eClearUiCaches) {}
+              try {
                 window.location.reload();
                 return;
               } catch (eReloadAfterEmailLogin) {}
@@ -14338,18 +14341,18 @@ function updateProfileDtId() {
   var el = document.getElementById("profileUserId");
   if (!el) return;
   var base = getApiBase();
-  var initData = tg && tg.initData ? tg.initData : "";
+  var authQ = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
   var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
   if (cached) {
     el.textContent = cached;
-    if (!base || !initData) return;
+    if (!base || !authQ || authQ === "?initData=") return;
   }
-  if (!base || !initData) {
+  if (!base || !authQ || authQ === "?initData=") {
     if (!cached) el.textContent = "\u2014";
     return;
   }
   el.textContent = "\u2026";
-  fetch(base + "/api/users?initData=" + encodeURIComponent(initData))
+  fetch(base + "/api/users" + authQ)
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok && data.dtId) {
@@ -14384,6 +14387,11 @@ function updateProfileDtId() {
           window.__pokerChatDisplayName = cdn;
           var cdnEl = document.getElementById("profileChatDisplayNameInput");
           if (cdnEl) cdnEl.value = cdn;
+          var nameEl = document.getElementById("profileUserName");
+          if (nameEl) {
+            var currentName = String(nameEl.textContent || "").trim().toLowerCase();
+            if (cdn && (!currentName || currentName === "гость")) nameEl.textContent = cdn;
+          }
         } catch (eCdn2) {}
       }
     })
@@ -14444,6 +14452,28 @@ function pokerClearSessionsAndReloadForLogin() {
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+
+function pokerClearUiCachesAfterAuthSwitch() {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(POKER_CHAT_CONTACTS_CACHE_KEY);
+      localStorage.removeItem(POKER_CHAT_GENERAL_DISK_KEY);
+      localStorage.removeItem(POKER_CHAT_PERSONAL_DISK_KEY);
+    }
+  } catch (eLocalCache) {}
+  try {
+    if (typeof sessionStorage !== "undefined") {
+      var removeKeys = [];
+      for (var i = 0; i < sessionStorage.length; i++) {
+        var key = sessionStorage.key(i);
+        if (key && key.indexOf("poker_avatar_data:") === 0) removeKeys.push(key);
+      }
+      removeKeys.forEach(function (key) {
+        try { sessionStorage.removeItem(key); } catch (eRm) {}
+      });
+    }
+  } catch (eSessionCache) {}
+}
 
 function initProfileExitBtn() {
   var btn = document.getElementById("profileExitBtn");
