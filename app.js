@@ -9303,8 +9303,8 @@ function getPokerResolvedTelegramUser() {
         "</button>" +
       "</div>" +
       '<div class="auth-banner__code-intro-wrap" role="note">' +
-        '<p class="auth-banner__code-intro">Введите email, который вы заранее привязали в профиле.</p>' +
-        '<p class="auth-banner__code-intro">Мы отправим на него код входа. Если почта ещё не привязана, сначала войдите через Telegram и добавьте её в профиле.</p>' +
+        '<p class="auth-banner__code-intro">Введите ваш email.</p>' +
+        '<p class="auth-banner__code-intro">Если аккаунт на эту почту уже есть, мы войдём в него. Если нет, создадим новый аккаунт TWO ACES и отправим код подтверждения.</p>' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
@@ -9356,7 +9356,10 @@ function getPokerResolvedTelegramUser() {
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
-            setEmailHint(data && data.ok ? "Код отправлен на почту." : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
+            var okMsg = "Код отправлен на почту.";
+            if (data && data.ok && data.mode === "register") okMsg = "Код отправлен на почту. После подтверждения создадим новый аккаунт.";
+            if (data && data.ok && data.mode === "login") okMsg = "Код отправлен на почту для входа.";
+            setEmailHint(data && data.ok ? okMsg : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
           })
           .catch(function () {
             setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
