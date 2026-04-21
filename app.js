@@ -31286,6 +31286,20 @@ function initChat() {
           }
         } catch (eSbClr) {}
       }
+      function hardResetTelegramChatMessagesKeyboardPad() {
+        if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) return;
+        try {
+          [generalMessages, messagesEl].forEach(function (el) {
+            if (!el || !el.style) return;
+            el.style.setProperty("padding-bottom", "0px", "important");
+            el.style.removeProperty("padding-bottom");
+          });
+        } catch (eTgPadHard) {}
+        try {
+          document.documentElement.style.removeProperty("--chat-vv-inset");
+          document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+        } catch (eTgPadVars) {}
+      }
       /**
        * Нижний отступ ленты: при position:fixed композера — только высота полосы + bottom (реальные пиксели),
        * без max() с --chat-vv-inset (иначе двойной учёт с dock bottom и «прыжки» при вводе).
@@ -31295,6 +31309,8 @@ function initChat() {
         logChatKeyboardDebug("pad-enter");
         if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
           clearChatMessagesKeyboardPad();
+          hardResetTelegramChatMessagesKeyboardPad();
+          logChatKeyboardDebug("pad-tg-hardoff");
           return;
         }
         if (enforceTelegramChatDefaultComposerState()) return;
@@ -33122,6 +33138,7 @@ function initChat() {
           try {
             setChatKeyboardOpenClasses(false);
             clearChatMessagesKeyboardPad();
+            hardResetTelegramChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
           } catch (eTgFocusClear) {}
           try {
