@@ -3496,6 +3496,7 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
   box-sizing: border-box !important;
   transform: none !important;
   margin-bottom: 0 !important;
+  padding-bottom: 4px !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
@@ -3536,6 +3537,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-conv-view .chat-container .chat-
   transform: none !important;
   margin-bottom: 0 !important;
   will-change: auto;
+  padding-bottom: 4px !important;
 }
 .chat-switcher-row {
   display: flex;
