@@ -890,6 +890,27 @@ function pokerRememberTransportMemberIdFromEnvironment() {
     }
   } catch (eTgUnsafe) {}
 }
+(function pokerBootstrapTransportMemberHint() {
+  function tick() {
+    try {
+      pokerRememberTransportMemberIdFromEnvironment();
+    } catch (eTick) {}
+  }
+  tick();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", tick, { once: true });
+  }
+  var attempts = 0;
+  var timer = setInterval(function () {
+    attempts += 1;
+    tick();
+    try {
+      if (pokerReadLastMemberIdHint() || attempts >= 20) clearInterval(timer);
+    } catch (eStop) {
+      if (attempts >= 20) clearInterval(timer);
+    }
+  }, 500);
+})();
 
 function pokerIsPwaDisplayStandalone() {
   try {
