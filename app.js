@@ -25750,24 +25750,57 @@ function initChat() {
       return dayDividerG + '<div class="' + cls + '"' + dataAttrs + '><div class="chat-msg__row">' + avatarEl + '<div class="' + bodyClass + '"><div class="chat-msg__meta">' + metaBlock + '</div>' + replyBlock + bodyMainHtmlG + reactionsRow + '</div></div></div>';
     }).join("");
   }
+  function getPersonalReceiptState(m, isOwn) {
+    var delivered = false;
+    var read = false;
+    if (!isOwn || !m) return { delivered: false, read: false };
+    var status = (m.deliveryStatus || m.status || m.state) != null ? String(m.deliveryStatus || m.status || m.state) : "";
+    status = status.toLowerCase();
+    if (status) {
+      if (status.indexOf("read") >= 0 || status.indexOf("seen") >= 0 || status.indexOf("прочит") >= 0) {
+        delivered = true;
+        read = true;
+      } else if (status.indexOf("deliver") >= 0 || status.indexOf("delivered") >= 0 || status.indexOf("достав") >= 0) {
+        delivered = true;
+      } else if (status.indexOf("sent") >= 0 || status.indexOf("send") >= 0 || status.indexOf("отправ") >= 0) {
+        delivered = false;
+        read = false;
+      }
+    }
+    if (m.peerHasRead === true) {
+      delivered = true;
+      read = true;
+    }
+    if (m.delivered === true || m.isDelivered === true || m.deliveredAt || m.delivered_at) delivered = true;
+    if (m.read === true || m.isRead === true || m.seen === true || m.isSeen === true || m.readAt || m.read_at || m.seenAt || m.seen_at) {
+      delivered = true;
+      read = true;
+    }
+    if (Array.isArray(m.readBy) && m.readBy.length) {
+      delivered = true;
+      read = true;
+    }
+    if (Array.isArray(m.seenBy) && m.seenBy.length) {
+      delivered = true;
+      read = true;
+    }
+    if (
+      !read &&
+      !delivered &&
+      pokerChatMessageHasPersistedId(m.id) &&
+      m.__clientOptimistic !== true &&
+      m.__pushPlaceholder !== true
+    ) {
+      delivered = true;
+    }
+    return { delivered: delivered, read: read };
+  }
   function buildPersonalMessagesBodyHtml(messages) {
     var myIdRenderP = resolveMyChatMemberId();
     function personalReceiptHtmlInline(m, isOwn) {
       if (!isOwn) return "";
-      var delivered = false;
-      var read = false;
-      var status = (m && (m.deliveryStatus || m.status || m.state)) != null ? String(m.deliveryStatus || m.status || m.state) : "";
-      status = status.toLowerCase();
-      if (status) {
-        if (status.indexOf("read") >= 0 || status.indexOf("seen") >= 0 || status.indexOf("прочит") >= 0) { delivered = true; read = true; }
-        else if (status.indexOf("deliver") >= 0 || status.indexOf("delivered") >= 0 || status.indexOf("достав") >= 0) delivered = true;
-      }
-      if (m) {
-        if (m.peerHasRead === true) { delivered = true; read = true; }
-        if (m.delivered === true || m.isDelivered === true || m.deliveredAt || m.delivered_at) delivered = true;
-        if (m.read === true || m.isRead === true || m.seen === true || m.isSeen === true || m.readAt || m.read_at || m.seenAt || m.seen_at) { delivered = true; read = true; }
-      }
-      return '<div class="chat-msg__ticks' + (delivered ? ' chat-msg__ticks--delivered' : ' chat-msg__ticks--sent') + (read ? ' chat-msg__ticks--read' : '') + '" aria-hidden="true">' + (delivered ? "✓✓" : "✓") + "</div>";
+      var receipt = getPersonalReceiptState(m, isOwn);
+      return '<div class="chat-msg__ticks' + (receipt.delivered ? ' chat-msg__ticks--delivered' : ' chat-msg__ticks--sent') + (receipt.read ? ' chat-msg__ticks--read' : '') + '" aria-hidden="true">' + (receipt.delivered ? "✓✓" : "✓") + "</div>";
     }
     return (messages || []).map(function (m, i) {
       var prev = i > 0 ? messages[i - 1] : null;
@@ -30471,61 +30504,14 @@ function initChat() {
     }
     function personalReceiptHtmlPrev(m, isOwn) {
       if (!isOwn) return "";
-      var delivered = false;
-      var read = false;
-      var status =
-        (m && (m.deliveryStatus || m.status || m.state)) != null
-          ? String(m.deliveryStatus || m.status || m.state)
-          : "";
-      status = status.toLowerCase();
-      if (status) {
-        if (status.indexOf("read") >= 0 || status.indexOf("seen") >= 0 || status.indexOf("прочит") >= 0) {
-          delivered = true;
-          read = true;
-        } else if (
-          status.indexOf("deliver") >= 0 ||
-          status.indexOf("delivered") >= 0 ||
-          status.indexOf("достав") >= 0
-        ) {
-          delivered = true;
-        } else if (status.indexOf("sent") >= 0 || status.indexOf("send") >= 0 || status.indexOf("отправ") >= 0) {
-          delivered = false;
-          read = false;
-        }
-      }
-      if (m) {
-        if (m.peerHasRead === true) {
-          delivered = true;
-          read = true;
-        }
-        if (m.delivered === true || m.isDelivered === true || m.deliveredAt || m.delivered_at) delivered = true;
-        if (
-          m.read === true ||
-          m.isRead === true ||
-          m.seen === true ||
-          m.isSeen === true ||
-          m.readAt ||
-          m.read_at ||
-          m.seenAt ||
-          m.seen_at
-        ) {
-          delivered = true;
-          read = true;
-        }
-        if (Array.isArray(m.readBy) && m.readBy.length) {
-          delivered = true;
-          read = true;
-        }
-        if (Array.isArray(m.seenBy) && m.seenBy.length) {
-          delivered = true;
-          read = true;
-        }
-      }
-      var textTicks = delivered ? "✓✓" : "✓";
+      var receipt = typeof getPersonalReceiptState === "function"
+        ? getPersonalReceiptState(m, isOwn)
+        : { delivered: false, read: false };
+      var textTicks = receipt.delivered ? "✓✓" : "✓";
       var cls =
         "chat-msg__ticks" +
-        (delivered ? " chat-msg__ticks--delivered" : " chat-msg__ticks--sent") +
-        (read ? " chat-msg__ticks--read" : "");
+        (receipt.delivered ? " chat-msg__ticks--delivered" : " chat-msg__ticks--sent") +
+        (receipt.read ? " chat-msg__ticks--read" : "");
       return '<div class="' + cls + '" aria-hidden="true">' + textTicks + "</div>";
     }
     var myIdRenderP = resolveMyChatMemberId();
