@@ -6851,22 +6851,31 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
 /* Галочки статуса (личные сообщения, только свои) */
 .chat-msg__ticks {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.45em;
   margin-left: 6px;
   font-size: 11px;
   line-height: 1;
-  color: var(--text-muted);
+  color: rgba(203, 213, 225, 0.72);
   user-select: none;
+  transition: color 140ms ease, opacity 140ms ease, text-shadow 140ms ease;
 }
-.chat-msg__ticks--sent { opacity: 0.75; }
+.chat-msg__ticks--sent {
+  color: rgba(203, 213, 225, 0.68);
+  opacity: 0.95;
+}
 /* Две галочки в одном узле (✓✓) — ближе друг к другу, как в мессенджерах */
 .chat-msg__ticks--delivered {
-  opacity: 0.9;
+  color: rgba(226, 232, 240, 0.92);
+  opacity: 1;
   letter-spacing: -0.28em;
   padding-right: 0.12em;
 }
 .chat-msg__ticks--read {
-  color: #22c55e;
+  color: #34d399;
   opacity: 1;
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.24);
 }
 .chat-msg--own .chat-msg__body {
   background: rgba(52, 82, 132, 0.94);
