@@ -9460,6 +9460,10 @@ function getPokerResolvedTelegramUser() {
               try {
                 window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
               } catch (eEv) {}
+              try {
+                window.location.reload();
+                return;
+              } catch (eReloadAfterEmailLogin) {}
               return;
             }
             setEmailHint((data && data.error) || "Не удалось войти.", true);
