@@ -14339,6 +14339,33 @@ function updateProfileUserMeta() {
   else metaEl.textContent = "";
 }
 
+function loadProfileDebugInfo() {
+  var el = document.getElementById("profileDebugInfo");
+  if (!el) return;
+  el.style.display = "none";
+  var base = getApiBase();
+  var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+  if (!base || !q || q === "?initData=") return;
+  fetch(base + "/api/account-debug" + q)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok || !data.account || !data.identity || !data.data) return;
+      var lines = [
+        "debug",
+        "memberId: " + (data.identity.memberId || "—"),
+        "dtId: " + (data.account.dtId || "—"),
+        "preferred: " + (data.account.preferredUserId || "—"),
+        "direct: " + (data.account.directUserId || "—"),
+        "chatName dt/legacy: " + String(data.data.chatDisplayDt || "—") + " / " + String(data.data.chatDisplayLegacy || "—"),
+        "respect dt/legacy: " + String(data.data.respectDt != null ? data.data.respectDt : "—") + " / " + String(data.data.respectLegacy != null ? data.data.respectLegacy : "—"),
+        "friends dt/legacy: " + String(data.data.friendsDt != null ? data.data.friendsDt : "—") + " / " + String(data.data.friendsLegacy != null ? data.data.friendsLegacy : "—"),
+      ];
+      el.textContent = lines.join("\n");
+      el.style.display = "block";
+    })
+    .catch(function () {});
+}
+
 function updateProfileDtId() {
   var el = document.getElementById("profileUserId");
   if (!el) return;
@@ -14400,6 +14427,7 @@ function updateProfileDtId() {
     .catch(function () {
       el.textContent = cached || "\u2014";
     });
+  loadProfileDebugInfo();
 }
 
 function updateProfileExitBtnVisibility() {
