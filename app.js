@@ -9211,15 +9211,25 @@ function getPokerResolvedTelegramUser() {
     m.setAttribute("data-pwa-enter-mounted", "1");
     m.innerHTML =
       '<div class="pwa-auth-screen__enter-actions">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterEmailBtn">Войти через почту</button>' +
         '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
         '<div class="pwa-auth-screen__guest-block">' +
         '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
         '<p class="pwa-auth-screen__guest-note">Гость не может участвовать в розыгрышах и общаться в чате</p>' +
         "</div>" +
       "</div>";
+    var emailBtn = document.getElementById("pwaAuthEnterEmailBtn");
     var btn = document.getElementById("pwaAuthEnterTelegramBtn");
     var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
-    if (!btn || !guestBtn) return true;
+    if (!emailBtn || !btn || !guestBtn) return true;
+    emailBtn.addEventListener("click", function () {
+      pokerSavePwaGuestMode(false);
+      try {
+        m.removeAttribute("data-pwa-enter-mounted");
+      } catch (e0) {}
+      m.innerHTML = "";
+      mountPwaEmailLogin(m);
+    });
     btn.addEventListener("click", function () {
       pokerSavePwaGuestMode(false);
       try {
@@ -9262,6 +9272,123 @@ function getPokerResolvedTelegramUser() {
     mountPwaStandaloneEnterButton();
   }
 
+  function mountPwaEmailLogin(mount) {
+    if (!mount) return;
+    if (mount.querySelector(".auth-banner__email-login")) return;
+    var wrap = document.createElement("div");
+    wrap.className = "auth-banner__email-login auth-banner__code-login";
+    wrap.innerHTML =
+      '<div class="auth-banner__code-row auth-banner__code-row--back">' +
+        '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaEmailBackBtn" aria-label="Назад к выбору входа">' +
+          '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
+        "</button>" +
+      "</div>" +
+      '<div class="auth-banner__code-intro-wrap" role="note">' +
+        '<p class="auth-banner__code-intro">Введите email, который вы заранее привязали в профиле.</p>' +
+        '<p class="auth-banner__code-intro">Мы отправим на него код входа. Если почта ещё не привязана, сначала войдите через Telegram и добавьте её в профиле.</p>' +
+      "</div>" +
+      '<div class="auth-banner__code-row">' +
+        '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
+      "</div>" +
+      '<div class="auth-banner__code-row">' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaEmailSendBtn">Получить код</button>' +
+      "</div>" +
+      '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaEmailHint" role="status" aria-live="polite"></div>' +
+      '<div class="auth-banner__code-row auth-banner__code-row--verify">' +
+        '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaEmailCodeInput" placeholder="Код из письма" inputmode="numeric" autocomplete="one-time-code" />' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">Войти</button>' +
+      "</div>";
+    mount.appendChild(wrap);
+
+    var backBtn = wrap.querySelector("#authPwaEmailBackBtn");
+    var emailInput = wrap.querySelector("#authPwaEmailInput");
+    var codeInput = wrap.querySelector("#authPwaEmailCodeInput");
+    var sendBtn = wrap.querySelector("#authPwaEmailSendBtn");
+    var verifyBtn = wrap.querySelector("#authPwaEmailVerifyBtn");
+    var hint = wrap.querySelector("#authPwaEmailHint");
+    var base = getTelegramAuthApiBase();
+    if (!base) return;
+
+    function setEmailHint(text, isError) {
+      if (!hint) return;
+      hint.textContent = text || "";
+      hint.classList.toggle("auth-banner__code-hint--error", !!isError);
+      hint.classList.toggle("auth-banner__code-hint--hidden", !text);
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener("click", function () {
+        remountPwaStandaloneEnterScreen();
+      });
+    }
+    if (codeInput) {
+      codeInput.addEventListener("input", function () {
+        codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+      });
+    }
+    if (sendBtn) {
+      sendBtn.addEventListener("click", function () {
+        var email = String(emailInput && emailInput.value ? emailInput.value : "").trim();
+        setEmailHint("Отправляем код…", false);
+        fetch(base + "/api/auth-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "request", email: email }),
+        })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (data) {
+            setEmailHint(data && data.ok ? "Код отправлен на почту." : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
+          })
+          .catch(function () {
+            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+          });
+      });
+    }
+    if (verifyBtn) {
+      verifyBtn.addEventListener("click", function () {
+        var email = String(emailInput && emailInput.value ? emailInput.value : "").trim();
+        var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
+        setEmailHint("Проверяем код…", false);
+        fetch(base + "/api/auth-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "verify", email: email, code: code }),
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data || {} }; });
+          })
+          .then(function (pack) {
+            var data = pack.data || {};
+            if (pack.res.ok && data.ok && data.user && data.pwaSession) {
+              var u = normalizeVerifiedUser(data.user, null);
+              if (
+                !pokerSavePwaTgSession(
+                  data.pwaSession,
+                  data.user,
+                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+                )
+              ) {
+                pwaSessionPersistenceWarning();
+              }
+              pokerSavePwaGuestMode(false);
+              window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+              updateHeaderGreeting();
+              showAuthorized(u);
+              loadHeaderAvatar();
+              try {
+                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
+              } catch (eEv) {}
+              return;
+            }
+            setEmailHint((data && data.error) || "Не удалось войти.", true);
+          })
+          .catch(function () {
+            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+          });
+      });
+    }
+  }
+
   function showAuthorized(user) {
     if (userEl) {
       var textEl = userEl.querySelector("#authUserText");
@@ -9296,6 +9423,7 @@ function getPokerResolvedTelegramUser() {
       }
       if (banner) banner.classList.add("auth-banner--hidden");
       showPwaAuthScreen();
+      remountPwaStandaloneEnterScreen();
     } else {
       if (banner) banner.classList.add("auth-banner--hidden");
     }
@@ -9910,6 +10038,7 @@ function getPokerResolvedTelegramUser() {
         setPwaAuthIdentifyingPhase(false);
         showUnauthorized();
         resetBannerForPwaLogin();
+        remountPwaStandaloneEnterScreen();
         mountTelegramLoginWidgetForPwa();
       } catch (ePwaFlow) {
         try {
@@ -10211,8 +10340,39 @@ function getPokerResolvedTelegramUser() {
     try {
       setPwaAuthIdentifyingPhase(false);
       showPwaAuthScreen();
+      remountPwaStandaloneEnterScreen();
       mountTelegramLoginWidgetForPwa();
     } catch (ePwaOpen) {}
+  };
+
+  window.__pokerShowLoggedOutState = function () {
+    try {
+      setPwaAuthIdentifyingPhase(false);
+    } catch (eIdOff) {}
+    try {
+      hideIdentifyingMini();
+    } catch (eMini) {}
+    try {
+      updateHeaderGreeting();
+    } catch (eHdr) {}
+    try {
+      showUnauthorized();
+    } catch (eUnauth) {}
+    try {
+      resetBannerForPwaLogin();
+    } catch (eBanner) {}
+    try {
+      remountPwaStandaloneEnterScreen();
+    } catch (eRemount) {}
+    try {
+      mountTelegramLoginWidgetForPwa();
+    } catch (eMount) {}
+    try {
+      updateProfileExitBtnVisibility();
+    } catch (eExitBtn) {}
+    try {
+      if (typeof loadHeaderAvatar === "function") loadHeaderAvatar();
+    } catch (eAvatar) {}
   };
 
   (function pokerBindBootOverlayRetryOnce() {
@@ -11291,6 +11451,7 @@ function setView(viewName, navOpts) {
     } catch (eFrC) {}
     initProfileKeyboardViewportCleanup();
     initProfileP21Id();
+    initProfileEmailAuth();
     initProfilePersonal();
     initProfileAvatar();
     syncProfileStatusVisual();
@@ -14100,6 +14261,11 @@ function updateProfileUserMeta() {
   var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
   var username = user && user.username ? user.username : "";
   if (username && !pokerHideRomanTelegramUsername(username)) parts.push("@" + String(username).replace(/^@+/, ""));
+  var linkedEmail = "";
+  try {
+    linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
+  } catch (eEmailMeta) {}
+  if (linkedEmail) parts.push(linkedEmail);
   if (parts.length) metaEl.textContent = " (" + parts.join(", ") + ")";
   else metaEl.textContent = "";
 }
@@ -14136,6 +14302,13 @@ function updateProfileDtId() {
         if (typeof localStorage !== "undefined") localStorage.setItem("poker_p21_id", p21Val);
         var p21Input = document.getElementById("profileP21IdInput");
         if (p21Input) p21Input.value = p21Val;
+      }
+      if (data && data.ok) {
+        try {
+          window.__pokerProfileLinkedEmail = data.email != null ? String(data.email).trim() : "";
+        } catch (eEmail) {}
+        if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
+        if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
       }
       if (data && data.ok && data.personalInfo != null) {
         var personalInput = document.getElementById("profilePersonalInput");
@@ -14199,6 +14372,12 @@ function pokerClearSessionsAndReloadForLogin() {
   try {
     delete window.__pokerChatDisplayName;
   } catch (eCdnL) {}
+  try {
+    if (typeof window.__pokerShowLoggedOutState === "function") {
+      window.__pokerShowLoggedOutState();
+      return;
+    }
+  } catch (eShowLogin) {}
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
@@ -14362,6 +14541,112 @@ function initProfileP21Id() {
     input.value = (input.value || "").replace(/\D/g, "").slice(0, 6);
   });
   if (saveBtn) saveBtn.addEventListener("click", saveP21Id);
+}
+
+function syncProfileEmailAuthUi() {
+  var section = document.getElementById("profileEmailAuthSection");
+  var textEl = document.getElementById("profileEmailAuthText");
+  var linkedRow = document.getElementById("profileEmailAuthLinkedRow");
+  var linkedValue = document.getElementById("profileEmailAuthLinkedValue");
+  var emailInput = document.getElementById("profileEmailAuthInput");
+  var codeInput = document.getElementById("profileEmailAuthCodeInput");
+  var sendBtn = document.getElementById("profileEmailAuthSendBtn");
+  var verifyBtn = document.getElementById("profileEmailAuthVerifyBtn");
+  var auth = window.__pokerTelegramAuth;
+  var isGuest = !!(auth && auth.status === "guest");
+  var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
+  var linkedEmail = "";
+  try {
+    linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
+  } catch (e) {}
+  if (section) section.hidden = false;
+  if (linkedRow) linkedRow.hidden = !linkedEmail;
+  if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
+  if (textEl) {
+    if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";
+    else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
+    else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
+  }
+  var disableInputs = !isVerified || isGuest;
+  if (emailInput) {
+    emailInput.disabled = disableInputs;
+    if (linkedEmail && !emailInput.value) emailInput.value = linkedEmail;
+  }
+  if (codeInput) codeInput.disabled = disableInputs;
+  if (sendBtn) sendBtn.disabled = disableInputs;
+  if (verifyBtn) verifyBtn.disabled = disableInputs;
+}
+
+function initProfileEmailAuth() {
+  var emailInput = document.getElementById("profileEmailAuthInput");
+  var codeInput = document.getElementById("profileEmailAuthCodeInput");
+  var sendBtn = document.getElementById("profileEmailAuthSendBtn");
+  var verifyBtn = document.getElementById("profileEmailAuthVerifyBtn");
+  var feedback = document.getElementById("profileEmailAuthFeedback");
+  if (!emailInput || !codeInput || !sendBtn || !verifyBtn) return;
+  if (sendBtn.dataset.bound === "1") {
+    syncProfileEmailAuthUi();
+    return;
+  }
+  sendBtn.dataset.bound = "1";
+  var base = getApiBase();
+  function setFeedback(text, isError) {
+    if (!feedback) return;
+    feedback.textContent = text || "";
+    feedback.style.color = isError ? "#ef4444" : "";
+  }
+  function authBody(extra) {
+    return pokerGuestOrAuthedPostBody(extra || {});
+  }
+  codeInput.addEventListener("input", function () {
+    codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+  });
+  sendBtn.addEventListener("click", function () {
+    if (!base) {
+      setFeedback("Сервер недоступен.", true);
+      return;
+    }
+    setFeedback("Отправляем код…", false);
+    fetch(base + "/api/auth-email-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(authBody({ action: "request", email: emailInput.value })),
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        setFeedback(data && data.ok ? "Код отправлен на почту." : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
+      })
+      .catch(function () {
+        setFeedback(POKER_NET_ERR, true);
+      });
+  });
+  verifyBtn.addEventListener("click", function () {
+    if (!base) {
+      setFeedback("Сервер недоступен.", true);
+      return;
+    }
+    setFeedback("Проверяем код…", false);
+    fetch(base + "/api/auth-email-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(authBody({ action: "verify", email: emailInput.value, code: codeInput.value })),
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.ok) {
+          window.__pokerProfileLinkedEmail = data.email ? String(data.email).trim() : String(emailInput.value || "").trim();
+          setFeedback("Почта привязана.", false);
+          syncProfileEmailAuthUi();
+          updateProfileUserMeta();
+          return;
+        }
+        setFeedback((data && data.error) || "Не удалось привязать почту.", true);
+      })
+      .catch(function () {
+        setFeedback(POKER_NET_ERR, true);
+      });
+  });
+  syncProfileEmailAuthUi();
 }
 
 var cashoutDepositFormBound = false;
@@ -14619,6 +14904,7 @@ function initProfileFriends() {
               .replace(/"/g, "&quot;");
           };
           var id = esc(f.userId || "");
+          var chatUserId = esc(f.chatUserId || "");
           var dataName = esc(forModal);
           var htmlLabels = contact
             ? '<span class="friends-list-modal__item-labels">' +
@@ -14635,6 +14921,8 @@ function initProfileFriends() {
           return (
             '<div class="friends-list-modal__item" data-user-id="' +
             id +
+            '" data-chat-user-id="' +
+            chatUserId +
             '" data-user-name="' +
             dataName +
             '">' +
@@ -14653,10 +14941,11 @@ function initProfileFriends() {
               e.preventDefault();
               e.stopPropagation();
               var id = item.dataset.userId;
+              var chatId = item.dataset.chatUserId || "";
               var name = item.dataset.userName;
-              if (id && typeof window.openChatUserModalById === "function") {
+              if ((id || chatId) && typeof window.openChatUserModalById === "function") {
                 closeFriendsModal();
-                window.openChatUserModalById(id, name);
+                window.openChatUserModalById(id || chatId, name);
               }
             });
           }

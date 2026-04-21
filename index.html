@@ -4245,6 +4245,39 @@
                 <button type="button" class="profile-chat-name__guest-btn" id="profileGuestAuthBtn">Авторизоваться</button>
               </div>
             </div>
+            <section class="profile-email-auth" id="profileEmailAuthSection">
+              <h2 class="profile-section__title">Вход по почте</h2>
+              <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
+              <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
+                <span class="profile-email-auth__label">Привязан email:</span>
+                <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
+              </div>
+              <div class="profile-email-auth__form">
+                <input
+                  type="email"
+                  id="profileEmailAuthInput"
+                  class="profile-chat-name__input"
+                  placeholder="your@email.com"
+                  aria-label="Email для входа"
+                  autocomplete="email"
+                />
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthSendBtn">Получить код</button>
+                  <input
+                    type="text"
+                    id="profileEmailAuthCodeInput"
+                    class="profile-chat-name__input profile-chat-name__input--id"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="Код"
+                    aria-label="Код подтверждения email"
+                    autocomplete="one-time-code"
+                  />
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthVerifyBtn">Привязать</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileEmailAuthFeedback" aria-live="polite"></span>
+              </div>
+            </section>
             <section class="profile-friends">
               <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
             </section>

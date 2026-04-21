@@ -26818,6 +26818,49 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-visible-to-others__p21-feedback:empty {
   display: none;
 }
+.profile-email-auth {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+.profile-email-auth__text {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.profile-email-auth__linked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text);
+}
+.profile-email-auth__label {
+  color: var(--text-muted);
+}
+.profile-email-auth__value {
+  font-weight: 600;
+}
+.profile-email-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-email-auth__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.profile-email-auth__actions .profile-chat-name__input--id {
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .profile-email-auth__actions {
+    grid-template-columns: 1fr;
+  }
+}
 
 .profile-status {
   margin-top: 0;
