@@ -1206,6 +1206,7 @@ function pokerGetChatMemberIdForPushCache() {
     var _auth = window.__pokerTelegramAuth;
     if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
       var u = _auth.user;
+      if (u.memberId != null && String(u.memberId).trim() !== "") return String(u.memberId).trim();
       var raw = String(u.id);
       if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) return raw;
       if (u.is_vk || u.vk) return "vk_" + raw;
@@ -8693,6 +8694,7 @@ function getPokerResolvedTelegramUser() {
     if (serverUser && serverUser.id != null) {
       return {
         id: serverUser.id,
+        memberId: serverUser.memberId != null ? String(serverUser.memberId).trim() : "",
         first_name: serverUser.first_name != null ? serverUser.first_name : "",
         last_name: serverUser.last_name != null ? serverUser.last_name : "",
         username: serverUser.username != null ? serverUser.username : "",
@@ -18367,6 +18369,7 @@ function initRaffles() {
     }
     try {
       var recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (recTg && recTg.user && recTg.user.memberId) add(recTg.user.memberId);
       if (recTg && recTg.user && recTg.user.id != null) add("tg_" + recTg.user.id);
     } catch (eT) {}
     try {
@@ -20832,6 +20835,7 @@ function getVisitorId() {
   try {
     var _auth = window.__pokerTelegramAuth;
     if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
+      if (_auth.user.memberId != null && String(_auth.user.memberId).trim() !== "") return String(_auth.user.memberId).trim();
       return "tg_" + _auth.user.id;
     }
   } catch (eAuth) {}
@@ -24380,6 +24384,7 @@ function initChat() {
       var _auth = window.__pokerTelegramAuth;
       if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
         var u = _auth.user;
+        if (u.memberId != null && String(u.memberId).trim() !== "") return String(u.memberId).trim();
         var raw = String(u.id);
         if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) return raw;
         if (u.is_vk || u.vk) return "vk_" + raw;
