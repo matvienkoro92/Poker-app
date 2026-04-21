@@ -524,6 +524,7 @@ function pokerReadPwaVkSessionToken() {
 function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   var rec = { token: token, user: userObj };
   if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
+  if (sessionExtra && sessionExtra.authMethod) rec.authMethod = String(sessionExtra.authMethod).trim().toLowerCase();
   var payload = JSON.stringify(rec);
   var ok = false;
   try {
@@ -547,7 +548,7 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
 }
 
 function pokerSavePwaVkSession(token, userObj) {
-  var payload = JSON.stringify({ token: token, user: userObj });
+  var payload = JSON.stringify({ token: token, user: userObj, authMethod: "telegram" });
   var ok = false;
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
@@ -9246,7 +9247,7 @@ function getPokerResolvedTelegramUser() {
               !pokerSavePwaTgSession(
                 data.pwaSession,
                 data.user,
-                data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+                data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
               )
             )
               pwaSessionPersistenceWarning();
@@ -9551,7 +9552,7 @@ function getPokerResolvedTelegramUser() {
                 !pokerSavePwaTgSession(
                   data.pwaSession,
                   data.user,
-                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "email" } : { authMethod: "email" }
                 )
               ) {
                 pwaSessionPersistenceWarning();
@@ -9952,7 +9953,7 @@ function getPokerResolvedTelegramUser() {
             !pokerSavePwaTgSession(
               data.pwaSession,
               data.user,
-              data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+              data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
             )
           )
             pwaSessionPersistenceWarning();
@@ -10201,6 +10202,7 @@ function getPokerResolvedTelegramUser() {
         if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
         window.__pokerTelegramAuth = _authRestore;
         pokerMaybeRememberMemberIdFromUser(uP);
+        pokerSetAuthMethod(so.authMethod || "telegram");
         updateHeaderGreeting();
         showAuthorized(uP);
         loadHeaderAvatar();
