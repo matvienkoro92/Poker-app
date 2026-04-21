@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.019">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.020">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4195,8 +4195,6 @@
               <h1 class="title">Профиль</h1>
               <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn">Войти в аккаунт</button>
             </div>
-            <pre id="profileDebugInfo" style="margin:6px 0 10px;padding:8px 10px;background:#fff3cd;color:#5c4400;border-radius:10px;font-size:13px;font-weight:700;white-space:pre-wrap;">DEBUG 2.019
-loading...</pre>
             <p class="profile-greeting">
               Привет, <span id="profileUserName">имя</span><span class="profile-user-meta" id="profileUserMeta"></span>, здесь все твои достижения в клубе Два туза.
             </p>
@@ -4254,7 +4252,7 @@ loading...</pre>
                 <span class="profile-email-auth__label">Привязан email:</span>
                 <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
               </div>
-              <div class="profile-email-auth__form">
+              <div class="profile-email-auth__form" id="profileEmailAuthForm">
                 <input
                   type="email"
                   id="profileEmailAuthInput"
@@ -4278,6 +4276,16 @@ loading...</pre>
                   <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthVerifyBtn">Привязать</button>
                 </div>
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileEmailAuthFeedback" aria-live="polite"></span>
+              </div>
+            </section>
+            <section class="profile-email-auth" id="profileTelegramLinkSection" hidden>
+              <h2 class="profile-section__title">Вход через Telegram</h2>
+              <p class="profile-email-auth__text" id="profileTelegramLinkText">Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.</p>
+              <div class="profile-email-auth__form">
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileTelegramLinkBtn">Привязать Telegram</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileTelegramLinkFeedback" aria-live="polite"></span>
               </div>
             </section>
             <section class="profile-friends">

@@ -839,6 +839,7 @@ function pokerApiHasCredential() {
 }
 
 var POKER_LAST_MEMBER_ID_KEY = "poker_last_member_id";
+var POKER_AUTH_METHOD_KEY = "poker_auth_method";
 function pokerRememberLastMemberId(memberId) {
   try {
     var v = String(memberId || "").trim();
@@ -852,6 +853,20 @@ function pokerReadLastMemberIdHint() {
     var v = localStorage.getItem(POKER_LAST_MEMBER_ID_KEY);
     v = String(v || "").trim();
     return v.indexOf("tg_") === 0 || v.indexOf("vk_") === 0 ? v : "";
+  } catch (e) {
+    return "";
+  }
+}
+function pokerSetAuthMethod(method) {
+  try {
+    var v = String(method || "").trim().toLowerCase();
+    if (!v) localStorage.removeItem(POKER_AUTH_METHOD_KEY);
+    else localStorage.setItem(POKER_AUTH_METHOD_KEY, v);
+  } catch (e) {}
+}
+function pokerGetAuthMethod() {
+  try {
+    return String(localStorage.getItem(POKER_AUTH_METHOD_KEY) || "").trim().toLowerCase();
   } catch (e) {
     return "";
   }
@@ -9239,6 +9254,7 @@ function getPokerResolvedTelegramUser() {
             var _authPwaCode = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authPwaCode.gazettePlannerAccess = true;
             window.__pokerTelegramAuth = _authPwaCode;
+            pokerSetAuthMethod("telegram");
             updateHeaderGreeting();
             showAuthorized(u);
             loadHeaderAvatar();
@@ -9543,6 +9559,7 @@ function getPokerResolvedTelegramUser() {
               pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
               pokerMaybeRememberMemberIdFromUser(u);
+              pokerSetAuthMethod("email");
               updateHeaderGreeting();
               showAuthorized(u);
               loadHeaderAvatar();
@@ -9944,6 +9961,7 @@ function getPokerResolvedTelegramUser() {
           if (data.gazettePlannerAccess === true) _authTgWidget.gazettePlannerAccess = true;
           window.__pokerTelegramAuth = _authTgWidget;
           pokerMaybeRememberMemberIdFromUser(u);
+          pokerSetAuthMethod("telegram");
           updateHeaderGreeting();
           showAuthorized(u);
           loadHeaderAvatar();
@@ -10198,6 +10216,7 @@ function getPokerResolvedTelegramUser() {
       if (soV && soV.user && soV.user.id != null && soV.token) {
         var uVk = normalizeVerifiedUser(soV.user, null);
         window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
+        pokerSetAuthMethod("telegram");
         updateHeaderGreeting();
         showAuthorized(uVk);
         loadHeaderAvatar();
@@ -10326,6 +10345,7 @@ function getPokerResolvedTelegramUser() {
             if (data.gazettePlannerAccess === true) _authMini.gazettePlannerAccess = true;
             window.__pokerTelegramAuth = _authMini;
             pokerMaybeRememberMemberIdFromUser(u);
+            pokerSetAuthMethod("telegram");
             if (data.pwaSession && data.user) {
               if (
                 !pokerSavePwaTgSession(
@@ -14451,44 +14471,7 @@ function updateProfileUserMeta() {
 }
 
 function loadProfileDebugInfo() {
-  var el = document.getElementById("profileDebugInfo");
-  if (!el) return;
-  el.textContent = "debug\nloading...";
-  el.style.display = "block";
-  var base = getApiBase();
-  var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-  if (!base || !q || q === "?initData=") {
-    el.textContent = "debug\nno auth";
-    return;
-  }
-  fetch(base + "/api/account-debug" + q)
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (!data || !data.ok || !data.account || !data.identity || !data.data) {
-        var err = data && data.error ? String(data.error) : "bad payload";
-        el.textContent = "debug\nerror: " + err;
-        el.style.display = "block";
-        return;
-      }
-      var lines = [
-        "debug",
-        "memberId: " + (data.identity.memberId || "—"),
-        "dtId: " + (data.account.dtId || "—"),
-        "preferred: " + (data.account.preferredUserId || "—"),
-        "direct: " + (data.account.directUserId || "—"),
-        "linked: " + ((data.account.linkedUserIds && data.account.linkedUserIds.length) ? data.account.linkedUserIds.join(", ") : "—"),
-        "clientHint: " + (typeof pokerReadLastMemberIdHint === "function" ? (pokerReadLastMemberIdHint() || "—") : "—"),
-        "chatName dt/legacy: " + String(data.data.chatDisplayDt || "—") + " / " + String(data.data.chatDisplayLegacy || "—"),
-        "respect dt/legacy: " + String(data.data.respectDt != null ? data.data.respectDt : "—") + " / " + String(data.data.respectLegacy != null ? data.data.respectLegacy : "—"),
-        "friends dt/legacy: " + String(data.data.friendsDt != null ? data.data.friendsDt : "—") + " / " + String(data.data.friendsLegacy != null ? data.data.friendsLegacy : "—"),
-      ];
-      el.textContent = lines.join("\n");
-      el.style.display = "block";
-    })
-    .catch(function (e) {
-      el.textContent = "debug\nfetch error";
-      el.style.display = "block";
-    });
+  return;
 }
 
 function updateProfileDtId() {
@@ -14805,13 +14788,16 @@ function syncProfileEmailAuthUi() {
   var textEl = document.getElementById("profileEmailAuthText");
   var linkedRow = document.getElementById("profileEmailAuthLinkedRow");
   var linkedValue = document.getElementById("profileEmailAuthLinkedValue");
+  var formWrap = document.getElementById("profileEmailAuthForm");
   var emailInput = document.getElementById("profileEmailAuthInput");
   var codeInput = document.getElementById("profileEmailAuthCodeInput");
   var sendBtn = document.getElementById("profileEmailAuthSendBtn");
   var verifyBtn = document.getElementById("profileEmailAuthVerifyBtn");
+  var tgSection = document.getElementById("profileTelegramLinkSection");
   var auth = window.__pokerTelegramAuth;
   var isGuest = !!(auth && auth.status === "guest");
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
+  var authMethod = pokerGetAuthMethod();
   var linkedEmail = "";
   try {
     linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
@@ -14819,11 +14805,14 @@ function syncProfileEmailAuthUi() {
   if (section) section.hidden = false;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
+  if (tgSection) tgSection.hidden = !(isVerified && !isGuest && authMethod === "email");
   if (textEl) {
     if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";
+    else if (authMethod === "email" && linkedEmail) textEl.textContent = "Вы вошли по этой почте. Это ваш текущий способ входа.";
     else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
     else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
   }
+  if (formWrap) formWrap.hidden = !!(authMethod === "email" && linkedEmail);
   var disableInputs = !isVerified || isGuest;
   if (emailInput) {
     emailInput.disabled = disableInputs;
@@ -14840,6 +14829,8 @@ function initProfileEmailAuth() {
   var sendBtn = document.getElementById("profileEmailAuthSendBtn");
   var verifyBtn = document.getElementById("profileEmailAuthVerifyBtn");
   var feedback = document.getElementById("profileEmailAuthFeedback");
+  var tgLinkBtn = document.getElementById("profileTelegramLinkBtn");
+  var tgLinkFeedback = document.getElementById("profileTelegramLinkFeedback");
   if (!emailInput || !codeInput || !sendBtn || !verifyBtn) return;
   if (sendBtn.dataset.bound === "1") {
     syncProfileEmailAuthUi();
@@ -14903,6 +14894,22 @@ function initProfileEmailAuth() {
         setFeedback(POKER_NET_ERR, true);
       });
   });
+  if (tgLinkBtn && tgLinkBtn.dataset.bound !== "1") {
+    tgLinkBtn.dataset.bound = "1";
+    tgLinkBtn.addEventListener("click", function () {
+      try {
+        if (tgLinkFeedback) tgLinkFeedback.textContent = "";
+        if (typeof window.__pokerOpenPwaLoginScreen === "function") {
+          window.__pokerOpenPwaLoginScreen();
+          if (tgLinkFeedback) tgLinkFeedback.textContent = "Откройте вход через Telegram и завершите привязку.";
+        } else if (tgLinkFeedback) {
+          tgLinkFeedback.textContent = "Откройте вход через Telegram на этом устройстве.";
+        }
+      } catch (eTgLink) {
+        if (tgLinkFeedback) tgLinkFeedback.textContent = "Не удалось открыть привязку Telegram.";
+      }
+    });
+  }
   syncProfileEmailAuthUi();
 }
 
