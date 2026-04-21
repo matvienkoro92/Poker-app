@@ -11516,6 +11516,9 @@ function setView(viewName, navOpts) {
     updateProfileExitBtnVisibility();
     updateProfileDtId();
     try {
+      if (typeof loadProfileDebugInfo === "function") loadProfileDebugInfo();
+    } catch (eProfileDebugInit) {}
+    try {
       if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
     } catch (eFrC) {}
     initProfileKeyboardViewportCleanup();
@@ -39462,6 +39465,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (typeof updateProfileUserName === "function") updateProfileUserName();
     if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
     if (typeof updateProfileDtId === "function") updateProfileDtId();
+    try {
+      if (typeof loadProfileDebugInfo === "function") loadProfileDebugInfo();
+    } catch (eAuthDebug) {}
     try {
       if (typeof pokerHydrateChatSnapshotsFromDisk === "function") {
         pokerHydrateChatSnapshotsFromDisk();
