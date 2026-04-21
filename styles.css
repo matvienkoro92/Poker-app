@@ -11944,6 +11944,21 @@ html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-top {
   width: 100% !important;
   pointer-events: auto !important;
 }
+html.app--telegram-miniapp body[data-view="chat"],
+html.poker-telegram-miniapp body[data-view="chat"],
+html.app--telegram-miniapp body[data-view="chat"] #app.app,
+html.poker-telegram-miniapp body[data-view="chat"] #app.app,
+html.app--telegram-miniapp body[data-view="chat"] .app,
+html.poker-telegram-miniapp body[data-view="chat"] .app,
+html.app--telegram-miniapp body[data-view="chat"] .card:has(.view--active[data-view="chat"]),
+html.poker-telegram-miniapp body[data-view="chat"] .card:has(.view--active[data-view="chat"]),
+html.app--telegram-miniapp body[data-view="chat"] .card:has(.view--active[data-view="chat"]) .card__content,
+html.poker-telegram-miniapp body[data-view="chat"] .card:has(.view--active[data-view="chat"]) .card__content,
+html.app--telegram-miniapp body[data-view="chat"] .view--active[data-view="chat"],
+html.poker-telegram-miniapp body[data-view="chat"] .view--active[data-view="chat"] {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: none !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
