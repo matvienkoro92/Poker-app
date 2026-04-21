@@ -22469,13 +22469,25 @@ function initChat() {
       if (chatGeneralComposerEl && chatGeneralComposerMount && !chatGeneralComposerMount.contains(chatGeneralComposerEl)) {
         chatGeneralComposerMount.appendChild(chatGeneralComposerEl);
       }
+      try {
+        if (typeof bindChatComposerInputEvents === "function") bindChatComposerInputEvents(chatGeneralComposerEl);
+      } catch (eBindGenComposer) {}
     }
     if (!chatPersonalComposerEl) {
       chatPersonalComposerEl = createDedicatedChatComposer("chatPersonalComposer", "Сообщение...", "");
       if (chatPersonalComposerEl && chatPersonalComposerMount && !chatPersonalComposerMount.contains(chatPersonalComposerEl)) {
         chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
       }
+      try {
+        if (typeof bindChatComposerInputEvents === "function") bindChatComposerInputEvents(chatPersonalComposerEl);
+      } catch (eBindPersonalComposer) {}
     }
+    try {
+      if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+    } catch (eUpdGenComposer) {}
+    try {
+      if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+    } catch (eUpdPersonalComposer) {}
     return !!(chatGeneralComposerEl && chatPersonalComposerEl);
   }
   function ensureTelegramDedicatedChatComposers() {
