@@ -3360,6 +3360,10 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
   padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
 }
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
+}
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages > .chat-msg:last-child,
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages > .chat-msg:last-child {
   margin-bottom: max(88px, calc(56px + env(safe-area-inset-bottom, 0px))) !important;

@@ -31670,6 +31670,12 @@ function initChat() {
         if (!document.body.classList.contains("chat-keyboard-open")) return;
         var box0 = getVisibleMessagesEl();
         if (!box0) return;
+        var isIosPwaPad =
+          !isTelegramChatRuntime() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset() &&
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport();
         /* До смены padding: иначе после роста pad расстояние до низа > CHAT_SCROLL_BOTTOM_NEAR_PX и snap «у низа» не сработает. */
         var nearBeforeLift = false;
         try {
@@ -31677,7 +31683,7 @@ function initChat() {
             nearBeforeLift = chatMessagesNearBottom(box0, CHAT_SCROLL_BOTTOM_NEAR_PX);
           }
         } catch (eNear0) {}
-        clearChatMessagesKeyboardPad();
+        if (!isIosPwaPad) clearChatMessagesKeyboardPad();
         var box = getVisibleMessagesEl();
         if (!box) return;
         if (!document.body.classList.contains("chat-keyboard-open")) return;
@@ -31770,14 +31776,7 @@ function initChat() {
           }
           try {
             var screenSafeBottomPad = getChatScreenSafeAreaBottomPx();
-            var isPwaIosPad =
-              typeof isTelegramWebApp === "function" &&
-              !isTelegramChatRuntime() &&
-              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
-              pokerPwaStandaloneForKeyboardInset() &&
-              typeof isIosLikeForChatViewport === "function" &&
-              isIosLikeForChatViewport();
-            if (isPwaIosPad) {
+            if (isIosPwaPad) {
               /* Для iOS PWA считаем запас от реальной видимой строки ввода, а не от клавиатурного cover:
                * иначе снизу появляется лишний резерв и последнее сообщение не доезжает до нужной позиции. */
               var pwaViewportHeight = window.innerHeight || 0;
@@ -33726,7 +33725,7 @@ function initChat() {
           pokerPwaStandaloneForKeyboardInset();
         try {
           window.__pokerChatPwaSettleToBottomAfterKeyboard =
-            !!(isIosPwaChatKb && getVisibleMessagesEl() && chatMessagesNearBottom(getVisibleMessagesEl(), CHAT_SCROLL_BOTTOM_NEAR_PX));
+            false;
         } catch (ePwaSettleFlag) {
           window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
         }
@@ -33743,9 +33742,9 @@ function initChat() {
         }
         if (isIosChatKb) {
           if (isIosPwaChatKb) {
-            setTimeout(function () {
+            requestAnimationFrame(function () {
               syncPwaChatVisualViewportInset();
-            }, 0);
+            });
           } else if (!isTelegramChatFocus) {
             setTimeout(function () {
               syncPwaChatVisualViewportInset();
@@ -33819,7 +33818,16 @@ function initChat() {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
                   try {
-                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard && !isTelegramChatRuntime()) {
+                    if (
+                      window.__pokerChatPwaSettleToBottomAfterKeyboard &&
+                      !isTelegramChatRuntime() &&
+                      !(
+                        typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+                        pokerPwaStandaloneForKeyboardInset() &&
+                        typeof isIosLikeForChatViewport === "function" &&
+                        isIosLikeForChatViewport()
+                      )
+                    ) {
                       var settleBox = getVisibleMessagesEl();
                       if (settleBox) settleBox.scrollTop = settleBox.scrollHeight;
                       var settleRaf = window.requestAnimationFrame || function (fn) {
