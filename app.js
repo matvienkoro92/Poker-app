@@ -22593,7 +22593,7 @@ function initChat() {
     });
   }
   function bindTelegramIosComposeOverlayGate(area, mode) {
-    if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return;
+    if (isTelegramChatRuntime()) return;
     if (!area || area.__pokerIosOverlayGateBound) return;
     area.__pokerIosOverlayGateBound = true;
     function gateOpen(event) {
@@ -22936,6 +22936,11 @@ function initChat() {
         if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
       } catch (ePd) {}
       scheduleTelegramIosChatComposerOverlaySync();
+      return;
+    }
+    if (isTelegramChatRuntime()) {
+      chatComposerMounted = "detached";
+      chatComposerEl = chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
       return;
     }
     chatComposerEl = chatSharedComposerEl;
@@ -31393,7 +31398,7 @@ function initChat() {
                * Иначе getComputedStyle даёт 0 на кадре или подмешивается сырой vv — лента и строка дёргаются разными величинами.
                */
               var dockPxStore = Number(window.__pokerChatThreadDockBottomCssPx);
-              var isTmaPad = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+              var isTmaPad = isTelegramChatRuntime();
               if (
                 isTmaPad &&
                 barEl.classList.contains("chat-input-area--vv-dock") &&
@@ -31414,7 +31419,7 @@ function initChat() {
                       }
                     }
                   } else {
-                    if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+                    if (isTelegramChatRuntime()) {
                       var twPad2 = window.Telegram && window.Telegram.WebApp;
                       if (twPad2 && twPad2.viewportStableHeight != null && twPad2.viewportHeight != null) {
                         var tsP2 = Number(twPad2.viewportStableHeight);
@@ -31459,7 +31464,7 @@ function initChat() {
             var screenSafeBottomPad = getChatScreenSafeAreaBottomPx();
             var isPwaIosPad =
               typeof isTelegramWebApp === "function" &&
-              !isTelegramWebApp() &&
+              !isTelegramChatRuntime() &&
               typeof pokerPwaStandaloneForKeyboardInset === "function" &&
               pokerPwaStandaloneForKeyboardInset() &&
               typeof isIosLikeForChatViewport === "function" &&
@@ -31539,8 +31544,7 @@ function initChat() {
         var shouldSnapAfterLift = !isChatPhysicalKeyboardContext() && nearBeforeLift;
         try {
           var pwaIosNear =
-            typeof isTelegramWebApp === "function" &&
-            !isTelegramWebApp() &&
+            !isTelegramChatRuntime() &&
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
@@ -31689,7 +31693,7 @@ function initChat() {
         /* Android Chrome / PWA */
         if (/Android/i.test(navigator.userAgent || "") && navigator.maxTouchPoints > 0) return true;
         /* Telegram: окно частично поджимается, но без translate поле часто остаётся под клавиатурой — подъём нужен; inset ниже чуть смягчён под TG. */
-        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return true;
+        if (isTelegramChatRuntime()) return true;
         /* Мобильный Safari/Chrome вне TG: иначе при открытой клавиатуре sync обнулял inset и поле не поднималось. */
         try {
           if (
@@ -31714,7 +31718,7 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
-        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+        if (isTelegramChatRuntime()) {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
@@ -31722,7 +31726,7 @@ function initChat() {
           doc.style.removeProperty("--chat-ios-accessory-inset");
           return;
         }
-        var tgAcc = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+        var tgAcc = isTelegramChatRuntime();
         var vv = window.visualViewport;
         var ih = window.innerHeight || 0;
         var vvh = Number(vv.height) || 0;
@@ -31751,10 +31755,7 @@ function initChat() {
       }
       function getPwaChatThreadAccessoryInsetPx() {
         try {
-          if (
-            typeof isTelegramWebApp === "function" &&
-            isTelegramWebApp()
-          ) return 0;
+          if (isTelegramChatRuntime()) return 0;
           if (!isIosLikeForChatViewport()) return 0;
           if (!pokerPwaStandaloneForKeyboardInset()) return 0;
           if (!document.body.classList.contains("chat-keyboard-open")) return 0;
@@ -32231,7 +32232,6 @@ function initChat() {
         try {
           isComposerTarget =
             target === chatComposerEl ||
-            target === chatSharedComposerEl ||
             target === chatGeneralComposerEl ||
             target === chatPersonalComposerEl ||
             (!!chatGeneralComposerMount && chatGeneralComposerMount.contains(target)) ||
@@ -32244,7 +32244,7 @@ function initChat() {
       }
       /** Зазор между низом полосы ввода и верхом клавиатуры (TMA — ровно 5px по UX). */
       function getChatComposerKeyboardGapPx() {
-        if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return 5;
+        if (isTelegramChatRuntime()) return 5;
         if (
           isIosLikeForChatViewport() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
@@ -32264,8 +32264,7 @@ function initChat() {
       function getChatComposerMandatoryBottomOffsetPx() {
         var safeBottom = getChatScreenSafeAreaBottomPx();
         if (
-          typeof isTelegramWebApp === "function" &&
-          !isTelegramWebApp() &&
+          !isTelegramChatRuntime() &&
           typeof isIosLikeForChatViewport === "function" &&
           isIosLikeForChatViewport() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
@@ -32567,7 +32566,7 @@ function initChat() {
         } catch (ePwaDockAcc) {}
         try {
           var ihLim = window.innerHeight || 0;
-          var isTgDock = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+          var isTgDock = isTelegramChatRuntime();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           var focusAgeDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           var isPwaIosDockFinal =
@@ -32609,15 +32608,13 @@ function initChat() {
         try {
           prevB = window.__pokerChatLastAppliedDockBottom;
           var isPwaIosDock =
-            typeof isTelegramWebApp === "function" &&
-            !isTelegramWebApp() &&
+            !isTelegramChatRuntime() &&
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport();
           var dockEps =
-            typeof isTelegramWebApp === "function" &&
-            isTelegramWebApp() &&
+            isTelegramChatRuntime() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
               ? 12
@@ -32637,8 +32634,7 @@ function initChat() {
           if (
             prevB != null &&
             prevB > 0 &&
-            typeof isTelegramWebApp === "function" &&
-            isTelegramWebApp() &&
+            isTelegramChatRuntime() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
@@ -32650,8 +32646,7 @@ function initChat() {
           if (
             prevB != null &&
             prevB > 0 &&
-            typeof isTelegramWebApp === "function" &&
-            isTelegramWebApp() &&
+            isTelegramChatRuntime() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
@@ -32672,8 +32667,7 @@ function initChat() {
         if (pwaAccessoryInset > 0) {
           try {
             var isPwaIosAcc =
-              typeof isTelegramWebApp === "function" &&
-              !isTelegramWebApp() &&
+              !isTelegramChatRuntime() &&
               typeof pokerPwaStandaloneForKeyboardInset === "function" &&
               pokerPwaStandaloneForKeyboardInset() &&
               typeof isIosLikeForChatViewport === "function" &&
@@ -32710,15 +32704,13 @@ function initChat() {
           window.getComputedStyle(target0).position === "fixed" &&
           (
             (
-              typeof isTelegramWebApp === "function" &&
-              isTelegramWebApp() &&
+              isTelegramChatRuntime() &&
               typeof isIosLikeForChatViewport === "function" &&
               isIosLikeForChatViewport() &&
               window.__pokerChatTmaDockTabKey === tabKey
             ) ||
             (
-              typeof isTelegramWebApp === "function" &&
-              !isTelegramWebApp() &&
+              !isTelegramChatRuntime() &&
               typeof pokerPwaStandaloneForKeyboardInset === "function" &&
               pokerPwaStandaloneForKeyboardInset()
             )
@@ -32773,7 +32765,7 @@ function initChat() {
         if (enforceTelegramChatDefaultComposerState()) return;
         var dvNoVv = String(document.body.getAttribute("data-view") || "");
         var useThreadDockFallback =
-          isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
+          isChatThreadComposerKeyboardDom() && !isTelegramChatRuntime();
         var ihFb = window.innerHeight || 0;
         var capFb = Math.min(520, Math.round(ihFb * 0.55));
         var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -33265,8 +33257,7 @@ function initChat() {
         var isIosChatKb = isIosLikeForChatViewport();
         var isIosPwaChatKb =
           isIosChatKb &&
-          typeof isTelegramWebApp === "function" &&
-          !isTelegramWebApp() &&
+          !isTelegramChatRuntime() &&
           typeof pokerPwaStandaloneForKeyboardInset === "function" &&
           pokerPwaStandaloneForKeyboardInset();
         try {
@@ -33350,8 +33341,7 @@ function initChat() {
                 });
               }
               var skipVv220 =
-                typeof isTelegramWebApp === "function" &&
-                isTelegramWebApp() &&
+                isTelegramChatRuntime() &&
                 document.body.classList.contains("chat-keyboard-open") &&
                 typeof isChatThreadComposerKeyboardDom === "function" &&
                 isChatThreadComposerKeyboardDom();
@@ -33363,7 +33353,7 @@ function initChat() {
                     syncPwaChatVisualViewportInset();
                   } catch (eVvIos) {}
                   try {
-                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard && !(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+                    if (window.__pokerChatPwaSettleToBottomAfterKeyboard && !isTelegramChatRuntime()) {
                       var settleBox = getVisibleMessagesEl();
                       if (settleBox) settleBox.scrollTop = settleBox.scrollHeight;
                       var settleRaf = window.requestAnimationFrame || function (fn) {
@@ -33448,7 +33438,7 @@ function initChat() {
           var ih = window.innerHeight || 0;
           if (ih < 200) return false;
           var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          var tg = typeof isTelegramWebApp === "function" && isTelegramWebApp();
+          var tg = isTelegramChatRuntime();
           if (tw && tg) {
             var tgvH = Number(tw.viewportHeight);
             var tgvS = Number(tw.viewportStableHeight);
@@ -33962,7 +33952,7 @@ function initChat() {
         if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
           window.__pokerActivateChatKeyboardViewport();
         } else {
-          if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+          if (!isTelegramChatRuntime()) {
             document.documentElement.classList.add("chat-keyboard-open");
             document.body.classList.add("chat-keyboard-open");
           }
@@ -34573,6 +34563,12 @@ function initChat() {
         pokerAutosizeTextarea(ta, { maxHeight: 140, minHeight: 44 });
       }
     }
+    function isDirectMountedChatComposer(ta, mode) {
+      if (!ta) return false;
+      if (mode === "general") return ta === chatGeneralComposerEl || (!!chatGeneralComposerMount && chatGeneralComposerMount.contains(ta));
+      if (mode === "personal") return ta === chatPersonalComposerEl || (!!chatPersonalComposerMount && chatPersonalComposerMount.contains(ta));
+      return false;
+    }
     function bindChatComposerInputEvents(ta) {
       if (!ta || ta.__pokerChatInputEventsBound) return;
       ta.__pokerChatInputEventsBound = true;
@@ -34604,8 +34600,8 @@ function initChat() {
             updateGeneralSendBtnIcon();
             updatePersonalSendBtnIcon();
             resizeChatTextarea(ta);
-            if (chatComposerMounted === "general") showTemplatesMenu("general");
-            else if (chatComposerMounted === "personal") showTemplatesMenu("personal");
+            if (isDirectMountedChatComposer(ta, "general") || chatComposerMounted === "general") showTemplatesMenu("general");
+            else if (isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") showTemplatesMenu("personal");
           }
         } catch (err) {}
       });
@@ -34634,10 +34630,10 @@ function initChat() {
             return;
           }
         } catch (eKd) {}
-        if (chatComposerMounted === "personal") {
+        if (isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") {
           e.preventDefault();
           sendMessage();
-        } else if (chatComposerMounted === "general") {
+        } else if (isDirectMountedChatComposer(ta, "general") || chatComposerMounted === "general") {
           e.preventDefault();
           sendGeneral();
         }
@@ -35254,7 +35250,7 @@ function initChat() {
       if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
         window.__pokerActivateChatKeyboardViewport();
       } else {
-        if (!(typeof isTelegramWebApp === "function" && isTelegramWebApp())) {
+        if (!isTelegramChatRuntime()) {
           document.documentElement.classList.add("chat-keyboard-open");
           document.body.classList.add("chat-keyboard-open");
         }
