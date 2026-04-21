@@ -838,6 +838,25 @@ function pokerApiHasCredential() {
   return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
 }
 
+var POKER_LAST_MEMBER_ID_KEY = "poker_last_member_id";
+function pokerRememberLastMemberId(memberId) {
+  try {
+    var v = String(memberId || "").trim();
+    if (!v) return;
+    if (!(v.indexOf("tg_") === 0 || v.indexOf("vk_") === 0)) return;
+    localStorage.setItem(POKER_LAST_MEMBER_ID_KEY, v);
+  } catch (e) {}
+}
+function pokerReadLastMemberIdHint() {
+  try {
+    var v = localStorage.getItem(POKER_LAST_MEMBER_ID_KEY);
+    v = String(v || "").trim();
+    return v.indexOf("tg_") === 0 || v.indexOf("vk_") === 0 ? v : "";
+  } catch (e) {
+    return "";
+  }
+}
+
 function pokerIsPwaDisplayStandalone() {
   try {
     if (window.__pokerDisplayStandaloneBoot === true) return true;
@@ -9406,7 +9425,12 @@ function getPokerResolvedTelegramUser() {
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "request", email: email, dtIdHint: getEmailDtIdHint() }),
+          body: JSON.stringify({
+            action: "request",
+            email: email,
+            dtIdHint: getEmailDtIdHint(),
+            memberIdHint: pokerReadLastMemberIdHint(),
+          }),
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
@@ -9429,7 +9453,13 @@ function getPokerResolvedTelegramUser() {
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "verify", email: email, code: code }),
+          body: JSON.stringify({
+            action: "verify",
+            email: email,
+            code: code,
+            dtIdHint: getEmailDtIdHint(),
+            memberIdHint: pokerReadLastMemberIdHint(),
+          }),
         })
           .then(function (res) {
             return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data || {} }; });
@@ -14402,6 +14432,11 @@ function updateProfileDtId() {
       if (data && data.ok && data.dtId) {
         sessionStorage.setItem("poker_dt_id", data.dtId);
         if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
+        try {
+          if (typeof window.pokerResolveMyChatMemberId === "function") {
+            pokerRememberLastMemberId(window.pokerResolveMyChatMemberId());
+          }
+        } catch (eRememberMid) {}
         el.textContent = data.dtId;
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
       } else {
