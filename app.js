@@ -21957,6 +21957,7 @@ function initChat() {
       var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
       var wrapRect = wrap && wrap.getBoundingClientRect ? wrap.getBoundingClientRect() : null;
       var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
+      var msgsRect = msgs && msgs.getBoundingClientRect ? msgs.getBoundingClientRect() : null;
       return {
         areaTop: areaRect ? Math.round(areaRect.top) : 0,
         areaH: areaRect ? Math.round(areaRect.height) : 0,
@@ -21964,11 +21965,18 @@ function initChat() {
         wrapH: wrapRect ? Math.round(wrapRect.height) : 0,
         taTop: taRect ? Math.round(taRect.top) : 0,
         taH: taRect ? Math.round(taRect.height) : 0,
+        msgsTop: msgsRect ? Math.round(msgsRect.top) : 0,
+        msgsH: msgsRect ? Math.round(msgsRect.height) : 0,
         msgPad: msgs && msgs.style ? String(msgs.style.paddingBottom || "") : "",
         msgScroll: msgs ? Math.round(msgs.scrollTop || 0) : 0,
+        msgScrollH: msgs ? Math.round(msgs.scrollHeight || 0) : 0,
+        msgClientH: msgs ? Math.round(msgs.clientHeight || 0) : 0,
         areaPos: area ? String(getComputedStyle(area).position || "") : "",
         areaBottom: area ? String(getComputedStyle(area).bottom || "") : "",
-        areaTransform: area ? String(getComputedStyle(area).transform || "") : ""
+        areaTransform: area ? String(getComputedStyle(area).transform || "") : "",
+        areaDisplay: area ? String(getComputedStyle(area).display || "") : "",
+        areaVis: area ? String(getComputedStyle(area).visibility || "") : "",
+        taBottom: taRect ? Math.round(taRect.bottom) : 0
       };
     } catch (eDbgGeom) {
       return null;
@@ -22043,13 +22051,20 @@ function initChat() {
         areaH: geom.areaH || 0,
         wrapTop: geom.wrapTop || 0,
         wrapH: geom.wrapH || 0,
+        msgsTop: geom.msgsTop || 0,
+        msgsH: geom.msgsH || 0,
         taTop: geom.taTop || 0,
         taH: geom.taH || 0,
+        taBottom: geom.taBottom || 0,
         msgPad: geom.msgPad || "",
         msgScroll: geom.msgScroll || 0,
+        msgScrollH: geom.msgScrollH || 0,
+        msgClientH: geom.msgClientH || 0,
         areaPos: geom.areaPos || "",
         areaBottom: geom.areaBottom || "",
         areaTransform: geom.areaTransform || "",
+        areaDisplay: geom.areaDisplay || "",
+        areaVis: geom.areaVis || "",
         safeBottom: safeBottom,
         winY: Math.round(window.scrollY || 0),
         active: getChatKeyboardDebugNodeLabel(active),
@@ -22082,19 +22097,22 @@ function initChat() {
       );
       lines.push(
         "cont:" + snap.contTop + "+" + snap.contH +
-        "area:" + snap.areaTop + "+" + snap.areaH +
+        " msgs:" + snap.msgsTop + "+" + snap.msgsH +
+        " area:" + snap.areaTop + "+" + snap.areaH +
           " wrap:" + snap.wrapTop + "+" + snap.wrapH +
-          " ta:" + snap.taTop + "+" + snap.taH
+          " ta:" + snap.taTop + "+" + snap.taH + "/" + snap.taBottom
       );
       lines.push(
         "pos:" + snap.areaPos +
           " bottom:" + snap.areaBottom +
           " pad:" + snap.msgPad +
-          " scr:" + snap.msgScroll +
+          " scr:" + snap.msgScroll + "/" + snap.msgScrollH + "/" + snap.msgClientH +
           " winY:" + snap.winY
       );
       lines.push(
         "tr:" + snap.areaTransform +
+          " dsp:" + snap.areaDisplay +
+          " vis:" + snap.areaVis +
           " kb:" + snap.htmlKb + "/" + snap.bodyKb +
           " safe:" + snap.safeBottom
       );
@@ -29435,8 +29453,92 @@ function initChat() {
   try {
     window.__pokerPeerChatIdsEqual = peerChatIdsEqual;
   } catch (ePeerExpose) {}
-  function pokerDebugChatOverscroll(stage, payload) {}
-  function collectChatOverscrollSnapshot(stage, focusTarget, extra) {}
+  function pokerDebugChatOverscroll(stage, payload) {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    try {
+      var suffix = "";
+      if (payload && typeof payload === "object") {
+        var parts = [];
+        Object.keys(payload).forEach(function (key) {
+          var value = payload[key];
+          if (value == null || value === "") return;
+          parts.push(String(key) + "=" + String(value));
+        });
+        if (parts.length) suffix = parts.join(" ");
+      }
+      logChatKeyboardDebug(String(stage || "overscroll"), suffix);
+    } catch (eDbgOver) {}
+  }
+  function collectChatOverscrollSnapshot(stage, focusTarget, extra) {
+    if (!shouldShowChatKeyboardDebugPanel()) return;
+    try {
+      var snap = getChatKeyboardDebugSnapshot() || {};
+      var rootStyle = null;
+      try {
+        rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+      } catch (eDbgRootStyle) {}
+      var viewChat = document.querySelector('.view[data-view="chat"]');
+      var viewRect = viewChat && viewChat.getBoundingClientRect ? viewChat.getBoundingClientRect() : null;
+      var generalRect = generalView && generalView.getBoundingClientRect ? generalView.getBoundingClientRect() : null;
+      var convRect = convView && convView.getBoundingClientRect ? convView.getBoundingClientRect() : null;
+      var msgs = typeof getVisibleMessagesEl === "function" ? getVisibleMessagesEl() : null;
+      var msgsRect = msgs && msgs.getBoundingClientRect ? msgs.getBoundingClientRect() : null;
+      var area = getActiveChatInputArea();
+      var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
+      var ta =
+        (area && area.querySelector ? area.querySelector("textarea") : null) ||
+        chatGeneralComposerEl ||
+        chatPersonalComposerEl ||
+        chatComposerEl ||
+        null;
+      var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
+      var scrollEl = document.scrollingElement || document.documentElement || document.body;
+      var payload = {
+        stage: stage || "",
+        focus: getChatKeyboardDebugNodeLabel(focusTarget || document.activeElement),
+        activeTab: chatActiveTab || "",
+        mounted: chatComposerMounted || "",
+        runtimeTg: isTelegramChatRuntime() ? 1 : 0,
+        activeShared: ta === chatSharedComposerEl ? 1 : 0,
+        activeGeneral: ta === chatGeneralComposerEl ? 1 : 0,
+        activePersonal: ta === chatPersonalComposerEl ? 1 : 0,
+        view: viewRect ? Math.round(viewRect.top) + "+" + Math.round(viewRect.height) : "",
+        gen: generalRect ? Math.round(generalRect.top) + "+" + Math.round(generalRect.height) : "",
+        conv: convRect ? Math.round(convRect.top) + "+" + Math.round(convRect.height) : "",
+        msgs: msgsRect ? Math.round(msgsRect.top) + "+" + Math.round(msgsRect.height) : "",
+        area: areaRect ? Math.round(areaRect.top) + "+" + Math.round(areaRect.height) : "",
+        ta: taRect ? Math.round(taRect.top) + "+" + Math.round(taRect.height) : "",
+        msgScr: msgs ? Math.round(msgs.scrollTop || 0) : 0,
+        msgH: msgs ? Math.round(msgs.scrollHeight || 0) + "/" + Math.round(msgs.clientHeight || 0) : "",
+        rootScr: scrollEl ? Math.round(scrollEl.scrollTop || 0) : 0,
+        winY: Math.round(window.scrollY || 0),
+        vv: snap.vvh ? snap.vvh + "/" + snap.vvTop + "/" + snap.vvPageTop : "",
+        tgV: snap.tgVh ? snap.tgVh + "/" + snap.tgVs : "",
+        kb: (document.documentElement.classList.contains("chat-keyboard-open") ? 1 : 0) + "/" + (document.body.classList.contains("chat-keyboard-open") ? 1 : 0),
+        areaPos: snap.areaPos || "",
+        areaBottom: snap.areaBottom || "",
+        areaTf: snap.areaTransform || "",
+        areaCls: area && area.className ? String(area.className).replace(/\s+/g, ".") : "",
+        taId: ta && ta.id ? ta.id : "",
+        docVv: rootStyle ? String(rootStyle.getPropertyValue("--chat-vv-inset") || "").trim() : "",
+        docAcc: rootStyle ? String(rootStyle.getPropertyValue("--chat-ios-accessory-inset") || "").trim() : "",
+        dockBottom: Number(window.__pokerChatThreadDockBottomCssPx) || 0,
+        lastPad: Number(window.__pokerChatMessagesKeyboardPadLast) || 0,
+        lastCover: Number(window.__pokerChatTgKeyboardCoverLast) || 0,
+        lastDock: Number(window.__pokerChatLastAppliedDockBottom) || 0,
+        focusAge: Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0)),
+        openingUntil: Math.max(0, (Number(window.__pokerChatKeyboardOpeningUntil) || 0) - Date.now())
+      };
+      if (extra && typeof extra === "object") {
+        Object.keys(extra).forEach(function (key) {
+          payload[key] = extra[key];
+        });
+      }
+      pokerDebugChatOverscroll("snap", payload);
+    } catch (eDbgCollect) {
+      logChatKeyboardDebug("snap-err", String((eDbgCollect && eDbgCollect.message) || eDbgCollect || ""));
+    }
+  }
   function syncChatDialogPreviewAddFriendBtn() {
     var btn = document.getElementById("chatDialogPreviewAddFriendBtn");
     var modal = document.getElementById("chatDialogPreviewModal");
@@ -31342,10 +31444,12 @@ function initChat() {
        */
       function updateChatMessagesKeyboardPad() {
         logChatKeyboardDebug("pad-enter");
+        collectChatOverscrollSnapshot("pad:enter");
         if (isTelegramChatRuntime()) {
           clearChatMessagesKeyboardPad();
           hardResetTelegramChatMessagesKeyboardPad();
           logChatKeyboardDebug("pad-tg-hardoff");
+          collectChatOverscrollSnapshot("pad:tg-hardoff");
           return;
         }
         if (enforceTelegramChatDefaultComposerState()) return;
@@ -31535,6 +31639,11 @@ function initChat() {
         } catch (eDbgPad) {}
         box.style.paddingBottom = pad + "px";
         logChatKeyboardDebug("pad-set", "pad=" + pad + " btm=" + btm + " fixed=" + (barFixed ? 1 : 0));
+        collectChatOverscrollSnapshot("pad:set", {
+          pad: pad,
+          btm: btm,
+          fixed: barFixed ? 1 : 0
+        });
         try {
           if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
             window.__pokerScheduleSyncChatScrollBottomButtons();
@@ -32509,6 +32618,7 @@ function initChat() {
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
+        collectChatOverscrollSnapshot("dock:enter", { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime()) {
           stripChatInputAreaTransforms();
@@ -32683,9 +32793,13 @@ function initChat() {
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
         } catch (eDockPx) {}
-        try {
-          updateTelegramMiniAppChatThreadDebugOverlay("apply", { cover: coverNum, bottom: bottomPx });
-        } catch (eDbgApply) {}
+          try {
+            updateTelegramMiniAppChatThreadDebugOverlay("apply", { cover: coverNum, bottom: bottomPx });
+          } catch (eDbgApply) {}
+        collectChatOverscrollSnapshot("dock:apply", {
+          cover: coverNum,
+          bottom: bottomPx
+        });
         /*
          * Каждый sync вызывал stripChatInputAreaTransforms: снимались position/bottom и класс vv-dock — на кадр полоса
          * теряла fixed и визуально «прыгала». В TMA+iOS при том же табе обновляем только bottom.
@@ -32813,6 +32927,7 @@ function initChat() {
       }
       function syncPwaChatVisualViewportInset() {
         logChatKeyboardDebug("vv-sync-enter");
+        collectChatOverscrollSnapshot("vv:enter");
         var doc = document.documentElement;
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime()) {
@@ -32822,6 +32937,7 @@ function initChat() {
           clearTelegramChatRootShiftCompensation();
           applyTelegramChatRootShiftCompensation();
           logChatKeyboardDebug("vv-sync-tg-hardoff");
+          collectChatOverscrollSnapshot("vv:tg-hardoff");
           return;
         }
         if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
@@ -33106,6 +33222,12 @@ function initChat() {
           applyChatIosAccessoryInsetFromViewport();
         }
         if (document.body.classList.contains("chat-keyboard-open")) updateChatMessagesKeyboardPad();
+        collectChatOverscrollSnapshot("vv:exit", {
+          inset: inset,
+          cover: coverPxDock,
+          tg: tg ? 1 : 0,
+          threadDock: useThreadDock ? 1 : 0
+        });
       }
       window.__pokerSyncPwaChatVisualViewportInset = syncPwaChatVisualViewportInset;
       try {
@@ -33500,6 +33622,7 @@ function initChat() {
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed = isChatKeyboardLayoutEffectivelyClosed;
       function onChatInputBlur() {
         logChatKeyboardDebug("blur");
+        collectChatOverscrollSnapshot("blur:start");
         try {
           clearTelegramChatRootShiftCompensation();
         } catch (eTgShiftBlur) {}
