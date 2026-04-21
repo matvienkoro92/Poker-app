@@ -264,6 +264,52 @@ PWA-проблема глубже и сложнее локального `paddin
 1. строка больше не улетает вверх;
 2. клавиатура открывается на прямом composer;
 3. временные красные debug-логи убраны из UI.
+
+## 14. Поздний регресс PWA и что его реально вызвало
+
+После серии Telegram composer-fix'ов позже всплыл отдельный регресс в PWA:
+
+1. composer снова мог подниматься только на часть высоты;
+2. иногда он не поднимался вообще;
+3. визуально это выглядело как старый PWA keyboard bug, хотя сломался уже не исходный PWA path, а его пересечение с Telegram fallback-логикой.
+
+### Что оказалось причиной
+
+Подтверждённый корень:
+
+1. `hardDisableChatComposerViewportLift()` и `isHardDisabledChatComposerFlowTarget()` были оставлены без жёсткого Telegram-scope;
+2. из-за этого PWA composer тоже мог случайно попадать в Telegram hard-disable контур;
+3. PWA тогда выходил не в свой штатный `visualViewport / pad / dock` сценарий, а в чужой Telegram-only bypass;
+4. именно это и возвращало старые симптомы:
+   - полуподнятый composer,
+   - отсутствие нормального lift,
+   - непредсказуемую посадку строки.
+
+### Что реально починило PWA-регресс
+
+Рабочий фикс:
+
+- `b7772c1` — `Scope hard-disabled composer flow to Telegram`
+
+Смысл фикса:
+
+1. `hardDisableChatComposerViewportLift()` теперь вообще не должен срабатывать вне Telegram runtime;
+2. `isHardDisabledChatComposerFlowTarget()` тоже ограничен только Telegram;
+3. после этого PWA снова идёт по своему родному keyboard path:
+   - `visualViewport`,
+   - `updateChatMessagesKeyboardPad()`,
+   - `vv-dock`/pad/final positioning логике,
+   - без Telegram hard-disable обходов.
+
+### Важное правило на будущее
+
+Если в проект снова добавляется Telegram-specific keyboard/composer guard, его нельзя оставлять глобальным.
+
+Нужно сразу проверять:
+
+1. есть ли жёсткий Telegram-only scope;
+2. может ли этот guard зацепить PWA;
+3. не подменяет ли он собой нормальный PWA lift path.
 2. Шапка чата реально лучше всего чинится через inline writer, что подтвердилось инспектором.
 3. PWA-проблема после клавиатуры глубже простого `padding` и сидит в общем chat-layout reset.
 

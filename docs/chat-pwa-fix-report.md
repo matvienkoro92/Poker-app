@@ -123,6 +123,20 @@
 2. Любой новый эксперимент делать узким и обратимым.
 3. Если фикс улучшает финальную посадку, но добавляет рывок, такой фикс не оставлять.
 
+### Дополнительное правило после позднего регресса
+
+Позже в проекте был подтверждён отдельный PWA-регресс, вызванный уже не самим PWA path, а тем, что Telegram-specific hard-disable логика случайно стала доступна и для PWA composer.
+
+Подтверждённый вывод:
+
+1. любые Telegram-only keyboard/composer bypass-ветки должны быть жёстко ограничены Telegram runtime;
+2. нельзя оставлять их как “общие чатовые” guard'ы;
+3. иначе PWA перестаёт идти по своему штатному `visualViewport / pad / dock` сценарию и получает старые симптомы подъёма строки.
+
+Фикс, который подтвердил это правило:
+
+- `b7772c1` — `Scope hard-disabled composer flow to Telegram`
+
 ## Основные коммиты этого цикла
 
 ### Friend-actions
@@ -142,6 +156,7 @@
 - `3ebc529` — `Lower raised iOS PWA last chat message by 7px`
 - `613d7d0` — `Reduce iOS PWA chat lift jitter on focus`
 - `ff6371e` — `Revert "Defer iOS PWA chat pad updates until keyboard settles"`
+- `b7772c1` — `Scope hard-disabled composer flow to Telegram`
 
 ## Основные файлы
 
