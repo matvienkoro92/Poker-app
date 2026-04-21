@@ -218,6 +218,52 @@ PWA-проблема глубже и сложнее локального `paddin
 ### Что подтверждено
 
 1. Telegram iOS баг строки ввода был связан с `chat-input-area--vv-dock` и переводом `.chat-input-area` в `fixed`.
+2. Одного отключения `vv-dock` было недостаточно, потому что чат иногда сваливался в старый fallback-путь через `chatSharedComposer`.
+3. В проблемном рантайме Telegram не всегда корректно проходил через detector, поэтому часть Telegram-guard'ов не срабатывала.
+4. Из-за этого после нормального первого кадра включался старый `visualViewport` pipeline:
+   - активировался `chatSharedComposer`,
+   - приходил delayed `vv:debounced`,
+   - `applyChatThreadComposerKeyboardDockFromCover()` снова переводил `.chat-input-area` в `fixed`,
+   - `updateChatMessagesKeyboardPad()` мог писать огромный `padding-bottom`.
+5. `Keyboard Lab` помог доказать, что сам Telegram WebView не был главным источником бага: минимальный экран вёл себя стабильно, а ломался именно боевой chat-shell.
+
+## 12. Финальный диагноз и что реально починило баг
+
+Финальный диагноз:
+
+1. Проблема была не в одном CSS-правиле и не в самой клавиатуре Telegram.
+2. Корень был в том, что боевой чат иногда шёл не по прямому composer-flow, а по старому fallback-сценарию.
+3. Этот fallback использовал:
+   - `chatSharedComposer`,
+   - `visualViewport` keyboard sync,
+   - `vv:debounced`,
+   - `chat-input-area--vv-dock`,
+   - `padding-bottom` writer у ленты сообщений.
+4. Когда это случалось, строка сначала вставала правильно, а потом вторым этапом уезжала вверх.
+
+Что в итоге добило баг:
+
+1. Для реального chat composer был добавлен жёсткий hard-disable контур, который больше не зависит только от `isTelegramWebApp()` / `isTelegramChatRuntime()`.
+2. Для боевого `general/personal` composer были насильно вырезаны старые fallback-пути:
+   - shared composer fallback,
+   - delayed `visualViewport` sync,
+   - `vv-dock`,
+   - лишний keyboard pad writer.
+3. Если фокус всё же прилетает в `chatSharedComposer`, теперь он перекидывается в direct composer, а не остаётся на старом textarea.
+
+## 13. Финальные рабочие коммиты этого цикла
+
+Ключевые итоговые коммиты:
+
+- `e3a7861` — `Hard-disable chat composer viewport lift fallback`
+- `f940805` — `Redirect chat focus to direct composer`
+- `c87b1ac` — `Hide chat keyboard debug overlays`
+
+На этой точке:
+
+1. строка больше не улетает вверх;
+2. клавиатура открывается на прямом composer;
+3. временные красные debug-логи убраны из UI.
 2. Шапка чата реально лучше всего чинится через inline writer, что подтвердилось инспектором.
 3. PWA-проблема после клавиатуры глубже простого `padding` и сидит в общем chat-layout reset.
 
