@@ -22698,11 +22698,12 @@ function initChat() {
         directComposer.style.removeProperty("pointer-events");
       } catch (eComposerAreaPrep) {}
       var isEarlyGesture = !!(event && (event.type === "touchstart" || event.type === "pointerdown"));
-      if (isEarlyGesture) return;
       try {
         if (directComposer.focus) directComposer.focus({ preventScroll: true });
-        var len = String(directComposer.value || "").length;
-        if (typeof directComposer.setSelectionRange === "function") directComposer.setSelectionRange(len, len);
+        if (!isEarlyGesture) {
+          var len = String(directComposer.value || "").length;
+          if (typeof directComposer.setSelectionRange === "function") directComposer.setSelectionRange(len, len);
+        }
       } catch (eComposerAreaFocus1) {
         try {
           if (directComposer && directComposer.focus) directComposer.focus();
