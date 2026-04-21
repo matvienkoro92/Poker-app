@@ -28862,7 +28862,12 @@ function initChat() {
     if (messagesEl) {
       var cached = userId && personalMessagesCache[userId];
       var cachedMeta = userId && personalMessagesCacheMeta[userId] ? personalMessagesCacheMeta[userId] : null;
-      if (Array.isArray(cached) && cached.length && (!cachedMeta || cachedMeta.source !== "disk")) {
+      if (
+        Array.isArray(cached) &&
+        cached.length &&
+        (!cachedMeta || cachedMeta.source !== "disk") &&
+        personalCacheHasReadyPeerMeta(userId, cached)
+      ) {
         renderMessages(cached);
       } else {
         messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
@@ -28980,6 +28985,24 @@ function initChat() {
     var meta = personalMessagesCacheMeta[userId];
     if (!meta || !meta.ts) return true;
     return (Date.now() - meta.ts) < PERSONAL_PREFETCH_TTL_MS;
+  }
+  function personalCacheHasReadyPeerMeta(userId, messages) {
+    var pid = userId != null ? String(userId).trim() : "";
+    var list = Array.isArray(messages) ? messages : [];
+    if (!pid || !list.length) return false;
+    var checked = 0;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var m = list[i];
+      if (!m || !m.from || !peerChatIdsEqual(m.from, pid)) continue;
+      if (m.__clientOptimistic || m.__pushPlaceholder) continue;
+      checked += 1;
+      var hasName = !!(m.fromName != null && String(m.fromName).trim());
+      var hasP21 = m.fromP21Id != null && String(m.fromP21Id).trim() !== "";
+      var hasRespect = m.fromRespect !== undefined && m.fromRespect !== null;
+      if (!hasName || !hasP21 || !hasRespect) return false;
+      if (checked >= 3) return true;
+    }
+    return checked > 0;
   }
 
   function prefetchPersonalMessages(userId) {
