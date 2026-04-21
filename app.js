@@ -9869,7 +9869,14 @@ function getPokerResolvedTelegramUser() {
     fetch(base + "/api/auth-telegram-login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(
+        Object.assign({}, payload, {
+          dtIdHint:
+            (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+            sessionStorage.getItem("poker_dt_id") ||
+            "",
+        })
+      ),
     })
       .then(function (res) {
         return res
@@ -10099,7 +10106,14 @@ function getPokerResolvedTelegramUser() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, wantPwaSession: !!wantPwaSession }),
+        body: JSON.stringify({
+          initData: initData,
+          wantPwaSession: !!wantPwaSession,
+          dtIdHint:
+            (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+            sessionStorage.getItem("poker_dt_id") ||
+            "",
+        }),
         cache: "no-store",
       },
       { timeoutMs: POKER_FETCH_TIMEOUT_MS, maxAttempts: 3, retryDelayMs: 750 }
