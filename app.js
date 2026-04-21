@@ -29418,6 +29418,113 @@ function initChat() {
     });
     return merged;
   }
+  function chatListRowNormalizedName(value) {
+    return String(value || "").trim().replace(/^@+/, "").toLowerCase();
+  }
+  function chatListRowAlias(c, friendSet) {
+    var isFriendContact = !!(c && !c.isGroupChat && friendSet && (friendSet[c.id] || friendSet[String(c.id)]));
+    if (!isFriendContact || !c) return "";
+    var alias = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
+    if (!alias) return "";
+    var baseName = c.name != null ? String(c.name).trim() : "";
+    if (chatListRowNormalizedName(alias) === chatListRowNormalizedName(baseName)) return "";
+    return alias;
+  }
+  function chatListRowDisplayTitle(c, friendSet) {
+    var alias = chatListRowAlias(c, friendSet);
+    return alias || (c && c.name ? c.name : "");
+  }
+  function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRender) {
+    if (!block || !Array.isArray(contactsForList) || !contactsForList.length) return false;
+    var wraps = block.querySelectorAll(".chat-contact-swipe");
+    if (!wraps || !wraps.length || wraps.length !== contactsForList.length) return false;
+    var existingById = Object.create(null);
+    for (var wi = 0; wi < wraps.length; wi++) {
+      var wrap = wraps[wi];
+      var btn = wrap && wrap.querySelector ? wrap.querySelector(".chat-contact") : null;
+      var id = btn && btn.dataset && btn.dataset.chatId ? String(btn.dataset.chatId) : "";
+      if (!id || existingById[id]) return false;
+      existingById[id] = wrap;
+    }
+    for (var ci = 0; ci < contactsForList.length; ci++) {
+      var row = contactsForList[ci];
+      if (!row || !row.id || !existingById[String(row.id)]) return false;
+    }
+    var frag = document.createDocumentFragment();
+    contactsForList.forEach(function (c) {
+      var wrap = existingById[String(c.id)];
+      var btn = wrap && wrap.querySelector ? wrap.querySelector(".chat-contact") : null;
+      if (!wrap || !btn) return;
+      var isGroupRow = !!(c && c.isGroupChat);
+      var isFriendContact = !isGroupRow && !!(friendSet[c.id] || friendSet[String(c.id)]);
+      var displayTitle = chatListRowDisplayTitle(c, friendSet);
+      var effectiveAlias = chatListRowAlias(c, friendSet);
+      var hasAlias = effectiveAlias !== "";
+      var labelEl = btn.querySelector(".chat-contact__label");
+      var primaryLabel = btn.querySelector(".chat-contact__label--primary");
+      var nickEl = btn.querySelector(".chat-contact__friend-nick, .chat-contact__login-sub");
+      var nextMainText = isGroupRow ? String(c.name || displayTitle || "") : String((hasAlias ? effectiveAlias : c.name) || displayTitle || "");
+      if (primaryLabel) setTextContentIfChanged(primaryLabel, nextMainText);
+      else if (labelEl) setTextContentIfChanged(labelEl, nextMainText);
+      if (nickEl) setTextContentIfChanged(nickEl, hasAlias ? String(c.name || "") : "");
+      btn.setAttribute("data-chat-name", displayTitle);
+      btn.setAttribute("data-chat-friend", isFriendContact ? "1" : "0");
+      btn.setAttribute("data-chat-group", isGroupRow ? "1" : "0");
+      btn.dataset.chatOnline = c.online ? "1" : "0";
+      if (c.p21Id != null && String(c.p21Id).trim() !== "") btn.dataset.chatP21Id = String(c.p21Id).trim();
+      else {
+        try { delete btn.dataset.chatP21Id; } catch (eP21del) {}
+        btn.removeAttribute("data-chat-p21-id");
+      }
+      var onlineEl = btn.querySelector(".chat-contact__online");
+      if (onlineEl) onlineEl.classList.toggle("chat-contact__online--visible", !isGroupRow && !!c.online);
+      var unreadEl = btn.querySelector(".chat-contact__unread");
+      var unreadCount = Math.max(0, Number(c.unreadCount) || 0);
+      var needUnread = unreadCount > 0;
+      var unreadText = unreadCount > 99 ? "99+" : String(unreadCount);
+      if (unreadEl) {
+        unreadEl.classList.toggle("chat-contact__unread--visible", needUnread);
+        setTextContentIfChanged(unreadEl, needUnread ? unreadText : "");
+        unreadEl.setAttribute("aria-label", needUnread ? "Непрочитано: " + unreadText : "");
+      }
+      var isPinned = false;
+      for (var pix = 0; pix < pinOrderRender.length; pix++) {
+        if (peerChatIdsEqual(pinOrderRender[pix], c.id)) {
+          isPinned = true;
+          break;
+        }
+      }
+      var pinIcon = btn.querySelector(".chat-contact__pin-icon");
+      var pinRow = btn.querySelector(".chat-contact__name-pin-row");
+      var labelBlock = btn.querySelector(".chat-contact__label-block");
+      if (isPinned && !pinIcon && labelBlock) {
+        if (!pinRow) {
+          pinRow = document.createElement("span");
+          pinRow.className = "chat-contact__name-pin-row";
+          while (labelBlock.firstChild) pinRow.appendChild(labelBlock.firstChild);
+          labelBlock.appendChild(pinRow);
+        }
+        var pinSpan = document.createElement("span");
+        pinSpan.className = "chat-contact__pin-icon";
+        pinSpan.setAttribute("aria-hidden", "true");
+        pinSpan.setAttribute("title", "Закреплён");
+        pinSpan.textContent = "\uD83D\uDCCC";
+        pinRow.insertBefore(pinSpan, pinRow.firstChild || null);
+      } else if (!isPinned && pinIcon && pinIcon.parentNode) {
+        pinIcon.parentNode.removeChild(pinIcon);
+      }
+      var pinBtn = wrap.querySelector(".chat-contact-swipe__pin");
+      if (pinBtn) {
+        var pinLabel = isPinned ? "Открепить диалог" : "Закрепить диалог";
+        pinBtn.classList.toggle("chat-contact-swipe__pin--unpin", isPinned);
+        pinBtn.setAttribute("aria-label", pinLabel);
+        pinBtn.setAttribute("title", pinLabel);
+      }
+      frag.appendChild(wrap);
+    });
+    block.appendChild(frag);
+    return true;
+  }
 
   function loadContacts(opts) {
     opts = opts || {};
@@ -29679,27 +29786,11 @@ function initChat() {
         } else {
           var block = contactsEl.querySelector(".chat-dialogs-block");
           var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
-          var chatListRowNormalizedName = function (value) {
-            return String(value || "").trim().replace(/^@+/, "").toLowerCase();
-          };
-          var chatListRowAlias = function (c, isFriendContact) {
-            if (!isFriendContact || !c) return "";
-            var alias = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
-            if (!alias) return "";
-            var baseName = c.name != null ? String(c.name).trim() : "";
-            if (chatListRowNormalizedName(alias) === chatListRowNormalizedName(baseName)) return "";
-            return alias;
-          };
-          var chatListRowDisplayTitle = function (c) {
-            var isFriendContact = !!(c && !c.isGroupChat && (friendSet[c.id] || friendSet[String(c.id)]));
-            var alias = chatListRowAlias(c, isFriendContact);
-            return alias || c.name;
-          };
           var pinsSnapForSameList = pokerLoadChatDialogListPins();
           var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
             var btn = existing[i];
             if (!btn || btn.dataset.chatId !== c.id) return false;
-            var wantName = chatListRowDisplayTitle(c);
+            var wantName = chatListRowDisplayTitle(c, friendSet);
             if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
             var wantFriend = !!(friendSet[c.id] || friendSet[String(c.id)]);
             if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
@@ -29752,6 +29843,11 @@ function initChat() {
                 unreadEl.setAttribute("aria-label", needUnread ? "Непрочитано: " + unreadText : "");
               }
             });
+            updateDialogUnreadBadges();
+            updateChatNavDot();
+            return;
+          }
+          if (!forceRerender && block && existing.length > 0 && patchExistingContactsList(block, contactsForList, friendSet, pinsSnapForSameList)) {
             updateDialogUnreadBadges();
             updateChatNavDot();
             return;
@@ -29812,8 +29908,8 @@ function initChat() {
               : '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
             var unreadNum = c.unreadCount > 0 ? (c.unreadCount > 99 ? "99+" : String(c.unreadCount)) : "";
             var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
-            var displayTitle = chatListRowDisplayTitle(c);
-            var effectiveAlias = chatListRowAlias(c, isFriendContact);
+            var displayTitle = chatListRowDisplayTitle(c, friendSet);
+            var effectiveAlias = chatListRowAlias(c, friendSet);
             var hasAlias = effectiveAlias !== "";
             var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
             var nameBlockInner;
