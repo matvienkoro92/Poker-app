@@ -22697,11 +22697,8 @@ function initChat() {
         directComposer.style.removeProperty("display");
         directComposer.style.removeProperty("pointer-events");
       } catch (eComposerAreaPrep) {}
-      if (event) {
-        try {
-          event.preventDefault();
-        } catch (eComposerAreaPrev) {}
-      }
+      var isEarlyGesture = !!(event && (event.type === "touchstart" || event.type === "pointerdown"));
+      if (isEarlyGesture) return;
       try {
         if (directComposer.focus) directComposer.focus({ preventScroll: true });
         var len = String(directComposer.value || "").length;
