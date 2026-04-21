@@ -32810,6 +32810,15 @@ function initChat() {
         logChatKeyboardDebug("vv-sync-enter");
         var doc = document.documentElement;
         if (enforceTelegramChatDefaultComposerState()) return;
+        if (isTelegramChatRuntime()) {
+          clearChatMessagesKeyboardPad();
+          hardResetTelegramChatMessagesKeyboardPad();
+          stripChatInputAreaTransforms();
+          clearTelegramChatRootShiftCompensation();
+          applyTelegramChatRootShiftCompensation();
+          logChatKeyboardDebug("vv-sync-tg-hardoff");
+          return;
+        }
         if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
           resetChatVisualViewportState({ clearPad: true, stripComposer: true, closeKeyboardState: true });
           return;
@@ -32842,10 +32851,10 @@ function initChat() {
         var offsetTop = metrics.offsetTop;
         var heightLoss = metrics.heightLoss;
         var overlap = metrics.overlap;
-        var tg = false;
-        var tw = null;
+        var tg = isTelegramChatRuntime();
+        var tw = tg && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         var useThreadDock =
-          isChatThreadComposerKeyboardDom() && !(typeof isTelegramWebApp === "function" && isTelegramWebApp());
+          isChatThreadComposerKeyboardDom() && !tg;
         /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
         if (tg && tw) {
           var tgvH = Number(tw.viewportHeight);
