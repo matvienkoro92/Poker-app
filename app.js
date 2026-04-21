@@ -22472,8 +22472,7 @@ function initChat() {
     ta.removeAttribute("tabindex");
     return ta;
   }
-  function ensureTelegramDedicatedChatComposers() {
-    if (!isTelegramChatRuntime()) return false;
+  function ensureDirectChatComposers() {
     if (!chatGeneralComposerEl) {
       chatGeneralComposerEl = createDedicatedChatComposer("chatGeneralComposer", "Сообщение в общий чат...", "Сообщение в общий чат");
       if (chatGeneralComposerEl && chatGeneralComposerMount && !chatGeneralComposerMount.contains(chatGeneralComposerEl)) {
@@ -22486,6 +22485,11 @@ function initChat() {
         chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
       }
     }
+    return !!(chatGeneralComposerEl && chatPersonalComposerEl);
+  }
+  function ensureTelegramDedicatedChatComposers() {
+    if (!isTelegramChatRuntime()) return false;
+    if (!ensureDirectChatComposers()) return false;
     try {
       if (chatComposerPool) {
         chatComposerPool.setAttribute("hidden", "hidden");
@@ -22514,6 +22518,12 @@ function initChat() {
     if (mode === "general") return chatGeneralComposerEl || null;
     if (mode === "personal") return chatPersonalComposerEl || null;
     return null;
+  }
+  function getDirectChatComposer(mode) {
+    if (!ensureDirectChatComposers()) return null;
+    if (mode === "general") return chatGeneralComposerEl || null;
+    if (mode === "personal") return chatPersonalComposerEl || null;
+    return chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
   }
   function shouldUseTelegramIosComposeOverlay() {
     return false;
@@ -32360,6 +32370,7 @@ function initChat() {
         var target = focusTarget || document.activeElement;
         if (!target) return false;
         try {
+          if (target === chatSharedComposerEl) return true;
           if (target === chatGeneralComposerEl || target === chatPersonalComposerEl) return true;
           var activeArea =
             chatActiveTab === "personal"
@@ -32371,6 +32382,17 @@ function initChat() {
       }
       function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
         if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
+        var directComposer = null;
+        try {
+          directComposer = getDirectChatComposer(chatActiveTab);
+          if (!directComposer) directComposer = getDirectChatComposer(chatActiveTab === "personal" ? "general" : "personal");
+        } catch (eHardDirectFind) {}
+        try {
+          if (directComposer && focusTarget === chatSharedComposerEl) {
+            var carried = chatSharedComposerEl && chatSharedComposerEl.value != null ? String(chatSharedComposerEl.value) : "";
+            if (carried && directComposer.value !== carried) directComposer.value = carried;
+          }
+        } catch (eHardCarry) {}
         try {
           clearPendingChatKeyboardDismissTimers();
           resetChatKeyboardDockRuntimeState();
@@ -32409,6 +32431,31 @@ function initChat() {
             chatSharedComposerEl.style.setProperty("pointer-events", "none", "important");
           }
         } catch (eHardShared) {}
+        try {
+          if (directComposer) {
+            chatComposerEl = directComposer;
+            directComposer.disabled = false;
+            directComposer.hidden = false;
+            directComposer.removeAttribute("tabindex");
+            directComposer.removeAttribute("aria-hidden");
+            directComposer.style.removeProperty("display");
+            directComposer.style.removeProperty("pointer-events");
+            if (document.activeElement !== directComposer) {
+              setTimeout(function () {
+                try {
+                  if (!directComposer || document.activeElement === directComposer) return;
+                  if (directComposer.focus) directComposer.focus({ preventScroll: true });
+                  var len = String(directComposer.value || "").length;
+                  if (typeof directComposer.setSelectionRange === "function") directComposer.setSelectionRange(len, len);
+                } catch (eHardRefocus1) {
+                  try {
+                    if (directComposer && directComposer.focus) directComposer.focus();
+                  } catch (eHardRefocus2) {}
+                }
+              }, 0);
+            }
+          }
+        } catch (eHardDirect) {}
         collectChatOverscrollSnapshot(stageLabel || "focus:hard-disabled", focusTarget);
         return true;
       }

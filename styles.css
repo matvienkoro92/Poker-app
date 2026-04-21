@@ -735,12 +735,12 @@ html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top-inner {
 }
 .chat-keyboard-debug {
   margin: 0 0 4px;
-  padding: 6px 8px;
-  font: 10px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 4px 6px;
+  font: 9px/1.18 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: #f8fafc;
-  background: rgba(185, 28, 28, 0.86);
+  background: rgba(185, 28, 28, 0.78);
   border: 1px solid rgba(254, 202, 202, 0.4);
-  border-radius: 10px;
+  border-radius: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   overflow: hidden;
@@ -753,10 +753,11 @@ html.poker-telegram-miniapp .chat-keyboard-debug {
   right: 8px;
   z-index: 10050;
   margin: 0;
-  max-height: min(34vh, 220px);
+  max-height: min(18vh, 128px);
   overflow: auto;
   pointer-events: none;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  opacity: 0.88;
 }
 html.app--telegram-miniapp .chat-keyboard-debug--floating,
 html.poker-telegram-miniapp .chat-keyboard-debug--floating {
