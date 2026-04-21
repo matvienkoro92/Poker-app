@@ -22651,6 +22651,22 @@ function initChat() {
   }
   bindTelegramIosComposeOverlayGate(chatGeneralInputArea, "general");
   bindTelegramIosComposeOverlayGate(chatPersonalInputArea, "personal");
+  function forceDetachSharedChatComposerForTelegram() {
+    if (!chatSharedComposerEl || !chatComposerPool) return;
+    try {
+      if (!chatComposerPool.contains(chatSharedComposerEl)) chatComposerPool.appendChild(chatSharedComposerEl);
+    } catch (eComposerPoolMove) {}
+    try {
+      chatSharedComposerEl.blur();
+      chatSharedComposerEl.disabled = true;
+      chatSharedComposerEl.hidden = true;
+      chatSharedComposerEl.value = "";
+      chatSharedComposerEl.setAttribute("tabindex", "-1");
+      chatSharedComposerEl.setAttribute("aria-hidden", "true");
+      chatSharedComposerEl.style.setProperty("display", "none", "important");
+      chatSharedComposerEl.style.setProperty("pointer-events", "none", "important");
+    } catch (eComposerPoolHide) {}
+  }
   function bindChatComposerAreaDirectFocus(area, mode) {
     if (!area || area.__pokerDirectComposerAreaFocusBound) return;
     area.__pokerDirectComposerAreaFocusBound = true;
@@ -22661,12 +22677,15 @@ function initChat() {
       );
     }
     function focusDirectComposerFromArea(event) {
+      if (!isTelegramChatRuntime()) return;
       if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
       if (mode === "general" && chatActiveTab !== "general") return;
       if (mode === "personal" && chatActiveTab !== "personal") return;
       var target = event && event.target ? event.target : null;
       if (shouldIgnoreAreaFocusTarget(target)) return;
-      var directComposer = getDirectChatComposer(mode);
+      if (!ensureTelegramDedicatedChatComposers()) return;
+      forceDetachSharedChatComposerForTelegram();
+      var directComposer = getDirectTelegramChatComposer(mode);
       if (!directComposer) return;
       chatComposerEl = directComposer;
       if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) return;
