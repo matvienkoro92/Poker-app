@@ -26045,8 +26045,86 @@ function initChat() {
   /** Пока POST в полёте, любая перезагрузка ленты с сервера снова рисует исходный список — без этого optimistic пропадает до ответа API. */
   var optimisticGeneralPayload = null;
   var optimisticPersonalPayload = null;
+  var failedGeneralPayload = null;
+  var failedPersonalPayloadByPeer = {};
   var incomingPushGeneralPayload = null;
   var incomingPushPersonalPayloadByPeer = {};
+  function chatCloneRetryPayload(payload) {
+    if (!payload || typeof payload !== "object") return null;
+    var out = {
+      text: payload.text != null ? String(payload.text) : "",
+      image: payload.image || null,
+      voice: payload.voice || null,
+      document: payload.document ? {
+        dataUrl: payload.document.dataUrl || "",
+        fileName: payload.document.fileName || "document.pdf",
+      } : null,
+      replyTo: payload.replyTo ? Object.assign({}, payload.replyTo) : null,
+      with: payload.with != null ? String(payload.with) : "",
+    };
+    return out;
+  }
+  function buildChatFailedActionsHtml(source) {
+    var safeSource = escapeHtml(source || "");
+    return '<div class="chat-msg__send-state"><span class="chat-msg__send-error">Не отправлено</span><button type="button" class="chat-msg__retry-btn" data-chat-retry="' + safeSource + '">Повторить</button></div>';
+  }
+  function attachFailedChatActions(node, source) {
+    if (!node) return;
+    node.classList.add("chat-msg--failed");
+    node.setAttribute("data-send-failed", "true");
+    var body = node.querySelector(".chat-msg__body");
+    if (!body) return;
+    var footer = body.querySelector(".chat-msg__footer");
+    if (footer) {
+      var ticks = footer.querySelector(".chat-msg__ticks");
+      if (ticks && ticks.parentNode) ticks.parentNode.removeChild(ticks);
+      var oldState = footer.querySelector(".chat-msg__send-state");
+      if (oldState && oldState.parentNode) oldState.parentNode.removeChild(oldState);
+      footer.insertAdjacentHTML("beforeend", buildChatFailedActionsHtml(source));
+      return;
+    }
+    var bodyMain = body.querySelector(".chat-msg__body-main") || body;
+    var oldStateWrap = body.querySelector(".chat-msg__send-state");
+    if (oldStateWrap && oldStateWrap.parentNode) oldStateWrap.parentNode.removeChild(oldStateWrap);
+    bodyMain.insertAdjacentHTML("beforeend", buildChatFailedActionsHtml(source));
+  }
+  function markLatestOptimisticMessageFailed(targetEl, source) {
+    if (!targetEl || !targetEl.querySelectorAll) return null;
+    var list = targetEl.querySelectorAll('[data-optimistic="true"]');
+    if (!list || !list.length) return null;
+    var node = list[list.length - 1];
+    if (!node) return null;
+    node.removeAttribute("data-optimistic");
+    attachFailedChatActions(node, source);
+    return node;
+  }
+  function retryFailedOutgoingChat(source) {
+    var mode = source === "general" ? "general" : "personal";
+    var payload = null;
+    if (mode === "general") payload = chatCloneRetryPayload(failedGeneralPayload);
+    else {
+      var peerKey = chatWithUserId != null ? String(chatWithUserId) : "";
+      payload = peerKey ? chatCloneRetryPayload(failedPersonalPayloadByPeer[peerKey]) : null;
+    }
+    if (!payload) {
+      if (tg && tg.showAlert) tg.showAlert("Не удалось найти сообщение для повторной отправки");
+      else if (typeof alert === "function") alert("Не удалось найти сообщение для повторной отправки");
+      return;
+    }
+    if (mode === "general" && generalMessages) {
+      var failedGen = generalMessages.querySelector('[data-send-failed="true"]');
+      if (failedGen && failedGen.parentNode) failedGen.parentNode.removeChild(failedGen);
+      failedGeneralPayload = null;
+      sendGeneral(payload);
+      return;
+    }
+    if (mode === "personal" && messagesEl) {
+      var failedPm = messagesEl.querySelector('[data-send-failed="true"]');
+      if (failedPm && failedPm.parentNode) failedPm.parentNode.removeChild(failedPm);
+      if (payload.with) delete failedPersonalPayloadByPeer[payload.with];
+      sendMessage(payload);
+    }
+  }
   function chatPushPlaceholderFromPayload(payload) {
     if (!payload || typeof payload !== "object") return null;
     var bodyRaw = payload.body != null ? String(payload.body).trim() : "";
@@ -28649,11 +28727,12 @@ function initChat() {
   }
   function sendGeneral(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+    var overridePayload = overrideText && typeof overrideText === "object" ? overrideText : null;
     var rawGeneral = getChatGeneralText();
-    var text = rawGeneral != null ? String(rawGeneral).trim() : "";
+    var text = overridePayload ? String(overridePayload.text || "").trim() : rawGeneral != null ? String(rawGeneral).trim() : "";
     // Сообщение из chat-шаблона: подставляем текст напрямую,
     // чтобы не зависеть от того, успело ли обновиться нужное поле.
-    if (typeof overrideText === "string") text = String(overrideText).trim();
+    if (!overridePayload && typeof overrideText === "string") text = String(overrideText).trim();
     // Редактирование сообщения: отправляем PATCH, а не POST нового.
     if (chatEditMode && chatEditSource === "general" && chatEditMessageId) {
       if (!text || sendingGeneral) return;
@@ -28719,7 +28798,11 @@ function initChat() {
       sendingGeneral = false;
       setGeneralSendBusy(false);
     }
-    if (!text && !generalImage && !generalVoice && !generalDocument) {
+    var generalImageOut = overridePayload ? (overridePayload.image || null) : generalImage;
+    var generalVoiceOut = overridePayload ? (overridePayload.voice || null) : generalVoice;
+    var generalDocumentOut = overridePayload ? (overridePayload.document || null) : generalDocument;
+    var generalReplyOut = overridePayload ? (overridePayload.replyTo || null) : generalReplyTo;
+    if (!text && !generalImageOut && !generalVoiceOut && !generalDocumentOut) {
       if (rawGeneral != null && String(rawGeneral).length > 0) {
         if (tg && tg.showAlert) tg.showAlert("Введите текст сообщения, не только пробелы.");
         else if (typeof alert === "function") alert("Введите текст сообщения, не только пробелы.");
@@ -28738,18 +28821,18 @@ function initChat() {
     }
     try {
       var body = pokerApiAuthJsonBody({ text: text });
-      if (generalImage) body.image = generalImage;
-      if (generalVoice) body.voice = generalVoice;
-      if (generalDocument) { body.document = generalDocument.dataUrl; body.documentName = generalDocument.fileName; }
-      if (generalReplyTo) {
-        var replyText = (generalReplyTo.text && String(generalReplyTo.text).trim()) || (generalReplyTo.hasImage ? "[Фото]" : generalReplyTo.hasVoice ? "[Голосовое сообщение]" : generalReplyTo.hasDocument ? "[Документ]" : "\u2014");
-        body.replyTo = { id: generalReplyTo.id, from: generalReplyTo.from, fromName: generalReplyTo.fromName || "Игрок", text: replyText };
+      if (generalImageOut) body.image = generalImageOut;
+      if (generalVoiceOut) body.voice = generalVoiceOut;
+      if (generalDocumentOut) { body.document = generalDocumentOut.dataUrl; body.documentName = generalDocumentOut.fileName; }
+      if (generalReplyOut) {
+        var replyText = (generalReplyOut.text && String(generalReplyOut.text).trim()) || (generalReplyOut.hasImage ? "[Фото]" : generalReplyOut.hasVoice ? "[Голосовое сообщение]" : generalReplyOut.hasDocument ? "[Документ]" : "\u2014");
+        body.replyTo = { id: generalReplyOut.id, from: generalReplyOut.from, fromName: generalReplyOut.fromName || "Игрок", text: replyText };
       }
       var optText = text;
-      var optImage = generalImage || null;
-      var optVoice = generalVoice || null;
-      var optDocument = generalDocument ? { dataUrl: generalDocument.dataUrl, fileName: generalDocument.fileName } : null;
-      var optReply = generalReplyTo ? { fromName: generalReplyTo.fromName || "Игрок", text: generalReplyTo.text || "" } : null;
+      var optImage = generalImageOut || null;
+      var optVoice = generalVoiceOut || null;
+      var optDocument = generalDocumentOut ? { dataUrl: generalDocumentOut.dataUrl, fileName: generalDocumentOut.fileName } : null;
+      var optReply = generalReplyOut ? { fromName: generalReplyOut.fromName || "Игрок", text: generalReplyOut.text || "" } : null;
       optimisticGeneralPayload = {
         text: optText || "",
         image: optImage || null,
@@ -28826,6 +28909,7 @@ function initChat() {
               });
             }
             optimisticGeneralPayload = null;
+            failedGeneralPayload = null;
             pokerChatRequestPollBurst("general");
             pokerChatRefreshLongPollTargets();
             var msg = d.message;
@@ -28845,8 +28929,14 @@ function initChat() {
             loadGeneral();
           } else {
             optimisticGeneralPayload = null;
-            var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
-            if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
+            failedGeneralPayload = chatCloneRetryPayload({
+              text: optText || "",
+              image: optImage || null,
+              voice: optVoice || null,
+              document: optDocument,
+              replyTo: body.replyTo || null,
+            });
+            markLatestOptimisticMessageFailed(generalMessages, "general");
             var errT = (d && d.error) || "Ошибка";
             if (tg && tg.showAlert) tg.showAlert(errT);
             else if (typeof alert === "function") alert(errT);
@@ -28854,11 +28944,17 @@ function initChat() {
         }
         function failGeneralPostNetwork() {
           optimisticGeneralPayload = null;
+          failedGeneralPayload = chatCloneRetryPayload({
+            text: optText || "",
+            image: optImage || null,
+            voice: optVoice || null,
+            document: optDocument,
+            replyTo: body.replyTo || null,
+          });
           sendingGeneral = false;
           sendingGeneralSince = 0;
           setGeneralSendBusy(false);
-          var opt = generalMessages && generalMessages.querySelector('[data-optimistic="true"]');
-          if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
+          markLatestOptimisticMessageFailed(generalMessages, "general");
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           else if (typeof alert === "function") alert(POKER_NET_ERR);
         }
@@ -31509,9 +31605,10 @@ function initChat() {
   }
   function sendMessage(overrideText) {
     if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var text = getChatPersonalText().trim();
+    var overridePayload = overrideText && typeof overrideText === "object" ? overrideText : null;
+    var text = overridePayload ? String(overridePayload.text || "").trim() : getChatPersonalText().trim();
     // Сообщение из chat-шаблона: подставляем текст напрямую.
-    if (typeof overrideText === "string") text = overrideText.trim();
+    if (!overridePayload && typeof overrideText === "string") text = overrideText.trim();
     // Редактирование сообщения: отправляем PATCH, а не новое сообщение.
     if (chatEditMode && chatEditSource === "personal" && chatEditMessageId) {
       if (!text || sendingPrivate) return;
@@ -31570,11 +31667,16 @@ function initChat() {
         });
       return;
     }
-    if ((!text && !personalImage && !personalVoice && !personalDocument) || !chatWithUserId || !pokerApiHasCredential() || sendingPrivate) {
-      if (!chatWithUserId && (text || personalImage || personalVoice || personalDocument)) {
+    var personalImageOut = overridePayload ? (overridePayload.image || null) : personalImage;
+    var personalVoiceOut = overridePayload ? (overridePayload.voice || null) : personalVoice;
+    var personalDocumentOut = overridePayload ? (overridePayload.document || null) : personalDocument;
+    var personalReplyOut = overridePayload ? (overridePayload.replyTo || null) : personalReplyTo;
+    var personalWithOut = overridePayload && overridePayload.with ? String(overridePayload.with) : chatWithUserId;
+    if ((!text && !personalImageOut && !personalVoiceOut && !personalDocumentOut) || !personalWithOut || !pokerApiHasCredential() || sendingPrivate) {
+      if (!personalWithOut && (text || personalImageOut || personalVoiceOut || personalDocumentOut)) {
         if (tg && tg.showAlert) tg.showAlert("Выберите собеседника"); else alert("Выберите собеседника");
       }
-      if (!pokerApiHasCredential() && (text || personalImage || personalVoice || personalDocument)) {
+      if (!pokerApiHasCredential() && (text || personalImageOut || personalVoiceOut || personalDocumentOut)) {
         var isStandalone =
           !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
           !!(window.navigator && window.navigator.standalone);
@@ -31594,19 +31696,19 @@ function initChat() {
       if (tg && tg.showAlert) tg.showAlert("Ошибка: чат не загружен");
       return;
     }
-    var body = pokerApiAuthJsonBody({ with: chatWithUserId, text: text });
-    if (personalImage) body.image = personalImage;
-    if (personalVoice) body.voice = personalVoice;
-    if (personalDocument) { body.document = personalDocument.dataUrl; body.documentName = personalDocument.fileName; }
-    if (personalReplyTo) {
-      var replyTextP = (personalReplyTo.text && String(personalReplyTo.text).trim()) || (personalReplyTo.hasImage ? "[Фото]" : personalReplyTo.hasVoice ? "[Голосовое сообщение]" : personalReplyTo.hasDocument ? "[Документ]" : "\u2014");
-      body.replyTo = { id: personalReplyTo.id, from: personalReplyTo.from, fromName: personalReplyTo.fromName || "Игрок", text: replyTextP };
+    var body = pokerApiAuthJsonBody({ with: personalWithOut, text: text });
+    if (personalImageOut) body.image = personalImageOut;
+    if (personalVoiceOut) body.voice = personalVoiceOut;
+    if (personalDocumentOut) { body.document = personalDocumentOut.dataUrl; body.documentName = personalDocumentOut.fileName; }
+    if (personalReplyOut) {
+      var replyTextP = (personalReplyOut.text && String(personalReplyOut.text).trim()) || (personalReplyOut.hasImage ? "[Фото]" : personalReplyOut.hasVoice ? "[Голосовое сообщение]" : personalReplyOut.hasDocument ? "[Документ]" : "\u2014");
+      body.replyTo = { id: personalReplyOut.id, from: personalReplyOut.from, fromName: personalReplyOut.fromName || "Игрок", text: replyTextP };
     }
     var optText = text;
-    var optImage = personalImage || null;
-    var optVoice = personalVoice || null;
-    var optDocument = personalDocument ? { dataUrl: personalDocument.dataUrl, fileName: personalDocument.fileName } : null;
-    var optReply = personalReplyTo ? { fromName: personalReplyTo.fromName || "Игрок", text: personalReplyTo.text || "" } : null;
+    var optImage = personalImageOut || null;
+    var optVoice = personalVoiceOut || null;
+    var optDocument = personalDocumentOut ? { dataUrl: personalDocumentOut.dataUrl, fileName: personalDocumentOut.fileName } : null;
+    var optReply = personalReplyOut ? { fromName: personalReplyOut.fromName || "Игрок", text: personalReplyOut.text || "" } : null;
     optimisticPersonalPayload = {
       text: optText || "",
       image: optImage || null,
@@ -31615,6 +31717,7 @@ function initChat() {
       replyTo: body.replyTo || null,
       from: resolveMyChatMemberId(),
       time: new Date().toISOString(),
+      with: personalWithOut,
     };
     if (chatTypingStopTimer) {
       clearTimeout(chatTypingStopTimer);
@@ -31694,6 +31797,7 @@ function initChat() {
             });
           }
           optimisticPersonalPayload = null;
+          if (personalWithOut) delete failedPersonalPayloadByPeer[String(personalWithOut)];
           pokerChatRequestPollBurst("personal");
           pokerChatRefreshLongPollTargets();
           /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
@@ -31706,23 +31810,41 @@ function initChat() {
           loadMessages();
         } else {
           optimisticPersonalPayload = null;
-          var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
-          if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-          chatComposerDrafts.personal = optText;
-          if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
+          if (personalWithOut) {
+            failedPersonalPayloadByPeer[String(personalWithOut)] = chatCloneRetryPayload({
+              text: optText || "",
+              image: optImage || null,
+              voice: optVoice || null,
+              document: optDocument,
+              replyTo: body.replyTo || null,
+              with: personalWithOut,
+            });
+          }
+          markLatestOptimisticMessageFailed(messagesEl, "personal");
+          chatComposerDrafts.personal = "";
+          if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = "";
           if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
           if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
         }
       }
       function handleError() {
         optimisticPersonalPayload = null;
+        if (personalWithOut) {
+          failedPersonalPayloadByPeer[String(personalWithOut)] = chatCloneRetryPayload({
+            text: optText || "",
+            image: optImage || null,
+            voice: optVoice || null,
+            document: optDocument,
+            replyTo: body.replyTo || null,
+            with: personalWithOut,
+          });
+        }
         sendingPrivate = false;
         setPersonalSendBusy(false);
         hideProgress();
-        var opt = messagesEl && messagesEl.querySelector('[data-optimistic="true"]');
-        if (opt && opt.parentNode) opt.parentNode.removeChild(opt);
-        chatComposerDrafts.personal = optText;
-        if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = optText;
+        markLatestOptimisticMessageFailed(messagesEl, "personal");
+        chatComposerDrafts.personal = "";
+        if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = "";
         if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
         if (tg && tg.showAlert) tg.showAlert("Не удалось отправить. Проверьте интернет или уменьшите файл (до 8 МБ).");
       }
@@ -35609,6 +35731,24 @@ function initChat() {
       var p = document.getElementById("chatPersonalReplyPreview");
       if (p) { p.classList.remove("chat-reply-preview--visible"); p.querySelector(".chat-reply-preview__text").textContent = ""; }
     });
+    if (generalMessages) {
+      generalMessages.addEventListener("click", function (e) {
+        var retryBtn = e.target && e.target.closest ? e.target.closest("[data-chat-retry]") : null;
+        if (!retryBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        retryFailedOutgoingChat(String(retryBtn.getAttribute("data-chat-retry") || "general"));
+      });
+    }
+    if (messagesEl) {
+      messagesEl.addEventListener("click", function (e) {
+        var retryBtn = e.target && e.target.closest ? e.target.closest("[data-chat-retry]") : null;
+        if (!retryBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        retryFailedOutgoingChat(String(retryBtn.getAttribute("data-chat-retry") || "personal"));
+      });
+    }
   }
 
   if (window.__pendingOpenClubChatGeneral) {

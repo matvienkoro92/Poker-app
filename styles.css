@@ -6877,6 +6877,37 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   opacity: 1;
   text-shadow: 0 0 10px rgba(52, 211, 153, 0.24);
 }
+.chat-msg--failed .chat-msg__body {
+  border-color: rgba(248, 113, 113, 0.48);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.16), 0 1px 4px rgba(0, 0, 0, 0.24);
+}
+.chat-msg__send-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+.chat-msg__send-error {
+  color: #fda4af;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.chat-msg__retry-btn {
+  border: 0;
+  background: transparent;
+  color: #fde68a;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.1;
+  padding: 0;
+  cursor: pointer;
+}
+.chat-msg__retry-btn:hover,
+.chat-msg__retry-btn:focus-visible {
+  color: #fef3c7;
+  text-decoration: underline;
+}
 .chat-msg--own .chat-msg__body {
   background: rgba(52, 82, 132, 0.94);
   border: 1px solid rgba(251, 146, 60, 0.42);
