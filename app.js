@@ -22651,6 +22651,54 @@ function initChat() {
   }
   bindTelegramIosComposeOverlayGate(chatGeneralInputArea, "general");
   bindTelegramIosComposeOverlayGate(chatPersonalInputArea, "personal");
+  function bindChatComposerAreaDirectFocus(area, mode) {
+    if (!area || area.__pokerDirectComposerAreaFocusBound) return;
+    area.__pokerDirectComposerAreaFocusBound = true;
+    function shouldIgnoreAreaFocusTarget(target) {
+      if (!target || !target.closest) return false;
+      return !!target.closest(
+        ".chat-attach-btn, .chat-attach-dropdown, .chat-emoji-btn, .chat-send-btn, .chat-scroll-bottom-btn, .chat-reply-preview__cancel, .chat-image-preview, .chat-voice-preview, .chat-upload-progress"
+      );
+    }
+    function focusDirectComposerFromArea(event) {
+      if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+      if (mode === "general" && chatActiveTab !== "general") return;
+      if (mode === "personal" && chatActiveTab !== "personal") return;
+      var target = event && event.target ? event.target : null;
+      if (shouldIgnoreAreaFocusTarget(target)) return;
+      var directComposer = getDirectChatComposer(mode);
+      if (!directComposer) return;
+      chatComposerEl = directComposer;
+      if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) return;
+      try {
+        directComposer.disabled = false;
+        directComposer.hidden = false;
+        directComposer.removeAttribute("tabindex");
+        directComposer.removeAttribute("aria-hidden");
+        directComposer.style.removeProperty("display");
+        directComposer.style.removeProperty("pointer-events");
+      } catch (eComposerAreaPrep) {}
+      if (event) {
+        try {
+          event.preventDefault();
+        } catch (eComposerAreaPrev) {}
+      }
+      try {
+        if (directComposer.focus) directComposer.focus({ preventScroll: true });
+        var len = String(directComposer.value || "").length;
+        if (typeof directComposer.setSelectionRange === "function") directComposer.setSelectionRange(len, len);
+      } catch (eComposerAreaFocus1) {
+        try {
+          if (directComposer && directComposer.focus) directComposer.focus();
+        } catch (eComposerAreaFocus2) {}
+      }
+    }
+    area.addEventListener("pointerdown", focusDirectComposerFromArea, true);
+    area.addEventListener("touchstart", focusDirectComposerFromArea, { passive: false, capture: true });
+    area.addEventListener("click", focusDirectComposerFromArea, true);
+  }
+  bindChatComposerAreaDirectFocus(chatGeneralInputArea, "general");
+  bindChatComposerAreaDirectFocus(chatPersonalInputArea, "personal");
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
   var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
