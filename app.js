@@ -24183,6 +24183,12 @@ function initChat() {
       b.setAttribute("aria-pressed", on ? "true" : "false");
     }
   }
+  function pokerApplySavedRateToChatVoiceAudio(audioEl) {
+    if (!audioEl || !audioEl.classList || !audioEl.classList.contains("chat-msg__voice")) return;
+    try {
+      audioEl.playbackRate = pokerGetSavedVoicePlaybackRate();
+    } catch (eAudioRate) {}
+  }
   /** FileReader/WebKit часто отдаёт data:application/octet-stream или data:video/webm — сервер ждёт data:audio/… */
   function pokerNormalizeVoiceDataUrl(dataUrl, recorderMime) {
     if (typeof dataUrl !== "string" || dataUrl.indexOf("data:") !== 0) return dataUrl;
@@ -24262,13 +24268,12 @@ function initChat() {
     aud.controls = true;
     aud.preload = "metadata";
     aud.src = voiceUrl;
+    pokerApplySavedRateToChatVoiceAudio(aud);
     aud.addEventListener(
       "loadedmetadata",
       function onVoiceMeta() {
         aud.removeEventListener("loadedmetadata", onVoiceMeta);
-        try {
-          aud.playbackRate = pokerGetSavedVoicePlaybackRate();
-        } catch (ePb) {}
+        pokerApplySavedRateToChatVoiceAudio(aud);
       },
       false
     );
@@ -24323,15 +24328,27 @@ function initChat() {
       pokerSetSavedVoicePlaybackRate(rate);
       pokerApplyChatVoicePlaybackRateGlobally(rate);
     });
+    document.addEventListener("loadedmetadata", function (ev) {
+      var t = ev.target;
+      pokerApplySavedRateToChatVoiceAudio(t);
+    }, true);
+    document.addEventListener("canplay", function (ev) {
+      var t = ev.target;
+      pokerApplySavedRateToChatVoiceAudio(t);
+    }, true);
     // WebKit / TG WebView: установка playbackRate в capture на «play» может срывать старт — после начала воспроизведения безопаснее.
+    document.addEventListener("play", function (ev) {
+      var t = ev.target;
+      if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
+      setTimeout(function () {
+        pokerApplySavedRateToChatVoiceAudio(t);
+      }, 0);
+    }, true);
     document.addEventListener("playing", function (ev) {
       var t = ev.target;
       if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
-      var rate = pokerGetSavedVoicePlaybackRate();
       function apply() {
-        try {
-          if (t && t.classList && t.classList.contains("chat-msg__voice")) t.playbackRate = rate;
-        } catch (ePl) {}
+        pokerApplySavedRateToChatVoiceAudio(t);
       }
       try {
         if (typeof requestAnimationFrame === "function") requestAnimationFrame(apply);
