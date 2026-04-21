@@ -21518,7 +21518,7 @@ var POKER_CHAT_GENERAL_DISK_KEY = "poker_chat_general_snapshot_v1";
 var POKER_CHAT_PERSONAL_DISK_KEY = "poker_chat_personal_snapshot_v1";
 var POKER_CHAT_DISK_GENERAL_MAX_MSG = 130;
 var POKER_CHAT_DISK_GENERAL_MAX_MEMBERS = 120;
-var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 150;
+var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 260;
 var POKER_CHAT_DISK_PERSONAL_MAX_PEERS = 40;
 function pokerTrimChatDiskMessages(arr, max) {
   if (!Array.isArray(arr) || max <= 0) return [];
@@ -21641,6 +21641,18 @@ function pokerHydrateChatSnapshotsFromDisk() {
       personalMessagesCacheMeta[k] = { ts: ent.t || 0, source: "disk" };
     });
   } catch (eHyd) {}
+}
+function getPersonalMessagesSnapshotForOpen(peerId) {
+  if (!peerId) return null;
+  var cache = personalMessagesCache[peerId];
+  if (!Array.isArray(cache) || !cache.length) return null;
+  var meta = personalMessagesCacheMeta[peerId] && typeof personalMessagesCacheMeta[peerId] === "object"
+    ? personalMessagesCacheMeta[peerId]
+    : null;
+  return {
+    messages: cache,
+    meta: meta,
+  };
 }
 
 function initChat() {
@@ -28896,9 +28908,9 @@ function initChat() {
       pokerHydrateOpenDmHeaderFromContacts(userId);
     } catch (eHdrConvOpen) {}
     if (messagesEl) {
-      var cached = userId && personalMessagesCache[userId];
-      var cachedMeta = userId && personalMessagesCacheMeta[userId] ? personalMessagesCacheMeta[userId] : null;
-      if (Array.isArray(cached) && cached.length && (!cachedMeta || cachedMeta.source !== "disk")) {
+      var snapshot = getPersonalMessagesSnapshotForOpen(userId);
+      var cached = snapshot ? snapshot.messages : null;
+      if (Array.isArray(cached) && cached.length) {
         renderMessages(cached);
       } else {
         messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
@@ -30729,7 +30741,12 @@ function initChat() {
       avatarPh.textContent = ini.toUpperCase();
       avatarPh.style.display = "flex";
     }
-    prevMsgEl.innerHTML = '<p class="chat-empty">Загрузка…</p>';
+    var previewSnapshot = getPersonalMessagesSnapshotForOpen(userId);
+    if (previewSnapshot && Array.isArray(previewSnapshot.messages) && previewSnapshot.messages.length) {
+      renderDialogPreviewMessagesInto(prevMsgEl, previewSnapshot.messages);
+    } else {
+      prevMsgEl.innerHTML = '<p class="chat-empty">Загрузка…</p>';
+    }
     modal.classList.add("chat-dialog-preview-modal--open");
     modal.setAttribute("aria-hidden", "false");
     try {
