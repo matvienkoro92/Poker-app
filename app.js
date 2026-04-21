@@ -14342,14 +14342,23 @@ function updateProfileUserMeta() {
 function loadProfileDebugInfo() {
   var el = document.getElementById("profileDebugInfo");
   if (!el) return;
-  el.style.display = "none";
+  el.textContent = "debug\nloading...";
+  el.style.display = "block";
   var base = getApiBase();
   var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-  if (!base || !q || q === "?initData=") return;
+  if (!base || !q || q === "?initData=") {
+    el.textContent = "debug\nno auth";
+    return;
+  }
   fetch(base + "/api/account-debug" + q)
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      if (!data || !data.ok || !data.account || !data.identity || !data.data) return;
+      if (!data || !data.ok || !data.account || !data.identity || !data.data) {
+        var err = data && data.error ? String(data.error) : "bad payload";
+        el.textContent = "debug\nerror: " + err;
+        el.style.display = "block";
+        return;
+      }
       var lines = [
         "debug",
         "memberId: " + (data.identity.memberId || "—"),
@@ -14363,7 +14372,10 @@ function loadProfileDebugInfo() {
       el.textContent = lines.join("\n");
       el.style.display = "block";
     })
-    .catch(function () {});
+    .catch(function (e) {
+      el.textContent = "debug\nfetch error";
+      el.style.display = "block";
+    });
 }
 
 function updateProfileDtId() {
