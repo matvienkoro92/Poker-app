@@ -29026,6 +29026,44 @@ function initChat() {
       setTimeout(function () { prefetchPersonalMessages(id); }, idx * 120);
     });
   }
+  function enrichPersonalThreadPeerMeta(messages, peerId, fallbackMeta) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    var list = Array.isArray(messages) ? messages : [];
+    var meta = fallbackMeta && typeof fallbackMeta === "object" ? Object.assign({}, fallbackMeta) : {};
+    if (!pid || !list.length) return list;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var m = list[i];
+      if (!m || !m.from || !peerChatIdsEqual(m.from, pid)) continue;
+      if (!meta.fromName && m.fromName != null && String(m.fromName).trim()) meta.fromName = String(m.fromName).trim();
+      if (!meta.fromDtId && m.fromDtId != null && String(m.fromDtId).trim()) meta.fromDtId = String(m.fromDtId).trim();
+      if (!meta.fromAvatar && m.fromAvatar != null && String(m.fromAvatar).trim()) meta.fromAvatar = String(m.fromAvatar).trim();
+      if ((meta.fromP21Id == null || String(meta.fromP21Id).trim() === "") && m.fromP21Id != null && String(m.fromP21Id).trim() !== "") {
+        meta.fromP21Id = String(m.fromP21Id).trim();
+      }
+      if (meta.fromRespect === undefined || meta.fromRespect === null) {
+        if (m.fromRespect !== undefined && m.fromRespect !== null) meta.fromRespect = m.fromRespect;
+      }
+    }
+    if (!meta.fromName && meta.fromDtId) meta.fromName = meta.fromDtId;
+    for (var j = 0; j < list.length; j++) {
+      var row = list[j];
+      if (!row || !row.from || !peerChatIdsEqual(row.from, pid)) continue;
+      if (meta.fromName && (!row.fromName || !String(row.fromName).trim())) row.fromName = meta.fromName;
+      if (meta.fromDtId && (!row.fromDtId || !String(row.fromDtId).trim())) row.fromDtId = meta.fromDtId;
+      if (meta.fromAvatar && (!row.fromAvatar || !String(row.fromAvatar).trim())) row.fromAvatar = meta.fromAvatar;
+      if (
+        meta.fromP21Id != null &&
+        String(meta.fromP21Id).trim() !== "" &&
+        (row.fromP21Id == null || String(row.fromP21Id).trim() === "")
+      ) {
+        row.fromP21Id = meta.fromP21Id;
+      }
+      if ((row.fromRespect === undefined || row.fromRespect === null) && meta.fromRespect !== undefined && meta.fromRespect !== null) {
+        row.fromRespect = meta.fromRespect;
+      }
+    }
+    return list;
+  }
 
   function buildContactsRequestUrl(opts) {
     opts = opts || {};
@@ -30914,6 +30952,13 @@ function initChat() {
             chatWithUserName = titleName;
             if (convTitle) setTextContentIfChanged(convTitle, titleName);
           }
+        }
+        if (!isGrpThread && Array.isArray(messages) && messages.length && chatWithUserId) {
+          messages = enrichPersonalThreadPeerMeta(messages, chatWithUserId, {
+            fromName: chatWithUserName || "",
+            fromAvatar: chatWithPeerAvatarUrl || "",
+            fromP21Id: data.otherP21Id != null ? data.otherP21Id : "",
+          });
         }
         var pt = data.participantsCount != null ? data.participantsCount : "—";
         var ol = data.onlineCount != null ? data.onlineCount : "—";
