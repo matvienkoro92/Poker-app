@@ -21659,17 +21659,7 @@ function initChat() {
   var chatGeneralKeyboardDebugEl = document.getElementById("chatGeneralKeyboardDebug");
   var chatPersonalKeyboardDebugEl = document.getElementById("chatPersonalKeyboardDebug");
   function ensureChatKeyboardDebugFloatingPanel() {
-    if (chatKeyboardDebugPanel && chatKeyboardDebugPanel.parentNode) return chatKeyboardDebugPanel;
-    try {
-      chatKeyboardDebugPanel = document.createElement("div");
-      chatKeyboardDebugPanel.id = "chatKeyboardDebugFloatingPanel";
-      chatKeyboardDebugPanel.className = "chat-keyboard-debug chat-keyboard-debug--floating";
-      chatKeyboardDebugPanel.setAttribute("aria-hidden", "false");
-      document.body.appendChild(chatKeyboardDebugPanel);
-      return chatKeyboardDebugPanel;
-    } catch (eDbgFloatCreate) {
-      return null;
-    }
+    return null;
   }
   var chatIosComposeOverlay = document.getElementById("chatIosComposeOverlay");
   var chatIosComposeOverlayBackdrop = document.getElementById("chatIosComposeOverlayBackdrop");
@@ -21929,7 +21919,7 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    return String(document.body.getAttribute("data-view") || "") === "chat";
+    return false;
   }
   function isChatKeyboardDebugTarget(node) {
     try {
@@ -22305,16 +22295,7 @@ function initChat() {
       }
     } catch (eDbgTicker) {}
   }
-  installChatKeyboardDebugObservers();
   renderChatKeyboardDebugPanel();
-  try {
-    var bootPanel = ensureChatKeyboardDebugFloatingPanel();
-    if (bootPanel) {
-      bootPanel.hidden = false;
-      bootPanel.setAttribute("aria-hidden", "false");
-      bootPanel.textContent = "chat debug booting...";
-    }
-  } catch (eDbgBoot) {}
   function ensureTelegramIosChatComposerOverlayHost() {
     return null;
   }

@@ -734,6 +734,7 @@ html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top-inner {
   margin-top: 0 !important;
 }
 .chat-keyboard-debug {
+  display: none !important;
   margin: 0 0 4px;
   padding: 4px 6px;
   font: 9px/1.18 ui-monospace, SFMono-Regular, Menlo, monospace;
