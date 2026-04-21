@@ -1597,7 +1597,12 @@ function initProfileChatPush() {
   try {
     document.addEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, { capture: true, passive: true });
   } catch (eP) {}
-  navigator.serviceWorker.register("./sw.js").then(function (reg) {
+  var swUrl = "./sw.js";
+  try {
+    var swBuild = document && document.documentElement ? String(document.documentElement.getAttribute("data-build") || "").trim() : "";
+    if (swBuild) swUrl += "?v=" + encodeURIComponent(swBuild);
+  } catch (eSwUrl) {}
+  navigator.serviceWorker.register(swUrl).then(function (reg) {
     try {
       if (reg && reg.waiting) {
         setTimeout(function () {
