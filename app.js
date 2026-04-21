@@ -9334,6 +9334,15 @@ function getPokerResolvedTelegramUser() {
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
       hint.classList.toggle("auth-banner__code-hint--hidden", !text);
     }
+    function getEmailDtIdHint() {
+      try {
+        var v = (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) || "";
+        v = String(v || "").trim().toUpperCase();
+        return /^ID\d{6}$/.test(v) ? v : "";
+      } catch (eDtHint) {
+        return "";
+      }
+    }
 
     if (backBtn) {
       backBtn.addEventListener("click", function () {
@@ -9352,7 +9361,7 @@ function getPokerResolvedTelegramUser() {
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "request", email: email }),
+          body: JSON.stringify({ action: "request", email: email, dtIdHint: getEmailDtIdHint() }),
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
@@ -9383,6 +9392,12 @@ function getPokerResolvedTelegramUser() {
             var data = pack.data || {};
             if (pack.res.ok && data.ok && data.user && data.pwaSession) {
               var u = normalizeVerifiedUser(data.user, null);
+              try {
+                if (data.dtId) {
+                  sessionStorage.setItem("poker_dt_id", data.dtId);
+                  if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
+                }
+              } catch (eDtSave) {}
               if (
                 !pokerSavePwaTgSession(
                   data.pwaSession,
@@ -14363,7 +14378,6 @@ function pokerClearSessionsAndReloadForLogin() {
   try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
   try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
   try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
-  try { localStorage.removeItem("poker_dt_id"); } catch (e5) {}
   try { localStorage.removeItem("poker_p21_id"); } catch (e6) {}
   try {
     pokerProfileChatPushClearUiCache();
