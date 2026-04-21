@@ -11092,12 +11092,17 @@ function setView(viewName, navOpts) {
     initPokerShowsPlayer();
     if (typeof updateTournamentDayBlock === "function") updateTournamentDayBlock();
     try {
-      var idleChatBoot = window.requestIdleCallback || function (cb) { setTimeout(cb, 80); };
-      idleChatBoot(function () {
+      var runHomeChatBoot = function () {
         if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
           window.__pokerScheduleChatBootstrapFetch();
         }
-      });
+      };
+      if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+        setTimeout(runHomeChatBoot, 0);
+      } else {
+        var idleChatBoot = window.requestIdleCallback || function (cb) { setTimeout(cb, 80); };
+        idleChatBoot(runHomeChatBoot);
+      }
     } catch (eChatBootHome) {}
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
@@ -11157,10 +11162,15 @@ function setView(viewName, navOpts) {
       try {
         pokerPushOpenStateDebug("setView-chat-initChat", "listeners=0");
       } catch (eSetViewDbg2) {}
-      var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
-      idleChat(function () {
+      var runChatInit = function () {
         if (!window.chatListenersAttached && typeof initChat === "function") initChat();
-      });
+      };
+      if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+        setTimeout(runChatInit, 0);
+      } else {
+        var idleChat = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
+        idleChat(runChatInit);
+      }
     } else if (window.chatListenersAttached) {
       try {
         pokerPushOpenStateDebug("setView-chat-refresh-path", "listeners=1");
@@ -31384,16 +31394,21 @@ function initChat() {
       });
     } catch (eWinDm) {}
     (function schedulePrefetchChatContactsCache() {
-      var idle = window.requestIdleCallback || function (cb) {
-        setTimeout(cb, 120);
-      };
-      idle(function () {
+      var runBoot = function () {
         try {
           if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
             window.__pokerScheduleChatBootstrapFetch();
           }
         } catch (ePf) {}
-      });
+      };
+      if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+        setTimeout(runBoot, 0);
+      } else {
+        var idle = window.requestIdleCallback || function (cb) {
+          setTimeout(cb, 120);
+        };
+        idle(runBoot);
+      }
     })();
     (function () {
       function getVisibleMessagesEl() {
@@ -38171,6 +38186,22 @@ window.addEventListener("poker-telegram-auth", function (ev) {
     if (typeof updateProfileUserName === "function") updateProfileUserName();
     if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
     if (typeof updateProfileDtId === "function") updateProfileDtId();
+    try {
+      if (typeof pokerHydrateChatSnapshotsFromDisk === "function") {
+        pokerHydrateChatSnapshotsFromDisk();
+      }
+    } catch (eChatHydAuth) {}
+    try {
+      if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
+        window.__pokerScheduleChatBootstrapFetch();
+      }
+    } catch (eChatBootAuth) {}
+    try {
+      if (typeof loadContacts === "function") loadContacts();
+    } catch (eChatContactsAuth) {}
+    try {
+      if (typeof loadGeneral === "function") loadGeneral();
+    } catch (eChatGeneralAuth) {}
     if (typeof window.chatRefresh === "function") window.chatRefresh();
     if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
     if (typeof pokerMaybeAutoEnrollChatPush === "function") pokerMaybeAutoEnrollChatPush();
