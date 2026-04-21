@@ -31795,7 +31795,7 @@ function initChat() {
               } catch (ePwaRectPad) {}
               /* Для scroll range нужен не только видимый блок composer, но и его фиксированный bottom:
                * иначе последнее сообщение визуально уходит под строку и не докручивается до края. */
-              pad = Math.max(32, Math.round(Math.max(bh, pwaComposerLift) + Math.max(0, btm) + 4));
+              pad = Math.max(30, Math.round(Math.max(bh, pwaComposerLift) + Math.max(0, btm) + 2));
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
