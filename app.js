@@ -873,6 +873,23 @@ function pokerMaybeRememberMemberIdFromUser(user) {
     else pokerRememberLastMemberId("tg_" + raw);
   } catch (e) {}
 }
+function pokerRememberTransportMemberIdFromEnvironment() {
+  try {
+    var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+    if (resolved && resolved.id != null) {
+      pokerMaybeRememberMemberIdFromUser(resolved);
+      if (pokerReadLastMemberIdHint()) return;
+    }
+  } catch (eResolved) {}
+  try {
+    var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    var wu = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
+    if (wu && wu.id != null) {
+      pokerRememberLastMemberId("tg_" + String(wu.id));
+      return;
+    }
+  } catch (eTgUnsafe) {}
+}
 
 function pokerIsPwaDisplayStandalone() {
   try {
@@ -11579,6 +11596,9 @@ function setView(viewName, navOpts) {
     }
   }
   if (viewName === "profile") {
+    try {
+      pokerRememberTransportMemberIdFromEnvironment();
+    } catch (eRememberEnvProfile) {}
     updateProfileUserName();
     updateProfileExitBtnVisibility();
     updateProfileDtId();
@@ -39540,6 +39560,9 @@ window.addEventListener("poker-telegram-auth", function (ev) {
   try {
     var d = ev && ev.detail;
     if (!d || !d.verified) return;
+    try {
+      pokerRememberTransportMemberIdFromEnvironment();
+    } catch (eAuthRememberEnv) {}
     if (typeof updateProfileUserName === "function") updateProfileUserName();
     if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
     if (typeof updateProfileDtId === "function") updateProfileDtId();
