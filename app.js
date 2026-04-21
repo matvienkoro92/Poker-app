@@ -22688,7 +22688,6 @@ function initChat() {
       var directComposer = getDirectTelegramChatComposer(mode);
       if (!directComposer) return;
       chatComposerEl = directComposer;
-      if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) return;
       try {
         directComposer.disabled = false;
         directComposer.hidden = false;
@@ -22697,6 +22696,7 @@ function initChat() {
         directComposer.style.removeProperty("display");
         directComposer.style.removeProperty("pointer-events");
       } catch (eComposerAreaPrep) {}
+      if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) return;
       var isEarlyGesture = !!(event && (event.type === "touchstart" || event.type === "pointerdown"));
       try {
         if (directComposer.focus) directComposer.focus({ preventScroll: true });
