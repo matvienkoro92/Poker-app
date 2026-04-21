@@ -14435,6 +14435,8 @@ function loadProfileDebugInfo() {
         "dtId: " + (data.account.dtId || "—"),
         "preferred: " + (data.account.preferredUserId || "—"),
         "direct: " + (data.account.directUserId || "—"),
+        "linked: " + ((data.account.linkedUserIds && data.account.linkedUserIds.length) ? data.account.linkedUserIds.join(", ") : "—"),
+        "clientHint: " + (typeof pokerReadLastMemberIdHint === "function" ? (pokerReadLastMemberIdHint() || "—") : "—"),
         "chatName dt/legacy: " + String(data.data.chatDisplayDt || "—") + " / " + String(data.data.chatDisplayLegacy || "—"),
         "respect dt/legacy: " + String(data.data.respectDt != null ? data.data.respectDt : "—") + " / " + String(data.data.respectLegacy != null ? data.data.respectLegacy : "—"),
         "friends dt/legacy: " + String(data.data.friendsDt != null ? data.data.friendsDt : "—") + " / " + String(data.data.friendsLegacy != null ? data.data.friendsLegacy : "—"),
