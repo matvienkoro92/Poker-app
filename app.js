@@ -21732,7 +21732,7 @@ function initChat() {
         return "0px";
       }
     } catch (eDeskHeadTop) {}
-    return "60px";
+    return "50px";
   }
   function syncConvGroupAvatarEditUi() {
     if (!convPeerAvatarWrap) return;
