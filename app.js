@@ -21624,6 +21624,7 @@ function pokerHydrateChatSnapshotsFromDisk() {
         onlineCount: g.onlineCount,
         generalPinned: g.generalPinned != null ? g.generalPinned : null,
         generalMembers: Array.isArray(g.generalMembers) ? g.generalMembers : [],
+        __fromDisk: true,
       };
     }
     var rawP = localStorage.getItem(POKER_CHAT_PERSONAL_DISK_KEY);
@@ -21637,7 +21638,7 @@ function pokerHydrateChatSnapshotsFromDisk() {
       if (personalMessagesCache[k] && personalMessagesCache[k].length) return;
       /* bust снимает только RAM после нового непрочитанного — диск всё ещё даёт быстрый первый кадр, loadMessages перезапишет. */
       personalMessagesCache[k] = ent.messages.slice();
-      personalMessagesCacheMeta[k] = { ts: ent.t || 0 };
+      personalMessagesCacheMeta[k] = { ts: ent.t || 0, source: "disk" };
     });
   } catch (eHyd) {}
 }
@@ -25920,6 +25921,7 @@ function initChat() {
       if (!document.querySelector('[data-view="chat"].view--active')) return;
       var cache = window._chatGeneralCache;
       if (!cache || !Array.isArray(cache.messages) || cache.messages.length === 0) return;
+      if (cache.__fromDisk) return;
       if (typeof getPokerChatTelegramAuthState === "function" && getPokerChatTelegramAuthState() !== "ok") return;
       scrollGeneralToBottomOnNextRender = true;
       updateGeneralInputLocked(false);
@@ -26752,6 +26754,7 @@ function initChat() {
           onlineCount: data.onlineCount,
           generalPinned: data.generalPinned != null ? data.generalPinned : null,
           generalMembers: nextGeneralMembers,
+          __fromDisk: false,
         };
         if (!noGeneralAccess) {
           try {
@@ -28858,7 +28861,8 @@ function initChat() {
     scrollPersonalToBottomOnNextRender = true;
     if (messagesEl) {
       var cached = userId && personalMessagesCache[userId];
-      if (Array.isArray(cached) && cached.length) {
+      var cachedMeta = userId && personalMessagesCacheMeta[userId] ? personalMessagesCacheMeta[userId] : null;
+      if (Array.isArray(cached) && cached.length && (!cachedMeta || cachedMeta.source !== "disk")) {
         renderMessages(cached);
       } else {
         messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
@@ -31027,7 +31031,7 @@ function initChat() {
           var sig = personalRenderSignature(chatWithUserId || "", messages, data.partial === true);
           if (sig !== lastPersonalMessagesSig) {
             personalMessagesCache[chatWithUserId] = messages.slice();
-            personalMessagesCacheMeta[chatWithUserId] = { ts: Date.now() };
+            personalMessagesCacheMeta[chatWithUserId] = { ts: Date.now(), source: "live" };
             try {
               pokerWritePersonalPeerSnapshotToDisk(chatWithUserId, personalMessagesCache[chatWithUserId]);
             } catch (eSnapP) {}
@@ -31104,7 +31108,7 @@ function initChat() {
           personalHasMoreBeforeByPeer[peerId] = !!data.hasMoreBefore;
           var merged = data.messages.concat(cache);
           personalMessagesCache[peerId] = merged.slice();
-          personalMessagesCacheMeta[peerId] = { ts: Date.now() };
+          personalMessagesCacheMeta[peerId] = { ts: Date.now(), source: "live" };
           if (
             messagesEl &&
             Array.isArray(data.messages) &&
@@ -34309,6 +34313,7 @@ function initChat() {
         genVis &&
         generalMessages &&
         window._chatGeneralCache &&
+        !window._chatGeneralCache.__fromDisk &&
         window._chatGeneralCache.messages &&
         window._chatGeneralCache.messages.length
       ) {
