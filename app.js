@@ -9272,6 +9272,25 @@ function getPokerResolvedTelegramUser() {
     mountPwaStandaloneEnterButton();
   }
 
+  function showPwaStandaloneEntryScreen() {
+    if (!isPwaStandaloneAuth()) return;
+    try {
+      showPwaAuthScreen();
+    } catch (eShowPwa) {}
+    try {
+      setPwaAuthIdentifyingPhase(false);
+    } catch (eIdOff) {}
+    try {
+      hideIdentifyingMini();
+    } catch (eMini) {}
+    try {
+      resetBannerForPwaLogin();
+    } catch (eBanner) {}
+    try {
+      remountPwaStandaloneEnterScreen();
+    } catch (eRemount) {}
+  }
+
   function mountPwaEmailLogin(mount) {
     if (!mount) return;
     if (mount.querySelector(".auth-banner__email-login")) return;
@@ -9422,8 +9441,7 @@ function getPokerResolvedTelegramUser() {
         return;
       }
       if (banner) banner.classList.add("auth-banner--hidden");
-      showPwaAuthScreen();
-      remountPwaStandaloneEnterScreen();
+      showPwaStandaloneEntryScreen();
     } else {
       if (banner) banner.classList.add("auth-banner--hidden");
     }
@@ -10035,11 +10053,7 @@ function getPokerResolvedTelegramUser() {
     } catch (eHdr) {}
     function finishPwaStandaloneIdentifyUi() {
       try {
-        setPwaAuthIdentifyingPhase(false);
-        showUnauthorized();
-        resetBannerForPwaLogin();
-        remountPwaStandaloneEnterScreen();
-        mountTelegramLoginWidgetForPwa();
+        showPwaStandaloneEntryScreen();
       } catch (ePwaFlow) {
         try {
           setPwaAuthIdentifyingPhase(false);
@@ -10338,35 +10352,20 @@ function getPokerResolvedTelegramUser() {
 
   window.__pokerOpenPwaLoginScreen = function () {
     try {
-      setPwaAuthIdentifyingPhase(false);
-      showPwaAuthScreen();
-      remountPwaStandaloneEnterScreen();
-      mountTelegramLoginWidgetForPwa();
+      showPwaStandaloneEntryScreen();
     } catch (ePwaOpen) {}
   };
 
   window.__pokerShowLoggedOutState = function () {
     try {
-      setPwaAuthIdentifyingPhase(false);
-    } catch (eIdOff) {}
-    try {
-      hideIdentifyingMini();
-    } catch (eMini) {}
-    try {
       updateHeaderGreeting();
     } catch (eHdr) {}
     try {
+      showPwaStandaloneEntryScreen();
+    } catch (eShowEntry) {}
+    try {
       showUnauthorized();
     } catch (eUnauth) {}
-    try {
-      resetBannerForPwaLogin();
-    } catch (eBanner) {}
-    try {
-      remountPwaStandaloneEnterScreen();
-    } catch (eRemount) {}
-    try {
-      mountTelegramLoginWidgetForPwa();
-    } catch (eMount) {}
     try {
       updateProfileExitBtnVisibility();
     } catch (eExitBtn) {}
@@ -10406,9 +10405,7 @@ function getPokerResolvedTelegramUser() {
         setPwaAuthIdentifyingPhase(false);
       } catch (eId) {}
       try {
-        showUnauthorized();
-        resetBannerForPwaLogin();
-        mountTelegramLoginWidgetForPwa();
+        showPwaStandaloneEntryScreen();
       } catch (eMount) {}
     } catch (eRec) {}
   }, 10000);
