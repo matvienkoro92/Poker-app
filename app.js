@@ -22454,17 +22454,20 @@ function initChat() {
     ta.removeAttribute("tabindex");
     return ta;
   }
-  if (shouldUseDedicatedTelegramIosChatComposer()) {
-    chatGeneralComposerEl = createDedicatedChatComposer("chatGeneralComposer", "Сообщение в общий чат...", "Сообщение в общий чат");
-    chatPersonalComposerEl = createDedicatedChatComposer("chatPersonalComposer", "Сообщение...", "");
-    if (chatGeneralComposerEl && chatGeneralComposerMount && !chatGeneralComposerMount.contains(chatGeneralComposerEl)) {
-      chatGeneralComposerMount.appendChild(chatGeneralComposerEl);
+  function ensureTelegramDedicatedChatComposers() {
+    if (!isTelegramChatRuntime()) return false;
+    if (!chatGeneralComposerEl) {
+      chatGeneralComposerEl = createDedicatedChatComposer("chatGeneralComposer", "Сообщение в общий чат...", "Сообщение в общий чат");
+      if (chatGeneralComposerEl && chatGeneralComposerMount && !chatGeneralComposerMount.contains(chatGeneralComposerEl)) {
+        chatGeneralComposerMount.appendChild(chatGeneralComposerEl);
+      }
     }
-    if (chatPersonalComposerEl && chatPersonalComposerMount && !chatPersonalComposerMount.contains(chatPersonalComposerEl)) {
-      chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
+    if (!chatPersonalComposerEl) {
+      chatPersonalComposerEl = createDedicatedChatComposer("chatPersonalComposer", "Сообщение...", "");
+      if (chatPersonalComposerEl && chatPersonalComposerMount && !chatPersonalComposerMount.contains(chatPersonalComposerEl)) {
+        chatPersonalComposerMount.appendChild(chatPersonalComposerEl);
+      }
     }
-    ensureTelegramIosMinimalComposerBlock(chatGeneralInputArea, chatGeneralComposerMount, generalSendBtn);
-    ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
     try {
       if (chatComposerPool) {
         chatComposerPool.setAttribute("hidden", "hidden");
@@ -22474,9 +22477,19 @@ function initChat() {
         chatSharedComposerEl.value = "";
         chatSharedComposerEl.blur();
         chatSharedComposerEl.disabled = true;
+        chatSharedComposerEl.hidden = true;
         chatSharedComposerEl.setAttribute("tabindex", "-1");
+        chatSharedComposerEl.setAttribute("aria-hidden", "true");
+        chatSharedComposerEl.style.setProperty("display", "none", "important");
+        chatSharedComposerEl.style.setProperty("pointer-events", "none", "important");
       }
-    } catch (eTgDedicatedPool) {}
+    } catch (eTgEnsurePool) {}
+    return !!(chatGeneralComposerEl && chatPersonalComposerEl);
+  }
+  if (shouldUseDedicatedTelegramIosChatComposer()) {
+    ensureTelegramDedicatedChatComposers();
+    ensureTelegramIosMinimalComposerBlock(chatGeneralInputArea, chatGeneralComposerMount, generalSendBtn);
+    ensureTelegramIosMinimalComposerBlock(chatPersonalInputArea, chatPersonalComposerMount, sendBtn);
   }
   function getDirectTelegramChatComposer(mode) {
     if (!isTelegramChatRuntime()) return null;
@@ -22878,7 +22891,7 @@ function initChat() {
     if (!chatSharedComposerEl || !chatComposerPool) return;
     mode = mode || "detached";
     var nextMounted = mode === "general" || mode === "personal" ? mode : "detached";
-    var useDedicated = shouldUseDedicatedTelegramIosChatComposer() && chatGeneralComposerEl && chatPersonalComposerEl;
+    var useDedicated = shouldUseDedicatedTelegramIosChatComposer() && ensureTelegramDedicatedChatComposers();
     if (useDedicated) {
       flushChatComposerToDrafts();
       chatComposerMounted = nextMounted;
