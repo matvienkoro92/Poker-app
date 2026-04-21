@@ -14454,6 +14454,10 @@ function updateProfileDtId() {
   var base = getApiBase();
   var authQ = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
   var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
+  var authQWithHint = authQ;
+  if (cached && authQWithHint && authQWithHint !== "?initData=") {
+    authQWithHint += "&dtIdHint=" + encodeURIComponent(cached);
+  }
   if (cached) {
     el.textContent = cached;
     if (!base || !authQ || authQ === "?initData=") return;
@@ -14463,7 +14467,7 @@ function updateProfileDtId() {
     return;
   }
   el.textContent = "\u2026";
-  fetch(base + "/api/users" + authQ)
+  fetch(base + "/api/users" + authQWithHint)
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok && data.dtId) {
