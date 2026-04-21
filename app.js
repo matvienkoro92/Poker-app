@@ -33048,7 +33048,7 @@ function initChat() {
               if (winSt > 72) {
                 var gapKb = Math.round(getChatComposerKeyboardGapPx());
                 var slackTop =
-                  typeof isTelegramWebApp === "function" && isTelegramWebApp()
+                  tg
                     ? Math.max(36, gapKb + 28)
                     : Math.max(44, gapKb + 26);
                 if (coverPxDock > winSt + slackTop) coverPxDock = winSt + slackTop;
