@@ -22669,6 +22669,7 @@ function initChat() {
   }
   function bindChatComposerAreaDirectFocus(area, mode) {
     if (!area || area.__pokerDirectComposerAreaFocusBound) return;
+    if (isTelegramChatRuntime()) return;
     area.__pokerDirectComposerAreaFocusBound = true;
     function shouldIgnoreAreaFocusTarget(target) {
       if (!target || !target.closest) return false;
@@ -22677,7 +22678,6 @@ function initChat() {
       );
     }
     function focusDirectComposerFromArea(event) {
-      if (!isTelegramChatRuntime()) return;
       if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
       if (mode === "general" && chatActiveTab !== "general") return;
       if (mode === "personal" && chatActiveTab !== "personal") return;
