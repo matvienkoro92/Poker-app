@@ -14523,6 +14523,9 @@ function updateProfileDtId() {
         try {
           window.__pokerProfileLinkedEmail = data.email != null ? String(data.email).trim() : "";
         } catch (eEmail) {}
+        try {
+          window.__pokerProfileTelegramUsername = data.telegramUsername != null ? String(data.telegramUsername).trim().replace(/^@+/, "") : "";
+        } catch (eTgProfile) {}
         if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
       }
@@ -14792,6 +14795,8 @@ function syncProfileEmailAuthUi() {
   var textEl = document.getElementById("profileEmailAuthText");
   var linkedRow = document.getElementById("profileEmailAuthLinkedRow");
   var linkedValue = document.getElementById("profileEmailAuthLinkedValue");
+  var tgLinkedRow = document.getElementById("profileTelegramLinkedRow");
+  var tgLinkedValue = document.getElementById("profileTelegramLinkedValue");
   var formWrap = document.getElementById("profileEmailAuthForm");
   var emailInput = document.getElementById("profileEmailAuthInput");
   var codeInput = document.getElementById("profileEmailAuthCodeInput");
@@ -14816,9 +14821,13 @@ function syncProfileEmailAuthUi() {
   if (/^mail_/.test(currentMemberId) || /^mail_pending_/.test(currentMemberId)) authMethod = "email";
   else if (/^tg_/.test(currentMemberId) || /^vk_/.test(currentMemberId)) authMethod = "telegram";
   var linkedEmail = "";
+  var linkedTelegramUsername = "";
   try {
     linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
   } catch (e) {}
+  try {
+    linkedTelegramUsername = String(window.__pokerProfileTelegramUsername || "").trim().replace(/^@+/, "");
+  } catch (eTgLinked) {}
   if (!linkedEmail) {
     try {
       linkedEmail = auth && auth.user && auth.user.email != null ? String(auth.user.email).trim() : "";
@@ -14829,6 +14838,8 @@ function syncProfileEmailAuthUi() {
   if (titleEl) titleEl.hidden = true;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
+  if (tgLinkedRow) tgLinkedRow.hidden = !linkedTelegramUsername;
+  if (tgLinkedValue && linkedTelegramUsername) tgLinkedValue.textContent = "@" + linkedTelegramUsername;
   if (tgSection) tgSection.hidden = !(isVerified && !isGuest && authMethod === "email");
   if (textEl) {
     if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";
