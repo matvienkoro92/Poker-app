@@ -8806,6 +8806,9 @@ function getPokerResolvedTelegramUser() {
   function isPwaStandaloneAuth() {
     return isPwaStandaloneMode();
   }
+  function shouldUseOverlayAuthScreen() {
+    return isPwaStandaloneMode() || isTelegramWebApp();
+  }
   /**
    * Не показываем карточку «Верификация для входа в PWA» внутри клиента Telegram (Mini App / WebView).
    * Скрипт telegram-web-app.js есть и в обычном браузере — отличаем по platform / version WebApp.
@@ -8814,7 +8817,7 @@ function getPokerResolvedTelegramUser() {
     return false;
   }
   function showPwaAuthScreen() {
-    if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
+    if (!shouldUseOverlayAuthScreen() || !pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "false");
     try {
@@ -8837,7 +8840,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function rerenderCurrentPwaAuthScreen() {
-    if (!isPwaStandaloneAuth()) {
+    if (!shouldUseOverlayAuthScreen()) {
       syncPwaAuthLanguageUi();
       return;
     }
@@ -9265,7 +9268,7 @@ function getPokerResolvedTelegramUser() {
     var wrap = document.createElement("div");
     wrap.className = "auth-banner__code-login";
     var backRow =
-      isPwaStandaloneAuth() && !isPwaAuthLocalHost()
+      shouldUseOverlayAuthScreen() && !isPwaAuthLocalHost()
         ? '<div class="auth-banner__code-row auth-banner__code-row--back">' +
           '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaCodeBackBtn" aria-label="' + pwaAuthT("backToChoice") + '">' +
           '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
@@ -9366,7 +9369,7 @@ function getPokerResolvedTelegramUser() {
     function setHint(text, isError) {
       var display = shortenPwaAuthHintForUi(text, !!isError);
       if (!hint) {
-        if (isError && display && isPwaStandaloneAuth()) {
+        if (isError && display && shouldUseOverlayAuthScreen()) {
           try {
             alert(display);
           } catch (eA) {}
@@ -9380,7 +9383,7 @@ function getPokerResolvedTelegramUser() {
     }
     function showCodeSentToBotHint() {
       if (!hint) {
-        if (isPwaStandaloneAuth()) {
+        if (shouldUseOverlayAuthScreen()) {
           try {
             alert(pwaAuthT("sentTelegramCode"));
           } catch (eAl) {}
@@ -9655,8 +9658,8 @@ function getPokerResolvedTelegramUser() {
     if (!mount) return null;
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
-      var title = isPwaStandaloneAuth() ? "" : "Верификация для входа в PWA";
-      var subtitle = isPwaStandaloneAuth()
+      var title = shouldUseOverlayAuthScreen() ? "" : "Верификация для входа в PWA";
+      var subtitle = shouldUseOverlayAuthScreen()
         ? ""
         : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram.</p>';
       var titleBlock = title ? '<p class="auth-banner__verify-title">' + title + "</p>" : "";
@@ -9741,7 +9744,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function mountPwaStandaloneEnterButton() {
-    if (!isPwaStandaloneAuth()) return false;
+    if (!shouldUseOverlayAuthScreen()) return false;
     var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
     if (!m) return false;
     return mountAuthEnterButtons(m, {
@@ -9767,7 +9770,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function remountPwaStandaloneEnterScreen() {
-    if (!isPwaStandaloneAuth()) return;
+    if (!shouldUseOverlayAuthScreen()) return;
     var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
     if (!m) return;
     m.innerHTML = "";
@@ -9778,7 +9781,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function remountCurrentAuthEnterScreen() {
-    if (isPwaStandaloneAuth()) {
+    if (shouldUseOverlayAuthScreen()) {
       remountPwaStandaloneEnterScreen();
       return;
     }
@@ -9793,7 +9796,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function showPwaStandaloneEntryScreen() {
-    if (!isPwaStandaloneAuth()) return;
+    if (!shouldUseOverlayAuthScreen()) return;
     try {
       showPwaAuthScreen();
     } catch (eShowPwa) {}
@@ -10232,7 +10235,7 @@ function getPokerResolvedTelegramUser() {
 
   function showUnauthorized() {
     if (userEl) userEl.classList.add("auth-user--hidden");
-    if (isPwaStandaloneAuth()) {
+    if (shouldUseOverlayAuthScreen()) {
       if (pokerReadPwaGuestMode()) {
         try {
           window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
@@ -10414,7 +10417,7 @@ function getPokerResolvedTelegramUser() {
 
   function openSharedAccountAuthFlow() {
     try {
-      if (isPwaStandaloneAuth() && typeof window.__pokerOpenPwaLoginScreen === "function") {
+      if (shouldUseOverlayAuthScreen() && typeof window.__pokerOpenPwaLoginScreen === "function") {
         window.__pokerOpenPwaLoginScreen();
         return;
       }
@@ -10463,7 +10466,7 @@ function getPokerResolvedTelegramUser() {
   window.__pokerSyncProfileGuestWebsiteMode = syncProfileGuestWebsiteMode;
 
   function setBannerVerifying() {
-    if (!isPwaStandaloneAuth()) {
+    if (!shouldUseOverlayAuthScreen()) {
       if (banner) banner.classList.add("auth-banner--hidden");
       /* Mini App: баннер убран из DOM раньше ломал виджет; полоса «идентификация» должна быть видна */
       showIdentifyingMini();
@@ -10481,7 +10484,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function setBannerFailure(message, showRetry) {
-    if (!isPwaStandaloneAuth()) {
+    if (!shouldUseOverlayAuthScreen()) {
       hideIdentifyingMini();
       if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
       if (banner) {
@@ -10516,7 +10519,7 @@ function getPokerResolvedTelegramUser() {
       hintEl.style.display = "none";
     }
     hideIdentifyingMini();
-    if (!isPwaStandaloneAuth()) return;
+    if (!shouldUseOverlayAuthScreen()) return;
     var cb = getTelegramWidgetAuthCallbackUrl();
     var dom = "";
     try {
@@ -10678,7 +10681,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function mountTelegramLoginWidgetForPwa() {
-    var mount = isPwaStandaloneAuth() && pwaAuthLoginMountEl ? pwaAuthLoginMountEl : document.getElementById("authBannerLoginMount");
+    var mount = shouldUseOverlayAuthScreen() && pwaAuthLoginMountEl ? pwaAuthLoginMountEl : document.getElementById("authBannerLoginMount");
     /*
      * v7: отдельная форма верификации в баннере + кнопка popup Telegram.Login.auth.
      * data-onauth + __pokerTelegramOauthMessageBridge; редирект — tryFinishTelegramLoginRedirect.
@@ -10687,7 +10690,7 @@ function getPokerResolvedTelegramUser() {
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
 
-    if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
+    if (shouldUseOverlayAuthScreen() && mount.getAttribute("data-pwa-widget-mounted")) {
       mount.removeAttribute("data-pwa-widget-mounted");
       mount.innerHTML = "";
     }
@@ -10695,7 +10698,7 @@ function getPokerResolvedTelegramUser() {
       if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) return;
       mount.innerHTML = "";
       var localActions = ensurePwaVerificationForm(mount) || mount;
-      if (isPwaStandaloneAuth()) {
+      if (shouldUseOverlayAuthScreen()) {
         mountPwaUsernameCodeLogin(localActions);
         mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
         return;
@@ -10722,7 +10725,7 @@ function getPokerResolvedTelegramUser() {
         localActions.appendChild(a);
       }
       mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
-      if (!isPwaStandaloneAuth()) mountMiniAppAuthEnterButtons();
+      if (!shouldUseOverlayAuthScreen()) mountMiniAppAuthEnterButtons();
       return;
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) {
@@ -10731,12 +10734,12 @@ function getPokerResolvedTelegramUser() {
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
       var mountedActions = ensurePwaVerificationForm(mount) || mount;
-      if (!isPwaStandaloneAuth()) {
+      if (!shouldUseOverlayAuthScreen()) {
         mountMiniAppAuthEnterButtons();
         return;
       }
       mountPwaUsernameCodeLogin(mountedActions);
-      if (!isPwaStandaloneAuth()) {
+      if (!shouldUseOverlayAuthScreen()) {
         mountVkLoginForPwa(mountedActions);
         mountTelegramExternalBrowserEscapeBtn(mountedActions);
         mountTelegramLoginPopupButton(mountedActions);
@@ -10759,7 +10762,7 @@ function getPokerResolvedTelegramUser() {
         deliverTelegramLoginWidgetPayload(user, false);
       } catch (eCb) {}
     };
-    if (bot && !isPwaStandaloneAuth()) {
+    if (bot && !shouldUseOverlayAuthScreen()) {
       var script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.async = true;
@@ -10771,12 +10774,12 @@ function getPokerResolvedTelegramUser() {
       actionsMount.appendChild(script);
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
-    if (isPwaStandaloneAuth()) {
+    if (shouldUseOverlayAuthScreen()) {
       if (!mountPwaStandaloneEnterButton()) mountPwaUsernameCodeLogin(actionsMount);
     } else {
       mountMiniAppAuthEnterButtons();
     }
-    if (!isPwaStandaloneAuth()) {
+    if (!shouldUseOverlayAuthScreen()) {
       mountVkLoginForPwa(mount);
       mountTelegramExternalBrowserEscapeBtn(mount);
       mountTelegramLoginPopupButton(mount);
@@ -10943,7 +10946,7 @@ function getPokerResolvedTelegramUser() {
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
-    if (isPwaStandaloneAuth()) {
+    if (shouldUseOverlayAuthScreen()) {
       runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
       return;
     }
@@ -11152,7 +11155,7 @@ function getPokerResolvedTelegramUser() {
 
   window.pokerRetryTelegramAuthVerification = function () {
     /* В PWA объект WebApp есть, initData часто пуст — иначе кнопка «Повторить» на оверлее ничего не делала */
-    if (isPwaStandaloneAuth()) {
+    if (shouldUseOverlayAuthScreen()) {
       runVerifyFlow();
       return;
     }
@@ -11193,7 +11196,7 @@ function getPokerResolvedTelegramUser() {
   );
 
   var wtgBoot = getTelegramWebAppNow();
-  if (isPwaStandaloneAuth()) {
+  if (shouldUseOverlayAuthScreen()) {
     /* В PWA initData из Telegram не придёт — не ждём таймер в WebApp-ветке (полоска в #app всё равно скрыта). */
     runVerifyFlow();
   } else if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
