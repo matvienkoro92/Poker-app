@@ -9320,6 +9320,8 @@ function getPokerResolvedTelegramUser() {
       "</div>" +
       '<div class="auth-banner__primary-action" id="authPwaRegisterActionRow">' +
         '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaRegisterSubmitBtn">' + pwaAuthT("register") + "</button>" +
+      "</div>" +
+      '<div class="auth-banner__secondary-action" id="authPwaRegisterBottomRow">' +
       "</div>";
     mount.appendChild(wrap);
 
@@ -9340,6 +9342,7 @@ function getPokerResolvedTelegramUser() {
     var sendBtn = wrap.querySelector("#authPwaCodeSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaCodeVerifyBtn");
     var registerSubmitBtn = wrap.querySelector("#authPwaRegisterSubmitBtn");
+    var registerBottomRow = wrap.querySelector("#authPwaRegisterBottomRow");
     var hint = wrap.querySelector("#authPwaCodeHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
@@ -9442,11 +9445,18 @@ function getPokerResolvedTelegramUser() {
       }
       if (loginModeBtn) loginModeBtn.style.display = registerMode ? "none" : "";
       if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
+      if (registerModeBtn && registerBottomRow && registerMode && registerModeBtn.parentElement !== registerBottomRow) {
+        registerBottomRow.appendChild(registerModeBtn);
+      }
+      if (registerModeBtn && loginModeBtn && !registerMode && registerModeBtn.parentElement !== loginModeBtn.parentElement) {
+        loginModeBtn.parentElement.appendChild(registerModeBtn);
+      }
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
       if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
       if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
+      if (registerBottomRow) registerBottomRow.style.display = registerMode ? "flex" : "none";
     }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
@@ -9795,6 +9805,8 @@ function getPokerResolvedTelegramUser() {
       "</div>" +
       '<div class="auth-banner__primary-action" id="authPwaEmailRegisterActionRow">' +
         '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaEmailRegisterSubmitBtn">' + pwaAuthT("register") + "</button>" +
+      "</div>" +
+      '<div class="auth-banner__secondary-action" id="authPwaEmailRegisterBottomRow">' +
       "</div>";
     mount.appendChild(wrap);
 
@@ -9815,6 +9827,7 @@ function getPokerResolvedTelegramUser() {
     var sendBtn = wrap.querySelector("#authPwaEmailSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaEmailVerifyBtn");
     var registerSubmitBtn = wrap.querySelector("#authPwaEmailRegisterSubmitBtn");
+    var registerBottomRow = wrap.querySelector("#authPwaEmailRegisterBottomRow");
     var hint = wrap.querySelector("#authPwaEmailHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
@@ -9900,11 +9913,18 @@ function getPokerResolvedTelegramUser() {
         loginModeBtn.style.display = registerMode ? "none" : "";
       }
       if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
+      if (registerModeBtn && registerBottomRow && registerMode && registerModeBtn.parentElement !== registerBottomRow) {
+        registerBottomRow.appendChild(registerModeBtn);
+      }
+      if (registerModeBtn && loginModeBtn && !registerMode && registerModeBtn.parentElement !== loginModeBtn.parentElement) {
+        loginModeBtn.parentElement.appendChild(registerModeBtn);
+      }
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
       if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
       if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
+      if (registerBottomRow) registerBottomRow.style.display = registerMode ? "flex" : "none";
     }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {

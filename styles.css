@@ -2131,6 +2131,11 @@ html.app-view-home .home-welcome-outline::before {
 .auth-banner__primary-action .pwa-auth-screen__enter-btn {
   width: 100%;
 }
+.auth-banner__secondary-action {
+  display: none;
+  justify-content: center;
+  margin-top: 10px;
+}
 .auth-banner__code-row {
   display: flex;
   gap: 8px;
