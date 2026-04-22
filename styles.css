@@ -26579,48 +26579,60 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-header-row .title {
   margin: 0;
 }
+.profile-header-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
 .profile-lang-switch {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  padding: 4px;
+  gap: 6px;
+  padding: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.22);
   background: rgba(15, 23, 42, 0.52);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
 }
 .profile-lang-switch__btn {
-  min-width: 46px;
-  height: 36px;
+  min-width: 56px;
+  height: 44px;
   padding: 0 14px;
-  border: 0;
+  border: none;
   border-radius: 999px;
   background: transparent;
-  color: rgba(226, 232, 240, 0.88);
+  color: rgba(226, 232, 240, 0.86);
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.04em;
   cursor: pointer;
+  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
 .profile-lang-switch__btn--active {
-  background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-  color: #fff7ed;
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.28);
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(251, 146, 60, 0.28);
 }
 [data-theme="light"] .profile-lang-switch {
-  background: rgba(255, 247, 237, 0.88);
-  border-color: rgba(249, 115, 22, 0.22);
+  background: rgba(255, 247, 237, 0.92);
+  border-color: rgba(249, 115, 22, 0.24);
 }
 [data-theme="light"] .profile-lang-switch__btn {
-  color: rgba(154, 52, 18, 0.88);
+  color: rgba(154, 52, 18, 0.86);
 }
 [data-theme="light"] .profile-lang-switch__btn--active {
-  color: #fff7ed;
+  color: #fff;
 }
 .view[data-view="profile"].profile-view--guest .profile-header-row {
   justify-content: center;
   margin-bottom: 12px;
+}
+.view[data-view="profile"].profile-view--guest .profile-header-controls {
+  width: 100%;
+  align-items: center;
+  margin-left: 0;
 }
 .view[data-view="profile"].profile-view--guest .profile-header-row .title {
   width: 100%;
