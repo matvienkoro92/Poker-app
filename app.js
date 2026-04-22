@@ -8612,6 +8612,166 @@ function getPokerResolvedTelegramUser() {
   var telegramAppUrl = (appEl && appEl.getAttribute("data-telegram-app-url")) || "";
   var hintEl = document.getElementById("authBannerHint");
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
+  var PWA_AUTH_LANG_KEY = "poker_pwa_auth_lang";
+  var pwaAuthLangRuBtn = document.getElementById("pwaAuthLangRuBtn");
+  var pwaAuthLangEnBtn = document.getElementById("pwaAuthLangEnBtn");
+
+  function getPwaAuthLocale() {
+    try {
+      var raw = typeof localStorage !== "undefined" ? localStorage.getItem(PWA_AUTH_LANG_KEY) : "";
+      return String(raw || "").toLowerCase() === "en" ? "en" : "ru";
+    } catch (eAuthLang) {
+      return "ru";
+    }
+  }
+
+  function setPwaAuthLocale(locale) {
+    var next = String(locale || "").toLowerCase() === "en" ? "en" : "ru";
+    try {
+      if (typeof localStorage !== "undefined") localStorage.setItem(PWA_AUTH_LANG_KEY, next);
+    } catch (eSaveAuthLang) {}
+    syncPwaAuthLanguageUi();
+    rerenderCurrentPwaAuthScreen();
+  }
+
+  function pwaAuthT(key) {
+    var locale = getPwaAuthLocale();
+    var dict = {
+      ru: {
+        langSwitchAria: "Выбор языка",
+        identifying: "Подождите, идентифицируем ваш аккаунт",
+        enterEmail: "Войти через почту",
+        enterTelegram: "Войти через Telegram",
+        enterGuest: "Войти, как гость",
+        guestNote: "Гость не может участвовать в розыгрышах и общаться в чате",
+        backToChoice: "Назад к выбору входа",
+        rememberPassword: "Сохранить пароль",
+        login: "Войти",
+        register: "Зарегистрироваться",
+        switchToLogin: "У меня уже есть аккаунт",
+        switchToRegister: "Создать новый аккаунт",
+        usernameIntro1: "Укажите ниже ваш @username из Телеграм.",
+        usernameIntro2: "Если этот Telegram уже подтверждали раньше, дальше достаточно логина и пароля.",
+        usernameIntro3: "Код подтверждения придёт в Telegram в бота",
+        usernameIntro4: "Если входите впервые, нажмите «Зарегистрироваться», сначала откройте бота",
+        usernameIntro5: "и отправьте /start, затем нажмите здесь «Получить код», введите код из бота и задайте пароль.",
+        usernamePlaceholder: "@Username из Telegram",
+        sendCode: "Получить код",
+        sendingCode: "Отправляем…",
+        codeFromTelegram: "Код из Telegram",
+        done: "Готово",
+        verifying: "Проверяем…",
+        setPassword: "Установите пароль",
+        confirmPassword: "Подтверждение пароля",
+        showPassword: "Показать пароль",
+        hidePassword: "Скрыть пароль",
+        invalidUsernameShort: "Сначала укажите корректный username.",
+        invalidUsernameLong: "Укажите корректный username (5-32, латиница/цифры/_).",
+        checkingPassword: "Проверяем пароль…",
+        loginFailed: "Не удалось войти.",
+        networkRetry: "Сеть недоступна. Попробуйте снова.",
+        invalidServerResponse: "Некорректный ответ сервера",
+        sentTelegramCode: "Код отправлен в Telegram.",
+        sendCodeFailed: "Не удалось отправить код.",
+        passwordsMismatch: "Пароли не совпадают.",
+        enterTelegramCode: "Введите 6-значный код из Telegram.",
+        codeNotVerified: "Код не подтверждён.",
+        emailIntro1: "Введите ваш email.",
+        emailIntro2: "Если вы уже подтверждали эту почту, дальше достаточно email и пароля.",
+        emailIntro3: "Если входите впервые, нажмите «Зарегистрироваться», получите код, подтвердите его и этим же задайте пароль для всего аккаунта.",
+        emailCodePlaceholder: "Код из письма",
+        emailVerify: "Подтвердить",
+        emailCheckingPassword: "Проверяем пароль…",
+        emailSendCode: "Отправить код",
+        emailSendingCode: "Отправляем код…",
+        emailCheckingCode: "Проверяем код…",
+        emailLoginFailed: "Не удалось войти.",
+        emailSendFailed: "Не удалось отправить код.",
+        emailSentDefault: "Код отправлен на почту.",
+        emailSentRegister: "Код отправлен на почту. После подтверждения создадим новый аккаунт.",
+        emailSentLogin: "Код отправлен на почту для входа.",
+        networkError: "Ошибка сети. Попробуйте ещё раз."
+      },
+      en: {
+        langSwitchAria: "Language switch",
+        identifying: "Please wait while we identify your account",
+        enterEmail: "Continue with email",
+        enterTelegram: "Continue with Telegram",
+        enterGuest: "Continue as guest",
+        guestNote: "Guests cannot join giveaways or chat",
+        backToChoice: "Back to sign-in options",
+        rememberPassword: "Remember password",
+        login: "Sign in",
+        register: "Sign up",
+        switchToLogin: "I already have an account",
+        switchToRegister: "Create a new account",
+        usernameIntro1: "Enter your Telegram @username below.",
+        usernameIntro2: "If this Telegram account was already verified before, your username and password are enough.",
+        usernameIntro3: "The verification code will be sent to our Telegram bot",
+        usernameIntro4: "If this is your first time, tap “Sign up”, open the bot",
+        usernameIntro5: "and send /start, then tap “Get code” here, enter the code from the bot, and create your password.",
+        usernamePlaceholder: "@Telegram username",
+        sendCode: "Get code",
+        sendingCode: "Sending…",
+        codeFromTelegram: "Code from Telegram",
+        done: "Done",
+        verifying: "Verifying…",
+        setPassword: "Create password",
+        confirmPassword: "Confirm password",
+        showPassword: "Show password",
+        hidePassword: "Hide password",
+        invalidUsernameShort: "Enter a valid username first.",
+        invalidUsernameLong: "Enter a valid username (5-32 characters, letters/numbers/_).",
+        checkingPassword: "Checking password…",
+        loginFailed: "Unable to sign in.",
+        networkRetry: "Network is unavailable. Please try again.",
+        invalidServerResponse: "Invalid server response",
+        sentTelegramCode: "The code was sent to Telegram.",
+        sendCodeFailed: "Unable to send the code.",
+        passwordsMismatch: "Passwords do not match.",
+        enterTelegramCode: "Enter the 6-digit code from Telegram.",
+        codeNotVerified: "The code could not be verified.",
+        emailIntro1: "Enter your email address.",
+        emailIntro2: "If this email was already verified before, your email and password are enough.",
+        emailIntro3: "If this is your first time, tap “Sign up”, get the code, confirm it, and create a password for your account.",
+        emailCodePlaceholder: "Code from email",
+        emailVerify: "Verify",
+        emailCheckingPassword: "Checking password…",
+        emailSendCode: "Send code",
+        emailSendingCode: "Sending code…",
+        emailCheckingCode: "Verifying code…",
+        emailLoginFailed: "Unable to sign in.",
+        emailSendFailed: "Unable to send the code.",
+        emailSentDefault: "The code was sent to your email.",
+        emailSentRegister: "The code was sent to your email. We will create a new account after confirmation.",
+        emailSentLogin: "The code was sent to your email for sign in.",
+        networkError: "Network error. Please try again."
+      }
+    };
+    var pack = dict[locale] || dict.ru;
+    return pack[key] != null ? pack[key] : dict.ru[key] || "";
+  }
+
+  function syncPwaAuthLanguageUi() {
+    var locale = getPwaAuthLocale();
+    var identifyingText = document.getElementById("pwaAuthIdentifyingText");
+    var langSwitch = document.getElementById("pwaAuthLangSwitch");
+    if (identifyingText) identifyingText.textContent = pwaAuthT("identifying");
+    if (langSwitch) langSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
+    if (pwaAuthLangRuBtn) pwaAuthLangRuBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "ru");
+    if (pwaAuthLangEnBtn) pwaAuthLangEnBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "en");
+  }
+  if (pwaAuthLangRuBtn) {
+    pwaAuthLangRuBtn.addEventListener("click", function () {
+      setPwaAuthLocale("ru");
+    });
+  }
+  if (pwaAuthLangEnBtn) {
+    pwaAuthLangEnBtn.addEventListener("click", function () {
+      setPwaAuthLocale("en");
+    });
+  }
+  syncPwaAuthLanguageUi();
 
   function isPwaStandaloneMode() {
     try {
@@ -8674,6 +8834,35 @@ function getPokerResolvedTelegramUser() {
       document.body.classList.remove("pwa-auth-gated");
       document.body.classList.remove("pwa-auth-preinit");
     } catch (e) {}
+  }
+
+  function rerenderCurrentPwaAuthScreen() {
+    if (!isPwaStandaloneAuth()) {
+      syncPwaAuthLanguageUi();
+      return;
+    }
+    var mount = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!mount) {
+      syncPwaAuthLanguageUi();
+      return;
+    }
+    syncPwaAuthLanguageUi();
+    if (mount.querySelector(".auth-banner__email-login")) {
+      var emailWrap = mount.querySelector(".auth-banner__email-login");
+      var emailMode = emailWrap && emailWrap.getAttribute("data-auth-mode") === "register" ? "register" : "login";
+      mount.innerHTML = "";
+      mountPwaEmailLogin(mount, emailMode);
+      return;
+    }
+    if (mount.querySelector(".auth-banner__code-login")) {
+      var tgWrap = mount.querySelector(".auth-banner__code-login");
+      var tgMode = tgWrap && tgWrap.getAttribute("data-auth-mode") === "register" ? "register" : "login";
+      mount.innerHTML = "";
+      var actionsMount = ensurePwaVerificationForm(mount) || mount;
+      mountPwaUsernameCodeLogin(actionsMount, tgMode);
+      return;
+    }
+    remountPwaStandaloneEnterScreen();
   }
 
   function showIdentifyingMini() {
@@ -9070,7 +9259,7 @@ function getPokerResolvedTelegramUser() {
     mount.appendChild(btn);
   }
 
-  function mountPwaUsernameCodeLogin(mount) {
+  function mountPwaUsernameCodeLogin(mount, initialMode) {
     if (!mount) return;
     if (mount.querySelector(".auth-banner__code-login")) return;
     var wrap = document.createElement("div");
@@ -9078,7 +9267,7 @@ function getPokerResolvedTelegramUser() {
     var backRow =
       isPwaStandaloneAuth() && !isPwaAuthLocalHost()
         ? '<div class="auth-banner__code-row auth-banner__code-row--back">' +
-          '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaCodeBackBtn" aria-label="Назад к выбору входа">' +
+          '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaCodeBackBtn" aria-label="' + pwaAuthT("backToChoice") + '">' +
           '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
           "</button>" +
           "</div>"
@@ -9091,63 +9280,50 @@ function getPokerResolvedTelegramUser() {
     var botUrl = botUser ? "https://t.me/" + botUser : "";
     var linkTme =
       botUrl && botUser
-        ? '<a href="' +
-          botUrl +
-          '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' +
-          botUser +
-          "</a>"
+        ? '<a href="' + botUrl + '" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/' + botUser + "</a>"
         : '<a href="https://t.me/Poker_dvatuza_bot" target="_blank" rel="noopener noreferrer" class="auth-banner__code-intro-link">t.me/Poker_dvatuza_bot</a>';
-    var introHtml =
-      '<div class="auth-banner__code-intro-wrap" role="note">' +
-      '<p class="auth-banner__code-intro">Укажите ниже ваш <strong>@username</strong> из Телеграм.</p>' +
-      '<p class="auth-banner__code-intro">Если этот Telegram уже подтверждали раньше, дальше достаточно логина и пароля.</p>' +
-      '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
-      linkTme +
-      ".</p>" +
-        '<p class="auth-banner__code-intro">Если входите впервые, то нажмите «Зарегистрироваться», сначала откройте бота — ' +
-      linkTme +
-      ' и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код», введите код из бота и задайте пароль.</p>' +
-      "</div>";
     wrap.innerHTML =
       backRow +
-      introHtml +
+      '<div class="auth-banner__code-intro-wrap" role="note">' +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("usernameIntro1") + "</p>" +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("usernameIntro2") + "</p>" +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("usernameIntro3") + " " + linkTme + ".</p>" +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("usernameIntro4") + " " + linkTme + " " + pwaAuthT("usernameIntro5") + "</p>" +
+      "</div>" +
       '<div class="auth-banner__code-row">' +
-        '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@Username из телеграмм" autocomplete="off" />' +
+        '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="' + pwaAuthT("usernamePlaceholder") + '" autocomplete="off" />' +
       "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaRememberPassword" />' +
-        '<span>Сохранить пароль</span>' +
+        '<span>' + pwaAuthT("rememberPassword") + "</span>" +
       "</label>" +
       '<div class="auth-banner__mode-switch">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaLoginModeBtn">Войти</button>' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="authPwaRegisterModeBtn">Зарегистрироваться</button>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaLoginModeBtn">' + pwaAuthT("login") + "</button>" +
+        '<button type="button" class="auth-banner__mode-link" id="authPwaRegisterModeBtn">' + pwaAuthT("switchToRegister") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaCodeSendRow">' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaCodeSendBtn">Отправить код</button>' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaCodeSendBtn">' + pwaAuthT("sendCode") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaCodeHint" role="status" aria-live="polite"></div>' +
       '<div class="auth-banner__code-row auth-banner__code-row--verify" id="authPwaCodeVerifyRow">' +
-        '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="Код из Telegram" inputmode="numeric" autocomplete="one-time-code" />' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Готово</button>' +
+        '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="' + pwaAuthT("codeFromTelegram") + '" inputmode="numeric" autocomplete="one-time-code" />' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">' + pwaAuthT("done") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaPasswordRow">' +
         '<div class="auth-banner__password-wrap">' +
-          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
-          '<button type="button" class="auth-banner__password-toggle" id="authPwaPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaPasswordInput" placeholder="' + pwaAuthT("setPassword") + '" autocomplete="current-password" />' +
+          '<button type="button" class="auth-banner__password-toggle" id="authPwaPasswordToggle" aria-label="' + pwaAuthT("showPassword") + '" aria-pressed="false">👁</button>' +
         "</div>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaPasswordConfirmRow">' +
-        '<input type="password" class="auth-banner__code-input" id="authPwaPasswordConfirmInput" placeholder="Подтверждение пароля" autocomplete="new-password" />' +
+        '<input type="password" class="auth-banner__code-input" id="authPwaPasswordConfirmInput" placeholder="' + pwaAuthT("confirmPassword") + '" autocomplete="new-password" />' +
+      "</div>" +
+      '<div class="auth-banner__primary-action" id="authPwaRegisterActionRow">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaRegisterSubmitBtn">' + pwaAuthT("register") + "</button>" +
       "</div>";
     mount.appendChild(wrap);
 
     var backBtn = wrap.querySelector("#authPwaCodeBackBtn");
-    if (backBtn) {
-      backBtn.addEventListener("click", function () {
-        remountPwaStandaloneEnterScreen();
-      });
-    }
-
     var userInput = wrap.querySelector("#authPwaUsernameInput");
     var passwordInput = wrap.querySelector("#authPwaPasswordInput");
     var passwordToggle = wrap.querySelector("#authPwaPasswordToggle");
@@ -9162,17 +9338,24 @@ function getPokerResolvedTelegramUser() {
     var codeInput = wrap.querySelector("#authPwaCodeInput");
     var sendBtn = wrap.querySelector("#authPwaCodeSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaCodeVerifyBtn");
+    var registerSubmitBtn = wrap.querySelector("#authPwaRegisterSubmitBtn");
     var hint = wrap.querySelector("#authPwaCodeHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
     var TG_LOGIN_LAST_KEY = "poker_auth_last_tg_username";
 
+    if (backBtn) {
+      backBtn.addEventListener("click", function () {
+        remountPwaStandaloneEnterScreen();
+      });
+    }
     function shortenPwaAuthHintForUi(raw, isError) {
       var s = raw != null ? String(raw).trim() : "";
       if (!isError || !s) return s;
-      /* Скрываем только старые многоабзацные тексты; ответы API оставляем читаемыми. */
       if (s.indexOf("\n\n") !== -1 || s.length > 320) {
-        return "Не удалось. Проверьте @username и шаги в инструкции выше.";
+        return getPwaAuthLocale() === "en"
+          ? "Unable to continue. Please check the username and the steps above."
+          : "Не удалось. Проверьте @username и шаги в инструкции выше.";
       }
       return s;
     }
@@ -9195,7 +9378,7 @@ function getPokerResolvedTelegramUser() {
       if (!hint) {
         if (isPwaStandaloneAuth()) {
           try {
-            alert("Код отправлен в Telegram.");
+            alert(pwaAuthT("sentTelegramCode"));
           } catch (eAl) {}
         }
         return;
@@ -9203,7 +9386,7 @@ function getPokerResolvedTelegramUser() {
       hint.classList.remove("auth-banner__code-hint--hidden");
       hint.classList.remove("auth-banner__code-hint--error");
       hint.innerHTML = "";
-      hint.textContent = "Код отправлен в Telegram.";
+      hint.textContent = pwaAuthT("sentTelegramCode");
     }
     function normalizeUsernameInput() {
       var raw = userInput && userInput.value ? userInput.value : "";
@@ -9233,7 +9416,7 @@ function getPokerResolvedTelegramUser() {
         var show = passwordInput.getAttribute("type") === "password";
         passwordInput.setAttribute("type", show ? "text" : "password");
         passwordToggle.setAttribute("aria-pressed", show ? "true" : "false");
-        passwordToggle.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+        passwordToggle.setAttribute("aria-label", show ? pwaAuthT("hidePassword") : pwaAuthT("showPassword"));
       });
     }
     if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
@@ -9246,18 +9429,17 @@ function getPokerResolvedTelegramUser() {
     function persistPassword() {
       pokerPersistPasswordPreference(passwordValue(), !!(rememberPassword && rememberPassword.checked));
     }
-    var authMode = "login";
+    var authMode = initialMode === "register" ? "register" : "login";
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
-      if (loginModeBtn) {
-        loginModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", registerMode);
-        loginModeBtn.style.display = registerMode ? "none" : "";
-      }
-      if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
+      wrap.setAttribute("data-auth-mode", authMode);
+      if (loginModeBtn) loginModeBtn.style.display = registerMode ? "none" : "";
+      if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
       if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
+      if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
@@ -9265,16 +9447,16 @@ function getPokerResolvedTelegramUser() {
         syncAuthModeUi();
         var username = normalizeUsernameInput();
         if (!/^[a-z0-9_]{5,32}$/.test(username)) {
-          setHint("Сначала укажите корректный username.", true);
+          setHint(pwaAuthT("invalidUsernameShort"), true);
           return;
         }
-        setHint("Проверяем пароль…", false);
+        setHint(pwaAuthT("checkingPassword"), false);
         fetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "login", username: username, password: passwordValue() }),
         })
-          .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
           .then(function (data) {
             if (data && data.ok && data.user && data.pwaSession) {
               saveLastUsername(username);
@@ -9301,29 +9483,28 @@ function getPokerResolvedTelegramUser() {
               } catch (ePwDispatch) {}
               return;
             }
-            setHint((data && data.error) || "Не удалось войти.", true);
+            setHint((data && data.error) || pwaAuthT("loginFailed"), true);
           })
           .catch(function () {
-            setHint("Сеть недоступна. Попробуйте снова.", true);
+            setHint(pwaAuthT("networkRetry"), true);
           });
       });
     }
     if (registerModeBtn) {
       registerModeBtn.addEventListener("click", function () {
-        authMode = "register";
+        authMode = authMode === "register" ? "login" : "register";
         syncAuthModeUi();
       });
     }
-
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
         var username = normalizeUsernameInput();
         if (!/^[a-z0-9_]{5,32}$/.test(username)) {
-          setHint("Укажите корректный username (5-32, латиница/цифры/_).", true);
+          setHint(pwaAuthT("invalidUsernameLong"), true);
           return;
         }
         sendBtn.disabled = true;
-        sendBtn.textContent = "Отправляем…";
+        sendBtn.textContent = pwaAuthT("sendingCode");
         if (hint) {
           hint.innerHTML = "";
           hint.classList.add("auth-banner__code-hint--hidden");
@@ -9334,26 +9515,25 @@ function getPokerResolvedTelegramUser() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "request", username: username }),
         })
-          .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
           .then(function (data) {
             if (data && data.ok) {
               saveLastUsername(username);
               showCodeSentToBotHint();
               if (codeInput && codeInput.focus) codeInput.focus();
             } else {
-              setHint((data && data.error) || "Не удалось отправить код.", true);
+              setHint((data && data.error) || pwaAuthT("sendCodeFailed"), true);
             }
           })
           .catch(function () {
-            setHint("Сеть недоступна. Попробуйте снова.", true);
+            setHint(pwaAuthT("networkRetry"), true);
           })
           .finally(function () {
             sendBtn.disabled = false;
-            sendBtn.textContent = "Получить код";
+            sendBtn.textContent = pwaAuthT("sendCode");
           });
       });
     }
-
     var verifyInflight = false;
     function tryVerifyCode(opts) {
       opts = opts || {};
@@ -9363,29 +9543,30 @@ function getPokerResolvedTelegramUser() {
       var code = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
       if (codeInput.value !== code) codeInput.value = code;
       if (!/^[a-z0-9_]{5,32}$/.test(username)) {
-        if (code.length >= 6 || fromButton) setHint("Сначала укажите корректный username.", true);
+        if (code.length >= 6 || fromButton) setHint(pwaAuthT("invalidUsernameShort"), true);
         return;
       }
       if (passwordValue() !== passwordConfirmValue()) {
-        setHint("Пароли не совпадают.", true);
+        setHint(pwaAuthT("passwordsMismatch"), true);
         return;
       }
       if (!/^\d{6}$/.test(code)) {
-        if (fromButton) setHint("Введите 6-значный код из Telegram.", true);
+        if (fromButton) setHint(pwaAuthT("enterTelegramCode"), true);
         return;
       }
       verifyInflight = true;
       codeInput.disabled = true;
       if (verifyBtn) {
         verifyBtn.disabled = true;
-        verifyBtn.textContent = "Проверяем…";
+        verifyBtn.textContent = pwaAuthT("verifying");
       }
+      if (registerSubmitBtn) registerSubmitBtn.disabled = true;
       fetch(base + "/api/auth-pwa-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "verify", username: username, code: code, password: passwordValue() }),
       })
-        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
         .then(function (data) {
           if (data && data.ok && data.user && data.pwaSession) {
             saveLastUsername(username);
@@ -9412,22 +9593,28 @@ function getPokerResolvedTelegramUser() {
             } catch (e1) {}
             return;
           }
-          setHint((data && data.error) || "Код не подтверждён.", true);
+          setHint((data && data.error) || pwaAuthT("codeNotVerified"), true);
         })
         .catch(function () {
-          setHint("Сеть недоступна. Попробуйте снова.", true);
+          setHint(pwaAuthT("networkRetry"), true);
         })
         .finally(function () {
           verifyInflight = false;
           if (codeInput) codeInput.disabled = false;
           if (verifyBtn) {
             verifyBtn.disabled = false;
-            verifyBtn.textContent = "Готово";
+            verifyBtn.textContent = pwaAuthT("done");
           }
+          if (registerSubmitBtn) registerSubmitBtn.disabled = false;
         });
     }
     if (verifyBtn) {
       verifyBtn.addEventListener("click", function () {
+        tryVerifyCode({ fromButton: true });
+      });
+    }
+    if (registerSubmitBtn) {
+      registerSubmitBtn.addEventListener("click", function () {
         tryVerifyCode({ fromButton: true });
       });
     }
@@ -9475,11 +9662,11 @@ function getPokerResolvedTelegramUser() {
     m.setAttribute("data-pwa-enter-mounted", "1");
     m.innerHTML =
       '<div class="pwa-auth-screen__enter-actions">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterEmailBtn">Войти через почту</button>' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">Войти через Telegram</button>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterEmailBtn">' + pwaAuthT("enterEmail") + "</button>" +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">' + pwaAuthT("enterTelegram") + "</button>" +
         '<div class="pwa-auth-screen__guest-block">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">Войти, как гость</button>' +
-        '<p class="pwa-auth-screen__guest-note">Гость не может участвовать в розыгрышах и общаться в чате</p>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">' + pwaAuthT("enterGuest") + "</button>" +
+        '<p class="pwa-auth-screen__guest-note">' + pwaAuthT("guestNote") + "</p>" +
         "</div>" +
       "</div>";
     var emailBtn = document.getElementById("pwaAuthEnterEmailBtn");
@@ -9555,49 +9742,52 @@ function getPokerResolvedTelegramUser() {
     } catch (eRemount) {}
   }
 
-  function mountPwaEmailLogin(mount) {
+  function mountPwaEmailLogin(mount, initialMode) {
     if (!mount) return;
     if (mount.querySelector(".auth-banner__email-login")) return;
     var wrap = document.createElement("div");
     wrap.className = "auth-banner__email-login auth-banner__code-login";
     wrap.innerHTML =
       '<div class="auth-banner__code-row auth-banner__code-row--back">' +
-        '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaEmailBackBtn" aria-label="Назад к выбору входа">' +
+        '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaEmailBackBtn" aria-label="' + pwaAuthT("backToChoice") + '">' +
           '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
         "</button>" +
       "</div>" +
       '<div class="auth-banner__code-intro-wrap" role="note">' +
-        '<p class="auth-banner__code-intro">Введите ваш email.</p>' +
-        '<p class="auth-banner__code-intro">Если вы уже подтверждали эту почту, дальше достаточно email и пароля.</p>' +
-        '<p class="auth-banner__code-intro">Если входите впервые, то нажмите «Зарегистрироваться», получите код, подтвердите его и этим же задайте пароль для всего аккаунта.</p>' +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("emailIntro1") + "</p>" +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("emailIntro2") + "</p>" +
+        '<p class="auth-banner__code-intro">' + pwaAuthT("emailIntro3") + "</p>" +
       "</div>" +
       '<div class="auth-banner__code-row">' +
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
       "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaEmailRememberPassword" />' +
-        '<span>Сохранить пароль</span>' +
+        '<span>' + pwaAuthT("rememberPassword") + "</span>" +
       "</label>" +
       '<div class="auth-banner__mode-switch">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaEmailLoginModeBtn">Войти</button>' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="authPwaEmailRegisterModeBtn">Зарегистрироваться</button>' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaEmailLoginModeBtn">' + pwaAuthT("login") + "</button>" +
+        '<button type="button" class="auth-banner__mode-link" id="authPwaEmailRegisterModeBtn">' + pwaAuthT("switchToRegister") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaEmailCodeSendRow">' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaEmailSendBtn">Отправить код</button>' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaEmailSendBtn">' + pwaAuthT("emailSendCode") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaEmailHint" role="status" aria-live="polite"></div>' +
       '<div class="auth-banner__code-row auth-banner__code-row--verify" id="authPwaEmailCodeVerifyRow">' +
-        '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaEmailCodeInput" placeholder="Код из письма" inputmode="numeric" autocomplete="one-time-code" />' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">Подтвердить</button>' +
+        '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaEmailCodeInput" placeholder="' + pwaAuthT("emailCodePlaceholder") + '" inputmode="numeric" autocomplete="one-time-code" />' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">' + pwaAuthT("emailVerify") + "</button>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaEmailPasswordRow">' +
         '<div class="auth-banner__password-wrap">' +
-          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
-          '<button type="button" class="auth-banner__password-toggle" id="authPwaEmailPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaEmailPasswordInput" placeholder="' + pwaAuthT("setPassword") + '" autocomplete="current-password" />' +
+        '<button type="button" class="auth-banner__password-toggle" id="authPwaEmailPasswordToggle" aria-label="' + pwaAuthT("showPassword") + '" aria-pressed="false">👁</button>' +
         "</div>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaEmailPasswordConfirmRow">' +
-        '<input type="password" class="auth-banner__code-input" id="authPwaEmailPasswordConfirmInput" placeholder="Подтверждение пароля" autocomplete="new-password" />' +
+        '<input type="password" class="auth-banner__code-input" id="authPwaEmailPasswordConfirmInput" placeholder="' + pwaAuthT("confirmPassword") + '" autocomplete="new-password" />' +
+      "</div>" +
+      '<div class="auth-banner__primary-action" id="authPwaEmailRegisterActionRow">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaEmailRegisterSubmitBtn">' + pwaAuthT("register") + "</button>" +
       "</div>";
     mount.appendChild(wrap);
 
@@ -9616,6 +9806,7 @@ function getPokerResolvedTelegramUser() {
     var codeInput = wrap.querySelector("#authPwaEmailCodeInput");
     var sendBtn = wrap.querySelector("#authPwaEmailSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaEmailVerifyBtn");
+    var registerSubmitBtn = wrap.querySelector("#authPwaEmailRegisterSubmitBtn");
     var hint = wrap.querySelector("#authPwaEmailHint");
     var base = getTelegramAuthApiBase();
     if (!base) return;
@@ -9669,7 +9860,7 @@ function getPokerResolvedTelegramUser() {
         var show = passwordInput.getAttribute("type") === "password";
         passwordInput.setAttribute("type", show ? "text" : "password");
         passwordToggle.setAttribute("aria-pressed", show ? "true" : "false");
-        passwordToggle.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+        passwordToggle.setAttribute("aria-label", show ? pwaAuthT("hidePassword") : pwaAuthT("showPassword"));
       });
     }
     if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
@@ -9687,25 +9878,26 @@ function getPokerResolvedTelegramUser() {
         codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
       });
     }
-    var authMode = "login";
+    var authMode = initialMode === "register" ? "register" : "login";
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
+      wrap.setAttribute("data-auth-mode", authMode);
       if (loginModeBtn) {
-        loginModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", registerMode);
         loginModeBtn.style.display = registerMode ? "none" : "";
       }
-      if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
+      if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
       if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
+      if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
         authMode = "login";
         syncAuthModeUi();
         var email = normalizeEmailInput();
-        setEmailHint("Проверяем пароль…", false);
+        setEmailHint(pwaAuthT("emailCheckingPassword"), false);
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -9760,23 +9952,23 @@ function getPokerResolvedTelegramUser() {
               } catch (eReloadAfterEmailPasswordLogin) {}
               return;
             }
-            setEmailHint((data && data.error) || "Не удалось войти.", true);
+            setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);
           })
           .catch(function () {
-            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+            setEmailHint(pwaAuthT("networkError"), true);
           });
       });
     }
     if (registerModeBtn) {
       registerModeBtn.addEventListener("click", function () {
-        authMode = "register";
+        authMode = authMode === "register" ? "login" : "register";
         syncAuthModeUi();
       });
     }
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
         var email = normalizeEmailInput();
-        setEmailHint("Отправляем код…", false);
+        setEmailHint(pwaAuthT("emailSendingCode"), false);
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -9789,14 +9981,14 @@ function getPokerResolvedTelegramUser() {
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
-            var okMsg = "Код отправлен на почту.";
+            var okMsg = pwaAuthT("emailSentDefault");
             if (data && data.ok) saveLastEmail(email);
-            if (data && data.ok && data.mode === "register") okMsg = "Код отправлен на почту. После подтверждения создадим новый аккаунт.";
-            if (data && data.ok && data.mode === "login") okMsg = "Код отправлен на почту для входа.";
-            setEmailHint(data && data.ok ? okMsg : ((data && data.error) || "Не удалось отправить код."), !(data && data.ok));
+            if (data && data.ok && data.mode === "register") okMsg = pwaAuthT("emailSentRegister");
+            if (data && data.ok && data.mode === "login") okMsg = pwaAuthT("emailSentLogin");
+            setEmailHint(data && data.ok ? okMsg : ((data && data.error) || pwaAuthT("emailSendFailed")), !(data && data.ok));
           })
           .catch(function () {
-            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+            setEmailHint(pwaAuthT("networkError"), true);
           });
       });
     }
@@ -9805,10 +9997,10 @@ function getPokerResolvedTelegramUser() {
         var email = normalizeEmailInput();
         var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
         if (passwordValue() !== passwordConfirmValue()) {
-          setEmailHint("Пароли не совпадают.", true);
+          setEmailHint(pwaAuthT("passwordsMismatch"), true);
           return;
         }
-        setEmailHint("Проверяем код…", false);
+        setEmailHint(pwaAuthT("emailCheckingCode"), false);
         fetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -9864,11 +10056,16 @@ function getPokerResolvedTelegramUser() {
               } catch (eReloadAfterEmailLogin) {}
               return;
             }
-            setEmailHint((data && data.error) || "Не удалось войти.", true);
+            setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);
           })
           .catch(function () {
-            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+            setEmailHint(pwaAuthT("networkError"), true);
           });
+      });
+    }
+    if (registerSubmitBtn) {
+      registerSubmitBtn.addEventListener("click", function () {
+        if (verifyBtn) verifyBtn.click();
       });
     }
     syncAuthModeUi();

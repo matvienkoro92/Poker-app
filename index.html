@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.043">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.044">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -405,9 +405,13 @@
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <span class="pwa-auth-screen__identifying-spinner" aria-hidden="true"></span>
-        <p class="pwa-auth-screen__identifying-text">Подождите, идентифицируем ваш аккаунт</p>
+        <p class="pwa-auth-screen__identifying-text" id="pwaAuthIdentifyingText">Подождите, идентифицируем ваш аккаунт</p>
       </div>
       <div class="pwa-auth-screen__inner">
+        <div class="pwa-auth-screen__lang-switch" id="pwaAuthLangSwitch" aria-label="Выбор языка">
+          <button type="button" class="pwa-auth-screen__lang-btn pwa-auth-screen__lang-btn--active" id="pwaAuthLangRuBtn">RU</button>
+          <button type="button" class="pwa-auth-screen__lang-btn" id="pwaAuthLangEnBtn">EN</button>
+        </div>
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
