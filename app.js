@@ -10616,16 +10616,6 @@ function getPokerResolvedTelegramUser() {
     }
     if (!mount) return;
 
-    if (isPwaStandaloneAuth()) {
-      try {
-        mount.removeAttribute("data-pwa-enter-mounted");
-        mount.removeAttribute("data-pwa-widget-mounted");
-      } catch (ePwaMount) {}
-      mount.innerHTML = "";
-      mountPwaStandaloneEnterButton();
-      return;
-    }
-
     if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
       mount.removeAttribute("data-pwa-widget-mounted");
       mount.innerHTML = "";
