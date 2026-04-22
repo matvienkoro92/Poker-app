@@ -9725,6 +9725,14 @@ function getPokerResolvedTelegramUser() {
 
   function ensurePwaVerificationForm(mount) {
     if (!mount) return null;
+    if (shouldUseOverlayAuthScreen()) {
+      if (!mount.querySelector(".pwa-auth-screen__enter-actions, .auth-banner__email-login, .auth-banner__code-login")) {
+        try {
+          mount.innerHTML = "";
+        } catch (eClearOverlayVerify) {}
+      }
+      return mount;
+    }
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
       var title = shouldUseOverlayAuthScreen() ? "" : "Верификация для входа в PWA";
@@ -10784,6 +10792,13 @@ function getPokerResolvedTelegramUser() {
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
     if (!mount) return;
+
+    if (shouldUseOverlayAuthScreen()) {
+      try {
+        mount.removeAttribute("data-pwa-widget-mounted");
+      } catch (eOverlayWidgetAttr) {}
+      return ensureOverlayAuthEntryMounted();
+    }
 
     if (shouldUseOverlayAuthScreen() && mount.getAttribute("data-pwa-widget-mounted")) {
       mount.removeAttribute("data-pwa-widget-mounted");
