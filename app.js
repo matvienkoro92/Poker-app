@@ -1320,6 +1320,14 @@ function pokerChatPushUnsubscribeBrowser() {
 var PROFILE_CHAT_PUSH_UI_CACHE_KEY = "poker_profile_chat_push_ui_v1";
 function pokerGetChatMemberIdForPushCache() {
   try {
+    var dtId =
+      (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_dt_id")) ||
+      (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+      "";
+    dtId = String(dtId || "").trim().toUpperCase();
+    if (/^ID\d{6}$/.test(dtId)) return dtId;
+  } catch (eDtCache) {}
+  try {
     var _auth = window.__pokerTelegramAuth;
     if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
       var u = _auth.user;
