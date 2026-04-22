@@ -9837,10 +9837,11 @@ function getPokerResolvedTelegramUser() {
     if (!base) return;
     var EMAIL_LAST_KEY = "poker_auth_last_email";
 
-    function setEmailHint(text, isError) {
+    function setEmailHint(text, isError, isSuccess) {
       if (!hint) return;
       hint.textContent = text || "";
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
+      hint.classList.toggle("auth-banner__code-hint--success", !!isSuccess && !isError);
       hint.classList.toggle("auth-banner__code-hint--hidden", !text);
     }
     function normalizeEmailInput() {
@@ -10035,7 +10036,7 @@ function getPokerResolvedTelegramUser() {
             if (data && data.ok) saveLastEmail(email);
             if (data && data.ok && data.mode === "register") okMsg = pwaAuthT("emailSentRegister");
             if (data && data.ok && data.mode === "login") okMsg = pwaAuthT("emailSentLogin");
-            setEmailHint(data && data.ok ? okMsg : ((data && data.error) || pwaAuthT("emailSendFailed")), !(data && data.ok));
+            setEmailHint(data && data.ok ? okMsg : ((data && data.error) || pwaAuthT("emailSendFailed")), !(data && data.ok), !!(data && data.ok));
           })
           .catch(function () {
             setEmailHint(pwaAuthT("networkError"), true);

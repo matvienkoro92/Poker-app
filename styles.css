@@ -2223,6 +2223,9 @@ html.app-view-home .home-welcome-outline::before {
   line-height: 1.35;
   white-space: pre-line;
 }
+.auth-banner__code-hint--success {
+  color: #22c55e;
+}
 .auth-banner__code-hint--error {
   color: #fca5a5;
 }
