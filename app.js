@@ -14828,6 +14828,18 @@ function syncProfileEmailAuthUi() {
   try {
     linkedTelegramUsername = String(window.__pokerProfileTelegramUsername || "").trim().replace(/^@+/, "");
   } catch (eTgLinked) {}
+  if (!linkedTelegramUsername) {
+    try {
+      linkedTelegramUsername =
+        auth && auth.user && auth.user.username != null ? String(auth.user.username).trim().replace(/^@+/, "") : "";
+    } catch (eAuthTgUsername) {}
+  }
+  if (!linkedTelegramUsername) {
+    try {
+      var resolvedUser = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      linkedTelegramUsername = resolvedUser && resolvedUser.username != null ? String(resolvedUser.username).trim().replace(/^@+/, "") : "";
+    } catch (eResolvedTgUsername) {}
+  }
   if (!linkedEmail) {
     try {
       linkedEmail = auth && auth.user && auth.user.email != null ? String(auth.user.email).trim() : "";
