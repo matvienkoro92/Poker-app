@@ -9114,12 +9114,6 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-row">' +
         '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
       "</div>" +
-      '<div class="auth-banner__code-row">' +
-        '<div class="auth-banner__password-wrap">' +
-          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
-          '<button type="button" class="auth-banner__password-toggle" id="authPwaPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
-        "</div>" +
-      "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaRememberPassword" />' +
         '<span>Сохранить пароль</span>' +
@@ -9135,6 +9129,12 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-row auth-banner__code-row--verify" id="authPwaCodeVerifyRow">' +
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaCodeInput" placeholder="Код из Telegram" inputmode="numeric" autocomplete="one-time-code" />' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaCodeVerifyBtn">Готово</button>' +
+      "</div>" +
+      '<div class="auth-banner__code-row" id="authPwaPasswordRow">' +
+        '<div class="auth-banner__password-wrap">' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+          '<button type="button" class="auth-banner__password-toggle" id="authPwaPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+        "</div>" +
       "</div>" +
       '<div class="auth-banner__code-row" id="authPwaPasswordConfirmRow">' +
         '<input type="password" class="auth-banner__code-input" id="authPwaPasswordConfirmInput" placeholder="Подтверждение пароля" autocomplete="new-password" />' +
@@ -9157,6 +9157,7 @@ function getPokerResolvedTelegramUser() {
     var passwordConfirmInput = wrap.querySelector("#authPwaPasswordConfirmInput");
     var codeSendRow = wrap.querySelector("#authPwaCodeSendRow");
     var codeVerifyRow = wrap.querySelector("#authPwaCodeVerifyRow");
+    var passwordRow = wrap.querySelector("#authPwaPasswordRow");
     var passwordConfirmRow = wrap.querySelector("#authPwaPasswordConfirmRow");
     var codeInput = wrap.querySelector("#authPwaCodeInput");
     var sendBtn = wrap.querySelector("#authPwaCodeSendBtn");
@@ -9255,6 +9256,7 @@ function getPokerResolvedTelegramUser() {
       if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
+      if (passwordRow) passwordRow.style.display = registerMode ? "" : "none";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
@@ -9572,12 +9574,6 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-row">' +
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
       "</div>" +
-      '<div class="auth-banner__code-row">' +
-        '<div class="auth-banner__password-wrap">' +
-          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
-          '<button type="button" class="auth-banner__password-toggle" id="authPwaEmailPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
-        "</div>" +
-      "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaEmailRememberPassword" />' +
         '<span>Сохранить пароль</span>' +
@@ -9594,6 +9590,12 @@ function getPokerResolvedTelegramUser() {
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaEmailCodeInput" placeholder="Код из письма" inputmode="numeric" autocomplete="one-time-code" />' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">Подтвердить</button>' +
       "</div>" +
+      '<div class="auth-banner__code-row" id="authPwaEmailPasswordRow">' +
+        '<div class="auth-banner__password-wrap">' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+          '<button type="button" class="auth-banner__password-toggle" id="authPwaEmailPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+        "</div>" +
+      "</div>" +
       '<div class="auth-banner__code-row" id="authPwaEmailPasswordConfirmRow">' +
         '<input type="password" class="auth-banner__code-input" id="authPwaEmailPasswordConfirmInput" placeholder="Подтверждение пароля" autocomplete="new-password" />' +
       "</div>";
@@ -9609,6 +9611,7 @@ function getPokerResolvedTelegramUser() {
     var passwordConfirmInput = wrap.querySelector("#authPwaEmailPasswordConfirmInput");
     var codeSendRow = wrap.querySelector("#authPwaEmailCodeSendRow");
     var codeVerifyRow = wrap.querySelector("#authPwaEmailCodeVerifyRow");
+    var passwordRow = wrap.querySelector("#authPwaEmailPasswordRow");
     var passwordConfirmRow = wrap.querySelector("#authPwaEmailPasswordConfirmRow");
     var codeInput = wrap.querySelector("#authPwaEmailCodeInput");
     var sendBtn = wrap.querySelector("#authPwaEmailSendBtn");
@@ -9694,6 +9697,7 @@ function getPokerResolvedTelegramUser() {
       if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
+      if (passwordRow) passwordRow.style.display = registerMode ? "" : "none";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
