@@ -9112,7 +9112,7 @@ function getPokerResolvedTelegramUser() {
       backRow +
       introHtml +
       '<div class="auth-banner__code-row">' +
-        '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
+        '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@Username из телеграмм" autocomplete="off" />' +
       "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaRememberPassword" />' +
