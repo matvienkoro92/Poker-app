@@ -9433,6 +9433,9 @@ function getPokerResolvedTelegramUser() {
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
+      if (passwordRow && codeSendRow && passwordRow.nextSibling !== codeSendRow) {
+        wrap.insertBefore(passwordRow, codeSendRow);
+      }
       if (loginModeBtn) loginModeBtn.style.display = registerMode ? "none" : "";
       if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
@@ -9882,6 +9885,9 @@ function getPokerResolvedTelegramUser() {
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
+      if (passwordRow && codeSendRow && passwordRow.nextSibling !== codeSendRow) {
+        wrap.insertBefore(passwordRow, codeSendRow);
+      }
       if (loginModeBtn) {
         loginModeBtn.style.display = registerMode ? "none" : "";
       }
