@@ -8940,6 +8940,13 @@ function getPokerResolvedTelegramUser() {
       setPwaAuthIdentifyingPhase(false);
     } catch (eOpenAuthId) {}
     remountPwaStandaloneEnterScreen();
+    ensureOverlayAuthEntryMounted();
+    setTimeout(function () {
+      ensureOverlayAuthEntryMounted();
+    }, 0);
+    setTimeout(function () {
+      ensureOverlayAuthEntryMounted();
+    }, 120);
   }
 
   /** PWA: экран «идентификация» поверх приложения (не внутри скрытого #app). */
@@ -9840,6 +9847,20 @@ function getPokerResolvedTelegramUser() {
       m.removeAttribute("data-pwa-enter-mounted");
     } catch (eRm) {}
     mountPwaStandaloneEnterButton();
+  }
+
+  function ensureOverlayAuthEntryMounted() {
+    var mount = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!mount) return false;
+    if (mount.querySelector(".pwa-auth-screen__enter-actions, .auth-banner__email-login, .auth-banner__code-login")) {
+      return true;
+    }
+    try {
+      mount.innerHTML = "";
+      mount.removeAttribute("data-pwa-enter-mounted");
+      mount.removeAttribute("data-pwa-widget-mounted");
+    } catch (eEnsureMount) {}
+    return !!mountPwaStandaloneEnterButton();
   }
 
   function remountCurrentAuthEnterScreen() {
