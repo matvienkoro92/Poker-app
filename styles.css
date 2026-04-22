@@ -3849,6 +3849,17 @@ button.welcome-home-title-btn.title:hover {
   line-height: 1;
 }
 
+.home-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: sepia(1) saturate(6) hue-rotate(-18deg) brightness(1.03);
+}
+
+.home-icon-emoji--top {
+  font-size: 24px;
+}
+
 .welcome-gazette-icon {
   opacity: 1;
 }
@@ -17339,6 +17350,11 @@ a.tournament-day-share-btn {
   border-radius: 0;
   color: #fb923c;
 }
+
+.home-icon-emoji--mini {
+  font-size: 22px;
+  line-height: 1;
+}
 .home-mini-icon__label {
   font-size: 6px;
   font-weight: 600;
@@ -18416,6 +18432,7 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
 .view--active[data-view="home"] .feature--rating-spring-promo .feature__cup,
 html.app-view-home .feature--rating-spring-promo .feature__cup {
   color: #fb923c;
+  filter: sepia(1) saturate(6) hue-rotate(-18deg) brightness(1.03);
 }
 .view--active[data-view="home"] .feature--rating-spring-promo .feature__title-prize--spring,
 html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
@@ -18424,6 +18441,11 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
 [data-theme="light"] .view--active[data-view="home"] .feature--rating-spring-promo .feature__cup,
 [data-theme="light"] html.app-view-home .feature--rating-spring-promo .feature__cup {
   color: #ea580c;
+}
+
+.view--active[data-view="home"] .feature__icon-emoji,
+html.app-view-home .feature__icon-emoji {
+  filter: sepia(1) saturate(6) hue-rotate(-18deg) brightness(1.03);
 }
 
 /* Рейтинг Турнирщиков зимы — стильный блок в духе покерного клуба */
