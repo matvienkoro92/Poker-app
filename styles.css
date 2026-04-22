@@ -2056,8 +2056,11 @@ html.app-view-home .home-welcome-outline::before {
   font-size: 14px;
 }
 .pwa-auth-screen .auth-banner__code-btn--verify {
-  min-width: 92px;
-  font-size: 12px;
+  min-width: 108px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 .auth-banner__verify-subtitle {
   margin: 0 0 10px;
