@@ -8784,7 +8784,7 @@ function getPokerResolvedTelegramUser() {
     if (
       mount.querySelector(".pwa-auth-screen__enter-actions") ||
       mount.querySelector(".auth-banner__code-login") ||
-      mount.querySelector(".auth-banner__verify-form")
+      mount.querySelector(".auth-banner__email-login")
     ) {
       return;
     }
