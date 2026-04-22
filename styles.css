@@ -2106,10 +2106,38 @@ html.app-view-home .home-welcome-outline::before {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 10px 0 12px;
+  margin: 12px 0 0;
+}
+.auth-banner__mode-switch--top {
+  margin: 14px 0 0;
+}
+.auth-banner__mode-switch--bottom {
+  margin-top: 10px;
 }
 .auth-banner__mode-switch .pwa-auth-screen__enter-btn {
   width: 100%;
+}
+.auth-banner__mode-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fb923c;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.auth-banner__mode-link:focus,
+.auth-banner__mode-link:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.5);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 .auth-banner__code-row {
   display: flex;
@@ -2155,6 +2183,40 @@ html.app-view-home .home-welcome-outline::before {
 .auth-banner__password-toggle:focus,
 .auth-banner__password-toggle:focus-visible {
   outline: 2px solid rgba(37, 99, 235, 0.65);
+  outline-offset: 1px;
+}
+.pwa-auth-screen__lang-switch {
+  display: inline-flex;
+  align-self: flex-end;
+  gap: 6px;
+  margin: 0 0 14px auto;
+  padding: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+.pwa-auth-screen__lang-btn {
+  min-width: 44px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.pwa-auth-screen__lang-btn.is-active {
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  color: #0f172a;
+  box-shadow: 0 8px 18px rgba(249, 115, 22, 0.26);
+}
+.pwa-auth-screen__lang-btn:focus,
+.pwa-auth-screen__lang-btn:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.65);
   outline-offset: 1px;
 }
 .auth-banner__code-input::placeholder {

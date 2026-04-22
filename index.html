@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.043">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.045">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -408,6 +408,10 @@
         <p class="pwa-auth-screen__identifying-text">Подождите, идентифицируем ваш аккаунт</p>
       </div>
       <div class="pwa-auth-screen__inner">
+        <div class="pwa-auth-screen__lang-switch" id="pwaAuthLangSwitch" aria-label="Language switch">
+          <button type="button" class="pwa-auth-screen__lang-btn is-active" id="pwaAuthLangRuBtn" data-lang="ru">RU</button>
+          <button type="button" class="pwa-auth-screen__lang-btn" id="pwaAuthLangEnBtn" data-lang="en">EN</button>
+        </div>
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
