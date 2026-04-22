@@ -14797,6 +14797,7 @@ function syncProfileEmailAuthUi() {
   var codeInput = document.getElementById("profileEmailAuthCodeInput");
   var sendBtn = document.getElementById("profileEmailAuthSendBtn");
   var verifyBtn = document.getElementById("profileEmailAuthVerifyBtn");
+  var feedbackEl = document.getElementById("profileEmailAuthFeedback");
   var tgSection = document.getElementById("profileTelegramLinkSection");
   var auth = window.__pokerTelegramAuth;
   var isGuest = !!(auth && auth.status === "guest");
@@ -14840,6 +14841,11 @@ function syncProfileEmailAuthUi() {
     formWrap.hidden = !!linkedEmail;
     formWrap.style.display = linkedEmail ? "none" : "";
   }
+  if (emailInput) emailInput.style.display = linkedEmail ? "none" : "";
+  if (codeInput) codeInput.style.display = linkedEmail ? "none" : "";
+  if (sendBtn) sendBtn.style.display = linkedEmail ? "none" : "";
+  if (verifyBtn) verifyBtn.style.display = linkedEmail ? "none" : "";
+  if (feedbackEl) feedbackEl.style.display = linkedEmail ? "none" : "";
   var disableInputs = !isVerified || isGuest;
   if (emailInput) {
     emailInput.disabled = disableInputs;
