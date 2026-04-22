@@ -8811,19 +8811,7 @@ function getPokerResolvedTelegramUser() {
    * Скрипт telegram-web-app.js есть и в обычном браузере — отличаем по platform / version WebApp.
    */
   function shouldSuppressMiniAppPwaLoginBanner() {
-    try {
-      if (isPwaStandaloneAuth()) return false;
-      if (typeof isTelegramWebApp !== "function" || !isTelegramWebApp()) return false;
-      var w = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (!w) return false;
-      var p = (w.platform != null && String(w.platform).trim()) ? String(w.platform).toLowerCase() : "";
-      if (p === "web") return false;
-      if (p) return true;
-      var v = w.version != null ? String(w.version).trim() : "";
-      return !!v;
-    } catch (e) {
-      return false;
-    }
+    return false;
   }
   function showPwaAuthScreen() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
@@ -9362,7 +9350,7 @@ function getPokerResolvedTelegramUser() {
 
     if (backBtn) {
       backBtn.addEventListener("click", function () {
-        remountPwaStandaloneEnterScreen();
+        remountCurrentAuthEnterScreen();
       });
     }
     function shortenPwaAuthHintForUi(raw, isError) {
@@ -9683,62 +9671,99 @@ function getPokerResolvedTelegramUser() {
     return form ? form.querySelector(".auth-banner__verify-actions") : null;
   }
 
-  function mountPwaStandaloneEnterButton() {
-    if (!isPwaStandaloneAuth()) return false;
-    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
-    if (!m) return false;
-    if (m.getAttribute("data-pwa-enter-mounted") === "1") return true;
-    m.setAttribute("data-pwa-enter-mounted", "1");
-    m.innerHTML =
-      '<div class="pwa-auth-screen__enter-actions">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterEmailBtn">' + pwaAuthT("enterEmail") + "</button>" +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="pwaAuthEnterTelegramBtn">' + pwaAuthT("enterTelegram") + "</button>" +
-        '<div class="pwa-auth-screen__guest-block">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="pwaAuthEnterGuestBtn">' + pwaAuthT("enterGuest") + "</button>" +
+  function mountAuthEnterButtons(mount, opts) {
+    opts = opts || {};
+    var standaloneMode = !!opts.standaloneMode;
+    var includeGuest = !!opts.includeGuest;
+    var mountedAttr = opts.mountedAttr || "data-pwa-enter-mounted";
+    var emailBtnId = opts.emailBtnId || "authEnterEmailBtn";
+    var telegramBtnId = opts.telegramBtnId || "authEnterTelegramBtn";
+    var guestBtnId = opts.guestBtnId || "authEnterGuestBtn";
+    var guestBlock = includeGuest
+      ? '<div class="pwa-auth-screen__guest-block">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="' + guestBtnId + '">' + pwaAuthT("enterGuest") + "</button>" +
         '<p class="pwa-auth-screen__guest-note">' + pwaAuthT("guestNote") + "</p>" +
-        "</div>" +
+        "</div>"
+      : "";
+    var wrapperClass = standaloneMode ? "pwa-auth-screen__enter-actions" : "auth-banner__verify-actions pwa-auth-screen__enter-actions";
+    if (!mount) return false;
+    if (mount.getAttribute(mountedAttr) === "1") return true;
+    mount.setAttribute(mountedAttr, "1");
+    mount.innerHTML =
+      '<div class="' + wrapperClass + '">' +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="' + emailBtnId + '">' + pwaAuthT("enterEmail") + "</button>" +
+        '<button type="button" class="pwa-auth-screen__enter-btn" id="' + telegramBtnId + '">' + pwaAuthT("enterTelegram") + "</button>" +
+        guestBlock +
       "</div>";
-    var emailBtn = document.getElementById("pwaAuthEnterEmailBtn");
-    var btn = document.getElementById("pwaAuthEnterTelegramBtn");
-    var guestBtn = document.getElementById("pwaAuthEnterGuestBtn");
-    if (!emailBtn || !btn || !guestBtn) return true;
+    var emailBtn = mount.querySelector("#" + emailBtnId);
+    var btn = mount.querySelector("#" + telegramBtnId);
+    var guestBtn = includeGuest ? mount.querySelector("#" + guestBtnId) : null;
+    if (!emailBtn || !btn || (includeGuest && !guestBtn)) return true;
     emailBtn.addEventListener("click", function () {
       pokerSavePwaGuestMode(false);
       try {
-        m.removeAttribute("data-pwa-enter-mounted");
+        mount.removeAttribute(mountedAttr);
       } catch (e0) {}
-      m.innerHTML = "";
-      mountPwaEmailLogin(m);
+      mount.innerHTML = "";
+      mountPwaEmailLogin(mount);
     });
     btn.addEventListener("click", function () {
       pokerSavePwaGuestMode(false);
       try {
-        m.removeAttribute("data-pwa-enter-mounted");
+        mount.removeAttribute(mountedAttr);
       } catch (e) {}
-      m.innerHTML = "";
-      var actionsMount = ensurePwaVerificationForm(m) || m;
+      mount.innerHTML = "";
+      var actionsMount = ensurePwaVerificationForm(mount) || mount;
       mountPwaUsernameCodeLogin(actionsMount);
     });
-    guestBtn.addEventListener("click", function () {
-      pokerSavePwaGuestMode(false);
-      try {
-        window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
-      } catch (eAuth) {}
-      updateHeaderGreeting();
-      updateProfileExitBtnVisibility();
-      hidePwaAuthScreen();
-      hideIdentifyingMini();
-      try {
-        if (banner) {
-          banner.classList.add("auth-banner--hidden");
-          banner.classList.remove("auth-banner--verifying");
-        }
-      } catch (eB) {}
-      try {
-        m.innerHTML = "";
-      } catch (eM) {}
-    });
+    if (guestBtn) {
+      guestBtn.addEventListener("click", function () {
+        pokerSavePwaGuestMode(false);
+        try {
+          window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+        } catch (eAuth) {}
+        updateHeaderGreeting();
+        updateProfileExitBtnVisibility();
+        hidePwaAuthScreen();
+        hideIdentifyingMini();
+        try {
+          if (banner) {
+            banner.classList.add("auth-banner--hidden");
+            banner.classList.remove("auth-banner--verifying");
+          }
+        } catch (eB) {}
+        try {
+          mount.innerHTML = "";
+        } catch (eM) {}
+      });
+    }
     return true;
+  }
+
+  function mountPwaStandaloneEnterButton() {
+    if (!isPwaStandaloneAuth()) return false;
+    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!m) return false;
+    return mountAuthEnterButtons(m, {
+      standaloneMode: true,
+      includeGuest: true,
+      mountedAttr: "data-pwa-enter-mounted",
+      emailBtnId: "pwaAuthEnterEmailBtn",
+      telegramBtnId: "pwaAuthEnterTelegramBtn",
+      guestBtnId: "pwaAuthEnterGuestBtn"
+    });
+  }
+
+  function mountMiniAppAuthEnterButtons() {
+    var mount = document.getElementById("authBannerLoginMount");
+    if (!mount) return false;
+    return mountAuthEnterButtons(mount, {
+      standaloneMode: false,
+      includeGuest: false,
+      mountedAttr: "data-miniapp-auth-enter-mounted",
+      emailBtnId: "miniAppAuthEnterEmailBtn",
+      telegramBtnId: "miniAppAuthEnterTelegramBtn"
+    });
   }
 
   function remountPwaStandaloneEnterScreen() {
@@ -9750,6 +9775,21 @@ function getPokerResolvedTelegramUser() {
       m.removeAttribute("data-pwa-enter-mounted");
     } catch (eRm) {}
     mountPwaStandaloneEnterButton();
+  }
+
+  function remountCurrentAuthEnterScreen() {
+    if (isPwaStandaloneAuth()) {
+      remountPwaStandaloneEnterScreen();
+      return;
+    }
+    var mount = document.getElementById("authBannerLoginMount");
+    if (!mount) return;
+    mount.innerHTML = "";
+    try {
+      mount.removeAttribute("data-miniapp-auth-enter-mounted");
+      mount.removeAttribute("data-pwa-widget-mounted");
+    } catch (eMiniRm) {}
+    mountMiniAppAuthEnterButtons();
   }
 
   function showPwaStandaloneEntryScreen() {
@@ -9888,7 +9928,7 @@ function getPokerResolvedTelegramUser() {
 
     if (backBtn) {
       backBtn.addEventListener("click", function () {
-        remountPwaStandaloneEnterScreen();
+        remountCurrentAuthEnterScreen();
       });
     }
     var lastEmail = readLastEmail();
@@ -10614,16 +10654,6 @@ function getPokerResolvedTelegramUser() {
      */
     var WIDGET_MOUNT_VER = "7";
     var LOCAL_MOUNT_MARK = "local";
-    if (shouldSuppressMiniAppPwaLoginBanner()) {
-      try {
-        var innerMount = document.getElementById("authBannerLoginMount");
-        if (innerMount) {
-          innerMount.innerHTML = "";
-          innerMount.removeAttribute("data-pwa-widget-mounted");
-        }
-      } catch (eSup) {}
-      return;
-    }
     if (!mount) return;
 
     if (isPwaStandaloneAuth() && mount.getAttribute("data-pwa-widget-mounted")) {
@@ -10661,6 +10691,7 @@ function getPokerResolvedTelegramUser() {
         localActions.appendChild(a);
       }
       mount.setAttribute("data-pwa-widget-mounted", LOCAL_MOUNT_MARK);
+      if (!isPwaStandaloneAuth()) mountMiniAppAuthEnterButtons();
       return;
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === LOCAL_MOUNT_MARK) {
@@ -10669,6 +10700,10 @@ function getPokerResolvedTelegramUser() {
     }
     if (mount.getAttribute("data-pwa-widget-mounted") === WIDGET_MOUNT_VER) {
       var mountedActions = ensurePwaVerificationForm(mount) || mount;
+      if (!isPwaStandaloneAuth()) {
+        mountMiniAppAuthEnterButtons();
+        return;
+      }
       mountPwaUsernameCodeLogin(mountedActions);
       if (!isPwaStandaloneAuth()) {
         mountVkLoginForPwa(mountedActions);
@@ -10705,11 +10740,15 @@ function getPokerResolvedTelegramUser() {
       actionsMount.appendChild(script);
     }
     mount.setAttribute("data-pwa-widget-mounted", WIDGET_MOUNT_VER);
-    if (!mountPwaStandaloneEnterButton()) mountPwaUsernameCodeLogin(actionsMount);
+    if (isPwaStandaloneAuth()) {
+      if (!mountPwaStandaloneEnterButton()) mountPwaUsernameCodeLogin(actionsMount);
+    } else {
+      mountMiniAppAuthEnterButtons();
+    }
     if (!isPwaStandaloneAuth()) {
-      mountVkLoginForPwa(actionsMount);
-      mountTelegramExternalBrowserEscapeBtn(actionsMount);
-      mountTelegramLoginPopupButton(actionsMount);
+      mountVkLoginForPwa(mount);
+      mountTelegramExternalBrowserEscapeBtn(mount);
+      mountTelegramLoginPopupButton(mount);
     }
   }
 
