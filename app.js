@@ -9364,7 +9364,7 @@ function getPokerResolvedTelegramUser() {
     var wrap = document.createElement("div");
     wrap.className = "auth-banner__code-login";
     var backRow =
-      shouldUseOverlayAuthScreen() && !isPwaAuthLocalHost()
+      (shouldUseOverlayAuthScreen() || isOverlayAuthScreenActive())
         ? '<div class="auth-banner__code-row auth-banner__code-row--back">' +
           '<button type="button" class="pwa-auth-screen__back-icon-btn" id="authPwaCodeBackBtn" aria-label="' + pwaAuthT("backToChoice") + '">' +
           '<span class="pwa-auth-screen__back-icon" aria-hidden="true">←</span>' +
