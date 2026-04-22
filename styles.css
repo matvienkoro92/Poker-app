@@ -2102,6 +2102,15 @@ html.app-view-home .home-welcome-outline::before {
   max-width: 380px;
   margin: 0 auto;
 }
+.auth-banner__mode-switch {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+.auth-banner__mode-switch .pwa-auth-screen__enter-btn {
+  width: 100%;
+}
 .auth-banner__code-row {
   display: flex;
   gap: 8px;
