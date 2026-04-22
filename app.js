@@ -10818,9 +10818,42 @@ function getPokerResolvedTelegramUser() {
     return false;
   }
 
+  function hasPendingPwaAuthReturn() {
+    try {
+      var sp = new URLSearchParams(window.location.search || "");
+      if (sp.get("code") && (sp.get("state") || "") === "vk_pwa") return true;
+      if (sp.get("hash") && sp.get("id") && sp.get("auth_date")) return true;
+    } catch (eSearch) {}
+    try {
+      var authObj = parseTelegramWidgetTgAuthResultFromHash();
+      if (authObj && authObj.hash && authObj.id != null && authObj.auth_date != null) return true;
+    } catch (eHash) {}
+    return false;
+  }
+
   /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */
   function runPwaStandaloneUnidentifiedFlow(hideBootOverlay) {
+    var needIdentify = false;
+    try {
+      needIdentify = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    } catch (eNeedIdentify) {}
+    if (!needIdentify) {
+      try {
+        needIdentify = hasPendingPwaAuthReturn();
+      } catch (eNeedPending) {}
+    }
     showPwaAuthScreen();
+    if (!needIdentify) {
+      try {
+        if (typeof hideBootOverlay === "function") hideBootOverlay();
+      } catch (eBootSkip) {}
+      try {
+        window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+        updateHeaderGreeting();
+      } catch (eHdrSkip) {}
+      showPwaStandaloneEntryScreen();
+      return;
+    }
     setPwaAuthIdentifyingPhase(true);
     try {
       if (typeof hideBootOverlay === "function") hideBootOverlay();
