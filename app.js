@@ -10568,6 +10568,7 @@ function getPokerResolvedTelegramUser() {
     if (personalSection) personalSection.classList.toggle("profile-guest-hidden", guestMode);
     if (guestWrap) guestWrap.hidden = !guestMode;
     syncProfileStatusVisibility(!guestMode);
+    syncProfileVerifiedContentVisibility(!guestMode);
     if (guestBtn && guestBtn.dataset.bound !== "1") {
       guestBtn.dataset.bound = "1";
       guestBtn.addEventListener("click", function () {
@@ -15394,11 +15395,12 @@ function updateProfileExitBtnVisibility() {
     isVerified = !!(a && (a.status === "verified" || a.status === "dev_skip"));
   } catch (e) {}
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-  var show = !!(hasSession || isGuest);
+  var show = !!(hasSession && isVerified);
   btn.classList.toggle("profile-exit-btn--hidden", !show);
   btn.classList.toggle("profile-exit-btn--auth-cta", !hasSession);
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
   syncProfileStatusVisibility(hasSession || isVerified);
+  syncProfileVerifiedContentVisibility(hasSession || isVerified);
 }
 
 function pokerClearSessionsAndReloadForLogin() {
@@ -15444,6 +15446,12 @@ function syncProfileStatusVisibility(isVerified) {
   var statusSection = document.getElementById("profileStatusSection");
   if (!statusSection) return;
   statusSection.classList.toggle("profile-guest-hidden", !isVerified);
+}
+
+function syncProfileVerifiedContentVisibility(isVerified) {
+  var verifiedContent = document.getElementById("profileVerifiedContent");
+  if (!verifiedContent) return;
+  verifiedContent.hidden = !isVerified;
 }
 
 function pokerClearUiCachesAfterAuthSwitch() {
@@ -15658,6 +15666,7 @@ function syncProfileEmailAuthUi() {
   }
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
   syncProfileStatusVisibility(isVerified);
+  syncProfileVerifiedContentVisibility(isVerified);
   var authMethod = pokerGetAuthMethod();
   var currentMemberId = "";
   try {
