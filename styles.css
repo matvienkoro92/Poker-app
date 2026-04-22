@@ -1580,10 +1580,10 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   flex-direction: column;
   width: 100%;
   border-radius: 22px;
-  border: 1px solid rgba(251, 191, 36, 0.5);
+  border: 1px solid rgba(251, 146, 60, 0.5);
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(51, 65, 85, 0.88));
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.22),
-              0 4px 20px rgba(251, 191, 36, 0.14),
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.22),
+              0 4px 20px rgba(249, 115, 22, 0.14),
               inset 0 1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
   box-sizing: border-box;
@@ -1592,8 +1592,8 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover {
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
-              0 6px 24px rgba(251, 191, 36, 0.2),
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.35),
+              0 6px 24px rgba(249, 115, 22, 0.2),
               inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo,
@@ -1611,7 +1611,7 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 [data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
   background: linear-gradient(145deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.94));
-  border-color: rgba(217, 119, 6, 0.4);
+  border-color: rgba(234, 88, 12, 0.4);
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats {
@@ -1622,7 +1622,7 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   border-radius: 16px;
   box-sizing: border-box;
   background: linear-gradient(165deg, rgba(30, 41, 59, 0.72), rgba(22, 31, 48, 0.82));
-  border: 1px solid rgba(251, 191, 36, 0.28);
+  border: 1px solid rgba(251, 146, 60, 0.28);
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card,
@@ -1631,13 +1631,13 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   padding: 8px 12px 10px;
   border-radius: 0;
   border: none;
-  border-top: 1px solid rgba(251, 191, 36, 0.22);
+  border-top: 1px solid rgba(251, 146, 60, 0.22);
   box-shadow: none;
   background: rgba(15, 23, 42, 0.28);
 }
 [data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 240, 0.94));
-  border-top-color: rgba(217, 119, 6, 0.22);
+  border-top-color: rgba(234, 88, 12, 0.22);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .spring-rating-home-promo-stats__april-row {
@@ -13360,6 +13360,7 @@ html.app-view-home .feature--rating-spring-promo:hover,
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
+  color: #fdba74;
 }
 .feature--rating-spring-promo .feature__title-line3--spring {
   font-size: 1.34em;
@@ -13381,10 +13382,10 @@ html.app-view-home .feature--rating-spring-promo:hover,
 [data-theme="light"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
 [data-theme="light"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
 [data-theme="light"] .feature--rating-spring-promo.feature--rating-promo {
-  border: 1px solid rgba(245, 158, 11, 0.55) !important;
-  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%) !important;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.22),
-              0 4px 16px rgba(245, 158, 11, 0.18),
+  border: 1px solid rgba(249, 115, 22, 0.55) !important;
+  background: linear-gradient(145deg, #ffedd5 0%, #fdba74 52%, #fb923c 100%) !important;
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.22),
+              0 4px 16px rgba(249, 115, 22, 0.18),
               inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
 }
 [data-theme="light"] .feature--rating-spring-promo .feature__title {
@@ -18251,16 +18252,16 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   border-radius: 999px;
   overflow: hidden;
   box-shadow:
-    0 0 12px rgba(255, 255, 255, 0.35),
-    0 0 24px rgba(255, 255, 255, 0.15),
+    0 0 12px rgba(251, 146, 60, 0.35),
+    0 0 24px rgba(249, 115, 22, 0.15),
     0 4px 16px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(251, 146, 60, 0.4);
   transition: box-shadow 0.2s ease;
 }
 .hero__link:hover {
   box-shadow:
-    0 0 18px rgba(255, 255, 255, 0.45),
-    0 0 32px rgba(255, 255, 255, 0.2),
+    0 0 18px rgba(251, 146, 60, 0.45),
+    0 0 32px rgba(249, 115, 22, 0.2),
     0 6px 20px rgba(0, 0, 0, 0.45);
 }
 
