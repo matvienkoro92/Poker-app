@@ -2029,6 +2029,9 @@ html.app-view-home .home-welcome-outline::before {
   padding-right: 2px;
   white-space: pre-line;
 }
+.pwa-auth-screen .auth-banner__code-hint.auth-banner__code-hint--success {
+  color: #22c55e;
+}
 .pwa-auth-screen .auth-banner__code-hint strong {
   color: #f8fafc;
   font-weight: 700;
