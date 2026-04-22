@@ -8928,7 +8928,14 @@ function getPokerResolvedTelegramUser() {
     } catch (eSetViewAuth) {}
     hideLegacyInlineAuthUi();
     setPwaAuthScreenNotice("");
-    showPwaAuthScreen();
+    if (pwaAuthScreenEl) {
+      pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
+      pwaAuthScreenEl.setAttribute("aria-hidden", "false");
+    }
+    try {
+      document.body.classList.add("pwa-auth-preinit");
+      document.body.classList.add("pwa-auth-gated");
+    } catch (eBodyAuthOpen) {}
     try {
       setPwaAuthIdentifyingPhase(false);
     } catch (eOpenAuthId) {}
