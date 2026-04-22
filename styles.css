@@ -26533,25 +26533,6 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
   color: var(--text);
 }
 
-.profile-greeting {
-  margin: 8px 0 0;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.profile-greeting #profileUserName {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.profile-greeting .profile-user-meta {
-  font-size: 0.9em;
-  font-weight: 400;
-  color: var(--text-muted);
-  font-family: var(--font-mono, monospace);
-}
-
 .profile-user-id {
   margin: 8px 0 0;
   font-size: 13px;
