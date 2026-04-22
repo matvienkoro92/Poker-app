@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.101">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.102">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -505,7 +505,7 @@
               </button>
               <button type="button" class="site-home-auth-btn pwa-install-btn" id="siteHomeAuthBtn" title="Войти в аккаунт" aria-label="Войти в аккаунт" hidden>
                 <span class="pwa-install-btn__icon" aria-hidden="true">🔐</span>
-                <span class="pwa-install-btn__label">Войти</span>
+                <span class="pwa-install-btn__label" id="siteHomeAuthBtnLabel">Войти</span>
               </button>
             </div>
             <div class="auth-user auth-user--hidden" id="authUser" aria-live="polite">
@@ -528,7 +528,7 @@
                     id="homeWelcomeTitleBtn"
                     aria-label="О клубе «Два туза»: добро пожаловать"
                   >
-                    Добро пожаловать!
+                    <span id="homeWelcomeTitleText">Добро пожаловать!</span>
                   </button>
                 </h1>
               </div>
@@ -555,7 +555,7 @@
                 </button>
               </div>
             </div>
-            <p class="subtitle">
+            <p class="subtitle" id="homeSubtitle">
               Закрытый покерный онлайн-клуб для своих.
             </p>
             <p class="home-admin-version home-admin-version--hidden" id="homeAdminVersionTop" aria-label="Версия приложения для администраторов"></p>
@@ -589,7 +589,7 @@
                       <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.43l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
                     </svg>
                   </span>
-                  <span class="home-mini-icon__label">Чат в ТГ</span>
+                  <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
                 </a>
                 <a
                   class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
@@ -600,18 +600,18 @@
                   aria-label="Канал"
                 >
                   <span class="home-mini-icon" aria-hidden="true">📡</span>
-                  <span class="home-mini-icon__label">Канал</span>
+                  <span class="home-mini-icon__label" id="homeMiniChannelLabel">Канал</span>
                 </a>
                 <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" id="dailyPredictionBtn" title="Предсказание на день" aria-label="Предсказание на день">
                   <span class="feature__badge feature__badge--hidden feature__badge--bottom-right" id="dailyPredictionBadge" aria-hidden="true">1</span>
                   <span class="home-mini-icon" aria-hidden="true">🔮</span>
-                  <span class="home-mini-icon__label">Предсказание</span>
+                  <span class="home-mini-icon__label" id="homeMiniPredictionLabel">Предсказание</span>
                   <span id="dailyPredictionPreview" aria-hidden="true" style="display:none">Нажми, чтобы узнать совет дня</span>
                 </a>
                 <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
                   <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
                   <span class="home-mini-icon" aria-hidden="true">🎲</span>
-                  <span class="home-mini-icon__label">Розыгрыши</span>
+                  <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
                 </a>
               </div>
               <script>
@@ -634,7 +634,7 @@
                       <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
                       <div class="feature__body">
                         <div class="feature__title feature__title--center feature__title--spring-promo-lines">
-                          <span class="feature__title-line1">Рейтинг турнирщиков</span>
+                          <span class="feature__title-line1" id="homeSpringRatingTitle">Рейтинг турнирщиков</span>
                           <span class="feature__title-prize feature__title-prize--spring">на 250 000р</span>
                           <span class="feature__title-line3 feature__title-line3--spring">Весна 2026 <span class="feature__title-leaf" aria-hidden="true">🌿</span></span>
                           <span class="feature__title-updated">обновлено 14.04.26</span>
@@ -653,7 +653,7 @@
                 <div class="tournament-day-block tournament-day-block--home feature feature--app" aria-label="Следующий фриролл">
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
-                      <h2 class="tournament-day-block__home-heading">Следующий фриролл</h2>
+                      <h2 class="tournament-day-block__home-heading" id="homeFreerollTitle">Следующий фриролл</h2>
                       <div class="tournament-day-block__countdown">
                         <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
                       </div>
@@ -670,14 +670,14 @@
                     id="freerollHomePlayBtn"
                     data-view-target="download"
                     aria-label="Сыграть во фриролл — скачать клиент"
-                  >Сыграть во фриролл</a>
+                  ><span id="freerollHomePlayBtnText">Сыграть во фриролл</span></a>
                 </div>
               </div>
               <div class="tournament-day-home-wrap tournament-day-home-wrap--tournament-day">
                 <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="schedule" aria-label="Турнир дня — перейти к расписанию">
                   <div class="feature__body tournament-day-block__body">
                     <div class="tournament-day-block__home-head">
-                      <h2 class="tournament-day-block__home-heading">Турнир дня</h2>
+                      <h2 class="tournament-day-block__home-heading" id="homeTournamentDayTitle">Турнир дня</h2>
                       <div class="tournament-day-block__countdown">
                         <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
                       </div>
@@ -685,19 +685,19 @@
                     <div class="feature__desc tournament-day-block__meta">
                       <div class="tournament-day-block__stats">
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Приз</span>
+                    <span class="tournament-day-block__stat-label" id="homeTournamentPrizeLabel">Приз</span>
                           <span class="tournament-day-block__stat-value" id="tournamentDayGuarantee">—</span>
                         </div>
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Вход</span>
+                    <span class="tournament-day-block__stat-label" id="homeTournamentBuyinLabel">Вход</span>
                           <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
                         </div>
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Время</span>
+                    <span class="tournament-day-block__stat-label" id="homeTournamentTimeLabel">Время</span>
                           <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="tournamentDayHomeWeekTime">—, 18:00 МСК</span>
                         </div>
                         <div class="tournament-day-block__stat">
-                          <span class="tournament-day-block__stat-label">Площадка</span>
+                    <span class="tournament-day-block__stat-label" id="homeTournamentRoomLabel">Площадка</span>
                           <span class="tournament-day-block__stat-value">Poker21</span>
                         </div>
                       </div>
@@ -711,50 +711,50 @@
                     id="tournamentDayScheduleBtn"
                     data-view-target="schedule"
                     aria-label="Расписание турниров на неделю"
-                  >Расписание на неделю</a>
+                  ><span id="tournamentDayScheduleBtnText">Расписание на неделю</span></a>
                 </div>
               </div>
             </div>
 
-            <h2 class="features-section-title features-section-title--games">Игры и приложения</h2>
+            <h2 class="features-section-title features-section-title--games" id="homeGamesTitle">Игры и приложения</h2>
             <div class="games-apps-block">
                 <div class="games-apps-grid">
                 <a href="#" class="feature feature--link feature--app" data-view-target="equilator" aria-label="Эквилятор">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">📊</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Эквилятор</div>
+                    <div class="feature__title" id="homeEquilatorTitle">Эквилятор</div>
                   </div>
                 </a>
                 <a href="#" class="feature feature--link feature--app games-apps-grid__promo-learn" data-view-target="learn-play-hub" aria-label="Научиться играть — бесплатные уроки">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">📚</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Научиться играть</div>
-                    <div class="feature__desc">Бесплатные уроки</div>
+                    <div class="feature__title" id="homeLearnTitle">Научиться играть</div>
+                    <div class="feature__desc" id="homeLearnDesc">Бесплатные уроки</div>
                   </div>
                 </a>
                 <a href="#" class="feature feature--link feature--app" data-view-target="streams" aria-label="Стримы">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">📺</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Стримы</div>
-                    <div class="feature__desc">(в разработке)</div>
+                    <div class="feature__title" id="homeStreamsTitle">Стримы</div>
+                    <div class="feature__desc" id="homeStreamsDesc">(в разработке)</div>
                   </div>
                 </a>
                 <a href="#" class="feature feature--link feature--bonus-game" data-view-target="bonus-game" aria-label="Найти Пиханину">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🎴</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Найди Пиханину</div>
+                    <div class="feature__title" id="homeBonusGameTitle">Найди Пиханину</div>
                   </div>
                 </a>
                 <a href="#" class="feature feature--link" data-view-target="plasterer-game" aria-label="Переедь Штукатура">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🏎️</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Переедь Штукатура</div>
+                    <div class="feature__title" id="homePlastererTitle">Переедь Штукатура</div>
                   </div>
                 </a>
                 <button type="button" class="feature feature--app" id="partnershipOpenBtn" aria-label="Партнёрство">
                   <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">💼</span></div>
                   <div class="feature__body">
-                    <div class="feature__title">Партнёрство</div>
+                    <div class="feature__title" id="homePartnerTitle">Партнёрство</div>
                   </div>
                 </button>
               </div>
@@ -763,7 +763,7 @@
             <footer class="card__footer card__footer--home" id="homeFooter">
               <div class="footer-meta-line" aria-label="Информация о клубе и версия приложения">
                 <p class="footer-note">
-                  Клуб «Два туза». Работаем с 2018г. Играйте ответственно.
+                  <span id="homeFooterNoteText">Клуб «Два туза». Работаем с 2018г. Играйте ответственно.</span>
                 </p>
                 <p class="footer-visitors" aria-label="Версия приложения и статистика (для администраторов)">
                   <span class="footer-visitors__stats" id="footerVisitorStatsWrap" hidden>
@@ -6387,7 +6387,7 @@
     <nav class="bottom-nav" role="navigation">
       <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
         <span class="bottom-nav__icon">🏠</span>
-        <span class="bottom-nav__label">Главная</span>
+        <span class="bottom-nav__label" id="bottomNavHomeLabel">Главная</span>
       </button>
       <div class="bottom-nav__chat-wrap">
         <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn" aria-label="Чаты">
@@ -6400,15 +6400,15 @@
       </div>
       <button type="button" class="bottom-nav__item" data-view-target="download">
         <span class="bottom-nav__icon">📥</span>
-        <span class="bottom-nav__label">Скачать</span>
+        <span class="bottom-nav__label" id="bottomNavDownloadLabel">Скачать</span>
       </button>
       <button type="button" class="bottom-nav__item" data-view-target="cashout">
         <span class="bottom-nav__icon">💳</span>
-        <span class="bottom-nav__label">Депозит</span>
+        <span class="bottom-nav__label" id="bottomNavCashoutLabel">Депозит</span>
       </button>
       <button type="button" class="bottom-nav__item" data-view-target="profile">
         <span class="bottom-nav__icon">👤</span>
-        <span class="bottom-nav__label">Профиль</span>
+        <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
       </button>
     </nav>
 

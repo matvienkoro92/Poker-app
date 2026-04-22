@@ -8678,6 +8678,7 @@ function getPokerResolvedTelegramUser() {
     } catch (eSaveAuthLang) {}
     syncPwaAuthLanguageUi();
     syncProfileLanguageUi();
+    syncGlobalAppLanguageUi();
     rerenderCurrentPwaAuthScreen();
   }
 
@@ -8911,6 +8912,128 @@ function getPokerResolvedTelegramUser() {
       personalInput.setAttribute("aria-label", t.notes);
     }
   }
+  function syncGlobalAppLanguageUi() {
+    var locale = getPwaAuthLocale();
+    var dict = {
+      ru: {
+        instructionTitle: "Добавьте ярлык на рабочий стол телефона",
+        loginShort: "Войти",
+        welcome: "Добро пожаловать!",
+        homeSubtitle: "Закрытый покерный онлайн-клуб для своих.",
+        tgChat: "Чат в ТГ",
+        channel: "Канал",
+        prediction: "Предсказание",
+        raffles: "Розыгрыши",
+        rating: "Рейтинг турнирщиков",
+        nextFreeroll: "Следующий фриролл",
+        playFreeroll: "Сыграть во фриролл",
+        tournamentDay: "Турнир дня",
+        prize: "Приз",
+        buyin: "Вход",
+        time: "Время",
+        room: "Площадка",
+        weeklySchedule: "Расписание на неделю",
+        games: "Игры и приложения",
+        equilator: "Эквилятор",
+        learn: "Научиться играть",
+        learnDesc: "Бесплатные уроки",
+        streams: "Стримы",
+        inDev: "(в разработке)",
+        bonusGame: "Найди Пиханину",
+        plasterer: "Переедь Штукатура",
+        partner: "Партнёрство",
+        footerNote: "Клуб «Два туза». Работаем с 2018г. Играйте ответственно.",
+        navHome: "Главная",
+        navChat: "Чаты",
+        navDownload: "Скачать",
+        navCashout: "Депозит",
+        navProfile: "Профиль"
+      },
+      en: {
+        instructionTitle: "Add a shortcut to your phone home screen",
+        loginShort: "Sign in",
+        welcome: "Welcome!",
+        homeSubtitle: "A private online poker club for our own people.",
+        tgChat: "TG Chat",
+        channel: "Channel",
+        prediction: "Prediction",
+        raffles: "Raffles",
+        rating: "Tournament ranking",
+        nextFreeroll: "Next freeroll",
+        playFreeroll: "Play freeroll",
+        tournamentDay: "Tournament of the day",
+        prize: "Prize",
+        buyin: "Buy-in",
+        time: "Time",
+        room: "Room",
+        weeklySchedule: "Weekly schedule",
+        games: "Games and apps",
+        equilator: "Equilator",
+        learn: "Learn to play",
+        learnDesc: "Free lessons",
+        streams: "Streams",
+        inDev: "(in development)",
+        bonusGame: "Find Pikhanina",
+        plasterer: "Run over the plasterer",
+        partner: "Partnership",
+        footerNote: "Two Aces Club. Since 2018. Play responsibly.",
+        navHome: "Home",
+        navChat: "Chats",
+        navDownload: "Download",
+        navCashout: "Deposit",
+        navProfile: "Profile"
+      }
+    };
+    var t = dict[locale] || dict.ru;
+    var setText = function (id, text) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    var instructionBtn = document.getElementById("siteHomeInstructionBtn");
+    if (instructionBtn) {
+      instructionBtn.title = t.instructionTitle;
+      instructionBtn.setAttribute("aria-label", t.instructionTitle);
+    }
+    var authBtn = document.getElementById("siteHomeAuthBtn");
+    if (authBtn) {
+      authBtn.title = t.loginShort;
+      authBtn.setAttribute("aria-label", t.loginShort);
+    }
+    setText("siteHomeAuthBtnLabel", t.loginShort);
+    setText("homeWelcomeTitleText", t.welcome);
+    setText("homeSubtitle", t.homeSubtitle);
+    setText("homeMiniChatLabel", t.tgChat);
+    setText("homeMiniChannelLabel", t.channel);
+    setText("homeMiniPredictionLabel", t.prediction);
+    setText("homeMiniRafflesLabel", t.raffles);
+    setText("homeSpringRatingTitle", t.rating);
+    setText("homeFreerollTitle", t.nextFreeroll);
+    setText("freerollHomePlayBtnText", t.playFreeroll);
+    setText("homeTournamentDayTitle", t.tournamentDay);
+    setText("homeTournamentPrizeLabel", t.prize);
+    setText("homeTournamentBuyinLabel", t.buyin);
+    setText("homeTournamentTimeLabel", t.time);
+    setText("homeTournamentRoomLabel", t.room);
+    setText("tournamentDayScheduleBtnText", t.weeklySchedule);
+    setText("homeGamesTitle", t.games);
+    setText("homeEquilatorTitle", t.equilator);
+    setText("homeLearnTitle", t.learn);
+    setText("homeLearnDesc", t.learnDesc);
+    setText("homeStreamsTitle", t.streams);
+    setText("homeStreamsDesc", t.inDev);
+    setText("homeBonusGameTitle", t.bonusGame);
+    setText("homePlastererTitle", t.plasterer);
+    setText("homePartnerTitle", t.partner);
+    setText("homeFooterNoteText", t.footerNote);
+    setText("bottomNavHomeLabel", t.navHome);
+    setText("chatNavLabel", t.navChat);
+    setText("bottomNavDownloadLabel", t.navDownload);
+    setText("bottomNavCashoutLabel", t.navCashout);
+    setText("bottomNavProfileLabel", t.navProfile);
+    try {
+      document.documentElement.lang = locale === "en" ? "en" : "ru";
+    } catch (eLangHtml) {}
+  }
   if (pwaAuthLangRuBtn) {
     pwaAuthLangRuBtn.addEventListener("click", function () {
       setPwaAuthLocale("ru");
@@ -8933,6 +9056,7 @@ function getPokerResolvedTelegramUser() {
   }
   syncPwaAuthLanguageUi();
   syncProfileLanguageUi();
+  syncGlobalAppLanguageUi();
 
   function isPwaStandaloneMode() {
     try {
