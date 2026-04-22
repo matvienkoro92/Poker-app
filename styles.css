@@ -18396,6 +18396,36 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
 
+/* Главная: единая оранжевая гамма для всех оставшихся иконок и рейтинга */
+.view--active[data-view="home"] .home-mini-icon-item--hall {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(234, 88, 12, 0.1));
+  border-color: rgba(251, 146, 60, 0.42);
+  box-shadow: 0 0 14px rgba(251, 146, 60, 0.32), 0 0 28px rgba(249, 115, 22, 0.18);
+}
+.view--active[data-view="home"] .home-mini-icon-item--hall:hover {
+  box-shadow: 0 0 18px rgba(251, 146, 60, 0.42), 0 0 32px rgba(249, 115, 22, 0.24);
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon-item--hall {
+  background: linear-gradient(135deg, #ffedd5, #fdba74);
+  border-color: rgba(249, 115, 22, 0.55);
+  box-shadow: 0 0 14px rgba(249, 115, 22, 0.22), 0 0 28px rgba(249, 115, 22, 0.12);
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon-item--hall:hover {
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.28), 0 0 32px rgba(249, 115, 22, 0.18);
+}
+.view--active[data-view="home"] .feature--rating-spring-promo .feature__cup,
+html.app-view-home .feature--rating-spring-promo .feature__cup {
+  color: #fb923c;
+}
+.view--active[data-view="home"] .feature--rating-spring-promo .feature__title-prize--spring,
+html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #fdba74 !important;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature--rating-spring-promo .feature__cup,
+[data-theme="light"] html.app-view-home .feature--rating-spring-promo .feature__cup {
+  color: #ea580c;
+}
+
 /* Рейтинг Турнирщиков зимы — стильный блок в духе покерного клуба */
 /* Зимний рейтинг: зимняя тема + покер */
 .winter-rating {
