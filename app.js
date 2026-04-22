@@ -15397,6 +15397,7 @@ function updateProfileExitBtnVisibility() {
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
   var show = !!(hasSession && isVerified);
   btn.classList.toggle("profile-exit-btn--hidden", !show);
+  btn.hidden = !show;
   btn.classList.toggle("profile-exit-btn--auth-cta", !hasSession);
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
   syncProfileStatusVisibility(hasSession || isVerified);
