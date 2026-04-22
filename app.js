@@ -14788,6 +14788,7 @@ function initProfileP21Id() {
 
 function syncProfileEmailAuthUi() {
   var section = document.getElementById("profileEmailAuthSection");
+  var titleEl = document.getElementById("profileEmailAuthTitle");
   var textEl = document.getElementById("profileEmailAuthText");
   var linkedRow = document.getElementById("profileEmailAuthLinkedRow");
   var linkedValue = document.getElementById("profileEmailAuthLinkedValue");
@@ -14824,6 +14825,7 @@ function syncProfileEmailAuthUi() {
   }
   if (linkedEmail && authMethod !== "telegram") authMethod = "email";
   if (section) section.hidden = false;
+  if (titleEl) titleEl.hidden = !!linkedEmail;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
   if (tgSection) tgSection.hidden = !(isVerified && !isGuest && authMethod === "email");
@@ -14832,6 +14834,7 @@ function syncProfileEmailAuthUi() {
     else if (authMethod === "email" && linkedEmail) textEl.textContent = "Вы вошли по этой почте. Это ваш текущий способ входа.";
     else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
     else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
+    textEl.hidden = !!linkedEmail;
   }
   if (formWrap) {
     formWrap.hidden = !!linkedEmail;
