@@ -14446,12 +14446,46 @@ function pokerShouldShowHomeTopVersionForSpecialUser() {
   return username === "roman1787443";
 }
 
+function getProfileGreetingName() {
+  var chatDisplayName = "";
+  try {
+    chatDisplayName = String(window.__pokerChatDisplayName || "").trim();
+  } catch (eChatDisplay) {}
+  if (chatDisplayName) return chatDisplayName;
+
+  var tgUsername = "";
+  try {
+    var auth = window.__pokerTelegramAuth;
+    tgUsername =
+      auth && auth.user && auth.user.username != null ? String(auth.user.username).trim().replace(/^@+/, "") : "";
+  } catch (eAuthUsername) {}
+  if (!tgUsername) {
+    try {
+      var resolvedUser = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      tgUsername = resolvedUser && resolvedUser.username != null ? String(resolvedUser.username).trim().replace(/^@+/, "") : "";
+    } catch (eResolvedUsername) {}
+  }
+  if (tgUsername) return "@" + tgUsername;
+
+  var authMethod = "";
+  try {
+    authMethod = String(pokerGetAuthMethod() || "").trim().toLowerCase();
+  } catch (eAuthMethod) {}
+  if (authMethod === "email") return "NoName";
+
+  var linkedEmail = "";
+  try {
+    linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
+  } catch (eLinkedEmail) {}
+  if (linkedEmail) return "NoName";
+
+  return "NoName";
+}
+
 function updateProfileUserName() {
   var el = document.getElementById("profileUserName");
   if (!el) return;
-  var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-  var dn = user && typeof telegramUserDisplayName === "function" ? telegramUserDisplayName(user) : "";
-  el.textContent = dn || "гость";
+  el.textContent = getProfileGreetingName();
   updateProfileUserMeta();
 }
 
@@ -14539,11 +14573,7 @@ function updateProfileDtId() {
           window.__pokerChatDisplayName = cdn;
           var cdnEl = document.getElementById("profileChatDisplayNameInput");
           if (cdnEl) cdnEl.value = cdn;
-          var nameEl = document.getElementById("profileUserName");
-          if (nameEl) {
-            var currentName = String(nameEl.textContent || "").trim().toLowerCase();
-            if (cdn && (!currentName || currentName === "гость")) nameEl.textContent = cdn;
-          }
+          if (typeof updateProfileUserName === "function") updateProfileUserName();
         } catch (eCdn2) {}
       }
     })
