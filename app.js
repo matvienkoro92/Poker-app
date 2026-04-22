@@ -10946,7 +10946,7 @@ function getPokerResolvedTelegramUser() {
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
-    if (shouldUseOverlayAuthScreen()) {
+    if (isPwaStandaloneAuth()) {
       runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
       return;
     }
@@ -11155,7 +11155,7 @@ function getPokerResolvedTelegramUser() {
 
   window.pokerRetryTelegramAuthVerification = function () {
     /* В PWA объект WebApp есть, initData часто пуст — иначе кнопка «Повторить» на оверлее ничего не делала */
-    if (shouldUseOverlayAuthScreen()) {
+    if (isPwaStandaloneAuth()) {
       runVerifyFlow();
       return;
     }
@@ -11196,7 +11196,7 @@ function getPokerResolvedTelegramUser() {
   );
 
   var wtgBoot = getTelegramWebAppNow();
-  if (shouldUseOverlayAuthScreen()) {
+  if (isPwaStandaloneAuth()) {
     /* В PWA initData из Telegram не придёт — не ждём таймер в WebApp-ветке (полоска в #app всё равно скрыта). */
     runVerifyFlow();
   } else if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
