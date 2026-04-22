@@ -8916,11 +8916,23 @@ function getPokerResolvedTelegramUser() {
 
   function openOverlayAuthEntryScreen() {
     try {
+      pokerSavePwaGuestMode(false);
+    } catch (eGuestOff) {}
+    try {
+      if (window.__pokerTelegramAuth && window.__pokerTelegramAuth.status === "guest") {
+        window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+      }
+    } catch (eAuthReset) {}
+    try {
       if (typeof setView === "function") setView("home");
     } catch (eSetViewAuth) {}
     hideLegacyInlineAuthUi();
     setPwaAuthScreenNotice("");
-    showPwaStandaloneEntryScreen();
+    showPwaAuthScreen();
+    try {
+      setPwaAuthIdentifyingPhase(false);
+    } catch (eOpenAuthId) {}
+    remountPwaStandaloneEnterScreen();
   }
 
   /** PWA: экран «идентификация» поверх приложения (не внутри скрытого #app). */
