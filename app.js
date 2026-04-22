@@ -14826,7 +14826,7 @@ function syncProfileEmailAuthUi() {
   }
   if (linkedEmail && authMethod !== "telegram") authMethod = "email";
   if (section) section.hidden = false;
-  if (titleEl) titleEl.hidden = !!linkedEmail;
+  if (titleEl) titleEl.hidden = true;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
   if (tgSection) tgSection.hidden = !(isVerified && !isGuest && authMethod === "email");
@@ -14835,7 +14835,7 @@ function syncProfileEmailAuthUi() {
     else if (authMethod === "email" && linkedEmail) textEl.textContent = "Вы вошли по этой почте. Это ваш текущий способ входа.";
     else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
     else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
-    textEl.hidden = !!linkedEmail;
+    textEl.hidden = true;
   }
   if (formWrap) {
     formWrap.hidden = !!linkedEmail;
@@ -14878,6 +14878,20 @@ function initProfileEmailAuth() {
   }
   function authBody(extra) {
     return pokerGuestOrAuthedPostBody(extra || {});
+  }
+  function refreshLinkedEmail() {
+    if (!base) return Promise.resolve();
+    return fetch(base + "/api/auth-email-link" + (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData="))
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.ok) {
+          try {
+            window.__pokerProfileLinkedEmail = data.email != null ? String(data.email).trim() : "";
+          } catch (eLinkedEmail) {}
+          syncProfileEmailAuthUi();
+        }
+      })
+      .catch(function () {});
   }
   codeInput.addEventListener("input", function () {
     codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
@@ -14944,6 +14958,7 @@ function initProfileEmailAuth() {
     });
   }
   syncProfileEmailAuthUi();
+  refreshLinkedEmail();
 }
 
 var cashoutDepositFormBound = false;
