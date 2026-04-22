@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.100">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.101">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4200,7 +4200,7 @@
           <!-- Профиль -->
           <div class="view" data-view="profile" id="profileView">
             <div class="profile-header-row">
-              <h1 class="title">Профиль</h1>
+              <h1 class="title" id="profileTitle">Профиль</h1>
               <div class="profile-header-controls">
                 <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
                 <div class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
@@ -4220,7 +4220,7 @@
             <div class="profile-chat-name">
               <div class="profile-chat-name__row" id="profileChatNameRow">
                 <div class="profile-chat-name__cell">
-                  <p class="profile-chat-name__field-caption">Введите ваше имя</p>
+                  <p class="profile-chat-name__field-caption" id="profileNameCaption">Введите ваше имя</p>
                   <input
                     type="text"
                     id="profileChatDisplayNameInput"
@@ -4232,7 +4232,7 @@
                   />
                 </div>
                 <div class="profile-chat-name__cell">
-                  <p class="profile-chat-name__field-caption profile-chat-name__field-caption--p21">
+                  <p class="profile-chat-name__field-caption profile-chat-name__field-caption--p21" id="profileP21Caption">
                     Введите ID из Poker21 <span class="profile-chat-name__p21-arrow" aria-hidden="true">↓</span>
                   </p>
                   <input
@@ -4258,11 +4258,11 @@
               <h2 class="profile-section__title" id="profileEmailAuthTitle">Вход по почте</h2>
               <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
               <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
-                <span class="profile-email-auth__label">Ваш емейл:</span>
+                <span class="profile-email-auth__label" id="profileEmailAuthLinkedLabel">Ваш емейл:</span>
                 <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
               </div>
               <div class="profile-email-auth__linked" id="profileTelegramLinkedRow" hidden>
-                <span class="profile-email-auth__label">Ваш телеграм:</span>
+                <span class="profile-email-auth__label" id="profileTelegramLinkedLabel">Ваш телеграм:</span>
                 <span class="profile-email-auth__value" id="profileTelegramLinkedValue">—</span>
               </div>
               <div class="profile-email-auth__form" id="profileEmailAuthForm">
@@ -4292,7 +4292,7 @@
               </div>
             </section>
             <section class="profile-email-auth" id="profileTelegramLinkSection" hidden>
-              <h2 class="profile-section__title">Вход через Telegram</h2>
+              <h2 class="profile-section__title" id="profileTelegramLinkTitle">Вход через Telegram</h2>
               <p class="profile-email-auth__text" id="profileTelegramLinkText">Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.</p>
               <div class="profile-email-auth__form">
                 <div class="profile-email-auth__actions">
@@ -4314,7 +4314,7 @@
             </div>
             <div class="profile-visible-to-others">
               <section class="profile-status" id="profileStatusSection">
-                <h2 class="profile-status__title">Ваш уровень 1 из 55</h2>
+                <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
                 <div class="profile-status__scale-wrap">
                   <div class="profile-status__labels profile-status__labels--cards">
                     <span class="profile-status__card">2♣</span>
@@ -4330,7 +4330,7 @@
                 </div>
               </section>
               <section class="profile-section profile-tournaments">
-                <h2 class="profile-section__title">Турниры</h2>
+                <h2 class="profile-section__title" id="profileTournamentsTitle">Турниры</h2>
                 <div class="profile-cols profile-cols--three">
                   <div class="profile-col">
                     <div class="profile-col__name">Лига 2</div>
@@ -4347,7 +4347,7 @@
                 </div>
               </section>
               <section class="profile-section profile-cash">
-                <h2 class="profile-section__title">Кеш</h2>
+                <h2 class="profile-section__title" id="profileCashTitle">Кеш</h2>
                 <div class="profile-cols profile-cols--three">
                   <div class="profile-col">
                     <div class="profile-col__name">Микро лимиты</div>

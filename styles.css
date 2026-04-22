@@ -26589,22 +26589,22 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-lang-switch {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
+  gap: 4px;
+  padding: 4px;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   background: rgba(15, 23, 42, 0.52);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
 }
 .profile-lang-switch__btn {
-  min-width: 56px;
-  height: 44px;
-  padding: 0 14px;
+  min-width: 44px;
+  height: 36px;
+  padding: 0 12px;
   border: none;
   border-radius: 999px;
   background: transparent;
   color: rgba(226, 232, 240, 0.86);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   cursor: pointer;
   pointer-events: auto;

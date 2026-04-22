@@ -8677,6 +8677,7 @@ function getPokerResolvedTelegramUser() {
       if (typeof localStorage !== "undefined") localStorage.setItem(PWA_AUTH_LANG_KEY, next);
     } catch (eSaveAuthLang) {}
     syncPwaAuthLanguageUi();
+    syncProfileLanguageUi();
     rerenderCurrentPwaAuthScreen();
   }
 
@@ -8814,6 +8815,102 @@ function getPokerResolvedTelegramUser() {
     if (profileLangRuBtn) profileLangRuBtn.classList.toggle("profile-lang-switch__btn--active", locale === "ru");
     if (profileLangEnBtn) profileLangEnBtn.classList.toggle("profile-lang-switch__btn--active", locale === "en");
   }
+  function syncProfileLanguageUi() {
+    var locale = getPwaAuthLocale();
+    var dict = {
+      ru: {
+        profileTitle: "Профиль",
+        loginAccount: "Войти в аккаунт",
+        nameCaption: "Введите ваше имя",
+        p21Caption: "Введите ID из Poker21",
+        save: "Сохранить",
+        emailLogin: "Вход по почте",
+        emailLoginText: "Привяжите email, чтобы потом можно было входить в аккаунт по почте.",
+        yourEmail: "Ваш емейл:",
+        yourTelegram: "Ваш телеграм:",
+        emailAria: "Email для входа",
+        getCode: "Получить код",
+        code: "Код",
+        verifyLink: "Привязать",
+        telegramLogin: "Вход через Telegram",
+        telegramLoginText: "Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.",
+        linkTelegram: "Привязать Telegram",
+        friends: "Друзья",
+        level: "Ваш уровень 1 из 55",
+        tournaments: "Турниры",
+        cash: "Кеш",
+        notes: "Нотс про себя",
+        displayNamePh: "Ваше имя"
+      },
+      en: {
+        profileTitle: "Profile",
+        loginAccount: "Sign in",
+        nameCaption: "Enter your name",
+        p21Caption: "Enter your Poker21 ID",
+        save: "Save",
+        emailLogin: "Email sign in",
+        emailLoginText: "Link your email so you can sign in to this account with email later.",
+        yourEmail: "Your email:",
+        yourTelegram: "Your Telegram:",
+        emailAria: "Email for sign in",
+        getCode: "Get code",
+        code: "Code",
+        verifyLink: "Link",
+        telegramLogin: "Telegram sign in",
+        telegramLoginText: "Link Telegram so you can sign in to this same account through Telegram later.",
+        linkTelegram: "Link Telegram",
+        friends: "Friends",
+        level: "Your level 1 of 55",
+        tournaments: "Tournaments",
+        cash: "Cash",
+        notes: "Notes about yourself",
+        displayNamePh: "Your name"
+      }
+    };
+    var t = dict[locale] || dict.ru;
+    var setText = function (id, text) {
+      var el = document.getElementById(id);
+      if (el) {
+        var arrow = el.querySelector && el.querySelector(".profile-chat-name__p21-arrow");
+        if (arrow && id === "profileP21Caption") {
+          el.innerHTML = text + ' <span class="profile-chat-name__p21-arrow" aria-hidden="true">↓</span>';
+        } else {
+          el.textContent = text;
+        }
+      }
+    };
+    setText("profileTitle", t.profileTitle);
+    setText("profileNameCaption", t.nameCaption);
+    setText("profileP21Caption", t.p21Caption);
+    setText("profileSaveBtn", t.save);
+    setText("profileEmailAuthTitle", t.emailLogin);
+    setText("profileEmailAuthText", t.emailLoginText);
+    setText("profileEmailAuthLinkedLabel", t.yourEmail);
+    setText("profileTelegramLinkedLabel", t.yourTelegram);
+    setText("profileEmailAuthSendBtn", t.getCode);
+    setText("profileEmailAuthVerifyBtn", t.verifyLink);
+    setText("profileTelegramLinkTitle", t.telegramLogin);
+    setText("profileTelegramLinkText", t.telegramLoginText);
+    setText("profileTelegramLinkBtn", t.linkTelegram);
+    setText("profileFriendsBtn", t.friends);
+    setText("profileStatusTitle", t.level);
+    setText("profileTournamentsTitle", t.tournaments);
+    setText("profileCashTitle", t.cash);
+    setText("profilePersonalSaveBtn", t.save);
+    var exitBtn = document.getElementById("profileExitBtn");
+    if (exitBtn) exitBtn.textContent = t.loginAccount;
+    var nameInput = document.getElementById("profileChatDisplayNameInput");
+    if (nameInput) nameInput.placeholder = t.displayNamePh;
+    var emailInput = document.getElementById("profileEmailAuthInput");
+    if (emailInput) emailInput.setAttribute("aria-label", t.emailAria);
+    var codeInput = document.getElementById("profileEmailAuthCodeInput");
+    if (codeInput) codeInput.placeholder = t.code;
+    var personalInput = document.getElementById("profilePersonalInput");
+    if (personalInput) {
+      personalInput.placeholder = t.notes;
+      personalInput.setAttribute("aria-label", t.notes);
+    }
+  }
   if (pwaAuthLangRuBtn) {
     pwaAuthLangRuBtn.addEventListener("click", function () {
       setPwaAuthLocale("ru");
@@ -8835,6 +8932,7 @@ function getPokerResolvedTelegramUser() {
     });
   }
   syncPwaAuthLanguageUi();
+  syncProfileLanguageUi();
 
   function isPwaStandaloneMode() {
     try {
