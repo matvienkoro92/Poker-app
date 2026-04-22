@@ -8785,6 +8785,7 @@ function getPokerResolvedTelegramUser() {
       return {
         id: serverUser.id,
         memberId: serverUser.memberId != null ? String(serverUser.memberId).trim() : "",
+        email: serverUser.email != null ? String(serverUser.email).trim() : "",
         first_name: serverUser.first_name != null ? serverUser.first_name : "",
         last_name: serverUser.last_name != null ? serverUser.last_name : "",
         username: serverUser.username != null ? serverUser.username : "",
@@ -14816,6 +14817,12 @@ function syncProfileEmailAuthUi() {
   try {
     linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
   } catch (e) {}
+  if (!linkedEmail) {
+    try {
+      linkedEmail = auth && auth.user && auth.user.email != null ? String(auth.user.email).trim() : "";
+    } catch (eAuthEmail) {}
+  }
+  if (linkedEmail && authMethod !== "telegram") authMethod = "email";
   if (section) section.hidden = false;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
