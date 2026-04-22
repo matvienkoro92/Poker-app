@@ -10559,22 +10559,13 @@ function getPokerResolvedTelegramUser() {
   function syncProfileGuestWebsiteMode() {
     var chatRow = document.getElementById("profileChatNameRow");
     var saveWrap = document.getElementById("profileChatNameSaveWrap");
-    var guestWrap = document.getElementById("profileGuestAuthWrap");
-    var guestBtn = document.getElementById("profileGuestAuthBtn");
     var personalSection = document.getElementById("profilePersonalSection");
     var guestMode = isWebsiteGuestProfileMode();
     if (chatRow) chatRow.classList.toggle("profile-guest-hidden", guestMode);
     if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", guestMode);
     if (personalSection) personalSection.classList.toggle("profile-guest-hidden", guestMode);
-    if (guestWrap) guestWrap.hidden = !guestMode;
     syncProfileStatusVisibility(!guestMode);
     syncProfileVerifiedContentVisibility(!guestMode);
-    if (guestBtn && guestBtn.dataset.bound !== "1") {
-      guestBtn.dataset.bound = "1";
-      guestBtn.addEventListener("click", function () {
-        openSharedAccountAuthFlow();
-      });
-    }
   }
   window.__pokerSyncProfileGuestWebsiteMode = syncProfileGuestWebsiteMode;
 
@@ -15395,10 +15386,10 @@ function updateProfileExitBtnVisibility() {
     isVerified = !!(a && (a.status === "verified" || a.status === "dev_skip"));
   } catch (e) {}
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-  var show = !!(hasSession && isVerified);
+  var show = !!(hasSession && isVerified) || !isVerified;
   btn.classList.toggle("profile-exit-btn--hidden", !show);
   btn.hidden = !show;
-  btn.classList.toggle("profile-exit-btn--auth-cta", !hasSession);
+  btn.classList.toggle("profile-exit-btn--auth-cta", !isVerified);
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
   syncProfileStatusVisibility(hasSession || isVerified);
   syncProfileVerifiedContentVisibility(hasSession || isVerified);

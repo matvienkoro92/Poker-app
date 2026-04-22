@@ -26518,9 +26518,6 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .view[data-view="profile"].profile-view--guest .profile-chat-name {
   margin-top: 0;
 }
-.view[data-view="profile"].profile-view--guest .profile-chat-name__guest-cta {
-  margin-top: 0;
-}
 
 .profile-exit-btn {
   margin-left: auto;
