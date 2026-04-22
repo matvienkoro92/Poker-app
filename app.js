@@ -1396,6 +1396,13 @@ var profileChatPushBound = false;
 var profileChatPushApplying = false;
 /** Инкремент при новом refresh / старте переключателя — отбрасываем устаревшие ответы fetch. */
 var profileChatPushRefreshGen = 0;
+function isInstalledPwaProfileMode() {
+  try {
+    if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.navigator && window.navigator.standalone === true) return true;
+  } catch (ePwaProfileMode) {}
+  return false;
+}
 function initProfileChatPush() {
   var row = document.getElementById("profileChatPushRow");
   var toggle = document.getElementById("profileChatPushToggle");
@@ -1409,7 +1416,7 @@ function initProfileChatPush() {
     return;
   }
 
-  if (typeof isPwaStandaloneMode === "function" && !isPwaStandaloneMode()) {
+  if (!isInstalledPwaProfileMode()) {
     row.classList.add("profile-chat-push--hidden");
     row.classList.remove("profile-chat-push--ios-miniapp");
     row.setAttribute("aria-hidden", "true");
