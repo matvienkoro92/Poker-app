@@ -9793,6 +9793,9 @@ function getPokerResolvedTelegramUser() {
   }
 
   function showAuthorized(user) {
+    try {
+      if (typeof setView === "function") setView("home");
+    } catch (eSetHomeAfterAuth) {}
     if (userEl) {
       var textEl = userEl.querySelector("#authUserText");
       if (textEl) {
