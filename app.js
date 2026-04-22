@@ -9115,7 +9115,10 @@ function getPokerResolvedTelegramUser() {
         '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
-        '<input type="password" class="auth-banner__code-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+        '<div class="auth-banner__password-wrap">' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+          '<button type="button" class="auth-banner__password-toggle" id="authPwaPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+        "</div>" +
       "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaRememberPassword" />' +
@@ -9141,6 +9144,7 @@ function getPokerResolvedTelegramUser() {
 
     var userInput = wrap.querySelector("#authPwaUsernameInput");
     var passwordInput = wrap.querySelector("#authPwaPasswordInput");
+    var passwordToggle = wrap.querySelector("#authPwaPasswordToggle");
     var rememberPassword = wrap.querySelector("#authPwaRememberPassword");
     var passwordLoginBtn = wrap.querySelector("#authPwaPasswordLoginBtn");
     var codeInput = wrap.querySelector("#authPwaCodeInput");
@@ -9212,6 +9216,14 @@ function getPokerResolvedTelegramUser() {
     var lastUsername = readLastUsername();
     if (userInput && lastUsername) userInput.value = "@" + lastUsername;
     if (passwordInput) passwordInput.value = pokerReadSavedPassword();
+    if (passwordToggle && passwordInput) {
+      passwordToggle.addEventListener("click", function () {
+        var show = passwordInput.getAttribute("type") === "password";
+        passwordInput.setAttribute("type", show ? "text" : "password");
+        passwordToggle.setAttribute("aria-pressed", show ? "true" : "false");
+        passwordToggle.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+      });
+    }
     if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
     function passwordValue() {
       return String(passwordInput && passwordInput.value ? passwordInput.value : "");
@@ -9522,7 +9534,10 @@ function getPokerResolvedTelegramUser() {
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
-        '<input type="password" class="auth-banner__code-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+        '<div class="auth-banner__password-wrap">' +
+          '<input type="password" class="auth-banner__code-input auth-banner__password-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+          '<button type="button" class="auth-banner__password-toggle" id="authPwaEmailPasswordToggle" aria-label="Показать пароль" aria-pressed="false">👁</button>' +
+        "</div>" +
       "</div>" +
       '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
         '<input type="checkbox" id="authPwaEmailRememberPassword" />' +
@@ -9542,6 +9557,7 @@ function getPokerResolvedTelegramUser() {
     var backBtn = wrap.querySelector("#authPwaEmailBackBtn");
     var emailInput = wrap.querySelector("#authPwaEmailInput");
     var passwordInput = wrap.querySelector("#authPwaEmailPasswordInput");
+    var passwordToggle = wrap.querySelector("#authPwaEmailPasswordToggle");
     var rememberPassword = wrap.querySelector("#authPwaEmailRememberPassword");
     var loginBtn = wrap.querySelector("#authPwaEmailLoginBtn");
     var codeInput = wrap.querySelector("#authPwaEmailCodeInput");
@@ -9595,6 +9611,14 @@ function getPokerResolvedTelegramUser() {
     var lastEmail = readLastEmail();
     if (emailInput && lastEmail) emailInput.value = lastEmail;
     if (passwordInput) passwordInput.value = pokerReadSavedPassword();
+    if (passwordToggle && passwordInput) {
+      passwordToggle.addEventListener("click", function () {
+        var show = passwordInput.getAttribute("type") === "password";
+        passwordInput.setAttribute("type", show ? "text" : "password");
+        passwordToggle.setAttribute("aria-pressed", show ? "true" : "false");
+        passwordToggle.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+      });
+    }
     if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
     function passwordValue() {
       return String(passwordInput && passwordInput.value ? passwordInput.value : "");

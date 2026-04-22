@@ -2121,6 +2121,33 @@ html.app-view-home .home-welcome-outline::before {
   padding: 10px 12px;
   font-size: 15px;
 }
+.auth-banner__password-wrap {
+  position: relative;
+  width: 100%;
+}
+.auth-banner__password-input {
+  padding-right: 44px;
+}
+.auth-banner__password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.95);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+.auth-banner__password-toggle:focus,
+.auth-banner__password-toggle:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.65);
+  outline-offset: 1px;
+}
 .auth-banner__code-input::placeholder {
   color: rgba(148, 163, 184, 0.8);
 }
