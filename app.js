@@ -8690,6 +8690,8 @@ function getPokerResolvedTelegramUser() {
         emailSentDefault: "Код отправлен на почту.",
         emailSentRegister: "Код отправлен на почту. После подтверждения создадим новый аккаунт.",
         emailSentLogin: "Код отправлен на почту для входа.",
+        emailCodeConfirmed: "Почта подтверждена, придумайте пароль ниже.",
+        passwordRequired: "Введите пароль.",
         networkError: "Ошибка сети. Попробуйте ещё раз."
       },
       en: {
@@ -8745,6 +8747,8 @@ function getPokerResolvedTelegramUser() {
         emailSentDefault: "The code was sent to your email.",
         emailSentRegister: "The code was sent to your email. We will create a new account after confirmation.",
         emailSentLogin: "The code was sent to your email for sign in.",
+        emailCodeConfirmed: "Email confirmed, create a password below.",
+        passwordRequired: "Enter a password.",
         networkError: "Network error. Please try again."
       }
     };
@@ -9842,6 +9846,11 @@ function getPokerResolvedTelegramUser() {
     function normalizeEmailInput() {
       return String(emailInput && emailInput.value ? emailInput.value : "").trim().toLowerCase();
     }
+    if (emailInput) {
+      emailInput.addEventListener("input", function () {
+        resetEmailRegisterVerification();
+      });
+    }
     function readLastEmail() {
       try {
         var raw = typeof localStorage !== "undefined" ? localStorage.getItem(EMAIL_LAST_KEY) : "";
@@ -9897,9 +9906,14 @@ function getPokerResolvedTelegramUser() {
     if (codeInput) {
       codeInput.addEventListener("input", function () {
         codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+        resetEmailRegisterVerification();
       });
     }
     var authMode = initialMode === "register" ? "register" : "login";
+    var emailCodeConfirmed = false;
+    function resetEmailRegisterVerification() {
+      emailCodeConfirmed = false;
+    }
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
@@ -9996,12 +10010,14 @@ function getPokerResolvedTelegramUser() {
     if (registerModeBtn) {
       registerModeBtn.addEventListener("click", function () {
         authMode = authMode === "register" ? "login" : "register";
+        if (authMode !== "register") resetEmailRegisterVerification();
         syncAuthModeUi();
       });
     }
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
         var email = normalizeEmailInput();
+        resetEmailRegisterVerification();
         setEmailHint(pwaAuthT("emailSendingCode"), false);
         fetch(base + "/api/auth-email", {
           method: "POST",
@@ -10030,6 +10046,49 @@ function getPokerResolvedTelegramUser() {
       verifyBtn.addEventListener("click", function () {
         var email = normalizeEmailInput();
         var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
+        setEmailHint(pwaAuthT("emailCheckingCode"), false);
+        fetch(base + "/api/auth-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "verify",
+            email: email,
+            code: code,
+            dtIdHint: getEmailDtIdHint(),
+            memberIdHint: pokerReadLastMemberIdHint(),
+          }),
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data || {} }; });
+          })
+          .then(function (pack) {
+            var data = pack.data || {};
+            if (pack.res.ok && data.ok) {
+              emailCodeConfirmed = true;
+              saveLastEmail(email);
+              setEmailHint(pwaAuthT("emailCodeConfirmed"), false);
+              if (passwordInput && passwordInput.focus) passwordInput.focus();
+              return;
+            }
+            setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);
+          })
+          .catch(function () {
+            setEmailHint(pwaAuthT("networkError"), true);
+          });
+      });
+    }
+    if (registerSubmitBtn) {
+      registerSubmitBtn.addEventListener("click", function () {
+        var email = normalizeEmailInput();
+        var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
+        if (!emailCodeConfirmed) {
+          if (verifyBtn) verifyBtn.click();
+          return;
+        }
+        if (!passwordValue()) {
+          setEmailHint(pwaAuthT("passwordRequired"), true);
+          return;
+        }
         if (passwordValue() !== passwordConfirmValue()) {
           setEmailHint(pwaAuthT("passwordsMismatch"), true);
           return;
@@ -10095,11 +10154,6 @@ function getPokerResolvedTelegramUser() {
           .catch(function () {
             setEmailHint(pwaAuthT("networkError"), true);
           });
-      });
-    }
-    if (registerSubmitBtn) {
-      registerSubmitBtn.addEventListener("click", function () {
-        if (verifyBtn) verifyBtn.click();
       });
     }
     syncAuthModeUi();
