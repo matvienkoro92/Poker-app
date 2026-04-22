@@ -10460,17 +10460,11 @@ function getPokerResolvedTelegramUser() {
 
   function openSharedAccountAuthFlow() {
     try {
-      if (shouldUseOverlayAuthScreen() && typeof window.__pokerOpenPwaLoginScreen === "function") {
+      if (typeof window.__pokerOpenPwaLoginScreen === "function") {
         window.__pokerOpenPwaLoginScreen();
         return;
       }
     } catch (eOpenPwaLogin) {}
-    try {
-      resetBannerForPwaLogin();
-      mountTelegramLoginWidgetForPwa();
-      if (banner) banner.classList.remove("auth-banner--hidden");
-      if (typeof setView === "function") setView("home");
-    } catch (eOpenBannerLogin) {}
   }
   window.__pokerOpenSharedAccountAuthFlow = openSharedAccountAuthFlow;
 
