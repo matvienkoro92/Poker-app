@@ -14800,6 +14800,18 @@ function syncProfileEmailAuthUi() {
   var isGuest = !!(auth && auth.status === "guest");
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
   var authMethod = pokerGetAuthMethod();
+  var currentMemberId = "";
+  try {
+    currentMemberId =
+      auth && auth.user && auth.user.memberId != null ? String(auth.user.memberId).trim() : "";
+  } catch (eMemberId) {}
+  if (!currentMemberId && typeof window.pokerResolveMyChatMemberId === "function") {
+    try {
+      currentMemberId = String(window.pokerResolveMyChatMemberId() || "").trim();
+    } catch (eResolvedMid) {}
+  }
+  if (/^mail_/.test(currentMemberId) || /^mail_pending_/.test(currentMemberId)) authMethod = "email";
+  else if (/^tg_/.test(currentMemberId) || /^vk_/.test(currentMemberId)) authMethod = "telegram";
   var linkedEmail = "";
   try {
     linkedEmail = String(window.__pokerProfileLinkedEmail || "").trim();
