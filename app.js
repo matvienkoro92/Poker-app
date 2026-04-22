@@ -15322,7 +15322,12 @@ function initProfileExitBtn() {
   if (btn.dataset.bound === "1") return;
   btn.dataset.bound = "1";
   btn.addEventListener("click", function () {
-    if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
+    var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    if (hasSession) {
+      if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
+      return;
+    }
+    if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
   });
 }
 
@@ -17688,7 +17693,7 @@ function initVideoLessons() {
     if (gBtn && gBtn.dataset.vlGateBound !== "1") {
       gBtn.dataset.vlGateBound = "1";
       gBtn.addEventListener("click", function () {
-        if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
+        if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
       });
     }
   } else if (gate) {
@@ -20894,7 +20899,7 @@ function initRaffles() {
   if (raffleGuestLoginBtn && raffleGuestLoginBtn.dataset.bound !== "1") {
     raffleGuestLoginBtn.dataset.bound = "1";
     raffleGuestLoginBtn.addEventListener("click", function () {
-      if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
+      if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
     });
   }
 
@@ -30898,7 +30903,7 @@ function initChat() {
         var gBtn = document.getElementById("chatGuestLoginBtn");
         if (gBtn) {
           gBtn.addEventListener("click", function () {
-            if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
+            if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
           });
         }
       }
