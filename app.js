@@ -8860,8 +8860,14 @@ function getPokerResolvedTelegramUser() {
     } catch (e) {}
   }
 
+  function isOverlayAuthScreenActive() {
+    if (!pwaAuthScreenEl) return false;
+    if (document.body && document.body.classList.contains("pwa-auth-gated")) return true;
+    return pwaAuthScreenEl.getAttribute("aria-hidden") === "false";
+  }
+
   function rerenderCurrentPwaAuthScreen() {
-    if (!shouldUseOverlayAuthScreen()) {
+    if (!shouldUseOverlayAuthScreen() && !isOverlayAuthScreenActive()) {
       syncPwaAuthLanguageUi();
       return;
     }
