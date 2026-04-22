@@ -15450,8 +15450,14 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   var verifiedContent = document.getElementById("profileVerifiedContent");
   var avatarBlock = document.getElementById("profileAvatarBlock");
   var profileView = document.getElementById("profileView");
+  var chatRow = document.getElementById("profileChatNameRow");
+  var saveWrap = document.getElementById("profileChatNameSaveWrap");
+  var chatNameWrap = document.querySelector("#profileView .profile-chat-name");
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
+  if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
+  if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
+  if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (profileView) profileView.classList.toggle("profile-view--guest", !isVerified);
 }
 
