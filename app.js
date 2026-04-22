@@ -10377,7 +10377,7 @@ function getPokerResolvedTelegramUser() {
     }
     if (!el) return;
     if (isSiteHomeInstructionMode()) {
-      el.textContent = "Авторизуйтесь";
+      el.textContent = "Войти";
       return;
     }
     var profileName = pokerPreferredProfileDisplayName();
