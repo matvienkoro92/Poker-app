@@ -15354,6 +15354,9 @@ function updateProfileDtId() {
           if (typeof updateHeaderGreeting === "function") updateHeaderGreeting();
         } catch (eCdn2) {}
       }
+      try {
+        if (typeof updateHeaderGreeting === "function") updateHeaderGreeting();
+      } catch (eHdrAfterUsers) {}
     })
     .catch(function () {
       el.textContent = cached || "\u2014";
