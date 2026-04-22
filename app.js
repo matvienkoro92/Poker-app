@@ -9821,7 +9821,6 @@ function getPokerResolvedTelegramUser() {
   }
 
   function mountPwaStandaloneEnterButton() {
-    if (!shouldUseOverlayAuthScreen()) return false;
     var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
     if (!m) return false;
     return mountAuthEnterButtons(m, {
@@ -9847,7 +9846,6 @@ function getPokerResolvedTelegramUser() {
   }
 
   function remountPwaStandaloneEnterScreen() {
-    if (!shouldUseOverlayAuthScreen()) return;
     var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
     if (!m) return;
     m.innerHTML = "";
