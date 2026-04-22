@@ -10407,9 +10407,11 @@ function getPokerResolvedTelegramUser() {
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
       window.navigator.standalone === true ||
       document.referrer.indexOf("android-app://") === 0;
+    var hasResolvedAuth = hasResolvedHomeAuthUser();
     var isSiteMode = isSiteHomeInstructionMode();
     var isTelegramMode = isTelegramHomeInstructionMode();
     var showInstructionBtn = isSiteMode || isTelegramMode;
+    var showAuthBtn = showInstructionBtn && !hasResolvedAuth;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
     var authBtn = document.getElementById("siteHomeAuthBtn");
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
@@ -10421,7 +10423,7 @@ function getPokerResolvedTelegramUser() {
       else instructionBtn.style.removeProperty("display");
     }
     if (authBtn) {
-      authBtn.hidden = !showInstructionBtn || isStandaloneMode;
+      authBtn.hidden = !showAuthBtn || isStandaloneMode;
       if (isStandaloneMode) authBtn.style.display = "none";
       else authBtn.style.removeProperty("display");
     }
