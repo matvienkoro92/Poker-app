@@ -23402,9 +23402,22 @@ function initChat() {
   }
   function syncChatWebsiteGuestGate() {
     if (forceHideChatGuestGateForTelegram()) return false;
+    var isPwaGuest = false;
+    try {
+      isPwaGuest = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    } catch (eChatPwaGuestMode) {}
     var guestMode = isWebsiteGuestChatGateMode();
     var contactsFilter = document.getElementById("chatContactsFilter");
     var findWrap = findByIdInputDialogs ? findByIdInputDialogs.closest(".chat-find-by-id") : null;
+    if (isPwaGuest) {
+      if (dialogsGuestGate) dialogsGuestGate.hidden = true;
+      if (dialogsPrimaryBlock) dialogsPrimaryBlock.classList.remove("profile-guest-hidden");
+      if (contactsFilter) contactsFilter.classList.remove("profile-guest-hidden");
+      if (contactsEl) contactsEl.classList.remove("profile-guest-hidden");
+      if (findWrap) findWrap.classList.remove("profile-guest-hidden");
+      if (chatNewGroupBtn) chatNewGroupBtn.classList.remove("profile-guest-hidden");
+      return false;
+    }
     if (dialogsGuestGate) dialogsGuestGate.hidden = !guestMode;
     if (dialogsPrimaryBlock) dialogsPrimaryBlock.classList.toggle("profile-guest-hidden", guestMode);
     if (contactsFilter) contactsFilter.classList.toggle("profile-guest-hidden", guestMode);
