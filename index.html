@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.078">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.079">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4247,7 +4247,7 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
               </div>
               <div class="profile-chat-name__guest-cta" id="profileGuestAuthWrap" hidden>
-                <button type="button" class="profile-exit-btn" id="profileGuestAuthBtn">Войти в аккаунт</button>
+                <button type="button" class="profile-exit-btn profile-exit-btn--auth-cta" id="profileGuestAuthBtn">Войти в аккаунт</button>
               </div>
             </div>
             <section class="profile-email-auth" id="profileEmailAuthSection">
@@ -4309,7 +4309,7 @@
               <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
             </div>
             <div class="profile-visible-to-others">
-              <section class="profile-status">
+              <section class="profile-status" id="profileStatusSection">
                 <h2 class="profile-status__title">Ваш уровень 1 из 55</h2>
                 <div class="profile-status__scale-wrap">
                   <div class="profile-status__labels profile-status__labels--cards">

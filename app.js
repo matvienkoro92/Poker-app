@@ -10567,6 +10567,7 @@ function getPokerResolvedTelegramUser() {
     if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", guestMode);
     if (personalSection) personalSection.classList.toggle("profile-guest-hidden", guestMode);
     if (guestWrap) guestWrap.hidden = !guestMode;
+    syncProfileStatusVisibility(!guestMode);
     if (guestBtn && guestBtn.dataset.bound !== "1") {
       guestBtn.dataset.bound = "1";
       guestBtn.addEventListener("click", function () {
@@ -15386,14 +15387,18 @@ function updateProfileExitBtnVisibility() {
   var btn = document.getElementById("profileExitBtn");
   if (!btn) return;
   var isGuest = false;
+  var isVerified = false;
   try {
     var a = window.__pokerTelegramAuth;
     isGuest = !!(a && a.status === "guest");
+    isVerified = !!(a && (a.status === "verified" || a.status === "dev_skip"));
   } catch (e) {}
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
   var show = !!(hasSession || isGuest);
   btn.classList.toggle("profile-exit-btn--hidden", !show);
+  btn.classList.toggle("profile-exit-btn--auth-cta", !hasSession);
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
+  syncProfileStatusVisibility(hasSession || isVerified);
 }
 
 function pokerClearSessionsAndReloadForLogin() {
@@ -15434,6 +15439,12 @@ function pokerClearSessionsAndReloadForLogin() {
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+
+function syncProfileStatusVisibility(isVerified) {
+  var statusSection = document.getElementById("profileStatusSection");
+  if (!statusSection) return;
+  statusSection.classList.toggle("profile-guest-hidden", !isVerified);
+}
 
 function pokerClearUiCachesAfterAuthSwitch() {
   try {
@@ -15646,6 +15657,7 @@ function syncProfileEmailAuthUi() {
     } catch (eGuestMode) {}
   }
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
+  syncProfileStatusVisibility(isVerified);
   var authMethod = pokerGetAuthMethod();
   var currentMemberId = "";
   try {
