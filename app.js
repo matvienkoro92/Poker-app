@@ -8880,6 +8880,49 @@ function getPokerResolvedTelegramUser() {
     identifyingMiniEl.setAttribute("aria-busy", "false");
   }
 
+  function setPwaAuthScreenNotice(message) {
+    if (!pwaAuthScreenEl) return;
+    var inner = pwaAuthScreenEl.querySelector(".pwa-auth-screen__inner");
+    if (!inner) return;
+    var notice = inner.querySelector(".pwa-auth-screen__notice");
+    var text = message != null ? String(message).trim() : "";
+    if (!text) {
+      if (notice) notice.remove();
+      return;
+    }
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.className = "pwa-auth-screen__notice";
+      notice.setAttribute("role", "status");
+      notice.setAttribute("aria-live", "polite");
+      inner.appendChild(notice);
+    }
+    notice.textContent = text;
+  }
+
+  function hideLegacyInlineAuthUi() {
+    hideIdentifyingMini();
+    if (banner) {
+      banner.classList.add("auth-banner--hidden");
+      banner.classList.remove("auth-banner--verifying");
+    }
+    if (bannerRetry) bannerRetry.hidden = true;
+    if (bannerLink) bannerLink.style.display = "none";
+    if (hintEl) {
+      hintEl.textContent = "";
+      hintEl.style.display = "none";
+    }
+  }
+
+  function openOverlayAuthEntryScreen() {
+    try {
+      if (typeof setView === "function") setView("home");
+    } catch (eSetViewAuth) {}
+    hideLegacyInlineAuthUi();
+    setPwaAuthScreenNotice("");
+    showPwaStandaloneEntryScreen();
+  }
+
   /** PWA: экран «идентификация» поверх приложения (не внутри скрытого #app). */
   var PWA_AUTH_IDENTIFY_MIN_MS = 620;
   function setPwaAuthIdentifyingPhase(on) {
@@ -10466,6 +10509,13 @@ function getPokerResolvedTelegramUser() {
   window.__pokerSyncProfileGuestWebsiteMode = syncProfileGuestWebsiteMode;
 
   function setBannerVerifying() {
+    if (shouldUseOverlayAuthScreen()) {
+      hideLegacyInlineAuthUi();
+      setPwaAuthScreenNotice("");
+      showPwaAuthScreen();
+      setPwaAuthIdentifyingPhase(true);
+      return;
+    }
     if (!shouldUseOverlayAuthScreen()) {
       if (banner) banner.classList.add("auth-banner--hidden");
       /* Mini App: баннер убран из DOM раньше ломал виджет; полоса «идентификация» должна быть видна */
@@ -10484,6 +10534,12 @@ function getPokerResolvedTelegramUser() {
   }
 
   function setBannerFailure(message, showRetry) {
+    if (shouldUseOverlayAuthScreen()) {
+      setPwaAuthIdentifyingPhase(false);
+      openOverlayAuthEntryScreen();
+      setPwaAuthScreenNotice(message || "Вход не подтверждён.");
+      return;
+    }
     if (!shouldUseOverlayAuthScreen()) {
       hideIdentifyingMini();
       if (bannerText) bannerText.textContent = message || "Вход не подтверждён.";
@@ -10510,6 +10566,11 @@ function getPokerResolvedTelegramUser() {
   }
 
   function resetBannerForPwaLogin() {
+    if (shouldUseOverlayAuthScreen()) {
+      hideLegacyInlineAuthUi();
+      setPwaAuthScreenNotice("");
+      return;
+    }
     if (bannerText) bannerText.textContent = "";
     if (banner) banner.classList.add("auth-banner--hidden");
     if (bannerRetry) bannerRetry.hidden = true;
@@ -11202,7 +11263,8 @@ function getPokerResolvedTelegramUser() {
   } else if (isTelegramWebApp() && wtgBoot && !wtgBoot.initData) {
     // initData иногда появляется с задержкой даже при открытии кнопкой бота.
     // Не блокируем первый рендер на 25с: ждём немного и пускаем verify/виджет.
-    showIdentifyingMini();
+    showPwaAuthScreen();
+    setPwaAuthIdentifyingPhase(true);
     waitForInitDataThenVerify(5000, 300);
   } else {
     runVerifyFlow();
@@ -11210,7 +11272,7 @@ function getPokerResolvedTelegramUser() {
 
   window.__pokerOpenPwaLoginScreen = function () {
     try {
-      showPwaStandaloneEntryScreen();
+      openOverlayAuthEntryScreen();
     } catch (ePwaOpen) {}
   };
 
@@ -11219,7 +11281,7 @@ function getPokerResolvedTelegramUser() {
       updateHeaderGreeting();
     } catch (eHdr) {}
     try {
-      showPwaStandaloneEntryScreen();
+      openOverlayAuthEntryScreen();
     } catch (eShowEntry) {}
     try {
       showUnauthorized();
