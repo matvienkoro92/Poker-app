@@ -10414,7 +10414,7 @@ function getPokerResolvedTelegramUser() {
 
   function openSharedAccountAuthFlow() {
     try {
-      if (typeof window.__pokerOpenPwaLoginScreen === "function") {
+      if (isPwaStandaloneAuth() && typeof window.__pokerOpenPwaLoginScreen === "function") {
         window.__pokerOpenPwaLoginScreen();
         return;
       }
@@ -15491,6 +15491,11 @@ function syncProfileEmailAuthUi() {
   var tgSection = document.getElementById("profileTelegramLinkSection");
   var auth = window.__pokerTelegramAuth;
   var isGuest = !!(auth && auth.status === "guest");
+  if (!isGuest) {
+    try {
+      isGuest = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    } catch (eGuestMode) {}
+  }
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
   var authMethod = pokerGetAuthMethod();
   var currentMemberId = "";
