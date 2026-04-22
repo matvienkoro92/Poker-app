@@ -9762,15 +9762,8 @@ function getPokerResolvedTelegramUser() {
     }
     var form = mount.querySelector(".auth-banner__verify-form");
     if (!form) {
-      var title = shouldUseOverlayAuthScreen() ? "" : "Верификация для входа в PWA";
-      var subtitle = shouldUseOverlayAuthScreen()
-        ? ""
-        : '<p class="auth-banner__verify-subtitle">Введите Telegram username и получите код в Telegram.</p>';
-      var titleBlock = title ? '<p class="auth-banner__verify-title">' + title + "</p>" : "";
       mount.innerHTML =
         '<div class="auth-banner__verify-form">' +
-          titleBlock +
-          subtitle +
           '<div class="auth-banner__verify-actions"></div>' +
         "</div>";
       form = mount.querySelector(".auth-banner__verify-form");
