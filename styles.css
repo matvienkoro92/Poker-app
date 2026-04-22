@@ -3083,6 +3083,9 @@ html.poker-telegram-miniapp body[data-view="home"] #siteHomeAuthBtn,
 html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn {
   display: inline-flex !important;
 }
+#siteHomeAuthBtn[hidden] {
+  display: none !important;
+}
 html.site-home-header-mode .header-greeting-wrap {
   max-width: 170px;
 }
