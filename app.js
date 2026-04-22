@@ -14833,7 +14833,7 @@ function syncProfileEmailAuthUi() {
     else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
     else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
   }
-  if (formWrap) formWrap.hidden = !!(authMethod === "email" && linkedEmail);
+  if (formWrap) formWrap.hidden = !!linkedEmail;
   var disableInputs = !isVerified || isGuest;
   if (emailInput) {
     emailInput.disabled = disableInputs;
