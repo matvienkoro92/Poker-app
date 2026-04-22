@@ -2915,9 +2915,13 @@ body.pwa-auth-gated #app {
 .site-home-instruction-btn__icon {
   font-size: 19px;
   line-height: 1;
+  color: #f97316;
 }
 .site-home-instruction-btn__label {
   display: none;
+}
+[data-theme="light"] .site-home-instruction-btn__icon {
+  color: #ea580c;
 }
 .site-home-instruction-modal__body {
   display: flex;
