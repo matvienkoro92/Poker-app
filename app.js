@@ -8617,6 +8617,7 @@ function getPokerResolvedTelegramUser() {
   var identifyingMiniEl = document.getElementById("authIdentifyingMini");
   var POKER_AUTH_LANG_KEY = "poker_auth_lang";
   var currentPwaAuthScreen = "entry";
+  var pwaAuthMountGuardTimer = null;
   var AUTH_SCREEN_I18N = {
     ru: {
       identifying: "Подождите, идентифицируем ваш аккаунт",
@@ -8794,6 +8795,30 @@ function getPokerResolvedTelegramUser() {
     mountPwaStandaloneEnterButton();
   }
 
+  function schedulePwaAuthMountGuard() {
+    if (!isPwaStandaloneAuth()) return;
+    if (pwaAuthMountGuardTimer) {
+      clearInterval(pwaAuthMountGuardTimer);
+      pwaAuthMountGuardTimer = null;
+    }
+    var attempts = 0;
+    pwaAuthMountGuardTimer = setInterval(function () {
+      attempts += 1;
+      try {
+        if (!pwaAuthScreenEl || pwaAuthScreenEl.classList.contains("pwa-auth-screen--hidden")) {
+          clearInterval(pwaAuthMountGuardTimer);
+          pwaAuthMountGuardTimer = null;
+          return;
+        }
+        ensurePwaAuthMountContent();
+      } catch (e) {}
+      if (attempts >= 12) {
+        clearInterval(pwaAuthMountGuardTimer);
+        pwaAuthMountGuardTimer = null;
+      }
+    }, 250);
+  }
+
   function authJsonOrDefault(res) {
     return res.json().catch(function () {
       return { ok: false, error: authScreenText("genericServerResponseFail") };
@@ -8857,6 +8882,7 @@ function getPokerResolvedTelegramUser() {
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "false");
     ensurePwaAuthMountContent();
+    schedulePwaAuthMountGuard();
     try {
       /* Сначала preinit: критический CSS в index.html держит #pwaAuthScreen видимым при гонках с --hidden */
       document.body.classList.add("pwa-auth-preinit");
@@ -8865,6 +8891,10 @@ function getPokerResolvedTelegramUser() {
   }
   function hidePwaAuthScreen() {
     if (!pwaAuthScreenEl) return;
+    if (pwaAuthMountGuardTimer) {
+      clearInterval(pwaAuthMountGuardTimer);
+      pwaAuthMountGuardTimer = null;
+    }
     try {
       pwaAuthScreenEl.classList.remove("pwa-auth-screen--identifying");
     } catch (eId) {}
