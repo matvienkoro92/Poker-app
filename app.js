@@ -9897,7 +9897,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function remountCurrentAuthEnterScreen() {
-    if (shouldUseOverlayAuthScreen()) {
+    if (shouldUseOverlayAuthScreen() || isOverlayAuthScreenActive()) {
       remountPwaStandaloneEnterScreen();
       return;
     }
