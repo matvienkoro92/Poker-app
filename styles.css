@@ -3818,6 +3818,7 @@ button.welcome-home-title-btn.title:hover {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  color: #fb923c;
 }
 
 .welcome-home-icon-tile:hover {
@@ -3834,6 +3835,7 @@ button.welcome-home-title-btn.title:hover {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     0 4px 14px rgba(15, 23, 42, 0.08);
+  color: #ea580c;
 }
 
 [data-theme="light"] .welcome-home-icon-tile:hover {
@@ -14216,6 +14218,7 @@ a.tournament-day-share-btn {
   font-size: 20px;
   line-height: 1;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  color: #fb923c;
 }
 .games-apps-grid .feature__body,
 .home-partnership-row .feature__body {
@@ -17303,10 +17306,11 @@ a.tournament-day-share-btn {
   min-height: 56px;
   padding: 5px 3px;
   box-sizing: border-box;
-  background: rgba(148, 163, 184, 0.2);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(249, 115, 22, 0.16);
+  border: 1px solid rgba(251, 146, 60, 0.45);
   border-radius: 12px;
   min-width: 0;
+  color: #fdba74;
 }
 .home-mini-icons button.home-mini-icon-item {
   font: inherit;
@@ -17332,13 +17336,14 @@ a.tournament-day-share-btn {
   background: none;
   border: none;
   border-radius: 0;
+  color: #fb923c;
 }
 .home-mini-icon__label {
   font-size: 6px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  color: var(--text);
+  color: #fed7aa;
   line-height: 1.15;
   text-align: center;
   max-width: 100%;
@@ -17419,9 +17424,9 @@ a.home-mini-icon-item {
 /* Чат в ТГ и Канал — белая подсветка */
 .home-mini-icon-item--white {
   position: relative;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 0 20px rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 10px rgba(251, 146, 60, 0.28), 0 0 20px rgba(249, 115, 22, 0.16);
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(234, 88, 12, 0.1));
+  border-color: rgba(251, 146, 60, 0.42);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -17429,11 +17434,11 @@ a.home-mini-icon-item {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.2) 45%, transparent 55%);
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 237, 213, 0.22) 45%, transparent 55%);
   pointer-events: none;
 }
 .home-mini-icon-item--white:hover {
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 28px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 14px rgba(251, 146, 60, 0.36), 0 0 28px rgba(249, 115, 22, 0.2);
 }
 /* Увеличение при наведении только у кнопок Чат в ТГ и Канал */
 .home-mini-icon-item--hover-scale:hover {
@@ -17462,13 +17467,28 @@ a.home-mini-icon-item {
   width: 28px;
   height: 28px;
   display: block;
-  fill: #fff;
+  fill: #fb923c;
 }
 .home-mini-icon--telegram svg path {
   fill: inherit;
 }
 [data-theme="light"] .view--active[data-view="home"] .home-mini-icon--telegram svg {
   fill: #c2410c;
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon-item {
+  background: rgba(251, 146, 60, 0.16);
+  border-color: rgba(234, 88, 12, 0.34);
+  color: #c2410c;
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon {
+  color: #ea580c;
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon__label {
+  color: #9a3412;
+}
+[data-theme="light"] .view--active[data-view="home"] .home-mini-icon-item--white {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(234, 88, 12, 0.1));
+  border-color: rgba(234, 88, 12, 0.34);
 }
 
 .download-layout {
