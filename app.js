@@ -9330,6 +9330,7 @@ function getPokerResolvedTelegramUser() {
     var loginModeBtn = wrap.querySelector("#authPwaLoginModeBtn");
     var registerModeBtn = wrap.querySelector("#authPwaRegisterModeBtn");
     var rememberPassword = wrap.querySelector("#authPwaRememberPassword");
+    var rememberPasswordRow = rememberPassword ? rememberPassword.parentElement : null;
     var passwordConfirmInput = wrap.querySelector("#authPwaPasswordConfirmInput");
     var codeSendRow = wrap.querySelector("#authPwaCodeSendRow");
     var codeVerifyRow = wrap.querySelector("#authPwaCodeVerifyRow");
@@ -9433,8 +9434,11 @@ function getPokerResolvedTelegramUser() {
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
-      if (passwordRow && codeSendRow && passwordRow.nextSibling !== codeSendRow) {
-        wrap.insertBefore(passwordRow, codeSendRow);
+      if (passwordRow && registerMode && passwordConfirmRow && passwordRow.nextSibling !== passwordConfirmRow) {
+        wrap.insertBefore(passwordRow, passwordConfirmRow);
+      }
+      if (passwordRow && !registerMode && rememberPasswordRow && passwordRow.nextSibling !== rememberPasswordRow) {
+        wrap.insertBefore(passwordRow, rememberPasswordRow);
       }
       if (loginModeBtn) loginModeBtn.style.display = registerMode ? "none" : "";
       if (registerModeBtn) registerModeBtn.textContent = registerMode ? pwaAuthT("switchToLogin") : pwaAuthT("switchToRegister");
@@ -9801,6 +9805,7 @@ function getPokerResolvedTelegramUser() {
     var loginModeBtn = wrap.querySelector("#authPwaEmailLoginModeBtn");
     var registerModeBtn = wrap.querySelector("#authPwaEmailRegisterModeBtn");
     var rememberPassword = wrap.querySelector("#authPwaEmailRememberPassword");
+    var rememberPasswordRow = rememberPassword ? rememberPassword.parentElement : null;
     var passwordConfirmInput = wrap.querySelector("#authPwaEmailPasswordConfirmInput");
     var codeSendRow = wrap.querySelector("#authPwaEmailCodeSendRow");
     var codeVerifyRow = wrap.querySelector("#authPwaEmailCodeVerifyRow");
@@ -9885,8 +9890,11 @@ function getPokerResolvedTelegramUser() {
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
-      if (passwordRow && codeSendRow && passwordRow.nextSibling !== codeSendRow) {
-        wrap.insertBefore(passwordRow, codeSendRow);
+      if (passwordRow && registerMode && passwordConfirmRow && passwordRow.nextSibling !== passwordConfirmRow) {
+        wrap.insertBefore(passwordRow, passwordConfirmRow);
+      }
+      if (passwordRow && !registerMode && rememberPasswordRow && passwordRow.nextSibling !== rememberPasswordRow) {
+        wrap.insertBefore(passwordRow, rememberPasswordRow);
       }
       if (loginModeBtn) {
         loginModeBtn.style.display = registerMode ? "none" : "";
