@@ -8673,6 +8673,7 @@ function getPokerResolvedTelegramUser() {
 
   function setPwaAuthLocale(locale) {
     var next = String(locale || "").toLowerCase() === "en" ? "en" : "ru";
+    var prev = getPwaAuthLocale();
     try {
       if (typeof localStorage !== "undefined") localStorage.setItem(PWA_AUTH_LANG_KEY, next);
     } catch (eSaveAuthLang) {}
@@ -8680,6 +8681,12 @@ function getPokerResolvedTelegramUser() {
     syncProfileLanguageUi();
     syncGlobalAppLanguageUi();
     rerenderCurrentPwaAuthScreen();
+    if (prev !== next) {
+      try {
+        window.location.reload();
+        return;
+      } catch (eReloadLocale) {}
+    }
   }
 
   function pwaAuthT(key) {
