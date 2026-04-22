@@ -9104,7 +9104,7 @@ function getPokerResolvedTelegramUser() {
       '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
       linkTme +
       ".</p>" +
-      '<p class="auth-banner__code-intro">Если входите впервые, сначала откройте бота — ' +
+        '<p class="auth-banner__code-intro">Если входите впервые, то нажмите «Зарегистрироваться», сначала откройте бота — ' +
       linkTme +
       ' и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код», введите код из бота и задайте пароль.</p>' +
       "</div>";
@@ -9564,7 +9564,7 @@ function getPokerResolvedTelegramUser() {
       '<div class="auth-banner__code-intro-wrap" role="note">' +
         '<p class="auth-banner__code-intro">Введите ваш email.</p>' +
         '<p class="auth-banner__code-intro">Если вы уже подтверждали эту почту, дальше достаточно email и пароля.</p>' +
-        '<p class="auth-banner__code-intro">Если входите впервые, получите код, подтвердите его и этим же задайте пароль для всего аккаунта.</p>' +
+        '<p class="auth-banner__code-intro">Если входите впервые, то нажмите «Зарегистрироваться», получите код, подтвердите его и этим же задайте пароль для всего аккаунта.</p>' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
