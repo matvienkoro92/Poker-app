@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.097">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.098">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4201,6 +4201,10 @@
           <div class="view" data-view="profile" id="profileView">
             <div class="profile-header-row">
               <h1 class="title">Профиль</h1>
+              <div class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
+                <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
+                <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+              </div>
               <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
             </div>
             <div class="profile-avatar-block" id="profileAvatarBlock">

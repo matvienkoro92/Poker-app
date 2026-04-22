@@ -8651,6 +8651,9 @@ function getPokerResolvedTelegramUser() {
   var PWA_AUTH_LANG_KEY = "poker_pwa_auth_lang";
   var pwaAuthLangRuBtn = document.getElementById("pwaAuthLangRuBtn");
   var pwaAuthLangEnBtn = document.getElementById("pwaAuthLangEnBtn");
+  var profileLangSwitch = document.getElementById("profileLangSwitch");
+  var profileLangRuBtn = document.getElementById("profileLangRuBtn");
+  var profileLangEnBtn = document.getElementById("profileLangEnBtn");
 
   function getPwaAuthLocale() {
     try {
@@ -8798,8 +8801,11 @@ function getPokerResolvedTelegramUser() {
     var langSwitch = document.getElementById("pwaAuthLangSwitch");
     if (identifyingText) identifyingText.textContent = pwaAuthT("identifying");
     if (langSwitch) langSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
+    if (profileLangSwitch) profileLangSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
     if (pwaAuthLangRuBtn) pwaAuthLangRuBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "ru");
     if (pwaAuthLangEnBtn) pwaAuthLangEnBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "en");
+    if (profileLangRuBtn) profileLangRuBtn.classList.toggle("profile-lang-switch__btn--active", locale === "ru");
+    if (profileLangEnBtn) profileLangEnBtn.classList.toggle("profile-lang-switch__btn--active", locale === "en");
   }
   if (pwaAuthLangRuBtn) {
     pwaAuthLangRuBtn.addEventListener("click", function () {
@@ -8808,6 +8814,16 @@ function getPokerResolvedTelegramUser() {
   }
   if (pwaAuthLangEnBtn) {
     pwaAuthLangEnBtn.addEventListener("click", function () {
+      setPwaAuthLocale("en");
+    });
+  }
+  if (profileLangRuBtn) {
+    profileLangRuBtn.addEventListener("click", function () {
+      setPwaAuthLocale("ru");
+    });
+  }
+  if (profileLangEnBtn) {
+    profileLangEnBtn.addEventListener("click", function () {
       setPwaAuthLocale("en");
     });
   }
