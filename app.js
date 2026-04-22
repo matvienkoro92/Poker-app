@@ -15536,13 +15536,13 @@ function syncProfileEmailAuthUi() {
     } catch (eAuthEmail) {}
   }
   if (linkedEmail && authMethod !== "telegram") authMethod = "email";
-  if (section) section.hidden = !!isGuest;
+  if (section) section.hidden = !!isGuest || !isVerified;
   if (titleEl) titleEl.hidden = true;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
   if (tgLinkedRow) tgLinkedRow.hidden = !linkedTelegramUsername;
   if (tgLinkedValue && linkedTelegramUsername) tgLinkedValue.textContent = "@" + linkedTelegramUsername;
-  if (tgSection) tgSection.hidden = !!isGuest || !(isVerified && authMethod === "email");
+  if (tgSection) tgSection.hidden = !!isGuest || !isVerified || authMethod !== "email";
   if (textEl) {
     if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";
     else if (authMethod === "email" && linkedEmail) textEl.textContent = "Вы вошли по этой почте. Это ваш текущий способ входа.";
@@ -15551,14 +15551,14 @@ function syncProfileEmailAuthUi() {
     textEl.hidden = true;
   }
   if (formWrap) {
-    formWrap.hidden = !!isGuest || !!linkedEmail;
-    formWrap.style.display = isGuest || linkedEmail ? "none" : "";
+    formWrap.hidden = !!isGuest || !isVerified || !!linkedEmail;
+    formWrap.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
   }
-  if (emailInput) emailInput.style.display = isGuest || linkedEmail ? "none" : "";
-  if (codeInput) codeInput.style.display = isGuest || linkedEmail ? "none" : "";
-  if (sendBtn) sendBtn.style.display = isGuest || linkedEmail ? "none" : "";
-  if (verifyBtn) verifyBtn.style.display = isGuest || linkedEmail ? "none" : "";
-  if (feedbackEl) feedbackEl.style.display = isGuest || linkedEmail ? "none" : "";
+  if (emailInput) emailInput.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
+  if (codeInput) codeInput.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
+  if (sendBtn) sendBtn.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
+  if (verifyBtn) verifyBtn.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
+  if (feedbackEl) feedbackEl.style.display = isGuest || !isVerified || linkedEmail ? "none" : "";
   var disableInputs = !isVerified || isGuest;
   if (emailInput) {
     emailInput.disabled = disableInputs;
