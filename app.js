@@ -15450,8 +15450,10 @@ function syncProfileStatusVisibility(isVerified) {
 
 function syncProfileVerifiedContentVisibility(isVerified) {
   var verifiedContent = document.getElementById("profileVerifiedContent");
+  var avatarBlock = document.getElementById("profileAvatarBlock");
   if (!verifiedContent) return;
   verifiedContent.hidden = !isVerified;
+  if (avatarBlock) avatarBlock.hidden = !isVerified;
 }
 
 function pokerClearUiCachesAfterAuthSwitch() {
