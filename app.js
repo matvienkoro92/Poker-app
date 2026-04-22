@@ -841,6 +841,8 @@ function pokerApiHasCredential() {
 
 var POKER_LAST_MEMBER_ID_KEY = "poker_last_member_id";
 var POKER_AUTH_METHOD_KEY = "poker_auth_method";
+var POKER_AUTH_PASSWORD_KEY = "poker_auth_password";
+var POKER_AUTH_PASSWORD_REMEMBER_KEY = "poker_auth_password_remember";
 function pokerRememberLastMemberId(memberId) {
   try {
     var v = String(memberId || "").trim();
@@ -871,6 +873,31 @@ function pokerGetAuthMethod() {
   } catch (e) {
     return "";
   }
+}
+function pokerReadSavedPassword() {
+  try {
+    return String(localStorage.getItem(POKER_AUTH_PASSWORD_KEY) || "");
+  } catch (e) {
+    return "";
+  }
+}
+function pokerShouldRememberPassword() {
+  try {
+    return String(localStorage.getItem(POKER_AUTH_PASSWORD_REMEMBER_KEY) || "") === "1";
+  } catch (e) {
+    return false;
+  }
+}
+function pokerPersistPasswordPreference(password, remember) {
+  try {
+    if (!remember) {
+      localStorage.removeItem(POKER_AUTH_PASSWORD_KEY);
+      localStorage.setItem(POKER_AUTH_PASSWORD_REMEMBER_KEY, "0");
+      return;
+    }
+    localStorage.setItem(POKER_AUTH_PASSWORD_KEY, String(password || ""));
+    localStorage.setItem(POKER_AUTH_PASSWORD_REMEMBER_KEY, "1");
+  } catch (e) {}
 }
 function pokerMaybeRememberMemberIdFromUser(user) {
   try {
@@ -9073,12 +9100,13 @@ function getPokerResolvedTelegramUser() {
     var introHtml =
       '<div class="auth-banner__code-intro-wrap" role="note">' +
       '<p class="auth-banner__code-intro">Укажите ниже ваш <strong>@username</strong> из Телеграм.</p>' +
+      '<p class="auth-banner__code-intro">Если этот Telegram уже подтверждали раньше, дальше достаточно логина и пароля.</p>' +
       '<p class="auth-banner__code-intro">Код подтверждения придёт в Telegram в бота — ' +
       linkTme +
       ".</p>" +
-      '<p class="auth-banner__code-intro">Если вы ещё не писали боту, сначала откройте его — ' +
+      '<p class="auth-banner__code-intro">Если входите впервые, сначала откройте бота — ' +
       linkTme +
-      ' и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код» и введите здесь код из бота.</p>' +
+      ' и отправьте <strong>/start</strong>, затем нажмите здесь «Получить код», введите код из бота и задайте пароль.</p>' +
       "</div>";
     wrap.innerHTML =
       backRow +
@@ -9087,6 +9115,14 @@ function getPokerResolvedTelegramUser() {
         '<input type="text" class="auth-banner__code-input" id="authPwaUsernameInput" placeholder="@username" autocomplete="off" />' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
+        '<input type="password" class="auth-banner__code-input" id="authPwaPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+      "</div>" +
+      '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
+        '<input type="checkbox" id="authPwaRememberPassword" />' +
+        '<span>Сохранить пароль</span>' +
+      "</label>" +
+      '<div class="auth-banner__code-row">' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaPasswordLoginBtn">Войти</button>' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaCodeSendBtn">Получить код</button>' +
       "</div>" +
       '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaCodeHint" role="status" aria-live="polite"></div>' +
@@ -9104,6 +9140,9 @@ function getPokerResolvedTelegramUser() {
     }
 
     var userInput = wrap.querySelector("#authPwaUsernameInput");
+    var passwordInput = wrap.querySelector("#authPwaPasswordInput");
+    var rememberPassword = wrap.querySelector("#authPwaRememberPassword");
+    var passwordLoginBtn = wrap.querySelector("#authPwaPasswordLoginBtn");
     var codeInput = wrap.querySelector("#authPwaCodeInput");
     var sendBtn = wrap.querySelector("#authPwaCodeSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaCodeVerifyBtn");
@@ -9172,6 +9211,61 @@ function getPokerResolvedTelegramUser() {
     }
     var lastUsername = readLastUsername();
     if (userInput && lastUsername) userInput.value = "@" + lastUsername;
+    if (passwordInput) passwordInput.value = pokerReadSavedPassword();
+    if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
+    function passwordValue() {
+      return String(passwordInput && passwordInput.value ? passwordInput.value : "");
+    }
+    function persistPassword() {
+      pokerPersistPasswordPreference(passwordValue(), !!(rememberPassword && rememberPassword.checked));
+    }
+    if (passwordLoginBtn) {
+      passwordLoginBtn.addEventListener("click", function () {
+        var username = normalizeUsernameInput();
+        if (!/^[a-z0-9_]{5,32}$/.test(username)) {
+          setHint("Сначала укажите корректный username.", true);
+          return;
+        }
+        setHint("Проверяем пароль…", false);
+        fetch(base + "/api/auth-pwa-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "login", username: username, password: passwordValue() }),
+        })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
+          .then(function (data) {
+            if (data && data.ok && data.user && data.pwaSession) {
+              saveLastUsername(username);
+              persistPassword();
+              var u = normalizeVerifiedUser(data.user, null);
+              if (
+                !pokerSavePwaTgSession(
+                  data.pwaSession,
+                  data.user,
+                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
+                )
+              )
+                pwaSessionPersistenceWarning();
+              pokerSavePwaGuestMode(false);
+              var _authPwaPassword = { status: "verified", user: u, error: null };
+              if (data.gazettePlannerAccess === true) _authPwaPassword.gazettePlannerAccess = true;
+              window.__pokerTelegramAuth = _authPwaPassword;
+              pokerSetAuthMethod("telegram");
+              updateHeaderGreeting();
+              showAuthorized(u);
+              loadHeaderAvatar();
+              try {
+                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
+              } catch (ePwDispatch) {}
+              return;
+            }
+            setHint((data && data.error) || "Не удалось войти.", true);
+          })
+          .catch(function () {
+            setHint("Сеть недоступна. Попробуйте снова.", true);
+          });
+      });
+    }
 
     if (sendBtn) {
       sendBtn.addEventListener("click", function () {
@@ -9237,12 +9331,13 @@ function getPokerResolvedTelegramUser() {
       fetch(base + "/api/auth-pwa-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", username: username, code: code }),
+        body: JSON.stringify({ action: "verify", username: username, code: code, password: passwordValue() }),
       })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Некорректный ответ сервера" }; }); })
         .then(function (data) {
           if (data && data.ok && data.user && data.pwaSession) {
             saveLastUsername(username);
+            persistPassword();
             var u = normalizeVerifiedUser(data.user, null);
             if (
               !pokerSavePwaTgSession(
@@ -9420,23 +9515,35 @@ function getPokerResolvedTelegramUser() {
       "</div>" +
       '<div class="auth-banner__code-intro-wrap" role="note">' +
         '<p class="auth-banner__code-intro">Введите ваш email.</p>' +
-        '<p class="auth-banner__code-intro">Если аккаунт на эту почту уже есть, мы войдём в него. Если нет, создадим новый аккаунт TWO ACES и отправим код подтверждения.</p>' +
+        '<p class="auth-banner__code-intro">Если вы уже подтверждали эту почту, дальше достаточно email и пароля.</p>' +
+        '<p class="auth-banner__code-intro">Если входите впервые, получите код, подтвердите его и этим же задайте пароль для всего аккаунта.</p>' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
         '<input type="email" class="auth-banner__code-input" id="authPwaEmailInput" placeholder="your@email.com" autocomplete="email" />' +
       "</div>" +
       '<div class="auth-banner__code-row">' +
+        '<input type="password" class="auth-banner__code-input" id="authPwaEmailPasswordInput" placeholder="Установите пароль" autocomplete="current-password" />' +
+      "</div>" +
+      '<label class="auth-banner__code-row" style="justify-content:flex-start;gap:10px;font-size:14px;color:#cbd5e1;">' +
+        '<input type="checkbox" id="authPwaEmailRememberPassword" />' +
+        '<span>Сохранить пароль</span>' +
+      "</label>" +
+      '<div class="auth-banner__code-row">' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailLoginBtn">Войти</button>' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaEmailSendBtn">Получить код</button>' +
       "</div>" +
       '<div class="auth-banner__code-hint auth-banner__code-hint--hidden" id="authPwaEmailHint" role="status" aria-live="polite"></div>' +
       '<div class="auth-banner__code-row auth-banner__code-row--verify">' +
         '<input type="text" class="auth-banner__code-input auth-banner__code-input--otp" id="authPwaEmailCodeInput" placeholder="Код из письма" inputmode="numeric" autocomplete="one-time-code" />' +
-        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">Войти</button>' +
+        '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--verify" id="authPwaEmailVerifyBtn">Подтвердить</button>' +
       "</div>";
     mount.appendChild(wrap);
 
     var backBtn = wrap.querySelector("#authPwaEmailBackBtn");
     var emailInput = wrap.querySelector("#authPwaEmailInput");
+    var passwordInput = wrap.querySelector("#authPwaEmailPasswordInput");
+    var rememberPassword = wrap.querySelector("#authPwaEmailRememberPassword");
+    var loginBtn = wrap.querySelector("#authPwaEmailLoginBtn");
     var codeInput = wrap.querySelector("#authPwaEmailCodeInput");
     var sendBtn = wrap.querySelector("#authPwaEmailSendBtn");
     var verifyBtn = wrap.querySelector("#authPwaEmailVerifyBtn");
@@ -9487,9 +9594,82 @@ function getPokerResolvedTelegramUser() {
     }
     var lastEmail = readLastEmail();
     if (emailInput && lastEmail) emailInput.value = lastEmail;
+    if (passwordInput) passwordInput.value = pokerReadSavedPassword();
+    if (rememberPassword) rememberPassword.checked = pokerShouldRememberPassword();
+    function passwordValue() {
+      return String(passwordInput && passwordInput.value ? passwordInput.value : "");
+    }
+    function persistPassword() {
+      pokerPersistPasswordPreference(passwordValue(), !!(rememberPassword && rememberPassword.checked));
+    }
     if (codeInput) {
       codeInput.addEventListener("input", function () {
         codeInput.value = String(codeInput.value || "").replace(/\D/g, "").slice(0, 6);
+      });
+    }
+    if (loginBtn) {
+      loginBtn.addEventListener("click", function () {
+        var email = normalizeEmailInput();
+        setEmailHint("Проверяем пароль…", false);
+        fetch(base + "/api/auth-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "login",
+            email: email,
+            password: passwordValue(),
+            dtIdHint: getEmailDtIdHint(),
+            memberIdHint: pokerReadLastMemberIdHint(),
+          }),
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data || {} }; });
+          })
+          .then(function (pack) {
+            var data = pack.data || {};
+            if (pack.res.ok && data.ok && data.user && data.pwaSession) {
+              saveLastEmail(email);
+              persistPassword();
+              var u = normalizeVerifiedUser(data.user, null);
+              try {
+                if (data.dtId) {
+                  sessionStorage.setItem("poker_dt_id", data.dtId);
+                  if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
+                }
+              } catch (eDtSaveLogin) {}
+              if (
+                !pokerSavePwaTgSession(
+                  data.pwaSession,
+                  data.user,
+                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "email" } : { authMethod: "email" }
+                )
+              ) {
+                pwaSessionPersistenceWarning();
+              }
+              pokerSavePwaGuestMode(false);
+              window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+              pokerMaybeRememberMemberIdFromUser(u);
+              pokerSetAuthMethod("email");
+              updateHeaderGreeting();
+              showAuthorized(u);
+              loadHeaderAvatar();
+              try {
+                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
+              } catch (eEmailLoginDispatch) {}
+              try {
+                pokerClearUiCachesAfterAuthSwitch();
+              } catch (eClearUiCachesLogin) {}
+              try {
+                window.location.reload();
+                return;
+              } catch (eReloadAfterEmailPasswordLogin) {}
+              return;
+            }
+            setEmailHint((data && data.error) || "Не удалось войти.", true);
+          })
+          .catch(function () {
+            setEmailHint("Ошибка сети. Попробуйте ещё раз.", true);
+          });
       });
     }
     if (sendBtn) {
@@ -9531,6 +9711,7 @@ function getPokerResolvedTelegramUser() {
             action: "verify",
             email: email,
             code: code,
+            password: passwordValue(),
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
           }),
@@ -9542,6 +9723,7 @@ function getPokerResolvedTelegramUser() {
             var data = pack.data || {};
             if (pack.res.ok && data.ok && data.user && data.pwaSession) {
               saveLastEmail(email);
+              persistPassword();
               var u = normalizeVerifiedUser(data.user, null);
               try {
                 if (data.dtId) {
