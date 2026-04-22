@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.055">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.056">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -502,6 +502,10 @@
               </button>
               <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Как войти" aria-label="Как войти" hidden>
                 <span class="site-home-instruction-btn__icon" aria-hidden="true">📲</span>
+              </button>
+              <button type="button" class="site-home-auth-btn pwa-install-btn" id="siteHomeAuthBtn" title="Войти в аккаунт" aria-label="Войти в аккаунт" hidden>
+                <span class="pwa-install-btn__icon" aria-hidden="true">🔐</span>
+                <span class="pwa-install-btn__label">Войти</span>
               </button>
             </div>
             <div class="auth-user auth-user--hidden" id="authUser" aria-live="polite">
@@ -4246,7 +4250,7 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
               </div>
               <div class="profile-chat-name__guest-cta" id="profileGuestAuthWrap" hidden>
-                <button type="button" class="profile-chat-name__guest-btn" id="profileGuestAuthBtn">Авторизоваться</button>
+                <button type="button" class="profile-exit-btn" id="profileGuestAuthBtn">Войти в аккаунт</button>
               </div>
             </div>
             <section class="profile-email-auth" id="profileEmailAuthSection">

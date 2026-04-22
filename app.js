@@ -10319,6 +10319,7 @@ function getPokerResolvedTelegramUser() {
     var isTelegramMode = isTelegramHomeInstructionMode();
     var showInstructionBtn = isSiteMode || isTelegramMode;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
+    var authBtn = document.getElementById("siteHomeAuthBtn");
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
@@ -10326,6 +10327,11 @@ function getPokerResolvedTelegramUser() {
       instructionBtn.hidden = !showInstructionBtn || isStandaloneMode;
       if (isStandaloneMode) instructionBtn.style.display = "none";
       else instructionBtn.style.removeProperty("display");
+    }
+    if (authBtn) {
+      authBtn.hidden = !showInstructionBtn || isStandaloneMode;
+      if (isStandaloneMode) authBtn.style.display = "none";
+      else authBtn.style.removeProperty("display");
     }
     if (pwaInstallBtn && isTelegramMode) {
       pwaInstallBtn.hidden = true;
@@ -10340,6 +10346,7 @@ function getPokerResolvedTelegramUser() {
   function initSiteHomeInstructionModal() {
     var modal = document.getElementById("siteHomeInstructionModal");
     var openBtn = document.getElementById("siteHomeInstructionBtn");
+    var authBtn = document.getElementById("siteHomeAuthBtn");
     var closeBtn = document.getElementById("siteHomeInstructionModalClose");
     var backdrop = document.getElementById("siteHomeInstructionModalBackdrop");
     var tabIphone = document.getElementById("siteHomeInstructionTabIphone");
@@ -10382,8 +10389,18 @@ function getPokerResolvedTelegramUser() {
       if (e && typeof e.preventDefault === "function") e.preventDefault();
       openModal();
     }
+    function handleOpenAccountAuth(e) {
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
+      if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") {
+        window.__pokerOpenSharedAccountAuthFlow();
+      }
+    }
     openBtn.onclick = handleOpenInstructionModal;
     openBtn.addEventListener("click", handleOpenInstructionModal);
+    if (authBtn) {
+      authBtn.onclick = handleOpenAccountAuth;
+      authBtn.addEventListener("click", handleOpenAccountAuth);
+    }
     if (tabIphone) tabIphone.addEventListener("click", function () { setTab("iphone"); });
     if (tabAndroid) tabAndroid.addEventListener("click", function () { setTab("android"); });
     closeBtn.addEventListener("click", closeModal);
@@ -10394,6 +10411,22 @@ function getPokerResolvedTelegramUser() {
     window.__pokerOpenSiteHomeInstructionModal = openModal;
   }
   window.__pokerInitSiteHomeInstructionModal = initSiteHomeInstructionModal;
+
+  function openSharedAccountAuthFlow() {
+    try {
+      if (typeof window.__pokerOpenPwaLoginScreen === "function") {
+        window.__pokerOpenPwaLoginScreen();
+        return;
+      }
+    } catch (eOpenPwaLogin) {}
+    try {
+      resetBannerForPwaLogin();
+      mountTelegramLoginWidgetForPwa();
+      if (banner) banner.classList.remove("auth-banner--hidden");
+      if (typeof setView === "function") setView("home");
+    } catch (eOpenBannerLogin) {}
+  }
+  window.__pokerOpenSharedAccountAuthFlow = openSharedAccountAuthFlow;
 
   function isWebsiteGuestProfileMode() {
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
@@ -10423,9 +10456,7 @@ function getPokerResolvedTelegramUser() {
     if (guestBtn && guestBtn.dataset.bound !== "1") {
       guestBtn.dataset.bound = "1";
       guestBtn.addEventListener("click", function () {
-        if (typeof window.__pokerOpenSiteHomeInstructionModal === "function") {
-          window.__pokerOpenSiteHomeInstructionModal();
-        }
+        openSharedAccountAuthFlow();
       });
     }
   }

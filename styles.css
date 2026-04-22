@@ -3062,6 +3062,9 @@ html.site-home-header-mode #pwaInstallBtn {
 html.site-home-header-mode #siteHomeInstructionBtn {
   display: flex !important;
 }
+html.site-home-header-mode #siteHomeAuthBtn {
+  display: inline-flex !important;
+}
 html.app--telegram-miniapp body[data-view="home"] #pwaInstallBtn,
 html.app--telegram-miniapp:has(body[data-view="home"]) #pwaInstallBtn,
 html.poker-telegram-miniapp body[data-view="home"] #pwaInstallBtn,
@@ -3073,6 +3076,12 @@ html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn,
 html.poker-telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn,
 html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn {
   display: flex !important;
+}
+html.app--telegram-miniapp body[data-view="home"] #siteHomeAuthBtn,
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn,
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeAuthBtn,
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn {
+  display: inline-flex !important;
 }
 html.site-home-header-mode .header-greeting-wrap {
   max-width: 170px;
