@@ -9256,7 +9256,7 @@ function getPokerResolvedTelegramUser() {
       if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
-      if (passwordRow) passwordRow.style.display = registerMode ? "" : "none";
+      if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
@@ -9697,7 +9697,7 @@ function getPokerResolvedTelegramUser() {
       if (registerModeBtn) registerModeBtn.classList.toggle("pwa-auth-screen__enter-btn--secondary", !registerMode);
       if (codeSendRow) codeSendRow.style.display = registerMode ? "" : "none";
       if (codeVerifyRow) codeVerifyRow.style.display = registerMode ? "" : "none";
-      if (passwordRow) passwordRow.style.display = registerMode ? "" : "none";
+      if (passwordRow) passwordRow.style.display = "";
       if (passwordConfirmRow) passwordConfirmRow.style.display = registerMode ? "" : "none";
     }
     if (loginModeBtn) {
