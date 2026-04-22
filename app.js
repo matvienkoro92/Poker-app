@@ -1402,6 +1402,13 @@ function initProfileChatPush() {
   var hint = document.getElementById("profileChatPushHint");
   if (!row || !toggle) return;
 
+  if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+    row.classList.add("profile-chat-push--hidden");
+    row.classList.remove("profile-chat-push--ios-miniapp");
+    row.setAttribute("aria-hidden", "true");
+    return;
+  }
+
   function setHint(t) {
     if (hint) hint.textContent = t;
   }
