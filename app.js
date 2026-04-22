@@ -10353,6 +10353,14 @@ function getPokerResolvedTelegramUser() {
       el.textContent = "Авторизуйтесь";
       return;
     }
+    var profileName = "";
+    try {
+      profileName = String(window.__pokerChatDisplayName || "").trim();
+    } catch (eProfileName) {}
+    if (profileName) {
+      el.textContent = "Привет, " + profileName + "!";
+      return;
+    }
     var u = null;
     var auth = window.__pokerTelegramAuth;
     if (auth && (auth.status === "invalid" || auth.status === "network")) {
@@ -15343,6 +15351,7 @@ function updateProfileDtId() {
           var cdnEl = document.getElementById("profileChatDisplayNameInput");
           if (cdnEl) cdnEl.value = cdn;
           if (typeof updateProfileUserName === "function") updateProfileUserName();
+          if (typeof updateHeaderGreeting === "function") updateHeaderGreeting();
         } catch (eCdn2) {}
       }
     })
