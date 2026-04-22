@@ -8601,11 +8601,31 @@ function telegramUserDisplayName(u) {
   return "";
 }
 
+var POKER_PROFILE_DISPLAY_NAME_KEY = "poker_profile_display_name";
+function pokerReadStoredProfileDisplayName() {
+  try {
+    var raw = typeof localStorage !== "undefined" ? localStorage.getItem(POKER_PROFILE_DISPLAY_NAME_KEY) : "";
+    return String(raw || "").trim();
+  } catch (eProfileNameRead) {
+    return "";
+  }
+}
+function pokerWriteStoredProfileDisplayName(name) {
+  try {
+    if (typeof localStorage === "undefined") return;
+    var value = String(name || "").trim();
+    if (value) localStorage.setItem(POKER_PROFILE_DISPLAY_NAME_KEY, value);
+    else localStorage.removeItem(POKER_PROFILE_DISPLAY_NAME_KEY);
+  } catch (eProfileNameWrite) {}
+}
+
 function pokerPreferredProfileDisplayName() {
   var profileName = "";
   try {
     profileName = String(window.__pokerChatDisplayName || "").trim();
   } catch (eStoredProfileName) {}
+  if (profileName) return profileName;
+  profileName = pokerReadStoredProfileDisplayName();
   if (profileName) return profileName;
   try {
     var input = document.getElementById("profileChatDisplayNameInput");
@@ -15617,6 +15637,7 @@ function updateProfileDtId() {
         try {
           var cdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
           window.__pokerChatDisplayName = cdn;
+          pokerWriteStoredProfileDisplayName(cdn);
           var cdnEl = document.getElementById("profileChatDisplayNameInput");
           if (cdnEl) cdnEl.value = cdn;
           if (typeof updateProfileUserName === "function") updateProfileUserName();
@@ -15682,6 +15703,9 @@ function pokerClearSessionsAndReloadForLogin() {
   try {
     delete window.__pokerChatDisplayName;
   } catch (eCdnL) {}
+  try {
+    pokerWriteStoredProfileDisplayName("");
+  } catch (eCdnLs) {}
   try {
     if (typeof window.__pokerShowLoggedOutState === "function") {
       window.__pokerShowLoggedOutState();
@@ -15791,6 +15815,7 @@ function initProfileP21Id() {
         try {
           var sdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
           window.__pokerChatDisplayName = sdn;
+          pokerWriteStoredProfileDisplayName(sdn);
           if (nameInput) nameInput.value = sdn;
         } catch (eSd) {}
       })
@@ -15820,6 +15845,7 @@ function initProfileP21Id() {
           .then(function (data) {
             try {
               window.__pokerChatDisplayName = nameVal;
+              pokerWriteStoredProfileDisplayName(nameVal);
             } catch (eNm) {}
             if (feedback) {
               var okNm = data && data.ok;
@@ -15849,6 +15875,7 @@ function initProfileP21Id() {
     if (!base || (!pokerApiHasCredential() && !pokerCanSyncGuestProfileToServer())) {
       try {
         window.__pokerChatDisplayName = nameVal;
+        pokerWriteStoredProfileDisplayName(nameVal);
       } catch (eLoc) {}
       if (feedback) {
         feedback.textContent = "Сохранено локально. Войдите в аккаунт или откройте в Telegram, чтобы синхронизировать.";
@@ -15871,6 +15898,7 @@ function initProfileP21Id() {
         .then(function (data) {
         try {
           window.__pokerChatDisplayName = nameVal;
+          pokerWriteStoredProfileDisplayName(nameVal);
         } catch (eOkNm) {}
         if (feedback) {
           var msg = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
