@@ -8580,6 +8580,20 @@ function telegramUserDisplayName(u) {
   return "";
 }
 
+function pokerPreferredProfileDisplayName() {
+  var profileName = "";
+  try {
+    profileName = String(window.__pokerChatDisplayName || "").trim();
+  } catch (eStoredProfileName) {}
+  if (profileName) return profileName;
+  try {
+    var input = document.getElementById("profileChatDisplayNameInput");
+    var typed = input && input.value != null ? String(input.value).trim() : "";
+    if (typed) return typed;
+  } catch (eInputProfileName) {}
+  return "";
+}
+
 /**
  * Пользователь Telegram для UI: сначала initDataUnsafe, затем серверно подтверждённый профиль.
  * Нужен, когда initData ещё пуст (гонка клиента) или профиль обновился после /api/auth-telegram.
@@ -10307,7 +10321,7 @@ function getPokerResolvedTelegramUser() {
     if (userEl) {
       var textEl = userEl.querySelector("#authUserText");
       if (textEl) {
-        var dn = telegramUserDisplayName(user);
+        var dn = pokerPreferredProfileDisplayName() || telegramUserDisplayName(user);
         textEl.textContent = dn ? "Привет, " + dn + "!" : "Вы вошли";
       }
       userEl.classList.remove("auth-user--hidden");
@@ -10353,10 +10367,7 @@ function getPokerResolvedTelegramUser() {
       el.textContent = "Авторизуйтесь";
       return;
     }
-    var profileName = "";
-    try {
-      profileName = String(window.__pokerChatDisplayName || "").trim();
-    } catch (eProfileName) {}
+    var profileName = pokerPreferredProfileDisplayName();
     if (profileName) {
       el.textContent = "Привет, " + profileName + "!";
       return;
