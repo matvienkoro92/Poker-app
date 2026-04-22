@@ -8863,6 +8863,15 @@ function getPokerResolvedTelegramUser() {
         telegramLogin: "Вход через Telegram",
         telegramLoginText: "Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.",
         linkTelegram: "Привязать Telegram",
+        pokerPlus: "PokerPlus",
+        pokerPlusText: "Привяжите аккаунт PokerPlus по ключу из игры, чтобы подтянуть ник, баланс и статистику.",
+        pokerPlusKeyPh: "Ключ из PokerPlus",
+        pokerPlusBind: "Привязать PokerPlus",
+        pokerPlusRefresh: "Обновить",
+        pokerPlusPlayer: "Связанный игрок:",
+        pokerPlusBalance: "Баланс:",
+        pokerPlusRole: "Роль:",
+        pokerPlusStats: "Статистика:",
         friends: "Друзья",
         level: "Ваш уровень 1 из 55",
         tournaments: "Турниры",
@@ -8887,6 +8896,15 @@ function getPokerResolvedTelegramUser() {
         telegramLogin: "Telegram sign in",
         telegramLoginText: "Link Telegram so you can sign in to this same account through Telegram later.",
         linkTelegram: "Link Telegram",
+        pokerPlus: "PokerPlus",
+        pokerPlusText: "Link your PokerPlus account with the key from the game to pull nickname, balance, and stats.",
+        pokerPlusKeyPh: "Key from PokerPlus",
+        pokerPlusBind: "Link PokerPlus",
+        pokerPlusRefresh: "Refresh",
+        pokerPlusPlayer: "Linked player:",
+        pokerPlusBalance: "Balance:",
+        pokerPlusRole: "Role:",
+        pokerPlusStats: "Stats:",
         friends: "Friends",
         level: "Your level 1 of 55",
         tournaments: "Tournaments",
@@ -8920,6 +8938,14 @@ function getPokerResolvedTelegramUser() {
     setText("profileTelegramLinkTitle", t.telegramLogin);
     setText("profileTelegramLinkText", t.telegramLoginText);
     setText("profileTelegramLinkBtn", t.linkTelegram);
+    setText("profilePokerPlusTitle", t.pokerPlus);
+    setText("profilePokerPlusText", t.pokerPlusText);
+    setText("profilePokerPlusBindBtn", t.pokerPlusBind);
+    setText("profilePokerPlusRefreshBtn", t.pokerPlusRefresh);
+    setText("profilePokerPlusLinkedLabel", t.pokerPlusPlayer);
+    setText("profilePokerPlusBalanceLabel", t.pokerPlusBalance);
+    setText("profilePokerPlusRoleLabel", t.pokerPlusRole);
+    setText("profilePokerPlusStatsLabel", t.pokerPlusStats);
     setText("profileFriendsBtn", t.friends);
     setText("profileStatusTitle", t.level);
     setText("profileTournamentsTitle", t.tournaments);
@@ -8929,6 +8955,8 @@ function getPokerResolvedTelegramUser() {
     if (exitBtn) exitBtn.textContent = t.loginAccount;
     var nameInput = document.getElementById("profileChatDisplayNameInput");
     if (nameInput) nameInput.placeholder = t.displayNamePh;
+    var pokerPlusInput = document.getElementById("profilePokerPlusCiphertextInput");
+    if (pokerPlusInput) pokerPlusInput.placeholder = t.pokerPlusKeyPh;
     var emailInput = document.getElementById("profileEmailAuthInput");
     if (emailInput) emailInput.setAttribute("aria-label", t.emailAria);
     var codeInput = document.getElementById("profileEmailAuthCodeInput");
@@ -12720,6 +12748,7 @@ function setView(viewName, navOpts) {
     } catch (eFrC) {}
     initProfileKeyboardViewportCleanup();
     initProfileP21Id();
+    initProfilePokerPlus();
     initProfileEmailAuth();
     initProfilePersonal();
     initProfileAvatar();
@@ -15927,6 +15956,179 @@ function initProfileP21Id() {
     input.value = (input.value || "").replace(/\D/g, "").slice(0, 6);
   });
   if (saveBtn) saveBtn.addEventListener("click", saveP21Id);
+}
+
+function initProfilePokerPlus() {
+  var section = document.getElementById("profilePokerPlusSection");
+  var input = document.getElementById("profilePokerPlusCiphertextInput");
+  var bindBtn = document.getElementById("profilePokerPlusBindBtn");
+  var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
+  var feedback = document.getElementById("profilePokerPlusFeedback");
+  var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
+  var linkedValue = document.getElementById("profilePokerPlusLinkedValue");
+  var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
+  var balanceValue = document.getElementById("profilePokerPlusBalanceValue");
+  var roleRow = document.getElementById("profilePokerPlusRoleRow");
+  var roleValue = document.getElementById("profilePokerPlusRoleValue");
+  var statsRow = document.getElementById("profilePokerPlusStatsRow");
+  var statsValue = document.getElementById("profilePokerPlusStatsValue");
+  if (!section || !input || !bindBtn || !refreshBtn) return;
+
+  function setFeedback(text, isError) {
+    if (!feedback) return;
+    feedback.textContent = text || "";
+    feedback.style.color = isError ? "#ef4444" : "";
+  }
+
+  function auth() {
+    var authState = window.__pokerTelegramAuth;
+    var isGuest = !!(authState && authState.status === "guest");
+    if (!isGuest) {
+      try {
+        isGuest = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+      } catch (eGuestMode) {}
+    }
+    var isVerified = !!(authState && (authState.status === "verified" || authState.status === "dev_skip"));
+    return { isGuest: isGuest, isVerified: isVerified };
+  }
+
+  function renderProfile(profile, linked) {
+    var p = profile && typeof profile === "object" ? profile : null;
+    if (!linked || !p) {
+      if (linkedRow) linkedRow.hidden = true;
+      if (balanceRow) balanceRow.hidden = true;
+      if (roleRow) roleRow.hidden = true;
+      if (statsRow) statsRow.hidden = true;
+      return;
+    }
+    if (linkedRow) linkedRow.hidden = false;
+    if (linkedValue) {
+      var playerParts = [];
+      if (p.nickname) playerParts.push(p.nickname);
+      if (p.pokerPlusUserId) playerParts.push("#" + p.pokerPlusUserId);
+      linkedValue.textContent = playerParts.join(" ") || "—";
+    }
+    if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
+    if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
+    if (roleRow) roleRow.hidden = !(p.role && String(p.role).trim());
+    if (roleValue) roleValue.textContent = p.role && String(p.role).trim() ? String(p.role).trim() : "—";
+    if (statsValue) {
+      var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : {};
+      var parts = [];
+      if (total.hands != null && total.hands === total.hands) parts.push("hands: " + total.hands);
+      if (total.winnings != null && total.winnings === total.winnings) parts.push("winnings: " + total.winnings);
+      if (total.mttWinnings != null && total.mttWinnings === total.mttWinnings) parts.push("MTT: " + total.mttWinnings);
+      if (total.bb != null && total.bb === total.bb) parts.push("bb: " + total.bb);
+      statsValue.textContent = parts.join(" · ") || "—";
+      if (statsRow) statsRow.hidden = parts.length === 0;
+    }
+  }
+
+  function syncVisibility() {
+    var state = auth();
+    section.hidden = !state.isVerified || !!state.isGuest;
+    bindBtn.disabled = !state.isVerified || !!state.isGuest;
+    refreshBtn.disabled = !state.isVerified || !!state.isGuest;
+    input.disabled = !state.isVerified || !!state.isGuest;
+    if (!state.isVerified || state.isGuest) {
+      setFeedback("", false);
+      renderProfile(null, false);
+    }
+    return state;
+  }
+
+  function loadProfile(refresh) {
+    var state = syncVisibility();
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!state.isVerified || state.isGuest || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      return Promise.resolve();
+    }
+    var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    if (refresh) q += (q.indexOf("?") >= 0 ? "&" : "?") + "refresh=1";
+    return fetch(base + "/api/pokerplus-player" + q, { cache: "no-store" })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          renderProfile(null, false);
+          if (data && data.error) setFeedback(data.error, true);
+          return;
+        }
+        renderProfile(data.profile, !!data.linked);
+        if (!data.linked) {
+          setFeedback("", false);
+          return;
+        }
+        if (data.syncError) setFeedback(data.syncError, true);
+        else setFeedback("", false);
+      })
+      .catch(function () {
+        setFeedback(POKER_NET_ERR, true);
+      });
+  }
+
+  function bindPokerPlus() {
+    var state = syncVisibility();
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!state.isVerified || state.isGuest) {
+      setFeedback("Сначала войдите в аккаунт.", true);
+      return;
+    }
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
+      return;
+    }
+    var ciphertext = String(input.value || "").trim().toUpperCase();
+    input.value = ciphertext;
+    if (!ciphertext) {
+      setFeedback("Вставьте ключ из PokerPlus.", true);
+      return;
+    }
+    bindBtn.disabled = true;
+    refreshBtn.disabled = true;
+    setFeedback("Привязываем PokerPlus…", false);
+    fetch(base + "/api/pokerplus-bind", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          setFeedback((data && data.error) || "Не удалось привязать PokerPlus.", true);
+          return;
+        }
+        renderProfile(data.profile, true);
+        setFeedback("PokerPlus привязан.", false);
+        input.value = "";
+      })
+      .catch(function () {
+        setFeedback(POKER_NET_ERR, true);
+      })
+      .finally(function () {
+        bindBtn.disabled = false;
+        refreshBtn.disabled = false;
+      });
+  }
+
+  if (bindBtn.dataset.bound !== "1") {
+    bindBtn.dataset.bound = "1";
+    bindBtn.addEventListener("click", bindPokerPlus);
+  }
+  if (refreshBtn.dataset.bound !== "1") {
+    refreshBtn.dataset.bound = "1";
+    refreshBtn.addEventListener("click", function () {
+      setFeedback("Обновляем данные PokerPlus…", false);
+      loadProfile(true).finally(function () {});
+    });
+  }
+  if (input.dataset.bound !== "1") {
+    input.dataset.bound = "1";
+    input.addEventListener("input", function () {
+      input.value = String(input.value || "").replace(/\s+/g, "").toUpperCase().slice(0, 64);
+    });
+  }
+  syncVisibility();
+  loadProfile(false);
 }
 
 function syncProfileEmailAuthUi() {

@@ -4301,6 +4301,44 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileTelegramLinkFeedback" aria-live="polite"></span>
               </div>
             </section>
+            <section class="profile-email-auth" id="profilePokerPlusSection">
+              <h2 class="profile-section__title" id="profilePokerPlusTitle">PokerPlus</h2>
+              <p class="profile-email-auth__text" id="profilePokerPlusText">Привяжите аккаунт PokerPlus по ключу из игры, чтобы подтянуть ник, баланс и статистику.</p>
+              <div class="profile-email-auth__form" id="profilePokerPlusForm">
+                <input
+                  type="text"
+                  id="profilePokerPlusCiphertextInput"
+                  class="profile-chat-name__input"
+                  maxlength="64"
+                  placeholder="Ключ из PokerPlus"
+                  aria-label="Ключ из PokerPlus"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusBindBtn">Привязать PokerPlus</button>
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusRefreshBtn">Обновить</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profilePokerPlusFeedback" aria-live="polite"></span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusLinkedRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusLinkedLabel">Связанный игрок:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusLinkedValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusBalanceRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusBalanceLabel">Баланс:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusBalanceValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusRoleRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusRoleLabel">Роль:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusRoleValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">—</span>
+              </div>
+            </section>
             <section class="profile-friends">
               <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
             </section>
