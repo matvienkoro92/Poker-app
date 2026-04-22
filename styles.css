@@ -2186,12 +2186,10 @@ html.app-view-home .home-welcome-outline::before {
   outline-offset: 1px;
 }
 .pwa-auth-screen__lang-switch {
-  position: absolute;
-  top: max(6px, env(safe-area-inset-top, 0px));
-  right: max(6px, env(safe-area-inset-right, 0px));
-  z-index: 2;
   display: inline-flex;
+  align-self: flex-end;
   gap: 6px;
+  margin: 0 0 14px auto;
   padding: 4px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 999px;
@@ -2505,7 +2503,6 @@ html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
   border-top-color: #ea580c;
 }
 .pwa-auth-screen__inner {
-  position: relative;
   width: 100%;
   max-width: 430px;
   flex: 1 1 auto;

@@ -8775,25 +8775,6 @@ function getPokerResolvedTelegramUser() {
     rerenderCurrentPwaAuthScreen();
   }
 
-  function ensurePwaAuthMountContent() {
-    if (!isPwaStandaloneAuth()) return;
-    var mount = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
-    if (!mount) return;
-    if (
-      mount.querySelector(".pwa-auth-screen__enter-actions") ||
-      mount.querySelector(".auth-banner__code-login") ||
-      mount.querySelector(".auth-banner__verify-form")
-    ) {
-      return;
-    }
-    try {
-      mount.removeAttribute("data-pwa-enter-mounted");
-      mount.removeAttribute("data-pwa-widget-mounted");
-    } catch (e) {}
-    currentPwaAuthScreen = "entry";
-    mountPwaStandaloneEnterButton();
-  }
-
   function authJsonOrDefault(res) {
     return res.json().catch(function () {
       return { ok: false, error: authScreenText("genericServerResponseFail") };
@@ -8856,7 +8837,6 @@ function getPokerResolvedTelegramUser() {
     if (!isPwaStandaloneAuth() || !pwaAuthScreenEl) return;
     pwaAuthScreenEl.classList.remove("pwa-auth-screen--hidden");
     pwaAuthScreenEl.setAttribute("aria-hidden", "false");
-    ensurePwaAuthMountContent();
     try {
       /* Сначала preinit: критический CSS в index.html держит #pwaAuthScreen видимым при гонках с --hidden */
       document.body.classList.add("pwa-auth-preinit");
