@@ -17,6 +17,7 @@ const handlers = {
   "auth-email-link": () => require(path.join(handlersDir, "auth-email-link.js")),
   "auth-pwa-code": () => require(path.join(handlersDir, "auth-pwa-code.js")),
   "pokerplus-bind": () => require(path.join(handlersDir, "pokerplus-bind.js")),
+  "pokerplus-unbind": () => require(path.join(handlersDir, "pokerplus-unbind.js")),
   "pokerplus-player": () => require(path.join(handlersDir, "pokerplus-player.js")),
   "pokerplus-tables": () => require(path.join(handlersDir, "pokerplus-tables.js")),
   "pokerplus-competitions": () => require(path.join(handlersDir, "pokerplus-competitions.js")),
