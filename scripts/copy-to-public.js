@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
  * Копирует статические файлы в public/ для деплоя на Vercel.
- * API (api/) не копируется — это serverless functions.
- * Из lib/ копируем только клиентские runtime-модули, которые подключаются из index.html.
+ * API (api/) и lib/ не копируются — это serverless functions.
  */
 
 const fs = require('fs');
@@ -22,7 +21,6 @@ const toCopy = [
   'sw.js',
 ];
 const dirsToCopy = ['assets'];
-const libFilesToCopy = ['pwa-runtime.js', 'radio-runtime.js', 'image-lightbox-runtime.js', 'home-widgets-runtime.js', 'view-runtime.js', 'tournament-share-runtime.js', 'app-state-store.js', 'home-freeroll-runtime.js'];
 
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
@@ -33,19 +31,6 @@ for (const file of toCopy) {
   if (fs.existsSync(src)) {
     fs.copyFileSync(src, path.join(publicDir, file));
     console.log('Copied:', file);
-  }
-}
-
-const publicLibDir = path.join(publicDir, 'lib');
-if (!fs.existsSync(publicLibDir)) {
-  fs.mkdirSync(publicLibDir, { recursive: true });
-}
-
-for (const file of libFilesToCopy) {
-  const src = path.join(root, 'lib', file);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(publicLibDir, file));
-    console.log('Copied:', path.join('lib', file));
   }
 }
 

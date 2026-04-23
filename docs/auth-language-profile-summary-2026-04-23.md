@@ -92,45 +92,6 @@
 - отображение success/error состояний;
 - отдельный шаг подтверждения email-кода без преждевременной привязки проверки к паролю.
 
-### 6. PokerPlus в профиле
-
-В профиль добавлен отдельный server-driven контур под PokerPlus Club API.
-
-Что закреплено:
-
-- интеграция идёт только через serverless API проекта, без прямых клиентских вызовов в PokerPlus;
-- сервер получает и кэширует PokerPlus `token` по `merchantId + secretKey`;
-- в профиле добавлен отдельный блок привязки PokerPlus по `ciphertext`;
-- после успешной привязки сервер сразу подтягивает профиль игрока PokerPlus и кэширует его в Redis;
-- в UI профиля показываются linked player, balance, role и агрегированная статистика;
-- для интеграции добавлены отдельные handlers под bind / profile / tables / competitions / maintenance.
-
-Практический эффект:
-
-- Mini App / web / PWA теперь имеют единый вход в PokerPlus integration flow;
-- секреты PokerPlus не уходят в клиент;
-- профиль PokerPlus можно подтягивать повторно кнопкой refresh без повторной привязки.
-
-Текущее ограничение:
-
-- bind-flow зависит от корректного `ciphertext` и от реальных доступов мерчанта;
-- при ошибках со стороны PokerPlus текущая диагностика ещё требует доработки до более детального уровня.
-
-### 7. Упрощение профиля
-
-Из профиля убран блок `Нотс про себя`.
-
-Что закреплено:
-
-- поле `Нотс про себя` больше не показывается;
-- нижняя кнопка `Сохранить`, относившаяся к этому блоку, тоже удалена;
-- удаление применено на уровне общей profile markup, поэтому действует одинаково в web, PWA и Telegram Mini App.
-
-Практический эффект:
-
-- нижняя часть профиля стала короче и чище;
-- убран ещё один secondary flow, который не должен отвлекать от авторизации, Poker21 ID и новых интеграций профиля.
-
 ## Важные инженерные выводы
 
 ### 1. Не смешивать overlay auth и старый inline banner
@@ -155,14 +116,6 @@
 - если display name хранится только в runtime-переменной, хедер рано или поздно откатится к Telegram username;
 - для приветствия нужен устойчивый источник, который не теряется между запросами и reload.
 
-### 4. Внешние интеграции в профиле должны идти только через сервер
-
-Подтверждённый вывод:
-
-- интеграции уровня PokerPlus нельзя вызывать прямо из клиента, потому что `merchantId`, `secretKey` и token lifecycle должны оставаться на сервере;
-- профильный UI должен работать только с внутренними `/api/*` endpoints проекта;
-- это упрощает безопасность, повторные запросы и будущую диагностику.
-
 ## Рабочее правило на будущее
 
 Для таких прод-фиксов в проекте закреплено правило:
@@ -177,8 +130,4 @@
 - `/Users/kosmonavt/Documents/poker-club-miniapp/app.js`
 - `/Users/kosmonavt/Documents/poker-club-miniapp/index.html`
 - `/Users/kosmonavt/Documents/poker-club-miniapp/styles.css`
-- `/Users/kosmonavt/Documents/poker-club-miniapp/lib/pokerplus.js`
-- `/Users/kosmonavt/Documents/poker-club-miniapp/lib/api-handlers/pokerplus-bind.js`
-- `/Users/kosmonavt/Documents/poker-club-miniapp/lib/api-handlers/pokerplus-player.js`
-- `/Users/kosmonavt/Documents/poker-club-miniapp/lib/api-handlers/friends.js`
 - `/Users/kosmonavt/Documents/poker-club-miniapp/docs/auth-language-profile-summary-2026-04-23.md`
