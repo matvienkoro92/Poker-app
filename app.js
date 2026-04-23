@@ -31974,7 +31974,7 @@ function initChat() {
             var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
             var nameBlockInner;
             if (isGroupRow) {
-              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(c.name || displayTitle) + "</span>";
+              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
             } else if (isFriendContact) {
               if (hasAlias) {
                 nameBlockInner =
@@ -31984,10 +31984,10 @@ function initChat() {
                   escapeHtml(effectiveAlias) +
                   "</span>" +
                   '<span class="chat-contact__friend-nick">' +
-                  escapeHtml(c.name) +
+                  escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
                   "</span></span></span>";
               } else {
-                nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(c.name) + "</span>";
+                nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
               }
             } else if (hasAlias) {
               nameBlockInner =
@@ -31996,10 +31996,10 @@ function initChat() {
                 escapeHtml(effectiveAlias) +
                 '</span>' +
                 '<span class="chat-contact__login-sub">' +
-                escapeHtml(c.name) +
+                escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
                 "</span></span>";
             } else {
-              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(c.name) + "</span>";
+              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
             }
             var avatarEl = isGroupRow
               ? c.avatar
