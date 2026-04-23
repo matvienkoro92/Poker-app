@@ -23543,7 +23543,9 @@ function pokerTryReadContactsCache() {
     if (!raw) return null;
     var pack = JSON.parse(raw);
     if (!pack || typeof pack.fp !== "string" || pack.fp !== fp || pack.data == null) return null;
-    return pack.data;
+    return typeof pokerSanitizeContactsPayloadForUi === "function"
+      ? pokerSanitizeContactsPayloadForUi(pack.data)
+      : pack.data;
   } catch (eRd) {
     return null;
   }
@@ -23553,7 +23555,10 @@ function pokerWriteContactsCache(data) {
     if (typeof localStorage === "undefined" || !data || !data.ok) return;
     var fp = pokerChatContactsAuthFingerprint();
     if (!fp) return;
-    localStorage.setItem(POKER_CHAT_CONTACTS_CACHE_KEY, JSON.stringify({ fp: fp, t: Date.now(), data: data }));
+    var sanitized = typeof pokerSanitizeContactsPayloadForUi === "function"
+      ? pokerSanitizeContactsPayloadForUi(data)
+      : data;
+    localStorage.setItem(POKER_CHAT_CONTACTS_CACHE_KEY, JSON.stringify({ fp: fp, t: Date.now(), data: sanitized }));
   } catch (eWr) {}
 }
 
@@ -31480,6 +31485,34 @@ function initChat() {
     if (/^mail_ID\d{6}$/.test(raw)) return raw.slice(5);
     return raw;
   }
+  function pokerSanitizeContactsPayloadForUi(data) {
+    if (!data || typeof data !== "object") return data;
+    if (Array.isArray(data)) {
+      return data.map(function (item) {
+        return pokerSanitizeContactsPayloadForUi(item);
+      });
+    }
+    var out = Object.assign({}, data);
+    if (Array.isArray(data.contacts)) {
+      out.contacts = data.contacts.map(function (row) {
+        if (!row || typeof row !== "object") return row;
+        var nextRow = Object.assign({}, row);
+        if (nextRow.name != null) nextRow.name = pokerNormalizeLegacyAccountLabel(nextRow.name);
+        if (nextRow.contactName != null) nextRow.contactName = pokerNormalizeLegacyAccountLabel(nextRow.contactName);
+        return nextRow;
+      });
+    }
+    if (Array.isArray(data.friends)) {
+      out.friends = data.friends.map(function (row) {
+        if (!row || typeof row !== "object") return row;
+        var nextRow = Object.assign({}, row);
+        if (nextRow.userName != null) nextRow.userName = pokerNormalizeLegacyAccountLabel(nextRow.userName);
+        if (nextRow.contactName != null) nextRow.contactName = pokerNormalizeLegacyAccountLabel(nextRow.contactName);
+        return nextRow;
+      });
+    }
+    return out;
+  }
   function chatListRowAlias(c, friendSet) {
     var isFriendContact = !!(c && !c.isGroupChat && friendSet && (friendSet[c.id] || friendSet[String(c.id)]));
     if (!isFriendContact || !c) return "";
@@ -31659,6 +31692,9 @@ function initChat() {
       return;
     }
     opts = opts || {};
+      if (typeof pokerSanitizeContactsPayloadForUi === "function") {
+        data = pokerSanitizeContactsPayloadForUi(data);
+      }
       var fromFilterOnly = !!opts.fromFilterOnly;
       var forceRerender = !!opts.forceRerender;
       if (data && data.ok) {
