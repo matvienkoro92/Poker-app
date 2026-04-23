@@ -31473,18 +31473,26 @@ function initChat() {
   function chatListRowNormalizedName(value) {
     return String(value || "").trim().replace(/^@+/, "").toLowerCase();
   }
+  function pokerNormalizeLegacyAccountLabel(value) {
+    var raw = value != null ? String(value).trim() : "";
+    if (!raw) return "";
+    if (/^(tg|vk)_ID\d{6}$/.test(raw)) return raw.slice(3);
+    if (/^mail_ID\d{6}$/.test(raw)) return raw.slice(5);
+    return raw;
+  }
   function chatListRowAlias(c, friendSet) {
     var isFriendContact = !!(c && !c.isGroupChat && friendSet && (friendSet[c.id] || friendSet[String(c.id)]));
     if (!isFriendContact || !c) return "";
     var alias = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
     if (!alias) return "";
-    var baseName = c.name != null ? String(c.name).trim() : "";
+    alias = pokerNormalizeLegacyAccountLabel(alias);
+    var baseName = pokerNormalizeLegacyAccountLabel(c.name != null ? String(c.name).trim() : "");
     if (chatListRowNormalizedName(alias) === chatListRowNormalizedName(baseName)) return "";
     return alias;
   }
   function chatListRowDisplayTitle(c, friendSet) {
     var alias = chatListRowAlias(c, friendSet);
-    return alias || (c && c.name ? c.name : "");
+    return alias || pokerNormalizeLegacyAccountLabel(c && c.name ? c.name : c && c.id ? c.id : "");
   }
   function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRender) {
     if (!block || !Array.isArray(contactsForList) || !contactsForList.length) return false;
