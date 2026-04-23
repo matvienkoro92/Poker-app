@@ -8864,12 +8864,12 @@ function getPokerResolvedTelegramUser() {
         telegramLoginText: "Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.",
         linkTelegram: "Привязать Telegram",
         pokerPlus: "PokerPlus",
-        pokerPlusText: "Привяжите аккаунт PokerPlus по email и ключу из игры, чтобы подтянуть ник, баланс и статистику.",
-        pokerPlusEmailPh: "Email из PokerPlus",
+        pokerPlusText: "Привяжите аккаунт PokerPlus по ключу из игры. Для проверки будет использован email, уже привязанный к вашему аккаунту.",
         pokerPlusKeyPh: "Ключ из PokerPlus",
         pokerPlusBind: "Привязать PokerPlus",
         pokerPlusRefresh: "Обновить",
         pokerPlusUnbind: "Отвязать",
+        pokerPlusEmailLabel: "Email для проверки:",
         pokerPlusPlayer: "Связанный игрок:",
         pokerPlusBalance: "Баланс:",
         pokerPlusRole: "Роль:",
@@ -8899,12 +8899,12 @@ function getPokerResolvedTelegramUser() {
         telegramLoginText: "Link Telegram so you can sign in to this same account through Telegram later.",
         linkTelegram: "Link Telegram",
         pokerPlus: "PokerPlus",
-        pokerPlusText: "Link your PokerPlus account with the email and key from the game to pull nickname, balance, and stats.",
-        pokerPlusEmailPh: "Email from PokerPlus",
+        pokerPlusText: "Link your PokerPlus account with the key from the game. The verification will use the email already linked to your account.",
         pokerPlusKeyPh: "Key from PokerPlus",
         pokerPlusBind: "Link PokerPlus",
         pokerPlusRefresh: "Refresh",
         pokerPlusUnbind: "Unlink",
+        pokerPlusEmailLabel: "Verification email:",
         pokerPlusPlayer: "Linked player:",
         pokerPlusBalance: "Balance:",
         pokerPlusRole: "Role:",
@@ -8947,6 +8947,7 @@ function getPokerResolvedTelegramUser() {
     setText("profilePokerPlusBindBtn", t.pokerPlusBind);
     setText("profilePokerPlusRefreshBtn", t.pokerPlusRefresh);
     setText("profilePokerPlusUnbindBtn", t.pokerPlusUnbind);
+    setText("profilePokerPlusEmailLabel", t.pokerPlusEmailLabel);
     setText("profilePokerPlusLinkedLabel", t.pokerPlusPlayer);
     setText("profilePokerPlusBalanceLabel", t.pokerPlusBalance);
     setText("profilePokerPlusRoleLabel", t.pokerPlusRole);
@@ -8960,8 +8961,6 @@ function getPokerResolvedTelegramUser() {
     if (exitBtn) exitBtn.textContent = t.loginAccount;
     var nameInput = document.getElementById("profileChatDisplayNameInput");
     if (nameInput) nameInput.placeholder = t.displayNamePh;
-    var pokerPlusEmailInput = document.getElementById("profilePokerPlusEmailInput");
-    if (pokerPlusEmailInput) pokerPlusEmailInput.placeholder = t.pokerPlusEmailPh;
     var pokerPlusInput = document.getElementById("profilePokerPlusCiphertextInput");
     if (pokerPlusInput) pokerPlusInput.placeholder = t.pokerPlusKeyPh;
     var emailInput = document.getElementById("profileEmailAuthInput");
@@ -15967,12 +15966,13 @@ function initProfileP21Id() {
 
 function initProfilePokerPlus() {
   var section = document.getElementById("profilePokerPlusSection");
-  var emailInput = document.getElementById("profilePokerPlusEmailInput");
   var input = document.getElementById("profilePokerPlusCiphertextInput");
   var bindBtn = document.getElementById("profilePokerPlusBindBtn");
   var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
   var unbindBtn = document.getElementById("profilePokerPlusUnbindBtn");
   var feedback = document.getElementById("profilePokerPlusFeedback");
+  var emailRow = document.getElementById("profilePokerPlusEmailRow");
+  var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
   var linkedValue = document.getElementById("profilePokerPlusLinkedValue");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
@@ -15981,7 +15981,7 @@ function initProfilePokerPlus() {
   var roleValue = document.getElementById("profilePokerPlusRoleValue");
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
-  if (!section || !emailInput || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
+  if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
 
   function setFeedback(text, isError) {
     if (!feedback) return;
@@ -16004,6 +16004,7 @@ function initProfilePokerPlus() {
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
+      if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
       if (roleRow) roleRow.hidden = true;
@@ -16012,6 +16013,8 @@ function initProfilePokerPlus() {
       return;
     }
     unbindBtn.hidden = false;
+    if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
+    if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
     if (linkedRow) linkedRow.hidden = false;
     if (linkedValue) {
       var playerParts = [];
@@ -16041,7 +16044,6 @@ function initProfilePokerPlus() {
     bindBtn.disabled = !state.isVerified || !!state.isGuest;
     refreshBtn.disabled = !state.isVerified || !!state.isGuest;
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
-    emailInput.disabled = !state.isVerified || !!state.isGuest;
     input.disabled = !state.isVerified || !!state.isGuest;
     if (!state.isVerified || state.isGuest) {
       setFeedback("", false);
@@ -16069,10 +16071,10 @@ function initProfilePokerPlus() {
         renderProfile(data.profile, !!data.linked);
         if (!data.linked) {
           setFeedback("", false);
+          if (emailRow) emailRow.hidden = true;
           unbindBtn.hidden = true;
           return;
         }
-        if (data.profile && data.profile.email) emailInput.value = String(data.profile.email).trim().toLowerCase();
         if (data.syncError) setFeedback(data.syncError, true);
         else setFeedback("", false);
       })
@@ -16092,14 +16094,8 @@ function initProfilePokerPlus() {
       setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
       return;
     }
-    var email = String(emailInput.value || "").trim().toLowerCase();
     var ciphertext = String(input.value || "").trim().toUpperCase();
-    emailInput.value = email;
     input.value = ciphertext;
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setFeedback("Введите email, указанный в PokerPlus.", true);
-      return;
-    }
     if (!ciphertext) {
       setFeedback("Вставьте ключ из PokerPlus.", true);
       return;
@@ -16111,7 +16107,7 @@ function initProfilePokerPlus() {
     fetch(base + "/api/pokerplus-bind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext, email: email })),
+      body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
     })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
@@ -16160,7 +16156,6 @@ function initProfilePokerPlus() {
           return;
         }
         renderProfile(null, false);
-        emailInput.value = "";
         input.value = "";
         setFeedback("PokerPlus отвязан.", false);
       })
@@ -16188,12 +16183,6 @@ function initProfilePokerPlus() {
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";
     unbindBtn.addEventListener("click", unbindPokerPlus);
-  }
-  if (emailInput.dataset.bound !== "1") {
-    emailInput.dataset.bound = "1";
-    emailInput.addEventListener("input", function () {
-      emailInput.value = String(emailInput.value || "").replace(/\s+/g, "").toLowerCase().slice(0, 160);
-    });
   }
   if (input.dataset.bound !== "1") {
     input.dataset.bound = "1";

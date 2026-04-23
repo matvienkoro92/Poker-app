@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.106">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.107">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4303,19 +4303,8 @@
             </section>
             <section class="profile-email-auth" id="profilePokerPlusSection">
               <h2 class="profile-section__title" id="profilePokerPlusTitle">PokerPlus</h2>
-              <p class="profile-email-auth__text" id="profilePokerPlusText">Привяжите аккаунт PokerPlus по email и ключу из игры, чтобы подтянуть ник, баланс и статистику.</p>
+              <p class="profile-email-auth__text" id="profilePokerPlusText">Привяжите аккаунт PokerPlus по ключу из игры. Для проверки будет использован email, уже привязанный к вашему аккаунту.</p>
               <div class="profile-email-auth__form" id="profilePokerPlusForm">
-                <input
-                  type="email"
-                  id="profilePokerPlusEmailInput"
-                  class="profile-chat-name__input"
-                  maxlength="160"
-                  placeholder="Email из PokerPlus"
-                  aria-label="Email из PokerPlus"
-                  autocomplete="email"
-                  autocapitalize="off"
-                  spellcheck="false"
-                />
                 <input
                   type="text"
                   id="profilePokerPlusCiphertextInput"
@@ -4333,6 +4322,10 @@
                   <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusUnbindBtn" hidden>Отвязать</button>
                 </div>
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profilePokerPlusFeedback" aria-live="polite"></span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusEmailRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusEmailLabel">Email для проверки:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusEmailValue">—</span>
               </div>
               <div class="profile-email-auth__linked" id="profilePokerPlusLinkedRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusLinkedLabel">Связанный игрок:</span>
