@@ -16071,6 +16071,7 @@ function initProfilePokerPlus() {
   var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
   var linkedValue = document.getElementById("profilePokerPlusLinkedValue");
+  var verifiedBadge = document.getElementById("profilePokerPlusVerifiedBadge");
   var avatarRow = document.getElementById("profilePokerPlusAvatarRow");
   var avatarImg = document.getElementById("profilePokerPlusAvatarImg");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
@@ -16148,6 +16149,7 @@ function initProfilePokerPlus() {
       if (lastLoginRow) lastLoginRow.hidden = true;
       if (lastIpRow) lastIpRow.hidden = true;
       if (statsRow) statsRow.hidden = true;
+      if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
       unbindBtn.hidden = true;
       return;
@@ -16162,6 +16164,7 @@ function initProfilePokerPlus() {
       if (p.pokerPlusUserId) playerParts.push("#" + p.pokerPlusUserId);
       linkedValue.textContent = playerParts.join(" ") || "—";
     }
+    if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
     if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
     if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
     var avatarUrl = pokerPlusText(p.avatarUrl);
@@ -23376,6 +23379,7 @@ var chatIsEditingMessage = false;
 window.chatGeneralUnread = false;
 window.chatPersonalUnread = false;
 var chatWithUserId = null;
+var chatWithUserPokerPlusVerified = false;
 /** Один кадр перед сетью — достаточно для отрисовки optimistic-пузыря; два кадра добавляли лишнюю микрозадержку. */
 function pokerChatRunAfterPaint(fn) {
   if (typeof requestAnimationFrame === "function") {
@@ -23942,6 +23946,7 @@ function initChat() {
   var chatDialogClub = document.getElementById("chatDialogClub");
   var convTitle = document.getElementById("chatConvTitle");
   var convTitleId = document.getElementById("chatConvTitleId");
+  var convVerifiedBadge = document.getElementById("chatConvVerifiedBadge");
   var convGroupDescEl = document.getElementById("chatConvGroupDesc");
   /** Описание группы не дублируем под шапкой чата — только в модалке «Информация о группе». */
   function applyConvGroupDescription() {
@@ -23955,6 +23960,10 @@ function initChat() {
   var convPeerAvatarWrap = document.getElementById("chatConvPeerAvatarWrap");
   var convGroupAvatarFile = document.getElementById("chatConvGroupAvatarFile");
   var convGroupCanChangeAvatar = false;
+  function setChatPeerVerified(on) {
+    chatWithUserPokerPlusVerified = !!on;
+    if (convVerifiedBadge) convVerifiedBadge.classList.toggle("chat-verified-badge--hidden", !chatWithUserPokerPlusVerified);
+  }
   function getInlineChatHeaderTopOffsetPx() {
     try {
       var root = document.documentElement;
@@ -26983,6 +26992,7 @@ function initChat() {
     } catch (eDlgReset) {}
     chatActiveTab = "dialogs";
     chatWithUserId = null;
+    setChatPeerVerified(false);
     chatPeerTypingActive = false;
     chatWithUserName = null;
     if (convTitle) convTitle.textContent = "";
@@ -27236,7 +27246,7 @@ function initChat() {
       pokerPushOpenStateDebug("openPushDmImmediate-done", String(uid || ""));
     } catch (ePushImmDbg1) {}
   }
-  function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt) {
+  function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt) {
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
     } catch (eOpenConvDbg0) {}
@@ -27254,7 +27264,7 @@ function initChat() {
     chatWithUserName = userName || userId;
     chatPeerTypingActive = false;
     setTab("personal");
-    showConv(userId, userName || userId, peerP21Id, peerAvatarOpt);
+    showConv(userId, userName || userId, peerP21Id, peerAvatarOpt, peerVerifiedOpt);
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
     } catch (eOpenConvDbg1) {}
@@ -27975,6 +27985,11 @@ function initChat() {
       return false;
     }
   }
+  function chatPokerPlusVerifiedBadgeHtml(isVerified) {
+    return isVerified
+      ? '<span class="chat-msg__verified" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
+      : "";
+  }
   function buildGeneralMessagesBodyHtml(messages) {
     var myIdRender = resolveMyChatMemberId();
     return (messages || []).map(function (m, i) {
@@ -28009,6 +28024,7 @@ function initChat() {
       var nameEl = "";
       if (!isOwn) {
         var nameStr = escapeHtml(m.fromName || "Игрок");
+        var verifiedStr = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var p21Str = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
         var respectVal = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClass = "chat-msg__respect";
@@ -28016,7 +28032,7 @@ function initChat() {
         else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
         var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
         var sep = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span></div>";
+        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span></div>";
         var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
         var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
         var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -28158,6 +28174,7 @@ function initChat() {
       var nameElP = "";
       if (!isOwn) {
         var nameStrP = escapeHtml(m.fromName || "Игрок");
+        var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
         var respectValP = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClassP = "chat-msg__respect";
@@ -28165,7 +28182,7 @@ function initChat() {
         else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
         var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
         var sepP = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span></div>";
+        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span></div>";
         var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
         var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
         var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -31279,7 +31296,7 @@ function initChat() {
     } catch (eDmLst) {}
   }
 
-  function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt) {
+  function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peerVerifiedOpt) {
     pokerPushOpenTraceTransition("showConv-enter", String(userId || ""));
     var allowPendingPushOpen = !!window.__pokerForceAllowPendingPushConvOpen;
     if (!allowPendingPushOpen && typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
@@ -31294,6 +31311,7 @@ function initChat() {
     }
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
+    setChatPeerVerified(!isGroupConv && !!peerVerifiedOpt);
     try {
       if (
         window.__pokerForcePushDmPeer &&
@@ -31571,6 +31589,7 @@ function initChat() {
       if (meta.fromRespect === undefined || meta.fromRespect === null) {
         if (m.fromRespect !== undefined && m.fromRespect !== null) meta.fromRespect = m.fromRespect;
       }
+      if (meta.fromPokerPlusVerified !== true && m.fromPokerPlusVerified === true) meta.fromPokerPlusVerified = true;
     }
     if (!meta.fromName && meta.fromDtId) meta.fromName = meta.fromDtId;
     for (var j = 0; j < list.length; j++) {
@@ -31589,6 +31608,7 @@ function initChat() {
       if ((row.fromRespect === undefined || row.fromRespect === null) && meta.fromRespect !== undefined && meta.fromRespect !== null) {
         row.fromRespect = meta.fromRespect;
       }
+      if (meta.fromPokerPlusVerified === true) row.fromPokerPlusVerified = true;
     }
     return list;
   }
@@ -31739,6 +31759,11 @@ function initChat() {
       else {
         try { delete btn.dataset.chatP21Id; } catch (eP21del) {}
         btn.removeAttribute("data-chat-p21-id");
+      }
+      if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
+      else {
+        try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
+        btn.removeAttribute("data-chat-verified");
       }
       var onlineEl = btn.querySelector(".chat-contact__online");
       if (onlineEl) onlineEl.classList.toggle("chat-contact__online--visible", !isGroupRow && !!c.online);
@@ -32094,6 +32119,12 @@ function initChat() {
               } catch (eP21d) {
                 btn.removeAttribute("data-chat-p21-id");
               }
+              if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
+              else try {
+                delete btn.dataset.chatVerified;
+              } catch (eVerD) {
+                btn.removeAttribute("data-chat-verified");
+              }
               var onEl = btn.querySelector(".chat-contact__online");
               if (onEl) {
                 var nowVisible = !!c.online;
@@ -32237,6 +32268,7 @@ function initChat() {
               (c.online ? "1" : "0") +
               '"' +
               (c.p21Id ? ' data-chat-p21-id="' + escapeHtml(String(c.p21Id)) + '"' : "") +
+              (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
               ">" +
               avatarEl +
               '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
@@ -33215,6 +33247,7 @@ function initChat() {
         var nameElP = "";
         if (!isOwn) {
           var nameStrP = escapeHtml(m.fromName || "Игрок");
+          var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
           var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
           var respectValP =
             m.fromRespect !== undefined && m.fromRespect !== null
@@ -33231,6 +33264,7 @@ function initChat() {
             '<span class="chat-msg__name">' +
             nameStrP +
             "</span>" +
+            verifiedStrP +
             sepP +
             '<span class="chat-msg__p21-inline">' +
             p21StrP +
@@ -33603,6 +33637,7 @@ function initChat() {
             fromName: chatWithUserName || "",
             fromAvatar: chatWithPeerAvatarUrl || "",
             fromP21Id: data.otherP21Id != null ? data.otherP21Id : "",
+            fromPokerPlusVerified: data.otherPokerPlusVerified === true,
           });
         }
         var pt = data.participantsCount != null ? data.participantsCount : "—";
@@ -33615,6 +33650,7 @@ function initChat() {
             var titleP21 =
               data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
             setTextContentIfChanged(convTitleId, titleP21 || "\u2014");
+            setChatPeerVerified(data.otherPokerPlusVerified === true);
             updateConvTypingUi();
           }
         }
@@ -38314,7 +38350,7 @@ function initChat() {
             rowAv = "";
           }
         }
-        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, el.dataset.chatP21Id, rowAv || undefined);
+        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, el.dataset.chatP21Id, rowAv || undefined, el.dataset.chatVerified === "1");
         return;
       }
       if (el.getAttribute && el.getAttribute("data-chat-user-id")) {
