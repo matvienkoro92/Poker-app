@@ -14583,24 +14583,42 @@ function springRatingViewScrollBy(target, delta, behavior) {
 function springRatingViewScrollToNextBlock(direction) {
   var dir = direction < 0 ? -1 : 1;
   var selectors = [
+    ".winter-rating__spring-main-tabs",
+    "#winterRatingSpringLeagues",
+    "#winterRatingLeague1Body tr:nth-child(6)",
+    "#winterRatingLeague1Body tr:nth-child(11)",
     "#winterRatingLeague1SearchWrap",
     "#springRatingViewTotals",
+    "#springRatingViewAprilWeeks",
+    ".spring-rating-view-week",
     "#winterRatingCalendarWrap",
     "#winterRatingDates",
+    ".winter-rating__date-item",
     "#winterRatingLeague2Body",
-    "#winterRatingLeague2SearchWrap"
+    "#winterRatingLeague2Body tr:nth-child(6)",
+    "#winterRatingLeague2Body tr:nth-child(11)",
+    "#winterRatingLeague2SearchWrap",
+    ".winter-rating__actions-row"
   ];
   var viewportTop = window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0;
   var viewportHeight = window.visualViewport && window.visualViewport.height ? window.visualViewport.height : window.innerHeight;
-  var line = dir > 0 ? viewportTop + 130 : viewportTop + 70;
+  var line = dir > 0 ? viewportTop + viewportHeight * 0.72 : viewportTop + viewportHeight * 0.28;
   var anchors = [];
   for (var i = 0; i < selectors.length; i++) {
-    var el = document.querySelector(selectors[i]);
-    if (!el) continue;
-    var rect = el.getBoundingClientRect();
-    if (rect.height <= 0 || rect.width <= 0) continue;
-    anchors.push({ el: el, rect: rect });
+    var els = document.querySelectorAll(selectors[i]);
+    for (var ei = 0; ei < els.length; ei++) {
+      var el = els[ei];
+      if (!el) continue;
+      var rect = el.getBoundingClientRect();
+      if (rect.height <= 0 || rect.width <= 0) continue;
+      var duplicate = false;
+      for (var ai = 0; ai < anchors.length; ai++) {
+        if (anchors[ai].el === el) duplicate = true;
+      }
+      if (!duplicate) anchors.push({ el: el, rect: rect });
+    }
   }
+  anchors.sort(function (a, b) { return a.rect.top - b.rect.top; });
   var target = null;
   if (dir > 0) {
     for (var j = 0; j < anchors.length; j++) {
@@ -14657,12 +14675,11 @@ function initSpringRatingViewScrollButton() {
   btn.addEventListener("pointermove", function (e) {
     if (!dragState || !dragState.targets || !dragState.targets.length) return;
     var dy = e.clientY - dragState.y;
-    if (Math.abs(dy) > 3) dragState.moved = true;
-    for (var i = 0; i < dragState.targets.length; i++) {
-      var item = dragState.targets[i];
-      if (!item || !item.target || !item.maxScroll) continue;
-      var ratio = Math.max(1, item.maxScroll / dragState.travel);
-      setSpringRatingViewScrollTop(item.target, item.scrollTop + dy * ratio);
+    if (Math.abs(dy) > 26) {
+      dragState.moved = true;
+      springRatingViewScrollToNextBlock(dy > 0 ? 1 : -1);
+      dragState.y = e.clientY;
+      btn._springRatingTapScrollAt = Date.now();
     }
     e.preventDefault();
   });
@@ -14701,11 +14718,6 @@ function updateSpringRatingViewScrollButton() {
   var progress = maxScroll > 4 ? getSpringRatingViewScrollTop(target) / maxScroll : 0;
   if (progress !== progress) progress = 0;
   progress = Math.max(0, Math.min(1, progress));
-  var viewportTop = window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0;
-  var topMin = Math.max(74, viewportTop + 74);
-  var bottomGap = 24;
-  var travel = Math.max(0, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
-  btn.style.top = Math.round(topMin + progress * travel) + "px";
 }
 
 function initWinterRatingPlayerModal() {
