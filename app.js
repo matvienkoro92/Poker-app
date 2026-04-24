@@ -15630,6 +15630,38 @@ function loadProfileDebugInfo() {
   return;
 }
 
+var pokerProfileUserInfoCache = null;
+var pokerProfileUserInfoPromise = null;
+var pokerProfileUserInfoCacheAt = 0;
+var POKER_PROFILE_USER_INFO_CACHE_MS = 15000;
+function loadCurrentProfileUserInfo() {
+  var now = Date.now();
+  if (pokerProfileUserInfoCache && now - pokerProfileUserInfoCacheAt < POKER_PROFILE_USER_INFO_CACHE_MS) {
+    return Promise.resolve(pokerProfileUserInfoCache);
+  }
+  if (pokerProfileUserInfoPromise) return pokerProfileUserInfoPromise;
+  var base = getApiBase();
+  var authQ = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+  if (!base || !authQ || authQ === "?initData=") return Promise.resolve(null);
+  var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
+  var authQWithHint = authQ;
+  if (cached && authQWithHint) authQWithHint += "&dtIdHint=" + encodeURIComponent(cached);
+  pokerProfileUserInfoPromise = fetch(base + "/api/users" + authQWithHint)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      pokerProfileUserInfoCache = data || null;
+      pokerProfileUserInfoCacheAt = Date.now();
+      return pokerProfileUserInfoCache;
+    })
+    .catch(function () {
+      return null;
+    })
+    .finally(function () {
+      pokerProfileUserInfoPromise = null;
+    });
+  return pokerProfileUserInfoPromise;
+}
+
 function updateProfileDtId() {
   var el = document.getElementById("profileUserId");
   if (!el) return;
@@ -15649,8 +15681,7 @@ function updateProfileDtId() {
     return;
   }
   el.textContent = "\u2026";
-  fetch(base + "/api/users" + authQWithHint)
-    .then(function (r) { return r.json(); })
+  loadCurrentProfileUserInfo()
     .then(function (data) {
       if (data && data.ok && data.dtId) {
         sessionStorage.setItem("poker_dt_id", data.dtId);
@@ -15848,8 +15879,10 @@ function initProfileP21Id() {
   var base = getApiBase();
   var canServer = base && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer());
   if (canServer) {
-    fetch(base + "/api/users" + pokerRafflesApiQueryLeading())
-      .then(function (r) { return r.json(); })
+    var profileInfoPromise = pokerApiHasCredential()
+      ? loadCurrentProfileUserInfo()
+      : fetch(base + "/api/users" + pokerRafflesApiQueryLeading()).then(function (r) { return r.json(); });
+    profileInfoPromise
       .then(function (data) {
         if (!data || !data.ok) return;
         var serverP21 = data.p21Id != null ? String(data.p21Id).trim() : "";
@@ -16524,8 +16557,10 @@ function initProfilePersonal() {
     ((typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) ||
       (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
   if (canServer) {
-    fetch(base + "/api/users" + pokerRafflesApiQueryLeading())
-      .then(function (r) { return r.json(); })
+    var profileInfoPromise = typeof pokerApiHasCredential === "function" && pokerApiHasCredential()
+      ? loadCurrentProfileUserInfo()
+      : fetch(base + "/api/users" + pokerRafflesApiQueryLeading()).then(function (r) { return r.json(); });
+    profileInfoPromise
       .then(function (data) {
         if (data && data.ok && data.personalInfo != null) textarea.value = data.personalInfo;
       })
