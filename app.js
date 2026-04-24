@@ -12756,6 +12756,10 @@ function setView(viewName, navOpts) {
     } catch (err) {
       if (typeof console !== "undefined" && console.error) console.error("initWinterRating", err);
     }
+    if (typeof initSpringRatingViewScrollButton === "function") {
+      initSpringRatingViewScrollButton();
+      requestAnimationFrame(updateSpringRatingViewScrollButton);
+    }
   }
   if (viewName === "profile") {
     try {
@@ -14487,6 +14491,84 @@ function initSpringRatingInfoModal() {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeSpringRatingInfoModal();
   });
+}
+
+function getSpringRatingViewScrollTarget() {
+  var view = document.querySelector(".view--active[data-view=\"spring-rating\"]") || document.getElementById("springRatingView");
+  var cardContent = view && view.closest ? view.closest(".card__content") : null;
+  if (cardContent && cardContent.scrollHeight - cardContent.clientHeight > 4) return cardContent;
+  var docEl = document.scrollingElement || document.documentElement;
+  if (docEl && docEl.scrollHeight - docEl.clientHeight > 4) return docEl;
+  return cardContent || docEl;
+}
+
+function initSpringRatingViewScrollButton() {
+  var btn = document.getElementById("springRatingViewScrollBtn");
+  if (!btn || btn.getAttribute("data-inited") === "1") return;
+  btn.setAttribute("data-inited", "1");
+  var dragState = null;
+  btn.addEventListener("pointerdown", function (e) {
+    var target = getSpringRatingViewScrollTarget();
+    if (!target) return;
+    var maxScroll = Math.max(0, target.scrollHeight - target.clientHeight);
+    if (!maxScroll) return;
+    dragState = {
+      y: e.clientY,
+      scrollTop: target.scrollTop,
+      target: target,
+      moved: false
+    };
+    btn.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  btn.addEventListener("pointermove", function (e) {
+    if (!dragState || !dragState.target) return;
+    var target = dragState.target;
+    var maxScroll = Math.max(0, target.scrollHeight - target.clientHeight);
+    var topMin = Math.max(74, (window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0) + 74);
+    var bottomGap = 24 + Math.max(0, parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"), 10) || 0);
+    var travel = Math.max(1, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
+    var ratio = Math.max(1, maxScroll / travel);
+    var dy = e.clientY - dragState.y;
+    if (Math.abs(dy) > 3) dragState.moved = true;
+    target.scrollTop = dragState.scrollTop + dy * ratio;
+    e.preventDefault();
+  });
+  btn.addEventListener("pointerup", function (e) {
+    if (!dragState) return;
+    if (!dragState.moved && dragState.target) {
+      dragState.target.scrollBy({ top: Math.round(dragState.target.clientHeight * 0.62), behavior: "smooth" });
+    }
+    dragState = null;
+    try { btn.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+  btn.addEventListener("pointercancel", function () {
+    dragState = null;
+  });
+  document.addEventListener("scroll", updateSpringRatingViewScrollButton, true);
+  window.addEventListener("resize", updateSpringRatingViewScrollButton);
+  updateSpringRatingViewScrollButton();
+}
+
+function updateSpringRatingViewScrollButton() {
+  var btn = document.getElementById("springRatingViewScrollBtn");
+  if (!btn) return;
+  var isSpringView = document.body && document.body.getAttribute("data-view") === "spring-rating";
+  var target = isSpringView ? getSpringRatingViewScrollTarget() : null;
+  var maxScroll = target ? Math.max(0, target.scrollHeight - target.clientHeight) : 0;
+  if (!isSpringView || !target) {
+    btn.setAttribute("hidden", "");
+    return;
+  }
+  btn.removeAttribute("hidden");
+  var progress = maxScroll > 4 ? target.scrollTop / maxScroll : 0;
+  if (progress !== progress) progress = 0;
+  progress = Math.max(0, Math.min(1, progress));
+  var viewportTop = window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0;
+  var topMin = Math.max(74, viewportTop + 74);
+  var bottomGap = 24;
+  var travel = Math.max(0, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
+  btn.style.top = Math.round(topMin + progress * travel) + "px";
 }
 
 function initWinterRatingPlayerModal() {

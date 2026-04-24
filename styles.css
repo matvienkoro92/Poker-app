@@ -19975,7 +19975,6 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   border: 1px solid rgba(251, 191, 36, 0.5);
   box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.2), 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 20px rgba(251, 191, 36, 0.12);
 }
-
 /* Модалка «Предсказание на день» — стиль похоже на весенний рейтинг, но компактнее */
 .daily-prediction-modal {
   position: fixed;
@@ -22754,6 +22753,60 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 }
 .view--active[data-view="spring-rating"] .winter-rating {
   margin-top: 0;
+}
+.spring-rating-view-scroll-btn {
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right, 0px));
+  top: 46%;
+  z-index: 90;
+  width: 28px;
+  height: 92px;
+  border: 1px solid rgba(251, 191, 36, 0.56);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(251, 191, 36, 0.34), rgba(217, 119, 6, 0.26)),
+    rgba(15, 23, 42, 0.76);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  cursor: ns-resize;
+  touch-action: none;
+}
+.spring-rating-view-scroll-btn::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 15px;
+  bottom: 15px;
+  width: 3px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(248, 250, 252, 0.9) 0 5px,
+    transparent 5px 10px
+  );
+}
+.spring-rating-view-scroll-btn:active {
+  background:
+    linear-gradient(180deg, rgba(251, 191, 36, 0.46), rgba(217, 119, 6, 0.36)),
+    rgba(15, 23, 42, 0.86);
+}
+.spring-rating-view-scroll-btn[hidden],
+body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
+  display: none;
+}
+[data-theme="light"] .spring-rating-view-scroll-btn {
+  border-color: rgba(180, 83, 9, 0.42);
+  background:
+    linear-gradient(180deg, rgba(180, 83, 9, 0.18), rgba(245, 158, 11, 0.3)),
+    rgba(255, 251, 235, 0.9);
+  box-shadow: 0 8px 18px rgba(146, 64, 14, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+[data-theme="light"] .spring-rating-view-scroll-btn::before {
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(120, 53, 15, 0.78) 0 5px,
+    transparent 5px 10px
+  );
 }
 /* Рейтинг весны: скрываем верхнее и нижнее меню */
 .card:has(.view--active[data-view="spring-rating"]) .card__header {
