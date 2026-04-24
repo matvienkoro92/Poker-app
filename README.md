@@ -1,24 +1,32 @@
-# Poker21 — Telegram Mini App (Welcome Screen)
+# Poker21 — Poker Club Mini App
 
-Простая приветственная страница покерного клуба **Poker21** для запуска внутри Telegram Mini App.
+Рабочее SPA-приложение покерного клуба для Telegram Mini App и PWA. В проекте есть профиль игрока, авторизация через Telegram/email/VK, общий и личные чаты, друзья, respect, розыгрыши, рейтинг, газета, инструкции по установке Poker21/Xpoker, игры, стримы, депозит/кэшаут и интеграция верификации через Poker21.
 
 ## Стэк
 
-- Чистый HTML / CSS / JavaScript
-- Интеграция с `telegram-web-app.js` (инициализация Mini App, отправка события в бота)
+- Vanilla HTML / CSS / JavaScript
+- Node.js serverless API handlers на Vercel
+- Redis через Upstash REST API
+- Telegram Mini App SDK и Telegram Bot API
+- PWA: `manifest.json`, `sw.js`, сборка в `public/`
 
 ## Структура
 
-- `index.html` — основной файл мини-приложения (приветственный экран)
+- `index.html` — единственная HTML-страница SPA
 - `styles.css` — оформление и адаптивная верстка
-- `app.js` — логика и интеграция с Telegram WebApp
-- `package.json` — служебный файл для быстрого локального запуска
+- `app.js` — основная клиентская логика
+- `api/[[...slug]].js` — единая точка входа API на Vercel
+- `lib/api-handlers/` — обработчики API
+- `lib/pokerplus.js` — клиент PokerPlus/Poker21 API для верификации
+- `scripts/copy-to-public.js` — сборка статики в `public/`
+- `docs/pokerplus-integration-for-vendor.md` — актуальная документация по интеграции Poker21/PokerPlus
 
 ## Локальный запуск
 
 ```bash
-npm install -g serve
-serve .
+npm install
+npm run build
+npx serve public
 ```
 
 После запуска откройте в браузере:
@@ -29,15 +37,9 @@ http://localhost:3000
 
 ## Использование в Telegram
 
-1. Задеплойте содержимое папки на любой статический хостинг (например, на Vercel / Netlify / GitHub Pages / свой сервер).
-2. В настройках вашего Telegram-бота укажите URL этого мини-приложения как WebApp.
-3. При нажатии на кнопку «Начать игру» Mini App отправит боту JSON:
-
-```json
-{ "action": "enter_club" }
-```
-
-Далее бот может открыть лобби, список столов и т.п. — в зависимости от вашей логики.
+1. Деплой идет на Vercel. `npm run build` копирует рабочие файлы в `public/`, а `vercel.json` использует `public` как output directory.
+2. В настройках Telegram-бота укажите URL приложения как WebApp.
+3. Для полноценной работы нужны переменные окружения из разделов ниже: Telegram bot token, Redis, email auth, cron secret и Poker21/PokerPlus credentials.
 
 ## Счётчик посетителей (уникальные / повторные)
 
@@ -117,6 +119,25 @@ http://localhost:3000
 - Telegram, email и другие способы входа привязываются к одному `dtId`, а не создают отдельные профили.
 - Любой пользовательский профиль должен читаться и сохраняться как данные аккаунта приложения, даже если вход был выполнен через Telegram.
 - Если в Redis ещё встречаются старые ключи на `tg_*`, приложение использует их только для мягкой обратной совместимости и постепенной миграции.
+
+## Верификация через Poker21
+
+В профиле есть секция **«Верификация через Poker21»**. Внутреннее имя файлов и API осталось `pokerplus`, потому что внешняя документация и endpoint'ы используют PokerPlus/Poker21 Plus.
+
+- Пользователь может привязать аккаунт ключом из Poker21/PokerPlus (`ciphertext`).
+- Кнопка **«Обновить»** пытается найти и обновить Poker21-профиль по email, который уже привязан к аккаунту в нашем приложении.
+- Если email не найден на стороне Poker21, пользователь может привязаться ключом.
+- `user_app_id` наружу отправляется как numeric Telegram ID, например `388008256`; старый сохраненный формат `tg_388008256` нормализуется до `388008256`.
+- Email передается в Poker21 с исходным регистром. При ошибке `Player data not found` backend пробует распространенные варианты регистра email.
+- Факт привязки хранится в Redis `poker_app:pokerplus_user_ids` на уровне `dtId`.
+- Галочка верификации (`pokerPlusVerified`) показывается:
+  - в профиле рядом со связанным игроком;
+  - в строке автора сообщения рядом с Poker21 ID;
+  - в верхней шапке личного диалога рядом с Poker21 ID;
+  - в модалке публичного профиля рядом с именем.
+- `league_id` и `group_id` сохраняются, но сейчас скрыты в UI.
+
+Подробная документация для разработчика Poker21: `docs/pokerplus-integration-for-vendor.md`.
 
 ## Чат: общий + личные сообщения
 

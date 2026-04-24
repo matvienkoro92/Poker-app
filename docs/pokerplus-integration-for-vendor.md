@@ -1,18 +1,21 @@
-# PokerPlus Integration Notes
+# Poker21 Verification / PokerPlus API Integration
 
-This document describes how the PokerPlus API integration is implemented on our side.
+This document describes how the Poker21 verification flow is implemented on our side.
+
+Naming note: the user-facing UI says **Verification via Poker21**. The code and API route names still use `pokerplus` because the external API documentation and endpoints use PokerPlus / Poker21 Plus terminology.
 
 ## Overview
 
-The PokerPlus API is called from our backend, not directly from the browser or Telegram Mini App frontend.
+The PokerPlus/Poker21 API is called from our backend, not directly from the browser, PWA, or Telegram Mini App frontend.
 
-The user enters only the PokerPlus secret key (`ciphertext`) in our app profile. Our server then:
+The user enters only the Poker21/PokerPlus secret key (`ciphertext`) in our app profile. Our server then:
 
 1. Verifies the user session.
 2. Resolves the internal account.
 3. Reads the email linked to that account, if available.
 4. Requests a PokerPlus API token.
 5. Calls the PokerPlus bind endpoint with `user_app_id`, `ciphertext`, `mail`, and `token`.
+6. Stores the returned player ID locally and marks the user as Poker21 verified.
 
 ## Relevant Files
 
@@ -23,6 +26,8 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 - `lib/api-handlers/pokerplus-tables.js` - Backend handler for currently playing tables.
 - `lib/api-handlers/pokerplus-competitions.js` - Backend handler for upcoming competitions.
 - `lib/api-handlers/pokerplus-maintenance.js` - Backend handler for game maintenance status.
+- `lib/api-handlers/chat.js` - Adds `pokerPlusVerified` to chat messages, contacts, group member lists, and personal chat metadata.
+- `lib/api-handlers/users.js` - Adds `pokerPlusVerified` to the current user profile and public chat profile card responses.
 - `app.js` - Frontend profile UI that sends the user-entered key to our backend.
 
 ## Current Production Behavior
@@ -40,6 +45,8 @@ The current implementation has these important details:
 - If the user has no linked email, refresh does not call PokerPlus. The user should bind with the PokerPlus key instead.
 - On normal profile opening, the frontend asks our backend for cached PokerPlus data only. A live PokerPlus refresh is made only when the user presses `Refresh`.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
+- A successful local binding is also used as our Poker21 verification flag.
+- The frontend displays the verification checkmark in the profile, chat message header, personal chat header, and public chat profile modal.
 
 ## Configuration
 
@@ -168,7 +175,7 @@ If the user has no linked email in our app, the same request is sent with an emp
 }
 ```
 
-## Important Note About `user_app_id`
+## `user_app_id`
 
 The current implementation sends the numeric Telegram user ID:
 
@@ -176,16 +183,7 @@ The current implementation sends the numeric Telegram user ID:
 388008256
 ```
 
-Please confirm whether this is the expected value for:
-
-```text
-user_app_id - Unique user ID in the third-party app
-```
-
-If PokerPlus expects a different stable internal application ID, we can send one of these values instead:
-
-- Our internal account ID, for example `ID123456`.
-- Another agreed stable identifier.
+Older locally stored values can contain the `tg_` prefix, for example `tg_388008256`. Before sending a request to PokerPlus/Poker21, our backend normalizes that value to `388008256`.
 
 ## Unbind Flow
 
@@ -294,6 +292,7 @@ Normalized fields used by our app:
 Currently visible in the profile UI:
 
 - linked PokerPlus player: nickname and player ID;
+- verification checkmark next to the linked player;
 - avatar;
 - balance;
 - registration date;
@@ -309,6 +308,34 @@ Currently visible in the profile UI:
 If `total_counter` is an empty array, we treat it as no statistics available and do not show a stats row. This does not break the profile display.
 
 PokerPlus profile values are not filtered by day on our side. We display the aggregate/current values returned by PokerPlus. The current refresh request does not send `date_from`, `date_to`, `day`, or other period filters.
+
+## Verification Checkmark
+
+The app treats a saved PokerPlus/Poker21 binding as a verified Poker21 account.
+
+Backend source of truth:
+
+```text
+Redis hash: poker_app:pokerplus_user_ids
+field:      internal account ID (dtId)
+value:      PokerPlus/Poker21 player ID
+```
+
+Backend response fields:
+
+- `/api/users` for the current user can return `pokerPlusVerified: true`.
+- `/api/users?userId=...` for a public chat profile card returns `pokerPlusVerified: true` when the viewed user has a binding.
+- `/api/chat` returns:
+  - `fromPokerPlusVerified` on message objects;
+  - `pokerPlusVerified` on contact/member objects;
+  - `otherPokerPlusVerified` for the currently opened personal chat peer.
+
+Frontend display locations:
+
+- Profile: next to the linked player row in **Verification via Poker21**.
+- Chat message header: next to the Poker21 ID, for example `Roman · 208238 ✓`.
+- Personal chat header: next to the peer Poker21 ID.
+- Public chat profile modal: next to the player name.
 
 ## Playing Tables Flow
 
@@ -430,7 +457,7 @@ The frontend does not currently display this status in the profile UI.
 
 ## PWA Profile Loading Notes
 
-The normal PWA profile screen also shows non-PokerPlus data such as email, Telegram username, respect score, display name, internal account ID, and Poker21 ID.
+The normal PWA profile screen also shows non-PokerPlus data such as email, Telegram username, respect score, display name, internal account ID, and manually entered Poker21 ID.
 
 Recent frontend behavior:
 
@@ -438,7 +465,7 @@ Recent frontend behavior:
 - Linked email and linked Telegram username are read from `/api/users`, then cached locally for faster subsequent profile openings.
 - The respect score shows the last locally cached value immediately and updates quietly from `/api/respect`.
 - These local profile caches are cleared when the user logs out.
-- PokerPlus live refresh is not part of the initial PWA profile load unless the user presses `Refresh`.
+- PokerPlus/Poker21 live refresh is not part of the initial PWA profile load unless the user presses `Refresh`.
 
 ## Error Handling
 
@@ -469,4 +496,4 @@ Our integration matches the PokerPlus API documentation in:
 - Competitions endpoint: `getTheUpcomingCompetitions`.
 - Maintenance endpoint: `getGameMaintainStatus`.
 
-The only integration detail that needs confirmation is whether numeric Telegram user ID is the expected value of `user_app_id`.
+Current user-facing label in the profile is **Verification via Poker21**. Internal route and file names remain `pokerplus-*` for compatibility with the existing integration.

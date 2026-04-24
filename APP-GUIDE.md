@@ -1,14 +1,14 @@
-# Руководство: Клуб «Два туза» — Mini App (полное приложение)
+# Руководство проекта: Poker21 / «Два туза» Mini App
 
-Документ для анализа всего приложения покерного клуба «Два туза» в Telegram Mini App.
+Актуальная техническая карта приложения. Исторические отчеты в `docs/chat-*.md` оставлены как архив расследований и не должны восприниматься как текущий план работ.
 
 ---
 
 ## 1. Обзор проекта
 
-- **Тип**: SPA (Single Page Application) для Telegram Mini App
+- **Тип**: SPA (Single Page Application) для Telegram Mini App и PWA
 - **Платформа**: Vercel (serverless API + статика)
-- **Размер**: index.html ~2466 строк, app.js ~10.4k строк, styles.css ~11.5k строк
+- **Размер на 2026-04-24**: `index.html` ~6.6k строк, `app.js` ~44.3k строк, `styles.css` ~29.6k строк
 - **Стек**: Vanilla JS, HTML, CSS, Node.js API handlers
 
 ---
@@ -19,9 +19,8 @@
 poker-club-miniapp/
 ├── index.html              # Единственная HTML-страница (SPA)
 ├── preview-iphone.html     # Превью в рамке iPhone (430×932)
-├── app.js                  # Основная логика (~10.4k строк)
-├── styles.css              # Стили (~11.5k строк)
-├── poker-tasks-data.js     # MTT_LEVELS, MTT_TASKS
+├── app.js                  # Основная клиентская логика
+├── styles.css              # Стили приложения
 ├── winter-rating-data.js   # Данные зимнего рейтинга
 ├── updates-data.js         # window.APP_UPDATES — список обновлений
 ├── sw.js                   # Service Worker (PWA)
@@ -37,6 +36,9 @@ poker-club-miniapp/
 │   ├── raffles.js
 │   ├── respect.js
 │   ├── friends.js
+│   ├── pokerplus-bind.js
+│   ├── pokerplus-player.js
+│   ├── pokerplus-unbind.js
 │   ├── pikhanina.js
 │   ├── gazette-subscribe.js
 │   ├── rating-subscribe.js
@@ -83,7 +85,6 @@ poker-club-miniapp/
 
 ### setView(viewName)
 ```javascript
-// app.js ~строка 1551
 function setView(viewName) {
   document.body.setAttribute("data-view", viewName);
   // Показ/скрытие .view по data-view
@@ -115,12 +116,31 @@ function setView(viewName) {
 
 ### Внешние сервисы
 - Telegram Bot API — sendMessage, getChatMember
-- Poker21 pipeline — данные пользователей
+- Poker21/PokerPlus API — верификация и данные связанного игрока
 - QStash — планировщик напоминаний
 
 ### Cron (vercel.json)
 - `/api/cron-reminder-10min` — воскресенье 21:21
 - `/api/deploy-hook` — ежедневно 12:00
+
+### Верификация через Poker21
+
+UI называет блок профиля **«Верификация через Poker21»**. В коде и маршрутах сохранен префикс `pokerplus`, потому что внешний API и исходная документация используют PokerPlus/Poker21 Plus.
+
+- `POST /api/pokerplus-bind` — привязка по ключу из Poker21/PokerPlus.
+- `GET /api/pokerplus-player` — чтение кэша или refresh по email при `refresh=1`.
+- `POST /api/pokerplus-unbind` — отвязка.
+- `GET /api/pokerplus-tables` — текущие столы из Poker21 API.
+- `GET /api/pokerplus-competitions` — ближайшие соревнования из Poker21 API.
+- `GET /api/pokerplus-maintenance` — статус обслуживания.
+
+Факт привязки хранится в Redis `poker_app:pokerplus_user_ids` на уровне `dtId`. В публичных ответах чата и карточки пользователя backend отдает `pokerPlusVerified: true`, чтобы фронт мог показать галочку верификации у других игроков.
+
+Галочка выводится:
+- в профиле рядом со связанным игроком;
+- в строке автора сообщения рядом с Poker21 ID;
+- в верхней шапке личного диалога рядом с Poker21 ID;
+- в модалке профиля игрока рядом с именем.
 
 ---
 
@@ -204,10 +224,9 @@ Vercel: `outputDirectory: "public"`, serverless в `api/`
 
 ---
 
-## 12. Вопросы для анализа
+## 12. Актуальные документы
 
-1. Архитектура: уместна ли монолитная app.js, стоит ли разбивать на модули?
-2. API: безопасность, rate limiting, обработка ошибок
-3. Производительность: оптимизация загрузки, lazy init
-4. UX: навигация, доступность, мобильная адаптация
-5. Масштабируемость: добавление новых разделов, поддержка
+- `README.md` — запуск, окружение, основные фичи и эксплуатационные заметки.
+- `APP-GUIDE.md` — карта приложения и API.
+- `docs/pokerplus-integration-for-vendor.md` — техническое описание интеграции Poker21/PokerPlus для внешнего разработчика.
+- `CRON-SETUP.md` — настройка cron-задач, если нужно отдельно поднять расписания.
