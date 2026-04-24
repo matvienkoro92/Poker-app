@@ -11228,6 +11228,10 @@ button.chat-conv-group-add-btn[hidden] {
   display: none !important;
 }
 .chat-conv-peer-title-chip__id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   font-family: ui-monospace, monospace;
   font-size: 11px;
   font-weight: 500;
@@ -11239,6 +11243,11 @@ button.chat-conv-group-add-btn[hidden] {
   max-width: 100%;
   width: 100%;
   text-align: center;
+}
+.chat-conv-peer-title-chip__id .chat-verified-badge {
+  width: 13px;
+  height: 13px;
+  font-size: 9px;
 }
 [data-theme="light"] .chat-conv-peer-title-chip {
   background: rgba(255, 255, 255, 0.48);
