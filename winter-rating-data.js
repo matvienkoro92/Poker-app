@@ -2279,6 +2279,10 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-13-04-2026-league1-tournir-ponedelnika-18h.png",
     "rating-13-04-2026-league1-monday-250k-18h.png",
     "rating-13-04-2026-league1-classic-6max-19h.png"
+  ],
+  "14.04.2026": [
+    "rating-14-04-2026-league1-dv-rebuy-12h.png",
+    "rating-14-04-2026-league1-classic-500-17h.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -4462,6 +4466,22 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "KamepuHa", place: 3, reward: 3050 },
       { nick: "kream89", place: 4, reward: 2440 },
       { nick: "Палач", place: 7, reward: 0 }
+    ] }
+  ],
+  "14.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 800, league: 1, players: [
+      { nick: "king00001", place: 3, reward: 7900 },
+      { nick: "FrankL", place: 5, reward: 0 },
+      { nick: "VOSOvec", place: 7, reward: 0 },
+      { nick: "Waaar", place: 10, reward: 0 },
+      { nick: "Bylochka😉", place: 16, reward: 0 }
+    ] },
+    { time: "17:00", name: "Classic Tournament", buyin: 500, league: 1, players: [
+      { nick: "MilkyWay77", place: 2, reward: 7500 },
+      { nick: "Чеб643", place: 3, reward: 4500 },
+      { nick: "WiNifly", place: 4, reward: 3600 },
+      { nick: "Prushnik", place: 10, reward: 0 },
+      { nick: "tatarin_1", place: 11, reward: 0 }
     ] }
   ]
 };
