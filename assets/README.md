@@ -1,35 +1,17 @@
-# Папка assets
+# Assets
 
-Сюда складывайте картинки и скриншоты для мини-приложения.
+Static images, audio, screenshots, and UI media live here.
 
-## Рейтинг турнирщиков (по датам)
+## Common Asset Groups
 
-Скрины для кнопок дат в разделе «Рейтинг турнирщиков зимы». Дата на скрине — в формате **MM/DD** рядом с надписью MTT.
+- Rating screenshots: files named like `rating-DD-MM-YYYY.png` and optional numbered variants (`-2`, `-3`, etc.).
+- Download/tutorial images: screenshots used by the download instructions.
+- Gazette and article images: images referenced by the newspaper UI.
+- Profile/game media: images and sounds used by profile, games, hall of fame, and seasonal sections.
 
-**Правило:** все новые скрины рейтинга складывай в эту папку (любое имя, например `rating-04.png`). Напиши в чат — по каждому скрину определю дату и добавлю в приложение.
+## Conventions
 
-Даты **07.12, 01.02, 02.02, 03.02** и др. Скрины в сетке, по клику — увеличение и листание в рамках даты.
-
-- **Январь 2026 (23–31.01)** — данные только из красных скринов «Статистика рук». Имена файлов: `rating-23-01-2026.png`, … `rating-31-01-2026.png`.
-- **Январь 2026 (03–06.01)** — синие скрины «Игровые данные»: `rating-03-01-2026.png`, `rating-04-01-2026.png`, `rating-05-01-2026.png`, `rating-06-01-2026.png` (турниры 13:00, 21:00, 23:00, 16:00).
-
-- **08.12.2025** (3 скрина): `rating-08-12-2025.png` (12:00 DV Rebuy), `rating-08-12-2025-2.png` (17:00 Rebuy), `rating-08-12-2025-3.png` (20:00 HOK).
-- **07.12.2025** (5 скринов по порядку турниров): положи в эту папку 5 файлов с именами:
-  - `rating-07-12-2025.png` — 12:00 DV Rebuy
-  - `rating-07-12-2025-2.png` — 17:00 Rebuy
-  - `rating-07-12-2025-3.png` — 18:00 Sunday Tournament
-  - `rating-07-12-2025-4.png` — 20:00 HOK
-  - `rating-07-12-2025-5.png` — 21:00 синий скрин (Игровые данные)
-  Если скрины пришли как `photo_2026-02-19_*.png`, переименуй их в эти имена по порядку.
-- **01.02.2026**: `rating-01-02-2026.png`, `rating-01-02-2026-2.png`, `rating-01-02-2026-3.png`
-- **02.02.2026**: `rating-02-02-2026.png`, `rating-02-02-2026-2.png`, `rating-02-02-2026-3.png`
-- **03.02.2026**: `rating-03-02-2026.png`, `rating-03-02-2026-2.png`
-- **25.02.2026** (12 скринов): 1–5 — с баллами (12:00 DV Rebuy, 13:00 DV Bounty 150k, 15:00 New - Hot PKO 2/3, 17:00 Rebuy MTT, 21:00 NLH KNOCKOUT 250k); 6–12 — только призы: `rating-25-02-2026-6.png` (10:00 DV Turbo 500 90K), `-7` (16:00 Magic Chest), `-8` (18:00 Freeroll 1 MLN), `-9` (18:00 Турнир Среды), `-10` (21:00 MOK), `-11` (22:00 Energetik), `-12` (22:00 Magic 500 * 150K).
-
-## Звук открытия двери (Зал славы)
-
-При нажатии на круг «Зал славы» проигрывается звук старой двери. Положи в эту папку файл **`door-open.mp3`** (звук скрипа/открытия старой большой двери). Бесплатные варианты: [SoundBible — Old Door Creaking](https://soundbible.com/1362-Old-Door-Creaking.html) (Public Domain), или любой «creaky door open» с Mixkit / Freesound.
-
-## Остальные картинки
-
-Используются в интерфейсе по путям вида `assets/имя-файла.png`.
+- Prefer descriptive lowercase filenames with hyphens.
+- Keep files referenced by `index.html`, `app.js`, or `styles.css` in this folder unless the code explicitly expects another path.
+- After adding or replacing assets, run `npm run build` so the files are copied to `public/assets`.
+- Avoid storing temporary screenshots here unless they are used by the app.

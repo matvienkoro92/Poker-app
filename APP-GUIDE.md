@@ -1,6 +1,6 @@
 # Руководство проекта: Poker21 / «Два туза» Mini App
 
-Актуальная техническая карта приложения. Исторические отчеты в `docs/chat-*.md` оставлены как архив расследований и не должны восприниматься как текущий план работ.
+Актуальная техническая карта приложения. Старые расследования и газетные черновики удалены из документационного дерева; при необходимости их можно поднять из истории git.
 
 ---
 
@@ -147,10 +147,12 @@ UI называет блок профиля **«Верификация чере�
 ## 6. Зависимости (CDN)
 
 ```html
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script defer src="./telegram-web-app.js?v=22"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter|Pacifico|Permanent+Marker" rel="stylesheet">
 ```
+
+`telegram-web-app.js` хранится локально, чтобы приложение не зависело от доступности `telegram.org` в WebView.
 
 ---
 
@@ -230,3 +232,6 @@ Vercel: `outputDirectory: "public"`, serverless в `api/`
 - `APP-GUIDE.md` — карта приложения и API.
 - `docs/pokerplus-integration-for-vendor.md` — техническое описание интеграции Poker21/PokerPlus для внешнего разработчика.
 - `CRON-SETUP.md` — настройка cron-задач, если нужно отдельно поднять расписания.
+- `CARD_COLORS.md` — соглашение по цветам мастей.
+- `assets/README.md` — правила для ассетов.
+- `Карта10к.md` — стратегическая карта масштабирования.
