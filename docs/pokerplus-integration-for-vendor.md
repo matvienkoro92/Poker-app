@@ -27,6 +27,7 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 The current implementation has these important details:
 
 - `user_app_id` is the user's numeric Telegram user ID, for example `388008256`.
+- `mail` is sent with the same letter casing that the user linked in our app. We keep a lowercase canonical email only for our own uniqueness checks, but PokerPlus receives the original linked email string.
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
 - The profile refresh request is email-based: it calls the same PokerPlus endpoint without `ciphertext`, but only when the user has a linked email in our app.
@@ -113,7 +114,7 @@ or, in PWA mode:
 Our backend then resolves:
 
 - `ciphertext` from the frontend request.
-- `mail` from the email linked to the user's account in our app, if available.
+- `mail` from the email linked to the user's account in our app, if available. The original letter casing is preserved for PokerPlus.
 - `user_app_id` from the user's numeric Telegram user ID.
 - `token` from the PokerPlus `getToken` endpoint.
 
@@ -135,7 +136,7 @@ Form-data fields:
 ```text
 user_app_id = <numeric Telegram user ID>
 ciphertext  = <secret key copied from PokerPlus>
-mail        = <email linked to the user's account in our app, or an empty string>
+mail        = <email linked to the user's account in our app, preserving letter casing, or an empty string>
 token       = <token returned by getToken>
 ```
 
@@ -145,7 +146,7 @@ Example payload shape:
 {
   "user_app_id": "388008256",
   "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
-  "mail": "user@example.com",
+  "mail": "User@example.com",
   "token": "<token from getToken>"
 }
 ```
@@ -201,7 +202,7 @@ token       = <token returned by getToken>
 When we refresh a linked player profile, our backend uses:
 
 - `user_app_id`
-- `mail`, from the email linked in our app
+- `mail`, from the email linked in our app, preserving the user's original letter casing
 
 Then it calls the same PokerPlus bind endpoint again, but without `ciphertext`:
 
@@ -213,7 +214,7 @@ Refresh form-data fields:
 
 ```text
 user_app_id = <numeric Telegram user ID>
-mail        = <email linked to the user's account in our app>
+mail        = <email linked to the user's account in our app, preserving letter casing>
 token       = <token returned by getToken>
 ```
 
@@ -222,7 +223,7 @@ Refresh example payload:
 ```json
 {
   "user_app_id": "388008256",
-  "mail": "user@example.com",
+  "mail": "User@example.com",
   "token": "<token from getToken>"
 }
 ```
@@ -234,6 +235,8 @@ If our app has no local linked PokerPlus profile yet, a refresh request still ca
 If the user has no linked email in our app, refresh returns an error and does not call PokerPlus. In that case the user can use the key-based bind flow instead.
 
 If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
+
+Note: email matching may be case-sensitive on the PokerPlus side. Because of that, our backend does not lowercase `mail` before sending it to PokerPlus. For older linked emails saved before this behavior, the original casing may not be recoverable; in that case the user should relink the email with the exact casing used in PokerPlus.
 
 ## Displayed Player Data
 
