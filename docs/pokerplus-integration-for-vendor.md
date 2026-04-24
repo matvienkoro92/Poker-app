@@ -178,13 +178,20 @@ token       = <token returned by getToken>
 When we refresh a linked player profile, our backend reuses the saved:
 
 - `user_app_id`
-- `ciphertext`
 - `mail`, if it was available during binding
 
-Then it calls the same PokerPlus bind endpoint again:
+Then it calls the same PokerPlus bind endpoint again, but without `ciphertext`:
 
 ```text
 POST /service_v1/getBindMiniAppPlayer
+```
+
+Refresh form-data fields:
+
+```text
+user_app_id = <numeric Telegram user ID>
+mail        = <email linked to the user's account in our app, or an empty string>
+token       = <token returned by getToken>
 ```
 
 The returned player data is normalized and cached in our app.
