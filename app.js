@@ -14494,12 +14494,138 @@ function initSpringRatingInfoModal() {
 }
 
 function getSpringRatingViewScrollTarget() {
+  var targets = getSpringRatingViewScrollTargets();
+  return targets.length ? targets[0] : (document.scrollingElement || document.documentElement);
+}
+
+function getSpringRatingViewScrollTargets() {
   var view = document.querySelector(".view--active[data-view=\"spring-rating\"]") || document.getElementById("springRatingView");
   var cardContent = view && view.closest ? view.closest(".card__content") : null;
-  if (cardContent && cardContent.scrollHeight - cardContent.clientHeight > 4) return cardContent;
-  var docEl = document.scrollingElement || document.documentElement;
-  if (docEl && docEl.scrollHeight - docEl.clientHeight > 4) return docEl;
-  return cardContent || docEl;
+  var card = view && view.closest ? view.closest(".card") : null;
+  var candidates = [
+    cardContent,
+    card,
+    view,
+    document.getElementById("springRatingSectionPlaceholder"),
+    document.getElementById("winterRatingSection"),
+    document.getElementById("app"),
+    document.querySelector(".app"),
+    document.scrollingElement,
+    document.documentElement,
+    document.body
+  ];
+  var targets = [];
+  for (var i = 0; i < candidates.length; i++) {
+    var el = candidates[i];
+    if (!el) continue;
+    var duplicate = false;
+    for (var j = 0; j < i; j++) {
+      if (candidates[j] === el) duplicate = true;
+    }
+    if (duplicate) continue;
+    var maxScroll = getSpringRatingViewMaxScroll(el);
+    if (maxScroll <= 4) continue;
+    targets.push(el);
+  }
+  return targets;
+}
+
+function getSpringRatingViewMaxScroll(target) {
+  if (!target) return 0;
+  if (target === document.body || target === document.documentElement || target === document.scrollingElement) {
+    var doc = document.documentElement;
+    var body = document.body;
+    var scrollHeight = Math.max(
+      doc ? doc.scrollHeight : 0,
+      body ? body.scrollHeight : 0
+    );
+    var clientHeight = window.visualViewport && window.visualViewport.height ? window.visualViewport.height : window.innerHeight;
+    return Math.max(0, scrollHeight - clientHeight);
+  }
+  return Math.max(0, target.scrollHeight - target.clientHeight);
+}
+
+function getSpringRatingViewScrollTop(target) {
+  if (!target) return 0;
+  if (target === document.body || target === document.documentElement || target === document.scrollingElement) {
+    return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  }
+  return target.scrollTop || 0;
+}
+
+function setSpringRatingViewScrollTop(target, value) {
+  if (!target) return;
+  if (target === document.body || target === document.documentElement || target === document.scrollingElement) {
+    window.scrollTo(0, value);
+    if (document.scrollingElement) document.scrollingElement.scrollTop = value;
+    return;
+  }
+  target.scrollTop = value;
+}
+
+function springRatingViewScrollBy(target, delta, behavior) {
+  if (!target) return;
+  if (target === document.body || target === document.documentElement || target === document.scrollingElement) {
+    try {
+      window.scrollBy({ top: delta, left: 0, behavior: behavior || "auto" });
+    } catch (eWinScroll) {
+      window.scrollTo(0, getSpringRatingViewScrollTop(target) + delta);
+    }
+    return;
+  }
+  try {
+    target.scrollBy({ top: delta, left: 0, behavior: behavior || "auto" });
+  } catch (eElScroll) {
+    target.scrollTop = (target.scrollTop || 0) + delta;
+  }
+}
+
+function springRatingViewScrollToNextBlock(direction) {
+  var dir = direction < 0 ? -1 : 1;
+  var selectors = [
+    "#winterRatingLeague1SearchWrap",
+    "#springRatingViewTotals",
+    "#winterRatingCalendarWrap",
+    "#winterRatingDates",
+    "#winterRatingLeague2Body",
+    "#winterRatingLeague2SearchWrap"
+  ];
+  var viewportTop = window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0;
+  var viewportHeight = window.visualViewport && window.visualViewport.height ? window.visualViewport.height : window.innerHeight;
+  var line = dir > 0 ? viewportTop + 130 : viewportTop + 70;
+  var anchors = [];
+  for (var i = 0; i < selectors.length; i++) {
+    var el = document.querySelector(selectors[i]);
+    if (!el) continue;
+    var rect = el.getBoundingClientRect();
+    if (rect.height <= 0 || rect.width <= 0) continue;
+    anchors.push({ el: el, rect: rect });
+  }
+  var target = null;
+  if (dir > 0) {
+    for (var j = 0; j < anchors.length; j++) {
+      if (anchors[j].rect.top > line) {
+        target = anchors[j].el;
+        break;
+      }
+    }
+  } else {
+    for (var k = anchors.length - 1; k >= 0; k--) {
+      if (anchors[k].rect.bottom < line) {
+        target = anchors[k].el;
+        break;
+      }
+    }
+  }
+  if (target && target.scrollIntoView) {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    return true;
+  }
+  var targets = getSpringRatingViewScrollTargets();
+  for (var t = 0; t < targets.length; t++) {
+    springRatingViewScrollBy(targets[t], Math.round(viewportHeight * 0.62) * dir, "smooth");
+  }
+  return targets.length > 0;
 }
 
 function initSpringRatingViewScrollButton() {
@@ -14508,39 +14634,50 @@ function initSpringRatingViewScrollButton() {
   btn.setAttribute("data-inited", "1");
   var dragState = null;
   btn.addEventListener("pointerdown", function (e) {
-    var target = getSpringRatingViewScrollTarget();
-    if (!target) return;
-    var maxScroll = Math.max(0, target.scrollHeight - target.clientHeight);
-    if (!maxScroll) return;
+    var targets = getSpringRatingViewScrollTargets();
+    if (!targets.length) return;
+    var topMin = Math.max(74, (window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0) + 74);
+    var bottomGap = 24 + Math.max(0, parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"), 10) || 0);
+    var travel = Math.max(1, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
     dragState = {
       y: e.clientY,
-      scrollTop: target.scrollTop,
-      target: target,
+      travel: travel,
+      targets: targets.map(function (target) {
+        return {
+          target: target,
+          scrollTop: getSpringRatingViewScrollTop(target),
+          maxScroll: getSpringRatingViewMaxScroll(target)
+        };
+      }),
       moved: false
     };
     btn.setPointerCapture(e.pointerId);
     e.preventDefault();
   });
   btn.addEventListener("pointermove", function (e) {
-    if (!dragState || !dragState.target) return;
-    var target = dragState.target;
-    var maxScroll = Math.max(0, target.scrollHeight - target.clientHeight);
-    var topMin = Math.max(74, (window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0) + 74);
-    var bottomGap = 24 + Math.max(0, parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"), 10) || 0);
-    var travel = Math.max(1, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
-    var ratio = Math.max(1, maxScroll / travel);
+    if (!dragState || !dragState.targets || !dragState.targets.length) return;
     var dy = e.clientY - dragState.y;
     if (Math.abs(dy) > 3) dragState.moved = true;
-    target.scrollTop = dragState.scrollTop + dy * ratio;
+    for (var i = 0; i < dragState.targets.length; i++) {
+      var item = dragState.targets[i];
+      if (!item || !item.target || !item.maxScroll) continue;
+      var ratio = Math.max(1, item.maxScroll / dragState.travel);
+      setSpringRatingViewScrollTop(item.target, item.scrollTop + dy * ratio);
+    }
     e.preventDefault();
   });
   btn.addEventListener("pointerup", function (e) {
     if (!dragState) return;
-    if (!dragState.moved && dragState.target) {
-      dragState.target.scrollBy({ top: Math.round(dragState.target.clientHeight * 0.62), behavior: "smooth" });
+    if (!dragState.moved && dragState.targets && dragState.targets.length) {
+      springRatingViewScrollToNextBlock(1);
+      btn._springRatingTapScrollAt = Date.now();
     }
     dragState = null;
     try { btn.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+  btn.addEventListener("click", function () {
+    if (btn._springRatingTapScrollAt && Date.now() - btn._springRatingTapScrollAt < 120) return;
+    springRatingViewScrollToNextBlock(1);
   });
   btn.addEventListener("pointercancel", function () {
     dragState = null;
@@ -14555,13 +14692,13 @@ function updateSpringRatingViewScrollButton() {
   if (!btn) return;
   var isSpringView = document.body && document.body.getAttribute("data-view") === "spring-rating";
   var target = isSpringView ? getSpringRatingViewScrollTarget() : null;
-  var maxScroll = target ? Math.max(0, target.scrollHeight - target.clientHeight) : 0;
+  var maxScroll = target ? getSpringRatingViewMaxScroll(target) : 0;
   if (!isSpringView || !target) {
     btn.setAttribute("hidden", "");
     return;
   }
   btn.removeAttribute("hidden");
-  var progress = maxScroll > 4 ? target.scrollTop / maxScroll : 0;
+  var progress = maxScroll > 4 ? getSpringRatingViewScrollTop(target) / maxScroll : 0;
   if (progress !== progress) progress = 0;
   progress = Math.max(0, Math.min(1, progress));
   var viewportTop = window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0;
