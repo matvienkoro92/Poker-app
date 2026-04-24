@@ -233,6 +233,8 @@ If our app has no local linked PokerPlus profile yet, a refresh request still ca
 
 If the user has no linked email in our app, refresh returns an error and does not call PokerPlus. In that case the user can use the key-based bind flow instead.
 
+If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
+
 ## Displayed Player Data
 
 When PokerPlus returns a successful response, we already normalize and display the returned player data in the app profile.
