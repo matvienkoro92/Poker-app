@@ -31,6 +31,7 @@ The current implementation has these important details:
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
 - The profile refresh request is email-based: it calls the same PokerPlus endpoint without `ciphertext`, but only when the user has a linked email in our app.
+- During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
 - If the user has no linked email, refresh does not call PokerPlus. The user should bind with the PokerPlus key instead.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
@@ -236,7 +237,7 @@ If the user has no linked email in our app, refresh returns an error and does no
 
 If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
 
-Note: email matching may be case-sensitive on the PokerPlus side. Because of that, our backend does not lowercase `mail` before sending it to PokerPlus. For older linked emails saved before this behavior, the original casing may not be recoverable; in that case the user should relink the email with the exact casing used in PokerPlus.
+Note: email matching may be case-sensitive on the PokerPlus side. Because of that, our backend does not lowercase `mail` before sending it to PokerPlus, and refresh retries several common case variants when PokerPlus responds with `Player data not found`. A fully case-insensitive match still needs to be supported by PokerPlus, because only PokerPlus can compare against every stored email casing.
 
 ## Displayed Player Data
 
