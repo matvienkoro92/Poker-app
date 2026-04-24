@@ -25574,6 +25574,7 @@ function initChat() {
     var modalFriendMsg = document.getElementById("chatUserModalFriendMsg");
     var modalLoginSub = document.getElementById("chatUserModalLoginSub");
     var modalLastSeen = document.getElementById("chatUserModalLastSeen");
+    var modalVerifiedBadge = document.getElementById("chatUserModalVerifiedBadge");
     var modalBackdrop = chatUserModalEl.querySelector(".chat-user-modal__backdrop");
     var modalClose = chatUserModalEl.querySelector(".chat-user-modal__close");
     var chatUserModalPeerLogin = "";
@@ -25700,6 +25701,7 @@ function initChat() {
       }
       if (modalEditFriendName) modalEditFriendName.style.display = "none";
       if (modalRemoveFriend) modalRemoveFriend.style.display = "none";
+      if (modalVerifiedBadge) modalVerifiedBadge.classList.add("chat-user-modal__verified--hidden");
       if (modalTitle) modalTitle.textContent = userName;
       if (modalAvatar && modalAvatarPlaceholder) {
         if (avatarUrl) {
@@ -25744,6 +25746,7 @@ function initChat() {
           if (modalLevelText && data && data.level != null) modalLevelText.textContent = "Уровень " + data.level + " из 55";
           if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
           if (data && data.ok) {
+            if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
             var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
             if (modalAvatar && modalAvatarPlaceholder && modalAvatar.style.display !== "none") {
               modalAvatar.alt = titleDisp;
