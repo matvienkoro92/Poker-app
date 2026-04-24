@@ -2283,6 +2283,41 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
   "14.04.2026": [
     "rating-14-04-2026-league1-dv-rebuy-12h.png",
     "rating-14-04-2026-league1-classic-500-17h.png"
+  ],
+  "15.04.2026": [
+    "rating-15-04-2026-league1-classic-500-17h.png"
+  ],
+  "16.04.2026": [
+    "rating-16-04-2026-league1-dv-rebuy-12h.png",
+    "rating-16-04-2026-league1-classic-500-17h.png",
+    "rating-16-04-2026-league1-tournir-chetverga-18h.png"
+  ],
+  "17.04.2026": [
+    "rating-17-04-2026-league1-dv-rebuy-12h.png",
+    "rating-17-04-2026-league1-friday-progressive-18h.png",
+    "rating-17-04-2026-league1-big-evening-19h.png"
+  ],
+  "18.04.2026": [
+    "rating-18-04-2026-league1-big-evening-19h.png"
+  ],
+  "19.04.2026": [
+    "rating-19-04-2026-league1-dv-rebuy-12h.png",
+    "rating-19-04-2026-league1-voskresnyj-tournir-18h.png"
+  ],
+  "20.04.2026": [
+    "rating-20-04-2026-league1-dv-rebuy-12h.png",
+    "rating-20-04-2026-league1-tournir-ponedelnika-18h.png",
+    "rating-20-04-2026-league1-big-evening-19h.png"
+  ],
+  "21.04.2026": [
+    "rating-21-04-2026-league1-dv-rebuy-12h.png"
+  ],
+  "22.04.2026": [
+    "rating-22-04-2026-league1-big-evening-19h.png"
+  ],
+  "23.04.2026": [
+    "rating-23-04-2026-league1-dv-rebuy-12h.png",
+    "rating-23-04-2026-league1-tournir-chetverga-18h.png"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2445,9 +2480,50 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-13-04-2026-league2-hyper-turbo-300-20h.png",
     "rating-13-04-2026-league2-mko-7max-21h.png",
     "rating-13-04-2026-league2-energetik-22h.png"
+  ],
+  "14.04.2026": [
+    "rating-14-04-2026-league2-tournir-vtornika-18h.png",
+    "rating-14-04-2026-league2-mko-7max-21h.png",
+    "rating-14-04-2026-league2-energetik-22h.png"
+  ],
+  "15.04.2026": [
+    "rating-15-04-2026-league2-tournir-sredy-18h.png",
+    "rating-15-04-2026-league2-mko-7max-21h.png",
+    "rating-15-04-2026-league2-energetik-22h.png"
+  ],
+  "16.04.2026": [
+    "rating-16-04-2026-league2-mko-7max-21h.png",
+    "rating-16-04-2026-league2-energetik-22h.png"
+  ],
+  "17.04.2026": [
+    "rating-17-04-2026-league2-tournament-rebuy-14h.png",
+    "rating-17-04-2026-league2-energetik-22h.png"
+  ],
+  "18.04.2026": [
+    "rating-18-04-2026-league2-plo4-20h.png",
+    "rating-18-04-2026-league2-mko-7max-21h.png"
+  ],
+  "19.04.2026": [
+    "rating-19-04-2026-league2-plo4-20h.png",
+    "rating-19-04-2026-league2-mko-7max-21h.png"
+  ],
+  "20.04.2026": [
+    "rating-20-04-2026-league2-mko-7max-21h.png"
+  ],
+  "21.04.2026": [
+    "rating-21-04-2026-league2-tournir-vtornika-18h.png",
+    "rating-21-04-2026-league2-mko-7max-21h.png"
+  ],
+  "22.04.2026": [
+    "rating-22-04-2026-league2-tournir-sredy-18h.png"
+  ],
+  "23.04.2026": [
+    "rating-23-04-2026-league2-tournament-rebuy-14h.png",
+    "rating-23-04-2026-league2-plo4-20h.png",
+    "rating-23-04-2026-league2-mok-21h.png"
   ]
 };
-var SPRING_RATING_UPDATED = "14.04.26";
+var SPRING_RATING_UPDATED = "23.04.26";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
@@ -4482,6 +4558,290 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "WiNifly", place: 4, reward: 3600 },
       { nick: "Prushnik", place: 10, reward: 0 },
       { nick: "tatarin_1", place: 11, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Вторника", buyin: 42300, league: 2, players: [
+      { nick: "WiNifly", place: 2, reward: 17100 },
+      { nick: "kriak", place: 5, reward: 6600 },
+      { nick: "AlenaSt", place: 6, reward: 5500 },
+      { nick: "AliPetuhov", place: 11, reward: 1600 },
+      { nick: "AliySvin", place: 12, reward: 1600 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 10200, league: 2, players: [
+      { nick: "tatarin_1", place: 1, reward: 8930 },
+      { nick: "Tanechka", place: 2, reward: 3050 },
+      { nick: "XORTYRETSKOGO", place: 3, reward: 1200 },
+      { nick: "Shkarubo", place: 4, reward: 950 },
+      { nick: "абыРвалГ", place: 5, reward: 870 }
+    ] },
+    { time: "22:00", name: "Energetik Tournament", buyin: 8000, league: 2, players: [
+      { nick: "FridaKahlo", place: 1, reward: 6670 },
+      { nick: "Чеб43", place: 2, reward: 3990 },
+      { nick: "Tanechka", place: 3, reward: 2660 },
+      { nick: "tatarin_1", place: 4, reward: 0 },
+      { nick: "Shkarubo", place: 5, reward: 0 }
+    ] }
+  ],
+  "15.04.2026": [
+    { time: "17:00", name: "Classic Tournament", buyin: 14000, league: 1, players: [
+      { nick: "VOSOvec", place: 2, reward: 7500 },
+      { nick: "FridaKahlo", place: 5, reward: 3300 },
+      { nick: "Рамиль01", place: 6, reward: 0 },
+      { nick: "WiNifly", place: 7, reward: 0 },
+      { nick: "Евгений.А", place: 8, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Среды", buyin: 26100, league: 2, players: [
+      { nick: "doss93", place: 1, reward: 14870 },
+      { nick: "tatarin_1", place: 5, reward: 3350 },
+      { nick: "zagrebnagreb", place: 8, reward: 1600 },
+      { nick: "мистерFox", place: 10, reward: 960 },
+      { nick: "Timon9419", place: 11, reward: 910 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 13200, league: 2, players: [
+      { nick: "Tanechka", place: 2, reward: 5830 },
+      { nick: "DmQa", place: 3, reward: 1130 },
+      { nick: "SantaClauS", place: 4, reward: 1730 },
+      { nick: "tatarin_1", place: 5, reward: 830 },
+      { nick: "Ksuha🦎", place: 7, reward: 0 }
+    ] },
+    { time: "22:00", name: "Energetik Tournament", buyin: 10600, league: 2, players: [
+      { nick: "Ksuha🦎", place: 1, reward: 4200 },
+      { nick: "MilkyWay77", place: 2, reward: 2840 },
+      { nick: "WiNifly", place: 4, reward: 1360 },
+      { nick: "Tanechka", place: 5, reward: 1240 },
+      { nick: "мистерFox", place: 6, reward: 0 }
+    ] }
+  ],
+  "16.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 12800, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 15000 },
+      { nick: "Ksuha🦎", place: 6, reward: 0 },
+      { nick: "MilkyWay77", place: 8, reward: 0 },
+      { nick: "FrankL", place: 9, reward: 0 },
+      { nick: "stafart", place: 11, reward: 0 }
+    ] },
+    { time: "17:00", name: "Classic Tournament", buyin: 17500, league: 1, players: [
+      { nick: "Waaar", place: 2, reward: 6600 },
+      { nick: "AlenaSt", place: 5, reward: 2700 },
+      { nick: "FrankL", place: 8, reward: 0 },
+      { nick: "WiNifly", place: 11, reward: 0 },
+      { nick: "MilkyWay77", place: 12, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Четверга 🏆", buyin: 57000, league: 1, players: [
+      { nick: "WiNifly", place: 1, reward: 58700 },
+      { nick: "Waaar", place: 2, reward: 24400 },
+      { nick: "FrankL", place: 6, reward: 6200 },
+      { nick: "Em13", place: 7, reward: 5300 },
+      { nick: "ПокерМанки", place: 10, reward: 0 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 11400, league: 2, players: [
+      { nick: "PlayerHyeEr", place: 3, reward: 1740 },
+      { nick: "WiNifly", place: 8, reward: 0 },
+      { nick: "Ksuha🦎", place: 12, reward: 0 },
+      { nick: "Shkarubo", place: 13, reward: 0 },
+      { nick: "Sarmat1305", place: 14, reward: 0 }
+    ] },
+    { time: "22:00", name: "Energetik Tournament", buyin: 9800, league: 2, players: [
+      { nick: "AlenaSt", place: 1, reward: 4600 },
+      { nick: "Sarmat1305", place: 3, reward: 1860 },
+      { nick: "Shkarubo", place: 4, reward: 1490 },
+      { nick: "DmQa", place: 6, reward: 0 },
+      { nick: "WiNifly", place: 7, reward: 0 }
+    ] }
+  ],
+  "17.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 8800, league: 1, players: [
+      { nick: "Waaar", place: 2, reward: 9000 },
+      { nick: "VOSOvec", place: 9, reward: 0 },
+      { nick: "Andrei350", place: 11, reward: 0 },
+      { nick: "Ферапонт", place: 12, reward: 0 },
+      { nick: "divanSHark", place: 13, reward: 0 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 3700, league: 2, players: [
+      { nick: "zagrebnagreb", place: 1, reward: 2570 },
+      { nick: "Ферапонт", place: 2, reward: 1740 },
+      { nick: "Tanechka", place: 5, reward: 760 },
+      { nick: "tatarin_1", place: 8, reward: 0 },
+      { nick: "Анубис", place: 9, reward: 0 }
+    ] },
+    { time: "18:00", name: "Пятница Прогрессив", buyin: 55500, league: 1, players: [
+      { nick: "Y-gin", place: 1, reward: 27001.9 },
+      { nick: "WiNifly", place: 2, reward: 18135.48 },
+      { nick: "TonniHalf😎", place: 7, reward: 4263.59 },
+      { nick: "ПокерМанки", place: 8, reward: 2802.5 },
+      { nick: "Tanechka", place: 11, reward: 225 }
+    ] },
+    { time: "19:00", name: "💸Big evening💰", buyin: 92400, league: 1, players: [
+      { nick: "doss93", place: 1, reward: 67800 },
+      { nick: "AliySvin", place: 3, reward: 26500 },
+      { nick: "ПокерМанки", place: 8, reward: 11000 },
+      { nick: "mamalena", place: 15, reward: 0 },
+      { nick: "WiNifly", place: 16, reward: 0 }
+    ] },
+    { time: "22:00", name: "Energetik Tournament", buyin: 9200, league: 2, players: [
+      { nick: "PlayerHyeEr", place: 2, reward: 4420 },
+      { nick: "VOSOvec", place: 4, reward: 2110 },
+      { nick: "Tanechka", place: 7, reward: 0 },
+      { nick: "tatarin_1", place: 8, reward: 0 },
+      { nick: "WiNifly", place: 11, reward: 0 }
+    ] }
+  ],
+  "18.04.2026": [
+    { time: "19:00", name: "💸Big evening💰", buyin: 74800, league: 1, players: [
+      { nick: "AliySvin", place: 2, reward: 44000 },
+      { nick: "PlayerFD6762", place: 4, reward: 22000 },
+      { nick: "VOSOvec", place: 9, reward: 0 },
+      { nick: "Y-gin", place: 12, reward: 0 },
+      { nick: "Waaar", place: 17, reward: 0 }
+    ] },
+    { time: "20:00", name: "Tournament PLO4", buyin: 8700, league: 2, players: [
+      { nick: "TonniHalf😎", place: 1, reward: 5950 },
+      { nick: "Sarmat1305", place: 3, reward: 2370 },
+      { nick: "jokerAA", place: 4, reward: 0 },
+      { nick: "kriak", place: 5, reward: 0 },
+      { nick: "KamepuHa", place: 7, reward: 0 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 12300, league: 2, players: [
+      { nick: "Tanechka", place: 1, reward: 13205 },
+      { nick: "YOUAREMYDONKEY", place: 4, reward: 1145 },
+      { nick: "tatarin_1", place: 6, reward: 830 },
+      { nick: "PONOCHKA", place: 8, reward: 0 },
+      { nick: "PlayerHyeEr", place: 9, reward: 0 }
+    ] }
+  ],
+  "19.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 21600, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 16300 },
+      { nick: "king00001", place: 3, reward: 6400 },
+      { nick: "TonniHalf😎", place: 7, reward: 0 },
+      { nick: "VOSOvec", place: 8, reward: 0 },
+      { nick: "Евгений.А", place: 9, reward: 0 }
+    ] },
+    { time: "18:00", name: "Воскресный турнир 🏆", buyin: 150000, league: 1, players: [
+      { nick: "Mr.V", place: 4, reward: 14675 },
+      { nick: "WiNifly", place: 9, reward: 4400 },
+      { nick: "TonniHalf😎", place: 11, reward: 3650 },
+      { nick: "Waaar", place: 12, reward: 6462.5 },
+      { nick: "PlayerFD6762", place: 13, reward: 4325 }
+    ] },
+    { time: "20:00", name: "Tournament PLO4", buyin: 13200, league: 2, players: [
+      { nick: "AlenaSt", place: 2, reward: 5020 },
+      { nick: "Tanechka", place: 4, reward: 0 },
+      { nick: "tatarin_1", place: 5, reward: 0 },
+      { nick: "Sarmat1305", place: 6, reward: 0 },
+      { nick: "Y-gin", place: 7, reward: 0 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 13800, league: 2, players: [
+      { nick: "DmQa", place: 1, reward: 10170 },
+      { nick: "T-150", place: 2, reward: 4270 },
+      { nick: "Tanechka", place: 3, reward: 1340 },
+      { nick: "viktor200688", place: 4, reward: 1060 },
+      { nick: "XORTYRETSKOGO", place: 5, reward: 980 }
+    ] }
+  ],
+  "20.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 16800, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 15000 },
+      { nick: "FrankL", place: 2, reward: 9000 },
+      { nick: "VOSOvec", place: 4, reward: 0 },
+      { nick: "Witch", place: 6, reward: 0 },
+      { nick: "Rom4ik", place: 8, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Понедельника", buyin: 64500, league: 1, players: [
+      { nick: "абыРвалГ", place: 1, reward: 46250 },
+      { nick: "Waaar", place: 2, reward: 20050 },
+      { nick: "AlenaSt", place: 4, reward: 5760 },
+      { nick: "kream89", place: 6, reward: 4470 },
+      { nick: "XORTYRETSKOGO", place: 8, reward: 3020 }
+    ] },
+    { time: "19:00", name: "💸Big evening💰", buyin: 66000, league: 1, players: [
+      { nick: "AliPetuhov", place: 2, reward: 44000 },
+      { nick: "WiNifly", place: 8, reward: 0 },
+      { nick: "Rifa", place: 12, reward: 0 },
+      { nick: "ПокерМанки", place: 14, reward: 0 },
+      { nick: "Waaar", place: 16, reward: 0 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 11100, league: 2, players: [
+      { nick: "Tanechka", place: 1, reward: 10170 },
+      { nick: "tatarin_1", place: 2, reward: 4920 },
+      { nick: "WiNifly", place: 4, reward: 1230 },
+      { nick: "мистерFox", place: 6, reward: 0 },
+      { nick: "DmQa", place: 7, reward: 0 }
+    ] }
+  ],
+  "21.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 12800, league: 1, players: [
+      { nick: "VOSOvec", place: 2, reward: 12560 },
+      { nick: "MilkyWay77", place: 6, reward: 0 },
+      { nick: "Waaar", place: 8, reward: 0 },
+      { nick: "абыРвалГ", place: 11, reward: 0 },
+      { nick: "Просто", place: 16, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Вторника", buyin: 37800, league: 2, players: [
+      { nick: "doss93", place: 1, reward: 29000 },
+      { nick: "Shkarubo", place: 3, reward: 8900 },
+      { nick: "Dins", place: 4, reward: 7900 },
+      { nick: "WiNifly", place: 9, reward: 2900 },
+      { nick: "абыРвалГ", place: 11, reward: 2100 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 11100, league: 2, players: [
+      { nick: "VOSOvec", place: 1, reward: 10730 },
+      { nick: "ДжекПотный", place: 2, reward: 1960 },
+      { nick: "zagrebnagreb", place: 4, reward: 930 },
+      { nick: "Tanechka", place: 5, reward: 860 },
+      { nick: "XORTYRETSKOGO", place: 6, reward: 0 }
+    ] }
+  ],
+  "22.04.2026": [
+    { time: "18:00", name: "Турнир Среды", buyin: 24100, league: 2, players: [
+      { nick: "абыРвалГ", place: 2, reward: 8250 },
+      { nick: "мистерFox", place: 6, reward: 2950 },
+      { nick: "Ksuha🦎", place: 8, reward: 1900 },
+      { nick: "zagrebnagreb", place: 9, reward: 1350 },
+      { nick: "Winifly", place: 10, reward: 1150 }
+    ] },
+    { time: "19:00", name: "💸Big evening💰", buyin: 68200, league: 1, players: [
+      { nick: "Waaar", place: 1, reward: 70000 },
+      { nick: "абыРвалГ", place: 5, reward: 18000 },
+      { nick: "\"ЗараЗа\"", place: 11, reward: 0 },
+      { nick: "AliySvin", place: 12, reward: 0 },
+      { nick: "Rifa", place: 19, reward: 0 }
+    ] }
+  ],
+  "23.04.2026": [
+    { time: "12:00", name: "DV Rebuy", buyin: 12800, league: 1, players: [
+      { nick: "VOSOvec", place: 1, reward: 15000 },
+      { nick: "king00001", place: 4, reward: 0 },
+      { nick: "ДжекПотный", place: 7, reward: 0 },
+      { nick: "FrankL", place: 9, reward: 0 },
+      { nick: "Палач", place: 12, reward: 0 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 2100, league: 2, players: [
+      { nick: "Shkarubo", place: 2, reward: 1500 },
+      { nick: "FridaKahlo", place: 3, reward: 1000 },
+      { nick: "ДжекПотный", place: 6, reward: 0 },
+      { nick: "Ферапонт", place: 7, reward: 0 },
+      { nick: "COBRA", place: 10, reward: 0 }
+    ] },
+    { time: "18:00", name: "Турнир Четверга", buyin: 70000, league: 1, players: [
+      { nick: "Kosik", place: 3, reward: 9300 },
+      { nick: "WiNifly", place: 7, reward: 6150 },
+      { nick: "ПокерМанки", place: 8, reward: 2900 },
+      { nick: "Waaar", place: 11, reward: 1700 },
+      { nick: "ПаПа_Мо}|{еТ", place: 15, reward: 1700 }
+    ] },
+    { time: "20:00", name: "Tournament PLO4", buyin: 11100, league: 2, players: [
+      { nick: "RCD_Miron", place: 1, reward: 11000 },
+      { nick: "ПокерМанки", place: 4, reward: 0 },
+      { nick: "Sarmat1305", place: 5, reward: 0 },
+      { nick: "абыРвалГ", place: 7, reward: 0 },
+      { nick: "Superuser", place: 9, reward: 0 }
+    ] },
+    { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 15900, league: 2, players: [
+      { nick: "AGE983", place: 2, reward: 2770 },
+      { nick: "WiNifly", place: 3, reward: 1670 },
+      { nick: "Ksuha🐍", place: 4, reward: 1320 },
+      { nick: "DemonDen", place: 5, reward: 1210 },
+      { nick: "Tanechka", place: 7, reward: 0 }
     ] }
   ]
 };

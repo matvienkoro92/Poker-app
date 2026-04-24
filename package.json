@@ -11,6 +11,9 @@
     "build": "node scripts/copy-to-public.js",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
+    "rating:snippet": "node scripts/rating-entry-helper.js snippet",
+    "rating:validate": "node scripts/rating-entry-helper.js validate",
+    "rating:validate:strict": "node scripts/rating-entry-helper.js validate --strict",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
   }
