@@ -27,10 +27,11 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 The current implementation has these important details:
 
 - `user_app_id` is the user's numeric Telegram user ID, for example `388008256`.
-- `mail` is optional on our side. If the user has no linked email in our app, we still call PokerPlus and send `mail` as an empty string.
+- `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
-- The profile refresh request calls the same PokerPlus endpoint, but without `ciphertext`.
+- The profile refresh request is email-based: it calls the same PokerPlus endpoint without `ciphertext`, but only when the user has a linked email in our app.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
+- If the user has no linked email, refresh does not call PokerPlus. The user should bind with the PokerPlus key instead.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 
 ## Configuration
@@ -197,10 +198,10 @@ token       = <token returned by getToken>
 
 ## Player Refresh Flow
 
-When we refresh a linked player profile, our backend reuses the saved:
+When we refresh a linked player profile, our backend uses:
 
 - `user_app_id`
-- `mail`, if it was available during binding
+- `mail`, from the email linked in our app
 
 Then it calls the same PokerPlus bind endpoint again, but without `ciphertext`:
 
@@ -212,7 +213,7 @@ Refresh form-data fields:
 
 ```text
 user_app_id = <numeric Telegram user ID>
-mail        = <email linked to the user's account in our app, or an empty string>
+mail        = <email linked to the user's account in our app>
 token       = <token returned by getToken>
 ```
 
@@ -221,14 +222,16 @@ Refresh example payload:
 ```json
 {
   "user_app_id": "388008256",
-  "mail": "",
+  "mail": "user@example.com",
   "token": "<token from getToken>"
 }
 ```
 
 The returned player data is normalized and cached in our app.
 
-If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
+If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID and linked email. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
+
+If the user has no linked email in our app, refresh returns an error and does not call PokerPlus. In that case the user can use the key-based bind flow instead.
 
 ## Displayed Player Data
 
