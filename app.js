@@ -8873,8 +8873,6 @@ function getPokerResolvedTelegramUser() {
         pokerPlusPlayer: "Связанный игрок:",
         pokerPlusAvatar: "Аватар:",
         pokerPlusBalance: "Баланс:",
-        pokerPlusLeague: "Лига:",
-        pokerPlusGroup: "Группа:",
         pokerPlusRegister: "Дата регистрации:",
         pokerPlusPosition: "Позиция:",
         pokerPlusCountry: "Страна:",
@@ -8916,8 +8914,6 @@ function getPokerResolvedTelegramUser() {
         pokerPlusPlayer: "Linked player:",
         pokerPlusAvatar: "Avatar:",
         pokerPlusBalance: "Balance:",
-        pokerPlusLeague: "League:",
-        pokerPlusGroup: "Group:",
         pokerPlusRegister: "Registered:",
         pokerPlusPosition: "Position:",
         pokerPlusCountry: "Country:",
@@ -8967,8 +8963,6 @@ function getPokerResolvedTelegramUser() {
     setText("profilePokerPlusLinkedLabel", t.pokerPlusPlayer);
     setText("profilePokerPlusAvatarLabel", t.pokerPlusAvatar);
     setText("profilePokerPlusBalanceLabel", t.pokerPlusBalance);
-    setText("profilePokerPlusLeagueLabel", t.pokerPlusLeague);
-    setText("profilePokerPlusGroupLabel", t.pokerPlusGroup);
     setText("profilePokerPlusRegisterLabel", t.pokerPlusRegister);
     setText("profilePokerPlusPositionLabel", t.pokerPlusPosition);
     setText("profilePokerPlusCountryLabel", t.pokerPlusCountry);
@@ -16003,10 +15997,6 @@ function initProfilePokerPlus() {
   var avatarImg = document.getElementById("profilePokerPlusAvatarImg");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
   var balanceValue = document.getElementById("profilePokerPlusBalanceValue");
-  var leagueRow = document.getElementById("profilePokerPlusLeagueRow");
-  var leagueValue = document.getElementById("profilePokerPlusLeagueValue");
-  var groupRow = document.getElementById("profilePokerPlusGroupRow");
-  var groupValue = document.getElementById("profilePokerPlusGroupValue");
   var registerRow = document.getElementById("profilePokerPlusRegisterRow");
   var registerValue = document.getElementById("profilePokerPlusRegisterValue");
   var positionRow = document.getElementById("profilePokerPlusPositionRow");
@@ -16073,8 +16063,6 @@ function initProfilePokerPlus() {
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
       if (avatarRow) avatarRow.hidden = true;
-      if (leagueRow) leagueRow.hidden = true;
-      if (groupRow) groupRow.hidden = true;
       if (registerRow) registerRow.hidden = true;
       if (positionRow) positionRow.hidden = true;
       if (countryRow) countryRow.hidden = true;
@@ -16104,8 +16092,6 @@ function initProfilePokerPlus() {
       if (avatarUrl) avatarImg.src = avatarUrl;
       else avatarImg.removeAttribute("src");
     }
-    setPokerPlusRow(leagueRow, leagueValue, p.leagueId);
-    setPokerPlusRow(groupRow, groupValue, p.groupId);
     setPokerPlusRow(registerRow, registerValue, pokerPlusDate(p.registerDate));
     setPokerPlusRow(positionRow, positionValue, p.position);
     setPokerPlusRow(countryRow, countryValue, p.country);
