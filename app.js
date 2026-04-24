@@ -8871,8 +8871,16 @@ function getPokerResolvedTelegramUser() {
         pokerPlusUnbind: "Отвязать",
         pokerPlusEmailLabel: "Email для проверки:",
         pokerPlusPlayer: "Связанный игрок:",
+        pokerPlusAvatar: "Аватар:",
         pokerPlusBalance: "Баланс:",
+        pokerPlusLeague: "Лига:",
+        pokerPlusGroup: "Группа:",
+        pokerPlusRegister: "Дата регистрации:",
+        pokerPlusPosition: "Позиция:",
+        pokerPlusCountry: "Страна:",
         pokerPlusRole: "Роль:",
+        pokerPlusLastLogin: "Последний вход:",
+        pokerPlusLastIp: "IP последнего входа:",
         pokerPlusStats: "Статистика:",
         friends: "Друзья",
         level: "Ваш уровень 1 из 55",
@@ -8906,8 +8914,16 @@ function getPokerResolvedTelegramUser() {
         pokerPlusUnbind: "Unlink",
         pokerPlusEmailLabel: "Verification email:",
         pokerPlusPlayer: "Linked player:",
+        pokerPlusAvatar: "Avatar:",
         pokerPlusBalance: "Balance:",
+        pokerPlusLeague: "League:",
+        pokerPlusGroup: "Group:",
+        pokerPlusRegister: "Registered:",
+        pokerPlusPosition: "Position:",
+        pokerPlusCountry: "Country:",
         pokerPlusRole: "Role:",
+        pokerPlusLastLogin: "Last login:",
+        pokerPlusLastIp: "Last login IP:",
         pokerPlusStats: "Stats:",
         friends: "Friends",
         level: "Your level 1 of 55",
@@ -8949,8 +8965,16 @@ function getPokerResolvedTelegramUser() {
     setText("profilePokerPlusUnbindBtn", t.pokerPlusUnbind);
     setText("profilePokerPlusEmailLabel", t.pokerPlusEmailLabel);
     setText("profilePokerPlusLinkedLabel", t.pokerPlusPlayer);
+    setText("profilePokerPlusAvatarLabel", t.pokerPlusAvatar);
     setText("profilePokerPlusBalanceLabel", t.pokerPlusBalance);
+    setText("profilePokerPlusLeagueLabel", t.pokerPlusLeague);
+    setText("profilePokerPlusGroupLabel", t.pokerPlusGroup);
+    setText("profilePokerPlusRegisterLabel", t.pokerPlusRegister);
+    setText("profilePokerPlusPositionLabel", t.pokerPlusPosition);
+    setText("profilePokerPlusCountryLabel", t.pokerPlusCountry);
     setText("profilePokerPlusRoleLabel", t.pokerPlusRole);
+    setText("profilePokerPlusLastLoginLabel", t.pokerPlusLastLogin);
+    setText("profilePokerPlusLastIpLabel", t.pokerPlusLastIp);
     setText("profilePokerPlusStatsLabel", t.pokerPlusStats);
     setText("profileFriendsBtn", t.friends);
     setText("profileStatusTitle", t.level);
@@ -15975,10 +15999,26 @@ function initProfilePokerPlus() {
   var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
   var linkedValue = document.getElementById("profilePokerPlusLinkedValue");
+  var avatarRow = document.getElementById("profilePokerPlusAvatarRow");
+  var avatarImg = document.getElementById("profilePokerPlusAvatarImg");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
   var balanceValue = document.getElementById("profilePokerPlusBalanceValue");
+  var leagueRow = document.getElementById("profilePokerPlusLeagueRow");
+  var leagueValue = document.getElementById("profilePokerPlusLeagueValue");
+  var groupRow = document.getElementById("profilePokerPlusGroupRow");
+  var groupValue = document.getElementById("profilePokerPlusGroupValue");
+  var registerRow = document.getElementById("profilePokerPlusRegisterRow");
+  var registerValue = document.getElementById("profilePokerPlusRegisterValue");
+  var positionRow = document.getElementById("profilePokerPlusPositionRow");
+  var positionValue = document.getElementById("profilePokerPlusPositionValue");
+  var countryRow = document.getElementById("profilePokerPlusCountryRow");
+  var countryValue = document.getElementById("profilePokerPlusCountryValue");
   var roleRow = document.getElementById("profilePokerPlusRoleRow");
   var roleValue = document.getElementById("profilePokerPlusRoleValue");
+  var lastLoginRow = document.getElementById("profilePokerPlusLastLoginRow");
+  var lastLoginValue = document.getElementById("profilePokerPlusLastLoginValue");
+  var lastIpRow = document.getElementById("profilePokerPlusLastIpRow");
+  var lastIpValue = document.getElementById("profilePokerPlusLastIpValue");
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
@@ -16001,14 +16041,48 @@ function initProfilePokerPlus() {
     return { isGuest: isGuest, isVerified: isVerified };
   }
 
+  function pokerPlusText(value) {
+    return value != null && String(value).trim() ? String(value).trim() : "";
+  }
+
+  function pokerPlusDate(value) {
+    var raw = pokerPlusText(value);
+    if (!raw) return "";
+    var n = Number(raw);
+    if (!n || n !== n) return raw;
+    var ms = n > 100000000000 ? n : n * 1000;
+    var d = new Date(ms);
+    if (!d || d.getTime() !== d.getTime()) return raw;
+    try {
+      return d.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
+    } catch (e) {
+      return d.toLocaleDateString();
+    }
+  }
+
+  function setPokerPlusRow(row, valueEl, value) {
+    var text = pokerPlusText(value);
+    if (row) row.hidden = !text;
+    if (valueEl) valueEl.textContent = text || "—";
+  }
+
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
+      if (avatarRow) avatarRow.hidden = true;
+      if (leagueRow) leagueRow.hidden = true;
+      if (groupRow) groupRow.hidden = true;
+      if (registerRow) registerRow.hidden = true;
+      if (positionRow) positionRow.hidden = true;
+      if (countryRow) countryRow.hidden = true;
       if (roleRow) roleRow.hidden = true;
+      if (lastLoginRow) lastLoginRow.hidden = true;
+      if (lastIpRow) lastIpRow.hidden = true;
       if (statsRow) statsRow.hidden = true;
+      if (avatarImg) avatarImg.removeAttribute("src");
       unbindBtn.hidden = true;
       return;
     }
@@ -16024,8 +16098,21 @@ function initProfilePokerPlus() {
     }
     if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
     if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
+    var avatarUrl = pokerPlusText(p.avatarUrl);
+    if (avatarRow) avatarRow.hidden = !avatarUrl;
+    if (avatarImg) {
+      if (avatarUrl) avatarImg.src = avatarUrl;
+      else avatarImg.removeAttribute("src");
+    }
+    setPokerPlusRow(leagueRow, leagueValue, p.leagueId);
+    setPokerPlusRow(groupRow, groupValue, p.groupId);
+    setPokerPlusRow(registerRow, registerValue, pokerPlusDate(p.registerDate));
+    setPokerPlusRow(positionRow, positionValue, p.position);
+    setPokerPlusRow(countryRow, countryValue, p.country);
     if (roleRow) roleRow.hidden = !(p.role && String(p.role).trim());
     if (roleValue) roleValue.textContent = p.role && String(p.role).trim() ? String(p.role).trim() : "—";
+    setPokerPlusRow(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
+    setPokerPlusRow(lastIpRow, lastIpValue, p.lastLoginIp);
     if (statsValue) {
       var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : {};
       var parts = [];

@@ -27090,16 +27090,30 @@ html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rat
 .profile-email-auth__linked {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
   margin-bottom: 12px;
   font-size: 13px;
   color: var(--text);
+}
+.profile-email-auth__linked--avatar {
+  align-items: flex-start;
 }
 .profile-email-auth__label {
   color: var(--text-muted);
 }
 .profile-email-auth__value {
   font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.profile-email-auth__avatar {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-subtle);
 }
 .profile-email-auth__form {
   display: flex;
