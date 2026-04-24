@@ -22,6 +22,16 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 - `lib/api-handlers/pokerplus-player.js` - Backend handler for reading/refreshing linked player info.
 - `app.js` - Frontend profile UI that sends the user-entered key to our backend.
 
+## Current Production Behavior
+
+The current implementation has these important details:
+
+- `user_app_id` is the user's numeric Telegram user ID, for example `388008256`.
+- `mail` is optional on our side. If the user has no linked email in our app, we still call PokerPlus and send `mail` as an empty string.
+- The initial bind request includes `ciphertext`.
+- The profile refresh request calls the same PokerPlus endpoint, but without `ciphertext`.
+- PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
+
 ## Configuration
 
 The backend reads the following environment variables:
@@ -138,6 +148,17 @@ Example payload shape:
 }
 ```
 
+If the user has no linked email in our app, the same request is sent with an empty `mail` value:
+
+```json
+{
+  "user_app_id": "388008256",
+  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
+  "mail": "",
+  "token": "<token from getToken>"
+}
+```
+
 ## Important Note About `user_app_id`
 
 The current implementation sends the numeric Telegram user ID:
@@ -194,7 +215,71 @@ mail        = <email linked to the user's account in our app, or an empty string
 token       = <token returned by getToken>
 ```
 
+Refresh example payload:
+
+```json
+{
+  "user_app_id": "388008256",
+  "mail": "",
+  "token": "<token from getToken>"
+}
+```
+
 The returned player data is normalized and cached in our app.
+
+## Displayed Player Data
+
+When PokerPlus returns a successful response, we already normalize and display the returned player data in the app profile.
+
+Example PokerPlus response:
+
+```json
+{
+  "status": 1,
+  "message": "success",
+  "data": {
+    "Id": "907778",
+    "Nike": "smjl123456",
+    "HeadImageUrl": "http://sp.poker21pro.com/upload/player_headimg/202509/1757587642559.jpg",
+    "league_id": "184691",
+    "group_id": "758417",
+    "RegisterDate": "1776863698",
+    "position": "0",
+    "total_counter": [],
+    "gold": "0.0000",
+    "LastLoginDate": "",
+    "LastLoginIp": "",
+    "Country": "",
+    "Role": "Member"
+  },
+  "code": 0
+}
+```
+
+Normalized fields used by our app:
+
+- `data.Id` -> `pokerPlusUserId`
+- `data.Nike` -> `nickname`
+- `data.HeadImageUrl` -> `avatarUrl`
+- `data.league_id` -> `leagueId`
+- `data.group_id` -> `groupId`
+- `data.RegisterDate` -> `registerDate`
+- `data.position` -> `position`
+- `data.gold` -> `balance`
+- `data.LastLoginDate` -> `lastLoginDate`
+- `data.LastLoginIp` -> `lastLoginIp`
+- `data.Country` -> `country`
+- `data.Role` -> `role`
+- `data.total_counter` -> statistics, if it is an object
+
+Currently visible in the profile UI:
+
+- linked PokerPlus player: nickname and player ID;
+- balance;
+- role;
+- statistics, when `total_counter` contains an object with values.
+
+If `total_counter` is an empty array, we treat it as no statistics available and do not show a stats row. This does not break the profile display.
 
 ## Error Handling
 
@@ -220,5 +305,6 @@ Our integration matches the PokerPlus API documentation in:
 - Token flow via `getToken`.
 - Bind fields: `user_app_id`, `ciphertext`, `mail`, `token`.
 - Unbind fields: `user_app_id`, `token`.
+- Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
 
 The only integration detail that needs confirmation is whether numeric Telegram user ID is the expected value of `user_app_id`.
