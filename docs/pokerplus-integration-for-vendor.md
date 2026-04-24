@@ -20,6 +20,9 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 - `lib/api-handlers/pokerplus-bind.js` - Backend handler for binding a PokerPlus account.
 - `lib/api-handlers/pokerplus-unbind.js` - Backend handler for unbinding.
 - `lib/api-handlers/pokerplus-player.js` - Backend handler for reading/refreshing linked player info.
+- `lib/api-handlers/pokerplus-tables.js` - Backend handler for currently playing tables.
+- `lib/api-handlers/pokerplus-competitions.js` - Backend handler for upcoming competitions.
+- `lib/api-handlers/pokerplus-maintenance.js` - Backend handler for game maintenance status.
 - `app.js` - Frontend profile UI that sends the user-entered key to our backend.
 
 ## Current Production Behavior
@@ -32,8 +35,10 @@ The current implementation has these important details:
 - The initial bind request includes `ciphertext`.
 - The profile refresh request is email-based: it calls the same PokerPlus endpoint without `ciphertext`, but only when the user has a linked email in our app.
 - During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
+- During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
 - If the user has no linked email, refresh does not call PokerPlus. The user should bind with the PokerPlus key instead.
+- On normal profile opening, the frontend asks our backend for cached PokerPlus data only. A live PokerPlus refresh is made only when the user presses `Refresh`.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 
 ## Configuration
@@ -233,6 +238,8 @@ The returned player data is normalized and cached in our app.
 
 If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID and linked email. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
 
+For older local bindings, the saved PokerPlus player ID can exist while the saved Telegram value is still empty. In that case, refresh uses the numeric Telegram ID from the current verified Telegram session as a fallback `user_app_id`. After a successful refresh, this value is saved locally and future refreshes can use it directly.
+
 If the user has no linked email in our app, refresh returns an error and does not call PokerPlus. In that case the user can use the key-based bind flow instead.
 
 If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
@@ -287,11 +294,151 @@ Normalized fields used by our app:
 Currently visible in the profile UI:
 
 - linked PokerPlus player: nickname and player ID;
+- avatar;
 - balance;
+- registration date;
+- position;
+- country, if present;
 - role;
+- last login date, if present;
+- last login IP, if present;
 - statistics, when `total_counter` contains an object with values.
 
+`leagueId` and `groupId` are stored by the backend, but they are currently hidden in the profile UI.
+
 If `total_counter` is an empty array, we treat it as no statistics available and do not show a stats row. This does not break the profile display.
+
+PokerPlus profile values are not filtered by day on our side. We display the aggregate/current values returned by PokerPlus. The current refresh request does not send `date_from`, `date_to`, `day`, or other period filters.
+
+## Playing Tables Flow
+
+Our backend can request currently playing tables from PokerPlus.
+
+PokerPlus endpoint:
+
+```text
+POST https://sp.poker21pro.com/service_v1/getPlayingTables
+Content-Type: form-data
+```
+
+Form-data fields:
+
+```text
+token = <token returned by getToken>
+```
+
+Our public backend endpoint:
+
+```text
+GET https://poker-app-ebon.vercel.app/api/pokerplus-tables
+```
+
+Normalized table fields:
+
+```json
+{
+  "playerCount": 0,
+  "deskId": "",
+  "deskName": "",
+  "unionId": "",
+  "leagueId": "",
+  "groupId": "",
+  "playType": "",
+  "blindAnnotation": "",
+  "entryFees": null
+}
+```
+
+The frontend does not currently display this list in the profile UI.
+
+## Upcoming Competitions Flow
+
+Our backend can request upcoming competitions from PokerPlus.
+
+PokerPlus endpoint:
+
+```text
+POST https://sp.poker21pro.com/service_v1/getTheUpcomingCompetitions
+Content-Type: form-data
+```
+
+Form-data fields:
+
+```text
+token = <token returned by getToken>
+```
+
+Our public backend endpoint:
+
+```text
+GET https://poker-app-ebon.vercel.app/api/pokerplus-competitions
+```
+
+Normalized competition fields:
+
+```json
+{
+  "competitionId": "",
+  "competitionName": "",
+  "unionId": "",
+  "leagueId": "",
+  "groupId": "",
+  "playType": "",
+  "startTime": null,
+  "endTime": null
+}
+```
+
+The frontend does not currently display this list in the profile UI.
+
+## Maintenance Status Flow
+
+Our backend can request game maintenance status from PokerPlus.
+
+PokerPlus endpoint:
+
+```text
+POST https://sp.poker21pro.com/service_v1/getGameMaintainStatus
+Content-Type: form-data
+```
+
+Form-data fields:
+
+```text
+token = <token returned by getToken>
+```
+
+Our public backend endpoint:
+
+```text
+GET https://poker-app-ebon.vercel.app/api/pokerplus-maintenance
+```
+
+Normalized maintenance fields:
+
+```json
+{
+  "maintainStatus": -1,
+  "startTime": "",
+  "endTime": "",
+  "content": "",
+  "title": ""
+}
+```
+
+The frontend does not currently display this status in the profile UI.
+
+## PWA Profile Loading Notes
+
+The normal PWA profile screen also shows non-PokerPlus data such as email, Telegram username, respect score, display name, internal account ID, and Poker21 ID.
+
+Recent frontend behavior:
+
+- The profile screen shares one `/api/users` request through a short in-memory cache instead of firing several duplicate profile requests at once.
+- Linked email and linked Telegram username are read from `/api/users`, then cached locally for faster subsequent profile openings.
+- The respect score shows the last locally cached value immediately and updates quietly from `/api/respect`.
+- These local profile caches are cleared when the user logs out.
+- PokerPlus live refresh is not part of the initial PWA profile load unless the user presses `Refresh`.
 
 ## Error Handling
 
@@ -318,5 +465,8 @@ Our integration matches the PokerPlus API documentation in:
 - Bind fields: `user_app_id`, `ciphertext`, `mail`, `token`.
 - Unbind fields: `user_app_id`, `token`.
 - Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
+- Tables endpoint: `getPlayingTables`.
+- Competitions endpoint: `getTheUpcomingCompetitions`.
+- Maintenance endpoint: `getGameMaintainStatus`.
 
 The only integration detail that needs confirmation is whether numeric Telegram user ID is the expected value of `user_app_id`.
