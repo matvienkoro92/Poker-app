@@ -30,6 +30,7 @@ The current implementation has these important details:
 - `mail` is optional on our side. If the user has no linked email in our app, we still call PokerPlus and send `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
 - The profile refresh request calls the same PokerPlus endpoint, but without `ciphertext`.
+- Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 
 ## Configuration
@@ -226,6 +227,8 @@ Refresh example payload:
 ```
 
 The returned player data is normalized and cached in our app.
+
+If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
 
 ## Displayed Player Data
 
