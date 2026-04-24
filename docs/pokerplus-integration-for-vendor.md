@@ -10,7 +10,7 @@ The user enters only the PokerPlus secret key (`ciphertext`) in our app profile.
 
 1. Verifies the user session.
 2. Resolves the internal account.
-3. Reads the email already linked to that account.
+3. Reads the email linked to that account, if available.
 4. Requests a PokerPlus API token.
 5. Calls the PokerPlus bind endpoint with `user_app_id`, `ciphertext`, `mail`, and `token`.
 
@@ -101,7 +101,7 @@ or, in PWA mode:
 Our backend then resolves:
 
 - `ciphertext` from the frontend request.
-- `mail` from the email already linked to the user's account in our app.
+- `mail` from the email linked to the user's account in our app, if available.
 - `user_app_id` from the user's numeric Telegram user ID.
 - `token` from the PokerPlus `getToken` endpoint.
 
@@ -123,7 +123,7 @@ Form-data fields:
 ```text
 user_app_id = <numeric Telegram user ID>
 ciphertext  = <secret key copied from PokerPlus>
-mail        = <email linked to the user's account in our app>
+mail        = <email linked to the user's account in our app, or an empty string>
 token       = <token returned by getToken>
 ```
 
@@ -179,7 +179,7 @@ When we refresh a linked player profile, our backend reuses the saved:
 
 - `user_app_id`
 - `ciphertext`
-- `mail`
+- `mail`, if it was available during binding
 
 Then it calls the same PokerPlus bind endpoint again:
 
