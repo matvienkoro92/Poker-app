@@ -28032,7 +28032,7 @@ function initChat() {
         else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
         var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
         var sep = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span></div>";
+        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span>" + verifiedStr + "</div>";
         var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
         var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
         var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -28182,7 +28182,7 @@ function initChat() {
         else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
         var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
         var sepP = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span></div>";
+        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span>" + verifiedStrP + "</div>";
         var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
         var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
         var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -33264,11 +33264,12 @@ function initChat() {
             '<span class="chat-msg__name">' +
             nameStrP +
             "</span>" +
-            verifiedStrP +
             sepP +
             '<span class="chat-msg__p21-inline">' +
             p21StrP +
-            "</span></div>";
+            "</span>" +
+            verifiedStrP +
+            "</div>";
           var respectPartP =
             '<span class="chat-msg__respect-row chat-msg__respect-inline"><span class="' +
             respectClassP +
