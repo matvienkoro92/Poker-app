@@ -28281,6 +28281,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   display: grid;
   grid-template-columns: 1fr;
   margin: 2px 0 4px;
+  gap: 0;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCiphertextInput,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBindBtn {
@@ -28290,6 +28291,13 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusFeedback {
+  margin-top: 8px;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusFeedback:empty {
+  display: none !important;
+  margin: 0 !important;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-visible-to-others__p21-save {
   width: auto;
