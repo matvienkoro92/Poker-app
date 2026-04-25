@@ -17001,10 +17001,18 @@ function initProfilePokerPlus() {
     if (valueEl) valueEl.textContent = text || "—";
   }
 
+  function setPokerPlusLinkedMode(linked) {
+    if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
+    input.hidden = !!linked;
+    bindBtn.hidden = !!linked;
+    refreshBtn.hidden = !linked;
+    unbindBtn.hidden = !linked;
+  }
+
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
-      if (section && section.classList) section.classList.remove("profile-pokerplus-card--linked");
+      setPokerPlusLinkedMode(false);
       if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Verification via Poker21" : "Верификация через Poker21";
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
@@ -17023,12 +17031,10 @@ function initProfilePokerPlus() {
       if (avatarImg) avatarImg.removeAttribute("src");
       try { window.__pokerPlusUserId = ""; } catch (eClearPpId) {}
       updateProfileHeroPokerPlusId("");
-      unbindBtn.hidden = true;
       return;
     }
-    if (section && section.classList) section.classList.add("profile-pokerplus-card--linked");
+    setPokerPlusLinkedMode(true);
     if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
-    unbindBtn.hidden = false;
     if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
     if (linkedRow) linkedRow.hidden = false;
@@ -17064,6 +17070,7 @@ function initProfilePokerPlus() {
   function syncVisibility() {
     var state = auth();
     section.hidden = !state.isVerified || !!state.isGuest;
+    if (state.isVerified && !state.isGuest) setPokerPlusLinkedMode(false);
     bindBtn.disabled = !state.isVerified || !!state.isGuest;
     refreshBtn.disabled = !state.isVerified || !!state.isGuest;
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
