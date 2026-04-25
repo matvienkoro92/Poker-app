@@ -18318,8 +18318,11 @@ body[data-view="cashout"] .title {
 }
 
 body[data-view="cashout"] .cashout-now-subtitle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
   min-height: 28px;
   margin: 0 auto 12px;
   padding: 5px 10px;
@@ -18329,6 +18332,7 @@ body[data-view="cashout"] .cashout-now-subtitle {
   color: #86efac;
   font-size: 12px;
   font-weight: 800;
+  text-align: center;
 }
 
 body[data-view="cashout"] .cashout-manager-block {
