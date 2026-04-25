@@ -29341,69 +29341,30 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 
 /* Эквилятор */
-body[data-view="equilator"] .view.view--active[data-view="equilator"] {
-  max-width: 760px;
-  margin: 0 auto;
-}
-body[data-view="equilator"] .title {
-  margin: 4px 0 8px;
-  color: #f8fafc;
-  font-size: clamp(34px, 7vw, 52px);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: 0;
-}
 .equilator-intro {
-  max-width: 38rem;
-  margin: 0 0 14px;
-  font-size: 15px;
-  color: rgba(203, 213, 225, 0.78);
-  line-height: 1.5;
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.45;
 }
 .equilator-form {
-  position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   padding: 16px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.13), transparent 30%),
-    radial-gradient(circle at 6% 0%, rgba(56, 189, 248, 0.12), transparent 28%),
-    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
-  border: 1px solid rgba(125, 211, 252, 0.22);
-  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 18px 46px rgba(0, 0, 0, 0.26);
-}
-.equilator-form::after {
-  content: "Equity";
-  position: absolute;
-  right: 8px;
-  top: 96px;
-  color: rgba(148, 163, 184, 0.055);
-  font-size: clamp(66px, 16vw, 150px);
-  font-weight: 900;
-  line-height: 1;
-  pointer-events: none;
-  transform: rotate(-12deg);
-}
-.equilator-form > * {
-  position: relative;
-  z-index: 1;
-}
-.equilator-section {
-  min-width: 0;
+  gap: 16px;
 }
 .equilator-section__title {
-  margin: 0 0 9px;
-  font-size: 14px;
-  font-weight: 900;
-  color: rgba(226, 232, 240, 0.92);
-  letter-spacing: 0;
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
 }
 .equilator-hand-label {
-  font-size: 15px;
+  font-size: 16px;
 }
 .equilator-hint {
   margin: 0 0 8px;
@@ -29415,67 +29376,50 @@ body[data-view="equilator"] .title {
 .equilator-board {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: flex-start;
 }
 .equilator-hands-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  gap: 12px;
+  gap: 16px;
 }
 .equilator-hero-block {
-  min-height: 120px;
-  padding: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.42);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 8px;
 }
 .equilator-opp-block {
-  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
 }
 .equilator-opp-list {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 .equilator-add-player-btn {
-  width: fit-content;
-  min-height: 38px;
-  padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 800;
-  color: rgba(203, 213, 225, 0.84);
-  background: rgba(15, 23, 42, 0.52);
-  border: 1px dashed rgba(148, 163, 184, 0.32);
-  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed var(--border-subtle);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 .equilator-add-player-btn:hover {
-  background: rgba(30, 41, 59, 0.72);
-  border-color: rgba(251, 146, 60, 0.48);
-  color: #f8fafc;
+  background: rgba(51, 65, 85, 0.8);
+  color: var(--text);
 }
 .equilator-opp-row {
-  width: 100%;
-  min-height: 120px;
-  padding: 12px;
-  box-sizing: border-box;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.42);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -29508,12 +29452,10 @@ body[data-view="equilator"] .title {
   color: #ef4444;
 }
 .equilator-opp-label {
-  min-width: 0;
-  max-width: 100%;
-  font-size: 15px;
-  font-weight: 900;
-  color: rgba(203, 213, 225, 0.82);
-  text-align: right;
+  min-width: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 .equilator-card-pick {
   display: flex;
@@ -29545,75 +29487,36 @@ body[data-view="equilator"] .title {
 }
 .equilator-result {
   padding: 16px;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.1), transparent 26%),
-    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
-  border: 1px solid rgba(125, 211, 252, 0.2);
-  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
   margin-top: 8px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 .equilator-result__title {
   margin: 0 0 12px;
-  font-size: 19px;
-  font-weight: 900;
-  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
 }
 .equilator-result__line {
-  margin: 0 0 8px;
-  font-size: 16px;
-  font-weight: 800;
-  color: #f8fafc;
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text);
 }
 .equilator-result__label {
-  color: rgba(203, 213, 225, 0.78);
-  font-weight: 700;
+  color: var(--text-muted);
   margin-right: 6px;
 }
 .equilator-result__meta {
   margin: 12px 0 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(148, 163, 184, 0.88);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-[data-theme="light"] body[data-view="equilator"] .title {
-  color: #2b1d15;
-}
-[data-theme="light"] .equilator-intro {
-  color: rgba(120, 92, 71, 0.9);
-}
-[data-theme="light"] .equilator-form {
-  background:
-    radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.15), transparent 30%),
-    radial-gradient(circle at 6% 0%, rgba(59, 130, 246, 0.1), transparent 28%),
-    linear-gradient(145deg, rgba(255, 251, 247, 0.98), rgba(255, 237, 213, 0.96));
-  border-color: rgba(249, 115, 22, 0.28);
-  box-shadow: 0 14px 32px rgba(249, 115, 22, 0.1);
-}
-[data-theme="light"] .equilator-form::after {
-  color: rgba(120, 92, 71, 0.07);
-}
-[data-theme="light"] .equilator-section__title,
-[data-theme="light"] .equilator-opp-label,
-[data-theme="light"] .equilator-result__title,
-[data-theme="light"] .equilator-result__line {
-  color: var(--text);
-}
-[data-theme="light"] .equilator-hero-block,
-[data-theme="light"] .equilator-opp-row {
-  background: rgba(255, 255, 255, 0.54);
-  border-color: rgba(120, 92, 71, 0.16);
-}
-[data-theme="light"] .equilator-add-player-btn {
-  color: rgba(120, 92, 71, 0.9);
-  background: rgba(255, 255, 255, 0.42);
-  border-color: rgba(120, 92, 71, 0.24);
-}
 [data-theme="light"] .equilator-result {
   background: linear-gradient(135deg, rgba(255, 251, 247, 0.98), rgba(255, 237, 213, 0.95));
-  border-color: rgba(249, 115, 22, 0.32);
-  box-shadow: 0 2px 10px rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.08);
 }
 [data-theme="light"] .equilator-result__title,
 [data-theme="light"] .equilator-result__line {
@@ -29628,15 +29531,15 @@ body[data-view="equilator"] .title {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 64px;
+  width: 48px;
+  height: 68px;
   padding: 0;
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text);
   background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 9px;
+  border-radius: 6px;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
@@ -29678,8 +29581,8 @@ body[data-view="equilator"] .title {
   font-size: 16px;
   line-height: 1;
   color: #fff;
-  background: rgba(100, 116, 139, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   cursor: pointer;
   display: inline-flex;
@@ -29699,28 +29602,22 @@ body[data-view="equilator"] .title {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 12px;
-  margin-bottom: 0;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.42);
+  margin-bottom: 10px;
 }
 .equilator-board-row:last-of-type { margin-bottom: 0; }
 .equilator-board-label {
-  flex: 0 0 100%;
-  min-width: 0;
+  min-width: 52px;
   font-size: 13px;
-  color: rgba(203, 213, 225, 0.76);
-  font-weight: 800;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 .equilator-picker-wrap {
   margin: 12px 0;
   padding: 14px;
   background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(125, 211, 252, 0.24);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   z-index: 100;
-  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
 }
 .equilator-picker-wrap--hidden { display: none; }
 .equilator-picker-title {
@@ -29774,56 +29671,6 @@ body[data-view="equilator"] .title {
   cursor: pointer;
 }
 .equilator-picker-close:hover { color: var(--text); border-color: var(--text-muted); }
-
-#equilatorCalcBtn {
-  min-height: 50px;
-  border-radius: 16px;
-  font-size: 17px;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  box-shadow: 0 16px 34px rgba(249, 115, 22, 0.26);
-}
-
-@media (max-width: 560px) {
-  body[data-view="equilator"] .title {
-    margin-top: 0;
-    font-size: 34px;
-  }
-  .equilator-intro {
-    font-size: 14px;
-  }
-  .equilator-form,
-  .equilator-result {
-    padding: 12px;
-    border-radius: 16px;
-  }
-  .equilator-hands-row {
-    grid-template-columns: 1fr;
-  }
-  .equilator-opp-block,
-  .equilator-opp-list,
-  .equilator-opp-row {
-    align-items: flex-start;
-  }
-  .equilator-opp-row-head {
-    flex-direction: row-reverse;
-  }
-  .equilator-opp-label {
-    text-align: left;
-  }
-  .equilator-card-slot {
-    width: 44px;
-    height: 62px;
-    border-radius: 8px;
-  }
-  .equilator-board-row {
-    gap: 7px;
-  }
-  #equilatorCalcBtn {
-    min-height: 48px;
-    font-size: 15px;
-  }
-}
 
 .streams-open-in-browser {
   margin-bottom: 20px;
