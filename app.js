@@ -4445,6 +4445,15 @@ function runGazetteAndTasksInit() {
       romanPlannerSwipeApplyMove(ev.clientX, ev.clientY, ev, isMouse);
     }
     function romanPlannerSwipeTouchDocMove(ev) {
+      var reorder = romanPlannerReorderActive;
+      if (reorder && reorder.active && reorder.touchId != null) {
+        var dragTouch = romanPlannerSwipeFindTouch(ev, reorder.touchId);
+        if (dragTouch) {
+          try { ev.preventDefault(); } catch (eReorderTouchPd) {}
+          romanPlannerReorderMoveTo(dragTouch.clientY);
+          return;
+        }
+      }
       var st = romanPlannerSwipeActive;
       if (!st || !st.dragging || st.touchId == null) return;
       var touch = romanPlannerSwipeFindTouch(ev, st.touchId);
@@ -4459,6 +4468,23 @@ function runGazetteAndTasksInit() {
       romanPlannerSwipeEnd(true);
     }
     function romanPlannerSwipeTouchDocEnd(ev) {
+      var reorder = romanPlannerReorderActive;
+      if (reorder && reorder.touchId != null && romanPlannerSwipeFindTouchChanged(ev, reorder.touchId)) {
+        var wasReorderActive = reorder.active;
+        var keepReorderScrollTop = reorder.keepScrollTop;
+        var keepReorderPageScrollTop = reorder.keepPageScrollTop;
+        if (wasReorderActive) {
+          romanPlannerReorderClearTimer();
+          reorder.item.classList.remove("roman-task-planner__item--dragging");
+          if (listAll) listAll.classList.remove("roman-task-planner__list--dragging");
+          document.body.classList.remove("tasks-drag-active");
+          romanPlannerReorderActive = null;
+          romanPlannerReorderSaveDomOrder(keepReorderScrollTop, keepReorderPageScrollTop);
+          if (romanPlannerSwipeActive) romanPlannerSwipeEnd(false);
+          return;
+        }
+        romanPlannerReorderCancel();
+      }
       var st = romanPlannerSwipeActive;
       if (!st || st.touchId == null) return;
       if (!romanPlannerSwipeFindTouchChanged(ev, st.touchId)) return;
@@ -4580,6 +4606,7 @@ function runGazetteAndTasksInit() {
     function romanPlannerReorderPointerDown(ev) {
       if (!listAll || plannerTab === "done") return;
       if (ev.pointerType === "mouse" && ev.button !== 0) return;
+      if (romanPlannerReorderActive) return;
       var t = ev.target;
       if (!t || !t.closest) return;
       if (t.closest(".roman-task-planner__btn, .roman-task-planner__edit-ta, input, textarea, select, a")) return;
@@ -4649,6 +4676,28 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (romanPlannerSwipeActive) return;
       if (romanPlannerReorderActive && romanPlannerReorderActive.active) return;
+      var item = t.closest(".roman-task-planner__item[data-roman-task-id]");
+      if (!romanPlannerReorderActive && item && listAll.contains(item) && plannerTab !== "done") {
+        romanPlannerReorderActive = {
+          item: item,
+          pointerId: null,
+          touchId: touch.identifier,
+          startX: touch.clientX,
+          startY: touch.clientY,
+          startedAt: Date.now(),
+          active: false,
+          timer: setTimeout(romanPlannerReorderStart, 220),
+          keepScrollTop: listAll.scrollTop || 0,
+          keepPageScrollTop:
+            (document.scrollingElement && document.scrollingElement.scrollTop) ||
+            (document.documentElement && document.documentElement.scrollTop) ||
+            (document.body && document.body.scrollTop) ||
+            0,
+        };
+      }
+      if (romanPlannerReorderActive && !romanPlannerReorderActive.active) {
+        romanPlannerReorderActive.touchId = touch.identifier;
+      }
       romanPlannerSwipeStartOnClip(clip, touch.clientX, touch.clientY, null, touch.identifier);
     }
     function romanPlannerListPointerDown(ev) {
