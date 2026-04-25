@@ -23828,11 +23828,25 @@ function clearClubTasksPlannerDragTimer() {
   }
 }
 
+function startClubTasksPlannerDrag() {
+  var drag = clubTasksPlannerDrag;
+  if (!drag || drag.active || !drag.taskEl || !drag.board) return;
+  clearClubTasksPlannerDragTimer();
+  drag.active = true;
+  drag.board.classList.add("tasks-board--dragging");
+  drag.taskEl.classList.add("tasks-task--dragging");
+  drag.taskEl.style.touchAction = "none";
+  document.body.classList.add("tasks-drag-active");
+}
+
 function cancelClubTasksPlannerDrag() {
   clearClubTasksPlannerDragTimer();
   if (clubTasksPlannerDrag && clubTasksPlannerDrag.taskEl) {
     clubTasksPlannerDrag.taskEl.classList.remove("tasks-task--dragging");
     clubTasksPlannerDrag.taskEl.style.removeProperty("touch-action");
+    if (clubTasksPlannerDrag.pointerId != null) {
+      try { clubTasksPlannerDrag.taskEl.releasePointerCapture(clubTasksPlannerDrag.pointerId); } catch (err) {}
+    }
   }
   if (clubTasksPlannerDrag && clubTasksPlannerDrag.board) {
     clubTasksPlannerDrag.board.classList.remove("tasks-board--dragging");
@@ -23854,16 +23868,13 @@ function bindClubTasksPlannerDrag(board) {
       pointerId: e.pointerId,
       startX: e.clientX,
       startY: e.clientY,
+      startedAt: Date.now(),
       timer: setTimeout(function () {
         if (!clubTasksPlannerDrag || clubTasksPlannerDrag.taskEl !== taskEl) return;
-        clubTasksPlannerDrag.active = true;
-        board.classList.add("tasks-board--dragging");
-        taskEl.classList.add("tasks-task--dragging");
-        taskEl.style.touchAction = "none";
-        document.body.classList.add("tasks-drag-active");
-        try { taskEl.setPointerCapture(e.pointerId); } catch (err) {}
-      }, 260)
+        startClubTasksPlannerDrag();
+      }, 180)
     };
+    try { taskEl.setPointerCapture(e.pointerId); } catch (err) {}
   });
 
   board.addEventListener("pointermove", function (e) {
@@ -23872,8 +23883,14 @@ function bindClubTasksPlannerDrag(board) {
     var dx = e.clientX - drag.startX;
     var dy = e.clientY - drag.startY;
     if (!drag.active) {
-      if (Math.sqrt(dx * dx + dy * dy) > 9) cancelClubTasksPlannerDrag();
-      return;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      var elapsed = Date.now() - drag.startedAt;
+      if (Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx) + 10 && elapsed < 180) {
+        cancelClubTasksPlannerDrag();
+        return;
+      }
+      if (distance < 7 || elapsed < 120) return;
+      startClubTasksPlannerDrag();
     }
     e.preventDefault();
     moveClubTaskElementToPoint(drag.taskEl, e.clientX, e.clientY);
@@ -23886,7 +23903,6 @@ function bindClubTasksPlannerDrag(board) {
     if (drag.active) {
       e.preventDefault();
       saveClubTasksPlannerDomOrder(board);
-      try { drag.taskEl.releasePointerCapture(e.pointerId); } catch (err) {}
       renderClubTasksPlanner();
     }
     cancelClubTasksPlannerDrag();

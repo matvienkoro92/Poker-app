@@ -16222,6 +16222,9 @@ a.tournament-day-share-btn {
   background: rgba(15, 23, 42, 0.07);
   cursor: grab;
   touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease, border-color 0.16s ease;
 }
 
