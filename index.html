@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.195">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.196">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4216,6 +4216,10 @@
               </div>
             </div>
             <section class="profile-hero-card" aria-labelledby="profileUserName">
+              <div class="profile-hero-card__identity">
+                <h2 class="profile-hero-card__name" id="profileUserName">Профиль игрока</h2>
+                <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
+              </div>
               <div class="profile-avatar-block" id="profileAvatarBlock">
                 <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать фото" aria-label="Выбрать фото" />
                 <button type="button" class="profile-avatar-block__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате">
@@ -4223,10 +4227,6 @@
                 </button>
                 <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
                 <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
-              </div>
-              <div class="profile-hero-card__identity">
-                <h2 class="profile-hero-card__name" id="profileUserName">Профиль игрока</h2>
-                <p class="profile-hero-card__id">ID <span id="profileUserId">—</span></p>
               </div>
               <section class="profile-status" id="profileStatusSection">
                 <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
@@ -6547,7 +6547,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=843"></script>
+    <script defer src="./app.js?v=844"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

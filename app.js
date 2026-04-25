@@ -16428,6 +16428,20 @@ function updateProfileUserMeta() {
   else metaEl.textContent = "";
 }
 
+function updateProfileHeroPokerPlusId(value) {
+  var el = document.getElementById("profileUserId");
+  var row = el && el.closest ? el.closest(".profile-hero-card__id") : null;
+  if (!el || !row) return;
+  var text = "";
+  try {
+    text = typeof pokerPlusText === "function" ? pokerPlusText(value) : String(value || "").trim();
+  } catch (eText) {
+    text = String(value || "").trim();
+  }
+  el.textContent = text || "\u2014";
+  row.hidden = !text;
+}
+
 function loadProfileDebugInfo() {
   return;
 }
@@ -16512,7 +16526,7 @@ function loadCurrentProfileUserInfo() {
 
 function updateProfileDtId() {
   var el = document.getElementById("profileUserId");
-  if (!el) return;
+  if (el) updateProfileHeroPokerPlusId(typeof window !== "undefined" ? window.__pokerPlusUserId : "");
   var base = getApiBase();
   var authQ = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
   var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
@@ -16521,14 +16535,11 @@ function updateProfileDtId() {
     authQWithHint += "&dtIdHint=" + encodeURIComponent(cached);
   }
   if (cached) {
-    el.textContent = cached;
     if (!base || !authQ || authQ === "?initData=") return;
   }
   if (!base || !authQ || authQ === "?initData=") {
-    if (!cached) el.textContent = "\u2014";
     return;
   }
-  el.textContent = "\u2026";
   loadCurrentProfileUserInfo()
     .then(function (data) {
       if (data && data.ok && data.dtId) {
@@ -16539,13 +16550,11 @@ function updateProfileDtId() {
             pokerRememberLastMemberId(window.pokerResolveMyChatMemberId());
           }
         } catch (eRememberMid) {}
-        el.textContent = data.dtId;
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
-      } else {
-        el.textContent = cached || "\u2014";
       }
       if (data && data.ok) {
         pokerApplyProfileUserInfo(data);
+        if (data.p21Id) updateProfileHeroPokerPlusId(data.p21Id);
         if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
       }
@@ -16569,7 +16578,7 @@ function updateProfileDtId() {
       } catch (eHdrAfterUsers) {}
     })
     .catch(function () {
-      el.textContent = cached || "\u2014";
+      updateProfileHeroPokerPlusId(typeof window !== "undefined" ? window.__pokerPlusUserId : "");
     });
   loadProfileDebugInfo();
 }
@@ -16954,6 +16963,7 @@ function initProfilePokerPlus() {
       if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
       try { window.__pokerPlusUserId = ""; } catch (eClearPpId) {}
+      updateProfileHeroPokerPlusId("");
       unbindBtn.hidden = true;
       return;
     }
@@ -16969,6 +16979,7 @@ function initProfilePokerPlus() {
       linkedValue.textContent = playerParts.join(" ") || "—";
     }
     try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
+    updateProfileHeroPokerPlusId(p.pokerPlusUserId);
     if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
     if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
     if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
