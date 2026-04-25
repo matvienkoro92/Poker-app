@@ -16949,6 +16949,33 @@ function initProfilePokerPlus() {
     return null;
   }
 
+  function renderPokerPlusStats(totalSource) {
+    if (!statsValue) return;
+    var total = totalSource && typeof totalSource === "object" ? totalSource : {};
+    var metrics = [];
+    var handsStat = pokerPlusPickStat(total, "hands", "hands");
+    var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
+    var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
+    var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
+    var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
+    var feeStat = pokerPlusPickStat(total, "fee", "fee");
+    var bbStat = pokerPlusPickStat(total, "bb", "bb");
+    metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
+    metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+    metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
+    metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
+    metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
+    metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
+    metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
+    statsValue.innerHTML = '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>";
+    if (statsRow) statsRow.hidden = false;
+  }
+
+  function renderPokerPlusStatsFallbackIfVisible() {
+    if (!section || !section.classList || !section.classList.contains("profile-pokerplus-card--linked")) return;
+    renderPokerPlusStats({});
+  }
+
   function pokerPlusDate(value) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
@@ -16986,7 +17013,7 @@ function initProfilePokerPlus() {
       if (roleRow) roleRow.hidden = true;
       if (lastLoginRow) lastLoginRow.hidden = true;
       if (lastIpRow) lastIpRow.hidden = true;
-      if (statsRow) statsRow.hidden = true;
+      renderPokerPlusStats({});
       if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
       unbindBtn.hidden = true;
@@ -17021,26 +17048,7 @@ function initProfilePokerPlus() {
     if (roleValue) roleValue.textContent = p.role && String(p.role).trim() ? String(p.role).trim() : "—";
     setPokerPlusRow(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
     setPokerPlusRow(lastIpRow, lastIpValue, p.lastLoginIp);
-    if (statsValue) {
-      var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : {});
-      var metrics = [];
-      var handsStat = pokerPlusPickStat(total, "hands", "hands");
-      var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
-      var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
-      var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
-      var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
-      var feeStat = pokerPlusPickStat(total, "fee", "fee");
-      var bbStat = pokerPlusPickStat(total, "bb", "bb");
-      metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
-      metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-      metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
-      metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
-      metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
-      metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
-      metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
-      statsValue.innerHTML = '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>";
-      if (statsRow) statsRow.hidden = false;
-    }
+    renderPokerPlusStats(p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : {}));
   }
 
   function syncVisibility() {
@@ -17090,6 +17098,7 @@ function initProfilePokerPlus() {
       })
       .catch(function () {
         setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
+        renderPokerPlusStatsFallbackIfVisible();
       });
   }
 

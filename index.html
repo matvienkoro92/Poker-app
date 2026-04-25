@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.187">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.188">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4380,9 +4380,19 @@
                 <span class="profile-email-auth__label" id="profilePokerPlusLastIpLabel">IP последнего входа:</span>
                 <span class="profile-email-auth__value" id="profilePokerPlusLastIpValue">—</span>
               </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
+              <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow">
                 <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">—</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">
+                  <span class="profile-pokerplus-stats">
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Раздачи</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♠</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Выигрыш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">⌁</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">MTT</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♜</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">SNG</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♞</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">OFC</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♢</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Fee</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">%</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">BB</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">BB</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                  </span>
+                </span>
               </div>
             </section>
             <section class="profile-friends">
@@ -6547,7 +6557,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=835"></script>
+    <script defer src="./app.js?v=836"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
