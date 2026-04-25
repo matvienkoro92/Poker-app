@@ -17004,6 +17004,7 @@ function initProfilePokerPlus() {
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
+      section.hidden = true;
       if (section && section.classList) section.classList.remove("profile-pokerplus-card--linked");
       if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Verification via Poker21" : "Верификация через Poker21";
       if (emailRow) emailRow.hidden = true;
@@ -17026,6 +17027,7 @@ function initProfilePokerPlus() {
       unbindBtn.hidden = true;
       return;
     }
+    section.hidden = false;
     if (section && section.classList) section.classList.add("profile-pokerplus-card--linked");
     if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
     unbindBtn.hidden = false;
@@ -17063,7 +17065,7 @@ function initProfilePokerPlus() {
 
   function syncVisibility() {
     var state = auth();
-    section.hidden = !state.isVerified || !!state.isGuest;
+    section.hidden = true;
     bindBtn.disabled = !state.isVerified || !!state.isGuest;
     refreshBtn.disabled = !state.isVerified || !!state.isGuest;
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
