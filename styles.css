@@ -17982,10 +17982,19 @@ a.home-mini-icon-item {
   gap: 14px;
 }
 
+.download-main-title {
+  margin: 0 0 10px;
+  color: #f8fafc;
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 950;
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+
 .download-layout__text {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   font-size: 13px;
   color: var(--text);
 }
@@ -18005,21 +18014,22 @@ a.home-mini-icon-item {
 
 .download-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .download-app {
   position: relative;
   border: none;
-  border-radius: 16px;
-  padding: 14px 16px;
-  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  min-height: 74px;
+  border-radius: 14px;
+  padding: 14px 12px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.78));
+  border: 1px solid rgba(148, 163, 184, 0.22);
   color: var(--text);
   font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 850;
+  letter-spacing: 0;
   text-transform: uppercase;
   cursor: pointer;
   overflow: hidden;
@@ -18029,7 +18039,7 @@ a.home-mini-icon-item {
     transform 0.2s ease,
     border-color 0.2s ease;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 10px 22px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .download-app::before {
@@ -18041,11 +18051,11 @@ a.home-mini-icon-item {
   border-radius: inherit;
 }
 .download-app:hover {
-  background: linear-gradient(145deg, #334155 0%, #1e293b 100%);
-  border-color: rgba(248, 250, 252, 0.35);
+  background: linear-gradient(145deg, rgba(51, 65, 85, 0.86), rgba(30, 41, 59, 0.82));
+  border-color: rgba(125, 211, 252, 0.36);
   box-shadow:
-    0 8px 24px rgba(248, 113, 22, 0.25),
-    0 0 0 1px rgba(248, 250, 252, 0.15),
+    0 14px 28px rgba(14, 165, 233, 0.16),
+    0 0 0 1px rgba(248, 250, 252, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
   color: var(--btn-on-accent);
@@ -18153,6 +18163,151 @@ a.home-mini-icon-item {
     0 0 0 1px rgba(248, 250, 252, 0.08);
   display: block;
   flex-shrink: 0;
+}
+
+body[data-view="download"] .download-page--active,
+body[data-view="cashout"] .view--active[data-view="cashout"] {
+  position: relative;
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active:not([data-download-page="main"]),
+body[data-view="cashout"] .cashout-manager-block {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 96% 4%, rgba(34, 197, 94, 0.15), transparent 26%),
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active:not([data-download-page="main"]) {
+  padding: 16px;
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout::after,
+body[data-view="download"] .download-page--active:not([data-download-page="main"])::after,
+body[data-view="cashout"] .cashout-manager-block::after {
+  content: "Poker21";
+  position: absolute;
+  right: 16px;
+  top: 46px;
+  color: rgba(148, 163, 184, 0.06);
+  font-size: clamp(54px, 12vw, 132px);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  transform: rotate(-12deg);
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout > *,
+body[data-view="download"] .download-page--active:not([data-download-page="main"]) > *,
+body[data-view="cashout"] .cashout-manager-block > * {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-view="download"] .download-quote {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.38);
+  color: rgba(203, 213, 225, 0.82);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+body[data-view="download"] .download-image,
+body[data-view="cashout"] .cashout-image {
+  max-width: 270px;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 222, 128, 0.46);
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 28px rgba(52, 211, 153, 0.22), inset 0 0 0 10px rgba(15, 23, 42, 0.64);
+}
+
+body[data-view="cashout"] .title {
+  margin: 0 0 8px;
+  color: #f8fafc;
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 950;
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+
+body[data-view="cashout"] .cashout-now-subtitle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 0 0 12px;
+  padding: 5px 10px;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.1);
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body[data-view="cashout"] .cashout-manager-block {
+  padding: 16px;
+}
+
+body[data-view="cashout"] .cashout-manager-block + .cashout-manager-block {
+  margin-top: 14px;
+}
+
+body[data-view="cashout"] .cashout-manager-block > .subtitle {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.96);
+  font-size: clamp(22px, 5.4vw, 34px);
+  font-weight: 900;
+  line-height: 1.08;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+body[data-view="cashout"] .cashout-manager-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+body[data-view="cashout"] .cashout-manager-btn {
+  min-height: 46px;
+  border-radius: 14px;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+body[data-view="cashout"] .cashout-manager-btn--here {
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  box-shadow: 0 10px 22px rgba(251, 146, 60, 0.22);
+}
+
+body[data-view="cashout"] .cashout-manager-btn--tg {
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.32);
+  background: rgba(15, 23, 42, 0.42);
+}
+
+@media (max-width: 430px) {
+  .download-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  body[data-view="cashout"] .cashout-manager-actions {
+    grid-template-columns: 1fr;
+  }
+  body[data-view="download"] .download-image,
+  body[data-view="cashout"] .cashout-image {
+    max-width: 220px;
+  }
 }
 
 .cashout-anna-btn {
