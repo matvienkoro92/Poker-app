@@ -6076,8 +6076,7 @@ function runGazetteAndTasksInit() {
         if (convTitle) setTextContentIfChanged(convTitle, resolvedName);
       }
       if (convTitleId) {
-        var resolvedP21 = found.p21Id != null && String(found.p21Id).trim() ? String(found.p21Id).trim() : "\u2014";
-        setTextContentIfChanged(convTitleId, resolvedP21);
+        setTextContentIfChanged(convTitleId, "\u2014");
       }
       var resolvedAvatar = found.avatar != null && String(found.avatar).trim() ? String(found.avatar).trim() : "";
       if (resolvedAvatar) {
@@ -6139,8 +6138,7 @@ function runGazetteAndTasksInit() {
             if (convTitle) setTextContentIfChanged(convTitle, profileName);
           }
           if (convTitleId) {
-            var profileP21 = data.p21Id != null && String(data.p21Id).trim() ? String(data.p21Id).trim() : "\u2014";
-            setTextContentIfChanged(convTitleId, profileP21);
+            setTextContentIfChanged(convTitleId, "\u2014");
           }
           var profileAvatar = data.avatar != null && String(data.avatar).trim() ? String(data.avatar).trim() : "";
           if (profileAvatar) {
@@ -9217,7 +9215,6 @@ function getPokerResolvedTelegramUser() {
         profileTitle: "Профиль",
         loginAccount: "Войти в аккаунт",
         nameCaption: "Введите ваше имя",
-        p21Caption: "Введите ID из Poker21",
         save: "Сохранить",
         emailLogin: "Вход по почте",
         emailLoginText: "Привяжите email, чтобы потом можно было входить в аккаунт по почте.",
@@ -9260,7 +9257,6 @@ function getPokerResolvedTelegramUser() {
         profileTitle: "Profile",
         loginAccount: "Sign in",
         nameCaption: "Enter your name",
-        p21Caption: "Enter your Poker21 ID",
         save: "Save",
         emailLogin: "Email sign in",
         emailLoginText: "Link your email so you can sign in to this account with email later.",
@@ -9304,17 +9300,11 @@ function getPokerResolvedTelegramUser() {
     var setText = function (id, text) {
       var el = document.getElementById(id);
       if (el) {
-        var arrow = el.querySelector && el.querySelector(".profile-chat-name__p21-arrow");
-        if (arrow && id === "profileP21Caption") {
-          el.innerHTML = text + ' <span class="profile-chat-name__p21-arrow" aria-hidden="true">↓</span>';
-        } else {
-          el.textContent = text;
-        }
+        el.textContent = text;
       }
     };
     setText("profileTitle", t.profileTitle);
     setText("profileNameCaption", t.nameCaption);
-    setText("profileP21Caption", t.p21Caption);
     setText("profileSaveBtn", t.save);
     setText("profileEmailAuthTitle", t.emailLogin);
     setText("profileEmailAuthText", t.emailLoginText);
@@ -16525,13 +16515,6 @@ function updateProfileDtId() {
       } else {
         el.textContent = cached || "\u2014";
       }
-      if (data && data.ok && data.p21Id != null) {
-        var p21Val = data.p21Id;
-        sessionStorage.setItem("poker_p21_id", p21Val);
-        if (typeof localStorage !== "undefined") localStorage.setItem("poker_p21_id", p21Val);
-        var p21Input = document.getElementById("profileP21IdInput");
-        if (p21Input) p21Input.value = p21Val;
-      }
       if (data && data.ok) {
         pokerApplyProfileUserInfo(data);
         if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
@@ -16692,23 +16675,10 @@ function initProfileExitBtn() {
 }
 
 function initProfileP21Id() {
-  var input = document.getElementById("profileP21IdInput");
   var nameInput = document.getElementById("profileChatDisplayNameInput");
   var saveBtn = document.getElementById("profileSaveBtn");
   var feedback = document.getElementById("profileSaveFeedback");
-  if (!input) return;
-  function getStoredP21() {
-    return (typeof localStorage !== "undefined" && localStorage.getItem("poker_p21_id")) || sessionStorage.getItem("poker_p21_id") || "";
-  }
-  function setStoredP21(val) {
-    if (typeof localStorage !== "undefined") {
-      if (val) localStorage.setItem("poker_p21_id", val); else localStorage.removeItem("poker_p21_id");
-    }
-    if (val) sessionStorage.setItem("poker_p21_id", val); else sessionStorage.removeItem("poker_p21_id");
-  }
-  var saved = getStoredP21();
-  if (saved) input.value = saved.replace(/\D/g, "").slice(0, 6);
-  else input.value = "";
+  if (!nameInput && !saveBtn) return;
   var base = getApiBase();
   var canServer = base && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer());
   if (canServer) {
@@ -16718,19 +16688,6 @@ function initProfileP21Id() {
     profileInfoPromise
       .then(function (data) {
         if (!data || !data.ok) return;
-        var serverP21 = data.p21Id != null ? String(data.p21Id).trim() : "";
-        var localP21 = getStoredP21().replace(/\D/g, "").slice(0, 6);
-        if (serverP21.length === 6) {
-          setStoredP21(serverP21);
-          input.value = serverP21;
-        } else if (localP21.length === 6) {
-          input.value = localP21;
-          fetch(base + "/api/users", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: localP21 })),
-          }).then(function (r) { return r.json(); }).catch(function () {});
-        }
         try {
           var sdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
           window.__pokerChatDisplayName = sdn;
@@ -16742,54 +16699,6 @@ function initProfileP21Id() {
   }
   function saveP21Id() {
     var nameVal = nameInput ? String(nameInput.value || "").trim().slice(0, 80) : "";
-    var val = (input.value || "").replace(/\D/g, "").slice(0, 6);
-    input.value = val;
-    if (val.length > 0 && val.length !== 6) {
-      if (feedback) {
-        feedback.textContent = "Введите 6 цифр или очистите поле";
-        feedback.classList.add("profile-save-feedback--visible");
-        setTimeout(function () {
-          feedback.textContent = "";
-          feedback.classList.remove("profile-save-feedback--visible");
-        }, 2500);
-      }
-      var baseEarly = getApiBase();
-      if (baseEarly && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer())) {
-        fetch(baseEarly + "/api/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerGuestOrAuthedPostBody({ chatDisplayName: nameVal })),
-        })
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            try {
-              window.__pokerChatDisplayName = nameVal;
-              pokerWriteStoredProfileDisplayName(nameVal);
-            } catch (eNm) {}
-            if (feedback) {
-              var okNm = data && data.ok;
-              feedback.textContent = okNm ? "Имя в чатах сохранено" : (data && data.error) || "Ошибка";
-              feedback.classList.add("profile-save-feedback--visible");
-              setTimeout(function () {
-                feedback.textContent = "";
-                feedback.classList.remove("profile-save-feedback--visible");
-              }, 2500);
-            }
-          })
-          .catch(function () {
-            if (feedback) {
-              feedback.textContent = POKER_NET_ERR;
-              feedback.classList.add("profile-save-feedback--visible");
-              setTimeout(function () {
-                feedback.textContent = "";
-                feedback.classList.remove("profile-save-feedback--visible");
-              }, 2500);
-            }
-          });
-      }
-      return;
-    }
-    setStoredP21(val);
     var base = getApiBase();
     if (!base || (!pokerApiHasCredential() && !pokerCanSyncGuestProfileToServer())) {
       try {
@@ -16809,7 +16718,7 @@ function initProfileP21Id() {
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({ p21Id: val || "", chatDisplayName: nameVal })),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ chatDisplayName: nameVal })),
     })
       .then(function (r) {
         return r.json().catch(function () { return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status }; });
@@ -16842,9 +16751,6 @@ function initProfileP21Id() {
         }
       });
   }
-  input.addEventListener("input", function () {
-    input.value = (input.value || "").replace(/\D/g, "").slice(0, 6);
-  });
   if (saveBtn) saveBtn.addEventListener("click", saveP21Id);
 }
 
@@ -17016,6 +16922,7 @@ function initProfilePokerPlus() {
       renderPokerPlusStats({});
       if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
+      try { window.__pokerPlusUserId = ""; } catch (eClearPpId) {}
       unbindBtn.hidden = true;
       return;
     }
@@ -17030,6 +16937,7 @@ function initProfilePokerPlus() {
       if (p.pokerPlusUserId) playerParts.push("ID " + p.pokerPlusUserId);
       linkedValue.textContent = playerParts.join(" ") || "—";
     }
+    try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
     if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
     if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
     if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
@@ -17441,7 +17349,7 @@ function initCashoutDepositForm() {
   if (!form || !wrapP21 || !wrapXpoker) return;
 
   function getStoredP21ForCashout() {
-    return (typeof localStorage !== "undefined" && localStorage.getItem("poker_p21_id")) || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_p21_id")) || "";
+    return (typeof window !== "undefined" && window.__pokerPlusUserId) || "";
   }
 
   function togglePlatform() {
@@ -22713,12 +22621,6 @@ function initRaffles() {
         raffleId: currentRaffleId,
         deviceId: getRaffleDeviceId(),
       };
-      try {
-        var p21Join = ((typeof localStorage !== "undefined" && localStorage.getItem("poker_p21_id")) || "")
-          .replace(/\D/g, "")
-          .slice(0, 6);
-        if (p21Join.length === 6) joinBody.p21Id = p21Join;
-      } catch (eJ) {}
       fetch(base + "/api/raffles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26782,7 +26684,7 @@ function initChat() {
       fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
         .then(function (r) { return r.json(); })
         .then(function (data) {
-          if (modalP21) modalP21.textContent = (data && data.p21Id) ? "P21 ID: " + data.p21Id : "";
+          if (modalP21) modalP21.textContent = "";
           var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
           if (modalPersonal) modalPersonal.textContent = personalText || "—";
           if (modalPersonalBlock) {
@@ -28249,7 +28151,7 @@ function initChat() {
     chatWithUserName = userName || uid;
     chatPeerTypingActive = false;
     if (convTitle) convTitle.textContent = chatWithUserName;
-    if (convTitleId) convTitleId.textContent = peerP21Id != null && String(peerP21Id).trim() ? String(peerP21Id).trim() : "\u2014";
+    if (convTitleId) convTitleId.textContent = "\u2014";
     if (peerAvatarOpt != null && String(peerAvatarOpt).trim()) {
       chatWithPeerAvatarUrl = String(peerAvatarOpt).trim();
       applyConvPeerAvatarHeader(chatWithPeerAvatarUrl, chatWithUserName);
@@ -29074,14 +28976,12 @@ function initChat() {
       if (!isOwn) {
         var nameStr = escapeHtml(m.fromName || "Игрок");
         var verifiedStr = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
-        var p21Str = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
         var respectVal = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClass = "chat-msg__respect";
         if (m.fromRespect > 0) respectClass += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
         var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var sep = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + sep + '<span class="chat-msg__p21-inline">' + p21Str + "</span>" + verifiedStr + "</div>";
+        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + "</div>";
         var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
         var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
         var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -29224,14 +29124,12 @@ function initChat() {
       if (!isOwn) {
         var nameStrP = escapeHtml(m.fromName || "Игрок");
         var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
-        var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
         var respectValP = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClassP = "chat-msg__respect";
         if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
         var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var sepP = '<span class="chat-msg__meta-sep"> · </span>';
-        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + sepP + '<span class="chat-msg__p21-inline">' + p21StrP + "</span>" + verifiedStrP + "</div>";
+        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + "</div>";
         var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
         var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
         var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -32421,11 +32319,7 @@ function initChat() {
       convTitle.textContent = nm;
     }
     if (convTitleId) {
-      convTitleId.textContent = isGroupConv
-        ? "\u2014"
-        : peerP21IdFromContact != null && String(peerP21IdFromContact).trim()
-          ? String(peerP21IdFromContact).trim()
-          : "\u2014";
+      convTitleId.textContent = "\u2014";
     }
     applyConvGroupDescription("");
     var convProfBtn = document.getElementById("chatConvProfileOpenBtn");
@@ -32806,11 +32700,6 @@ function initChat() {
       btn.setAttribute("data-chat-friend", isFriendContact ? "1" : "0");
       btn.setAttribute("data-chat-group", isGroupRow ? "1" : "0");
       btn.dataset.chatOnline = c.online ? "1" : "0";
-      if (c.p21Id != null && String(c.p21Id).trim() !== "") btn.dataset.chatP21Id = String(c.p21Id).trim();
-      else {
-        try { delete btn.dataset.chatP21Id; } catch (eP21del) {}
-        btn.removeAttribute("data-chat-p21-id");
-      }
       if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
       else {
         try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
@@ -33164,12 +33053,6 @@ function initChat() {
               var btn = existing[i];
               if (!btn) return;
               btn.dataset.chatOnline = c.online ? "1" : "0";
-              if (c.p21Id != null && String(c.p21Id).trim() !== "") btn.dataset.chatP21Id = String(c.p21Id).trim();
-              else try {
-                delete btn.dataset.chatP21Id;
-              } catch (eP21d) {
-                btn.removeAttribute("data-chat-p21-id");
-              }
               if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
               else try {
                 delete btn.dataset.chatVerified;
@@ -33318,7 +33201,6 @@ function initChat() {
               '" data-chat-online="' +
               (c.online ? "1" : "0") +
               '"' +
-              (c.p21Id ? ' data-chat-p21-id="' + escapeHtml(String(c.p21Id)) + '"' : "") +
               (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
               ">" +
               avatarEl +
@@ -34299,7 +34181,6 @@ function initChat() {
         if (!isOwn) {
           var nameStrP = escapeHtml(m.fromName || "Игрок");
           var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
-          var p21StrP = m.fromP21Id ? escapeHtml(m.fromP21Id) : "\u2014";
           var respectValP =
             m.fromRespect !== undefined && m.fromRespect !== null
               ? m.fromRespect === 0
@@ -34309,15 +34190,10 @@ function initChat() {
           var respectClassP = "chat-msg__respect";
           if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
           else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
-          var sepP = '<span class="chat-msg__meta-sep"> · </span>';
           var metaLineTopP =
             '<div class="chat-msg__meta-line">' +
             '<span class="chat-msg__name">' +
             nameStrP +
-            "</span>" +
-            sepP +
-            '<span class="chat-msg__p21-inline">' +
-            p21StrP +
             "</span>" +
             verifiedStrP +
             "</div>";
@@ -34447,8 +34323,7 @@ function initChat() {
     modal.dataset.previewP21Id = peerP21Id || "";
     if (titleEl) titleEl.textContent = userName || userId;
     if (subEl) {
-      var subInit = peerP21Id && String(peerP21Id).trim() ? "Poker21: " + String(peerP21Id).trim() : "";
-      subEl.textContent = subInit;
+      subEl.textContent = "";
     }
     if (avatarEl) {
       avatarEl.style.display = "none";
@@ -34490,9 +34365,7 @@ function initChat() {
         var p21v = data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : "";
         if (p21v) modal.dataset.previewP21Id = p21v;
         if (subEl) {
-          if (p21v) subEl.textContent = "Poker21: " + p21v;
-          else if (peerP21Id && String(peerP21Id).trim()) subEl.textContent = "Poker21: " + String(peerP21Id).trim();
-          else subEl.textContent = "";
+          subEl.textContent = "";
         }
         var av = data.otherAvatar != null && String(data.otherAvatar).trim() ? String(data.otherAvatar).trim() : "";
         if (av && avatarEl && avatarPh) {
@@ -39402,7 +39275,7 @@ function initChat() {
             rowAv = "";
           }
         }
-        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, el.dataset.chatP21Id, rowAv || undefined, el.dataset.chatVerified === "1");
+        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, "", rowAv || undefined, el.dataset.chatVerified === "1");
         return;
       }
       if (el.getAttribute && el.getAttribute("data-chat-user-id")) {
@@ -39429,7 +39302,7 @@ function initChat() {
         return {
           userId: btn.dataset.chatId,
           userName: btn.dataset.chatName || "",
-          p21Id: btn.dataset.chatP21Id || "",
+          p21Id: "",
         };
       }
       var uid = btn.getAttribute("data-chat-user-id");
