@@ -3563,6 +3563,9 @@ function runGazetteAndTasksInit() {
     var tabImportantBtn = document.getElementById("romanPlannerTabImportant");
     var tabNormalBtn = document.getElementById("romanPlannerTabNormal");
     var tabDoneBtn = document.getElementById("romanPlannerTabDone");
+    var tabImportantCount = document.getElementById("romanPlannerTabImportantCount");
+    var tabNormalCount = document.getElementById("romanPlannerTabNormalCount");
+    var tabDoneCount = document.getElementById("romanPlannerTabDoneCount");
     function setPlannerTabUi() {
       var isDone = plannerTab === "done";
       var showAddForm = !isDone;
@@ -3720,15 +3723,13 @@ function runGazetteAndTasksInit() {
         if (t.important) imp++;
         else norm++;
       }
-      el.textContent =
-        "Всего задач: " +
-        total +
-        " · Важные: " +
-        imp +
-        " · Не важные: " +
-        norm +
-        " · Выполненные: " +
-        doneC;
+      el.textContent = "Всего задач: " + total;
+      if (tabImportantCount) tabImportantCount.textContent = "(" + imp + ")";
+      if (tabNormalCount) tabNormalCount.textContent = "(" + norm + ")";
+      if (tabDoneCount) tabDoneCount.textContent = "(" + doneC + ")";
+      if (tabImportantBtn) tabImportantBtn.setAttribute("aria-label", "Важные (" + imp + ")");
+      if (tabNormalBtn) tabNormalBtn.setAttribute("aria-label", "Не важные (" + norm + ")");
+      if (tabDoneBtn) tabDoneBtn.setAttribute("aria-label", "Выполненные (" + doneC + ")");
     }
     var romanPlannerDirtySinceOpen = false;
     var romanPlannerPushTimer = null;

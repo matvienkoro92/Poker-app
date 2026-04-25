@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.167">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.168">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -5925,7 +5925,8 @@
                 aria-selected="true"
                 aria-controls="romanTaskListAll"
               >
-                Важные
+                <span class="roman-task-planner__tab-label">Важные</span>
+                <span class="roman-task-planner__tab-count" id="romanPlannerTabImportantCount">(0)</span>
               </button>
               <button
                 type="button"
@@ -5935,7 +5936,8 @@
                 aria-selected="false"
                 aria-controls="romanTaskListAll"
               >
-                Не важные
+                <span class="roman-task-planner__tab-label">Не важные</span>
+                <span class="roman-task-planner__tab-count" id="romanPlannerTabNormalCount">(0)</span>
               </button>
               <button
                 type="button"
@@ -5945,7 +5947,8 @@
                 aria-selected="false"
                 aria-controls="romanTaskListAll"
               >
-                Выполненные
+                <span class="roman-task-planner__tab-label">Выполненные</span>
+                <span class="roman-task-planner__tab-count" id="romanPlannerTabDoneCount">(0)</span>
               </button>
             </div>
             <div class="roman-task-planner__board roman-task-planner__board--stacked" id="romanTaskPlannerBoard">
