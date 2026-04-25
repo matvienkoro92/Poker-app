@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.194">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.195">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4227,8 +4227,26 @@
               <div class="profile-hero-card__identity">
                 <h2 class="profile-hero-card__name" id="profileUserName">Профиль игрока</h2>
                 <p class="profile-hero-card__id">ID <span id="profileUserId">—</span></p>
-                <p class="profile-hero-card__meta" id="profileUserMeta"></p>
               </div>
+              <section class="profile-status" id="profileStatusSection">
+                <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
+                <div class="profile-status__scale-wrap">
+                  <div class="profile-status__labels profile-status__labels--cards">
+                    <span class="profile-status__card">2♣</span>
+                    <div class="profile-status__scale-visual" id="profileStatusVisual" style="--status-value: 0;">
+                      <input type="range" id="profileStatusInput" class="profile-status__scale-input" min="0" max="100" value="0" step="1" aria-label="Статус" readonly tabindex="-1" aria-hidden="true" />
+                      <div class="profile-status__track">
+                        <div class="profile-status__fill"></div>
+                        <span class="profile-status__fish" aria-hidden="true">🐟</span>
+                      </div>
+                    </div>
+                    <span class="profile-status__card">3♣</span>
+                  </div>
+                </div>
+              </section>
+              <section class="profile-friends">
+                <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
+              </section>
               <div class="profile-chat-name">
                 <div class="profile-chat-name__row" id="profileChatNameRow">
                   <div class="profile-chat-name__cell">
@@ -4386,9 +4404,6 @@
                 </span>
               </div>
             </section>
-            <section class="profile-friends">
-              <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
-            </section>
             <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true">
               <p class="profile-chat-push__title">Уведомления (PWA)</p>
               <label class="profile-chat-push__label">
@@ -4398,22 +4413,6 @@
               <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
             </div>
             <div class="profile-visible-to-others">
-              <section class="profile-status" id="profileStatusSection">
-                <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
-                <div class="profile-status__scale-wrap">
-                  <div class="profile-status__labels profile-status__labels--cards">
-                    <span class="profile-status__card">2♣</span>
-                    <div class="profile-status__scale-visual" id="profileStatusVisual" style="--status-value: 0;">
-                      <input type="range" id="profileStatusInput" class="profile-status__scale-input" min="0" max="100" value="0" step="1" aria-label="Статус" readonly tabindex="-1" aria-hidden="true" />
-                      <div class="profile-status__track">
-                        <div class="profile-status__fill"></div>
-                        <span class="profile-status__fish" aria-hidden="true">🐟</span>
-                      </div>
-                    </div>
-                    <span class="profile-status__card">3♣</span>
-                  </div>
-                </div>
-              </section>
               <section class="profile-section profile-tournaments">
                 <h2 class="profile-section__title" id="profileTournamentsTitle">Турниры</h2>
                 <div class="profile-cols profile-cols--three">
@@ -6548,7 +6547,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=842"></script>
+    <script defer src="./app.js?v=843"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

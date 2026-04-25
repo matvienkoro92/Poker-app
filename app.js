@@ -16658,11 +16658,13 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   var chatRow = document.getElementById("profileChatNameRow");
   var saveWrap = document.getElementById("profileChatNameSaveWrap");
   var chatNameWrap = document.querySelector("#profileView .profile-chat-name");
+  var friendsWrap = document.querySelector("#profileView .profile-friends");
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
   if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
   if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);
+  if (friendsWrap) friendsWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (profileView) profileView.classList.toggle("profile-view--guest", !isVerified);
 }
 
