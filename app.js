@@ -16362,6 +16362,12 @@ function pokerShouldShowHomeTopVersionForSpecialUser() {
 }
 
 function getProfileGreetingName() {
+  var preferredName = "";
+  try {
+    preferredName = typeof pokerPreferredProfileDisplayName === "function" ? pokerPreferredProfileDisplayName() : "";
+  } catch (ePreferredName) {}
+  if (preferredName) return preferredName;
+
   var chatDisplayName = "";
   try {
     chatDisplayName = String(window.__pokerChatDisplayName || "").trim();
@@ -16409,7 +16415,7 @@ function updateProfileUserMeta() {
   if (!metaEl) return;
   var parts = [];
   var dtId = (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_dt_id")) || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) || "";
-  if (dtId) parts.push("ID: " + dtId);
+  if (dtId && !document.getElementById("profileUserId")) parts.push("ID: " + dtId);
   var user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
   var username = user && user.username ? user.username : "";
   if (username && !pokerHideRomanTelegramUsername(username)) parts.push("@" + String(username).replace(/^@+/, ""));

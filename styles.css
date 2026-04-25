@@ -27528,6 +27528,75 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   color: var(--text);
 }
 
+.profile-hero-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  margin: 16px 0 22px;
+  padding: 22px 18px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 96% 4%, rgba(34, 197, 94, 0.16), transparent 26%),
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+.profile-hero-card::after {
+  content: "Poker21";
+  position: absolute;
+  right: 16px;
+  top: 70px;
+  color: rgba(148, 163, 184, 0.06);
+  font-size: clamp(56px, 13vw, 132px);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  transform: rotate(-12deg);
+}
+.profile-hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+.profile-hero-card__identity {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.profile-hero-card__name {
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #f8fafc;
+  font-size: clamp(32px, 7vw, 56px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+.profile-hero-card__id {
+  margin: 0;
+  color: rgba(203, 213, 225, 0.86);
+  font-size: 18px;
+  font-weight: 800;
+}
+.profile-hero-card__id span {
+  color: #f8fafc;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 900;
+}
+.profile-hero-card__meta {
+  min-height: 1.2em;
+  margin: 0;
+  color: rgba(203, 213, 225, 0.68);
+  font-size: 13px;
+  font-weight: 700;
+}
+.profile-hero-card__meta:empty {
+  display: none;
+}
+
 .profile-user-id {
   margin: 8px 0 0;
   font-size: 13px;
@@ -27585,8 +27654,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 
 .profile-avatar-block {
   position: relative;
-  margin-top: 16px;
-  margin-bottom: 10px;
+  margin: 0;
   text-align: center;
 }
 /* display:none на file ломает программный .click() в части WebView/iOS — визуально скрываем без display:none */
@@ -27603,12 +27671,17 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 .profile-avatar-block__img {
   display: block;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 6px;
+  width: 136px;
+  height: 136px;
+  margin: 0 auto 10px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border-subtle);
+  border: 1px solid rgba(74, 222, 128, 0.58);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(148, 163, 184, 0.58) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 73%, rgba(148, 163, 184, 0.58) 0 31%, transparent 32%),
+    rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 28px rgba(52, 211, 153, 0.28), inset 0 0 0 12px rgba(15, 23, 42, 0.44);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -27618,18 +27691,18 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   justify-content: center;
   gap: 5px;
   margin: 0 auto 8px;
-  padding: 2px 8px;
+  padding: 6px 14px;
   max-width: 100%;
   box-sizing: border-box;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 800;
   line-height: 1.3;
   letter-spacing: 0.02em;
-  color: var(--text-muted);
+  color: rgba(203, 213, 225, 0.86);
   text-align: center;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.36);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 999px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -27647,9 +27720,9 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   outline-offset: 2px;
 }
 .profile-avatar-block__respect-val {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+  color: #f8fafc;
 }
 .profile-avatar-block__img:hover {
   border-color: rgba(249, 115, 22, 0.4);
@@ -27685,7 +27758,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   min-height: 1.2em;
   font-size: 13px;
   font-weight: 600;
-  color: var(--accent-2, #22c55e);
+  color: #86efac;
   text-align: center;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -27732,10 +27805,14 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 /* Имя в чатах — под аватаром */
 .profile-chat-name {
-  max-width: 22rem;
-  margin: 0 auto 20px;
-  padding: 0 12px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
   box-sizing: border-box;
+}
+.profile-hero-card .profile-chat-name {
+  max-width: 34rem;
 }
 /* Имя в чатах — тот же блок сохранения профиля */
 .profile-chat-name__row {
@@ -27754,7 +27831,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   font-size: 11px;
   line-height: 1.35;
   font-weight: 500;
-  color: var(--text-muted);
+  color: rgba(203, 213, 225, 0.76);
   text-align: center;
 }
 .profile-chat-name__input {
@@ -27762,11 +27839,18 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  font-size: 15px;
-  color: var(--text);
-  background: var(--block-bg-solid);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #f8fafc;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+}
+.profile-hero-card .profile-visible-to-others__p21-save {
+  min-height: 48px;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 900;
 }
 .profile-chat-name__input::placeholder {
   color: var(--text-muted);
@@ -27800,7 +27884,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 @media (max-width: 430px) {
   .profile-chat-name {
     max-width: 100%;
-    padding: 0 10px;
+    padding: 0;
   }
 
   .profile-chat-name__row {
@@ -27822,12 +27906,24 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   .profile-chat-name__input {
     min-height: 39px;
     padding: 8px 10px;
-    font-size: 14px;
+    font-size: 15px;
     border-radius: 9px;
   }
 
   .profile-chat-name__save-wrap {
     margin-top: 12px;
+  }
+}
+@media (max-width: 430px) {
+  .profile-hero-card {
+    padding: 18px 14px 16px;
+  }
+  .profile-avatar-block__img {
+    width: 124px;
+    height: 124px;
+  }
+  .profile-hero-card__id {
+    font-size: 16px;
   }
 }
 @media (max-width: 370px) {
