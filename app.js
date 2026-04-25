@@ -17005,7 +17005,7 @@ function initProfilePokerPlus() {
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     input.hidden = !!linked;
     bindBtn.hidden = !!linked;
-    refreshBtn.hidden = !linked;
+    refreshBtn.hidden = false;
     unbindBtn.hidden = !linked;
   }
 
