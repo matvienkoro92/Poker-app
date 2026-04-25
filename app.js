@@ -16896,7 +16896,17 @@ function initProfilePokerPlus() {
     return value != null && String(value).trim() ? String(value).trim() : "";
   }
 
-  function pokerPlusStatMetricHtml(label, value, tone) {
+  function pokerPlusShortStat(value) {
+    var n = Number(value);
+    if (!isFinite(n)) return pokerPlusText(value);
+    var abs = Math.abs(n);
+    var sign = n < 0 ? "-" : "";
+    if (abs >= 1000000) return sign + (abs / 1000000).toFixed(abs >= 10000000 ? 0 : 2).replace(/\.?0+$/, "") + "M";
+    if (abs >= 1000) return sign + (abs / 1000).toFixed(abs >= 10000 ? 1 : 2).replace(/\.?0+$/, "") + "K";
+    return String(value);
+  }
+
+  function pokerPlusStatMetricHtml(label, value, tone, icon) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
     var cls = "profile-pokerplus-stat";
@@ -16906,7 +16916,11 @@ function initProfilePokerPlus() {
       cls +
       '"><span class="profile-pokerplus-stat__label">' +
       escapeHtml(label) +
-      '</span><span class="profile-pokerplus-stat__value">' +
+      '</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">' +
+      escapeHtml(icon || "") +
+      '</span></span><span class="profile-pokerplus-stat__value">' +
+      escapeHtml(pokerPlusShortStat(value)) +
+      '</span><span class="profile-pokerplus-stat__raw">' +
       escapeHtml(raw) +
       "</span></span>"
     );
@@ -16942,6 +16956,7 @@ function initProfilePokerPlus() {
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
+      if (section && section.classList) section.classList.remove("profile-pokerplus-card--linked");
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
@@ -16958,6 +16973,7 @@ function initProfilePokerPlus() {
       unbindBtn.hidden = true;
       return;
     }
+    if (section && section.classList) section.classList.add("profile-pokerplus-card--linked");
     unbindBtn.hidden = false;
     if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
@@ -16972,7 +16988,7 @@ function initProfilePokerPlus() {
     if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
     if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
     var avatarUrl = pokerPlusText(p.avatarUrl);
-    if (avatarRow) avatarRow.hidden = !avatarUrl;
+    if (avatarRow) avatarRow.hidden = false;
     if (avatarImg) {
       if (avatarUrl) avatarImg.src = avatarUrl;
       else avatarImg.removeAttribute("src");
@@ -16987,10 +17003,10 @@ function initProfilePokerPlus() {
     if (statsValue) {
       var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : {};
       var metrics = [];
-      if (total.hands != null && total.hands === total.hands) metrics.push(pokerPlusStatMetricHtml("Карты", total.hands, ""));
-      if (total.winnings != null && total.winnings === total.winnings) metrics.push(pokerPlusStatMetricHtml("Касса", total.winnings, pokerPlusStatTone(total.winnings)));
-      if (total.mttWinnings != null && total.mttWinnings === total.mttWinnings) metrics.push(pokerPlusStatMetricHtml("Турниры", total.mttWinnings, pokerPlusStatTone(total.mttWinnings)));
-      if (total.bb != null && total.bb === total.bb) metrics.push(pokerPlusStatMetricHtml("BB", total.bb, pokerPlusStatTone(total.bb)));
+      if (total.hands != null && total.hands === total.hands) metrics.push(pokerPlusStatMetricHtml("Раздачи", total.hands, "", "♠"));
+      if (total.winnings != null && total.winnings === total.winnings) metrics.push(pokerPlusStatMetricHtml("Выигрыш", total.winnings, pokerPlusStatTone(total.winnings), "⌁"));
+      if (total.mttWinnings != null && total.mttWinnings === total.mttWinnings) metrics.push(pokerPlusStatMetricHtml("MTT", total.mttWinnings, pokerPlusStatTone(total.mttWinnings), "♜"));
+      if (total.bb != null && total.bb === total.bb) metrics.push(pokerPlusStatMetricHtml("BB", total.bb, pokerPlusStatTone(total.bb), "BB"));
       statsValue.innerHTML = metrics.length ? '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>" : "—";
       if (statsRow) statsRow.hidden = metrics.length === 0;
     }
