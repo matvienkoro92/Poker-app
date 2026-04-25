@@ -27990,6 +27990,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 
 .profile-visible-to-others {
+  display: none !important;
   margin-top: 24px;
   padding: 16px;
   border: 1px solid var(--border-subtle);
