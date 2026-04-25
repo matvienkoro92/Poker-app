@@ -17984,7 +17984,6 @@ function initProfileAvatar() {
   if (!avatarEl || !inputEl) return;
 
   var base = getApiBase();
-  if (!base) return;
 
   var uploadInProgress = false;
   var avatarPickSessionActive = false;
@@ -18001,6 +18000,14 @@ function initProfileAvatar() {
 
   function fetchProfileAvatarFromServer() {
     if (uploadInProgress || avatarPickSessionActive) return;
+    base = base || getApiBase();
+    if (!base) {
+      revokePendingObjectUrl();
+      avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
+      avatarEl.dataset.avatarId = "";
+      pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+      return;
+    }
     inputEl.value = "";
     var cached = pokerReadAvatarCacheEntry();
     if (cached) {
@@ -18137,11 +18144,6 @@ function initProfileAvatar() {
 
   function openProfileAvatarChoiceModal() {
     if (uploadInProgress || avatarPickSessionActive) return;
-    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
-      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
-      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
-      return;
-    }
     renderProfileAvatarChoiceGrid();
     var modal = getProfileAvatarChoiceModal();
     modal.classList.add("profile-avatar-choice-modal--open");
@@ -18160,6 +18162,12 @@ function initProfileAvatar() {
   function savePresetAvatar(id) {
     var preset = pokerFindPresetAvatarById(id);
     if (!preset || uploadInProgress) return;
+    base = base || getApiBase();
+    if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
+      return;
+    }
     uploadInProgress = true;
     showAvatarFeedback("Сохранение…", false);
     var payload =
@@ -18243,7 +18251,8 @@ function initProfileAvatar() {
 
   function openProfileAvatarFilePicker() {
     if (uploadInProgress || avatarPickSessionActive) return;
-    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+    base = base || getApiBase();
+    if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
       if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
       else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
       return;
