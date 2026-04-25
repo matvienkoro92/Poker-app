@@ -4812,7 +4812,7 @@ html.vpn-proxy-modal-open {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: max(10px, env(safe-area-inset-top, 0px)) 12px 0;
+  padding: max(8px, env(safe-area-inset-top, 0px)) 8px 0;
   box-sizing: border-box;
   opacity: 0;
   visibility: hidden;
@@ -4839,7 +4839,7 @@ html.vpn-proxy-modal-open {
   flex-direction: column;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 22px 20px 20px;
+  padding: 22px 12px 14px;
   border-radius: 18px 18px 0 0;
   box-sizing: border-box;
   background: var(--card-bg, rgba(15, 23, 42, 0.96));
@@ -4966,8 +4966,8 @@ html.vpn-proxy-modal-open {
   flex: 1 1 auto;
   min-height: 0;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .roman-task-planner-modal .roman-task-planner__column {
   flex: none;
@@ -4988,7 +4988,7 @@ html.vpn-proxy-modal-open {
   max-height: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -4999,7 +4999,7 @@ html.vpn-proxy-modal-open {
 }
 .roman-task-planner-modal .roman-task-planner__list--active,
 .roman-task-planner-modal .roman-task-planner__list--done {
-  padding: 8px;
+  padding: 6px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(148, 163, 184, 0.12);
@@ -5012,7 +5012,7 @@ html.vpn-proxy-modal-open {
 }
 .roman-task-planner-modal .roman-task-planner__item {
   margin: 0;
-  padding: 9px 10px;
+  padding: 8px 8px;
   font-size: 14px;
   line-height: 1.35;
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -5498,7 +5498,7 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
 .roman-task-planner__input {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
+  padding: 9px 10px;
   font-size: 14px;
   line-height: 1.4;
   border: 1px solid rgba(44, 24, 16, 0.35);
@@ -5518,7 +5518,7 @@ textarea.roman-task-planner__input {
   width: 100%;
   box-sizing: border-box;
   margin-top: 6px;
-  padding: 8px 10px;
+  padding: 8px;
   font-size: 13px;
   border: 1px solid rgba(44, 24, 16, 0.35);
   border-radius: 8px;
