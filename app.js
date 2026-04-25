@@ -18144,12 +18144,21 @@ function initProfileAvatar() {
       '<button type="button" class="profile-avatar-choice-modal__close" data-avatar-close="1" aria-label="Закрыть">×</button>' +
       "</div>" +
       '<div class="profile-avatar-choice-modal__grid" id="profileAvatarChoiceGrid"></div>' +
+      '<div class="profile-avatar-choice-modal__actions">' +
+      '<button type="button" class="profile-avatar-choice-modal__upload" data-avatar-upload="1">Загрузить своё фото</button>' +
+      "</div>" +
       "</div>";
     document.body.appendChild(modal);
     modal.addEventListener("click", function (e) {
       var closeBtn = e.target && e.target.closest ? e.target.closest("[data-avatar-close]") : null;
       if (closeBtn) {
         closeProfileAvatarChoiceModal();
+        return;
+      }
+      var uploadBtn = e.target && e.target.closest ? e.target.closest("[data-avatar-upload]") : null;
+      if (uploadBtn) {
+        closeProfileAvatarChoiceModal();
+        openProfileAvatarFilePicker();
         return;
       }
       var btn = e.target && e.target.closest ? e.target.closest(".profile-avatar-choice-modal__item[data-avatar-id]") : null;

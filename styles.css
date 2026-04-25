@@ -28243,6 +28243,31 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .profile-avatar-choice-modal__item--active .profile-avatar-choice-modal__check {
   display: flex;
 }
+.profile-avatar-choice-modal__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.profile-avatar-choice-modal__upload {
+  width: min(100%, 280px);
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 146, 60, 0.46);
+  background: linear-gradient(to top, #ea580c, #fb923c);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(251, 146, 60, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-avatar-choice-modal__upload:hover,
+.profile-avatar-choice-modal__upload:focus-visible {
+  outline: none;
+  filter: brightness(1.05);
+}
 body.profile-avatar-choice-open {
   overflow: hidden;
 }
@@ -28259,6 +28284,9 @@ body.profile-avatar-choice-open {
 [data-theme="light"] .profile-avatar-choice-modal__close {
   background: rgba(255, 255, 255, 0.7);
   color: #111827;
+}
+[data-theme="light"] .profile-avatar-choice-modal__upload {
+  box-shadow: 0 12px 24px rgba(234, 88, 12, 0.16);
 }
 @media (max-width: 420px) {
   .profile-avatar-choice-modal__grid {
