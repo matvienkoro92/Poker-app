@@ -14437,6 +14437,15 @@ function escapeHtmlRating(s) {
   return String(s).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
 }
 
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function winterRatingDateKeyToStamp(dateStr) {
   var parts = dateStr.split(".");
   if (parts.length !== 3) return 0;

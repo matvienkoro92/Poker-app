@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.231">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.234">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=550" />
+    <link rel="stylesheet" href="./styles.css?v=552" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4205,16 +4205,16 @@
             <section class="profile-hero-card" aria-labelledby="profileUserName">
               <div class="profile-hero-card__identity">
                 <h2 class="profile-hero-card__name" id="profileUserName">
-                  <span id="profileUserNameText">Профиль игрока</span>
                   <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                  <span id="profileUserNameText" class="profile-hero-card__name-text">Профиль игрока</span>
                   <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
                     <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
                     <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
-                    <button type="button" class="profile-avatar-block__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате" title="Уважение">
-                      <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
-                      <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
-                    </button>
                   </span>
+                  <button type="button" class="profile-avatar-block__respect-btn profile-hero-card__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате" title="Уважение">
+                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
+                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+                  </button>
                 </h2>
                 <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
                 <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
@@ -6534,7 +6534,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=860"></script>
+    <script defer src="./app.js?v=861"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

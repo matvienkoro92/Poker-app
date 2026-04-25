@@ -27863,13 +27863,16 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 .profile-hero-card__name {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  min-height: 90px;
+  min-height: 42px;
   margin: 0;
-  padding: 0 54px;
+  padding: 0 72px;
   white-space: nowrap;
   color: #f8fafc;
   font-size: var(--profile-name-font-size, clamp(18px, 5.4vw, 34px));
@@ -27878,23 +27881,20 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   letter-spacing: 0;
   text-align: center;
 }
-.profile-hero-card__name span:first-child {
+.profile-hero-card__name-text {
   display: block;
   min-width: 0;
-  max-width: 100%;
+  max-width: min(100%, 460px);
   overflow: hidden;
   font-size: var(--profile-name-font-size, inherit);
   text-align: center;
   text-overflow: clip;
 }
-.profile-hero-card__name--empty span {
+.profile-hero-card__name--empty .profile-hero-card__name-text {
   color: rgba(226, 232, 240, 0.74);
   font-size: var(--profile-name-font-size, clamp(18px, 5.4vw, 30px));
 }
 .profile-hero-card__edit-name {
-  position: absolute;
-  top: 4px;
-  right: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -27919,6 +27919,11 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   border-color: rgba(251, 146, 60, 0.46);
   color: #fff7ed;
   background: rgba(249, 115, 22, 0.18);
+}
+.profile-hero-card__respect-btn {
+  position: absolute;
+  top: 72px;
+  right: 3px;
 }
 .profile-hero-card__id {
   max-width: 100%;
