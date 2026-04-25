@@ -1945,6 +1945,11 @@ function getAssetUrl(relativePath) {
     lightbox.setAttribute("aria-hidden", "false");
   }
 
+  function getAvatarPreviewSrc(img) {
+    if (!img) return "";
+    return img.getAttribute("data-avatar-full") || img.currentSrc || img.src || "";
+  }
+
   function openGallery(items, startIndex) {
     var arr = (items || []).filter(function (x) {
       return x && x.src;
@@ -2119,7 +2124,7 @@ function getAssetUrl(relativePath) {
     }
     if (t.classList && t.classList.contains("chat-msg__avatar") && t.src) {
       e.preventDefault();
-      openSingle(t.src, t.alt, "", true);
+      openSingle(getAvatarPreviewSrc(t), t.alt, "", true);
       return;
     }
     if (t.classList && t.classList.contains("chat-pinned-self__thumb") && t.src) {
@@ -2130,7 +2135,7 @@ function getAssetUrl(relativePath) {
     if (t.classList && t.classList.contains("chat-contact__avatar") && t.src && !(t.closest && t.closest(".chat-contact"))) {
       e.preventDefault();
       e.stopPropagation();
-      openSingle(t.src, t.alt, "", true);
+      openSingle(getAvatarPreviewSrc(t), t.alt, "", true);
     }
   });
   document.body.addEventListener("click", function (e) {
@@ -17904,7 +17909,7 @@ function initProfileAvatar() {
 
   function uploadAvatarAfterPick(toSend) {
     var base64 = toSend.replace(/^data:image\/\w+;base64,/, "");
-    if (base64.length > 100000) {
+    if (base64.length > 430000) {
       var im = new Image();
       var settled = false;
       var tIm = setTimeout(function () {
@@ -17919,14 +17924,14 @@ function initProfileAvatar() {
         var canvas = document.createElement("canvas");
         var w = im.width,
           h = im.height;
-        var r = Math.min(150 / w, 150 / h, 1);
+        var r = Math.min(420 / w, 420 / h, 1);
         w = Math.round(w * r);
         h = Math.round(h * r);
         canvas.width = w;
         canvas.height = h;
         canvas.getContext("2d").drawImage(im, 0, 0, w, h);
         try {
-          uploadAvatar(canvas.toDataURL("image/jpeg", 0.6));
+          uploadAvatar(canvas.toDataURL("image/jpeg", 0.82));
         } catch (eSm) {
           uploadAvatar(toSend);
         }
@@ -17972,11 +17977,11 @@ function initProfileAvatar() {
       avatarEl.src = objectUrlPending;
       avatarEl.alt = "Аватар";
     } catch (eOb) {}
-    resizeImage(file, 200, 200, 0.8, function (dataUrl) {
+    resizeImage(file, 512, 512, 0.88, function (dataUrl) {
       try {
         var base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-        if (base64.length > 100000) {
-          resizeImage(file, 150, 150, 0.6, function (dataUrl2) {
+        if (base64.length > 430000) {
+          resizeImage(file, 420, 420, 0.82, function (dataUrl2) {
             try {
               revokePendingObjectUrl();
               avatarEl.src = dataUrl2;

@@ -8659,10 +8659,11 @@ img.chat-contact__avatar {
   max-height: 100%;
 }
 .image-lightbox.image-lightbox--avatar-preview .image-lightbox__img {
-  width: min(96vw, calc(100vw - 24px));
-  height: min(92vh, calc(100dvh - 56px));
-  max-width: min(96vw, calc(100vw - 24px));
-  max-height: min(92vh, calc(100dvh - 56px));
+  width: min(82vw, 420px);
+  height: min(82vw, 420px);
+  max-width: min(82vw, 420px);
+  max-height: min(82vw, 420px);
+  border-radius: 22px;
 }
 .image-lightbox__caption {
   margin: 10px 0 0;
