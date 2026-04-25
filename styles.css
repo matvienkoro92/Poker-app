@@ -5142,10 +5142,12 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   display: flex;
   gap: 0;
   margin: 0 0 10px;
+  min-height: 38px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(44, 24, 16, 0.18);
   background: rgba(255, 255, 255, 0.35);
+  box-sizing: border-box;
 }
 .roman-task-planner-modal .roman-task-planner__tabs {
   border-color: rgba(148, 163, 184, 0.25);
@@ -5154,10 +5156,16 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
 .roman-task-planner__tab {
   flex: 1 1 0;
   min-width: 0;
+  min-height: 36px;
   margin: 0;
   padding: 10px 8px;
+  box-sizing: border-box;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: none;
   background: transparent;
   color: var(--muted, #64748b);
