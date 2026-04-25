@@ -31147,10 +31147,12 @@ function initChat() {
   }
   /** При длинном тексте время внизу пузыря (колонка), а не справа от последней строки. */
   var CHAT_MSG_TALL_TEXT_LINE_THRESHOLD = 5;
+  var CHAT_MSG_TALL_TEXT_MEASURE_TAIL_LIMIT = 90;
   function applyChatMsgTallTextTimeBelowLayout(root) {
     if (!root || !root.querySelectorAll) return;
     var mains = root.querySelectorAll(".chat-msg__body-main");
-    for (var i = 0; i < mains.length; i++) {
+    var startIndex = Math.max(0, mains.length - CHAT_MSG_TALL_TEXT_MEASURE_TAIL_LIMIT);
+    for (var i = startIndex; i < mains.length; i++) {
       var main = mains[i];
       if (
         main.classList.contains("chat-msg__body-main--with-image") ||
