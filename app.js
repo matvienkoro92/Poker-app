@@ -17049,9 +17049,14 @@ function initProfilePokerPlus() {
     if (!state.isVerified || state.isGuest || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       return Promise.resolve();
     }
-    var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    if (refresh) q += (q.indexOf("?") >= 0 ? "&" : "?") + "refresh=1";
-    return fetch(base + "/api/pokerplus-player" + q, { cache: "no-store" })
+    var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
+    if (refresh) body.refresh = "1";
+    return fetch(base + "/api/pokerplus-player", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify(body),
+    })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok) {
@@ -17070,7 +17075,7 @@ function initProfilePokerPlus() {
         else setFeedback("", false);
       })
       .catch(function () {
-        setFeedback(POKER_NET_ERR, true);
+        setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
       });
   }
 
