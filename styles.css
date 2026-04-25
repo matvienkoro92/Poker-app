@@ -4846,6 +4846,15 @@ html.vpn-proxy-modal-open {
   border: 1px solid rgba(148, 163, 184, 0.35);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
+.roman-task-planner-modal.roman-task-planner-modal--keyboard {
+  align-items: flex-start;
+  padding-top: calc(var(--roman-planner-viewport-top, 0px) + max(8px, env(safe-area-inset-top, 0px)));
+}
+.roman-task-planner-modal.roman-task-planner-modal--keyboard .roman-task-planner-modal__panel {
+  min-height: auto;
+  height: calc(var(--roman-planner-viewport-height, 100vh) - max(8px, env(safe-area-inset-top, 0px)));
+  max-height: calc(var(--roman-planner-viewport-height, 100vh) - max(8px, env(safe-area-inset-top, 0px)));
+}
 .roman-task-planner-modal__close {
   position: absolute;
   top: 10px;

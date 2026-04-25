@@ -4586,6 +4586,7 @@ function runGazetteAndTasksInit() {
     function closePlannerModal() {
       romanPlannerStopLiveSync();
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
+      if (plannerModal) plannerModal.classList.remove("roman-task-planner-modal--keyboard");
       try {
         var ae = document.activeElement;
         if (ae && plannerModal && plannerModal.contains(ae) && ae.blur) ae.blur();
@@ -4665,6 +4666,27 @@ function runGazetteAndTasksInit() {
     (function bindPlannerModalKeyboardRepair() {
       if (!plannerModal) return;
       var blurTimer = null;
+      function updatePlannerKeyboardLayout() {
+        var vv = window.visualViewport || null;
+        var h = vv && vv.height ? Math.round(vv.height) : window.innerHeight || 0;
+        var top = vv && vv.offsetTop ? Math.round(vv.offsetTop) : 0;
+        if (h > 0) plannerModal.style.setProperty("--roman-planner-viewport-height", h + "px");
+        plannerModal.style.setProperty("--roman-planner-viewport-top", top + "px");
+      }
+      function keepPlannerFieldVisible(field) {
+        if (!field || !plannerModal.contains(field)) return;
+        updatePlannerKeyboardLayout();
+        try {
+          field.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+        } catch (eSv) {
+          try { field.scrollIntoView(false); } catch (eSv2) {}
+        }
+      }
+      function scheduleKeepPlannerFieldVisible(field) {
+        keepPlannerFieldVisible(field);
+        setTimeout(function () { keepPlannerFieldVisible(field); }, 180);
+        setTimeout(function () { keepPlannerFieldVisible(field); }, 420);
+      }
       function scheduleFinalizePlannerKb() {
         clearTimeout(blurTimer);
         blurTimer = setTimeout(function () {
@@ -4676,6 +4698,7 @@ function runGazetteAndTasksInit() {
             (active.classList.contains("roman-task-planner__input") ||
               active.classList.contains("roman-task-planner__edit-ta"));
           if (kbField && plannerModal.contains(active)) return;
+          plannerModal.classList.remove("roman-task-planner-modal--keyboard");
           try {
             document.documentElement.classList.remove("gazette-comment-keyboard");
           } catch (eRm) {}
@@ -4702,6 +4725,8 @@ function runGazetteAndTasksInit() {
           try {
             document.documentElement.classList.add("gazette-comment-keyboard");
           } catch (eIn) {}
+          plannerModal.classList.add("roman-task-planner-modal--keyboard");
+          scheduleKeepPlannerFieldVisible(t);
         },
         true
       );
@@ -4722,6 +4747,20 @@ function runGazetteAndTasksInit() {
         },
         true
       );
+      try {
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", function () {
+            var active = document.activeElement;
+            var kbField =
+              active &&
+              active.classList &&
+              (active.classList.contains("roman-task-planner__input") ||
+                active.classList.contains("roman-task-planner__edit-ta"));
+            if (!kbField || !plannerModal.contains(active)) return;
+            scheduleKeepPlannerFieldVisible(active);
+          });
+        }
+      } catch (eVv) {}
     })();
     window.addEventListener("poker-telegram-auth", function () {
       syncVisibility();
