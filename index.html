@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.197">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.198">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4217,8 +4217,30 @@
             </div>
             <section class="profile-hero-card" aria-labelledby="profileUserName">
               <div class="profile-hero-card__identity">
-                <h2 class="profile-hero-card__name" id="profileUserName">Профиль игрока</h2>
+                <h2 class="profile-hero-card__name" id="profileUserName">
+                  <span id="profileUserNameText">Профиль игрока</span>
+                  <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                </h2>
                 <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
+                <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
+                  <div class="profile-chat-name__row" id="profileChatNameRow">
+                    <div class="profile-chat-name__cell">
+                      <input
+                        type="text"
+                        id="profileChatDisplayNameInput"
+                        class="profile-chat-name__input"
+                        maxlength="80"
+                        placeholder="Как вас показывать в чате?"
+                        aria-label="Отображаемое имя в чатах"
+                        autocomplete="nickname"
+                      />
+                    </div>
+                  </div>
+                  <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
+                    <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
+                    <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
+                  </div>
+                </div>
               </div>
               <div class="profile-avatar-block" id="profileAvatarBlock">
                 <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать фото" aria-label="Выбрать фото" />
@@ -4247,26 +4269,6 @@
               <section class="profile-friends">
                 <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
               </section>
-              <div class="profile-chat-name">
-                <div class="profile-chat-name__row" id="profileChatNameRow">
-                  <div class="profile-chat-name__cell">
-                    <p class="profile-chat-name__field-caption" id="profileNameCaption">Введите ваше имя</p>
-                    <input
-                      type="text"
-                      id="profileChatDisplayNameInput"
-                      class="profile-chat-name__input"
-                      maxlength="80"
-                      placeholder="Ваше имя"
-                      aria-label="Отображаемое имя в чатах"
-                      autocomplete="nickname"
-                    />
-                  </div>
-                </div>
-                <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
-                  <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
-                </div>
-              </div>
             </section>
             <div id="profileVerifiedContent">
             <section class="profile-email-auth" id="profileEmailAuthSection" hidden>
@@ -6547,7 +6549,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=845"></script>
+    <script defer src="./app.js?v=846"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

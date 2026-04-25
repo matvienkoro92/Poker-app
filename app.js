@@ -16406,8 +16406,55 @@ function getProfileGreetingName() {
 function updateProfileUserName() {
   var el = document.getElementById("profileUserName");
   if (!el) return;
-  el.textContent = getProfileGreetingName();
+  var textEl = document.getElementById("profileUserNameText") || el;
+  var name = getProfileGreetingName();
+  var isEmptyName = !name || String(name).trim() === "NoName";
+  textEl.textContent = isEmptyName ? "Добавьте имя" : name;
+  el.classList.toggle("profile-hero-card__name--empty", isEmptyName);
   updateProfileUserMeta();
+}
+
+function closeProfileNameEditor() {
+  var editor = document.getElementById("profileChatNameEditor");
+  if (editor) editor.hidden = true;
+}
+
+function openProfileNameEditor() {
+  var editor = document.getElementById("profileChatNameEditor");
+  var input = document.getElementById("profileChatDisplayNameInput");
+  if (!editor || !input) return;
+  editor.hidden = false;
+  try {
+    input.value = pokerPreferredProfileDisplayName() || "";
+  } catch (eNamePrefill) {}
+  requestAnimationFrame(function () {
+    try {
+      input.focus({ preventScroll: true });
+      input.select();
+    } catch (eNameFocus) {}
+  });
+}
+
+function initProfileNameEditor() {
+  var btn = document.getElementById("profileNameEditBtn");
+  var input = document.getElementById("profileChatDisplayNameInput");
+  if (!btn || !input || btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", function () {
+    var editor = document.getElementById("profileChatNameEditor");
+    if (editor && !editor.hidden) closeProfileNameEditor();
+    else openProfileNameEditor();
+  });
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeProfileNameEditor();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      var saveBtn = document.getElementById("profileSaveBtn");
+      if (saveBtn) saveBtn.click();
+    }
+  });
 }
 
 function updateProfileUserMeta() {
@@ -16733,6 +16780,7 @@ function initProfileP21Id() {
           window.__pokerChatDisplayName = sdn;
           pokerWriteStoredProfileDisplayName(sdn);
           if (nameInput) nameInput.value = sdn;
+          if (typeof updateProfileUserName === "function") updateProfileUserName();
         } catch (eSd) {}
       })
       .catch(function () {});
@@ -16744,6 +16792,8 @@ function initProfileP21Id() {
       try {
         window.__pokerChatDisplayName = nameVal;
         pokerWriteStoredProfileDisplayName(nameVal);
+        updateProfileUserName();
+        closeProfileNameEditor();
       } catch (eLoc) {}
       if (feedback) {
         feedback.textContent = "Сохранено локально. Войдите в аккаунт или откройте в Telegram, чтобы синхронизировать.";
@@ -16767,6 +16817,8 @@ function initProfileP21Id() {
         try {
           window.__pokerChatDisplayName = nameVal;
           pokerWriteStoredProfileDisplayName(nameVal);
+          updateProfileUserName();
+          if (data && data.ok) closeProfileNameEditor();
         } catch (eOkNm) {}
         if (feedback) {
           var msg = data && data.ok ? "Сохранено" : (data && data.error) || "Ошибка";
@@ -16792,6 +16844,7 @@ function initProfileP21Id() {
       });
   }
   if (saveBtn) saveBtn.addEventListener("click", saveP21Id);
+  initProfileNameEditor();
 }
 
 function initProfilePokerPlus() {
