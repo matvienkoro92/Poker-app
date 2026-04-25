@@ -28267,7 +28267,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsRow {
   grid-column: 1 / -1;
-  order: 14;
+  order: 5;
   display: block;
   margin-top: 6px;
   padding: 16px;
