@@ -16412,6 +16412,47 @@ function updateProfileUserName() {
   textEl.textContent = isEmptyName ? "Добавьте имя" : name;
   el.classList.toggle("profile-hero-card__name--empty", isEmptyName);
   updateProfileUserMeta();
+  pokerScheduleProfileHeroTextFit();
+}
+
+function pokerFitProfileTextOneLine(el, cssVarName, maxPx, minPx) {
+  if (!el) return;
+  var parent = el.parentElement || el;
+  var available = Math.floor(parent.clientWidth || el.clientWidth || 0);
+  if (!available) return;
+  el.style.setProperty(cssVarName, maxPx + "px");
+  var size = maxPx;
+  while (size > minPx && el.scrollWidth > available + 1) {
+    size -= 1;
+    el.style.setProperty(cssVarName, size + "px");
+  }
+}
+
+function pokerFitProfileHeroText() {
+  var nameEl = document.getElementById("profileUserName");
+  var idEl = document.getElementById("profileUserId");
+  var idRow = idEl && idEl.closest ? idEl.closest(".profile-hero-card__id") : null;
+  var vw = Math.max(320, Math.min(window.innerWidth || 390, 900));
+  var nameMax = Math.max(32, Math.min(56, Math.round(vw * 0.07)));
+  if (nameEl && nameEl.classList.contains("profile-hero-card__name--empty")) {
+    nameMax = Math.max(22, Math.min(32, Math.round(vw * 0.064)));
+  }
+  var idMax = vw <= 430 ? 16 : 15;
+  pokerFitProfileTextOneLine(nameEl, "--profile-name-font-size", nameMax, 12);
+  if (idRow && !idRow.hidden) pokerFitProfileTextOneLine(idRow, "--profile-id-font-size", idMax, 10);
+}
+
+function pokerScheduleProfileHeroTextFit() {
+  var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+  raf(function () {
+    pokerFitProfileHeroText();
+    raf(pokerFitProfileHeroText);
+  });
+}
+
+if (!window.__pokerProfileHeroTextFitBound) {
+  window.__pokerProfileHeroTextFitBound = true;
+  window.addEventListener("resize", pokerScheduleProfileHeroTextFit, { passive: true });
 }
 
 function closeProfileNameEditor() {
@@ -16487,6 +16528,7 @@ function updateProfileHeroPokerPlusId(value) {
   }
   el.textContent = text || "\u2014";
   row.hidden = !text;
+  pokerScheduleProfileHeroTextFit();
 }
 
 function loadProfileDebugInfo() {

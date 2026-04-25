@@ -27826,6 +27826,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   display: grid;
   justify-items: center;
   gap: 4px;
+  width: 100%;
   text-align: center;
 }
 .profile-hero-card__name {
@@ -27833,19 +27834,23 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
   max-width: 100%;
   margin: 0;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
   color: #f8fafc;
-  font-size: clamp(32px, 7vw, 56px);
+  font-size: var(--profile-name-font-size, clamp(32px, 7vw, 56px));
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: 0;
   text-align: center;
 }
+.profile-hero-card__name span:first-child {
+  min-width: 0;
+}
 .profile-hero-card__name--empty span {
   color: rgba(226, 232, 240, 0.74);
-  font-size: clamp(22px, 6.4vw, 32px);
+  font-size: var(--profile-name-font-size, clamp(22px, 6.4vw, 32px));
 }
 .profile-hero-card__edit-name {
   display: inline-flex;
@@ -27874,10 +27879,13 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   background: rgba(249, 115, 22, 0.18);
 }
 .profile-hero-card__id {
+  max-width: 100%;
   margin: 0;
   color: rgba(203, 213, 225, 0.86);
-  font-size: 15px;
+  font-size: var(--profile-id-font-size, 15px);
   font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 .profile-hero-card__id[hidden] {
   display: none !important;
@@ -28385,7 +28393,7 @@ body.profile-avatar-choice-open {
     height: 112px;
   }
   .profile-hero-card__id {
-    font-size: 16px;
+    font-size: var(--profile-id-font-size, 16px);
   }
 }
 @media (max-width: 370px) {
