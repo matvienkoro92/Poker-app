@@ -16970,6 +16970,10 @@ function initProfilePokerPlus() {
     if (statsRow) statsRow.hidden = false;
   }
 
+  function hidePokerPlusStats() {
+    if (statsRow) statsRow.hidden = true;
+  }
+
   function renderPokerPlusStatsFallbackIfVisible() {
     if (!section || !section.classList || !section.classList.contains("profile-pokerplus-card--linked")) return;
     renderPokerPlusStats({});
@@ -17012,7 +17016,7 @@ function initProfilePokerPlus() {
       if (roleRow) roleRow.hidden = true;
       if (lastLoginRow) lastLoginRow.hidden = true;
       if (lastIpRow) lastIpRow.hidden = true;
-      renderPokerPlusStats({});
+      hidePokerPlusStats();
       if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
       try { window.__pokerPlusUserId = ""; } catch (eClearPpId) {}
