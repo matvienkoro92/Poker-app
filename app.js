@@ -4257,16 +4257,23 @@ function runGazetteAndTasksInit() {
     function romanPlannerCloseAllSwipes(exceptClip) {
       if (!boardEl) return;
       var tracks = boardEl.querySelectorAll(".roman-task-planner__swipe-track");
+      var exceptId = "";
       for (var i = 0; i < tracks.length; i++) {
         var tr = tracks[i];
         var c = tr && tr.closest ? tr.closest(".roman-task-planner__swipe-clip") : null;
-        if (exceptClip && c === exceptClip) continue;
+        if (exceptClip && c === exceptClip) {
+          var exceptItem = c.closest(".roman-task-planner__item[data-roman-task-id]");
+          exceptId = exceptItem ? String(exceptItem.getAttribute("data-roman-task-id") || "") : "";
+          continue;
+        }
         tr.style.transform = "";
         tr.classList.remove("roman-task-planner__swipe-track--open");
       }
+      romanPlannerOpenSwipeTaskId = exceptId;
     }
     var romanPlannerSwipeActive = null;
     var romanPlannerReorderActive = null;
+    var romanPlannerOpenSwipeTaskId = "";
     /** passive: false — иначе preventDefault на pointermove не гасит скролл во время горизонтального свайпа (iOS / часть WebView). */
     var romanPlannerSwipeDocListenerOpts = { capture: true, passive: false };
     var romanPlannerSwipeDocEndOpts = { capture: true, passive: true };
@@ -4310,24 +4317,30 @@ function runGazetteAndTasksInit() {
       var cur = romanPlannerSwipeGetTx(track);
       var frac = 0.35;
       var wasOpen = track.classList.contains("roman-task-planner__swipe-track--open");
+      var item = track.closest ? track.closest(".roman-task-planner__item[data-roman-task-id]") : null;
+      var taskId = item ? String(item.getAttribute("data-roman-task-id") || "") : "";
       if (wasOpen) {
         /* Уже открыто: закрываем, если увели полосу правее чем (1−frac) пути к 0 — иначе тот же порог, что «влево», ломал свайп вправо. */
         var closeThreshold = -openPx * (1 - frac);
         if (cur > closeThreshold) {
           track.classList.remove("roman-task-planner__swipe-track--open");
           romanPlannerSwipeSetTx(track, openPx, 0);
+          if (romanPlannerOpenSwipeTaskId === taskId) romanPlannerOpenSwipeTaskId = "";
         } else {
           track.classList.add("roman-task-planner__swipe-track--open");
           romanPlannerSwipeSetTx(track, openPx, -openPx);
+          romanPlannerOpenSwipeTaskId = taskId;
         }
       } else {
         var openThreshold = -openPx * frac;
         if (cur < openThreshold) {
           track.classList.add("roman-task-planner__swipe-track--open");
           romanPlannerSwipeSetTx(track, openPx, -openPx);
+          romanPlannerOpenSwipeTaskId = taskId;
         } else {
           track.classList.remove("roman-task-planner__swipe-track--open");
           romanPlannerSwipeSetTx(track, openPx, 0);
+          if (romanPlannerOpenSwipeTaskId === taskId) romanPlannerOpenSwipeTaskId = "";
         }
       }
     }
@@ -4742,6 +4755,24 @@ function runGazetteAndTasksInit() {
         romanPlannerApplyOpenForClip(clips[c]);
       }
     }
+    function romanPlannerRestoreOpenSwipe() {
+      if (!romanPlannerOpenSwipeTaskId || !boardEl) return;
+      var item = boardEl.querySelector(
+        '.roman-task-planner__item[data-roman-task-id="' + cssEscape(romanPlannerOpenSwipeTaskId) + '"]'
+      );
+      var clip = item ? item.querySelector(".roman-task-planner__swipe-clip") : null;
+      if (!clip) {
+        romanPlannerOpenSwipeTaskId = "";
+        return;
+      }
+      var layout = romanPlannerApplyOpenForClip(clip);
+      if (!layout || !layout.track) {
+        romanPlannerOpenSwipeTaskId = "";
+        return;
+      }
+      layout.track.classList.add("roman-task-planner__swipe-track--open");
+      romanPlannerSwipeSetTx(layout.track, layout.openPx, -layout.openPx);
+    }
     function renderTasks() {
       setPlannerTabUi();
       var raw = loadTasks();
@@ -4806,6 +4837,7 @@ function runGazetteAndTasksInit() {
       }
       listAll.innerHTML = parts.join("");
       initRomanPlannerSwipeRows();
+      romanPlannerRestoreOpenSwipe();
       updatePlannerHintText(raw);
     }
     function openPlannerModal() {
