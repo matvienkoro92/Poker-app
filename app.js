@@ -4374,6 +4374,9 @@ function runGazetteAndTasksInit() {
           return;
         }
         st.swipeAxisLocked = true;
+        if (romanPlannerReorderActive && !romanPlannerReorderActive.active) {
+          romanPlannerReorderCancel();
+        }
         if (!st.pointerCaptureSet && st.pointerId != null && evPrevent && typeof evPrevent.pointerId === "number") {
           st.pointerCaptureSet = true;
           try {
@@ -4421,7 +4424,7 @@ function runGazetteAndTasksInit() {
       romanPlannerSwipeEnd(true);
     }
     function romanPlannerSwipeStartOnClip(clip, clientX, clientY, pointerId, touchId) {
-      if (romanPlannerReorderActive) return false;
+      if (romanPlannerReorderActive && romanPlannerReorderActive.active) return false;
       romanPlannerCloseAllSwipes(clip);
       var layout = romanPlannerApplyOpenForClip(clip);
       if (!layout) return false;
@@ -4602,7 +4605,7 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__btn")) return;
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (romanPlannerSwipeActive) return;
-      if (romanPlannerReorderActive) return;
+      if (romanPlannerReorderActive && romanPlannerReorderActive.active) return;
       romanPlannerSwipeStartOnClip(clip, touch.clientX, touch.clientY, null, touch.identifier);
     }
     function romanPlannerListPointerDown(ev) {
@@ -4615,7 +4618,7 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (ev.pointerType === "mouse" && ev.button !== 0) return;
       if (romanPlannerSwipeActive) return;
-      if (romanPlannerReorderActive) return;
+      if (romanPlannerReorderActive && romanPlannerReorderActive.active) return;
       /** Касание уже обработано touchstart (там touchmove с passive:false). */
       if (ev.pointerType === "touch") return;
       try {
