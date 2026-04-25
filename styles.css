@@ -5611,6 +5611,17 @@ textarea.roman-task-planner__input {
 [data-theme="light"] .roman-task-planner__section-head {
   color: #5c4033;
 }
+.roman-task-planner__list-hint {
+  list-style: none;
+  margin: 0;
+  padding: 2px 4px 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--muted, #94a3b8);
+}
+[data-theme="light"] .roman-task-planner__list-hint {
+  color: #8a7668;
+}
 .roman-task-planner__empty--stacked {
   list-style: none;
   padding: 8px 6px 14px;

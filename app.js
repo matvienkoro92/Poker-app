@@ -4111,8 +4111,6 @@ function runGazetteAndTasksInit() {
           ? '<span class="roman-task-planner__num-cell" aria-label="Номер в списке">' + displayNum + ".</span>"
           : "";
       var taskTopLine = numberBadge || badgesRow ? '<div class="roman-task-planner__top-line">' + numberBadge + badgesRow + "</div>" : "";
-      var swipeHint =
-        '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Влево — действия · вправо — закрыть</div>';
       var reorderBtns =
         !columnDone && reorderOpts
           ? '<div class="roman-task-planner__reorder-col">' +
@@ -4140,7 +4138,6 @@ function runGazetteAndTasksInit() {
           '<div class="roman-task-planner__text">' +
           escHtml(text) +
           "</div>" +
-          swipeHint +
           "</div>" +
           reorderBtns +
           "</div>";
@@ -4149,8 +4146,7 @@ function runGazetteAndTasksInit() {
           taskTopLine +
           '<div class="roman-task-planner__text">' +
           escHtml(text) +
-          "</div>" +
-          swipeHint;
+          "</div>";
       }
       var statusBtns = "";
       if (!columnDone) {
@@ -4669,6 +4665,7 @@ function runGazetteAndTasksInit() {
         return !!x.done;
       }));
       var parts = [];
+      parts.push('<li class="roman-task-planner__list-hint">Свайп влево открывает меню действий</li>');
       if (plannerTab === "important") {
         if (importantActive.length) {
           for (var ai = 0; ai < importantActive.length; ai++) {
