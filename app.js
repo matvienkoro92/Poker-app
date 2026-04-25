@@ -16428,12 +16428,12 @@ function pokerFitProfileHeroText() {
   var idEl = document.getElementById("profileUserId");
   var idRow = idEl && idEl.closest ? idEl.closest(".profile-hero-card__id") : null;
   var vw = Math.max(320, Math.min(window.innerWidth || 390, 900));
-  var nameMax = Math.max(32, Math.min(56, Math.round(vw * 0.07)));
+  var nameMax = Math.max(18, Math.min(42, Math.round(vw * 0.072)));
   if (nameEl && nameEl.classList.contains("profile-hero-card__name--empty")) {
-    nameMax = Math.max(22, Math.min(32, Math.round(vw * 0.064)));
+    nameMax = Math.max(18, Math.min(30, Math.round(vw * 0.064)));
   }
   var idMax = vw <= 430 ? 16 : 15;
-  pokerFitProfileTextOneLine(nameTextEl || nameEl, "--profile-name-font-size", nameMax, 12);
+  pokerFitProfileTextOneLine(nameTextEl || nameEl, "--profile-name-font-size", nameMax, 10);
   if (idRow && !idRow.hidden) pokerFitProfileTextOneLine(idRow, "--profile-id-font-size", idMax, 10);
 }
 
@@ -16448,6 +16448,11 @@ function pokerScheduleProfileHeroTextFit() {
 if (!window.__pokerProfileHeroTextFitBound) {
   window.__pokerProfileHeroTextFitBound = true;
   window.addEventListener("resize", pokerScheduleProfileHeroTextFit, { passive: true });
+  try {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(pokerScheduleProfileHeroTextFit).catch(function () {});
+    }
+  } catch (eProfileFontsFit) {}
 }
 
 function closeProfileNameEditor() {
