@@ -9072,12 +9072,6 @@ function getPokerResolvedTelegramUser() {
     syncProfileLanguageUi();
     syncGlobalAppLanguageUi();
     rerenderCurrentPwaAuthScreen();
-    if (prev !== next) {
-      try {
-        window.location.reload();
-        return;
-      } catch (eReloadLocale) {}
-    }
   }
 
   function pwaAuthT(key) {
@@ -16418,7 +16412,7 @@ function updateProfileUserName() {
 function pokerFitProfileTextOneLine(el, cssVarName, maxPx, minPx) {
   if (!el) return;
   var parent = el.parentElement || el;
-  var available = Math.floor(parent.clientWidth || el.clientWidth || 0);
+  var available = Math.floor(el.clientWidth || parent.clientWidth || 0);
   if (!available) return;
   el.style.setProperty(cssVarName, maxPx + "px");
   var size = maxPx;
@@ -16430,6 +16424,7 @@ function pokerFitProfileTextOneLine(el, cssVarName, maxPx, minPx) {
 
 function pokerFitProfileHeroText() {
   var nameEl = document.getElementById("profileUserName");
+  var nameTextEl = document.getElementById("profileUserNameText");
   var idEl = document.getElementById("profileUserId");
   var idRow = idEl && idEl.closest ? idEl.closest(".profile-hero-card__id") : null;
   var vw = Math.max(320, Math.min(window.innerWidth || 390, 900));
@@ -16438,7 +16433,7 @@ function pokerFitProfileHeroText() {
     nameMax = Math.max(22, Math.min(32, Math.round(vw * 0.064)));
   }
   var idMax = vw <= 430 ? 16 : 15;
-  pokerFitProfileTextOneLine(nameEl, "--profile-name-font-size", nameMax, 12);
+  pokerFitProfileTextOneLine(nameTextEl || nameEl, "--profile-name-font-size", nameMax, 12);
   if (idRow && !idRow.hidden) pokerFitProfileTextOneLine(idRow, "--profile-id-font-size", idMax, 10);
 }
 
@@ -18193,6 +18188,8 @@ function initProfileAvatar() {
     document.body.classList.add("profile-avatar-choice-open");
   }
 
+  window.__pokerOpenProfileAvatarChoiceModal = openProfileAvatarChoiceModal;
+
   function closeProfileAvatarChoiceModal() {
     var modal = document.getElementById("profileAvatarChoiceModal");
     if (!modal) return;
@@ -18492,6 +18489,41 @@ function initProfileAvatar() {
   });
 
   fetchProfileAvatarFromServer();
+}
+
+if (!window.__pokerProfileAvatarDelegatedOpenBound) {
+  window.__pokerProfileAvatarDelegatedOpenBound = true;
+  document.addEventListener(
+    "click",
+    function (e) {
+      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar") : null;
+      if (!target) return;
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        if (typeof initProfileAvatar === "function") initProfileAvatar();
+      } catch (eInitAvatar) {}
+      if (typeof window.__pokerOpenProfileAvatarChoiceModal === "function") {
+        window.__pokerOpenProfileAvatarChoiceModal();
+      }
+    },
+    true
+  );
+  document.addEventListener(
+    "keydown",
+    function (e) {
+      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar") : null;
+      if (!target || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      try {
+        if (typeof initProfileAvatar === "function") initProfileAvatar();
+      } catch (eInitAvatarKey) {}
+      if (typeof window.__pokerOpenProfileAvatarChoiceModal === "function") {
+        window.__pokerOpenProfileAvatarChoiceModal();
+      }
+    },
+    true
+  );
 }
 
 // Стримы: трансляция экрана и микрофона в реальном времени (PeerJS). Задержка 2 мин — отдельный сервер.
