@@ -4113,7 +4113,7 @@ function runGazetteAndTasksInit() {
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
-        '">Выполнено</button>';
+        '">Готово</button>';
       var uncompleteBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-uncomplete="' +
         escHtml(id) +
@@ -4181,18 +4181,18 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-doing="' +
             escHtml(id) +
-            '">Снять «Выполняется»</button>';
+            '">Снять работу</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--doing" data-roman-task-set-doing="' +
             escHtml(id) +
-            '">Выполняется</button>';
+            '">В работе</button>';
         }
         if (important) {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-important="' +
             escHtml(id) +
-            '">Снять «Важно»</button>';
+            '">Снять важно</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--important" data-roman-task-set-important="' +
@@ -4203,30 +4203,30 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
             escHtml(id) +
-            '">Снять «Ожидаю»</button>';
+            '">Снять ожид.</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--waiting" data-roman-task-set-stage="' +
             escHtml(id) +
-            '" data-roman-task-stage="waiting">Ожидаю выполнения</button>';
+            '" data-roman-task-stage="waiting">Ожидаю</button>';
         }
         if (stage === "checking") {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
             escHtml(id) +
-            '">Снять «Проверяю»</button>';
+            '">Снять проверку</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--checking" data-roman-task-set-stage="' +
             escHtml(id) +
-            '" data-roman-task-stage="checking">Проверяю выполнение</button>';
+            '" data-roman-task-stage="checking">Проверяю</button>';
         }
       }
       var actionsHtml =
         (columnDone ? uncompleteBtn : statusBtns + completeBtn) +
         '<button type="button" class="roman-task-planner__btn" data-roman-task-edit="' +
         escHtml(id) +
-        '">Изменить</button>' +
+        '">Изм.</button>' +
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--danger" data-roman-task-delete="' +
         escHtml(id) +
         '">Удалить</button>';
