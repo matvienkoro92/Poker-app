@@ -4101,6 +4101,9 @@ function runGazetteAndTasksInit() {
             '"' +
             (reorderOpts.canDown ? "" : " disabled") +
             ' aria-label="Ниже в списке">↓</button>' +
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--reorder-edit" data-roman-task-edit="' +
+            escHtml(id) +
+            '">Изм.</button>' +
             "</div>"
           : "";
       var bodyContent = "";

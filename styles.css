@@ -5425,6 +5425,16 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   min-width: 36px;
   padding: 0;
 }
+.roman-task-planner__btn--reorder-edit,
+.roman-task-planner-modal .roman-task-planner__btn--reorder-edit {
+  flex: 0 0 30px;
+  width: 36px;
+  min-width: 36px;
+  height: 30px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+}
 .roman-task-planner__text {
   line-height: 1.35;
   word-break: break-word;
