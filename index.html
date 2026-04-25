@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.229">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.230">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=548" />
+    <link rel="stylesheet" href="./styles.css?v=549" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4210,6 +4210,10 @@
                   <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
                     <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
                     <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+                    <button type="button" class="profile-avatar-block__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате" title="Уважение">
+                      <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
+                      <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+                    </button>
                   </span>
                 </h2>
                 <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
@@ -4235,9 +4239,6 @@
               </div>
               <div class="profile-avatar-block" id="profileAvatarBlock">
                 <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать аватар" aria-label="Выбрать аватар" />
-                <button type="button" class="profile-avatar-block__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате">
-                  Уважение <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
-                </button>
                 <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
                 <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
               </div>
