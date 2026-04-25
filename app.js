@@ -4874,6 +4874,9 @@ function runGazetteAndTasksInit() {
       if (ixE < 0) return;
       var body = li.querySelector(".roman-task-planner__body");
       if (!body) return;
+      var editClip = li.querySelector(".roman-task-planner__swipe-clip");
+      romanPlannerCloseAllSwipes();
+      if (editClip) romanPlannerApplyOpenForClip(editClip);
       li.setAttribute("data-roman-editing", "1");
       var cur = tasksE[ixE].text != null ? String(tasksE[ixE].text) : "";
       body.innerHTML =
@@ -4888,6 +4891,7 @@ function runGazetteAndTasksInit() {
         "</div>";
       var taEd = body.querySelector(".roman-task-planner__edit-ta");
       if (taEd) taEd.value = cur;
+      if (editClip) romanPlannerApplyOpenForClip(editClip);
       try {
         taEd.focus();
       } catch (eFoc) {}
