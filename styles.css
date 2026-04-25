@@ -18685,7 +18685,7 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   display: block;
   width: 88%;
   max-width: 100%;
-  margin-left: auto;
+  margin-left: clamp(4px, 3.2%, 14px);
   margin-right: auto;
   aspect-ratio: 1;
   text-decoration: none;
