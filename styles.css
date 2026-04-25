@@ -18685,7 +18685,7 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
   display: block;
   width: 88%;
   max-width: 100%;
-  margin-left: 0;
+  margin-left: auto;
   margin-right: auto;
   aspect-ratio: 1;
   text-decoration: none;
@@ -18723,12 +18723,12 @@ body[data-view="download"] .download-page:not([data-download-page="poker21"]) .d
 /* Узкие экраны: меньше отступы и gap, кнопки остаются в границах */
 @media (max-width: 430px) {
   .hero-row {
-    gap: 8px;
+    gap: 6px;
   }
 }
 @media (max-width: 380px) {
   .hero-row {
-    gap: 6px;
+    gap: 4px;
   }
 }
 
