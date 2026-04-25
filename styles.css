@@ -28216,6 +28216,8 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusPositionRow,
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow,
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusGroupRow,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCountryRow,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRoleRow,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastLoginRow,
@@ -28235,6 +28237,8 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusPositionRow::before,
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before,
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusGroupRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCountryRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRoleRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastLoginRow::before,
@@ -28251,6 +28255,8 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before { content: "₽"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow::before { content: "□"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusPositionRow::before { content: "#"; }
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before { content: "L"; }
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusGroupRow::before { content: "G"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCountryRow::before { content: "◎"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRoleRow::before { content: "♙"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastLoginRow::before { content: "◷"; }
