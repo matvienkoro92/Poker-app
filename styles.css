@@ -5710,7 +5710,7 @@ textarea.roman-task-planner__input {
 .roman-task-planner__swipe-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: minmax(34px, auto);
+  grid-auto-rows: minmax(40px, auto);
   gap: 5px;
   box-sizing: border-box;
   padding: 6px;
@@ -5736,7 +5736,7 @@ textarea.roman-task-planner__input {
   width: 100%;
   padding: 6px 4px;
   font-size: 10px;
-  line-height: 1.05;
+  line-height: 1.08;
   white-space: normal;
   overflow-wrap: anywhere;
 }
@@ -5746,7 +5746,7 @@ textarea.roman-task-planner__input {
   width: 100%;
   padding: 6px 4px;
   font-size: 10px;
-  line-height: 1.05;
+  line-height: 1.08;
   white-space: normal;
   overflow-wrap: anywhere;
 }
