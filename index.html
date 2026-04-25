@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.222">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.223">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -227,7 +227,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=541" />
+    <link rel="stylesheet" href="./styles.css?v=542" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4203,14 +4203,14 @@
               </div>
             </div>
             <section class="profile-hero-card" aria-labelledby="profileUserName">
-              <div class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
-                <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
-                <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
-              </div>
               <div class="profile-hero-card__identity">
                 <h2 class="profile-hero-card__name" id="profileUserName">
                   <span id="profileUserNameText">Профиль игрока</span>
                   <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
+                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
+                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+                  </span>
                 </h2>
                 <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
                 <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
