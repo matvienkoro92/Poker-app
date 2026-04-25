@@ -27993,6 +27993,49 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+.profile-email-auth__linked:has(.profile-pokerplus-stats) {
+  align-items: flex-start;
+}
+.profile-pokerplus-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.profile-pokerplus-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  color: var(--text);
+  line-height: 1.15;
+}
+.profile-pokerplus-stat__label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.profile-pokerplus-stat__value {
+  font-size: 13px;
+  font-weight: 800;
+}
+.profile-pokerplus-stat--good {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.28);
+}
+.profile-pokerplus-stat--good .profile-pokerplus-stat__value {
+  color: #22c55e;
+}
+.profile-pokerplus-stat--bad {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.24);
+}
+.profile-pokerplus-stat--bad .profile-pokerplus-stat__value {
+  color: #ef4444;
+}
 .profile-verified-badge {
   display: inline-flex;
   align-items: center;
