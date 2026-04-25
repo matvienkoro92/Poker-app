@@ -16981,7 +16981,7 @@ function initProfilePokerPlus() {
     if (linkedValue) {
       var playerParts = [];
       if (p.nickname) playerParts.push(p.nickname);
-      if (p.pokerPlusUserId) playerParts.push("#" + p.pokerPlusUserId);
+      if (p.pokerPlusUserId) playerParts.push("ID " + p.pokerPlusUserId);
       linkedValue.textContent = playerParts.join(" ") || "—";
     }
     if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
