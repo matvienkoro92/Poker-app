@@ -27974,8 +27974,9 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   background: rgba(249, 115, 22, 0.12);
 }
 .profile-avatar-block__feedback {
-  margin: 8px 0 0;
-  min-height: 1.2em;
+  display: none;
+  margin: 6px 0 0;
+  min-height: 0;
   font-size: 13px;
   font-weight: 600;
   color: #86efac;
@@ -27984,6 +27985,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   transition: opacity 0.2s ease;
 }
 .profile-avatar-block__feedback--visible {
+  display: block;
   opacity: 1;
 }
 
