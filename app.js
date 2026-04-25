@@ -33038,6 +33038,8 @@ function initChat() {
         try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
         btn.removeAttribute("data-chat-verified");
       }
+      var verifiedEl = btn.querySelector(".chat-contact__verified");
+      if (verifiedEl) verifiedEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
       var onlineEl = btn.querySelector(".chat-contact__online");
       if (onlineEl) onlineEl.classList.toggle("chat-contact__online--visible", !isGroupRow && !!c.online);
       var unreadEl = btn.querySelector(".chat-contact__unread");
@@ -33392,6 +33394,8 @@ function initChat() {
               } catch (eVerD) {
                 btn.removeAttribute("data-chat-verified");
               }
+              var verEl = btn.querySelector(".chat-contact__verified");
+              if (verEl) verEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
               var onEl = btn.querySelector(".chat-contact__online");
               if (onEl) {
                 var nowVisible = !!c.online;
@@ -33477,6 +33481,11 @@ function initChat() {
             var effectiveAlias = chatListRowAlias(c, friendSet);
             var hasAlias = effectiveAlias !== "";
             var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
+            var verifiedBadgeHtml = !isGroupRow
+              ? '<span class="chat-contact__verified' +
+                (c.pokerPlusVerified ? "" : " chat-contact__verified--hidden") +
+                '" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
+              : "";
             var nameBlockInner;
             if (isGroupRow) {
               nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
@@ -33485,26 +33494,42 @@ function initChat() {
                 nameBlockInner =
                   '<span class="chat-contact__name-stack chat-contact__name-stack--friend">' +
                   '<span class="chat-contact__friend-name-nick">' +
+                  '<span class="chat-contact__name-line">' +
                   '<span class="chat-contact__label chat-contact__label--primary">' +
                   escapeHtml(effectiveAlias) +
+                  "</span>" +
+                  verifiedBadgeHtml +
                   "</span>" +
                   '<span class="chat-contact__friend-nick">' +
                   escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
                   "</span></span></span>";
               } else {
-                nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
+                nameBlockInner =
+                  '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
+                  escapeHtml(displayTitle || c.name || c.id || "") +
+                  "</span>" +
+                  verifiedBadgeHtml +
+                  "</span>";
               }
             } else if (hasAlias) {
               nameBlockInner =
                 '<span class="chat-contact__name-stack">' +
+                '<span class="chat-contact__name-line">' +
                 '<span class="chat-contact__label chat-contact__label--primary">' +
                 escapeHtml(effectiveAlias) +
-                '</span>' +
+                "</span>" +
+                verifiedBadgeHtml +
+                "</span>" +
                 '<span class="chat-contact__login-sub">' +
                 escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
                 "</span></span>";
             } else {
-              nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
+              nameBlockInner =
+                '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
+                escapeHtml(displayTitle || c.name || c.id || "") +
+                "</span>" +
+                verifiedBadgeHtml +
+                "</span>";
             }
             var avatarEl = isGroupRow
               ? c.avatar

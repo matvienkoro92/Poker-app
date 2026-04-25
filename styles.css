@@ -12849,6 +12849,31 @@ html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .c
   min-width: 0;
 }
 .chat-contact__label { flex: 1; font-weight: 500; }
+.chat-contact__name-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-width: 0;
+}
+.chat-contact__verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: #22c55e;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+}
+.chat-contact__verified--hidden {
+  display: none;
+}
 .chat-contact__name-stack {
   display: flex;
   flex-direction: column;
