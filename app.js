@@ -16918,7 +16918,7 @@ function initProfilePokerPlus() {
 
   function pokerPlusStatMetricHtml(label, value, tone, icon) {
     var raw = pokerPlusText(value);
-    if (!raw) return "";
+    var hasValue = !!raw;
     var cls = "profile-pokerplus-stat";
     if (tone) cls += " profile-pokerplus-stat--" + tone;
     return (
@@ -16929,9 +16929,9 @@ function initProfilePokerPlus() {
       '</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">' +
       escapeHtml(icon || "") +
       '</span></span><span class="profile-pokerplus-stat__value">' +
-      escapeHtml(pokerPlusShortStat(value)) +
+      escapeHtml(hasValue ? pokerPlusShortStat(value) : "—") +
       '</span><span class="profile-pokerplus-stat__raw">' +
-      escapeHtml(raw) +
+      escapeHtml(hasValue ? raw : "—") +
       "</span></span>"
     );
   }
@@ -17031,14 +17031,14 @@ function initProfilePokerPlus() {
       var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
       var feeStat = pokerPlusPickStat(total, "fee", "fee");
       var bbStat = pokerPlusPickStat(total, "bb", "bb");
-      if (handsStat != null) metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
-      if (winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-      if (mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
-      if (sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
-      if (ofcStat != null) metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
-      if (feeStat != null) metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
-      if (bbStat != null) metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
-      statsValue.innerHTML = metrics.length ? '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>" : '<span class="profile-pokerplus-stats-empty">Статистика не пришла от Poker21. Старые данные профиля показаны выше.</span>';
+      metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
+      metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+      metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
+      metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
+      metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
+      metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
+      metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
+      statsValue.innerHTML = '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>";
       if (statsRow) statsRow.hidden = false;
     }
   }
