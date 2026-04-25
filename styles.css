@@ -28313,6 +28313,15 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-empty {
+  display: block;
+  padding: 12px 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  color: rgba(203, 213, 225, 0.78);
+  font-size: 13px;
+  font-weight: 700;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat {
   display: grid;
   grid-template-rows: auto auto auto auto;

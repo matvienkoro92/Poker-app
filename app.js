@@ -16942,6 +16942,13 @@ function initProfilePokerPlus() {
     return n > 0 ? "good" : "bad";
   }
 
+  function pokerPlusPickStat(total, camelKey, snakeKey) {
+    if (!total || typeof total !== "object") return null;
+    if (total[camelKey] != null && total[camelKey] === total[camelKey]) return total[camelKey];
+    if (snakeKey && total[snakeKey] != null && total[snakeKey] === total[snakeKey]) return total[snakeKey];
+    return null;
+  }
+
   function pokerPlusDate(value) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
@@ -17015,17 +17022,24 @@ function initProfilePokerPlus() {
     setPokerPlusRow(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
     setPokerPlusRow(lastIpRow, lastIpValue, p.lastLoginIp);
     if (statsValue) {
-      var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : {};
+      var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : {});
       var metrics = [];
-      if (total.hands != null && total.hands === total.hands) metrics.push(pokerPlusStatMetricHtml("Раздачи", total.hands, "", "♠"));
-      if (total.winnings != null && total.winnings === total.winnings) metrics.push(pokerPlusStatMetricHtml("Выигрыш", total.winnings, pokerPlusStatTone(total.winnings), "⌁"));
-      if (total.mttWinnings != null && total.mttWinnings === total.mttWinnings) metrics.push(pokerPlusStatMetricHtml("MTT", total.mttWinnings, pokerPlusStatTone(total.mttWinnings), "♜"));
-      if (total.sngWinnings != null && total.sngWinnings === total.sngWinnings) metrics.push(pokerPlusStatMetricHtml("SNG", total.sngWinnings, pokerPlusStatTone(total.sngWinnings), "♞"));
-      if (total.ofcWinnings != null && total.ofcWinnings === total.ofcWinnings) metrics.push(pokerPlusStatMetricHtml("OFC", total.ofcWinnings, pokerPlusStatTone(total.ofcWinnings), "♢"));
-      if (total.fee != null && total.fee === total.fee) metrics.push(pokerPlusStatMetricHtml("Fee", total.fee, pokerPlusStatTone(total.fee), "%"));
-      if (total.bb != null && total.bb === total.bb) metrics.push(pokerPlusStatMetricHtml("BB", total.bb, pokerPlusStatTone(total.bb), "BB"));
-      statsValue.innerHTML = metrics.length ? '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>" : "—";
-      if (statsRow) statsRow.hidden = metrics.length === 0;
+      var handsStat = pokerPlusPickStat(total, "hands", "hands");
+      var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
+      var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
+      var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
+      var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
+      var feeStat = pokerPlusPickStat(total, "fee", "fee");
+      var bbStat = pokerPlusPickStat(total, "bb", "bb");
+      if (handsStat != null) metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
+      if (winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+      if (mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
+      if (sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
+      if (ofcStat != null) metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
+      if (feeStat != null) metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
+      if (bbStat != null) metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
+      statsValue.innerHTML = metrics.length ? '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>" : '<span class="profile-pokerplus-stats-empty">Статистика не пришла от Poker21. Старые данные профиля показаны выше.</span>';
+      if (statsRow) statsRow.hidden = false;
     }
   }
 
