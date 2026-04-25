@@ -854,6 +854,12 @@ function pokerApiHasCredential() {
   return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
 }
 
+function pokerSetHomeAuthResolved(value) {
+  try {
+    window.__pokerHomeAuthResolved = value === true;
+  } catch (e) {}
+}
+
 var POKER_LAST_MEMBER_ID_KEY = "poker_last_member_id";
 var POKER_AUTH_METHOD_KEY = "poker_auth_method";
 var POKER_AUTH_PASSWORD_KEY = "poker_auth_password";
@@ -11015,6 +11021,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function showAuthorized(user) {
+    pokerSetHomeAuthResolved(true);
     try {
       if (typeof setView === "function") setView("home");
     } catch (eSetHomeAfterAuth) {}
@@ -11034,9 +11041,11 @@ function getPokerResolvedTelegramUser() {
     hidePwaAuthScreen();
     hideIdentifyingMini();
     if (bannerRetry) bannerRetry.hidden = true;
+    syncSiteHomeInstructionMode();
   }
 
   function showUnauthorized() {
+    pokerSetHomeAuthResolved(false);
     if (userEl) userEl.classList.add("auth-user--hidden");
     if (shouldUseOverlayAuthScreen()) {
       if (pokerReadPwaGuestMode()) {
@@ -11087,9 +11096,16 @@ function getPokerResolvedTelegramUser() {
 
   function hasResolvedHomeAuthUser() {
     try {
+      if (window.__pokerHomeAuthResolved === true) return true;
+    } catch (eHomeFlag) {}
+    try {
       var auth = window.__pokerTelegramAuth;
+      if (auth && (auth.status === "invalid" || auth.status === "network" || auth.status === "guest")) return false;
       if (auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip")) return true;
     } catch (eAuthHome) {}
+    try {
+      if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) return true;
+    } catch (eCredHome) {}
     try {
       var tgNow = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       if (tgNow && tgNow.initDataUnsafe && tgNow.initDataUnsafe.user) return true;
@@ -11135,15 +11151,17 @@ function getPokerResolvedTelegramUser() {
     var authBtn = document.getElementById("siteHomeAuthBtn");
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
+    var hideInstructionBtn = !showInstructionBtn || isStandaloneMode;
+    var hideAuthBtn = !showAuthBtn || isStandaloneMode;
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
     if (instructionBtn) {
-      instructionBtn.hidden = !showInstructionBtn || isStandaloneMode;
-      if (isStandaloneMode) instructionBtn.style.display = "none";
+      instructionBtn.hidden = hideInstructionBtn;
+      if (hideInstructionBtn) instructionBtn.style.display = "none";
       else instructionBtn.style.removeProperty("display");
     }
     if (authBtn) {
-      authBtn.hidden = !showAuthBtn || isStandaloneMode;
-      if (isStandaloneMode) authBtn.style.display = "none";
+      authBtn.hidden = hideAuthBtn;
+      if (hideAuthBtn) authBtn.style.display = "none";
       else authBtn.style.removeProperty("display");
     }
     if (pwaInstallBtn && isTelegramMode) {
@@ -16441,6 +16459,11 @@ function pokerWriteProfileStorage(key, value) {
 }
 function pokerApplyProfileUserInfo(data) {
   if (!data || !data.ok) return;
+  try {
+    if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+      pokerSetHomeAuthResolved(true);
+    }
+  } catch (eHomeAuth) {}
   try {
     var linkedEmail = data.email != null ? String(data.email).trim() : "";
     window.__pokerProfileLinkedEmail = linkedEmail;

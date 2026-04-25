@@ -3107,6 +3107,18 @@ html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn {
 #siteHomeAuthBtn[hidden] {
   display: none !important;
 }
+html.site-home-header-mode #siteHomeInstructionBtn[hidden],
+html.site-home-header-mode #siteHomeAuthBtn[hidden],
+html.app--telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn[hidden],
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn[hidden],
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn[hidden],
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn[hidden],
+html.app--telegram-miniapp body[data-view="home"] #siteHomeAuthBtn[hidden],
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn[hidden],
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeAuthBtn[hidden],
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn[hidden] {
+  display: none !important;
+}
 html.site-home-header-mode .header-greeting-wrap {
   max-width: 170px;
 }
