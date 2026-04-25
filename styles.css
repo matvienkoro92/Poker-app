@@ -27872,7 +27872,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   max-width: 100%;
   min-height: 42px;
   margin: 0;
-  padding: 0 72px;
+  padding: 0 54px 0 8px;
   white-space: nowrap;
   color: #f8fafc;
   font-size: var(--profile-name-font-size, clamp(18px, 5.4vw, 34px));
@@ -27883,12 +27883,13 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 .profile-hero-card__name-text {
   display: block;
+  flex: 0 1 auto;
   min-width: 0;
-  max-width: min(100%, 460px);
+  max-width: min(calc(100% - 44px), 460px);
   overflow: hidden;
   font-size: var(--profile-name-font-size, inherit);
   text-align: center;
-  text-overflow: clip;
+  text-overflow: ellipsis;
 }
 .profile-hero-card__name--empty .profile-hero-card__name-text {
   color: rgba(226, 232, 240, 0.74);
