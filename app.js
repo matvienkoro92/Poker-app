@@ -4094,6 +4094,7 @@ function runGazetteAndTasksInit() {
       var text = t.text != null ? String(t.text) : "";
       var important = !!(t && t.important);
       var doing = !!(t && t.doing);
+      var stage = t && (t.stage === "waiting" || t.stage === "checking") ? t.stage : "";
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
@@ -4108,6 +4109,12 @@ function runGazetteAndTasksInit() {
       }
       if (doing && !columnDone) {
         badges += '<span class="roman-task-planner__badge roman-task-planner__badge--doing">Выполняется</span>';
+      }
+      if (stage === "waiting" && !columnDone) {
+        badges += '<span class="roman-task-planner__badge roman-task-planner__badge--waiting">Ожидаю выполнения</span>';
+      }
+      if (stage === "checking" && !columnDone) {
+        badges += '<span class="roman-task-planner__badge roman-task-planner__badge--checking">Проверяю выполнение</span>';
       }
       var badgesRow = "";
       if (badges) badgesRow = '<div class="roman-task-planner__meta-badges">' + badges + "</div>";
@@ -4176,6 +4183,28 @@ function runGazetteAndTasksInit() {
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--important" data-roman-task-set-important="' +
             escHtml(id) +
             '">Важно</button>';
+        }
+        if (stage === "waiting") {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
+            escHtml(id) +
+            '">Снять «Ожидаю»</button>';
+        } else {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--waiting" data-roman-task-set-stage="' +
+            escHtml(id) +
+            '" data-roman-task-stage="waiting">Ожидаю выполнения</button>';
+        }
+        if (stage === "checking") {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
+            escHtml(id) +
+            '">Снять «Проверяю»</button>';
+        } else {
+          statusBtns +=
+            '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--checking" data-roman-task-set-stage="' +
+            escHtml(id) +
+            '" data-roman-task-stage="checking">Проверяю выполнение</button>';
         }
       }
       var actionsHtml =
@@ -4996,6 +5025,31 @@ function runGazetteAndTasksInit() {
           tasksCi[ixCi].important = false;
           tasksCi[ixCi].plannerOrder = nextPlannerOrderInBucket(tasksCi, false);
           saveTasks(tasksCi);
+          renderTasks();
+        }
+        return;
+      }
+      var setStage = t.closest("[data-roman-task-set-stage]");
+      if (setStage) {
+        var idSt = setStage.getAttribute("data-roman-task-set-stage");
+        var nextStage = setStage.getAttribute("data-roman-task-stage") || "";
+        var tasksSt = loadTasks();
+        var ixSt = findTaskById(tasksSt, idSt);
+        if (ixSt >= 0 && !tasksSt[ixSt].done && (nextStage === "waiting" || nextStage === "checking")) {
+          tasksSt[ixSt].stage = nextStage;
+          saveTasks(tasksSt);
+          renderTasks();
+        }
+        return;
+      }
+      var clearStage = t.closest("[data-roman-task-clear-stage]");
+      if (clearStage) {
+        var idCs = clearStage.getAttribute("data-roman-task-clear-stage");
+        var tasksCs = loadTasks();
+        var ixCs = findTaskById(tasksCs, idCs);
+        if (ixCs >= 0) {
+          delete tasksCs[ixCs].stage;
+          saveTasks(tasksCs);
           renderTasks();
         }
         return;
