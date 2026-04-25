@@ -4277,19 +4277,18 @@ function runGazetteAndTasksInit() {
       var actionsEl = clip.querySelector(".roman-task-planner__swipe-actions");
       if (!track || !front) return null;
       var cw = clip.offsetWidth || 0;
-      var openPx = Math.max(0, Math.round(cw * 0.28));
-      if (openPx < 72) openPx = 72;
+      var openPx = Math.max(0, Math.round(cw * 0.74));
+      if (openPx < 196) openPx = Math.min(cw, 196);
+      if (cw > 0) openPx = Math.min(openPx, Math.max(120, cw - 8));
       if (actionsEl && cw > 0) {
-        actionsEl.style.flex = "0 0 auto";
-        actionsEl.style.width = "max-content";
-        var aw = Math.ceil(actionsEl.getBoundingClientRect().width);
-        if (aw > openPx) openPx = aw;
+        actionsEl.style.width = openPx + "px";
+        actionsEl.style.flex = "0 0 " + openPx + "px";
       }
       if (cw > 0) {
         track.style.width = cw + openPx + "px";
         front.style.flex = "0 0 " + cw + "px";
         if (actionsEl) {
-          actionsEl.style.width = "";
+          actionsEl.style.width = openPx + "px";
           actionsEl.style.flex = "0 0 " + openPx + "px";
         }
       }
