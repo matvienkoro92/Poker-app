@@ -5198,6 +5198,13 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 0;
+}
+.roman-task-planner__top-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 6px;
 }
 .roman-task-planner__badge {
@@ -5387,11 +5394,10 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   width: 100%;
 }
 .roman-task-planner__num-cell {
-  flex-shrink: 0;
+  flex: 0 0 auto;
   font-size: 12px;
   font-weight: 800;
   color: #7c2d12;
-  min-width: 1.5em;
   line-height: 1.35;
 }
 .roman-task-planner-modal .roman-task-planner__num-cell {

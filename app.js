@@ -4106,6 +4106,11 @@ function runGazetteAndTasksInit() {
       }
       var badgesRow = "";
       if (badges) badgesRow = '<div class="roman-task-planner__meta-badges">' + badges + "</div>";
+      var numberBadge =
+        displayNum != null && displayNum > 0
+          ? '<span class="roman-task-planner__num-cell" aria-label="Номер в списке">' + displayNum + ".</span>"
+          : "";
+      var taskTopLine = numberBadge || badgesRow ? '<div class="roman-task-planner__top-line">' + numberBadge + badgesRow + "</div>" : "";
       var swipeHint =
         '<div class="roman-task-planner__swipe-hint" aria-hidden="true">Влево — действия · вправо — закрыть</div>';
       var reorderBtns =
@@ -4130,11 +4135,8 @@ function runGazetteAndTasksInit() {
       if (displayNum != null && displayNum > 0) {
         bodyContent =
           '<div class="roman-task-planner__body-row">' +
-          '<span class="roman-task-planner__num-cell" aria-label="Номер в списке">' +
-          displayNum +
-          ".</span>" +
           '<div class="roman-task-planner__main-col">' +
-          badgesRow +
+          taskTopLine +
           '<div class="roman-task-planner__text">' +
           escHtml(text) +
           "</div>" +
@@ -4144,7 +4146,7 @@ function runGazetteAndTasksInit() {
           "</div>";
       } else {
         bodyContent =
-          badgesRow +
+          taskTopLine +
           '<div class="roman-task-planner__text">' +
           escHtml(text) +
           "</div>" +
