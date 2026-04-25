@@ -28122,7 +28122,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
   grid-column: 1 / -1;
-  order: 4;
+  order: 10;
   display: grid;
   grid-template-columns: 1fr;
   margin-top: 0;
@@ -28222,6 +28222,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastIpRow {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
+  order: 4;
   gap: 3px 10px;
   align-items: center;
   min-height: 72px;
