@@ -30115,9 +30115,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 
 .profile-personal {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-subtle);
+  display: none !important;
 }
 .profile-personal__title {
   margin: 0 0 6px;
