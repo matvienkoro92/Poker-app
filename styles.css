@@ -9688,18 +9688,21 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   min-width: 0;
 }
 .chat-find-new-group-btn {
+  position: relative;
   flex-shrink: 0;
-  width: 44px;
-  min-width: 44px;
+  width: 46px;
+  min-width: 46px;
   height: auto;
   min-height: 44px;
   align-self: stretch;
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(249, 115, 22, 0.18);
-  color: var(--accent, #fb923c);
-  font-size: 26px;
-  font-weight: 500;
+  border-radius: 15px;
+  border: 1px solid rgba(251, 146, 60, 0.56);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 237, 213, 0.42), transparent 30%),
+    linear-gradient(145deg, #fb923c 0%, #f97316 46%, #c2410c 100%);
+  color: transparent;
+  font-size: 0;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
   font-family: inherit;
@@ -9708,15 +9711,52 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 10px 24px rgba(249, 115, 22, 0.25),
+    0 2px 10px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+}
+.chat-find-new-group-btn::before,
+.chat-find-new-group-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 8px rgba(124, 45, 18, 0.3);
+  transform: translate(-50%, -50%);
+}
+.chat-find-new-group-btn::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 .chat-find-new-group-btn:hover,
 .chat-find-new-group-btn:focus {
-  background: rgba(249, 115, 22, 0.28);
+  border-color: rgba(255, 237, 213, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 12px 30px rgba(249, 115, 22, 0.34),
+    0 4px 14px rgba(0, 0, 0, 0.22);
+  filter: saturate(1.05) brightness(1.03);
   outline: none;
 }
+.chat-find-new-group-btn:active {
+  transform: scale(0.97);
+}
 [data-theme="light"] .chat-find-new-group-btn {
-  background: rgba(249, 115, 22, 0.12);
-  border-color: rgba(148, 163, 184, 0.45);
+  border-color: rgba(234, 88, 12, 0.34);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 247, 237, 0.7), transparent 30%),
+    linear-gradient(145deg, #fb923c 0%, #f97316 48%, #ea580c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 10px 22px rgba(249, 115, 22, 0.22),
+    0 2px 10px rgba(15, 23, 42, 0.08);
 }
 .chat-contact-swipe--group .chat-contact-swipe__panel {
   width: 100%;
@@ -11206,29 +11246,58 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
   min-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   margin: 0;
   padding: 0;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(248, 250, 252, 0.95);
-  font-size: 22px;
-  font-weight: 300;
+  border-radius: 15px;
+  border: 1px solid rgba(251, 146, 60, 0.54);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 237, 213, 0.36), transparent 30%),
+    linear-gradient(145deg, rgba(251, 146, 60, 0.98), rgba(249, 115, 22, 0.92) 48%, rgba(194, 65, 12, 0.95));
+  color: transparent;
+  font-size: 0;
+  font-weight: 800;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 22px rgba(249, 115, 22, 0.22),
+    0 2px 12px rgba(0, 0, 0, 0.16);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+}
+.chat-conv-group-add-btn::before,
+.chat-conv-group-add-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 17px;
+  height: 3px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 8px rgba(124, 45, 18, 0.3);
+  transform: translate(-50%, -50%);
+}
+.chat-conv-group-add-btn::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 /* Иначе display:inline-flex перебивает UA [hidden] — плюс оставался виден в личных чатах */
 button.chat-conv-group-add-btn[hidden] {
   display: none;
 }
 .chat-conv-group-add-btn:hover {
-  background: rgba(249, 115, 22, 0.35);
-  border-color: rgba(249, 115, 22, 0.55);
+  border-color: rgba(255, 237, 213, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 10px 28px rgba(249, 115, 22, 0.32),
+    0 4px 14px rgba(0, 0, 0, 0.2);
+  filter: saturate(1.05) brightness(1.03);
+}
+.chat-conv-group-add-btn:active {
+  transform: scale(0.97);
 }
 .chat-conv-group-add-btn:focus {
   outline: none;
@@ -11238,14 +11307,17 @@ button.chat-conv-group-add-btn[hidden] {
   outline-offset: 2px;
 }
 [data-theme="light"] .chat-conv-group-add-btn {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(15, 23, 42, 0.14);
-  color: rgba(30, 41, 59, 0.92);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  border-color: rgba(234, 88, 12, 0.34);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 247, 237, 0.7), transparent 30%),
+    linear-gradient(145deg, #fb923c 0%, #f97316 48%, #ea580c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 8px 20px rgba(249, 115, 22, 0.2),
+    0 2px 10px rgba(15, 23, 42, 0.08);
 }
 [data-theme="light"] .chat-conv-group-add-btn:hover {
-  background: rgba(249, 115, 22, 0.25);
-  border-color: rgba(249, 115, 22, 0.45);
+  border-color: rgba(154, 52, 18, 0.36);
 }
 .chat-conv-peer-avatar-wrap {
   flex-shrink: 0;
