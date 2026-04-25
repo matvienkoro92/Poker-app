@@ -5328,12 +5328,22 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   color: #2c1810;
   position: relative;
   z-index: 1;
+  transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
 }
 .roman-task-planner__item:not(.roman-task-planner__item--done) {
   z-index: 2;
 }
 .roman-task-planner__item--done {
   z-index: 1;
+}
+.roman-task-planner__list--dragging {
+  touch-action: none;
+}
+.roman-task-planner__item--dragging {
+  opacity: 0.86;
+  transform: scale(1.01);
+  z-index: 8 !important;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
 }
 .roman-task-planner__item:last-child {
   border-bottom: none;

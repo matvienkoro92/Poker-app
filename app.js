@@ -4219,6 +4219,7 @@ function runGazetteAndTasksInit() {
       }
     }
     var romanPlannerSwipeActive = null;
+    var romanPlannerReorderActive = null;
     /** passive: false — иначе preventDefault на pointermove не гасит скролл во время горизонтального свайпа (iOS / часть WebView). */
     var romanPlannerSwipeDocListenerOpts = { capture: true, passive: false };
     var romanPlannerSwipeDocEndOpts = { capture: true, passive: true };
@@ -4352,6 +4353,7 @@ function runGazetteAndTasksInit() {
      * @param {boolean} isMouse
      */
     function romanPlannerSwipeApplyMove(clientX, clientY, evPrevent, isMouse) {
+      if (romanPlannerReorderActive && romanPlannerReorderActive.active) return;
       var st = romanPlannerSwipeActive;
       if (!st || !st.dragging) return;
       var dx = clientX - st.startX;
@@ -4419,6 +4421,7 @@ function runGazetteAndTasksInit() {
       romanPlannerSwipeEnd(true);
     }
     function romanPlannerSwipeStartOnClip(clip, clientX, clientY, pointerId, touchId) {
+      if (romanPlannerReorderActive) return false;
       romanPlannerCloseAllSwipes(clip);
       var layout = romanPlannerApplyOpenForClip(clip);
       if (!layout) return false;
@@ -4452,6 +4455,142 @@ function runGazetteAndTasksInit() {
       }
       return true;
     }
+    function romanPlannerReorderClearTimer() {
+      if (romanPlannerReorderActive && romanPlannerReorderActive.timer) {
+        clearTimeout(romanPlannerReorderActive.timer);
+        romanPlannerReorderActive.timer = null;
+      }
+    }
+    function romanPlannerReorderItemAt(clientY, draggingItem) {
+      var items = Array.prototype.slice.call(listAll.querySelectorAll(".roman-task-planner__item[data-roman-task-id]"));
+      var closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item === draggingItem) continue;
+        var rect = item.getBoundingClientRect();
+        var offset = clientY - rect.top - rect.height / 2;
+        if (offset < 0 && offset > closest.offset) closest = { offset: offset, element: item };
+      }
+      return closest.element;
+    }
+    function romanPlannerReorderMoveTo(clientY) {
+      var st = romanPlannerReorderActive;
+      if (!st || !st.active || !st.item) return;
+      var beforeEl = romanPlannerReorderItemAt(clientY, st.item);
+      if (beforeEl) listAll.insertBefore(st.item, beforeEl);
+      else listAll.appendChild(st.item);
+    }
+    function romanPlannerReorderSaveDomOrder(keepScrollTop, keepPageScrollTop) {
+      var tasks = loadTasks();
+      var byId = {};
+      for (var i = 0; i < tasks.length; i++) {
+        if (tasks[i] && tasks[i].id != null) byId[String(tasks[i].id)] = tasks[i];
+      }
+      var cards = Array.prototype.slice.call(listAll.querySelectorAll(".roman-task-planner__item[data-roman-task-id]"));
+      var order = 0;
+      for (var j = 0; j < cards.length; j++) {
+        var id = cards[j].getAttribute("data-roman-task-id");
+        if (!byId[id]) continue;
+        if (plannerTab === "important") byId[id].important = true;
+        if (plannerTab === "normal") byId[id].important = false;
+        byId[id].plannerOrder = order * PLANNER_ORDER_STEP;
+        order++;
+      }
+      saveTasks(tasks);
+      renderTasks();
+      function restore() {
+        if (listAll) listAll.scrollTop = keepScrollTop || 0;
+        var se = document.scrollingElement || document.documentElement || document.body;
+        if (se) se.scrollTop = keepPageScrollTop || 0;
+      }
+      restore();
+      try { requestAnimationFrame(restore); } catch (eRaf) { setTimeout(restore, 0); }
+    }
+    function romanPlannerReorderCancel() {
+      romanPlannerReorderClearTimer();
+      if (romanPlannerReorderActive && romanPlannerReorderActive.item) {
+        romanPlannerReorderActive.item.classList.remove("roman-task-planner__item--dragging");
+        try {
+          if (romanPlannerReorderActive.pointerId != null) {
+            romanPlannerReorderActive.item.releasePointerCapture(romanPlannerReorderActive.pointerId);
+          }
+        } catch (eRel) {}
+      }
+      if (listAll) listAll.classList.remove("roman-task-planner__list--dragging");
+      document.body.classList.remove("tasks-drag-active");
+      romanPlannerReorderActive = null;
+    }
+    function romanPlannerReorderStart() {
+      var st = romanPlannerReorderActive;
+      if (!st || st.active || !st.item) return;
+      romanPlannerReorderClearTimer();
+      if (romanPlannerSwipeActive) romanPlannerSwipeEnd(false);
+      romanPlannerCloseAllSwipes();
+      st.active = true;
+      st.item.classList.add("roman-task-planner__item--dragging");
+      listAll.classList.add("roman-task-planner__list--dragging");
+      document.body.classList.add("tasks-drag-active");
+    }
+    function romanPlannerReorderPointerDown(ev) {
+      if (!listAll || plannerTab === "done") return;
+      if (ev.pointerType === "mouse" && ev.button !== 0) return;
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      if (t.closest(".roman-task-planner__btn, .roman-task-planner__edit-ta, input, textarea, select, a")) return;
+      var item = t.closest(".roman-task-planner__item[data-roman-task-id]");
+      if (!item || !listAll.contains(item)) return;
+      romanPlannerReorderActive = {
+        item: item,
+        pointerId: ev.pointerId,
+        startX: ev.clientX,
+        startY: ev.clientY,
+        startedAt: Date.now(),
+        active: false,
+        timer: setTimeout(romanPlannerReorderStart, 220),
+        keepScrollTop: listAll.scrollTop || 0,
+        keepPageScrollTop:
+          (document.scrollingElement && document.scrollingElement.scrollTop) ||
+          (document.documentElement && document.documentElement.scrollTop) ||
+          (document.body && document.body.scrollTop) ||
+          0,
+      };
+      try { item.setPointerCapture(ev.pointerId); } catch (eCap) {}
+    }
+    function romanPlannerReorderPointerMove(ev) {
+      var st = romanPlannerReorderActive;
+      if (!st || st.pointerId !== ev.pointerId) return;
+      var dx = ev.clientX - st.startX;
+      var dy = ev.clientY - st.startY;
+      if (!st.active) {
+        var elapsed = Date.now() - st.startedAt;
+        if (Math.abs(dx) > 14 || (Math.abs(dy) > 14 && elapsed < 180)) {
+          romanPlannerReorderCancel();
+          return;
+        }
+        return;
+      }
+      try { ev.preventDefault(); } catch (ePd) {}
+      romanPlannerReorderMoveTo(ev.clientY);
+    }
+    function romanPlannerReorderPointerUp(ev) {
+      var st = romanPlannerReorderActive;
+      if (!st || st.pointerId !== ev.pointerId) return;
+      var wasActive = st.active;
+      var keepScrollTop = st.keepScrollTop;
+      var keepPageScrollTop = st.keepPageScrollTop;
+      if (wasActive) {
+        try { ev.preventDefault(); } catch (ePd) {}
+        romanPlannerReorderClearTimer();
+        st.item.classList.remove("roman-task-planner__item--dragging");
+        try { st.item.releasePointerCapture(ev.pointerId); } catch (eRel) {}
+        listAll.classList.remove("roman-task-planner__list--dragging");
+        document.body.classList.remove("tasks-drag-active");
+        romanPlannerReorderActive = null;
+        romanPlannerReorderSaveDomOrder(keepScrollTop, keepPageScrollTop);
+        return;
+      }
+      romanPlannerReorderCancel();
+    }
     function romanPlannerListTouchStart(ev) {
       if (!listAll || !boardEl) return;
       if (ev.touches.length !== 1) return;
@@ -4463,6 +4602,7 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__btn")) return;
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (romanPlannerSwipeActive) return;
+      if (romanPlannerReorderActive) return;
       romanPlannerSwipeStartOnClip(clip, touch.clientX, touch.clientY, null, touch.identifier);
     }
     function romanPlannerListPointerDown(ev) {
@@ -4475,6 +4615,7 @@ function runGazetteAndTasksInit() {
       if (t.closest(".roman-task-planner__edit-ta")) return;
       if (ev.pointerType === "mouse" && ev.button !== 0) return;
       if (romanPlannerSwipeActive) return;
+      if (romanPlannerReorderActive) return;
       /** Касание уже обработано touchstart (там touchmove с passive:false). */
       if (ev.pointerType === "touch") return;
       try {
@@ -4486,6 +4627,10 @@ function runGazetteAndTasksInit() {
       if (!boardEl) return;
       if (listAll && listAll.dataset.romanPlannerSwipeDelegation !== "1") {
         listAll.dataset.romanPlannerSwipeDelegation = "1";
+        listAll.addEventListener("pointerdown", romanPlannerReorderPointerDown, true);
+        listAll.addEventListener("pointermove", romanPlannerReorderPointerMove, true);
+        listAll.addEventListener("pointerup", romanPlannerReorderPointerUp, true);
+        listAll.addEventListener("pointercancel", romanPlannerReorderCancel, true);
         listAll.addEventListener("touchstart", romanPlannerListTouchStart, { capture: true, passive: true });
         listAll.addEventListener("pointerdown", romanPlannerListPointerDown);
         listAll.addEventListener(
