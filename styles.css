@@ -27987,6 +27987,9 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   font-size: 13px;
   color: var(--text);
 }
+.profile-email-auth__linked[hidden] {
+  display: none !important;
+}
 .profile-email-auth__linked--avatar {
   align-items: flex-start;
 }
