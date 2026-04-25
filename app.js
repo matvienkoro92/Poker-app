@@ -16849,6 +16849,7 @@ function initProfileP21Id() {
 
 function initProfilePokerPlus() {
   var section = document.getElementById("profilePokerPlusSection");
+  var title = document.getElementById("profilePokerPlusTitle");
   var input = document.getElementById("profilePokerPlusCiphertextInput");
   var bindBtn = document.getElementById("profilePokerPlusBindBtn");
   var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
@@ -17004,6 +17005,7 @@ function initProfilePokerPlus() {
     var p = profile && typeof profile === "object" ? profile : null;
     if (!linked || !p) {
       if (section && section.classList) section.classList.remove("profile-pokerplus-card--linked");
+      if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Verification via Poker21" : "Верификация через Poker21";
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
@@ -17025,6 +17027,7 @@ function initProfilePokerPlus() {
       return;
     }
     if (section && section.classList) section.classList.add("profile-pokerplus-card--linked");
+    if (title) title.textContent = getPwaAuthLocale && getPwaAuthLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
     unbindBtn.hidden = false;
     if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
