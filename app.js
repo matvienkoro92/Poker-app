@@ -17246,8 +17246,13 @@ function syncProfileEmailAuthUi() {
     } catch (eGuestMode) {}
   }
   var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
-  syncProfileStatusVisibility(isVerified);
-  syncProfileVerifiedContentVisibility(isVerified);
+  var hasStoredSession = false;
+  try {
+    hasStoredSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+  } catch (eProfileSession) {}
+  var showProfileShell = !isGuest && (isVerified || hasStoredSession);
+  syncProfileStatusVisibility(showProfileShell);
+  syncProfileVerifiedContentVisibility(showProfileShell);
   var authMethod = pokerGetAuthMethod();
   var currentMemberId = "";
   try {
