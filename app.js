@@ -249,7 +249,22 @@ window.pokerTryBootOverlayNetworkError = pokerTryBootOverlayNetworkError;
 window.pokerResetBootOverlayLoading = pokerResetBootOverlayLoading;
 
 function isTelegramWebApp() {
-  return !!(window.Telegram && window.Telegram.WebApp);
+  try {
+    var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (!wtg) return false;
+    if (wtg.initData && String(wtg.initData).trim()) return true;
+    if (
+      wtg.initDataUnsafe &&
+      (wtg.initDataUnsafe.user ||
+        (wtg.initDataUnsafe.start_param != null && String(wtg.initDataUnsafe.start_param).trim()))
+    ) {
+      return true;
+    }
+    var platform = String(wtg.platform || "").trim().toLowerCase();
+    return !!(platform && platform !== "unknown");
+  } catch (eTgEnv) {
+    return false;
+  }
 }
 
 function isTelegramChatRuntime() {
@@ -8933,7 +8948,7 @@ function getPokerResolvedTelegramUser() {
 
   /** Актуальный WebApp (не замыкание на старый объект — иногда initData появляется с задержкой). */
   function getTelegramWebAppNow() {
-    return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    return isTelegramWebApp() && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   }
 
   var banner = document.getElementById("authBanner");
