@@ -27974,6 +27974,10 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   color: var(--text-muted);
   line-height: 1.45;
 }
+.profile-tournaments,
+.profile-cash {
+  display: none !important;
+}
 .profile-email-auth__linked {
   display: flex;
   flex-wrap: wrap;
