@@ -4181,7 +4181,7 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-doing="' +
             escHtml(id) +
-            '">Снять работу</button>';
+            '">Стоп</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--doing" data-roman-task-set-doing="' +
@@ -4192,7 +4192,7 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-important="' +
             escHtml(id) +
-            '">Снять важно</button>';
+            '">Не важно</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--important" data-roman-task-set-important="' +
@@ -4203,7 +4203,7 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
             escHtml(id) +
-            '">Снять ожид.</button>';
+            '">Не жду</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--waiting" data-roman-task-set-stage="' +
@@ -4214,7 +4214,7 @@ function runGazetteAndTasksInit() {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-clear-stage="' +
             escHtml(id) +
-            '">Снять проверку</button>';
+            '">Не провер.</button>';
         } else {
           statusBtns +=
             '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--checking" data-roman-task-set-stage="' +
@@ -4277,9 +4277,7 @@ function runGazetteAndTasksInit() {
       var actionsEl = clip.querySelector(".roman-task-planner__swipe-actions");
       if (!track || !front) return null;
       var cw = clip.offsetWidth || 0;
-      var openPx = Math.max(0, Math.round(cw * 0.74));
-      if (openPx < 196) openPx = Math.min(cw, 196);
-      if (cw > 0) openPx = Math.min(openPx, Math.max(120, cw - 8));
+      var openPx = cw > 0 ? Math.max(120, cw - 8) : 0;
       if (actionsEl && cw > 0) {
         actionsEl.style.width = openPx + "px";
         actionsEl.style.flex = "0 0 " + openPx + "px";

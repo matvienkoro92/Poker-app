@@ -5726,6 +5726,11 @@ textarea.roman-task-planner__input {
 .roman-task-planner__swipe-track--open .roman-task-planner__swipe-actions {
   pointer-events: auto;
 }
+.roman-task-planner__swipe-track--open .roman-task-planner__reorder-col {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 [data-theme="light"] .roman-task-planner__swipe-actions {
   background: rgba(44, 24, 16, 0.06);
   border-left-color: rgba(44, 24, 16, 0.1);
@@ -5735,20 +5740,22 @@ textarea.roman-task-planner__input {
   min-width: 0;
   width: 100%;
   padding: 6px 4px;
-  font-size: 10px;
+  font-size: 9.5px;
   line-height: 1.08;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 .roman-task-planner .roman-task-planner__swipe-actions .roman-task-planner__btn {
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
   padding: 6px 4px;
-  font-size: 10px;
+  font-size: 9.5px;
   line-height: 1.08;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 /* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
