@@ -4018,6 +4018,12 @@ function runGazetteAndTasksInit() {
       var tid = taskId != null ? String(taskId) : "";
       if (!tid || (delta !== -1 && delta !== 1)) return;
       if (plannerTab !== "important" && plannerTab !== "normal") return;
+      var keepListScrollTop = listAll ? listAll.scrollTop || 0 : 0;
+      var keepPageScrollTop =
+        (document.scrollingElement && document.scrollingElement.scrollTop) ||
+        (document.documentElement && document.documentElement.scrollTop) ||
+        (document.body && document.body.scrollTop) ||
+        0;
       var tasks = loadTasks();
       ensurePlannerOrdersMutateTasks(tasks);
       var pred =
@@ -4055,7 +4061,21 @@ function runGazetteAndTasksInit() {
       a.plannerOrder = ob;
       b.plannerOrder = oa;
       saveTasks(tasks);
+      try {
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      } catch (eBlur) {}
       renderTasks();
+      function restorePlannerMoveScroll() {
+        if (listAll) listAll.scrollTop = keepListScrollTop;
+        var se = document.scrollingElement || document.documentElement || document.body;
+        if (se) se.scrollTop = keepPageScrollTop;
+      }
+      restorePlannerMoveScroll();
+      try {
+        requestAnimationFrame(restorePlannerMoveScroll);
+      } catch (eRaf) {
+        setTimeout(restorePlannerMoveScroll, 0);
+      }
     }
     function findTaskById(tasks, id) {
       var sid = String(id);

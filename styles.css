@@ -5290,6 +5290,7 @@ html.poker-telegram-miniapp .roman-task-planner-modal {
   padding: 0;
   max-height: min(28vh, 200px);
   overflow-y: auto;
+  overflow-anchor: none;
 }
 .roman-task-planner__list--active,
 .roman-task-planner__list--done {
