@@ -14372,7 +14372,7 @@ a.tournament-day-share-btn {
   }
   .tournament-day-home-wrap .tournament-day-block__home-heading,
   .tournament-day-home-wrap--freeroll .tournament-day-block__home-heading {
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.05;
     letter-spacing: 0;
     white-space: nowrap;
@@ -14380,18 +14380,18 @@ a.tournament-day-share-btn {
     text-overflow: ellipsis;
   }
   .tournament-day-home-wrap--tournament-day .tournament-day-block__home-heading {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.05;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__countdown {
     margin-top: 4px;
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.1;
     overflow: hidden;
     text-overflow: clip;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__meta {
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.15;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__meta .tournament-day-block__timer {
@@ -14406,13 +14406,13 @@ a.tournament-day-share-btn {
     padding: 5px 5px;
   }
   .home-freeroll-schedule__day {
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1;
     letter-spacing: 0;
   }
   .home-freeroll-schedule__title,
   .home-freeroll-schedule__meta {
-    font-size: 8px;
+    font-size: 9px;
     line-height: 1.05;
   }
   .home-freeroll-schedule__main {
@@ -14428,16 +14428,16 @@ a.tournament-day-share-btn {
     padding: 4px 2px;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__stat-label {
-    font-size: 8px;
+    font-size: 9px;
     line-height: 1.05;
     margin-bottom: 2px;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__stat-value {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.08;
   }
   .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__stat-value--time {
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.08;
     white-space: nowrap;
   }
@@ -14448,7 +14448,7 @@ a.tournament-day-share-btn {
   .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta {
     min-height: 32px;
     padding: 6px 3px;
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1;
     gap: 3px;
     white-space: nowrap;
@@ -14709,8 +14709,8 @@ a.tournament-day-share-btn {
   .home-partnership-row .feature__title,
   .games-apps-grid .games-apps-grid__promo-learn .feature__title {
     max-width: 100%;
-    font-size: 8.2px;
-    line-height: 1.05;
+    font-size: 9.6px;
+    line-height: 1.12;
     letter-spacing: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -14720,8 +14720,8 @@ a.tournament-day-share-btn {
   .games-apps-grid .feature__desc,
   .home-partnership-row .feature__desc {
     max-width: 100%;
-    font-size: 7px;
-    line-height: 1.05;
+    font-size: 8.4px;
+    line-height: 1.12;
     margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -17916,8 +17916,8 @@ a.tournament-day-share-btn {
   .home-mini-icon__label {
     width: 100%;
     max-width: 41px;
-    font-size: 5.4px;
-    line-height: 1;
+    font-size: 6.6px;
+    line-height: 1.08;
     letter-spacing: 0;
     white-space: nowrap;
     word-break: normal;
@@ -30756,7 +30756,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   .bottom-nav__chat-wrap .bottom-nav__item {
     max-width: none;
     padding: 6px 2px 8px;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.02em;
   }
   .bottom-nav__chat-wrap {
@@ -30773,7 +30773,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 @media (max-width: 360px) {
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
-    font-size: 8px;
+    font-size: 9px;
     padding: 4px 1px 6px;
   }
   .bottom-nav__icon {
