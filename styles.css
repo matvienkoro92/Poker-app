@@ -7546,6 +7546,7 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   align-items: stretch;
   gap: 2px;
   --chat-msg-image-column-w: min(calc(260px / 1.5), calc(70vw / 1.5));
+  --chat-msg-image-column-h: min(130px, 35vw);
 }
 .chat-msg__body-main--with-image .chat-msg__text {
   flex: 0 1 auto;
@@ -7572,6 +7573,7 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
 /* Свои фото в ленте: в 1,5× крупнее базового превью min(260px/1.5, 70vw/1.5) */
 .chat-msg--own .chat-msg__body-main--with-image {
   --chat-msg-image-column-w: min(260px, 70vw);
+  --chat-msg-image-column-h: min(195px, 52.5vw);
 }
 .chat-msg--own .chat-msg__image {
   max-width: min(260px, 70vw);
@@ -8119,9 +8121,11 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   /* Превью в 1,5× компактнее прежнего min(260px, 70vw); файл без пережатия — полное качество по нажатию */
   max-width: min(calc(260px / 1.5), calc(70vw / 1.5));
   width: 100%;
-  height: auto;
+  height: var(--chat-msg-image-column-h, min(130px, 35vw));
+  aspect-ratio: 4 / 3;
   border-radius: 10px;
   object-fit: contain;
+  background: rgba(148, 163, 184, 0.14);
 }
 .chat-voice-preview {
   display: flex;
