@@ -3709,7 +3709,7 @@ function runGazetteAndTasksInit() {
       }
       var raw = rawOpt != null ? rawOpt : loadTasks();
       if (!Array.isArray(raw)) raw = [];
-      var total = raw.length;
+      var total = 0;
       var imp = 0;
       var norm = 0;
       var doneC = 0;
@@ -3720,6 +3720,7 @@ function runGazetteAndTasksInit() {
           doneC++;
           continue;
         }
+        total++;
         if (t.important) imp++;
         else norm++;
       }
