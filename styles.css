@@ -28267,10 +28267,10 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
   grid-column: 1 / -1;
-  order: 10;
+  order: 3;
   display: grid;
   grid-template-columns: 1fr;
-  margin-top: 0;
+  margin: 2px 0 4px;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCiphertextInput,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBindBtn {
