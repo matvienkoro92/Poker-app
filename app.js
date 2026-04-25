@@ -17221,6 +17221,7 @@ function syncProfileEmailAuthUi() {
   }
   if (linkedEmail && authMethod !== "telegram") authMethod = "email";
   if (section) section.hidden = !!isGuest || !isVerified;
+  if (section && section.classList) section.classList.toggle("profile-email-auth--email-linked", !!linkedEmail);
   if (titleEl) titleEl.hidden = true;
   if (linkedRow) linkedRow.hidden = !linkedEmail;
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;

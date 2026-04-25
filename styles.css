@@ -28067,6 +28067,9 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   flex-direction: column;
   gap: 10px;
 }
+.profile-email-auth--email-linked .profile-email-auth__form {
+  display: none !important;
+}
 .profile-email-auth__actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
