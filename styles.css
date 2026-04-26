@@ -28939,19 +28939,24 @@ body.profile-avatar-choice-open {
   grid-column: 1 / -1;
   order: 5;
   display: block;
-  margin-top: 6px;
-  padding: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.38);
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(56, 189, 248, 0.14), transparent 34%),
+    radial-gradient(circle at 86% 18%, rgba(248, 113, 113, 0.12), transparent 38%),
+    linear-gradient(145deg, rgba(2, 6, 23, 0.9), rgba(15, 23, 42, 0.86));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035), 0 0 32px rgba(14, 165, 233, 0.1);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsLabel {
   display: block;
-  margin: 0 0 10px;
-  color: rgba(203, 213, 225, 0.9);
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
+  margin: 0 0 16px;
+  color: rgba(226, 232, 240, 0.96);
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.34);
   text-transform: uppercase;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsLabel::before {
@@ -28970,8 +28975,8 @@ body.profile-avatar-choice-open {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-empty {
   display: block;
@@ -28983,72 +28988,110 @@ body.profile-avatar-choice-open {
   font-weight: 700;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-rows: auto auto auto auto;
   justify-items: center;
-  min-height: 116px;
-  gap: 5px;
-  padding: 9px 7px;
-  border-radius: 12px;
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(30, 41, 59, 0.58));
-  border-color: rgba(96, 165, 250, 0.24);
+  min-height: 186px;
+  gap: 10px;
+  padding: 22px 18px 18px;
+  border: 1px solid rgba(96, 165, 250, 0.62);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 78% 42%, rgba(96, 165, 250, 0.15) 0 2px, transparent 2px 8px),
+    linear-gradient(145deg, rgba(8, 27, 55, 0.94), rgba(3, 13, 30, 0.9));
+  box-shadow: inset 0 0 18px rgba(96, 165, 250, 0.08), 0 0 18px rgba(59, 130, 246, 0.16);
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, transparent 8%, rgba(147, 197, 253, 0.52), transparent 42%);
+  height: 1px;
+  opacity: 0.75;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__label {
   min-width: 0;
-  color: #93c5fd;
+  color: #60a5fa;
   max-width: 100%;
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 0 12px rgba(96, 165, 250, 0.54);
+  text-transform: uppercase;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__ring {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  border: 5px solid rgba(96, 165, 250, 0.76);
-  box-shadow: 0 0 12px rgba(96, 165, 250, 0.16), inset 0 0 10px rgba(96, 165, 250, 0.08);
+  border: 4px solid rgba(96, 165, 250, 0.88);
+  background: radial-gradient(circle, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.78));
+  box-shadow: 0 0 16px rgba(96, 165, 250, 0.38), inset 0 0 16px rgba(96, 165, 250, 0.16);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__icon {
   color: #bfdbfe;
-  font-size: 17px;
+  font-size: 25px;
   font-weight: 900;
+  text-shadow: 0 0 12px currentColor;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__value {
-  color: #dbeafe;
-  font-size: 22px;
+  color: #e0f2fe;
+  font-size: 40px;
   font-weight: 950;
-  line-height: 1;
+  line-height: 0.95;
+  text-shadow: 0 0 18px rgba(96, 165, 250, 0.42);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__raw {
-  color: rgba(203, 213, 225, 0.62);
-  font-size: 11px;
-  font-weight: 700;
+  max-width: 100%;
+  color: rgba(203, 213, 225, 0.68);
+  font-size: 16px;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 10px rgba(148, 163, 184, 0.2);
+  white-space: nowrap;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad {
-  background: linear-gradient(145deg, rgba(41, 24, 37, 0.78), rgba(30, 41, 59, 0.52));
-  border-color: rgba(248, 113, 113, 0.28);
+  background:
+    radial-gradient(circle at 78% 42%, rgba(248, 113, 113, 0.16) 0 2px, transparent 2px 8px),
+    linear-gradient(145deg, rgba(42, 13, 26, 0.94), rgba(15, 10, 24, 0.9));
+  border-color: rgba(248, 113, 113, 0.68);
+  box-shadow: inset 0 0 18px rgba(248, 113, 113, 0.08), 0 0 18px rgba(239, 68, 68, 0.18);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad .profile-pokerplus-stat__label,
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad .profile-pokerplus-stat__value,
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad .profile-pokerplus-stat__icon {
   color: #f87171;
+  text-shadow: 0 0 16px rgba(248, 113, 113, 0.52);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad .profile-pokerplus-stat__ring {
-  border-color: rgba(248, 113, 113, 0.72);
-  box-shadow: 0 0 12px rgba(248, 113, 113, 0.14), inset 0 0 10px rgba(248, 113, 113, 0.06);
+  border-color: rgba(248, 113, 113, 0.86);
+  box-shadow: 0 0 18px rgba(248, 113, 113, 0.38), inset 0 0 16px rgba(248, 113, 113, 0.14);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__label,
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__value,
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__icon {
   color: #86efac;
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.52);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__ring {
-  border-color: rgba(74, 222, 128, 0.72);
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.14), inset 0 0 10px rgba(74, 222, 128, 0.06);
+  border-color: rgba(74, 222, 128, 0.86);
+  box-shadow: 0 0 18px rgba(74, 222, 128, 0.34), inset 0 0 16px rgba(74, 222, 128, 0.14);
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good {
+  background:
+    radial-gradient(circle at 78% 42%, rgba(74, 222, 128, 0.15) 0 2px, transparent 2px 8px),
+    linear-gradient(145deg, rgba(5, 46, 32, 0.94), rgba(3, 21, 18, 0.9));
+  border-color: rgba(74, 222, 128, 0.66);
+  box-shadow: inset 0 0 18px rgba(74, 222, 128, 0.08), 0 0 18px rgba(34, 197, 94, 0.16);
 }
 @media (max-width: 720px) {
   #profilePokerPlusSection.profile-pokerplus-card--linked {
@@ -29078,6 +29121,25 @@ body.profile-avatar-choice-open {
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat {
+    min-height: 154px;
+    padding: 16px 10px 14px;
+    border-radius: 16px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__label {
+    font-size: 13px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__ring {
+    width: 54px;
+    height: 54px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__value {
+    font-size: 30px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__raw {
+    font-size: 12px;
   }
 }
 
