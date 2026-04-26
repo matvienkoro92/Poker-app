@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.248">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.249">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4365,7 +4365,10 @@
               </div>
               <div class="profile-email-auth__linked" id="profilePokerPlusBalanceRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusBalanceLabel">Баланс:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusBalanceValue">—</span>
+                <span class="profile-email-auth__value profile-pokerplus-balance">
+                  <span class="profile-pokerplus-balance__amount" id="profilePokerPlusBalanceValue">—</span>
+                  <button type="button" class="profile-pokerplus-balance__toggle" id="profilePokerPlusBalanceToggle" aria-pressed="false">Показать</button>
+                </span>
               </div>
               <div class="profile-email-auth__linked" id="profilePokerPlusRegisterRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusRegisterLabel">Дата регистрации:</span>

@@ -16915,6 +16915,7 @@ function initProfilePokerPlus() {
   var avatarImg = document.getElementById("profilePokerPlusAvatarImg");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
   var balanceValue = document.getElementById("profilePokerPlusBalanceValue");
+  var balanceToggle = document.getElementById("profilePokerPlusBalanceToggle");
   var registerRow = document.getElementById("profilePokerPlusRegisterRow");
   var registerValue = document.getElementById("profilePokerPlusRegisterValue");
   var positionRow = document.getElementById("profilePokerPlusPositionRow");
@@ -16934,6 +16935,12 @@ function initProfilePokerPlus() {
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
+  var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
+  var pokerPlusBalanceRaw = "";
+  var pokerPlusBalanceVisible = false;
+  try {
+    pokerPlusBalanceVisible = localStorage.getItem(POKERPLUS_BALANCE_VISIBLE_KEY) === "1";
+  } catch (eReadPpBalanceVisible) {}
 
   function setFeedback(text, tone) {
     if (!feedback) return;
@@ -16959,6 +16966,27 @@ function initProfilePokerPlus() {
 
   function pokerPlusLocale() {
     return typeof getPwaAuthLocale === "function" && getPwaAuthLocale() === "en" ? "en" : "ru";
+  }
+
+  function renderPokerPlusBalance() {
+    var hasBalance = !!pokerPlusBalanceRaw;
+    if (balanceRow) balanceRow.hidden = !hasBalance;
+    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusBalanceRaw : "••••") : "—";
+    if (balanceToggle) {
+      balanceToggle.hidden = !hasBalance;
+      balanceToggle.textContent = pokerPlusBalanceVisible ? "Скрыть" : "Показать";
+      balanceToggle.setAttribute("aria-pressed", pokerPlusBalanceVisible ? "true" : "false");
+      balanceToggle.setAttribute("aria-label", pokerPlusBalanceVisible ? "Скрыть баланс Poker21" : "Показать баланс Poker21");
+    }
+  }
+
+  function setPokerPlusBalanceVisible(visible) {
+    pokerPlusBalanceVisible = !!visible;
+    try {
+      if (pokerPlusBalanceVisible) localStorage.setItem(POKERPLUS_BALANCE_VISIBLE_KEY, "1");
+      else localStorage.removeItem(POKERPLUS_BALANCE_VISIBLE_KEY);
+    } catch (eSavePpBalanceVisible) {}
+    renderPokerPlusBalance();
   }
 
   function pokerPlusShortStat(value) {
@@ -17068,6 +17096,8 @@ function initProfilePokerPlus() {
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
       if (balanceRow) balanceRow.hidden = true;
+      pokerPlusBalanceRaw = "";
+      renderPokerPlusBalance();
       if (avatarRow) avatarRow.hidden = true;
       if (registerRow) registerRow.hidden = true;
       if (positionRow) positionRow.hidden = true;
@@ -17098,8 +17128,8 @@ function initProfilePokerPlus() {
     try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
     updateProfileHeroPokerPlusId(p.pokerPlusUserId);
     if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
-    if (balanceRow) balanceRow.hidden = !(p.balance && String(p.balance).trim());
-    if (balanceValue) balanceValue.textContent = p.balance && String(p.balance).trim() ? String(p.balance).trim() : "—";
+    pokerPlusBalanceRaw = pokerPlusText(p.balance);
+    renderPokerPlusBalance();
     var avatarUrl = pokerPlusText(p.avatarUrl);
     if (avatarRow) avatarRow.hidden = false;
     if (avatarImg) {
@@ -17284,6 +17314,12 @@ function initProfilePokerPlus() {
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";
     unbindBtn.addEventListener("click", unbindPokerPlus);
+  }
+  if (balanceToggle && balanceToggle.dataset.bound !== "1") {
+    balanceToggle.dataset.bound = "1";
+    balanceToggle.addEventListener("click", function () {
+      setPokerPlusBalanceVisible(!pokerPlusBalanceVisible);
+    });
   }
   if (input.dataset.bound !== "1") {
     input.dataset.bound = "1";

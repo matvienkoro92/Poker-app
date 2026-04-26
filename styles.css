@@ -28906,6 +28906,35 @@ body.profile-avatar-choice-open {
   font-size: 15px;
   font-weight: 850;
 }
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__amount {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid rgba(147, 197, 253, 0.34);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #bfdbfe;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle:hover,
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle:focus-visible {
+  border-color: rgba(59, 130, 246, 0.72);
+  color: #eff6ff;
+  outline: none;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsRow {
   grid-column: 1 / -1;
   order: 5;
