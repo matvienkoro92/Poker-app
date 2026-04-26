@@ -16727,19 +16727,6 @@ function updateProfileExitBtnVisibility() {
 }
 
 function pokerClearSessionsAndReloadForLogin() {
-  try {
-    var baseLogout = typeof getApiBase === "function" ? getApiBase() : "";
-    if (baseLogout && pokerApiHasCredential()) {
-      fetch(baseLogout + "/api/chat-push-subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerApiAuthJsonBody({ action: "disable" })),
-      }).catch(function () {});
-    }
-  } catch (eLogoutPush) {}
-  try {
-    pokerChatPushUnsubscribeBrowser();
-  } catch (eUnsub) {}
   try { localStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (e) {}
   try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
   try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}
@@ -16753,9 +16740,6 @@ function pokerClearSessionsAndReloadForLogin() {
   pokerWriteProfileStorage(POKER_PROFILE_RESPECT_CACHE_KEY, "");
   pokerProfileUserInfoCache = null;
   pokerProfileUserInfoCacheAt = 0;
-  try {
-    pokerProfileChatPushClearUiCache();
-  } catch (ePushCache) {}
   try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
   try {
     delete window.__pokerChatDisplayName;
