@@ -17789,6 +17789,14 @@ function pokerProfileStatusCardLabel(level) {
   return rank + suit;
 }
 
+function pokerProfileStatusFishSlot(level) {
+  var slot = Math.min(54, Math.max(0, (parseInt(level, 10) || 1) - 1));
+  return {
+    col: slot % 11,
+    row: Math.floor(slot / 11),
+  };
+}
+
 function pokerProfileFormatRake(value) {
   var n = Math.max(0, Math.floor(Number(value) || 0));
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -17819,6 +17827,7 @@ function setProfileStatusFromRake(value) {
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
   if (fish) {
+    var fishSlot = pokerProfileStatusFishSlot(status.level);
     var currentLevelRake = Math.max(0, status.rake - status.levelStart);
     var neededRake = Math.max(0, status.nextStart - status.levelStart);
     var leftRake = Math.max(0, status.nextStart - status.rake);
@@ -17837,6 +17846,8 @@ function setProfileStatusFromRake(value) {
     fish.setAttribute("title", tip);
     fish.setAttribute("aria-label", tip);
     fish.setAttribute("data-status-tip", tip);
+    fish.style.setProperty("--fish-level-col", String(fishSlot.col));
+    fish.style.setProperty("--fish-level-row", String(fishSlot.row));
   }
 }
 
