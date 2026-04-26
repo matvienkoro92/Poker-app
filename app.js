@@ -13180,6 +13180,7 @@ function setView(viewName, navOpts) {
     initProfilePersonal();
     initProfileAvatar();
     syncProfileStatusVisual();
+    initProfileFishCollectionModal();
     loadProfileRespect();
     initProfileRespectVotersButton();
     initProfileFriends();
@@ -17783,10 +17784,7 @@ function pokerProfileStatusCardLabel(level) {
   if (n === 53) return "Joker";
   if (n === 54) return "Joker+";
   if (n >= 55) return "Бог";
-  var value = ((n - 1) % 13) + 2;
-  var rank = value <= 10 ? String(value) : value === 11 ? "J" : value === 12 ? "Q" : value === 13 ? "K" : "A";
-  var suit = n <= 13 ? "♣" : n <= 26 ? "♦" : n <= 39 ? "♥" : "♠";
-  return rank + suit;
+  return String(n);
 }
 
 function pokerProfileFormatRake(value) {
@@ -17825,7 +17823,34 @@ var POKER_PROFILE_STATUS_FISH_ASSETS = [
   "./assets/profile-status-fish-level-28.png",
   "./assets/profile-status-fish-level-29.png",
   "./assets/profile-status-fish-level-30.png",
+  "./assets/profile-status-fish-level-31.png",
+  "./assets/profile-status-fish-level-32.png",
+  "./assets/profile-status-fish-level-33.png",
+  "./assets/profile-status-fish-level-34.png",
+  "./assets/profile-status-fish-level-35.png",
+  "./assets/profile-status-fish-level-36.png",
+  "./assets/profile-status-fish-level-37.png",
+  "./assets/profile-status-fish-level-38.png",
+  "./assets/profile-status-fish-level-39.png",
+  "./assets/profile-status-fish-level-40.png",
+  "./assets/profile-status-fish-level-41.png",
+  "./assets/profile-status-fish-level-42.png",
+  "./assets/profile-status-fish-level-43.png",
+  "./assets/profile-status-fish-level-44.png",
+  "./assets/profile-status-fish-level-45.png",
+  "./assets/profile-status-fish-level-46.png",
+  "./assets/profile-status-fish-level-47.png",
+  "./assets/profile-status-fish-level-48.png",
+  "./assets/profile-status-fish-level-49.png",
+  "./assets/profile-status-fish-level-50.png",
+  "./assets/profile-status-fish-level-51.png",
+  "./assets/profile-status-fish-level-52.png",
+  "./assets/profile-status-fish-level-53.png",
+  "./assets/profile-status-fish-level-54.png",
+  "./assets/profile-status-fish-level-55.png",
 ];
+
+var POKER_PROFILE_CURRENT_STATUS_LEVEL = 1;
 
 function pokerProfileStatusFishLevel(level) {
   var n = parseInt(level, 10);
@@ -17837,12 +17862,122 @@ function pokerProfileStatusFishSrc(level) {
   return POKER_PROFILE_STATUS_FISH_ASSETS[pokerProfileStatusFishLevel(level) - 1];
 }
 
+function pokerProfileStatusFishIconHtml(level, extraClass) {
+  if (level == null || level === "") return "";
+  var fishLevel = pokerProfileStatusFishLevel(level);
+  var cls = "profile-status-fish-inline";
+  if (extraClass) cls += " " + String(extraClass);
+  return (
+    '<img class="' +
+    cls +
+    '" src="' +
+    escapeHtml(pokerProfileStatusFishSrc(fishLevel)) +
+    '" alt="" aria-hidden="true" loading="lazy" decoding="async" data-status-fish-level="' +
+    escapeHtml(String(fishLevel)) +
+    '" />'
+  );
+}
+
 function pokerProfileApplyStatusFish(fish, level) {
   if (!fish) return;
   var fishLevel = pokerProfileStatusFishLevel(level);
   var img = fish.querySelector("img");
   if (img) img.src = pokerProfileStatusFishSrc(fishLevel);
   fish.setAttribute("data-status-fish-level", String(fishLevel));
+}
+
+function pokerProfileRenderFishCollection() {
+  var grid = document.getElementById("profileFishCollectionGrid");
+  if (!grid) return;
+  var currentLevel = pokerProfileStatusFishLevel(POKER_PROFILE_CURRENT_STATUS_LEVEL);
+  grid.innerHTML = POKER_PROFILE_STATUS_FISH_ASSETS.map(function (src, index) {
+    var level = index + 1;
+    var unlocked = level <= currentLevel;
+    var classes =
+      "profile-fish-collection__item" +
+      (unlocked ? " profile-fish-collection__item--unlocked" : " profile-fish-collection__item--locked") +
+      (level === currentLevel ? " profile-fish-collection__item--current" : "");
+    return (
+      '<div class="' +
+      classes +
+      '" role="listitem" aria-label="Уровень ' +
+      escapeHtml(String(level)) +
+      (unlocked ? " открыт" : " закрыт") +
+      '">' +
+      '<span class="profile-fish-collection__level">' +
+      escapeHtml(String(level)) +
+      "</span>" +
+      '<img class="profile-fish-collection__img" src="' +
+      escapeHtml(src) +
+      '" alt="" aria-hidden="true" loading="lazy" decoding="async" />' +
+      "</div>"
+    );
+  }).join("");
+}
+
+function closeProfileFishCollectionModal() {
+  var modal = document.getElementById("profileFishCollectionModal");
+  if (!modal) return;
+  modal.classList.remove("profile-fish-collection-modal--open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("profile-fish-collection-open");
+}
+
+function openProfileFishCollectionModal() {
+  var modal = document.getElementById("profileFishCollectionModal");
+  if (!modal) modal = createProfileFishCollectionModal();
+  pokerProfileRenderFishCollection();
+  modal.classList.add("profile-fish-collection-modal--open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("profile-fish-collection-open");
+  var closeBtn = document.getElementById("profileFishCollectionClose");
+  if (closeBtn) closeBtn.focus({ preventScroll: true });
+}
+
+function createProfileFishCollectionModal() {
+  var modal = document.createElement("div");
+  modal.className = "profile-fish-collection-modal";
+  modal.id = "profileFishCollectionModal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML =
+    '<div class="profile-fish-collection-modal__backdrop" data-profile-fish-collection-close></div>' +
+    '<section class="profile-fish-collection-modal__panel" role="dialog" aria-modal="true" aria-labelledby="profileFishCollectionTitle">' +
+    '<header class="profile-fish-collection-modal__header">' +
+    '<h3 class="profile-fish-collection-modal__title" id="profileFishCollectionTitle">Рыбки статуса</h3>' +
+    '<button type="button" class="profile-fish-collection-modal__close" id="profileFishCollectionClose" aria-label="Закрыть">×</button>' +
+    "</header>" +
+    '<div class="profile-fish-collection__grid" id="profileFishCollectionGrid" role="list"></div>' +
+    "</section>";
+  document.body.appendChild(modal);
+  modal.addEventListener("click", function (e) {
+    if (e.target && e.target.closest("[data-profile-fish-collection-close]")) {
+      closeProfileFishCollectionModal();
+    }
+  });
+  var closeBtn = modal.querySelector("#profileFishCollectionClose");
+  if (closeBtn) closeBtn.addEventListener("click", closeProfileFishCollectionModal);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("profile-fish-collection-modal--open")) {
+      closeProfileFishCollectionModal();
+    }
+  });
+  return modal;
+}
+
+function initProfileFishCollectionModal() {
+  var fish = document.querySelector("#profileStatusVisual .profile-status__fish");
+  if (!fish || fish.getAttribute("data-fish-collection-bound") === "1") return;
+  fish.setAttribute("data-fish-collection-bound", "1");
+  fish.addEventListener("click", function (e) {
+    e.preventDefault();
+    openProfileFishCollectionModal();
+  });
+  fish.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openProfileFishCollectionModal();
+    }
+  });
 }
 
 function setProfileStatus(value) {
@@ -17862,6 +17997,7 @@ function setProfileStatusFromRake(value) {
   var cards = document.querySelectorAll("#profileStatusSection .profile-status__card");
   if (!input || !visual) return;
   var status = pokerProfileStatusFromRake(value);
+  POKER_PROFILE_CURRENT_STATUS_LEVEL = status.level;
   input.value = status.valuePercent;
   visual.style.setProperty("--status-value", String(status.valuePercent));
   if (title) {
@@ -17876,16 +18012,16 @@ function setProfileStatusFromRake(value) {
     var leftRake = Math.max(0, status.nextStart - status.rake);
     var tip =
       status.level >= 55
-        ? "Максимальный уровень. Рейк: " + pokerProfileFormatRake(status.rake) + " ₽"
+        ? "Максимальный уровень. Набито " + pokerProfileFormatRake(status.rake) + " очков"
         : "До уровня " +
           status.nextLevel +
           ": набито " +
           pokerProfileFormatRake(currentLevelRake) +
           " из " +
           pokerProfileFormatRake(neededRake) +
-          " ₽. Осталось " +
+          " очков. Осталось " +
           pokerProfileFormatRake(leftRake) +
-          " ₽";
+          " очков";
     fish.setAttribute("title", tip);
     fish.setAttribute("aria-label", tip);
     fish.setAttribute("data-status-tip", tip);
@@ -25540,6 +25676,7 @@ function initChat() {
   var chatGeneralBackBtn = document.getElementById("chatGeneralBackBtn");
   var chatDialogClub = document.getElementById("chatDialogClub");
   var convTitle = document.getElementById("chatConvTitle");
+  var convTitleFish = document.getElementById("chatConvTitleFish");
   var convTitleId = document.getElementById("chatConvTitleId");
   var convVerifiedBadge = document.getElementById("chatConvVerifiedBadge");
   var convGroupDescEl = document.getElementById("chatConvGroupDesc");
@@ -25549,6 +25686,19 @@ function initChat() {
     convGroupDescEl.textContent = "";
     convGroupDescEl.classList.add("chat-conv-group-desc--hidden");
     convGroupDescEl.setAttribute("aria-hidden", "true");
+  }
+  function setChatConvTitleFish(level) {
+    if (!convTitleFish) return;
+    if (level == null || level === "") {
+      convTitleFish.hidden = true;
+      convTitleFish.removeAttribute("src");
+      convTitleFish.removeAttribute("data-status-fish-level");
+      return;
+    }
+    var fishLevel = pokerProfileStatusFishLevel(level);
+    convTitleFish.src = pokerProfileStatusFishSrc(fishLevel);
+    convTitleFish.setAttribute("data-status-fish-level", String(fishLevel));
+    convTitleFish.hidden = false;
   }
   var convPeerAvatar = document.getElementById("chatConvPeerAvatar");
   var convPeerAvatarPh = document.getElementById("chatConvPeerAvatarPh");
@@ -27151,6 +27301,17 @@ function initChat() {
   var chatNameBtnLongPressTimer = null;
   if (chatUserModalEl) {
     var modalTitle = document.getElementById("chatUserModalTitle");
+    var modalTitleFish = null;
+    if (modalTitle && modalTitle.parentNode) {
+      modalTitleFish = document.createElement("img");
+      modalTitleFish.className = "profile-status-fish-inline chat-user-modal__title-fish";
+      modalTitleFish.alt = "";
+      modalTitleFish.setAttribute("aria-hidden", "true");
+      modalTitleFish.loading = "lazy";
+      modalTitleFish.decoding = "async";
+      modalTitleFish.hidden = true;
+      modalTitle.parentNode.insertBefore(modalTitleFish, modalTitle.nextSibling);
+    }
     var modalAvatar = document.getElementById("chatUserModalAvatar");
     var modalAvatarPlaceholder = document.getElementById("chatUserModalAvatarPlaceholder");
     var modalP21 = document.getElementById("chatUserModalP21");
@@ -27318,6 +27479,7 @@ function initChat() {
       if (modalRespectVal) modalRespectVal.textContent = "—";
       if (modalStatusScale) modalStatusScale.style.setProperty("--status-value", "0");
       pokerProfileApplyStatusFish(modalStatusFish, 1);
+      if (modalTitleFish) modalTitleFish.hidden = true;
       if (typeof updateChatUserModalRespectButtons === "function") {
         if (modalRespectUp) modalRespectUp.disabled = true;
         if (modalRespectDown) modalRespectDown.disabled = true;
@@ -27341,7 +27503,15 @@ function initChat() {
             else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
           }
           if (modalLevelText && data && data.level != null) modalLevelText.textContent = "Уровень " + data.level + " из 55";
-          if (data && data.level != null) pokerProfileApplyStatusFish(modalStatusFish, data.level);
+          if (data && data.level != null) {
+            pokerProfileApplyStatusFish(modalStatusFish, data.level);
+            if (modalTitleFish) {
+              var modalFishLevel = pokerProfileStatusFishLevel(data.level);
+              modalTitleFish.src = pokerProfileStatusFishSrc(modalFishLevel);
+              modalTitleFish.setAttribute("data-status-fish-level", String(modalFishLevel));
+              modalTitleFish.hidden = false;
+            }
+          }
           if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
           if (data && data.ok) {
             if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
@@ -28847,7 +29017,7 @@ function initChat() {
       pokerPushOpenStateDebug("openPushDmImmediate-done", String(uid || ""));
     } catch (ePushImmDbg1) {}
   }
-  function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt) {
+  function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt) {
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
     } catch (eOpenConvDbg0) {}
@@ -28865,7 +29035,7 @@ function initChat() {
     chatWithUserName = userName || userId;
     chatPeerTypingActive = false;
     setTab("personal");
-    showConv(userId, userName || userId, peerP21Id, peerAvatarOpt, peerVerifiedOpt);
+    showConv(userId, userName || userId, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt);
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
     } catch (eOpenConvDbg1) {}
@@ -29625,13 +29795,14 @@ function initChat() {
       var nameEl = "";
       if (!isOwn) {
         var nameStr = escapeHtml(m.fromName || "Игрок");
+        var fishIconStr = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
         var verifiedStr = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var respectVal = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClass = "chat-msg__respect";
         if (m.fromRespect > 0) respectClass += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
         var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + "</div>";
+        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + fishIconStr + verifiedStr + "</div>";
         var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
         var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
         var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -29773,13 +29944,14 @@ function initChat() {
       var nameElP = "";
       if (!isOwn) {
         var nameStrP = escapeHtml(m.fromName || "Игрок");
+        var fishIconStrP = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
         var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var respectValP = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClassP = "chat-msg__respect";
         if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
         var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + "</div>";
+        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + fishIconStrP + verifiedStrP + "</div>";
         var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
         var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
         var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -32895,12 +33067,13 @@ function initChat() {
     } catch (eDmLst) {}
   }
 
-  function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peerVerifiedOpt) {
+  function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peerVerifiedOpt, peerStatusLevelOpt) {
     pokerPushOpenTraceTransition("showConv-enter", String(userId || ""));
     var allowPendingPushOpen = !!window.__pokerForceAllowPendingPushConvOpen;
     if (!allowPendingPushOpen && typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
     var myOpen = resolveMyChatMemberId();
     var isGroupConv = userId && String(userId).indexOf("group_") === 0;
+    setChatConvTitleFish(isGroupConv ? null : peerStatusLevelOpt);
     if (myOpen && userId && !isGroupConv && peerChatIdsEqual(userId, myOpen)) {
       var selfMsg =
         "Это личный чат с самим собой — входящие от игроков здесь не отображаются. Откройте диалог с игроком из списка контактов ниже или найдите человека по ID / нику.";
@@ -33355,6 +33528,34 @@ function initChat() {
         try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
         btn.removeAttribute("data-chat-verified");
       }
+      var statusLevel = c.statusLevel != null && c.statusLevel !== "" ? pokerProfileStatusFishLevel(c.statusLevel) : 0;
+      if (statusLevel) btn.dataset.chatStatusLevel = String(statusLevel);
+      else {
+        try { delete btn.dataset.chatStatusLevel; } catch (eStatusDel) {}
+        btn.removeAttribute("data-chat-status-level");
+      }
+      var statusFishEl = btn.querySelector(".chat-contact__status-fish");
+      if (statusLevel) {
+        if (!statusFishEl) {
+          var nameLineEl = btn.querySelector(".chat-contact__name-line");
+          var beforeEl = nameLineEl ? nameLineEl.querySelector(".chat-contact__verified") : null;
+          if (nameLineEl) {
+            statusFishEl = document.createElement("img");
+            statusFishEl.className = "profile-status-fish-inline chat-contact__status-fish";
+            statusFishEl.alt = "";
+            statusFishEl.setAttribute("aria-hidden", "true");
+            statusFishEl.loading = "lazy";
+            statusFishEl.decoding = "async";
+            nameLineEl.insertBefore(statusFishEl, beforeEl || null);
+          }
+        }
+        if (statusFishEl) {
+          statusFishEl.src = pokerProfileStatusFishSrc(statusLevel);
+          statusFishEl.setAttribute("data-status-fish-level", String(statusLevel));
+        }
+      } else if (statusFishEl && statusFishEl.parentNode) {
+        statusFishEl.parentNode.removeChild(statusFishEl);
+      }
       var verifiedEl = btn.querySelector(".chat-contact__verified");
       if (verifiedEl) verifiedEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
       var onlineEl = btn.querySelector(".chat-contact__online");
@@ -33803,6 +34004,7 @@ function initChat() {
                 (c.pokerPlusVerified ? "" : " chat-contact__verified--hidden") +
                 '" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
               : "";
+            var fishContactHtml = !isGroupRow ? pokerProfileStatusFishIconHtml(c.statusLevel, "chat-contact__status-fish") : "";
             var nameBlockInner;
             if (isGroupRow) {
               nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
@@ -33815,6 +34017,7 @@ function initChat() {
                   '<span class="chat-contact__label chat-contact__label--primary">' +
                   escapeHtml(effectiveAlias) +
                   "</span>" +
+                  fishContactHtml +
                   verifiedBadgeHtml +
                   "</span>" +
                   '<span class="chat-contact__friend-nick">' +
@@ -33825,6 +34028,7 @@ function initChat() {
                   '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
                   escapeHtml(displayTitle || c.name || c.id || "") +
                   "</span>" +
+                  fishContactHtml +
                   verifiedBadgeHtml +
                   "</span>";
               }
@@ -33835,6 +34039,7 @@ function initChat() {
                 '<span class="chat-contact__label chat-contact__label--primary">' +
                 escapeHtml(effectiveAlias) +
                 "</span>" +
+                fishContactHtml +
                 verifiedBadgeHtml +
                 "</span>" +
                 '<span class="chat-contact__login-sub">' +
@@ -33845,6 +34050,7 @@ function initChat() {
                 '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
                 escapeHtml(displayTitle || c.name || c.id || "") +
                 "</span>" +
+                fishContactHtml +
                 verifiedBadgeHtml +
                 "</span>";
             }
@@ -33877,6 +34083,7 @@ function initChat() {
               (c.online ? "1" : "0") +
               '"' +
               (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
+              (c.statusLevel != null && c.statusLevel !== "" ? ' data-chat-status-level="' + escapeHtml(String(pokerProfileStatusFishLevel(c.statusLevel))) + '"' : "") +
               ">" +
               avatarEl +
               '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
@@ -34855,6 +35062,7 @@ function initChat() {
         var nameElP = "";
         if (!isOwn) {
           var nameStrP = escapeHtml(m.fromName || "Игрок");
+          var fishIconStrP = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
           var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
           var respectValP =
             m.fromRespect !== undefined && m.fromRespect !== null
@@ -34870,6 +35078,7 @@ function initChat() {
             '<span class="chat-msg__name">' +
             nameStrP +
             "</span>" +
+            fishIconStrP +
             verifiedStrP +
             "</div>";
           var respectPartP =
@@ -35251,6 +35460,7 @@ function initChat() {
               data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
             setTextContentIfChanged(convTitleId, titleP21 || "\u2014");
             setChatPeerVerified(data.otherPokerPlusVerified === true);
+            setChatConvTitleFish(data.otherStatusLevel != null ? data.otherStatusLevel : "");
             updateConvTypingUi();
           }
         }
@@ -39950,7 +40160,7 @@ function initChat() {
             rowAv = "";
           }
         }
-        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, "", rowAv || undefined, el.dataset.chatVerified === "1");
+        openConvFromDialogs(el.dataset.chatId, el.dataset.chatName, "", rowAv || undefined, el.dataset.chatVerified === "1", el.dataset.chatStatusLevel || "");
         return;
       }
       if (el.getAttribute && el.getAttribute("data-chat-user-id")) {
