@@ -16787,6 +16787,13 @@ function setProfileTab(tab) {
   try {
     if (typeof localStorage !== "undefined") localStorage.setItem(PROFILE_ACTIVE_TAB_STORAGE_KEY, activeTab);
   } catch (eStoreProfileTab) {}
+  if (activeTab === "poker21" && typeof initProfilePokerPlus === "function") {
+    try {
+      setTimeout(function () {
+        initProfilePokerPlus();
+      }, 0);
+    } catch (eLazyPpProfile) {}
+  }
 }
 
 function initProfileTabs() {
@@ -17411,8 +17418,15 @@ function initProfilePokerPlus() {
       input.value = String(input.value || "").replace(/\s+/g, "").toUpperCase().slice(0, 64);
     });
   }
-  syncVisibility();
-  loadProfile(false);
+  var initialState = syncVisibility();
+  var profileRoot = document.getElementById("profileView");
+  var activeProfileTab = profileRoot && profileRoot.dataset ? profileRoot.dataset.profileActiveTab : "";
+  if (activeProfileTab === "poker21" && initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
+    section.dataset.profilePokerPlusLoaded = "1";
+    loadProfile(false).catch(function () {
+      section.dataset.profilePokerPlusLoaded = "";
+    });
+  }
 }
 
 function syncProfileEmailAuthUi() {
