@@ -2293,17 +2293,29 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-15-04-2026-league1-night-magic-80k-23h.jpg"
   ],
   "16.04.2026": [
+    "rating-16-04-2026-league1-s-bounty-120k-00h.jpg",
+    "rating-16-04-2026-league1-tai-7-ko-15k-06h.jpg",
     "rating-16-04-2026-league1-dv-rebuy-12h.png",
+    "rating-16-04-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-16-04-2026-league1-classic-500-17h.png",
-    "rating-16-04-2026-league1-tournir-chetverga-18h.png"
+    "rating-16-04-2026-league1-tournir-chetverga-18h.png",
+    "rating-16-04-2026-league1-nlh-knockout-220k-21h.jpg",
+    "rating-16-04-2026-league1-night-magic-80k-23h.jpg"
   ],
   "17.04.2026": [
     "rating-17-04-2026-league1-dv-rebuy-12h.png",
+    "rating-17-04-2026-league1-s-bounty-120k-00h.jpg",
+    "rating-17-04-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-17-04-2026-league1-new-hot-pko-15h.jpg",
     "rating-17-04-2026-league1-friday-progressive-18h.png",
     "rating-17-04-2026-league1-big-evening-19h.png"
   ],
   "18.04.2026": [
-    "rating-18-04-2026-league1-big-evening-19h.png"
+    "rating-18-04-2026-league1-s-bounty-120k-00h.jpg",
+    "rating-18-04-2026-league1-dv-turbo-500-60k-10h.jpg",
+    "rating-18-04-2026-league1-holdem-6plus-30k-16h.jpg",
+    "rating-18-04-2026-league1-big-evening-19h.png",
+    "rating-18-04-2026-league1-nlh-knockout-220k-21h.jpg"
   ],
   "19.04.2026": [
     "rating-19-04-2026-league1-dv-rebuy-12h.png",
@@ -2500,14 +2512,24 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-15-04-2026-league2-energetik-22h.png"
   ],
   "16.04.2026": [
+    "rating-16-04-2026-league2-kg-plo6-2d-09h.jpg",
+    "rating-16-04-2026-league2-micro-200-50k-14h.jpg",
+    "rating-16-04-2026-league2-plo4-20k-16h.jpg",
     "rating-16-04-2026-league2-mko-7max-21h.png",
     "rating-16-04-2026-league2-energetik-22h.png"
   ],
   "17.04.2026": [
+    "rating-17-04-2026-league2-kg-plo6-2d-09h.jpg",
+    "rating-17-04-2026-league2-dv-plo5-30k-12h.jpg",
     "rating-17-04-2026-league2-tournament-rebuy-14h.png",
+    "rating-17-04-2026-league2-plo5-300-19h.jpg",
+    "rating-17-04-2026-league2-hyper-turbo-300-20h.jpg",
     "rating-17-04-2026-league2-energetik-22h.png"
   ],
   "18.04.2026": [
+    "rating-18-04-2026-league2-deep-night-15k-02h.jpg",
+    "rating-18-04-2026-league2-magic-bounty-50k-11h.jpg",
+    "rating-18-04-2026-league2-hyper-turbo-300-20h.jpg",
     "rating-18-04-2026-league2-plo4-20h.png",
     "rating-18-04-2026-league2-mko-7max-21h.png"
   ],
@@ -4661,12 +4683,34 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "16.04.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 120k", buyin: 20000, league: 1, players: [
+      { nick: "Em13!!", place: 6, reward: 6076 },
+      { nick: "AndrushaMorf", place: 0, reward: 1106 }
+    ] },
+    { time: "06:00", name: "Tai 7 1/2 KO 15k", buyin: 10000, league: 1, players: [
+      { nick: "Evgen1722", place: 3, reward: 871 }
+    ] },
+    { time: "09:00", name: "KG PLO6 / 2$", buyin: 10000, league: 2, players: [
+      { nick: "Sarmat1305", place: 3, reward: 1665 }
+    ] },
     { time: "12:00", name: "DV Rebuy", buyin: 12800, league: 1, players: [
       { nick: "Waaar", place: 1, reward: 15000 },
       { nick: "Ksuha🦎", place: 6, reward: 0 },
       { nick: "MilkyWay77", place: 8, reward: 0 },
       { nick: "FrankL", place: 9, reward: 0 },
       { nick: "stafart", place: 11, reward: 0 }
+    ] },
+    { time: "13:00", name: "DV Bounty 100k", buyin: 10000, league: 1, players: [
+      { nick: "AlenaSt", place: 1, reward: 39919 },
+      { nick: "Evgen1722", place: 12, reward: 2100 }
+    ] },
+    { time: "14:00", name: "Micro 200 50K GTD", buyin: 200, league: 2, players: [
+      { nick: "Malek3084", place: 2, reward: 9928 },
+      { nick: "ABevege", place: 16, reward: 618 },
+      { nick: "B551OB", place: 15, reward: 88 }
+    ] },
+    { time: "16:00", name: "PLO4 20K", buyin: 10000, league: 2, players: [
+      { nick: "Sarmat1305", place: 2, reward: 4319 }
     ] },
     { time: "17:00", name: "Classic Tournament", buyin: 17500, league: 1, players: [
       { nick: "Waaar", place: 2, reward: 6600 },
@@ -4682,6 +4726,13 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Em13", place: 7, reward: 5300 },
       { nick: "ПокерМанки", place: 10, reward: 0 }
     ] },
+    { time: "21:00", name: "NLH KNOCKOUT 220k", buyin: 20000, league: 1, players: [
+      { nick: "Asta la Vista", place: 8, reward: 8544 },
+      { nick: "Откотика_Я", place: 26, reward: 5547 },
+      { nick: "Malek3084", place: 21, reward: 3918 },
+      { nick: "Бабник", place: 25, reward: 2468 },
+      { nick: "Simba33", place: 29, reward: 1597 }
+    ] },
     { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 11400, league: 2, players: [
       { nick: "PlayerHyeEr", place: 3, reward: 1740 },
       { nick: "WiNifly", place: 8, reward: 0 },
@@ -4695,9 +4746,18 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Shkarubo", place: 4, reward: 1490 },
       { nick: "DmQa", place: 6, reward: 0 },
       { nick: "WiNifly", place: 7, reward: 0 }
+    ] },
+    { time: "23:00", name: "Night magic 80K", buyin: 20000, league: 1, players: [
+      { nick: "Фокс", place: 4, reward: 42303 }
     ] }
   ],
   "17.04.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 120k", buyin: 20000, league: 1, players: [
+      { nick: "биртман", place: 7, reward: 11675 }
+    ] },
+    { time: "09:00", name: "KG PLO6 / 2$", buyin: 10000, league: 2, players: [
+      { nick: "Sarmat1305", place: 5, reward: 1192 }
+    ] },
     { time: "12:00", name: "DV Rebuy", buyin: 8800, league: 1, players: [
       { nick: "Waaar", place: 2, reward: 9000 },
       { nick: "VOSOvec", place: 9, reward: 0 },
@@ -4705,12 +4765,23 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Ферапонт", place: 12, reward: 0 },
       { nick: "divanSHark", place: 13, reward: 0 }
     ] },
+    { time: "12:00", name: "DV PLO5 30k", buyin: 20000, league: 2, players: [
+      { nick: "Sarmat1305", place: 2, reward: 7780 }
+    ] },
+    { time: "13:00", name: "DV Bounty 100k", buyin: 10000, league: 1, players: [
+      { nick: "Evgen1722", place: 2, reward: 15980 },
+      { nick: "Бардюр", place: 15, reward: 3042 }
+    ] },
     { time: "14:00", name: "Tournament Rebuy", buyin: 3700, league: 2, players: [
       { nick: "zagrebnagreb", place: 1, reward: 2570 },
       { nick: "Ферапонт", place: 2, reward: 1740 },
       { nick: "Tanechka", place: 5, reward: 760 },
       { nick: "tatarin_1", place: 8, reward: 0 },
       { nick: "Анубис", place: 9, reward: 0 }
+    ] },
+    { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
+      { nick: "хер вам))))", place: 4, reward: 3898 },
+      { nick: "nikola233", place: 9, reward: 315 }
     ] },
     { time: "18:00", name: "Пятница Прогрессив", buyin: 55500, league: 1, players: [
       { nick: "Y-gin", place: 1, reward: 27001.9 },
@@ -4726,6 +4797,12 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "mamalena", place: 15, reward: 0 },
       { nick: "WiNifly", place: 16, reward: 0 }
     ] },
+    { time: "19:00", name: "PLO5 300", buyin: 300, league: 2, players: [
+      { nick: "Sarmat1305", place: 3, reward: 2337 }
+    ] },
+    { time: "20:00", name: "💎Hyper Turbo 300💎", buyin: 300, league: 2, players: [
+      { nick: "AlenaSt", place: 1, reward: 24057 }
+    ] },
     { time: "22:00", name: "Energetik Tournament", buyin: 9200, league: 2, players: [
       { nick: "PlayerHyeEr", place: 2, reward: 4420 },
       { nick: "VOSOvec", place: 4, reward: 2110 },
@@ -4735,6 +4812,22 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "18.04.2026": [
+    { time: "00:00", name: "S.Bounty 2/3 120k", buyin: 20000, league: 1, players: [
+      { nick: "Бардюр", place: 3, reward: 5059 }
+    ] },
+    { time: "02:00", name: "Deep Night 15k", buyin: 10000, league: 2, players: [
+      { nick: "Жуля", place: 4, reward: 2038 }
+    ] },
+    { time: "10:00", name: "DV Turbo 500 60K", buyin: 10000, league: 1, players: [
+      { nick: "nikola233", place: 8, reward: 2574 }
+    ] },
+    { time: "11:00", name: "Magic Bounty 50k", buyin: 10000, league: 2, players: [
+      { nick: "Julia Shish", place: 7, reward: 1296 }
+    ] },
+    { time: "16:00", name: "HOLDEM 6+ GTD 30K", buyin: 10000, league: 1, players: [
+      { nick: "arxitektor", place: 1, reward: 15300 },
+      { nick: "shockin", place: 3, reward: 6720 }
+    ] },
     { time: "19:00", name: "💸Big evening💰", buyin: 74800, league: 1, players: [
       { nick: "AliySvin", place: 2, reward: 44000 },
       { nick: "PlayerFD6762", place: 4, reward: 22000 },
@@ -4742,12 +4835,18 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
       { nick: "Y-gin", place: 12, reward: 0 },
       { nick: "Waaar", place: 17, reward: 0 }
     ] },
+    { time: "20:00", name: "💎Hyper Turbo 300💎", buyin: 300, league: 2, players: [
+      { nick: "Julia Shish", place: 4, reward: 4132 }
+    ] },
     { time: "20:00", name: "Tournament PLO4", buyin: 8700, league: 2, players: [
       { nick: "TonniHalf😎", place: 1, reward: 5950 },
       { nick: "Sarmat1305", place: 3, reward: 2370 },
       { nick: "jokerAA", place: 4, reward: 0 },
       { nick: "kriak", place: 5, reward: 0 },
       { nick: "KamepuHa", place: 7, reward: 0 }
+    ] },
+    { time: "21:00", name: "NLH KNOCKOUT 220k", buyin: 20000, league: 1, players: [
+      { nick: "Em13!!", place: 6, reward: 7051 }
     ] },
     { time: "21:00", name: "MOK 🏰 MKO 7MAX", buyin: 12300, league: 2, players: [
       { nick: "Tanechka", place: 1, reward: 13205 },
