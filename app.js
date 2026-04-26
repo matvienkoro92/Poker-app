@@ -17781,9 +17781,6 @@ function pokerProfileStatusFromRake(value) {
 
 function pokerProfileStatusCardLabel(level) {
   var n = Math.min(55, Math.max(1, parseInt(level, 10) || 1));
-  if (n === 53) return "Joker";
-  if (n === 54) return "Joker+";
-  if (n >= 55) return "Бог";
   return String(n);
 }
 
