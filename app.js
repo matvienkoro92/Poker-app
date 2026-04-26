@@ -17808,12 +17808,7 @@ function setProfileStatusFromRake(value) {
   input.value = status.valuePercent;
   visual.style.setProperty("--status-value", String(status.valuePercent));
   if (title) {
-    title.textContent =
-      "Ваш уровень " +
-      status.level +
-      " из 55 · рейк " +
-      Math.floor(status.rake) +
-      " ₽";
+    title.textContent = "Ваш уровень " + status.level + " из 55";
   }
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
