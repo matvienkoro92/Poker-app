@@ -66,12 +66,13 @@ function isStoredAvatar(value) {
   return !!(s && (s.startsWith("preset:") || s.startsWith("data:")));
 }
 
-function accountIdForUserId(userId, dtIds) {
+function accountIdForUserId(userId, dtIds, accountIdsByUserId) {
   const id = userId != null ? String(userId).trim() : "";
   if (!id) return "";
   if (/^ID\d{6}$/.test(id) || id.startsWith("guest_")) return id;
   if (/^(tg|vk)_ID\d{6}$/.test(id)) return id.slice(3);
   if (/^mail_ID\d{6}$/.test(id)) return id.slice(5);
+  if (accountIdsByUserId[id]) return accountIdsByUserId[id];
   return dtIds[id] || id;
 }
 
@@ -124,11 +125,16 @@ async function main() {
   const chatUsers = Array.isArray(seed[1] && seed[1].result) ? seed[1].result.map(String) : [];
   const dtIds = parseHash(seed[2] && seed[2].result);
   const idToUser = parseHash(seed[3] && seed[3].result);
+  const accountIdsByUserId = {};
+  Object.keys(idToUser).forEach((accountId) => {
+    const userId = idToUser[accountId];
+    if (accountId && userId) accountIdsByUserId[userId] = accountId;
+  });
 
   const rawIds = new Set([...visitors, ...chatUsers, ...Object.keys(dtIds), ...Object.values(idToUser), ...Object.keys(idToUser)]);
   const accounts = new Set();
   for (const rawId of rawIds) {
-    const accountId = accountIdForUserId(rawId, dtIds);
+    const accountId = accountIdForUserId(rawId, dtIds, accountIdsByUserId);
     if (accountId) accounts.add(accountId);
   }
 
