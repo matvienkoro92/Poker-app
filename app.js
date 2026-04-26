@@ -16959,6 +16959,7 @@ function initProfilePokerPlus() {
   var lastIpValue = document.getElementById("profilePokerPlusLastIpValue");
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
+  var statusLinkHint = document.getElementById("profileStatusLinkHint");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
   var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
   var pokerPlusBalanceRaw = "";
@@ -17117,6 +17118,10 @@ function initProfilePokerPlus() {
 
   function setPokerPlusLinkedMode(linked) {
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
+    if (statusLinkHint) {
+      var state = auth();
+      statusLinkHint.hidden = !!linked || !state.isVerified || !!state.isGuest;
+    }
     input.hidden = !!linked;
     bindBtn.hidden = !!linked;
     refreshBtn.hidden = false;
