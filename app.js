@@ -17012,16 +17012,12 @@ function initProfilePokerPlus() {
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
     var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
     var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
-    var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
-    var bbStat = pokerPlusPickStat(total, "bb", "bb");
     metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
-    metrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+    metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
     metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
-    metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "♢"));
     metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
-    metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
     statsValue.innerHTML = '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>";
     if (statsRow) statsRow.hidden = false;
   }
@@ -17111,12 +17107,15 @@ function initProfilePokerPlus() {
       else avatarImg.removeAttribute("src");
     }
     setPokerPlusRow(registerRow, registerValue, pokerPlusDate(p.registerDate));
-    setPokerPlusRow(positionRow, positionValue, p.position);
-    setPokerPlusRow(leagueRow, leagueValue, p.leagueId);
-    setPokerPlusRow(groupRow, groupValue, p.groupId);
+    if (positionRow) positionRow.hidden = true;
+    if (positionValue) positionValue.textContent = "—";
+    if (leagueRow) leagueRow.hidden = true;
+    if (leagueValue) leagueValue.textContent = "—";
+    if (groupRow) groupRow.hidden = true;
+    if (groupValue) groupValue.textContent = "—";
     setPokerPlusRow(countryRow, countryValue, p.country);
-    if (roleRow) roleRow.hidden = !(p.role && String(p.role).trim());
-    if (roleValue) roleValue.textContent = p.role && String(p.role).trim() ? String(p.role).trim() : "—";
+    if (roleRow) roleRow.hidden = true;
+    if (roleValue) roleValue.textContent = "—";
     setPokerPlusRow(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
     setPokerPlusRow(lastIpRow, lastIpValue, p.lastLoginIp);
     renderPokerPlusStats(p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : {}));
