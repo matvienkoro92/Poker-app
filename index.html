@@ -4273,7 +4273,11 @@
                 <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
               </div>
             </div>
-            <section class="profile-hero-card" aria-labelledby="profileUserName">
+            <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Меню профиля">
+              <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
+              <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
+            </div>
+            <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
               <div class="profile-hero-card__identity">
                 <h2 class="profile-hero-card__name" id="profileUserName">
                   <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
@@ -4337,7 +4341,7 @@
               </section>
             </section>
             <div id="profileVerifiedContent">
-            <section class="profile-email-auth" id="profileEmailAuthSection" hidden>
+            <section class="profile-email-auth" id="profileEmailAuthSection" hidden data-profile-club-panel>
               <h2 class="profile-section__title" id="profileEmailAuthTitle">Вход по почте</h2>
               <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
               <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
@@ -4374,7 +4378,7 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileEmailAuthFeedback" aria-live="polite"></span>
               </div>
             </section>
-            <section class="profile-email-auth" id="profileTelegramLinkSection" hidden>
+            <section class="profile-email-auth" id="profileTelegramLinkSection" hidden data-profile-club-panel>
               <h2 class="profile-section__title" id="profileTelegramLinkTitle">Вход через Telegram</h2>
               <p class="profile-email-auth__text" id="profileTelegramLinkText">Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.</p>
               <div class="profile-email-auth__form">
@@ -4384,7 +4388,7 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileTelegramLinkFeedback" aria-live="polite"></span>
               </div>
             </section>
-            <section class="profile-email-auth" id="profilePokerPlusSection" hidden>
+            <section class="profile-email-auth" id="profilePokerPlusSection" hidden data-profile-poker21-panel>
               <h2 class="profile-section__title" id="profilePokerPlusTitle">Верификация через Poker21</h2>
               <p class="profile-email-auth__text" id="profilePokerPlusText">Нажмите "Проверить по почте" если ваш емейл в Poker21 и здесь совпадают и тогда аккаунт привяжется автоматически.<br />Если у вас разные емейлы, тогда введите ключ из Poker21.</p>
               <div class="profile-email-auth__form" id="profilePokerPlusForm">
@@ -4473,7 +4477,7 @@
                 </span>
               </div>
             </section>
-            <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true">
+            <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true" data-profile-club-panel>
               <p class="profile-chat-push__title">Уведомления (PWA)</p>
               <label class="profile-chat-push__label">
                 <input type="checkbox" class="profile-chat-push__checkbox" id="profileChatPushToggle" />
@@ -4481,7 +4485,7 @@
               </label>
               <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
             </div>
-            <div class="profile-visible-to-others">
+            <div class="profile-visible-to-others" data-profile-club-panel>
               <section class="profile-section profile-tournaments">
                 <h2 class="profile-section__title" id="profileTournamentsTitle">Турниры</h2>
                 <div class="profile-cols profile-cols--three">

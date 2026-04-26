@@ -28100,6 +28100,63 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .view[data-view="profile"].profile-view--guest .profile-chat-name {
   margin-top: 0;
 }
+.profile-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 14px;
+  padding: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.66);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.profile-tabs__btn {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.15;
+  letter-spacing: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-tabs__btn:hover,
+.profile-tabs__btn:focus-visible {
+  color: #fff;
+  border-color: rgba(251, 146, 60, 0.3);
+  outline: none;
+}
+.profile-tabs__btn--active {
+  color: #fff7ed;
+  border-color: rgba(251, 146, 60, 0.42);
+  background: linear-gradient(to top, rgba(234, 88, 12, 0.92), rgba(251, 146, 60, 0.94));
+  box-shadow: 0 10px 22px rgba(251, 146, 60, 0.22);
+}
+.view[data-view="profile"].profile-view--tab-club [data-profile-poker21-panel],
+.view[data-view="profile"].profile-view--tab-poker21 [data-profile-club-panel] {
+  display: none !important;
+}
+[data-theme="light"] .profile-tabs {
+  background: rgba(255, 247, 237, 0.86);
+  border-color: rgba(249, 115, 22, 0.2);
+}
+[data-theme="light"] .profile-tabs__btn {
+  color: rgba(154, 52, 18, 0.82);
+}
+[data-theme="light"] .profile-tabs__btn--active {
+  color: #fff;
+}
+@media (max-width: 360px) {
+  .profile-tabs__btn {
+    font-size: 13px;
+  }
+}
 
 .profile-exit-btn {
   margin-left: auto;

@@ -9237,6 +9237,8 @@ function getPokerResolvedTelegramUser() {
     var dict = {
       ru: {
         profileTitle: "Профиль",
+        profileClubTab: "Профиль в клубе",
+        profilePoker21Tab: "Профиль Poker21",
         loginAccount: "Войти в аккаунт",
         nameCaption: "Введите ваше имя",
         save: "Сохранить",
@@ -9279,6 +9281,8 @@ function getPokerResolvedTelegramUser() {
       },
       en: {
         profileTitle: "Profile",
+        profileClubTab: "Club profile",
+        profilePoker21Tab: "Poker21 profile",
         loginAccount: "Sign in",
         nameCaption: "Enter your name",
         save: "Save",
@@ -9294,10 +9298,10 @@ function getPokerResolvedTelegramUser() {
         telegramLoginText: "Link Telegram so you can sign in to this same account through Telegram later.",
         linkTelegram: "Link Telegram",
         pokerPlus: "Verification via Poker21",
-        pokerPlusText: "Link your PokerPlus account with the key from the game. Email will be sent only if it is already linked to your account.",
+        pokerPlusText: 'Tap "Check by email" if your email in Poker21 matches this account, and the account will link automatically.\nIf your emails are different, enter the key from Poker21.',
         pokerPlusKeyPh: "Key from PokerPlus",
-        pokerPlusBind: "Link PokerPlus",
-        pokerPlusRefresh: "Refresh",
+        pokerPlusBind: "Link by key from Poker21",
+        pokerPlusRefresh: "Check by email",
         pokerPlusUnbind: "Unlink",
         pokerPlusEmailLabel: "Verification email:",
         pokerPlusPlayer: "Linked player:",
@@ -9328,6 +9332,8 @@ function getPokerResolvedTelegramUser() {
       }
     };
     setText("profileTitle", t.profileTitle);
+    setText("profileClubTabBtn", t.profileClubTab);
+    setText("profilePoker21TabBtn", t.profilePoker21Tab);
     setText("profileNameCaption", t.nameCaption);
     setText("profileSaveBtn", t.save);
     setText("profileEmailAuthTitle", t.emailLogin);
@@ -13174,6 +13180,7 @@ function setView(viewName, navOpts) {
       if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
     } catch (eFrC) {}
     initProfileKeyboardViewportCleanup();
+    initProfileTabs();
     initProfileP21Id();
     initProfilePokerPlus();
     initProfileEmailAuth();
@@ -16760,6 +16767,49 @@ function pokerClearSessionsAndReloadForLogin() {
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+
+var PROFILE_ACTIVE_TAB_STORAGE_KEY = "poker_profile_active_tab";
+
+function setProfileTab(tab) {
+  var root = document.getElementById("profileView");
+  var tabs = document.querySelectorAll("[data-profile-tab]");
+  var activeTab = tab === "poker21" ? "poker21" : "club";
+  if (root) {
+    root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
+    root.classList.toggle("profile-view--tab-club", activeTab !== "poker21");
+    root.dataset.profileActiveTab = activeTab;
+  }
+  tabs.forEach(function (btn) {
+    var isActive = btn.getAttribute("data-profile-tab") === activeTab;
+    btn.classList.toggle("profile-tabs__btn--active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(PROFILE_ACTIVE_TAB_STORAGE_KEY, activeTab);
+  } catch (eStoreProfileTab) {}
+}
+
+function initProfileTabs() {
+  var root = document.getElementById("profileView");
+  if (!root) return;
+  var tabs = document.querySelectorAll("[data-profile-tab]");
+  if (!tabs.length) return;
+  if (root.dataset.profileTabsBound !== "1") {
+    root.dataset.profileTabsBound = "1";
+    tabs.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        setProfileTab(btn.getAttribute("data-profile-tab"));
+      });
+    });
+  }
+  var saved = "club";
+  try {
+    if (typeof localStorage !== "undefined" && localStorage.getItem(PROFILE_ACTIVE_TAB_STORAGE_KEY) === "poker21") {
+      saved = "poker21";
+    }
+  } catch (eReadProfileTab) {}
+  setProfileTab(root.dataset.profileActiveTab || saved);
+}
 
 function syncProfileStatusVisibility(isVerified) {
   var statusSection = document.getElementById("profileStatusSection");
