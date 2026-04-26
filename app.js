@@ -17052,8 +17052,8 @@ function initProfilePokerPlus() {
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
     metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-    metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "♜"));
-    metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♞"));
+    metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
+    metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
     metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
     statsValue.innerHTML = '<span class="profile-pokerplus-stats">' + metrics.join("") + "</span>";
     if (statsRow) statsRow.hidden = false;
