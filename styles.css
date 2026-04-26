@@ -29575,10 +29575,11 @@ body.profile-avatar-choice-open {
   gap: 8px;
   margin-bottom: 10px;
   color: #ffe8a3;
-  font-size: clamp(18px, 5vw, 28px);
+  font-size: clamp(18px, 4.2vw, 28px);
   font-weight: 950;
   line-height: 1;
   text-align: center;
+  white-space: nowrap;
   text-shadow:
     0 2px 0 rgba(55, 31, 5, 0.9),
     0 0 18px rgba(250, 204, 21, 0.38),
@@ -29711,6 +29712,36 @@ body.profile-avatar-choice-open {
   transition: left 0.35s ease-out;
   z-index: 1;
 }
+.profile-status__fish::after {
+  content: attr(data-status-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: min(280px, 72vw);
+  padding: 8px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  border-radius: 10px;
+  background: rgba(2, 9, 25, 0.96);
+  color: #ffe8a3;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38), 0 0 18px rgba(14, 165, 233, 0.18);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  text-shadow: none;
+  transform: translateX(-50%) scaleX(-1) translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  white-space: normal;
+}
+.profile-status__fish:hover::after,
+.profile-status__fish:focus-visible::after,
+.profile-status__fish:active::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(-1) translateY(0);
+}
 .profile-status__labels {
   display: flex;
   justify-content: space-between;
@@ -29726,7 +29757,7 @@ body.profile-avatar-choice-open {
   .profile-hero-card .profile-status__title {
     gap: 6px;
     margin-bottom: 9px;
-    font-size: clamp(17px, 5.2vw, 20px);
+    font-size: clamp(16px, 4.2vw, 18px);
   }
   .profile-hero-card .profile-status__title::before,
   .profile-hero-card .profile-status__title::after {

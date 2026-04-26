@@ -17789,6 +17789,11 @@ function pokerProfileStatusCardLabel(level) {
   return rank + suit;
 }
 
+function pokerProfileFormatRake(value) {
+  var n = Math.max(0, Math.floor(Number(value) || 0));
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
 function setProfileStatus(value) {
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");
@@ -17802,6 +17807,7 @@ function setProfileStatusFromRake(value) {
   var title = document.getElementById("profileStatusTitle");
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");
+  var fish = visual ? visual.querySelector(".profile-status__fish") : null;
   var cards = document.querySelectorAll("#profileStatusSection .profile-status__card");
   if (!input || !visual) return;
   var status = pokerProfileStatusFromRake(value);
@@ -17812,6 +17818,26 @@ function setProfileStatusFromRake(value) {
   }
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
+  if (fish) {
+    var currentLevelRake = Math.max(0, status.rake - status.levelStart);
+    var neededRake = Math.max(0, status.nextStart - status.levelStart);
+    var leftRake = Math.max(0, status.nextStart - status.rake);
+    var tip =
+      status.level >= 55
+        ? "Максимальный уровень. Рейк: " + pokerProfileFormatRake(status.rake) + " ₽"
+        : "До уровня " +
+          status.nextLevel +
+          ": набито " +
+          pokerProfileFormatRake(currentLevelRake) +
+          " из " +
+          pokerProfileFormatRake(neededRake) +
+          " ₽. Осталось " +
+          pokerProfileFormatRake(leftRake) +
+          " ₽";
+    fish.setAttribute("title", tip);
+    fish.setAttribute("aria-label", tip);
+    fish.setAttribute("data-status-tip", tip);
+  }
 }
 
 function loadProfileRespect() {
