@@ -17899,6 +17899,16 @@ var POKER_PROFILE_AVATAR_PRESETS = [
   { id: "bulldog", src: "./assets/avatar-bulldog.jpg", label: "Бульдог" },
   { id: "fox", src: "./assets/avatar-fox.jpg", label: "Лис" },
   { id: "chip", src: "./assets/avatar-chip.jpg", label: "Фишка" },
+  { id: "koala", src: "./assets/avatar-koala.jpg", label: "Коала" },
+  { id: "raven", src: "./assets/avatar-raven.jpg", label: "Ворон" },
+  { id: "crocodile", src: "./assets/avatar-crocodile.jpg", label: "Крокодил" },
+  { id: "rabbit", src: "./assets/avatar-rabbit.jpg", label: "Кролик" },
+  { id: "chameleon", src: "./assets/avatar-chameleon.jpg", label: "Хамелеон" },
+  { id: "panda", src: "./assets/avatar-panda.jpg", label: "Панда" },
+  { id: "wolf", src: "./assets/avatar-wolf.jpg", label: "Волк" },
+  { id: "owl", src: "./assets/avatar-owl.jpg", label: "Сова" },
+  { id: "bat", src: "./assets/avatar-bat.jpg", label: "Летучая мышь" },
+  { id: "gorilla", src: "./assets/avatar-gorilla.jpg", label: "Горилла" },
 ];
 
 function pokerAvatarCacheStorageKey() {
