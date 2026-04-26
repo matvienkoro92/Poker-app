@@ -17003,7 +17003,7 @@ function initProfilePokerPlus() {
   function renderPokerPlusBalance() {
     var hasBalance = !!pokerPlusBalanceRaw;
     if (balanceRow) balanceRow.hidden = !hasBalance;
-    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusWholeNumber(pokerPlusBalanceRaw) : "••••") : "—";
+    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusWholeNumber(pokerPlusBalanceRaw) + " ₽" : "••••") : "—";
     if (balanceToggle) {
       balanceToggle.hidden = !hasBalance;
       balanceToggle.textContent = pokerPlusBalanceVisible ? "Скрыть" : "Показать";
@@ -17074,7 +17074,7 @@ function initProfilePokerPlus() {
     var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
     var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
-    metrics.push(pokerPlusStatMetricHtml("Fee", feeStat, pokerPlusStatTone(feeStat), "%"));
+    metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
     metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
