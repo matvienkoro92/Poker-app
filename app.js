@@ -17074,6 +17074,7 @@ function initProfilePokerPlus() {
     var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
     var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
+    setProfileStatusFromRake(feeStat);
     metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
     metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
@@ -17727,6 +17728,67 @@ function syncProfileStatusVisual() {
   visual.style.setProperty("--status-value", String(val));
 }
 
+function pokerProfileRakeNumber(value) {
+  var raw = value != null ? String(value).trim() : "";
+  if (!raw) return 0;
+  var normalized = raw.replace(/\s+/g, "").replace(",", ".");
+  var n = Number(normalized);
+  return isFinite(n) && n > 0 ? n : 0;
+}
+
+function pokerProfileStatusStepForLevel(level) {
+  if (level <= 5) return 10000;
+  if (level <= 15) return 20000;
+  if (level <= 25) return 35000;
+  if (level <= 35) return 50000;
+  if (level <= 45) return 75000;
+  return 100000;
+}
+
+function pokerProfileRakeForLevel(level) {
+  var target = Math.min(55, Math.max(1, parseInt(level, 10) || 1));
+  var rake = 0;
+  for (var lvl = 1; lvl < target; lvl++) {
+    rake += pokerProfileStatusStepForLevel(lvl);
+  }
+  return rake;
+}
+
+function pokerProfileStatusFromRake(value) {
+  var rake = pokerProfileRakeNumber(value);
+  var level = 1;
+  var levelStart = 0;
+  while (level < 55) {
+    var step = pokerProfileStatusStepForLevel(level);
+    if (rake < levelStart + step) break;
+    levelStart += step;
+    level++;
+  }
+  var nextLevel = Math.min(55, level + 1);
+  var nextStart = pokerProfileRakeForLevel(nextLevel);
+  var levelSize = Math.max(1, nextStart - levelStart);
+  var valuePercent = level >= 55 ? 100 : Math.floor(Math.min(99, Math.max(0, ((rake - levelStart) / levelSize) * 100)));
+  return {
+    rake: rake,
+    level: level,
+    nextLevel: nextLevel,
+    levelStart: levelStart,
+    nextStart: nextStart,
+    valuePercent: valuePercent,
+  };
+}
+
+function pokerProfileStatusCardLabel(level) {
+  var n = Math.min(55, Math.max(1, parseInt(level, 10) || 1));
+  if (n === 53) return "Joker";
+  if (n === 54) return "Joker+";
+  if (n >= 55) return "Бог";
+  var value = ((n - 1) % 13) + 2;
+  var rank = value <= 10 ? String(value) : value === 11 ? "J" : value === 12 ? "Q" : value === 13 ? "K" : "A";
+  var suit = n <= 13 ? "♣" : n <= 26 ? "♦" : n <= 39 ? "♥" : "♠";
+  return rank + suit;
+}
+
 function setProfileStatus(value) {
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");
@@ -17734,6 +17796,27 @@ function setProfileStatus(value) {
   var val = Math.min(100, Math.max(0, parseInt(value, 10) || 0));
   input.value = val;
   visual.style.setProperty("--status-value", String(val));
+}
+
+function setProfileStatusFromRake(value) {
+  var title = document.getElementById("profileStatusTitle");
+  var input = document.getElementById("profileStatusInput");
+  var visual = document.getElementById("profileStatusVisual");
+  var cards = document.querySelectorAll("#profileStatusSection .profile-status__card");
+  if (!input || !visual) return;
+  var status = pokerProfileStatusFromRake(value);
+  input.value = status.valuePercent;
+  visual.style.setProperty("--status-value", String(status.valuePercent));
+  if (title) {
+    title.textContent =
+      "Ваш уровень " +
+      status.level +
+      " из 55 · рейк " +
+      Math.floor(status.rake) +
+      " ₽";
+  }
+  if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
+  if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
 }
 
 function loadProfileRespect() {
