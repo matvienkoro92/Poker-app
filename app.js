@@ -16935,10 +16935,10 @@ function initProfilePokerPlus() {
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
 
-  function setFeedback(text, isError) {
+  function setFeedback(text, tone) {
     if (!feedback) return;
     feedback.textContent = text || "";
-    feedback.style.color = isError ? "#ef4444" : "";
+    feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
   }
 
   function auth() {
@@ -17154,15 +17154,26 @@ function initProfilePokerPlus() {
           if (data && data.error) setFeedback(data.error, true);
           return;
         }
-        renderProfile(data.profile, !!data.linked);
+        try {
+          renderProfile(data.profile, !!data.linked);
+        } catch (renderErr) {
+          try { console.error("PokerPlus profile render failed", renderErr); } catch (eLogPpRender) {}
+          setFeedback("Данные Poker21 пришли, но не удалось отобразить профиль. Обновите страницу.", true);
+          return;
+        }
         if (!data.linked) {
           setFeedback("", false);
           if (emailRow) emailRow.hidden = true;
           unbindBtn.hidden = true;
           return;
         }
-        if (data.syncError) setFeedback(data.syncError, true);
-        else setFeedback("", false);
+        if (data.syncError) {
+          setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + data.syncError, "warn");
+        } else if (refresh) {
+          setFeedback("Данные Poker21 обновлены.", false);
+        } else {
+          setFeedback("", false);
+        }
       })
       .catch(function () {
         setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
