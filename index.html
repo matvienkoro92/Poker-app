@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.254">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.255">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -40,6 +40,9 @@
       html[data-theme="gold"] {
         background-color: #05070d !important;
       }
+      html[data-theme="neon"] {
+        background-color: #020611 !important;
+      }
       body {
         background-color: #0f172a !important;
       }
@@ -48,6 +51,9 @@
       }
       html[data-theme="gold"] body {
         background-color: #05070d !important;
+      }
+      html[data-theme="neon"] body {
+        background-color: #020611 !important;
       }
       /* Каркас #app до styles.css: под полупрозрачным оверлеем не белый прямоугольник */
       #app.app {
@@ -62,6 +68,9 @@
       }
       html[data-theme="gold"] #app.app {
         background-color: #05070d;
+      }
+      html[data-theme="neon"] #app.app {
+        background-color: #020611;
       }
     </style>
     <!-- До styles.css: оверлей загрузки сразу виден (не белый экран) -->
@@ -88,6 +97,9 @@
       html[data-theme="gold"] .app-boot-overlay {
         background: rgba(5, 7, 13, 0.6);
       }
+      html[data-theme="neon"] .app-boot-overlay {
+        background: rgba(2, 6, 17, 0.66);
+      }
       .app-boot-overlay__panel {
         text-align: center;
         padding: 22px 28px;
@@ -102,6 +114,11 @@
       html[data-theme="light"] .app-boot-overlay__panel {
         background: rgba(255, 255, 255, 0.95);
         border-color: rgba(251, 146, 60, 0.35);
+      }
+      html[data-theme="neon"] .app-boot-overlay__panel {
+        background: rgba(3, 8, 23, 0.9);
+        border-color: rgba(34, 211, 238, 0.45);
+        box-shadow: 0 0 26px rgba(34, 211, 238, 0.18), 0 0 34px rgba(255, 38, 96, 0.12);
       }
       .app-boot-overlay__logo {
         display: block;
@@ -123,6 +140,10 @@
       html[data-theme="light"] .app-boot-overlay__conn-title {
         color: #0f172a;
       }
+      html[data-theme="neon"] .app-boot-overlay__conn-title {
+        color: #dff7ff;
+        text-shadow: 0 0 16px rgba(34, 211, 238, 0.45);
+      }
       .app-boot-overlay__spinner {
         width: 38px;
         height: 38px;
@@ -135,6 +156,10 @@
       html[data-theme="light"] .app-boot-overlay__spinner {
         border-color: rgba(251, 146, 60, 0.35);
         border-top-color: #ea580c;
+      }
+      html[data-theme="neon"] .app-boot-overlay__spinner {
+        border-color: rgba(34, 211, 238, 0.26);
+        border-top-color: #ff2d73;
       }
       @keyframes app-boot-spin {
         to {
@@ -152,6 +177,9 @@
       html[data-theme="light"] .app-boot-overlay__text {
         color: #64748b;
       }
+      html[data-theme="neon"] .app-boot-overlay__text {
+        color: rgba(190, 238, 255, 0.72);
+      }
       .app-boot-overlay__version {
         margin: 10px 0 0;
         font-size: 11px;
@@ -161,6 +189,9 @@
       }
       html[data-theme="light"] .app-boot-overlay__version {
         color: #94a3b8;
+      }
+      html[data-theme="neon"] .app-boot-overlay__version {
+        color: rgba(125, 211, 252, 0.65);
       }
       .app-boot-overlay__error-panel {
         text-align: center;
@@ -193,6 +224,12 @@
         background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%);
         border-color: rgba(154, 52, 18, 0.9);
       }
+      html[data-theme="neon"] .app-boot-overlay__retry-btn {
+        color: #e9fbff;
+        background: linear-gradient(135deg, rgba(255, 38, 96, 0.92), rgba(34, 211, 238, 0.82));
+        border-color: rgba(125, 211, 252, 0.72);
+        box-shadow: 0 0 18px rgba(34, 211, 238, 0.28), 0 0 18px rgba(255, 38, 96, 0.24);
+      }
       .app-boot-overlay.app-boot-overlay--hidden {
         opacity: 0;
         visibility: hidden;
@@ -204,6 +241,9 @@
         }
         html[data-theme="light"] .app-boot-overlay {
           background: rgba(255, 247, 237, 0.94);
+        }
+        html[data-theme="neon"] .app-boot-overlay {
+          background: rgba(2, 6, 17, 0.94);
         }
       }
       /* До загрузки app.js: в standalone PWA сразу блокируем контент приложений */
@@ -505,6 +545,7 @@
                 <span class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true">🌙</span>
                 <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
                 <span class="theme-toggle__icon theme-toggle__icon--gold" aria-hidden="true">🪙</span>
+                <span class="theme-toggle__icon theme-toggle__icon--neon" aria-hidden="true">💠</span>
               </button>
               <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Добавьте ярлык на рабочий стол телефона" aria-label="Добавьте ярлык на рабочий стол телефона" hidden>
                 <span class="site-home-instruction-btn__icon" aria-hidden="true">🪛</span>

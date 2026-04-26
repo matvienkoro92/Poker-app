@@ -235,6 +235,183 @@ html[data-theme="gold"] body,
 [data-theme="gold"] .chat-empty {
   color: var(--text-muted) !important;
 }
+html[data-theme="neon"],
+html[data-theme="neon"] body,
+[data-theme="neon"] .app {
+  background-image:
+    radial-gradient(circle at 14% 6%, rgba(255, 38, 96, 0.22), transparent 30%),
+    radial-gradient(circle at 86% 6%, rgba(34, 211, 238, 0.2), transparent 34%),
+    radial-gradient(circle at 50% 94%, rgba(168, 85, 247, 0.16), transparent 38%),
+    linear-gradient(145deg, #020611 0%, #071126 46%, #02030a 100%) !important;
+  background-color: var(--overscroll-canvas) !important;
+}
+[data-theme="neon"] {
+  --bg-color: #020611;
+  --bg-elevated: rgba(4, 10, 28, 0.94);
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.16);
+  --accent-2: #ff2d73;
+  --accent-3: #b45cff;
+  --text: #e8f8ff;
+  --text-muted: rgba(181, 223, 238, 0.72);
+  --border-subtle: rgba(34, 211, 238, 0.34);
+  --shadow-strong: 0 26px 64px rgba(0, 0, 0, 0.72), 0 0 28px rgba(34, 211, 238, 0.12);
+  --body-bg:
+    radial-gradient(circle at 14% 6%, rgba(255, 38, 96, 0.22), transparent 30%),
+    radial-gradient(circle at 86% 6%, rgba(34, 211, 238, 0.2), transparent 34%),
+    radial-gradient(circle at 50% 94%, rgba(168, 85, 247, 0.16), transparent 38%),
+    linear-gradient(145deg, #020611 0%, #071126 46%, #02030a 100%);
+  --overscroll-canvas: #020611;
+  --card-bg:
+    linear-gradient(90deg, rgba(34, 211, 238, 0.34), transparent 18%, transparent 82%, rgba(255, 38, 96, 0.34)),
+    radial-gradient(circle at 28% 16%, rgba(255, 38, 96, 0.16), transparent 34%),
+    radial-gradient(circle at 76% 20%, rgba(34, 211, 238, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(3, 10, 28, 0.96), rgba(3, 6, 18, 0.98));
+  --card-border: rgba(34, 211, 238, 0.58);
+  --bg-gradient-opacity: 0.58;
+  --bg-blur-gradient:
+    radial-gradient(circle at 12% 0%, rgba(255, 38, 96, 0.16), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(34, 211, 238, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(2, 5, 16, 0.96));
+  --block-bg: rgba(5, 13, 34, 0.72);
+  --block-bg-solid: #071126;
+  --block-bg-gradient:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.12), transparent 40%),
+    linear-gradient(315deg, rgba(255, 38, 96, 0.12), transparent 42%),
+    linear-gradient(145deg, rgba(5, 14, 35, 0.94), rgba(2, 5, 16, 0.98));
+  --btn-on-accent: #020611;
+  --nav-bg: linear-gradient(180deg, rgba(2, 6, 17, 0.22), rgba(2, 6, 17, 0.96));
+  --nav-item-bg: linear-gradient(180deg, rgba(8, 24, 50, 0.95), rgba(2, 6, 17, 0.98));
+  --chat-input-field-bg: rgba(5, 13, 34, 0.86);
+  --chat-input-textarea-bg: rgba(2, 6, 17, 0.9);
+}
+[data-theme="neon"] .bg-blur {
+  background:
+    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 38, 96, 0.035) 1px, transparent 1px),
+    var(--bg-blur-gradient) !important;
+  background-size: 42px 42px, 42px 42px, auto !important;
+}
+[data-theme="neon"] .card,
+[data-theme="neon"] .modal,
+[data-theme="neon"] .gazette-modal__content,
+[data-theme="neon"] .club-charter-modal__paper,
+[data-theme="neon"] .profile-hero-card,
+[data-theme="neon"] .profile-section,
+[data-theme="neon"] .download-app:not(.download-app--poker21),
+[data-theme="neon"] .feature,
+[data-theme="neon"] .updates-block,
+[data-theme="neon"] .chat-dialog-item,
+[data-theme="neon"] .chat-contact,
+[data-theme="neon"] .chat-msg__bubble,
+[data-theme="neon"] .tournament-day-block,
+[data-theme="neon"] .schedule-section,
+[data-theme="neon"] .winter-rating,
+[data-theme="neon"] .hall-of-fame__block,
+[data-theme="neon"] .profile-email-auth,
+[data-theme="neon"] .welcome-home-icon-tile,
+[data-theme="neon"] .home-mini-icon-item {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background: var(--block-bg-gradient) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 245, 255, 0.045),
+    0 0 18px rgba(34, 211, 238, 0.1),
+    0 0 22px rgba(255, 38, 96, 0.08) !important;
+  color: var(--text);
+}
+[data-theme="neon"] .card {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(190, 245, 255, 0.06),
+    0 0 0 1px rgba(255, 38, 96, 0.16),
+    0 24px 64px rgba(0, 0, 0, 0.62),
+    0 0 34px rgba(34, 211, 238, 0.16) !important;
+}
+[data-theme="neon"] h1,
+[data-theme="neon"] h2,
+[data-theme="neon"] h3,
+[data-theme="neon"] .logo__title,
+[data-theme="neon"] .hero__title,
+[data-theme="neon"] .section-title,
+[data-theme="neon"] .profile-section__title,
+[data-theme="neon"] .winter-rating__title,
+[data-theme="neon"] .hall-of-fame__section-title,
+[data-theme="neon"] .title--welcome {
+  color: #e9fbff !important;
+  text-shadow: 0 0 14px rgba(34, 211, 238, 0.52), 0 0 22px rgba(255, 38, 96, 0.26);
+}
+[data-theme="neon"] .logo__subtitle,
+[data-theme="neon"] .feature__icon,
+[data-theme="neon"] .home-mini-icon,
+[data-theme="neon"] .welcome-home-icon-tile__icon {
+  color: #22d3ee !important;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.42));
+}
+[data-theme="neon"] .theme-toggle,
+[data-theme="neon"] .radio-toggle,
+[data-theme="neon"] .welcome-admin-report-btn,
+[data-theme="neon"] .bottom-nav__item,
+[data-theme="neon"] button,
+[data-theme="neon"] .app-store-btn,
+[data-theme="neon"] .profile-visible-to-others__p21-save {
+  border-color: rgba(34, 211, 238, 0.48);
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.12), transparent 48%),
+    linear-gradient(315deg, rgba(255, 38, 96, 0.13), transparent 52%),
+    linear-gradient(145deg, rgba(7, 20, 46, 0.94), rgba(2, 6, 17, 0.98));
+  color: #dff7ff;
+  box-shadow: inset 0 0 0 1px rgba(190, 245, 255, 0.04), 0 0 14px rgba(34, 211, 238, 0.12);
+}
+[data-theme="neon"] .bottom-nav {
+  background: var(--nav-bg);
+}
+[data-theme="neon"] .bottom-nav__item--active,
+[data-theme="neon"] .bottom-nav__item:hover,
+[data-theme="neon"] .theme-toggle:hover,
+[data-theme="neon"] .home-mini-icon-item:hover,
+[data-theme="neon"] .welcome-home-icon-tile:hover {
+  border-color: rgba(125, 241, 255, 0.82) !important;
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.24), 0 0 20px rgba(255, 38, 96, 0.15) !important;
+}
+[data-theme="neon"] .home-welcome-outline::before {
+  border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: inset 0 0 24px rgba(34, 211, 238, 0.1), 0 0 22px rgba(255, 38, 96, 0.14);
+}
+[data-theme="neon"] input,
+[data-theme="neon"] textarea,
+[data-theme="neon"] select,
+[data-theme="neon"] .chat-input,
+[data-theme="neon"] .chat-input-area textarea {
+  border-color: rgba(34, 211, 238, 0.36) !important;
+  background: rgba(2, 6, 17, 0.82) !important;
+  color: var(--text) !important;
+}
+[data-theme="neon"] a,
+[data-theme="neon"] .link {
+  color: #67e8f9;
+}
+[data-theme="neon"] .text-muted,
+[data-theme="neon"] .profile-email-auth__text,
+[data-theme="neon"] .feature__desc,
+[data-theme="neon"] .chat-empty,
+[data-theme="neon"] .home-mini-icon__label {
+  color: var(--text-muted) !important;
+}
+[data-theme="neon"] .feature--highlight,
+[data-theme="neon"] .feature.feature--link.feature--rating-promo,
+[data-theme="neon"] .spring-rating-home-promo-unified {
+  border-color: rgba(255, 38, 96, 0.48) !important;
+  box-shadow: 0 0 20px rgba(255, 38, 96, 0.16), 0 0 22px rgba(34, 211, 238, 0.12) !important;
+}
+[data-theme="neon"] .raffles-hero__share-btn--primary,
+[data-theme="neon"] .primary-button {
+  background: linear-gradient(135deg, #ff2d73, #22d3ee) !important;
+  border-color: rgba(125, 241, 255, 0.72) !important;
+  color: #020611 !important;
+  text-shadow: none;
+}
 [data-theme="light"] .card {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
 }
@@ -2995,12 +3172,19 @@ body.pwa-auth-gated #app {
 .theme-toggle__icon--light { display: none; }
 .theme-toggle__icon--dark { display: inline; }
 .theme-toggle__icon--gold { display: none; }
+.theme-toggle__icon--neon { display: none; }
 [data-theme="light"] .theme-toggle__icon--light { display: inline; }
 [data-theme="light"] .theme-toggle__icon--dark { display: none; }
 [data-theme="light"] .theme-toggle__icon--gold { display: none; }
+[data-theme="light"] .theme-toggle__icon--neon { display: none; }
 [data-theme="gold"] .theme-toggle__icon--gold { display: inline; }
 [data-theme="gold"] .theme-toggle__icon--dark,
-[data-theme="gold"] .theme-toggle__icon--light { display: none; }
+[data-theme="gold"] .theme-toggle__icon--light,
+[data-theme="gold"] .theme-toggle__icon--neon { display: none; }
+[data-theme="neon"] .theme-toggle__icon--neon { display: inline; }
+[data-theme="neon"] .theme-toggle__icon--dark,
+[data-theme="neon"] .theme-toggle__icon--light,
+[data-theme="neon"] .theme-toggle__icon--gold { display: none; }
 
 .pwa-install-btn {
   display: flex;
@@ -28994,9 +29178,9 @@ body.profile-avatar-choice-open {
   min-height: 72px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 0;
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.74), rgba(15, 23, 42, 0.72));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before,
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow::before,
@@ -29012,9 +29196,9 @@ body.profile-avatar-choice-open {
   place-items: center;
   width: 32px;
   height: 32px;
-  border-right: 1px solid rgba(148, 163, 184, 0.18);
   color: #93c5fd;
   font-weight: 900;
+  opacity: 0.82;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before { content: "₽"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow::before { content: "□"; }
@@ -29025,6 +29209,20 @@ body.profile-avatar-choice-open {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRoleRow::before { content: "♙"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastLoginRow::before { content: "◷"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLastIpRow::before { content: "⌘"; }
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  min-height: 118px;
+  text-align: center;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before {
+  display: none;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceLabel {
+  font-size: 15px;
+  font-weight: 800;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-email-auth__label {
   color: rgba(191, 219, 254, 0.82);
   font-size: 13px;
@@ -29038,19 +29236,24 @@ body.profile-avatar-choice-open {
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance {
   display: grid;
   align-items: center;
-  justify-items: start;
-  gap: 8px;
+  justify-items: center;
+  width: 100%;
+  gap: 10px;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__amount {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: clamp(24px, 6vw, 34px);
+  font-weight: 950;
+  line-height: 1.05;
   white-space: nowrap;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle {
-  min-height: 30px;
-  padding: 5px 10px;
+  min-width: 104px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 6px 14px;
   border: 1px solid rgba(147, 197, 253, 0.34);
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.72);
@@ -29058,6 +29261,7 @@ body.profile-avatar-choice-open {
   font: inherit;
   font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle:hover,
@@ -29125,15 +29329,15 @@ body.profile-avatar-choice-open {
   display: grid;
   grid-template-rows: auto auto auto auto;
   justify-items: center;
-  min-height: 158px;
-  gap: 8px;
-  padding: 18px 16px 16px;
+  min-height: 138px;
+  gap: 7px;
+  padding: 14px 10px 12px;
   border: 0;
   border-radius: 16px;
   background:
     radial-gradient(circle at 78% 42%, rgba(96, 165, 250, 0.15) 0 2px, transparent 2px 8px),
     linear-gradient(145deg, rgba(8, 27, 55, 0.94), rgba(3, 13, 30, 0.9));
-  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.1);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__label {
   min-width: 0;
@@ -29151,34 +29355,32 @@ body.profile-avatar-choice-open {
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__ring {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 0;
   background: radial-gradient(circle, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.78));
-  box-shadow: inset 0 0 0 3px rgba(96, 165, 250, 0.62), 0 0 8px rgba(96, 165, 250, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.56), 0 0 6px rgba(96, 165, 250, 0.12);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__icon {
   color: #bfdbfe;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
   text-shadow: 0 0 12px currentColor;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__value {
   color: #e0f2fe;
   max-width: 100%;
-  font-size: clamp(24px, 7.4vw, 31px);
+  font-size: clamp(18px, 5.3vw, 24px);
   font-weight: 950;
-  line-height: 0.95;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1;
   text-shadow: 0 0 18px rgba(96, 165, 250, 0.42);
   white-space: nowrap;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__raw {
   max-width: 100%;
   color: rgba(203, 213, 225, 0.68);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 850;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -29198,7 +29400,7 @@ body.profile-avatar-choice-open {
   text-shadow: 0 0 16px rgba(248, 113, 113, 0.52);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--bad .profile-pokerplus-stat__ring {
-  box-shadow: inset 0 0 0 3px rgba(248, 113, 113, 0.62), 0 0 8px rgba(248, 113, 113, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(248, 113, 113, 0.56), 0 0 6px rgba(248, 113, 113, 0.12);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__label,
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__value,
@@ -29207,7 +29409,7 @@ body.profile-avatar-choice-open {
   text-shadow: 0 0 16px rgba(74, 222, 128, 0.52);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good .profile-pokerplus-stat__ring {
-  box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.62), 0 0 8px rgba(74, 222, 128, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(74, 222, 128, 0.56), 0 0 6px rgba(74, 222, 128, 0.12);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat--good {
   background:
@@ -29246,19 +29448,19 @@ body.profile-avatar-choice-open {
     gap: 10px;
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat {
-    min-height: 154px;
-    padding: 16px 10px 14px;
-    border-radius: 16px;
+    min-height: 124px;
+    padding: 12px 8px 10px;
+    border-radius: 14px;
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__label {
-    font-size: 13px;
+    font-size: 12px;
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__ring {
-    width: 54px;
-    height: 54px;
+    width: 34px;
+    height: 34px;
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__value {
-    font-size: clamp(22px, 8.2vw, 28px);
+    font-size: clamp(17px, 5vw, 22px);
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stat__raw {
     font-size: 12px;
