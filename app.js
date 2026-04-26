@@ -17837,7 +17837,6 @@ function setProfileStatusFromRake(value) {
     fish.setAttribute("title", tip);
     fish.setAttribute("aria-label", tip);
     fish.setAttribute("data-status-tip", tip);
-    fish.style.backgroundImage = 'url("./assets/profile-status-fish-levels/level-' + String(status.level).padStart(2, "0") + '.png")';
   }
 }
 

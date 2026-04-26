@@ -29703,13 +29703,9 @@ body.profile-avatar-choice-open {
   position: absolute;
   left: calc(var(--status-value) * 1%);
   top: 50%;
-  display: block;
-  width: clamp(34px, 9vw, 48px);
-  height: clamp(34px, 9vw, 48px);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  transform: translate(-50%, -52%);
+  transform: translate(-50%, -52%) scaleX(-1);
+  font-size: clamp(24px, 7vw, 34px);
+  line-height: 1;
   filter:
     drop-shadow(0 2px 0 rgba(6, 23, 38, 0.88))
     drop-shadow(0 0 10px rgba(34, 211, 238, 0.7));
@@ -29791,8 +29787,7 @@ body.profile-avatar-choice-open {
     height: 32px;
   }
   .profile-status__fish {
-    width: 32px;
-    height: 32px;
+    font-size: 25px;
   }
 }
 
