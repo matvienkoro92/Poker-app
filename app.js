@@ -33654,6 +33654,51 @@ function initChat() {
     var alias = chatListRowAlias(c, friendSet);
     return alias || pokerNormalizeLegacyAccountLabel(c && c.name ? c.name : c && c.id ? c.id : "");
   }
+  function chatCachedFriendRows() {
+    try {
+      var cache = window.__pokerFriendsPickCache;
+      return cache && Array.isArray(cache.friends) ? cache.friends.filter(function (row) { return row && row.userId; }) : [];
+    } catch (eFriendsCacheRows) {
+      return [];
+    }
+  }
+  function chatBuildFriendContactsFromFriendsApi(friendRows, contacts) {
+    var byId = {};
+    function addKey(key, row) {
+      if (key == null || key === "" || !row) return;
+      byId[String(key)] = row;
+      try {
+        var norm = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(String(key)) : String(key);
+        if (norm) byId[String(norm)] = row;
+      } catch (eFriendNormKey) {}
+    }
+    (contacts || []).forEach(function (c) {
+      if (!c || c.isGroupChat) return;
+      addKey(c.id, c);
+      addKey(c.accountId, c);
+      addKey(c.userId, c);
+      addKey(c.chatUserId, c);
+    });
+    return (friendRows || []).map(function (f) {
+      var friendUserId = f && f.userId != null ? String(f.userId).trim() : "";
+      if (!friendUserId) return null;
+      var chatUserId = f.chatUserId != null && String(f.chatUserId).trim() ? String(f.chatUserId).trim() : "";
+      var matched = byId[chatUserId] || byId[friendUserId] || null;
+      var displayName = pokerNormalizeLegacyAccountLabel(f.contactName || f.userName || friendUserId);
+      var baseName = pokerNormalizeLegacyAccountLabel(f.userName || friendUserId);
+      var row = Object.assign({}, matched || {});
+      row.id = chatUserId || (matched && matched.id) || friendUserId;
+      row.name = baseName;
+      row.contactName = f.contactName ? pokerNormalizeLegacyAccountLabel(f.contactName) : "";
+      if (!row.contactName && displayName && displayName !== baseName) row.contactName = displayName;
+      row.isGroupChat = false;
+      row.admin = !!row.admin;
+      row.online = !!row.online;
+      row.unreadCount = Math.max(0, Number(row.unreadCount) || 0);
+      row.__friendAccountId = friendUserId;
+      return row;
+    }).filter(Boolean);
+  }
   function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRender) {
     if (!block || !Array.isArray(contactsForList) || !contactsForList.length) return false;
     var wraps = block.querySelectorAll(".chat-contact-swipe");
@@ -33960,6 +34005,9 @@ function initChat() {
               if (fn2 && fn2 !== um) window.__pokerChatFriendIdsSet[fn2] = true;
             } catch (eFn2) {}
           }
+          if (typeof pokerUpdateFriendsCountLabels === "function" && fpcM.length > 0) {
+            pokerUpdateFriendsCountLabels(fpcM.length);
+          }
         } catch (eFpcM) {}
         try {
           var cgMx = document.getElementById("chatCreateGroupModal");
@@ -34000,9 +34048,26 @@ function initChat() {
           }
         } catch (ePkRf) {}
         if (showFriendsOnly) {
-          contactsForList = contactsForList.filter(function (c) {
-            if (c && c.isGroupChat) return false;
-            return !!(friendSet[c.id] || friendSet[String(c.id)]);
+          var friendsRowsForList = chatCachedFriendRows();
+          if (!friendsRowsForList.length && typeof window.__pokerFetchFriendsForGroupPick === "function" && !opts.friendsFetchDone) {
+            contactsEl.innerHTML =
+              '<div class="chat-contacts-list-block">' +
+              '<p class="chat-empty">Загружаем друзей…</p>' +
+              "</div>";
+            window.__pokerFetchFriendsForGroupPick(function () {
+              try {
+                applyContactsApiResponse(data, { fromFilterOnly: true, forceRerender: true, friendsFetchDone: true });
+              } catch (eFriendsApplyAfterFetch) {}
+            });
+            updateDialogUnreadBadges();
+            updateChatNavDot();
+            return;
+          }
+          contactsForList = chatBuildFriendContactsFromFriendsApi(friendsRowsForList, contactsForList);
+          contactsForList.forEach(function (c) {
+            if (!c) return;
+            if (c.id != null) friendSet[String(c.id)] = true;
+            if (c.__friendAccountId) friendSet[String(c.__friendAccountId)] = true;
           });
         }
         window.chatAdminUnread = data.adminUnread || {};
@@ -34359,7 +34424,19 @@ function initChat() {
             sessionStorage.setItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY, fv === "friends" ? "friends" : "all");
           } catch (eStF) {}
           pokerSyncChatContactsFilterTabs();
-          if (window.__pokerLastContactsApiData) {
+          if (fv === "friends" && typeof window.__pokerFetchFriendsForGroupPick === "function") {
+            if (contactsEl) {
+              contactsEl.innerHTML =
+                '<div class="chat-contacts-list-block">' +
+                '<p class="chat-empty">Загружаем друзей…</p>' +
+                "</div>";
+            }
+            window.__pokerFetchFriendsForGroupPick(function () {
+              if (window.__pokerLastContactsApiData) {
+                applyContactsApiResponse(window.__pokerLastContactsApiData, { fromFilterOnly: true, forceRerender: true, friendsFetchDone: true });
+              }
+            });
+          } else if (window.__pokerLastContactsApiData) {
             applyContactsApiResponse(window.__pokerLastContactsApiData, { fromFilterOnly: true });
           }
         });
@@ -40867,6 +40944,7 @@ function initChat() {
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.friends)) {
           window.__pokerFriendsPickCache = { ts: Date.now(), friends: data.friends };
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(data.friends.length);
           var set = window.__pokerChatFriendIdsSet || {};
           for (var i = 0; i < data.friends.length; i++) {
             var row = data.friends[i];
