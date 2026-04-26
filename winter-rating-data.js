@@ -2356,7 +2356,16 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
   "24.04.2026": [
     "rating-24-04-2026-league1-s-bounty-2-3-120k-00h.jpg",
     "rating-24-04-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-24-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-24-04-2026-league1-friday-progressive-18h.jpg",
     "rating-24-04-2026-league1-magic-500-120k-22h.jpg"
+  ],
+  "25.04.2026": [
+    "rating-25-04-2026-league1-bali-yana-20k-08h.jpg",
+    "rating-25-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-25-04-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-25-04-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-25-04-2026-league1-lucky-777-gtd-18h.jpg"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2584,7 +2593,13 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "24.04.2026": [
     "rating-24-04-2026-league2-kg-plo6-09h.jpg",
-    "rating-24-04-2026-league2-bounty-200-50k-14h.jpg"
+    "rating-24-04-2026-league2-bounty-200-50k-14h.jpg",
+    "rating-24-04-2026-league2-tournament-plo4-20h.jpg",
+    "rating-24-04-2026-league2-mok-7max-21h.jpg"
+  ],
+  "25.04.2026": [
+    "rating-25-04-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-25-04-2026-league2-mok-7max-21h.jpg"
   ]
 };
 var SPRING_RATING_UPDATED = "23.04.26";
@@ -3978,7 +3993,7 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   ],
   "05.04.2026": [
     { time: "00:00", name: "S.Bounty 2/3 🥊 150k", buyin: 20000, league: 1, players: [
-      { nick: "Em13!!", place: 1, reward: 85920 },
+      { nick: "Em13!!", place: 5, reward: 8592 },
       { nick: "OMGraise_27", place: 2, reward: 0 },
       { nick: "АршакМкртчян", place: 3, reward: 0 },
       { nick: "Rusag81", place: 4, reward: 0 },
@@ -5116,16 +5131,64 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "09:00", name: "KG PLO6 / 2$", buyin: 10000, league: 2, players: [
       { nick: "Sarmat1305", place: 2, reward: 2463 }
     ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 8800, league: 1, players: [
+      { nick: "FrankL", place: 1, reward: 15200 }
+    ] },
     { time: "14:00", name: "Bounty 200 50K GTD", buyin: 10000, league: 2, players: [
       { nick: "AlenaSt", place: 3, reward: 2116 }
     ] },
     { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
       { nick: "Em13!!", place: 1, reward: 23432 }
     ] },
+    { time: "18:00", name: "Пятница Прогрессив", buyin: 60000, league: 1, players: [
+      { nick: "Rom4ik", place: 4, reward: 13016.41 },
+      { nick: "MOJO", place: 5, reward: 5816.25 },
+      { nick: "Tokio90", place: 6, reward: 4149.37 },
+      { nick: "WiNifly", place: 7, reward: 6265.31 },
+      { nick: "Adam1993", place: 8, reward: 3315 }
+    ] },
+    { time: "20:00", name: "Tournament PLO4", buyin: 8400, league: 2, players: [
+      { nick: "kriak", place: 1, reward: 6220 },
+      { nick: "Sarmat1305", place: 3, reward: 2480 }
+    ] },
+    { time: "21:00", name: "MOK 7MAX", buyin: 14700, league: 2, players: [
+      { nick: "WiNifly", place: 1, reward: 11610 },
+      { nick: "Shkarubo", place: 2, reward: 7210 },
+      { nick: "Yurak700", place: 5, reward: 1270 }
+    ] },
     { time: "22:00", name: "Magic 500 120K", buyin: 10000, league: 1, players: [
       { nick: "МВД", place: 22, reward: 13040 },
       { nick: "Olegan393", place: 6, reward: 4467 },
       { nick: "outsider", place: 25, reward: 593 }
+    ] }
+  ],
+  "25.04.2026": [
+    { time: "08:00", name: "Bali Yana 20k", buyin: 10000, league: 1, players: [
+      { nick: "nikola233", place: 3, reward: 4359 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 12800, league: 1, players: [
+      { nick: "king00001", place: 2, reward: 9300 },
+      { nick: "Waaar", place: 3, reward: 6160 }
+    ] },
+    { time: "13:00", name: "DV Bounty 100k", buyin: 10000, league: 1, players: [
+      { nick: "Olegan393", place: 4, reward: 6698 },
+      { nick: "Em13!!", place: 27, reward: 294 }
+    ] },
+    { time: "14:00", name: "Tournament Rebuy", buyin: 5500, league: 2, players: [
+      { nick: "⚡72⚡", place: 2, reward: 2750 },
+      { nick: "AlenaSt", place: 3, reward: 1830 }
+    ] },
+    { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
+      { nick: "Jindaniels", place: 2, reward: 10523 },
+      { nick: "Em13!!", place: 0, reward: 585 }
+    ] },
+    { time: "18:00", name: "LUCKY 777 GTD", buyin: 20000, league: 1, players: [
+      { nick: "Em13!!", place: 5, reward: 44355 },
+      { nick: "AlenaSt", place: 25, reward: 1948 }
+    ] },
+    { time: "21:00", name: "MOK 7MAX", buyin: 10800, league: 2, players: [
+      { nick: "⚡72⚡", place: 3, reward: 1355 },
+      { nick: "Tanechka", place: 4, reward: 1080 }
     ] }
   ]
 };
