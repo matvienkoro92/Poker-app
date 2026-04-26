@@ -29142,6 +29142,19 @@ body.profile-avatar-choice-open {
 #profilePokerPlusText {
   white-space: pre-line;
 }
+#profilePokerPlusSection.profile-pokerplus-card--loading #profilePokerPlusText,
+#profilePokerPlusSection.profile-pokerplus-card--loading #profilePokerPlusForm,
+#profilePokerPlusSection.profile-pokerplus-card--loading .profile-email-auth__linked {
+  display: none !important;
+}
+#profilePokerPlusSection.profile-pokerplus-card--loading::before {
+  content: "Загружаем профиль Poker21...";
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
 .profile-tournaments,
 .profile-cash {
   display: none !important;

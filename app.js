@@ -17041,6 +17041,12 @@ function initProfilePokerPlus() {
     else refreshBtn.textContent = pokerPlusLocale() === "en" ? "Check by email" : "Проверить по почте";
   }
 
+  function setPokerPlusInitialLoading(loading) {
+    if (!section || !section.classList) return;
+    section.classList.toggle("profile-pokerplus-card--loading", !!loading);
+    if (loading && title) title.textContent = pokerPlusLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
+  }
+
   function pokerPlusWholeNumber(value) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
@@ -17178,6 +17184,7 @@ function initProfilePokerPlus() {
 
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
+    setPokerPlusInitialLoading(false);
     if (!linked || !p) {
       setPokerPlusLinkedMode(false);
       if (title) title.textContent = pokerPlusLocale() === "en" ? "Verification via Poker21" : "Верификация через Poker21";
@@ -17309,6 +17316,9 @@ function initProfilePokerPlus() {
       .catch(function () {
         setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
         renderPokerPlusStatsFallbackIfVisible();
+      })
+      .finally(function () {
+        setPokerPlusInitialLoading(false);
       });
   }
 
@@ -17430,6 +17440,7 @@ function initProfilePokerPlus() {
   var activeProfileTab = profileRoot && profileRoot.dataset ? profileRoot.dataset.profileActiveTab : "";
   if (activeProfileTab === "poker21" && initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
     section.dataset.profilePokerPlusLoaded = "1";
+    if (!section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusInitialLoading(true);
     loadProfile(false).catch(function () {
       section.dataset.profilePokerPlusLoaded = "";
     });
