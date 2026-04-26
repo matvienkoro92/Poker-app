@@ -28938,6 +28938,9 @@ body.profile-avatar-choice-open {
   color: var(--text-muted);
   line-height: 1.45;
 }
+#profilePokerPlusText {
+  white-space: pre-line;
+}
 .profile-tournaments,
 .profile-cash {
   display: none !important;

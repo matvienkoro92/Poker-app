@@ -9252,7 +9252,7 @@ function getPokerResolvedTelegramUser() {
         telegramLoginText: "Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.",
         linkTelegram: "Привязать Telegram",
         pokerPlus: "Верификация через Poker21",
-        pokerPlusText: "Привяжите аккаунт PokerPlus по ключу из игры. Email будет передан только если он уже привязан к вашему аккаунту.",
+        pokerPlusText: 'Нажмите "Проверить по почте" если ваш емейл в Poker21 и здесь совпадают и тогда аккаунт привяжется автоматически.\nЕсли у вас разные емейлы, тогда введите ключ из Poker21.',
         pokerPlusKeyPh: "Ключ из PokerPlus",
         pokerPlusBind: "Привязать по ключу из Poker21",
         pokerPlusRefresh: "Проверить по почте",
