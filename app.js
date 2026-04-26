@@ -29797,6 +29797,11 @@ function initChat() {
       ? '<span class="chat-msg__verified" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
       : "";
   }
+  function chatProfileStatusLevelHtml(level) {
+    if (level == null || level === "") return "";
+    var statusLevel = pokerProfileStatusFishLevel(level);
+    return '<span class="chat-msg__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
+  }
   function buildGeneralMessagesBodyHtml(messages) {
     var myIdRender = resolveMyChatMemberId();
     return (messages || []).map(function (m, i) {
@@ -29831,14 +29836,16 @@ function initChat() {
       var nameEl = "";
       if (!isOwn) {
         var nameStr = escapeHtml(m.fromName || "Игрок");
-        var fishIconStr = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
+        var statusLevel = m.fromStatusLevel != null && m.fromStatusLevel !== "" ? pokerProfileStatusFishLevel(m.fromStatusLevel) : "";
+        var levelStr = chatProfileStatusLevelHtml(statusLevel);
+        var fishIconStr = pokerProfileStatusFishIconHtml(statusLevel, "chat-msg__status-fish");
         var verifiedStr = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var respectVal = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClass = "chat-msg__respect";
         if (m.fromRespect > 0) respectClass += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
         var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + fishIconStr + verifiedStr + "</div>";
+        var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + levelStr + fishIconStr + "</div>";
         var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
         var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
         var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -29980,14 +29987,16 @@ function initChat() {
       var nameElP = "";
       if (!isOwn) {
         var nameStrP = escapeHtml(m.fromName || "Игрок");
-        var fishIconStrP = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
+        var statusLevelP = m.fromStatusLevel != null && m.fromStatusLevel !== "" ? pokerProfileStatusFishLevel(m.fromStatusLevel) : "";
+        var levelStrP = chatProfileStatusLevelHtml(statusLevelP);
+        var fishIconStrP = pokerProfileStatusFishIconHtml(statusLevelP, "chat-msg__status-fish");
         var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
         var respectValP = m.fromRespect !== undefined && m.fromRespect !== null ? (m.fromRespect === 0 ? "\u2014" : String(m.fromRespect)) : "\u2014";
         var respectClassP = "chat-msg__respect";
         if (m.fromRespect > 0) respectClassP += " chat-msg__respect--positive";
         else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
         var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
-        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + fishIconStrP + verifiedStrP + "</div>";
+        var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + levelStrP + fishIconStrP + "</div>";
         var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
         var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
         var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
@@ -35098,7 +35107,9 @@ function initChat() {
         var nameElP = "";
         if (!isOwn) {
           var nameStrP = escapeHtml(m.fromName || "Игрок");
-          var fishIconStrP = pokerProfileStatusFishIconHtml(m.fromStatusLevel, "chat-msg__status-fish");
+          var statusLevelP = m.fromStatusLevel != null && m.fromStatusLevel !== "" ? pokerProfileStatusFishLevel(m.fromStatusLevel) : "";
+          var levelStrP = chatProfileStatusLevelHtml(statusLevelP);
+          var fishIconStrP = pokerProfileStatusFishIconHtml(statusLevelP, "chat-msg__status-fish");
           var verifiedStrP = chatPokerPlusVerifiedBadgeHtml(m.fromPokerPlusVerified);
           var respectValP =
             m.fromRespect !== undefined && m.fromRespect !== null
@@ -35114,8 +35125,9 @@ function initChat() {
             '<span class="chat-msg__name">' +
             nameStrP +
             "</span>" +
-            fishIconStrP +
             verifiedStrP +
+            levelStrP +
+            fishIconStrP +
             "</div>";
           var respectPartP =
             '<span class="chat-msg__respect-row chat-msg__respect-inline"><span class="' +

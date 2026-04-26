@@ -7771,6 +7771,16 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   height: 17px;
   margin-left: 4px;
 }
+.chat-msg__status-level {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
 .chat-msg__verified {
   display: inline-flex;
   align-items: center;
