@@ -16968,10 +16968,18 @@ function initProfilePokerPlus() {
     return typeof getPwaAuthLocale === "function" && getPwaAuthLocale() === "en" ? "en" : "ru";
   }
 
+  function pokerPlusWholeNumber(value) {
+    var raw = pokerPlusText(value);
+    if (!raw) return "";
+    var n = Number(String(raw).replace(/\s+/g, "").replace(",", "."));
+    if (!isFinite(n)) return raw.replace(/([.,]\d+)\b/, "");
+    return String(n < 0 ? Math.ceil(n) : Math.floor(n));
+  }
+
   function renderPokerPlusBalance() {
     var hasBalance = !!pokerPlusBalanceRaw;
     if (balanceRow) balanceRow.hidden = !hasBalance;
-    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusBalanceRaw : "••••") : "—";
+    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusWholeNumber(pokerPlusBalanceRaw) : "••••") : "—";
     if (balanceToggle) {
       balanceToggle.hidden = !hasBalance;
       balanceToggle.textContent = pokerPlusBalanceVisible ? "Скрыть" : "Показать";
@@ -17002,6 +17010,7 @@ function initProfilePokerPlus() {
   function pokerPlusStatMetricHtml(label, value, tone, icon) {
     var raw = pokerPlusText(value);
     var hasValue = !!raw;
+    var rawDisplay = hasValue ? pokerPlusWholeNumber(raw) : "—";
     var cls = "profile-pokerplus-stat";
     if (tone) cls += " profile-pokerplus-stat--" + tone;
     return (
@@ -17014,7 +17023,7 @@ function initProfilePokerPlus() {
       '</span></span><span class="profile-pokerplus-stat__value">' +
       escapeHtml(hasValue ? pokerPlusShortStat(value) : "—") +
       '</span><span class="profile-pokerplus-stat__raw">' +
-      escapeHtml(hasValue ? raw : "—") +
+      escapeHtml(rawDisplay) +
       "</span></span>"
     );
   }

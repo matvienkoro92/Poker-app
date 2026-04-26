@@ -28907,17 +28907,19 @@ body.profile-avatar-choice-open {
   font-weight: 850;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance {
-  display: flex;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-items: start;
+  gap: 8px;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__amount {
   min-width: 0;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-balance__toggle {
-  flex: 0 0 auto;
   min-height: 30px;
   padding: 5px 10px;
   border: 1px solid rgba(147, 197, 253, 0.34);
