@@ -111,6 +111,130 @@ body::-webkit-scrollbar,
   --chat-input-field-bg: rgba(255, 237, 213, 0.82);
   --chat-input-textarea-bg: #ffffff;
 }
+html[data-theme="gold"],
+html[data-theme="gold"] body,
+[data-theme="gold"] .app {
+  background-image:
+    radial-gradient(circle at 18% 0%, rgba(180, 121, 34, 0.22), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(245, 158, 11, 0.12), transparent 36%),
+    linear-gradient(145deg, #05070d 0%, #09111f 48%, #02040a 100%) !important;
+  background-color: var(--overscroll-canvas) !important;
+}
+[data-theme="gold"] {
+  --bg-color: #05070d;
+  --bg-elevated: rgba(9, 17, 31, 0.94);
+  --accent: #d6a354;
+  --accent-soft: rgba(214, 163, 84, 0.16);
+  --accent-2: #f6d58a;
+  --accent-3: #b7792a;
+  --text: #f4ead6;
+  --text-muted: rgba(229, 213, 187, 0.68);
+  --border-subtle: rgba(214, 163, 84, 0.34);
+  --shadow-strong: 0 26px 58px rgba(0, 0, 0, 0.64);
+  --body-bg:
+    radial-gradient(circle at 18% 0%, rgba(180, 121, 34, 0.22), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(245, 158, 11, 0.12), transparent 36%),
+    linear-gradient(145deg, #05070d 0%, #09111f 48%, #02040a 100%);
+  --overscroll-canvas: #05070d;
+  --card-bg:
+    radial-gradient(circle at 22% 8%, rgba(214, 163, 84, 0.13), transparent 32%),
+    linear-gradient(145deg, rgba(9, 17, 31, 0.96), rgba(3, 7, 15, 0.98));
+  --card-border: rgba(214, 163, 84, 0.42);
+  --bg-gradient-opacity: 0.42;
+  --bg-blur-gradient:
+    radial-gradient(circle at 18% 0%, rgba(214, 163, 84, 0.12), transparent 32%),
+    linear-gradient(145deg, rgba(9, 17, 31, 0.96), rgba(3, 7, 15, 0.96));
+  --block-bg: rgba(10, 16, 28, 0.74);
+  --block-bg-solid: #0b1220;
+  --block-bg-gradient: linear-gradient(145deg, rgba(21, 28, 42, 0.96), rgba(6, 10, 18, 0.98));
+  --btn-on-accent: #090d16;
+  --nav-bg: linear-gradient(180deg, rgba(5, 7, 13, 0.35), rgba(5, 7, 13, 0.94));
+  --nav-item-bg: linear-gradient(180deg, rgba(22, 28, 42, 0.95), rgba(5, 8, 15, 0.98));
+  --chat-input-field-bg: rgba(11, 18, 32, 0.86);
+  --chat-input-textarea-bg: rgba(5, 8, 15, 0.9);
+}
+[data-theme="gold"] .bg-blur {
+  background: var(--bg-blur-gradient) !important;
+}
+[data-theme="gold"] .card,
+[data-theme="gold"] .modal,
+[data-theme="gold"] .gazette-modal__content,
+[data-theme="gold"] .club-charter-modal__paper,
+[data-theme="gold"] .profile-hero-card,
+[data-theme="gold"] .profile-section,
+[data-theme="gold"] .download-app:not(.download-app--poker21),
+[data-theme="gold"] .feature,
+[data-theme="gold"] .updates-block,
+[data-theme="gold"] .chat-dialog-item,
+[data-theme="gold"] .chat-contact,
+[data-theme="gold"] .chat-msg__bubble,
+[data-theme="gold"] .tournament-day-block,
+[data-theme="gold"] .schedule-section,
+[data-theme="gold"] .winter-rating,
+[data-theme="gold"] .hall-of-fame__block,
+[data-theme="gold"] .profile-email-auth {
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  background: var(--block-bg-gradient) !important;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.38), inset 0 0 0 1px rgba(255, 240, 200, 0.035) !important;
+  color: var(--text);
+}
+[data-theme="gold"] .card {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+[data-theme="gold"] h1,
+[data-theme="gold"] h2,
+[data-theme="gold"] h3,
+[data-theme="gold"] .logo__title,
+[data-theme="gold"] .hero__title,
+[data-theme="gold"] .section-title,
+[data-theme="gold"] .profile-section__title,
+[data-theme="gold"] .winter-rating__title,
+[data-theme="gold"] .hall-of-fame__section-title {
+  color: #f5d99c !important;
+  text-shadow: 0 0 18px rgba(214, 163, 84, 0.22);
+}
+[data-theme="gold"] .theme-toggle,
+[data-theme="gold"] .radio-toggle,
+[data-theme="gold"] .welcome-admin-report-btn,
+[data-theme="gold"] .bottom-nav__item,
+[data-theme="gold"] button,
+[data-theme="gold"] .app-store-btn,
+[data-theme="gold"] .profile-visible-to-others__p21-save {
+  border-color: rgba(214, 163, 84, 0.42);
+  background: linear-gradient(145deg, rgba(20, 24, 34, 0.94), rgba(6, 8, 13, 0.96));
+  color: #f4dfb3;
+  box-shadow: inset 0 0 0 1px rgba(255, 240, 200, 0.035), 0 0 14px rgba(214, 163, 84, 0.08);
+}
+[data-theme="gold"] .bottom-nav {
+  background: var(--nav-bg);
+}
+[data-theme="gold"] .bottom-nav__item--active,
+[data-theme="gold"] .bottom-nav__item:hover,
+[data-theme="gold"] .theme-toggle:hover {
+  border-color: rgba(245, 213, 138, 0.72);
+  color: #ffe9b5;
+  box-shadow: 0 0 18px rgba(214, 163, 84, 0.16);
+}
+[data-theme="gold"] input,
+[data-theme="gold"] textarea,
+[data-theme="gold"] select,
+[data-theme="gold"] .chat-input,
+[data-theme="gold"] .chat-input-area textarea {
+  border-color: rgba(214, 163, 84, 0.32) !important;
+  background: rgba(5, 8, 15, 0.82) !important;
+  color: var(--text) !important;
+}
+[data-theme="gold"] a,
+[data-theme="gold"] .link {
+  color: #f3c875;
+}
+[data-theme="gold"] .text-muted,
+[data-theme="gold"] .profile-email-auth__text,
+[data-theme="gold"] .feature__desc,
+[data-theme="gold"] .chat-empty {
+  color: var(--text-muted) !important;
+}
 [data-theme="light"] .card {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
 }
@@ -2870,8 +2994,13 @@ body.pwa-auth-gated #app {
 }
 .theme-toggle__icon--light { display: none; }
 .theme-toggle__icon--dark { display: inline; }
+.theme-toggle__icon--gold { display: none; }
 [data-theme="light"] .theme-toggle__icon--light { display: inline; }
 [data-theme="light"] .theme-toggle__icon--dark { display: none; }
+[data-theme="light"] .theme-toggle__icon--gold { display: none; }
+[data-theme="gold"] .theme-toggle__icon--gold { display: inline; }
+[data-theme="gold"] .theme-toggle__icon--dark,
+[data-theme="gold"] .theme-toggle__icon--light { display: none; }
 
 .pwa-install-btn {
   display: flex;

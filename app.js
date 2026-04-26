@@ -1,15 +1,24 @@
-// Темы: тёмная / светлая
+// Темы: тёмная / светлая / золотая клубная
 (function initTheme() {
   /** Сплошной слой под градиентом: при верхнем/нижнем overscroll WebView рисует именно его, не белый */
   var LIGHT_OVERSCROLL = "#fff7ed";
   var DARK_OVERSCROLL = "#0f172a";
+  var GOLD_OVERSCROLL = "#05070d";
   var LIGHT_GRAD =
     "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%)";
   var DARK_GRAD = "radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%)";
+  var GOLD_GRAD =
+    "radial-gradient(circle at 18% 0%, rgba(180, 121, 34, 0.22), transparent 34%), radial-gradient(circle at 86% 12%, rgba(245, 158, 11, 0.12), transparent 36%), linear-gradient(145deg, #05070d 0%, #09111f 48%, #02040a 100%)";
+  var THEMES = ["dark", "light", "gold"];
+  function normalizeTheme(value) {
+    return THEMES.indexOf(value) !== -1 ? value : "dark";
+  }
   function applyBg() {
-    var isLight = document.documentElement.getAttribute("data-theme") === "light";
-    var canvas = isLight ? LIGHT_OVERSCROLL : DARK_OVERSCROLL;
-    var grad = isLight ? LIGHT_GRAD : DARK_GRAD;
+    var current = normalizeTheme(document.documentElement.getAttribute("data-theme"));
+    var isLight = current === "light";
+    var isGold = current === "gold";
+    var canvas = isLight ? LIGHT_OVERSCROLL : isGold ? GOLD_OVERSCROLL : DARK_OVERSCROLL;
+    var grad = isLight ? LIGHT_GRAD : isGold ? GOLD_GRAD : DARK_GRAD;
     function paintRoot(el) {
       if (!el) return;
       el.style.background = "";
@@ -21,21 +30,29 @@
     paintRoot(document.getElementById("app"));
   }
   var stored = localStorage.getItem("poker_theme");
-  var theme = stored === "light" ? "light" : "dark";
+  var theme = normalizeTheme(stored);
   document.documentElement.setAttribute("data-theme", theme);
   applyBg();
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg && tg.setBackgroundColor) {
-    tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : DARK_OVERSCROLL);
+    tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : theme === "gold" ? GOLD_OVERSCROLL : DARK_OVERSCROLL);
   }
   var btn = document.getElementById("themeToggle");
   if (btn) {
+    function syncThemeButton() {
+      btn.setAttribute("data-theme-current", theme);
+      btn.title = theme === "dark" ? "Тема: тёмная" : theme === "light" ? "Тема: светлая" : "Тема: золотая";
+      btn.setAttribute("aria-label", btn.title);
+    }
+    syncThemeButton();
     btn.addEventListener("click", function () {
-      theme = theme === "dark" ? "light" : "dark";
+      var idx = THEMES.indexOf(theme);
+      theme = THEMES[(idx + 1) % THEMES.length];
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("poker_theme", theme);
+      syncThemeButton();
       applyBg();
-      if (tg && tg.setBackgroundColor) tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : DARK_OVERSCROLL);
+      if (tg && tg.setBackgroundColor) tg.setBackgroundColor(theme === "light" ? LIGHT_OVERSCROLL : theme === "gold" ? GOLD_OVERSCROLL : DARK_OVERSCROLL);
     });
   }
 })();
@@ -8812,9 +8829,11 @@ if (tg) {
   tg.ready();
   if (tg.expand) tg.expand();
   if (typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes();
-  var isLight = document.documentElement.getAttribute("data-theme") === "light";
+  var currentTheme = document.documentElement.getAttribute("data-theme");
+  var isLight = currentTheme === "light";
+  var isGold = currentTheme === "gold";
   /* Совпадает с --overscroll-canvas / initTheme (резинка сверху не белая) */
-  if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : "#0f172a");
+  if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : isGold ? "#05070d" : "#0f172a");
   // По ссылке t.me/Poker_dvatuza_bot/DvaTuza всегда открываем в полный экран.
   // Повторные вызовы expand() с задержкой и при событиях помогают развернуть на части устройств.
   function tryExpand() {

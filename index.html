@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.253">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.254">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -37,11 +37,17 @@
       html[data-theme="light"] {
         background-color: #fff7ed !important;
       }
+      html[data-theme="gold"] {
+        background-color: #05070d !important;
+      }
       body {
         background-color: #0f172a !important;
       }
       html[data-theme="light"] body {
         background-color: #fff7ed !important;
+      }
+      html[data-theme="gold"] body {
+        background-color: #05070d !important;
       }
       /* Каркас #app до styles.css: под полупрозрачным оверлеем не белый прямоугольник */
       #app.app {
@@ -53,6 +59,9 @@
       }
       html[data-theme="light"] #app.app {
         background-color: #fff7ed;
+      }
+      html[data-theme="gold"] #app.app {
+        background-color: #05070d;
       }
     </style>
     <!-- До styles.css: оверлей загрузки сразу виден (не белый экран) -->
@@ -75,6 +84,9 @@
         background: rgba(255, 247, 237, 0.55);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+      }
+      html[data-theme="gold"] .app-boot-overlay {
+        background: rgba(5, 7, 13, 0.6);
       }
       .app-boot-overlay__panel {
         text-align: center;
@@ -492,6 +504,7 @@
               <button type="button" class="theme-toggle" id="themeToggle" title="Сменить тему" aria-label="Сменить тему">
                 <span class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true">🌙</span>
                 <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
+                <span class="theme-toggle__icon theme-toggle__icon--gold" aria-hidden="true">🪙</span>
               </button>
               <button type="button" class="site-home-instruction-btn theme-toggle" id="siteHomeInstructionBtn" title="Добавьте ярлык на рабочий стол телефона" aria-label="Добавьте ярлык на рабочий стол телефона" hidden>
                 <span class="site-home-instruction-btn__icon" aria-hidden="true">🪛</span>
