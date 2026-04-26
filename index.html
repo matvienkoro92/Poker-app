@@ -2687,8 +2687,23 @@
             </div>
 
             <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelCompleted" data-raffle-panel="completed">
+              <section class="raffle-winner-leaders raffle-winner-leaders--hidden" id="raffleWinnerLeaders" hidden>
+                <div class="raffle-winner-leaders__head">
+                  <h3 class="raffle-winner-leaders__title">Кто выигрывал чаще всех</h3>
+                  <button type="button" class="raffle-winner-leaders__expand" id="raffleWinnerLeadersExpandBtn">Развернуть</button>
+                </div>
+                <ol class="raffle-winner-leaders__list" id="raffleWinnerLeadersList"></ol>
+              </section>
               <div class="raffles-completed-list" id="rafflesCompleted"></div>
               <p class="raffle-empty raffles-completed-empty" id="rafflesCompletedEmpty">Нет завершённых розыгрышей.</p>
+            </div>
+            <div class="raffle-winner-leaders-modal raffle-winner-leaders-modal--hidden" id="raffleWinnerLeadersModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="raffleWinnerLeadersModalTitle">
+              <div class="raffle-winner-leaders-modal__backdrop" id="raffleWinnerLeadersModalBackdrop" tabindex="-1"></div>
+              <div class="raffle-winner-leaders-modal__box">
+                <button type="button" class="raffle-winner-leaders-modal__close" id="raffleWinnerLeadersModalClose" aria-label="Закрыть">×</button>
+                <h2 class="raffle-winner-leaders-modal__title" id="raffleWinnerLeadersModalTitle">Все победители розыгрышей</h2>
+                <ol class="raffle-winner-leaders-modal__list" id="raffleWinnerLeadersModalList"></ol>
+              </div>
             </div>
 
           </div>

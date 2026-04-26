@@ -21332,6 +21332,13 @@ function initRaffles() {
   var rafflesTabCompletedSum = document.getElementById("rafflesTabCompletedSum");
   var rafflesCompleted = document.getElementById("rafflesCompleted");
   var rafflesCompletedEmpty = document.getElementById("rafflesCompletedEmpty");
+  var raffleWinnerLeaders = document.getElementById("raffleWinnerLeaders");
+  var raffleWinnerLeadersList = document.getElementById("raffleWinnerLeadersList");
+  var raffleWinnerLeadersExpandBtn = document.getElementById("raffleWinnerLeadersExpandBtn");
+  var raffleWinnerLeadersModal = document.getElementById("raffleWinnerLeadersModal");
+  var raffleWinnerLeadersModalBackdrop = document.getElementById("raffleWinnerLeadersModalBackdrop");
+  var raffleWinnerLeadersModalClose = document.getElementById("raffleWinnerLeadersModalClose");
+  var raffleWinnerLeadersModalList = document.getElementById("raffleWinnerLeadersModalList");
   var raffleCard = document.getElementById("raffleCard");
   var raffleCardHeading = document.getElementById("raffleCardHeading");
   var raffleCompleteBtn = document.getElementById("raffleCompleteBtn");
@@ -21368,6 +21375,7 @@ function initRaffles() {
   var currentRaffleEndDate = null;
   var currentRaffleData = null;
   var raffleTimerInterval = null;
+  var raffleWinnerLeaderRows = [];
   var rafflesIsAdmin = false;
   var myRaffleUserId = null;
   var raffleFeedbackTimer = null;
@@ -21615,6 +21623,85 @@ function initRaffles() {
       statusIcon +
       "</span></li>"
     );
+  }
+
+  function raffleWinCountText(n) {
+    var v = Math.abs(parseInt(n, 10) || 0) % 100;
+    var d = v % 10;
+    if (v >= 11 && v <= 19) return n + " раз";
+    if (d === 1) return n + " раз";
+    if (d >= 2 && d <= 4) return n + " раза";
+    return n + " раз";
+  }
+
+  function raffleWinnerLeaderId(w) {
+    if (!w) return "";
+    var p21 = w.p21Id != null ? String(w.p21Id).trim() : "";
+    if (p21) return p21;
+    var uid = w.userId != null ? String(w.userId).trim() : "";
+    return uid;
+  }
+
+  function buildRaffleWinnerLeaderRows(completed) {
+    var byId = {};
+    (completed || []).forEach(function (raffle) {
+      var winners = raffle && Array.isArray(raffle.winners) ? raffle.winners : [];
+      winners.forEach(function (w) {
+        var id = raffleWinnerLeaderId(w);
+        if (!id) return;
+        if (!byId[id]) byId[id] = { id: id, count: 0 };
+        byId[id].count += 1;
+      });
+    });
+    return Object.keys(byId)
+      .map(function (id) { return byId[id]; })
+      .sort(function (a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        return String(a.id).localeCompare(String(b.id), "ru");
+      });
+  }
+
+  function raffleWinnerLeaderRowsHtml(rows) {
+    return (rows || []).map(function (row) {
+      return (
+        '<li class="raffle-winner-leaders__item"><span class="raffle-winner-leaders__id">' +
+        escapeHtml(row.id) +
+        '</span><span class="raffle-winner-leaders__count">— ' +
+        escapeHtml(raffleWinCountText(row.count)) +
+        "</span></li>"
+      );
+    }).join("");
+  }
+
+  function renderRaffleWinnerLeaders(completed) {
+    raffleWinnerLeaderRows = buildRaffleWinnerLeaderRows(completed);
+    var hasRows = raffleWinnerLeaderRows.length > 0;
+    if (raffleWinnerLeaders) {
+      raffleWinnerLeaders.hidden = !hasRows;
+      raffleWinnerLeaders.classList.toggle("raffle-winner-leaders--hidden", !hasRows);
+    }
+    if (raffleWinnerLeadersList) {
+      raffleWinnerLeadersList.innerHTML = hasRows ? raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows.slice(0, 10)) : "";
+    }
+    if (raffleWinnerLeadersExpandBtn) {
+      raffleWinnerLeadersExpandBtn.hidden = raffleWinnerLeaderRows.length <= 10;
+      raffleWinnerLeadersExpandBtn.textContent = raffleWinnerLeaderRows.length > 10 ? "Развернуть" : "Все показаны";
+    }
+  }
+
+  function openRaffleWinnerLeadersModal() {
+    if (!raffleWinnerLeadersModal || !raffleWinnerLeaderRows.length) return;
+    if (raffleWinnerLeadersModalList) {
+      raffleWinnerLeadersModalList.innerHTML = raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows);
+    }
+    raffleWinnerLeadersModal.classList.remove("raffle-winner-leaders-modal--hidden");
+    raffleWinnerLeadersModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeRaffleWinnerLeadersModal() {
+    if (!raffleWinnerLeadersModal) return;
+    raffleWinnerLeadersModal.classList.add("raffle-winner-leaders-modal--hidden");
+    raffleWinnerLeadersModal.setAttribute("aria-hidden", "true");
   }
 
   function setRaffleWinnerStatus(rid, wid, btnIsOk, currentStatus, onDone) {
@@ -22142,6 +22229,7 @@ function initRaffles() {
         var completedSumRub = completed.reduce(function (s, r) { return s + getRaffleTotalPrize(r); }, 0);
         if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = String(completedCount);
         if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = formatRaffleSum(completedSumRub);
+        renderRaffleWinnerLeaders(completed);
 
         if (rafflesCompleted) {
           if (completed.length > 0) {
@@ -22850,6 +22938,9 @@ function initRaffles() {
   }
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
+  if (raffleWinnerLeadersExpandBtn) raffleWinnerLeadersExpandBtn.addEventListener("click", openRaffleWinnerLeadersModal);
+  if (raffleWinnerLeadersModalClose) raffleWinnerLeadersModalClose.addEventListener("click", closeRaffleWinnerLeadersModal);
+  if (raffleWinnerLeadersModalBackdrop) raffleWinnerLeadersModalBackdrop.addEventListener("click", closeRaffleWinnerLeadersModal);
 
   if (raffleInviteFriendInlineBtn) {
     raffleInviteFriendInlineBtn.addEventListener("click", function () {
