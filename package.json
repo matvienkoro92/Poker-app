@@ -14,6 +14,8 @@
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",
     "rating:validate": "node scripts/rating-entry-helper.js validate",
     "rating:validate:strict": "node scripts/rating-entry-helper.js validate --strict",
+    "avatars:assign-missing": "node scripts/assign-random-preset-avatars.js",
+    "avatars:assign-missing:apply": "node scripts/assign-random-preset-avatars.js --apply",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
   }
