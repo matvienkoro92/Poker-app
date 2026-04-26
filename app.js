@@ -17052,6 +17052,12 @@ function initProfilePokerPlus() {
     if (valueEl) valueEl.textContent = text || "—";
   }
 
+  function setPokerPlusRowAlways(row, valueEl, value) {
+    var text = pokerPlusText(value);
+    if (row) row.hidden = false;
+    if (valueEl) valueEl.textContent = text || "—";
+  }
+
   function setPokerPlusLinkedMode(linked) {
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     input.hidden = !!linked;
@@ -17113,11 +17119,11 @@ function initProfilePokerPlus() {
     if (leagueValue) leagueValue.textContent = "—";
     if (groupRow) groupRow.hidden = true;
     if (groupValue) groupValue.textContent = "—";
-    setPokerPlusRow(countryRow, countryValue, p.country);
+    setPokerPlusRowAlways(countryRow, countryValue, p.country);
     if (roleRow) roleRow.hidden = true;
     if (roleValue) roleValue.textContent = "—";
-    setPokerPlusRow(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
-    setPokerPlusRow(lastIpRow, lastIpValue, p.lastLoginIp);
+    setPokerPlusRowAlways(lastLoginRow, lastLoginValue, pokerPlusDate(p.lastLoginDate));
+    setPokerPlusRowAlways(lastIpRow, lastIpValue, p.lastLoginIp);
     renderPokerPlusStats(p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : {}));
   }
 
