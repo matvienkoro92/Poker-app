@@ -17794,6 +17794,57 @@ function pokerProfileFormatRake(value) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+var POKER_PROFILE_STATUS_FISH_ASSETS = [
+  "./assets/profile-status-fish-level-01.png",
+  "./assets/profile-status-fish-level-02.png",
+  "./assets/profile-status-fish-level-03.png",
+  "./assets/profile-status-fish-level-04.png",
+  "./assets/profile-status-fish-level-05.png",
+  "./assets/profile-status-fish-level-06.png",
+  "./assets/profile-status-fish-level-07.png",
+  "./assets/profile-status-fish-level-08.png",
+  "./assets/profile-status-fish-level-09.png",
+  "./assets/profile-status-fish-level-10.png",
+  "./assets/profile-status-fish-level-11.png",
+  "./assets/profile-status-fish-level-12.png",
+  "./assets/profile-status-fish-level-13.png",
+  "./assets/profile-status-fish-level-14.png",
+  "./assets/profile-status-fish-level-15.png",
+  "./assets/profile-status-fish-level-16.png",
+  "./assets/profile-status-fish-level-17.png",
+  "./assets/profile-status-fish-level-18.png",
+  "./assets/profile-status-fish-level-19.png",
+  "./assets/profile-status-fish-level-20.png",
+  "./assets/profile-status-fish-level-21.png",
+  "./assets/profile-status-fish-level-22.png",
+  "./assets/profile-status-fish-level-23.png",
+  "./assets/profile-status-fish-level-24.png",
+  "./assets/profile-status-fish-level-25.png",
+  "./assets/profile-status-fish-level-26.png",
+  "./assets/profile-status-fish-level-27.png",
+  "./assets/profile-status-fish-level-28.png",
+  "./assets/profile-status-fish-level-29.png",
+  "./assets/profile-status-fish-level-30.png",
+];
+
+function pokerProfileStatusFishLevel(level) {
+  var n = parseInt(level, 10);
+  if (!isFinite(n) || n < 1) n = 1;
+  return Math.min(POKER_PROFILE_STATUS_FISH_ASSETS.length, n);
+}
+
+function pokerProfileStatusFishSrc(level) {
+  return POKER_PROFILE_STATUS_FISH_ASSETS[pokerProfileStatusFishLevel(level) - 1];
+}
+
+function pokerProfileApplyStatusFish(fish, level) {
+  if (!fish) return;
+  var fishLevel = pokerProfileStatusFishLevel(level);
+  var img = fish.querySelector("img");
+  if (img) img.src = pokerProfileStatusFishSrc(fishLevel);
+  fish.setAttribute("data-status-fish-level", String(fishLevel));
+}
+
 function setProfileStatus(value) {
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");
@@ -17819,6 +17870,7 @@ function setProfileStatusFromRake(value) {
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
   if (fish) {
+    pokerProfileApplyStatusFish(fish, status.level);
     var currentLevelRake = Math.max(0, status.rake - status.levelStart);
     var neededRake = Math.max(0, status.nextStart - status.levelStart);
     var leftRake = Math.max(0, status.nextStart - status.rake);
@@ -27106,6 +27158,7 @@ function initChat() {
     var modalLevelText = document.getElementById("chatUserModalLevelText");
     var modalRespectVal = document.getElementById("chatUserModalRespectVal");
     var modalStatusScale = document.getElementById("chatUserModalStatusScale");
+    var modalStatusFish = modalStatusScale ? modalStatusScale.querySelector(".chat-user-modal__status-fish") : null;
     var modalPersonalBlock = document.getElementById("chatUserModalPersonalBlock");
     var modalWriteBtn = document.getElementById("chatUserModalWriteBtn");
     var modalRespectUp = document.getElementById("chatUserModalRespectUp");
@@ -27264,6 +27317,7 @@ function initChat() {
       if (modalLevelText) modalLevelText.textContent = "Уровень — из 55";
       if (modalRespectVal) modalRespectVal.textContent = "—";
       if (modalStatusScale) modalStatusScale.style.setProperty("--status-value", "0");
+      pokerProfileApplyStatusFish(modalStatusFish, 1);
       if (typeof updateChatUserModalRespectButtons === "function") {
         if (modalRespectUp) modalRespectUp.disabled = true;
         if (modalRespectDown) modalRespectDown.disabled = true;
@@ -27287,6 +27341,7 @@ function initChat() {
             else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
           }
           if (modalLevelText && data && data.level != null) modalLevelText.textContent = "Уровень " + data.level + " из 55";
+          if (data && data.level != null) pokerProfileApplyStatusFish(modalStatusFish, data.level);
           if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
           if (data && data.ok) {
             if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);

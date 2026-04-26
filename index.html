@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.256">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.257">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4321,7 +4321,9 @@
                       <input type="range" id="profileStatusInput" class="profile-status__scale-input" min="0" max="100" value="0" step="1" aria-label="Статус" readonly tabindex="-1" aria-hidden="true" />
                       <div class="profile-status__track">
                         <div class="profile-status__fill"></div>
-                        <span class="profile-status__fish" role="button" tabindex="0" aria-label="Прогресс статуса">🐟</span>
+                        <span class="profile-status__fish" role="button" tabindex="0" aria-label="Прогресс статуса">
+                          <img class="profile-status__fish-img" src="./assets/profile-status-fish-level-01.png" alt="" aria-hidden="true" />
+                        </span>
                       </div>
                     </div>
                     <span class="profile-status__card">3♣</span>
@@ -6091,7 +6093,7 @@
             <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Статус</h4>
             <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
               <span class="chat-user-modal__status-card">2♣</span>
-              <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true">🐟</span></div>
+              <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
               <span class="chat-user-modal__status-card">3♣</span>
             </div>
           </section>
