@@ -28241,6 +28241,25 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .view[data-view="profile"].profile-view--guest .profile-chat-name {
   margin-top: 0;
 }
+.profile-loading-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  border-radius: 12px;
+  background: rgba(251, 146, 60, 0.1);
+  color: #fed7aa;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+.profile-loading-note--hidden {
+  display: none !important;
+}
 .profile-tabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

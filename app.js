@@ -16718,10 +16718,12 @@ function updateProfileExitBtnVisibility() {
   if (!btn) return;
   var isGuest = false;
   var isVerified = false;
+  var isLoading = false;
   try {
     var a = window.__pokerTelegramAuth;
     isGuest = !!(a && a.status === "guest");
     isVerified = !!(a && (a.status === "verified" || a.status === "dev_skip"));
+    isLoading = !a || a.status === "unknown" || a.status === "verifying";
   } catch (e) {}
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
   var show = !!(hasSession && isVerified) || !isVerified;
@@ -16731,6 +16733,7 @@ function updateProfileExitBtnVisibility() {
   btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
   syncProfileStatusVisibility(hasSession || isVerified);
   syncProfileVerifiedContentVisibility(hasSession || isVerified);
+  syncProfileLoadingVisibility(!!(hasSession && isLoading && !isVerified && !isGuest));
 }
 
 function pokerClearSessionsAndReloadForLogin() {
@@ -16768,8 +16771,6 @@ function pokerClearSessionsAndReloadForLogin() {
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
 
-var PROFILE_ACTIVE_TAB_STORAGE_KEY = "poker_profile_active_tab";
-
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
@@ -16784,9 +16785,6 @@ function setProfileTab(tab) {
     btn.classList.toggle("profile-tabs__btn--active", isActive);
     btn.setAttribute("aria-selected", isActive ? "true" : "false");
   });
-  try {
-    if (typeof localStorage !== "undefined") localStorage.setItem(PROFILE_ACTIVE_TAB_STORAGE_KEY, activeTab);
-  } catch (eStoreProfileTab) {}
   if (activeTab === "poker21" && typeof initProfilePokerPlus === "function") {
     try {
       setTimeout(function () {
@@ -16809,13 +16807,7 @@ function initProfileTabs() {
       });
     });
   }
-  var saved = "club";
-  try {
-    if (typeof localStorage !== "undefined" && localStorage.getItem(PROFILE_ACTIVE_TAB_STORAGE_KEY) === "poker21") {
-      saved = "poker21";
-    }
-  } catch (eReadProfileTab) {}
-  setProfileTab(root.dataset.profileActiveTab || saved);
+  setProfileTab("club");
 }
 
 function syncProfileStatusVisibility(isVerified) {
@@ -16839,6 +16831,16 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (friendsWrap) friendsWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (profileView) profileView.classList.toggle("profile-view--guest", !isVerified);
+}
+
+function syncProfileLoadingVisibility(isLoading) {
+  var note = document.getElementById("profileLoadingNote");
+  var profileView = document.getElementById("profileView");
+  if (note) {
+    note.hidden = !isLoading;
+    note.classList.toggle("profile-loading-note--hidden", !isLoading);
+  }
+  if (profileView) profileView.classList.toggle("profile-view--loading-account", !!isLoading);
 }
 
 function pokerClearUiCachesAfterAuthSwitch() {
