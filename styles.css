@@ -29139,13 +29139,29 @@ body.profile-avatar-choice-open {
   line-height: 1.05;
   letter-spacing: 0;
 }
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-player-name,
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-player-id {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-player-id {
+  margin-top: 4px;
+  color: rgba(191, 219, 254, 0.88);
+  font-size: clamp(18px, 4.2vw, 28px);
+  font-weight: 850;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow::after {
-  content: "Профиль игрока";
+  content: attr(data-register-date);
   flex-basis: 100%;
   order: 2;
   color: rgba(203, 213, 225, 0.82);
   font-size: 17px;
   font-weight: 500;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow:not([data-register-date])::after,
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow[data-register-date=""]::after {
+  display: none;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-verified-badge {
   order: 3;

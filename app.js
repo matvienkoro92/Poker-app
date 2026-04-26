@@ -17128,6 +17128,7 @@ function initProfilePokerPlus() {
       if (title) title.textContent = pokerPlusLocale() === "en" ? "Verification via Poker21" : "Верификация через Poker21";
       if (emailRow) emailRow.hidden = true;
       if (linkedRow) linkedRow.hidden = true;
+      if (linkedRow) linkedRow.removeAttribute("data-register-date");
       if (balanceRow) balanceRow.hidden = true;
       pokerPlusBalanceRaw = "";
       renderPokerPlusBalance();
@@ -17153,10 +17154,18 @@ function initProfilePokerPlus() {
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
     if (linkedRow) linkedRow.hidden = false;
     if (linkedValue) {
-      var playerParts = [];
-      if (p.nickname) playerParts.push(p.nickname);
-      if (p.pokerPlusUserId) playerParts.push("ID " + p.pokerPlusUserId);
-      linkedValue.textContent = playerParts.join(" ") || "—";
+      var playerName = pokerPlusText(p.nickname) || "—";
+      var playerId = pokerPlusText(p.pokerPlusUserId);
+      linkedValue.innerHTML =
+        '<span class="profile-pokerplus-player-name">' +
+        escapeHtml(playerName) +
+        '</span><span class="profile-pokerplus-player-id">' +
+        escapeHtml(playerId ? "ID " + playerId : "ID —") +
+        "</span>";
+    }
+    if (linkedRow) {
+      var registerDateText = pokerPlusDate(p.registerDate);
+      linkedRow.setAttribute("data-register-date", registerDateText ? "Дата регистрации: " + registerDateText : "");
     }
     try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
     updateProfileHeroPokerPlusId(p.pokerPlusUserId);
@@ -17169,7 +17178,8 @@ function initProfilePokerPlus() {
       if (avatarUrl) avatarImg.src = avatarUrl;
       else avatarImg.removeAttribute("src");
     }
-    setPokerPlusRow(registerRow, registerValue, pokerPlusDate(p.registerDate));
+    if (registerRow) registerRow.hidden = true;
+    if (registerValue) registerValue.textContent = pokerPlusDate(p.registerDate) || "—";
     if (positionRow) positionRow.hidden = true;
     if (positionValue) positionValue.textContent = "—";
     if (leagueRow) leagueRow.hidden = true;
