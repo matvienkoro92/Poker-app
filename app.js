@@ -9255,7 +9255,7 @@ function getPokerResolvedTelegramUser() {
         pokerPlusText: "Привяжите аккаунт PokerPlus по ключу из игры. Email будет передан только если он уже привязан к вашему аккаунту.",
         pokerPlusKeyPh: "Ключ из PokerPlus",
         pokerPlusBind: "Привязать PokerPlus",
-        pokerPlusRefresh: "Обновить",
+        pokerPlusRefresh: "Проверить по почте",
         pokerPlusUnbind: "Отвязать",
         pokerPlusEmailLabel: "Email для проверки:",
         pokerPlusPlayer: "Связанный игрок:",
