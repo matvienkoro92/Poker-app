@@ -17035,6 +17035,12 @@ function initProfilePokerPlus() {
     return typeof getPwaAuthLocale === "function" && getPwaAuthLocale() === "en" ? "en" : "ru";
   }
 
+  function setPokerPlusRefreshButtonText(linked) {
+    if (!refreshBtn) return;
+    if (linked) refreshBtn.textContent = pokerPlusLocale() === "en" ? "Refresh" : "Обновить";
+    else refreshBtn.textContent = pokerPlusLocale() === "en" ? "Check by email" : "Проверить по почте";
+  }
+
   function pokerPlusWholeNumber(value) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
@@ -17166,6 +17172,7 @@ function initProfilePokerPlus() {
     input.hidden = !!linked;
     bindBtn.hidden = !!linked;
     refreshBtn.hidden = false;
+    setPokerPlusRefreshButtonText(!!linked);
     unbindBtn.hidden = !linked;
   }
 
@@ -17245,7 +17252,7 @@ function initProfilePokerPlus() {
   function syncVisibility() {
     var state = auth();
     section.hidden = !state.isVerified || !!state.isGuest;
-    if (state.isVerified && !state.isGuest) setPokerPlusLinkedMode(false);
+    if (state.isVerified && !state.isGuest && section.dataset.profilePokerPlusLoaded !== "1" && !section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusLinkedMode(false);
     bindBtn.disabled = !state.isVerified || !!state.isGuest;
     refreshBtn.disabled = !state.isVerified || !!state.isGuest;
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
