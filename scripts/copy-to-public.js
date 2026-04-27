@@ -10,7 +10,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
 
-const toCopy = [
+const baseFiles = [
   'index.html',
   'styles.css',
   'app.js',
@@ -21,6 +21,25 @@ const toCopy = [
   'sw.js',
 ];
 const dirsToCopy = ['assets'];
+
+function localScriptsFromIndex() {
+  const indexPath = path.join(root, 'index.html');
+  if (!fs.existsSync(indexPath)) return [];
+  const html = fs.readFileSync(indexPath, 'utf8');
+  const scripts = [];
+  const re = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const rawSrc = String(match[1] || '').trim();
+    if (!rawSrc || /^[a-z][a-z0-9+.-]*:/i.test(rawSrc) || rawSrc.startsWith('//')) continue;
+    const cleanSrc = rawSrc.split(/[?#]/)[0].replace(/^\.\//, '');
+    if (!cleanSrc || cleanSrc.startsWith('/') || cleanSrc.includes('..')) continue;
+    scripts.push(cleanSrc);
+  }
+  return scripts;
+}
+
+const toCopy = [...new Set(baseFiles.concat(localScriptsFromIndex()))];
 
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
