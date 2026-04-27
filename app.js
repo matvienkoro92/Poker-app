@@ -18053,7 +18053,7 @@ function pokerProfileStatusFishIconHtml(level, extraClass) {
 function pokerProfileApplyStatusFish(fish, level) {
   if (!fish) return;
   var fishLevel = pokerProfileStatusFishLevel(level);
-  var img = fish.querySelector("img");
+  var img = fish.tagName && String(fish.tagName).toLowerCase() === "img" ? fish : fish.querySelector("img");
   if (img) img.src = pokerProfileStatusFishSrc(fishLevel);
   fish.setAttribute("data-status-fish-level", String(fishLevel));
 }

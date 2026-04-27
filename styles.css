@@ -22585,7 +22585,7 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   height: 20px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 .chat-user-modal__status-fill {
   position: absolute;
@@ -22597,6 +22597,7 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   background: var(--accent);
   border-radius: 10px;
   transition: width 0.35s ease-out;
+  z-index: 1;
 }
 .chat-user-modal__status-fish {
   position: absolute;
@@ -22609,6 +22610,7 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   line-height: 1;
   transition: left 0.35s ease-out;
   pointer-events: none;
+  z-index: 2;
 }
 .chat-user-modal__status-fish-img {
   display: block;
