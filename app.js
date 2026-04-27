@@ -25026,7 +25026,7 @@ function clubTasksPlannerEscape(text) {
 function clubTasksPlannerStatusLabel(status) {
   if (status === "important") return "Важно";
   if (status === "doing") return "В работе";
-  if (status === "done") return "Готово";
+  if (status === "done") return "Выполнено";
   return "Надо сделать";
 }
 
@@ -25063,7 +25063,7 @@ function renderClubTasksPlanner() {
       if (task.status !== "important") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="important">В важное</button>');
       if (task.status !== "todo") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="todo">В надо сделать</button>');
       if (task.status !== "doing") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="doing">В работу</button>');
-      if (task.status !== "done") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="done">Готово</button>');
+      if (task.status !== "done") actions.push('<button type="button" class="tasks-task__action" data-task-action="move" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="done">Выполнено</button>');
       actions.push('<button type="button" class="tasks-task__delete" data-task-action="delete" data-task-id="' + clubTasksPlannerEscape(task.id) + '">Удалить</button>');
       return '<article class="tasks-task' + (task.status === "important" ? ' tasks-task--important' : '') + '" data-task-id="' + clubTasksPlannerEscape(task.id) + '" data-task-status="' + clubTasksPlannerEscape(task.status) + '">' +
         '<div class="tasks-task__text">' + clubTasksPlannerEscape(task.text) + '</div>' +
