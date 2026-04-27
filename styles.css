@@ -14071,6 +14071,29 @@ html.app-view-home .feature--rating-spring-promo:hover,
   color: #b45309 !important;
   text-shadow: none;
 }
+/* Обычная ночная тема: рейтинг не должен наследовать тёмно-золотую кнопку. */
+[data-theme="dark"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="dark"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="dark"] .feature--rating-spring-promo.feature--rating-promo {
+  border: 1px solid rgba(186, 230, 253, 0.6) !important;
+  background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.98)) !important;
+  box-shadow:
+    0 0 0 1px rgba(186, 230, 253, 0.25),
+    0 4px 20px rgba(56, 189, 248, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+[data-theme="dark"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover,
+[data-theme="dark"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover,
+[data-theme="dark"] .feature--rating-spring-promo.feature--rating-promo:hover {
+  box-shadow:
+    0 0 0 1px rgba(186, 230, 253, 0.35),
+    0 6px 24px rgba(56, 189, 248, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+[data-theme="dark"] .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #7dd3fc !important;
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.4);
+}
 /* Узкие экраны — ещё компактнее, до 4 строк в промо */
 @media (max-width: 400px) {
   .feature--rating-spring-promo.feature--rating-promo {
