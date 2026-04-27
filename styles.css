@@ -22701,9 +22701,9 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   background: rgba(255, 255, 255, 0.1);
 }
 .chat-user-modal__actions {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-subtle);
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 .chat-user-modal__actions .chat-user-modal__respect-actions {
   margin-bottom: 12px;
@@ -22851,85 +22851,104 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
 .chat-user-modal__respect-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 0;
 }
 .chat-user-modal__respect-hint {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.35;
   color: var(--text-muted);
   text-align: center;
+  font-weight: 750;
 }
 .chat-user-modal__respect-btn-row {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 .chat-user-modal__respect-btn {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--block-bg-solid);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  min-height: 78px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: rgba(248, 250, 252, 0.94);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(125, 211, 252, 0.13), transparent 42%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.72));
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 15px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 24px rgba(2, 6, 23, 0.18);
   cursor: pointer;
   box-sizing: border-box;
 }
 .chat-user-modal__respect-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(125, 211, 252, 0.42);
+  transform: translateY(-1px);
+  filter: brightness(1.04);
 }
 .chat-user-modal__respect-btn:disabled {
-  opacity: 0.5;
+  color: rgba(203, 213, 225, 0.7);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(148, 163, 184, 0.11), transparent 42%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.46), rgba(15, 23, 42, 0.42));
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: none;
+  opacity: 0.78;
   cursor: not-allowed;
 }
 .chat-user-modal__friend-row {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .chat-user-modal__friend-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
   width: 100%;
 }
 .chat-user-modal__edit-friend-name {
-  flex: 1 1 0;
   min-width: 0;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  min-height: 54px;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.15;
+  font-weight: 850;
+  color: rgba(226, 232, 240, 0.9);
+  background: rgba(30, 41, 59, 0.54);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 13px;
   cursor: pointer;
   box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 .chat-user-modal__edit-friend-name:hover:not(:disabled) {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.44);
+  background: rgba(51, 65, 85, 0.62);
 }
 .chat-user-modal__remove-friend {
-  flex: 1 1 0;
   min-width: 0;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(248, 113, 113, 0.95);
-  background: transparent;
-  border: 1px solid rgba(248, 113, 113, 0.35);
-  border-radius: 8px;
+  min-height: 54px;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.15;
+  font-weight: 900;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.16);
+  border: 1px solid rgba(248, 113, 113, 0.42);
+  border-radius: 13px;
   cursor: pointer;
   box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(254, 202, 202, 0.06);
 }
 .chat-user-modal__remove-friend:hover:not(:disabled) {
-  background: rgba(248, 113, 113, 0.12);
-  border-color: rgba(248, 113, 113, 0.5);
+  color: #fee2e2;
+  background: rgba(127, 29, 29, 0.28);
+  border-color: rgba(248, 113, 113, 0.62);
 }
 [data-theme="light"] .chat-user-modal__remove-friend {
   color: #b91c1c;
@@ -22939,21 +22958,22 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   background: rgba(185, 28, 28, 0.08);
 }
 .chat-user-modal__friend-btn {
-  flex: 1 1 100%;
+  grid-column: 1 / -1;
   width: 100%;
   min-width: 0;
-  padding: 10px 16px;
+  min-height: 54px;
+  padding: 12px 16px;
   font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--block-bg-solid);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  font-weight: 850;
+  color: rgba(248, 250, 252, 0.94);
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 14px;
   cursor: pointer;
   box-sizing: border-box;
 }
 .chat-user-modal__friend-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(51, 65, 85, 0.66);
 }
 .chat-user-modal__friend-btn:disabled,
 .chat-user-modal__friend-btn--added {
@@ -22967,18 +22987,21 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
 }
 .chat-user-modal__write-btn {
   width: 100%;
-  padding: 10px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--btn-on-accent);
-  background: var(--accent);
+  min-height: 74px;
+  padding: 16px 18px;
+  font-size: 18px;
+  font-weight: 950;
+  color: #130b02;
+  background: linear-gradient(180deg, #ff8a1f, #ff6b00);
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
   box-sizing: border-box;
+  box-shadow: 0 16px 34px rgba(255, 107, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 .chat-user-modal__write-btn:hover {
-  filter: brightness(1.08);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
 }
 
 .winter-rating__table {
@@ -29398,9 +29421,9 @@ body.profile-avatar-choice-open {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 24px;
-  padding: 20px;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 16px;
   overflow: hidden;
   border: 1px solid rgba(125, 211, 252, 0.22);
   border-radius: 18px;
@@ -29432,9 +29455,9 @@ body.profile-avatar-choice-open {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusTitle {
   grid-column: 1 / -1;
   order: 0;
-  margin: 0 0 4px;
+  margin: 0;
   color: rgba(248, 250, 252, 0.96);
-  font-size: clamp(22px, 5.4vw, 34px);
+  font-size: clamp(18px, 4.6vw, 28px);
   font-weight: 950;
   line-height: 1.08;
   text-align: center;
@@ -29445,7 +29468,7 @@ body.profile-avatar-choice-open {
   order: 3;
   display: grid;
   grid-template-columns: 1fr;
-  margin: 2px 0 4px;
+  margin: 0;
   gap: 0;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCiphertextInput,
@@ -29466,10 +29489,10 @@ body.profile-avatar-choice-open {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-visible-to-others__p21-save {
   width: auto;
-  min-height: 48px;
-  padding: 10px 24px;
-  border-radius: 14px;
-  font-size: 16px;
+  min-height: 42px;
+  padding: 8px 22px;
+  border-radius: 13px;
+  font-size: 15px;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-email-auth__linked {
   position: relative;
@@ -29488,15 +29511,15 @@ body.profile-avatar-choice-open {
   display: none;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-email-auth__avatar {
-  width: 136px;
-  height: 136px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   border: 1px solid rgba(74, 222, 128, 0.58);
   background:
     radial-gradient(circle at 50% 34%, rgba(148, 163, 184, 0.58) 0 18%, transparent 19%),
     radial-gradient(ellipse at 50% 73%, rgba(148, 163, 184, 0.58) 0 31%, transparent 32%),
     rgba(15, 23, 42, 0.9);
-  box-shadow: 0 0 28px rgba(52, 211, 153, 0.28), inset 0 0 0 12px rgba(15, 23, 42, 0.78);
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.24), inset 0 0 0 8px rgba(15, 23, 42, 0.78);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow {
   grid-column: 1 / -1;
@@ -29504,7 +29527,7 @@ body.profile-avatar-choice-open {
   display: flex;
   justify-content: center;
   align-content: flex-start;
-  gap: 8px 12px;
+  gap: 6px 10px;
   padding-top: 0;
   text-align: center;
 }
@@ -29514,7 +29537,7 @@ body.profile-avatar-choice-open {
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedValue {
   flex-basis: 100%;
   color: #f8fafc;
-  font-size: clamp(32px, 7vw, 56px);
+  font-size: clamp(26px, 6vw, 42px);
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: 0;
@@ -29526,9 +29549,9 @@ body.profile-avatar-choice-open {
   overflow-wrap: anywhere;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-player-id {
-  margin-top: 4px;
+  margin-top: 2px;
   color: rgba(191, 219, 254, 0.88);
-  font-size: clamp(18px, 4.2vw, 28px);
+  font-size: clamp(16px, 3.7vw, 23px);
   font-weight: 850;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow::after {
@@ -29536,7 +29559,7 @@ body.profile-avatar-choice-open {
   flex-basis: 100%;
   order: 2;
   color: rgba(203, 213, 225, 0.82);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 500;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLinkedRow:not([data-register-date])::after,
@@ -29545,15 +29568,15 @@ body.profile-avatar-choice-open {
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-verified-badge {
   order: 3;
-  min-height: 34px;
+  min-height: 28px;
   margin: 0 auto;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 10px;
   color: #86efac;
   background: rgba(22, 163, 74, 0.11);
   border-color: rgba(34, 197, 94, 0.72);
   box-shadow: inset 0 0 18px rgba(34, 197, 94, 0.08);
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -29727,19 +29750,34 @@ body.profile-avatar-choice-open {
   background: rgba(2, 6, 23, 0.58);
 }
 .profile-pokerplus-stats-visibility__btn {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 48px;
   min-height: 30px;
   padding: 5px 12px;
   border: 0;
   border-radius: 999px;
   color: rgba(203, 213, 225, 0.82);
+  -webkit-text-fill-color: rgba(203, 213, 225, 0.82);
   background: transparent;
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
 }
-.profile-pokerplus-stats-visibility__btn--active {
+.profile-pokerplus-stats-visibility__btn:hover,
+.profile-pokerplus-stats-visibility__btn:focus,
+.profile-pokerplus-stats-visibility__btn:active {
+  color: rgba(248, 250, 252, 0.96);
+  -webkit-text-fill-color: rgba(248, 250, 252, 0.96);
+  background: rgba(125, 211, 252, 0.08);
+  outline: none;
+}
+.profile-pokerplus-stats-visibility__btn--active,
+.profile-pokerplus-stats-visibility__btn--active:hover,
+.profile-pokerplus-stats-visibility__btn--active:focus,
+.profile-pokerplus-stats-visibility__btn--active:active {
   color: #082f49;
+  -webkit-text-fill-color: #082f49;
   background: linear-gradient(180deg, #bae6fd, #67e8f9);
   box-shadow: 0 0 14px rgba(103, 232, 249, 0.28);
 }
