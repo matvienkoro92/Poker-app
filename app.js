@@ -33762,6 +33762,21 @@ function initChat() {
     if (/^mail_ID\d{6}$/.test(raw)) return raw.slice(5);
     return raw;
   }
+  function chatContactMatchesFriendSet(c, friendSet) {
+    if (!c || c.isGroupChat || !friendSet) return false;
+    var keys = [c.id, c.dtId, c.accountId, c.userId, c.chatUserId, c.__friendAccountId];
+    for (var ki = 0; ki < keys.length; ki++) {
+      var rawKey = keys[ki];
+      if (rawKey == null || rawKey === "") continue;
+      var key = String(rawKey);
+      if (friendSet[key]) return true;
+      try {
+        var normKey = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(key) : key;
+        if (normKey && friendSet[normKey]) return true;
+      } catch (eFriendMatchNorm) {}
+    }
+    return false;
+  }
   function pokerSanitizeContactsPayloadForUi(data) {
     if (!data || typeof data !== "object") return data;
     if (Array.isArray(data)) {
@@ -33791,7 +33806,7 @@ function initChat() {
     return out;
   }
   function chatListRowAlias(c, friendSet) {
-    var isFriendContact = !!(c && !c.isGroupChat && friendSet && (friendSet[c.id] || friendSet[String(c.id)]));
+    var isFriendContact = chatContactMatchesFriendSet(c, friendSet);
     if (!isFriendContact || !c) return "";
     var alias = c.contactName != null && String(c.contactName).trim() ? String(c.contactName).trim() : "";
     if (!alias) return "";
@@ -33871,7 +33886,7 @@ function initChat() {
       var btn = wrap && wrap.querySelector ? wrap.querySelector(".chat-contact") : null;
       if (!wrap || !btn) return;
       var isGroupRow = !!(c && c.isGroupChat);
-      var isFriendContact = !isGroupRow && !!(friendSet[c.id] || friendSet[String(c.id)]);
+      var isFriendContact = chatContactMatchesFriendSet(c, friendSet);
       var displayTitle = chatListRowDisplayTitle(c, friendSet);
       var effectiveAlias = chatListRowAlias(c, friendSet);
       var hasAlias = effectiveAlias !== "";
@@ -34197,6 +34212,7 @@ function initChat() {
           contactsForList.forEach(function (c) {
             if (!c) return;
             if (c.id != null) friendSet[String(c.id)] = true;
+            if (c.dtId != null) friendSet[String(c.dtId)] = true;
             if (c.__friendAccountId) friendSet[String(c.__friendAccountId)] = true;
           });
         }
@@ -34240,7 +34256,7 @@ function initChat() {
             if (!btn || btn.dataset.chatId !== c.id) return false;
             var wantName = chatListRowDisplayTitle(c, friendSet);
             if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
-            var wantFriend = !!(friendSet[c.id] || friendSet[String(c.id)]);
+            var wantFriend = chatContactMatchesFriendSet(c, friendSet);
             if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
             if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
             var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(pokerProfileStatusFishLevel(c.statusLevel)) : "";
@@ -34326,7 +34342,7 @@ function initChat() {
                 break;
               }
             }
-            var isFriendContact = !isGroupRow && !!(friendSet[c.id] || friendSet[String(c.id)]);
+            var isFriendContact = chatContactMatchesFriendSet(c, friendSet);
             var pinIcon = !isPinned
               ? ""
               : '<span class="chat-contact__pin-icon" aria-hidden="true" title="Закреплён">📌</span>';
