@@ -25351,7 +25351,7 @@ window.chatClubPendingReviewCount = 0;
 var chatClubAdminLongPressTimer = null;
 var chatListenersAttached = false;
 
-var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v6";
+var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v7";
 var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
 function pokerGetChatContactsListFilter() {
   try {
