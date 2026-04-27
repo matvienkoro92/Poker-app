@@ -2145,11 +2145,15 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   margin: 0;
   padding: 10px 12px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.45);
+  border: none;
   background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 55%),
     radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.1), transparent 55%),
     rgba(15, 23, 42, 0.65);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
+  box-shadow: none;
+}
+.winter-rating.spring-rating .spring-rating-view-week + .spring-rating-view-week {
+  border-top: 1px solid rgba(226, 232, 240, 0.28);
+  padding-top: 14px;
 }
 .winter-rating.spring-rating .spring-rating-view-week__summary {
   display: flex;
@@ -2194,15 +2198,24 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap {
   margin: 0;
+  border: none;
+  background: rgba(15, 23, 42, 0.24);
+  box-shadow: none;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+  border-left: 1px solid rgba(226, 232, 240, 0.22);
+  padding-left: 14px;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.16);
 }
 .winter-rating.spring-rating .spring-rating-view-week--march-month {
   margin-bottom: 4px;
-  border-color: rgba(251, 191, 36, 0.42);
-  box-shadow: 0 6px 22px rgba(251, 191, 36, 0.08);
+  box-shadow: none;
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week--march-month {
-  border-color: rgba(217, 119, 6, 0.45);
-  box-shadow: 0 4px 18px rgba(217, 119, 6, 0.12);
+  box-shadow: none;
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-totals-panel {
   background: linear-gradient(165deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
@@ -2219,14 +2232,25 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week {
   background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(148, 163, 184, 0.45);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week + .spring-rating-view-week {
+  border-top-color: rgba(100, 116, 139, 0.3);
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__summary {
   color: rgba(30, 41, 59, 0.95);
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__meta {
   color: rgba(30, 41, 59, 0.55);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap {
+  background: rgba(255, 255, 255, 0.36);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+  border-left-color: rgba(100, 116, 139, 0.28);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
+  border-bottom-color: rgba(100, 116, 139, 0.18);
 }
 /* Зазор «Рейтинг весны» от эмблемы — margin-top у .features--home-rating-on-border */
 html.app-view-home .home-welcome-outline > .hero-row,
@@ -24249,9 +24273,15 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
     overflow: hidden;
   }
 
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+    padding-left: 10px;
+  }
+
   .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-title,
   html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-title {
     margin-bottom: 7px;
+    padding-bottom: 6px;
     font-size: 9.8px;
     line-height: 1.18;
   }
