@@ -16808,6 +16808,13 @@ function initProfileTabs() {
     });
   }
   setProfileTab("club");
+  if (typeof initProfilePokerPlus === "function") {
+    setTimeout(function () {
+      try {
+        initProfilePokerPlus();
+      } catch (eProfilePokerPlusPreload) {}
+    }, 0);
+  }
 }
 
 function syncProfileStatusVisibility(isVerified) {
@@ -17440,9 +17447,9 @@ function initProfilePokerPlus() {
   var initialState = syncVisibility();
   var profileRoot = document.getElementById("profileView");
   var activeProfileTab = profileRoot && profileRoot.dataset ? profileRoot.dataset.profileActiveTab : "";
-  if (activeProfileTab === "poker21" && initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
+  if (initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
     section.dataset.profilePokerPlusLoaded = "1";
-    if (!section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusInitialLoading(true);
+    if (activeProfileTab === "poker21" && !section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusInitialLoading(true);
     loadProfile(false).catch(function () {
       section.dataset.profilePokerPlusLoaded = "";
     });
