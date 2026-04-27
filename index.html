@@ -279,7 +279,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=554" />
+    <link rel="stylesheet" href="./styles.css?v=555" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -303,8 +303,8 @@
         margin-right: calc(-1 * var(--card-padding-x));
         width: calc(100% + (2 * var(--card-padding-x)));
         box-sizing: border-box;
-        --home-outline-pad-x: 10px;
-        --home-outline-pad-left: 18px;
+        --home-outline-pad-x: clamp(16px, 3vw, 32px);
+        --home-outline-pad-left: clamp(16px, 3vw, 32px);
         /* Зазор до «Следующий фриролл» — margin-top у .tournament-day-home-dual (styles.css); без лишнего padding-bottom */
         padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
       }
@@ -333,8 +333,8 @@
       }
       .app.app--view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo {
         border: 1px solid rgba(251, 191, 36, 0.5) !important;
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(51, 65, 85, 0.9)) !important;
-        box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25), 0 4px 20px rgba(251, 191, 36, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        background: linear-gradient(145deg, rgba(12, 18, 29, 0.98), rgba(35, 31, 27, 0.94) 50%, rgba(11, 18, 30, 0.98)) !important;
+        box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35), 0 10px 32px rgba(251, 146, 60, 0.22), 0 0 38px rgba(251, 191, 36, 0.16), inset 0 1px 0 rgba(255, 244, 214, 0.18) !important;
       }
       [data-theme="light"] .app.app--view-home .feature.feature--link.feature--rating-promo {
         border: 1px solid rgba(56, 189, 248, 0.5) !important;
