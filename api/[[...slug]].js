@@ -59,7 +59,6 @@ const handlers = {
   "rating-manual-subscribers": () => require(path.join(handlersDir, "rating-manual-subscribers.js")),
   "raffle-manual-subscribers": () => require(path.join(handlersDir, "raffle-manual-subscribers.js")),
   raffles: () => require(path.join(handlersDir, "raffles.js")),
-  "twitch-viewers": () => require(path.join(handlersDir, "twitch-viewers.js")),
   respect: () => require(path.join(handlersDir, "respect.js")),
   friends: () => require(path.join(handlersDir, "friends.js")),
   "share-button-stats": () => require(path.join(handlersDir, "share-button-stats.js")),
