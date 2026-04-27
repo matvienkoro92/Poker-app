@@ -21550,12 +21550,15 @@ function initRaffles() {
   function raffleParticipantDisplayLine(p) {
     var namePart = escapeHtml(p.name);
     var uid0 = String(p.userId != null ? p.userId : "").trim();
+    var raffleIdText = p.p21Id != null && String(p.p21Id).trim()
+      ? String(p.p21Id).trim()
+      : (p.accountId != null && String(p.accountId).trim() ? String(p.accountId).trim() : uid0);
     var un =
       p.telegramUsername != null ? String(p.telegramUsername).trim().replace(/^@+/g, "") : "";
     if (un && uid0.indexOf("tg_") === 0) {
       namePart += " (@" + escapeHtml(un) + ")";
     }
-    return namePart + " — " + escapeHtml(p.p21Id);
+    return raffleIdText ? namePart + " — " + escapeHtml(raffleIdText) : namePart;
   }
 
   /** Строка участника: клик открывает карточку профиля (tg_/vk_). */
