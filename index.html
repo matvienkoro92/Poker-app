@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.175">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.178">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -1825,8 +1825,8 @@
                             <span class="chat-conv-peer-title-chip__name" id="chatConvTitle">Чат</span>
                             <img class="profile-status-fish-inline chat-conv-peer-title-chip__fish" id="chatConvTitleFish" alt="" aria-hidden="true" hidden loading="lazy" decoding="async" />
                           </span>
-                          <span class="chat-conv-peer-title-chip__id">
-                            <span id="chatConvTitleId">—</span>
+                          <span class="chat-conv-peer-title-chip__id" hidden>
+                            <span id="chatConvTitleId"></span>
                             <span class="chat-verified-badge chat-verified-badge--hidden" id="chatConvVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                           </span>
                         </button>
@@ -4336,6 +4336,7 @@
               </div>
               <section class="profile-status" id="profileStatusSection">
                 <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
+                <p class="profile-status__progress-text" id="profileStatusProgressText">До уровня 2: набито 0 из 0 очков. Осталось 0 очков</p>
                 <p class="profile-status__hint" id="profileStatusLinkHint" hidden>Привяжите ниже аккаунт из Poker21,<br />чтобы определить ваш статус в клубе.</p>
                 <div class="profile-status__scale-wrap">
                   <p class="profile-status__loading" id="profileStatusLoading" hidden>Идет загрузка статуса...</p>
@@ -6632,7 +6633,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=867"></script>
+    <script defer src="./app.js?v=870"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>

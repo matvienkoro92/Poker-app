@@ -4149,7 +4149,7 @@ function runGazetteAndTasksInit() {
       var completeBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--complete" data-roman-task-complete="' +
         escHtml(id) +
-        '">Готово</button>';
+        '">Выполнено</button>';
       var uncompleteBtn =
         '<button type="button" class="roman-task-planner__btn roman-task-planner__btn--ghost" data-roman-task-uncomplete="' +
         escHtml(id) +
@@ -6109,9 +6109,7 @@ function runGazetteAndTasksInit() {
         chatWithUserName = resolvedName;
         if (convTitle) setTextContentIfChanged(convTitle, resolvedName);
       }
-      if (convTitleId) {
-        setTextContentIfChanged(convTitleId, "\u2014");
-      }
+      setChatConvTitleIdText(found.p21Id != null ? found.p21Id : "");
       var resolvedAvatar = found.avatar != null && String(found.avatar).trim() ? String(found.avatar).trim() : "";
       if (resolvedAvatar) {
         chatWithPeerAvatarUrl = resolvedAvatar;
@@ -6171,9 +6169,7 @@ function runGazetteAndTasksInit() {
             chatWithUserName = profileName;
             if (convTitle) setTextContentIfChanged(convTitle, profileName);
           }
-          if (convTitleId) {
-            setTextContentIfChanged(convTitleId, "\u2014");
-          }
+          setChatConvTitleIdText(data.p21Id != null ? data.p21Id : "");
           var profileAvatar = data.avatar != null && String(data.avatar).trim() ? String(data.avatar).trim() : "";
           if (profileAvatar) {
             chatWithPeerAvatarUrl = profileAvatar;
@@ -18091,6 +18087,7 @@ function setProfileStatus(value) {
 
 function setProfileStatusFromRake(value) {
   var title = document.getElementById("profileStatusTitle");
+  var progressText = document.getElementById("profileStatusProgressText");
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");
   var fish = visual ? visual.querySelector(".profile-status__fish") : null;
@@ -18122,6 +18119,7 @@ function setProfileStatusFromRake(value) {
           " очков. Осталось " +
           pokerProfileFormatRake(leftRake) +
           " очков";
+    if (progressText) progressText.textContent = tip;
     fish.setAttribute("title", tip);
     fish.setAttribute("aria-label", tip);
     fish.setAttribute("data-status-tip", tip);
@@ -25908,16 +25906,29 @@ function initChat() {
   }
   function setChatConvTitleFish(level) {
     if (!convTitleFish) return;
-    if (level == null || level === "") {
+    var fishLevel = level != null && level !== "" ? pokerProfileStatusFishLevel(level) : 0;
+    if (!fishLevel) {
       convTitleFish.hidden = true;
       convTitleFish.removeAttribute("src");
       convTitleFish.removeAttribute("data-status-fish-level");
       return;
     }
-    var fishLevel = pokerProfileStatusFishLevel(level);
     convTitleFish.src = pokerProfileStatusFishSrc(fishLevel);
     convTitleFish.setAttribute("data-status-fish-level", String(fishLevel));
     convTitleFish.hidden = false;
+  }
+  function syncChatConvTitleMetaVisibility() {
+    var wrap = convTitleId && convTitleId.closest ? convTitleId.closest(".chat-conv-peer-title-chip__id") : null;
+    if (!wrap) return;
+    var hasId = !!(convTitleId && String(convTitleId.textContent || "").trim());
+    var hasVerified = !!(convVerifiedBadge && !convVerifiedBadge.classList.contains("chat-verified-badge--hidden"));
+    wrap.hidden = !(hasId || hasVerified);
+  }
+  function setChatConvTitleIdText(value) {
+    if (!convTitleId) return;
+    var clean = value != null ? String(value).trim() : "";
+    setTextContentIfChanged(convTitleId, clean);
+    syncChatConvTitleMetaVisibility();
   }
   var convPeerAvatar = document.getElementById("chatConvPeerAvatar");
   var convPeerAvatarPh = document.getElementById("chatConvPeerAvatarPh");
@@ -25927,6 +25938,7 @@ function initChat() {
   function setChatPeerVerified(on) {
     chatWithUserPokerPlusVerified = !!on;
     if (convVerifiedBadge) convVerifiedBadge.classList.toggle("chat-verified-badge--hidden", !chatWithUserPokerPlusVerified);
+    syncChatConvTitleMetaVisibility();
   }
   function getInlineChatHeaderTopOffsetPx() {
     try {
@@ -28729,6 +28741,7 @@ function initChat() {
     if (String(chatWithUserId).indexOf("group_") === 0) return;
     if (chatPeerTypingActive) {
       setTextContentIfChanged(convTitleId, "печатает…");
+      syncChatConvTitleMetaVisibility();
     }
   }
   function pokerChatSendTypingState(active) {
@@ -29039,7 +29052,7 @@ function initChat() {
     chatPeerTypingActive = false;
     chatWithUserName = null;
     if (convTitle) convTitle.textContent = "";
-    if (convTitleId) convTitleId.textContent = "\u2014";
+    setChatConvTitleIdText("");
     clearConvPeerAvatarHeader();
     syncChatConvGroupAddMembersBtn();
     if (dialogsView) dialogsView.classList.remove("chat-dialogs-view--hidden");
@@ -29243,7 +29256,7 @@ function initChat() {
     chatWithUserName = userName || uid;
     chatPeerTypingActive = false;
     if (convTitle) convTitle.textContent = chatWithUserName;
-    if (convTitleId) convTitleId.textContent = "\u2014";
+    setChatConvTitleIdText("");
     if (peerAvatarOpt != null && String(peerAvatarOpt).trim()) {
       chatWithPeerAvatarUrl = String(peerAvatarOpt).trim();
       applyConvPeerAvatarHeader(chatWithPeerAvatarUrl, chatWithUserName);
@@ -32544,7 +32557,6 @@ function initChat() {
     }
   }
   function attachContextMenuForOthers(container, source, scrollParentOpt) {
-    var scrollParent = scrollParentOpt || container;
     var ctxMenu = document.getElementById("chatContextMenu");
     var ctxBackdrop = document.getElementById("chatContextBackdrop");
     var longPressTimer = null;
@@ -32615,6 +32627,8 @@ function initChat() {
       var maxBottom = window.innerHeight - bottomNavHeight;
       ctxMenu.style.width = menuWidth + "px";
       ctxMenu.style.maxWidth = (window.innerWidth - 24) + "px";
+      ctxMenu.style.maxHeight = Math.max(160, maxBottom - 24) + "px";
+      ctxMenu.style.overflowY = "auto";
       ctxMenu.style.top = "-9999px";
       ctxMenu.style.left = "12px";
       ctxMenu.style.visibility = "hidden";
@@ -32640,14 +32654,7 @@ function initChat() {
       }
       requestAnimationFrame(function () {
         var layout = computeCtxMenuLayout();
-        /* Меню обрезается сверху — чуть сдвигаем только scrollTop ленты чата, не трогая document */
-        if (layout.menuTop < 12 && scrollParent) {
-          scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop - (12 - layout.menuTop));
-        }
-        requestAnimationFrame(function () {
-          layout = computeCtxMenuLayout();
-          applyCtxMenuLayout(layout);
-        });
+        applyCtxMenuLayout(layout);
       });
     }
     function hideMenu() {
@@ -33370,7 +33377,7 @@ function initChat() {
     pokerPushOpenTraceTransition("showList-commit", "");
     chatWithUserId = null;
     if (convTitle) convTitle.textContent = "";
-    if (convTitleId) convTitleId.textContent = "\u2014";
+    setChatConvTitleIdText("");
     clearConvPeerAvatarHeader();
     syncChatConvGroupAddMembersBtn();
     if (listView) listView.classList.remove("chat-list-view--hidden");
@@ -33459,9 +33466,7 @@ function initChat() {
       var nm = (userName && String(userName).trim()) ? String(userName).trim() : (userId ? String(userId) : "");
       convTitle.textContent = nm;
     }
-    if (convTitleId) {
-      convTitleId.textContent = "\u2014";
-    }
+    setChatConvTitleIdText(isGroupConv ? "" : peerP21IdFromContact);
     applyConvGroupDescription("");
     var convProfBtn = document.getElementById("chatConvProfileOpenBtn");
     if (convProfBtn) {
@@ -35857,11 +35862,11 @@ function initChat() {
         window.lastConvStats = pt + " уч · " + ol + " онл";
         if (convTitleId) {
           if (isGrpThread) {
-            setTextContentIfChanged(convTitleId, pt !== "—" ? String(pt) + " уч." : "\u2014");
+            setChatConvTitleIdText(pt !== "—" ? String(pt) + " уч." : "");
           } else {
             var titleP21 =
               data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
-            setTextContentIfChanged(convTitleId, titleP21 || "\u2014");
+            setChatConvTitleIdText(titleP21 || "");
             setChatPeerVerified(data.otherPokerPlusVerified === true);
             setChatConvTitleFish(data.otherStatusLevel != null ? data.otherStatusLevel : "");
             updateConvTypingUi();

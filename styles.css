@@ -11842,6 +11842,9 @@ button.chat-conv-group-add-btn[hidden] {
   width: 100%;
   text-align: center;
 }
+.chat-conv-peer-title-chip__id[hidden] {
+  display: none !important;
+}
 .chat-conv-peer-title-chip__id .chat-verified-badge {
   width: 13px;
   height: 13px;
@@ -29924,6 +29927,18 @@ body.profile-avatar-choice-open {
     0 0 18px rgba(250, 204, 21, 0.38),
     0 0 28px rgba(14, 165, 233, 0.18);
 }
+.profile-status__progress-text {
+  max-width: 34rem;
+  margin: -2px auto 12px;
+  color: #ffe8a3;
+  font-size: clamp(13px, 3.1vw, 17px);
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow:
+    0 2px 0 rgba(55, 31, 5, 0.78),
+    0 0 16px rgba(250, 204, 21, 0.28);
+}
 .profile-status__hint {
   max-width: 30rem;
   margin: -2px auto 10px;
@@ -30103,7 +30118,7 @@ body.profile-avatar-choice-open {
   border-radius: 50%;
 }
 .profile-status__fish::after {
-  content: attr(data-status-tip);
+  content: none;
   position: absolute;
   left: 50%;
   bottom: calc(100% + 10px);
