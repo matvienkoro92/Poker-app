@@ -25558,17 +25558,26 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   if (data && Array.isArray(data.contacts)) {
     try {
       var matchedContactId = "";
-      for (var ci = 0; ci < data.contacts.length; ci++) {
-        var row = data.contacts[ci];
-        if (!row || row.id == null || !peerIdsEqual(row.id, uid)) continue;
+      var hasChatPartnerList = data && Array.isArray(data.chatPartnerIds);
+      function isCurrentChatPartner() {
+        if (!hasChatPartnerList) return true;
+        for (var pi = 0; pi < data.chatPartnerIds.length; pi++) {
+          if (peerIdsEqual(data.chatPartnerIds[pi], uid)) return true;
+        }
+        return false;
+      }
+      var keepAsChatPartner = isCurrentChatPartner();
+      data.contacts = data.contacts.filter(function (row) {
+        if (!row || row.id == null || !peerIdsEqual(row.id, uid)) return true;
         row.contactName = "";
         matchedContactId = String(row.id);
-        break;
-      }
+        return keepAsChatPartner;
+      });
       friendDebugLog("removeLocal:contactsPatched", {
         uid: uid,
         contactsCount: data.contacts.length,
         matchedContactId: matchedContactId,
+        keepAsChatPartner: keepAsChatPartner,
       });
     } catch (eFrContacts) {
       friendDebugLog("removeLocal:contactsPatchError", {
