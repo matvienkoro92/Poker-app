@@ -7790,6 +7790,10 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
     drop-shadow(0 1px 0 rgba(6, 23, 38, 0.74))
     drop-shadow(0 0 5px rgba(34, 211, 238, 0.34));
 }
+.profile-status-fish-inline[hidden],
+.chat-conv-peer-title-chip__fish[hidden] {
+  display: none !important;
+}
 .chat-msg__status-fish {
   width: 17px;
   height: 17px;
@@ -22523,21 +22527,22 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   border: 1px solid var(--border-subtle);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
-.chat-user-modal__intro {
-  margin: 0 0 10px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
 .chat-user-modal__level {
   text-align: center;
   margin-bottom: 12px;
 }
-.chat-user-modal__level-img {
+.chat-user-modal__level-fish {
   display: block;
-  width: 64px;
-  height: auto;
-  margin: 0 auto 6px;
-  border-radius: 8px;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 8px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 4px 7px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 12px rgba(34, 211, 238, 0.28));
+}
+.chat-user-modal__level-fish[hidden] {
+  display: none !important;
 }
 .chat-user-modal__level-text {
   margin: 0;
@@ -22627,6 +22632,37 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   margin: 0;
   font-size: 13px;
   color: var(--text-muted);
+}
+.chat-user-modal__player-stats-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.chat-user-modal__player-stat {
+  display: grid;
+  gap: 3px;
+  padding: 8px 9px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.11);
+}
+.chat-user-modal__player-stat-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.chat-user-modal__player-stat-value {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 850;
+}
+.chat-user-modal__player-stats-private {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
 }
 .chat-user-modal__personal-block {
   margin-top: 12px;
@@ -29663,6 +29699,52 @@ body.profile-avatar-choice-open {
   background: #67e8f9;
   box-shadow: 0 0 14px rgba(103, 232, 249, 0.72);
 }
+.profile-pokerplus-stats-visibility {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -6px 0 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.56);
+}
+.profile-pokerplus-stats-visibility__label {
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 14px;
+  font-weight: 850;
+}
+.profile-pokerplus-stats-visibility__switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.58);
+}
+.profile-pokerplus-stats-visibility__btn {
+  min-width: 48px;
+  min-height: 30px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(203, 213, 225, 0.82);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.profile-pokerplus-stats-visibility__btn--active {
+  color: #082f49;
+  background: linear-gradient(180deg, #bae6fd, #67e8f9);
+  box-shadow: 0 0 14px rgba(103, 232, 249, 0.28);
+}
+.profile-pokerplus-stats-visibility__btn:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsValue {
   display: block;
 }
@@ -29932,7 +30014,7 @@ body.profile-avatar-choice-open {
   margin: -2px auto 12px;
   color: #ffe8a3;
   font-size: clamp(13px, 3.1vw, 17px);
-  font-weight: 900;
+  font-weight: 650;
   line-height: 1.25;
   text-align: center;
   text-shadow:

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.178">
+<html lang="ru" data-theme="dark" class="app-view-home app-view-home-html-scroll" data-build="v34" data-app-version="2.182">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -279,7 +279,7 @@
     <link rel="preload" as="image" href="./assets/download-hero.png" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=560" />
+    <link rel="stylesheet" href="./styles.css?v=564" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -4485,6 +4485,13 @@
               </div>
               <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
+                <div class="profile-pokerplus-stats-visibility" id="profilePokerPlusStatsVisibilityRow">
+                  <span class="profile-pokerplus-stats-visibility__label">Показывать другим</span>
+                  <span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать статистику другим">
+                    <button type="button" class="profile-pokerplus-stats-visibility__btn" id="profilePokerPlusStatsVisibleYes" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button>
+                    <button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" id="profilePokerPlusStatsVisibleNo" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button>
+                  </span>
+                </div>
                 <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">
                   <span class="profile-pokerplus-stats">
                     <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Рейк</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">%</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
@@ -6108,28 +6115,23 @@
               <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
             </div>
           </div>
-          <p class="chat-user-modal__intro">Эта информация видна другим пользователям</p>
           <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
           <div class="chat-user-modal__level">
-            <img src="./assets/profile-pokerist.jpg" alt="" class="chat-user-modal__level-img" width="256" height="139" decoding="async" />
+            <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
             <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
             <p class="chat-user-modal__respect">Уважение в чате <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
           </div>
           <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
             <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Статус</h4>
             <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
-              <span class="chat-user-modal__status-card">2♣</span>
+              <span class="chat-user-modal__status-card">2</span>
               <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
-              <span class="chat-user-modal__status-card">3♣</span>
+              <span class="chat-user-modal__status-card">3</span>
             </div>
           </section>
-          <section class="chat-user-modal__section">
-            <h4 class="chat-user-modal__section-title">Турниры</h4>
-            <p class="chat-user-modal__placeholder" id="chatUserModalTournaments">—</p>
-          </section>
-          <section class="chat-user-modal__section">
-            <h4 class="chat-user-modal__section-title">Кеш</h4>
-            <p class="chat-user-modal__placeholder" id="chatUserModalCash">—</p>
+          <section class="chat-user-modal__section chat-user-modal__player-stats">
+            <h4 class="chat-user-modal__section-title">Статистика игрока:</h4>
+            <div class="chat-user-modal__player-stats-body" id="chatUserModalPlayerStats">Загрузка...</div>
           </section>
           <section class="chat-user-modal__personal-block chat-user-modal__personal-block--hidden" id="chatUserModalPersonalBlock">
             <h4 class="chat-user-modal__section-title">Нотс про себя</h4>
@@ -6633,7 +6635,7 @@
     <script defer src="./telegram-web-app.js?v=22"></script>
     <script defer src="./updates-data.js"></script>
     <script defer src="./poker-tasks-data.js"></script>
-    <script defer src="./app.js?v=870"></script>
+    <script defer src="./app.js?v=874"></script>
     <script defer src="./winter-rating-data.js?v=139"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
     <script>
