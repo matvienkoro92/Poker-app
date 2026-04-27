@@ -2259,7 +2259,8 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-11-04-2026-league1-new-hot-pko-15h.png",
     "rating-11-04-2026-league1-rebuy-17h.png",
     "rating-11-04-2026-league1-classic-6max-19h.png",
-    "rating-11-04-2026-league1-night-magic-100k-23h.png"
+    "rating-11-04-2026-league1-night-magic-100k-23h.png",
+    "rating-11-04-2026-league1-dva-tuza-dollars-jackpot-a-4ezzi.jpg"
   ],
   "12.04.2026": [
     "rating-12-04-2026-league1-bali-yana-30k-08h.png",
@@ -2308,20 +2309,23 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-17-04-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-17-04-2026-league1-new-hot-pko-15h.jpg",
     "rating-17-04-2026-league1-friday-progressive-18h.png",
-    "rating-17-04-2026-league1-big-evening-19h.png"
+    "rating-17-04-2026-league1-big-evening-19h.png",
+    "rating-17-04-2026-league1-dva-tuza-dollars-jackpot-b-waaar.jpg"
   ],
   "18.04.2026": [
     "rating-18-04-2026-league1-s-bounty-120k-00h.jpg",
     "rating-18-04-2026-league1-dv-turbo-500-60k-10h.jpg",
     "rating-18-04-2026-league1-holdem-6plus-30k-16h.jpg",
     "rating-18-04-2026-league1-big-evening-19h.png",
-    "rating-18-04-2026-league1-nlh-knockout-220k-21h.jpg"
+    "rating-18-04-2026-league1-nlh-knockout-220k-21h.jpg",
+    "rating-18-04-2026-league1-dva-tuza-dollars-crazy-waaar.jpg"
   ],
   "19.04.2026": [
     "rating-19-04-2026-league1-dv-rebuy-12h.png",
     "rating-19-04-2026-league1-dv-turbo-500-60k-10h.jpg",
     "rating-19-04-2026-league1-voskresnyj-tournir-18h.png",
-    "rating-19-04-2026-league1-nlh-knockout-220k-21h.jpg"
+    "rating-19-04-2026-league1-nlh-knockout-220k-21h.jpg",
+    "rating-19-04-2026-league1-dva-tuza-dollars-fast-crazy-4ezzi.jpg"
   ],
   "20.04.2026": [
     "rating-20-04-2026-league1-dv-turbo-500-60k-10h.jpg",
@@ -2333,13 +2337,16 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-20-04-2026-league1-big-evening-19h.png",
     "rating-20-04-2026-league1-nlh-knockout-220k-21h.jpg",
     "rating-20-04-2026-league1-magic-500-120k-22h.jpg",
-    "rating-20-04-2026-league1-night-magic-80k-23h.jpg"
+    "rating-20-04-2026-league1-night-magic-80k-23h.jpg",
+    "rating-20-04-2026-league1-dva-tuza-dollars-deep-freeze-waaar.jpg",
+    "rating-20-04-2026-league1-dva-tuza-dollars-wow-mystery-waaar.jpg"
   ],
   "21.04.2026": [
     "rating-21-04-2026-league1-dv-plo5-30k-12h.jpg",
     "rating-21-04-2026-league1-dv-rebuy-12h.png",
     "rating-21-04-2026-league1-nlh-knockout-220k-21h.jpg",
-    "rating-21-04-2026-league1-night-magic-80k-23h.jpg"
+    "rating-21-04-2026-league1-night-magic-80k-23h.jpg",
+    "rating-21-04-2026-league1-dva-tuza-dollars-crazy-waaar.jpg"
   ],
   "22.04.2026": [
     "rating-22-04-2026-league1-s-bounty-2-3-120k-00h.jpg",
@@ -2366,6 +2373,14 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-25-04-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-25-04-2026-league1-new-hot-pko-2-3-15h.jpg",
     "rating-25-04-2026-league1-lucky-777-gtd-18h.jpg"
+  ],
+  "26.04.2026": [
+    "rating-26-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-26-04-2026-league1-voskresnyj-tournir-18h.jpg",
+    "rating-26-04-2026-league1-tai-7-ko-06h.jpg",
+    "rating-26-04-2026-league1-kg-plo6-09h.jpg",
+    "rating-26-04-2026-league1-new-hot-pko-15h.jpg",
+    "rating-26-04-2026-league1-holdem-6plus-16h.jpg"
   ]
 };
 var SPRING_RATING_IMAGES_LEAGUE2 = {
@@ -2509,6 +2524,9 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-09-04-2026-league2-micro-200-70k-14h.png",
     "rating-09-04-2026-league2-mko-7max-21h.png"
   ],
+  "10.04.2026": [
+    "rating-10-04-2026-league2-xpoker-plo6-sarmat1305-rank3.jpg"
+  ],
   "11.04.2026": [
     "rating-11-04-2026-league2-bali-yana-30k-08h.png",
     "rating-11-04-2026-league2-mko-7max-21h.png"
@@ -2579,7 +2597,10 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-21-04-2026-league2-kg-plo6-09h.jpg",
     "rating-21-04-2026-league2-micro-200-50k-14h.jpg",
     "rating-21-04-2026-league2-tournir-vtornika-18h.png",
-    "rating-21-04-2026-league2-mko-7max-21h.png"
+    "rating-21-04-2026-league2-mko-7max-21h.png",
+    "rating-21-04-2026-league2-xpoker-plo6-sarmat1305-rank3.jpg",
+    "rating-21-04-2026-league2-xpoker-nlh-sarmat1305-rank7.jpg",
+    "rating-21-04-2026-league2-xpoker-plo4-sarmat1305-rank4.jpg"
   ],
   "22.04.2026": [
     "rating-22-04-2026-league2-hyper-turbo-300-20h.jpg",
@@ -2600,6 +2621,9 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   "25.04.2026": [
     "rating-25-04-2026-league2-tournament-rebuy-14h.jpg",
     "rating-25-04-2026-league2-mok-7max-21h.jpg"
+  ],
+  "26.04.2026": [
+    "rating-26-04-2026-league2-mok-7max-21h.jpg"
   ]
 };
 var SPRING_RATING_UPDATED = "23.04.26";
@@ -4344,6 +4368,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "10.04.2026": [
+    { time: "00:00", name: "X-Poker PLO6", buyin: 0, league: 2, players: [
+      { nick: "Sarmat1305", place: 3, reward: 1800, points: 90 }
+    ] },
     { time: "00:00", name: "S.Bounty 2/3 🥊 150k", buyin: 20000, league: 1, players: [
       { nick: "Рыбнадзор", place: 2, reward: 10800 },
       { nick: "Em13!!", place: 21, reward: 200 },
@@ -4392,6 +4419,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "11.04.2026": [
+    { time: "00:00", name: "Два туза. Доллары (JACKPOT A)", buyin: 0, league: 1, players: [
+      { nick: "4ezzi", place: 2, reward: 30130, points: 110 }
+    ] },
     { time: "08:00", name: "Bali Yana 🌴🆕 30k", buyin: 10000, league: 2, players: [
       { nick: "AndrushaMorf", place: 3, reward: 1800 },
       { nick: "Бэха", place: 0, reward: 0 },
@@ -4801,6 +4831,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "17.04.2026": [
+    { time: "00:00", name: "Два туза. Доллары (JACKPOT B)", buyin: 0, league: 1, players: [
+      { nick: "Waaar", place: 2, reward: 19550, points: 110 }
+    ] },
     { time: "00:00", name: "S.Bounty 2/3 120k", buyin: 20000, league: 1, players: [
       { nick: "биртман", place: 7, reward: 11675 }
     ] },
@@ -4861,6 +4894,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "18.04.2026": [
+    { time: "08:00", name: "Два туза. Доллары (CRAZY)", buyin: 0, league: 1, players: [
+      { nick: "Waaar", place: 4, reward: 16330, points: 70 }
+    ] },
     { time: "00:00", name: "S.Bounty 2/3 120k", buyin: 20000, league: 1, players: [
       { nick: "Бардюр", place: 3, reward: 5059 }
     ] },
@@ -4906,6 +4942,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "19.04.2026": [
+    { time: "00:00", name: "Два туза. Доллары (FAST CRAZY)", buyin: 0, league: 1, players: [
+      { nick: "4ezzi", place: 2, reward: 26680, points: 110 }
+    ] },
     { time: "10:00", name: "DV Turbo 500 60K", buyin: 10000, league: 1, players: [
       { nick: "Фокс", place: 5, reward: 6630 }
     ] },
@@ -4945,6 +4984,12 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "20.04.2026": [
+    { time: "00:00", name: "Два туза. Доллары (DEEP FREEZE)", buyin: 0, league: 1, players: [
+      { nick: "Waaar", place: 2, reward: 42090, points: 110 }
+    ] },
+    { time: "14:00", name: "Два туза. Доллары (WOW MYSTERY)", buyin: 0, league: 1, players: [
+      { nick: "Waaar", place: 3, reward: 6670, points: 90 }
+    ] },
     { time: "10:00", name: "DV Turbo 500 60K", buyin: 10000, league: 1, players: [
       { nick: "Откотика_Я", place: 8, reward: 2571 }
     ] },
@@ -5004,6 +5049,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] }
   ],
   "21.04.2026": [
+    { time: "00:00", name: "Два туза. Доллары (CRAZY)", buyin: 0, league: 1, players: [
+      { nick: "Waaar", place: 5, reward: 12420, points: 60 }
+    ] },
     { time: "02:00", name: "Deep Night 15k", buyin: 10000, league: 2, players: [
       { nick: "ДомСоветов", place: 3, reward: 3423 },
       { nick: "Бардюр", place: 5, reward: 1805 }
@@ -5011,6 +5059,9 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "09:00", name: "KG PLO6 / 2$", buyin: 10000, league: 2, players: [
       { nick: "Sarmat1305", place: 3, reward: 2250 },
       { nick: "undertaker", place: 13, reward: 815 }
+    ] },
+    { time: "09:00", name: "X-Poker PLO6", buyin: 0, league: 2, players: [
+      { nick: "Sarmat1305", place: 3, reward: 1900, points: 90 }
     ] },
     { time: "12:00", name: "DV PLO5 30k", buyin: 20000, league: 1, players: [
       { nick: "Sarmat1305", place: 2, reward: 4216 }
@@ -5024,6 +5075,12 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     ] },
     { time: "14:00", name: "Micro 200 50K GTD", buyin: 10000, league: 2, players: [
       { nick: "Annie1609", place: 7, reward: 2469 }
+    ] },
+    { time: "14:00", name: "X-Poker NLH", buyin: 0, league: 2, players: [
+      { nick: "Sarmat1305", place: 7, reward: 3200, points: 0 }
+    ] },
+    { time: "14:00", name: "X-Poker PLO4", buyin: 0, league: 2, players: [
+      { nick: "Sarmat1305", place: 4, reward: 4300, points: 70 }
     ] },
     { time: "18:00", name: "Турнир Вторника", buyin: 37800, league: 2, players: [
       { nick: "doss93", place: 1, reward: 29000 },
@@ -5189,6 +5246,42 @@ var SPRING_RATING_TOURNAMENTS_BY_DATE = {
     { time: "21:00", name: "MOK 7MAX", buyin: 10800, league: 2, players: [
       { nick: "⚡72⚡", place: 3, reward: 1355 },
       { nick: "Tanechka", place: 4, reward: 1080 }
+    ] }
+  ],
+  "26.04.2026": [
+    { time: "06:00", name: "Tai 7 1/2 KO 15k", buyin: 10000, league: 1, players: [
+      { nick: "Evgen1722", place: 2, reward: 5915, points: 110 },
+      { nick: "AlenaSt", place: 3, reward: 1365, points: 90 }
+    ] },
+    { time: "09:00", name: "KG PLO6 / 2$", buyin: 10000, league: 1, players: [
+      { nick: "МВД", place: 1, reward: 6321, points: 135 }
+    ] },
+    { time: "12:00", name: "DV Rebuy", buyin: 11200, league: 1, players: [
+      { nick: "PONOCHKA", place: 2, reward: 9000 },
+      { nick: "PlayerHyeEr", place: 7, reward: 0 },
+      { nick: "COBRA", place: 8, reward: 0 },
+      { nick: "Палач", place: 9, reward: 0 },
+      { nick: "мистерFox", place: 12, reward: 0 }
+    ] },
+    { time: "15:00", name: "New - Hot PKO 2/3", buyin: 10000, league: 1, players: [
+      { nick: "хер вам))))", place: 2, reward: 11852, points: 110 }
+    ] },
+    { time: "16:00", name: "HOLDEM 6+ GTD 30K", buyin: 10000, league: 1, players: [
+      { nick: "AndrushaMorf", place: 4, reward: 4156, points: 70 }
+    ] },
+    { time: "18:00", name: "Воскресный турнир 🏆", buyin: 186000, league: 1, players: [
+      { nick: "Em13", place: 2, reward: 51181.25 },
+      { nick: "VOSOvec", place: 3, reward: 26006.25 },
+      { nick: "Алеша™", place: 6, reward: 13540.62 },
+      { nick: "WiNifly", place: 7, reward: 9825 },
+      { nick: "Waaar", place: 9, reward: 8175 }
+    ] },
+    { time: "21:00", name: "MOK 7MAX", buyin: 18900, league: 2, players: [
+      { nick: "AlenaSt", place: 2, reward: 4250 },
+      { nick: "Shkarubo", place: 4, reward: 4675 },
+      { nick: "Алеша™", place: 5, reward: 1270 },
+      { nick: "Ksuha🦎", place: 7, reward: 0 },
+      { nick: "\"Зараза\"", place: 8, reward: 0 }
     ] }
   ]
 };
