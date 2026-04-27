@@ -29930,6 +29930,57 @@ function initChat() {
     var statusLevel = pokerProfileStatusFishLevel(level);
     return '<span class="chat-msg__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
   }
+  function chatContactStatusLevelHtml(level) {
+    if (level == null || level === "") return "";
+    var statusLevel = pokerProfileStatusFishLevel(level);
+    if (!statusLevel) return "";
+    return '<span class="chat-contact__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
+  }
+  function syncChatContactStatusMeta(btn, level, isVerified) {
+    if (!btn || !btn.querySelector) return;
+    var nameLineEl = btn.querySelector(".chat-contact__name-line");
+    if (!nameLineEl) return;
+    var labelEl =
+      nameLineEl.querySelector(".chat-contact__label--primary") ||
+      nameLineEl.querySelector(".chat-contact__label");
+    var verifiedEl = nameLineEl.querySelector(".chat-contact__verified");
+    if (verifiedEl) {
+      verifiedEl.classList.toggle("chat-contact__verified--hidden", !isVerified);
+      if (labelEl && verifiedEl.previousSibling !== labelEl) {
+        nameLineEl.insertBefore(verifiedEl, labelEl.nextSibling);
+      }
+    }
+    var statusLevel = level != null && level !== "" ? pokerProfileStatusFishLevel(level) : 0;
+    var levelEl = nameLineEl.querySelector(".chat-contact__status-level");
+    var fishEl = nameLineEl.querySelector(".chat-contact__status-fish");
+    if (statusLevel) {
+      if (!levelEl) {
+        levelEl = document.createElement("span");
+        levelEl.className = "chat-contact__status-level";
+      }
+      levelEl.textContent = "Уровень: " + String(statusLevel);
+      var levelAfter = verifiedEl || labelEl;
+      if (levelAfter) nameLineEl.insertBefore(levelEl, levelAfter.nextSibling);
+      else nameLineEl.appendChild(levelEl);
+      if (!fishEl) {
+        fishEl = document.createElement("img");
+        fishEl.className = "profile-status-fish-inline chat-contact__status-fish";
+        fishEl.alt = "";
+        fishEl.setAttribute("aria-hidden", "true");
+        fishEl.loading = "lazy";
+        fishEl.decoding = "async";
+      }
+      fishEl.src = pokerProfileStatusFishSrc(statusLevel);
+      fishEl.setAttribute("data-status-fish-level", String(statusLevel));
+      nameLineEl.insertBefore(fishEl, levelEl.nextSibling);
+      btn.dataset.chatStatusLevel = String(statusLevel);
+    } else {
+      if (levelEl && levelEl.parentNode) levelEl.parentNode.removeChild(levelEl);
+      if (fishEl && fishEl.parentNode) fishEl.parentNode.removeChild(fishEl);
+      try { delete btn.dataset.chatStatusLevel; } catch (eStatusDel) {}
+      btn.removeAttribute("data-chat-status-level");
+    }
+  }
   function buildGeneralMessagesBodyHtml(messages) {
     var myIdRender = resolveMyChatMemberId();
     return (messages || []).map(function (m, i) {
@@ -33746,36 +33797,7 @@ function initChat() {
         try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
         btn.removeAttribute("data-chat-verified");
       }
-      var statusLevel = c.statusLevel != null && c.statusLevel !== "" ? pokerProfileStatusFishLevel(c.statusLevel) : 0;
-      if (statusLevel) btn.dataset.chatStatusLevel = String(statusLevel);
-      else {
-        try { delete btn.dataset.chatStatusLevel; } catch (eStatusDel) {}
-        btn.removeAttribute("data-chat-status-level");
-      }
-      var statusFishEl = btn.querySelector(".chat-contact__status-fish");
-      if (statusLevel) {
-        if (!statusFishEl) {
-          var nameLineEl = btn.querySelector(".chat-contact__name-line");
-          var beforeEl = nameLineEl ? nameLineEl.querySelector(".chat-contact__verified") : null;
-          if (nameLineEl) {
-            statusFishEl = document.createElement("img");
-            statusFishEl.className = "profile-status-fish-inline chat-contact__status-fish";
-            statusFishEl.alt = "";
-            statusFishEl.setAttribute("aria-hidden", "true");
-            statusFishEl.loading = "lazy";
-            statusFishEl.decoding = "async";
-            nameLineEl.insertBefore(statusFishEl, beforeEl || null);
-          }
-        }
-        if (statusFishEl) {
-          statusFishEl.src = pokerProfileStatusFishSrc(statusLevel);
-          statusFishEl.setAttribute("data-status-fish-level", String(statusLevel));
-        }
-      } else if (statusFishEl && statusFishEl.parentNode) {
-        statusFishEl.parentNode.removeChild(statusFishEl);
-      }
-      var verifiedEl = btn.querySelector(".chat-contact__verified");
-      if (verifiedEl) verifiedEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
+      syncChatContactStatusMeta(btn, c.statusLevel, c.pokerPlusVerified);
       var onlineEl = btn.querySelector(".chat-contact__online");
       if (onlineEl) onlineEl.classList.toggle("chat-contact__online--visible", !isGroupRow && !!c.online);
       var unreadEl = btn.querySelector(".chat-contact__unread");
@@ -34118,6 +34140,9 @@ function initChat() {
             var wantFriend = !!(friendSet[c.id] || friendSet[String(c.id)]);
             if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
             if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
+            var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(pokerProfileStatusFishLevel(c.statusLevel)) : "";
+            if ((btn.getAttribute("data-chat-status-level") || "") !== wantStatusLevel) return false;
+            if ((btn.getAttribute("data-chat-verified") || "") !== (c.pokerPlusVerified ? "1" : "")) return false;
             if (c.isGroupChat) {
               var imgG = btn.querySelector("img.chat-contact__avatar");
               var haveG = imgG && imgG.getAttribute("src") ? String(imgG.getAttribute("src")).slice(0, 160) : "";
@@ -34152,6 +34177,7 @@ function initChat() {
               }
               var verEl = btn.querySelector(".chat-contact__verified");
               if (verEl) verEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
+              if (!c.isGroupChat) syncChatContactStatusMeta(btn, c.statusLevel, c.pokerPlusVerified);
               var onEl = btn.querySelector(".chat-contact__online");
               if (onEl) {
                 var nowVisible = !!c.online;
@@ -34242,6 +34268,7 @@ function initChat() {
                 (c.pokerPlusVerified ? "" : " chat-contact__verified--hidden") +
                 '" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
               : "";
+            var statusLevelContactHtml = !isGroupRow ? chatContactStatusLevelHtml(c.statusLevel) : "";
             var fishContactHtml = !isGroupRow ? pokerProfileStatusFishIconHtml(c.statusLevel, "chat-contact__status-fish") : "";
             var nameBlockInner;
             if (isGroupRow) {
@@ -34255,8 +34282,9 @@ function initChat() {
                   '<span class="chat-contact__label chat-contact__label--primary">' +
                   escapeHtml(effectiveAlias) +
                   "</span>" +
-                  fishContactHtml +
                   verifiedBadgeHtml +
+                  statusLevelContactHtml +
+                  fishContactHtml +
                   "</span>" +
                   '<span class="chat-contact__friend-nick">' +
                   escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
@@ -34266,8 +34294,9 @@ function initChat() {
                   '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
                   escapeHtml(displayTitle || c.name || c.id || "") +
                   "</span>" +
-                  fishContactHtml +
                   verifiedBadgeHtml +
+                  statusLevelContactHtml +
+                  fishContactHtml +
                   "</span>";
               }
             } else if (hasAlias) {
@@ -34277,8 +34306,9 @@ function initChat() {
                 '<span class="chat-contact__label chat-contact__label--primary">' +
                 escapeHtml(effectiveAlias) +
                 "</span>" +
-                fishContactHtml +
                 verifiedBadgeHtml +
+                statusLevelContactHtml +
+                fishContactHtml +
                 "</span>" +
                 '<span class="chat-contact__login-sub">' +
                 escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
@@ -34288,8 +34318,9 @@ function initChat() {
                 '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
                 escapeHtml(displayTitle || c.name || c.id || "") +
                 "</span>" +
-                fishContactHtml +
                 verifiedBadgeHtml +
+                statusLevelContactHtml +
+                fishContactHtml +
                 "</span>";
             }
             var avatarEl = isGroupRow

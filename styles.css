@@ -13225,6 +13225,16 @@ html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .c
   height: 20px;
   margin-left: 1px;
 }
+.chat-contact__status-level {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
 .chat-contact__name-stack {
   display: flex;
   flex-direction: column;
