@@ -17056,6 +17056,15 @@ function initProfilePokerPlus() {
     if (loading && title) title.textContent = pokerPlusLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
   }
 
+  function setProfileStatusLoading(loading) {
+    var statusSection = document.getElementById("profileStatusSection");
+    var statusLoading = document.getElementById("profileStatusLoading");
+    if (statusSection && statusSection.classList) {
+      statusSection.classList.toggle("profile-status--loading", !!loading);
+    }
+    if (statusLoading) statusLoading.hidden = !loading;
+  }
+
   function pokerPlusWholeNumber(value) {
     var raw = pokerPlusText(value);
     if (!raw) return "";
@@ -17131,6 +17140,7 @@ function initProfilePokerPlus() {
 
   function renderPokerPlusStats(totalSource) {
     if (!statsValue) return;
+    setProfileStatusLoading(false);
     var total = totalSource && typeof totalSource === "object" ? totalSource : {};
     var metrics = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
@@ -17150,6 +17160,7 @@ function initProfilePokerPlus() {
 
   function hidePokerPlusStats() {
     if (statsRow) statsRow.hidden = true;
+    setProfileStatusLoading(false);
   }
 
   function renderPokerPlusStatsFallbackIfVisible() {
@@ -17284,8 +17295,10 @@ function initProfilePokerPlus() {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!state.isVerified || state.isGuest || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      setProfileStatusLoading(false);
       return Promise.resolve();
     }
+    setProfileStatusLoading(true);
     var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
     if (refresh) body.refresh = "1";
     return fetch(base + "/api/pokerplus-player", {
@@ -17298,6 +17311,7 @@ function initProfilePokerPlus() {
       .then(function (data) {
         if (!data || !data.ok) {
           renderProfile(null, false);
+          setProfileStatusLoading(false);
           if (data && data.error) setFeedback(data.error, true);
           return;
         }
@@ -17305,6 +17319,7 @@ function initProfilePokerPlus() {
           renderProfile(data.profile, !!data.linked);
         } catch (renderErr) {
           try { console.error("PokerPlus profile render failed", renderErr); } catch (eLogPpRender) {}
+          setProfileStatusLoading(false);
           setFeedback("Данные Poker21 пришли, но не удалось отобразить профиль. Обновите страницу.", true);
           return;
         }
@@ -17328,6 +17343,7 @@ function initProfilePokerPlus() {
       })
       .finally(function () {
         setPokerPlusInitialLoading(false);
+        setProfileStatusLoading(false);
       });
   }
 
