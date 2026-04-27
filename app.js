@@ -27195,6 +27195,59 @@ function initChat() {
       }
     }, 0);
   }
+  function focusChatComposerForReply(mode, messagesScrollEl) {
+    var replyMode = mode === "personal" ? "personal" : "general";
+    try {
+      mountChatComposer(replyMode);
+    } catch (eMountReplyComposer) {}
+    var targetComposer = null;
+    try {
+      targetComposer = isTelegramChatRuntime() ? getDirectTelegramChatComposer(replyMode) : chatComposerEl;
+      if (!targetComposer) targetComposer = chatComposerEl;
+    } catch (eReplyComposerFind) {
+      targetComposer = chatComposerEl;
+    }
+    if (!targetComposer) return;
+    chatComposerEl = targetComposer;
+    try {
+      targetComposer.disabled = false;
+      targetComposer.hidden = false;
+      targetComposer.removeAttribute("tabindex");
+      targetComposer.removeAttribute("aria-hidden");
+      targetComposer.style.removeProperty("display");
+      targetComposer.style.removeProperty("pointer-events");
+    } catch (eReplyComposerPrep) {}
+    var prevScrollTop = messagesScrollEl ? messagesScrollEl.scrollTop : null;
+    try {
+      targetComposer.focus({ preventScroll: true });
+    } catch (eReplyFocus1) {
+      try {
+        targetComposer.focus();
+      } catch (eReplyFocus2) {}
+    }
+    try {
+      var len = String(targetComposer.value || "").length;
+      if (typeof targetComposer.setSelectionRange === "function") targetComposer.setSelectionRange(len, len);
+    } catch (eReplyCaret) {}
+    try {
+      if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
+        window.__pokerActivateChatKeyboardViewport(targetComposer);
+      }
+    } catch (eReplyKb) {}
+    requestAnimationFrame(function () {
+      try {
+        if (messagesScrollEl && prevScrollTop != null) messagesScrollEl.scrollTop = prevScrollTop;
+      } catch (eReplyScroll) {}
+      try {
+        if (typeof updateChatMessagesKeyboardPad === "function") updateChatMessagesKeyboardPad();
+      } catch (eReplyPad) {}
+      try {
+        if (typeof window.__pokerSyncPwaChatVisualViewportInset === "function") {
+          window.__pokerSyncPwaChatVisualViewportInset();
+        }
+      } catch (eReplyVv) {}
+    });
+  }
   function mountChatComposer(mode) {
     if (!chatSharedComposerEl || !chatComposerPool) return;
     mode = mode || "detached";
@@ -32555,6 +32608,7 @@ function initChat() {
       ctxMenu.style.maxWidth = (window.innerWidth - 24) + "px";
       ctxMenu.style.top = "-9999px";
       ctxMenu.style.left = "12px";
+      ctxMenu.style.visibility = "hidden";
       ctxMenu.classList.add("chat-ctx-menu--visible");
       ctxMenu.setAttribute("aria-hidden", "false");
       menuOpenedAt = Date.now();
@@ -32569,9 +32623,11 @@ function initChat() {
       }
       function applyCtxMenuLayout(layout) {
         var menuTop = Math.max(12, Math.min(layout.menuTop, maxBottom - layout.menuHeight));
-        var menuLeft = Math.max(12, Math.min(Math.round(layout.anchorX - menuWidth / 2), window.innerWidth - menuWidth - 12));
+        var actualMenuWidth = Math.min(menuWidth, ctxMenu.offsetWidth || menuWidth, window.innerWidth - 24);
+        var menuLeft = Math.max(12, Math.min(Math.round(layout.anchorX - actualMenuWidth / 2), window.innerWidth - actualMenuWidth - 12));
         ctxMenu.style.top = menuTop + "px";
         ctxMenu.style.left = menuLeft + "px";
+        ctxMenu.style.visibility = "";
       }
       requestAnimationFrame(function () {
         var layout = computeCtxMenuLayout();
@@ -32597,6 +32653,7 @@ function initChat() {
         ctxBackdrop.setAttribute("aria-hidden", "true");
       }
       if (ctxMenu) {
+        ctxMenu.style.visibility = "";
         ctxMenu.classList.remove("chat-ctx-menu--visible");
         ctxMenu.setAttribute("aria-hidden", "true");
       }
@@ -32745,17 +32802,7 @@ function initChat() {
               prev.querySelector(".chat-reply-preview__text").textContent = "Ответ на " + (msg.fromName || "Игрок") + ": " + quotePreviewText;
               prev.classList.add("chat-reply-preview--visible");
             }
-            // Фокус на input в Telegram/WebView часто дёргает скролл чата вверх.
-            // Сохраняем scrollTop и возвращаем после фокуса.
-            var prevScrollTopG = generalMessages ? generalMessages.scrollTop : null;
-            if (chatComposerEl && chatComposerEl.focus) {
-              try { chatComposerEl.focus({ preventScroll: true }); } catch (e1) { try { chatComposerEl.focus(); } catch (e2) {} }
-              if (generalMessages && prevScrollTopG != null) {
-                requestAnimationFrame(function () {
-                  try { generalMessages.scrollTop = prevScrollTopG; } catch (e3) {}
-                });
-              }
-            }
+            focusChatComposerForReply("general", generalMessages);
           } else {
             personalReplyTo = msg;
             var prevP = document.getElementById("chatPersonalReplyPreview");
@@ -32763,15 +32810,7 @@ function initChat() {
               prevP.querySelector(".chat-reply-preview__text").textContent = "Ответ на " + (msg.fromName || "Игрок") + ": " + quotePreviewText;
               prevP.classList.add("chat-reply-preview--visible");
             }
-            var prevScrollTopP = messagesEl ? messagesEl.scrollTop : null;
-            if (chatComposerEl && chatComposerEl.focus) {
-              try { chatComposerEl.focus({ preventScroll: true }); } catch (e1) { try { chatComposerEl.focus(); } catch (e2) {} }
-              if (messagesEl && prevScrollTopP != null) {
-                requestAnimationFrame(function () {
-                  try { messagesEl.scrollTop = prevScrollTopP; } catch (e3) {}
-                });
-              }
-            }
+            focusChatComposerForReply("personal", messagesEl);
           }
           hideMenu();
         } else if (action === "copy") {
