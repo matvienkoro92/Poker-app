@@ -21950,6 +21950,22 @@ function initRaffles() {
     return !!(base && (pokerApiHasCredential() || pokerCanSyncGuestProfileToServer()));
   }
 
+  function rafflesViewerIsGuestOnly() {
+    var guestMode = false;
+    try {
+      guestMode = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    } catch (eGuest) {}
+    if (!guestMode) return false;
+    try {
+      if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) return false;
+    } catch (eCred) {}
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.user && auth.status && auth.status !== "guest") return false;
+    } catch (eAuth) {}
+    return true;
+  }
+
   function parseMoscowDateTimeLocal(value) {
     if (!value) return null;
     if (/[zZ]$/.test(value) || /[+-]\d\d:\d\d$/.test(value)) return new Date(value);
@@ -22027,7 +22043,7 @@ function initRaffles() {
         var uid = String(p.userId != null ? p.userId : "").trim();
         return uid && raffleIds.indexOf(uid) !== -1;
       });
-    var guestRaffleBlock = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    var guestRaffleBlock = rafflesViewerIsGuestOnly();
     var showRaffleGuestGate = !!(guestRaffleBlock && isActive && !iAmIn);
     if (raffleGuestGate) {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
@@ -23574,7 +23590,7 @@ function initRaffles() {
           });
         return;
       }
-      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) {
+      if (rafflesViewerIsGuestOnly()) {
         if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
         else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
         return;
