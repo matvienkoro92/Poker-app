@@ -32,14 +32,27 @@ function localScriptFilesFromIndex() {
   return out;
 }
 
+function localStylesheetFilesFromIndex() {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const out = [];
+  const re = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith('/')) continue;
+    if (file.includes('/') || !file.endsWith('.css')) continue;
+    out.push(file);
+  }
+  return out;
+}
+
 const baseFiles = [
   'index.html',
-  'styles.css',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',
 ];
-const toCopy = [...new Set(baseFiles.concat(localScriptFilesFromIndex()))];
+const toCopy = [...new Set(baseFiles.concat(localStylesheetFilesFromIndex(), localScriptFilesFromIndex()))];
 const dirsToCopy = ['assets'];
 
 if (!fs.existsSync(publicDir)) {
