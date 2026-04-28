@@ -25917,6 +25917,10 @@ function pokerHydrateChatSnapshotsFromDisk() {
     }
     var rawP = localStorage.getItem(POKER_CHAT_PERSONAL_DISK_KEY);
     if (!rawP) return;
+    if (rawP.length > 1600000) {
+      localStorage.removeItem(POKER_CHAT_PERSONAL_DISK_KEY);
+      return;
+    }
     var packP = JSON.parse(rawP);
     var fpp = pokerChatContactsAuthFingerprint();
     if (!packP || packP.fp !== fpp || !packP.peers || typeof packP.peers !== "object") return;
@@ -25925,7 +25929,7 @@ function pokerHydrateChatSnapshotsFromDisk() {
       if (!ent || !Array.isArray(ent.messages) || !ent.messages.length) return;
       if (personalMessagesCache[k] && personalMessagesCache[k].length) return;
       /* bust снимает только RAM после нового непрочитанного — диск всё ещё даёт быстрый первый кадр, loadMessages перезапишет. */
-      personalMessagesCache[k] = ent.messages.slice();
+      personalMessagesCache[k] = pokerTrimChatDiskMessages(ent.messages, POKER_CHAT_DISK_PERSONAL_MAX_MSG);
       personalMessagesCacheMeta[k] = { ts: ent.t || 0, source: "disk" };
     });
   } catch (eHyd) {}
@@ -25934,6 +25938,10 @@ function getPersonalMessagesSnapshotForOpen(peerId) {
   if (!peerId) return null;
   var cache = personalMessagesCache[peerId];
   if (!Array.isArray(cache) || !cache.length) return null;
+  if (cache.length > POKER_CHAT_DISK_PERSONAL_MAX_MSG) {
+    cache = pokerTrimChatDiskMessages(cache, POKER_CHAT_DISK_PERSONAL_MAX_MSG);
+    personalMessagesCache[peerId] = cache;
+  }
   var meta = personalMessagesCacheMeta[peerId] && typeof personalMessagesCacheMeta[peerId] === "object"
     ? personalMessagesCacheMeta[peerId]
     : null;
@@ -35431,6 +35439,10 @@ function initChat() {
 
   function renderMessages(messages) {
     if (!messagesEl) return;
+    if (Array.isArray(messages) && messages.length > POKER_CHAT_DISK_PERSONAL_MAX_MSG) {
+      messages = messages.slice(-POKER_CHAT_DISK_PERSONAL_MAX_MSG);
+      if (chatWithUserId) personalMessagesCache[chatWithUserId] = messages;
+    }
     var personalMsgWrapEarly = messagesEl.parentElement;
     var openingForceBottomP = scrollPersonalToBottomOnNextRender;
     try {
