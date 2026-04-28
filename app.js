@@ -33616,9 +33616,6 @@ function initChat() {
         window.__pokerPersonalPollRev = "";
       }
     } catch (ePrPoll) {}
-    try {
-      pokerHydrateChatSnapshotsFromDisk();
-    } catch (eHydCv) {}
     convGroupCanChangeAvatar = false;
     syncConvGroupAvatarEditUi();
     var peerAvParam = peerAvatarUrlOpt != null && String(peerAvatarUrlOpt).trim() ? String(peerAvatarUrlOpt).trim() : "";
