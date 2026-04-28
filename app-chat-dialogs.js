@@ -585,6 +585,25 @@ function pokerPrepareChatContactsFetchData(data, opts) {
   return { handled: false, data: data };
 }
 
+function pokerCompleteChatContactsFetchData(data, opts) {
+  opts = opts || {};
+  var metaOnly = !!opts.metaOnly;
+  try {
+    if (data && data.ok) pokerWriteContactsCache(data);
+  } catch (eSav) {}
+  if (typeof opts.applyContactsApiResponse === "function") opts.applyContactsApiResponse(data);
+  if (opts.waitForChange && metaOnly && typeof opts.scheduleLongPoll === "function") {
+    opts.scheduleLongPoll("contacts", 0);
+  }
+  if (data && data.trace && data.trace.serverNowMs && data.ok && metaOnly && typeof opts.recordTrace === "function") {
+    opts.recordTrace("contacts-delivery", {
+      serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+      rows: Array.isArray(data.contacts) ? data.contacts.length : 0,
+    });
+  }
+  if (typeof opts.fireContactsLoaded === "function") opts.fireContactsLoaded();
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {

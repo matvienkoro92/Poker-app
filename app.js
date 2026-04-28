@@ -16795,18 +16795,14 @@ function initChat() {
         });
         if (contactsFetchDataState.handled) return;
         data = contactsFetchDataState.data;
-        try {
-          if (data && data.ok) pokerWriteContactsCache(data);
-        } catch (eSav) {}
-        applyContactsApiResponse(data);
-        if (opts.waitForChange && metaOnly) pokerChatScheduleLongPoll("contacts", 0);
-        if (data && data.trace && data.trace.serverNowMs && data.ok && metaOnly) {
-          pokerChatRecordTrace("contacts-delivery", {
-            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
-            rows: Array.isArray(data.contacts) ? data.contacts.length : 0,
-          });
-        }
-        fireContactsLoaded();
+        pokerCompleteChatContactsFetchData(data, {
+          metaOnly: metaOnly,
+          waitForChange: opts.waitForChange,
+          applyContactsApiResponse: applyContactsApiResponse,
+          scheduleLongPoll: pokerChatScheduleLongPoll,
+          recordTrace: pokerChatRecordTrace,
+          fireContactsLoaded: fireContactsLoaded,
+        });
       })
       .catch(function () {
         if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
