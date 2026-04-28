@@ -16712,21 +16712,9 @@ function initChat() {
             prefetchTopPersonalDialogs(data.contacts);
           }
         }
-        var contactsForList = data.contacts.filter(function (c) {
-          return !chatContactIsDuplicateOfPinnedDialog(c);
-        });
-        var contactsFilterMode = pokerGetChatContactsListFilter();
-        var showFriendsOnly = contactsFilterMode === "friends";
-        if (!showFriendsOnly && Array.isArray(data.chatPartnerIds)) {
-          contactsForList = contactsForList.filter(function (c) {
-            if (!c || c.isGroupChat) return true;
-            for (var cpi = 0; cpi < data.chatPartnerIds.length; cpi++) {
-              if (peerChatIdsEqual(data.chatPartnerIds[cpi], c.id)) return true;
-            }
-            return false;
-          });
-        }
-        contactsForList = pokerSortContactsByDialogListPins(contactsForList);
+        var contactsListState = pokerBuildChatContactsListState(data);
+        var contactsForList = contactsListState.contactsForList;
+        var showFriendsOnly = contactsListState.showFriendsOnly;
         var friendSet = pokerBuildChatContactsFriendSet(data);
         try {
           var cgMx = document.getElementById("chatCreateGroupModal");
@@ -16782,13 +16770,7 @@ function initChat() {
             updateChatNavDot();
             return;
           }
-          contactsForList = chatBuildFriendContactsFromFriendsApi(friendsRowsForList, contactsForList);
-          contactsForList.forEach(function (c) {
-            if (!c) return;
-            if (c.id != null) friendSet[String(c.id)] = true;
-            if (c.dtId != null) friendSet[String(c.dtId)] = true;
-            if (c.__friendAccountId) friendSet[String(c.__friendAccountId)] = true;
-          });
+          contactsForList = pokerApplyChatContactsFriendsOnlyList(contactsForList, friendSet, friendsRowsForList);
         }
         window.chatAdminUnread = data.adminUnread || {};
         var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;

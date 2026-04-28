@@ -392,6 +392,41 @@ function pokerBuildChatContactsFriendSet(data) {
   return friendSet;
 }
 
+function pokerBuildChatContactsListState(data) {
+  var contacts = data && Array.isArray(data.contacts) ? data.contacts : [];
+  var contactsForList = contacts.filter(function (c) {
+    return !chatContactIsDuplicateOfPinnedDialog(c);
+  });
+  var contactsFilterMode = pokerGetChatContactsListFilter();
+  var showFriendsOnly = contactsFilterMode === "friends";
+  if (!showFriendsOnly && data && Array.isArray(data.chatPartnerIds)) {
+    contactsForList = contactsForList.filter(function (c) {
+      if (!c || c.isGroupChat) return true;
+      for (var cpi = 0; cpi < data.chatPartnerIds.length; cpi++) {
+        if (peerChatIdsEqual(data.chatPartnerIds[cpi], c.id)) return true;
+      }
+      return false;
+    });
+  }
+  contactsForList = pokerSortContactsByDialogListPins(contactsForList);
+  return {
+    contactsForList: contactsForList,
+    contactsFilterMode: contactsFilterMode,
+    showFriendsOnly: showFriendsOnly,
+  };
+}
+
+function pokerApplyChatContactsFriendsOnlyList(contactsForList, friendSet, friendsRowsForList) {
+  contactsForList = chatBuildFriendContactsFromFriendsApi(friendsRowsForList, contactsForList);
+  contactsForList.forEach(function (c) {
+    if (!c) return;
+    if (c.id != null) friendSet[String(c.id)] = true;
+    if (c.dtId != null) friendSet[String(c.dtId)] = true;
+    if (c.__friendAccountId) friendSet[String(c.__friendAccountId)] = true;
+  });
+  return contactsForList;
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
