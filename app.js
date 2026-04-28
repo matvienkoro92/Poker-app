@@ -25812,6 +25812,7 @@ var POKER_CHAT_DISK_GENERAL_MAX_MSG = 130;
 var POKER_CHAT_DISK_GENERAL_MAX_MEMBERS = 120;
 var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 260;
 var POKER_CHAT_DISK_PERSONAL_MAX_PEERS = 40;
+var POKER_CHAT_OPEN_SNAPSHOT_MAX_MSG = 80;
 var pokerChatPersonalSnapshotsHydrated = false;
 function pokerTrimChatDiskMessages(arr, max) {
   if (!Array.isArray(arr) || max <= 0) return [];
@@ -25962,6 +25963,11 @@ function getPersonalMessagesSnapshotForOpen(peerId) {
     messages: cache,
     meta: meta,
   };
+}
+function pokerMessagesForFastOpenSnapshot(messages) {
+  if (!Array.isArray(messages) || !messages.length) return [];
+  if (messages.length <= POKER_CHAT_OPEN_SNAPSHOT_MAX_MSG) return messages.slice();
+  return messages.slice(-POKER_CHAT_OPEN_SNAPSHOT_MAX_MSG);
 }
 
 function initChat() {
@@ -33697,19 +33703,16 @@ function initChat() {
       pokerHydrateOpenDmHeaderFromContacts(userId);
     } catch (eHdrConvOpen) {}
     var renderedOpenSnapshot = false;
-    if (!isGroupConv) {
-      try {
-        var openSnapshot = getPersonalMessagesSnapshotForOpen(userId);
-        var openMessages = openSnapshot && Array.isArray(openSnapshot.messages) ? openSnapshot.messages : null;
-        var openMeta = openSnapshot && openSnapshot.meta && typeof openSnapshot.meta === "object" ? openSnapshot.meta : null;
-        if (openMessages && openMessages.length && (!openMeta || openMeta.source !== "disk")) {
-          var openMessagesCopy = openMessages.slice();
-          lastPersonalMessagesSig = personalRenderSignature(userId || "", openMessagesCopy, false);
-          renderMessages(openMessagesCopy);
-          renderedOpenSnapshot = true;
-        }
-      } catch (eOpenSnapshot) {}
-    }
+    try {
+      var openSnapshot = getPersonalMessagesSnapshotForOpen(userId);
+      var openMessages = openSnapshot && Array.isArray(openSnapshot.messages) ? openSnapshot.messages : null;
+      if (openMessages && openMessages.length) {
+        var openMessagesCopy = pokerMessagesForFastOpenSnapshot(openMessages);
+        lastPersonalMessagesSig = personalRenderSignature(userId || "", openMessagesCopy, false);
+        renderMessages(openMessagesCopy);
+        renderedOpenSnapshot = true;
+      }
+    } catch (eOpenSnapshot) {}
     if (!renderedOpenSnapshot && messagesEl) {
       messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
       messagesEl.scrollTop = 0;
@@ -34314,7 +34317,17 @@ function initChat() {
           if (!isNaN(suc) && suc > 0) sumPersonalUnreads += suc;
         }
         window.chatPersonalUnreadTotalFromContacts = sumPersonalUnreads;
-        if (!fromFilterOnly && !metaOnly && !fromInstantCache) prefetchTopPersonalDialogs(data.contacts);
+        if (!fromFilterOnly && !metaOnly) {
+          if (fromInstantCache) {
+            setTimeout(function () {
+              try {
+                prefetchTopPersonalDialogs(data.contacts);
+              } catch (ePrefInstant) {}
+            }, 250);
+          } else {
+            prefetchTopPersonalDialogs(data.contacts);
+          }
+        }
         var contactsForList = data.contacts.filter(function (c) {
           return !chatContactIsDuplicateOfPinnedDialog(c);
         });
