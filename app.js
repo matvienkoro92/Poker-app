@@ -8029,6 +8029,23 @@ function setView(viewName, navOpts) {
       initChat();
     }
     try {
+      [0, 250, 900].forEach(function (delay) {
+        setTimeout(function () {
+          try {
+            var contacts = document.getElementById("chatContacts");
+            if (!contacts || !contacts.querySelector || !contacts.querySelector(".chat-empty--skeleton")) return;
+            if (typeof window.__pokerKickChatContactsLoad === "function") {
+              window.__pokerKickChatContactsLoad({ forceRerender: true });
+            } else if (typeof window.__pokerReloadChatContacts === "function") {
+              window.__pokerReloadChatContacts({ forceRerender: true });
+            } else if (typeof window.chatShowDialogs === "function") {
+              window.chatShowDialogs();
+            }
+          } catch (eChatContactsKick) {}
+        }, delay);
+      });
+    } catch (eChatContactsKickSetup) {}
+    try {
       pokerTryConsumePendingManagerFromCashout();
     } catch (eCashoutMgr) {}
     try {
@@ -11082,6 +11099,12 @@ function initChat() {
   var buildContactsRequestUrl = chatContactsLoader.buildContactsRequestUrl;
   var mergeContactsMetaPayload = chatContactsLoader.mergeContactsMetaPayload;
   var loadContacts = chatContactsLoader.loadContacts;
+  try {
+    window.__pokerReloadChatContacts = loadContacts;
+    window.__pokerKickChatContactsLoad = function (opts) {
+      return loadContacts(opts || {});
+    };
+  } catch (eExposeContactsKick) {}
 
   var chatClubGate = initChatClubGate({
     base: base,
