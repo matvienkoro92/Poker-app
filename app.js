@@ -11016,243 +11016,67 @@ function initChat() {
 
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
-  function openClubChat() {
-    function applyClubGeneralHeaderLayout() {
-      try {
-        var genHeader = document.querySelector("#chatGeneralView .chat-general-header");
-        if (genHeader) {
-          genHeader.style.top = getInlineChatHeaderTopOffsetPx();
-          genHeader.style.left = "0";
-          genHeader.style.right = "0";
-          genHeader.style.transform = "none";
-          genHeader.style.width = "100%";
-        genHeader.style.maxWidth = "none";
-      }
-    } catch (err) {}
-    try {
-      var rafDlg = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-      rafDlg(function () {
-        try {
-          pokerResetChatDialogsViewportArtifacts();
-        } catch (eDlgResetRaf1) {}
-        rafDlg(function () {
-          try {
-            pokerResetChatDialogsViewportArtifacts();
-          } catch (eDlgResetRaf2) {}
-        });
-      });
-    } catch (eDlgResetRaf) {}
-  }
-    function openClubChatShell() {
-      try {
-        updateGeneralInputLocked(false);
-      } catch (eOpenG) {}
-      if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
-      if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-      if (generalView) {
-        generalView.classList.remove("chat-general-view--hidden");
-        generalView.style.display = "";
-      }
-      if (personalView) personalView.classList.add("chat-personal-view--hidden");
-      window.chatGeneralUnread = false;
-      chatActiveTab = "general";
-      scrollGeneralToBottomOnNextRender = true;
-      updateChatHeaderStats();
-      applyClubGeneralHeaderLayout();
-      mountChatComposer("general");
-      syncChatInertForIosAccessory();
-      try {
-        scheduleSyncChatScrollBottomButtons();
-      } catch (eSbClub) {}
-      try {
-        pokerUpdateChatDmFocusFromUiState();
-      } catch (eDmClub) {}
-      pokerChatRefreshLongPollTargets();
-    }
+  var chatOpenShell = initChatOpenShell({
+    POKER_CHAT_NEED_AUTH_PWA_MSG: POKER_CHAT_NEED_AUTH_PWA_MSG,
+    POKER_NET_ERR: POKER_NET_ERR,
+    getDialogsView: function () { return dialogsView; },
+    getGeneralView: function () { return generalView; },
+    getPersonalView: function () { return personalView; },
+    getListView: function () { return listView; },
+    getConvView: function () { return convView; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    setChatActiveTab: function (value) { chatActiveTab = value; },
+    getChatWithUserId: function () { return chatWithUserId; },
+    setChatWithUserId: function (value) { chatWithUserId = value; },
+    getChatWithUserName: function () { return chatWithUserName; },
+    setChatWithUserName: function (value) { chatWithUserName = value; },
+    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    getConvTitle: function () { return convTitle; },
+    getChatWithPeerAvatarUrl: function () { return chatWithPeerAvatarUrl; },
+    setChatWithPeerAvatarUrl: function (value) { chatWithPeerAvatarUrl = value; },
+    getGeneralMessages: function () { return generalMessages; },
+    getMessagesEl: function () { return messagesEl; },
+    getPersonalMessagesCache: function () { return personalMessagesCache; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    getChatComposerDrafts: function () { return chatComposerDrafts; },
+    setScrollGeneralToBottomOnNextRender: function (value) { scrollGeneralToBottomOnNextRender = !!value; },
+    setScrollPersonalToBottomOnNextRender: function (value) { scrollPersonalToBottomOnNextRender = !!value; },
+    getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
+    pokerResetChatDialogsViewportArtifacts: pokerResetChatDialogsViewportArtifacts,
+    updateGeneralInputLocked: updateGeneralInputLocked,
+    updateChatHeaderStats: updateChatHeaderStats,
+    mountChatComposer: mountChatComposer,
+    syncChatInertForIosAccessory: syncChatInertForIosAccessory,
+    scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
+    pokerUpdateChatDmFocusFromUiState: pokerUpdateChatDmFocusFromUiState,
+    pokerChatRefreshLongPollTargets: pokerChatRefreshLongPollTargets,
+    getPokerChatTelegramAuthState: typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState : null,
+    escapeHtml: escapeHtml,
+    isTelegramWebApp: typeof isTelegramWebApp === "function" ? isTelegramWebApp : null,
+    pokerNotifyChatAuthPending: typeof pokerNotifyChatAuthPending === "function" ? pokerNotifyChatAuthPending : null,
+    pokerNotifyChatVerificationRequired: typeof pokerNotifyChatVerificationRequired === "function" ? pokerNotifyChatVerificationRequired : null,
+    paintGeneralFromMemoryBeforeFetch: paintGeneralFromMemoryBeforeFetch,
+    loadGeneral: loadGeneral,
+    pokerPushOpenStateDebug: pokerPushOpenStateDebug,
+    setChatConvTitleIdText: setChatConvTitleIdText,
+    applyConvPeerAvatarHeader: applyConvPeerAvatarHeader,
+    syncChatConvGroupAddMembersBtn: syncChatConvGroupAddMembersBtn,
+    updateUnreadDots: updateUnreadDots,
+    pokerApiHasCredential: pokerApiHasCredential,
+    loadMessages: loadMessages,
+    pokerPushOpenDebug: pokerPushOpenDebug,
+    peerChatIdsEqual: peerChatIdsEqual,
+    pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
+    resolveMyChatMemberId: resolveMyChatMemberId,
+    pokerSafeChatAlert: pokerSafeChatAlert,
+    setTab: setTab,
+    showConv: showConv,
+    resizeChatTextarea: resizeChatTextarea,
+  });
+  var openClubChat = chatOpenShell.openClubChat;
+  var openPushDmImmediate = chatOpenShell.openPushDmImmediate;
+  var openConvFromDialogs = chatOpenShell.openConvFromDialogs;
 
-    var st = typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState() : "ok";
-    if (st !== "ok") {
-      openClubChatShell();
-      updateGeneralInputLocked(true);
-      var gateBlockInner;
-      if (st === "pending") {
-        gateBlockInner =
-          '<p class="chat-empty">' +
-          escapeHtml(
-            "Выполняется проверка входа через Telegram. Подождите несколько секунд и снова откройте «Главный чат» или вернитесь на главную."
-          ) +
-          "</p>";
-      } else if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
-        gateBlockInner =
-          '<p class="chat-empty">' +
-          escapeHtml("Чтобы общаться в чатах, сначала войдите: откройте Mini App из бота Telegram.") +
-          "</p>";
-      } else {
-        gateBlockInner = POKER_CHAT_NEED_AUTH_PWA_MSG.split("\n")
-          .map(function (line) {
-            return '<p class="chat-empty">' + escapeHtml(line) + "</p>";
-          })
-          .join("");
-      }
-      if (generalMessages) {
-        var wrapNeedLogin = generalMessages.parentElement;
-        if (wrapNeedLogin && wrapNeedLogin.classList) wrapNeedLogin.classList.remove("chat-messages-wrap--settling");
-        generalMessages.innerHTML =
-          '<div class="chat-general-gate chat-general-gate--need-login">' + gateBlockInner + "</div>";
-      }
-      if (st === "pending") {
-        if (typeof pokerNotifyChatAuthPending === "function") pokerNotifyChatAuthPending();
-      } else if (typeof pokerNotifyChatVerificationRequired === "function") {
-        pokerNotifyChatVerificationRequired();
-      }
-      return;
-    }
-
-    openClubChatShell();
-    /* Без сброса pollRev следующий loadGeneral может вернуть notModified без тела — превью в списке уже
-       обновлено полным ответом, а лента ещё на старом кэше до следующего полного запроса. */
-    try {
-      window.__pokerGeneralPollRev = "";
-    } catch (ePollOpen) {}
-    paintGeneralFromMemoryBeforeFetch();
-    loadGeneral();
-  }
-  function openPushDmImmediate(userId, userName, peerP21Id, peerAvatarOpt) {
-    try {
-      pokerPushOpenStateDebug("openPushDmImmediate-enter", String(userId || ""));
-    } catch (ePushImmDbg0) {}
-    var uid = userId != null ? String(userId).trim() : "";
-    if (!uid) return;
-    function ensurePushDmShellStable() {
-      try {
-        if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
-        if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-        if (generalView) {
-          generalView.classList.add("chat-general-view--hidden");
-          generalView.style.display = "none";
-        }
-        if (personalView) personalView.classList.remove("chat-personal-view--hidden");
-        if (listView) listView.classList.add("chat-list-view--hidden");
-        if (convView) convView.classList.remove("chat-conv-view--hidden");
-        chatActiveTab = "personal";
-        chatWithUserId = uid;
-        chatWithUserName = userName || uid;
-        updateChatHeaderStats();
-        updateUnreadDots();
-        syncChatInertForIosAccessory();
-      } catch (ePushDmStable) {}
-    }
-    if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
-    if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-    if (generalView) {
-      generalView.classList.add("chat-general-view--hidden");
-      generalView.style.display = "none";
-    }
-    if (personalView) personalView.classList.remove("chat-personal-view--hidden");
-    if (listView) listView.classList.add("chat-list-view--hidden");
-    if (convView) convView.classList.remove("chat-conv-view--hidden");
-    chatActiveTab = "personal";
-    chatWithUserId = uid;
-    chatWithUserName = userName || uid;
-    chatPeerTypingActive = false;
-    if (convTitle) convTitle.textContent = chatWithUserName;
-    setChatConvTitleIdText("");
-    if (peerAvatarOpt != null && String(peerAvatarOpt).trim()) {
-      chatWithPeerAvatarUrl = String(peerAvatarOpt).trim();
-      applyConvPeerAvatarHeader(chatWithPeerAvatarUrl, chatWithUserName);
-    } else {
-      chatWithPeerAvatarUrl = null;
-      applyConvPeerAvatarHeader("", chatWithUserName);
-    }
-    syncChatConvGroupAddMembersBtn();
-    scrollPersonalToBottomOnNextRender = true;
-    if (messagesEl && (!personalMessagesCache[uid] || !personalMessagesCache[uid].length)) {
-      messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
-      messagesEl.scrollTop = 0;
-    }
-    mountChatComposer("personal");
-    syncChatInertForIosAccessory();
-    updateChatHeaderStats();
-    updateUnreadDots();
-    try {
-      pokerUpdateChatDmFocusFromUiState();
-    } catch (ePushImmFocus) {}
-    pokerChatRefreshLongPollTargets();
-    try {
-      scheduleSyncChatScrollBottomButtons();
-    } catch (ePushImmScroll) {}
-    if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
-      loadMessages();
-    }
-    [120, 420, 900].forEach(function (ms) {
-      setTimeout(function () {
-        try {
-          var convVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-          var samePeer = !!(chatWithUserId && peerChatIdsEqual(chatWithUserId, uid));
-          if (convVisible && samePeer) return;
-          pokerPushOpenDebug("openPushDmImmediate-stabilize", uid + " @" + ms);
-          ensurePushDmShellStable();
-          if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
-            loadMessages();
-          }
-        } catch (ePushImmStabilize) {}
-      }, ms);
-    });
-    try {
-      pokerPushOpenStateDebug("openPushDmImmediate-done", String(uid || ""));
-    } catch (ePushImmDbg1) {}
-  }
-  function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt) {
-    try {
-      pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
-    } catch (eOpenConvDbg0) {}
-    if (!userId) return;
-    var openConvIsGroup = String(userId).indexOf("group_") === 0;
-    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    try {
-      var myOpenConvId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
-      if (myOpenConvId && !openConvIsGroup && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(userId, myOpenConvId)) {
-        var selfMsg =
-          "Это личный чат с самим собой — входящие от игроков здесь не отображаются. Откройте диалог с игроком из списка контактов ниже или найдите человека по ID / нику.";
-        pokerSafeChatAlert(selfMsg);
-        return;
-      }
-    } catch (eOpenConvSelfGuard) {}
-    if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
-    if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-    if (generalView) {
-      generalView.classList.add("chat-general-view--hidden");
-      generalView.style.display = "none";
-    }
-    if (personalView) personalView.classList.remove("chat-personal-view--hidden");
-    if (listView) listView.classList.add("chat-list-view--hidden");
-    if (convView) convView.classList.remove("chat-conv-view--hidden");
-    // Важно: `setTab("personal")` внутри `setTab()` проверяет `chatWithUserId`.
-    // Если вызвать `setTab()` до `showConv()`, чат может не открыться.
-    // Поэтому сначала выставляем нужные поля, затем фиксируем таб и грузим сообщения.
-    chatWithUserId = userId;
-    chatWithUserName = userName || userId;
-    chatPeerTypingActive = false;
-    window.__pokerSuppressSetTabPersonalLoad = true;
-    try {
-      setTab("personal");
-    } finally {
-      window.__pokerSuppressSetTabPersonalLoad = false;
-    }
-    showConv(userId, userName || userId, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt);
-    try {
-      pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
-    } catch (eOpenConvDbg1) {}
-    pokerChatRefreshLongPollTargets();
-    if (window.__pendingDepositMessage && chatComposerEl) {
-      chatComposerDrafts.personal = String(window.__pendingDepositMessage);
-      chatComposerEl.value = chatComposerDrafts.personal;
-      try {
-        if (typeof resizeChatTextarea === "function") resizeChatTextarea(chatComposerEl);
-      } catch (eDep) {}
-      window.__pendingDepositMessage = null;
-    }
-  }
   window.chatSetTab = setTab;
   window.chatShowDialogs = showDialogs;
   window.chatOpenConvFromDialogs = openConvFromDialogs;
