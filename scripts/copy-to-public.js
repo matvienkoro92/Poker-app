@@ -16,6 +16,7 @@ const toCopy = [
   'app.js',
   'winter-rating-data.js',
   'updates-data.js',
+  'peerjs.min.js',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',
