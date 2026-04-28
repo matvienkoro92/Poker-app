@@ -25781,6 +25781,10 @@ function pokerTryReadContactsCache() {
     if (!fp) return null;
     var raw = localStorage.getItem(POKER_CHAT_CONTACTS_CACHE_KEY);
     if (!raw) return null;
+    if (raw.length > 800000) {
+      localStorage.removeItem(POKER_CHAT_CONTACTS_CACHE_KEY);
+      return null;
+    }
     var pack = JSON.parse(raw);
     if (!pack || typeof pack.fp !== "string" || pack.fp !== fp || pack.data == null) return null;
     return typeof pokerSanitizeContactsPayloadForUi === "function"
@@ -25847,6 +25851,10 @@ function pokerTryReadGeneralSnapshotFromDisk() {
     if (!fp) return null;
     var raw = localStorage.getItem(POKER_CHAT_GENERAL_DISK_KEY);
     if (!raw) return null;
+    if (raw.length > 1000000) {
+      localStorage.removeItem(POKER_CHAT_GENERAL_DISK_KEY);
+      return null;
+    }
     var pack = JSON.parse(raw);
     if (!pack || typeof pack.fp !== "string" || pack.fp !== fp || !Array.isArray(pack.messages)) return null;
     return {
