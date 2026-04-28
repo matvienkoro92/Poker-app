@@ -16819,18 +16819,6 @@ function initChat() {
       });
   }
 
-  function pokerChatPeerIdIsFriend(pid) {
-    if (!pid) return false;
-    var set = window.__pokerChatFriendIdsSet;
-    if (!set) return false;
-    if (set[String(pid)]) return true;
-    try {
-      for (var pk in set) {
-        if (set[pk] && peerChatIdsEqual(pk, pid)) return true;
-      }
-    } catch (eR) {}
-    return false;
-  }
   function pokerDebugChatFriendAction(stage, payload) {
     try {
       var oldOverlay = document.getElementById("chatFriendDebugOverlay");
