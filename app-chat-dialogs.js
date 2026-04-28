@@ -530,6 +530,24 @@ function pokerBindChatContactsFilterHandler(contactsEl, callbacks) {
   });
 }
 
+function pokerHydrateChatContactsFromInstantCache(opts) {
+  opts = opts || {};
+  try {
+    var metaOnly = !!opts.metaOnly;
+    var c0 = !metaOnly && window.__pokerLastContactsApiData && Array.isArray(window.__pokerLastContactsApiData.contacts)
+      ? window.__pokerLastContactsApiData
+      : pokerTryReadContactsCache();
+    if (!metaOnly && c0 && Array.isArray(c0.contacts)) {
+      if (typeof opts.applyContactsApiResponse === "function") {
+        opts.applyContactsApiResponse(c0, { fromInstantCache: true });
+      }
+      if (typeof opts.fireContactsLoaded === "function") opts.fireContactsLoaded();
+      return true;
+    }
+  } catch (eInst) {}
+  return false;
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {

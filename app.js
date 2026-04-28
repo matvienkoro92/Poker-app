@@ -16772,16 +16772,11 @@ function initChat() {
     pokerBindChatContactsFilterHandler(contactsEl, {
       applyContactsApiResponse: applyContactsApiResponse,
     });
-    try {
-      var c0 = !metaOnly && window.__pokerLastContactsApiData && Array.isArray(window.__pokerLastContactsApiData.contacts)
-        ? window.__pokerLastContactsApiData
-        : pokerTryReadContactsCache();
-      if (!metaOnly && c0 && Array.isArray(c0.contacts)) {
-        contactsInstantFromCache = true;
-        applyContactsApiResponse(c0, { fromInstantCache: true });
-        fireContactsLoaded();
-      }
-    } catch (eInst) {}
+    contactsInstantFromCache = pokerHydrateChatContactsFromInstantCache({
+      metaOnly: metaOnly,
+      applyContactsApiResponse: applyContactsApiResponse,
+      fireContactsLoaded: fireContactsLoaded,
+    });
     fetch(url, { cache: "no-store" })
       .then(function (r) {
         return r.json();
