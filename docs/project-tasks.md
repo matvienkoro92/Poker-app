@@ -2,15 +2,15 @@
 
 Этот список зафиксирован как рабочий backlog проекта.
 
-## P0
+## Done
 
-- Закрыть или сделать admin-only `/api/account-debug`.
-- Починить мёртвый API route `twitch-viewers`: либо добавить handler, либо убрать маршрут из `api/[[...slug]].js`.
-- Исправить поиск пользователя по username в `lib/api-handlers/users.js`: runtime-риск с `DT_IDS_KEY` и неверными ключами для `personal`/`chatDisplay`.
-- Проверить и исправить `scripts/copy-to-public.js`, чтобы в `public/` попадали все скрипты из `index.html`, включая `telegram-web-app.js` и `poker-tasks-data.js`.
-- Зафиксировать единые identity-инварианты для `dtId`, `tg_...`, `vk_...`, `ID...`, legacy-ключей и aliases вроде `tg_roman`.
+- Закрыт `/api/account-debug`: endpoint доступен только admin.
+- Починен route `twitch-viewers`: handler добавлен и маршрут живой.
+- Исправлен поиск пользователя по username в `lib/api-handlers/users.js`: `DT_IDS_KEY` импортирован, profile-ключи читаются через актуальный account id.
+- Исправлен `scripts/copy-to-public.js`: в `public/` попадают локальные скрипты из `index.html`, включая `telegram-web-app.js`, `poker-tasks-data.js`, `app-*.js` и `peerjs.min.js`.
+- Зафиксированы identity-инварианты для `dtId`, `tg_...`, `vk_...`, `ID...`, legacy-ключей и aliases вроде `tg_roman` в `docs/identity-invariants.md`.
 
 ## P1
 
-- Начать дробить `app.js`, сначала зоны chat, profile, auth.
+- Продолжить дробить `app.js`, сначала зоны chat, profile, auth.
 - Начать дробить `styles.css` по feature-зонам.

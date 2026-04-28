@@ -5,9 +5,33 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const root = path.join(__dirname, "..");
-const roots = ["app.js", "api", "lib", "scripts"];
+const roots = ["api", "lib", "scripts"];
 const skipDirs = new Set(["node_modules", "public", ".git"]);
 const files = [];
+
+function stripAssetUrl(raw) {
+  return String(raw || "")
+    .trim()
+    .replace(/^\.\/+/, "")
+    .split("#")[0]
+    .split("?")[0];
+}
+
+function localRootScriptFilesFromIndex() {
+  const indexPath = path.join(root, "index.html");
+  if (!fs.existsSync(indexPath)) return ["app.js"];
+  const html = fs.readFileSync(indexPath, "utf8");
+  const out = [];
+  const re = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+    if (file.includes("/") || !file.endsWith(".js")) continue;
+    out.push(file);
+  }
+  return out.length ? out : ["app.js"];
+}
 
 function walk(relPath) {
   const abs = path.join(root, relPath);
@@ -24,11 +48,12 @@ function walk(relPath) {
   if (stat.isFile() && relPath.endsWith(".js")) files.push(relPath);
 }
 
+for (const rel of localRootScriptFilesFromIndex()) walk(rel);
 for (const rel of roots) walk(rel);
-files.sort();
+const uniqueFiles = [...new Set(files)].sort();
 
 let failed = false;
-for (const rel of files) {
+for (const rel of uniqueFiles) {
   const result = spawnSync(process.execPath, ["--check", path.join(root, rel)], {
     cwd: root,
     encoding: "utf8",
@@ -42,4 +67,4 @@ for (const rel of files) {
 }
 
 if (failed) process.exit(1);
-console.log(`Checked ${files.length} JavaScript files.`);
+console.log(`Checked ${uniqueFiles.length} JavaScript files.`);
