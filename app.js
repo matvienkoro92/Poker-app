@@ -33840,7 +33840,7 @@ function initChat() {
     if (personalPrefetchInFlight[userId]) return;
     if (shouldUsePersonalCache(userId)) return;
     personalPrefetchInFlight[userId] = true;
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -35866,7 +35866,7 @@ function initChat() {
       syncChatDialogPreviewAddFriendBtn();
     } catch (eSyncPrev0) {}
     var url =
-      base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
+      base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
     fetch(url, { cache: "no-store" })
       .then(function (r) {
         return r.json().catch(function () {
@@ -35977,7 +35977,8 @@ function initChat() {
       }
     }
     var fastGroupQs = isGroupLoad ? "&skipPresence=1" : "";
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + pollQs + diffQs;
+    var fastOpenQs = !opts.waitForChange && !usePersonalDiff ? "&fastOpen=1" : "";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + fastOpenQs + pollQs + diffQs;
     fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
