@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "node scripts/copy-to-public.js",
+    "check:syntax": "node scripts/check-js-syntax.js",
+    "check:handlers": "node scripts/check-js-syntax.js",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",
