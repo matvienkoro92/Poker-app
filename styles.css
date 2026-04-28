@@ -1994,7 +1994,7 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 .spring-rating-home-promo-stats__summary-meta strong {
   color: #fbbf24;
-  font-weight: 700;
+  font-weight: 600;
 }
 .spring-rating-home-promo-stats__nested {
   display: flex;
@@ -21130,10 +21130,10 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
 .spring-rating-top3 {
   margin: 16px 0 20px;
   padding: 16px 12px;
-  background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(251, 191, 36, 0.58);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.1);
+  box-shadow: 0 8px 26px rgba(2, 6, 23, 0.34), 0 0 18px rgba(251, 191, 36, 0.13);
 }
 .spring-rating-top3[hidden] {
   display: none !important;
@@ -21164,22 +21164,24 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   flex-direction: column;
   align-items: center;
   padding: 12px 8px;
-  background: rgba(51, 65, 85, 0.8);
+  background: rgba(15, 23, 42, 0.96);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.46);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035), 0 8px 18px rgba(2, 6, 23, 0.22);
 }
 .spring-rating-top3__card--first {
   max-width: 130px;
   margin-bottom: 8px;
-  background: rgba(51, 65, 85, 0.95);
-  border-color: rgba(251, 191, 36, 0.4);
-  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.15);
+  background: rgba(15, 23, 42, 0.99);
+  border-color: rgba(251, 191, 36, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.12), 0 8px 20px rgba(2, 6, 23, 0.26), 0 0 18px rgba(251, 191, 36, 0.18);
 }
 .spring-rating-top3__rank {
   font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #f8fafc;
   margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .spring-rating-top3__card--first .spring-rating-top3__rank {
   font-size: 18px;
@@ -21189,8 +21191,8 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(251, 191, 36, 0.25);
-  border: 2px solid rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.62);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21198,6 +21200,7 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   font-weight: 700;
   color: #f8fafc;
   margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 .spring-rating-top3__card--first .spring-rating-top3__avatar {
   width: 56px;
@@ -21210,6 +21213,7 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   color: #f8fafc;
   text-align: center;
   margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -21221,15 +21225,16 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   align-items: center;
   gap: 2px;
   font-size: 11px;
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 .spring-rating-top3__points {
   font-weight: 600;
-  color: #e2e8f0;
+  color: #f1f5f9;
 }
 .spring-rating-top3__reward {
-  color: #fbbf24;
+  color: #fcd34d;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.48);
 }
 .spring-rating-top3__nick-btn {
   position: absolute;
@@ -21239,6 +21244,8 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
   background: transparent;
   cursor: pointer;
   border-radius: 12px;
+  opacity: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 [data-theme="light"] .spring-rating-top3 {
   background: linear-gradient(180deg, rgba(254, 243, 199, 0.95), rgba(253, 230, 138, 0.9));
@@ -32924,24 +32931,27 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .tournament-day-home-dual {
   --home-promo-gold: #ffc64a;
   --home-promo-orange: #ff9f1a;
-  --home-promo-line: rgba(255, 198, 74, 0.28);
-  --home-promo-card: rgba(8, 17, 31, 0.86);
+  --home-promo-line: rgba(255, 198, 74, 0.34);
+  --home-promo-card: rgba(7, 16, 30, 0.9);
   --home-promo-card-soft: rgba(255, 255, 255, 0.045);
   display: grid;
   grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr);
   gap: 18px;
   position: relative;
   margin: 30px 0 0;
-  padding: 18px;
-  border: 0;
-  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid rgba(255, 198, 74, 0.32);
+  border-radius: 26px;
   overflow: visible;
   background:
-    radial-gradient(circle at 18% 0%, rgba(255, 198, 74, 0.12), transparent 36%),
-    linear-gradient(145deg, rgba(4, 12, 25, 0.98), rgba(2, 9, 20, 0.96) 58%, rgba(8, 18, 34, 0.98));
+    radial-gradient(circle at 18% 0%, rgba(255, 198, 74, 0.15), transparent 34%),
+    radial-gradient(circle at 84% 0%, rgba(255, 159, 26, 0.1), transparent 36%),
+    linear-gradient(145deg, rgba(6, 15, 28, 0.99), rgba(2, 9, 20, 0.97) 58%, rgba(8, 18, 34, 0.99));
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.26),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    0 0 26px rgba(255, 159, 26, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.055),
+    inset 0 0 28px rgba(255, 198, 74, 0.035);
 }
 .app.app--view-home .tournament-day-home-dual::before {
   content: "";
@@ -32950,7 +32960,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   bottom: 18px;
   left: 50%;
   width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.36), transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 198, 74, 0.42), rgba(148, 163, 184, 0.18), transparent);
   transform: translateX(-9px);
   pointer-events: none;
 }
@@ -32965,15 +32975,17 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home {
   flex: 1 1 auto;
   padding: 0;
-  border: 1px solid rgba(148, 163, 184, 0.25) !important;
-  border-radius: 16px !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 20px !important;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 42%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.075), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%),
     var(--home-promo-card) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 0 1px rgba(0, 0, 0, 0.32) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.12),
+    0 12px 24px rgba(0, 0, 0, 0.18) !important;
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home:hover {
   border-color: rgba(255, 198, 74, 0.45) !important;
@@ -32991,7 +33003,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   grid-template-rows: auto auto;
   column-gap: 14px;
   row-gap: 8px;
-  align-items: center;
+  align-items: start;
   margin: 0;
   padding: 12px 12px 16px;
   border: 0;
@@ -33006,12 +33018,16 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   place-items: center;
   width: 52px;
   height: 52px;
-  border: 1.5px solid var(--home-promo-gold);
-  border-radius: 15px;
+  border: 1.5px solid rgba(255, 198, 74, 0.92);
+  border-radius: 50%;
   color: var(--home-promo-gold);
-  background: rgba(255, 198, 74, 0.05);
-  box-shadow: inset 0 0 14px rgba(255, 198, 74, 0.12);
-  transform: rotate(30deg);
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.22), transparent 34%),
+    linear-gradient(180deg, rgba(255, 198, 74, 0.15), rgba(255, 159, 26, 0.05));
+  box-shadow:
+    0 0 18px rgba(255, 159, 26, 0.18),
+    inset 0 0 16px rgba(255, 198, 74, 0.16);
+  transform: none;
   font-size: 24px;
   line-height: 1;
 }
@@ -33026,7 +33042,8 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   width: 52px;
   height: 52px;
   pointer-events: none;
-  transform: rotate(-30deg);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-head::before {
   text-shadow: 0 2px 8px rgba(255, 198, 74, 0.38);
@@ -33039,7 +33056,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   text-align: left;
   color: #f8fafc;
   font-size: clamp(19px, 3vw, 27px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.04;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -33052,7 +33069,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .tournament-day-home-dual .tournament-day-block__countdown {
   grid-column: 2;
   grid-row: 2;
-  margin-top: 8px;
+  margin-top: 0;
   text-align: left;
   color: rgba(241, 245, 249, 0.88);
   font-size: clamp(15px, 2.25vw, 23px);
@@ -33062,7 +33079,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .tournament-day-home-dual .tournament-day-block__meta .tournament-day-block__timer {
   color: var(--home-promo-orange);
   font-size: 1em;
-  font-weight: 900;
+  font-weight: 700;
   text-shadow: 0 0 14px rgba(255, 159, 26, 0.18);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-block__meta {
@@ -33071,9 +33088,12 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .home-freeroll-schedule {
   gap: 0;
   padding: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 16px;
-  background: rgba(3, 10, 22, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 46%),
+    rgba(3, 10, 22, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
 }
 .app.app--view-home .home-freeroll-schedule__row {
   grid-template-columns: 54px minmax(0, 1fr) 22px;
@@ -33087,9 +33107,14 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 .app.app--view-home .home-freeroll-schedule__row--next {
-  border: 1px solid rgba(255, 198, 74, 0.78);
-  background: linear-gradient(90deg, rgba(255, 198, 74, 0.2), rgba(255, 159, 26, 0.08));
-  box-shadow: 0 0 18px rgba(255, 198, 74, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 198, 74, 0.86);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(255, 198, 74, 0.24), transparent 42%),
+    linear-gradient(90deg, rgba(255, 198, 74, 0.18), rgba(255, 159, 26, 0.08));
+  box-shadow:
+    0 0 20px rgba(255, 198, 74, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045);
 }
 .app.app--view-home .home-freeroll-schedule__row--next::after {
   content: "›";
@@ -33101,7 +33126,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .home-freeroll-schedule__day {
   color: var(--home-promo-gold);
   font-size: clamp(17px, 2.2vw, 23px);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0;
 }
 .app.app--view-home .home-freeroll-schedule__main {
@@ -33113,7 +33138,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .home-freeroll-schedule__meta {
   color: #f8fafc;
   font-size: clamp(16px, 2.05vw, 21px);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.15;
 }
 .app.app--view-home .home-freeroll-schedule__meta {
@@ -33121,9 +33146,12 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stats {
   margin-top: 0;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 16px;
-  background: rgba(3, 10, 22, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 46%),
+    rgba(3, 10, 22, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat {
   display: grid;
@@ -33139,7 +33167,14 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat::before {
   content: "🏆";
   color: var(--home-promo-gold);
-  font-size: 25px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), rgba(255, 198, 74, 0.08) 48%, rgba(255, 159, 26, 0.05));
+  box-shadow: inset 0 0 0 1px rgba(255, 198, 74, 0.22);
+  font-size: 20px;
   line-height: 1;
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(2)::before {
@@ -33147,11 +33182,11 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(3)::before {
   content: "◷";
-  font-size: 30px;
+  font-size: 22px;
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(4)::before {
   content: "♤";
-  font-size: 32px;
+  font-size: 24px;
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat-label {
   margin: 0;
@@ -33164,7 +33199,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   justify-self: end;
   color: #f8fafc;
   font-size: clamp(18px, 2.75vw, 30px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.05;
   text-align: right;
   white-space: normal;
@@ -33180,36 +33215,54 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
   overflow: visible;
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn {
-  min-height: 42px;
-  padding: 9px 12px;
-  border: 1px solid rgba(255, 198, 74, 0.72);
-  border-radius: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 220, 150, 0.9);
+  border-radius: 16px;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.28), transparent 30%),
-    linear-gradient(180deg, #ffd15a 0%, #ffad24 48%, #f97316 100%);
-  color: #06111f;
-  font-size: clamp(13px, 1.75vw, 18px);
-  font-weight: 900;
-  line-height: 1.05;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.1) 28%, transparent 29%),
+    radial-gradient(circle at 20% 10%, rgba(255, 246, 214, 0.5), transparent 30%),
+    linear-gradient(180deg, #ffd47a 0%, #f0a12e 44%, #c96912 100%);
+  color: #1b1208;
+  font-size: clamp(13px, 1.85vw, 17px);
+  font-weight: 500;
+  line-height: 1.08;
   letter-spacing: 0;
   text-transform: none;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+  text-shadow: 0 1px 0 rgba(255, 237, 196, 0.46);
+  text-align: center;
+  white-space: normal;
   box-shadow:
-    0 8px 18px rgba(249, 115, 22, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    0 10px 24px rgba(180, 83, 9, 0.28),
+    0 0 18px rgba(255, 198, 74, 0.16),
+    inset 0 1px 0 rgba(255, 250, 232, 0.7),
+    inset 0 -12px 20px rgba(120, 53, 15, 0.18),
+    inset 0 0 0 1px rgba(92, 47, 10, 0.16);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta {
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.24), transparent 30%),
-    linear-gradient(180deg, #ffc84a 0%, #ff9f1a 50%, #ea580c 100%);
-  color: #07111f;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.08) 28%, transparent 29%),
+    radial-gradient(circle at 18% 10%, rgba(255, 239, 198, 0.46), transparent 30%),
+    linear-gradient(180deg, #ffc967 0%, #e89227 46%, #b9550f 100%);
+  color: #1b1208;
   box-shadow:
-    0 8px 18px rgba(249, 115, 22, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+    0 10px 24px rgba(180, 83, 9, 0.26),
+    0 0 18px rgba(255, 198, 74, 0.14),
+    inset 0 1px 0 rgba(255, 250, 232, 0.64),
+    inset 0 -12px 20px rgba(120, 53, 15, 0.2),
+    inset 0 0 0 1px rgba(92, 47, 10, 0.16);
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-share-btn span {
+  display: inline-block;
+  max-width: 11.5em;
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
+  content: "🎁";
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn::before,
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::before,
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
+  flex: 0 0 auto;
   font-size: 27px;
 }
 
@@ -33220,7 +33273,7 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     width: calc(100% + 22px);
     margin-left: -11px;
     margin-right: -11px;
-    padding: 8px;
+    padding: 9px;
     border-radius: 18px;
   }
   .app.app--view-home .tournament-day-home-dual::before {
@@ -33239,31 +33292,50 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     grid-template-columns: 27px minmax(0, 1fr);
     grid-template-rows: auto auto;
     column-gap: 5px;
-    row-gap: 3px;
-    padding: 5px 3px 7px;
+    row-gap: 2px;
+    align-items: center;
+    padding: 3px 3px 6px;
+  }
+  .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__home-head {
+    margin-top: -8px;
+    padding-top: 0;
+    padding-bottom: 4px;
   }
   .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-heading,
   .app.app--view-home .tournament-day-home-wrap--freeroll .tournament-day-block__home-heading,
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__home-heading {
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.05;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
   .app.app--view-home .tournament-day-home-wrap--freeroll .tournament-day-block__home-heading {
-    font-size: 9px;
+    font-size: 10.5px;
   }
   .app.app--view-home .tournament-day-home-dual .tournament-day-block__countdown {
-    font-size: 9px;
+    min-width: 0;
+    font-size: 8.5px;
     margin-top: 0;
-    white-space: nowrap;
+    white-space: normal;
     overflow: visible;
+    text-overflow: clip;
+    line-height: 1.05;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-block__timer-label {
+    display: block;
+    font-size: 1em;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-block__meta .tournament-day-block__timer {
+    display: block;
+    font-size: 1.28em;
+    line-height: 1;
   }
   .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-head::before,
   .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-head::after {
     width: 23px;
     height: 23px;
+    align-self: center;
     border-radius: 8px;
     font-size: 12px;
   }
@@ -33300,17 +33372,19 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     font-size: 20px;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat {
-    grid-template-columns: 17px minmax(0, 0.78fr) minmax(0, 1.22fr);
+    grid-template-columns: 22px minmax(0, 0.72fr) minmax(0, 1.28fr);
     min-height: 36px;
-    padding: 6px 4px;
-    column-gap: 3px;
+    padding: 6px 5px;
+    column-gap: 5px;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat::before {
-    font-size: 16px;
+    width: 19px;
+    height: 19px;
+    font-size: 12px;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(3)::before,
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(4)::before {
-    font-size: 18px;
+    font-size: 14px;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat-label {
     font-size: 9px;
@@ -33323,16 +33397,20 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     line-height: 1.1;
   }
   .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn {
-    min-height: 38px;
-    padding: 7px 4px;
-    border-radius: 9px;
-    font-size: 9px;
-    gap: 2px;
-    white-space: nowrap;
+    min-height: 45px;
+    padding: 6px 7px;
+    border-radius: 13px;
+    font-size: 12.5px;
+    gap: 5px;
+    line-height: 1.08;
+    white-space: normal;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn span {
+    max-width: 8.6em;
   }
   .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn::before,
   .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::before,
   .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
-    font-size: 14px;
+    font-size: 20px;
   }
 }
