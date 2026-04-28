@@ -12867,6 +12867,24 @@ html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-dialogs-view {
   height: 100% !important;
   max-height: none !important;
 }
+html.app--telegram-miniapp body[data-view="chat"] .chat-dialogs-view.chat-dialogs-view--hidden,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-dialogs-view.chat-dialogs-view--hidden,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-dialogs-view.chat-dialogs-view--hidden,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-dialogs-view.chat-dialogs-view--hidden,
+html.app--telegram-miniapp body[data-view="chat"] .chat-personal-view.chat-personal-view--hidden,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-personal-view.chat-personal-view--hidden,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-personal-view.chat-personal-view--hidden,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-personal-view.chat-personal-view--hidden,
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view.chat-general-view--hidden,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view.chat-general-view--hidden,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view.chat-general-view--hidden,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view.chat-general-view--hidden,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view.chat-conv-view--hidden,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view.chat-conv-view--hidden,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view.chat-conv-view--hidden,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view.chat-conv-view--hidden {
+  display: none !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-messages-wrap,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-messages-wrap,
