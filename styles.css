@@ -12826,6 +12826,14 @@ html.poker-telegram-miniapp body[data-view="chat"] #app.app {
   position: relative;
   z-index: 10021;
 }
+html.app--telegram-miniapp body[data-view="chat"] #app.app:has(.chat-dialogs-view:not(.chat-dialogs-view--hidden)) ~ .bottom-nav,
+html.poker-telegram-miniapp body[data-view="chat"] #app.app:has(.chat-dialogs-view:not(.chat-dialogs-view--hidden)) ~ .bottom-nav {
+  z-index: 10030;
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view,
 html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view,
