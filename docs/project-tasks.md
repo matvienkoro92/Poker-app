@@ -15,4 +15,3 @@
 - Начать дробить `app.js`, сначала зоны chat, profile, auth.
 - Начать дробить `styles.css` по feature-зонам.
 - Централизовать admin/auth config: `isAdmin`, `ADMIN_IDS`, `parseBody`, `authRequired`, CORS.
-- Провести Redis schema audit: документ ключей, legacy-ключи, cleanup/backfill script.

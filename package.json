@@ -13,6 +13,8 @@
     "check:syntax": "node scripts/check-js-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",
     "redis:audit": "node scripts/redis-schema-audit.js",
+    "redis:cleanup": "node scripts/redis-cleanup-backfill.js",
+    "redis:cleanup:apply": "node scripts/redis-cleanup-backfill.js --apply",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",

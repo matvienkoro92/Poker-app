@@ -105,5 +105,7 @@
 ## Operational Rules
 
 - Destructive cleanup must be two-step: run audit, review report, then run a dedicated migration with explicit `--apply`.
+- `npm run redis:audit` is read-only and reports known schema/legacy findings.
+- `npm run redis:cleanup` is dry-run by default; `npm run redis:cleanup:apply` writes only safe backfills. Legacy deletion additionally requires `node scripts/redis-cleanup-backfill.js --apply --delete-legacy`.
 - New account-scoped keys should use `dtId`, not `tg_*` / `vk_*`.
 - New Redis keys must be added to this document in the same PR/commit.
