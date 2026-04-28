@@ -13802,398 +13802,72 @@ function initChat() {
 
   var sendingGeneral = false;
   var sendingGeneralSince = 0;
-  function appendOptimisticGeneralMessage(text, image, voice, docAttachment, replyTo) {
-    if (!generalMessages) return;
-    var emptyEl = generalMessages.querySelector(".chat-empty");
-    if (emptyEl) generalMessages.innerHTML = "";
-    var authAvatarEl = document.getElementById("authUserAvatar");
-    var myAvatarUrl = (authAvatarEl && authAvatarEl.src && authAvatarEl.src.indexOf("data:") !== 0 && authAvatarEl.src.indexOf("http") === 0) ? authAvatarEl.src : "";
-    var myNmOpt = resolveMyChatDisplayName();
-    var placeholderLetter = "Я";
-    try {
-      if (myNmOpt && typeof myNmOpt === "string" && myNmOpt.length) {
-        for (var ci = 0; ci < myNmOpt.length; ci++) {
-          var ch = myNmOpt.charAt(ci);
-          if (ch.trim()) {
-            placeholderLetter = ch;
-            break;
-          }
-        }
-      }
-    } catch (ePl) {}
-    var optAvatarEl = myAvatarUrl
-      ? '<img class="chat-msg__avatar" src="' + escapeHtml(myAvatarUrl) + '" alt=""' + CHAT_MSG_AVATAR_IMG_ATTRS + " />"
-      : '<span class="chat-msg__avatar chat-msg__avatar--placeholder">' + escapeHtml(placeholderLetter) + "</span>";
-    var time = "";
-    try {
-      time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-    } catch (eTime) {
-      time = "";
-    }
-    var replyBlock = replyTo ? '<div class="chat-msg__reply"><strong>' + escapeHtml(replyTo.fromName || "Игрок") + ":</strong> " + escapeHtml(String(replyTo.text || "").slice(0, 80)) + (String(replyTo.text || "").length > 80 ? "…" : "") + "</div>" : "";
-    var textContent = "";
-    if (image) {
-      textContent =
-        '<img class="chat-msg__image" src="' +
-        escapeHtml(pokerChatDisplayImageSrc(image)) +
-        '" alt="Картинка" loading="eager" decoding="async" fetchpriority="high" />';
-    } else if (voice) {
-      textContent = chatVoiceMessageHtml(voice, {
-        footerToolbarHtml: '<span class="chat-msg__time">' + escapeHtml(time) + "</span>",
-      });
-    } else if (docAttachment && docAttachment.dataUrl && docAttachment.fileName) textContent = chatDocumentBlockHtml(docAttachment.dataUrl, docAttachment.fileName);
-    else if (text) {
-      try {
-        textContent = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(text).replace(/\n/g, "<br>"))));
-      } catch (eLink) {
-        textContent = escapeHtml(text).replace(/\n/g, "<br>");
-      }
-    }
-    var optBodyClass =
-      "chat-msg__body" +
-      (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
-      (image ? " chat-msg__body--own-image" : "");
-    var textBlockG = textContent ? '<div class="chat-msg__text">' + textContent + "</div>" : "";
-    var footerHtmlOptG = voice
-      ? ""
-      : '<div class="chat-msg__footer"><span class="chat-msg__time">' + escapeHtml(time) + "</span></div>";
-    var bodyMainClsOptG =
-      "chat-msg__body-main" +
-      (!textBlockG ? " chat-msg__body-main--solo-footer" : "") +
-      (image ? " chat-msg__body-main--with-image" : "") +
-      (voice ? " chat-msg__body-main--voice-inline-time" : "");
-    var bodyMainHtmlOptG = '<div class="' + bodyMainClsOptG + '">' + textBlockG + footerHtmlOptG + "</div>";
-    var html = '<div class="chat-msg chat-msg--own" data-optimistic="true"><div class="chat-msg__row">' + optAvatarEl + '<div class="' + optBodyClass + '"><div class="chat-msg__meta"></div>' + replyBlock + bodyMainHtmlOptG + "</div></div></div>";
-    var wrap = document.createElement("div");
-    var newNode = null;
-    try {
-      wrap.innerHTML = html;
-      newNode = wrap.firstElementChild;
-    } catch (eInner) {}
-    if (!newNode) {
-      newNode = document.createElement("div");
-      newNode.className = "chat-msg chat-msg--own";
-      newNode.setAttribute("data-optimistic", "true");
-      var row = document.createElement("div");
-      row.className = "chat-msg__row";
-      var body = document.createElement("div");
-      body.className =
-        "chat-msg__body" +
-        (text && !image && !voice && !docAttachment ? " chat-msg__body--has-text" : "") +
-        (image ? " chat-msg__body--own-image" : "");
-      var textWrap = document.createElement("div");
-      textWrap.className = "chat-msg__text";
-      if (image && typeof image === "string") {
-        var im = document.createElement("img");
-        im.className = "chat-msg__image";
-        im.alt = "Картинка";
-        im.src = pokerChatDisplayImageSrc(image) || image;
-        textWrap.appendChild(im);
-      } else if (voice && typeof voice === "string") {
-        appendChatVoiceToTextWrap(textWrap, voice, {
-          footerToolbarHtml:
-            '<span class="chat-msg__time">' + escapeHtml(time) + "</span>",
-        });
-      } else {
-        textWrap.textContent = text != null ? String(text) : "";
-      }
-      body.appendChild(textWrap);
-      row.appendChild(body);
-      newNode.appendChild(row);
-    }
-    generalMessages.appendChild(newNode);
-    requestAnimationFrame(function () {
-      applyChatMsgTallTextTimeBelowLayout(generalMessages);
-    });
-    try {
-      generalMessages.scrollTop = generalMessages.scrollHeight;
-    } catch (eScroll) {}
-  }
-  function sendGeneral(overrideText) {
-    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    var overridePayload = overrideText && typeof overrideText === "object" ? overrideText : null;
-    var rawGeneral = getChatGeneralText();
-    var text = overridePayload ? String(overridePayload.text || "").trim() : rawGeneral != null ? String(rawGeneral).trim() : "";
-    // Сообщение из chat-шаблона: подставляем текст напрямую,
-    // чтобы не зависеть от того, успело ли обновиться нужное поле.
-    if (!overridePayload && typeof overrideText === "string") text = String(overrideText).trim();
-    // Редактирование сообщения: отправляем PATCH, а не POST нового.
-    if (chatEditMode && chatEditSource === "general" && chatEditMessageId) {
-      if (!text || sendingGeneral) return;
-      if (!pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте в Telegram.");
-        else if (typeof alert === "function") alert("Войдите через Telegram, чтобы отправлять сообщения в общий чат.");
-        return;
-      }
-      sendingGeneral = true;
-      setGeneralSendBusy(true);
-      fetch(base + "/api/chat", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          pokerApiAuthJsonBody({ action: "edit", messageId: String(chatEditMessageId), text: text })
-        ),
-      })
-        .then(function (r) {
-          return r
-            .json()
-            .catch(function () {
-              return { ok: false, error: "Не удалось разобрать ответ сервера" };
-            })
-            .then(function (data) {
-              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
-              if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "");
-              return { d: d, httpOk: r.ok };
-            });
-        })
-        .then(function (pack) {
-          sendingGeneral = false;
-          setGeneralSendBusy(false);
-          var d = pack.d;
-          if (d && d.ok) {
-            var srvMsg = d.message && typeof d.message === "object" ? d.message : null;
-            if (srvMsg && srvMsg.id) window._pendingGeneralEdit = srvMsg;
-            patchCachedEditedMessage(chatEditMessageId, (srvMsg && srvMsg.text) || text, "general", srvMsg);
-            applyEditedMessageToDom(chatEditMessageId, (srvMsg && srvMsg.text) || text, "general");
-            clearChatEditUI();
-            if (!generalMessages || !chatMsgElById(generalMessages, chatEditMessageId)) loadGeneral();
-          } else {
-            var errG = (d && d.error) || "Ошибка";
-            if (tg && tg.showAlert) tg.showAlert(errG);
-            else if (typeof alert === "function") alert(errG);
-          }
-        })
-        .catch(function () {
-          sendingGeneral = false;
-          setGeneralSendBusy(false);
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-          else if (typeof alert === "function") alert(POKER_NET_ERR);
-        });
-      return;
-    }
-    if (sendingGeneral) {
-      if (Date.now() - sendingGeneralSince < 45000) {
-        if (text || generalImage || generalVoice || generalDocument) {
-          if (tg && tg.showAlert) tg.showAlert("Подождите, предыдущее сообщение ещё отправляется…");
-          else if (typeof alert === "function") alert("Подождите, предыдущее сообщение ещё отправляется…");
-        }
-        return;
-      }
-      sendingGeneral = false;
-      setGeneralSendBusy(false);
-    }
-    var generalImageOut = overridePayload ? (overridePayload.image || null) : generalImage;
-    var generalVoiceOut = overridePayload ? (overridePayload.voice || null) : generalVoice;
-    var generalDocumentOut = overridePayload ? (overridePayload.document || null) : generalDocument;
-    var generalReplyOut = overridePayload ? (overridePayload.replyTo || null) : generalReplyTo;
-    if (!text && !generalImageOut && !generalVoiceOut && !generalDocumentOut) {
-      if (rawGeneral != null && String(rawGeneral).length > 0) {
-        if (tg && tg.showAlert) tg.showAlert("Введите текст сообщения, не только пробелы.");
-        else if (typeof alert === "function") alert("Введите текст сообщения, не только пробелы.");
-      }
-      return;
-    }
-    var genArea = document.getElementById("chatGeneralInputArea");
-    if (genArea && genArea.classList.contains("chat-input-area--locked")) {
-      if (tg && tg.showAlert) tg.showAlert("Нет доступа к общему чату.");
-      return;
-    }
-    if (!pokerApiHasCredential()) {
-      if (tg && tg.showAlert) tg.showAlert("Откройте в Telegram.");
-      else if (typeof alert === "function") alert("Войдите через Telegram, чтобы отправлять сообщения в общий чат.");
-      return;
-    }
-    try {
-      var body = pokerApiAuthJsonBody({ text: text });
-      if (generalImageOut) body.image = generalImageOut;
-      if (generalVoiceOut) body.voice = generalVoiceOut;
-      if (generalDocumentOut) { body.document = generalDocumentOut.dataUrl; body.documentName = generalDocumentOut.fileName; }
-      if (generalReplyOut) {
-        var replyText = (generalReplyOut.text && String(generalReplyOut.text).trim()) || (generalReplyOut.hasImage ? "[Фото]" : generalReplyOut.hasVoice ? "[Голосовое сообщение]" : generalReplyOut.hasDocument ? "[Документ]" : "\u2014");
-        body.replyTo = { id: generalReplyOut.id, from: generalReplyOut.from, fromName: generalReplyOut.fromName || "Игрок", text: replyText };
-      }
-      var optText = text;
-      var optImage = generalImageOut || null;
-      var optVoice = generalVoiceOut || null;
-      var optDocument = generalDocumentOut ? { dataUrl: generalDocumentOut.dataUrl, fileName: generalDocumentOut.fileName } : null;
-      var optReply = generalReplyOut ? { fromName: generalReplyOut.fromName || "Игрок", text: generalReplyOut.text || "" } : null;
-      chatOutgoingState.optimisticGeneralPayload = {
-        text: optText || "",
-        image: optImage || null,
-        voice: optVoice || null,
-        document: optDocument,
-        replyTo: body.replyTo || null,
-        from: resolveMyChatMemberId(),
-        time: new Date().toISOString(),
-        __domAppended: false,
-      };
-      sendingGeneral = true;
-      sendingGeneralSince = Date.now();
-      setGeneralSendBusy(true);
-      try {
-        appendOptimisticGeneralMessage(optText, optImage, optVoice, optDocument, optReply);
-        if (chatOutgoingState.optimisticGeneralPayload) chatOutgoingState.optimisticGeneralPayload.__domAppended = true;
-      } catch (e) {
-        /* Не блокировать POST: в TG WKWebView innerHTML/append иногда падает — лента подтянется через mergeOptimistic + loadGeneral. */
-        if (typeof console !== "undefined" && console.error) console.error("appendOptimisticGeneralMessage failed", e);
-      }
-      /* Не ставим scrollGeneralToBottomOnNextRender при отправке — лишний полный render; скролл вниз даёт pinChatMessagesToBottom. */
-      try {
-        if (generalMessages && typeof pinChatMessagesToBottom === "function") pinChatMessagesToBottom(generalMessages, true);
-        if (generalMessages) try { void generalMessages.offsetHeight; } catch (eFlushG) {}
-      } catch (ePinG) {}
-      pokerChatRunAfterPaint(function () {
-        chatComposerDrafts.general = "";
-        if (chatComposerMounted === "general" && chatComposerEl) {
-          chatComposerEl.value = "";
-          try { resizeChatTextarea(chatComposerEl); } catch (e) {}
-          try { updateGeneralSendBtnIcon(); } catch (e) {}
-          if (shouldAutoFocusChatComposerOnDesktop()) {
-            focusChatComposerForDesktop();
-          } else {
-            setTimeout(function () {
-              try { chatComposerEl.blur(); } catch (e) {}
-            }, 50);
-            setTimeout(function () {
-              try {
-                if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
-                    !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
-                  return;
-                }
-                if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
-                  window.__pokerFinalizeChatKeyboardDismiss();
-                }
-              } catch (eKbSend) {}
-            }, 220);
-          }
-        }
-        generalReplyTo = null;
-        generalImage = null;
-        generalDocument = null;
-        generalVoice = null;
-        var prevEl = document.getElementById("chatGeneralReplyPreview");
-        if (prevEl) { prevEl.classList.remove("chat-reply-preview--visible"); prevEl.querySelector(".chat-reply-preview__text").textContent = ""; }
-        var imgPrev = document.getElementById("chatGeneralImagePreview");
-        if (imgPrev) { imgPrev.classList.remove("chat-image-preview--visible"); imgPrev.innerHTML = ""; }
-        var voicePrev = document.getElementById("chatGeneralVoicePreview");
-        if (voicePrev) voicePrev.classList.add("chat-voice-preview--hidden");
-        var bodyStrG = JSON.stringify(body);
-        var hasMediaG = !!(body.image || body.voice || body.document);
-        function applyGeneralPostResponse(data, httpOk) {
-          sendingGeneral = false;
-          sendingGeneralSince = 0;
-          setGeneralSendBusy(false);
-          var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
-          if (!httpOk && !d.error) d.error = "Ошибка отправки";
-          if (httpOk && d && d.ok) {
-            if (d.trace && d.trace.serverNowMs) {
-              pokerChatRecordTrace("general-send-ack", {
-                ackMs: Math.max(0, Date.now() - Number(d.trace.serverNowMs || 0)),
-                messageId: d.message && d.message.id ? String(d.message.id) : "",
-              });
-            }
-            chatOutgoingState.optimisticGeneralPayload = null;
-            chatOutgoingState.failedGeneralPayload = null;
-            pokerChatRequestPollBurst("general");
-            pokerChatRefreshLongPollTargets();
-            var msg = d.message;
-            if (msg && pokerChatMessageHasPersistedId(msg.id)) {
-              window._pendingGeneralMessage = msg;
-              var cache = window._chatGeneralCache || { messages: [], participantsCount: null, onlineCount: null, generalMembers: [] };
-              if (Array.isArray(cache.messages) && !cache.messages.some(function (m) { return String(m.id) === String(msg.id); })) {
-                var msgs = cache.messages.concat([msg]);
-                window._chatGeneralCache = Object.assign({}, cache, { messages: msgs });
-                lastGeneralMessagesSig = null;
-                if (chatActiveTab === "general" && !chatIsEditingMessage) {
-                  lastGeneralMessagesSig = generalMessagesSignature(msgs);
-                  renderGeneralMessages(msgs);
-                }
-              }
-            }
-            loadGeneral();
-          } else {
-            chatOutgoingState.optimisticGeneralPayload = null;
-            chatOutgoingState.failedGeneralPayload = chatCloneRetryPayload({
-              text: optText || "",
-              image: optImage || null,
-              voice: optVoice || null,
-              document: optDocument,
-              replyTo: body.replyTo || null,
-            });
-            markLatestOptimisticMessageFailed(generalMessages, "general");
-            var errT = (d && d.error) || "Ошибка";
-            if (tg && tg.showAlert) tg.showAlert(errT);
-            else if (typeof alert === "function") alert(errT);
-          }
-        }
-        function failGeneralPostNetwork() {
-          chatOutgoingState.optimisticGeneralPayload = null;
-          chatOutgoingState.failedGeneralPayload = chatCloneRetryPayload({
-            text: optText || "",
-            image: optImage || null,
-            voice: optVoice || null,
-            document: optDocument,
-            replyTo: body.replyTo || null,
-          });
-          sendingGeneral = false;
-          sendingGeneralSince = 0;
-          setGeneralSendBusy(false);
-          markLatestOptimisticMessageFailed(generalMessages, "general");
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-          else if (typeof alert === "function") alert(POKER_NET_ERR);
-        }
-        if (hasMediaG && typeof XMLHttpRequest !== "undefined") {
-          var xhrG = new XMLHttpRequest();
-          xhrG.addEventListener("load", function () {
-            var parsed = null;
-            try {
-              parsed = JSON.parse(xhrG.responseText || "{}");
-            } catch (eJ) {
-              parsed = { ok: false, error: "Не удалось разобрать ответ сервера" };
-            }
-            var okHttp = xhrG.status >= 200 && xhrG.status < 300;
-            if (!okHttp && parsed && !parsed.error) {
-              if (xhrG.status === 413) parsed.error = "Вложение слишком большое.";
-              else parsed.error = "Ошибка " + (xhrG.status || "");
-            }
-            applyGeneralPostResponse(parsed, okHttp);
-          });
-          xhrG.addEventListener("error", failGeneralPostNetwork);
-          xhrG.addEventListener("abort", failGeneralPostNetwork);
-          xhrG.open("POST", base + "/api/chat");
-          xhrG.setRequestHeader("Content-Type", "application/json");
-          xhrG.send(bodyStrG);
-        } else {
-          fetch(base + "/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: bodyStrG,
-          })
-            .then(function (r) {
-              return r.json().catch(function () {
-                return { ok: false, error: "Не удалось разобрать ответ сервера" };
-              }).then(function (data) {
-                var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
-                if (!r.ok && !d.error) d.error = "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "");
-                return { d: d, ok: r.ok };
-              });
-            })
-            .then(function (pack) {
-              applyGeneralPostResponse(pack.d, pack.ok);
-            })
-            .catch(failGeneralPostNetwork);
-        }
-      });
-    } catch (err) {
-      chatOutgoingState.optimisticGeneralPayload = null;
-      sendingGeneral = false;
-      sendingGeneralSince = 0;
-      setGeneralSendBusy(false);
-      if (typeof console !== "undefined" && console.error) console.error("sendGeneral failed", err);
-      if (tg && tg.showAlert) tg.showAlert("Не удалось отправить сообщение");
-      else if (typeof alert === "function") alert("Не удалось отправить сообщение");
-    }
-  }
+  var chatGeneralSender = initChatGeneralSender({
+    base: base,
+    tg: tg,
+    POKER_NET_ERR: POKER_NET_ERR,
+    chatOutgoingState: chatOutgoingState,
+    escapeHtml: escapeHtml,
+    getGeneralMessagesEl: function () { return generalMessages; },
+    getChatMsgAvatarImgAttrs: function () { return CHAT_MSG_AVATAR_IMG_ATTRS; },
+    getSendingGeneral: function () { return sendingGeneral; },
+    setSendingGeneral: function (value) { sendingGeneral = !!value; },
+    getSendingGeneralSince: function () { return sendingGeneralSince; },
+    setSendingGeneralSince: function (value) { sendingGeneralSince = Number(value) || 0; },
+    getGeneralImage: function () { return generalImage; },
+    setGeneralImage: function (value) { generalImage = value; },
+    getGeneralVoice: function () { return generalVoice; },
+    setGeneralVoice: function (value) { generalVoice = value; },
+    getGeneralDocument: function () { return generalDocument; },
+    setGeneralDocument: function (value) { generalDocument = value; },
+    getGeneralReplyTo: function () { return generalReplyTo; },
+    setGeneralReplyTo: function (value) { generalReplyTo = value; },
+    getChatEditMode: function () { return chatEditMode; },
+    getChatEditSource: function () { return chatEditSource; },
+    getChatEditMessageId: function () { return chatEditMessageId; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    getChatIsEditingMessage: function () { return chatIsEditingMessage; },
+    getChatComposerMounted: function () { return chatComposerMounted; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    clearGeneralComposerDraft: function () { chatComposerDrafts.general = ""; },
+    pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
+    getChatGeneralText: getChatGeneralText,
+    pokerApiHasCredential: pokerApiHasCredential,
+    setGeneralSendBusy: setGeneralSendBusy,
+    pokerApiAuthJsonBody: pokerApiAuthJsonBody,
+    patchCachedEditedMessage: patchCachedEditedMessage,
+    applyEditedMessageToDom: applyEditedMessageToDom,
+    clearChatEditUI: clearChatEditUI,
+    chatMsgElById: chatMsgElById,
+    loadGeneral: function (opts) { return loadGeneral(opts); },
+    pokerChatDisplayImageSrc: pokerChatDisplayImageSrc,
+    chatVoiceMessageHtml: chatVoiceMessageHtml,
+    chatDocumentBlockHtml: chatDocumentBlockHtml,
+    linkTgUsernames: linkTgUsernames,
+    linkAppIds: linkAppIds,
+    linkUrls: linkUrls,
+    appendChatVoiceToTextWrap: appendChatVoiceToTextWrap,
+    applyChatMsgTallTextTimeBelowLayout: applyChatMsgTallTextTimeBelowLayout,
+    resolveMyChatDisplayName: resolveMyChatDisplayName,
+    resolveMyChatMemberId: resolveMyChatMemberId,
+    pinChatMessagesToBottom: typeof pinChatMessagesToBottom === "function" ? pinChatMessagesToBottom : null,
+    pokerChatRunAfterPaint: pokerChatRunAfterPaint,
+    resizeChatTextarea: resizeChatTextarea,
+    updateGeneralSendBtnIcon: updateGeneralSendBtnIcon,
+    shouldAutoFocusChatComposerOnDesktop: shouldAutoFocusChatComposerOnDesktop,
+    focusChatComposerForDesktop: focusChatComposerForDesktop,
+    pokerChatRecordTrace: pokerChatRecordTrace,
+    pokerChatRequestPollBurst: pokerChatRequestPollBurst,
+    pokerChatRefreshLongPollTargets: pokerChatRefreshLongPollTargets,
+    pokerChatMessageHasPersistedId: pokerChatMessageHasPersistedId,
+    setLastGeneralMessagesSig: function (value) { lastGeneralMessagesSig = value; },
+    generalMessagesSignature: generalMessagesSignature,
+    renderGeneralMessages: renderGeneralMessages,
+    chatCloneRetryPayload: chatCloneRetryPayload,
+    markLatestOptimisticMessageFailed: markLatestOptimisticMessageFailed,
+  });
+  var appendOptimisticGeneralMessage = chatGeneralSender.appendOptimisticGeneralMessage;
+  var sendGeneral = chatGeneralSender.sendGeneral;
 
   function showList() {
     try {
