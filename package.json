@@ -11,6 +11,7 @@
     "build": "node scripts/copy-to-public.js",
     "check:syntax": "node scripts/check-js-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",
+    "redis:audit": "node scripts/redis-schema-audit.js",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",
