@@ -71,7 +71,7 @@ add("PWA auth shell is present", () =>
     'id="pwaLoginScreenVersion"',
     "pwa-auth-preinit",
   ]) &&
-  hasAll("app", [
+  hasAll("client", [
     "pokerReadPwaGuestMode",
     "__pokerOpenSharedAccountAuthFlow",
     "pwaAuthScreen",
