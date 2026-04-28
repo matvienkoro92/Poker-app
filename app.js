@@ -29702,7 +29702,7 @@ function initChat() {
     if (hintEl) hintEl.textContent = "";
     modal.classList.remove("chat-club-access-modal--hidden");
     modal.setAttribute("aria-hidden", "false");
-    fetch(base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=clubChatManage")
+    fetch(base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=clubChatManage", { cache: "no-store" })
       .then(function (r) {
         return r.json();
       })
@@ -33813,7 +33813,7 @@ function initChat() {
     if (shouldUsePersonalCache(userId)) return;
     personalPrefetchInFlight[userId] = true;
     var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0";
-    fetch(url)
+    fetch(url, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.messages)) return;
@@ -36805,7 +36805,7 @@ function initChat() {
       var qB = pokerApiAuthQuery("?");
       var urlContactsB = base + "/api/chat" + qB + "&mode=contacts" + lastVP;
       var urlGeneralB = base + "/api/chat" + qB + "&mode=general&trackSeen=0";
-      fetch(urlContactsB)
+      fetch(urlContactsB, { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -36827,7 +36827,7 @@ function initChat() {
           }
         })
         .catch(function () {});
-      fetch(urlGeneralB)
+      fetch(urlGeneralB, { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -41763,7 +41763,7 @@ function initChat() {
         } catch (eTam) {}
       }, 560);
       var qAm = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-      fetch(base + "/api/chat" + qAm + "&with=" + encodeURIComponent(gid) + "&metaonly=1")
+      fetch(base + "/api/chat" + qAm + "&with=" + encodeURIComponent(gid) + "&metaonly=1", { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -42304,7 +42304,7 @@ function initChat() {
       var q = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
       var urlMeta = base + "/api/chat" + q + "&with=" + encodeURIComponent(gid) + "&metaonly=1";
       var metaFetchGid = gid;
-      fetch(urlMeta)
+      fetch(urlMeta, { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -42399,7 +42399,7 @@ function initChat() {
       }
       if (membersEl) membersEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
       var qG = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-      fetch(base + "/api/chat" + qG + "&mode=general&trackSeen=0&includeRoster=1")
+      fetch(base + "/api/chat" + qG + "&mode=general&trackSeen=0&includeRoster=1", { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -42754,7 +42754,7 @@ function initChat() {
       var gid = openGroupId;
       if (!gid || openGroupInfoMode !== "group") return;
       var qMeta = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-      fetch(base + "/api/chat" + qMeta + "&with=" + encodeURIComponent(gid) + "&metaonly=1")
+      fetch(base + "/api/chat" + qMeta + "&with=" + encodeURIComponent(gid) + "&metaonly=1", { cache: "no-store" })
         .then(function (r) {
           return r.json();
         })
@@ -42799,7 +42799,7 @@ function initChat() {
                   kickB.disabled = false;
                   if (data && data.ok) {
                     var qGr = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-                    fetch(base + "/api/chat" + qGr + "&mode=general&trackSeen=0&includeRoster=1")
+                    fetch(base + "/api/chat" + qGr + "&mode=general&trackSeen=0&includeRoster=1", { cache: "no-store" })
                       .then(function (r2) {
                         return r2.json();
                       })
