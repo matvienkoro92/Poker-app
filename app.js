@@ -28344,12 +28344,8 @@ function initChat() {
             rvDownEl.textContent = down.map(respectVoterLineLabel).join(", ") || "Никто";
             applyRespectVotersModalVoteState(data.myVote || null);
           } else {
-            var accessMsg =
-              data && data.error === "respect_voters_forbidden"
-                ? "Список виден только владельцу профиля или админу"
-                : "—";
-            rvUpEl.textContent = accessMsg;
-            rvDownEl.textContent = accessMsg;
+            rvUpEl.textContent = "—";
+            rvDownEl.textContent = "—";
             applyRespectVotersModalVoteState(null);
           }
         })

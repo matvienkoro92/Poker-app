@@ -20,7 +20,6 @@
 - Централизовать admin/auth config: `isAdmin`, `ADMIN_IDS`, `parseBody`, `authRequired`, CORS.
 - Провести Redis schema audit: документ ключей, legacy-ключи, cleanup/backfill script.
 - Добавить rate limits и payload limits для чата, комментариев, рассылок, трекинга, загрузок.
-- Ограничить `respect?list=1`, чтобы списки голосовавших были доступны только владельцу профиля или админу.
 - Убрать hardcoded prod URL из `cron-reminder-10min.js`, использовать `APP_URL` / `VERCEL_URL`.
 - Укрепить deploy hook: не `sleep 90`, а ожидание готового Vercel deploy.
 - Добавить минимальный CI: `npm ci`, `npm run build`, проверка handlers, `node --check`.
