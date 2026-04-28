@@ -604,6 +604,24 @@ function pokerCompleteChatContactsFetchData(data, opts) {
   if (typeof opts.fireContactsLoaded === "function") opts.fireContactsLoaded();
 }
 
+function pokerHandleChatContactsFetchError(opts) {
+  opts = opts || {};
+  if (!opts.contactsInstantFromCache && opts.contactsEl) {
+    opts.contactsEl.innerHTML = '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
+  }
+  if (opts.waitForChange && opts.metaOnly && typeof opts.scheduleLongPoll === "function") {
+    opts.scheduleLongPoll("contacts", 1200);
+  }
+  if (typeof opts.fireContactsLoaded === "function") opts.fireContactsLoaded();
+  if (window.__openClubChatAfterNextContacts) {
+    window.__openClubChatAfterNextContacts = false;
+    setTimeout(function () {
+      if (typeof opts.tryOpenClubChatFromDialogs === "function") opts.tryOpenClubChatFromDialogs();
+      else if (typeof opts.openClubChat === "function") opts.openClubChat();
+    }, 0);
+  }
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {

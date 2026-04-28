@@ -16806,18 +16806,16 @@ function initChat() {
       })
       .catch(function () {
         if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
-        if (!contactsInstantFromCache)
-          contactsEl.innerHTML =
-            '<div class="chat-contacts-list-block"><p class="chat-empty">Ошибка</p></div>';
-        if (opts.waitForChange && metaOnly) pokerChatScheduleLongPoll("contacts", 1200);
-        fireContactsLoaded();
-        if (window.__openClubChatAfterNextContacts) {
-          window.__openClubChatAfterNextContacts = false;
-          setTimeout(function () {
-            if (typeof tryOpenClubChatFromDialogs === "function") tryOpenClubChatFromDialogs();
-            else if (typeof openClubChat === "function") openClubChat();
-          }, 0);
-        }
+        pokerHandleChatContactsFetchError({
+          contactsInstantFromCache: contactsInstantFromCache,
+          contactsEl: contactsEl,
+          waitForChange: opts.waitForChange,
+          metaOnly: metaOnly,
+          scheduleLongPoll: pokerChatScheduleLongPoll,
+          fireContactsLoaded: fireContactsLoaded,
+          tryOpenClubChatFromDialogs: tryOpenClubChatFromDialogs,
+          openClubChat: openClubChat,
+        });
       });
   }
 
