@@ -18196,9 +18196,9 @@ function setProfileStatusFromRake(value) {
           pokerProfileFormatRake(leftRake) +
           " очков";
     if (progressText) progressText.textContent = tip;
-    fish.setAttribute("title", tip);
     fish.setAttribute("aria-label", tip);
-    fish.setAttribute("data-status-tip", tip);
+    fish.removeAttribute("title");
+    fish.removeAttribute("data-status-tip");
   }
 }
 
@@ -27904,20 +27904,26 @@ function initChat() {
             if (personalText) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
             else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
           }
-          if (modalLevelText && data && data.level != null) {
-            modalLevelText.textContent = "Уровень " + data.level + " из 55";
+          var modalStatusLevel =
+            data && data.level != null
+              ? data.level
+              : data && data.pokerPlusVerified === true
+                ? 1
+                : null;
+          if (modalLevelText && modalStatusLevel != null) {
+            modalLevelText.textContent = "Уровень " + modalStatusLevel + " из 55";
             modalLevelText.hidden = false;
           }
-          if (data && data.level != null) {
-            var modalLevel = Math.min(55, Math.max(1, parseInt(data.level, 10) || 1));
+          if (modalStatusLevel != null) {
+            var modalLevel = Math.min(55, Math.max(1, parseInt(modalStatusLevel, 10) || 1));
             if (modalStatusCards[0]) modalStatusCards[0].textContent = pokerProfileStatusCardLabel(modalLevel);
             if (modalStatusCards[1]) modalStatusCards[1].textContent = pokerProfileStatusCardLabel(Math.min(55, modalLevel + 1));
             if (modalStatusSection) modalStatusSection.hidden = false;
-            pokerProfileApplyStatusFish(modalLevelFish, data.level);
+            pokerProfileApplyStatusFish(modalLevelFish, modalStatusLevel);
             if (modalLevelFish) modalLevelFish.hidden = false;
-            pokerProfileApplyStatusFish(modalStatusFish, data.level);
+            pokerProfileApplyStatusFish(modalStatusFish, modalStatusLevel);
             if (modalTitleFish) {
-              var modalFishLevel = pokerProfileStatusFishLevel(data.level);
+              var modalFishLevel = pokerProfileStatusFishLevel(modalStatusLevel);
               modalTitleFish.src = pokerProfileStatusFishSrc(modalFishLevel);
               modalTitleFish.setAttribute("data-status-fish-level", String(modalFishLevel));
               modalTitleFish.hidden = false;
