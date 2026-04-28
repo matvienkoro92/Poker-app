@@ -40647,7 +40647,15 @@ function initChat() {
     if (raw.startsWith("tg_") && raw !== "tg_roman") {
       doShow(raw);
     } else if (raw === "tg_roman") {
-      doShow("tg_388008256");
+      var romanUsername = "roman1787443";
+      fetch(base + "/api/users?username=" + encodeURIComponent(romanUsername) + pokerApiAuthQuery("&"))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && data.ok && data.userId) doShow(data.userId);
+          else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не найдено");
+        })
+        .catch(function () { if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR); });
+      return;
     } else if (/^ID\d{6}$/.test(raw.toUpperCase())) {
       var id = raw.toUpperCase();
       fetch(base + "/api/users?id=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
