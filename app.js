@@ -37525,8 +37525,19 @@ function initChat() {
           document.body.classList.remove("chat-keyboard-open--tma-flow");
         } catch (eKbCls) {}
       }
-      function scrollVisibleChatMessagesToBottom() {
+      function scrollVisibleChatMessagesToBottom(options) {
         var isTelegramChat = isTelegramChatRuntime();
+        var opts = options || {};
+        var shouldSnap = !!opts.force;
+        try {
+          var visibleBeforePad = getVisibleMessagesEl();
+          shouldSnap =
+            shouldSnap ||
+            !visibleBeforePad ||
+            chatMessagesNearBottom(visibleBeforePad, CHAT_SCROLL_BOTTOM_NEAR_PX);
+        } catch (eSnapCheck) {
+          shouldSnap = true;
+        }
         updateChatMessagesKeyboardPad();
         if (!isTelegramChat) {
           try {
@@ -37538,7 +37549,7 @@ function initChat() {
         }
         try {
           var visibleMessages = getVisibleMessagesEl();
-          if (visibleMessages && !isTelegramChat) visibleMessages.scrollTop = visibleMessages.scrollHeight;
+          if (visibleMessages && !isTelegramChat && shouldSnap) visibleMessages.scrollTop = visibleMessages.scrollHeight;
         } catch (eMsgSc) {}
       }
       function detachTelegramMiniAppChatThreadRootScrollLock() {
@@ -39290,17 +39301,26 @@ function initChat() {
           if (deferBlur) return;
           var el = getVisibleMessagesEl();
           var anchorFromBottom = 0;
+          var scrollTopBefore = 0;
+          var nearBottomBefore = false;
+          var hadKeyboardLayoutShift = false;
           if (el) {
             try {
               anchorFromBottom = Math.max(0, el.scrollHeight - el.clientHeight - el.scrollTop);
+              scrollTopBefore = Math.max(0, el.scrollTop || 0);
+              nearBottomBefore = chatMessagesNearBottom(el, CHAT_SCROLL_BOTTOM_NEAR_PX);
+              hadKeyboardLayoutShift =
+                document.body.classList.contains("chat-keyboard-open") ||
+                document.documentElement.classList.contains("chat-keyboard-open") ||
+                !!(el.style && el.style.paddingBottom);
             } catch (eAnc) {}
           }
           var inChat = !!el;
           if (!inChat) scrollDocumentToZero();
           finalizeChatKeyboardDismiss();
           if (!inChat) scrollDocumentToZero();
-          /* Якорь от низа: после снятия padding-bottom ленты сырой scrollTop смещает блок относительно композера. */
-          if (el) {
+          /* После dismiss сохраняем позицию: якорь от низа нужен только когда пользователь был у последних сообщений. */
+          if (el && hadKeyboardLayoutShift) {
             var rafB = window.requestAnimationFrame || function (fn) {
               setTimeout(fn, 16);
             };
@@ -39308,7 +39328,11 @@ function initChat() {
               rafB(function () {
                 try {
                   var max = Math.max(0, el.scrollHeight - el.clientHeight);
-                  el.scrollTop = Math.max(0, max - anchorFromBottom);
+                  if (nearBottomBefore) {
+                    el.scrollTop = Math.max(0, max - anchorFromBottom);
+                  } else {
+                    el.scrollTop = Math.min(scrollTopBefore, max);
+                  }
                 } catch (e3) {}
               });
             });
