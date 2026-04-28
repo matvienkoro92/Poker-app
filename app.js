@@ -25812,6 +25812,7 @@ var POKER_CHAT_DISK_GENERAL_MAX_MSG = 130;
 var POKER_CHAT_DISK_GENERAL_MAX_MEMBERS = 120;
 var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 260;
 var POKER_CHAT_DISK_PERSONAL_MAX_PEERS = 40;
+var pokerChatPersonalSnapshotsHydrated = false;
 function pokerTrimChatDiskMessages(arr, max) {
   if (!Array.isArray(arr) || max <= 0) return [];
   if (arr.length <= max) return arr.slice();
@@ -25903,8 +25904,9 @@ function pokerWritePersonalPeerSnapshotToDisk(peerId, messages) {
     } catch (eRmP) {}
   }
 }
-function pokerHydrateChatSnapshotsFromDisk() {
+function pokerHydrateChatSnapshotsFromDisk(opts) {
   try {
+    opts = opts || {};
     if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     if (!pokerChatContactsAuthFingerprint()) return;
     var g = pokerTryReadGeneralSnapshotFromDisk();
@@ -25923,6 +25925,9 @@ function pokerHydrateChatSnapshotsFromDisk() {
         __fromDisk: true,
       };
     }
+    if (opts.generalOnly) return;
+    if (pokerChatPersonalSnapshotsHydrated) return;
+    pokerChatPersonalSnapshotsHydrated = true;
     var rawP = localStorage.getItem(POKER_CHAT_PERSONAL_DISK_KEY);
     if (!rawP) return;
     if (rawP.length > 1600000) {
@@ -29260,13 +29265,20 @@ function initChat() {
     generalView.style.display = "none";
     /* До сети: превью клуба из RAM или сразу с диска (иначе строка «Главный чат» пуста до loadContacts). */
     try {
-      pokerHydrateChatSnapshotsFromDisk();
+      pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
     } catch (eHydDlg) {}
-    try {
-      pokerPrefetchDiskPeersWarmup();
-    } catch (eWarmDlg) {}
+    setTimeout(function () {
+      try {
+        pokerPrefetchDiskPeersWarmup();
+      } catch (eWarmDlg) {}
+    }, 350);
     if (window._chatGeneralCache && window._chatGeneralCache.messages && typeof updateClubChatPreview === "function") updateClubChatPreview(window._chatGeneralCache.messages);
-    loadGeneral();
+    loadContacts();
+    setTimeout(function () {
+      try {
+        loadGeneral();
+      } catch (eLoadGenDlg) {}
+    }, 0);
     // На некоторых переходах между экранами (в т.ч. download) браузер может
     // сохранить inline-трансформы/позиции для абсолютных элементов.
     // Принудительно возвращаем верхнюю панель общего чата в корректное место.
@@ -29281,7 +29293,6 @@ function initChat() {
         genHeader.style.maxWidth = "none";
       }
     } catch (err) {}
-    loadContacts();
     updateAdminShiftOnline();
     updateChatHeaderStats();
     updateUnreadDots();
@@ -34217,7 +34228,7 @@ function initChat() {
       return;
     }
     try {
-      pokerHydrateChatSnapshotsFromDisk();
+      pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
     } catch (eHydCt) {}
     var url = buildContactsRequestUrl(opts);
     var contactsFetchGen = (window.__pokerContactsFetchGen || 0) + 1;
@@ -34235,6 +34246,7 @@ function initChat() {
         data = pokerSanitizeContactsPayloadForUi(data);
       }
       var fromFilterOnly = !!opts.fromFilterOnly;
+      var fromInstantCache = !!opts.fromInstantCache;
       var forceRerender = !!opts.forceRerender;
       if (data && data.ok) {
         chatIsAdmin = !!data.isAdmin;
@@ -34302,7 +34314,7 @@ function initChat() {
           if (!isNaN(suc) && suc > 0) sumPersonalUnreads += suc;
         }
         window.chatPersonalUnreadTotalFromContacts = sumPersonalUnreads;
-        if (!fromFilterOnly && !metaOnly) prefetchTopPersonalDialogs(data.contacts);
+        if (!fromFilterOnly && !metaOnly && !fromInstantCache) prefetchTopPersonalDialogs(data.contacts);
         var contactsForList = data.contacts.filter(function (c) {
           return !chatContactIsDuplicateOfPinnedDialog(c);
         });
@@ -34799,10 +34811,12 @@ function initChat() {
       }
     }
     try {
-      var c0 = pokerTryReadContactsCache();
-      if (!metaOnly && c0 && !window.__pokerLastContactsApiData) {
+      var c0 = !metaOnly && window.__pokerLastContactsApiData && Array.isArray(window.__pokerLastContactsApiData.contacts)
+        ? window.__pokerLastContactsApiData
+        : pokerTryReadContactsCache();
+      if (!metaOnly && c0 && Array.isArray(c0.contacts)) {
         contactsInstantFromCache = true;
-        applyContactsApiResponse(c0);
+        applyContactsApiResponse(c0, { fromInstantCache: true });
         fireContactsLoaded();
       }
     } catch (eInst) {}
