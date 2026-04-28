@@ -28408,6 +28408,12 @@ function initChat() {
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data && data.ok) {
+            if (data.canViewVoters === false) {
+              rvUpEl.textContent = "Список виден только владельцу профиля или админу";
+              rvDownEl.textContent = "Список виден только владельцу профиля или админу";
+              applyRespectVotersModalVoteState(data.myVote || null);
+              return;
+            }
             var up = Array.isArray(data.up) ? data.up : [];
             var down = Array.isArray(data.down) ? data.down : [];
             var vd =
