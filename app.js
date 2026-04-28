@@ -17143,7 +17143,7 @@ function initProfilePokerPlus() {
         } else {
           pokerProfileUserInfoCache = null;
           pokerProfileUserInfoCacheAt = 0;
-          setFeedback("Видимость статистики сохранена.", false);
+          setFeedback(nextVisible ? "Ваша статистика теперь видна другим." : "Ваша статистика теперь НЕ видна другим.", false);
         }
       })
       .catch(function () {
