@@ -54,6 +54,16 @@ function localRootScriptFilesFromIndex() {
   return [...new Set(out)];
 }
 
+files.client = localRootScriptFilesFromIndex()
+  .map((file) => {
+    try {
+      return read(file);
+    } catch (err) {
+      return "";
+    }
+  })
+  .join("\n");
+
 add("PWA auth shell is present", () =>
   hasAll("html", [
     'id="pwaAuthScreen"',
@@ -136,7 +146,7 @@ add("Poker21 profile privacy/status controls are wired", () =>
     'id="profileStatusSection"',
     'id="profileStatusVisual"',
   ]) &&
-  hasAll("app", [
+  hasAll("client", [
     "window.pokerApplyPokerPlusStatsVisible",
     "Ваша статистика теперь видна другим.",
     "Ваша статистика теперь НЕ видна другим.",
