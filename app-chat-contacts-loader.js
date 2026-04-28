@@ -210,7 +210,9 @@ function applyContactsApiResponse(data, opts) {
             } catch (ePrefInstant) {}
           }, 250);
         } else {
-          prefetchTopPersonalDialogs(data.contacts);
+          try {
+            prefetchTopPersonalDialogs(data.contacts);
+          } catch (ePrefContacts) {}
         }
       }
       var contactsListState = pokerBuildChatContactsListState(data);
