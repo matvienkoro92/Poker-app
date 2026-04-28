@@ -79,9 +79,9 @@ add("PWA auth shell is present", () =>
 );
 
 add("PWA service worker is versioned", () =>
-  has("app", 'var swUrl = "./sw.js"') &&
-  has("app", 'getAttribute("data-app-version")') &&
-  has("app", "navigator.serviceWorker.register(swUrl")
+  has("client", 'var swUrl = "./sw.js"') &&
+  has("client", 'getAttribute("data-app-version")') &&
+  has("client", "navigator.serviceWorker.register(swUrl")
 );
 
 add("Chat shell has dialog, general and conversation views", () =>
