@@ -487,3 +487,38 @@ function renderChatContactsListDom(opts) {
   chatContactsAttachAvatarFallbacks(contactsEl);
   return "rebuilt";
 }
+
+function pokerRenderChatContactsListResult(opts) {
+  opts = opts || {};
+  var contactsEl = opts.contactsEl;
+  var contactsForList = Array.isArray(opts.contactsForList) ? opts.contactsForList : [];
+  var friendSet = opts.friendSet || {};
+  var showFriendsOnly = !!opts.showFriendsOnly;
+  if (!contactsEl) return false;
+  if (contactsForList.length === 0) {
+    var emptyText = "Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.";
+    if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";
+    contactsEl.innerHTML =
+      '<div class="chat-contacts-list-block">' +
+      '<p class="chat-empty">' + chatContactsRenderEscapeHtml(emptyText) + "</p>" +
+      "</div>";
+    if (typeof opts.updateDialogUnreadBadges === "function") opts.updateDialogUnreadBadges();
+    if (typeof opts.updateChatNavDot === "function") opts.updateChatNavDot();
+    return false;
+  }
+  var contactsRenderMode = renderChatContactsListDom({
+    contactsEl: contactsEl,
+    contactsForList: contactsForList,
+    friendSet: friendSet,
+    forceRerender: !!opts.forceRerender,
+  });
+  if (contactsRenderMode) {
+    if (typeof opts.updateDialogUnreadBadges === "function") opts.updateDialogUnreadBadges();
+    if (contactsRenderMode === "rebuilt" && typeof opts.attachDialogButtons === "function") {
+      opts.attachDialogButtons();
+    }
+    if (typeof opts.updateChatNavDot === "function") opts.updateChatNavDot();
+    return true;
+  }
+  return false;
+}

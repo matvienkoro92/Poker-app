@@ -16742,31 +16742,16 @@ function initChat() {
           syncRoster: syncClubChatRosterUi,
           updatePreviewText: updateClubChatPreviewText,
         });
-        if (contactsForList.length === 0) {
-          var emptyText = "Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.";
-          if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";
-          contactsEl.innerHTML =
-            '<div class="chat-contacts-list-block">' +
-            '<p class="chat-empty">' + escapeHtml(emptyText) + "</p>" +
-            "</div>";
-          updateDialogUnreadBadges();
-          updateChatNavDot();
-        } else {
-          var contactsRenderMode = renderChatContactsListDom({
-            contactsEl: contactsEl,
-            contactsForList: contactsForList,
-            friendSet: friendSet,
-            forceRerender: forceRerender,
-          });
-          if (contactsRenderMode) {
-            updateDialogUnreadBadges();
-            if (contactsRenderMode === "rebuilt" && typeof window.chatAttachDialogButtons === "function") {
-              window.chatAttachDialogButtons();
-            }
-            updateChatNavDot();
-            return;
-          }
-        }
+        if (pokerRenderChatContactsListResult({
+          contactsEl: contactsEl,
+          contactsForList: contactsForList,
+          friendSet: friendSet,
+          showFriendsOnly: showFriendsOnly,
+          forceRerender: forceRerender,
+          updateDialogUnreadBadges: updateDialogUnreadBadges,
+          updateChatNavDot: updateChatNavDot,
+          attachDialogButtons: window.chatAttachDialogButtons,
+        })) return;
       }
     }
     try {
