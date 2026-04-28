@@ -11198,7 +11198,11 @@ function initChat() {
     resolveMyChatMemberId: resolveMyChatMemberId,
     pokerSafeChatAlert: pokerSafeChatAlert,
     setTab: setTab,
-    showConv: showConv,
+    showConv: function (userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt) {
+      if (typeof showConv === "function") {
+        return showConv(userId, userName, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt);
+      }
+    },
     resizeChatTextarea: resizeChatTextarea,
   });
   var openClubChat = chatOpenShell.openClubChat;
