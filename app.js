@@ -14954,6 +14954,10 @@ function initSpringRatingInfoModal() {
 }
 
 function getSpringRatingViewScrollTarget() {
+  if (document.body && document.body.getAttribute("data-view") === "spring-rating") {
+    var panel = document.querySelector("main.card .card__content") || document.querySelector(".card__content");
+    if (panel) return panel;
+  }
   var targets = getSpringRatingViewScrollTargets();
   return targets.length ? targets[0] : (document.scrollingElement || document.documentElement);
 }
@@ -15116,6 +15120,27 @@ function springRatingViewScrollToNextBlock(direction) {
   return targets.length > 0;
 }
 
+function springRatingViewScrollOnePage(direction) {
+  var dir = direction < 0 ? -1 : 1;
+  var target = getSpringRatingViewScrollTarget();
+  var maxScroll = getSpringRatingViewMaxScroll(target);
+  if (!target || maxScroll <= 4) return false;
+  var current = getSpringRatingViewScrollTop(target);
+  var viewportHeight =
+    target === document.body || target === document.documentElement || target === document.scrollingElement
+      ? ((window.visualViewport && window.visualViewport.height) || window.innerHeight || 0)
+      : (target.clientHeight || window.innerHeight || 0);
+  var step = Math.max(220, Math.round((viewportHeight || 0) * 0.72));
+  var next = current + step * dir;
+  if (dir > 0 && current >= maxScroll - 12) next = 0;
+  next = Math.max(0, Math.min(maxScroll, next));
+  setSpringRatingViewScrollTop(target, next);
+  try {
+    updateSpringRatingViewScrollButton();
+  } catch (eUpd) {}
+  return true;
+}
+
 function initSpringRatingViewScrollButton() {
   var btn = document.getElementById("springRatingViewScrollBtn");
   if (!btn || btn.getAttribute("data-inited") === "1") return;
@@ -15214,129 +15239,9 @@ function initSpringRatingViewScrollButton() {
     updateSpringRatingViewScrollButton();
     return;
   }
-  var dragState = null;
-  function startSpringRatingHandleDrag(y, e) {
-    var targets = getSpringRatingViewScrollTargets();
-    if (!targets.length) return false;
-    var topMin = Math.max(74, (window.visualViewport && window.visualViewport.offsetTop ? window.visualViewport.offsetTop : 0) + 74);
-    var bottomGap = 24 + Math.max(0, parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"), 10) || 0);
-    var travel = Math.max(1, window.innerHeight - topMin - btn.offsetHeight - bottomGap);
-    dragState = {
-      y: y,
-      travel: travel,
-      targets: targets.map(function (target) {
-        return {
-          target: target,
-          scrollTop: getSpringRatingViewScrollTop(target),
-          maxScroll: getSpringRatingViewMaxScroll(target)
-        };
-      }),
-      moved: false
-    };
+  btn.addEventListener("click", function (e) {
+    springRatingViewScrollOnePage(1);
     if (e && e.preventDefault) e.preventDefault();
-    return true;
-  }
-  function moveSpringRatingHandleDrag(y, e) {
-    if (!dragState || !dragState.targets || !dragState.targets.length) return;
-    var dy = y - dragState.y;
-    if (Math.abs(dy) > 18) {
-      dragState.moved = true;
-      springRatingViewScrollToNextBlock(dy > 0 ? 1 : -1);
-      dragState.y = y;
-      btn._springRatingTapScrollAt = Date.now();
-    }
-    if (e && e.preventDefault) e.preventDefault();
-  }
-  function endSpringRatingHandleDrag(e) {
-    if (!dragState) return;
-    if (!dragState.moved && dragState.targets && dragState.targets.length) {
-      springRatingViewScrollToNextBlock(1);
-      btn._springRatingTapScrollAt = Date.now();
-    }
-    dragState = null;
-    if (e && e.preventDefault) e.preventDefault();
-  }
-  btn.addEventListener("pointerdown", function (e) {
-    if (!startSpringRatingHandleDrag(e.clientY, e)) return;
-    try { btn.setPointerCapture(e.pointerId); } catch (errCapture) {}
-    var onPointerMove = function (moveEvent) {
-      moveSpringRatingHandleDrag(moveEvent.clientY, moveEvent);
-    };
-    var onPointerUp = function (upEvent) {
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
-      endSpringRatingHandleDrag(upEvent);
-    };
-    var onPointerCancel = function () {
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
-      dragState = null;
-    };
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerCancel);
-  });
-  btn.addEventListener("pointermove", function (e) {
-    moveSpringRatingHandleDrag(e.clientY, e);
-  });
-  btn.addEventListener("pointerup", function (e) {
-    endSpringRatingHandleDrag(e);
-    try { btn.releasePointerCapture(e.pointerId); } catch (err) {}
-  });
-  btn.addEventListener("pointercancel", function () {
-    dragState = null;
-  });
-  btn.addEventListener("touchstart", function (e) {
-    var touch = e.touches && e.touches[0];
-    if (!touch) return;
-    if (!startSpringRatingHandleDrag(touch.clientY, e)) return;
-    var onTouchMove = function (moveEvent) {
-      var moveTouch = moveEvent.touches && moveEvent.touches[0];
-      if (!moveTouch) return;
-      moveSpringRatingHandleDrag(moveTouch.clientY, moveEvent);
-    };
-    var onTouchEnd = function (endEvent) {
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("touchend", onTouchEnd);
-      document.removeEventListener("touchcancel", onTouchCancel);
-      endSpringRatingHandleDrag(endEvent);
-    };
-    var onTouchCancel = function () {
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("touchend", onTouchEnd);
-      document.removeEventListener("touchcancel", onTouchCancel);
-      dragState = null;
-    };
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-    document.addEventListener("touchend", onTouchEnd, { passive: false });
-    document.addEventListener("touchcancel", onTouchCancel, { passive: false });
-  }, { passive: false });
-  btn.addEventListener("touchmove", function (e) {
-    var touch = e.touches && e.touches[0];
-    if (!touch) return;
-    moveSpringRatingHandleDrag(touch.clientY, e);
-  }, { passive: false });
-  btn.addEventListener("touchend", function (e) {
-    endSpringRatingHandleDrag(e);
-  }, { passive: false });
-  btn.addEventListener("mousedown", function (e) {
-    if (!startSpringRatingHandleDrag(e.clientY, e)) return;
-    var onMove = function (moveEvent) {
-      moveSpringRatingHandleDrag(moveEvent.clientY, moveEvent);
-    };
-    var onUp = function (upEvent) {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-      endSpringRatingHandleDrag(upEvent);
-    };
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  });
-  btn.addEventListener("click", function () {
-    if (btn._springRatingTapScrollAt && Date.now() - btn._springRatingTapScrollAt < 120) return;
-    springRatingViewScrollToNextBlock(1);
   });
   document.addEventListener("scroll", updateSpringRatingViewScrollButton, true);
   window.addEventListener("resize", updateSpringRatingViewScrollButton);
