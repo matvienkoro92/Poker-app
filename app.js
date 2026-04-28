@@ -8022,7 +8022,7 @@ function setView(viewName, navOpts) {
   if (viewName === "chat") {
     document.documentElement.classList.add("app-view-chat");
     document.documentElement.classList.remove("app-view-winter-rating", "app-view-home");
-    updateChatNavDot();
+    if (typeof updateChatNavDot === "function") updateChatNavDot();
     if (window.chatListenersAttached && typeof window.chatRefresh === "function") {
       window.chatRefresh();
     } else {
@@ -11013,7 +11013,9 @@ function initChat() {
     scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
     pokerUpdateChatDmFocusFromUiState: pokerUpdateChatDmFocusFromUiState,
     pokerChatRefreshLongPollTargets: pokerChatRefreshLongPollTargets,
-    pokerResetChatDialogsViewportArtifacts: pokerResetChatDialogsViewportArtifacts,
+    pokerResetChatDialogsViewportArtifacts: function () {
+      if (typeof pokerResetChatDialogsViewportArtifacts === "function") return pokerResetChatDialogsViewportArtifacts();
+    },
     scrollMainDocumentToTop: typeof scrollMainDocumentToTop === "function" ? scrollMainDocumentToTop : null,
     pokerApplyAppTopPadding: typeof pokerApplyAppTopPadding === "function" ? pokerApplyAppTopPadding : null,
     setChatPeerVerified: setChatPeerVerified,
@@ -11065,7 +11067,9 @@ function initChat() {
     pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
     syncChatWebsiteGuestGate: syncChatWebsiteGuestGate,
     updateDialogUnreadBadges: updateDialogUnreadBadges,
-    updateChatNavDot: updateChatNavDot,
+    updateChatNavDot: function () {
+      if (typeof updateChatNavDot === "function") return updateChatNavDot();
+    },
     pokerSanitizeContactsPayloadForUi: typeof pokerSanitizeContactsPayloadForUi === "function" ? pokerSanitizeContactsPayloadForUi : null,
     tryOpenClubChatFromDialogs: function () {
       if (typeof tryOpenClubChatFromDialogs === "function") return tryOpenClubChatFromDialogs();
@@ -11161,7 +11165,9 @@ function initChat() {
     setScrollGeneralToBottomOnNextRender: function (value) { scrollGeneralToBottomOnNextRender = !!value; },
     setScrollPersonalToBottomOnNextRender: function (value) { scrollPersonalToBottomOnNextRender = !!value; },
     getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
-    pokerResetChatDialogsViewportArtifacts: pokerResetChatDialogsViewportArtifacts,
+    pokerResetChatDialogsViewportArtifacts: function () {
+      if (typeof pokerResetChatDialogsViewportArtifacts === "function") return pokerResetChatDialogsViewportArtifacts();
+    },
     updateGeneralInputLocked: updateGeneralInputLocked,
     updateChatHeaderStats: updateChatHeaderStats,
     mountChatComposer: mountChatComposer,
@@ -11460,7 +11466,7 @@ function initChat() {
   var dedupePersonalMessagesForRender = chatOutgoingHelpers.dedupePersonalMessagesForRender;
 
   function updateUnreadDots() {
-    updateChatNavDot();
+    if (typeof updateChatNavDot === "function") updateChatNavDot();
   }
   window.chatGeneralUnread = false;
   window.chatPersonalUnread = false;
