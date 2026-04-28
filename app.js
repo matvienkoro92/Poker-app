@@ -15475,388 +15475,77 @@ function initChat() {
     }
   })();
 
-  function loadMessages(opts) {
-    opts = opts || {};
-    if (!chatWithUserId || !messagesEl) return;
-    var loadForPeer = chatWithUserId;
-    var isGroupLoad = loadForPeer && String(loadForPeer).indexOf("group_") === 0;
-    var loadPersonalSeq = (window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1);
-    var pollQs = "";
-    if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
-      pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
-    }
-    if (opts.waitForChange && pollQs) {
-      pollQs += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
-    }
-    var personalCacheBeforeReq =
-      loadForPeer && personalMessagesCache[loadForPeer] && Array.isArray(personalMessagesCache[loadForPeer])
-        ? personalMessagesCache[loadForPeer]
-        : [];
-    var usePersonalDiff =
-      Date.now() < (chatBurstUntilByScope.personal || 0) &&
-      personalCacheBeforeReq.length > 0;
-    var diffQs = "";
-    if (usePersonalDiff) {
-      var lastPersonalMsg = personalCacheBeforeReq[personalCacheBeforeReq.length - 1];
-      if (lastPersonalMsg && lastPersonalMsg.id != null && lastPersonalMsg.id !== "") {
-        diffQs += "&afterId=" + encodeURIComponent(String(lastPersonalMsg.id));
-      }
-      if (lastPersonalMsg && lastPersonalMsg.time) {
-        diffQs += "&afterTime=" + encodeURIComponent(String(lastPersonalMsg.time));
-      }
-    }
-    var fastGroupQs = isGroupLoad ? "&skipPresence=1" : "";
-    var fastOpenQs = !opts.waitForChange && !usePersonalDiff ? "&fastOpen=1" : "";
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + fastOpenQs + pollQs + diffQs;
-    fetch(url, { cache: "no-store" })
-      .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
-      .then(function (data) {
-      if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
-      if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
-      if (data && data.notModified === true && data.pollRev) {
-        if (typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
-        if (data.trace && data.trace.serverNowMs) {
-          pokerChatRecordTrace("personal-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited, peer: loadForPeer });
-        }
-        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 0);
-        return;
-      }
-      if (data && data.ok) {
-        personalHasMoreBeforeByPeer[loadForPeer] = !!data.hasMoreBefore;
-        if (data.pollRev && typeof data.pollRev === "string") {
-          window.__pokerPersonalPollRev = data.pollRev;
-        }
-        if (data.isAdmin !== undefined) chatIsAdmin = !!data.isAdmin;
-        chatPeerTypingActive = !!data.peerTyping;
-        var prevPersonalMessages =
-          chatWithUserId && personalMessagesCache[chatWithUserId] && Array.isArray(personalMessagesCache[chatWithUserId])
-            ? personalMessagesCache[chatWithUserId]
-            : [];
-        var prevPersonalLatest = prevPersonalMessages.length
-          ? String(prevPersonalMessages[prevPersonalMessages.length - 1].id || "") + "|" + String(prevPersonalMessages[prevPersonalMessages.length - 1].time || "")
-          : "";
-        var messages = data.messages || [];
-        if (data.partial === true && personalCacheBeforeReq.length) {
-          messages = personalCacheBeforeReq.concat(messages || []);
-        }
-        var pendingEditP = window._pendingPersonalEditMessage;
-        if (pendingEditP && pendingEditP.id && chatWithUserId) {
-          var pePid = String(pendingEditP.id);
-          messages = messages.map(function (mp) {
-            if (mp && String(mp.id) === pePid) return pendingEditP;
-            return mp;
-          });
-          window._pendingPersonalEditMessage = null;
-        }
-        var pending = window._pendingPersonalMessage;
-        var pendingPeer = window._pendingPersonalWith;
-        if (pending && pending.id && chatWithUserId && pendingPeer && peerChatIdsEqual(chatWithUserId, pendingPeer)) {
-          if (!messages.some(function (m) { return String(m.id) === String(pending.id); })) {
-            messages = messages.concat([pending]);
-          } else {
-            window._pendingPersonalMessage = null;
-            window._pendingPersonalWith = null;
-          }
-        }
-        messages = mergeOptimisticPersonalIntoMessages(messages);
-        messages = mergeIncomingPushPersonalIntoMessages(messages, loadForPeer);
-        messages = dedupePersonalMessagesForRender(messages);
-        if (
-          window._pendingPersonalMessage &&
-          window._pendingPersonalWith &&
-          peerChatIdsEqual(window._pendingPersonalWith, loadForPeer) &&
-          pokerChatMessageHasPersistedId(window._pendingPersonalMessage.id) &&
-          messages.some(function (m) { return pokerChatMessageHasPersistedId(m.id) && String(m.id) === String(window._pendingPersonalMessage.id); })
-        ) {
-          window._pendingPersonalMessage = null;
-          window._pendingPersonalWith = null;
-        }
-        var isGrpThread =
-          data.isGroupChat === true || (chatWithUserId && String(chatWithUserId).indexOf("group_") === 0);
-        if (isGrpThread && data.groupTitle && convTitle) {
-          var gt = String(data.groupTitle).trim();
-          if (gt) {
-            setTextContentIfChanged(convTitle, gt);
-            chatWithUserName = gt;
-          }
-        } else if (!isGrpThread) {
-          var titleName =
-            data.contactName != null && String(data.contactName).trim()
-              ? String(data.contactName).trim()
-              : data.chatDisplayName != null && String(data.chatDisplayName).trim()
-                ? String(data.chatDisplayName).trim()
-                : data.userName != null && String(data.userName).trim()
-                  ? String(data.userName).trim()
-                  : "";
-          if (!titleName && messages.length && chatWithUserId) {
-            var myIdName = resolveMyChatMemberId();
-            for (var ni = messages.length - 1; ni >= 0; ni--) {
-              var nm = messages[ni];
-              if (!nm || !nm.from) continue;
-              if (myIdName && peerChatIdsEqual(nm.from, myIdName)) continue;
-              if (!peerChatIdsEqual(nm.from, chatWithUserId)) continue;
-              if (nm.fromName && String(nm.fromName).trim()) {
-                titleName = String(nm.fromName).trim();
-                break;
-              }
-            }
-          }
-          if (titleName) {
-            chatWithUserName = titleName;
-            if (convTitle) setTextContentIfChanged(convTitle, titleName);
-          }
-        }
-        if (!isGrpThread && Array.isArray(messages) && messages.length && chatWithUserId) {
-          messages = enrichPersonalThreadPeerMeta(messages, chatWithUserId, {
-            fromName: chatWithUserName || "",
-            fromAvatar: chatWithPeerAvatarUrl || "",
-            fromP21Id: data.otherP21Id != null ? data.otherP21Id : "",
-            fromPokerPlusVerified: data.otherPokerPlusVerified === true,
-          });
-        }
-        var pt = data.participantsCount != null ? data.participantsCount : "—";
-        var ol = data.onlineCount != null ? data.onlineCount : "—";
-        window.lastConvStats = pt + " уч · " + ol + " онл";
-        if (convTitleId) {
-          if (isGrpThread) {
-            setChatConvTitleIdText(pt !== "—" ? String(pt) + " уч." : "");
-          } else {
-            var titleP21 =
-              data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
-            setChatConvTitleIdText(titleP21 || "");
-            setChatPeerVerified(data.otherPokerPlusVerified === true);
-            setChatConvTitleFish(data.otherStatusLevel != null ? data.otherStatusLevel : "");
-            updateConvTypingUi();
-          }
-        }
-        var peerAvData = "";
-        if (isGrpThread) {
-          peerAvData = data.groupAvatar != null && String(data.groupAvatar).trim() ? String(data.groupAvatar).trim() : "";
-        } else {
-          peerAvData = data.otherAvatar != null && String(data.otherAvatar).trim() ? String(data.otherAvatar).trim() : "";
-        }
-        if (!peerAvData && !isGrpThread && messages.length && chatWithUserId) {
-          var myIdL = resolveMyChatMemberId();
-          for (var li = messages.length - 1; li >= 0; li--) {
-            var ml = messages[li];
-            if (!ml || !ml.from) continue;
-            if (myIdL && peerChatIdsEqual(ml.from, myIdL)) continue;
-            if (!peerChatIdsEqual(ml.from, chatWithUserId)) continue;
-            if (ml.fromAvatar) {
-              peerAvData = String(ml.fromAvatar).trim();
-              break;
-            }
-          }
-        }
-        if (isGrpThread) {
-          convGroupCanChangeAvatar =
-            data.iCanChangeGroupAvatar === true || data.iCanChangeGroupAvatar === false
-              ? !!data.iCanChangeGroupAvatar
-              : !!(data.isAdmin || data.iAmGroupCreator);
-          syncConvGroupAvatarEditUi();
-          if (peerAvData) {
-            chatWithPeerAvatarUrl = peerAvData;
-            applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
-          } else {
-            applyConvPeerAvatarHeader("", "");
-            if (convPeerAvatarPh) {
-              convPeerAvatarPh.textContent = "\uD83D\uDC65";
-              convPeerAvatarPh.classList.remove("chat-conv-peer-avatar--hidden");
-            }
-            if (convPeerAvatar) convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
-          }
-        } else {
-          convGroupCanChangeAvatar = false;
-          syncConvGroupAvatarEditUi();
-        }
-        if (!isGrpThread && peerAvData) {
-          chatWithPeerAvatarUrl = peerAvData;
-          applyConvPeerAvatarHeader(peerAvData, chatWithUserName);
-        }
-        var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
-        var nextPersonalLatest = messages.length
-          ? String(messages[messages.length - 1].id || "") + "|" + String(messages[messages.length - 1].time || "")
-          : "";
-        if (nextPersonalLatest && nextPersonalLatest !== prevPersonalLatest) {
-          pokerChatRequestPollBurst("personal");
-        }
-        var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
-        var peerLvKey = chatWithUserId ? normalizePeerIdForChat(chatWithUserId) : "";
-        var lastView = peerLvKey && lastViewedPersonal[peerLvKey] != null ? lastViewedPersonal[peerLvKey] : "";
-        var personalLastSet = !!(peerLvKey && lastViewedPersonal[peerLvKey] != null);
-        var peerNorm = peerLvKey;
-        var myIdUnread = resolveMyChatMemberId();
-        var unreadCount = personalLastSet
-          ? messages.filter(function (m) {
-              if (!pokerChatMessageIsNewerThanViewed(m.time, lastView)) return false;
-              if (isGrpThread) {
-                return !!(myIdUnread && !peerChatIdsEqual(m.from, myIdUnread));
-              }
-              return normalizePeerIdForChat(m.from) === peerNorm;
-            }).length
-          : 0;
-        // Звук лички (PWA и Mini App): когда открыт другой экран / другой диалог; общий чат в TWA по-прежнему без звука.
-        if (pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
-          var isOnPersonal = !!(isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden"));
-          if (!isOnPersonal && personalLastSet && unreadCount > 0) {
-            var lastUnreadP = null;
-            try {
-              var unreadMsgsP = messages.filter(function (m) {
-                if (!pokerChatMessageIsNewerThanViewed(m.time, lastView)) return false;
-                if (isGrpThread) {
-                  return !!(myIdUnread && !peerChatIdsEqual(m.from, myIdUnread));
-                }
-                return normalizePeerIdForChat(m.from) === peerNorm;
-              });
-              lastUnreadP = unreadMsgsP.length ? unreadMsgsP[unreadMsgsP.length - 1] : null;
-            } catch (eUnreadP) {}
-            if (lastUnreadP) {
-              var keyP = String(lastUnreadP.id || "") + "|" + String(lastUnreadP.time || "");
-              var map = window.__pokerChatSoundedPersonalByWith || (window.__pokerChatSoundedPersonalByWith = {});
-              if (keyP && map[String(chatWithUserId)] !== keyP) {
-                map[String(chatWithUserId)] = keyP;
-                pokerPlayChatMessageNotificationSound();
-              }
-            }
-          }
-        }
-        if (isChatViewActive && chatActiveTab === "personal" && convView && !convView.classList.contains("chat-conv-view--hidden") && peerLvKey) {
-          if (latest && !isNaN(Date.parse(String(latest).trim()))) {
-            lastViewedPersonal[peerLvKey] = latest;
-            saveChatLastViewed();
-          }
-          window.chatPersonalUnread = false;
-          window.chatPersonalUnreadCount = 0;
-        } else if (chatWithUserId && personalLastSet && unreadCount > 0) {
-          window.chatPersonalUnread = true;
-          window.chatPersonalUnreadCount = unreadCount;
-        } else {
-          window.chatPersonalUnread = false;
-          window.chatPersonalUnreadCount = 0;
-        }
-        if (Array.isArray(messages) && !chatIsEditingMessage) {
-          var sig = personalRenderSignature(chatWithUserId || "", messages, data.partial === true);
-          if (sig !== lastPersonalMessagesSig) {
-            personalMessagesCache[chatWithUserId] = messages.slice();
-            personalMessagesCacheMeta[chatWithUserId] = { ts: Date.now(), source: "live" };
-            try {
-              pokerWritePersonalPeerSnapshotToDisk(chatWithUserId, personalMessagesCache[chatWithUserId]);
-            } catch (eSnapP) {}
-            var fastAppendedPersonal = false;
-            if (
-              data.partial === true &&
-              messagesEl &&
-              !chatMessagesDomHasOptimisticNode(messagesEl) &&
-              !chatOutgoingState.optimisticPersonalPayload &&
-              !(window._pendingPersonalMessage && window._pendingPersonalMessage.id) &&
-              canFastAppendMessages(prevPersonalMessages, messages)
-            ) {
-              fastAppendedPersonal = fastAppendChatMessages(
-                messagesEl,
-                messages.slice(prevPersonalMessages.length),
-                buildPersonalMessagesBodyHtml,
-                function () {
-                  lastPersonalMessagesSig = sig;
-                  bindChatMsgNameProfileButtons(messagesEl);
-                  attachContextMenuForOthers(messagesEl, "personal", messagesEl);
-                  try { refreshChatSelfPinBars(); } catch (ePinFastP) {}
-                  try { scheduleSyncChatScrollBottomButtons(); } catch (eSbFastP) {}
-                }
-              );
-            }
-            if (!fastAppendedPersonal) schedulePersonalRender(messages, sig);
-          }
-        }
-        scheduleChatPostRenderSync(function () {
-          updateChatHeaderStats();
-          applyConvGroupDescription();
-          updateUnreadDots();
-        });
-        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 0);
-        if (data.trace && data.trace.serverNowMs && messages.length) {
-          var lastMsgP = messages[messages.length - 1];
-          pokerChatRecordTrace("personal-delivery", {
-            peer: loadForPeer,
-            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
-            msgAgeMs: lastMsgP && lastMsgP.time ? Math.max(0, Date.now() - Date.parse(String(lastMsgP.time))) : null,
-            partial: !!data.partial,
-          });
-        }
-      } else if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
-        messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
-        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
-      }
-    })
-      .catch(function () {
-        if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
-        if (!peerChatIdsEqual(chatWithUserId, loadForPeer)) return;
-        if (convView && !convView.classList.contains("chat-conv-view--hidden") && messagesEl) {
-          messagesEl.innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
-        }
-        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
-      });
-  }
-  window.__pokerLoadOlderPersonalMessages = function () {
-    try {
-      if (!chatWithUserId || !messagesEl) return;
-      var peerId = String(chatWithUserId);
-      var cache = personalMessagesCache[peerId] && Array.isArray(personalMessagesCache[peerId]) ? personalMessagesCache[peerId] : [];
-      if (!cache.length) return;
-      var oldest = cache[0];
-      var prevTop = messagesEl.scrollTop;
-      var prevHeight = messagesEl.scrollHeight;
-      var urlOlder =
-        base +
-        "/api/chat" +
-        pokerApiAuthQuery("?") +
-        "&with=" +
-        encodeURIComponent(peerId) +
-        "&beforeId=" +
-        encodeURIComponent(String(oldest.id || "")) +
-        "&beforeTime=" +
-        encodeURIComponent(String(oldest.time || ""));
-      fetch(urlOlder, { cache: "no-store" })
-        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
-        .then(function (data) {
-          if (!peerChatIdsEqual(chatWithUserId, peerId)) return;
-          if (!data || !data.ok || !Array.isArray(data.messages) || !data.messages.length) {
-            personalHasMoreBeforeByPeer[peerId] = !!(data && data.hasMoreBefore);
-            if (typeof renderMessages === "function") renderMessages(cache);
-            return;
-          }
-          personalHasMoreBeforeByPeer[peerId] = !!data.hasMoreBefore;
-          var merged = data.messages.concat(cache);
-          personalMessagesCache[peerId] = merged.slice();
-          personalMessagesCacheMeta[peerId] = { ts: Date.now(), source: "live" };
-          if (
-            messagesEl &&
-            Array.isArray(data.messages) &&
-            data.messages.length
-          ) {
-            var fastPrependedPersonal = fastPrependChatMessages(
-              messagesEl,
-              data.messages,
-              buildPersonalMessagesBodyHtml,
-              personalHasMoreBeforeByPeer[peerId] ? "personal" : null,
-              function () {
-                lastPersonalMessagesSig = personalRenderSignature(peerId, merged, false);
-                bindChatMsgNameProfileButtons(messagesEl);
-                attachContextMenuForOthers(messagesEl, "personal", messagesEl);
-                try { refreshChatSelfPinBars(); } catch (ePinPreP) {}
-                try { scheduleSyncChatScrollBottomButtons(); } catch (eSbPreP) {}
-              }
-            );
-            if (fastPrependedPersonal) return;
-          }
-          renderMessages(merged);
-          requestAnimationFrame(function () {
-            try {
-              if (messagesEl) messagesEl.scrollTop = Math.max(0, messagesEl.scrollHeight - prevHeight + prevTop);
-            } catch (eScrollOldP) {}
-          });
-        });
-    } catch (eOlderP) {}
-  };
+  var chatPersonalLoader = initChatPersonalLoader({
+    base: base,
+    POKER_NET_ERR: POKER_NET_ERR,
+    escapeHtml: escapeHtml,
+    pokerApiAuthQuery: pokerApiAuthQuery,
+    getChatWithUserId: function () { return chatWithUserId; },
+    getChatWithUserName: function () { return chatWithUserName; },
+    setChatWithUserName: function (value) { chatWithUserName = value; },
+    getChatWithPeerAvatarUrl: function () { return chatWithPeerAvatarUrl; },
+    setChatWithPeerAvatarUrl: function (value) { chatWithPeerAvatarUrl = value; },
+    getMessagesEl: function () { return messagesEl; },
+    getConvView: function () { return convView; },
+    getConvTitle: function () { return convTitle; },
+    getConvTitleId: function () { return convTitleId; },
+    getConvPeerAvatarPh: function () { return convPeerAvatarPh; },
+    getConvPeerAvatar: function () { return convPeerAvatar; },
+    getChatLongPollTimeoutMs: function () { return CHAT_LONG_POLL_TIMEOUT_MS; },
+    getPersonalBurstUntil: function () { return chatBurstUntilByScope.personal || 0; },
+    getPersonalHasMoreBefore: function (peerId) { return !!personalHasMoreBeforeByPeer[peerId]; },
+    setPersonalHasMoreBefore: function (peerId, value) { personalHasMoreBeforeByPeer[peerId] = !!value; },
+    setChatIsAdmin: function (value) { chatIsAdmin = !!value; },
+    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    setConvGroupCanChangeAvatar: function (value) { convGroupCanChangeAvatar = !!value; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    getChatIsEditingMessage: function () { return chatIsEditingMessage; },
+    getLastPersonalMessagesSig: function () { return lastPersonalMessagesSig; },
+    setLastPersonalMessagesSig: function (value) { lastPersonalMessagesSig = value; },
+    getOptimisticPersonalPayload: function () { return chatOutgoingState.optimisticPersonalPayload; },
+    peerChatIdsEqual: peerChatIdsEqual,
+    pokerChatRecordTrace: pokerChatRecordTrace,
+    pokerChatScheduleLongPoll: pokerChatScheduleLongPoll,
+    mergeOptimisticPersonalIntoMessages: mergeOptimisticPersonalIntoMessages,
+    mergeIncomingPushPersonalIntoMessages: mergeIncomingPushPersonalIntoMessages,
+    dedupePersonalMessagesForRender: dedupePersonalMessagesForRender,
+    pokerChatMessageHasPersistedId: pokerChatMessageHasPersistedId,
+    setTextContentIfChanged: setTextContentIfChanged,
+    resolveMyChatMemberId: resolveMyChatMemberId,
+    enrichPersonalThreadPeerMeta: enrichPersonalThreadPeerMeta,
+    setChatConvTitleIdText: setChatConvTitleIdText,
+    setChatPeerVerified: setChatPeerVerified,
+    setChatConvTitleFish: setChatConvTitleFish,
+    updateConvTypingUi: updateConvTypingUi,
+    syncConvGroupAvatarEditUi: syncConvGroupAvatarEditUi,
+    applyConvPeerAvatarHeader: applyConvPeerAvatarHeader,
+    pokerChatRequestPollBurst: pokerChatRequestPollBurst,
+    normalizePeerIdForChat: normalizePeerIdForChat,
+    lastViewedPersonal: lastViewedPersonal,
+    pokerChatMessageIsNewerThanViewed: pokerChatMessageIsNewerThanViewed,
+    pokerApiHasCredential: pokerApiHasCredential,
+    pokerReadChatMessageSoundEnabled: pokerReadChatMessageSoundEnabled,
+    pokerPlayChatMessageNotificationSound: pokerPlayChatMessageNotificationSound,
+    saveChatLastViewed: saveChatLastViewed,
+    personalRenderSignature: personalRenderSignature,
+    pokerWritePersonalPeerSnapshotToDisk: pokerWritePersonalPeerSnapshotToDisk,
+    chatMessagesDomHasOptimisticNode: chatMessagesDomHasOptimisticNode,
+    canFastAppendMessages: canFastAppendMessages,
+    fastAppendChatMessages: fastAppendChatMessages,
+    buildPersonalMessagesBodyHtml: buildPersonalMessagesBodyHtml,
+    bindChatMsgNameProfileButtons: bindChatMsgNameProfileButtons,
+    attachContextMenuForOthers: attachContextMenuForOthers,
+    refreshChatSelfPinBars: refreshChatSelfPinBars,
+    scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
+    schedulePersonalRender: schedulePersonalRender,
+    scheduleChatPostRenderSync: scheduleChatPostRenderSync,
+    updateChatHeaderStats: updateChatHeaderStats,
+    applyConvGroupDescription: applyConvGroupDescription,
+    updateUnreadDots: updateUnreadDots,
+    renderMessages: renderMessages,
+    fastPrependChatMessages: fastPrependChatMessages,
+  });
+  var loadMessages = chatPersonalLoader.loadMessages;
 
   var sendingPrivate = false;
   function appendOptimisticPersonalMessage(text, image, voice, docAttachment, replyTo) {
