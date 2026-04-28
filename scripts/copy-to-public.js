@@ -22,6 +22,26 @@ const toCopy = [
 ];
 const dirsToCopy = ['assets'];
 
+function localScriptFilesFromIndex() {
+  const indexPath = path.join(root, 'index.html');
+  if (!fs.existsSync(indexPath)) return [];
+  const html = fs.readFileSync(indexPath, 'utf8');
+  const files = [];
+  const re = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const src = String(match[1] || '').trim();
+    if (!src || /^(?:https?:)?\/\//i.test(src) || src.startsWith('data:')) continue;
+    const clean = src.replace(/^[./]+/, '').split(/[?#]/)[0];
+    if (clean && !clean.includes('..') && !files.includes(clean)) files.push(clean);
+  }
+  return files;
+}
+
+for (const file of localScriptFilesFromIndex()) {
+  if (!toCopy.includes(file)) toCopy.push(file);
+}
+
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
@@ -29,7 +49,9 @@ if (!fs.existsSync(publicDir)) {
 for (const file of toCopy) {
   const src = path.join(root, file);
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(publicDir, file));
+    const dest = path.join(publicDir, file);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
     console.log('Copied:', file);
   }
 }
