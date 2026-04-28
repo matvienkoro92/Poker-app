@@ -11965,6 +11965,7 @@ function initChat() {
   var patchCachedDeletedMessage = chatReactionHandlers.patchCachedDeletedMessage;
   var chatMsgElById = chatReactionHandlers.chatMsgElById;
   var optimisticToggleChatReaction = chatReactionHandlers.optimisticToggleChatReaction;
+  var sendReaction = chatReactionHandlers.sendReaction;
 
   var CHAT_POLL_TICK_MS = 1000;
   var CHAT_OPEN_IDLE_MS = 5000;
