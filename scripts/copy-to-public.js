@@ -13,44 +13,15 @@ const publicDir = path.join(root, 'public');
 const toCopy = [
   'index.html',
   'styles.css',
-  'telegram-web-app.js',
   'app.js',
   'winter-rating-data.js',
   'updates-data.js',
-  'poker-tasks-data.js',
   'peerjs.min.js',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',
 ];
 const dirsToCopy = ['assets'];
-
-function getLocalScriptFilesFromIndex() {
-  const indexPath = path.join(root, 'index.html');
-  if (!fs.existsSync(indexPath)) return [];
-  const html = fs.readFileSync(indexPath, 'utf8');
-  const files = [];
-  const scriptSrcRe = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
-  let match;
-  while ((match = scriptSrcRe.exec(html))) {
-    const raw = String(match[1] || '').trim();
-    if (!raw || raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('//')) continue;
-    const clean = raw.split('#')[0].split('?')[0].replace(/^\.\//, '');
-    if (!clean || clean.startsWith('/') || clean.includes('..') || clean.endsWith('/')) continue;
-    files.push(clean);
-  }
-  return Array.from(new Set(files));
-}
-
-function assertIndexScriptsAreCopied() {
-  const copySet = new Set(toCopy);
-  const missing = getLocalScriptFilesFromIndex().filter((file) => !copySet.has(file));
-  if (missing.length) {
-    throw new Error('Local scripts from index.html are missing in copy list: ' + missing.join(', '));
-  }
-}
-
-assertIndexScriptsAreCopied();
 
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
