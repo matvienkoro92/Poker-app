@@ -10953,310 +10953,67 @@ function initChat() {
       }
     } catch (eInert) {}
   }
-  function setTab(tab) {
-    pokerPushOpenTraceTransition("setTab-call", String(tab || ""));
-    if (tab === "dialogs") {
-      try {
-        var pendingDialogsDirect = window.__pendingOpenChatPersonalFromDeepLink;
-        var pendingDialogsPeer =
-          pendingDialogsDirect && pendingDialogsDirect.userId != null
-            ? String(pendingDialogsDirect.userId).trim()
-            : "";
-        if (pendingDialogsPeer) {
-          pokerPushOpenDebug("setTab-dialogs-pending-blocked", pendingDialogsPeer);
-          window.__pokerForcePushDmPeer = normalizePeerIdForChat(pendingDialogsPeer);
-          window.__pokerForcePushDmPeerUntil = Date.now() + 15000;
-          window.__pokerForceAllowPendingPushConvOpen = true;
-          try {
-            if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" &&
-                window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
-              return;
-            }
-            if (typeof pokerOpenResolvedChatPeer === "function" &&
-                pokerOpenResolvedChatPeer(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
-              return;
-            }
-            if (typeof pokerOpenChatPeerDirectFallback === "function" &&
-                pokerOpenChatPeerDirectFallback(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
-              return;
-            }
-            if (typeof pokerOpenPendingPushDmWithoutContacts === "function" &&
-                pokerOpenPendingPushDmWithoutContacts(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer)) {
-              return;
-            }
-            if (typeof pokerOpenPushDmHard === "function") {
-              pokerOpenPushDmHard(pendingDialogsPeer, pendingDialogsDirect.userName || pendingDialogsPeer);
-              return;
-            }
-          } finally {
-            window.__pokerForceAllowPendingPushConvOpen = false;
-          }
-        }
-      } catch (eSetTabDialogsPending) {}
-    }
-    chatActiveTab = tab;
-    closeSwitcherDropdown();
-    /* Раньше setTab("dialogs") только прятал dialogsView первой строкой — список диалогов не показывался; chatRefresh дополнял showDialogs(), что ломало общий/админ таб после setTab("general"). */
-    if (tab === "dialogs") {
-      pokerPushOpenSetCaller("setTab:dialogs");
-      showDialogs();
-      return;
-    }
-    if (tab === "personal" || tab === "general") {
-      try {
-        if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
-          return;
-        }
-      } catch (eTabPending) {}
-    }
-    if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-    if (tab === "general") {
-      if (generalView) { generalView.classList.remove("chat-general-view--hidden"); generalView.style.display = ""; }
-      if (personalView) personalView.classList.add("chat-personal-view--hidden");
-      if (adminsView) adminsView.classList.add("chat-admins-view--hidden");
-      window.chatGeneralUnread = false;
-      scrollGeneralToBottomOnNextRender = true;
-      try {
-        pokerHydrateChatSnapshotsFromDisk();
-      } catch (eHydTabG) {}
-      /* scrollTop до renderGeneralMessages даёт ложный max (старый/пустой DOM) и дёрганье после fetch */
-      try {
-        window.__pokerGeneralPollRev = "";
-      } catch (ePollTabG) {}
-      paintGeneralFromMemoryBeforeFetch();
-      loadGeneral();
-    } else if (tab === "personal") {
-      if (!chatWithUserId) {
-        try {
-          var pendingPersonalDirect = window.__pendingOpenChatPersonalFromDeepLink;
-          var pendingPersonalDirectPeer =
-            pendingPersonalDirect && pendingPersonalDirect.userId != null
-              ? String(pendingPersonalDirect.userId).trim()
-              : "";
-          if (pendingPersonalDirectPeer) {
-            chatWithUserId = normalizePeerIdForChat(pendingPersonalDirectPeer);
-            if (!chatWithUserName) chatWithUserName = pendingPersonalDirect.userName || pendingPersonalDirectPeer;
-          }
-          var pendingPersonalPeer = pokerGetActivePushDmTarget();
-          if (!chatWithUserId && pendingPersonalPeer) {
-            chatWithUserId = normalizePeerIdForChat(pendingPersonalPeer);
-            if (!chatWithUserName) chatWithUserName = pendingPersonalPeer;
-          }
-        } catch (eTabPersonalPending) {}
-      }
-      if (!chatWithUserId) {
-        pokerPushOpenTraceTransition("setTab-personal-no-with", "");
-        try {
-          var pendingPersonalRetry = window.__pendingOpenChatPersonalFromDeepLink;
-          var pendingPersonalRetryPeer =
-            pendingPersonalRetry && pendingPersonalRetry.userId != null
-              ? String(pendingPersonalRetry.userId).trim()
-              : "";
-          if (pendingPersonalRetryPeer) {
-            pokerPushOpenDebug("setTab-personal-direct-reroute", pendingPersonalRetryPeer);
-            if (typeof pokerOpenPushDmHard === "function" &&
-                pokerOpenPushDmHard(
-                  pendingPersonalRetryPeer,
-                  pendingPersonalRetry.userName || pendingPersonalRetryPeer,
-                  pendingPersonalRetry.peerP21Id,
-                  pendingPersonalRetry.avatar || pendingPersonalRetry.peerAvatar
-                )) {
-              return;
-            }
-          }
-        } catch (eTabPersonalDirectReroute) {}
-        pokerPushOpenSetCaller("setTab:personal-no-with");
-        showDialogs();
-        updateChatHeaderStats();
-        updateUnreadDots();
-        return;
-      }
-      if (generalView) { generalView.classList.add("chat-general-view--hidden"); generalView.style.display = "none"; }
-      if (personalView) personalView.classList.remove("chat-personal-view--hidden");
-      if (adminsView) adminsView.classList.add("chat-admins-view--hidden");
-      scrollPersonalToBottomOnNextRender = true;
-      if (!window.__pokerSuppressSetTabPersonalLoad) loadMessages();
-    } else if (tab === "admins") {
-      if (generalView) { generalView.classList.add("chat-general-view--hidden"); generalView.style.display = "none"; }
-      if (personalView) personalView.classList.add("chat-personal-view--hidden");
-      if (adminsView) adminsView.classList.remove("chat-admins-view--hidden");
-      loadAdminsOnline();
-    }
-    if (tab === "personal") window.chatPersonalUnread = false;
-    if (tab === "general") {
-      mountChatComposer("general");
-    } else if (tab === "admins") {
-      mountChatComposer("detached");
-    } else if (tab === "personal" && chatWithUserId) {
-      if (convView && !convView.classList.contains("chat-conv-view--hidden")) mountChatComposer("personal");
-      else mountChatComposer("detached");
-    }
-    updateChatHeaderStats();
-    updateUnreadDots();
-    syncChatInertForIosAccessory();
-    try {
-      scheduleSyncChatScrollBottomButtons();
-    } catch (eSbTab) {}
-    try {
-      pokerUpdateChatDmFocusFromUiState();
-    } catch (eDmTab) {}
-    pokerChatRefreshLongPollTargets();
-  }
-  function showDialogs() {
-    var callerLabel = pokerPushOpenConsumeCaller();
-    if (callerLabel) window.__pokerLastShowDialogsCaller = callerLabel;
-    try {
-      pokerPushOpenStateDebug("showDialogs-enter", callerLabel ? "src=" + callerLabel : "");
-    } catch (eShowDialogsDbg0) {}
-    var pendingPeerDialogsCommit = "";
-    try {
-      var pendingDirectDlg = window.__pendingOpenChatPersonalFromDeepLink;
-      var pendingDirectPeerDlg =
-        pendingDirectDlg && pendingDirectDlg.userId != null ? String(pendingDirectDlg.userId).trim() : "";
-      if (pendingDirectPeerDlg) {
-        window.__pokerLastShowDialogsReason = "pending-direct";
-        pokerPushOpenDebug("showDialogs-direct-blocked", pendingDirectPeerDlg);
-        chatActiveTab = "personal";
-        if (!chatWithUserId) chatWithUserId = normalizePeerIdForChat(pendingDirectPeerDlg);
-        if (!chatWithUserName) chatWithUserName = pendingDirectDlg.userName || pendingDirectPeerDlg;
-        if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function" &&
-            window.__pokerEnsureOpenPendingChatPersonalFromDeepLink()) {
-          return;
-        }
-      }
-      var pendingPeerDlgHard = pokerGetActivePushDmTarget();
-      pendingPeerDialogsCommit = pendingPeerDlgHard || "";
-      window.__pokerLastShowDialogsReason = pendingPeerDlgHard ? "pending-hard" : "";
-      if (pendingPeerDlgHard) {
-        pokerPushOpenDebug("showDialogs-hard-blocked", pendingPeerDlgHard);
-        if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) return;
-      }
-      var forcedPeerDlg = window.__pokerForcePushDmPeer;
-      var forcedUntilDlg = Number(window.__pokerForcePushDmPeerUntil || 0);
-      if (
-        forcedPeerDlg &&
-        forcedUntilDlg > Date.now() &&
-        typeof window.chatOpenConvFromDialogs === "function"
-      ) {
-        window.__pokerLastShowDialogsReason = "forced-reroute";
-        pokerPushOpenDebug("showDialogs-blocked", forcedPeerDlg);
-        window.chatOpenConvFromDialogs(forcedPeerDlg, forcedPeerDlg);
-        return;
-      }
-    } catch (eForceDialogs) {}
-    try {
-      if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
-        window.__pokerLastShowDialogsReason = "flush-pending";
-        return;
-      }
-    } catch (eDlgPending) {}
-    if (pendingPeerDialogsCommit) {
-      window.__pokerLastShowDialogsReason = "commit-blocked";
-      pokerPushOpenDebug("showDialogs-commit-blocked", pendingPeerDialogsCommit);
-      return;
-    }
-    /* После переписки+клавиатуры blur/onChatInputBlur иногда не успевает снять классы (или фокус ещё в поле) —
-       таббар остаётся в «режиме клавиатуры» / с залипшим visualViewport. Сбрасываем всегда при выходе на список. */
-    try {
-      window.__pokerLastShowDialogsReason = "commit";
-      pokerPushOpenTraceTransition("showDialogs-commit", "");
-      if (chatComposerEl && typeof chatComposerEl.blur === "function") chatComposerEl.blur();
-      var findDlgBlur = document.getElementById("chatFindByIdInputDialogs");
-      if (findDlgBlur && typeof findDlgBlur.blur === "function") findDlgBlur.blur();
-    } catch (eDlgBlur) {}
-    try {
-      if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
-        window.__pokerFinalizeChatKeyboardDismiss();
-      } else {
-        if (typeof window.__pokerClearChatKeyboardViewportState === "function") {
-          window.__pokerClearChatKeyboardViewportState();
-        }
-        if (typeof window.__pokerChatDetachVisualViewportListeners === "function") {
-          window.__pokerChatDetachVisualViewportListeners();
-        }
-        if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
-      }
-    } catch (eDlgKb) {}
-    try {
-      if (typeof scrollMainDocumentToTop === "function") scrollMainDocumentToTop();
-    } catch (eDlgScr) {}
-    try {
-      pokerResetChatDialogsViewportArtifacts();
-    } catch (eDlgReset) {}
-    chatActiveTab = "dialogs";
-    chatWithUserId = null;
-    setChatPeerVerified(false);
-    chatPeerTypingActive = false;
-    chatWithUserName = null;
-    if (convTitle) convTitle.textContent = "";
-    setChatConvTitleIdText("");
-    clearConvPeerAvatarHeader();
-    syncChatConvGroupAddMembersBtn();
-    if (dialogsView) dialogsView.classList.remove("chat-dialogs-view--hidden");
-    if (generalView) generalView.classList.add("chat-general-view--hidden");
-    if (personalView) personalView.classList.add("chat-personal-view--hidden");
-    if (listView) listView.classList.add("chat-list-view--hidden");
-    if (convView) convView.classList.add("chat-conv-view--hidden");
-    generalView.style.display = "none";
-    /* До сети: превью клуба из RAM или сразу с диска (иначе строка «Главный чат» пуста до loadContacts). */
-    try {
-      pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
-    } catch (eHydDlg) {}
-    setTimeout(function () {
-      try {
-        pokerPrefetchDiskPeersWarmup();
-      } catch (eWarmDlg) {}
-    }, 350);
-    if (window._chatGeneralCache && window._chatGeneralCache.messages && typeof updateClubChatPreview === "function") updateClubChatPreview(window._chatGeneralCache.messages);
-    loadContacts();
-    setTimeout(function () {
-      try {
-        loadGeneral();
-      } catch (eLoadGenDlg) {}
-    }, 0);
-    // На некоторых переходах между экранами (в т.ч. download) браузер может
-    // сохранить inline-трансформы/позиции для абсолютных элементов.
-    // Принудительно возвращаем верхнюю панель общего чата в корректное место.
-    try {
-      var genHeader = document.querySelector('#chatGeneralView .chat-general-header');
-      if (genHeader) {
-        genHeader.style.top = getInlineChatHeaderTopOffsetPx();
-        genHeader.style.left = "0";
-        genHeader.style.right = "0";
-        genHeader.style.transform = "none";
-        genHeader.style.width = "100%";
-        genHeader.style.maxWidth = "none";
-      }
-    } catch (err) {}
-    updateAdminShiftOnline();
-    updateChatHeaderStats();
-    updateUnreadDots();
-    mountChatComposer("detached");
-    syncChatInertForIosAccessory();
-    try {
-      scheduleSyncChatScrollBottomButtons();
-    } catch (eSbDlg) {}
-    try {
-      refreshChatSelfPinBars();
-    } catch (ePinDlg) {}
-    try {
-      if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-    } catch (eDlgFlush) {}
-    try {
-      setTimeout(function () {
-        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-      }, 120);
-    } catch (eDlgFlush2) {}
-    try {
-      setTimeout(function () {
-        if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
-      }, 320);
-    } catch (eDlgFlush3) {}
-    try {
-      pokerUpdateChatDmFocusFromUiState();
-    } catch (eDmDlg) {}
-    pokerChatRefreshLongPollTargets();
-  }
+  var chatTabDialogShell = initChatTabDialogShell({
+    getChatActiveTab: function () { return chatActiveTab; },
+    setChatActiveTab: function (value) { chatActiveTab = value; },
+    getChatWithUserId: function () { return chatWithUserId; },
+    setChatWithUserId: function (value) { chatWithUserId = value; },
+    getChatWithUserName: function () { return chatWithUserName; },
+    setChatWithUserName: function (value) { chatWithUserName = value; },
+    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    getDialogsView: function () { return dialogsView; },
+    getGeneralView: function () { return generalView; },
+    getPersonalView: function () { return personalView; },
+    getAdminsView: function () { return adminsView; },
+    getListView: function () { return listView; },
+    getConvView: function () { return convView; },
+    getConvTitle: function () { return convTitle; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    setScrollGeneralToBottomOnNextRender: function (value) { scrollGeneralToBottomOnNextRender = !!value; },
+    setScrollPersonalToBottomOnNextRender: function (value) { scrollPersonalToBottomOnNextRender = !!value; },
+    pokerPushOpenTraceTransition: pokerPushOpenTraceTransition,
+    pokerPushOpenDebug: pokerPushOpenDebug,
+    pokerPushOpenSetCaller: pokerPushOpenSetCaller,
+    pokerPushOpenConsumeCaller: pokerPushOpenConsumeCaller,
+    pokerPushOpenStateDebug: pokerPushOpenStateDebug,
+    normalizePeerIdForChat: normalizePeerIdForChat,
+    pokerOpenResolvedChatPeer: typeof pokerOpenResolvedChatPeer === "function" ? pokerOpenResolvedChatPeer : null,
+    pokerOpenChatPeerDirectFallback: typeof pokerOpenChatPeerDirectFallback === "function" ? pokerOpenChatPeerDirectFallback : null,
+    pokerOpenPendingPushDmWithoutContacts: typeof pokerOpenPendingPushDmWithoutContacts === "function" ? pokerOpenPendingPushDmWithoutContacts : null,
+    pokerOpenPushDmHard: typeof pokerOpenPushDmHard === "function" ? pokerOpenPushDmHard : null,
+    pokerGetActivePushDmTarget: pokerGetActivePushDmTarget,
+    pokerGuardDefaultDialogsOpen: typeof pokerGuardDefaultDialogsOpen === "function" ? pokerGuardDefaultDialogsOpen : null,
+    pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
+    paintGeneralFromMemoryBeforeFetch: paintGeneralFromMemoryBeforeFetch,
+    loadGeneral: loadGeneral,
+    loadMessages: loadMessages,
+    loadAdminsOnline: loadAdminsOnline,
+    loadContacts: loadContacts,
+    updateChatHeaderStats: updateChatHeaderStats,
+    updateUnreadDots: updateUnreadDots,
+    mountChatComposer: mountChatComposer,
+    syncChatInertForIosAccessory: syncChatInertForIosAccessory,
+    scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
+    pokerUpdateChatDmFocusFromUiState: pokerUpdateChatDmFocusFromUiState,
+    pokerChatRefreshLongPollTargets: pokerChatRefreshLongPollTargets,
+    pokerResetChatDialogsViewportArtifacts: pokerResetChatDialogsViewportArtifacts,
+    scrollMainDocumentToTop: typeof scrollMainDocumentToTop === "function" ? scrollMainDocumentToTop : null,
+    pokerApplyAppTopPadding: typeof pokerApplyAppTopPadding === "function" ? pokerApplyAppTopPadding : null,
+    setChatPeerVerified: setChatPeerVerified,
+    setChatConvTitleIdText: setChatConvTitleIdText,
+    clearConvPeerAvatarHeader: clearConvPeerAvatarHeader,
+    syncChatConvGroupAddMembersBtn: syncChatConvGroupAddMembersBtn,
+    pokerPrefetchDiskPeersWarmup: pokerPrefetchDiskPeersWarmup,
+    updateClubChatPreview: typeof updateClubChatPreview === "function" ? updateClubChatPreview : null,
+    updateAdminShiftOnline: updateAdminShiftOnline,
+    getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
+    refreshChatSelfPinBars: refreshChatSelfPinBars,
+    pokerFlushBottomNavAndViewportAfterChatChrome: typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function" ? pokerFlushBottomNavAndViewportAfterChatChrome : null,
+    closeSwitcherDropdown: closeSwitcherDropdown,
+  });
+  var setTab = chatTabDialogShell.setTab;
+  var showDialogs = chatTabDialogShell.showDialogs;
+
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
   function openClubChat() {
