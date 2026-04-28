@@ -33691,14 +33691,8 @@ function initChat() {
       pokerHydrateOpenDmHeaderFromContacts(userId);
     } catch (eHdrConvOpen) {}
     if (messagesEl) {
-      var snapshot = getPersonalMessagesSnapshotForOpen(userId);
-      var cached = snapshot ? snapshot.messages : null;
-      if (Array.isArray(cached) && cached.length) {
-        renderMessages(cached);
-      } else {
-        messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
-        messagesEl.scrollTop = 0;
-      }
+      messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
+      messagesEl.scrollTop = 0;
     }
     try {
       pokerSchedulePushDmHeaderHydrate(userId);
