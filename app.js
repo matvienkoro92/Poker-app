@@ -16716,44 +16716,9 @@ function initChat() {
         var contactsForList = contactsListState.contactsForList;
         var showFriendsOnly = contactsListState.showFriendsOnly;
         var friendSet = pokerBuildChatContactsFriendSet(data);
-        try {
-          var cgMx = document.getElementById("chatCreateGroupModal");
-          if (
-            cgMx &&
-            !cgMx.classList.contains("chat-create-group-modal--hidden") &&
-            typeof window.__pokerRefreshCreateGroupPickers === "function"
-          ) {
-            window.__pokerRefreshCreateGroupPickers();
-          }
-          var gaMx = document.getElementById("chatGroupAddMembersModal");
-          if (
-            gaMx &&
-            !gaMx.classList.contains("chat-create-group-modal--hidden") &&
-            typeof window.__pokerRefreshGroupAddPickers === "function"
-          ) {
-            window.__pokerRefreshGroupAddPickers();
-          }
-          var pickModalOpen =
-            (cgMx && !cgMx.classList.contains("chat-create-group-modal--hidden")) ||
-            (gaMx && !gaMx.classList.contains("chat-create-group-modal--hidden"));
-          if (
-            pickModalOpen &&
-            typeof window.__pokerFetchGeneralRosterForGroupPickIfEmpty === "function" &&
-            typeof pokerBuildGroupModalContactList === "function" &&
-            pokerBuildGroupModalContactList().length === 0
-          ) {
-            window.__pokerFetchGeneralRosterForGroupPickIfEmpty(function () {
-              try {
-                if (typeof window.__pokerRefreshCreateGroupPickers === "function") {
-                  window.__pokerRefreshCreateGroupPickers();
-                }
-                if (typeof window.__pokerRefreshGroupAddPickers === "function") {
-                  window.__pokerRefreshGroupAddPickers();
-                }
-              } catch (ePickF) {}
-            });
-          }
-        } catch (ePkRf) {}
+        pokerRefreshChatContactsGroupPickers({
+          buildGroupModalContactList: pokerBuildGroupModalContactList,
+        });
         if (showFriendsOnly) {
           var friendsRowsForList = chatCachedFriendRows();
           if (!friendsRowsForList.length && typeof window.__pokerFetchFriendsForGroupPick === "function" && !opts.friendsFetchDone) {
