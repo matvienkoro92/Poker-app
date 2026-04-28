@@ -495,6 +495,41 @@ function pokerRefreshChatContactsGroupPickers(callbacks) {
   } catch (ePkRf) {}
 }
 
+function pokerBindChatContactsFilterHandler(contactsEl, callbacks) {
+  callbacks = callbacks || {};
+  if (!contactsEl || contactsEl._chatContactsFilterBound) return;
+  contactsEl._chatContactsFilterBound = true;
+  var filterWrapEl = document.getElementById("chatContactsFilter");
+  if (!filterWrapEl) return;
+  filterWrapEl.addEventListener("click", function (e) {
+    var tb = e.target && e.target.closest ? e.target.closest(".chat-contacts-filter__tab") : null;
+    if (!tb || !filterWrapEl.contains(tb)) return;
+    var fv = tb.getAttribute("data-filter");
+    if (fv !== "friends" && fv !== "all") return;
+    try {
+      sessionStorage.setItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY, fv === "friends" ? "friends" : "all");
+    } catch (eStF) {}
+    pokerSyncChatContactsFilterTabs();
+    if (fv === "friends" && typeof window.__pokerFetchFriendsForGroupPick === "function") {
+      contactsEl.innerHTML =
+        '<div class="chat-contacts-list-block">' +
+        '<p class="chat-empty">Загружаем друзей…</p>' +
+        "</div>";
+      window.__pokerFetchFriendsForGroupPick(function () {
+        if (window.__pokerLastContactsApiData && typeof callbacks.applyContactsApiResponse === "function") {
+          callbacks.applyContactsApiResponse(window.__pokerLastContactsApiData, {
+            fromFilterOnly: true,
+            forceRerender: true,
+            friendsFetchDone: true,
+          });
+        }
+      });
+    } else if (window.__pokerLastContactsApiData && typeof callbacks.applyContactsApiResponse === "function") {
+      callbacks.applyContactsApiResponse(window.__pokerLastContactsApiData, { fromFilterOnly: true });
+    }
+  });
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
