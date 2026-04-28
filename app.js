@@ -10998,7 +10998,10 @@ function initChat() {
     pokerOpenChatPeerDirectFallback: typeof pokerOpenChatPeerDirectFallback === "function" ? pokerOpenChatPeerDirectFallback : null,
     pokerOpenPendingPushDmWithoutContacts: typeof pokerOpenPendingPushDmWithoutContacts === "function" ? pokerOpenPendingPushDmWithoutContacts : null,
     pokerOpenPushDmHard: typeof pokerOpenPushDmHard === "function" ? pokerOpenPushDmHard : null,
-    pokerGetActivePushDmTarget: pokerGetActivePushDmTarget,
+    pokerGetActivePushDmTarget: function () {
+      if (typeof pokerGetActivePushDmTarget === "function") return pokerGetActivePushDmTarget();
+      return "";
+    },
     pokerGuardDefaultDialogsOpen: typeof pokerGuardDefaultDialogsOpen === "function" ? pokerGuardDefaultDialogsOpen : null,
     pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
     paintGeneralFromMemoryBeforeFetch: paintGeneralFromMemoryBeforeFetch,
@@ -12386,7 +12389,10 @@ function initChat() {
     setScrollPersonalToBottomOnNextRender: function (value) { scrollPersonalToBottomOnNextRender = !!value; },
     setLastPersonalMessagesSig: function (value) { lastPersonalMessagesSig = value; },
     pokerPushOpenStateDebug: pokerPushOpenStateDebug,
-    pokerGetActivePushDmTarget: pokerGetActivePushDmTarget,
+    pokerGetActivePushDmTarget: function () {
+      if (typeof pokerGetActivePushDmTarget === "function") return pokerGetActivePushDmTarget();
+      return "";
+    },
     pokerPushOpenDebug: pokerPushOpenDebug,
     pokerGuardDefaultDialogsOpen: typeof pokerGuardDefaultDialogsOpen === "function" ? pokerGuardDefaultDialogsOpen : null,
     pokerPushOpenTraceTransition: pokerPushOpenTraceTransition,
@@ -12407,12 +12413,16 @@ function initChat() {
     applyConvPeerAvatarHeader: applyConvPeerAvatarHeader,
     applyConvGroupDescription: applyConvGroupDescription,
     getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
-    pokerHydrateOpenDmHeaderFromContacts: pokerHydrateOpenDmHeaderFromContacts,
+    pokerHydrateOpenDmHeaderFromContacts: function (peerId) {
+      if (typeof pokerHydrateOpenDmHeaderFromContacts === "function") return pokerHydrateOpenDmHeaderFromContacts(peerId);
+    },
     getPersonalMessagesSnapshotForOpen: getPersonalMessagesSnapshotForOpen,
     pokerMessagesForFastOpenSnapshot: pokerMessagesForFastOpenSnapshot,
     personalRenderSignature: personalRenderSignature,
     renderMessages: renderMessages,
-    pokerSchedulePushDmHeaderHydrate: pokerSchedulePushDmHeaderHydrate,
+    pokerSchedulePushDmHeaderHydrate: function (peerId) {
+      if (typeof pokerSchedulePushDmHeaderHydrate === "function") return pokerSchedulePushDmHeaderHydrate(peerId);
+    },
     loadMessages: loadMessages,
     mountChatComposer: mountChatComposer,
     syncChatInertForIosAccessory: syncChatInertForIosAccessory,
