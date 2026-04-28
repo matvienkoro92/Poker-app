@@ -33685,7 +33685,21 @@ function initChat() {
     try {
       pokerHydrateOpenDmHeaderFromContacts(userId);
     } catch (eHdrConvOpen) {}
-    if (messagesEl) {
+    var renderedOpenSnapshot = false;
+    if (!isGroupConv) {
+      try {
+        var openSnapshot = getPersonalMessagesSnapshotForOpen(userId);
+        var openMessages = openSnapshot && Array.isArray(openSnapshot.messages) ? openSnapshot.messages : null;
+        var openMeta = openSnapshot && openSnapshot.meta && typeof openSnapshot.meta === "object" ? openSnapshot.meta : null;
+        if (openMessages && openMessages.length && (!openMeta || openMeta.source !== "disk")) {
+          var openMessagesCopy = openMessages.slice();
+          lastPersonalMessagesSig = personalRenderSignature(userId || "", openMessagesCopy, false);
+          renderMessages(openMessagesCopy);
+          renderedOpenSnapshot = true;
+        }
+      } catch (eOpenSnapshot) {}
+    }
+    if (!renderedOpenSnapshot && messagesEl) {
       messagesEl.innerHTML = '<p class="chat-empty">Загрузка...</p>';
       messagesEl.scrollTop = 0;
     }
