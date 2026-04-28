@@ -12434,183 +12434,44 @@ function initChat() {
   var chatEditWith = null; // используется для PATCH personal
   var chatEditFromName = null;
 
-  function getQuotePreviewText(t) {
-    var s = (t == null ? "" : String(t)).trim();
-    if (!s) return "—";
-    var max = 60;
-    var out = s.slice(0, max);
-    if (s.length > max) out += "…";
-    return out;
-  }
+  var chatEditDeleteUi = initChatEditDeleteUi({
+    escapeHtml: escapeHtml,
+    linkTgUsernames: linkTgUsernames,
+    linkAppIds: linkAppIds,
+    linkUrls: linkUrls,
+    getMessagesEl: function () { return messagesEl; },
+    getGeneralMessagesEl: function () { return generalMessages; },
+    getChatWithUserId: function () { return chatWithUserId; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    getChatComposerDraft: function (mode) { return chatComposerDrafts[mode] || ""; },
+    setChatComposerDraft: function (mode, value) { chatComposerDrafts[mode] = value; },
+    setChatEditMode: function (value) { chatEditMode = !!value; },
+    setChatEditMessageId: function (value) { chatEditMessageId = value; },
+    setChatEditSource: function (value) { chatEditSource = value; },
+    setChatEditWith: function (value) { chatEditWith = value; },
+    getChatEditFromName: function () { return chatEditFromName; },
+    setChatEditFromName: function (value) { chatEditFromName = value; },
+    setChatIsEditingMessage: function (value) { chatIsEditingMessage = !!value; },
+    setGeneralReplyTo: function (value) { generalReplyTo = value; },
+    setPersonalReplyTo: function (value) { personalReplyTo = value; },
+    setGeneralImage: function (value) { generalImage = value; },
+    setGeneralVoice: function (value) { generalVoice = value; },
+    setGeneralDocument: function (value) { generalDocument = value; },
+    setPersonalImage: function (value) { personalImage = value; },
+    setPersonalVoice: function (value) { personalVoice = value; },
+    setPersonalDocument: function (value) { personalDocument = value; },
+    resizeChatTextarea: resizeChatTextarea,
+    updateGeneralSendBtnIcon: function () { if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon(); },
+    updatePersonalSendBtnIcon: function () { if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon(); },
+    mountChatComposer: mountChatComposer,
+    applyChatMsgTallTextTimeBelowLayout: applyChatMsgTallTextTimeBelowLayout,
+    chatMsgElById: chatMsgElById,
+  });
+  var clearChatEditUI = chatEditDeleteUi.clearChatEditUI;
+  var applyEditedMessageToDom = chatEditDeleteUi.applyEditedMessageToDom;
+  var applyDeletedMessageToDom = chatEditDeleteUi.applyDeletedMessageToDom;
+  var startChatEdit = chatEditDeleteUi.startChatEdit;
 
-  function clearChatEditUI() {
-    chatEditMode = false;
-    chatEditMessageId = null;
-    chatEditSource = null;
-    chatEditWith = null;
-    chatEditFromName = null;
-    chatIsEditingMessage = false;
-
-    generalReplyTo = null;
-    personalReplyTo = null;
-
-    try {
-      chatComposerDrafts.general = "";
-      chatComposerDrafts.personal = "";
-      if (chatComposerEl) {
-        chatComposerEl.value = "";
-        try { resizeChatTextarea(chatComposerEl); } catch (eResizeG) {}
-      }
-    } catch (e) {}
-
-    var prevG = document.getElementById("chatGeneralReplyPreview");
-    if (prevG) {
-      prevG.classList.remove("chat-reply-preview--visible");
-      var txG = prevG.querySelector(".chat-reply-preview__text");
-      if (txG) txG.textContent = "";
-    }
-    var prevP = document.getElementById("chatPersonalReplyPreview");
-    if (prevP) {
-      prevP.classList.remove("chat-reply-preview--visible");
-      var txP = prevP.querySelector(".chat-reply-preview__text");
-      if (txP) txP.textContent = "";
-    }
-
-    // Сбрасываем вложения (на всякий случай): режим редактирования только для текста.
-    generalImage = null; generalVoice = null; generalDocument = null;
-    personalImage = null; personalVoice = null; personalDocument = null;
-
-    var imgPrevG = document.getElementById("chatGeneralImagePreview");
-    if (imgPrevG) { imgPrevG.classList.remove("chat-image-preview--visible"); imgPrevG.innerHTML = ""; }
-    var voicePrevG = document.getElementById("chatGeneralVoicePreview");
-    if (voicePrevG) voicePrevG.classList.add("chat-voice-preview--hidden");
-    var fileInG = document.getElementById("chatGeneralFileInput");
-    if (fileInG) fileInG.value = "";
-    var pdfInG = document.getElementById("chatGeneralPdfInput");
-    if (pdfInG) pdfInG.value = "";
-
-    var imgPrevP = document.getElementById("chatPersonalImagePreview");
-    if (imgPrevP) { imgPrevP.classList.remove("chat-image-preview--visible"); imgPrevP.innerHTML = ""; }
-    var voicePrevP = document.getElementById("chatPersonalVoicePreview");
-    if (voicePrevP) voicePrevP.classList.add("chat-voice-preview--hidden");
-    var fileInP = document.getElementById("chatPersonalFileInput");
-    if (fileInP) fileInP.value = "";
-    var pdfInP = document.getElementById("chatPersonalPdfInput");
-    if (pdfInP) pdfInP.value = "";
-
-    try { if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon(); } catch (e3) {}
-    try { if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon(); } catch (e4) {}
-  }
-
-  function applyEditedMessageToDom(messageId, newText, source) {
-    if (!messageId) return;
-    var selector = '.chat-msg[data-msg-id="' + String(messageId).replace(/"/g, '\\"') + '"]';
-    var root = source === "personal" ? messagesEl : generalMessages;
-    if (!root) return;
-    var msgEl = root.querySelector(selector);
-    if (!msgEl) return;
-    var textEl = msgEl.querySelector(".chat-msg__text");
-    if (textEl) {
-      var safeHtml = linkTgUsernames(linkAppIds(linkUrls(escapeHtml(String(newText)).replace(/\n/g, "<br>"))));
-      textEl.innerHTML = safeHtml;
-    }
-    var footer = msgEl.querySelector(".chat-msg__footer");
-    if (footer && !footer.querySelector(".chat-msg__edited")) {
-      var span = document.createElement("span");
-      span.className = "chat-msg__edited";
-      span.textContent = "(отредактировано)";
-      footer.insertBefore(span, footer.lastElementChild);
-    }
-    requestAnimationFrame(function () {
-      applyChatMsgTallTextTimeBelowLayout(root);
-    });
-  }
-
-  function applyDeletedMessageToDom(messageId, source) {
-    if (!messageId) return false;
-    var root = source === "personal" ? messagesEl : generalMessages;
-    if (!root) return false;
-    var msgEl = chatMsgElById(root, messageId);
-    if (!msgEl) return false;
-    var next = msgEl.nextElementSibling;
-    if (next && next.classList && next.classList.contains("chat-day-divider")) {
-      var afterDivider = next.nextElementSibling;
-      if (!afterDivider || !afterDivider.classList || !afterDivider.classList.contains("chat-msg")) {
-        next.remove();
-      }
-    }
-    msgEl.remove();
-    if (!root.querySelector(".chat-msg")) {
-      root.innerHTML = '<p class="chat-empty">Сообщений пока нет</p>';
-    } else {
-      requestAnimationFrame(function () {
-        try {
-          applyChatMsgTallTextTimeBelowLayout(root);
-        } catch (eDelLayout) {}
-      });
-    }
-    return true;
-  }
-
-  function startChatEdit(src, msgId, oldText, fromName) {
-    if (!src) return;
-    // UI редактирования показываем всегда, а режим PATCH включаем только если есть id.
-    chatEditMode = !!msgId;
-    chatEditMessageId = msgId || null;
-    chatEditSource = src;
-    chatEditWith = src === "personal" ? chatWithUserId : null;
-    chatEditFromName = fromName || "Игрок";
-
-    chatIsEditingMessage = true;
-
-    // Сбрасываем предыдущие reply/вложения и показываем редактор.
-    generalReplyTo = null;
-    personalReplyTo = null;
-
-    if (src === "general") {
-      mountChatComposer("general");
-      if (chatComposerEl) {
-        chatComposerDrafts.general = String(oldText == null ? "" : oldText);
-        chatComposerEl.value = chatComposerDrafts.general;
-        try { resizeChatTextarea(chatComposerEl); } catch (e) {}
-        if (chatComposerEl.focus) chatComposerEl.focus();
-      }
-      var prevG = document.getElementById("chatGeneralReplyPreview");
-      if (prevG) {
-        var txG = prevG.querySelector(".chat-reply-preview__text");
-        if (txG) txG.textContent = "Редактирование: " + (chatEditFromName || "Игрок") + ": " + getQuotePreviewText(oldText);
-        prevG.classList.add("chat-reply-preview--visible");
-      }
-      // Подсказка: редактирование только для текста — убираем вложения.
-      generalImage = null; generalVoice = null; generalDocument = null;
-      var imgPrevG2 = document.getElementById("chatGeneralImagePreview");
-      if (imgPrevG2) { imgPrevG2.classList.remove("chat-image-preview--visible"); imgPrevG2.innerHTML = ""; }
-      var voicePrevG2 = document.getElementById("chatGeneralVoicePreview");
-      if (voicePrevG2) voicePrevG2.classList.add("chat-voice-preview--hidden");
-    } else {
-      mountChatComposer("personal");
-      if (chatComposerEl) {
-        chatComposerDrafts.personal = String(oldText == null ? "" : oldText);
-        chatComposerEl.value = chatComposerDrafts.personal;
-        try { resizeChatTextarea(chatComposerEl); } catch (e2) {}
-        if (chatComposerEl.focus) chatComposerEl.focus();
-      }
-      var prevP = document.getElementById("chatPersonalReplyPreview");
-      if (prevP) {
-        var txP = prevP.querySelector(".chat-reply-preview__text");
-        if (txP) txP.textContent = "Редактирование: " + (chatEditFromName || "Игрок") + ": " + getQuotePreviewText(oldText);
-        prevP.classList.add("chat-reply-preview--visible");
-      }
-      personalImage = null; personalVoice = null; personalDocument = null;
-      var imgPrevP2 = document.getElementById("chatPersonalImagePreview");
-      if (imgPrevP2) { imgPrevP2.classList.remove("chat-image-preview--visible"); imgPrevP2.innerHTML = ""; }
-      var voicePrevP2 = document.getElementById("chatPersonalVoicePreview");
-      if (voicePrevP2) voicePrevP2.classList.add("chat-voice-preview--hidden");
-    }
-
-    try { if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon(); } catch (e) {}
-    try { if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon(); } catch (e) {}
-  }
 
   function resizeImage(file, maxW, maxH, quality) {
     maxW = maxW || 800;
