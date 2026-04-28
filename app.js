@@ -719,21 +719,50 @@ function pokerSavePwaGuestMode(v) {
   } catch (e) {}
 }
 
+function pokerHasLiveTelegramWebViewTransport() {
+  try {
+    if (typeof window.TelegramWebviewProxy !== "undefined") return true;
+    if (window.external && "notify" in window.external) return true;
+    if (window.parent && window.parent !== window) return true;
+  } catch (eTgTransport) {}
+  return false;
+}
+
+function pokerCurrentUrlHasTelegramInitData() {
+  try {
+    var raw = String(window.location.hash || "") + "&" + String(window.location.search || "");
+    return raw.indexOf("tgWebAppData=") !== -1 || raw.indexOf("tgWebAppData%3D") !== -1;
+  } catch (eTgUrl) {
+    return false;
+  }
+}
+
+function pokerShouldPreferSavedPwaAuth(tg0) {
+  if (!tg0 || !tg0.initData) return false;
+  if (!pokerReadPwaTgSessionToken() && !pokerReadPwaVkSessionToken()) return false;
+  try {
+    if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) return true;
+  } catch (ePwaStandalone) {}
+  return !pokerHasLiveTelegramWebViewTransport() && !pokerCurrentUrlHasTelegramInitData();
+}
+
 /** Для запросов к API: Mini App — initData; PWA — pwaSession (Telegram) или pwaVkSession (ВКонтакте) */
 function pokerApiAuthQuery(lead) {
+  var tok = pokerReadPwaTgSessionToken();
+  var vkt = pokerReadPwaVkSessionToken();
   try {
     if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
-      var tokQ = pokerReadPwaTgSessionToken();
-      if (tokQ) return lead + "pwaSession=" + encodeURIComponent(tokQ);
-      var vkQ = pokerReadPwaVkSessionToken();
-      if (vkQ) return lead + "pwaVkSession=" + encodeURIComponent(vkQ);
+      if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
+      if (vkt) return lead + "pwaVkSession=" + encodeURIComponent(vkt);
     }
   } catch (eQ) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (pokerShouldPreferSavedPwaAuth(tg0)) {
+    if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
+    if (vkt) return lead + "pwaVkSession=" + encodeURIComponent(vkt);
+  }
   if (tg0 && tg0.initData) return lead + "initData=" + encodeURIComponent(tg0.initData);
-  var tok = pokerReadPwaTgSessionToken();
   if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
-  var vkt = pokerReadPwaVkSessionToken();
   if (vkt) return lead + "pwaVkSession=" + encodeURIComponent(vkt);
   return lead + "initData=";
 }
@@ -777,37 +806,49 @@ function pokerChatDisplayImageSrc(raw) {
 function pokerApiAuthJsonBody(extra) {
   var o = Object.assign({}, extra || {});
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  var tok = pokerReadPwaTgSessionToken();
+  var vkt = pokerReadPwaVkSessionToken();
   /** PWA с «Домой»: при сохранённой pwaSession не шлём initData из скрипта WebApp — иначе на сервере раньше брался чужой tg id и пуш писался не в тот Redis-ключ, что чат. */
   try {
     if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
-      var tokS = pokerReadPwaTgSessionToken();
-      if (tokS) {
-        o.pwaSession = tokS;
+      if (tok) {
+        o.pwaSession = tok;
         delete o.initData;
         delete o.pwaVkSession;
         return o;
       }
-      var vkS = pokerReadPwaVkSessionToken();
-      if (vkS) {
-        o.pwaVkSession = vkS;
+      if (vkt) {
+        o.pwaVkSession = vkt;
         delete o.initData;
         delete o.pwaSession;
         return o;
       }
     }
   } catch (ePwaBody) {}
+  if (pokerShouldPreferSavedPwaAuth(tg0)) {
+    if (tok) {
+      o.pwaSession = tok;
+      delete o.initData;
+      delete o.pwaVkSession;
+      return o;
+    }
+    if (vkt) {
+      o.pwaVkSession = vkt;
+      delete o.initData;
+      delete o.pwaSession;
+      return o;
+    }
+  }
   if (tg0 && tg0.initData) {
     o.initData = tg0.initData;
     delete o.pwaSession;
     delete o.pwaVkSession;
   } else {
-    var tok = pokerReadPwaTgSessionToken();
     if (tok) {
       o.pwaSession = tok;
       delete o.initData;
       delete o.pwaVkSession;
     } else {
-      var vkt = pokerReadPwaVkSessionToken();
       if (vkt) {
         o.pwaVkSession = vkt;
         delete o.initData;
