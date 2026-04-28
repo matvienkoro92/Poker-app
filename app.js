@@ -25450,9 +25450,9 @@ var personalHasMoreBeforeByPeer = {};
 var generalHasMoreBefore = false;
 var personalPrefetchInFlight = {};
 var PERSONAL_PREFETCH_TTL_MS = 90000;
-var PERSONAL_PREFETCH_BATCH = 4;
-/** Не запускать волну prefetch диалогов чаще (mode=contacts дергается часто — иначе N× полный GET «съедает» bandwidth). */
-var PERSONAL_PREFETCH_COOLDOWN_MS = 90000;
+var PERSONAL_PREFETCH_BATCH = 12;
+/** Не запускать волну prefetch слишком часто: ответы лёгкие, но mode=contacts дергается фоном. */
+var PERSONAL_PREFETCH_COOLDOWN_MS = 45000;
 var personalPrefetchLastBulkAt = 0;
 var chatWithUserName = null;
 var chatWithPeerAvatarUrl = null;
@@ -33870,7 +33870,7 @@ function initChat() {
       picked.push(id);
     }
     picked.forEach(function (id, idx) {
-      setTimeout(function () { prefetchPersonalMessages(id); }, idx * 120);
+      setTimeout(function () { prefetchPersonalMessages(id); }, idx * 70);
     });
   }
   function enrichPersonalThreadPeerMeta(messages, peerId, fallbackMeta) {
