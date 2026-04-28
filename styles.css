@@ -3862,8 +3862,9 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body {
   overflow: hidden !important;
 }
-/* Клавиатура в чате (включая поиск в списке диалогов): таббар перекрывал поле ввода в PWA — скрываем всегда */
-html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"]) .bottom-nav {
+/* Клавиатура в открытом треде: таббар перекрывает поле ввода в PWA. В списке диалогов таббар остаётся доступен. */
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden)) .bottom-nav,
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden)) .bottom-nav {
   transform: translate3d(0, 100%, 0);
   opacity: 0;
   pointer-events: none;
@@ -3878,17 +3879,18 @@ html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard
 html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .card__header {
   display: none !important;
 }
-/* Внутри общего чата или личного чата скрываем только верхнее меню: нижний таббар остаётся доступен. */
+/* Внутри общего чата или личного чата скрываем верхнее меню и нижний таббар. */
 .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .card__header,
 .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .card__header {
   display: none !important;
 }
 #app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) ~ .bottom-nav,
 #app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) ~ .bottom-nav {
-  transform: translate3d(0, 0, 0);
-  opacity: 1;
-  pointer-events: auto;
-  visibility: visible;
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  /* Без анимации: иначе ~200ms таббар «уезжает», вёрстка чата пересчитывается и лента визуально прыгает вверх—вниз при первом входе в тред. */
   transition: none !important;
 }
 /* Личка: верхний inset у #app — под шапку диалога у кромки экрана */
@@ -13000,14 +13002,6 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
     calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + var(--chat-composer-edge-gap))
   ) !important;
   box-sizing: border-box !important;
-}
-
-body[data-view="chat"]:not(.chat-keyboard-open) .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
-body[data-view="chat"]:not(.chat-keyboard-open) .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
-  padding-bottom: max(
-    var(--chat-thread-bottom-gap),
-    calc(var(--app-bottom-tabbar-height, 64px) + var(--chat-composer-edge-gap) + 8px)
-  ) !important;
 }
 
 @media (max-width: 380px) {

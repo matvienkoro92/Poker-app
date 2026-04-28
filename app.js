@@ -8125,7 +8125,32 @@ function pokerApplyBottomTabbarPad() {
   try {
     if (typeof pokerSyncIosPwaRootClass === "function") pokerSyncIosPwaRootClass();
   } catch (eIosCls) {}
-  /* Таббар остаётся доступным и в тредах чата, поэтому его высоту измеряем так же, как на остальных экранах. */
+  /* В треде общий/личный таббар скрыт — inline pad с прошлого экрана не должен жить на :root (гонка после клавиатуры). */
+  try {
+    if (document.body && document.body.getAttribute("data-view") === "chat") {
+      var gvPad = document.getElementById("chatGeneralView");
+      var cvPad = document.getElementById("chatConvView");
+      var visibleThreadInput = null;
+      try {
+        visibleThreadInput = document.querySelector(
+          '.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area, ' +
+          '.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area, ' +
+          'body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area, ' +
+          'body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area'
+        );
+      } catch (eChatPadQuery) {}
+      var threadPad =
+        !!(gvPad && !gvPad.classList.contains("chat-general-view--hidden")) ||
+        !!(cvPad && !cvPad.classList.contains("chat-conv-view--hidden")) ||
+        !!(visibleThreadInput && visibleThreadInput.getBoundingClientRect && visibleThreadInput.getBoundingClientRect().height > 0);
+      if (threadPad) {
+        document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
+        pokerApplyBottomTabbarPad._lastPad = null;
+        if (typeof pokerSyncPwaIosBottomNavGap === "function") pokerSyncPwaIosBottomNavGap();
+        return;
+      }
+    }
+  } catch (eChatPad) {}
   var tabbarGapPx =
     document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "home" ? 5 : 15;
   if (pokerApplyBottomTabbarPad._lastGap !== tabbarGapPx) {
