@@ -29129,7 +29129,7 @@ function initChat() {
       if (personalView) personalView.classList.remove("chat-personal-view--hidden");
       if (adminsView) adminsView.classList.add("chat-admins-view--hidden");
       scrollPersonalToBottomOnNextRender = true;
-      loadMessages();
+      if (!window.__pokerSuppressSetTabPersonalLoad) loadMessages();
     } else if (tab === "admins") {
       if (generalView) { generalView.classList.add("chat-general-view--hidden"); generalView.style.display = "none"; }
       if (personalView) personalView.classList.add("chat-personal-view--hidden");
@@ -29510,7 +29510,12 @@ function initChat() {
     chatWithUserId = userId;
     chatWithUserName = userName || userId;
     chatPeerTypingActive = false;
-    setTab("personal");
+    window.__pokerSuppressSetTabPersonalLoad = true;
+    try {
+      setTab("personal");
+    } finally {
+      window.__pokerSuppressSetTabPersonalLoad = false;
+    }
     showConv(userId, userName || userId, peerP21Id, peerAvatarOpt, peerVerifiedOpt, peerStatusLevelOpt);
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
@@ -33633,19 +33638,6 @@ function initChat() {
         }
         if (convPeerAvatar) convPeerAvatar.classList.add("chat-conv-peer-avatar--hidden");
       }
-    } else if (userId && personalMessagesCache[userId] && Array.isArray(personalMessagesCache[userId])) {
-      var msgsC = personalMessagesCache[userId];
-      var myIdC = resolveMyChatMemberId();
-      for (var ci = msgsC.length - 1; ci >= 0; ci--) {
-        var cm = msgsC[ci];
-        if (!cm || !cm.from) continue;
-        if (myIdC && peerChatIdsEqual(cm.from, myIdC)) continue;
-        if (!peerChatIdsEqual(cm.from, userId)) continue;
-        if (cm.fromAvatar) {
-          peerAvCache = String(cm.fromAvatar).trim();
-          break;
-        }
-      }
     }
     var peerAv = isGroupConv ? (peerAvParam || peerAvCache || "") : peerAvParam || peerAvCache || "";
     chatWithPeerAvatarUrl = peerAv || null;
@@ -33694,7 +33686,9 @@ function initChat() {
     try {
       pokerSchedulePushDmHeaderHydrate(userId);
     } catch (eHdrConvSched) {}
-    loadMessages();
+    setTimeout(function () {
+      if (chatWithUserId && peerChatIdsEqual(chatWithUserId, userId)) loadMessages();
+    }, 0);
     pokerPushOpenTraceTransition("showConv-after-load", String(userId || ""));
     mountChatComposer("personal");
     syncChatInertForIosAccessory();
@@ -39537,7 +39531,12 @@ function initChat() {
           return;
         }
         function doShow(tgUserId, peerP21) {
-          setTab("personal");
+          window.__pokerSuppressSetTabPersonalLoad = true;
+          try {
+            setTab("personal");
+          } finally {
+            window.__pokerSuppressSetTabPersonalLoad = false;
+          }
           showConv(tgUserId, userName, peerP21);
         }
         if (raw.startsWith("tg_")) {
