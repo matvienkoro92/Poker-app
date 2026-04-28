@@ -96,7 +96,7 @@ add("Chat shell has dialog, general and conversation views", () =>
 );
 
 add("Chat open keeps instant local snapshots", () =>
-  hasAll("app", [
+  hasAll("client", [
     "pokerTryReadContactsCache",
     "pokerWriteContactsCache",
     "pokerTryReadGeneralSnapshotFromDisk",
