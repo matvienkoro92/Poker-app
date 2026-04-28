@@ -1,0 +1,6 @@
+/* Rating CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
+@import url("./styles-rating-learning-games.css");
+@import url("./styles-rating-raffles.css");
+@import url("./styles-rating-home-download.css");
+@import url("./styles-rating-tables-modals.css");
+@import url("./styles-rating-chat-modals.css");

@@ -1,0 +1,757 @@
+/* Tournament day tooltip, expandable card, ticket and freeroll table visuals.
+ * Extracted from styles-hall.css; keep import order in styles-hall.css stable. */
+
+/* Обёртка «Турнир дня» для всплывающей подсказки */
+.feature-tooltip-wrap {
+  position: relative;
+}
+
+.tournament-day-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  min-width: 200px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tournament-day-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  border: 6px solid transparent;
+  border-top-color: rgba(168, 85, 247, 0.4);
+}
+
+.feature-tooltip-wrap:hover .tournament-day-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.tournament-day-tooltip__logo {
+  font-size: 15px;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.tournament-day-tooltip__row {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.tournament-day-tooltip__row + .tournament-day-tooltip__row {
+  margin-top: 2px;
+}
+
+.tournament-day-tooltip__note {
+  font-size: 11px;
+  color: var(--text-muted, rgba(148, 163, 184, 0.9));
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  line-height: 1.35;
+}
+
+/* Карточка «Турнир дня» с возможностью разворота */
+.tournament-day-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border-radius: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.tournament-day-card__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  border-radius: inherit;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.tournament-day-card__toggle:hover {
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.tournament-day-card__toggle .feature__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tournament-day-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.tournament-day-line {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tournament-day-line .feature__timer {
+  display: inline;
+  margin-top: 0;
+  min-width: 6ch;
+}
+
+.tournament-day-card__chevron {
+  flex-shrink: 0;
+  font-size: 10px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.tournament-day-wrap--expanded .tournament-day-card__chevron {
+  transform: rotate(180deg);
+}
+
+.tournament-day-expanded {
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.tournament-day-expanded[hidden] {
+  display: none;
+}
+
+.tournament-day-expanded__inner {
+  padding: 12px 16px 16px;
+  margin: 0 16px 14px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.tournament-day-expanded__inner .tournament-day-tooltip__logo {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+}
+
+.tournament-day-expanded__inner .tournament-day-tooltip__row + .tournament-day-tooltip__row {
+  margin-top: 2px;
+}
+
+.tournament-day-expanded__inner .tournament-day-tooltip__note {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.tournament-day-expanded__link {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.tournament-day-card__remind-now {
+  margin: 8px 16px 4px;
+}
+
+.tournament-day-card__remind-now-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px !important;
+}
+
+.tournament-day-card__remind-options {
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tournament-day-card__remind-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.tournament-day-card__remind-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #a855f7;
+}
+
+.feature__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.feature__icon--green {
+  background: radial-gradient(circle at 30% 20%, #22c55e, #16a34a);
+  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.45);
+}
+
+.feature__icon--purple {
+  background: radial-gradient(circle at 30% 20%, #a855f7, #7c3aed);
+  box-shadow: 0 10px 18px rgba(168, 85, 247, 0.45);
+}
+
+.feature__icon--orange {
+  background: radial-gradient(circle at 30% 20%, #fb923c, #f97316);
+  box-shadow: 0 10px 18px rgba(249, 115, 22, 0.45);
+}
+
+.feature__icon--gold {
+  background: radial-gradient(circle at 30% 20%, #fbbf24, #f59e0b);
+  box-shadow: 0 10px 18px rgba(245, 158, 11, 0.45);
+}
+
+.feature__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feature__title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.feature__desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.feature__text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.feature__timer {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Турнир дня: сверху стол с паролем на всю ширину + стрелка, турнир дня, внизу справа билет + стрелка вверх */
+.tournament-day {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.tournament-day__top {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tournament-day--hidden {
+  display: none !important;
+}
+
+.tournament-day__arrow--to-tournament {
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+.tournament-day__bottom-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.tournament-day__bottom-row .tournament-day__freeroll-table + .lottery-ticket {
+  margin-left: 16px;
+}
+
+.tournament-day__bottom-row .tournament-day__freeroll-table {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tournament-day__arrow--left {
+  flex-shrink: 0;
+}
+
+.tournament-day__bottom-row .lottery-ticket {
+  flex-shrink: 0;
+}
+
+.tournament-day__freeroll-heading {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text);
+}
+
+.tournament-day__freeroll-table {
+  width: 100%;
+  max-width: 100%;
+}
+
+.private-table-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.private-table-link:hover .private-table {
+  filter: brightness(1.08);
+}
+
+.private-table-link:active .private-table {
+  filter: brightness(0.98);
+}
+
+/* Лотерейный билет — в стиле стола Poker21 (овал, тёмный фон, золотая рамка), меньше, по центру */
+.lottery-ticket {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 12px;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+  border: 2px solid #d97706;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+.lottery-ticket--table-style {
+  width: auto;
+  max-width: 200px;
+  padding: 14px 18px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #1c1c1e 0%, #141416 50%, #0e0e10 100%);
+  border: none;
+  border-radius: 50% / 38%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(180, 150, 80, 0.35),
+    0 0 0 2px rgba(120, 90, 40, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.lottery-ticket--table-style::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  border: 1px solid rgba(200, 170, 100, 0.2);
+  pointer-events: none;
+}
+
+.lottery-ticket__text {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #78350f;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.lottery-ticket--table-style .lottery-ticket__text {
+  font-size: 11px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.lottery-ticket--link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.lottery-ticket--link:hover {
+  filter: brightness(1.1);
+}
+
+.lottery-ticket__link-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+.lottery-ticket--blink {
+  animation: lottery-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes lottery-blink {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.85; filter: brightness(1.15); }
+}
+
+/* Стол фриролла — овал, тёмное сукно, аккуратная металлическая рамка */
+.private-table {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  padding: 18px 22px 16px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #1c1c1e 0%, #141416 50%, #0e0e10 100%);
+  border: none;
+  border-radius: 50% / 38%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(180, 150, 80, 0.35),
+    0 0 0 2px rgba(120, 90, 40, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  text-align: center;
+}
+
+.private-table::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  border: 1px solid rgba(200, 170, 100, 0.2);
+  pointer-events: none;
+}
+
+.private-table__logo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+.private-table__logo--freeroll {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.private-table__freeroll-label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #e63946;
+}
+
+.private-table__freeroll-date {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.private-table__logo-name {
+  font-family: "Pacifico", cursive;
+  font-size: 22px;
+  font-weight: 400;
+  color: #e63e4a;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.private-table__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.private-table__lock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b8a050;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+.private-table__password-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+
+.private-table__combo {
+  display: flex;
+  gap: 2px;
+}
+
+.private-table__digit {
+  width: 24px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #c9a227 0%, #a78b2a 45%, #8b7318 100%);
+  border: 1px solid rgba(220, 190, 120, 0.4);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.private-table__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.private-table__meta-line1 {
+  line-height: 1.35;
+  white-space: nowrap;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.03em;
+}
+
+.private-table__meta-line2 {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tournament-day__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tournament-day__arrow svg {
+  stroke-width: 2.5;
+}
+
+.tournament-day__arrow--bold {
+  color: #c2410c;
+}
+
+.tournament-day__arrow--bold svg {
+  stroke-width: 4;
+  filter: drop-shadow(0 0 1px #9a3412);
+}
+
+.tournament-day__arrow--between {
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+.tournament-day__main-table {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 4px;
+}
+
+.tournament-day__main-table.poker-table {
+  max-width: none;
+}
+
+/* Турнир дня — тот же стиль сукна, рамка чуть выразительнее */
+.poker-table.poker-table--private-style {
+  padding: 18px 22px 16px;
+  gap: 10px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+    linear-gradient(180deg, #1c1c1e 0%, #141416 50%, #0e0e10 100%) !important;
+  border: none;
+  border-radius: 50% / 38%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(200, 170, 100, 0.4),
+    0 0 0 3px rgba(160, 130, 60, 0.25),
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 12px 36px rgba(0, 0, 0, 0.35);
+  color: #fff;
+}
+
+.poker-table--private-style::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  border: 1px solid rgba(200, 170, 100, 0.25);
+  pointer-events: none;
+}
+
+.poker-table--private-style .poker-table__logo-name {
+  font-family: "Pacifico", cursive;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #e63e4a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.poker-table--private-style .poker-table__title {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e63e4a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.poker-table--private-style .poker-table__date,
+.poker-table--private-style .poker-table__info {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.poker-table--private-style .poker-table__tag {
+  color: #9fcc9f;
+  letter-spacing: 0.06em;
+}
+
+.poker-table__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.poker-table__trophy {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.poker-table--featured .poker-table__title {
+  color: #fef08a;
+  text-shadow: 0 0 12px rgba(254, 240, 138, 0.5);
+}
+
+.poker-table {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  padding: 16px 20px;
+  background: linear-gradient(160deg, #0d5c2e 0%, #0a4723 40%, #083d1e 100%);
+  border-radius: 50% / 30%;
+  border: 3px solid #1a3d27;
+  box-shadow:
+    inset 0 4px 12px rgba(255, 255, 255, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #e8f5e9;
+  text-align: center;
+}
+
+.poker-table--small {
+  max-width: 260px;
+  padding: 10px 14px;
+  gap: 2px;
+}
+
+.poker-table__title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.poker-table__date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.poker-table__info {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.poker-table__tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a5d6a7;
+}
+
+.poker-table__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.poker-table__detail {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+}
+

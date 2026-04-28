@@ -1,0 +1,1746 @@
+/* Rating date/calendar, compact view, screenshots and rating lightbox rules.
+ * Extracted from styles-hall.css; keep import order in styles-hall.css stable. */
+
+.winter-rating__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+/* Модалка игрока: таблица может шире экрана — горизонтальный скролл в обёртке */
+.winter-rating-player-modal__table.winter-rating__table {
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
+}
+/* Итоговая таблица — крупный шрифт */
+#winterRatingTableWrap .winter-rating__table {
+  font-size: 16px;
+}
+#winterRatingTableWrap .winter-rating__table th,
+#winterRatingTableWrap .winter-rating__table td {
+  padding: 10px 12px;
+}
+.winter-rating__table th,
+.winter-rating__table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.winter-rating__table tr.winter-rating__row--gold {
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.2), transparent);
+}
+.winter-rating__table tr.winter-rating__row--gold td:first-child {
+  font-weight: 700;
+}
+.winter-rating__table tr.winter-rating__row--silver {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.2), transparent);
+}
+.winter-rating__table tr.winter-rating__row--silver td:first-child {
+  font-weight: 600;
+}
+.winter-rating__table tr.winter-rating__row--bronze {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.2), transparent);
+}
+.winter-rating__table tr.winter-rating__row--bronze td:first-child {
+  font-weight: 600;
+}
+.winter-rating__table tr.winter-rating__row--gold {
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.2) 0%, transparent 100%);
+}
+.winter-rating__table tr.winter-rating__row--silver {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.25) 0%, transparent 100%);
+}
+.winter-rating__table tr.winter-rating__row--bronze {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.2) 0%, transparent 100%);
+}
+.winter-rating__table tr.winter-rating__row--gold .winter-rating__place-medal,
+.winter-rating__table tr.winter-rating__row--silver .winter-rating__place-medal,
+.winter-rating__table tr.winter-rating__row--bronze .winter-rating__place-medal {
+  font-size: 1.1em;
+}
+.winter-rating__table th {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.winter-rating__table td {
+  color: var(--text);
+}
+.winter-rating__table tbody tr:last-child td {
+  border-bottom: none;
+}
+.winter-rating__table-total-row td {
+  border-top: 1px solid var(--border-subtle);
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-top: 10px;
+}
+/* Итоговая таблица: последняя колонка «Приз» компактно */
+#winterRatingTableOverall th:last-child,
+#winterRatingTableOverall td:last-child {
+  white-space: nowrap;
+  text-align: right;
+  padding-left: 6px;
+  padding-right: 8px;
+  min-width: 0;
+  width: 1%;
+}
+#winterRatingTableOverall th:last-child {
+  padding-right: 10px;
+}
+.winter-rating__week-tops-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 12px 10px;
+}
+.winter-rating-week__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.winter-rating-week__summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.winter-rating-week__toggle::after {
+  content: "▾";
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+.winter-rating-week--collapsed .winter-rating-week__toggle::after {
+  transform: rotate(-90deg);
+}
+.winter-rating-week__body[hidden] {
+  display: none !important;
+}
+.winter-rating__single-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 12px 16px;
+}
+.winter-rating__single-top-wrap {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+}
+.winter-rating__single-top-wrap--march[hidden] {
+  display: none !important;
+}
+.winter-rating__past-week-section {
+  margin: 16px 12px 20px;
+  padding: 12px 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.12), transparent 55%),
+    rgba(15, 23, 42, 0.7);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.65);
+}
+.winter-rating__past-week-section[hidden] {
+  display: none !important;
+}
+.winter-rating__past-week-heading {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.winter-rating__past-week-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.winter-rating__past-week-row .winter-rating__past-week-wrap {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.winter-rating__past-week-row .winter-rating__past-week-title {
+  font-size: 12px;
+}
+.winter-rating__past-week-row .winter-rating__single-top-list {
+  font-size: 11px;
+}
+.winter-rating__past-week-wrap {
+  margin: 8px 12px 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+}
+.winter-rating__past-week-wrap[hidden] {
+  display: none !important;
+}
+.winter-rating__past-week-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.winter-rating__past-week-total {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.winter-rating__past-week-total--below {
+  margin: 10px 0 0;
+}
+[data-theme="light"] .winter-rating__past-week-wrap {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+.winter-rating__single-top--sublabel {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.winter-rating__single-top {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.winter-rating__single-top--title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.winter-rating__single-top-link {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: normal;
+  word-break: break-word;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.winter-rating__single-top-link:hover,
+.winter-rating__single-top-link:focus-visible {
+  background: rgba(51, 65, 85, 0.65);
+  border-color: rgba(251, 191, 36, 0.45);
+  outline: none;
+}
+/* Топ заносов: места без привязанного скрина — тот же вид, без клика */
+.winter-rating__single-top-static {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 8px;
+  cursor: default;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+.winter-rating__single-top-expand {
+  margin-top: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(30, 58, 95, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.winter-rating__single-top-expand:hover {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+.winter-rating__single-top-more {
+  margin-top: 6px;
+}
+.winter-rating__single-top-more[hidden] {
+  display: none !important;
+}
+.winter-rating__single-top-list {
+  margin: 0;
+  padding-left: 0;
+  font-size: 12px;
+  list-style: none;
+}
+.winter-rating__single-top-item {
+  margin: 0 0 2px;
+  white-space: nowrap;
+}
+
+/* Топ-15: карточка по центру (рейтинг + зал славы) */
+#winterRatingSingleTopWrap,
+.view[data-view="hall-of-fame"] .hall-of-fame__single-top-wrap {
+  margin-left: auto;
+  margin-right: auto;
+  flex: 0 1 auto;
+  width: 100%;
+  max-width: 420px;
+}
+
+
+.view[data-view="hall-of-fame"] .hall-of-fame__blog-top15-copy-wrap {
+  align-items: center;
+}
+.view[data-view="hall-of-fame"] .hall-of-fame__blog-top15-copy-hint {
+  text-align: center;
+}
+
+.winter-rating__week-tops-hint {
+  margin: 12px 12px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.winter-rating.spring-rating .winter-rating__week-tops-hint,
+.winter-rating.spring-rating .winter-rating__week-tops-row {
+  display: none;
+}
+.winter-rating__week-top-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(22, 45, 65, 0.5);
+  border: 1px solid rgba(186, 230, 253, 0.22);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.winter-rating__week-top-btn:hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+[data-theme="light"] .winter-rating__week-top-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+[data-theme="light"] .winter-rating__week-top-btn:hover {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+.winter-rating__week-top-btn-label {
+  display: block;
+  font-weight: 700;
+}
+.winter-rating__week-top-btn-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.winter-rating__week-top-preview-line {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.winter-rating__week-top-preview-ellipsis {
+  display: block;
+  margin-top: 2px;
+}
+.winter-rating__week-top-list {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.winter-rating__week-top-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px dotted rgba(148, 163, 184, 0.25);
+}
+.winter-rating__week-top-item:last-child {
+  border-bottom: none;
+}
+.winter-rating__week-top-num {
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 1.2em;
+}
+.winter-rating__week-top-list .winter-rating__nick-btn {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.winter-rating__week-top-reward {
+  font-weight: 700;
+  color: #bae6fd;
+  white-space: nowrap;
+}
+[data-theme="light"] .winter-rating__week-top-reward {
+  color: #0284c7;
+}
+.winter-rating__week-top-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Модалка «Топы за неделю» — в стиле покерного клуба */
+.winter-rating-week-top-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.winter-rating-week-top-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.winter-rating-week-top-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  cursor: pointer;
+}
+.winter-rating-week-top-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(175deg, #0b1220 0%, #020617 100%);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+[data-theme="light"] .winter-rating-week-top-modal__inner {
+  background: linear-gradient(175deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: rgba(148, 163, 184, 0.55);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+.winter-rating-week-top-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.winter-rating-week-top-modal__close:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+.winter-rating-week-top-modal__title {
+  margin: 0 40px 14px 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+.winter-rating-week-top-modal__prize {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.winter-rating-week-top-modal__list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0 6px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-header-nick {
+  flex: 1;
+  min-width: 0;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-item .winter-rating__nick-btn {
+  flex: 1;
+  min-width: 0;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-prize {
+  font-weight: 700;
+  color: var(--accent, #d4af37);
+  white-space: nowrap;
+  min-width: 4.5em;
+  text-align: right;
+}
+.winter-rating-week-top-modal__list--with-prize .winter-rating__week-top-header-prize {
+  min-width: 4.5em;
+  text-align: right;
+}
+.winter-rating-week-top-modal__share-row {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.winter-rating-week-top-modal__share-btn.winter-rating__share-btn--copy-icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+  color: #0f172a;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.winter-rating-week-top-modal__share-btn.winter-rating__share-btn--copy-icon:hover {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 0 6px 22px rgba(251, 191, 36, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.winter-rating-week-top-modal__share-btn.winter-rating__share-btn--copy-icon::before {
+  display: none;
+}
+.winter-rating-week-top-modal__share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(186, 230, 253, 0.5);
+  background: rgba(56, 189, 248, 0.15);
+  color: #bae6fd;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, border-color 0.2s;
+}
+.winter-rating-week-top-modal__share-btn:hover {
+  background: rgba(56, 189, 248, 0.28);
+  border-color: rgba(186, 230, 253, 0.7);
+}
+[data-theme="light"] .winter-rating-week-top-modal__share-btn {
+  color: #0369a1;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+[data-theme="light"] .winter-rating-week-top-modal__share-btn:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: rgba(56, 189, 248, 0.6);
+}
+[data-theme="light"] .winter-rating-week-top-modal__share-btn.winter-rating__share-btn--copy-icon {
+  color: #0f172a;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border-color: rgba(251, 191, 36, 0.9);
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
+}
+[data-theme="light"] .winter-rating-week-top-modal__share-btn.winter-rating__share-btn--copy-icon:hover {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+}
+
+/* Модалка «Рейтинг на дату» по клику в календаре */
+.winter-rating-date-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.winter-rating-date-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.winter-rating-date-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  cursor: pointer;
+}
+.winter-rating-date-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 48px 16px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.winter-rating-date-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.12);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.winter-rating-date-modal__close:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+.winter-rating-date-modal__title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.winter-rating-date-modal__body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+.winter-rating-date-modal__body .winter-rating__date-panel {
+  display: block;
+  padding: 0;
+  border: none;
+}
+.winter-rating-date-modal__body .winter-rating__screenshots {
+  margin-bottom: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .winter-rating-date-modal__body .winter-rating__screenshots {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+}
+.winter-rating-date-modal__body .winter-rating__date-table-wrap {
+  overflow-x: auto;
+}
+
+.winter-rating__dates-caption {
+  margin: 24px 12px 8px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.winter-rating__dates-hint {
+  margin: 0 12px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.winter-rating__dates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 12px;
+}
+/* Календарь по датам */
+.winter-rating__calendar-wrap {
+  margin-bottom: 10px;
+}
+.winter-rating__calendar {
+  background: rgba(15, 23, 42, 0.25);
+  border-radius: 12px;
+  padding: 12px 10px 10px;
+  border: 1px solid var(--border-subtle);
+}
+[data-theme="light"] .winter-rating__calendar {
+  background: rgba(248, 250, 252, 0.8);
+}
+.winter-rating__calendar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.winter-rating__calendar-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  flex: 1;
+}
+.winter-rating__calendar-nav {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+  background: rgba(148, 163, 184, 0.2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.winter-rating__calendar-nav:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.35);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+.winter-rating__calendar-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.winter-rating__calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.winter-rating__calendar-wday {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.winter-rating__calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.winter-rating__calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.winter-rating__calendar-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  min-width: 0;
+}
+.winter-rating__calendar-cell--empty {
+  visibility: hidden;
+}
+.winter-rating__calendar-cell--no-data {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+.winter-rating__calendar-cell--day {
+  border: none;
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.winter-rating__calendar-cell--day:hover {
+  background: rgba(212, 175, 55, 0.25);
+}
+.winter-rating__calendar-cell--day.winter-rating__calendar-cell--active {
+  background: rgba(212, 175, 55, 0.35);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.4);
+}
+[data-theme="light"] .winter-rating__calendar-cell--day:hover {
+  background: rgba(249, 115, 22, 0.2);
+}
+[data-theme="light"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--active {
+  background: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.4);
+}
+/* Список дат: кнопки скрыты, открытие только через календарь */
+.winter-rating__dates .winter-rating__date-item > .winter-rating__date-btn {
+  display: none;
+}
+.winter-rating__dates .winter-rating__date-item {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.winter-rating__dates .winter-rating__date-item .winter-rating__date-panel {
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  margin-top: 4px;
+}
+.winter-rating__dates .winter-rating__date-panel--hidden {
+  display: none;
+}
+/* Экран рейтинга — уместить в один экран, контент не уезжает в сторону (зима + весна) */
+.card:has(.view--active[data-view="winter-rating"]) .card__content,
+.card:has(.view--active[data-view="spring-rating"]) .card__content,
+html.app-view-winter-rating .card .card__content,
+html.app-view-spring-rating .card .card__content {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.view--active[data-view="winter-rating"],
+.view--active[data-view="spring-rating"] {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+html.app-view-winter-rating .card .view.view--active[data-view="winter-rating"],
+html.app-view-spring-rating .card .view.view--active[data-view="spring-rating"] {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+/* Карточка на экране рейтинга — не уезжает в сторону, всегда в видимой области */
+.app:has(.view--active[data-view="winter-rating"]) .card,
+.app:has(.view--active[data-view="spring-rating"]) .card,
+html.app-view-winter-rating .app .card,
+html.app-view-spring-rating .app .card {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+.app:has(.view--active[data-view="winter-rating"]),
+.app:has(.view--active[data-view="spring-rating"]),
+html.app-view-winter-rating .app,
+html.app-view-spring-rating .app {
+  overflow-x: hidden;
+}
+/* Фон карточки на экране рейтинга (fallback без :has(), против чёрного экрана на части устройств) */
+html.app-view-winter-rating .card,
+html.app-view-spring-rating .card {
+  background: var(--card-bg);
+  min-height: 200px;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+html.app-view-winter-rating .card::before,
+html.app-view-spring-rating .card::before {
+  opacity: 0;
+  pointer-events: none;
+}
+.view--active[data-view="winter-rating"] .winter-rating,
+.view--active[data-view="spring-rating"] .winter-rating,
+html.app-view-winter-rating .card .winter-rating,
+html.app-view-spring-rating .card .winter-rating {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 6px 0 8px;
+}
+.view--active[data-view="winter-rating"] .winter-rating__table-wrap,
+.view--active[data-view="spring-rating"] .winter-rating__table-wrap,
+html.app-view-winter-rating .card .winter-rating__table-wrap,
+html.app-view-spring-rating .card .winter-rating__table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  gap: 6px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__cup {
+  font-size: 43px; /* +10% от 39 */
+  margin-left: -6px;
+  margin-right: 2px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__updated {
+  margin: 0;
+  font-size: 10px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-caption-row {
+  margin: 0 12px 4px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-caption {
+  font-size: 13px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__counters {
+  font-size: 10px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table-wrap {
+  margin: 0 12px 6px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y pan-x;
+}
+/* Рейтинг весны: общий вертикальный скролл в .card__content (как главная), не отдельный порт в .winter-rating */
+html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .card__content {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .view.view--active[data-view="spring-rating"] {
+  flex: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  display: block !important;
+}
+html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rating {
+  flex: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  display: block !important;
+}
+html.app-view-spring-rating-html-scroll.app-view-spring-rating .card .winter-rating__table-wrap {
+  flex: none !important;
+  min-height: 0 !important;
+  margin: 0 12px 6px;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  max-height: none !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pan-x;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table {
+  font-size: 11px;
+}
+/* Итоговая таблица в экране рейтинга — оставляем крупный шрифт */
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table {
+  font-size: 15px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table th,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__table td {
+  padding: 4px 6px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table th,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table td {
+  padding: 8px 10px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableOverall th:last-child,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableOverall td:last-child {
+  padding-left: 4px;
+  padding-right: 6px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table th:last-child,
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) #winterRatingTableWrap .winter-rating__table td:last-child {
+  padding-left: 8px;
+  padding-right: 10px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__show-all-wrap {
+  margin: 0 12px 4px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__show-all-btn {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates-caption {
+  margin: 6px 12px 4px;
+  font-size: 13px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates-hint {
+  margin: 0 12px 4px;
+  font-size: 11px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates {
+  flex-direction: column;
+  gap: 0;
+  margin: 0 12px;
+}
+/* После календаря и блока «самый выигрыш» — минимальный отступ, без пропасти от gap между скрытыми date-item */
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__calendar-wrap {
+  margin-bottom: 8px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__single-top-row {
+  margin-bottom: 8px;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .winter-rating__dates .winter-rating__date-item {
+  margin-bottom: 0;
+}
+:is(.view--active[data-view="winter-rating"], .view--active[data-view="spring-rating"]) .bonus-game-back {
+  margin: 0 0 5px;
+}
+/* Рейтинг весны: убираем отступ между кнопкой «Назад» и листочками */
+.view--active[data-view="spring-rating"] .bonus-game-back {
+  margin-bottom: 0;
+}
+.view--active[data-view="spring-rating"] .winter-rating {
+  margin-top: 0;
+}
+.spring-rating-view-scroll-btn {
+  display: block;
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right, 0px));
+  top: 46%;
+  z-index: 90;
+  width: 28px;
+  height: 92px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(251, 191, 36, 0.56);
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0 5px, transparent 5px 10px),
+    linear-gradient(180deg, rgba(251, 191, 36, 0.34), rgba(217, 119, 6, 0.26)),
+    rgba(15, 23, 42, 0.76);
+  background-size: 3px calc(100% - 30px), 100% 100%, 100% 100%;
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: transparent;
+  cursor: ns-resize;
+  font-size: 0;
+  line-height: 0;
+  touch-action: none;
+}
+.spring-rating-view-scroll-btn::-webkit-slider-runnable-track {
+  width: 28px;
+  height: 92px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+}
+.spring-rating-view-scroll-btn::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 26px;
+  height: 92px;
+  margin: 0;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+}
+.spring-rating-view-scroll-btn::-moz-range-track {
+  width: 28px;
+  height: 92px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+}
+.spring-rating-view-scroll-btn::-moz-range-thumb {
+  width: 26px;
+  height: 92px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+}
+.spring-rating-view-scroll-btn[hidden],
+body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
+  display: none;
+}
+[data-theme="light"] .spring-rating-view-scroll-btn {
+  border-color: rgba(180, 83, 9, 0.42);
+  background:
+    repeating-linear-gradient(180deg, rgba(120, 53, 15, 0.78) 0 5px, transparent 5px 10px),
+    linear-gradient(180deg, rgba(180, 83, 9, 0.18), rgba(245, 158, 11, 0.3)),
+    rgba(255, 251, 235, 0.9);
+  background-size: 3px calc(100% - 30px), 100% 100%, 100% 100%;
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  box-shadow: 0 8px 18px rgba(146, 64, 14, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+@media (max-width: 430px) {
+  .view--active[data-view="spring-rating"] .winter-rating.spring-rating,
+  html.app-view-spring-rating .winter-rating.spring-rating {
+    margin-bottom: 12px;
+    padding-top: 8px;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__winter-decor,
+  html.app-view-spring-rating .winter-rating__winter-decor {
+    margin-bottom: 4px;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__title,
+  html.app-view-spring-rating .winter-rating__title {
+    gap: 5px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    line-height: 1.14;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__title-text,
+  html.app-view-spring-rating .winter-rating__title-text {
+    line-height: 1.14;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__title-accent,
+  html.app-view-spring-rating .winter-rating__title-accent {
+    font-size: 1.18em;
+    line-height: 1.08;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__cup,
+  html.app-view-spring-rating .winter-rating__cup {
+    font-size: 34px;
+    margin-left: -4px;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-conditions-wrap,
+  html.app-view-spring-rating .winter-rating__spring-conditions-wrap {
+    margin-bottom: 16px;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-conditions-btn,
+  html.app-view-spring-rating .winter-rating__spring-conditions-btn {
+    padding: 8px 16px;
+    border-radius: 11px;
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-main-tabs,
+  html.app-view-spring-rating .winter-rating__spring-main-tabs {
+    margin-bottom: 10px;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab,
+  html.app-view-spring-rating .winter-rating__spring-main-tab {
+    padding: 9px 8px;
+    font-size: 14px;
+    line-height: 1.1;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-league-caption,
+  html.app-view-spring-rating .winter-rating__spring-league-caption {
+    margin: 0 8px 10px;
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3,
+  html.app-view-spring-rating .spring-rating-top3 {
+    margin: 10px 0 14px;
+    padding: 12px 8px;
+    border-radius: 14px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__podium,
+  html.app-view-spring-rating .spring-rating-top3__podium {
+    gap: 7px;
+    flex-wrap: nowrap;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__card,
+  html.app-view-spring-rating .spring-rating-top3__card {
+    max-width: none;
+    padding: 10px 6px;
+    border-radius: 11px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__card--first,
+  html.app-view-spring-rating .spring-rating-top3__card--first {
+    max-width: none;
+    margin-bottom: 6px;
+    padding: 11px 7px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__rank,
+  html.app-view-spring-rating .spring-rating-top3__rank {
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__card--first .spring-rating-top3__rank,
+  html.app-view-spring-rating .spring-rating-top3__card--first .spring-rating-top3__rank {
+    font-size: 15px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__avatar,
+  html.app-view-spring-rating .spring-rating-top3__avatar {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    font-size: 17px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__card--first .spring-rating-top3__avatar,
+  html.app-view-spring-rating .spring-rating-top3__card--first .spring-rating-top3__avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 21px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__nick,
+  html.app-view-spring-rating .spring-rating-top3__nick {
+    margin-bottom: 5px;
+    font-size: 10.5px;
+    line-height: 1.12;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-top3__stats,
+  html.app-view-spring-rating .spring-rating-top3__stats {
+    gap: 1px;
+    font-size: 9.5px;
+    line-height: 1.12;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__table-wrap--league,
+  html.app-view-spring-rating .winter-rating__table-wrap--league {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+
+  .view--active[data-view="spring-rating"] #springRatingViewTotals.spring-rating-view-totals-stack,
+  html.app-view-spring-rating #springRatingViewTotals.spring-rating-view-totals-stack {
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals-panel,
+  html.app-view-spring-rating .spring-rating-view-totals-panel {
+    padding: 8px 8px 10px;
+    border-radius: 12px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals__april-head,
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals__month-summary,
+  html.app-view-spring-rating .spring-rating-view-totals__april-head,
+  html.app-view-spring-rating .spring-rating-view-totals__month-summary {
+    gap: 6px;
+    padding-bottom: 7px;
+    font-size: 9px;
+    line-height: 1.15;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals__month-meta,
+  html.app-view-spring-rating .spring-rating-view-totals__month-meta {
+    font-size: 8.2px;
+    line-height: 1.15;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals__weeks-host,
+  html.app-view-spring-rating .spring-rating-view-totals__weeks-host {
+    gap: 7px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week,
+  html.app-view-spring-rating .spring-rating-view-week {
+    padding: 8px 8px 9px;
+    border-radius: 11px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week__summary,
+  html.app-view-spring-rating .spring-rating-view-week__summary {
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.12;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week__meta,
+  html.app-view-spring-rating .spring-rating-view-week__meta {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9.5px;
+    line-height: 1.12;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week__inner,
+  html.app-view-spring-rating .spring-rating-view-week__inner {
+    padding-top: 8px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-row,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-row {
+    gap: 7px;
+    margin-bottom: 7px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-wrap,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-wrap {
+    padding: 8px 6px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+    padding-left: 10px;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-title,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-title {
+    margin-bottom: 7px;
+    padding-bottom: 6px;
+    font-size: 9.8px;
+    line-height: 1.18;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__single-top-list,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__single-top-list {
+    font-size: 8.7px;
+    line-height: 1.18;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__single-top-item,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__single-top-item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .view--active[data-view="spring-rating"] .spring-rating-view-week .winter-rating__past-week-total,
+  html.app-view-spring-rating .spring-rating-view-week .winter-rating__past-week-total {
+    margin-top: 7px;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .spring-rating-view-scroll-btn {
+    right: max(2px, env(safe-area-inset-right, 0px));
+    width: 22px;
+    height: 78px;
+    background-size: 3px calc(100% - 24px), 100% 100%, 100% 100%;
+  }
+
+  .spring-rating-view-scroll-btn::-webkit-slider-runnable-track,
+  .spring-rating-view-scroll-btn::-webkit-slider-thumb,
+  .spring-rating-view-scroll-btn::-moz-range-track,
+  .spring-rating-view-scroll-btn::-moz-range-thumb {
+    width: 22px;
+    height: 78px;
+  }
+}
+/* Рейтинг весны: скрываем верхнее и нижнее меню */
+.card:has(.view--active[data-view="spring-rating"]) .card__header {
+  display: none !important;
+}
+#app:has(.view--active[data-view="spring-rating"]) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+}
+/* Зал славы и расписание: скрываем верхнее и нижнее меню (как в турнире дня и газете) */
+.card:has(.view--active[data-view="hall-of-fame"]) .card__header,
+.card:has(.view--active[data-view="schedule"]) .card__header {
+  display: none !important;
+}
+#app:has(.view--active[data-view="hall-of-fame"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="schedule"]) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+}
+/* Кнопки игр и приложений (с главной): скрываем верхнее и нижнее меню */
+.card:has(.view--active[data-view="bonus-game"]) .card__header,
+.card:has(.view--active[data-view="plasterer-game"]) .card__header,
+.card:has(.view--active[data-view="raffles"]) .card__header,
+.card:has(.view--active[data-view="learn-play-hub"]) .card__header,
+.card:has(.view--active[data-view="poker-tasks"]) .card__header,
+.card:has(.view--active[data-view="video-lessons"]) .card__header,
+.card:has(.view--active[data-view="streams"]) .card__header,
+.card:has(.view--active[data-view="equilator"]) .card__header,
+.card:has(.view--active[data-view="winter-rating"]) .card__header {
+  display: none !important;
+}
+/* Скачать, Депозит, Профиль: скрываем только верхнее меню */
+.card:has(.view--active[data-view="download"]) .card__header,
+.card:has(.view--active[data-view="cashout"]) .card__header,
+.card:has(.view--active[data-view="profile"]) .card__header {
+  display: none !important;
+}
+#app:has(.view--active[data-view="bonus-game"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="plasterer-game"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="raffles"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="learn-play-hub"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="poker-tasks"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="video-lessons"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="streams"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="equilator"]) ~ .bottom-nav,
+#app:has(.view--active[data-view="winter-rating"]) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease-out, visibility 0s linear 0.21s;
+}
+
+/* Нижнее меню скрыто — компактный запас + safe-area (меньше «пустой» нижней резинки) */
+.app:has(.view--active[data-view="spring-rating"]),
+.app:has(.view--active[data-view="hall-of-fame"]),
+.app:has(.view--active[data-view="schedule"]),
+.app:has(.view--active[data-view="bonus-game"]),
+.app:has(.view--active[data-view="plasterer-game"]),
+.app:has(.view--active[data-view="raffles"]),
+.app:has(.view--active[data-view="learn-play-hub"]),
+.app:has(.view--active[data-view="poker-tasks"]),
+.app:has(.view--active[data-view="video-lessons"]),
+.app:has(.view--active[data-view="streams"]),
+.app:has(.view--active[data-view="equilator"]),
+.app:has(.view--active[data-view="winter-rating"]) {
+  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px)));
+}
+/* Видеоуроки: ещё компактнее — safe-area достаточно с края экрана */
+.app:has(.view--active[data-view="video-lessons"]) {
+  padding-bottom: max(6px, calc(4px + env(safe-area-inset-bottom, 0px)));
+}
+
+.winter-rating__date-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.3);
+}
+[data-theme="light"] .winter-rating__date-item {
+  background: rgba(255, 251, 247, 0.6);
+}
+.winter-rating__date-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.winter-rating__date-btn:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+.winter-rating__date-btn[aria-expanded="true"] {
+  background: rgba(168, 85, 247, 0.15);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.winter-rating__date-panel {
+  padding: 14px;
+  border-top: none;
+}
+.winter-rating__date-panel--hidden {
+  display: none;
+}
+.spring-rating-date-leagues {
+  margin-top: 0;
+}
+.spring-rating-date-league-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.spring-rating-date-league-tab {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: rgba(192, 132, 252, 0.15);
+  color: #e9d5ff;
+  cursor: pointer;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.spring-rating-date-league-tab:hover {
+  background: rgba(192, 132, 252, 0.25);
+}
+.spring-rating-date-league-tab--active {
+  background: rgba(192, 132, 252, 0.35);
+  color: #fff;
+}
+.spring-rating-date-league {
+  margin-bottom: 12px;
+}
+.spring-rating-date-league .winter-rating__screenshots {
+  margin-bottom: 10px;
+}
+.winter-rating__date-tournaments-list:not(:empty) {
+  margin-bottom: 12px;
+}
+.winter-rating__date-tournaments-caption {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.winter-rating__screenshots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 480px) {
+  .winter-rating__screenshots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .winter-rating__screenshots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.winter-rating__screenshot {
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.winter-rating__screenshot:hover {
+  opacity: 0.9;
+}
+
+.winter-rating__screenshot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  vertical-align: middle;
+  pointer-events: none;
+}
+.winter-rating__screenshot img[src=""],
+.winter-rating__screenshot img:not([src]) {
+  min-height: 80px;
+  background: var(--border-subtle);
+}
+
+/* Лайтбокс: увеличение скрина по клику — на весь экран без обрезки низа */
+/* Отступ сверху как у .app: под шапку Telegram Mini App + safe-area, иначе ×/«Назад» не нажимаются */
+.winter-rating-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 0;
+  /* Одно calc без вложенности — надёжнее в старых WebView */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.winter-rating-lightbox[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+/* Один скрин (топ‑15 и т.п.): без прокрутки оверлея и жестов «листания» по картинке */
+.winter-rating-lightbox--single {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.winter-rating-lightbox--single .winter-rating-lightbox__img {
+  touch-action: none;
+}
+
+.winter-rating-lightbox__close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.winter-rating-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Позиция «Назад» в лайтбоксе; цвета — у селектора .winter-rating-lightbox .winter-rating-lightbox__back выше */
+.winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 52px + 8px);
+  left: max(12px, env(safe-area-inset-left, 0px));
+  z-index: 20;
+  margin: 0;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.winter-rating-lightbox__img {
+  position: relative;
+  z-index: 0;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  /* Нужны клики: повторное нажатие по скрину закрывает лайтбокс (см. initWinterRatingLightbox) */
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.winter-rating-lightbox__prev,
+.winter-rating-lightbox__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.winter-rating-lightbox__prev:hover,
+.winter-rating-lightbox__next:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.winter-rating-lightbox__prev {
+  left: max(12px, env(safe-area-inset-left, 0px));
+}
+
+.winter-rating-lightbox__next {
+  right: max(12px, env(safe-area-inset-right, 0px));
+}
+
+.winter-rating-lightbox__counter {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+.winter-rating__date-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
+}
+.winter-rating__date-table-wrap .winter-rating__table {
+  margin: 0;
+}
+.winter-rating__date-table-wrap .winter-rating__table tr.winter-rating__tr--reward-mid td {
+  background-color: rgba(251, 146, 60, 0.35);
+}
+.winter-rating__date-table-wrap .winter-rating__table tr.winter-rating__tr--reward-high td {
+  background-color: rgba(34, 197, 94, 0.35);
+}
+

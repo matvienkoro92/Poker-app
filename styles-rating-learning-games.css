@@ -1,0 +1,1633 @@
+/* Video lessons, poker tasks and game challenge surfaces.
+ * Extracted from styles-rating.css; keep import order in styles-rating.css stable. */
+
+/* Rating, raffle and tournament result interfaces.
+ * Extracted from styles.css; keep import order in styles.css stable. */
+
+  font-size: 8px;
+  padding: 6px 2px;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+.video-lessons__coach-student-tab:hover {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.08);
+}
+.video-lessons__coach-student-tab--active {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.2);
+}
+[data-theme="dark"] .video-lessons__coach-students-subtabs {
+  border-color: rgba(251, 146, 60, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab {
+  color: rgba(226, 232, 240, 0.72);
+  border-right-color: rgba(251, 146, 60, 0.28);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab:hover {
+  color: #f1f5f9;
+  background: rgba(249, 115, 22, 0.12);
+}
+[data-theme="dark"] .video-lessons__coach-student-tab--active {
+  color: #fff7ed;
+  background: rgba(249, 115, 22, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .video-lessons__coach-students-subtabs {
+  border-color: rgba(234, 88, 12, 0.65);
+}
+[data-theme="light"] .video-lessons__coach-student-tab {
+  color: #64748b;
+  border-right-color: rgba(234, 88, 12, 0.28);
+}
+[data-theme="light"] .video-lessons__coach-student-tab:hover {
+  color: #0f172a;
+  background: rgba(251, 146, 60, 0.12);
+}
+[data-theme="light"] .video-lessons__coach-student-tab--active {
+  color: #9a3412;
+  background: rgba(251, 146, 60, 0.26);
+}
+.video-lessons__coach-student-panels {
+  min-width: 0;
+}
+.video-lessons__coach-student-panel {
+  display: none;
+}
+.video-lessons__coach-student-panel--active {
+  display: block;
+}
+.video-lessons__coach-student-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+/* Две фотографии — в один ряд, два столбца */
+.video-lessons__coach-student-gallery:has(img:nth-child(2)) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.video-lessons__coach-student-gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  vertical-align: top;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(251, 191, 36, 0.28);
+}
+.video-lessons__coach-student-text p {
+  margin: 0 0 0.75em;
+}
+.video-lessons__coach-student-text p:last-child {
+  margin-bottom: 0;
+}
+.video-lessons__coach-student-lead {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+.video-lessons__coach-student-lead strong {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.video-lessons__coach-student-quote {
+  margin: 14px 0 0;
+  padding: 12px 12px 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--vl-free-border, rgba(249, 115, 22, 0.45));
+  background: var(--vl-free-bg-soft, rgba(249, 115, 22, 0.09));
+}
+.video-lessons__coach-student-quote-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vl-free-open, #fb923c);
+}
+.video-lessons__coach-student-quote p:not(.video-lessons__coach-student-quote-label) {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+[data-theme="light"] .video-lessons__coach-student-quote {
+  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(251, 146, 60, 0.1);
+}
+[data-theme="light"] .video-lessons__coach-student-quote-label {
+  color: var(--vl-free-open, #ea580c);
+}
+/* Видеоуроки: обводки и акценты в чёрно-оранжевом стиле приложения */
+.view[data-view="video-lessons"] {
+  --vl-free-border: rgba(249, 115, 22, 0.5);
+  --vl-free-bg-soft: rgba(249, 115, 22, 0.11);
+  --vl-free-open: #fb923c;
+  --vl-free-num-fg: #fdba74;
+  --vl-free-num-bg: rgba(249, 115, 22, 0.24);
+}
+[data-theme="light"] .view[data-view="video-lessons"] {
+  --vl-free-border: rgba(234, 88, 12, 0.42);
+  --vl-free-bg-soft: rgba(251, 146, 60, 0.12);
+  --vl-free-open: #ea580c;
+  --vl-free-num-fg: #c2410c;
+  --vl-free-num-bg: rgba(251, 146, 60, 0.2);
+}
+.video-lessons__intro {
+  margin: 8px 0 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.video-lessons__guest-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 16px 14px;
+  text-align: center;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  background: var(--vl-free-bg-soft);
+  box-sizing: border-box;
+}
+.video-lessons__guest-gate--hidden {
+  display: none !important;
+}
+.video-lessons__guest-gate-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 320px;
+}
+.video-lessons__guest-gate .profile-exit-btn {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+.video-lessons--guest-lock .video-lessons__video,
+.video-lessons--guest-lock .video-lessons__iframe {
+  display: none !important;
+}
+.video-lessons--guest-lock .video-lessons__open-external,
+.video-lessons--guest-lock .video-lessons__attachment,
+.video-lessons--guest-lock .video-lessons__training-link {
+  display: none !important;
+}
+.video-lessons__free-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin: 0;
+  padding: 12px 14px;
+  text-align: center;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--vl-free-border);
+  background: var(--vl-free-bg-soft);
+}
+.video-lessons__list > .video-lessons__free-cta {
+  flex-shrink: 0;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  border-bottom: 1px solid var(--vl-free-border);
+}
+.video-lessons__free-cta-text {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--vl-free-num-fg);
+}
+.video-lessons__free-cta-arrow {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--vl-free-open);
+  animation: video-lessons-free-bounce 1.4s ease-in-out infinite;
+}
+@keyframes video-lessons-free-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-lessons__free-cta-arrow {
+    animation: none;
+  }
+}
+/* Платный МТТ + запись на тренировку — общая обводка: .video-lessons__paid-wrap */
+.video-lessons__paid-wrap {
+  margin-top: 18px;
+  padding: 14px 12px 16px;
+  border: 1px solid rgba(24, 22, 20, 0.75);
+  border-radius: 14px;
+  background: var(--block-bg);
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+}
+[data-theme="light"] .video-lessons__paid-wrap {
+  border-color: rgba(41, 37, 36, 0.22);
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.35);
+}
+.video-lessons__mtt-paid {
+  margin-top: 0;
+  padding: 0;
+  border-top: none;
+}
+.video-lessons__mtt-spoiler.video-lessons__mtt-paid {
+  padding: 0 2px 4px;
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.video-lessons__mtt-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 14px;
+  margin: 0;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid rgba(249, 115, 22, 0.55);
+  background: linear-gradient(145deg, rgba(35, 32, 30, 0.98), rgba(20, 18, 17, 0.99));
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: border-color 0.2s, box-shadow 0.2s, filter 0.2s;
+  box-shadow:
+    0 2px 14px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(249, 115, 22, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .video-lessons__mtt-summary {
+  border-color: rgba(234, 88, 12, 0.45);
+  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 55%, #fed7aa 100%);
+  box-shadow:
+    0 2px 12px rgba(234, 88, 12, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.video-lessons__mtt-summary::-webkit-details-marker,
+.video-lessons__mtt-summary::marker {
+  display: none;
+  content: "";
+}
+.video-lessons__mtt-summary:hover {
+  border-color: rgba(251, 146, 60, 0.85);
+  filter: brightness(1.05);
+  box-shadow:
+    0 4px 18px rgba(249, 115, 22, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.video-lessons__mtt-spoiler[open] > .video-lessons__mtt-summary {
+  margin-bottom: 16px;
+  border-color: rgba(251, 146, 60, 0.75);
+  box-shadow:
+    0 2px 16px rgba(249, 115, 22, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.video-lessons__mtt-spoiler-chevron {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+  color: #fb923c;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.45));
+  transition: transform 0.25s ease;
+}
+[data-theme="light"] .video-lessons__mtt-spoiler-chevron {
+  color: #ea580c;
+  filter: none;
+}
+.video-lessons__mtt-spoiler[open] .video-lessons__mtt-spoiler-chevron {
+  transform: rotate(-180deg);
+}
+.video-lessons__mtt-spoiler-inner {
+  padding: 0 2px 4px;
+}
+.video-lessons__mtt-title {
+  margin: 0 0 14px;
+  font-size: clamp(17px, 4.5vw, 20px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text);
+}
+.video-lessons__mtt-summary .video-lessons__mtt-title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  color: #ffedd5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 18px rgba(249, 115, 22, 0.25);
+}
+[data-theme="light"] .video-lessons__mtt-summary .video-lessons__mtt-title {
+  color: #9a3412;
+  text-shadow: none;
+}
+.video-lessons__mtt-subtitle {
+  margin: 18px 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fb923c;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .video-lessons__mtt-subtitle {
+  color: #c2410c;
+}
+.video-lessons__mtt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 4px;
+}
+.video-lessons__mtt-thumb {
+  display: block;
+  width: 100%;
+  max-height: 118px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(251, 191, 36, 0.25);
+}
+[data-theme="light"] .video-lessons__mtt-thumb {
+  background: rgba(255, 247, 237, 0.95);
+  border-color: rgba(234, 88, 12, 0.32);
+}
+.video-lessons__mtt-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.video-lessons__mtt-desc p {
+  margin: 0 0 12px;
+}
+.video-lessons__mtt-desc strong {
+  color: var(--text);
+}
+.video-lessons__mtt-ol {
+  margin: 0 0 12px;
+  padding-left: 1.25rem;
+}
+.video-lessons__mtt-ol > li {
+  margin-bottom: 10px;
+}
+.video-lessons__mtt-ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.video-lessons__mtt-ul li {
+  margin-bottom: 6px;
+}
+.video-lessons__mtt-paid .learn-play-hub__training-btn.video-lessons__mtt-cta {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+}
+.video-lessons__footer-cta {
+  margin-top: 0;
+  padding-top: 14px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(249, 115, 22, 0.28);
+  box-sizing: border-box;
+}
+[data-theme="light"] .video-lessons__footer-cta {
+  border-top-color: rgba(234, 88, 12, 0.22);
+}
+.video-lessons__footer-cta .learn-play-hub__training-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+.video-lessons__group-head {
+  flex-shrink: 0;
+  margin: 8px 0 4px;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: 12px;
+  background: var(--vl-free-bg-soft);
+  border: 1px dashed rgba(249, 115, 22, 0.45);
+  box-sizing: border-box;
+}
+.video-lessons__group-head-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--vl-free-num-fg);
+}
+[data-theme="light"] .video-lessons__group-head {
+  background: var(--vl-free-bg-soft);
+  border-color: rgba(234, 88, 12, 0.38);
+}
+[data-theme="light"] .video-lessons__group-head-text {
+  color: var(--vl-free-num-fg);
+}
+.video-lessons__card.video-lessons__card--bonus {
+  border-color: var(--vl-free-border);
+  box-shadow: none;
+}
+.video-lessons__card.video-lessons__card--bonus:hover {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.12);
+}
+.video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.18);
+}
+.video-lessons__num--bonus {
+  min-width: 34px;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--vl-free-num-fg);
+  background: var(--vl-free-num-bg);
+}
+[data-theme="light"] .video-lessons__num--bonus {
+  color: var(--vl-free-num-fg);
+  background: var(--vl-free-num-bg);
+}
+/* Скролл страницы — html.app-view-long-scroll + body; не задаём max-height на список: иначе flex сжимает карточки (flex-shrink: 1) и «ломает» кнопки */
+.video-lessons__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  overflow-anchor: none;
+  padding: 10px 10px 12px;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--block-bg);
+}
+.video-lessons__list > .video-lessons__group-head {
+  margin: 0;
+}
+.video-lessons__card {
+  flex-shrink: 0;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--block-bg);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+/* Без привязки скролла к соседним блокам — меньше «дёрганья» при раскрытии урока */
+.video-lessons__list {
+  overflow-anchor: none;
+}
+.video-lessons__list > .video-lessons__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--block-bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  overflow-anchor: none;
+  /* Мгновенное переключение open/hover — иначе 0.2s анимация теней совпадает с scrollBy и визуально «трясёт» */
+  transition: none;
+}
+.video-lessons__card:hover {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
+}
+.video-lessons__list > .video-lessons__card:hover {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 2px 14px rgba(249, 115, 22, 0.18);
+  background: rgba(249, 115, 22, 0.05);
+}
+.video-lessons__card.video-lessons__card--open {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.22);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--open {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.28), 0 4px 16px rgba(249, 115, 22, 0.12);
+  background: rgba(249, 115, 22, 0.06);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus {
+  border-color: var(--vl-free-border);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus:hover {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 2px 14px rgba(249, 115, 22, 0.16);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus.video-lessons__card--open {
+  border-color: var(--vl-free-open);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25), 0 4px 16px rgba(249, 115, 22, 0.1);
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--bonus {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+/* Заголовок урока — отдельная полоса «спойлера»; под ним только после раскрытия */
+.video-lessons__list > .video-lessons__card > .video-lessons__item {
+  background: var(--vl-free-bg-soft);
+  border-bottom: 1px solid transparent;
+}
+.video-lessons__list > .video-lessons__card.video-lessons__card--open > .video-lessons__item {
+  border-bottom-color: rgba(249, 115, 22, 0.35);
+}
+[data-theme="light"] .video-lessons__list > .video-lessons__card > .video-lessons__item {
+  background: rgba(251, 146, 60, 0.14);
+}
+.video-lessons__desc {
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+/* Описание внутри раскрытого блока (не в строке заголовка) */
+.video-lessons__player-inner .video-lessons__desc {
+  margin: 0 0 12px;
+  padding: 0 4px;
+}
+.video-lessons__attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--vl-free-open);
+  text-decoration: none;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 10px;
+  background: var(--vl-free-bg-soft);
+  transition: background 0.2s, border-color 0.2s;
+}
+.video-lessons__attachment:hover {
+  background: rgba(249, 115, 22, 0.16);
+  border-color: var(--vl-free-open);
+}
+.video-lessons__attachment::before {
+  content: "📎";
+  font-size: 1em;
+}
+/* Кнопка «Записаться…» внутри раскрытого блока */
+.video-lessons__player-inner .learn-play-hub__training-btn.video-lessons__training-link {
+  display: block;
+  margin: 14px 0 0;
+  width: 100%;
+  max-width: none;
+  padding: 12px 14px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.video-lessons__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.video-lessons__item:hover {
+  background: rgba(249, 115, 22, 0.08);
+}
+.video-lessons__item[aria-expanded="true"] .video-lessons__chevron {
+  transform: rotate(180deg);
+}
+.video-lessons__num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--vl-free-num-fg, #67e8f9);
+  background: var(--vl-free-num-bg, rgba(34, 211, 238, 0.18));
+  border-radius: 8px;
+}
+.video-lessons__title {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(15px, 4.1vw, 17px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.video-lessons__chevron {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: rgba(251, 146, 60, 0.85);
+  transition: transform 0.25s ease;
+}
+[data-theme="light"] .video-lessons__chevron {
+  color: rgba(234, 88, 12, 0.7);
+}
+.video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(251, 146, 60, 0.8);
+}
+[data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(194, 65, 12, 0.65);
+}
+/* Закрытый урок: контент полностью убран из вёрстки (display:none) — в части WebView grid 0fr «протекал», текст с ✅ оказывался виден под заголовком */
+.video-lessons__player-wrap {
+  overflow: hidden;
+  min-height: 0;
+}
+.video-lessons__player-wrap.video-lessons__player-wrap--hidden .video-lessons__player-inner {
+  display: none;
+}
+.video-lessons__player-inner {
+  min-height: 0;
+  padding: 12px 12px 14px;
+  display: block;
+  overflow: visible;
+  contain: layout;
+}
+.video-lessons__video-error {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.4);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+}
+.video-lessons__video-error[hidden] {
+  display: none !important;
+}
+[data-theme="light"] .video-lessons__video-error {
+  color: #7f1d1d;
+  background: rgba(254, 226, 226, 0.95);
+  border-color: rgba(185, 28, 28, 0.25);
+}
+.video-lessons__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(68vh, 520px);
+  height: auto;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+  object-fit: contain;
+  vertical-align: top;
+}
+.video-lessons__iframe {
+  display: block;
+  width: 100%;
+  height: 220px;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+}
+.video-lessons__open-external {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.video-lessons__open-external:hover {
+  text-decoration: underline;
+}
+.video-lessons__no-video {
+  margin: 0;
+  padding: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.poker-tasks__start {
+  padding-bottom: 20px;
+}
+.poker-tasks__spr-btn {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 16px 0 0;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: var(--block-bg);
+  color: var(--text);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.poker-tasks__spr-btn:hover {
+  background: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Стартовый экран — выбор режима */
+.poker-tasks__desc {
+  margin: 12px 0 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.poker-tasks__mtt-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--block-bg);
+  border: 1px solid var(--border-subtle);
+}
+.poker-tasks__mtt-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.poker-tasks__mtt-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.poker-tasks__start-btn {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  margin: 8px 0 0;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.poker-tasks__start-btn:hover {
+  background: #fb923c;
+  transform: translateY(-1px);
+}
+.poker-tasks__leaderboard {
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+.poker-tasks__leaderboard-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.poker-tasks__leaderboard-table-wrap {
+  overflow-x: auto;
+}
+.poker-tasks__leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.poker-tasks__leaderboard-table th,
+.poker-tasks__leaderboard-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.poker-tasks__leaderboard-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.poker-tasks__leaderboard-table td {
+  color: var(--text);
+}
+.poker-tasks__leaderboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+[data-theme="light"] .poker-tasks__leaderboard {
+  background: rgba(255, 237, 213, 0.5);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+.poker-tasks__planner {
+  margin-top: 18px;
+}
+
+.tasks-board {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tasks-drag-active {
+  user-select: none;
+}
+
+.tasks-board__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-board__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-board__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.tasks-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.tasks-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-create-label,
+.tasks-column__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-create-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg, rgba(15, 23, 42, 0.06));
+  color: var(--text);
+  font: inherit;
+}
+
+.tasks-important-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-create-btn,
+.tasks-task__action,
+.tasks-task__delete {
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tasks-create-btn {
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #fff7ed;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.22);
+}
+
+.tasks-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.tasks-column {
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.tasks-column--important {
+  border-color: rgba(245, 158, 11, 0.45);
+  background:
+    linear-gradient(180deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.04)),
+    var(--card-bg);
+}
+
+.tasks-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tasks-column__count {
+  min-width: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tasks-column__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 44px;
+  border-radius: 14px;
+  transition: background 0.16s ease, outline-color 0.16s ease;
+}
+
+.tasks-board--dragging .tasks-column__list {
+  min-height: 74px;
+  outline: 1px dashed rgba(59, 130, 246, 0.28);
+  outline-offset: 4px;
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.tasks-board--dragging .tasks-column__empty {
+  display: none;
+}
+
+.tasks-column__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tasks-task {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.07);
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease, border-color 0.16s ease;
+}
+
+.tasks-task--important {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.tasks-task--dragging {
+  cursor: grabbing;
+  opacity: 0.86;
+  transform: scale(1.015);
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+  z-index: 2;
+}
+
+.tasks-task__text {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.tasks-task__meta {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.tasks-task__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tasks-task__action {
+  padding: 8px 10px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text);
+}
+
+.tasks-task__delete {
+  padding: 8px 10px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .tasks-create-form,
+[data-theme="dark"] .tasks-column {
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.34);
+}
+
+[data-theme="dark"] .tasks-create-input {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="dark"] .tasks-task {
+  background: rgba(15, 23, 42, 0.56);
+}
+
+@media (min-width: 860px) {
+  .tasks-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.poker-streak-header--mtt {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.poker-streak-header--mtt .poker-streak-header__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.poker-streak-header__timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.poker-streak-header__speed-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.poker-streak-feedback__score {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffd700;
+}
+.poker-streak-feedback__score:empty {
+  display: none;
+}
+.poker-tasks__start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.poker-tasks__mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--block-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  text-align: left;
+}
+.poker-tasks__mode-btn:hover {
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
+}
+.poker-tasks__mode-btn--streak {
+  border-color: rgba(251, 146, 60, 0.4);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(51, 65, 85, 0.8));
+}
+.poker-tasks__mode-btn--streak:hover {
+  border-color: rgba(251, 146, 60, 0.6);
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.95), rgba(71, 85, 105, 0.9));
+}
+.poker-tasks__mode-btn--spr {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+.poker-tasks__mode-btn--easy {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(22, 101, 52, 0.15));
+}
+.poker-tasks__mode-btn--easy:hover {
+  border-color: rgba(34, 197, 94, 0.6);
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.95), rgba(22, 101, 52, 0.25));
+}
+.poker-tasks__mode-btn--hard {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(127, 29, 29, 0.2));
+}
+.poker-tasks__mode-btn--hard:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.95), rgba(127, 29, 29, 0.3));
+}
+.poker-tasks__mode-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.poker-tasks__mode-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.poker-tasks__mode-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* Poker Streak Challenge — игровой экран */
+.poker-streak-screen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 40%, rgba(88, 28, 135, 0.25) 0%, transparent 50%), radial-gradient(ellipse 100% 60% at 50% 50%, rgba(236, 72, 153, 0.08) 0%, transparent 60%), #0d0a12;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  padding-top: 48px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.poker-streak-screen--hidden {
+  display: none;
+}
+.poker-streak-screen__back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  margin: 0 !important;
+  padding: 0 12px 0 10px;
+  font-size: 18px;
+  line-height: 1;
+}
+.poker-streak-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(30, 20, 45, 0.5);
+}
+.poker-streak-header__timer {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00b894;
+  min-width: 36px;
+}
+.poker-streak-header__streak {
+  font-size: 14px;
+  color: #ffd700;
+}
+.poker-streak-header__score {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e9d5ff;
+}
+.poker-streak-progress {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.poker-streak-situation {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.poker-streak-cards {
+  margin-bottom: 16px;
+}
+.poker-streak-cards__player,
+.poker-streak-cards__board {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.poker-streak-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 48px;
+  padding: 0 6px;
+  margin: 0 4px;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a2e;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.poker-streak-card--red {
+  color: #c0392b;
+}
+.poker-streak-card__suit {
+  font-size: 14px;
+  margin-left: 2px;
+}
+.poker-streak-question {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #e9d5ff;
+}
+.poker-streak-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.poker-streak-options--disabled .poker-streak-option {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.poker-streak-option {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 2px solid rgba(192, 132, 252, 0.3);
+  background: rgba(30, 20, 45, 0.6);
+  color: #e9d5ff;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.poker-streak-option:hover {
+  background: rgba(192, 132, 252, 0.2);
+  border-color: rgba(192, 132, 252, 0.5);
+}
+.poker-streak-feedback {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(30, 20, 45, 0.7);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+.poker-streak-feedback--hidden {
+  display: none;
+}
+.poker-streak-feedback__result {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.poker-streak-feedback__result--correct {
+  color: #00b894;
+}
+.poker-streak-feedback__result--wrong {
+  color: #e74c3c;
+}
+.poker-streak-feedback__explanation {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+.poker-streak-feedback__next {
+  width: 100%;
+}
+
+/* Экран итогов Poker Streak */
+.poker-streak-result-screen {
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  padding-top: 56px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: #0d0a12;
+}
+.poker-streak-result-screen--hidden {
+  display: none;
+}
+.poker-streak-result-stats {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--block-bg);
+  border: 1px solid var(--border-subtle);
+}
+.poker-streak-result-stats p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+.poker-streak-result-stats strong {
+  color: var(--accent-2);
+}
+
+/* Экран задачи — стол в стиле скрина: овал с неоновой розово-фиолетовой обводкой */
+.poker-task-screen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 40%, rgba(88, 28, 135, 0.25) 0%, transparent 50%), radial-gradient(ellipse 100% 60% at 50% 50%, rgba(236, 72, 153, 0.08) 0%, transparent 60%), #0d0a12;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.poker-task-screen--hidden {
+  display: none;
+}
+/* Позиция; вид — общий блок «Назад» (чёрный / оранжевая обводка) */
+.poker-task-screen__back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  margin: 0 !important;
+}
+.poker-task-screen__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 0 12px;
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+  box-sizing: border-box;
+}
+.poker-task-screen__task-prev,
+.poker-task-screen__task-next {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(192, 132, 252, 0.15);
+  color: #e9d5ff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+.poker-task-screen__task-prev:hover,
+.poker-task-screen__task-next:hover {
+  background: rgba(192, 132, 252, 0.28);
+}
+.poker-task-screen__share {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: rgba(192, 132, 252, 0.2);
+  color: #e9d5ff;
+  cursor: pointer;
+}
+.poker-task-screen__share:hover {
+  background: rgba(192, 132, 252, 0.35);
+}
+.poker-task-screen__table-wrap {
+  flex: 0 0 auto;
+  position: relative;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.poker-task-screen__table {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  height: 0;
+  padding-bottom: 58%;
+  border: 2px solid rgba(236, 72, 153, 0.65);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+  background: rgba(30, 20, 45, 0.4);
+  box-sizing: content-box;
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.35), 0 0 48px rgba(139, 92, 246, 0.2), inset 0 0 30px rgba(88, 28, 135, 0.15);
+}
+.poker-task-screen__table--task {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 340px;
+  margin: 0;
+}
+.poker-task-screen__table--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+.poker-task-screen__table--blue-chips .poker-task-screen__bet-chip {
+  background: linear-gradient(145deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 10px rgba(37, 99, 235, 0.35);
+}
+.poker-task-screen__seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(30, 20, 45, 0.9);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  font-size: 10px;
+  font-weight: 600;
+  color: #c4b5fd;
+  line-height: 1.2;
+  transform: translate(-50%, -50%);
+}
+.poker-task-screen__seat--hero {
+  border: 2px solid rgba(236, 72, 153, 0.9);
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.3), 0 0 16px rgba(236, 72, 153, 0.25);
+  color: #fce7f3;
+}
+.poker-task-screen__seat--bb { top: 8%; left: 18%; }
+.poker-task-screen__seat--utg { top: 4%; left: 50%; }
+.poker-task-screen__seat--utg1 { top: 10%; right: 20%; left: auto; transform: translate(50%, -50%); }
+.poker-task-screen__seat--lj { right: 8%; top: 35%; left: auto; transform: translate(50%, -50%); }
+.poker-task-screen__seat--hj { right: 14%; bottom: 32%; top: auto; left: auto; transform: translate(50%, 50%); }
+.poker-task-screen__seat--co { bottom: 6%; left: 50%; top: auto; transform: translate(-50%, 50%); }
+.poker-task-screen__seat--btn { bottom: 8%; left: 18%; top: auto; transform: translate(-50%, 50%); }
+.poker-task-screen__seat--sb { left: 10%; top: 42%; transform: translate(-50%, -50%); }
+.poker-task-screen__pos { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.02em; }
+.poker-task-screen__stack { display: block; font-size: 11px; }
+/* Фишки перед игроком: круглые, ближе к центру стола */
+.poker-task-screen__bet {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.poker-task-screen__seat--bb .poker-task-screen__bet { bottom: -18px; left: calc(50% + 14px); transform: translate(-50%, 0); }
+.poker-task-screen__seat--sb .poker-task-screen__bet { bottom: -18px; left: calc(50% + 16px); transform: translate(-50%, 0); }
+.poker-task-screen__seat--utg1 .poker-task-screen__bet { bottom: -18px; left: calc(50% - 14px); transform: translate(-50%, 0); }
+.poker-task-screen__seat--hj .poker-task-screen__bet { bottom: -18px; left: calc(50% - 16px); transform: translate(-50%, 0); }
+.poker-task-screen__bet-chip {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 10px rgba(220, 38, 38, 0.3);
+}
+.poker-task-screen__bet-amount {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fce7f3;
+  line-height: 1;
+}
+.poker-task-screen__dealer {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #0d0a12;
+  background: rgba(255, 255, 255, 0.95);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.poker-task-screen__grid {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+.poker-task-screen__cards {
+  position: absolute;
+  right: -42px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 3px;
+}
+.poker-task-screen__card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(145deg, #1e3a5f, #1e40af);
+  color: #fff;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.poker-task-screen__card--red {
+  background: linear-gradient(145deg, #b91c1c, #991b1b);
+  color: #fff;
+}
+.poker-task-screen__pot {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 12px;
+  color: #93c5fd;
+  pointer-events: none;
+}
+.poker-task-screen__pot-main { display: block; font-weight: 700; font-size: 17px; margin-bottom: 4px; color: #60a5fa; }
+.poker-task-screen__pot-bet { display: block; font-size: 11px; color: #a5b4fc; }
+.poker-task-screen__pot-bet strong { color: #93c5fd; }
+.poker-task-screen__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  margin-top: 2cm;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+.poker-task-screen__action {
+  padding: 14px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #fff;
+  transition: opacity 0.2s;
+}
+.poker-task-screen__action:hover {
+  opacity: 0.92;
+}
+.poker-task-screen__action--fold {
+  background: #2563eb;
+  grid-column: 1;
+  grid-row: 1;
+}
+.poker-task-screen__action--call {
+  background: #16a34a;
+  grid-column: 2;
+  grid-row: 1;
+}
+.poker-task-screen__action--raise {
+  background: #dc2626;
+  grid-column: 3;
+  grid-row: 1;
+}
+.poker-task-screen__action--allin {
+  background: #991b1b;
+  grid-column: 2;
+  grid-row: 2;
+}
+

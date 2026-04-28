@@ -39,7 +39,11 @@ const baseFiles = [
   'manifest.json',
   'sw.js',
 ];
-const toCopy = [...new Set(baseFiles.concat(localScriptFilesFromIndex()))];
+const cssPartFiles = fs
+  .readdirSync(root)
+  .filter((name) => /^styles-.+\.css$/.test(name))
+  .sort();
+const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex()))];
 const dirsToCopy = ['assets'];
 
 if (!fs.existsSync(publicDir)) {

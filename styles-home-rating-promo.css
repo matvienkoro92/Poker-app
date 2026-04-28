@@ -1,0 +1,470 @@
+/* Home rating promo and spring rating summary blocks.
+ * Extracted from styles.css; keep import order in styles.css stable. */
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  opacity: 0.4;
+  pointer-events: none;
+  mask-image: radial-gradient(circle at top, black 0, transparent 60%);
+}
+/* Главная: обводка от 2мм над газетой до низа кнопки рейтинга, до краёв приложения */
+html.app-view-home .card {
+  border: none;
+}
+/* Главная: 5px воздуха над таббаром (дублирует tabbarGapPx в pokerApplyBottomTabbarPad до inline-pad) */
+#app.app.app--view-home {
+  --app-tabbar-content-gap: 5px;
+}
+.card:has(.view--active[data-view="home"])::before,
+html.app-view-home .card::before {
+  display: none;
+}
+.app.app--view-home .home-welcome-outline,
+html.app-view-home .home-welcome-outline {
+  position: relative;
+  /* Кнопка «Рейтинг весны» в потоке после hero-row; нижняя линия рамки ::before — посередине шапки промо (высота через --home-welcome-outline-frame-h). */
+  z-index: auto;
+  margin-top: -2mm;
+  /* Поскольку «на главной» у .card нет обычной рамки (border убран),
+     выравниваем обводку home-welcome-outline с рамкой карточки: уходим
+     в боковые padding .card на величину var(--card-padding-x). */
+  margin-left: calc(-1 * var(--card-padding-x));
+  margin-right: calc(-1 * var(--card-padding-x));
+  width: calc(100% + (2 * var(--card-padding-x)));
+  box-sizing: border-box;
+  /* Справа/сверху/снизу — как раньше; слева +8px к базовым 10px для основного контента (кнопка рейтинга компенсирует через переменные) */
+  --home-outline-pad-x: 10px;
+  --home-outline-pad-left: 18px;
+  /* Снизу: зазор 30px до блока «Следующий фриролл» задаёт margin-top у .tournament-day-home-dual */
+  padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
+}
+html.app--telegram-miniapp .app.app--view-home .home-welcome-outline,
+html.app--telegram-miniapp.app-view-home .home-welcome-outline {
+  margin-top: 8px;
+  padding-top: 18px;
+}
+/* «Рейтинг весны»: после «Зал славы», уже не absolute — 20px от низа hero-row до верха кнопки */
+html.app-view-home .home-welcome-outline .features--home-rating-on-border,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border {
+  position: relative;
+  margin: 20px 0 0;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  z-index: auto;
+  width: 100%;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .features-row--full,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .features-row--full {
+  margin-bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .feature.feature--link.feature--rating-promo,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .feature.feature--link.feature--rating-promo {
+  pointer-events: auto;
+  width: auto !important;
+  max-width: min(92vw, 300px) !important;
+  flex: 0 1 auto;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: min(92vw, 300px);
+  pointer-events: auto;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(251, 146, 60, 0.5);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(51, 65, 85, 0.88));
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.22),
+              0 4px 20px rgba(249, 115, 22, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+  transition: box-shadow 0.15s ease;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified:hover {
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.35),
+              0 6px 24px rgba(249, 115, 22, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo:hover,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified__header.feature--rating-spring-promo:hover {
+  box-shadow: none !important;
+}
+[data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
+  background: linear-gradient(145deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.94));
+  border-color: rgba(234, 88, 12, 0.4);
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats {
+  pointer-events: auto;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, rgba(30, 41, 59, 0.72), rgba(22, 31, 48, 0.82));
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
+}
+html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card,
+.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
+  margin-top: 0;
+  padding: 8px 12px 10px;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid rgba(251, 146, 60, 0.22);
+  box-shadow: none;
+  background: rgba(15, 23, 42, 0.28);
+}
+[data-theme="light"] .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats--in-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 240, 0.94));
+  border-top-color: rgba(234, 88, 12, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.spring-rating-home-promo-stats__april-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 8px;
+  padding: 0 0 6px;
+  margin: 0;
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.spring-rating-home-promo-stats__april-row .spring-rating-home-promo-stats__summary-main {
+  flex-shrink: 0;
+}
+.spring-rating-home-promo-stats__april-row .spring-rating-home-promo-stats__summary-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spring-rating-home-promo-stats__details--march {
+  margin: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 5px;
+}
+.spring-rating-home-promo-stats__summary {
+  cursor: pointer;
+  list-style: none;
+}
+.spring-rating-home-promo-stats__summary::-webkit-details-marker {
+  display: none;
+}
+.spring-rating-home-promo-stats__summary--march {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3px 10px;
+  padding: 2px 0 4px;
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.spring-rating-home-promo-stats__summary-main {
+  font-weight: 600;
+}
+.spring-rating-home-promo-stats__summary-meta {
+  font-size: 9.5px;
+  color: rgba(248, 250, 252, 0.72);
+}
+.spring-rating-home-promo-stats__summary-meta strong {
+  color: #fbbf24;
+  font-weight: 600;
+}
+.spring-rating-home-promo-stats__nested {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0 2px 4px;
+  border-left: 2px solid rgba(251, 191, 36, 0.2);
+  margin-left: 2px;
+}
+.spring-rating-home-promo-stats__details--week {
+  margin: 0;
+  font-size: 11px;
+}
+.spring-rating-home-promo-stats__details--week summary {
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: 8px;
+  color: rgba(248, 250, 252, 0.85);
+  list-style: none;
+}
+.spring-rating-home-promo-stats__details--week summary::-webkit-details-marker {
+  display: none;
+}
+.spring-rating-home-promo-stats__details--week summary:hover {
+  background: rgba(251, 191, 36, 0.08);
+}
+[data-theme="light"] .spring-rating-home-promo-stats {
+  background: linear-gradient(165deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
+  border-color: rgba(217, 119, 6, 0.35);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__april-row {
+  color: rgba(30, 41, 59, 0.92);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__summary--march,
+[data-theme="light"] .spring-rating-home-promo-stats__details--week summary {
+  color: rgba(30, 41, 59, 0.92);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__summary-meta {
+  color: rgba(30, 41, 59, 0.65);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__summary-meta strong {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-home-promo-stats__details--march {
+  border-top-color: rgba(180, 83, 9, 0.18);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__nested {
+  border-left-color: rgba(217, 119, 6, 0.28);
+}
+[data-theme="light"] .spring-rating-home-promo-stats__details--week summary:hover {
+  background: rgba(251, 146, 60, 0.12);
+}
+.winter-rating:not(.spring-rating) #springRatingViewTotals {
+  display: none !important;
+}
+.winter-rating.spring-rating #springRatingViewTotals.spring-rating-view-totals-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  margin: 14px 0 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  box-sizing: border-box;
+}
+.winter-rating.spring-rating .spring-rating-view-totals-panel {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, rgba(30, 41, 59, 0.72), rgba(22, 31, 48, 0.82));
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
+}
+.winter-rating.spring-rating .spring-rating-view-totals__april-head {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0 10px;
+  margin: 0;
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month {
+  margin: 0;
+  border: none;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month--march {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-summary {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0 8px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 10.5px;
+  color: rgba(248, 250, 252, 0.92);
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-summary::-webkit-details-marker {
+  display: none;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-summary::after {
+  content: "▾";
+  font-size: 11px;
+  opacity: 0.75;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month:not([open]) .spring-rating-view-totals__month-summary::after {
+  transform: rotate(-90deg);
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-title {
+  flex-shrink: 0;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  font-size: 9.5px;
+  color: rgba(248, 250, 252, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__month-meta strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+.winter-rating.spring-rating .spring-rating-view-totals__weeks-host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+.winter-rating.spring-rating .spring-rating-view-week {
+  margin: 0;
+  padding: 10px 12px 12px;
+  border-radius: 12px;
+  border: none;
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.1), transparent 55%),
+    rgba(15, 23, 42, 0.65);
+  box-shadow: none;
+}
+.winter-rating.spring-rating .spring-rating-view-week + .spring-rating-view-week {
+  border-top: 1px solid rgba(226, 232, 240, 0.28);
+  padding-top: 14px;
+}
+.winter-rating.spring-rating .spring-rating-view-week__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 2px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+}
+.winter-rating.spring-rating .spring-rating-view-week__summary::-webkit-details-marker {
+  display: none;
+}
+.winter-rating.spring-rating .spring-rating-view-week__summary::after {
+  content: "▾";
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.winter-rating.spring-rating .spring-rating-view-week:not([open]) .spring-rating-view-week__summary::after {
+  transform: rotate(-90deg);
+}
+.winter-rating.spring-rating .spring-rating-view-week__label {
+  flex-shrink: 0;
+}
+.winter-rating.spring-rating .spring-rating-view-week__meta {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted, #94a3b8);
+  text-align: right;
+  white-space: nowrap;
+}
+.winter-rating.spring-rating .spring-rating-view-week__inner {
+  padding-top: 10px;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-row {
+  margin: 0 0 8px;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap {
+  margin: 0;
+  border: none;
+  background: rgba(15, 23, 42, 0.24);
+  box-shadow: none;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+  border-left: 1px solid rgba(226, 232, 240, 0.22);
+  padding-left: 14px;
+}
+.winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.16);
+}
+.winter-rating.spring-rating .spring-rating-view-week--march-month {
+  margin-bottom: 4px;
+  box-shadow: none;
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week--march-month {
+  box-shadow: none;
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-totals-panel {
+  background: linear-gradient(165deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
+  border-color: rgba(217, 119, 6, 0.35);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-totals__april-head {
+  color: rgba(30, 41, 59, 0.92);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-totals__month-summary {
+  color: rgba(30, 41, 59, 0.92);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-totals__month-meta {
+  color: rgba(30, 41, 59, 0.65);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week + .spring-rating-view-week {
+  border-top-color: rgba(100, 116, 139, 0.3);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__summary {
+  color: rgba(30, 41, 59, 0.95);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__meta {
+  color: rgba(30, 41, 59, 0.55);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap {
+  background: rgba(255, 255, 255, 0.36);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+  border-left-color: rgba(100, 116, 139, 0.28);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
+  border-bottom-color: rgba(100, 116, 139, 0.18);
+}
+/* Зазор «Рейтинг весны» от эмблемы — margin-top у .features--home-rating-on-border */

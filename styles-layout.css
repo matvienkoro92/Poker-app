@@ -1,0 +1,775 @@
+/* Bottom navigation, boot overlay and final scroll/layout fallbacks.
+ * Extracted from styles.css; keep import order in styles.css stable. */
+
+.bottom-nav.bottom-nav--no-transition {
+  transition: none !important;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 8px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
+    max(6px, env(safe-area-inset-bottom, 0px)) max(12px, var(--app-gutter), env(safe-area-inset-left, 0px));
+  min-height: 56px;
+  /* Непрозрачная база + градиент: иначе под backdrop-filter на iOS при скролле/PWA «просвечивает» лента */
+  background-color: var(--overscroll-canvas);
+  background-image: var(--nav-bg);
+  /* backdrop-filter + оверскролл в WKWebView дают «отрыв» таббара от низа — только сплошная подложка */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  flex-wrap: nowrap;
+  z-index: 1001;
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: visible;
+  /* flex-end: иконки/подписи прижаты к зоне safe-area — без лишнего «воздуха» от align-items:center */
+  /* Один слой композита + явный «домашний» transform; translateY в скрытых состояниях не анимируем */
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overscroll-behavior: none;
+  transition: opacity 0.2s ease-out;
+  opacity: 1;
+  visibility: visible;
+}
+/*
+ * PWA / fullscreen: без жёсткого 34px на всех ОС — на Android env часто 0, а max(..., 34px) давал лишний «воздух» под иконками.
+ * iOS PWA: отдельное правило с floor 34px (env в WKWebView иногда обнуляется).
+ */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .bottom-nav {
+    transform: translate3d(0, 0, 0);
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+}
+html.poker-ios-pwa .bottom-nav {
+  padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
+}
+html.poker-ios-pwa.app-view-chat .bottom-nav,
+html.poker-ios-pwa body[data-view="chat"] .bottom-nav,
+html.poker-ios-pwa #app.app:has(.view--active[data-view="chat"]) ~ .bottom-nav {
+  padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
+}
+/* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
+html.app--tg-bottom-nav-inset .bottom-nav {
+  padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
+}
+.bottom-nav__item {
+  flex: 1;
+  min-width: 0;
+  max-width: 120px;
+  border: none;
+  border-radius: 12px;
+  background: var(--nav-item-bg);
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.bottom-nav__item .bottom-nav__label {
+  line-height: 1.2;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bottom-nav__item:nth-child(3),
+.bottom-nav__chat-wrap .bottom-nav__item {
+  font-size: 10px;
+  padding: 6px 8px 8px;
+}
+
+.bottom-nav__icon-wrap {
+  position: relative;
+  display: inline-block;
+}
+.bottom-nav__icon {
+  font-size: 18px;
+}
+.bottom-nav__dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  display: none;
+}
+.bottom-nav__dot.bottom-nav__dot--on { display: block; }
+.bottom-nav__badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  display: none;
+  box-sizing: border-box;
+}
+.bottom-nav__badge.bottom-nav__badge--on {
+  display: inline-block;
+}
+
+.bottom-nav__item:nth-child(3) .bottom-nav__icon,
+.bottom-nav__chat-wrap .bottom-nav__icon {
+  font-size: 20px;
+}
+
+.bottom-nav__item--active {
+  color: var(--btn-on-accent);
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  box-shadow: 0 8px 18px rgba(248, 113, 22, 0.6);
+}
+
+[data-theme="gold"] .bottom-nav__item.bottom-nav__item--active {
+  border-color: rgba(255, 220, 150, 0.92);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 232, 0.34), rgba(255, 250, 232, 0.08) 32%, transparent 33%),
+    radial-gradient(circle at 50% 0%, rgba(255, 198, 74, 0.32), transparent 58%),
+    linear-gradient(180deg, #c98a2b 0%, #8a4f16 100%);
+  color: #fff3cf;
+  text-shadow: 0 1px 0 rgba(67, 34, 6, 0.42);
+  box-shadow:
+    0 8px 22px rgba(180, 83, 9, 0.34),
+    0 0 20px rgba(255, 198, 74, 0.24),
+    inset 0 1px 0 rgba(255, 250, 232, 0.62),
+    inset 0 -10px 18px rgba(54, 27, 5, 0.22);
+}
+[data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+  filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
+}
+html.app-view-home .bottom-nav__item.bottom-nav__item--active,
+body[data-view="home"] .bottom-nav__item.bottom-nav__item--active {
+  border-color: rgba(255, 220, 150, 0.92);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 232, 0.34), rgba(255, 250, 232, 0.08) 32%, transparent 33%),
+    radial-gradient(circle at 50% 0%, rgba(255, 198, 74, 0.32), transparent 58%),
+    linear-gradient(180deg, #c98a2b 0%, #8a4f16 100%);
+  color: #fff3cf;
+  text-shadow: 0 1px 0 rgba(67, 34, 6, 0.42);
+  box-shadow:
+    0 8px 22px rgba(180, 83, 9, 0.34),
+    0 0 20px rgba(255, 198, 74, 0.24),
+    inset 0 1px 0 rgba(255, 250, 232, 0.62),
+    inset 0 -10px 18px rgba(54, 27, 5, 0.22);
+}
+html.app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
+body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+  filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
+}
+
+.bottom-nav__chat-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+.bottom-nav__chat-wrap--hidden {
+  display: none !important;
+}
+.bottom-nav__chat-wrap .bottom-nav__item {
+  width: 100%;
+  max-width: 100%;
+  flex-direction: column;
+}
+.bottom-nav__chat-wrap .bottom-nav__item .bottom-nav__label {
+  flex: none;
+  min-width: 0;
+  text-align: center;
+}
+
+/* Узкие экраны: нижнее меню влезает в ширину (Realme C11 и др.) */
+@media (max-width: 400px) {
+  .bottom-nav {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .bottom-nav__item,
+  .bottom-nav__chat-wrap .bottom-nav__item {
+    max-width: none;
+    padding: 6px 2px 8px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+  .bottom-nav__chat-wrap {
+    max-width: none;
+  }
+  .bottom-nav__icon {
+    font-size: 16px;
+  }
+  .bottom-nav__item:nth-child(3) .bottom-nav__icon,
+  .bottom-nav__chat-wrap .bottom-nav__icon {
+    font-size: 18px;
+  }
+}
+@media (max-width: 360px) {
+  .bottom-nav__item,
+  .bottom-nav__chat-wrap .bottom-nav__item {
+    font-size: 9px;
+    padding: 4px 1px 6px;
+  }
+  .bottom-nav__icon {
+    font-size: 14px;
+  }
+  .bottom-nav__item:nth-child(3) .bottom-nav__icon,
+  .bottom-nav__chat-wrap .bottom-nav__icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 18px var(--card-padding-x) 14px;
+    border-radius: 20px;
+  }
+  .logo__mark {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+}
+
+/* Экран загрузки при открытии Mini App */
+.app-boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+[data-theme="light"] .app-boot-overlay {
+  background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+}
+.app-boot-overlay__panel {
+  text-align: center;
+  padding: 24px 32px;
+  border-radius: 20px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+[data-theme="light"] .app-boot-overlay__panel {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(251, 146, 60, 0.35);
+  box-shadow: 0 12px 32px rgba(251, 146, 60, 0.15);
+}
+.app-boot-overlay__logo {
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(249, 115, 22, 0.12);
+}
+.app-boot-overlay__spinner {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(148, 163, 184, 0.35);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: app-boot-spin 0.75s linear infinite;
+}
+[data-theme="light"] .app-boot-overlay__spinner {
+  border-color: rgba(251, 146, 60, 0.35);
+  border-top-color: #ea580c;
+}
+@keyframes app-boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.app-boot-overlay__text {
+  margin: 0 auto;
+  max-width: 280px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #94a3b8;
+  white-space: pre-line;
+}
+[data-theme="light"] .app-boot-overlay__text {
+  color: #64748b;
+}
+.app-boot-overlay.app-boot-overlay--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Чат: кнопка отправки/микрофона во время запроса */
+.chat-send-btn.chat-send-btn--waiting {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Главный чат: заявка / админ-список доступа */
+.chat-club-access-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.chat-club-access-modal:not(.chat-club-access-modal--hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+.chat-club-access-modal--hidden {
+  pointer-events: none;
+}
+.chat-club-access-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+}
+.chat-club-access-modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--block-bg-solid, #1e293b);
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.chat-club-access-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.chat-club-access-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.chat-club-access-modal__x {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.chat-club-access-modal__body {
+  padding: 12px 14px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.chat-club-access-modal__subtitle {
+  margin: 10px 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.chat-club-access-modal__subtitle:first-child {
+  margin-top: 0;
+}
+.chat-club-access-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-club-access-modal__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.04);
+}
+.chat-club-access-modal__name-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.chat-club-access-modal__name-line {
+  font-size: 14px;
+  color: var(--text);
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  width: 100%;
+}
+.chat-club-access-modal__joined {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.chat-club-access-modal__profile-btn {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  word-break: break-all;
+}
+.chat-club-access-modal__profile-btn:active {
+  opacity: 0.85;
+}
+.chat-club-access-modal__badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--accent);
+  vertical-align: middle;
+}
+[data-theme="light"] .chat-club-access-modal__badge {
+  background: rgba(234, 88, 12, 0.18);
+}
+.chat-club-access-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-self: center;
+}
+.chat-club-access-modal__btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+}
+.chat-club-access-modal__btn--danger {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.15);
+}
+.chat-club-access-modal__hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.chat-general-gate {
+  padding: 16px 12px;
+  text-align: center;
+}
+.chat-general-gate .chat-empty {
+  margin: 0;
+  line-height: 1.5;
+}
+#chatGeneralView .chat-input-area--locked {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/*
+ * Скачать, главная, депозит, рейтинг весны, розыгрыши, профиль, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Дублирует ключевые свойства на случай правок выше по файлу.
+ */
+html:has(body[data-view="download"]),
+html.app-view-download-html-scroll,
+html:has(body[data-view="home"]),
+html.app-view-home-html-scroll,
+html:has(body[data-view="cashout"]),
+html.app-view-cashout-html-scroll,
+html:has(body[data-view="spring-rating"]),
+html.app-view-spring-rating-html-scroll,
+html:has(body[data-view="raffles"]),
+html.app-view-raffles-html-scroll,
+html:has(body[data-view="profile"]),
+html.app-view-profile-html-scroll,
+html:has(body[data-view="video-lessons"]),
+html.app-view-video-lessons-html-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+}
+html:has(body[data-view="download"]) body,
+html:has(body[data-view="download"]) body.app-view-long-scroll,
+html.app-view-download-html-scroll body,
+html.app-view-download-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="home"]) body,
+html:has(body[data-view="home"]) body.app-view-long-scroll,
+html.app-view-home-html-scroll body,
+html.app-view-home-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="cashout"]) body,
+html:has(body[data-view="cashout"]) body.app-view-long-scroll,
+html.app-view-cashout-html-scroll body,
+html.app-view-cashout-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="spring-rating"]) body,
+html:has(body[data-view="spring-rating"]) body.app-view-long-scroll,
+html.app-view-spring-rating-html-scroll body,
+html.app-view-spring-rating-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="raffles"]) body,
+html:has(body[data-view="raffles"]) body.app-view-long-scroll,
+html.app-view-raffles-html-scroll body,
+html.app-view-raffles-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="profile"]) body,
+html:has(body[data-view="profile"]) body.app-view-long-scroll,
+html.app-view-profile-html-scroll body,
+html.app-view-profile-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="video-lessons"]) body,
+html:has(body[data-view="video-lessons"]) body.app-view-long-scroll,
+html.app-view-video-lessons-html-scroll body,
+html.app-view-video-lessons-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+}
+body[data-view="download"] #app.app,
+body[data-view="home"] #app.app,
+body[data-view="cashout"] #app.app,
+body[data-view="spring-rating"] #app.app,
+body[data-view="raffles"] #app.app,
+body[data-view="profile"] #app.app,
+body[data-view="video-lessons"] #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+}
+body[data-view="download"] #app.app .card,
+body[data-view="home"] #app.app .card,
+body[data-view="cashout"] #app.app .card,
+body[data-view="spring-rating"] #app.app .card,
+body[data-view="raffles"] #app.app .card,
+body[data-view="profile"] #app.app .card,
+body[data-view="video-lessons"] #app.app .card {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="video-lessons"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
+}
+body[data-view="download"] #app.app .card .card__content,
+body[data-view="home"] #app.app .card .card__content,
+body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="spring-rating"] #app.app .card .card__content,
+body[data-view="raffles"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  margin-left: calc(-1 * var(--card-padding-x)) !important;
+  margin-right: calc(-1 * var(--card-padding-x)) !important;
+  width: calc(100% + 2 * var(--card-padding-x)) !important;
+  max-width: none !important;
+  padding-left: var(--card-padding-x) !important;
+  padding-right: var(--card-padding-x) !important;
+  box-sizing: border-box !important;
+}
+/* Главная: margin-top: -2mm у .home-welcome-outline + overflow-y:auto на .card__content обрезали верхнюю линию рамки (::before) */
+body[data-view="home"] #app.app .card .card__content {
+  padding-top: calc(2mm + 8px) !important;
+}
+
+/* PWA / iOS: нижний floor под таббар, если JS занижает --app-bottom-tabbar-pad (главная, скачать, профиль и др. с scrollport в .card__content). */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html:has(body[data-view="home"]) .card .card__content,
+  html.app-view-home-html-scroll .card .card__content,
+  body[data-view="home"] #app.app .card .card__content,
+  html:has(body[data-view="download"]) .card .card__content,
+  html.app-view-download-html-scroll .card .card__content,
+  body[data-view="download"] #app.app .card .card__content,
+  html:has(body[data-view="profile"]) .card .card__content,
+  html.app-view-profile-html-scroll .card .card__content,
+  body[data-view="profile"] #app.app .card .card__content {
+    padding-bottom: max(
+      var(--app-bottom-tabbar-pad, 105px),
+      calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
+    ) !important;
+  }
+}
+/* Тот же нижний floor, что у standalone PWA, после выравнивания .bottom-nav (без лишнего padding-bottom на iOS PWA). */
+html.poker-ios-pwa:has(body[data-view="home"]) .card .card__content,
+html.poker-ios-pwa.app-view-home-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="download"]) .card .card__content,
+html.poker-ios-pwa.app-view-download-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
+html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {
+  padding-bottom: max(
+    var(--app-bottom-tabbar-pad, 105px),
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
+  ) !important;
+}
+
+/*
+ * Зал славы — финальный слой (как «Скачать»): #app + data-view перебивает long-scroll .card__content visible.
+ */
+html:has(body[data-view="hall-of-fame"]),
+html.app-view-hall-html-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+}
+html:has(body[data-view="hall-of-fame"]) body,
+html:has(body[data-view="hall-of-fame"]) body.app-view-long-scroll,
+html.app-view-hall-html-scroll body,
+html.app-view-hall-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+}
+body[data-view="hall-of-fame"] #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+}
+body[data-view="hall-of-fame"] #app.app .card {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="hall-of-fame"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  body[data-view="hall-of-fame"] #app.app .card .card__content {
+    scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
+  }
+}

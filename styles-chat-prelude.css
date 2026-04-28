@@ -1,0 +1,1311 @@
+/* Legacy pre-chat content, gazette and home-adjacent rules.
+ * Extracted from styles-chat.css; keep import order in styles-chat.css stable. */
+
+/* Chat lists, messages, composers, contacts and chat interaction surfaces.
+ * Extracted from styles.css; keep import order in styles.css stable. */
+
+  list-style: none;
+  margin: 0;
+  padding: 10px 4px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: var(--muted, #94a3b8);
+}
+.roman-task-planner__section-head:first-child {
+  padding-top: 4px;
+}
+[data-theme="light"] .roman-task-planner__section-head {
+  color: #5c4033;
+}
+.roman-task-planner__list-hint {
+  list-style: none;
+  margin: 0;
+  padding: 2px 4px 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--muted, #94a3b8);
+}
+[data-theme="light"] .roman-task-planner__list-hint {
+  color: #8a7668;
+}
+.roman-task-planner__empty--stacked {
+  list-style: none;
+  padding: 8px 6px 14px;
+  text-align: center;
+  border: none;
+}
+.roman-task-planner-modal .roman-task-planner__empty--stacked {
+  color: var(--muted, #94a3b8);
+}
+.roman-task-planner__swipe-clip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Изоляция слоя: иначе composited transform трека может перехватывать касания у нижней строки (свайп «активной» двигал «выполненную»). */
+  isolation: isolate;
+  contain: paint;
+}
+.roman-task-planner__swipe-clip:active {
+  cursor: grabbing;
+}
+.roman-task-planner__swipe-clip .roman-task-planner__edit-ta {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+.roman-task-planner__swipe-track {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  will-change: transform;
+}
+.roman-task-planner__swipe-front {
+  box-sizing: border-box;
+  min-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.roman-task-planner__swipe-hint {
+  margin-top: 2px;
+  font-size: 9px;
+  line-height: 1.2;
+  opacity: 0.4;
+  letter-spacing: 0.02em;
+}
+.roman-task-planner__swipe-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(40px, auto);
+  gap: 5px;
+  box-sizing: border-box;
+  padding: 6px;
+  align-items: stretch;
+  justify-content: stretch;
+  align-content: center;
+  background: rgba(0, 0, 0, 0.22);
+  border-left: 1px solid rgba(148, 163, 184, 0.15);
+  overflow: hidden;
+  /* Пока ряд закрыт, кнопки не должны получать hit-test (иначе onDown в JS выходит по .roman-task-planner__btn и свайп с мыши не стартует). */
+  pointer-events: none;
+}
+.roman-task-planner__swipe-track--open .roman-task-planner__swipe-actions {
+  pointer-events: auto;
+}
+.roman-task-planner__swipe-track--open .roman-task-planner__reorder-col {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+[data-theme="light"] .roman-task-planner__swipe-actions {
+  background: rgba(44, 24, 16, 0.06);
+  border-left-color: rgba(44, 24, 16, 0.1);
+}
+.roman-task-planner-modal .roman-task-planner__swipe-actions .roman-task-planner__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 4px;
+  font-size: 9.5px;
+  line-height: 1.08;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.roman-task-planner .roman-task-planner__swipe-actions .roman-task-planner__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 4px;
+  font-size: 9.5px;
+  line-height: 1.08;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* .subscribe-btn__in-dev оставлена для совместимости, но сейчас не используется */
+/* Кнопка подписки в блоке новостей */
+.gazette-modal__subscribe-in-news {
+  margin: 0 0 16px;
+  text-align: center;
+}
+.gazette-modal__subscribe-in-news-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c1810;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.gazette-modal__subscribe-in-news-btn:hover:not(:disabled) {
+  color: #5c4033;
+  opacity: 0.9;
+}
+.gazette-modal__subscribe-in-news-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* Кнопка подписки под каждой статьёй */
+.gazette-modal__subscribe-in-article {
+  margin: 12px 0 24px;
+  text-align: center;
+}
+.gazette-modal__subscribe-in-article-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c1810;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.gazette-modal__subscribe-in-article-btn:hover:not(:disabled) {
+  color: #5c4033;
+  opacity: 0.9;
+}
+.gazette-modal__subscribe-in-article-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* Контент страницы (новости или заносы) */
+.gazette-modal__content {
+  padding: 50px 52px 24px 20px;
+  overflow-y: visible;
+  max-height: none;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+.gazette-modal__content[hidden] {
+  display: none !important;
+}
+/* Чтобы контент газеты не уходил под нижнее меню: отступ снизу = высота меню + 2мм */
+.gazette-modal__content--news {
+  padding-top: 50px;
+  /* Больше отступ снизу, чтобы кнопка «Подписаться на газету» всегда была видна над нижним меню */
+  padding-bottom: calc(104px + 8mm);
+}
+.gazette-modal__content-masthead {
+  display: block;
+  width: 100%;
+  padding: 12px 20px 10px;
+  background: #2c1810;
+  color: #ebe0c8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.gazette-modal__content-rule {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #2c1810;
+  margin: 0;
+}
+.gazette-modal__content--news .gazette-modal__back {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+.gazette-modal__content--news .gazette-modal__content-masthead {
+  margin-top: 12px;
+}
+.gazette-modal__content-date {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #5c4033;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+.gazette-modal__lead--top {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #2c1810;
+}
+.gazette-modal__content--news .gazette-modal__lead--top:first-of-type {
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: none;
+}
+/* .gazette-modal__back — базовый вид в блоке «Единый стиль … как в общем чате» */
+.gazette-modal__back {
+  margin-bottom: 12px;
+}
+.gazette-modal__header {
+  text-align: center;
+  margin: 0 0 16px;
+  padding: 0;
+}
+.gazette-modal__edition {
+  margin: 0 0 4px;
+  font-size: 10px;
+  color: #5c4033;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.gazette-modal__masthead {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #2c1810;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  line-height: 1.15;
+}
+.gazette-modal__date {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #5c4033;
+  letter-spacing: 0.02em;
+}
+.gazette-modal__rule {
+  margin-top: 14px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b5a2b 8%, #8b5a2b 92%, transparent);
+}
+.gazette-modal__lead {
+  margin: 20px 0 0;
+  padding: 0 4px;
+}
+.gazette-modal__headline--main {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.25;
+  text-align: left;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.gazette-modal__content--news .gazette-modal__content-date {
+  color: #5c4033;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.gazette-modal__photo-wrap {
+  margin: 14px 0 10px;
+  text-align: center;
+}
+.gazette-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #8b5a2b;
+  box-shadow:
+    inset 0 0 20px rgba(139, 90, 43, 0.15),
+    2px 2px 0 rgba(0, 0, 0, 0.15),
+    4px 4px 12px rgba(0, 0, 0, 0.2);
+  filter: sepia(0.35) contrast(1.05);
+  box-sizing: border-box;
+}
+/* Фото в духе жёлтой прессы: усиленный сепия под газетную полосу */
+.gazette-modal__photo-wrap--warm .gazette-modal__photo {
+  filter: sepia(0.6) contrast(1.08) saturate(0.9);
+}
+.gazette-modal__photo-caption {
+  margin: 6px 0 0;
+  font-size: 10px;
+  font-style: italic;
+  color: #5c4033;
+  line-height: 1.3;
+}
+.gazette-modal__body {
+  margin: 12px 0 0;
+}
+.gazette-modal__body p {
+  margin: 0;
+  font-size: 13px;
+  color: #2c1810;
+  line-height: 1.55;
+  text-align: justify;
+}
+.gazette-modal__body a.gazette-modal__rating-link {
+  color: #8b5a2b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.gazette-modal__body a.gazette-modal__rating-link:hover {
+  color: #5c4033;
+}
+
+/* Газета: сказочная статья (Зал славы / Ривер) */
+.gazette-modal__lead--fairytale {
+  position: relative;
+}
+.gazette-fairytale__kicker {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #7c3aed;
+}
+.gazette-modal__headline--fairytale {
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.32;
+  color: #4c1d95;
+  margin-bottom: 4px;
+  padding: 0 2px 0;
+  border-bottom: none;
+  position: relative;
+}
+.gazette-modal__headline--fairytale::after {
+  content: "";
+  display: block;
+  margin: 10px auto 0;
+  width: 88%;
+  max-width: 320px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #a855f7, #22d3ee, #c084fc, transparent);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+.gazette-modal__body--fairytale {
+  margin-top: 4px;
+  padding: 14px 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(168deg, rgba(250, 245, 255, 0.97), rgba(255, 251, 235, 0.94));
+  border: 1px solid rgba(139, 90, 43, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 4px 18px rgba(76, 29, 149, 0.08);
+}
+.gazette-modal__body--fairytale p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.62;
+  color: #3d2914;
+  text-align: left;
+}
+.gazette-modal__body--fairytale p:last-of-type {
+  margin-bottom: 0;
+}
+.gazette-fairytale__villain {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 58, 237, 0.42);
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.07), rgba(14, 165, 233, 0.08));
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.14);
+  font-size: 13px;
+  line-height: 1.58;
+  font-style: italic;
+  color: #3730a3;
+}
+.gazette-fairytale__villain-title {
+  display: block;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6d28d9;
+  margin-bottom: 6px;
+}
+.gazette-fairytale__lead {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+  color: #422006 !important;
+  text-align: center !important;
+  margin-bottom: 14px !important;
+}
+.gazette-fairytale__moral {
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+  border-top: 1px dashed rgba(139, 90, 43, 0.38) !important;
+  font-size: 12.5px !important;
+  line-height: 1.55 !important;
+  color: #5c4033 !important;
+}
+.gazette-modal__share-row {
+  margin: 16px 0 20px 0;
+  padding: 12px 16px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Единый блок действий под статьёй: переслать, ссылка, подписка, комментарии */
+.gazette-modal__article-actions-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0 28px;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row--article-actions {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+  gap: 10px;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article--article-actions {
+  margin: 0;
+  padding: 0;
+  text-align: stretch;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn) {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
+  background: transparent;
+  border: none;
+  color: #2c1810;
+  box-shadow: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):hover:not(:disabled) {
+  color: #5c4033;
+  opacity: 0.9;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):active:not(:disabled) {
+  opacity: 0.85;
+}
+.gazette-modal__article-actions-card .gazette-modal__subscribe-in-article-btn:not(.raffles-hero__share-btn):disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.gazette-modal__article-actions-card .gazette-article-comments:not(.gazette-article-comments--panel) {
+  margin: 4px 0 0;
+  padding: 14px 0 2px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gazette-modal__article-actions-card .gazette-article-comments:not(.gazette-article-comments--panel) .gazette-article-comments__title {
+  margin-top: 2px;
+}
+.gazette-modal__article-actions-card .gazette-article-comments--panel {
+  margin: 14px 0 0;
+  padding: 16px 14px 18px;
+  border: 1px solid rgba(44, 24, 16, 0.26);
+  border-radius: 14px;
+  background: linear-gradient(165deg, rgba(255, 253, 248, 0.98) 0%, rgba(250, 244, 232, 0.99) 100%);
+  box-shadow: 0 8px 32px rgba(44, 24, 16, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+.gazette-article-comments__panel-head {
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(44, 24, 16, 0.12);
+}
+.gazette-article-comments--panel .gazette-article-comments__title {
+  margin: 0;
+}
+.gazette-article-comments__panel-sub {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #78716c;
+  font-weight: 400;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.gazette-article-comments__composer-card {
+  margin-top: 14px;
+  padding: 14px 12px 16px;
+  border-radius: 12px;
+  border: 1px dashed rgba(44, 24, 16, 0.38);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 2px 8px rgba(44, 24, 16, 0.05);
+}
+.gazette-article-comments__composer-card[hidden] {
+  display: none !important;
+}
+.gazette-article-comments--panel .gazette-article-comments__textarea {
+  padding: 12px 14px;
+  min-height: 96px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(44, 24, 16, 0.32);
+  border-radius: 10px;
+  background: #fffef9;
+  box-shadow: inset 0 1px 3px rgba(44, 24, 16, 0.06);
+}
+.gazette-article-comments--panel .gazette-article-comments__textarea:focus {
+  border-color: rgba(34, 158, 217, 0.75);
+  box-shadow: inset 0 1px 3px rgba(44, 24, 16, 0.05), 0 0 0 2px rgba(34, 158, 217, 0.2);
+}
+.gazette-article-comments--panel .gazette-article-comments__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(44, 24, 16, 0.22);
+  background: linear-gradient(180deg, #4a3428 0%, #2c1810 100%);
+  color: #fff8f0;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+.gazette-article-comments--panel .gazette-article-comments__submit:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.gazette-article-comments--panel .gazette-article-comments__submit:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+.gazette-article-comments--panel .gazette-article-comments__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+/* Современная иконка «поделиться» для кнопок Отправить другу / Поделиться */
+.gazette-modal__share-btn,
+.winter-rating__share-btn,
+.winter-rating-player-modal__share-btn,
+.winter-rating-week-top-modal__share-btn {
+  --share-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='18' cy='5' r='3'/%3E%3Ccircle cx='6' cy='12' r='3'/%3E%3Ccircle cx='18' cy='19' r='3'/%3E%3Cline x1='8.59' y1='13.51' x2='15.42' y2='17.49'/%3E%3Cline x1='15.41' y1='6.51' x2='8.59' y2='10.49'/%3E%3C/svg%3E");
+}
+.gazette-modal__share-btn::before,
+.winter-rating__share-btn::before,
+.winter-rating-player-modal__share-btn::before,
+.winter-rating-week-top-modal__share-btn::before {
+  content: "";
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 6px;
+  vertical-align: -0.2em;
+  background-color: currentColor;
+  mask: var(--share-icon) no-repeat center;
+  mask-size: contain;
+  -webkit-mask: var(--share-icon) no-repeat center;
+  -webkit-mask-size: contain;
+}
+.gazette-modal__share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 calc(50% - 5px);
+  min-width: 0;
+  max-width: 100%;
+  width: auto;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 12px 12px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #2c1810;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
+  box-shadow: none;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  word-break: break-word;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
+}
+.gazette-modal__share-btn:focus-visible {
+  opacity: 0.85;
+}
+.gazette-modal__share-btn.gazette-modal__share-copy {
+  flex: 1 1 calc(50% - 5px);
+  font-size: 12px;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+.gazette-modal__share-btn.gazette-modal__share-telegram {
+  background: transparent;
+  border: none;
+  color: #2c1810;
+  box-shadow: none;
+}
+.gazette-modal__share-btn.gazette-modal__share-telegram:hover {
+  color: #5c4033;
+  opacity: 0.9;
+}
+.gazette-modal__share-btn:hover {
+  color: #5c4033;
+  opacity: 0.9;
+}
+.gazette-modal__share-btn:active {
+  opacity: 0.8;
+}
+
+/* Газета под статьёй: ряд как в розыгрышах (.raffles-hero__share-row) — сброс газетных «ссылок» у .gazette-modal__share-btn */
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__share-btn {
+  flex: 0 0 auto;
+  text-decoration: none;
+  white-space: nowrap;
+  word-break: normal;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__share-btn::before {
+  display: none;
+}
+.gazette-modal__article-actions-card .gazette-modal__share-row.raffles-hero__share-row > .gazette-modal__subscribe-in-article-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: auto;
+  max-width: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Комментарии к статьям газеты */
+.gazette-article-comments {
+  margin: 20px 0 8px;
+  padding: 14px 0 16px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.gazette-article-comments__title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5c4033;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.gazette-article-comments__hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #78350f;
+}
+.gazette-article-comments__hint[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__feed {
+  margin-bottom: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gazette-article-comments__loading,
+.gazette-article-comments__empty {
+  margin: 0;
+  font-size: 12px;
+  color: #78716c;
+  font-style: italic;
+}
+.gazette-article-comments__item {
+  margin: 0 0 12px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.gazette-article-comments__item:last-child {
+  margin-bottom: 0;
+}
+.gazette-article-comments__item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-bottom: 4px;
+}
+.gazette-article-comments__author {
+  font-size: 12px;
+  font-weight: 700;
+  color: #422006;
+}
+/* Профиль чата (карточка игрока) — внешне как имя в тексте */
+.gazette-article-comments__author--profile {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
+}
+.gazette-article-comments__author--profile:hover {
+  opacity: 0.88;
+}
+.gazette-article-comments__time {
+  font-size: 11px;
+  color: #78716c;
+}
+.gazette-article-comments__mod-actions {
+  margin-left: auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.gazette-article-comments__edit {
+  padding: 2px 0;
+  font-size: 11px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #57534e;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
+  font-family: inherit;
+}
+.gazette-article-comments__edited {
+  font-size: 10px;
+  color: #a8a29e;
+  white-space: nowrap;
+}
+.gazette-article-comments__delete {
+  margin-left: 0;
+  padding: 2px 0;
+  font-size: 11px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #7f1d1d;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  outline: none;
+  font-family: inherit;
+}
+.gazette-article-comments__delete:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.gazette-article-comments__body {
+  margin: 0;
+}
+.gazette-article-comments__item--editing .gazette-article-comments__text[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__edit-box {
+  margin-top: 4px;
+}
+.gazette-article-comments__edit-box[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__edit-textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(44, 24, 16, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  color: #1c1917;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+.gazette-article-comments__edit-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gazette-article-comments__edit-save,
+.gazette-article-comments__edit-cancel {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(44, 24, 16, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  color: #292524;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gazette-article-comments__edit-save {
+  background: rgba(249, 115, 22, 0.14);
+  border-color: rgba(234, 88, 12, 0.32);
+}
+.gazette-article-comments__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #292524;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.gazette-article-comments__form[hidden] {
+  display: none !important;
+}
+.gazette-article-comments__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c4033;
+}
+.gazette-article-comments__textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  margin-bottom: 8px;
+  padding: 10px 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(44, 24, 16, 0.35);
+  background: transparent;
+  color: #1c1917;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.45;
+  resize: vertical;
+  outline: none;
+  box-shadow: none;
+}
+.gazette-article-comments__textarea::placeholder {
+  color: rgba(44, 24, 16, 0.45);
+}
+.gazette-article-comments__submit {
+  min-height: 40px;
+  padding: 8px 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #2c1810;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
+}
+.gazette-article-comments__submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.gazette-article-comments__form-status {
+  margin: 8px 0 0;
+  min-height: 1.2em;
+  font-size: 12px;
+  color: #78350f;
+}
+
+.gazette-modal__intro {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: #5c4033;
+  line-height: 1.5;
+  text-align: justify;
+}
+.gazette-modal__lead {
+  padding: 0 4px;
+}
+.gazette-modal__article {
+  margin: 0;
+}
+.gazette-modal__content-date {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #5c4033;
+  letter-spacing: 0.02em;
+}
+.gazette-modal__content--news .gazette-modal__lead {
+  margin-top: 0;
+}
+.gazette-modal__lead--top {
+  margin-top: 24px;
+}
+/* Черновики газеты: скрыты в общей ленте, видны по прямой ссылке ?startapp=news_N */
+#gazetteModalNews .gazette-modal__lead[data-gazette-draft="1"] {
+  display: none !important;
+}
+.gazette-modal__draft-banner {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 700;
+  text-align: center;
+  color: #7c2d12;
+  background: linear-gradient(135deg, rgba(254, 215, 170, 0.95), rgba(251, 191, 36, 0.35));
+  border: 1px dashed rgba(154, 52, 18, 0.55);
+  border-radius: 10px;
+}
+[data-theme="dark"] .gazette-modal__draft-banner {
+  color: #fed7aa;
+  background: linear-gradient(135deg, rgba(124, 45, 18, 0.45), rgba(30, 20, 15, 0.9));
+  border-color: rgba(251, 191, 36, 0.35);
+}
+.gazette-modal__headline--continuation {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c1810;
+}
+.gazette-modal__headline-cont {
+  font-weight: 600;
+  color: #5c4033;
+  font-size: 13px;
+}
+.gazette-modal__top-list {
+  font-size: 13px;
+  line-height: 1.65;
+  column-count: 2;
+  column-gap: 20px;
+  column-rule: 1px solid rgba(139, 90, 43, 0.25);
+}
+.gazette-modal__top-item {
+  break-inside: avoid;
+  margin-bottom: 6px;
+  padding: 4px 0 4px 2px;
+  border-bottom: 1px dotted rgba(139, 90, 43, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.gazette-modal__top-item:last-child {
+  border-bottom: none;
+}
+.gazette-modal__top-num {
+  font-weight: 700;
+  color: #5c4033;
+  min-width: 1.2em;
+  flex-shrink: 0;
+}
+.gazette-modal__nick-btn {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  color: #2c1810;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+.gazette-modal__nick-btn:hover {
+  text-decoration: underline;
+  color: #1a0d08;
+}
+.gazette-modal__top-nick {
+  flex: 1;
+  font-weight: 600;
+  color: #2c1810;
+  min-width: 0;
+}
+.gazette-modal__top-reward {
+  font-weight: 700;
+  color: #2c1810;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Модалка партнёрства: 4 листа с листанием вправо */
+.partnership-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.partnership-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.partnership-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+}
+.partnership-modal__box {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 32px);
+  background: var(--card-bg, #1e293b);
+  border: 1px solid var(--card-border, rgba(148, 163, 184, 0.35));
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.partnership-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: var(--text, #f1f5f9);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+.partnership-modal__close:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.partnership-modal__track {
+  display: flex;
+  width: 500%;
+  flex-shrink: 0;
+  transition: transform 0.3s ease-out;
+  min-height: 0;
+  flex: 1;
+}
+.partnership-modal__sheet {
+  width: 20%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 48px 20px 60px;
+  box-sizing: border-box;
+}
+.partnership-modal__sheet-inner {
+  max-width: 100%;
+}
+.partnership-modal__img {
+  display: block;
+  width: calc(100% - 16px);
+  max-width: none;
+  height: auto;
+  margin: 0 8px 16px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.partnership-modal__title {
+  margin: 0 0 16px;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text, #f1f5f9);
+}
+.partnership-modal__heading {
+  margin: 20px 0 12px;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text, #f1f5f9);
+}
+.partnership-modal__heading:first-child {
+  margin-top: 0;
+}
+.partnership-modal__step {
+  margin: 0 0 12px;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--accent, #93c5fd);
+}
+.partnership-modal__text {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted, #94a3b8);
+}
+.partnership-modal__text:last-child {
+  margin-bottom: 0;
+}
+.partnership-modal__text--contact {
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text, #f1f5f9);
+}
+.partnership-modal__link {
+  color: var(--accent, #93c5fd);
+  text-decoration: underline;
+}
+.partnership-modal__link:hover {
+  color: #bfdbfe;
+}
+.partnership-modal__nav-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.partnership-modal__prev,
+.partnership-modal__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: var(--text, #f1f5f9);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.partnership-modal__prev:hover,
+.partnership-modal__next:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.partnership-modal__nav {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.partnership-modal__page-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+}
+
+[data-theme="light"] .partnership-modal__box {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+[data-theme="light"] .partnership-modal__title,
+[data-theme="light"] .partnership-modal__heading,
+[data-theme="light"] .partnership-modal__step {
+  color: #0f172a;
+}
+[data-theme="light"] .partnership-modal__text {
+  color: #475569;
+}
+[data-theme="light"] .partnership-modal__text--contact {
+  color: #0f172a;
+}
+[data-theme="light"] .partnership-modal__close {
+  color: #334155;
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+[data-theme="light"] .partnership-modal__link {
+  color: #2563eb;
+}
+[data-theme="light"] .partnership-modal__prev,
+[data-theme="light"] .partnership-modal__next {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.home-mini-icon-item--clickable {
+  cursor: pointer;
+  opacity: 1;
+  border: none;
+  font: inherit;
+  color: inherit;
+}
+.home-mini-icons .home-mini-icon-item--clickable:hover {
+  opacity: 1;
+}
+
+.title--welcome {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .title--welcome {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+

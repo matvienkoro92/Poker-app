@@ -54,6 +54,20 @@ function localRootScriptFilesFromIndex() {
   return [...new Set(out)];
 }
 
+function localCssImportsFromStyles() {
+  const css = read("styles.css");
+  const out = [];
+  const re = /@import\s+url\(["']?([^"')]+)["']?\)/gi;
+  let match;
+  while ((match = re.exec(css))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+    if (file.includes("/") || !file.endsWith(".css")) continue;
+    out.push(file);
+  }
+  return [...new Set(out)];
+}
+
 files.client = localRootScriptFilesFromIndex()
   .map((file) => {
     try {
@@ -167,6 +181,14 @@ add("Service worker does not stale-cache explicit fresh chat requests", () =>
 add("Build output contains every local script from index.html", () => {
   const publicDir = path.join(root, "public");
   return localRootScriptFilesFromIndex().every((file) =>
+    fs.existsSync(path.join(root, file)) &&
+    fs.existsSync(path.join(publicDir, file))
+  );
+});
+
+add("Build output contains every local CSS import from styles.css", () => {
+  const publicDir = path.join(root, "public");
+  return localCssImportsFromStyles().every((file) =>
     fs.existsSync(path.join(root, file)) &&
     fs.existsSync(path.join(publicDir, file))
   );
