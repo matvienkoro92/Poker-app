@@ -8125,32 +8125,7 @@ function pokerApplyBottomTabbarPad() {
   try {
     if (typeof pokerSyncIosPwaRootClass === "function") pokerSyncIosPwaRootClass();
   } catch (eIosCls) {}
-  /* В треде общий/личный таббар скрыт — inline pad с прошлого экрана не должен жить на :root (гонка после клавиатуры). */
-  try {
-    if (document.body && document.body.getAttribute("data-view") === "chat") {
-      var gvPad = document.getElementById("chatGeneralView");
-      var cvPad = document.getElementById("chatConvView");
-      var visibleThreadInput = null;
-      try {
-        visibleThreadInput = document.querySelector(
-          '.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area, ' +
-          '.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area, ' +
-          'body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area, ' +
-          'body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area'
-        );
-      } catch (eChatPadQuery) {}
-      var threadPad =
-        !!(gvPad && !gvPad.classList.contains("chat-general-view--hidden")) ||
-        !!(cvPad && !cvPad.classList.contains("chat-conv-view--hidden")) ||
-        !!(visibleThreadInput && visibleThreadInput.getBoundingClientRect && visibleThreadInput.getBoundingClientRect().height > 0);
-      if (threadPad) {
-        document.documentElement.style.removeProperty("--app-bottom-tabbar-pad");
-        pokerApplyBottomTabbarPad._lastPad = null;
-        if (typeof pokerSyncPwaIosBottomNavGap === "function") pokerSyncPwaIosBottomNavGap();
-        return;
-      }
-    }
-  } catch (eChatPad) {}
+  /* Таббар остаётся доступным и в тредах чата, поэтому его высоту измеряем так же, как на остальных экранах. */
   var tabbarGapPx =
     document.body && document.body.getAttribute && document.body.getAttribute("data-view") === "home" ? 5 : 15;
   if (pokerApplyBottomTabbarPad._lastGap !== tabbarGapPx) {
@@ -12790,20 +12765,30 @@ function getPokerChatTelegramAuthState() {
 var POKER_CHAT_NEED_AUTH_PWA_MSG =
   "Чтобы общаться в чатах, сначала авторизуйтесь.\n1. Добавьте ярлык на экран «Домой» (из Safari или Google Chrome).\n2. Зайдите с ярлыка и авторизуйтесь.";
 
+function pokerSafeChatAlert(msg) {
+  var text = msg != null ? String(msg) : "";
+  try {
+    var w = window.Telegram && window.Telegram.WebApp;
+    if (w && typeof w.showAlert === "function") {
+      w.showAlert(text);
+      return;
+    }
+  } catch (eTgChatAlert) {}
+  try {
+    if (typeof alert === "function") alert(text);
+  } catch (eBrowserChatAlert) {}
+}
+
 function pokerNotifyChatVerificationRequired() {
   var msg = isTelegramWebApp()
     ? "Чтобы общаться в чатах, сначала войдите: откройте Mini App из бота Telegram."
     : POKER_CHAT_NEED_AUTH_PWA_MSG;
-  var w = window.Telegram && window.Telegram.WebApp;
-  if (w && w.showAlert) w.showAlert(msg);
-  else if (typeof alert === "function") alert(msg);
+  pokerSafeChatAlert(msg);
 }
 
 function pokerNotifyChatAuthPending() {
   var msg = "Выполняется проверка входа через Telegram… Повторите через несколько секунд.";
-  var w = window.Telegram && window.Telegram.WebApp;
-  if (w && w.showAlert) w.showAlert(msg);
-  else if (typeof alert === "function") alert(msg);
+  pokerSafeChatAlert(msg);
 }
 
 /** false — прервать действие в чате (показано уведомление) */
@@ -29425,10 +29410,24 @@ function initChat() {
     try {
       pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
     } catch (eOpenConvDbg0) {}
+    if (!userId) return;
+    var openConvIsGroup = String(userId).indexOf("group_") === 0;
+    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+    try {
+      var myOpenConvId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
+      if (myOpenConvId && !openConvIsGroup && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(userId, myOpenConvId)) {
+        var selfMsg =
+          "Это личный чат с самим собой — входящие от игроков здесь не отображаются. Откройте диалог с игроком из списка контактов ниже или найдите человека по ID / нику.";
+        pokerSafeChatAlert(selfMsg);
+        return;
+      }
+    } catch (eOpenConvSelfGuard) {}
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
     if (dialogsView) dialogsView.classList.add("chat-dialogs-view--hidden");
-    if (generalView) generalView.classList.add("chat-general-view--hidden");
-    generalView.style.display = "none";
+    if (generalView) {
+      generalView.classList.add("chat-general-view--hidden");
+      generalView.style.display = "none";
+    }
     if (personalView) personalView.classList.remove("chat-personal-view--hidden");
     if (listView) listView.classList.add("chat-list-view--hidden");
     if (convView) convView.classList.remove("chat-conv-view--hidden");
@@ -40863,7 +40862,16 @@ function initChat() {
           }
           e.preventDefault();
           e.stopPropagation();
-          openDialogsViewItem(btn);
+          try {
+            openDialogsViewItem(btn);
+          } catch (eOpenDialogItem) {
+            try {
+              console.error("chat dialog open failed", eOpenDialogItem);
+            } catch (eLogOpenDialog) {}
+            try {
+              if (typeof showDialogs === "function") showDialogs();
+            } catch (eRecoverDialog) {}
+          }
         },
         { capture: true }
       );
