@@ -33,6 +33,27 @@ function hasAll(file, patterns) {
   return patterns.every((pattern) => has(file, pattern));
 }
 
+function stripAssetUrl(raw) {
+  return String(raw || "")
+    .trim()
+    .replace(/^\.\/+/, "")
+    .split("#")[0]
+    .split("?")[0];
+}
+
+function localRootScriptFilesFromIndex() {
+  const out = [];
+  const re = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+    if (file.includes("/") || !file.endsWith(".js")) continue;
+    out.push(file);
+  }
+  return [...new Set(out)];
+}
+
 add("PWA auth shell is present", () =>
   hasAll("html", [
     'id="pwaAuthScreen"',
@@ -132,6 +153,14 @@ add("Service worker does not stale-cache explicit fresh chat requests", () =>
     "pokerSwChatApiStaleWhileRevalidate",
   ])
 );
+
+add("Build output contains every local script from index.html", () => {
+  const publicDir = path.join(root, "public");
+  return localRootScriptFilesFromIndex().every((file) =>
+    fs.existsSync(path.join(root, file)) &&
+    fs.existsSync(path.join(publicDir, file))
+  );
+});
 
 const failures = [];
 for (const check of checks) {

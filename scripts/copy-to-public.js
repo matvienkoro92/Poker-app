@@ -10,17 +10,36 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
 
-const toCopy = [
+function stripAssetUrl(raw) {
+  return String(raw || '')
+    .trim()
+    .replace(/^\.\/+/, '')
+    .split('#')[0]
+    .split('?')[0];
+}
+
+function localScriptFilesFromIndex() {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const out = [];
+  const re = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith('/')) continue;
+    if (file.includes('/') || !file.endsWith('.js')) continue;
+    out.push(file);
+  }
+  return out;
+}
+
+const baseFiles = [
   'index.html',
   'styles.css',
-  'app.js',
-  'winter-rating-data.js',
-  'updates-data.js',
-  'peerjs.min.js',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',
 ];
+const toCopy = [...new Set(baseFiles.concat(localScriptFilesFromIndex()))];
 const dirsToCopy = ['assets'];
 
 if (!fs.existsSync(publicDir)) {
@@ -29,10 +48,11 @@ if (!fs.existsSync(publicDir)) {
 
 for (const file of toCopy) {
   const src = path.join(root, file);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(publicDir, file));
-    console.log('Copied:', file);
+  if (!fs.existsSync(src)) {
+    throw new Error('Missing static file referenced for build: ' + file);
   }
+  fs.copyFileSync(src, path.join(publicDir, file));
+  console.log('Copied:', file);
 }
 
 function copyDirRecursive(src, dest) {
