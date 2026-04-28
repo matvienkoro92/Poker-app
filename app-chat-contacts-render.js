@@ -1,3 +1,16 @@
+function chatContactsRenderEscapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+
+function chatContactStatusLevelHtml(level) {
+  if (level == null || level === "") return "";
+  var statusLevel = typeof pokerProfileStatusFishLevel === "function" ? pokerProfileStatusFishLevel(level) : 0;
+  if (!statusLevel) return "";
+  return '<span class="chat-contact__status-level">Уровень: ' + chatContactsRenderEscapeHtml(String(statusLevel)) + "</span>";
+}
+
 function chatContactsRenderSetTextContentIfChanged(el, txt) {
   if (!el) return;
   var next = txt != null ? String(txt) : "";
@@ -177,16 +190,16 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     roleInnerHtml =
       '<span class="chat-contact__group-kind">Общий чат</span>' +
       (mcN > 0
-        ? '<span class="chat-contact__group-count">' + escapeHtml(String(mcN) + " уч.") + "</span>"
+        ? '<span class="chat-contact__group-count">' + chatContactsRenderEscapeHtml(String(mcN) + " уч.") + "</span>"
         : "");
   } else if (c.admin) {
-    roleInnerHtml = escapeHtml("Админ");
+    roleInnerHtml = chatContactsRenderEscapeHtml("Админ");
   } else if (isFriendContact) {
     roleInnerHtml =
       '<span class="chat-contact__role-friend-icon" aria-hidden="true">\uD83D\uDC64</span>' +
-      escapeHtml("Друг");
+      chatContactsRenderEscapeHtml("Друг");
   } else {
-    roleInnerHtml = escapeHtml("Игрок");
+    roleInnerHtml = chatContactsRenderEscapeHtml("Игрок");
   }
   var onlineHtml = isGroupRow
     ? '<span class="chat-contact__online" aria-hidden="true"></span>'
@@ -206,7 +219,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
   var fishContactHtml = !isGroupRow ? pokerProfileStatusFishIconHtml(c.statusLevel, "chat-contact__status-fish") : "";
   var nameBlockInner;
   if (isGroupRow) {
-    nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
+    nameBlockInner = '<span class="chat-contact__label">' + chatContactsRenderEscapeHtml(displayTitle || c.name || c.id || "") + "</span>";
   } else if (isFriendContact) {
     if (hasAlias) {
       nameBlockInner =
@@ -214,19 +227,19 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
         '<span class="chat-contact__friend-name-nick">' +
         '<span class="chat-contact__name-line">' +
         '<span class="chat-contact__label chat-contact__label--primary">' +
-        escapeHtml(effectiveAlias) +
+        chatContactsRenderEscapeHtml(effectiveAlias) +
         "</span>" +
         verifiedBadgeHtml +
         statusLevelContactHtml +
         fishContactHtml +
         "</span>" +
         '<span class="chat-contact__friend-nick">' +
-        escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
+        chatContactsRenderEscapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
         "</span></span></span>";
     } else {
       nameBlockInner =
         '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
-        escapeHtml(displayTitle || c.name || c.id || "") +
+        chatContactsRenderEscapeHtml(displayTitle || c.name || c.id || "") +
         "</span>" +
         verifiedBadgeHtml +
         statusLevelContactHtml +
@@ -238,19 +251,19 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
       '<span class="chat-contact__name-stack">' +
       '<span class="chat-contact__name-line">' +
       '<span class="chat-contact__label chat-contact__label--primary">' +
-      escapeHtml(effectiveAlias) +
+      chatContactsRenderEscapeHtml(effectiveAlias) +
       "</span>" +
       verifiedBadgeHtml +
       statusLevelContactHtml +
       fishContactHtml +
       "</span>" +
       '<span class="chat-contact__login-sub">' +
-      escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
+      chatContactsRenderEscapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
       "</span></span>";
   } else {
     nameBlockInner =
       '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
-      escapeHtml(displayTitle || c.name || c.id || "") +
+      chatContactsRenderEscapeHtml(displayTitle || c.name || c.id || "") +
       "</span>" +
       verifiedBadgeHtml +
       statusLevelContactHtml +
@@ -260,12 +273,12 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
   var avatarEl = isGroupRow
     ? c.avatar
       ? '<img class="chat-contact__avatar chat-contact__avatar--group" src="' +
-        escapeHtml(c.avatar) +
+        chatContactsRenderEscapeHtml(c.avatar) +
         '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
       : '<span class="chat-contact__avatar chat-contact__avatar--placeholder chat-contact__avatar--group" aria-hidden="true">\uD83D\uDC65</span>'
     : c.avatar
       ? '<img class="chat-contact__avatar" src="' +
-        escapeHtml(c.avatar) +
+        chatContactsRenderEscapeHtml(c.avatar) +
         '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
       : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
   var nameCellPart = pinIcon
@@ -273,20 +286,20 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     : nameBlockInner;
   var innerBtn =
     '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
-    escapeHtml(c.id) +
+    chatContactsRenderEscapeHtml(c.id) +
     '" data-chat-name="' +
-    escapeHtml(displayTitle) +
+    chatContactsRenderEscapeHtml(displayTitle) +
     '" data-chat-friend="' +
     (isFriendContact ? "1" : "0") +
     '" data-chat-group="' +
     (isGroupRow ? "1" : "0") +
     '" data-chat-initial="' +
-    escapeHtml(initial) +
+    chatContactsRenderEscapeHtml(initial) +
     '" data-chat-online="' +
     (c.online ? "1" : "0") +
     '"' +
     (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
-    (c.statusLevel != null && c.statusLevel !== "" ? ' data-chat-status-level="' + escapeHtml(String(pokerProfileStatusFishLevel(c.statusLevel))) + '"' : "") +
+    (c.statusLevel != null && c.statusLevel !== "" ? ' data-chat-status-level="' + chatContactsRenderEscapeHtml(String(pokerProfileStatusFishLevel(c.statusLevel))) + '"' : "") +
     ">" +
     avatarEl +
     '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
@@ -307,9 +320,9 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
       '<button type="button" class="' +
       swipePinBtnClass +
       '" tabindex="-1" data-chat-swipe-pin="1" aria-label="' +
-      escapeHtml(swipePinAria) +
+      chatContactsRenderEscapeHtml(swipePinAria) +
       '" title="' +
-      escapeHtml(swipePinAria) +
+      chatContactsRenderEscapeHtml(swipePinAria) +
       '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">' +
       (isPinned ? chatSwipeUnpinIconSvg : chatSwipePinIconSvg) +
       "</span></button>" +
@@ -331,9 +344,9 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     '<button type="button" class="' +
     swipePinBtnClass +
     '" tabindex="-1" data-chat-swipe-pin="1" aria-label="' +
-    escapeHtml(swipePinAria) +
+    chatContactsRenderEscapeHtml(swipePinAria) +
     '" title="' +
-    escapeHtml(swipePinAria) +
+    chatContactsRenderEscapeHtml(swipePinAria) +
     '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">' +
     (isPinned ? chatSwipeUnpinIconSvg : chatSwipePinIconSvg) +
     "</span></button>" +
@@ -343,4 +356,134 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     innerBtn +
     "</div></div>"
   );
+}
+
+function chatContactsRenderDefaultIcons() {
+  return {
+    pin:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
+      "</svg>",
+    unpin:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
+      '<line x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke-width="2.35"/>' +
+      "</svg>",
+  };
+}
+
+function chatContactsSameList(existing, contactsForList, friendSet, pinOrderRender) {
+  return existing.length === contactsForList.length && contactsForList.every(function (c, i) {
+    var btn = existing[i];
+    if (!btn || btn.dataset.chatId !== c.id) return false;
+    var wantName = chatListRowDisplayTitle(c, friendSet);
+    if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
+    var wantFriend = chatContactMatchesFriendSet(c, friendSet);
+    if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
+    if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
+    var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(pokerProfileStatusFishLevel(c.statusLevel)) : "";
+    if ((btn.getAttribute("data-chat-status-level") || "") !== wantStatusLevel) return false;
+    if ((btn.getAttribute("data-chat-verified") || "") !== (c.pokerPlusVerified ? "1" : "")) return false;
+    if (c.isGroupChat) {
+      var imgG = btn.querySelector("img.chat-contact__avatar");
+      var haveG = imgG && imgG.getAttribute("src") ? String(imgG.getAttribute("src")).slice(0, 160) : "";
+      var wantG = c.avatar && String(c.avatar) ? String(c.avatar).slice(0, 160) : "";
+      if (haveG !== wantG) return false;
+    }
+    var wantPinned = false;
+    for (var pxi = 0; pxi < pinOrderRender.length; pxi++) {
+      if (peerChatIdsEqual(pinOrderRender[pxi], c.id)) {
+        wantPinned = true;
+        break;
+      }
+    }
+    var havePinIcon = !!btn.querySelector(".chat-contact__pin-icon");
+    if (wantPinned !== havePinIcon) return false;
+    var wrapPin = btn.closest(".chat-contact-swipe");
+    var pinActBtn = wrapPin && wrapPin.querySelector(".chat-contact-swipe__pin");
+    if (!pinActBtn) return false;
+    if (wantPinned !== pinActBtn.classList.contains("chat-contact-swipe__pin--unpin")) return false;
+    return true;
+  });
+}
+
+function chatContactsPatchSameList(existing, contactsForList) {
+  contactsForList.forEach(function (c, i) {
+    var btn = existing[i];
+    if (!btn) return;
+    btn.dataset.chatOnline = c.online ? "1" : "0";
+    if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
+    else try {
+      delete btn.dataset.chatVerified;
+    } catch (eVerD) {
+      btn.removeAttribute("data-chat-verified");
+    }
+    var verEl = btn.querySelector(".chat-contact__verified");
+    if (verEl) verEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
+    if (!c.isGroupChat) syncChatContactStatusMeta(btn, c.statusLevel, c.pokerPlusVerified);
+    var onEl = btn.querySelector(".chat-contact__online");
+    if (onEl) {
+      var nowVisible = !!c.online;
+      if (onEl.classList.contains("chat-contact__online--visible") !== nowVisible) {
+        onEl.classList.toggle("chat-contact__online--visible", nowVisible);
+      }
+    }
+    var unreadEl = btn.querySelector(".chat-contact__unread");
+    var needUnread = c.unreadCount > 0;
+    var unreadText = c.unreadCount > 99 ? "99+" : String(c.unreadCount);
+    if (unreadEl) {
+      unreadEl.classList.toggle("chat-contact__unread--visible", needUnread);
+      unreadEl.textContent = unreadText;
+      unreadEl.setAttribute("aria-label", needUnread ? "Непрочитано: " + unreadText : "");
+    }
+  });
+}
+
+function chatContactsAttachAvatarFallbacks(contactsEl) {
+  if (!contactsEl || !contactsEl.querySelectorAll) return;
+  contactsEl.querySelectorAll(".chat-contact img.chat-contact__avatar").forEach(function (img) {
+    img.onerror = function () {
+      var contact = this.closest(".chat-contact");
+      if (!contact) return;
+      var initial = contact.dataset.chatInitial || "?";
+      var place = document.createElement("span");
+      place.className = "chat-contact__avatar chat-contact__avatar--placeholder";
+      place.textContent = initial;
+      if (this.parentNode) this.parentNode.replaceChild(place, this);
+    };
+  });
+}
+
+function renderChatContactsListDom(opts) {
+  opts = opts || {};
+  var contactsEl = opts.contactsEl;
+  var contactsForList = opts.contactsForList;
+  var friendSet = opts.friendSet || {};
+  var forceRerender = !!opts.forceRerender;
+  if (!contactsEl || !Array.isArray(contactsForList) || !contactsForList.length) return "";
+
+  var block = contactsEl.querySelector(".chat-dialogs-block");
+  var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
+  var pinsSnapForSameList = pokerLoadChatDialogListPins();
+
+  if (!forceRerender && chatContactsSameList(existing, contactsForList, friendSet, pinsSnapForSameList) && existing.length > 0) {
+    chatContactsPatchSameList(existing, contactsForList);
+    return "updated";
+  }
+
+  if (!forceRerender && block && existing.length > 0 && patchExistingContactsList(block, contactsForList, friendSet, pinsSnapForSameList)) {
+    return "patched";
+  }
+
+  var pinOrderRender = pokerLoadChatDialogListPins();
+  var icons = chatContactsRenderDefaultIcons();
+  var contactButtons = contactsForList.map(function (c) {
+    return buildChatContactRowHtml(c, friendSet, pinOrderRender, icons);
+  }).join("");
+  contactsEl.innerHTML =
+    '<div class="chat-contacts-list-block"><div class="chat-dialogs-block">' +
+    contactButtons +
+    "</div></div>";
+  chatContactsAttachAvatarFallbacks(contactsEl);
+  return "rebuilt";
 }

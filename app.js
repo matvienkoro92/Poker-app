@@ -16899,114 +16899,20 @@ function initChat() {
           updateDialogUnreadBadges();
           updateChatNavDot();
         } else {
-          var block = contactsEl.querySelector(".chat-dialogs-block");
-          var existing = block ? block.querySelectorAll(".chat-contact-swipe .chat-contact") : [];
-          var pinsSnapForSameList = pokerLoadChatDialogListPins();
-          var sameList = existing.length === contactsForList.length && contactsForList.every(function (c, i) {
-            var btn = existing[i];
-            if (!btn || btn.dataset.chatId !== c.id) return false;
-            var wantName = chatListRowDisplayTitle(c, friendSet);
-            if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
-            var wantFriend = chatContactMatchesFriendSet(c, friendSet);
-            if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
-            if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
-            var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(pokerProfileStatusFishLevel(c.statusLevel)) : "";
-            if ((btn.getAttribute("data-chat-status-level") || "") !== wantStatusLevel) return false;
-            if ((btn.getAttribute("data-chat-verified") || "") !== (c.pokerPlusVerified ? "1" : "")) return false;
-            if (c.isGroupChat) {
-              var imgG = btn.querySelector("img.chat-contact__avatar");
-              var haveG = imgG && imgG.getAttribute("src") ? String(imgG.getAttribute("src")).slice(0, 160) : "";
-              var wantG = (c.avatar && String(c.avatar)) ? String(c.avatar).slice(0, 160) : "";
-              if (haveG !== wantG) return false;
-            }
-            var wantPinned = false;
-            for (var pxi = 0; pxi < pinsSnapForSameList.length; pxi++) {
-              if (peerChatIdsEqual(pinsSnapForSameList[pxi], c.id)) {
-                wantPinned = true;
-                break;
-              }
-            }
-            var havePinIcon = !!btn.querySelector(".chat-contact__pin-icon");
-            if (wantPinned !== havePinIcon) return false;
-            var wrapPin = btn.closest(".chat-contact-swipe");
-            var pinActBtn = wrapPin && wrapPin.querySelector(".chat-contact-swipe__pin");
-            if (!pinActBtn) return false;
-            if (wantPinned !== pinActBtn.classList.contains("chat-contact-swipe__pin--unpin")) return false;
-            return true;
+          var contactsRenderMode = renderChatContactsListDom({
+            contactsEl: contactsEl,
+            contactsForList: contactsForList,
+            friendSet: friendSet,
+            forceRerender: forceRerender,
           });
-          if (!forceRerender && sameList && existing.length > 0) {
-            contactsForList.forEach(function (c, i) {
-              var btn = existing[i];
-              if (!btn) return;
-              btn.dataset.chatOnline = c.online ? "1" : "0";
-              if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
-              else try {
-                delete btn.dataset.chatVerified;
-              } catch (eVerD) {
-                btn.removeAttribute("data-chat-verified");
-              }
-              var verEl = btn.querySelector(".chat-contact__verified");
-              if (verEl) verEl.classList.toggle("chat-contact__verified--hidden", !c.pokerPlusVerified);
-              if (!c.isGroupChat) syncChatContactStatusMeta(btn, c.statusLevel, c.pokerPlusVerified);
-              var onEl = btn.querySelector(".chat-contact__online");
-              if (onEl) {
-                var nowVisible = !!c.online;
-                if (onEl.classList.contains("chat-contact__online--visible") !== nowVisible) {
-                  onEl.classList.toggle("chat-contact__online--visible", nowVisible);
-                }
-              }
-              var unreadEl = btn.querySelector(".chat-contact__unread");
-              var needUnread = c.unreadCount > 0;
-              var unreadText = c.unreadCount > 99 ? "99+" : String(c.unreadCount);
-              if (unreadEl) {
-                unreadEl.classList.toggle("chat-contact__unread--visible", needUnread);
-                unreadEl.textContent = unreadText;
-                unreadEl.setAttribute("aria-label", needUnread ? "Непрочитано: " + unreadText : "");
-              }
-            });
+          if (contactsRenderMode) {
             updateDialogUnreadBadges();
+            if (contactsRenderMode === "rebuilt" && typeof window.chatAttachDialogButtons === "function") {
+              window.chatAttachDialogButtons();
+            }
             updateChatNavDot();
             return;
           }
-          if (!forceRerender && block && existing.length > 0 && patchExistingContactsList(block, contactsForList, friendSet, pinsSnapForSameList)) {
-            updateDialogUnreadBadges();
-            updateChatNavDot();
-            return;
-          }
-          var chatSwipePinIconSvg =
-            '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
-            "</svg>";
-          var chatSwipeUnpinIconSvg =
-            '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>' +
-            '<line x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke-width="2.35"/>' +
-            "</svg>";
-          var pinOrderRender = pokerLoadChatDialogListPins();
-          var contactButtons = contactsForList.map(function (c) {
-            return buildChatContactRowHtml(c, friendSet, pinOrderRender, {
-              pin: chatSwipePinIconSvg,
-              unpin: chatSwipeUnpinIconSvg,
-            });
-          }).join("");
-          contactsEl.innerHTML =
-            '<div class="chat-contacts-list-block"><div class="chat-dialogs-block">' +
-            contactButtons +
-            "</div></div>";
-          updateDialogUnreadBadges();
-          contactsEl.querySelectorAll(".chat-contact img.chat-contact__avatar").forEach(function (img) {
-            img.onerror = function () {
-              var contact = this.closest(".chat-contact");
-              if (!contact) return;
-              var initial = contact.dataset.chatInitial || "?";
-              var place = document.createElement("span");
-              place.className = "chat-contact__avatar chat-contact__avatar--placeholder";
-              place.textContent = initial;
-              if (this.parentNode) this.parentNode.replaceChild(place, this);
-            };
-          });
-          if (typeof window.chatAttachDialogButtons === "function") window.chatAttachDialogButtons();
-          updateChatNavDot();
         }
       }
     }
