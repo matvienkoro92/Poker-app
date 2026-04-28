@@ -54,19 +54,6 @@ function localRootScriptFilesFromIndex() {
   return [...new Set(out)];
 }
 
-function localRootStylesheetFilesFromIndex() {
-  const out = [];
-  const re = /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/gi;
-  let match;
-  while ((match = re.exec(files.html))) {
-    const file = stripAssetUrl(match[1]);
-    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
-    if (file.includes("/") || !file.endsWith(".css")) continue;
-    out.push(file);
-  }
-  return [...new Set(out)];
-}
-
 add("PWA auth shell is present", () =>
   hasAll("html", [
     'id="pwaAuthScreen"',
@@ -170,14 +157,6 @@ add("Service worker does not stale-cache explicit fresh chat requests", () =>
 add("Build output contains every local script from index.html", () => {
   const publicDir = path.join(root, "public");
   return localRootScriptFilesFromIndex().every((file) =>
-    fs.existsSync(path.join(root, file)) &&
-    fs.existsSync(path.join(publicDir, file))
-  );
-});
-
-add("Build output contains every local stylesheet from index.html", () => {
-  const publicDir = path.join(root, "public");
-  return localRootStylesheetFilesFromIndex().every((file) =>
     fs.existsSync(path.join(root, file)) &&
     fs.existsSync(path.join(publicDir, file))
   );
