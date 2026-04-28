@@ -12953,7 +12953,7 @@ body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-
 }
 
 body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
-  padding-top: calc(var(--chat-thread-header-safe-top, 0px) + var(--chat-thread-header-gap)) !important;
+  padding-top: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   padding-bottom: var(--chat-thread-inner-gap) !important;
