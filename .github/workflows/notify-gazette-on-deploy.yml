@@ -10,8 +10,34 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Wait for Vercel deploy
-        run: sleep 90
+        env:
+          # Опционально: переменная APP_URL (иначе используется URL ниже)
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          BASE="${APP_URL:-https://poker-app-ebon.vercel.app}"
+          EXPECTED_VERSION=$(sed -n 's/.*data-app-version="\([^"]*\)".*/\1/p' index.html | head -n1)
+          if [ -z "$EXPECTED_VERSION" ]; then
+            echo "Could not read data-app-version from index.html"
+            exit 1
+          fi
+          echo "Waiting for ${BASE} to serve app version ${EXPECTED_VERSION}"
+          deadline=$((SECONDS + 240))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            html=$(curl -fsSL -H "Cache-Control: no-cache" "${BASE}/index.html?_deployWait=${GITHUB_SHA}-${SECONDS}" || true)
+            live=$(printf '%s' "$html" | sed -n 's/.*data-app-version="\([^"]*\)".*/\1/p' | head -n1)
+            if [ "$live" = "$EXPECTED_VERSION" ]; then
+              echo "Deploy is ready: ${live}"
+              exit 0
+            fi
+            echo "Current version: ${live:-none}; expected: ${EXPECTED_VERSION}"
+            sleep 5
+          done
+          echo "Deploy did not become ready in time"
+          exit 1
 
       - name: Call deploy-hook (run gazette-notify if new news)
         env:

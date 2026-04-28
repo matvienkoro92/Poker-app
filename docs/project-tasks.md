@@ -16,4 +16,3 @@
 - Начать дробить `styles.css` по feature-зонам.
 - Централизовать admin/auth config: `isAdmin`, `ADMIN_IDS`, `parseBody`, `authRequired`, CORS.
 - Провести Redis schema audit: документ ключей, legacy-ключи, cleanup/backfill script.
-- Укрепить deploy hook: не `sleep 90`, а ожидание готового Vercel deploy.
