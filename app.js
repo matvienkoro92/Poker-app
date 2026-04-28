@@ -10985,10 +10985,10 @@ function initChat() {
     pokerGuardDefaultDialogsOpen: typeof pokerGuardDefaultDialogsOpen === "function" ? pokerGuardDefaultDialogsOpen : null,
     pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
     paintGeneralFromMemoryBeforeFetch: paintGeneralFromMemoryBeforeFetch,
-    loadGeneral: loadGeneral,
-    loadMessages: loadMessages,
-    loadAdminsOnline: loadAdminsOnline,
-    loadContacts: loadContacts,
+    loadGeneral: function (opts) { return loadGeneral(opts); },
+    loadMessages: function (opts) { return loadMessages(opts); },
+    loadAdminsOnline: function () { return loadAdminsOnline(); },
+    loadContacts: function (opts) { return loadContacts(opts); },
     updateChatHeaderStats: updateChatHeaderStats,
     updateUnreadDots: updateUnreadDots,
     mountChatComposer: mountChatComposer,
@@ -11004,10 +11004,14 @@ function initChat() {
     clearConvPeerAvatarHeader: clearConvPeerAvatarHeader,
     syncChatConvGroupAddMembersBtn: syncChatConvGroupAddMembersBtn,
     pokerPrefetchDiskPeersWarmup: pokerPrefetchDiskPeersWarmup,
-    updateClubChatPreview: typeof updateClubChatPreview === "function" ? updateClubChatPreview : null,
+    updateClubChatPreview: function (messages) {
+      if (typeof updateClubChatPreview === "function") return updateClubChatPreview(messages);
+    },
     updateAdminShiftOnline: updateAdminShiftOnline,
     getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
-    refreshChatSelfPinBars: refreshChatSelfPinBars,
+    refreshChatSelfPinBars: function () {
+      if (typeof refreshChatSelfPinBars === "function") return refreshChatSelfPinBars();
+    },
     pokerFlushBottomNavAndViewportAfterChatChrome: typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function" ? pokerFlushBottomNavAndViewportAfterChatChrome : null,
     closeSwitcherDropdown: closeSwitcherDropdown,
   });
@@ -11095,9 +11099,11 @@ function initChat() {
     pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
     pokerApiHasCredential: pokerApiHasCredential,
     pokerApiAuthJsonBody: pokerApiAuthJsonBody,
-    loadContacts: loadContacts,
-    loadGeneral: loadGeneral,
-    updateClubChatPreview: typeof updateClubChatPreview === "function" ? updateClubChatPreview : null,
+    loadContacts: function (opts) { return loadContacts(opts); },
+    loadGeneral: function (opts) { return loadGeneral(opts); },
+    updateClubChatPreview: function (messages) {
+      if (typeof updateClubChatPreview === "function") return updateClubChatPreview(messages);
+    },
     escapeHtml: escapeHtml,
   });
   var tryOpenClubChatFromDialogs = chatClubGate.tryOpenClubChatFromDialogs;
@@ -11146,14 +11152,14 @@ function initChat() {
     pokerNotifyChatAuthPending: typeof pokerNotifyChatAuthPending === "function" ? pokerNotifyChatAuthPending : null,
     pokerNotifyChatVerificationRequired: typeof pokerNotifyChatVerificationRequired === "function" ? pokerNotifyChatVerificationRequired : null,
     paintGeneralFromMemoryBeforeFetch: paintGeneralFromMemoryBeforeFetch,
-    loadGeneral: loadGeneral,
+    loadGeneral: function (opts) { return loadGeneral(opts); },
     pokerPushOpenStateDebug: pokerPushOpenStateDebug,
     setChatConvTitleIdText: setChatConvTitleIdText,
     applyConvPeerAvatarHeader: applyConvPeerAvatarHeader,
     syncChatConvGroupAddMembersBtn: syncChatConvGroupAddMembersBtn,
     updateUnreadDots: updateUnreadDots,
     pokerApiHasCredential: pokerApiHasCredential,
-    loadMessages: loadMessages,
+    loadMessages: function (opts) { return loadMessages(opts); },
     pokerPushOpenDebug: pokerPushOpenDebug,
     peerChatIdsEqual: peerChatIdsEqual,
     pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
