@@ -333,7 +333,14 @@ function loadMessages(opts) {
       }
       if (Array.isArray(messages) && !getChatIsEditingMessage()) {
         var sig = personalRenderSignature(getChatWithUserId() || "", messages, data.partial === true);
-        if (sig !== getLastPersonalMessagesSig()) {
+        var shouldRenderPersonalMessages = sig !== getLastPersonalMessagesSig();
+        try {
+          var msgElForRenderCheck = getMessagesEl();
+          if (!shouldRenderPersonalMessages && msgElForRenderCheck) {
+            shouldRenderPersonalMessages = /Загрузка|Loading/i.test(String(msgElForRenderCheck.textContent || ""));
+          }
+        } catch (ePersonalRenderCheck) {}
+        if (shouldRenderPersonalMessages) {
           personalMessagesCache[getChatWithUserId()] = messages.slice();
           personalMessagesCacheMeta[getChatWithUserId()] = { ts: Date.now(), source: "live" };
           try {
