@@ -144,15 +144,16 @@ UI называет блок профиля **«Верификация чере�
 
 ---
 
-## 6. Зависимости (CDN)
+## 6. Внешние зависимости
 
 ```html
 <script defer src="./telegram-web-app.js?v=22"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" async></script>
+<script src="./peerjs.min.js?v=1" async></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter|Pacifico|Permanent+Marker" rel="stylesheet">
 ```
 
 `telegram-web-app.js` хранится локально, чтобы приложение не зависело от доступности `telegram.org` в WebView.
+`peerjs.min.js` тоже vendored локально: он нужен разделу стримов и копируется в `public/` через `scripts/copy-to-public.js`.
 
 ---
 

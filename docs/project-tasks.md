@@ -12,7 +12,6 @@
 
 ## P1
 
-- Удалить или завендорить PeerJS с unpkg, если он реально нужен.
 - Начать дробить `app.js`, сначала зоны chat, profile, auth.
 - Начать дробить `styles.css` по feature-зонам.
 - Добавить smoke-тесты: PWA auth, чат, карточка игрока, Poker21 privacy/status, service worker cache.
