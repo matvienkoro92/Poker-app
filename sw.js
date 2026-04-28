@@ -1,6 +1,6 @@
-/* PWA: installability + push. Chat API is network-first unless a request explicitly opts into SW cache. */
+/* PWA: installability + push; GET /api/chat uses stale-while-revalidate unless caller explicitly asks for a fresh fetch. */
 var POKER_CHAT_API_CACHE = "poker-chat-api-v3";
-var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v2"];
+var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1"];
 var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v1";
 var POKER_CHAT_NOTIFY_WAV = "./assets/chat-push-notify.wav";
 
@@ -60,7 +60,6 @@ self.addEventListener("fetch", function (event) {
     if (u.pathname.indexOf("/api/chat") !== 0) return;
     /* Бинарные ответы прокси картинок: stale-while-revalidate как у JSON чата даёт залипание битого кэша в PWA. */
     if (u.pathname.indexOf("/api/chat-image") === 0) return;
-    if (u.searchParams.get("swCache") !== "1") return;
     /* fetch(..., { cache: "no-store" }) — не отдаём устаревший Cache Storage: иначе после тапа по пушу
  лента/личка рисуются из старого ответа, а фоновый revalidate не дергает UI (задержка ~интервал опроса). */
     var cmode = "";
