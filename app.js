@@ -16772,28 +16772,11 @@ function initChat() {
           }
           contactsForList = pokerApplyChatContactsFriendsOnlyList(contactsForList, friendSet, friendsRowsForList);
         }
-        window.chatAdminUnread = data.adminUnread || {};
-        var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
-        window.chatGeneralUnreadCount = genUnread;
-        window.chatGeneralUnread = genUnread > 0;
-        var total = data.participantsCount != null ? data.participantsCount : "—";
-        var online = data.onlineCount != null ? data.onlineCount : "—";
-        window.lastListStats = total + " конт · " + online + " онл";
-        updateChatHeaderStats();
-        if (data.generalChatParticipantsCount != null) {
-          if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
-            window._chatGeneralCache = { messages: [], generalMembers: [] };
-          }
-          window._chatGeneralCache.participantsCount = data.generalChatParticipantsCount;
-          window._chatGeneralCache.onlineCount =
-            data.generalChatOnlineCount != null ? data.generalChatOnlineCount : 0;
-          try {
-            syncClubChatRosterUi();
-          } catch (eRosterContacts) {}
-        }
-        if (data.generalChatPreview != null && typeof updateClubChatPreviewText === "function") {
-          updateClubChatPreviewText(data.generalChatPreview);
-        }
+        pokerApplyChatContactsMetaState(data, {
+          updateHeaderStats: updateChatHeaderStats,
+          syncRoster: syncClubChatRosterUi,
+          updatePreviewText: updateClubChatPreviewText,
+        });
         if (contactsForList.length === 0) {
           var emptyText = "Общайтесь в чате клуба, чтобы найти друзей, но помните, что за столом друзей нет.";
           if (showFriendsOnly) emptyText = "Здесь будут друзья, с которыми у вас уже есть личные диалоги.";

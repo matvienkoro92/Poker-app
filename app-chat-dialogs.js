@@ -427,6 +427,32 @@ function pokerApplyChatContactsFriendsOnlyList(contactsForList, friendSet, frien
   return contactsForList;
 }
 
+function pokerApplyChatContactsMetaState(data, callbacks) {
+  callbacks = callbacks || {};
+  data = data || {};
+  window.chatAdminUnread = data.adminUnread || {};
+  var genUnread = data.generalUnreadCount != null ? data.generalUnreadCount : 0;
+  window.chatGeneralUnreadCount = genUnread;
+  window.chatGeneralUnread = genUnread > 0;
+  var total = data.participantsCount != null ? data.participantsCount : "—";
+  var online = data.onlineCount != null ? data.onlineCount : "—";
+  window.lastListStats = total + " конт · " + online + " онл";
+  if (typeof callbacks.updateHeaderStats === "function") callbacks.updateHeaderStats();
+  if (data.generalChatParticipantsCount != null) {
+    if (!window._chatGeneralCache || typeof window._chatGeneralCache !== "object") {
+      window._chatGeneralCache = { messages: [], generalMembers: [] };
+    }
+    window._chatGeneralCache.participantsCount = data.generalChatParticipantsCount;
+    window._chatGeneralCache.onlineCount = data.generalChatOnlineCount != null ? data.generalChatOnlineCount : 0;
+    try {
+      if (typeof callbacks.syncRoster === "function") callbacks.syncRoster();
+    } catch (eRosterContacts) {}
+  }
+  if (data.generalChatPreview != null && typeof callbacks.updatePreviewText === "function") {
+    callbacks.updatePreviewText(data.generalChatPreview);
+  }
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
