@@ -142,3 +142,205 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
   block.appendChild(frag);
   return true;
 }
+
+function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
+  icons = icons || {};
+  var chatSwipePinIconSvg = icons.pin || "";
+  var chatSwipeUnpinIconSvg = icons.unpin || "";
+  var firstChar = function (name) { return (name || "?").toString().replace(/^@/, "")[0] || "?"; };
+
+  var isGroupRow = !!(c && c.isGroupChat);
+  var isPinned = false;
+  for (var pix = 0; pix < pinOrderRender.length; pix++) {
+    if (peerChatIdsEqual(pinOrderRender[pix], c.id)) {
+      isPinned = true;
+      break;
+    }
+  }
+  var isFriendContact = chatContactMatchesFriendSet(c, friendSet);
+  var pinIcon = !isPinned
+    ? ""
+    : '<span class="chat-contact__pin-icon" aria-hidden="true" title="Закреплён">📌</span>';
+  var swipePinAria = isPinned ? "Открепить диалог" : "Закрепить диалог";
+  var swipePinBtnClass =
+    "chat-contact-swipe__pin" + (isPinned ? " chat-contact-swipe__pin--unpin" : "");
+  var roleClass = isGroupRow
+    ? " chat-contact__role--group"
+    : c.admin
+      ? " chat-contact__role--admin"
+      : isFriendContact
+        ? " chat-contact__role--friend"
+        : "";
+  var roleInnerHtml;
+  if (isGroupRow) {
+    var mcN = c.memberCount != null ? Number(c.memberCount) : 0;
+    roleInnerHtml =
+      '<span class="chat-contact__group-kind">Общий чат</span>' +
+      (mcN > 0
+        ? '<span class="chat-contact__group-count">' + escapeHtml(String(mcN) + " уч.") + "</span>"
+        : "");
+  } else if (c.admin) {
+    roleInnerHtml = escapeHtml("Админ");
+  } else if (isFriendContact) {
+    roleInnerHtml =
+      '<span class="chat-contact__role-friend-icon" aria-hidden="true">\uD83D\uDC64</span>' +
+      escapeHtml("Друг");
+  } else {
+    roleInnerHtml = escapeHtml("Игрок");
+  }
+  var onlineHtml = isGroupRow
+    ? '<span class="chat-contact__online" aria-hidden="true"></span>'
+    : '<span class="chat-contact__online' + (c.online ? ' chat-contact__online--visible' : '') + '" aria-label="онлайн">онлайн</span>';
+  var unreadNum = c.unreadCount > 0 ? (c.unreadCount > 99 ? "99+" : String(c.unreadCount)) : "";
+  var unreadBadge = '<span class="chat-contact__unread' + (c.unreadCount > 0 ? ' chat-contact__unread--visible' : '') + '" aria-label="' + (c.unreadCount > 0 ? 'Непрочитано: ' + (c.unreadCount > 99 ? '99+' : c.unreadCount) : '') + '">' + unreadNum + '</span>';
+  var displayTitle = chatListRowDisplayTitle(c, friendSet);
+  var effectiveAlias = chatListRowAlias(c, friendSet);
+  var hasAlias = effectiveAlias !== "";
+  var initial = isGroupRow ? "\uD83D\uDC65" : firstChar(displayTitle);
+  var verifiedBadgeHtml = !isGroupRow
+    ? '<span class="chat-contact__verified' +
+      (c.pokerPlusVerified ? "" : " chat-contact__verified--hidden") +
+      '" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'
+    : "";
+  var statusLevelContactHtml = !isGroupRow ? chatContactStatusLevelHtml(c.statusLevel) : "";
+  var fishContactHtml = !isGroupRow ? pokerProfileStatusFishIconHtml(c.statusLevel, "chat-contact__status-fish") : "";
+  var nameBlockInner;
+  if (isGroupRow) {
+    nameBlockInner = '<span class="chat-contact__label">' + escapeHtml(displayTitle || c.name || c.id || "") + "</span>";
+  } else if (isFriendContact) {
+    if (hasAlias) {
+      nameBlockInner =
+        '<span class="chat-contact__name-stack chat-contact__name-stack--friend">' +
+        '<span class="chat-contact__friend-name-nick">' +
+        '<span class="chat-contact__name-line">' +
+        '<span class="chat-contact__label chat-contact__label--primary">' +
+        escapeHtml(effectiveAlias) +
+        "</span>" +
+        verifiedBadgeHtml +
+        statusLevelContactHtml +
+        fishContactHtml +
+        "</span>" +
+        '<span class="chat-contact__friend-nick">' +
+        escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
+        "</span></span></span>";
+    } else {
+      nameBlockInner =
+        '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
+        escapeHtml(displayTitle || c.name || c.id || "") +
+        "</span>" +
+        verifiedBadgeHtml +
+        statusLevelContactHtml +
+        fishContactHtml +
+        "</span>";
+    }
+  } else if (hasAlias) {
+    nameBlockInner =
+      '<span class="chat-contact__name-stack">' +
+      '<span class="chat-contact__name-line">' +
+      '<span class="chat-contact__label chat-contact__label--primary">' +
+      escapeHtml(effectiveAlias) +
+      "</span>" +
+      verifiedBadgeHtml +
+      statusLevelContactHtml +
+      fishContactHtml +
+      "</span>" +
+      '<span class="chat-contact__login-sub">' +
+      escapeHtml(pokerNormalizeLegacyAccountLabel(c.name || c.id || "")) +
+      "</span></span>";
+  } else {
+    nameBlockInner =
+      '<span class="chat-contact__name-line"><span class="chat-contact__label">' +
+      escapeHtml(displayTitle || c.name || c.id || "") +
+      "</span>" +
+      verifiedBadgeHtml +
+      statusLevelContactHtml +
+      fishContactHtml +
+      "</span>";
+  }
+  var avatarEl = isGroupRow
+    ? c.avatar
+      ? '<img class="chat-contact__avatar chat-contact__avatar--group" src="' +
+        escapeHtml(c.avatar) +
+        '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
+      : '<span class="chat-contact__avatar chat-contact__avatar--placeholder chat-contact__avatar--group" aria-hidden="true">\uD83D\uDC65</span>'
+    : c.avatar
+      ? '<img class="chat-contact__avatar" src="' +
+        escapeHtml(c.avatar) +
+        '" alt="" width="40" height="40" loading="lazy" decoding="async" />'
+      : '<span class="chat-contact__avatar chat-contact__avatar--placeholder">' + initial + "</span>";
+  var nameCellPart = pinIcon
+    ? '<span class="chat-contact__name-pin-row">' + pinIcon + nameBlockInner + "</span>"
+    : nameBlockInner;
+  var innerBtn =
+    '<button type="button" class="chat-contact" tabindex="-1" data-chat-id="' +
+    escapeHtml(c.id) +
+    '" data-chat-name="' +
+    escapeHtml(displayTitle) +
+    '" data-chat-friend="' +
+    (isFriendContact ? "1" : "0") +
+    '" data-chat-group="' +
+    (isGroupRow ? "1" : "0") +
+    '" data-chat-initial="' +
+    escapeHtml(initial) +
+    '" data-chat-online="' +
+    (c.online ? "1" : "0") +
+    '"' +
+    (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
+    (c.statusLevel != null && c.statusLevel !== "" ? ' data-chat-status-level="' + escapeHtml(String(pokerProfileStatusFishLevel(c.statusLevel))) + '"' : "") +
+    ">" +
+    avatarEl +
+    '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
+    nameCellPart +
+    '<span class="chat-contact__role' +
+    roleClass +
+    '">' +
+    roleInnerHtml +
+    '</span></span><span class="chat-contact__right">' +
+    onlineHtml +
+    "</span></span>" +
+    unreadBadge +
+    "</button>";
+  if (isGroupRow) {
+    return (
+      '<div class="chat-contact-swipe chat-contact-swipe--group">' +
+      '<div class="chat-contact-swipe__actions" aria-hidden="true">' +
+      '<button type="button" class="' +
+      swipePinBtnClass +
+      '" tabindex="-1" data-chat-swipe-pin="1" aria-label="' +
+      escapeHtml(swipePinAria) +
+      '" title="' +
+      escapeHtml(swipePinAria) +
+      '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">' +
+      (isPinned ? chatSwipeUnpinIconSvg : chatSwipePinIconSvg) +
+      "</span></button>" +
+      "</div>" +
+      '<div class="chat-contact-swipe__panel">' +
+      innerBtn +
+      "</div></div>"
+    );
+  }
+  var swipeFriendBtn = isFriendContact
+    ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--remove" tabindex="-1" data-chat-swipe-remove-friend="1" aria-label="Удалить из друзей" title="Удалить из друзей"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">−</span></button>'
+    : '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>';
+  var swipeWrapClass = "chat-contact-swipe chat-contact-swipe--wide-actions";
+  return (
+    '<div class="' +
+    swipeWrapClass +
+    '">' +
+    '<div class="chat-contact-swipe__actions" aria-hidden="true">' +
+    '<button type="button" class="' +
+    swipePinBtnClass +
+    '" tabindex="-1" data-chat-swipe-pin="1" aria-label="' +
+    escapeHtml(swipePinAria) +
+    '" title="' +
+    escapeHtml(swipePinAria) +
+    '"><span class="chat-contact-swipe__pin-icon" aria-hidden="true">' +
+    (isPinned ? chatSwipeUnpinIconSvg : chatSwipePinIconSvg) +
+    "</span></button>" +
+    swipeFriendBtn +
+    "</div>" +
+    '<div class="chat-contact-swipe__panel">' +
+    innerBtn +
+    "</div></div>"
+  );
+}
