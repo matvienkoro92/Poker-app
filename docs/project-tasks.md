@@ -14,8 +14,6 @@
 
 - Начать дробить `app.js`, сначала зоны chat, profile, auth.
 - Начать дробить `styles.css` по feature-зонам.
-- Добавить smoke-тесты: PWA auth, чат, карточка игрока, Poker21 privacy/status, service worker cache.
 - Централизовать admin/auth config: `isAdmin`, `ADMIN_IDS`, `parseBody`, `authRequired`, CORS.
 - Провести Redis schema audit: документ ключей, legacy-ключи, cleanup/backfill script.
 - Укрепить deploy hook: не `sleep 90`, а ожидание готового Vercel deploy.
-- Добавить минимальный CI: `npm ci`, `npm run build`, проверка handlers, `node --check`.

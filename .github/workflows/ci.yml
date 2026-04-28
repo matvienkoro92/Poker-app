@@ -25,5 +25,8 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Smoke checks
+        run: npm run smoke
+
       - name: Check JavaScript syntax
         run: npm run check:syntax
