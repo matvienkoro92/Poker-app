@@ -12,7 +12,6 @@
 
 ## P1
 
-- Сузить service worker cache для `/api/chat` или добавить `cache: "no-store"` всем свежим управляющим GET-запросам чата.
 - Удалить или завендорить PeerJS с unpkg, если он реально нужен.
 - Начать дробить `app.js`, сначала зоны chat, profile, auth.
 - Начать дробить `styles.css` по feature-зонам.
