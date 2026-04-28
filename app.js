@@ -11016,6 +11016,33 @@ function initChat() {
 
   var scrollGeneralToBottomOnNextRender = false;
   var scrollPersonalToBottomOnNextRender = false;
+  var chatClubGate = initChatClubGate({
+    base: base,
+    tg: tg,
+    POKER_NET_ERR: POKER_NET_ERR,
+    getOpenClubChat: function () { return openClubChat; },
+    getChatIsAdmin: function () { return chatIsAdmin; },
+    getClubChatAccess: function () { return clubChatAccess; },
+    setClubChatAccess: function (value) { clubChatAccess = value; },
+    getGeneralView: function () { return generalView; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    getGeneralMessages: function () { return generalMessages; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    getChatComposerMounted: function () { return chatComposerMounted; },
+    pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
+    pokerApiHasCredential: pokerApiHasCredential,
+    pokerApiAuthJsonBody: pokerApiAuthJsonBody,
+    loadContacts: loadContacts,
+    loadGeneral: loadGeneral,
+    updateClubChatPreview: typeof updateClubChatPreview === "function" ? updateClubChatPreview : null,
+    escapeHtml: escapeHtml,
+  });
+  var tryOpenClubChatFromDialogs = chatClubGate.tryOpenClubChatFromDialogs;
+  var submitClubChatApplication = chatClubGate.submitClubChatApplication;
+  var updateGeneralInputLocked = chatClubGate.updateGeneralInputLocked;
+  var renderGeneralAccessGate = chatClubGate.renderGeneralAccessGate;
+  window.tryOpenClubChatFromDialogs = tryOpenClubChatFromDialogs;
+
   var chatOpenShell = initChatOpenShell({
     POKER_CHAT_NEED_AUTH_PWA_MSG: POKER_CHAT_NEED_AUTH_PWA_MSG,
     POKER_NET_ERR: POKER_NET_ERR,
@@ -11100,108 +11127,7 @@ function initChat() {
     }
   } catch (eChatExportsReady) {}
 
-  function tryOpenClubChatFromDialogs() {
-    if (chatIsAdmin || clubChatAccess === "open" || clubChatAccess === "member") {
-      openClubChat();
-      return;
-    }
-    if (clubChatAccess === "revoked") {
-      if (tg && tg.showAlert) tg.showAlert("Доступ к главному чату отозван администратором.");
-      else if (typeof alert === "function") alert("Доступ к главному чату отозван администратором.");
-      return;
-    }
-    if (clubChatAccess === "pending") {
-      if (tg && tg.showAlert) tg.showAlert("Заявка на рассмотрении. Ожидайте решения администратора.");
-      else if (typeof alert === "function") alert("Заявка на рассмотрении.");
-      return;
-    }
-    if (clubChatAccess === "need_apply") {
-      if (tg && tg.showConfirm) {
-        tg.showConfirm("Подать заявку на доступ к главному чату клуба?", function (ok) {
-          if (ok) submitClubChatApplication();
-        });
-      } else if (typeof confirm === "function" && confirm("Подать заявку на доступ к главному чату?")) {
-        submitClubChatApplication();
-      }
-      return;
-    }
-    openClubChat();
-  }
-  window.tryOpenClubChatFromDialogs = tryOpenClubChatFromDialogs;
 
-  function submitClubChatApplication() {
-    if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
-    if (!pokerApiHasCredential()) {
-      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
-      else if (typeof alert === "function") alert("Войдите через Telegram, чтобы подать заявку.");
-      return;
-    }
-    fetch(base + "/api/chat", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({ action: "clubChatApply" })),
-    })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (d) {
-        if (d && d.ok) {
-          clubChatAccess = d.clubChatAccess || "pending";
-          if (clubChatAccess === "revoked") {
-            if (tg && tg.showAlert) tg.showAlert("Доступ к главному чату отозван администратором.");
-            else if (typeof alert === "function") alert("Доступ к главному чату отозван администратором.");
-            loadContacts();
-            if (typeof loadGeneral === "function") loadGeneral();
-            if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
-            return;
-          }
-          if (tg && tg.showAlert) tg.showAlert("Заявка отправлена. После одобрения администратором чат откроется.");
-          else if (typeof alert === "function") alert("Заявка отправлена.");
-          try {
-            var chatViewOn = !!document.querySelector('[data-view="chat"].view--active');
-            var genVis = generalView && !generalView.classList.contains("chat-general-view--hidden");
-            if (chatViewOn && chatActiveTab === "general" && genVis && generalMessages) {
-              if (typeof renderGeneralAccessGate === "function") renderGeneralAccessGate(clubChatAccess);
-              updateGeneralInputLocked(true);
-            }
-          } catch (eGateApply) {}
-          loadContacts();
-          if (typeof loadGeneral === "function") loadGeneral();
-          if (typeof updateClubChatPreview === "function") updateClubChatPreview([]);
-        } else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
-        else if (typeof alert === "function") alert((d && d.error) || "Ошибка");
-      })
-      .catch(function () {
-        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-        else if (typeof alert === "function") alert(POKER_NET_ERR);
-      });
-  }
-
-  function updateGeneralInputLocked(locked) {
-    var area = document.getElementById("chatGeneralInputArea");
-    if (area) area.classList.toggle("chat-input-area--locked", !!locked);
-    if (chatComposerEl && chatComposerMounted === "general") chatComposerEl.disabled = !!locked;
-    var ab = document.getElementById("chatGeneralAttachBtn");
-    if (ab) ab.disabled = !!locked;
-    var eb = document.getElementById("chatGeneralEmojiBtn");
-    if (eb) eb.disabled = !!locked;
-    var sb = document.getElementById("chatGeneralSendBtn");
-    if (sb) sb.disabled = !!locked;
-  }
-
-  function renderGeneralAccessGate(state) {
-    if (!generalMessages) return;
-    var wrapG = generalMessages.parentElement;
-    if (wrapG && wrapG.classList) wrapG.classList.remove("chat-messages-wrap--settling");
-    var msg =
-      state === "pending"
-        ? "Заявка на рассмотрении. После одобрения администратором здесь появятся сообщения."
-        : state === "revoked"
-          ? "Доступ к главному чату отозван администратором."
-          : "Главный чат доступен по заявке. Вернитесь к списку чатов, нажмите «Главный чат» и подайте заявку.";
-    generalMessages.innerHTML =
-      '<div class="chat-general-gate"><p class="chat-empty">' + escapeHtml(msg) + "</p></div>";
-  }
 
   var openChatClubAccessModal = initChatClubAccessModal({
     base: base,
