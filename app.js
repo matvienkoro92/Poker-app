@@ -12349,308 +12349,66 @@ function initChat() {
     } catch (eChatPerf) {}
   }
 
-  function loadGeneral(opts) {
-    opts = opts || {};
-    var genVisEarly = generalView && !generalView.classList.contains("chat-general-view--hidden");
-    if (typeof getPokerChatTelegramAuthState === "function" && chatActiveTab === "general" && genVisEarly) {
-      if (getPokerChatTelegramAuthState() !== "ok") {
-        /* Экран «нужно войти»: не дергать API и не затирать текст подсказки опросом */
-        return;
-      }
-    }
-    /* mode=general с trackSeen по умолчанию помечает ленту прочитанной в Redis — без этого фоновый
-       loadGeneral (например из showDialogs при пустом кэше) снимал бейдж, хотя пользователь не заходил в общий чат. */
-    var chatViewActiveForGeneral = !!document.querySelector('[data-view="chat"].view--active');
-    var userActuallyViewingGeneral =
-      chatViewActiveForGeneral &&
-      chatActiveTab === "general" &&
-      generalView &&
-      !generalView.classList.contains("chat-general-view--hidden");
-    var trackSeenQs = userActuallyViewingGeneral ? "" : "&trackSeen=0";
-    var pollQs = "";
-    if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
-      pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
-    }
-    if (opts.waitForChange && pollQs) {
-      pollQs += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
-    }
-    var generalCacheBeforeReq =
-      window._chatGeneralCache && Array.isArray(window._chatGeneralCache.messages) ? window._chatGeneralCache.messages : [];
-    var useGeneralDiff =
-      Date.now() < (chatBurstUntilByScope.general || 0) &&
-      generalCacheBeforeReq.length > 0;
-    var diffQs = "";
-    if (useGeneralDiff) {
-      var lastGeneralMsg = generalCacheBeforeReq[generalCacheBeforeReq.length - 1];
-      if (lastGeneralMsg && lastGeneralMsg.id != null && lastGeneralMsg.id !== "") {
-        diffQs += "&afterId=" + encodeURIComponent(String(lastGeneralMsg.id));
-      }
-      if (lastGeneralMsg && lastGeneralMsg.time) {
-        diffQs += "&afterTime=" + encodeURIComponent(String(lastGeneralMsg.time));
-      }
-    }
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs + diffQs;
-    var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
-    fetch(url, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
-      if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
-      if (data && data.notModified === true && data.pollRev) {
-        if (data.trace && data.trace.serverNowMs) {
-          pokerChatRecordTrace("general-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited });
-        }
-        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 0);
-        return;
-      }
-        if (data && data.ok) {
-        generalHasMoreBefore = !!data.hasMoreBefore;
-        if (data.pollRev && typeof data.pollRev === "string") {
-          window.__pokerGeneralPollRev = data.pollRev;
-        }
-        chatIsAdmin = !!data.isAdmin;
-        if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
-        if (data.clubChatPendingReviewCount != null) {
-          window.chatClubPendingReviewCount = Math.max(0, parseInt(data.clubChatPendingReviewCount, 10) || 0);
-        } else if (!data.isAdmin) {
-          window.chatClubPendingReviewCount = 0;
-        }
-        var access = data.clubChatAccess != null ? data.clubChatAccess : "open";
-        var noGeneralAccess =
-          !chatIsAdmin && (access === "need_apply" || access === "pending" || access === "revoked");
-        var messages = data.messages || [];
-        if (data.partial === true && generalCacheBeforeReq.length) {
-          messages = generalCacheBeforeReq.concat(messages || []);
-        }
-        if (noGeneralAccess) {
-          messages = [];
-        }
-        var pendingEditG = window._pendingGeneralEdit;
-        if (pendingEditG && pendingEditG.id) {
-          var peId = String(pendingEditG.id);
-          messages = messages.map(function (mg) {
-            if (mg && String(mg.id) === peId) return pendingEditG;
-            return mg;
-          });
-          window._pendingGeneralEdit = null;
-        }
-        var pending = window._pendingGeneralMessage;
-        if (pending && pending.id) {
-          if (!messages.some(function (m) { return String(m.id) === String(pending.id); })) {
-            messages = messages.concat([pending]);
-          } else {
-            window._pendingGeneralMessage = null;
-          }
-        }
-        messages = mergeOptimisticGeneralIntoMessages(messages);
-        messages = mergeIncomingPushGeneralIntoMessages(messages);
-        messages = dedupeGeneralMessagesForRender(messages);
-        var prevGeneralCache =
-          window._chatGeneralCache && typeof window._chatGeneralCache === "object" ? window._chatGeneralCache : {};
-        var prevGeneralMessages = Array.isArray(prevGeneralCache.messages) ? prevGeneralCache.messages : [];
-        var prevGeneralLatest = prevGeneralMessages.length
-          ? String(prevGeneralMessages[prevGeneralMessages.length - 1].id || "") + "|" + String(prevGeneralMessages[prevGeneralMessages.length - 1].time || "")
-          : "";
-        var nextGeneralMembers = Array.isArray(data.generalMembers)
-          ? data.generalMembers
-          : (Array.isArray(prevGeneralCache.generalMembers) ? prevGeneralCache.generalMembers : []);
-        var nextGeneralLatest = messages.length
-          ? String(messages[messages.length - 1].id || "") + "|" + String(messages[messages.length - 1].time || "")
-          : "";
-        window._chatGeneralCache = {
-          messages: messages,
-          participantsCount: data.participantsCount,
-          onlineCount: data.onlineCount,
-          generalPinned: data.generalPinned != null ? data.generalPinned : null,
-          generalMembers: nextGeneralMembers,
-          __fromDisk: false,
-        };
-        if (!noGeneralAccess) {
-          try {
-            pokerWriteGeneralSnapshotToDisk(window._chatGeneralCache);
-          } catch (eSnapG) {}
-        }
-        /* Полоса закрепления (глобальное / личное) зависит от generalPinned в кэше; без этого при том же
-           наборе сообщений renderGeneralMessages не вызывается — после открепления админом плашка залипала. */
-        try {
-          refreshChatSelfPinBars();
-        } catch (ePinLoadG) {}
-        if (nextGeneralLatest && nextGeneralLatest !== prevGeneralLatest) {
-          pokerChatRequestPollBurst("general");
-        }
-        var latest = messages.length ? (messages[messages.length - 1].time || "") : "";
-        var isChatViewActive = !!document.querySelector('[data-view="chat"].view--active');
-        var isGeneralScreenVisible = generalView && !generalView.classList.contains("chat-general-view--hidden");
-        var lastView = lastViewedGeneral != null ? lastViewedGeneral : "";
-        var myMemberIdForUnread = resolveMyChatMemberId();
-        /* Локальный пересчёт для звука; бейдж «главный чат» и chatGeneralUnreadCount вне открытого
-           экрана общего чата задаёт только loadContacts (server generalUnreadCount), иначе гонка с loadGeneral. */
-        var unreadCount = 0;
-        if (lastViewedGeneral != null && myMemberIdForUnread) {
-          unreadCount = messages.filter(function (m) {
-            return pokerChatMessageIsNewerThanViewed(m.time, lastView) && !peerChatIdsEqual(m.from, myMemberIdForUnread);
-          }).length;
-        }
-        // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
-        // (в Telegram Mini App не включаем, чтобы не конфликтовать с Telegram поведением)
-        if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
-          var isOnGeneral = !!(isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible);
-          if (!isOnGeneral && lastViewedGeneral != null && unreadCount > 0) {
-            var lastUnread = null;
-            try {
-              var unreadMsgs = messages.filter(function (m) {
-                return pokerChatMessageIsNewerThanViewed(m.time, lastView) && !peerChatIdsEqual(m.from, myMemberIdForUnread);
-              });
-              lastUnread = unreadMsgs.length ? unreadMsgs[unreadMsgs.length - 1] : null;
-            } catch (eUnread) {}
-            if (lastUnread) {
-              var key = String(lastUnread.id || "") + "|" + String(lastUnread.time || "");
-              if (key && window.__pokerChatSoundedGeneralKey !== key) {
-                window.__pokerChatSoundedGeneralKey = key;
-                pokerPlayChatMessageNotificationSound();
-              }
-            }
-          }
-        }
-        if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible) {
-          if (latest && !isNaN(Date.parse(String(latest).trim()))) {
-            lastViewedGeneral = latest;
-            saveChatLastViewed();
-          }
-          window.chatGeneralUnread = false;
-          window.chatGeneralUnreadCount = 0;
-        }
-        /* Вне экрана «главный чат» не трогаем chatGeneralUnread* — только mode=contacts. */
-        var total = data.participantsCount != null ? data.participantsCount : "—";
-        window.lastGeneralStats = total !== "—" ? String(total) + " уч" : "";
-        /* Не трогаем DOM общего чата, пока экран скрыт — иначе scrollTop обнуляется и при входе лента «сверху». */
-        if (isChatViewActive && chatActiveTab === "general" && isGeneralScreenVisible && !chatIsEditingMessage) {
-          if (noGeneralAccess) {
-            lastGeneralMessagesSig = "";
-            renderGeneralAccessGate(access);
-            updateGeneralInputLocked(true);
-          } else {
-            updateGeneralInputLocked(false);
-            var sig = generalRenderSignature(messages, data.partial === true);
-            if (scrollGeneralToBottomOnNextRender || sig !== lastGeneralMessagesSig) {
-              var fastAppendedGeneral = false;
-              if (
-                data.partial === true &&
-                generalMessages &&
-                !chatMessagesDomHasOptimisticNode(generalMessages) &&
-                !chatOutgoingState.optimisticGeneralPayload &&
-                !(window._pendingGeneralMessage && window._pendingGeneralMessage.id) &&
-                canFastAppendMessages(prevGeneralMessages, messages)
-              ) {
-                fastAppendedGeneral = fastAppendChatMessages(
-                  generalMessages,
-                  messages.slice(prevGeneralMessages.length),
-                  buildGeneralMessagesBodyHtml,
-                  function () {
-                    lastGeneralMessagesSig = sig;
-                    bindChatMsgNameProfileButtons(generalMessages);
-                    attachContextMenuForOthers(generalMessages, "general", generalMessages);
-                    try { refreshChatSelfPinBars(); } catch (ePinFastG) {}
-                    try { scheduleSyncChatScrollBottomButtons(); } catch (eSbFastG) {}
-                  }
-                );
-              }
-              if (!fastAppendedGeneral) scheduleGeneralRender(messages, sig);
-            }
-          }
-        } else if (!noGeneralAccess) {
-          updateGeneralInputLocked(false);
-        }
-        scheduleChatPostRenderSync(function () {
-          updateChatHeaderStats();
-          try {
-            syncClubChatRosterUi();
-          } catch (eRosterG) {}
-          updateUnreadDots();
-          if (typeof updateDialogUnreadBadges === "function") updateDialogUnreadBadges();
-          if (typeof updateClubChatPreview === "function") updateClubChatPreview(messages);
-        });
-        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 0);
-        if (data.trace && data.trace.serverNowMs && messages.length) {
-          var lastMsgG = messages[messages.length - 1];
-          pokerChatRecordTrace("general-delivery", {
-            serverToClientMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
-            msgAgeMs: lastMsgG && lastMsgG.time ? Math.max(0, Date.now() - Date.parse(String(lastMsgG.time))) : null,
-            partial: !!data.partial,
-          });
-        }
-      } else if (
-        chatActiveTab === "general" &&
-        generalView &&
-        !generalView.classList.contains("chat-general-view--hidden") &&
-        generalMessages
-      ) {
-        var wrapErr = generalMessages.parentElement;
-        if (wrapErr && wrapErr.classList) wrapErr.classList.remove("chat-messages-wrap--settling");
-        generalMessages.innerHTML = "<p class=\"chat-empty\">" + (data && data.error ? escapeHtml(data.error) : "Ошибка загрузки") + "</p>";
-        updateGeneralInputLocked(false);
-        if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
-      }
-    }).catch(function () {
-      if (
-        chatActiveTab === "general" &&
-        generalView &&
-        !generalView.classList.contains("chat-general-view--hidden") &&
-        generalMessages
-      ) {
-        var wrapCatch = generalMessages.parentElement;
-        if (wrapCatch && wrapCatch.classList) wrapCatch.classList.remove("chat-messages-wrap--settling");
-        generalMessages.innerHTML = "<p class=\"chat-empty\">" + escapeHtml(POKER_NET_ERR) + "</p>";
-        updateGeneralInputLocked(false);
-      }
-      if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
-    });
-  }
-  window.__pokerLoadOlderGeneralMessages = function () {
-    try {
-      var cache = window._chatGeneralCache && Array.isArray(window._chatGeneralCache.messages) ? window._chatGeneralCache.messages : [];
-      if (!cache.length) return;
-      var oldest = cache[0];
-      var prevTop = generalMessages ? generalMessages.scrollTop : 0;
-      var prevHeight = generalMessages ? generalMessages.scrollHeight : 0;
-      var q = "&mode=general&beforeId=" + encodeURIComponent(String(oldest.id || "")) + "&beforeTime=" + encodeURIComponent(String(oldest.time || ""));
-      fetch(base + "/api/chat" + pokerApiAuthQuery("?") + q, { cache: "no-store" })
-        .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
-        .then(function (data) {
-          if (!data || !data.ok || !Array.isArray(data.messages) || !data.messages.length) {
-            generalHasMoreBefore = !!(data && data.hasMoreBefore);
-            if (typeof renderGeneralMessages === "function") renderGeneralMessages(cache);
-            return;
-          }
-          generalHasMoreBefore = !!data.hasMoreBefore;
-          var merged = data.messages.concat(cache);
-          window._chatGeneralCache = Object.assign({}, window._chatGeneralCache || {}, { messages: merged });
-          if (
-            generalMessages &&
-            Array.isArray(data.messages) &&
-            data.messages.length
-          ) {
-            var fastPrependedGeneral = fastPrependChatMessages(
-              generalMessages,
-              data.messages,
-              buildGeneralMessagesBodyHtml,
-              generalHasMoreBefore ? "general" : null,
-              function () {
-                lastGeneralMessagesSig = generalMessagesSignature(merged);
-                bindChatMsgNameProfileButtons(generalMessages);
-                attachContextMenuForOthers(generalMessages, "general", generalMessages);
-                try { refreshChatSelfPinBars(); } catch (ePinPreG) {}
-                try { scheduleSyncChatScrollBottomButtons(); } catch (eSbPreG) {}
-              }
-            );
-            if (fastPrependedGeneral) return;
-          }
-          renderGeneralMessages(merged);
-          requestAnimationFrame(function () {
-            try {
-              if (generalMessages) generalMessages.scrollTop = Math.max(0, generalMessages.scrollHeight - prevHeight + prevTop);
-            } catch (eScrollOldG) {}
-          });
-        });
-    } catch (eOlderGen) {}
-  };
+  var chatGeneralLoader = initChatGeneralLoader({
+    base: base,
+    escapeHtml: escapeHtml,
+    pokerApiAuthQuery: pokerApiAuthQuery,
+    getPokerChatTelegramAuthState: typeof getPokerChatTelegramAuthState === "function" ? getPokerChatTelegramAuthState : null,
+    getChatLongPollTimeoutMs: function () { return CHAT_LONG_POLL_TIMEOUT_MS; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    getGeneralView: function () { return generalView; },
+    getGeneralMessagesEl: function () { return generalMessages; },
+    getGeneralBurstUntil: function () { return chatBurstUntilByScope.general || 0; },
+    getGeneralHasMoreBefore: function () { return generalHasMoreBefore; },
+    setGeneralHasMoreBefore: function (value) { generalHasMoreBefore = !!value; },
+    setChatIsAdmin: function (value) { chatIsAdmin = !!value; },
+    setClubChatAccess: function (value) { clubChatAccess = value; },
+    getLastViewedGeneral: function () { return lastViewedGeneral; },
+    setLastViewedGeneral: function (value) { lastViewedGeneral = value; },
+    saveChatLastViewed: saveChatLastViewed,
+    getLastGeneralMessagesSig: function () { return lastGeneralMessagesSig; },
+    setLastGeneralMessagesSig: function (value) { lastGeneralMessagesSig = value; },
+    getScrollGeneralToBottomOnNextRender: function () { return scrollGeneralToBottomOnNextRender; },
+    getChatIsEditingMessage: function () { return chatIsEditingMessage; },
+    getOptimisticGeneralPayload: function () { return chatOutgoingState.optimisticGeneralPayload; },
+    POKER_NET_ERR: POKER_NET_ERR,
+    mergeOptimisticGeneralIntoMessages: mergeOptimisticGeneralIntoMessages,
+    mergeIncomingPushGeneralIntoMessages: mergeIncomingPushGeneralIntoMessages,
+    dedupeGeneralMessagesForRender: dedupeGeneralMessagesForRender,
+    peerChatIdsEqual: peerChatIdsEqual,
+    resolveMyChatMemberId: resolveMyChatMemberId,
+    pokerChatMessageIsNewerThanViewed: pokerChatMessageIsNewerThanViewed,
+    isTelegramWebApp: isTelegramWebApp,
+    pokerApiHasCredential: pokerApiHasCredential,
+    pokerReadChatMessageSoundEnabled: pokerReadChatMessageSoundEnabled,
+    pokerPlayChatMessageNotificationSound: pokerPlayChatMessageNotificationSound,
+    pokerWriteGeneralSnapshotToDisk: pokerWriteGeneralSnapshotToDisk,
+    refreshChatSelfPinBars: refreshChatSelfPinBars,
+    pokerChatRequestPollBurst: pokerChatRequestPollBurst,
+    generalRenderSignature: generalRenderSignature,
+    chatMessagesDomHasOptimisticNode: chatMessagesDomHasOptimisticNode,
+    canFastAppendMessages: canFastAppendMessages,
+    fastAppendChatMessages: fastAppendChatMessages,
+    buildGeneralMessagesBodyHtml: buildGeneralMessagesBodyHtml,
+    bindChatMsgNameProfileButtons: bindChatMsgNameProfileButtons,
+    attachContextMenuForOthers: attachContextMenuForOthers,
+    scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
+    scheduleGeneralRender: scheduleGeneralRender,
+    renderGeneralAccessGate: renderGeneralAccessGate,
+    updateGeneralInputLocked: updateGeneralInputLocked,
+    scheduleChatPostRenderSync: scheduleChatPostRenderSync,
+    updateChatHeaderStats: updateChatHeaderStats,
+    syncClubChatRosterUi: syncClubChatRosterUi,
+    updateUnreadDots: updateUnreadDots,
+    updateDialogUnreadBadges: typeof updateDialogUnreadBadges === "function" ? updateDialogUnreadBadges : null,
+    updateClubChatPreview: typeof updateClubChatPreview === "function" ? updateClubChatPreview : null,
+    pokerChatScheduleLongPoll: pokerChatScheduleLongPoll,
+    pokerChatRecordTrace: pokerChatRecordTrace,
+    renderGeneralMessages: renderGeneralMessages,
+    fastPrependChatMessages: fastPrependChatMessages,
+    generalMessagesSignature: generalMessagesSignature,
+  });
+  var loadGeneral = chatGeneralLoader.loadGeneral;
 
   var generalReplyTo = null;
   var personalReplyTo = null;

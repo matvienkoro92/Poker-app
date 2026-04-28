@@ -109,10 +109,10 @@ add("Chat open keeps instant local snapshots", () =>
 );
 
 add("Fresh chat GET paths bypass browser/SW cache", () =>
-  has("app", /fetch\(url,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
-  has("app", /fetch\(urlContactsB,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
-  has("app", /fetch\(urlGeneralB,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
-  has("app", /fetch\(base \+ "\/api\/chat" \+ pokerApiAuthQuery\("\?"\) \+ q,\s*\{\s*cache:\s*"no-store"\s*\}\)/)
+  has("client", /fetch\(url,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
+  has("client", /fetch\(urlContactsB,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
+  has("client", /fetch\(urlGeneralB,\s*\{\s*cache:\s*"no-store"\s*\}\)/) &&
+  has("client", /fetch\(base \+ "\/api\/chat" \+ pokerApiAuthQuery\("\?"\) \+ q,\s*\{\s*cache:\s*"no-store"\s*\}\)/)
 );
 
 add("Chat API supports fast/diff/poll responses", () =>
