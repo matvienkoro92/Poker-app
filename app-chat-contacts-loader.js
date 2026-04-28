@@ -43,6 +43,19 @@ function initChatContactsLoader(opts) {
   var pokerChatRecordTrace = typeof opts.pokerChatRecordTrace === "function" ? opts.pokerChatRecordTrace : function () {};
   var pokerChatScheduleLongPoll = typeof opts.pokerChatScheduleLongPoll === "function" ? opts.pokerChatScheduleLongPoll : function () {};
 
+function clearContactsLoadingSkeletonFallback(text) {
+  var el = getContactsEl();
+  if (!el) return;
+  try {
+    var hasSkeleton = !!(el.querySelector && el.querySelector(".chat-empty--skeleton"));
+    if (!hasSkeleton && String(el.textContent || "").trim()) return;
+    el.innerHTML =
+      '<div class="chat-contacts-list-block">' +
+      '<p class="chat-empty">' + String(text || "Диалогов пока нет") + "</p>" +
+      "</div>";
+  } catch (eClearContactsSkeleton) {}
+}
+
 function buildContactsRequestUrl(opts) {
   opts = opts || {};
   var lastViewedParam = "";
@@ -201,7 +214,9 @@ function applyContactsApiResponse(data, opts) {
         filterRowEl.classList.toggle("chat-contacts-filter--hidden", !credF);
         if (credF) pokerSyncChatContactsFilterTabs();
       }
-      pokerApplyChatContactsUnreadState(data, { fromFilterOnly: fromFilterOnly });
+      try {
+        pokerApplyChatContactsUnreadState(data, { fromFilterOnly: fromFilterOnly });
+      } catch (eContactsUnreadState) {}
       if (!fromFilterOnly && !metaOnly) {
         if (fromInstantCache) {
           setTimeout(function () {
@@ -215,13 +230,23 @@ function applyContactsApiResponse(data, opts) {
           } catch (ePrefContacts) {}
         }
       }
-      var contactsListState = pokerBuildChatContactsListState(data);
-      var contactsForList = contactsListState.contactsForList;
-      var showFriendsOnly = contactsListState.showFriendsOnly;
-      var friendSet = pokerBuildChatContactsFriendSet(data);
-      pokerRefreshChatContactsGroupPickers({
-        buildGroupModalContactList: pokerBuildGroupModalContactList,
-      });
+      var contactsListState;
+      try {
+        contactsListState = pokerBuildChatContactsListState(data);
+      } catch (eContactsListState) {
+        contactsListState = { contactsForList: data.contacts || [], showFriendsOnly: false };
+      }
+      var contactsForList = Array.isArray(contactsListState.contactsForList) ? contactsListState.contactsForList : [];
+      var showFriendsOnly = !!contactsListState.showFriendsOnly;
+      var friendSet = {};
+      try {
+        friendSet = pokerBuildChatContactsFriendSet(data) || {};
+      } catch (eContactsFriendSet) {}
+      try {
+        pokerRefreshChatContactsGroupPickers({
+          buildGroupModalContactList: pokerBuildGroupModalContactList,
+        });
+      } catch (eContactsPickers) {}
       if (showFriendsOnly) {
         var friendsRowsForList = chatCachedFriendRows();
         if (!friendsRowsForList.length && typeof window.__pokerFetchFriendsForGroupPick === "function" && !opts.friendsFetchDone) {
@@ -240,21 +265,29 @@ function applyContactsApiResponse(data, opts) {
         }
         contactsForList = pokerApplyChatContactsFriendsOnlyList(contactsForList, friendSet, friendsRowsForList);
       }
-      pokerApplyChatContactsMetaState(data, {
-        updateHeaderStats: updateChatHeaderStats,
-        syncRoster: syncClubChatRosterUi,
-        updatePreviewText: updateClubChatPreviewText,
-      });
-      if (pokerRenderChatContactsListResult({
-        contactsEl: getContactsEl(),
-        contactsForList: contactsForList,
-        friendSet: friendSet,
-        showFriendsOnly: showFriendsOnly,
-        forceRerender: forceRerender,
-        updateDialogUnreadBadges: updateDialogUnreadBadges,
-        updateChatNavDot: updateChatNavDot,
-        attachDialogButtons: window.chatAttachDialogButtons,
-      })) return;
+      try {
+        pokerApplyChatContactsMetaState(data, {
+          updateHeaderStats: updateChatHeaderStats,
+          syncRoster: syncClubChatRosterUi,
+          updatePreviewText: updateClubChatPreviewText,
+        });
+      } catch (eContactsMetaState) {}
+      try {
+        if (pokerRenderChatContactsListResult({
+          contactsEl: getContactsEl(),
+          contactsForList: contactsForList,
+          friendSet: friendSet,
+          showFriendsOnly: showFriendsOnly,
+          forceRerender: forceRerender,
+          updateDialogUnreadBadges: updateDialogUnreadBadges,
+          updateChatNavDot: updateChatNavDot,
+          attachDialogButtons: window.chatAttachDialogButtons,
+        })) return;
+      } catch (eContactsRender) {
+        clearContactsLoadingSkeletonFallback("Не удалось отрисовать список диалогов");
+        return;
+      }
+      clearContactsLoadingSkeletonFallback(showFriendsOnly ? "Здесь будут друзья, с которыми у вас уже есть личные диалоги." : "Диалогов пока нет");
     }
   }
   try {
