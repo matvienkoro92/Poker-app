@@ -44,6 +44,7 @@ function initChatConversationShell(opts) {
   var applyConvGroupDescription = typeof opts.applyConvGroupDescription === "function" ? opts.applyConvGroupDescription : function () {};
   var getInlineChatHeaderTopOffsetPx = typeof opts.getInlineChatHeaderTopOffsetPx === "function" ? opts.getInlineChatHeaderTopOffsetPx : function () { return "0px"; };
   var pokerHydrateOpenDmHeaderFromContacts = typeof opts.pokerHydrateOpenDmHeaderFromContacts === "function" ? opts.pokerHydrateOpenDmHeaderFromContacts : function () {};
+  var pokerHydrateChatSnapshotsFromDisk = typeof opts.pokerHydrateChatSnapshotsFromDisk === "function" ? opts.pokerHydrateChatSnapshotsFromDisk : function () {};
   var getPersonalMessagesSnapshotForOpen = typeof opts.getPersonalMessagesSnapshotForOpen === "function" ? opts.getPersonalMessagesSnapshotForOpen : function () { return null; };
   var pokerMessagesForFastOpenSnapshot = typeof opts.pokerMessagesForFastOpenSnapshot === "function" ? opts.pokerMessagesForFastOpenSnapshot : function (messages) { return messages || []; };
   var personalRenderSignature = typeof opts.personalRenderSignature === "function" ? opts.personalRenderSignature : function () { return ""; };
@@ -186,6 +187,7 @@ function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peer
   } catch (eHdrConvOpen) {}
   var renderedOpenSnapshot = false;
   try {
+    pokerHydrateChatSnapshotsFromDisk();
     var openSnapshot = getPersonalMessagesSnapshotForOpen(userId);
     var openMessages = openSnapshot && Array.isArray(openSnapshot.messages) ? openSnapshot.messages : null;
     if (openMessages && openMessages.length) {

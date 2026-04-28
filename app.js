@@ -12420,6 +12420,7 @@ function initChat() {
     pokerHydrateOpenDmHeaderFromContacts: function (peerId) {
       if (typeof pokerHydrateOpenDmHeaderFromContacts === "function") return pokerHydrateOpenDmHeaderFromContacts(peerId);
     },
+    pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
     getPersonalMessagesSnapshotForOpen: getPersonalMessagesSnapshotForOpen,
     pokerMessagesForFastOpenSnapshot: pokerMessagesForFastOpenSnapshot,
     personalRenderSignature: personalRenderSignature,
