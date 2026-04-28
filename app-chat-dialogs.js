@@ -548,6 +548,43 @@ function pokerHydrateChatContactsFromInstantCache(opts) {
   return false;
 }
 
+function pokerPrepareChatContactsFetchData(data, opts) {
+  opts = opts || {};
+  var metaOnly = !!opts.metaOnly;
+  if (metaOnly && data && data.notModified === true && data.pollRev) {
+    if (typeof data.pollRev === "string") window.__pokerContactsMetaPollRev = data.pollRev;
+    if (data.trace && data.trace.serverNowMs && typeof opts.recordTrace === "function") {
+      opts.recordTrace("contacts-wait-timeout", {
+        rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+        waited: !!data.waited,
+      });
+    }
+    if (opts.waitForChange && typeof opts.scheduleLongPoll === "function") opts.scheduleLongPoll("contacts", 0);
+    if (typeof opts.fireContactsLoaded === "function") opts.fireContactsLoaded();
+    return { handled: true, data: data };
+  }
+  if (metaOnly && data && data.ok && data.contactsMetaOnly) {
+    if (data.pollRev && typeof data.pollRev === "string") window.__pokerContactsMetaPollRev = data.pollRev;
+    var baseContactsData = window.__pokerLastContactsApiData;
+    if (!baseContactsData && typeof pokerTryReadContactsCache === "function") {
+      try {
+        baseContactsData = pokerTryReadContactsCache();
+      } catch (eMetaCache) {}
+    }
+    var mergedMeta = typeof opts.mergeContactsMetaPayload === "function"
+      ? opts.mergeContactsMetaPayload(baseContactsData, data)
+      : null;
+    if (!mergedMeta) {
+      window.__pokerContactsMetaPollRev = null;
+      if (typeof opts.loadContacts === "function") opts.loadContacts({ onLoaded: opts.onContactsLoaded });
+      return { handled: true, data: data };
+    }
+    return { handled: false, data: mergedMeta };
+  }
+  if (!metaOnly) window.__pokerContactsMetaPollRev = null;
+  return { handled: false, data: data };
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {

@@ -16783,35 +16783,18 @@ function initChat() {
       })
       .then(function (data) {
         if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
-        if (metaOnly && data && data.notModified === true && data.pollRev) {
-          if (typeof data.pollRev === "string") window.__pokerContactsMetaPollRev = data.pollRev;
-          if (data.trace && data.trace.serverNowMs) {
-            pokerChatRecordTrace("contacts-wait-timeout", { rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)), waited: !!data.waited });
-          }
-          if (opts.waitForChange) pokerChatScheduleLongPoll("contacts", 0);
-          fireContactsLoaded();
-          return;
-        }
-        if (metaOnly && data && data.ok && data.contactsMetaOnly) {
-          if (data.pollRev && typeof data.pollRev === "string") {
-            window.__pokerContactsMetaPollRev = data.pollRev;
-          }
-          var baseContactsData = window.__pokerLastContactsApiData;
-          if (!baseContactsData && typeof pokerTryReadContactsCache === "function") {
-            try {
-              baseContactsData = pokerTryReadContactsCache();
-            } catch (eMetaCache) {}
-          }
-          var mergedMeta = mergeContactsMetaPayload(baseContactsData, data);
-          if (!mergedMeta) {
-            window.__pokerContactsMetaPollRev = null;
-            loadContacts({ onLoaded: onContactsLoaded });
-            return;
-          }
-          data = mergedMeta;
-        } else if (!metaOnly) {
-          window.__pokerContactsMetaPollRev = null;
-        }
+        var contactsFetchDataState = pokerPrepareChatContactsFetchData(data, {
+          metaOnly: metaOnly,
+          waitForChange: opts.waitForChange,
+          recordTrace: pokerChatRecordTrace,
+          scheduleLongPoll: pokerChatScheduleLongPoll,
+          fireContactsLoaded: fireContactsLoaded,
+          mergeContactsMetaPayload: mergeContactsMetaPayload,
+          loadContacts: loadContacts,
+          onContactsLoaded: onContactsLoaded,
+        });
+        if (contactsFetchDataState.handled) return;
+        data = contactsFetchDataState.data;
         try {
           if (data && data.ok) pokerWriteContactsCache(data);
         } catch (eSav) {}
