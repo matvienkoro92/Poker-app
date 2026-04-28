@@ -905,13 +905,13 @@ html.app-view-chat,
 body.app-view-chat,
 html:has(.view--active[data-view="chat"]),
 body:has(.view--active[data-view="chat"]) {
-  --chat-side-pad: 3px;
+  --chat-side-pad: clamp(6px, 2.4vw, 12px);
   background-color: var(--overscroll-canvas) !important;
   background-image: var(--bg-blur-gradient) !important;
 }
 html:has(body[data-view="chat"]),
 body[data-view="chat"] {
-  --chat-side-pad: 3px;
+  --chat-side-pad: clamp(6px, 2.4vw, 12px);
 }
 [data-theme="light"] html.app-view-chat,
 [data-theme="light"] body.app-view-chat,
@@ -12909,6 +12909,112 @@ html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .ch
 html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view > .chat-pinned-self {
   margin-top: 0 !important;
 }
+
+/* Адаптивная геометрия тредов: шапка, лента и композер занимают отдельные строки,
+   а не компенсируют друг друга фиксированными пикселями. */
+body[data-view="chat"] {
+  --chat-thread-header-safe-top: env(safe-area-inset-top, 0px);
+  --chat-thread-header-gap: clamp(4px, 1.4vw, 8px);
+  --chat-thread-inner-gap: clamp(6px, 1.8vw, 10px);
+  --chat-thread-bottom-gap: clamp(10px, 2.8vw, 16px);
+  --chat-composer-edge-gap: clamp(4px, 1.2vw, 8px);
+}
+
+html.app--tg-content-inset body[data-view="chat"] {
+  --chat-thread-header-safe-top: min(var(--app-top-from-tg, 0px), 48px);
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden),
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  z-index: 30 !important;
+  pointer-events: auto !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header {
+  padding-top: calc(var(--chat-thread-header-safe-top, 0px) + var(--chat-thread-header-gap)) !important;
+  padding-left: max(var(--chat-side-pad, 8px), env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(var(--chat-side-pad, 8px), env(safe-area-inset-right, 0px)) !important;
+  padding-bottom: var(--chat-thread-inner-gap) !important;
+  overflow: visible !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
+  padding-top: calc(var(--chat-thread-header-safe-top, 0px) + var(--chat-thread-header-gap)) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: var(--chat-thread-inner-gap) !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top-inner {
+  padding-left: max(var(--chat-side-pad, 8px), env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(var(--chat-side-pad, 8px), env(safe-area-inset-right, 0px)) !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) > .chat-general-pinned-stack,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) > .chat-pinned-self {
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages-wrap,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages-wrap {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: var(--chat-thread-inner-gap) !important;
+  padding-left: max(var(--chat-side-pad, 8px), env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(var(--chat-side-pad, 8px), env(safe-area-inset-right, 0px)) !important;
+  scroll-padding-top: var(--chat-thread-inner-gap) !important;
+}
+
+body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  flex: 0 0 auto !important;
+  padding-left: max(var(--chat-side-pad, 8px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap))) !important;
+  padding-right: max(var(--chat-side-pad, 8px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap))) !important;
+  padding-bottom: max(
+    var(--chat-thread-bottom-gap),
+    calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + var(--chat-composer-edge-gap))
+  ) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 380px) {
+  body[data-view="chat"] {
+    --chat-side-pad: 6px;
+    --chat-thread-inner-gap: 6px;
+    --chat-thread-bottom-gap: 10px;
+  }
+  body[data-view="chat"] .chat-general-header__title-btn {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
 [data-theme="dark"] .chat-general-header__segments {
   border-color: rgba(255, 255, 255, 0.22);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
