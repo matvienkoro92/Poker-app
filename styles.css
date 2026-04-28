@@ -9635,8 +9635,8 @@ img.chat-contact__avatar {
 }
 html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   bottom: var(--app-bottom-tabbar-height, 67px);
-  padding-bottom: 0;
-  scroll-padding-bottom: 0;
+  padding-bottom: max(12px, max(env(safe-area-inset-bottom, 0px), 34px));
+  scroll-padding-bottom: max(12px, max(env(safe-area-inset-bottom, 0px), 34px));
 }
 .chat-dialogs-block {
   background: var(--block-bg);
@@ -32104,7 +32104,7 @@ html.poker-ios-pwa .bottom-nav {
 html.poker-ios-pwa.app-view-chat .bottom-nav,
 html.poker-ios-pwa body[data-view="chat"] .bottom-nav,
 html.poker-ios-pwa #app.app:has(.view--active[data-view="chat"]) ~ .bottom-nav {
-  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
 }
 /* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
 html.app--tg-bottom-nav-inset .bottom-nav {
