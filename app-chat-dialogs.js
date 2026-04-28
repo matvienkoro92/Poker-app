@@ -297,6 +297,101 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
   } catch (eFrDbgDone) {}
 }
 
+
+function pokerApplyChatContactsUnreadState(data, opts) {
+  opts = opts || {};
+  if (!data || !Array.isArray(data.contacts)) return 0;
+  var fromFilterOnly = !!opts.fromFilterOnly;
+  try {
+    if (!fromFilterOnly && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+      var nextUC = {};
+      for (var ui = 0; ui < data.contacts.length; ui++) {
+        var c0 = data.contacts[ui];
+        if (!c0 || c0.id == null || String(c0.id) === "") continue;
+        var uc0 = Number(c0.unreadCount);
+        if (isNaN(uc0)) uc0 = 0;
+        nextUC[String(c0.id)] = uc0;
+      }
+      if (!window.__pokerChatContactsUnreadSoundPrimed) {
+        window.__pokerChatContactsUnreadSoundPrimed = true;
+        window.__pokerChatContactsUnreadSnap = nextUC;
+      } else {
+        var prevUC = window.__pokerChatContactsUnreadSnap || {};
+        var anyIncOther = false;
+        var activePeer = typeof chatWithUserId !== "undefined" ? chatWithUserId : null;
+        for (var uk in nextUC) {
+          if (!Object.prototype.hasOwnProperty.call(nextUC, uk)) continue;
+          var ucN = nextUC[uk];
+          var pu = prevUC[uk];
+          if (pu == null || isNaN(pu)) pu = 0;
+          if (ucN > pu && (!activePeer || !peerChatIdsEqual(uk, activePeer))) {
+            anyIncOther = true;
+            try {
+              if (typeof personalMessagesCache !== "undefined") delete personalMessagesCache[uk];
+              if (typeof personalMessagesCacheMeta !== "undefined") personalMessagesCacheMeta[uk] = { ts: 0, bust: true };
+            } catch (eInvPeer) {}
+          }
+        }
+        window.__pokerChatContactsUnreadSnap = nextUC;
+        if (
+          anyIncOther &&
+          typeof pokerReadChatMessageSoundEnabled === "function" &&
+          pokerReadChatMessageSoundEnabled() &&
+          typeof pokerPlayChatMessageNotificationSound === "function"
+        ) {
+          pokerPlayChatMessageNotificationSound();
+        }
+      }
+    }
+  } catch (eContSound) {}
+  var sumPersonalUnreads = 0;
+  for (var su = 0; su < data.contacts.length; su++) {
+    var sc = data.contacts[su];
+    if (!sc) continue;
+    var suc = Number(sc.unreadCount);
+    if (!isNaN(suc) && suc > 0) sumPersonalUnreads += suc;
+  }
+  window.chatPersonalUnreadTotalFromContacts = sumPersonalUnreads;
+  return sumPersonalUnreads;
+}
+
+function pokerBuildChatContactsFriendSet(data) {
+  var friendSet = {};
+  if (data && data.friendIds && Array.isArray(data.friendIds)) {
+    for (var fi = 0; fi < data.friendIds.length; fi++) {
+      var fid = data.friendIds[fi];
+      if (fid == null || String(fid) === "") continue;
+      var fstr = String(fid);
+      friendSet[fstr] = true;
+      try {
+        var fnorm = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(fstr) : fstr;
+        if (fnorm && fnorm !== fstr) friendSet[fnorm] = true;
+      } catch (eFnFr) {}
+    }
+    try {
+      if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(data.friendIds.length);
+    } catch (eFc) {}
+  }
+  window.__pokerChatFriendIdsSet = friendSet;
+  try {
+    var fpcM = window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
+      ? window.__pokerFriendsPickCache.friends
+      : [];
+    for (var fmj = 0; fmj < fpcM.length; fmj++) {
+      var frv = fpcM[fmj];
+      if (!frv || !frv.userId) continue;
+      var um = String(frv.userId);
+      window.__pokerChatFriendIdsSet[um] = true;
+      try {
+        var fn2 = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(um) : um;
+        if (fn2 && fn2 !== um) window.__pokerChatFriendIdsSet[fn2] = true;
+      } catch (eFn2) {}
+    }
+    if (typeof pokerUpdateFriendsCountLabels === "function" && fpcM.length > 0) pokerUpdateFriendsCountLabels(fpcM.length);
+  } catch (eFpcM) {}
+  return friendSet;
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
