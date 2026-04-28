@@ -635,6 +635,33 @@ function pokerChatPeerIdIsFriend(pid) {
   return false;
 }
 
+function pokerPeerIsInMyChatPartnerList(peerIdRaw) {
+  if (peerIdRaw == null || peerIdRaw === "") return false;
+  var d = window.__pokerLastContactsApiData;
+  if ((!d || !Array.isArray(d.chatPartnerIds)) && typeof pokerTryReadContactsCache === "function") {
+    try {
+      var cPr = pokerTryReadContactsCache();
+      if (cPr && cPr.ok && Array.isArray(cPr.chatPartnerIds)) d = cPr;
+    } catch (ePr) {}
+  }
+  if (!d || !Array.isArray(d.chatPartnerIds)) return true;
+  var norm =
+    typeof normalizePeerIdForChat === "function"
+      ? normalizePeerIdForChat(String(peerIdRaw).trim())
+      : String(peerIdRaw).trim();
+  for (var pi = 0; pi < d.chatPartnerIds.length; pi++) {
+    var p = d.chatPartnerIds[pi];
+    if (p == null || p === "") continue;
+    var pn =
+      typeof normalizePeerIdForChat === "function"
+        ? normalizePeerIdForChat(String(p).trim())
+        : String(p).trim();
+    if (pn === norm) return true;
+    if (typeof peerChatIdsEqual === "function" && peerChatIdsEqual(pn, norm)) return true;
+  }
+  return false;
+}
+
 function pokerChatContactsAuthFingerprint() {
   var q = "";
   try {
