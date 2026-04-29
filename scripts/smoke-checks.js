@@ -64,6 +64,18 @@ function localRootScriptFilesFromIndex() {
   return [...new Set(out)];
 }
 
+function localAssetVersionsFromIndex() {
+  const out = [];
+  const re = /\b(?:href|src)=["']\.\/([^"']+\.(?:css|js))(?:\?v=([^"']+))?["']/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || file.includes("/")) continue;
+    out.push({ file, version: match[2] || "" });
+  }
+  return out;
+}
+
 function localAppFilesFromRoot() {
   return fs.readdirSync(root)
     .filter((name) => /^app.*\.js$/.test(name))
@@ -81,9 +93,30 @@ function jsManifestFiles() {
   const out = [];
   Object.keys(domains).forEach((name) => {
     const list = Array.isArray(domains[name]) ? domains[name] : [];
-    list.forEach((file) => out.push(file));
+    list.forEach((file) => {
+      if (/^app.*\.js$/.test(file)) out.push(file);
+    });
+  });
+  const adminModules = parsed && parsed.domains && parsed.domains.adminModules && typeof parsed.domains.adminModules === "object"
+    ? parsed.domains.adminModules
+    : {};
+  Object.keys(adminModules).forEach((name) => {
+    const list = Array.isArray(adminModules[name]) ? adminModules[name] : [];
+    list.forEach((file) => {
+      if (/^app.*\.js$/.test(file)) out.push(file);
+    });
   });
   return [...new Set(out)].sort();
+}
+
+function indexScriptOrder() {
+  return localRootScriptFilesFromIndex();
+}
+
+function appearsBefore(list, before, after) {
+  const a = list.indexOf(before);
+  const b = list.indexOf(after);
+  return a >= 0 && b >= 0 && a < b;
 }
 
 function localCssImportsFromStyles() {
@@ -186,6 +219,13 @@ add("PWA version bump also cache-busts local CSS and JS assets", () =>
     "?v=${next}",
   ])
 );
+
+add("Local CSS and JS assets use data-app-version cache bust", () => {
+  const versionMatch = files.html.match(/data-app-version="([^"]+)"/);
+  const version = versionMatch && versionMatch[1];
+  if (!version) return false;
+  return localAssetVersionsFromIndex().every((asset) => asset.version === version);
+});
 
 add("PWA session has cookie fallback for storage-hostile browsers", () =>
   hasAll("client", [
@@ -397,12 +437,31 @@ add("JS manifest maps core app domains", () =>
     '"profile":',
     '"push":',
     '"admin":',
+    '"adminModules":',
+    '"visitors":',
+    '"broadcasts":',
+    '"reports":',
+    '"tracking":',
+    '"auth-debug":',
     '"app-auth.js"',
     '"app-pwa-auth.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
   ])
 );
+
+add("JS manifest preserves critical load order", () => {
+  const order = indexScriptOrder();
+  return appearsBefore(order, "app-auth.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-auth.js", "app-auth-debug.js") &&
+    appearsBefore(order, "app-chat-utils.js", "app-chat-render-utils.js") &&
+    appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
+    appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
+    appearsBefore(order, "app-rating-core.js", "app-rating.js") &&
+    appearsBefore(order, "app.js", "app-section-views.js") &&
+    appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
+    appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
+});
 
 add("Build output contains every local CSS import from styles.css", () => {
   const publicDir = path.join(root, "public");
@@ -438,6 +497,18 @@ add("CSS manifest maps split home and tournament domains", () =>
     '"styles-rating-tables.css"',
     '"styles-rating-modals.css"',
     '"styles-rating-late.css"',
+    '"styles-chat-threads.css"',
+    '"styles-chat-contacts.css"',
+    '"styles-chat-threads-contacts-responsive.css"',
+    '"styles-chat-dialogs-list.css"',
+    '"styles-chat-groups.css"',
+    '"styles-chat-dialogs-groups-responsive.css"',
+    '"styles-hall-main-shell.css"',
+    '"styles-hall-main-players.css"',
+    '"styles-hall-main-responsive.css"',
+    '"styles-rating-learning.css"',
+    '"styles-rating-games.css"',
+    '"styles-rating-learning-games-responsive.css"',
   ])
 );
 

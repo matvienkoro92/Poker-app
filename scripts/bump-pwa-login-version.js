@@ -32,5 +32,9 @@ out = out.replace(
   /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js)))\?v=[^"#]+(")/g,
   `$1?v=${next}$2`
 );
+out = out.replace(
+  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js)))(")/g,
+  `$1?v=${next}$2`
+);
 fs.writeFileSync(indexPath, out, "utf8");
 console.log(`bump-pwa-login-version: ${m[1]}.${m[2]} → ${next}`);

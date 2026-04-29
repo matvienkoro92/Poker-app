@@ -1,0 +1,563 @@
+/* Hall CSS: main hall shell, board and shared hall surfaces.
+ * Extracted from styles-hall-main.css; keep import order in styles-hall-main.css stable. */
+
+/* Hall of Fame toolbar, panels, albums, shame board, rating cards and game-adjacent surfaces.
+ * Extracted from styles-hall.css; keep import order in styles-hall.css stable. */
+
+/* Зал славы — экран */
+.hall-of-fame__toolbar {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 0 0 10px;
+  min-width: 0;
+}
+.hall-of-fame__toolbar-back {
+  margin: 0 !important;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+/* Одна сплошная полоса с общей обводкой на всю оставшуюся ширину */
+.hall-of-fame__subtabs {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: var(--app-back-btn-min-height);
+  background: var(--block-bg-solid);
+  border: 1px solid rgba(249, 115, 22, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.hall-of-fame__subtab {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 6px 4px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  color: var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid rgba(249, 115, 22, 0.28);
+}
+.hall-of-fame__subtab:last-child {
+  border-right: none;
+}
+@media (max-width: 400px) {
+  .hall-of-fame__subtab {
+    font-size: 9px;
+    padding: 6px 2px;
+  }
+}
+.hall-of-fame__subtab:hover {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.08);
+}
+.hall-of-fame__subtab--active {
+  color: var(--text);
+  background: rgba(249, 115, 22, 0.2);
+  box-shadow: none;
+}
+[data-theme="dark"] .hall-of-fame__subtabs {
+  border-color: rgba(251, 146, 60, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] .hall-of-fame__subtab {
+  color: rgba(226, 232, 240, 0.72);
+  border-right-color: rgba(251, 146, 60, 0.28);
+}
+[data-theme="dark"] .hall-of-fame__subtab:hover {
+  color: #f1f5f9;
+  background: rgba(249, 115, 22, 0.12);
+}
+[data-theme="dark"] .hall-of-fame__subtab--active {
+  color: #fff7ed;
+  background: rgba(249, 115, 22, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .hall-of-fame__subtabs {
+  border-color: rgba(234, 88, 12, 0.65);
+}
+[data-theme="light"] .hall-of-fame__subtab {
+  color: #64748b;
+  border-right-color: rgba(234, 88, 12, 0.28);
+}
+[data-theme="light"] .hall-of-fame__subtab:hover {
+  color: #0f172a;
+  background: rgba(251, 146, 60, 0.12);
+}
+[data-theme="light"] .hall-of-fame__subtab--active {
+  color: #9a3412;
+  background: rgba(251, 146, 60, 0.26);
+}
+.hall-of-fame__main-title {
+  margin: 4px 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hall-of-fame__main-title--top {
+  margin: 0 0 10px;
+  text-align: center;
+  width: 100%;
+}
+/* Ссылка на вкладку: Поделиться / Скопировать (уникальный startapp на раздел) */
+/* Ряд «Поделиться / копировать»: отступы зала славы + разметка как .raffles-hero__share-row */
+.hall-of-fame__panel-share-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.hall-of-fame__panel-share-row--in-card {
+  margin-top: 0;
+}
+.hall-of-fame__startapp-code {
+  font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  word-break: break-all;
+}
+[data-theme="light"] .hall-of-fame__startapp-code {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.hall-of-fame__panels {
+  margin-top: 4px;
+  min-height: 120px;
+}
+.hall-of-fame__panel[hidden] {
+  display: none !important;
+}
+.hall-of-fame__panel--active {
+  display: block;
+}
+.hall-of-fame__block--nested {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+/* Топ-15 заносов за один турнир — под заголовком зала славы */
+.hall-of-fame__single-top-outer {
+  margin: 0 auto 20px;
+  max-width: 100%;
+}
+.view[data-view="hall-of-fame"] .hall-of-fame__single-top-wrap {
+  width: 100%;
+  max-width: none;
+}
+.hall-of-fame__blog-top15-copy-wrap {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+/* Визуал кнопки — как .raffles-hero__share-btn--copy-icon */
+.hall-of-fame__blog-top15-copy-btn {
+  cursor: pointer;
+}
+.hall-of-fame__blog-top15-copy-btn:active {
+  opacity: 0.9;
+}
+.hall-of-fame__blog-top15-copy-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 100%;
+}
+
+/* Фотоальбом — сетка превью 5×N, плотные зазоры */
+.hall-photo-album--feed {
+  position: relative;
+  padding: 16px 10px 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, rgba(30, 58, 42, 0.35) 0%, rgba(15, 23, 42, 0.72) 50%, rgba(15, 23, 42, 0.85) 100%),
+    radial-gradient(ellipse 100% 70% at 50% 0%, rgba(251, 146, 60, 0.1), transparent 55%);
+  border: 1px solid rgba(251, 146, 60, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.hall-photo-album--feed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-7deg, transparent, transparent 14px, rgba(0, 0, 0, 0.025) 14px, rgba(0, 0, 0, 0.025) 15px);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.hall-photo-album__ribbon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+.hall-photo-album__suit--spade,
+.hall-photo-album__suit--club {
+  color: #e2e8f0;
+}
+.hall-photo-album__suit--heart,
+.hall-photo-album__suit--diamond {
+  color: #fb7185;
+}
+.hall-photo-album__title {
+  position: relative;
+  z-index: 1;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.hall-photo-album__lead {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(226, 232, 240, 0.9);
+  text-align: center;
+  max-width: 32em;
+  margin-left: auto;
+  margin-right: auto;
+  font-style: italic;
+}
+[data-theme="light"] .hall-photo-album--feed {
+  background: linear-gradient(170deg, rgba(214, 232, 212, 0.55) 0%, rgba(255, 252, 245, 0.98) 45%, rgba(254, 236, 214, 0.45) 100%),
+    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(251, 146, 60, 0.12), transparent 50%);
+  border-color: rgba(234, 88, 12, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 28px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] .hall-photo-album__suit--spade,
+[data-theme="light"] .hall-photo-album__suit--club {
+  color: #0f172a;
+}
+[data-theme="light"] .hall-photo-album__suit--heart,
+[data-theme="light"] .hall-photo-album__suit--diamond {
+  color: #dc2626;
+}
+[data-theme="light"] .hall-photo-album__lead {
+  color: #475569;
+}
+
+.hall-photo-album__grid {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Подзаголовок серии — на всю ширину сетки */
+.hall-photo-album__group-head {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 8px 6px 4px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px dashed rgba(251, 146, 60, 0.35);
+  box-sizing: border-box;
+}
+.hall-photo-album__group-head-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: rgba(253, 230, 138, 0.95);
+}
+[data-theme="light"] .hall-photo-album__group-head {
+  background: rgba(251, 146, 60, 0.12);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+[data-theme="light"] .hall-photo-album__group-head-text {
+  color: #9a3412;
+}
+
+.hall-photo-album__card {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(251, 146, 60, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  min-width: 0;
+}
+[data-theme="light"] .hall-photo-album__card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(234, 88, 12, 0.2);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+}
+
+.hall-photo-album__card-body {
+  padding: 3px 2px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.hall-photo-album--feed .hall-photo-album__idx {
+  display: none;
+}
+
+.hall-photo-album__idx {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(251, 191, 36, 0.95);
+  background: rgba(0, 0, 0, 0.25);
+}
+[data-theme="light"] .hall-photo-album__idx {
+  color: #b45309;
+  background: rgba(251, 146, 60, 0.15);
+}
+
+.hall-photo-album--feed .hall-photo-album__btn {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #0c0a09;
+  line-height: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+}
+.hall-photo-album--feed .hall-photo-album__btn:hover,
+.hall-photo-album--feed .hall-photo-album__btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 0 2px rgba(251, 146, 60, 0.45);
+}
+.hall-photo-album--feed .hall-photo-album__btn:active .hall-photo-album__img {
+  transform: scale(0.995);
+}
+
+.hall-photo-album--feed .hall-photo-album__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+  background: #1c1917;
+}
+
+.hall-photo-album--feed .hall-photo-album__caption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 4px 0 0;
+  padding: 0 1px;
+  font-size: 9px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  line-height: 1.25;
+  color: rgba(250, 250, 249, 0.92);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+[data-theme="light"] .hall-photo-album--feed .hall-photo-album__caption {
+  color: #334155;
+}
+.hall-photo-album--feed .hall-photo-album__caption--long {
+  font-size: 8px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+@media (max-width: 380px) {
+  .hall-photo-album__grid {
+    gap: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hall-photo-album--feed .hall-photo-album__img,
+  .hall-photo-album--feed .hall-photo-album__btn {
+    transition: none;
+  }
+}
+
+/* Доска позора — вкладка справа от «Фото» */
+.hall-shame-board {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.hall-shame-board__title {
+  position: relative;
+}
+.hall-shame-board__title::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(100, 116, 139, 0.4), rgba(71, 85, 105, 0.9), rgba(100, 116, 139, 0.4));
+}
+.hall-shame-board__lead {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted, var(--muted));
+  text-align: center;
+  max-width: 34em;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hall-shame-board__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hall-shame-board__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.75));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+.hall-shame-board__item--muted {
+  opacity: 0.92;
+  border-style: dashed;
+  border-color: rgba(100, 116, 139, 0.35);
+}
+.hall-shame-board__item--featured {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  border-color: rgba(148, 163, 184, 0.55);
+  background: linear-gradient(145deg, rgba(51, 65, 85, 0.65), rgba(15, 23, 42, 0.88));
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Ряд «скрины | текст» только когда хватает ширины; иначе снова узкий текст и вылет галереи за колонку */
+@media (min-width: 640px) {
+  .hall-shame-board__item--featured {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+.hall-shame-board__featured-media {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+  box-sizing: border-box;
+}
+.hall-shame-board__featured-media:has(.hall-shame-board__corgi-gallery--mosaic) {
+  max-width: 100%;
+}
+@media (min-width: 640px) {
+  .hall-shame-board__featured-media {
+    align-self: stretch;
+    flex: 0 0 200px;
+    width: 200px;
+    max-width: 200px;
+  }
+  /* Мозаика 2+1: узкая колонка картинок — больше места под текст */
+  .hall-shame-board__item--featured .hall-shame-board__featured-media:has(.hall-shame-board__corgi-gallery--mosaic) {
+    flex: 0 0 min(220px, 34%);
+    width: min(220px, 34%);
+    max-width: min(220px, 34%);
+  }
+}
+.hall-shame-board__item--featured .hall-shame-board__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+@media (min-width: 640px) {
+  /* Не flex-basis в %: 55% + колонка 200px даёт переполнение узкой карточки — текст «уезжает» вправо */
+  .hall-shame-board__item--featured .hall-shame-board__body {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+.hall-shame-board__corgi-gallery-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.95);
+  text-align: center;
+}
+[data-theme="light"] .hall-shame-board__corgi-gallery-title {

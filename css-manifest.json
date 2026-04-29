@@ -23,7 +23,13 @@
       "styles-chat-messages.css",
       "styles-chat-composer-media.css",
       "styles-chat-dialogs-groups.css",
+      "styles-chat-dialogs-list.css",
+      "styles-chat-groups.css",
+      "styles-chat-dialogs-groups-responsive.css",
       "styles-chat-threads-contacts.css",
+      "styles-chat-threads.css",
+      "styles-chat-contacts.css",
+      "styles-chat-threads-contacts-responsive.css",
       "styles-chat-after.css",
       "styles-chat-after-shell.css",
       "styles-chat-after-modals.css",
@@ -33,6 +39,9 @@
     "rating": [
       "styles-rating.css",
       "styles-rating-learning-games.css",
+      "styles-rating-learning.css",
+      "styles-rating-games.css",
+      "styles-rating-learning-games-responsive.css",
       "styles-rating-raffles.css",
       "styles-rating-home-download.css",
       "styles-rating-tables-modals.css",
@@ -46,6 +55,9 @@
       "styles-hall-prelude.css",
       "styles-hall-rating-lightbox.css",
       "styles-hall-main.css",
+      "styles-hall-main-shell.css",
+      "styles-hall-main-players.css",
+      "styles-hall-main-responsive.css",
       "styles-hall-footer.css"
     ],
     "profile": [

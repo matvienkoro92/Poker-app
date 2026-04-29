@@ -1,0 +1,563 @@
+/* Hall CSS: player rows, highlights and hall lists.
+ * Extracted from styles-hall-main.css; keep import order in styles-hall-main.css stable. */
+
+  color: rgba(71, 85, 105, 0.88);
+}
+.hall-shame-board__corgi-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Три превью столбиком (не мозаика) */
+.hall-shame-board__item--featured .hall-shame-board__corgi-gallery:not(.hall-shame-board__corgi-gallery--mosaic) {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 10px;
+}
+/* Первая статья: два скрина в ряд, третий на всю ширину снизу */
+.hall-shame-board__corgi-gallery--mosaic {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+}
+.hall-shame-board__corgi-gallery--mosaic > .hall-shame-board__thumb-btn:nth-child(3) {
+  grid-column: 1 / -1;
+}
+.hall-shame-board__corgi-gallery--mosaic .hall-shame-board__thumb-btn {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+.hall-shame-board__corgi-gallery--mosaic .hall-shame-board__thumb-btn--chat {
+  max-width: none;
+}
+.hall-shame-board__corgi-gallery--mosaic .hall-shame-board__avatar {
+  max-width: none;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  height: auto;
+}
+.hall-shame-board__corgi-gallery--mosaic .hall-shame-board__chat-thumb {
+  max-width: none;
+  width: 100%;
+  max-height: min(22vw, 130px);
+  object-fit: cover;
+  object-position: top center;
+}
+.hall-shame-board__corgi-gallery--mosaic > .hall-shame-board__thumb-btn:nth-child(3) .hall-shame-board__chat-thumb {
+  max-height: min(36vh, 200px);
+}
+.hall-shame-board__corgi-gallery .hall-shame-board__thumb-btn {
+  margin: 0;
+  max-width: 100%;
+  width: 100%;
+}
+.hall-shame-board__item--featured .hall-shame-board__corgi-gallery:not(.hall-shame-board__corgi-gallery--mosaic) .hall-shame-board__thumb-btn {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 200px;
+}
+.hall-shame-board__thumb-btn--chat {
+  max-width: 132px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.hall-shame-board__item--featured .hall-shame-board__corgi-gallery:not(.hall-shame-board__corgi-gallery--mosaic) .hall-shame-board__thumb-btn--chat {
+  max-width: 200px;
+  width: 100%;
+}
+.hall-shame-board__chat-thumb {
+  display: block;
+  width: 100%;
+  max-width: 132px;
+  height: auto;
+  max-height: 260px;
+  object-fit: cover;
+  object-position: top center;
+  vertical-align: middle;
+}
+.hall-shame-board__item--featured .hall-shame-board__corgi-gallery:not(.hall-shame-board__corgi-gallery--mosaic) .hall-shame-board__chat-thumb {
+  max-width: 200px;
+  margin: 0 auto;
+  max-height: 200px;
+}
+.hall-shame-board__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #64748b, #334155);
+  border-radius: 999px;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.hall-shame-board__thumb-btn {
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  max-width: 200px;
+  margin: 0 auto;
+}
+.hall-shame-board__thumb-btn:hover,
+.hall-shame-board__thumb-btn:focus-visible {
+  transform: scale(1.02);
+  outline: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(251, 146, 60, 0.45);
+}
+.hall-shame-board__avatar {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  vertical-align: middle;
+}
+.hall-shame-board__tag {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.95);
+  background: rgba(120, 53, 15, 0.35);
+  border-radius: 8px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+[data-theme="light"] .hall-shame-board__item--featured {
+  background: linear-gradient(145deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.95));
+  border-color: rgba(100, 116, 139, 0.4);
+}
+[data-theme="light"] .hall-shame-board__tag {
+  color: #92400e;
+  background: rgba(254, 243, 199, 0.9);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+.hall-shame-board__emoji {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hall-shame-board__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.hall-shame-board__nomination {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.hall-shame-board__desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted, var(--muted));
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.hall-shame-board__item--featured .hall-shame-board__tag {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.hall-shame-board__gazette-teaser {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+}
+.hall-shame-board__gazette-link {
+  color: #fb923c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.hall-shame-board__gazette-link:hover,
+.hall-shame-board__gazette-link:focus-visible {
+  color: #fdba74;
+}
+[data-theme="light"] .hall-shame-board__gazette-teaser {
+  color: #334155;
+}
+[data-theme="light"] .hall-shame-board__gazette-link {
+  color: #c2410c;
+}
+[data-theme="light"] .hall-shame-board__gazette-link:hover,
+[data-theme="light"] .hall-shame-board__gazette-link:focus-visible {
+  color: #9a3412;
+}
+[data-theme="light"] .hall-shame-board__item {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
+  border-color: rgba(100, 116, 139, 0.35);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+[data-theme="light"] .hall-shame-board__item--muted {
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+.hall-of-fame__section-title--cups-above-rating {
+  margin: 8px auto 12px;
+  max-width: 100%;
+  text-align: center;
+}
+.hall-of-fame__rating-card-wrap {
+  margin: 0 auto 10px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Карточка «Зимний рейтинг» в Зале славы — тот же вид, что на главной */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card {
+  border: 1px solid rgba(186, 230, 253, 0.6) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.98)) !important;
+  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.25),
+              0 4px 20px rgba(56, 189, 248, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.35),
+              0 6px 24px rgba(56, 189, 248, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize {
+  color: #7dd3fc !important;
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.4);
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card {
+  border: 1px solid rgba(56, 189, 248, 0.5) !important;
+  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%) !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2),
+              0 4px 16px rgba(56, 189, 248, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35),
+              0 6px 20px rgba(56, 189, 248, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize {
+  color: #0284c7 !important;
+  text-shadow: none;
+}
+.hall-of-fame__winter-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #7dd3fc;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .hall-of-fame__winter-winner {
+  color: #0284c7;
+}
+
+/* Карточка «Рейтинг осени 2025» — тёплая осенняя палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg, rgba(154, 52, 18, 0.42) 0%, rgba(67, 20, 7, 0.92) 45%, rgba(28, 25, 23, 0.98) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.22),
+              0 4px 22px rgba(234, 88, 12, 0.2),
+              inset 0 1px 0 rgba(255, 237, 213, 0.12) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
+              0 6px 26px rgba(234, 88, 12, 0.28),
+              inset 0 1px 0 rgba(255, 247, 237, 0.16) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize {
+  color: #fdba74 !important;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season {
+  color: #fed7aa !important;
+}
+.hall-of-fame__autumn-leaf {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+.hall-of-fame__autumn-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fde68a;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card {
+  border: 1px solid rgba(234, 88, 12, 0.45) !important;
+  background: linear-gradient(165deg, #fff7ed 0%, #ffedd5 35%, #fdba74 100%) !important;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.2),
+              0 4px 18px rgba(234, 88, 12, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.35),
+              0 6px 22px rgba(234, 88, 12, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__prize {
+  color: #c2410c !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__autumn-rating-card .hall-of-fame__autumn-rating-card__season {
+  color: #9a3412 !important;
+}
+[data-theme="light"] .hall-of-fame__autumn-winner {
+  color: #b45309;
+}
+
+/* Карточка «Кубок лета 2025» — солнечная палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(250, 204, 21, 0.55) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(160deg, rgba(14, 116, 144, 0.55) 0%, rgba(21, 94, 117, 0.75) 28%, rgba(30, 58, 95, 0.92) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.2),
+              0 4px 22px rgba(34, 211, 238, 0.18),
+              inset 0 1px 0 rgba(254, 249, 195, 0.14) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.4),
+              0 6px 28px rgba(34, 211, 238, 0.25),
+              inset 0 1px 0 rgba(255, 251, 235, 0.2) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize {
+  color: #fef08a !important;
+  text-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season {
+  color: #a5f3fc !important;
+}
+.hall-of-fame__summer-sun {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+.hall-of-fame__summer-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fef9c3;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card {
+  border: 1px solid rgba(14, 165, 233, 0.45) !important;
+  background: linear-gradient(165deg, #ecfeff 0%, #cffafe 35%, #a5f3fc 100%) !important;
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.2),
+              0 4px 20px rgba(14, 165, 233, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.35),
+              0 6px 24px rgba(14, 165, 233, 0.22),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__prize {
+  color: #0369a1 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card .hall-of-fame__summer-rating-card__season {
+  color: #0e7490 !important;
+}
+[data-theme="light"] .hall-of-fame__summer-winner {
+  color: #0c4a6e;
+}
+
+/* Кубок лета 2024 — миниатюра на кнопке в зале славы */
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .feature__cup--photo.hall-of-fame__summer-2024-cup {
+  font-size: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .hall-of-fame__cup-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(253, 224, 71, 0.3);
+}
+@media (max-width: 400px) {
+  .view[data-view="hall-of-fame"] .hall-of-fame__summer-rating-card--cup-thumb .feature__cup--photo.hall-of-fame__summer-2024-cup {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Карточка «Весна 2024» — свежая весенняя палитра */
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(167, 243, 208, 0.55) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg, rgba(6, 95, 70, 0.5) 0%, rgba(20, 83, 45, 0.82) 45%, rgba(15, 23, 42, 0.95) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.22),
+              0 4px 22px rgba(16, 185, 129, 0.2),
+              inset 0 1px 0 rgba(236, 253, 245, 0.1) !important;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(110, 231, 183, 0.4),
+              0 6px 26px rgba(16, 185, 129, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize {
+  color: #a7f3d0 !important;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
+}
+.view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season,
+.view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season {
+  color: #d1fae5 !important;
+}
+.hall-of-fame__spring-2024-winner {
+  display: block;
+  margin-top: 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #ecfdf5;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card {
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  background: linear-gradient(165deg, #ecfdf5 0%, #d1fae5 40%, #a7f3d0 100%) !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2),
+              0 4px 18px rgba(5, 150, 105, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card:hover {
+  box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.35),
+              0 6px 22px rgba(16, 185, 129, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__prize {
+  color: #047857 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season,
+[data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__spring-2024-rating-card .hall-of-fame__spring-2024-rating-card__season {
+  color: #065f46 !important;
+}
+[data-theme="light"] .hall-of-fame__spring-2024-winner {
+  color: #064e3b;
+}
+
+.hall-of-fame__block {
+  margin-bottom: 12px;
+}
+.hall-of-fame__section-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+.hall-of-fame__placeholder {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.hall-of-fame__legends-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

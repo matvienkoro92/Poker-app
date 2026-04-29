@@ -1,0 +1,563 @@
+/* Rating CSS: game cards, tools and play surfaces.
+ * Extracted from styles-rating-learning-games.css; keep import order in styles-rating-learning-games.css stable. */
+
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+/* Описание внутри раскрытого блока (не в строке заголовка) */
+.video-lessons__player-inner .video-lessons__desc {
+  margin: 0 0 12px;
+  padding: 0 4px;
+}
+.video-lessons__attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--vl-free-open);
+  text-decoration: none;
+  border: 1px solid var(--vl-free-border);
+  border-radius: 10px;
+  background: var(--vl-free-bg-soft);
+  transition: background 0.2s, border-color 0.2s;
+}
+.video-lessons__attachment:hover {
+  background: rgba(249, 115, 22, 0.16);
+  border-color: var(--vl-free-open);
+}
+.video-lessons__attachment::before {
+  content: "📎";
+  font-size: 1em;
+}
+/* Кнопка «Записаться…» внутри раскрытого блока */
+.video-lessons__player-inner .learn-play-hub__training-btn.video-lessons__training-link {
+  display: block;
+  margin: 14px 0 0;
+  width: 100%;
+  max-width: none;
+  padding: 12px 14px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.video-lessons__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.video-lessons__item:hover {
+  background: rgba(249, 115, 22, 0.08);
+}
+.video-lessons__item[aria-expanded="true"] .video-lessons__chevron {
+  transform: rotate(180deg);
+}
+.video-lessons__num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--vl-free-num-fg, #67e8f9);
+  background: var(--vl-free-num-bg, rgba(34, 211, 238, 0.18));
+  border-radius: 8px;
+}
+.video-lessons__title {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(15px, 4.1vw, 17px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.video-lessons__chevron {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: rgba(251, 146, 60, 0.85);
+  transition: transform 0.25s ease;
+}
+[data-theme="light"] .video-lessons__chevron {
+  color: rgba(234, 88, 12, 0.7);
+}
+.video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(251, 146, 60, 0.8);
+}
+[data-theme="light"] .video-lessons__card--bonus .video-lessons__chevron {
+  color: rgba(194, 65, 12, 0.65);
+}
+/* Закрытый урок: контент полностью убран из вёрстки (display:none) — в части WebView grid 0fr «протекал», текст с ✅ оказывался виден под заголовком */
+.video-lessons__player-wrap {
+  overflow: hidden;
+  min-height: 0;
+}
+.video-lessons__player-wrap.video-lessons__player-wrap--hidden .video-lessons__player-inner {
+  display: none;
+}
+.video-lessons__player-inner {
+  min-height: 0;
+  padding: 12px 12px 14px;
+  display: block;
+  overflow: visible;
+  contain: layout;
+}
+.video-lessons__video-error {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.4);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+}
+.video-lessons__video-error[hidden] {
+  display: none !important;
+}
+[data-theme="light"] .video-lessons__video-error {
+  color: #7f1d1d;
+  background: rgba(254, 226, 226, 0.95);
+  border-color: rgba(185, 28, 28, 0.25);
+}
+.video-lessons__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(68vh, 520px);
+  height: auto;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+  object-fit: contain;
+  vertical-align: top;
+}
+.video-lessons__iframe {
+  display: block;
+  width: 100%;
+  height: 220px;
+  border: none;
+  border-radius: 10px;
+  background: #000;
+}
+.video-lessons__open-external {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.video-lessons__open-external:hover {
+  text-decoration: underline;
+}
+.video-lessons__no-video {
+  margin: 0;
+  padding: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.poker-tasks__start {
+  padding-bottom: 20px;
+}
+.poker-tasks__spr-btn {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 16px 0 0;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: var(--block-bg);
+  color: var(--text);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.poker-tasks__spr-btn:hover {
+  background: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Стартовый экран — выбор режима */
+.poker-tasks__desc {
+  margin: 12px 0 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.poker-tasks__mtt-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--block-bg);
+  border: 1px solid var(--border-subtle);
+}
+.poker-tasks__mtt-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.poker-tasks__mtt-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.poker-tasks__start-btn {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  margin: 8px 0 0;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.poker-tasks__start-btn:hover {
+  background: #fb923c;
+  transform: translateY(-1px);
+}
+.poker-tasks__leaderboard {
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+.poker-tasks__leaderboard-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.poker-tasks__leaderboard-table-wrap {
+  overflow-x: auto;
+}
+.poker-tasks__leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.poker-tasks__leaderboard-table th,
+.poker-tasks__leaderboard-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.poker-tasks__leaderboard-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.poker-tasks__leaderboard-table td {
+  color: var(--text);
+}
+.poker-tasks__leaderboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+[data-theme="light"] .poker-tasks__leaderboard {
+  background: rgba(255, 237, 213, 0.5);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+.poker-tasks__planner {
+  margin-top: 18px;
+}
+
+.tasks-board {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tasks-drag-active {
+  user-select: none;
+}
+
+.tasks-board__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-board__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-board__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.tasks-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.tasks-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tasks-create-label,
+.tasks-column__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tasks-create-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg, rgba(15, 23, 42, 0.06));
+  color: var(--text);
+  font: inherit;
+}
+
+.tasks-important-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-create-btn,
+.tasks-task__action,
+.tasks-task__delete {
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tasks-create-btn {
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #fff7ed;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.22);
+}
+
+.tasks-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.tasks-column {
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.tasks-column--important {
+  border-color: rgba(245, 158, 11, 0.45);
+  background:
+    linear-gradient(180deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.04)),
+    var(--card-bg);
+}
+
+.tasks-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tasks-column__count {
+  min-width: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tasks-column__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 44px;
+  border-radius: 14px;
+  transition: background 0.16s ease, outline-color 0.16s ease;
+}
+
+.tasks-board--dragging .tasks-column__list {
+  min-height: 74px;
+  outline: 1px dashed rgba(59, 130, 246, 0.28);
+  outline-offset: 4px;
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.tasks-board--dragging .tasks-column__empty {
+  display: none;
+}
+
+.tasks-column__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tasks-task {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.07);
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease, border-color 0.16s ease;
+}
+
+.tasks-task--important {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.tasks-task--dragging {
+  cursor: grabbing;
+  opacity: 0.86;
+  transform: scale(1.015);
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+  z-index: 2;
+}
+
+.tasks-task__text {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.tasks-task__meta {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.tasks-task__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tasks-task__action {
+  padding: 8px 10px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text);
+}
+
+.tasks-task__delete {
+  padding: 8px 10px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .tasks-create-form,
+[data-theme="dark"] .tasks-column {
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.34);
+}
+
+[data-theme="dark"] .tasks-create-input {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+[data-theme="dark"] .tasks-task {
+  background: rgba(15, 23, 42, 0.56);
+}
+
+@media (min-width: 860px) {
+  .tasks-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.poker-streak-header--mtt {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.poker-streak-header--mtt .poker-streak-header__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.poker-streak-header__timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.poker-streak-header__speed-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.poker-streak-feedback__score {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffd700;
+}
+.poker-streak-feedback__score:empty {
+  display: none;
+}
+.poker-tasks__start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;

@@ -61,11 +61,19 @@
       "app-push.js"
     ],
     "admin": [
-      "app-visitors-admin.js",
-      "app-admin-reports.js",
-      "app-share-stats.js",
-      "app-tracking-links.js"
+      "visitors",
+      "broadcasts",
+      "reports",
+      "tracking",
+      "auth-debug"
     ],
+    "adminModules": {
+      "visitors": ["app-visitors-admin.js"],
+      "broadcasts": ["app-share-stats.js"],
+      "reports": ["app-admin-reports.js"],
+      "tracking": ["app-tracking-links.js"],
+      "auth-debug": ["app-auth-debug.js"]
+    },
     "home": [
       "app-home-media.js",
       "app-home-gazette-tasks.js",
