@@ -465,18 +465,13 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
 
-add("Heavy app domains are lazy-loadable", () =>
-  hasAll("html", [
-    'type="application/poker-lazy"',
-    'data-poker-lazy-domain="chat"',
-    'data-poker-lazy-domain="rating"',
-    'data-poker-lazy-domain="media"',
-    './app-lazy-loader.js?v=',
-  ]) &&
+add("View navigation is not gated by lazy loading", () =>
+  !has("html", 'type="application/poker-lazy"') &&
+  !has("client", "pokerEnsureViewScripts(viewName)") &&
   hasAll("client", [
-    "window.pokerEnsureViewScripts",
-    "window.pokerLoadDomainScripts",
-    "pokerEnsureViewScripts(viewName)",
+    "function setView(viewName, navOpts)",
+    "navItems.forEach(function (item)",
+    "setView(target)",
   ])
 );
 

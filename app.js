@@ -636,26 +636,6 @@ function pokerChatDomainScriptsReady() {
 
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
-  if (!navOpts.__lazyReady && typeof window.pokerEnsureViewScripts === "function") {
-    try {
-      var lazyReady = window.pokerEnsureViewScripts(viewName);
-      if (lazyReady && typeof lazyReady.then === "function") {
-        lazyReady.then(function (loadedDomain) {
-          var nextOpts = {};
-          Object.keys(navOpts || {}).forEach(function (key) {
-            nextOpts[key] = navOpts[key];
-          });
-          nextOpts.__lazyReady = true;
-          setView(viewName, nextOpts);
-        }).catch(function (err) {
-          if (typeof console !== "undefined" && console.error) console.error("lazy view scripts", err);
-        });
-        return;
-      }
-    } catch (eLazyView) {
-      if (typeof console !== "undefined" && console.error) console.error("lazy view scripts", eLazyView);
-    }
-  }
   try {
     pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
   } catch (eSetViewDbg0) {}
@@ -858,7 +838,7 @@ function setView(viewName, navOpts) {
         idleChatBoot(runHomeChatBoot);
       }
     } catch (eChatBootHome) {}
-    if (!window.chatListenersAttached && typeof initChat === "function" && pokerChatDomainScriptsReady()) {
+    if (!window.chatListenersAttached && typeof initChat === "function") {
       var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idle(function () { initChat(); });
     }
@@ -1143,6 +1123,27 @@ function setView(viewName, navOpts) {
       initChat();
     }
     try {
+      if (
+        !window.__pendingOpenClubChatGeneral &&
+        !window.__pendingOpenChatPersonalFromDeepLink &&
+        typeof window.chatShowDialogs === "function"
+      ) {
+        setTimeout(function () {
+          try {
+            if (
+              document.body &&
+              document.body.getAttribute("data-view") === "chat" &&
+              !window.__pendingOpenClubChatGeneral &&
+              !window.__pendingOpenChatPersonalFromDeepLink &&
+              typeof window.chatShowDialogs === "function"
+            ) {
+              window.chatShowDialogs();
+            }
+          } catch (eChatShowDialogsLater) {}
+        }, 0);
+      }
+    } catch (eChatShowDialogsEnter) {}
+    try {
       [0, 250, 900].forEach(function (delay) {
         setTimeout(function () {
           try {
@@ -1393,10 +1394,6 @@ function updateRaffleBadge(hasActive) {
 
 navItems.forEach(function (item) {
   item.addEventListener("click", function (e) {
-    if (window.__touchWasScroll && window.__touchWasScroll()) {
-      e.preventDefault();
-      return;
-    }
     var target = item.dataset.viewTarget;
     if (target) {
       setView(target);
@@ -1404,6 +1401,44 @@ navItems.forEach(function (item) {
     }
   });
 });
+
+function pokerOpenChatFromTab() {
+  setView("chat");
+  [0, 80, 240].forEach(function (delay) {
+    setTimeout(function () {
+      try {
+        if (typeof initChat === "function" && !window.chatListenersAttached) initChat();
+      } catch (eInitChatTab) {}
+      try {
+        if (
+          document.body &&
+          document.body.getAttribute("data-view") === "chat" &&
+          !window.__pendingOpenClubChatGeneral &&
+          !window.__pendingOpenChatPersonalFromDeepLink &&
+          typeof window.chatShowDialogs === "function"
+        ) {
+          window.chatShowDialogs();
+        }
+      } catch (eShowChatTab) {}
+    }, delay);
+  });
+}
+
+(function bindChatTabFastOpen() {
+  var btn = document.getElementById("chatNavBtn");
+  if (!btn || btn.__pokerFastOpenBound) return;
+  btn.__pokerFastOpenBound = true;
+  btn.addEventListener("touchend", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    pokerOpenChatFromTab();
+  }, { passive: false });
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    pokerOpenChatFromTab();
+  });
+})();
 
 document.addEventListener("click", function (e) {
   var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
@@ -1482,10 +1517,6 @@ function handleViewLinkClick(e) {
     }
     return;
   }
-  if (window.__touchWasScroll && window.__touchWasScroll()) {
-    e.preventDefault();
-    return;
-  }
   var spring2024Btn = e.target.closest("#springRating2024InfoBtn");
   if (spring2024Btn) {
     e.preventDefault();
@@ -1553,15 +1584,6 @@ document.addEventListener("touchend", function (e) {
     viewHandledInTouchend = true;
     if (typeof navigateToHallFameBlogTop15 === "function") navigateToHallFameBlogTop15();
     return;
-  }
-  var link = e.target.closest("a[data-view-target]");
-  if (!link || link.getAttribute("data-download-page")) return;
-  if (window.__touchWasScroll && window.__touchWasScroll()) return;
-  e.preventDefault();
-  var view = link.getAttribute("data-view-target");
-  if (view) {
-    viewHandledInTouchend = true;
-    setView(view);
   }
 }, { passive: false });
 
@@ -11412,14 +11434,13 @@ document.addEventListener("visibilitychange", function () {
   }, 500);
 });
 
-if (typeof initChat === "function" && pokerChatDomainScriptsReady()) initChat();
+if (typeof initChat === "function") initChat();
 if (typeof initPokerShowsPlayer === "function") initPokerShowsPlayer();
 
 (function preinitChat() {
   var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 150); };
   idle(function () {
     if (window.chatListenersAttached) return;
-    if (!pokerChatDomainScriptsReady()) return;
     if (typeof initChat === "function") initChat();
   });
 })();
