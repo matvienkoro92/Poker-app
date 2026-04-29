@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const { pipeline: sharedRedisPipeline, isConfigured: redisConfigured } = require("../lib/redis");
 
 const PRESET_AVATAR_IDS = [
   "tiger",
@@ -85,25 +84,14 @@ function deterministicPreset(accountId) {
   return PRESET_AVATAR_IDS[hash % PRESET_AVATAR_IDS.length] || PRESET_AVATAR_IDS[0];
 }
 
-async function redisPipeline(commands) {
-  if (!REDIS_URL || !REDIS_TOKEN) {
+async function runRedisPipeline(commands) {
+  if (!redisConfigured()) {
     throw new Error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
   }
   if (!commands.length) return [];
-  const base = String(REDIS_URL).replace(/\/$/, "");
-  const res = await fetch(base + "/pipeline", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(commands),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error("Redis pipeline failed: HTTP " + res.status + (text ? " " + text.slice(0, 200) : ""));
-  }
-  return res.json();
+  const data = await sharedRedisPipeline(commands, { throwOnError: true, context: "assign-random-preset-avatars" });
+  if (!data) throw new Error("Redis pipeline failed");
+  return data;
 }
 
 async function main() {
@@ -114,7 +102,7 @@ async function main() {
     return;
   }
 
-  const seed = await redisPipeline([
+  const seed = await runRedisPipeline([
     ["SMEMBERS", "poker_app:visitors"],
     ["SMEMBERS", "poker_app:chat_users"],
     ["HGETALL", "poker_app:visitor_dt_ids"],
@@ -143,7 +131,7 @@ async function main() {
   for (const accountId of accountList) {
     checks.push(["GET", avatarKey(accountId)]);
   }
-  const checked = await redisPipeline(checks);
+  const checked = await runRedisPipeline(checks);
 
   const missing = [];
   const existing = [];
@@ -184,7 +172,7 @@ async function main() {
   let written = 0;
   for (let i = 0; i < commands.length; i += batchSize) {
     const batch = commands.slice(i, i + batchSize);
-    const res = await redisPipeline(batch);
+    const res = await runRedisPipeline(batch);
     written += res.filter((x) => x && x.result != null).length;
   }
   console.log(JSON.stringify({ ok: true, written }, null, 2));

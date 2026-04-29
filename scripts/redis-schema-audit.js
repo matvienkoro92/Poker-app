@@ -6,8 +6,7 @@
  * and highlights likely legacy keys/fields for manual migration planning.
  */
 
-const REDIS_URL = String(process.env.UPSTASH_REDIS_REST_URL || "").replace(/\/$/, "");
-const REDIS_TOKEN = String(process.env.UPSTASH_REDIS_REST_TOKEN || "");
+const { pipeline: redisPipeline, isConfigured: redisConfigured } = require("../lib/redis");
 
 const PATTERNS = [
   "poker_app:visitor_dt_ids",
@@ -49,22 +48,6 @@ const PATTERNS = [
 
 const MAX_SCAN_PER_PATTERN = 2000;
 const SAMPLE_LIMIT = 8;
-
-async function redisPipeline(commands) {
-  if (!REDIS_URL || !REDIS_TOKEN) return null;
-  const res = await fetch(REDIS_URL + "/pipeline", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(commands),
-  });
-  if (!res.ok) {
-    throw new Error(`Redis pipeline HTTP ${res.status}: ${await res.text().catch(() => "")}`);
-  }
-  return res.json();
-}
 
 function commandResult(row) {
   return row && Object.prototype.hasOwnProperty.call(row, "result") ? row.result : null;
@@ -170,7 +153,7 @@ function arrayPairs(raw) {
 }
 
 async function main() {
-  if (!REDIS_URL || !REDIS_TOKEN) {
+  if (!redisConfigured()) {
     console.log("Redis audit skipped: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are not set.");
     return;
   }

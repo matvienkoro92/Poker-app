@@ -8,8 +8,7 @@
  * Destructive legacy deletion additionally requires `--delete-legacy`.
  */
 
-const REDIS_URL = String(process.env.UPSTASH_REDIS_REST_URL || "").replace(/\/$/, "");
-const REDIS_TOKEN = String(process.env.UPSTASH_REDIS_REST_TOKEN || "");
+const { pipeline: redisPipeline, isConfigured: redisConfigured } = require("../lib/redis");
 const APPLY = process.argv.includes("--apply");
 const DELETE_LEGACY = APPLY && process.argv.includes("--delete-legacy");
 const JSON_OUT = process.argv.includes("--json");
@@ -19,22 +18,6 @@ const ID_TO_USER_KEY = "poker_app:id_to_user";
 const RESPECT_SCORE_KEY = "poker_app:respect_score";
 const ROMAN_CHAT_PARTNERS_KEY = "poker_app:chat_partners:tg_388008256";
 const ROMAN_LEGACY_ALIAS = "tg_roman";
-
-async function redisPipeline(commands) {
-  if (!REDIS_URL || !REDIS_TOKEN) return null;
-  const res = await fetch(REDIS_URL + "/pipeline", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(commands),
-  });
-  if (!res.ok) {
-    throw new Error(`Redis pipeline HTTP ${res.status}: ${await res.text().catch(() => "")}`);
-  }
-  return res.json();
-}
 
 function commandResult(row) {
   return row && Object.prototype.hasOwnProperty.call(row, "result") ? row.result : null;
@@ -156,7 +139,7 @@ async function applyPlan(plans) {
 }
 
 async function main() {
-  if (!REDIS_URL || !REDIS_TOKEN) {
+  if (!redisConfigured()) {
     console.log("Redis cleanup skipped: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are not set.");
     return;
   }

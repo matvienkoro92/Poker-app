@@ -114,6 +114,20 @@ function localAppFilesFromRoot() {
     .sort();
 }
 
+function walkJsFiles(relDir) {
+  const dir = path.join(root, relDir);
+  const out = [];
+  function walk(absDir) {
+    fs.readdirSync(absDir, { withFileTypes: true }).forEach((entry) => {
+      const abs = path.join(absDir, entry.name);
+      if (entry.isDirectory()) return walk(abs);
+      if (entry.isFile() && entry.name.endsWith(".js")) out.push(path.relative(root, abs));
+    });
+  }
+  walk(dir);
+  return out.sort();
+}
+
 function jsManifestFiles() {
   let parsed;
   try {
@@ -514,6 +528,17 @@ add("Shared Redis layer owns pipeline helpers for contract-covered handlers", ()
   !has("respectHandler", "function redisPipeline") &&
   !has("usersHandler", "function redisPipeline")
 );
+
+add("Shared Redis layer has no local pipeline clones left in project code", () => {
+  const filesToCheck = walkJsFiles("lib").concat(walkJsFiles("scripts"))
+    .filter((rel) => rel !== "lib/redis.js" && rel !== "scripts/smoke-checks.js" && rel !== "scripts/contract-tests.js");
+  return filesToCheck.every((rel) => {
+    const text = read(rel);
+    return !/async function redisPipeline\b/.test(text) &&
+      !/function redisPipeline\b/.test(text) &&
+      !/fetch\([^)]*\/pipeline/.test(text);
+  });
+});
 
 add("Chat sender label hides Telegram login when a name exists", () =>
   has("chatHandler", "if (nameParts) return nameParts;") &&
