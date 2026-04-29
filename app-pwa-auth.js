@@ -174,6 +174,7 @@ function getPokerResolvedTelegramUser() {
         emailSentRegister: "Код отправлен на почту. После подтверждения создадим новый аккаунт.",
         emailSentLogin: "Код отправлен на почту для входа.",
         emailCodeConfirmed: "Почта подтверждена, придумайте пароль ниже.",
+        emailPasswordSetupHint: "Пароль для этой почты ещё не задан. Нажмите «Отправить код», введите код из письма и задайте пароль.",
         passwordRequired: "Введите пароль.",
         networkError: "Ошибка сети. Попробуйте ещё раз."
       },
@@ -231,6 +232,7 @@ function getPokerResolvedTelegramUser() {
         emailSentRegister: "The code was sent to your email. We will create a new account after confirmation.",
         emailSentLogin: "The code was sent to your email for sign in.",
         emailCodeConfirmed: "Email confirmed, create a password below.",
+        emailPasswordSetupHint: "This email does not have a password yet. Tap “Send code”, enter the email code, and create a password.",
         passwordRequired: "Enter a password.",
         networkError: "Network error. Please try again."
       }
@@ -1831,6 +1833,13 @@ function getPokerResolvedTelegramUser() {
     function resetEmailRegisterVerification() {
       emailCodeConfirmed = false;
     }
+    function switchEmailToPasswordSetup() {
+      authMode = "register";
+      resetEmailRegisterVerification();
+      syncAuthModeUi();
+      setEmailHint(pwaAuthT("emailPasswordSetupHint"), true);
+      if (sendBtn && sendBtn.focus) sendBtn.focus();
+    }
     function syncAuthModeUi() {
       var registerMode = authMode === "register";
       wrap.setAttribute("data-auth-mode", authMode);
@@ -1911,6 +1920,10 @@ function getPokerResolvedTelegramUser() {
               try {
                 pokerClearUiCachesAfterAuthSwitch();
               } catch (eClearUiCachesLogin) {}
+              return;
+            }
+            if (data && data.passwordSetupRequired) {
+              switchEmailToPasswordSetup();
               return;
             }
             setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);

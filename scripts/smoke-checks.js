@@ -16,6 +16,7 @@ const files = {
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
   authPwaCodeHandler: read("lib/api-handlers/auth-pwa-code.js"),
+  authEmailHandler: read("lib/api-handlers/auth-email.js"),
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
 };
 
@@ -156,6 +157,15 @@ add("PWA Telegram code requests use current auth and avoid stale username binds"
     "usernameRedisCommands",
     "HGETALL",
     "commands.push([\"HDEL\", USERNAMES_KEY, key])",
+  ])
+);
+
+add("Email login prefers the linked email account over stale device hints", () =>
+  has("authEmailHandler", "let dtId = existingLinkedDtId || hintedDtId") &&
+  hasAll("client", [
+    "function switchEmailToPasswordSetup()",
+    "emailPasswordSetupHint",
+    "data && data.passwordSetupRequired",
   ])
 );
 
