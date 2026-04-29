@@ -2626,7 +2626,7 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-26-04-2026-league2-mok-7max-21h.jpg"
   ]
 };
-var SPRING_RATING_UPDATED = "23.04.26";
+var SPRING_RATING_UPDATED = "26 апреля";
 var SPRING_RATING_TOURNAMENTS_BY_DATE = {
   "01.03.2026": [
     { time: "10:00", buyin: 500, players: [{ nick: "asianflushie", place: 0, reward: 4989 }] },
