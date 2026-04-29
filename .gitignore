@@ -3,6 +3,7 @@
 
 # Build output (generated on Vercel)
 public/
+archived-assets/
 
 # Node / tooling
 node_modules/
@@ -18,4 +19,3 @@ log.txt
 
 # Локальные резервные копии (папка на уровень выше проекта)
 ../poker-club-miniapp-backups/
-

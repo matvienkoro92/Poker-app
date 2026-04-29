@@ -92,7 +92,7 @@ for (const dir of dirsToCopy) {
   const src = path.join(root, dir);
   if (fs.existsSync(src)) {
     const dest = path.join(publicDir, dir);
-    removeBlockedAssetsRecursive(dest);
+    fs.rmSync(dest, { recursive: true, force: true });
     copyDirRecursive(src, dest);
     console.log('Copied dir:', dir);
   }
