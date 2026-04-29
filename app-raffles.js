@@ -353,6 +353,16 @@ function initRaffles() {
     return uid;
   }
 
+  function raffleWinnerLeaderMetaText(row) {
+    if (!row) return "";
+    var parts = [];
+    var login = row.telegramUsername != null ? String(row.telegramUsername).trim().replace(/^@+/g, "") : "";
+    if (login) parts.push("@" + login);
+    var name = row.name != null ? String(row.name).trim() : "";
+    if (name && name !== "Участник" && parts.indexOf(name) === -1) parts.push(name);
+    return parts.join(" · ");
+  }
+
   function buildRaffleWinnerLeaderRows(completed) {
     var byId = {};
     (completed || []).forEach(function (raffle) {
@@ -360,7 +370,19 @@ function initRaffles() {
       winners.forEach(function (w) {
         var id = raffleWinnerLeaderId(w);
         if (!id) return;
-        if (!byId[id]) byId[id] = { id: id, count: 0 };
+        if (!byId[id]) {
+          byId[id] = {
+            id: id,
+            userId: w.userId != null ? String(w.userId).trim() : "",
+            name: w.name != null ? String(w.name).trim() : "",
+            telegramUsername: w.telegramUsername != null ? String(w.telegramUsername).trim() : "",
+            count: 0
+          };
+        } else {
+          if (!byId[id].name && w.name != null && String(w.name).trim()) byId[id].name = String(w.name).trim();
+          if (!byId[id].telegramUsername && w.telegramUsername != null && String(w.telegramUsername).trim()) byId[id].telegramUsername = String(w.telegramUsername).trim();
+          if (!byId[id].userId && w.userId != null && String(w.userId).trim()) byId[id].userId = String(w.userId).trim();
+        }
         byId[id].count += 1;
       });
     });
@@ -374,9 +396,11 @@ function initRaffles() {
 
   function raffleWinnerLeaderRowsHtml(rows) {
     return (rows || []).map(function (row) {
+      var meta = raffleWinnerLeaderMetaText(row);
       return (
         '<li class="raffle-winner-leaders__item"><span class="raffle-winner-leaders__id">' +
         escapeHtml(row.id) +
+        (meta ? '<span class="raffle-winner-leaders__meta">' + escapeHtml(meta) + "</span>" : "") +
         '</span><span class="raffle-winner-leaders__count">— ' +
         escapeHtml(raffleWinCountText(row.count)) +
         "</span></li>"
@@ -2415,4 +2439,3 @@ function initRaffles() {
     });
   }
 })();
-

@@ -642,6 +642,13 @@
   overflow-wrap: anywhere;
   font-weight: 800;
 }
+.raffle-winner-leaders__meta {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
 .raffle-winner-leaders__count {
   flex: 0 0 auto;
   color: #fdba74;
