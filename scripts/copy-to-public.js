@@ -47,6 +47,7 @@ const cssPartFiles = fs
   .sort();
 const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex()))];
 const dirsToCopy = ['assets'];
+const blockedAssetExtensions = new Set(['.mov']);
 
 if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
@@ -69,7 +70,20 @@ function copyDirRecursive(src, dest) {
     if (fs.statSync(s).isDirectory()) {
       copyDirRecursive(s, d);
     } else {
+      if (blockedAssetExtensions.has(path.extname(name).toLowerCase())) continue;
       fs.copyFileSync(s, d);
+    }
+  }
+}
+
+function removeBlockedAssetsRecursive(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const name of fs.readdirSync(dir)) {
+    const p = path.join(dir, name);
+    if (fs.statSync(p).isDirectory()) {
+      removeBlockedAssetsRecursive(p);
+    } else if (blockedAssetExtensions.has(path.extname(name).toLowerCase())) {
+      fs.unlinkSync(p);
     }
   }
 }
@@ -77,7 +91,9 @@ function copyDirRecursive(src, dest) {
 for (const dir of dirsToCopy) {
   const src = path.join(root, dir);
   if (fs.existsSync(src)) {
-    copyDirRecursive(src, path.join(publicDir, dir));
+    const dest = path.join(publicDir, dir);
+    removeBlockedAssetsRecursive(dest);
+    copyDirRecursive(src, dest);
     console.log('Copied dir:', dir);
   }
 }

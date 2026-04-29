@@ -630,6 +630,26 @@ function pokerTryConsumePendingManagerFromCashout() {
 
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
+  if (!navOpts.__lazyReady && typeof window.pokerEnsureViewScripts === "function") {
+    try {
+      var lazyReady = window.pokerEnsureViewScripts(viewName);
+      if (lazyReady && typeof lazyReady.then === "function") {
+        lazyReady.then(function (loadedDomain) {
+          var nextOpts = {};
+          Object.keys(navOpts || {}).forEach(function (key) {
+            nextOpts[key] = navOpts[key];
+          });
+          nextOpts.__lazyReady = true;
+          setView(viewName, nextOpts);
+        }).catch(function (err) {
+          if (typeof console !== "undefined" && console.error) console.error("lazy view scripts", err);
+        });
+        return;
+      }
+    } catch (eLazyView) {
+      if (typeof console !== "undefined" && console.error) console.error("lazy view scripts", eLazyView);
+    }
+  }
   try {
     pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
   } catch (eSetViewDbg0) {}

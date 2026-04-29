@@ -447,6 +447,7 @@ add("JS manifest maps core app domains", () =>
     '"app-pwa-auth.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
+    '"app-lazy-loader.js"',
   ])
 );
 
@@ -458,10 +459,26 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
     appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
     appearsBefore(order, "app-rating-core.js", "app-rating.js") &&
+    appearsBefore(order, "app-lazy-loader.js", "app.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
+
+add("Heavy app domains are lazy-loadable", () =>
+  hasAll("html", [
+    'type="application/poker-lazy"',
+    'data-poker-lazy-domain="chat"',
+    'data-poker-lazy-domain="rating"',
+    'data-poker-lazy-domain="media"',
+    './app-lazy-loader.js?v=',
+  ]) &&
+  hasAll("client", [
+    "window.pokerEnsureViewScripts",
+    "window.pokerLoadDomainScripts",
+    "pokerEnsureViewScripts(viewName)",
+  ])
+);
 
 add("Build output contains every local CSS import from styles.css", () => {
   const publicDir = path.join(root, "public");
@@ -470,6 +487,15 @@ add("Build output contains every local CSS import from styles.css", () => {
     fs.existsSync(path.join(publicDir, file))
   );
 });
+
+add("Large unused movie assets are not shipped", () =>
+  !fs.existsSync(path.join(root, "assets", "rat_2.mov")) &&
+  !fs.existsSync(path.join(root, "public", "assets", "rat_2.mov")) &&
+  has("html", 'src="./assets/download-hero.png"') &&
+  !has("html", 'rel="preload" as="image" href="./assets/download-hero.png"') &&
+  has("html", 'class="download-image"') &&
+  has("html", 'loading="lazy"')
+);
 
 add("CSS domain entrypoints cover auth and tournament styles", () =>
   localCssImportsFromStyles().includes("styles-auth.css") &&

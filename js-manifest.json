@@ -94,6 +94,7 @@
       "app-shell-layout.js",
       "app-navigation-scroll.js",
       "app-api-tracking.js",
+      "app-lazy-loader.js",
       "app.js",
       "app-section-views.js"
     ]
