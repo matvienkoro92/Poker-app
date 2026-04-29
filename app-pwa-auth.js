@@ -1892,10 +1892,6 @@ function getPokerResolvedTelegramUser() {
               try {
                 pokerClearUiCachesAfterAuthSwitch();
               } catch (eClearUiCachesLogin) {}
-              try {
-                window.location.reload();
-                return;
-              } catch (eReloadAfterEmailPasswordLogin) {}
               return;
             }
             setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);
@@ -2041,10 +2037,6 @@ function getPokerResolvedTelegramUser() {
               try {
                 pokerClearUiCachesAfterAuthSwitch();
               } catch (eClearUiCaches) {}
-              try {
-                window.location.reload();
-                return;
-              } catch (eReloadAfterEmailLogin) {}
               return;
             }
             setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);

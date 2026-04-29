@@ -102,6 +102,10 @@ add("PWA saved session restores before empty initData login gate", () =>
   has("client", /if \(!initData\) \{\s*if \(attemptPwaSideAuthRestore\(hideBootOverlay\)\) return;/)
 );
 
+add("PWA email login does not force a post-auth reload", () =>
+  !has("client", "eReloadAfterEmailPasswordLogin") && !has("client", "eReloadAfterEmailLogin")
+);
+
 add("Chat shell has dialog, general and conversation views", () =>
   hasAll("html", [
     'id="chatDialogsView"',
