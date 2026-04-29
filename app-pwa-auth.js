@@ -89,6 +89,12 @@ function getPokerResolvedTelegramUser() {
   var profileLangSwitch = document.getElementById("profileLangSwitch");
   var profileLangRuBtn = document.getElementById("profileLangRuBtn");
   var profileLangEnBtn = document.getElementById("profileLangEnBtn");
+  var authFlowGeneration = 0;
+
+  function bumpAuthFlowGeneration() {
+    authFlowGeneration += 1;
+    return authFlowGeneration;
+  }
 
   function getPwaAuthLocale() {
     try {
@@ -886,6 +892,7 @@ function getPokerResolvedTelegramUser() {
           pokerSavePwaGuestMode(false);
           window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
           pokerMaybeRememberMemberIdFromUser(u);
+          pokerSetAuthMethod("vk");
           updateHeaderGreeting();
           showAuthorized(u);
           loadHeaderAvatar();
@@ -2050,6 +2057,7 @@ function getPokerResolvedTelegramUser() {
   }
 
   function showAuthorized(user) {
+    bumpAuthFlowGeneration();
     pokerSetHomeAuthResolved(true);
     try {
       if (typeof setView === "function") setView("home");
@@ -2073,7 +2081,29 @@ function getPokerResolvedTelegramUser() {
     syncSiteHomeInstructionMode();
   }
 
-  function showUnauthorized() {
+  function hasActiveVerifiedAuthState() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip")) return true;
+    } catch (eAuthState) {}
+    return false;
+  }
+
+  function showUnauthorized(force) {
+    if (!force && hasActiveVerifiedAuthState()) {
+      try {
+        pokerSetHomeAuthResolved(true);
+        hidePwaAuthScreen();
+        hideIdentifyingMini();
+        if (banner) {
+          banner.classList.add("auth-banner--hidden");
+          banner.classList.remove("auth-banner--verifying");
+        }
+        if (userEl) userEl.classList.remove("auth-user--hidden");
+        syncSiteHomeInstructionMode();
+      } catch (eKeepAuth) {}
+      return;
+    }
     pokerSetHomeAuthResolved(false);
     if (userEl) userEl.classList.add("auth-user--hidden");
     if (shouldUseOverlayAuthScreen()) {
@@ -2749,7 +2779,7 @@ function getPokerResolvedTelegramUser() {
       if (soV && soV.user && soV.user.id != null && soV.token) {
         var uVk = normalizeVerifiedUser(soV.user, null);
         window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
-        pokerSetAuthMethod("telegram");
+        pokerSetAuthMethod(soV.authMethod || "vk");
         updateHeaderGreeting();
         showAuthorized(uVk);
         loadHeaderAvatar();
@@ -2859,6 +2889,7 @@ function getPokerResolvedTelegramUser() {
     }
 
     window.__pokerTelegramAuth = { status: "verifying", user: null, error: null };
+    var verifyFlowGeneration = bumpAuthFlowGeneration();
     setBannerVerifying();
     showUnauthorized();
     updateHeaderGreeting();
@@ -2868,9 +2899,11 @@ function getPokerResolvedTelegramUser() {
     var maxAuthAttempts = 5;
     var attempts = 0;
     function tryOnce() {
+      if (verifyFlowGeneration !== authFlowGeneration) return;
       attempts += 1;
       postAuthTelegram(initData, true)
         .then(function (pack) {
+          if (verifyFlowGeneration !== authFlowGeneration) return;
           var res = pack.res;
           var data = pack.data || {};
           if (res.ok && data.ok && data.user) {
@@ -2948,6 +2981,7 @@ function getPokerResolvedTelegramUser() {
           } catch (e4) {}
         })
         .catch(function () {
+          if (verifyFlowGeneration !== authFlowGeneration) return;
           if (attempts < maxAuthAttempts) {
             setTimeout(tryOnce, authRetryDelayMs(attempts));
             return;
@@ -3096,7 +3130,7 @@ function getPokerResolvedTelegramUser() {
       openOverlayAuthEntryScreen();
     } catch (eShowEntry) {}
     try {
-      showUnauthorized();
+      showUnauthorized(true);
     } catch (eUnauth) {}
     try {
       updateProfileExitBtnVisibility();

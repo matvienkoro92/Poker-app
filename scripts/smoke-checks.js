@@ -106,6 +106,16 @@ add("PWA email login does not force a post-auth reload", () =>
   !has("client", "eReloadAfterEmailPasswordLogin") && !has("client", "eReloadAfterEmailLogin")
 );
 
+add("PWA auth keeps verified sessions over stale unauthorized UI", () =>
+  hasAll("client", [
+    "function hasActiveVerifiedAuthState()",
+    "function showUnauthorized(force)",
+    "if (!force && hasActiveVerifiedAuthState())",
+    "var authFlowGeneration = 0",
+    "var verifyFlowGeneration = bumpAuthFlowGeneration()",
+  ])
+);
+
 add("Chat shell has dialog, general and conversation views", () =>
   hasAll("html", [
     'id="chatDialogsView"',

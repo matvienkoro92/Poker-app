@@ -313,7 +313,7 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
 }
 
 function pokerSavePwaVkSession(token, userObj) {
-  var payload = JSON.stringify({ token: token, user: userObj, authMethod: "telegram" });
+  var payload = JSON.stringify({ token: token, user: userObj, authMethod: "vk" });
   var ok = false;
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
