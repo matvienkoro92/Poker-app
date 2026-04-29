@@ -13,6 +13,7 @@ function read(rel) {
 const files = {
   html: read("index.html"),
   chatFragment: read("html-fragments/chat.html"),
+  downloadFragment: read("html-fragments/download.html"),
   hallOfFameFragment: read("html-fragments/hall-of-fame.html"),
   videoLessonsFragment: read("html-fragments/video-lessons.html"),
   rafflesFragment: read("html-fragments/raffles.html"),
@@ -474,6 +475,26 @@ add("Chat shell is lazy-loaded from a hydrated HTML fragment", () =>
     "function initChat()",
     'document.getElementById("chatDialogsView")',
   ])
+);
+
+add("Download HTML is lazy-loaded from a fragment", () =>
+  hasAll("html", [
+    'data-view="download"',
+    'data-html-fragment="./html-fragments/download.html"',
+    'data-html-fragment-view="download"',
+  ]) &&
+  !has("html", 'data-download-page="poker21"') &&
+  !has("html", 'class="download-image"') &&
+  hasAll("downloadFragment", [
+    'data-view="download"',
+    'data-html-fragment-view="download"',
+    'data-download-page="main"',
+    'data-download-page="poker21"',
+    'data-download-page="xpoker"',
+    'data-download-page="pppoker"',
+    'data-download-page="supremapoker"',
+  ]) &&
+  fs.existsSync(path.join(root, "html-fragments", "download.html"))
 );
 
 add("Chat open keeps instant local snapshots", () =>
@@ -950,12 +971,12 @@ add("Large unused movie assets are not shipped", () =>
   !fs.existsSync(path.join(root, "assets", "rat_2.mov")) &&
   !fs.existsSync(path.join(root, "public", "assets", "rat_2.mov")) &&
   !fs.existsSync(path.join(root, "public", "assets", "README.md")) &&
-  has("html", 'src="./assets/download-hero.png"') &&
-  has("html", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
-  has("html", 'srcset="./assets/download-hero.webp" type="image/webp"') &&
+  has("downloadFragment", 'src="./assets/download-hero.png"') &&
+  has("downloadFragment", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
+  has("downloadFragment", 'srcset="./assets/download-hero.webp" type="image/webp"') &&
   !has("html", 'rel="preload" as="image" href="./assets/download-hero.png"') &&
-  has("html", 'class="download-image"') &&
-  has("html", 'loading="lazy"')
+  has("downloadFragment", 'class="download-image"') &&
+  has("downloadFragment", 'loading="lazy"')
 );
 
 add("Modern image variants exist for heavy visual assets", () => {
