@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.364">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.365">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -276,7 +276,7 @@
     <link rel="manifest" href="./manifest.json?v=2.006" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=2.364" />
+    <link rel="stylesheet" href="./styles.css?v=2.365" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1170,228 +1170,7 @@
           </div>
 
           <!-- Розыгрыши -->
-          <div class="view" data-view="raffles">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
-            <p class="raffles-tagline">Розыгрыши беккинг-билетов на турниры клуба</p>
-            <header class="raffles-hero" aria-hidden="true">
-              <picture>
-                <source srcset="./assets/raffles-hero.avif" type="image/avif" />
-                <source srcset="./assets/raffles-hero.webp" type="image/webp" />
-                <img src="./assets/raffles-hero.png" alt="" class="raffles-hero__img" width="720" height="288" loading="lazy" decoding="async" />
-              </picture>
-              <p class="raffles-subscribe-text">Получать уведомления о новых розыгрышах в Telegram</p>
-              <div class="raffles-hero__share-row">
-                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="rafflesInviteFriendBtn" aria-label="Позвать друга">Позвать друга</button>
-                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="rafflesCopyLinkBtn" aria-label="Скопировать ссылку на розыгрыши"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary raffles-subscribe-btn" id="rafflesSubscribeBtn">Подписаться</button>
-              </div>
-            </header>
-
-            <div class="raffles-admin-wrap raffles-admin-wrap--hidden" id="rafflesAdminWrap">
-              <div class="raffles-admin-actions raffles-admin-actions--top">
-                <button type="button" class="raffles-create-toggle" id="rafflesCreateToggle">Создать розыгрыш</button>
-                <button type="button" class="raffles-create-toggle raffles-create-toggle--ghost" id="rafflesDuplicateLastBtn">Повторить розыгрыш</button>
-              </div>
-              <div class="raffle-create-form raffle-create-form--hidden" id="raffleCreateForm">
-                <p class="raffle-create-form__type-label">Вид розыгрыша</p>
-                <div class="raffle-create-form__type-row" role="group" aria-label="Тип розыгрыша">
-                  <label class="raffle-create-form__type-option">
-                    <input type="radio" name="raffleType" value="tickets" id="raffleTypeTickets" checked />
-                    <span>Розыгрыш беккинг-билетов на турниры</span>
-                  </label>
-                  <label class="raffle-create-form__type-option">
-                    <input type="radio" name="raffleType" value="other" id="raffleTypeOther" />
-                    <span>Розыгрыш на кеш. Столы Бонус гейм на Poker21</span>
-                  </label>
-                </div>
-
-                <!-- Форма: Розыгрыш беккинг-билетов на турниры -->
-                <div class="raffle-create-form__panel raffle-create-form__panel--tickets" id="raffleCreatePanelTickets">
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Сколько групп победителей:</span>
-                    <input type="number" id="raffleTicketGroupCount" class="randomizer-input" min="1" max="10" value="1" />
-                  </label>
-                  <div class="raffle-ticket-tournament-wrap" id="raffleTicketTournamentWrap">
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Турнир из расписания:</span>
-                    <select id="raffleTicketTournamentSelect" class="randomizer-input raffle-tournament-select" aria-label="Выберите турнир">
-                      <option value="">— Выберите турнир —</option>
-                      <optgroup label="Ежедневные">
-                        <option value="0" data-name="Сателлит на Турнир недели (10:00)">Сателлит на Турнир недели (10:00) — бесплатно</option>
-                        <option value="800" data-name="Rebuy DV">Rebuy DV — 800₽</option>
-                        <option value="150" data-name="Сателлит на Турнир недели (15:00)">Сателлит на Турнир недели (15:00) — 150₽</option>
-                        <option value="100" data-name="Tournament Rebuy">Tournament Rebuy — 100₽</option>
-                        <option value="50" data-name="Magic Chest">Magic Chest — 50₽</option>
-                        <option value="300" data-name="PKO/MKO (17:00)">PKO/MKO (17:00) — 300₽</option>
-                        <option value="1000" data-name="Нокаут (19:00)">Нокаут (19:00) — 1000₽</option>
-                        <option value="300" data-name="PLO4">PLO4 — 300₽, приз 10 000₽, 20:00 МСК</option>
-                        <option value="200" data-name="Energetic Tournament">Energetic Tournament — 200₽</option>
-                        <option value="50" data-name="MKO (23:00)">MKO (23:00) — 50₽</option>
-                      </optgroup>
-                      <optgroup label="Турнир дня (18:00 Мск)">
-                        <option value="500" data-name="Magic MKO (Пн)">Magic MKO (Пн) — 500₽</option>
-                        <option value="300" data-name="Rebuy (Вт)">Rebuy (Вт) — 300₽</option>
-                        <option value="100" data-name="Rebuy (Ср)">Rebuy (Ср) — 100₽</option>
-                        <option value="1000" data-name="Нокаут Мистери (Чт)">Нокаут Мистери (Чт) — 1000₽</option>
-                        <option value="500" data-name="Нокаут Прогрессив (Пт)">Нокаут Прогрессив (Пт) — 500₽</option>
-                        <option value="0" data-name="Фриролл (Сб)">Фриролл (Сб) — бесплатно</option>
-                        <option value="2000" data-name="Турнир Недели Нокаут Меджик (Вс)">Турнир Недели Нокаут Меджик (Вс) — 2000₽</option>
-                      </optgroup>
-                      <option value="custom">Свой вариант (ввести вручную)</option>
-                    </select>
-                  </label>
-                  <div id="raffleTicketCustomFields" style="display:none;">
-                    <label class="randomizer-label">
-                      <span class="randomizer-label__text">Название турнира:</span>
-                      <input type="text" id="raffleTicketCustomName" class="randomizer-input" maxlength="120" placeholder="Например, Sunday Million" />
-                    </label>
-                    <label class="randomizer-label">
-                      <span class="randomizer-label__text">Цена билета:</span>
-                      <input type="number" id="raffleTicketCustomPrice" class="randomizer-input" min="0" step="0.01" inputmode="decimal" placeholder="Например, 550" />
-                    </label>
-                  </div>
-                  </div>
-                  <div class="raffle-ticket-winners-wrap raffle-ticket-winners-wrap--single" id="raffleTicketWinnersWrap">
-                    <label class="randomizer-label raffle-ticket-single-winners" id="raffleTicketSingleWinnersLabel">
-                      <span class="randomizer-label__text">Сколько беккинг-билетов разыграть:</span>
-                      <input type="number" id="raffleTicketWinnersCount" class="randomizer-input" min="1" max="100" value="3" />
-                    </label>
-                    <div class="raffle-ticket-groups" id="raffleTicketGroups"></div>
-                  </div>
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Дата и время завершения (МСК):</span>
-                    <input type="datetime-local" id="raffleEndDate" class="randomizer-input" />
-                  </label>
-                  <p class="raffle-create-form__total" id="raffleCreateTotal">Итого: 0 ₽</p>
-                </div>
-
-                <!-- Форма: Розыгрыш на кеш. Столы Бонус гейм на Poker21 -->
-                <div class="raffle-create-form__panel raffle-create-form__panel--hidden" id="raffleCreatePanelOther">
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Название приза / розыгрыша:</span>
-                    <input type="text" id="raffleTitle" class="randomizer-input" placeholder="Например: беккинг-билеты на турнир" maxlength="200" />
-                  </label>
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Количество групп призов:</span>
-                    <input type="number" id="raffleGroupCount" class="randomizer-input" min="1" max="10" value="1" />
-                  </label>
-                  <div class="raffle-groups" id="raffleGroups"></div>
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Дата и время завершения (МСК):</span>
-                    <input type="datetime-local" id="raffleEndDateOther" class="randomizer-input" />
-                  </label>
-                </div>
-
-                <button type="button" class="primary-button" id="raffleCreateBtn">Создать</button>
-              </div>
-
-              <div class="raffles-admin-row" id="rafflesSubscribersRow">
-                <div class="raffles-admin-actions">
-                  <button
-                    type="button"
-                    class="raffles-admin-btn"
-                    id="rafflesNotifySubsBtn"
-                  >
-                    Разослать подписчикам розыгрыша
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesLastBroadcastReportBtn"
-                  >
-                    Отчёт последней рассылки
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesRetryFailedBroadcastBtn"
-                  >
-                    Дослать кому не дошло
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesPurgeBlockedSubsBtn"
-                  >
-                    Удалить отписавшихся / заблокировавших бота
-                  </button>
-                </div>
-                <p class="raffles-admin-hint" id="rafflesNotifySubsHint"></p>
-              </div>
-            </div>
-
-            <div class="raffles-tabs" id="rafflesTabs">
-              <button type="button" class="raffles-tab raffles-tab--active" id="rafflesTabActive" data-raffle-tab="active" aria-selected="true">Активные (<span id="rafflesTabActiveCount">0</span>) — <span id="rafflesTabActiveSum">0</span></button>
-              <button type="button" class="raffles-tab" id="rafflesTabCompleted" data-raffle-tab="completed" aria-selected="false">Завершённые (<span id="rafflesTabCompletedCount">0</span>) — <span id="rafflesTabCompletedSum">0</span></button>
-            </div>
-
-            <div class="raffles-panel raffles-panel--active" id="rafflesPanelActive" data-raffle-panel="active">
-              <p class="raffle-empty raffle-empty--hidden" id="raffleEmpty">Нет активных розыгрышей.</p>
-              <div class="raffle-current raffle-current--hidden" id="raffleCurrent">
-                <div class="raffle-card raffle-card--ticket" id="raffleCard">
-                  <h2 class="raffle-card__heading" id="raffleCardHeading"></h2>
-                  <ul class="raffle-id-note" aria-label="Важно об ID">
-                    <li>Проверьте ваш ID из Poker21 в профиле.</li>
-                    <li>На него будет начисляться выигранный приз.</li>
-                  </ul>
-                  <div class="raffle-stats-block">
-                    <p class="raffle-stat" id="raffleStatWinners">Победителей:</p>
-                    <p class="raffle-stat" id="raffleStatPrize">Общая сумма розыгрыша: <span id="raffleStatPrizeValue">—</span></p>
-                    <p class="raffle-stat" id="raffleStatGroups">Групп призов:</p>
-                    <p class="raffle-stat raffle-stat--timer" id="raffleEnd"></p>
-                  </div>
-                  <div class="raffle-prizes" id="rafflePrizes"></div>
-                  <div class="raffle-join-invite-row">
-                    <div class="raffle-join-leave-cell">
-                      <button type="button" class="primary-button raffle-join-toggle-btn" id="raffleJoinToggleBtn" data-raffle-action="join">Участвовать</button>
-                    </div>
-                    <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary" id="raffleInviteFriendInlineBtn">Позвать друга</button>
-                  </div>
-                  <p class="raffle-action-feedback raffle-action-feedback--hidden" id="raffleActionFeedback" role="status" aria-live="polite"></p>
-                  <div class="raffle-admin-actions raffle-admin-actions--hidden" id="raffleAdminActions" aria-hidden="true">
-                    <button type="button" class="raffle-complete-btn" id="raffleCompleteBtn">Завершить розыгрыш (админ)</button>
-                    <button type="button" class="raffle-cancel-btn" id="raffleCancelBtn">Отменить розыгрыш (админ)</button>
-                    <button type="button" class="raffle-cancel-btn" id="raffleUpdateEndBtn">Изменить время итогов (админ)</button>
-                    <button type="button" class="raffle-cancel-btn" id="raffleDeleteBtn">Удалить розыгрыш (админ)</button>
-                  </div>
-                  <p class="raffle-joined-msg raffle-joined-msg--hidden" id="raffleJoinedMsg">Вы участвуете</p>
-                  <div id="raffleGuestGate" class="raffle-guest-gate raffle-guest-gate--hidden" hidden>
-                    <p class="raffle-guest-gate__text">Чтобы участвовать в розыгрышах, войдите в аккаунт.</p>
-                    <button type="button" class="profile-exit-btn" id="raffleGuestLoginBtn">Войти в аккаунт</button>
-                  </div>
-                  <p class="raffle-channel-note">Участвуют только подписчики канала <a href="https://t.me/dva_tuza_club" target="_blank" rel="noopener">клуба Два туза</a>.</p>
-                  <h3 class="raffle-participants-title">Участники <span class="raffle-participants-count" id="raffleParticipantsCount">(0)</span></h3>
-                  <p class="raffle-participants-chance" id="raffleParticipantsChance"></p>
-                  <ul class="raffle-participants" id="raffleParticipants"></ul>
-                  <div class="raffle-winners-wrap raffle-winners-wrap--hidden" id="raffleWinnersWrap">
-                    <h3 class="raffle-winners-title">Победители</h3>
-                    <ul class="raffle-winners" id="raffleWinners"></ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelCompleted" data-raffle-panel="completed">
-              <section class="raffle-winner-leaders raffle-winner-leaders--hidden" id="raffleWinnerLeaders" hidden>
-                <div class="raffle-winner-leaders__head">
-                  <h3 class="raffle-winner-leaders__title">Кто выигрывал чаще всех</h3>
-                  <button type="button" class="raffle-winner-leaders__expand" id="raffleWinnerLeadersExpandBtn">Развернуть</button>
-                </div>
-                <ol class="raffle-winner-leaders__list" id="raffleWinnerLeadersList"></ol>
-              </section>
-              <div class="raffles-completed-list" id="rafflesCompleted"></div>
-              <p class="raffle-empty raffles-completed-empty" id="rafflesCompletedEmpty">Нет завершённых розыгрышей.</p>
-            </div>
-            <div class="raffle-winner-leaders-modal raffle-winner-leaders-modal--hidden" id="raffleWinnerLeadersModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="raffleWinnerLeadersModalTitle">
-              <div class="raffle-winner-leaders-modal__backdrop" id="raffleWinnerLeadersModalBackdrop" tabindex="-1"></div>
-              <div class="raffle-winner-leaders-modal__box">
-                <button type="button" class="raffle-winner-leaders-modal__close" id="raffleWinnerLeadersModalClose" aria-label="Закрыть">×</button>
-                <h2 class="raffle-winner-leaders-modal__title" id="raffleWinnerLeadersModalTitle">Все победители розыгрышей</h2>
-                <ol class="raffle-winner-leaders-modal__list" id="raffleWinnerLeadersModalList"></ol>
-              </div>
-            </div>
-
-          </div>
+          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html" data-html-fragment-view="raffles"></div>
 
           <!-- Научиться играть — хаб: видео-уроки -->
           <div class="view" data-view="learn-play-hub">
@@ -1775,82 +1554,82 @@
         <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
       </button>
     </nav>
-    <script defer src="./telegram-web-app.js?v=2.364"></script>
-    <script defer src="./updates-data.js?v=2.364"></script>
-    <script defer src="./poker-tasks-data.js?v=2.364"></script>
-    <script defer src="./app-auth.js?v=2.364"></script>
-    <script defer src="./app-network.js?v=2.364"></script>
-    <script defer src="./app-home-media.js?v=2.364"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=2.364"></script>
-    <script defer src="./app-rating-core.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-render-utils.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-contacts-render.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialogs.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-storage.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-prefetch.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-pickers.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-builders.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-outgoing-helpers.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-general-loader.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-general-sender.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-personal-loader.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-personal-sender.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reactions.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-edit-delete-ui.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-context-menu.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-polling.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-conversation-shell.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-tab-dialog-shell.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-open-shell.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-gate.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialogs-meta.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-contacts-loader.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-self-pins.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-friend-actions.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-unread.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-auth-guard.js?v=2.364"></script>
-    <script defer src="./app-profile.js?v=2.364"></script>
-    <script defer src="./app-pwa-auth.js?v=2.364"></script>
-    <script defer src="./app-push.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-streams.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-video-lessons.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="games" src="./app-games.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-video-lessons-modals.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-equilator.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="games" src="./app-club-tasks.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-hall-fame.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-rating.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-rating-week-tops.js?v=2.364"></script>
-    <script defer src="./app-shell-layout.js?v=2.364"></script>
-    <script defer src="./app-navigation-scroll.js?v=2.364"></script>
-    <script defer src="./app-html-fragments.js?v=2.364"></script>
-    <script defer src="./app-webview-keyboard.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js?v=2.364"></script>
-    <script defer src="./app-view-router.js?v=2.364"></script>
-    <script defer src="./app-api-tracking.js?v=2.364"></script>
-    <script defer src="./app-lazy-loader.js?v=2.364"></script>
-    <script defer src="./app.js?v=2.364"></script>
-    <script defer src="./app-section-views.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-visitors-admin.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-admin-reports.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-auth-debug.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-share-stats.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-tracking-links.js?v=2.364"></script>
-    <script defer src="./app-cashout.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="tournament" src="./app-tournament-day.js?v=2.364"></script>
-    <script defer src="./app-updates.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./winter-rating-data.js?v=2.364"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./peerjs.min.js?v=2.364"></script>
+    <script defer src="./telegram-web-app.js?v=2.365"></script>
+    <script defer src="./updates-data.js?v=2.365"></script>
+    <script defer src="./poker-tasks-data.js?v=2.365"></script>
+    <script defer src="./app-auth.js?v=2.365"></script>
+    <script defer src="./app-network.js?v=2.365"></script>
+    <script defer src="./app-home-media.js?v=2.365"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=2.365"></script>
+    <script defer src="./app-rating-core.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-render-utils.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-contacts-render.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialogs.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-storage.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-prefetch.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-pickers.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-builders.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-outgoing-helpers.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-general-loader.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-general-sender.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-personal-loader.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-personal-sender.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reactions.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-edit-delete-ui.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-context-menu.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-polling.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-conversation-shell.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-tab-dialog-shell.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-open-shell.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-gate.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialogs-meta.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-contacts-loader.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-self-pins.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-friend-actions.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-unread.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-auth-guard.js?v=2.365"></script>
+    <script defer src="./app-profile.js?v=2.365"></script>
+    <script defer src="./app-pwa-auth.js?v=2.365"></script>
+    <script defer src="./app-push.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-streams.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-video-lessons.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="games" src="./app-games.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-video-lessons-modals.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./app-equilator.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="games" src="./app-club-tasks.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-hall-fame.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-rating.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./app-rating-week-tops.js?v=2.365"></script>
+    <script defer src="./app-shell-layout.js?v=2.365"></script>
+    <script defer src="./app-navigation-scroll.js?v=2.365"></script>
+    <script defer src="./app-html-fragments.js?v=2.365"></script>
+    <script defer src="./app-webview-keyboard.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js?v=2.365"></script>
+    <script defer src="./app-view-router.js?v=2.365"></script>
+    <script defer src="./app-api-tracking.js?v=2.365"></script>
+    <script defer src="./app-lazy-loader.js?v=2.365"></script>
+    <script defer src="./app.js?v=2.365"></script>
+    <script defer src="./app-section-views.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-visitors-admin.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-admin-reports.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-auth-debug.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-share-stats.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin" src="./app-tracking-links.js?v=2.365"></script>
+    <script defer src="./app-cashout.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="tournament" src="./app-tournament-day.js?v=2.365"></script>
+    <script defer src="./app-updates.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating" src="./winter-rating-data.js?v=2.365"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="media" src="./peerjs.min.js?v=2.365"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

@@ -15,6 +15,7 @@ const files = {
   chatFragment: read("html-fragments/chat.html"),
   hallOfFameFragment: read("html-fragments/hall-of-fame.html"),
   videoLessonsFragment: read("html-fragments/video-lessons.html"),
+  rafflesFragment: read("html-fragments/raffles.html"),
   profileFragment: read("html-fragments/profile.html"),
   globalModalsFragment: read("html-fragments/global-modals.html"),
   app: read("app.js"),
@@ -782,6 +783,26 @@ add("Equilator HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "equilator.html"))
 );
 
+add("Raffles HTML is lazy-loaded from a fragment", () =>
+  hasAll("html", [
+    'data-view="raffles"',
+    'data-html-fragment="./html-fragments/raffles.html"',
+    'data-html-fragment-view="raffles"',
+  ]) &&
+  !has("html", 'id="rafflesAdminWrap"') &&
+  !has("html", 'id="raffleCreateForm"') &&
+  hasAll("rafflesFragment", [
+    'data-view="raffles"',
+    'data-html-fragment-view="raffles"',
+    'id="rafflesAdminWrap"',
+    'id="raffleCreateForm"',
+    'id="rafflesTabs"',
+    'id="raffleCurrent"',
+    'id="raffleWinnerLeadersModal"',
+  ]) &&
+  fs.existsSync(path.join(root, "html-fragments", "raffles.html"))
+);
+
 add("Winter rating HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="winter-rating"',
@@ -915,10 +936,13 @@ add("CSS manifest owns every split stylesheet", () => {
   const domainNames = Object.keys(domains);
   const manifestFiles = cssManifestDomainFiles();
   const rootCssFiles = localStyleFilesFromRoot().filter((file) => file !== "styles.css");
+  const importedFiles = localCssImportsFromStyles();
   return parsed.entrypoint === "styles.css" &&
     domainNames.length > 0 &&
     domainNames.every((name) => ownership[name] && ownership[name].owner && ownership[name].scope) &&
     rootCssFiles.every((file) => manifestFiles.includes(file)) &&
+    rootCssFiles.every((file) => importedFiles.includes(file)) &&
+    manifestFiles.every((file) => importedFiles.includes(file)) &&
     manifestFiles.every((file) => fs.existsSync(path.join(root, file)));
 });
 
@@ -949,7 +973,7 @@ add("Modern image variants exist for heavy visual assets", () => {
     fs.existsSync(path.join(root, "public", "assets", name + ".webp")) &&
     fs.existsSync(path.join(root, "public", "assets", name + ".avif"))
   ) &&
-    has("html", 'srcset="./assets/raffles-hero.avif" type="image/avif"') &&
+    has("rafflesFragment", 'srcset="./assets/raffles-hero.avif" type="image/avif"') &&
     has("videoLessonsFragment", 'srcset="./assets/video-lessons-coach-nikolay.avif" type="image/avif"') &&
     has("globalModalsFragment", 'srcset="./assets/gazette-frankl-vaaar-march8.avif" type="image/avif"');
 });
