@@ -62,7 +62,8 @@
       "app-cashout.js"
     ],
     "push": [
-      "app-push.js"
+      "app-push.js",
+      "app-pwa-open-handlers.js"
     ],
     "admin": [
       "visitors",
@@ -79,6 +80,7 @@
       "auth-debug": ["app-auth-debug.js"]
     },
     "home": [
+      "app-home-init.js",
       "app-home-media.js",
       "app-home-gazette-tasks.js",
       "app-club-tasks.js",
@@ -99,6 +101,7 @@
       "app-navigation-scroll.js",
       "app-html-fragments.js",
       "app-webview-keyboard.js",
+      "app-shared-helpers.js",
       "app-view-router.js",
       "app-network.js",
       "app-api-tracking.js",

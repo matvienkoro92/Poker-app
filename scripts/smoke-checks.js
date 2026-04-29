@@ -21,6 +21,9 @@ const files = {
   globalModalsFragment: read("html-fragments/global-modals.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
+  appSharedHelpers: read("app-shared-helpers.js"),
+  appHomeInit: read("app-home-init.js"),
+  appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
@@ -705,10 +708,13 @@ add("JS manifest maps core app domains", () =>
     '"auth-debug":',
     '"app-auth.js"',
     '"app-network.js"',
+    '"app-shared-helpers.js"',
+    '"app-home-init.js"',
     '"app-pwa-auth.js"',
     '"app-chat-lifecycle.js"',
     '"app-html-fragments.js"',
     '"app-webview-keyboard.js"',
+    '"app-pwa-open-handlers.js"',
     '"app-view-router.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
@@ -720,12 +726,15 @@ add("JS manifest preserves critical load order", () => {
   const order = indexScriptOrder();
   return appearsBefore(order, "app-auth.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-auth.js", "app-network.js") &&
+    appearsBefore(order, "app-network.js", "app-shared-helpers.js") &&
+    appearsBefore(order, "app-shared-helpers.js", "app-home-init.js") &&
     appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-webview-keyboard.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-html-fragments.js") &&
     appearsBefore(order, "app-html-fragments.js", "app-view-router.js") &&
     appearsBefore(order, "app-webview-keyboard.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-chat-lifecycle.js", "app-view-router.js") &&
+    appearsBefore(order, "app-pwa-open-handlers.js", "app-view-router.js") &&
     appearsBefore(order, "app-view-router.js", "app.js") &&
     appearsBefore(order, "app-network.js", "app-api-tracking.js") &&
     appearsBefore(order, "app-network.js", "app.js") &&
@@ -749,7 +758,38 @@ add("Network helpers stay isolated from the app monolith", () =>
   ]) &&
   !has("app", "function pokerFetchWithTimeout") &&
   !has("app", "function pokerFetchRetry") &&
-  !has("app", "var POKER_FETCH_TIMEOUT_MS")
+    !has("app", "var POKER_FETCH_TIMEOUT_MS")
+);
+
+add("App monolith delegates shared helpers, home init, and PWA install", () =>
+  hasAll("appSharedHelpers", [
+    "function pokerAutosizeTextarea",
+    "function pokerTryBootOverlayNetworkError",
+    "function pokerRememberTransportMemberIdFromEnvironment",
+  ]) &&
+  hasAll("appHomeInit", [
+    "initTheme",
+    "initRadioToggle",
+    "function updateRaffleBadge",
+    "pokerTasksStartBtn",
+  ]) &&
+  hasAll("appPwaOpenHandlers", [
+    "initPwaInstall",
+    "beforeinstallprompt",
+    "getAppBaseUrlForLinks",
+  ]) &&
+  hasAll("appPwaOpenHandlers", [
+    "poker-telegram-auth",
+    "__pendingOpenChatPersonalFromDeepLink",
+    "visibilitychange",
+    "__pokerRefreshChatUnreadForPwaBadge",
+  ]) &&
+  !has("app", "function pokerAutosizeTextarea") &&
+  !has("app", "function pokerTryBootOverlayNetworkError") &&
+  !has("app", "function updateRaffleBadge") &&
+  !has("app", "beforeinstallprompt") &&
+  !has("app", "poker-telegram-auth") &&
+  !has("app", "__pendingOpenChatPersonalFromDeepLink")
 );
 
 add("App monolith delegates chat lifecycle, webview keyboard, and view router", () =>
