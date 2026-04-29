@@ -98,6 +98,10 @@ add("PWA service worker is versioned", () =>
   has("client", "navigator.serviceWorker.register(swUrl")
 );
 
+add("PWA saved session restores before empty initData login gate", () =>
+  has("client", /if \(!initData\) \{\s*if \(attemptPwaSideAuthRestore\(hideBootOverlay\)\) return;/)
+);
+
 add("Chat shell has dialog, general and conversation views", () =>
   hasAll("html", [
     'id="chatDialogsView"',

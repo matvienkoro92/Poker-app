@@ -2843,6 +2843,7 @@ function getPokerResolvedTelegramUser() {
     }
 
     if (!initData) {
+      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
       window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
       updateHeaderGreeting();
       showUnauthorized();
@@ -3264,4 +3265,3 @@ function getPokerResolvedTelegramUser() {
   document.addEventListener("focusin", onFocusIn, true);
   document.addEventListener("focusout", onFocusOut, true);
 })();
-
