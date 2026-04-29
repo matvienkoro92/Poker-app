@@ -16,6 +16,7 @@ pnpm-lock.yaml
 logs
 *.log
 log.txt
+tmp/
 
 # Локальные резервные копии (папка на уровень выше проекта)
 ../poker-club-miniapp-backups/

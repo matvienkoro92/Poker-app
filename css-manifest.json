@@ -15,7 +15,7 @@
     },
     "tournament": {
       "owner": "tournament",
-      "scope": "tournament day cards and transitional home tournament overrides"
+      "scope": "tournament day cards and explicit home tournament overrides"
     },
     "chat": {
       "owner": "chat",
@@ -43,8 +43,13 @@
     }
   },
   "domains": {
-    "base": ["styles-base.css"],
-    "auth": ["styles-auth.css", "styles-pwa.css"],
+    "base": [
+      "styles-base.css"
+    ],
+    "auth": [
+      "styles-auth.css",
+      "styles-pwa.css"
+    ],
     "home": [
       "styles-home.css",
       "styles-home-shell.css",
@@ -56,7 +61,6 @@
     "tournament": [
       "styles-tournament.css",
       "styles-hall-tournament-day.css",
-      "styles-home-tournament.css",
       "styles-home-overrides.css"
     ],
     "chat": [
@@ -110,7 +114,77 @@
       "styles-profile-adjacent-tools.css",
       "styles-profile-modals-tail.css"
     ],
-    "admin": ["styles-admin.css"],
-    "layout": ["styles-layout.css"]
+    "admin": [
+      "styles-admin.css"
+    ],
+    "layout": [
+      "styles-layout.css"
+    ]
+  },
+  "views": {
+    "home": [
+      "base",
+      "auth",
+      "home",
+      "tournament",
+      "rating",
+      "layout"
+    ],
+    "chat": [
+      "base",
+      "chat",
+      "layout"
+    ],
+    "download": [
+      "base",
+      "rating",
+      "layout"
+    ],
+    "cashout": [
+      "base",
+      "profile",
+      "layout"
+    ],
+    "profile": [
+      "base",
+      "profile",
+      "layout"
+    ],
+    "raffles": [
+      "base",
+      "rating",
+      "layout"
+    ],
+    "video-lessons": [
+      "base",
+      "rating",
+      "layout"
+    ],
+    "hall-of-fame": [
+      "base",
+      "hall",
+      "tournament",
+      "layout"
+    ],
+    "spring-rating": [
+      "base",
+      "rating",
+      "layout"
+    ],
+    "winter-rating": [
+      "base",
+      "rating",
+      "layout"
+    ],
+    "schedule": [
+      "base",
+      "tournament",
+      "layout"
+    ],
+    "admin": [
+      "base",
+      "admin",
+      "layout"
+    ]
   }
 }

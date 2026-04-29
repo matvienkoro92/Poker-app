@@ -923,12 +923,14 @@ add("CSS domain entrypoints cover auth and tournament styles", () =>
   localCssImportsFromStyles().includes("styles-pwa.css") &&
   localCssImportsFromStyles().includes("styles-tournament.css") &&
   localCssImportsFromStyles().includes("styles-hall-tournament-day.css") &&
-  localCssImportsFromStyles().includes("styles-home-tournament.css") &&
-  localCssImportsFromStyles().includes("styles-home-overrides.css")
+  localCssImportsFromStyles().includes("styles-home-overrides.css") &&
+  !localCssImportsFromStyles().includes("styles-home-tournament.css")
 );
 
-add("CSS manifest maps split home and tournament domains", () =>
-  hasAll("cssManifest", [
+add("CSS manifest maps split home and tournament domains", () => {
+  const parsed = cssManifestData();
+  const views = parsed && parsed.views && typeof parsed.views === "object" ? parsed.views : {};
+  return hasAll("cssManifest", [
     '"entrypoint": "styles.css"',
     '"auth":',
     '"home":',
@@ -937,7 +939,7 @@ add("CSS manifest maps split home and tournament domains", () =>
     '"styles-home-sections.css"',
     '"styles-home-modals.css"',
     '"styles-home-planner.css"',
-    '"styles-home-tournament.css"',
+    '"styles-home-overrides.css"',
     '"styles-chat-after-shell.css"',
     '"styles-chat-after-modals.css"',
     '"styles-chat-after-responsive.css"',
@@ -956,8 +958,15 @@ add("CSS manifest maps split home and tournament domains", () =>
     '"styles-rating-learning.css"',
     '"styles-rating-games.css"',
     '"styles-rating-learning-games-responsive.css"',
-  ])
-);
+  ]) &&
+    Array.isArray(views.home) &&
+    Array.isArray(views.chat) &&
+    Array.isArray(views["spring-rating"]) &&
+    views.home.includes("home") &&
+    views.home.includes("tournament") &&
+    views.chat.includes("chat") &&
+    views["spring-rating"].includes("rating");
+});
 
 add("Admin auth debug panel is wired", () =>
   hasAll("globalModalsFragment", [

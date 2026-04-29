@@ -1,2 +1,0 @@
-/* Home tournament CSS entrypoint. Loaded late to preserve legacy override priority. */
-@import url("./styles-home-overrides.css");
