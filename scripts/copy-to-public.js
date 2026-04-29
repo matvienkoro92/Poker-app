@@ -35,6 +35,7 @@ function localScriptFilesFromIndex() {
 const baseFiles = [
   'index.html',
   'styles.css',
+  'css-manifest.json',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',

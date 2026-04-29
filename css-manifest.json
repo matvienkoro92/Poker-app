@@ -1,0 +1,56 @@
+{
+  "entrypoint": "styles.css",
+  "domains": {
+    "base": ["styles-base.css"],
+    "auth": ["styles-auth.css", "styles-pwa.css"],
+    "home": [
+      "styles-home.css",
+      "styles-home-shell.css",
+      "styles-home-sections.css",
+      "styles-home-modals.css",
+      "styles-home-planner.css",
+      "styles-home-rating-promo.css"
+    ],
+    "tournament": [
+      "styles-tournament.css",
+      "styles-hall-tournament-day.css",
+      "styles-home-tournament.css",
+      "styles-home-overrides.css"
+    ],
+    "chat": [
+      "styles-chat.css",
+      "styles-chat-prelude.css",
+      "styles-chat-messages.css",
+      "styles-chat-composer-media.css",
+      "styles-chat-dialogs-groups.css",
+      "styles-chat-threads-contacts.css",
+      "styles-chat-after.css",
+      "styles-chat-overlays.css"
+    ],
+    "rating": [
+      "styles-rating.css",
+      "styles-rating-learning-games.css",
+      "styles-rating-raffles.css",
+      "styles-rating-home-download.css",
+      "styles-rating-tables-modals.css",
+      "styles-rating-chat-modals.css"
+    ],
+    "hall": [
+      "styles-hall.css",
+      "styles-hall-prelude.css",
+      "styles-hall-rating-lightbox.css",
+      "styles-hall-main.css",
+      "styles-hall-footer.css"
+    ],
+    "profile": [
+      "styles-profile.css",
+      "styles-profile-core-avatar.css",
+      "styles-profile-poker21.css",
+      "styles-profile-status-social.css",
+      "styles-profile-adjacent-tools.css",
+      "styles-profile-modals-tail.css"
+    ],
+    "admin": ["styles-admin.css"],
+    "layout": ["styles-layout.css"]
+  }
+}

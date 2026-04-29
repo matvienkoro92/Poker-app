@@ -22,6 +22,7 @@ const files = {
   authEmailHandler: read("lib/api-handlers/auth-email.js"),
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
   pwaSessionLib: read("lib/poker-pwa-session.js"),
+  cssManifest: read("css-manifest.json"),
 };
 
 const checks = [];
@@ -360,7 +361,23 @@ add("CSS domain entrypoints cover auth and tournament styles", () =>
   localCssImportsFromStyles().includes("styles-auth.css") &&
   localCssImportsFromStyles().includes("styles-pwa.css") &&
   localCssImportsFromStyles().includes("styles-tournament.css") &&
-  localCssImportsFromStyles().includes("styles-hall-tournament-day.css")
+  localCssImportsFromStyles().includes("styles-hall-tournament-day.css") &&
+  localCssImportsFromStyles().includes("styles-home-tournament.css") &&
+  localCssImportsFromStyles().includes("styles-home-overrides.css")
+);
+
+add("CSS manifest maps split home and tournament domains", () =>
+  hasAll("cssManifest", [
+    '"entrypoint": "styles.css"',
+    '"auth":',
+    '"home":',
+    '"tournament":',
+    '"styles-home-shell.css"',
+    '"styles-home-sections.css"',
+    '"styles-home-modals.css"',
+    '"styles-home-planner.css"',
+    '"styles-home-tournament.css"',
+  ])
 );
 
 const failures = [];

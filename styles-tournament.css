@@ -1,2 +1,3 @@
-/* Tournament CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
+/* Tournament CSS entrypoint. Keep imports in this order: the legacy cascade depends on it.
+ * Home tournament overrides are loaded late through styles-home-tournament.css. */
 @import url("./styles-hall-tournament-day.css");

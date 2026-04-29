@@ -1,0 +1,1003 @@
+/* Home sections CSS: instruction surfaces, responsive app view states and welcome/gazette entry points.
+ * Extracted from styles-home.css; keep import order in styles-home.css stable. */
+
+.site-home-instruction-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.site-home-instruction-btn__icon {
+  font-size: 19px;
+  line-height: 1;
+  color: #f97316;
+}
+.site-home-instruction-btn__label {
+  display: none;
+}
+[data-theme="light"] .site-home-instruction-btn__icon {
+  color: #ea580c;
+}
+.site-home-instruction-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #2a2118;
+}
+.site-home-instruction-modal__tabs {
+  margin-bottom: 14px;
+}
+.site-home-instruction-modal__panels {
+  display: block;
+}
+.site-home-instruction-modal__panel[hidden] {
+  display: none !important;
+}
+.site-home-instruction-modal__body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #2a2118;
+}
+.site-home-instruction-modal__image {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 33, 24, 0.14);
+  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.12);
+}
+.site-home-instruction-modal .club-charter-modal__paper,
+.site-home-instruction-modal .club-charter-modal__kicker,
+.site-home-instruction-modal .club-charter-modal__title {
+  color: #2a2118;
+}
+html.app--telegram-miniapp,
+html.poker-telegram-miniapp {
+  --tg-modal-top-safe: calc(env(safe-area-inset-top, 0px) + 56px);
+}
+html.app--telegram-miniapp :is(
+  .club-charter-modal,
+  .gazette-modal,
+  .roman-task-planner-modal,
+  .video-lessons__coach-modal,
+  .winter-rating-player-modal,
+  .spring-rating-info-modal,
+  .daily-prediction-modal,
+  .autumn-rating-2025-modal,
+  .summer-rating-2024-modal,
+  .summer-rating-2025-modal,
+  .spring-rating-2024-modal,
+  .chat-dialog-preview-modal,
+  .chat-user-modal,
+  .chat-templates-modal,
+  .winter-rating-week-top-modal,
+  .winter-rating-date-modal,
+  .visitors-admin-modal,
+  .share-stats-admin-modal,
+  .respect-voters-modal,
+  .friends-list-modal,
+  .chat-club-access-modal,
+  .image-lightbox,
+  .pdf-viewer
+),
+html.poker-telegram-miniapp :is(
+  .club-charter-modal,
+  .gazette-modal,
+  .roman-task-planner-modal,
+  .video-lessons__coach-modal,
+  .winter-rating-player-modal,
+  .spring-rating-info-modal,
+  .daily-prediction-modal,
+  .autumn-rating-2025-modal,
+  .summer-rating-2024-modal,
+  .summer-rating-2025-modal,
+  .spring-rating-2024-modal,
+  .chat-dialog-preview-modal,
+  .chat-user-modal,
+  .chat-templates-modal,
+  .winter-rating-week-top-modal,
+  .winter-rating-date-modal,
+  .visitors-admin-modal,
+  .share-stats-admin-modal,
+  .respect-voters-modal,
+  .friends-list-modal,
+  .chat-club-access-modal,
+  .image-lightbox,
+  .pdf-viewer
+) {
+  padding-top: var(--tg-modal-top-safe) !important;
+  box-sizing: border-box;
+}
+html.app--telegram-miniapp :is(
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .pdf-viewer__close
+),
+html.poker-telegram-miniapp :is(
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .pdf-viewer__close
+) {
+  top: calc(var(--tg-modal-top-safe) + 8px) !important;
+  right: max(12px, env(safe-area-inset-right, 0px)) !important;
+}
+html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet,
+html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__sheet {
+  width: min(920px, calc(100vw - 16px));
+  max-height: calc(100vh - 108px);
+  margin-top: 40px;
+}
+html.app--telegram-miniapp .site-home-instruction-modal .club-charter-modal__close,
+html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__close {
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+}
+html.site-home-header-mode #vpnProxyOpenBtn,
+html.site-home-header-mode #radioToggle,
+html.site-home-header-mode #themeToggle,
+html.site-home-header-mode #pwaInstallBtn {
+  display: none !important;
+}
+html.site-home-header-mode #siteHomeInstructionBtn {
+  display: flex !important;
+}
+html.site-home-header-mode #siteHomeAuthBtn {
+  display: inline-flex !important;
+}
+html.app--telegram-miniapp body[data-view="home"] #pwaInstallBtn,
+html.app--telegram-miniapp:has(body[data-view="home"]) #pwaInstallBtn,
+html.poker-telegram-miniapp body[data-view="home"] #pwaInstallBtn,
+html.poker-telegram-miniapp:has(body[data-view="home"]) #pwaInstallBtn {
+  display: none !important;
+}
+html.app--telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn,
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn,
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn,
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn {
+  display: flex !important;
+}
+html.app--telegram-miniapp body[data-view="home"] #siteHomeAuthBtn,
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn,
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeAuthBtn,
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn {
+  display: inline-flex !important;
+}
+#siteHomeAuthBtn[hidden] {
+  display: none !important;
+}
+html.site-home-header-mode #siteHomeInstructionBtn[hidden],
+html.site-home-header-mode #siteHomeAuthBtn[hidden],
+html.app--telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn[hidden],
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn[hidden],
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeInstructionBtn[hidden],
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeInstructionBtn[hidden],
+html.app--telegram-miniapp body[data-view="home"] #siteHomeAuthBtn[hidden],
+html.app--telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn[hidden],
+html.poker-telegram-miniapp body[data-view="home"] #siteHomeAuthBtn[hidden],
+html.poker-telegram-miniapp:has(body[data-view="home"]) #siteHomeAuthBtn[hidden] {
+  display: none !important;
+}
+html.site-home-header-mode .header-greeting-wrap {
+  max-width: 170px;
+}
+html.site-home-header-mode .header-greeting {
+  max-width: 170px;
+}
+html.site-home-header-mode .header-greeting__arrow {
+  display: none;
+}
+@media (max-width: 480px) {
+  .pwa-install-btn__label { display: none; }
+  .pwa-install-btn { padding: 0; min-width: 40px; justify-content: center; }
+  .site-home-instruction-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+  html.site-home-header-mode .header-greeting-wrap {
+    max-width: 138px;
+  }
+  html.site-home-header-mode .header-greeting {
+    max-width: 138px;
+    font-size: 12px;
+  }
+}
+
+.radio-toggle {
+  width: auto;
+  min-width: 40px;
+  padding: 0 8px;
+  gap: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+.radio-toggle__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+.radio-toggle .radio-toggle__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.radio-toggle__listen {
+  display: none;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  white-space: nowrap;
+}
+.radio-toggle.radio-toggle--chill .radio-toggle__listen,
+.radio-toggle.radio-toggle--lounge .radio-toggle__listen,
+.radio-toggle.radio-toggle--90s .radio-toggle__listen,
+.radio-toggle.radio-toggle--radio7 .radio-toggle__listen { display: block; }
+.radio-toggle__listen #headerRadioListenersCount {
+  font-weight: 600;
+  color: var(--text);
+}
+.radio-toggle .radio-toggle__icon {
+  flex-shrink: 0;
+}
+.radio-toggle .radio-toggle__icon--off { display: inline-flex; }
+.radio-toggle .radio-toggle__icon--chill,
+.radio-toggle .radio-toggle__icon--lounge,
+.radio-toggle .radio-toggle__icon--90s,
+.radio-toggle .radio-toggle__icon--radio7,
+.radio-toggle .radio-toggle__icon--winwave { display: none; }
+.radio-toggle.radio-toggle--chill .radio-toggle__icon--off { display: none; }
+.radio-toggle.radio-toggle--chill .radio-toggle__icon--chill { display: inline-flex; }
+.radio-toggle.radio-toggle--lounge .radio-toggle__icon--off { display: none; }
+.radio-toggle.radio-toggle--lounge .radio-toggle__icon--lounge { display: inline-flex; }
+.radio-toggle.radio-toggle--90s .radio-toggle__icon--off { display: none; }
+.radio-toggle.radio-toggle--90s .radio-toggle__icon--90s { display: inline-flex; }
+.radio-toggle.radio-toggle--radio7 .radio-toggle__icon--off { display: none; }
+.radio-toggle.radio-toggle--radio7 .radio-toggle__icon--radio7 { display: inline-flex; }
+.radio-toggle.radio-toggle--winwave .radio-toggle__icon--off { display: none; }
+.radio-toggle.radio-toggle--winwave .radio-toggle__icon--winwave { display: inline-flex; }
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.logo--link {
+  color: inherit;
+  text-decoration: none;
+}
+.logo--link:hover {
+  opacity: 0.9;
+}
+button.logo.logo--welcome {
+  font: inherit;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  max-width: 100%;
+}
+button.logo.logo--welcome:hover {
+  opacity: 0.9;
+}
+button.logo.logo--welcome:focus-visible {
+  outline: 2px solid var(--accent, #38bdf8);
+  outline-offset: 2px;
+}
+.club-welcome-modal {
+  z-index: 1001;
+}
+.club-welcome-modal__body p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.club-welcome-modal__body p:last-child {
+  margin-bottom: 0;
+}
+
+.logo__image {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  object-fit: cover;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(248, 250, 252, 0.1);
+}
+
+.logo__mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 30% 30%, #f97316, #ea580c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fffbeb;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  box-shadow:
+    0 12px 25px rgba(249, 115, 22, 0.4),
+    0 0 0 1px rgba(248, 250, 252, 0.08);
+}
+
+.logo__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.logo__title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: clamp(9px, 2.85vw, 15px);
+}
+
+.logo__title-line {
+  display: block;
+  max-width: 100%;
+}
+
+/* Одна строка без переноса посередине «Два» / «туза» */
+.logo__title-line--name {
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logo__subtitle {
+  font-size: clamp(8px, 2.2vw, 11px);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (max-width: 380px) {
+  .card__header {
+    gap: 6px;
+  }
+  .logo {
+    gap: 8px;
+  }
+  .logo__image {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.card__content {
+  pointer-events: auto;
+  touch-action: manipulation;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* Главная: карточка по высоте по контенту, скролл всей страницы как в остальных разделах */
+.card:has(.view--active[data-view="home"]) {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+}
+/* overflow-y задаётся блоком html:has(home) / app-view-home-html-scroll (как «Скачать») */
+.card:has(.view--active[data-view="home"]) .card__content {
+  min-width: 0;
+}
+.card:has(.view--active[data-view="home"]) .card__content > .view {
+  min-width: 0;
+}
+/* Длинные списки (хаб, задачи): скролл на body; видеоуроки — внутренний scrollport (app-view-video-lessons-html-scroll) */
+.card:has(.view--active[data-view="learn-play-hub"]) .card__content,
+.card:has(.view--active[data-view="poker-tasks"]) .card__content {
+  min-width: 0;
+  overflow: visible;
+}
+.card:has(.view--active[data-view="video-lessons"]) .card__content {
+  min-width: 0;
+}
+/* Зал славы: только min-width — overflow-y в блоке html.app-view-hall-html-scroll */
+.card:has(.view--active[data-view="hall-of-fame"]) .card__content {
+  min-width: 0;
+}
+/* Скачать, депозит, рейтинг весны, розыгрыши: только min-width — overflow задаётся html:has(...) / конец файла */
+.card:has(.view--active[data-view="download"]) .card__content,
+.card:has(.view--active[data-view="cashout"]) .card__content,
+.card:has(.view--active[data-view="spring-rating"]) .card__content,
+.card:has(.view--active[data-view="raffles"]) .card__content {
+  min-width: 0;
+}
+/* fallback для главной без :has(); при внутреннем скролле класс app-view-home-html-scroll — не трогаем overflow */
+html.app-view-home:not(.app-view-home-html-scroll) .card .card__content {
+  min-width: 0;
+  overflow: visible;
+}
+.card__content:has(.view--active[data-view="chat"]) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+  gap: 0;
+  padding-top: 0;
+}
+
+.view {
+  display: none;
+}
+
+.view--active {
+  display: block;
+}
+
+/* Чат: один textarea переносится между общим и личным — без второго поля в DOM для iOS */
+.chat-composer-mount {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+}
+.chat-composer-mount .chat-input--textarea {
+  width: 100%;
+}
+.chat-composer-pool {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.view--active[data-view="home"] {
+  padding-bottom: 28px;
+}
+/* Низкий ландшафт: фиксированный таббар перекрывает последний ряд сетки на главной */
+@media (orientation: landscape) and (max-height: 520px) {
+  .view--active[data-view="home"] {
+    padding-bottom: max(44px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* Депозит / кэшаут: без резинового оверскролла у корня (у html по умолчанию contain) */
+html:has(body[data-view="cashout"]) {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  min-height: 0 !important;
+}
+body[data-view="cashout"] {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  /* У body по умолчанию и у .app-view-browser-local body — min-height: 100dvh; при коротком депозите
+     внизу остаётся пустой «хвост» на весь экран */
+  min-height: 0 !important;
+}
+.app:has(.view--active[data-view="cashout"]) {
+  min-height: 0 !important;
+}
+.view--active[data-view="cashout"] {
+  padding-bottom: 30px;
+}
+
+.view--active[data-view="chat"] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 0;
+}
+/* Лента и список диалогов: не оставляем прозрачными — иначе виден .bg-blur с backdrop-filter под #app,
+   и при фокусе поля (chat-keyboard-open, сдвиг viewport / z-index) композитинг меняется и фон «светлеет». */
+.view--active[data-view="chat"] .chat-messages {
+  border: none;
+  background-color: var(--overscroll-canvas);
+  background-image: var(--bg-blur-gradient);
+  /* Догрузка img выше видимой области — браузер держит якорь, меньше сдвига при lazy (snap к низу только если уже у низа, см. app.js). */
+  overflow-anchor: auto;
+}
+.view--active[data-view="chat"] .chat-list-view {
+  background-color: var(--overscroll-canvas);
+  background-image: var(--bg-blur-gradient);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-messages,
+[data-theme="light"] .view--active[data-view="chat"] .chat-list-view {
+  background-color: var(--overscroll-canvas);
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
+}
+/* Полоса ввода: тот же градиент, что у ленты — без белой подложки */
+[data-theme="light"] .chat-general-view .chat-input-area,
+[data-theme="light"] .chat-container .chat-input-area {
+  background-color: transparent;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
+}
+.view--active[data-view="chat"] .chat-input-wrap,
+.view--active[data-view="chat"] .chat-input-area,
+.view--active[data-view="chat"] .chat-container {
+  border: none;
+}
+.view--active[data-view="chat"] .chat-input-area {
+  padding-top: var(--chat-composer-edge-gap, 2px);
+  padding-left: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)));
+  padding-right: max(var(--chat-side-pad, 3px), calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)));
+}
+/* Лента чата: таббар скрыт — 65px не нужен (иначе пустая полоса над футером TG / домашней зоной).
+   Без :has(): надёжнее в WKWebView / Telegram iOS. */
+.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-input-area {
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + var(--chat-composer-edge-gap, 2px)));
+}
+/* Клавиатура открыта: лента чуть ниже (+10px к верхнему отступу), композер поднимается сильнее через JS */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages {
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
+}
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 22px);
+}
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages {
+  padding-top: calc(var(--chat-general-floating-toolbar-h) + 12px);
+}
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages > .chat-msg:last-child,
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages > .chat-msg:last-child {
+  margin-bottom: max(88px, calc(56px + env(safe-area-inset-bottom, 0px))) !important;
+}
+/* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
+   чтобы не было дёрганий и белых вспышек. */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) {
+  overflow: hidden !important;
+}
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body {
+  overflow: hidden !important;
+}
+/* Клавиатура в открытом треде: таббар перекрывает поле ввода в PWA. В списке диалогов таббар остаётся доступен. */
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden)) .bottom-nav,
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden)) .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  /* Как в треде: без transition — иначе на iPhone TG/WK после закрытия клавиатуры таббар и viewport «ломают» низ (полоса под панелью). */
+  transition: none !important;
+}
+/* На случай если transform таббара не сработал в WebView — весь #app выше нижнего меню */
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"]) #app.app {
+  z-index: 1002;
+}
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .card__header {
+  display: none !important;
+}
+/* Внутри общего чата или личного чата скрываем верхнее меню и нижний таббар. */
+.app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .card__header,
+.app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .card__header {
+  display: none !important;
+}
+#app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) ~ .bottom-nav,
+#app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) ~ .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  /* Без анимации: иначе ~200ms таббар «уезжает», вёрстка чата пересчитывается и лента визуально прыгает вверх—вниз при первом входе в тред. */
+  transition: none !important;
+}
+/* Личка: верхний inset у #app — под шапку диалога у кромки экрана */
+.app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) {
+  padding-bottom: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+/* Главный чат: верхний safe-area внутри .chat-general-header — шапка от самого верха карточки */
+.app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) {
+  padding-bottom: 0;
+  padding-top: 0 !important;
+}
+html.app--tg-content-inset
+  .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) {
+  padding-top: 0 !important;
+}
+/* Только чат: иначе при фокусе в полях других экранов срывается запас под таббар и контент «прыгает».
+ * С клавиатурой safe-area снизу дублирует «воздух» над системной панелью — достаточно 0. */
+html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
+  padding-bottom: 0;
+}
+/* Профиль: таббар как в чате — не перекрывает поля при клавиатуре */
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: none !important;
+}
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) .app {
+  padding-bottom: 0;
+}
+body.chat-keyboard-open:has(.view--active[data-view="profile"]) #app.app {
+  z-index: 1002;
+}
+/* Профиль: запас снизу у scrollport, чтобы имя / Poker21 прокручивались над клавиатурой */
+html.chat-keyboard-open body[data-view="profile"] .card .card__content {
+  padding-bottom: calc(
+    var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + env(safe-area-inset-bottom, 0px) + 10px
+  );
+  box-sizing: border-box;
+}
+/* Список чатов: поиск вверху — нижний отступ по inset, иначе поле остаётся под клавиатурой */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-dialogs-view .chat-dialogs-list {
+  padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
+  box-sizing: border-box;
+}
+/* Контакты: строка поиска / фильтр — запас снизу у списка, иначе последние строки под клавиатурой */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-contacts {
+  padding-bottom: calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + 14px);
+  box-sizing: border-box;
+}
+/* Подъём композера по --chat-vv-inset отключён — позиция при клавиатуре переделывается в JS. */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) .chat-general-view .chat-input-area,
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) .chat-container .chat-input-area {
+  --chat-input-lift: 0px;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+}
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  --chat-input-lift: 0px;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+}
+/* После закрытия клавиатуры WKWebView иногда оставляет композитный сдвиг — явно к нулю (!important ломает залипший слой) */
+body:not(.chat-keyboard-open) .chat-general-view .chat-input-area,
+body:not(.chat-keyboard-open) .chat-container .chat-input-area {
+  transform: translate3d(0, 0, 0) !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+}
+/* Клавиатура открыта: тот же фон, что у поля — иначе вокруг textarea остаётся «свой» цвет, а отступы полосы светлеют.
+ * Не тянуть env(safe-area-inset-bottom) сюда: при открытой клавиатуре iOS часто всё равно отдаёт ~34px «домой».
+ * padding-bottom: 0 при открытой клавиатуре — без лишнего safe-area под полем. */
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .chat-general-view .chat-input-area,
+html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open .chat-container .chat-input-area {
+  padding-bottom: var(--chat-composer-edge-gap, 2px);
+  box-shadow: none;
+  background-color: var(--chat-input-field-bg);
+  background-image: none;
+}
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:not(.chat-input-area--vv-dock),
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:not(.chat-input-area--vv-dock) {
+  position: fixed !important;
+  left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
+  right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
+  bottom: max(calc(env(safe-area-inset-bottom, 0px) + 10px + var(--chat-composer-edge-gap, 2px)), calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  width: auto !important;
+  max-width: 100% !important;
+  z-index: 120 !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 4px !important;
+}
+html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-input-area {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  inset: auto !important;
+  transform: none !important;
+  margin-bottom: 0 !important;
+  --chat-input-lift: 0px !important;
+}
+/* Светлая тема: при открытой клавиатуре не заливать полосу цветом поля ввода — как у ленты */
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-general-view .chat-input-area,
+html[data-theme="light"].chat-keyboard-open body.chat-keyboard-open .chat-container .chat-input-area {
+  background-color: transparent;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95));
+}
+/* JS: position:fixed + bottom — отключаем translate/margin из --chat-vv-inset, иначе двойной подъём и полоса под панелью iOS. */
+html.chat-keyboard-open .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+html.chat-keyboard-open .chat-container .chat-input-area.chat-input-area--vv-dock {
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+  --chat-input-lift: 0px !important;
+}
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock,
+html.poker-ios-pwa body[data-view="chat"] .chat-general-view .chat-input-area.chat-input-area--vv-dock,
+html.poker-ios-pwa body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area.chat-input-area--vv-dock {
+  transform: none !important;
+  margin-bottom: 0 !important;
+  will-change: auto;
+  padding-bottom: 4px !important;
+}
+.chat-switcher-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+.chat-switcher-row--above-input {
+  margin-top: 0;
+  margin-bottom: 4px;
+  padding: 4px 0;
+}
+.chat-switcher-row--above-input.chat-switcher-wrap {
+  position: relative;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: 0;
+}
+.chat-switcher-row .chat-switcher-wrap {
+  max-width: 200px;
+  flex: 0 1 auto;
+}
+.view--active[data-view="chat"] .chat-switcher-row--above-input .chat-switcher-dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+.view--active[data-view="chat"] .chat-switcher-row:not(.chat-switcher-row--above-input) .chat-switcher-dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.title {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.welcome-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 0;
+  min-width: 0;
+}
+
+.welcome-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome-title-row .title--welcome {
+  margin: 0;
+}
+.welcome-home-title-shell {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: inherit;
+  border: none;
+  background: none;
+}
+button.welcome-home-title-btn.title {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  max-width: 100%;
+}
+button.welcome-home-title-btn.title:focus-visible {
+  outline: 2px solid var(--accent, #38bdf8);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+button.welcome-home-title-btn.title:hover {
+  opacity: 0.92;
+}
+
+.welcome-title-row__actions-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.welcome-title-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.welcome-planner-icon--hidden {
+  display: none !important;
+}
+.welcome-planner-icon__emoji {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.welcome-date {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.welcome-home-icon-tile {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 2px solid rgba(186, 128, 68, 0.5);
+  background:
+    linear-gradient(180deg, rgba(102, 66, 31, 0.28), rgba(15, 23, 42, 0.72)),
+    rgba(15, 23, 42, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 214, 0.08),
+    0 4px 14px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(120, 74, 28, 0.14);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  color: #d9a86f;
+}
+
+.welcome-home-icon-tile:hover {
+  border-color: rgba(219, 156, 92, 0.72);
+  background:
+    linear-gradient(180deg, rgba(132, 84, 39, 0.34), rgba(15, 23, 42, 0.82)),
+    rgba(15, 23, 42, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 214, 0.12),
+    0 6px 18px rgba(0, 0, 0, 0.25),
+    0 0 18px rgba(176, 116, 52, 0.16);
+}
+
+[data-theme="light"] .welcome-home-icon-tile {
+  border-color: rgba(100, 116, 139, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 14px rgba(15, 23, 42, 0.08);
+  color: #ea580c;
+}
+
+[data-theme="light"] .welcome-home-icon-tile:hover {
+  border-color: rgba(249, 115, 22, 0.45);
+  background: rgba(255, 247, 237, 0.95);
+}
+
+.welcome-charter-icon__emoji {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.welcome-gazette-icon {
+  opacity: 1;
+}
+
+.welcome-gazette-icon__badge-wrap {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+}
+
+.welcome-gazette-icon__unread {
+  display: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dc2626;
+  box-shadow: 0 0 0 2px var(--card-bg, rgba(255, 255, 255, 0.95));
+}
+
+.welcome-gazette-icon__unread--visible {
+  display: block;
+}
+
+.welcome-gazette-icon__emoji {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+}
