@@ -236,6 +236,11 @@ add("Chat API supports fast/diff/poll responses", () =>
   ])
 );
 
+add("Chat sender label hides Telegram login when a name exists", () =>
+  has("chatHandler", "if (nameParts) return nameParts;") &&
+  !has("chatHandler", 'return nameParts + " · " + nickDisplay')
+);
+
 add("Player card exposes Poker21, status, stats and actions", () =>
   hasAll("html", [
     'id="chatUserModal"',
