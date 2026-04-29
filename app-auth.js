@@ -250,6 +250,7 @@ var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
 var POKER_PWA_GUEST_KEY = "poker_pwa_guest";
 var POKER_PWA_IDB_NAME = "poker_pwa_auth";
 var POKER_PWA_IDB_STORE = "sessions";
+var POKER_PWA_AUTH_COOKIE_MAX_AGE_SEC = 15552000;
 
 function pokerReadAuthCookie(name) {
   try {
@@ -269,7 +270,7 @@ function pokerWriteAuthCookie(name, value) {
       encodeURIComponent(name) +
       "=" +
       encodeURIComponent(String(value || "")) +
-      "; Max-Age=2592000; Path=/; SameSite=Lax" +
+      "; Max-Age=" + POKER_PWA_AUTH_COOKIE_MAX_AGE_SEC + "; Path=/; SameSite=Lax" +
       secure;
   } catch (e) {}
 }

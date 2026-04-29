@@ -2837,6 +2837,16 @@ function getPokerResolvedTelegramUser() {
     var _authRestore = { status: "verified", user: u, error: null };
     if (record.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
     window.__pokerTelegramAuth = _authRestore;
+    try {
+      if (options.vk) {
+        if (typeof pokerSavePwaVkSession === "function") pokerSavePwaVkSession(record.token, record.user);
+      } else if (typeof pokerSavePwaTgSession === "function") {
+        pokerSavePwaTgSession(record.token, record.user, {
+          authMethod: record.authMethod || "telegram",
+          gazettePlannerAccess: record.gazettePlannerAccess === true,
+        });
+      }
+    } catch (eRehydratePwaAuth) {}
     pokerMaybeRememberMemberIdFromUser(u);
     pokerSetAuthMethod(record.authMethod || (options.vk ? "vk" : "telegram"));
     updateHeaderGreeting();

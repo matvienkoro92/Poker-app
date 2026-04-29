@@ -21,6 +21,7 @@ const files = {
   authPwaCodeHandler: read("lib/api-handlers/auth-pwa-code.js"),
   authEmailHandler: read("lib/api-handlers/auth-email.js"),
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
+  pwaSessionLib: read("lib/poker-pwa-session.js"),
 };
 
 const checks = [];
@@ -142,6 +143,20 @@ add("PWA session has IndexedDB fallback before login gate", () =>
     "function pokerReadPwaSessionRecordAsync(key)",
     "function attemptPwaSideAuthRestoreAsync(hideBootOverlay)",
     "attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored)",
+    "pokerSavePwaTgSession(record.token, record.user",
+  ])
+);
+
+add("PWA session persistence rehydrates sync stores and lasts 180 days", () =>
+  hasAll("client", [
+    "POKER_PWA_AUTH_COOKIE_MAX_AGE_SEC = 15552000",
+    "Max-Age=\" + POKER_PWA_AUTH_COOKIE_MAX_AGE_SEC",
+    "pokerSavePwaTgSession(record.token, record.user",
+    "pokerSavePwaVkSession(record.token, record.user)",
+  ]) &&
+  hasAll("pwaSessionLib", [
+    "PWA_SESSION_TTL_SEC = 60 * 60 * 24 * 180",
+    "ttlSec || PWA_SESSION_TTL_SEC",
   ])
 );
 
