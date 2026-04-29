@@ -14,6 +14,7 @@
     "smoke:visual": "node scripts/smoke-visual.js",
     "check:syntax": "node scripts/check-js-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",
+    "test:contracts": "node scripts/contract-tests.js",
     "redis:audit": "node scripts/redis-schema-audit.js",
     "redis:cleanup": "node scripts/redis-cleanup-backfill.js",
     "redis:cleanup:apply": "node scripts/redis-cleanup-backfill.js --apply",
