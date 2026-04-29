@@ -1,6 +1,6 @@
 /* Hall CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-hall-prelude.css");
 @import url("./styles-hall-rating-lightbox.css");
-@import url("./styles-hall-tournament-day.css");
+@import url("./styles-tournament.css");
 @import url("./styles-hall-main.css");
 @import url("./styles-hall-footer.css");

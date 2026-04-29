@@ -1,0 +1,2 @@
+/* Tournament CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
+@import url("./styles-hall-tournament-day.css");

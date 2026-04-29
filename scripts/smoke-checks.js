@@ -62,17 +62,29 @@ function localRootScriptFilesFromIndex() {
 }
 
 function localCssImportsFromStyles() {
-  const css = read("styles.css");
   const out = [];
-  const re = /@import\s+url\(["']?([^"')]+)["']?\)/gi;
-  let match;
-  while ((match = re.exec(css))) {
-    const file = stripAssetUrl(match[1]);
-    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
-    if (file.includes("/") || !file.endsWith(".css")) continue;
-    out.push(file);
+  const seen = new Set();
+  function walk(rel) {
+    let css = "";
+    try {
+      css = read(rel);
+    } catch (err) {
+      return;
+    }
+    const re = /@import\s+url\(["']?([^"')]+)["']?\)/gi;
+    let match;
+    while ((match = re.exec(css))) {
+      const file = stripAssetUrl(match[1]);
+      if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+      if (file.includes("/") || !file.endsWith(".css")) continue;
+      if (seen.has(file)) continue;
+      seen.add(file);
+      out.push(file);
+      walk(file);
+    }
   }
-  return [...new Set(out)];
+  walk("styles.css");
+  return out;
 }
 
 files.client = localRootScriptFilesFromIndex()
@@ -343,6 +355,13 @@ add("Build output contains every local CSS import from styles.css", () => {
     fs.existsSync(path.join(publicDir, file))
   );
 });
+
+add("CSS domain entrypoints cover auth and tournament styles", () =>
+  localCssImportsFromStyles().includes("styles-auth.css") &&
+  localCssImportsFromStyles().includes("styles-pwa.css") &&
+  localCssImportsFromStyles().includes("styles-tournament.css") &&
+  localCssImportsFromStyles().includes("styles-hall-tournament-day.css")
+);
 
 const failures = [];
 for (const check of checks) {
