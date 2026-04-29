@@ -23,6 +23,7 @@ const files = {
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
   pwaSessionLib: read("lib/poker-pwa-session.js"),
   cssManifest: read("css-manifest.json"),
+  jsManifest: read("js-manifest.json"),
   bumpPwaVersion: read("scripts/bump-pwa-login-version.js"),
 };
 
@@ -61,6 +62,28 @@ function localRootScriptFilesFromIndex() {
     out.push(file);
   }
   return [...new Set(out)];
+}
+
+function localAppFilesFromRoot() {
+  return fs.readdirSync(root)
+    .filter((name) => /^app.*\.js$/.test(name))
+    .sort();
+}
+
+function jsManifestFiles() {
+  let parsed;
+  try {
+    parsed = JSON.parse(files.jsManifest);
+  } catch (err) {
+    return [];
+  }
+  const domains = parsed && parsed.domains && typeof parsed.domains === "object" ? parsed.domains : {};
+  const out = [];
+  Object.keys(domains).forEach((name) => {
+    const list = Array.isArray(domains[name]) ? domains[name] : [];
+    list.forEach((file) => out.push(file));
+  });
+  return [...new Set(out)].sort();
 }
 
 function localCssImportsFromStyles() {
@@ -357,6 +380,29 @@ add("Build output contains every local script from index.html", () => {
     fs.existsSync(path.join(publicDir, file))
   );
 });
+
+add("JS manifest covers every app module in the workspace", () => {
+  const manifestFiles = jsManifestFiles();
+  const appFiles = localAppFilesFromRoot();
+  return appFiles.every((file) => manifestFiles.includes(file));
+});
+
+add("JS manifest maps core app domains", () =>
+  hasAll("jsManifest", [
+    '"entrypoint": "index.html"',
+    '"auth":',
+    '"chat":',
+    '"rating":',
+    '"tournament":',
+    '"profile":',
+    '"push":',
+    '"admin":',
+    '"app-auth.js"',
+    '"app-pwa-auth.js"',
+    '"app-auth-debug.js"',
+    '"app-tournament-day.js"',
+  ])
+);
 
 add("Build output contains every local CSS import from styles.css", () => {
   const publicDir = path.join(root, "public");

@@ -36,6 +36,7 @@ const baseFiles = [
   'index.html',
   'styles.css',
   'css-manifest.json',
+  'js-manifest.json',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',

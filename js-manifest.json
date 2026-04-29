@@ -1,0 +1,93 @@
+{
+  "entrypoint": "index.html",
+  "loadOrderSource": "script tags in index.html",
+  "domains": {
+    "auth": [
+      "app-auth.js",
+      "app-pwa-auth.js",
+      "app-auth-debug.js"
+    ],
+    "chat": [
+      "app-chat-utils.js",
+      "app-chat-render-utils.js",
+      "app-chat-contacts-render.js",
+      "app-chat-dialogs.js",
+      "app-chat-storage.js",
+      "app-chat-prefetch.js",
+      "app-chat-group-pickers.js",
+      "app-chat-group-add-members.js",
+      "app-chat-group-create.js",
+      "app-chat-group-info.js",
+      "app-chat-user-modal.js",
+      "app-chat-club-access.js",
+      "app-chat-templates.js",
+      "app-chat-message-render-helpers.js",
+      "app-chat-message-builders.js",
+      "app-chat-outgoing-helpers.js",
+      "app-chat-general-loader.js",
+      "app-chat-general-sender.js",
+      "app-chat-personal-loader.js",
+      "app-chat-personal-sender.js",
+      "app-chat-reactions.js",
+      "app-chat-edit-delete-ui.js",
+      "app-chat-context-menu.js",
+      "app-chat-polling.js",
+      "app-chat-conversation-shell.js",
+      "app-chat-tab-dialog-shell.js",
+      "app-chat-open-shell.js",
+      "app-chat-club-gate.js",
+      "app-chat-dialogs-meta.js",
+      "app-chat-contacts-loader.js",
+      "app-chat-self-pins.js",
+      "app-chat-friend-actions.js",
+      "app-chat-unread.js",
+      "app-chat-keyboard.js",
+      "app-chat-auth-guard.js"
+    ],
+    "rating": [
+      "app-rating-core.js",
+      "app-rating.js",
+      "app-rating-week-tops.js"
+    ],
+    "tournament": [
+      "app-tournament-day.js",
+      "app-hall-fame.js"
+    ],
+    "profile": [
+      "app-profile.js",
+      "app-cashout.js"
+    ],
+    "push": [
+      "app-push.js"
+    ],
+    "admin": [
+      "app-visitors-admin.js",
+      "app-admin-reports.js",
+      "app-share-stats.js",
+      "app-tracking-links.js"
+    ],
+    "home": [
+      "app-home-media.js",
+      "app-home-gazette-tasks.js",
+      "app-club-tasks.js",
+      "app-updates.js"
+    ],
+    "media": [
+      "app-streams.js",
+      "app-video-lessons.js",
+      "app-video-lessons-modals.js",
+      "app-games.js",
+      "app-equilator.js"
+    ],
+    "raffles": [
+      "app-raffles.js"
+    ],
+    "shell": [
+      "app-shell-layout.js",
+      "app-navigation-scroll.js",
+      "app-api-tracking.js",
+      "app.js",
+      "app-section-views.js"
+    ]
+  }
+}
