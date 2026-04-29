@@ -67,7 +67,7 @@ const cssPartFiles = fs
   .filter((name) => /^styles-.+\.css$/.test(name))
   .sort();
 const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
-const dirsToCopy = ['assets'];
+const dirsToCopy = ['assets', 'html-fragments'];
 const blockedAssetExtensions = new Set(['.mov']);
 
 if (!fs.existsSync(publicDir)) {

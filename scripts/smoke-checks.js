@@ -17,6 +17,7 @@ const files = {
   appChatLifecycle: read("app-chat-lifecycle.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
+  appHtmlFragments: read("app-html-fragments.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
@@ -516,6 +517,7 @@ add("JS manifest maps core app domains", () =>
     '"app-network.js"',
     '"app-pwa-auth.js"',
     '"app-chat-lifecycle.js"',
+    '"app-html-fragments.js"',
     '"app-webview-keyboard.js"',
     '"app-view-router.js"',
     '"app-auth-debug.js"',
@@ -530,6 +532,8 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-webview-keyboard.js") &&
+    appearsBefore(order, "app-navigation-scroll.js", "app-html-fragments.js") &&
+    appearsBefore(order, "app-html-fragments.js", "app-view-router.js") &&
     appearsBefore(order, "app-webview-keyboard.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-chat-lifecycle.js", "app-view-router.js") &&
     appearsBefore(order, "app-view-router.js", "app.js") &&
@@ -570,13 +574,31 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
   ]) &&
   hasAll("appViewRouter", [
     "function setView(viewName, navOpts)",
-    "const views = document.querySelectorAll",
+    "function pokerGetViewNodes()",
     "function pokerOpenChatFromTab",
     "function handleViewLinkClick",
   ]) &&
   !has("app", "function initChat()") &&
   !has("app", "function setView(viewName, navOpts)") &&
   !has("app", "var telegramIosKeyboardRootLockActive")
+);
+
+add("Heavy video lessons HTML is lazy-loaded from a fragment", () =>
+  hasAll("html", [
+    'data-view="video-lessons"',
+    'data-html-fragment="./html-fragments/video-lessons.html"',
+  ]) &&
+  !has("html", 'id="videoLessonsList"') &&
+  hasAll("appHtmlFragments", [
+    "window.pokerEnsureViewHtml",
+    "data-html-fragment",
+    "pokerInitVideoLessonsModals",
+  ]) &&
+  hasAll("appViewRouter", [
+    "pokerEnsureViewHtml(viewName)",
+    "nextOpts.htmlReady = true",
+  ]) &&
+  fs.existsSync(path.join(root, "html-fragments", "video-lessons.html"))
 );
 
 add("View navigation is not gated by lazy loading", () =>

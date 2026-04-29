@@ -1,5 +1,5 @@
 // Видеоуроки: уникальная ссылка на раздел = мини‑апп с ?startapp=video_lessons
-(function initVideoLessonsHeroShare() {
+function initVideoLessonsHeroShare() {
   function videoLessonsSectionLink() {
     return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("video_lessons") : "";
   }
@@ -56,7 +56,7 @@
       });
     });
   }
-})();
+}
 
 // Хаб «Научиться играть»: ?startapp=learn_play_hub (тот же t.me, что и остальные разделы)
 (function initLearnPlayHubShare() {
@@ -156,7 +156,7 @@ function syncVideoLessonsModalScrollLock() {
   }
 }
 
-(function initVideoLessonsCoachModal() {
+function initVideoLessonsCoachModal() {
   var modal = document.getElementById("videoLessonsCoachModal");
   var btn = document.getElementById("videoLessonsCoachHintBtn");
   if (!modal || !btn || btn.getAttribute("data-coach-modal-bound") === "1") return;
@@ -247,9 +247,9 @@ function syncVideoLessonsModalScrollLock() {
     var sid = tab.getAttribute("data-vl-coach-student");
     if (sid) coachModalSetStudentTab(sid, tab);
   });
-})();
+}
 
-(function initVideoLessonsReviewsModal() {
+function initVideoLessonsReviewsModal() {
   var modal = document.getElementById("videoLessonsReviewsModal");
   var btn = document.getElementById("videoLessonsReviewsOpenBtn");
   var coachModal = document.getElementById("videoLessonsCoachModal");
@@ -647,4 +647,12 @@ function syncVideoLessonsModalScrollLock() {
       });
     });
   }
-})();
+}
+
+window.pokerInitVideoLessonsModals = function () {
+  initVideoLessonsHeroShare();
+  initVideoLessonsCoachModal();
+  initVideoLessonsReviewsModal();
+};
+
+window.pokerInitVideoLessonsModals();

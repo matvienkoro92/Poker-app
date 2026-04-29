@@ -97,6 +97,7 @@
     "shell": [
       "app-shell-layout.js",
       "app-navigation-scroll.js",
+      "app-html-fragments.js",
       "app-webview-keyboard.js",
       "app-view-router.js",
       "app-network.js",

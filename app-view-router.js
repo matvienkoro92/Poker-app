@@ -1,9 +1,12 @@
 // View router: tab navigation, view switching, route clicks, and active-view classes.
 
 // Простая навигация по разделам (вкладки внизу)
-const views = document.querySelectorAll("[data-view]");
 const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-back)");
 const footer = document.querySelector(".card__footer");
+
+function pokerGetViewNodes() {
+  return document.querySelectorAll("[data-view]");
+}
 
 /** Inert только у экранов .view — не у body[data-view] и пр., иначе весь документ (в т.ч. .bottom-nav) перестаёт получать клики. */
 function pokerSyncInertForViewScreensOnly() {
@@ -11,7 +14,7 @@ function pokerSyncInertForViewScreensOnly() {
     if (typeof HTMLElement === "undefined" || !("inert" in HTMLElement.prototype)) return;
     /* Снять ошибочный inert с body после старых сборок */
     if (document.body) document.body.removeAttribute("inert");
-    views.forEach(function (view) {
+    pokerGetViewNodes().forEach(function (view) {
       if (!view.classList || !view.classList.contains("view")) return;
       if (view.classList.contains("view--active")) view.removeAttribute("inert");
       else view.setAttribute("inert", "");
@@ -85,6 +88,27 @@ function pokerChatDomainScriptsReady() {
 
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
+  try {
+    if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
+      var htmlReady = window.pokerEnsureViewHtml(viewName);
+      if (htmlReady && typeof htmlReady.then === "function") {
+        htmlReady.then(function () {
+          var nextOpts = {};
+          Object.keys(navOpts).forEach(function (key) {
+            nextOpts[key] = navOpts[key];
+          });
+          nextOpts.htmlReady = true;
+          setView(viewName, nextOpts);
+        }).catch(function (err) {
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+            window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
+          }
+          if (typeof console !== "undefined" && console.warn) console.warn("view html fragment", err);
+        });
+        return;
+      }
+    }
+  } catch (eHtmlView) {}
   try {
     pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
   } catch (eSetViewDbg0) {}
@@ -229,7 +253,7 @@ function setView(viewName, navOpts) {
       });
     } catch (ePostChat) {}
   }
-  views.forEach(function (view) {
+  pokerGetViewNodes().forEach(function (view) {
     if (view.dataset.view === viewName) {
       view.classList.add("view--active");
     } else {
