@@ -135,6 +135,13 @@ add("PWA Telegram startup keeps restored session during initData refresh", () =>
   ])
 );
 
+add("PWA auth scripts are cache-busted after session fixes", () =>
+  hasAll("html", [
+    './app-auth.js?v=2',
+    './app-pwa-auth.js?v=2',
+  ])
+);
+
 add("PWA session has cookie fallback for storage-hostile browsers", () =>
   hasAll("client", [
     "function pokerReadAuthCookie(name)",
