@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.351">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.352">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -278,7 +278,7 @@
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=2.351" />
+    <link rel="stylesheet" href="./styles.css?v=2.352" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -859,543 +859,8 @@
             </section>
           </div>
 
-          <!-- Чат: поиск → Чаты (меню) → общий чат → Админы → Игроки -->
-          <div class="view" data-view="chat">
-            <!-- Один textarea для общего и личного чата: иначе iOS показывает панель «< > Готово» над клавиатурой -->
-            <div id="chatComposerPool" class="chat-composer-pool" aria-hidden="true">
-              <textarea class="chat-input chat-input--textarea" id="chatSharedComposer" maxlength="4096" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
-            </div>
-            <div class="chat-dialogs-view" id="chatDialogsView">
-              <div class="chat-dialogs-list-wrap">
-              <div class="chat-dialogs-list">
-                <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--in-dialogs-scroll">
-                  <div class="chat-find-row">
-                    <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
-                      <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
-                      <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
-                      <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
-                        <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>
-                      </div>
-                    </div>
-                    <button type="button" class="chat-find-new-group-btn" id="chatNewGroupBtn" aria-label="Создать групповой чат" title="Новый групповой чат">+</button>
-                  </div>
-                </div>
-                <div
-                  class="chat-contacts-filter chat-contacts-filter--hidden"
-                  id="chatContactsFilter"
-                  role="tablist"
-                  aria-label="Кто в списке переписок"
-                >
-                  <button
-                    type="button"
-                    class="chat-contacts-filter__tab chat-contacts-filter__tab--active"
-                    data-filter="all"
-                    role="tab"
-                    aria-selected="true"
-                    id="chatContactsFilterAll"
-                  >
-                    Все
-                  </button>
-                  <button
-                    type="button"
-                    class="chat-contacts-filter__tab"
-                    data-filter="friends"
-                    role="tab"
-                    aria-selected="false"
-                    id="chatContactsFilterFriends"
-                  >
-                    Друзья
-                  </button>
-                </div>
-                <div class="chat-dialogs-block" id="chatDialogsPrimaryBlock">
-                <button type="button" class="chat-dialog-item chat-dialog-item--club" data-chat-type="club" id="chatDialogClub" tabindex="-1">
-                  <img class="chat-dialog-item__avatar chat-dialog-item__avatar--club" src="./assets/logo-two-aces.png" alt="" width="40" height="40" decoding="sync" fetchpriority="high" loading="eager" />
-                  <span class="chat-dialog-item__label-wrap">
-                    <span class="chat-dialog-item__club-wrap">
-                      <span class="chat-dialog-item__title-row">
-                        <span class="chat-dialog-item__label" id="chatDialogClubTitle">Главный чат</span>
-                        <span class="chat-dialog-item__pending-review-badge" id="chatDialogClubPendingBadge" aria-hidden="true"></span>
-                      </span>
-                      <span class="chat-dialog-item__preview chat-dialog-item__preview--skeleton" id="chatDialogClubPreview" aria-busy="true" aria-label="Загрузка превью"></span>
-                    </span>
-                    <span class="chat-dialog-item__right">
-                      <span class="chat-dialog-item__hours chat-dialog-item__hours--admin" id="chatDialogClubParticipantsMeta">—</span>
-                    </span>
-                  </span>
-                  <span class="chat-dialog-item__unread" id="chatDialogClubUnread" aria-hidden="true"></span>
-                </button>
-                <button type="button" class="chat-dialog-item" data-chat-user-id="tg_2144406710" data-chat-user-name="Анна" data-chat-hours="06:00–18:00 мск" data-shift-start="6" data-shift-end="18" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager.jpg" alt="" width="40" height="40" decoding="async" fetchpriority="high" loading="eager" />
-                  <span class="chat-dialog-item__label-wrap">
-                    <span class="chat-dialog-item__label-block">
-                      <span class="chat-dialog-item__label">Анна</span>
-                      <span class="chat-dialog-item__role chat-dialog-item__role--admin">06:00–18:00 мск</span>
-                    </span>
-                    <span class="chat-dialog-item__right">
-                      <span class="chat-dialog-item__hours chat-dialog-item__hours--admin">Админ, депозит/вывод</span>
-                      <span class="chat-dialog-item__online" aria-label="онлайн">онлайн</span>
-                    </span>
-                  </span>
-                  <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_2144406710" aria-hidden="true"></span>
-                </button>
-                <button type="button" class="chat-dialog-item" data-chat-user-id="tg_1897001087" data-chat-user-name="Вика" data-chat-hours="18:00–02:00 мск" data-shift-start="18" data-shift-end="2" tabindex="-1">
-                  <img class="chat-dialog-item__avatar" src="./assets/dep-manager-vika.jpg" alt="" width="40" height="40" decoding="async" fetchpriority="high" loading="eager" />
-                  <span class="chat-dialog-item__label-wrap">
-                    <span class="chat-dialog-item__label-block">
-                      <span class="chat-dialog-item__label">Вика</span>
-                      <span class="chat-dialog-item__role chat-dialog-item__role--admin">18:00–02:00 мск</span>
-                    </span>
-                    <span class="chat-dialog-item__right">
-                      <span class="chat-dialog-item__hours chat-dialog-item__hours--admin">Админ, депозит/вывод</span>
-                      <span class="chat-dialog-item__online" aria-label="онлайн">онлайн</span>
-                    </span>
-                  </span>
-                  <span class="chat-dialog-item__unread" data-dialog-unread-for="tg_1897001087" aria-hidden="true"></span>
-                </button>
-                </div>
-                <div class="chat-contacts chat-contacts--in-dialogs" id="chatContacts">
-                  <div class="chat-contacts-list-block">
-                    <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка списка переписок"></p>
-                  </div>
-                </div>
-              </div>
-              </div>
-            </div>
-            <div class="chat-general-view chat-general-view--hidden" id="chatGeneralView">
-              <div class="chat-general-header">
-                <button type="button" class="chat-back-btn chat-general-header__toolbar-back" id="chatGeneralBackBtn" aria-label="Назад к чатам">←</button>
-                <button type="button" class="chat-general-header__title-btn" id="chatGeneralTitleBtn" aria-label="Главный чат: участники">
-                  <span class="chat-general-header__title-main">Главный чат</span>
-                  <span class="chat-general-header__title-sub" id="chatGeneralHeaderRosterMeta" hidden></span>
-                  <span class="chat-general-header__title-sub" id="chatBuildMarker">build 1.718</span>
-                </button>
-                <div class="chat-general-header__segments" role="toolbar" aria-label="Действия в общем чате">
-                  <button type="button" class="chat-general-invite-friend-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralInviteFriendBtn" title="Пригласить в общий чат" aria-label="Поделиться ссылкой на общий чат">
-                    <span class="chat-general-invite-friend-btn__icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    </span>
-                  </button>
-                  <button type="button" class="chat-general-copy-link-btn chat-general-header__segment chat-general-header__segment--icon" id="chatGeneralCopyLinkBtn" title="Скопировать ссылку на общий чат" aria-label="Скопировать ссылку на общий чат">
-                    <span class="chat-general-copy-link-btn__icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div class="chat-general-pinned-stack" id="chatGeneralPinnedStack">
-              <div class="chat-pinned-self" id="chatGeneralPinnedGlobal" aria-hidden="true"></div>
-              <div class="chat-pinned-self" id="chatGeneralPinnedSelf" aria-hidden="true"></div>
-              </div>
-              <div class="chat-messages-wrap">
-              <div class="chat-messages" id="chatGeneralMessages" role="log" aria-live="polite">
-                <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка сообщений"></p>
-              </div>
-              </div>
-              <div class="chat-input-area" id="chatGeneralInputArea">
-                <div class="chat-keyboard-debug" id="chatGeneralKeyboardDebug" aria-hidden="true" hidden></div>
-                <div class="chat-reply-preview" id="chatGeneralReplyPreview">
-                  <div class="chat-reply-preview__text"></div>
-                  <button type="button" class="chat-reply-preview__cancel" title="Отменить ответ">✕</button>
-                </div>
-                <div class="chat-image-preview" id="chatGeneralImagePreview"></div>
-                <div class="chat-voice-preview chat-voice-preview--hidden" id="chatGeneralVoicePreview">
-                  <span class="chat-voice-preview__recording chat-voice-preview__recording--hidden" id="chatGeneralVoiceRecording">🔴 Идёт запись <span class="chat-voice-preview__timer" id="chatGeneralVoiceTimer">0</span> с <button type="button" class="chat-voice-preview__stop-btn" id="chatGeneralVoiceStop">Остановить</button></span>
-                  <span class="chat-voice-preview__label chat-voice-preview__label--recorded">Голосовое сообщение</span>
-                  <button type="button" class="chat-voice-preview__remove" id="chatGeneralVoiceRemove">Убрать</button>
-                  <button type="button" class="chat-voice-preview__send" id="chatGeneralVoiceSend" title="Отправить">↑</button>
-                </div>
-                <div class="chat-input-wrap">
-                  <div class="chat-attach-wrap">
-                    <input type="file" class="chat-input-file" id="chatGeneralFileInput" tabindex="-1" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
-                    <input type="file" class="chat-input-file" id="chatGeneralPdfInput" tabindex="-1" accept="application/pdf" style="display:none" aria-hidden="true" />
-                    <button type="button" class="chat-attach-btn" id="chatGeneralAttachBtn" title="Прикрепить" aria-haspopup="true" aria-expanded="false" aria-controls="chatGeneralAttachDropdown">📎</button>
-                    <div class="chat-attach-dropdown chat-attach-dropdown--hidden" id="chatGeneralAttachDropdown" role="menu" aria-hidden="true">
-                      <button type="button" class="chat-attach-dropdown__item" data-action="photo" role="menuitem">Фото</button>
-                      <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
-                    </div>
-                  </div>
-                  <div class="chat-composer-mount" id="chatGeneralComposerMount"></div>
-                  <button type="button" class="chat-emoji-btn" id="chatGeneralEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
-                  <div class="chat-composer-actions">
-                    <button type="button" class="chat-scroll-bottom-btn chat-scroll-bottom-btn--hidden" id="chatGeneralScrollBottomBtn" title="Вниз к последним сообщениям" aria-label="Вниз к последним сообщениям" aria-hidden="true">↓</button>
-                    <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatGeneralSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="chat-personal-view chat-personal-view--hidden" id="chatPersonalView">
-              <div class="chat-list-view chat-list-view--hidden" id="chatListView">
-                <!-- Список контактов перенесён в экран диалогов (chatDialogsView) -->
-              </div>
-              <div class="chat-conv-view chat-conv-view--hidden" id="chatConvView">
-                <div class="chat-conv-top">
-                  <div class="chat-conv-top-inner">
-                    <button type="button" class="chat-back-btn chat-conv-top__toolbar-back" id="chatBackBtn" aria-label="Назад">←</button>
-                    <div class="chat-conv-header">
-                      <div class="chat-conv-header__title-actions">
-                        <button type="button" class="chat-conv-peer-title-chip" id="chatConvProfileOpenBtn" aria-label="Профиль собеседника">
-                          <span class="chat-conv-peer-title-chip__name-row">
-                            <span class="chat-conv-peer-title-chip__name" id="chatConvTitle">Чат</span>
-                            <img class="profile-status-fish-inline chat-conv-peer-title-chip__fish" id="chatConvTitleFish" alt="" aria-hidden="true" hidden loading="lazy" decoding="async" />
-                          </span>
-                          <span class="chat-conv-peer-title-chip__id" hidden>
-                            <span id="chatConvTitleId"></span>
-                            <span class="chat-verified-badge chat-verified-badge--hidden" id="chatConvVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
-                          </span>
-                        </button>
-                        <button type="button" class="chat-conv-group-add-btn" id="chatConvGroupAddMembersBtn" hidden aria-label="Добавить участников">+</button>
-                      </div>
-                      <input type="file" id="chatConvGroupAvatarFile" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
-                      <div class="chat-conv-peer-avatar-wrap" id="chatConvPeerAvatarWrap" aria-hidden="true">
-                        <img id="chatConvPeerAvatar" class="chat-conv-peer-avatar chat-conv-peer-avatar--hidden" alt="" width="40" height="40" decoding="async" fetchpriority="high" />
-                        <span id="chatConvPeerAvatarPh" class="chat-conv-peer-avatar chat-conv-peer-avatar--ph">?</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="chat-conv-group-desc chat-conv-group-desc--hidden" id="chatConvGroupDesc" aria-hidden="true"></p>
-                </div>
-                <div class="chat-pinned-self" id="chatPersonalPinnedSelf" aria-hidden="true"></div>
-                <div class="chat-container">
-                  <div class="chat-messages-wrap">
-                  <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
-                    <p class="chat-empty chat-empty--skeleton" aria-busy="true" aria-label="Загрузка сообщений"></p>
-                  </div>
-                  </div>
-                  <div class="chat-input-area" id="chatPersonalInputArea">
-                    <div class="chat-keyboard-debug" id="chatPersonalKeyboardDebug" aria-hidden="true" hidden></div>
-                    <div class="chat-reply-preview" id="chatPersonalReplyPreview">
-                      <div class="chat-reply-preview__text"></div>
-                      <button type="button" class="chat-reply-preview__cancel" title="Отменить ответ">✕</button>
-                    </div>
-                    <div class="chat-image-preview" id="chatPersonalImagePreview"></div>
-                    <div class="chat-upload-progress chat-upload-progress--hidden" id="chatPersonalUploadProgress" role="status" aria-live="polite" aria-hidden="true">
-                      <span class="chat-upload-progress__label" id="chatPersonalUploadProgressLabel">Отправка...</span>
-                      <div class="chat-upload-progress__bar"><div class="chat-upload-progress__fill" id="chatPersonalUploadProgressFill"></div></div>
-                    </div>
-                    <div class="chat-voice-preview chat-voice-preview--hidden" id="chatPersonalVoicePreview">
-                      <span class="chat-voice-preview__recording chat-voice-preview__recording--hidden" id="chatPersonalVoiceRecording">🔴 Идёт запись <span class="chat-voice-preview__timer" id="chatPersonalVoiceTimer">0</span> с <button type="button" class="chat-voice-preview__stop-btn" id="chatPersonalVoiceStop">Остановить</button></span>
-                      <span class="chat-voice-preview__label chat-voice-preview__label--recorded">Голосовое сообщение</span>
-                      <button type="button" class="chat-voice-preview__remove" id="chatPersonalVoiceRemove">Убрать</button>
-                      <button type="button" class="chat-voice-preview__send" id="chatPersonalVoiceSend" title="Отправить">↑</button>
-                    </div>
-                    <div class="chat-input-wrap">
-                      <div class="chat-attach-wrap">
-                        <input type="file" class="chat-input-file" id="chatPersonalFileInput" tabindex="-1" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" />
-                        <input type="file" class="chat-input-file" id="chatPersonalPdfInput" tabindex="-1" accept="application/pdf" style="display:none" aria-hidden="true" />
-                        <button type="button" class="chat-attach-btn" id="chatPersonalAttachBtn" title="Прикрепить" aria-haspopup="true" aria-expanded="false" aria-controls="chatPersonalAttachDropdown">📎</button>
-                        <div class="chat-attach-dropdown chat-attach-dropdown--hidden" id="chatPersonalAttachDropdown" role="menu" aria-hidden="true">
-                          <button type="button" class="chat-attach-dropdown__item" data-action="photo" role="menuitem">Фото</button>
-                          <button type="button" class="chat-attach-dropdown__item" data-action="document" role="menuitem">PDF файл</button>
-                        </div>
-                      </div>
-                      <div class="chat-composer-mount" id="chatPersonalComposerMount"></div>
-                      <button type="button" class="chat-emoji-btn" id="chatPersonalEmojiBtn" title="Смайлики" aria-label="Смайлики">😀</button>
-                      <div class="chat-composer-actions">
-                        <button type="button" class="chat-scroll-bottom-btn chat-scroll-bottom-btn--hidden" id="chatPersonalScrollBottomBtn" title="Вниз к последним сообщениям" aria-label="Вниз к последним сообщениям" aria-hidden="true">↓</button>
-                        <button type="button" class="chat-send-btn chat-send-btn--icon chat-send-btn--mic" id="chatSendBtn" title="Голосовое сообщение" aria-label="Записать голосовое">🎤</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="chat-ios-compose-overlay chat-ios-compose-overlay--hidden" id="chatIosComposeOverlay" aria-hidden="true">
-              <div class="chat-ios-compose-overlay__backdrop" id="chatIosComposeOverlayBackdrop"></div>
-              <div class="chat-ios-compose-overlay__sheet">
-                <div class="chat-ios-compose-overlay__head">
-                  <div class="chat-ios-compose-overlay__title-wrap">
-                    <span class="chat-ios-compose-overlay__eyebrow">Telegram iPhone</span>
-                    <strong class="chat-ios-compose-overlay__title" id="chatIosComposeOverlayTitle">Новое сообщение</strong>
-                  </div>
-                  <button type="button" class="chat-ios-compose-overlay__close" id="chatIosComposeOverlayClose" aria-label="Закрыть">×</button>
-                </div>
-                <textarea class="chat-ios-compose-overlay__textarea" id="chatIosComposeOverlayTextarea" rows="4" maxlength="4096" placeholder="Введите сообщение"></textarea>
-                <div class="chat-ios-compose-overlay__actions">
-                  <button type="button" class="chat-ios-compose-overlay__cancel" id="chatIosComposeOverlayCancel">Отмена</button>
-                  <button type="button" class="chat-ios-compose-overlay__send" id="chatIosComposeOverlaySend">Отправить</button>
-                </div>
-              </div>
-            </div>
-            <div class="chat-reaction-picker chat-reaction-picker--hidden" id="chatReactionPicker" role="dialog" aria-label="Выбор реакции" aria-hidden="true">
-              <div class="chat-reaction-picker__group">
-                <span class="chat-reaction-picker__label">Базовые</span>
-                <div class="chat-reaction-picker__row" role="group" aria-label="Базовые смайлы">
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🔥" title="🔥">🔥</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="✅" title="✅">✅</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👍" title="👍">👍</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👎" title="👎">👎</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="❤️" title="❤️">❤️</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😂" title="😂">😂</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤣" title="🤣">🤣</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😮" title="😮">😮</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😢" title="😢">😢</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🙏" title="🙏">🙏</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😍" title="😍">😍</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🥰" title="🥰">🥰</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😊" title="😊">😊</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎉" title="🎉">🎉</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👏" title="👏">👏</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🙌" title="🙌">🙌</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💯" title="💯">💯</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="✨" title="✨">✨</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="⭐" title="⭐">⭐</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤔" title="🤔">🤔</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😤" title="😤">😤</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🥳" title="🥳">🥳</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤝" title="🤝">🤝</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💪" title="💪">💪</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😉" title="😉">😉</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😎" title="😎">😎</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤩" title="🤩">🤩</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="😭" title="😭">😭</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤯" title="🤯">🤯</button>
-                </div>
-              </div>
-              <div class="chat-reaction-picker__divider" aria-hidden="true"></div>
-              <div class="chat-reaction-picker__group">
-                <span class="chat-reaction-picker__label">Покер</span>
-                <div class="chat-reaction-picker__row" role="group" aria-label="Покерные смайлы">
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♠️" title="♠️">♠️</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♥️" title="♥️">♥️</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♦️" title="♦️">♦️</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="♣️" title="♣️">♣️</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🃏" title="🃏">🃏</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎲" title="🎲">🎲</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🎰" title="🎰">🎰</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="💰" title="💰">💰</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🤑" title="🤑">🤑</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🏆" title="🏆">🏆</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="👑" title="👑">👑</button>
-                  <button type="button" class="chat-reaction-picker__emoji" data-emoji="🧠" title="🧠">🧠</button>
-                </div>
-              </div>
-            </div>
-            <div class="chat-emoji-picker chat-emoji-picker--hidden" id="chatEmojiPicker" role="dialog" aria-label="Смайлики" aria-hidden="true">
-              <div class="chat-emoji-picker__grid" id="chatEmojiPickerGrid"></div>
-            </div>
-            <div class="chat-create-group-modal chat-create-group-modal--hidden" id="chatCreateGroupModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="chatCreateGroupModalTitle">
-              <div class="chat-create-group-modal__backdrop" id="chatCreateGroupModalBackdrop" tabindex="-1"></div>
-              <div class="chat-create-group-modal__box">
-                <button type="button" class="chat-create-group-modal__close" id="chatCreateGroupModalClose" aria-label="Закрыть">×</button>
-                <h2 id="chatCreateGroupModalTitle" class="chat-create-group-modal__title">Новый групповой чат</h2>
-                <div class="chat-create-group-modal__avatar-row">
-                  <input type="file" class="chat-input-file" id="chatCreateGroupAvatarInput" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
-                  <button type="button" class="chat-create-group-modal__avatar-btn" id="chatCreateGroupAvatarBtn" aria-label="Выбрать аватар группы">
-                    <span class="chat-create-group-modal__avatar-ph" id="chatCreateGroupAvatarPh">📷</span>
-                    <img class="chat-create-group-modal__avatar-img chat-create-group-modal__avatar-img--hidden" id="chatCreateGroupAvatarPreview" alt="" width="72" height="72" decoding="async" />
-                  </button>
-                  <div class="chat-create-group-modal__avatar-hint">
-                    <span class="chat-create-group-modal__avatar-title">Аватар группы</span>
-                    <button type="button" class="chat-create-group-modal__avatar-clear" id="chatCreateGroupAvatarClear" hidden>Убрать фото</button>
-                  </div>
-                </div>
-                <label class="chat-create-group-modal__label">Название
-                  <input type="text" class="chat-input chat-create-group-modal__title-input" id="chatCreateGroupTitleInput" maxlength="100" autocomplete="off" placeholder="Например: Кеш пятница" />
-                </label>
-                <label class="chat-create-group-modal__label">Описание <span class="chat-create-group-modal__optional">необязательно</span>
-                  <textarea class="chat-input chat-create-group-modal__desc-input" id="chatCreateGroupDescInput" maxlength="2000" rows="2" autocomplete="off" placeholder="Увидят все участники группы"></textarea>
-                </label>
-                <div class="chat-create-group-modal__tabs" role="tablist" aria-label="Источник списка">
-                  <button type="button" class="chat-create-group-modal__tab chat-create-group-modal__tab--active" data-create-group-tab="all" role="tab" aria-selected="true" id="chatCreateGroupTabAll">Все</button>
-                  <button type="button" class="chat-create-group-modal__tab" data-create-group-tab="friends" role="tab" aria-selected="false" id="chatCreateGroupTabFriends">Друзья</button>
-                  <button type="button" class="chat-create-group-modal__tab" data-create-group-tab="manual" role="tab" aria-selected="false" id="chatCreateGroupTabManual">Вручную</button>
-                </div>
-                <div id="chatCreateGroupPaneAll" class="chat-create-group-modal__pane" role="tabpanel">
-                  <p class="chat-create-group-modal__hint">Нажмите на человека, чтобы добавить или убрать из группы</p>
-                  <div class="chat-create-group-modal__picker" id="chatCreateGroupPickerAll"></div>
-                </div>
-                <div id="chatCreateGroupPaneFriends" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
-                  <div class="chat-create-group-modal__picker" id="chatCreateGroupPickerFriends"></div>
-                </div>
-                <div id="chatCreateGroupPaneManual" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
-                  <div class="chat-create-group-modal__manual-row">
-                    <input type="text" class="chat-input" id="chatCreateGroupManualInput" maxlength="35" placeholder="Ник в Telegram или ID" autocomplete="off" />
-                    <button type="button" class="chat-create-group-modal__add-manual" id="chatCreateGroupManualAddBtn">Добавить</button>
-                  </div>
-                  <p class="chat-create-group-modal__hint chat-create-group-modal__hint--err" id="chatCreateGroupManualHint" aria-live="polite"></p>
-                </div>
-                <div class="chat-create-group-modal__selected-wrap">
-                  <span class="chat-create-group-modal__selected-label">В группе:</span>
-                  <div class="chat-create-group-modal__selected" id="chatCreateGroupSelected"></div>
-                </div>
-                <div class="chat-create-group-modal__actions">
-                  <button type="button" class="profile-exit-btn chat-create-group-modal__submit chat-create-group-modal__submit--tall" id="chatCreateGroupSubmitBtn">Создать</button>
-                  <button type="button" class="chat-create-group-modal__cancel" id="chatCreateGroupCancelBtn">Отмена</button>
-                </div>
-              </div>
-            </div>
-            <div
-              class="chat-create-group-modal chat-group-add-members-modal chat-create-group-modal--hidden"
-              id="chatGroupAddMembersModal"
-              role="dialog"
-              aria-modal="true"
-              aria-hidden="true"
-              aria-labelledby="chatGroupAddMembersModalTitle"
-            >
-              <div class="chat-create-group-modal__backdrop" id="chatGroupAddMembersModalBackdrop" tabindex="-1"></div>
-              <div class="chat-create-group-modal__box">
-                <button type="button" class="chat-create-group-modal__close" id="chatGroupAddMembersModalClose" aria-label="Закрыть">×</button>
-                <h2 id="chatGroupAddMembersModalTitle" class="chat-create-group-modal__title">Добавить участников</h2>
-                <p class="chat-create-group-modal__hint" id="chatGroupAddMembersMetaHint"></p>
-                <div class="chat-create-group-modal__tabs" role="tablist" aria-label="Список контактов">
-                  <button
-                    type="button"
-                    class="chat-create-group-modal__tab chat-create-group-modal__tab--active"
-                    data-group-add-tab="all"
-                    role="tab"
-                    aria-selected="true"
-                    id="chatGroupAddTabAll"
-                  >
-                    Все
-                  </button>
-                  <button type="button" class="chat-create-group-modal__tab" data-group-add-tab="friends" role="tab" aria-selected="false" id="chatGroupAddTabFriends">
-                    Друзья
-                  </button>
-                  <button type="button" class="chat-create-group-modal__tab" data-group-add-tab="manual" role="tab" aria-selected="false" id="chatGroupAddTabManual">
-                    Вручную
-                  </button>
-                </div>
-                <div id="chatGroupAddPaneAll" class="chat-create-group-modal__pane" role="tabpanel">
-                  <p class="chat-create-group-modal__hint">Нажмите на человека, чтобы отметить для приглашения</p>
-                  <div class="chat-create-group-modal__picker" id="chatGroupAddPickerAll"></div>
-                </div>
-                <div id="chatGroupAddPaneFriends" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
-                  <div class="chat-create-group-modal__picker" id="chatGroupAddPickerFriends"></div>
-                </div>
-                <div id="chatGroupAddPaneManual" class="chat-create-group-modal__pane chat-create-group-modal__pane--hidden" role="tabpanel" hidden>
-                  <div class="chat-create-group-modal__manual-row">
-                    <input type="text" class="chat-input" id="chatGroupAddManualInput" maxlength="35" placeholder="Ник в Telegram или ID" autocomplete="off" />
-                    <button type="button" class="chat-create-group-modal__add-manual" id="chatGroupAddManualBtn">Добавить</button>
-                  </div>
-                  <p class="chat-create-group-modal__hint chat-create-group-modal__hint--err" id="chatGroupAddManualHint" aria-live="polite"></p>
-                </div>
-                <div class="chat-create-group-modal__selected-wrap">
-                  <span class="chat-create-group-modal__selected-label">Будут добавлены:</span>
-                  <div class="chat-create-group-modal__selected" id="chatGroupAddSelected"></div>
-                </div>
-                <div class="chat-create-group-modal__actions">
-                  <button type="button" class="profile-exit-btn chat-create-group-modal__submit" id="chatGroupAddSubmitBtn">Добавить в группу</button>
-                  <button type="button" class="chat-create-group-modal__cancel" id="chatGroupAddCancelBtn">Отмена</button>
-                </div>
-              </div>
-            </div>
-            <div class="chat-group-info-modal chat-group-info-modal--hidden" id="chatGroupInfoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="chatGroupInfoModalTitle">
-              <div class="chat-group-info-modal__backdrop" id="chatGroupInfoModalBackdrop" tabindex="-1"></div>
-              <div class="chat-group-info-modal__box">
-                <button type="button" class="chat-group-info-modal__close" id="chatGroupInfoModalClose" aria-label="Закрыть">×</button>
-                <div class="chat-group-info-modal__scroll">
-                <div class="chat-group-info-modal__head">
-                  <input type="file" id="chatGroupInfoAvatarFile" accept="image/jpeg,image/png,image/gif,image/webp" tabindex="-1" aria-hidden="true" style="display:none" />
-                  <button type="button" class="chat-group-info-modal__avatar-btn" id="chatGroupInfoAvatarBtn" disabled aria-label="Аватар группы">
-                    <img class="chat-group-info-modal__avatar chat-group-info-modal__avatar--hidden" id="chatGroupInfoAvatar" alt="" width="64" height="64" decoding="async" />
-                    <span class="chat-group-info-modal__avatar-ph" id="chatGroupInfoAvatarPh">👥</span>
-                  </button>
-                  <p class="chat-group-info-modal__avatar-edit-hint" id="chatGroupInfoAvatarEditHint" hidden>Создатель или администратор клуба: нажмите на фото, чтобы сменить аватар группы</p>
-                  <p class="chat-group-info-modal__creator-badge" id="chatGroupInfoCreatorBadge" hidden>Вы — создатель группы</p>
-                  <h2 id="chatGroupInfoModalTitle" class="chat-group-info-modal__title">Группа</h2>
-                  <label class="chat-group-info-modal__label chat-group-info-modal__title-edit-label" id="chatGroupInfoTitleLabel" hidden>Название
-                    <input type="text" class="chat-input" id="chatGroupInfoTitleInput" maxlength="100" autocomplete="off" />
-                  </label>
-                  <p class="chat-group-info-modal__meta" id="chatGroupInfoMeta"></p>
-                  <div class="chat-group-info-modal__desc-editor" id="chatGroupInfoDescEditWrap" hidden>
-                    <label class="chat-group-info-modal__label">Описание <span class="chat-group-info-modal__desc-note" id="chatGroupInfoDescNote">его видят все участники</span>
-                      <textarea class="chat-input chat-group-info-modal__desc" id="chatGroupInfoDescription" maxlength="2000" rows="3" autocomplete="off" placeholder="Кратко о группе"></textarea>
-                    </label>
-                  </div>
-                  <div class="chat-group-info-modal__desc-view-block" id="chatGroupInfoDescViewWrap" hidden>
-                    <p class="chat-group-info-modal__desc-view-caption">Описание</p>
-                    <p class="chat-group-info-modal__desc-view-text" id="chatGroupInfoDescView"></p>
-                  </div>
-                  <button type="button" class="profile-exit-btn chat-group-info-modal__save-profile" id="chatGroupInfoSaveProfileBtn" hidden>Сохранить изменения</button>
-                  <p class="chat-group-info-modal__save-feedback" id="chatGroupInfoSaveFeedback" role="status" aria-live="polite"></p>
-                </div>
-                <div class="chat-group-info-modal__section-head">
-                  <h3 class="chat-group-info-modal__section-title">Участники</h3>
-                  <button type="button" class="chat-group-info-modal__add-members-icon-btn" id="chatGroupInfoAddMembersBtn" aria-label="Добавить участников">+</button>
-                </div>
-                <div class="chat-group-info-modal__members" id="chatGroupInfoMembers"></div>
-                <div class="chat-group-info-modal__leave-wrap" id="chatGroupInfoLeaveWrap" hidden>
-                  <button type="button" class="chat-group-info-modal__leave-btn" id="chatGroupInfoLeaveBtn">Выйти из группы</button>
-                </div>
-                <div class="chat-group-info-modal__danger" id="chatGroupInfoDanger" hidden>
-                  <button type="button" class="chat-group-info-modal__delete-open" id="chatGroupInfoDeleteOpenBtn">Удалить группу</button>
-                  <div class="chat-group-info-modal__delete-panel" id="chatGroupInfoDeletePanel" hidden>
-                    <p class="chat-group-info-modal__delete-lead">Наберите слово <strong>удалить</strong>, затем подтвердите. Это действие необратимо.</p>
-                    <label class="chat-group-info-modal__delete-label">Подтверждение
-                      <input type="text" class="chat-input chat-group-info-modal__delete-input" id="chatGroupInfoDeleteInput" maxlength="32" autocomplete="off" placeholder="удалить" />
-                    </label>
-                    <div class="chat-group-info-modal__delete-actions">
-                      <button type="button" class="chat-group-info-modal__delete-final profile-exit-btn" id="chatGroupInfoDeleteFinalBtn" disabled>Удалить навсегда</button>
-                      <button type="button" class="chat-group-info-modal__delete-cancel" id="chatGroupInfoDeleteCancelBtn">Отмена</button>
-                    </div>
-                  </div>
-                </div>
-                </div>
-              </div>
-            </div>
-            <div class="chat-ctx-backdrop" id="chatContextBackdrop" aria-hidden="true"></div>
-            <div class="chat-ctx-menu" id="chatContextMenu" role="menu" aria-hidden="true">
-              <div class="chat-ctx-menu__reactions" aria-label="Реакции">
-                <span class="chat-ctx-menu__reactions-label">Базовые</span>
-                <div class="chat-ctx-menu__reactions-row" role="group" aria-label="Базовые смайлы">
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🔥" title="🔥">🔥</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="✅" title="✅">✅</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👍" title="👍">👍</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👎" title="👎">👎</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="❤️" title="❤️">❤️</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😂" title="😂">😂</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤣" title="🤣">🤣</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😮" title="😮">😮</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😢" title="😢">😢</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🙏" title="🙏">🙏</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😍" title="😍">😍</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🥰" title="🥰">🥰</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😊" title="😊">😊</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎉" title="🎉">🎉</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👏" title="👏">👏</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🙌" title="🙌">🙌</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💯" title="💯">💯</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="✨" title="✨">✨</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="⭐" title="⭐">⭐</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤔" title="🤔">🤔</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😤" title="😤">😤</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🥳" title="🥳">🥳</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤝" title="🤝">🤝</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💪" title="💪">💪</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😉" title="😉">😉</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😎" title="😎">😎</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤩" title="🤩">🤩</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="😭" title="😭">😭</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤯" title="🤯">🤯</button>
-                </div>
-                <span class="chat-ctx-menu__reactions-label">Покер</span>
-                <div class="chat-ctx-menu__reactions-row" role="group" aria-label="Покерные смайлы">
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♠️" title="♠️">♠️</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♥️" title="♥️">♥️</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♦️" title="♦️">♦️</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="♣️" title="♣️">♣️</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🃏" title="🃏">🃏</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎲" title="🎲">🎲</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🎰" title="🎰">🎰</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="💰" title="💰">💰</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🤑" title="🤑">🤑</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🏆" title="🏆">🏆</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="👑" title="👑">👑</button>
-                  <button type="button" class="chat-ctx-menu__reaction-emoji" data-action="react" data-emoji="🧠" title="🧠">🧠</button>
-                </div>
-              </div>
-              <div class="chat-ctx-menu__items-wrap">
-                <button type="button" class="chat-ctx-menu__item" data-action="reply"><span class="chat-ctx-menu__icon" aria-hidden="true">↩</span>Ответить</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="copy"><span class="chat-ctx-menu__icon" aria-hidden="true">📋</span>Копировать</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="pin"><span class="chat-ctx-menu__icon" aria-hidden="true">📌</span>Закрепить</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="pin-global"><span class="chat-ctx-menu__icon" aria-hidden="true">📌</span>Закрепить для всех</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="unpin"><span class="chat-ctx-menu__icon" aria-hidden="true">📍</span>Открепить</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="unpin-global"><span class="chat-ctx-menu__icon" aria-hidden="true">📍</span>Открепить для всех</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="edit"><span class="chat-ctx-menu__icon" aria-hidden="true">✎</span>Изменить</button>
-                <button type="button" class="chat-ctx-menu__item" data-action="delete"><span class="chat-ctx-menu__icon" aria-hidden="true">🗑</span>Удалить</button>
-              </div>
-            </div>
-          </div>
+          <!-- Чат грузится лениво: тяжёлый DOM живёт в html-fragments/chat.html -->
+          <div class="view" data-view="chat" data-html-fragment="./html-fragments/chat.html" data-html-fragment-view="chat"></div>
 
           <!-- Скачать -->
           <div class="view" data-view="download">
@@ -4846,82 +4311,82 @@
     </div>
 
     <!-- defer: параллельная загрузка; порядок сохранён. Telegram SDK — локально: иначе в РФ без VPN первый defer ждёт telegram.org и блокирует весь остальной JS. Обновлять: curl -o telegram-web-app.js https://telegram.org/js/telegram-web-app.js -->
-    <script defer src="./telegram-web-app.js?v=2.351"></script>
-    <script defer src="./updates-data.js?v=2.351"></script>
-    <script defer src="./poker-tasks-data.js?v=2.351"></script>
-    <script defer src="./app-auth.js?v=2.351"></script>
-    <script defer src="./app-network.js?v=2.351"></script>
-    <script defer src="./app-home-media.js?v=2.351"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=2.351"></script>
-    <script defer src="./app-rating-core.js?v=2.351"></script>
-    <script defer src="./app-chat-utils.js?v=2.351"></script>
-    <script defer src="./app-chat-render-utils.js?v=2.351"></script>
-    <script defer src="./app-chat-contacts-render.js?v=2.351"></script>
-    <script defer src="./app-chat-dialogs.js?v=2.351"></script>
-    <script defer src="./app-chat-storage.js?v=2.351"></script>
-    <script defer src="./app-chat-prefetch.js?v=2.351"></script>
-    <script defer src="./app-chat-group-pickers.js?v=2.351"></script>
-    <script defer src="./app-chat-group-add-members.js?v=2.351"></script>
-    <script defer src="./app-chat-group-create.js?v=2.351"></script>
-    <script defer src="./app-chat-group-info.js?v=2.351"></script>
-    <script defer src="./app-chat-user-modal.js?v=2.351"></script>
-    <script defer src="./app-chat-club-access.js?v=2.351"></script>
-    <script defer src="./app-chat-templates.js?v=2.351"></script>
-    <script defer src="./app-chat-message-render-helpers.js?v=2.351"></script>
-    <script defer src="./app-chat-message-builders.js?v=2.351"></script>
-    <script defer src="./app-chat-outgoing-helpers.js?v=2.351"></script>
-    <script defer src="./app-chat-general-loader.js?v=2.351"></script>
-    <script defer src="./app-chat-general-sender.js?v=2.351"></script>
-    <script defer src="./app-chat-personal-loader.js?v=2.351"></script>
-    <script defer src="./app-chat-personal-sender.js?v=2.351"></script>
-    <script defer src="./app-chat-reactions.js?v=2.351"></script>
-    <script defer src="./app-chat-edit-delete-ui.js?v=2.351"></script>
-    <script defer src="./app-chat-context-menu.js?v=2.351"></script>
-    <script defer src="./app-chat-polling.js?v=2.351"></script>
-    <script defer src="./app-chat-conversation-shell.js?v=2.351"></script>
-    <script defer src="./app-chat-tab-dialog-shell.js?v=2.351"></script>
-    <script defer src="./app-chat-open-shell.js?v=2.351"></script>
-    <script defer src="./app-chat-club-gate.js?v=2.351"></script>
-    <script defer src="./app-chat-dialogs-meta.js?v=2.351"></script>
-    <script defer src="./app-chat-contacts-loader.js?v=2.351"></script>
-    <script defer src="./app-chat-self-pins.js?v=2.351"></script>
-    <script defer src="./app-chat-friend-actions.js?v=2.351"></script>
-    <script defer src="./app-chat-unread.js?v=2.351"></script>
-    <script defer src="./app-chat-keyboard.js?v=2.351"></script>
-    <script defer src="./app-chat-auth-guard.js?v=2.351"></script>
-    <script defer src="./app-profile.js?v=2.351"></script>
-    <script defer src="./app-pwa-auth.js?v=2.351"></script>
-    <script defer src="./app-push.js?v=2.351"></script>
-    <script defer src="./app-streams.js?v=2.351"></script>
-    <script defer src="./app-video-lessons.js?v=2.351"></script>
-    <script defer src="./app-games.js?v=2.351"></script>
-    <script defer src="./app-raffles.js?v=2.351"></script>
-    <script defer src="./app-video-lessons-modals.js?v=2.351"></script>
-    <script defer src="./app-equilator.js?v=2.351"></script>
-    <script defer src="./app-club-tasks.js?v=2.351"></script>
-    <script defer src="./app-hall-fame.js?v=2.351"></script>
-    <script defer src="./app-rating.js?v=2.351"></script>
-    <script defer src="./app-rating-week-tops.js?v=2.351"></script>
-    <script defer src="./app-shell-layout.js?v=2.351"></script>
-    <script defer src="./app-navigation-scroll.js?v=2.351"></script>
-    <script defer src="./app-html-fragments.js?v=2.351"></script>
-    <script defer src="./app-webview-keyboard.js?v=2.351"></script>
-    <script defer src="./app-chat-lifecycle.js?v=2.351"></script>
-    <script defer src="./app-view-router.js?v=2.351"></script>
-    <script defer src="./app-api-tracking.js?v=2.351"></script>
-    <script defer src="./app-lazy-loader.js?v=2.351"></script>
-    <script defer src="./app.js?v=2.351"></script>
-    <script defer src="./app-section-views.js?v=2.351"></script>
-    <script defer src="./app-visitors-admin.js?v=2.351"></script>
-    <script defer src="./app-admin-reports.js?v=2.351"></script>
-    <script defer src="./app-auth-debug.js?v=2.351"></script>
-    <script defer src="./app-share-stats.js?v=2.351"></script>
-    <script defer src="./app-tracking-links.js?v=2.351"></script>
-    <script defer src="./app-cashout.js?v=2.351"></script>
-    <script defer src="./app-tournament-day.js?v=2.351"></script>
-    <script defer src="./app-updates.js?v=2.351"></script>
-    <script defer src="./winter-rating-data.js?v=2.351"></script>
-    <script defer src="./peerjs.min.js?v=2.351"></script>
+    <script defer src="./telegram-web-app.js?v=2.352"></script>
+    <script defer src="./updates-data.js?v=2.352"></script>
+    <script defer src="./poker-tasks-data.js?v=2.352"></script>
+    <script defer src="./app-auth.js?v=2.352"></script>
+    <script defer src="./app-network.js?v=2.352"></script>
+    <script defer src="./app-home-media.js?v=2.352"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=2.352"></script>
+    <script defer src="./app-rating-core.js?v=2.352"></script>
+    <script defer src="./app-chat-utils.js?v=2.352"></script>
+    <script defer src="./app-chat-render-utils.js?v=2.352"></script>
+    <script defer src="./app-chat-contacts-render.js?v=2.352"></script>
+    <script defer src="./app-chat-dialogs.js?v=2.352"></script>
+    <script defer src="./app-chat-storage.js?v=2.352"></script>
+    <script defer src="./app-chat-prefetch.js?v=2.352"></script>
+    <script defer src="./app-chat-group-pickers.js?v=2.352"></script>
+    <script defer src="./app-chat-group-add-members.js?v=2.352"></script>
+    <script defer src="./app-chat-group-create.js?v=2.352"></script>
+    <script defer src="./app-chat-group-info.js?v=2.352"></script>
+    <script defer src="./app-chat-user-modal.js?v=2.352"></script>
+    <script defer src="./app-chat-club-access.js?v=2.352"></script>
+    <script defer src="./app-chat-templates.js?v=2.352"></script>
+    <script defer src="./app-chat-message-render-helpers.js?v=2.352"></script>
+    <script defer src="./app-chat-message-builders.js?v=2.352"></script>
+    <script defer src="./app-chat-outgoing-helpers.js?v=2.352"></script>
+    <script defer src="./app-chat-general-loader.js?v=2.352"></script>
+    <script defer src="./app-chat-general-sender.js?v=2.352"></script>
+    <script defer src="./app-chat-personal-loader.js?v=2.352"></script>
+    <script defer src="./app-chat-personal-sender.js?v=2.352"></script>
+    <script defer src="./app-chat-reactions.js?v=2.352"></script>
+    <script defer src="./app-chat-edit-delete-ui.js?v=2.352"></script>
+    <script defer src="./app-chat-context-menu.js?v=2.352"></script>
+    <script defer src="./app-chat-polling.js?v=2.352"></script>
+    <script defer src="./app-chat-conversation-shell.js?v=2.352"></script>
+    <script defer src="./app-chat-tab-dialog-shell.js?v=2.352"></script>
+    <script defer src="./app-chat-open-shell.js?v=2.352"></script>
+    <script defer src="./app-chat-club-gate.js?v=2.352"></script>
+    <script defer src="./app-chat-dialogs-meta.js?v=2.352"></script>
+    <script defer src="./app-chat-contacts-loader.js?v=2.352"></script>
+    <script defer src="./app-chat-self-pins.js?v=2.352"></script>
+    <script defer src="./app-chat-friend-actions.js?v=2.352"></script>
+    <script defer src="./app-chat-unread.js?v=2.352"></script>
+    <script defer src="./app-chat-keyboard.js?v=2.352"></script>
+    <script defer src="./app-chat-auth-guard.js?v=2.352"></script>
+    <script defer src="./app-profile.js?v=2.352"></script>
+    <script defer src="./app-pwa-auth.js?v=2.352"></script>
+    <script defer src="./app-push.js?v=2.352"></script>
+    <script defer src="./app-streams.js?v=2.352"></script>
+    <script defer src="./app-video-lessons.js?v=2.352"></script>
+    <script defer src="./app-games.js?v=2.352"></script>
+    <script defer src="./app-raffles.js?v=2.352"></script>
+    <script defer src="./app-video-lessons-modals.js?v=2.352"></script>
+    <script defer src="./app-equilator.js?v=2.352"></script>
+    <script defer src="./app-club-tasks.js?v=2.352"></script>
+    <script defer src="./app-hall-fame.js?v=2.352"></script>
+    <script defer src="./app-rating.js?v=2.352"></script>
+    <script defer src="./app-rating-week-tops.js?v=2.352"></script>
+    <script defer src="./app-shell-layout.js?v=2.352"></script>
+    <script defer src="./app-navigation-scroll.js?v=2.352"></script>
+    <script defer src="./app-html-fragments.js?v=2.352"></script>
+    <script defer src="./app-webview-keyboard.js?v=2.352"></script>
+    <script defer src="./app-chat-lifecycle.js?v=2.352"></script>
+    <script defer src="./app-view-router.js?v=2.352"></script>
+    <script defer src="./app-api-tracking.js?v=2.352"></script>
+    <script defer src="./app-lazy-loader.js?v=2.352"></script>
+    <script defer src="./app.js?v=2.352"></script>
+    <script defer src="./app-section-views.js?v=2.352"></script>
+    <script defer src="./app-visitors-admin.js?v=2.352"></script>
+    <script defer src="./app-admin-reports.js?v=2.352"></script>
+    <script defer src="./app-auth-debug.js?v=2.352"></script>
+    <script defer src="./app-share-stats.js?v=2.352"></script>
+    <script defer src="./app-tracking-links.js?v=2.352"></script>
+    <script defer src="./app-cashout.js?v=2.352"></script>
+    <script defer src="./app-tournament-day.js?v=2.352"></script>
+    <script defer src="./app-updates.js?v=2.352"></script>
+    <script defer src="./winter-rating-data.js?v=2.352"></script>
+    <script defer src="./peerjs.min.js?v=2.352"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

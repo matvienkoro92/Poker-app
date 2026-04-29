@@ -12,6 +12,7 @@ function read(rel) {
 
 const files = {
   html: read("index.html"),
+  chatFragment: read("html-fragments/chat.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
@@ -383,14 +384,25 @@ add("Admin push broadcast can choose a click target section", () =>
   has("chatPushAdminBroadcastHandler", "openUrl")
 );
 
-add("Chat shell has dialog, general and conversation views", () =>
+add("Chat shell is lazy-loaded from a hydrated HTML fragment", () =>
   hasAll("html", [
+    'data-view="chat"',
+    'data-html-fragment="./html-fragments/chat.html"',
+    'data-html-fragment-view="chat"',
+  ]) &&
+  !has("html", 'id="chatDialogsView"') &&
+  hasAll("chatFragment", [
     'id="chatDialogsView"',
     'id="chatContacts"',
     'id="chatGeneralView"',
+    'id="chatPersonalView"',
     'id="chatConvView"',
     'id="chatMessages"',
     'id="chatConvProfileOpenBtn"',
+  ]) &&
+  hasAll("appChatLifecycle", [
+    "function initChat()",
+    'document.getElementById("chatDialogsView")',
   ])
 );
 

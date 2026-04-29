@@ -141,6 +141,8 @@ async function main() {
       setView: typeof setView,
       initChat: typeof initChat,
       dialogs: !!document.getElementById("chatDialogsView"),
+      chatGeneral: !!document.getElementById("chatGeneralView"),
+      chatPersonal: !!document.getElementById("chatPersonalView"),
       videoLessonsList: !!document.getElementById("videoLessonsList"),
       equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
       winterRatingSection: !!document.getElementById("winterRatingSection"),
@@ -152,6 +154,8 @@ async function main() {
     if (state.setView !== "function") throw new Error("setView is not a function");
     if (state.initChat !== "function") throw new Error("initChat is not a function");
     if (!state.dialogs) throw new Error("chat dialogs DOM is missing");
+    if (!state.chatGeneral) throw new Error("chat general DOM is missing");
+    if (!state.chatPersonal) throw new Error("chat personal DOM is missing");
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
     if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
