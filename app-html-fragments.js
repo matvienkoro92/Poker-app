@@ -14,6 +14,9 @@
       if (viewName === "video-lessons" && typeof window.pokerInitVideoLessonsModals === "function") {
         window.pokerInitVideoLessonsModals();
       }
+      if (viewName === "hall-of-fame" && typeof window.pokerInitHallOfFamePanelShareButtons === "function") {
+        window.pokerInitHallOfFamePanelShareButtons();
+      }
     } catch (eHooks) {}
   }
 

@@ -1,0 +1,268 @@
+          <!-- Профиль -->
+          <div class="view" data-view="profile" id="profileView">
+            <div class="profile-header-row">
+              <h1 class="title" id="profileTitle">Профиль</h1>
+              <div class="profile-header-controls">
+                <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
+              </div>
+            </div>
+            <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Меню профиля">
+              <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
+              <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
+            </div>
+            <p class="profile-loading-note profile-loading-note--hidden" id="profileLoadingNote" aria-live="polite">Загружаем профиль...</p>
+            <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
+              <div class="profile-hero-card__identity">
+                <h2 class="profile-hero-card__name" id="profileUserName">
+                  <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                  <span id="profileUserNameText" class="profile-hero-card__name-text">Профиль игрока</span>
+                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
+                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
+                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+                  </span>
+                  <button type="button" class="profile-avatar-block__respect-btn profile-hero-card__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате" title="Уважение">
+                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
+                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+                  </button>
+                </h2>
+                <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
+                <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
+                  <div class="profile-chat-name__row" id="profileChatNameRow">
+                    <div class="profile-chat-name__cell">
+                      <input
+                        type="text"
+                        id="profileChatDisplayNameInput"
+                        class="profile-chat-name__input"
+                        maxlength="80"
+                        placeholder="Как вас показывать в чате?"
+                        aria-label="Отображаемое имя в чатах"
+                        autocomplete="nickname"
+                      />
+                    </div>
+                  </div>
+                  <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
+                    <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
+                    <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="profile-avatar-block" id="profileAvatarBlock">
+                <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать аватар" aria-label="Выбрать аватар" />
+                <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
+                <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
+              </div>
+              <section class="profile-status" id="profileStatusSection">
+                <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
+                <p class="profile-status__progress-text" id="profileStatusProgressText">До уровня 2: набито 0 из 10 000 очков. Осталось 10 000 очков</p>
+                <p class="profile-status__hint" id="profileStatusLinkHint" hidden>Привяжите аккаунт из Poker21 во вкладке Профиль Poker21,<br />чтобы определить ваш статус в клубе.</p>
+                <div class="profile-status__scale-wrap">
+                  <p class="profile-status__loading" id="profileStatusLoading" hidden>Идет загрузка статуса...</p>
+                  <div class="profile-status__labels profile-status__labels--cards">
+                    <span class="profile-status__card">1</span>
+                    <div class="profile-status__scale-visual" id="profileStatusVisual" style="--status-value: 0;">
+                      <input type="range" id="profileStatusInput" class="profile-status__scale-input" min="0" max="100" value="0" step="1" aria-label="Статус" readonly tabindex="-1" aria-hidden="true" />
+                      <div class="profile-status__track">
+                        <div class="profile-status__fill"></div>
+                        <span class="profile-status__fish" role="button" tabindex="0" aria-label="Прогресс статуса">
+                          <img class="profile-status__fish-img" src="./assets/profile-status-fish-level-01.png" alt="" aria-hidden="true" />
+                        </span>
+                      </div>
+                    </div>
+                    <span class="profile-status__card">2</span>
+                  </div>
+                </div>
+              </section>
+              <section class="profile-friends">
+                <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
+              </section>
+            </section>
+            <div id="profileVerifiedContent">
+            <section class="profile-email-auth" id="profileEmailAuthSection" hidden data-profile-club-panel>
+              <h2 class="profile-section__title" id="profileEmailAuthTitle">Вход по почте</h2>
+              <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
+              <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
+                <span class="profile-email-auth__label" id="profileEmailAuthLinkedLabel">Ваш емейл:</span>
+                <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profileTelegramLinkedRow" hidden>
+                <span class="profile-email-auth__label" id="profileTelegramLinkedLabel">Ваш телеграм:</span>
+                <span class="profile-email-auth__value" id="profileTelegramLinkedValue">—</span>
+              </div>
+              <div class="profile-email-auth__form" id="profileEmailAuthForm">
+                <input
+                  type="email"
+                  id="profileEmailAuthInput"
+                  class="profile-chat-name__input"
+                  placeholder="your@email.com"
+                  aria-label="Email для входа"
+                  autocomplete="email"
+                />
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthSendBtn">Получить код</button>
+                  <input
+                    type="text"
+                    id="profileEmailAuthCodeInput"
+                    class="profile-chat-name__input profile-chat-name__input--id"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="Код"
+                    aria-label="Код подтверждения email"
+                    autocomplete="one-time-code"
+                  />
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthVerifyBtn">Привязать</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileEmailAuthFeedback" aria-live="polite"></span>
+              </div>
+            </section>
+            <section class="profile-email-auth" id="profileTelegramLinkSection" hidden data-profile-club-panel>
+              <h2 class="profile-section__title" id="profileTelegramLinkTitle">Вход через Telegram</h2>
+              <p class="profile-email-auth__text" id="profileTelegramLinkText">Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.</p>
+              <div class="profile-email-auth__form">
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileTelegramLinkBtn">Привязать Telegram</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileTelegramLinkFeedback" aria-live="polite"></span>
+              </div>
+            </section>
+            <section class="profile-email-auth" id="profilePokerPlusSection" hidden data-profile-poker21-panel>
+              <h2 class="profile-section__title" id="profilePokerPlusTitle">Верификация через Poker21</h2>
+              <p class="profile-email-auth__text" id="profilePokerPlusText">Нажмите "Проверить по почте" если ваш емейл в Poker21 и здесь совпадают и тогда аккаунт привяжется автоматически.<br />Если у вас разные емейлы, тогда введите ключ из Poker21.</p>
+              <div class="profile-email-auth__form" id="profilePokerPlusForm">
+                <input
+                  type="text"
+                  id="profilePokerPlusCiphertextInput"
+                  class="profile-chat-name__input"
+                  maxlength="64"
+                  placeholder="Ключ из PokerPlus"
+                  aria-label="Ключ из PokerPlus"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusBindBtn">Привязать по ключу из Poker21</button>
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusRefreshBtn">Проверить по почте</button>
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusUnbindBtn" hidden>Отвязать</button>
+                </div>
+                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profilePokerPlusFeedback" aria-live="polite"></span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusEmailRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusEmailLabel">Email для проверки:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusEmailValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusLinkedRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusLinkedLabel">Связанный игрок:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusLinkedValue">—</span>
+                <span class="profile-verified-badge profile-verified-badge--hidden" id="profilePokerPlusVerifiedBadge" title="PokerPlus verified">✓ Verified</span>
+              </div>
+              <div class="profile-email-auth__linked profile-email-auth__linked--avatar" id="profilePokerPlusAvatarRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusAvatarLabel">Аватар:</span>
+                <span class="profile-email-auth__value">
+                  <img class="profile-email-auth__avatar" id="profilePokerPlusAvatarImg" alt="" width="48" height="48" loading="lazy" decoding="async" />
+                </span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusBalanceRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusBalanceLabel">Баланс:</span>
+                <span class="profile-email-auth__value profile-pokerplus-balance">
+                  <span class="profile-pokerplus-balance__amount" id="profilePokerPlusBalanceValue">—</span>
+                  <button type="button" class="profile-pokerplus-balance__toggle" id="profilePokerPlusBalanceToggle" aria-pressed="false">Показать</button>
+                </span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusRegisterRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusRegisterLabel">Дата регистрации:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusRegisterValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusPositionRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusPositionLabel">Позиция:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusPositionValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusLeagueRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusLeagueLabel">Лига:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusLeagueValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusGroupRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusGroupLabel">Группа:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusGroupValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusCountryRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusCountryLabel">Страна:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusCountryValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusRoleRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusRoleLabel">Роль:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusRoleValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusLastLoginRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusLastLoginLabel">Последний вход:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusLastLoginValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusLastIpRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusLastIpLabel">IP последнего входа:</span>
+                <span class="profile-email-auth__value" id="profilePokerPlusLastIpValue">—</span>
+              </div>
+              <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
+                <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
+                <div class="profile-pokerplus-stats-visibility" id="profilePokerPlusStatsVisibilityRow">
+                  <span class="profile-pokerplus-stats-visibility__label">Показывать другим</span>
+                  <span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать статистику другим">
+                    <button type="button" class="profile-pokerplus-stats-visibility__btn" id="profilePokerPlusStatsVisibleYes" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button>
+                    <button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" id="profilePokerPlusStatsVisibleNo" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button>
+                  </span>
+                </div>
+                <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">
+                  <span class="profile-pokerplus-stats">
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Рейк</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">%</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Раздачи</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♠</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Кеш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">⌁</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">MTT</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">🏆</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">SNG</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♦</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
+                  </span>
+                </span>
+              </div>
+            </section>
+            <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true" data-profile-club-panel>
+              <p class="profile-chat-push__title">Уведомления (PWA)</p>
+              <label class="profile-chat-push__label">
+                <input type="checkbox" class="profile-chat-push__checkbox" id="profileChatPushToggle" />
+                <span class="profile-chat-push__text">Пуш о новых сообщениях в чате</span>
+              </label>
+              <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
+            </div>
+            <div class="profile-visible-to-others" data-profile-club-panel>
+              <section class="profile-section profile-tournaments">
+                <h2 class="profile-section__title" id="profileTournamentsTitle">Турниры</h2>
+                <div class="profile-cols profile-cols--three">
+                  <div class="profile-col">
+                    <div class="profile-col__name">Лига 2</div>
+                    <div class="profile-col__range">0–499₽</div>
+                  </div>
+                  <div class="profile-col">
+                    <div class="profile-col__name">Лига 1</div>
+                    <div class="profile-col__range">Турниры 500₽–2000₽</div>
+                  </div>
+                  <div class="profile-col">
+                    <div class="profile-col__name">Лига 3 хайролл</div>
+                    <div class="profile-col__range">2001₽+</div>
+                  </div>
+                </div>
+              </section>
+              <section class="profile-section profile-cash">
+                <h2 class="profile-section__title" id="profileCashTitle">Кеш</h2>
+                <div class="profile-cols profile-cols--three">
+                  <div class="profile-col">
+                    <div class="profile-col__name">Микро лимиты</div>
+                    <div class="profile-col__range">1/2₽ – 5/10₽</div>
+                  </div>
+                  <div class="profile-col">
+                    <div class="profile-col__name">Средние лимиты</div>
+                    <div class="profile-col__range">10/20₽ – 50/100₽</div>
+                  </div>
+                  <div class="profile-col">
+                    <div class="profile-col__name">Хайролл</div>
+                    <div class="profile-col__range">100/200₽+</div>
+                  </div>
+                </div>
+              </section>
+            </div>
+            </div>
+          </div>

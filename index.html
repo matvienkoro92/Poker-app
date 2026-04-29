@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.352">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.353">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -278,7 +278,7 @@
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=2.352" />
+    <link rel="stylesheet" href="./styles.css?v=2.353" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1531,448 +1531,8 @@
           <!-- Видео-уроки грузятся лениво: тяжёлый DOM живёт в html-fragments/video-lessons.html -->
           <div class="view" data-view="video-lessons" data-html-fragment="./html-fragments/video-lessons.html" data-html-fragment-view="video-lessons"></div>
 
-          <!-- Зал славы -->
-          <div class="view" data-view="hall-of-fame" id="hallOfFameView">
-            <h1 class="hall-of-fame__main-title hall-of-fame__main-title--top">Зал славы</h1>
-            <div class="hall-of-fame__toolbar" role="navigation" aria-label="Разделы зала славы">
-              <button type="button" class="bonus-game-back hall-of-fame__toolbar-back" data-view-target="home" aria-label="На главную">←</button>
-              <div class="hall-of-fame__subtabs" role="tablist" aria-label="Разделы зала славы">
-                <button type="button" class="hall-of-fame__subtab hall-of-fame__subtab--active" role="tab" aria-selected="true" data-hall-section="legends">Легенды</button>
-                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="cups">Кубки</button>
-                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="top2026">Топ2026</button>
-                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="photos">Фото</button>
-                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="shame">Доска позора</button>
-              </div>
-            </div>
-            <div class="hall-of-fame__panels">
-              <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" aria-labelledby="hallLegendsTitle">
-                <div class="hall-of-fame__panel-share-row raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Легенды»">
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="legends" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" data-hall-fame-share="legends" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Легенды»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                </div>
-                <section class="hall-of-fame__block" aria-labelledby="hallLegendsTitle">
-                  <h2 class="hall-of-fame__section-title" id="hallLegendsTitle">Легенды клуба</h2>
-                  <div class="hall-of-fame__legends-list" role="list">
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Waaarr" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Waaarr</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Coo1er91" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Coo1er91</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Emil13" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Emil13</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Рыбнадзор" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Рыбнадзор</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="AndrushaMorf" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">AndrushaMorf</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Shummmx" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shummmx</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="WhiskeyClub" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">WhiskeyClub</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Пряник" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Пряник</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Siropchik" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Siropchik</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Хулинадо" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Хулинадо</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="Shockin" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">Shockin</span></button>
-                    <button type="button" class="hall-of-fame__legend-link" data-nick="qoqoEpta" role="listitem"><span class="hall-of-fame__legend-card-label">Легенда Два туза</span><span class="hall-of-fame__legend-head" aria-hidden="true">🙋</span><span class="hall-of-fame__legend-name">qoqoEpta</span></button>
-                  </div>
-                </section>
-              </div>
-              <div class="hall-of-fame__panel" id="hallFamePanelCups" data-hall-panel="cups" role="tabpanel" hidden>
-                <div class="hall-of-fame__panel-share-row raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Кубки»">
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="cups" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" data-hall-fame-share="cups" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Кубки»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                </div>
-                <h2 class="hall-of-fame__section-title hall-of-fame__section-title--cups-above-rating" id="hallCupsTitle">Кубки два туза</h2>
-                <div class="hall-of-fame__rating-card-wrap">
-                  <a href="#" class="feature feature--link feature--rating-promo feature--rating-spring-full hall-of-fame__winter-rating-card" data-view-target="winter-rating" aria-label="Рейтинг турнирщиков зима 2025-2026 на 250 000р">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize">НА 250 000р</span>
-                        <span class="feature__title-line3"><span class="feature__title-snowflake" aria-hidden="true">❄</span> Зима 2025-2026</span>
-                        <span class="hall-of-fame__winter-winner">Победитель Waaar</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </a>
-                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__autumn-rating-card" id="autumnRating2025InfoBtn" aria-label="Рейтинг МТТ осени 2025, победитель Эмиль">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize hall-of-fame__autumn-rating-card__prize">МТТ осени 2025</span>
-                        <span class="feature__title-line3 hall-of-fame__autumn-rating-card__season"><span class="hall-of-fame__autumn-leaf" aria-hidden="true">🍂</span> Осенний зачёт</span>
-                        <span class="hall-of-fame__autumn-winner">Победитель Эмиль (Em13)</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </button>
-                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card" id="summerRating2025InfoBtn" aria-label="Кубок лета 2025, победитель Sarmat">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize hall-of-fame__summer-rating-card__prize">МТТ лета 2025</span>
-                        <span class="feature__title-line3 hall-of-fame__summer-rating-card__season"><span class="hall-of-fame__summer-sun" aria-hidden="true">☀️</span> Летний зачёт</span>
-                        <span class="hall-of-fame__summer-winner">Победитель Sarmat</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </button>
-                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__summer-rating-card hall-of-fame__summer-rating-card--cup-thumb" id="summerRating2024InfoBtn" aria-label="Кубок лета 2024, победитель Пряник">
-                    <span class="feature__cup feature__cup--left feature__cup--photo hall-of-fame__summer-2024-cup" aria-hidden="true">
-                      <img
-                        class="hall-of-fame__cup-thumb"
-                        src="./assets/hall-fame-cup-summer-2024-pryanik.png"
-                        alt=""
-                        width="64"
-                        height="64"
-                        decoding="async"
-                      />
-                    </span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize hall-of-fame__summer-rating-card__prize">МТТ лета 2024</span>
-                        <span class="feature__title-line3 hall-of-fame__summer-rating-card__season"><span class="hall-of-fame__summer-sun" aria-hidden="true">☀️</span> Летний зачёт</span>
-                        <span class="hall-of-fame__summer-winner">Победитель Пряник</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </button>
-                  <button type="button" class="feature feature--rating-promo feature--rating-spring-full hall-of-fame__spring-2024-rating-card" id="springRating2024InfoBtn" aria-label="Турнирщик весны 2024, победитель Рыбнадзор">
-                    <span class="feature__cup feature__cup--left" aria-hidden="true">🏆</span>
-                    <div class="feature__body">
-                      <div class="feature__title feature__title--center feature__title--uppercase">
-                        <span class="feature__title-line1">Рейтинг турнирщиков</span>
-                        <span class="feature__title-prize hall-of-fame__spring-2024-rating-card__prize">Весна 2024</span>
-                        <span class="feature__title-line3 hall-of-fame__spring-2024-rating-card__season"><span aria-hidden="true">🌸</span> Турнирщик весны</span>
-                        <span class="hall-of-fame__spring-2024-winner">Победитель Рыбнадзор</span>
-                      </div>
-                    </div>
-                    <span class="feature__cup feature__cup--right" aria-hidden="true">🏆</span>
-                  </button>
-                </div>
-                <section class="hall-of-fame__block hall-of-fame__block--nested" aria-labelledby="hallPrivateTitle">
-                  <h2 class="hall-of-fame__section-title" id="hallPrivateTitle">Приватные турниры</h2>
-                  <p class="hall-of-fame__placeholder">Скоро здесь появятся данные.</p>
-                </section>
-              </div>
-              <div class="hall-of-fame__panel" id="hallFamePanelTop2026" data-hall-panel="top2026" role="tabpanel" hidden aria-labelledby="hallFameSingleTopSummary">
-                <div class="hall-of-fame__single-top-outer winter-rating__single-top-row">
-                  <div class="winter-rating__single-top-wrap hall-of-fame__single-top-wrap" id="hallFameSingleTopWrap">
-                    <h2 class="winter-rating__single-top winter-rating__single-top--title" id="hallFameSingleTopSummary">Топ выигрышей за один турнир (2026)</h2>
-                    <ul class="winter-rating__single-top-list" id="hallFameSingleTopList"></ul>
-                    <div class="hall-of-fame__blog-top15-copy-wrap">
-                      <div class="hall-of-fame__panel-share-row hall-of-fame__panel-share-row--in-card raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Топ 2026»">
-                        <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="top2026" data-hall-fame-action="share">Поделиться</button>
-                        <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon hall-of-fame__blog-top15-copy-btn" id="hallFameBlogTop15CopyBtn" data-hall-fame-share="top2026" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Топ 2026»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                      </div>
-                      <p class="hall-of-fame__blog-top15-copy-hint">Ссылка с <code class="hall-of-fame__startapp-code">hall_fame_top2026</code> открывает этот раздел. Раньше использовали <code class="hall-of-fame__startapp-code">blog_top15</code> / <code class="hall-of-fame__startapp-code">hall_top15</code> — они по‑прежнему работают.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="hall-of-fame__panel" id="hallFamePanelPhotos" data-hall-panel="photos" role="tabpanel" hidden>
-                <div class="hall-of-fame__panel-share-row raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Фото»">
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="photos" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" data-hall-fame-share="photos" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Фото»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                </div>
-                <section class="hall-of-fame__block hall-photo-album hall-photo-album--feed" aria-labelledby="hallPhotosTitle">
-                  <div class="hall-photo-album__ribbon" aria-hidden="true">
-                    <span class="hall-photo-album__suit hall-photo-album__suit--spade">♠</span>
-                    <span class="hall-photo-album__suit hall-photo-album__suit--heart">♥</span>
-                    <span class="hall-photo-album__suit hall-photo-album__suit--club">♣</span>
-                    <span class="hall-photo-album__suit hall-photo-album__suit--diamond">♦</span>
-                  </div>
-                  <h2 class="hall-of-fame__section-title hall-photo-album__title" id="hallPhotosTitle">Фотоальбом</h2>
-                  <p class="hall-photo-album__lead">Кадры клуба «Два туза» — сетка превью. Нажми на фото, чтобы открыть крупно.</p>
-                  <ul class="hall-photo-album__grid" role="list">
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">1</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Рома Venius в гостях у Кулера, март 2026">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-1.png"
-                            alt="Рома Venius в гостях у Кулера, март 2026, покерный стол с фишками"
-                            loading="lazy"
-                            width="720"
-                            height="960"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption hall-photo-album__caption--long">Рома Venius в гостях у Кулера — Март 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">2</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Кулер и Вениус, март 2026">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-2.png"
-                            alt="Кулер и Вениус, март 2026, в руках тройка и семёрка пик"
-                            loading="lazy"
-                            width="720"
-                            height="960"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Кулер и Вениус — Март 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">3</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Вениус и Гика, март 2026">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-3.png"
-                            alt="Вениус и Гика, март 2026, на набережной ночью, на фоне подсвеченный мост"
-                            loading="lazy"
-                            width="720"
-                            height="960"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Вениус и Гика — Март 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">4</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Роман (ПокерМанки), финальный стол ноября 2023">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-roman-nov2023.png"
-                            alt="Групповое фото участников у баннера турнира, финальный стол"
-                            loading="lazy"
-                            width="960"
-                            height="720"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption hall-photo-album__caption--long">Роман (ПокерМанки), ноябрь 2023&nbsp;г., финальный стол Ко за 10&nbsp;000&nbsp;₽ — 6е место и чистый выигрыш 100&nbsp;000&nbsp;₽</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">5</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: топ-реги в баре, октябрь 2025">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-bar-oct2025.png"
-                            alt="Селфи в баре: Никола, Оутсайдер, Виски, Рыбнадзор и Эмиль"
-                            loading="lazy"
-                            width="768"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption hall-photo-album__caption--long">В октябре 2025&nbsp;г. наши топ-реги — три легенды: Эмиль, Рыбнадзор и Виски — вместе с Николой и Оутсайдером встретились в одном, так скажем, баре 😀 Один из них (Виски) занял 4‑е место в барных соревнованиях. На фото слева направо — Никола, Оутсайдер, Виски, Рыбнадзор, Эмиль.</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">6</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки с Пряником">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-album-pokermanki-pryanik.png"
-                            alt="Покерманки и Пряник в костюме пряника, вечерняя улица с гирляндами"
-                            loading="lazy"
-                            width="820"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Покерманки с Пряником</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">7</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок за столом в куртке Real Madrid">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-bpt-jan2026-01.png"
-                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок за покерным столом в куртке Real Madrid"
-                            loading="lazy"
-                            width="680"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">8</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в чёрной футболке за столом">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-bpt-jan2026-02.png"
-                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в чёрной футболке за покерным столом"
-                            loading="lazy"
-                            width="998"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">9</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в худи у стола">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-bpt-jan2026-03.png"
-                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в бежевом худи за покерным столом"
-                            loading="lazy"
-                            width="680"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">10</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Покерманки Беларусь Покер Тур, январь 2026 — игрок в худи за столом Belarus Poker Tour">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-bpt-jan2026-04.png"
-                            alt="Покерманки, Belarus Poker Tour, январь 2026: игрок в худи за столом с брендингом турнира"
-                            loading="lazy"
-                            width="681"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">Покерманки Беларусь Покер Тур. Январь 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">11</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: игрок Котик, Belarus Poker Tour 2026">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-bpt-kotik-2026.png"
-                            alt="Игрок Котик за покерным столом на Belarus Poker Tour 2026"
-                            loading="lazy"
-                            width="795"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">игрок Котик БПТ 2026</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">12</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: Паша Шкарубо, Russian Poker Tour, декабрь 2025">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-shkarubo-rpt-dec2025.png"
-                            alt="Паша Шкарубо за покерным столом, Russian Poker Tour, декабрь 2025"
-                            loading="lazy"
-                            width="682"
-                            height="1024"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption hall-photo-album__caption--long">Паша Шкарубо — Russian Poker Tour, декабрь&nbsp;2025</span>
-                      </div>
-                    </li>
-                    <li class="hall-photo-album__card" role="listitem">
-                      <div class="hall-photo-album__card-body">
-                        <span class="hall-photo-album__idx" aria-hidden="true">13</span>
-                        <button type="button" class="hall-photo-album__btn" aria-label="Увеличить: на волне покерных побед">
-                          <img
-                            class="hall-photo-album__img"
-                            src="./assets/hall-photo-poker-winners-wave-2026.jpg"
-                            alt="Игрок на покерной доске на волне из фишек и карт, на волне покерных побед"
-                            loading="lazy"
-                            width="680"
-                            height="849"
-                          />
-                        </button>
-                        <span class="hall-photo-album__caption">На волне покерных побед</span>
-                      </div>
-                    </li>
-                  </ul>
-                </section>
-              </div>
-              <div class="hall-of-fame__panel" id="hallFamePanelShame" data-hall-panel="shame" role="tabpanel" hidden>
-                <div class="hall-of-fame__panel-share-row raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Доска позора»">
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="shame" data-hall-fame-action="share">Поделиться</button>
-                  <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" data-hall-fame-share="shame" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Доска позора»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                </div>
-                <section class="hall-of-fame__block hall-shame-board" aria-labelledby="hallShameTitle">
-                  <h2 class="hall-of-fame__section-title hall-shame-board__title" id="hallShameTitle">Доска позора</h2>
-                  <p class="hall-shame-board__lead">
-                    Антизал славы: курьёзные фолды, тильты и вечера, о которых шепчутся за бортом. Всё в шутку — без злобы, только покерный юмор.
-                  </p>
-                  <ul class="hall-shame-board__list" role="list">
-                    <li class="hall-shame-board__item hall-shame-board__item--featured" role="listitem">
-                      <div class="hall-shame-board__featured-media">
-                        <span class="hall-shame-board__badge" aria-hidden="true">№1</span>
-                        <p class="hall-shame-board__corgi-gallery-title">Скрины переписки</p>
-                        <div class="hall-shame-board__corgi-gallery hall-shame-board__corgi-gallery--mosaic" role="group" aria-label="Скриншоты Telegram: Корги в деловом костюме">
-                          <button
-                            type="button"
-                            class="hall-shame-board__thumb-btn"
-                            aria-label="Увеличить: аватар «Корги в деловом костюме» и фрагмент чата"
-                          >
-                            <img
-                              class="hall-shame-board__avatar"
-                              src="./assets/hall-shame-dmitry-corgi.png"
-                              alt="Скриншот переписки: Корги в деловом костюме (аватар в Telegram)"
-                              loading="lazy"
-                              width="200"
-                              height="200"
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            class="hall-shame-board__thumb-btn hall-shame-board__thumb-btn--chat"
-                            aria-label="Увеличить: переписка с Корги в деловом костюме, февраль 2025"
-                          >
-                            <img
-                              class="hall-shame-board__chat-thumb"
-                              src="./assets/hall-shame-dmitry-corgi-chat-1.png"
-                              alt="Telegram: переписка про долг и зарплату, февраль"
-                              loading="lazy"
-                              width="472"
-                              height="1024"
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            class="hall-shame-board__thumb-btn hall-shame-board__thumb-btn--chat"
-                            aria-label="Увеличить: переписка с Корги в деловом костюме, продолжение, март 2025"
-                          >
-                            <img
-                              class="hall-shame-board__chat-thumb"
-                              src="./assets/hall-shame-dmitry-corgi-chat-2.png"
-                              alt="Telegram: переписка про возврат и обещания, март"
-                              loading="lazy"
-                              width="472"
-                              height="1024"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                      <div class="hall-shame-board__body">
-                        <span class="hall-shame-board__tag">Первый позорник клуба</span>
-                        <span class="hall-shame-board__nomination">Корги в деловом костюме</span>
-                        <span class="hall-shame-board__desc">Качал с другого игрока якобы проспоренные <strong>1000&nbsp;₽</strong>, которые тот «не отдал». При этом сам занял у <strong>Кулера 2000&nbsp;₽</strong> и около <strong>двух месяцев</strong> кормил завтраками — в итоге <strong>загасился</strong>. История зафиксирована чатом; ирония оценена по достоинству.</span>
-                        <p class="hall-shame-board__gazette-teaser">
-                          Читайте в газете —
-                          <a href="#" class="hall-shame-board__gazette-link" data-gazette-article-link="17">репортаж «Вестника» с разбором переписки</a>.
-                        </p>
-                      </div>
-                    </li>
-                    <li class="hall-shame-board__item hall-shame-board__item--muted" role="listitem">
-                      <span class="hall-shame-board__emoji" aria-hidden="true">🃏</span>
-                      <div class="hall-shame-board__body">
-                        <span class="hall-shame-board__nomination">Следующий номинант</span>
-                        <span class="hall-shame-board__desc">Место свободно — надеемся, надолго.</span>
-                      </div>
-                    </li>
-                  </ul>
-                </section>
-              </div>
-            </div>
-          </div>
+          <!-- Зал славы грузится лениво: тяжёлый DOM живёт в html-fragments/hall-of-fame.html -->
+          <div class="view" data-view="hall-of-fame" data-html-fragment="./html-fragments/hall-of-fame.html" data-html-fragment-view="hall-of-fame"></div>
 
           <!-- Депозит / кэшаут -->
           <div class="view" data-view="cashout">
@@ -2020,274 +1580,8 @@
             </div>
           </div>
 
-          <!-- Профиль -->
-          <div class="view" data-view="profile" id="profileView">
-            <div class="profile-header-row">
-              <h1 class="title" id="profileTitle">Профиль</h1>
-              <div class="profile-header-controls">
-                <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
-              </div>
-            </div>
-            <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Меню профиля">
-              <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
-              <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
-            </div>
-            <p class="profile-loading-note profile-loading-note--hidden" id="profileLoadingNote" aria-live="polite">Загружаем профиль...</p>
-            <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
-              <div class="profile-hero-card__identity">
-                <h2 class="profile-hero-card__name" id="profileUserName">
-                  <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
-                  <span id="profileUserNameText" class="profile-hero-card__name-text">Профиль игрока</span>
-                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
-                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
-                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
-                  </span>
-                  <button type="button" class="profile-avatar-block__respect-btn profile-hero-card__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение в чате" title="Уважение">
-                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
-                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
-                  </button>
-                </h2>
-                <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
-                <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
-                  <div class="profile-chat-name__row" id="profileChatNameRow">
-                    <div class="profile-chat-name__cell">
-                      <input
-                        type="text"
-                        id="profileChatDisplayNameInput"
-                        class="profile-chat-name__input"
-                        maxlength="80"
-                        placeholder="Как вас показывать в чате?"
-                        aria-label="Отображаемое имя в чатах"
-                        autocomplete="nickname"
-                      />
-                    </div>
-                  </div>
-                  <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
-                    <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
-                    <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
-                  </div>
-                </div>
-              </div>
-              <div class="profile-avatar-block" id="profileAvatarBlock">
-                <img id="profileAvatar" class="profile-avatar-block__img" src="./assets/profile-pokerist.jpg" alt="Аватар" width="96" height="96" decoding="async" fetchpriority="high" role="button" tabindex="0" title="Выбрать аватар" aria-label="Выбрать аватар" />
-                <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
-                <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
-              </div>
-              <section class="profile-status" id="profileStatusSection">
-                <h2 class="profile-status__title" id="profileStatusTitle">Ваш уровень 1 из 55</h2>
-                <p class="profile-status__progress-text" id="profileStatusProgressText">До уровня 2: набито 0 из 10 000 очков. Осталось 10 000 очков</p>
-                <p class="profile-status__hint" id="profileStatusLinkHint" hidden>Привяжите аккаунт из Poker21 во вкладке Профиль Poker21,<br />чтобы определить ваш статус в клубе.</p>
-                <div class="profile-status__scale-wrap">
-                  <p class="profile-status__loading" id="profileStatusLoading" hidden>Идет загрузка статуса...</p>
-                  <div class="profile-status__labels profile-status__labels--cards">
-                    <span class="profile-status__card">1</span>
-                    <div class="profile-status__scale-visual" id="profileStatusVisual" style="--status-value: 0;">
-                      <input type="range" id="profileStatusInput" class="profile-status__scale-input" min="0" max="100" value="0" step="1" aria-label="Статус" readonly tabindex="-1" aria-hidden="true" />
-                      <div class="profile-status__track">
-                        <div class="profile-status__fill"></div>
-                        <span class="profile-status__fish" role="button" tabindex="0" aria-label="Прогресс статуса">
-                          <img class="profile-status__fish-img" src="./assets/profile-status-fish-level-01.png" alt="" aria-hidden="true" />
-                        </span>
-                      </div>
-                    </div>
-                    <span class="profile-status__card">2</span>
-                  </div>
-                </div>
-              </section>
-              <section class="profile-friends">
-                <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
-              </section>
-            </section>
-            <div id="profileVerifiedContent">
-            <section class="profile-email-auth" id="profileEmailAuthSection" hidden data-profile-club-panel>
-              <h2 class="profile-section__title" id="profileEmailAuthTitle">Вход по почте</h2>
-              <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
-              <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
-                <span class="profile-email-auth__label" id="profileEmailAuthLinkedLabel">Ваш емейл:</span>
-                <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profileTelegramLinkedRow" hidden>
-                <span class="profile-email-auth__label" id="profileTelegramLinkedLabel">Ваш телеграм:</span>
-                <span class="profile-email-auth__value" id="profileTelegramLinkedValue">—</span>
-              </div>
-              <div class="profile-email-auth__form" id="profileEmailAuthForm">
-                <input
-                  type="email"
-                  id="profileEmailAuthInput"
-                  class="profile-chat-name__input"
-                  placeholder="your@email.com"
-                  aria-label="Email для входа"
-                  autocomplete="email"
-                />
-                <div class="profile-email-auth__actions">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthSendBtn">Получить код</button>
-                  <input
-                    type="text"
-                    id="profileEmailAuthCodeInput"
-                    class="profile-chat-name__input profile-chat-name__input--id"
-                    inputmode="numeric"
-                    maxlength="6"
-                    placeholder="Код"
-                    aria-label="Код подтверждения email"
-                    autocomplete="one-time-code"
-                  />
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profileEmailAuthVerifyBtn">Привязать</button>
-                </div>
-                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileEmailAuthFeedback" aria-live="polite"></span>
-              </div>
-            </section>
-            <section class="profile-email-auth" id="profileTelegramLinkSection" hidden data-profile-club-panel>
-              <h2 class="profile-section__title" id="profileTelegramLinkTitle">Вход через Telegram</h2>
-              <p class="profile-email-auth__text" id="profileTelegramLinkText">Привяжите Telegram, чтобы потом можно было входить в этот же аккаунт через Telegram.</p>
-              <div class="profile-email-auth__form">
-                <div class="profile-email-auth__actions">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profileTelegramLinkBtn">Привязать Telegram</button>
-                </div>
-                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileTelegramLinkFeedback" aria-live="polite"></span>
-              </div>
-            </section>
-            <section class="profile-email-auth" id="profilePokerPlusSection" hidden data-profile-poker21-panel>
-              <h2 class="profile-section__title" id="profilePokerPlusTitle">Верификация через Poker21</h2>
-              <p class="profile-email-auth__text" id="profilePokerPlusText">Нажмите "Проверить по почте" если ваш емейл в Poker21 и здесь совпадают и тогда аккаунт привяжется автоматически.<br />Если у вас разные емейлы, тогда введите ключ из Poker21.</p>
-              <div class="profile-email-auth__form" id="profilePokerPlusForm">
-                <input
-                  type="text"
-                  id="profilePokerPlusCiphertextInput"
-                  class="profile-chat-name__input"
-                  maxlength="64"
-                  placeholder="Ключ из PokerPlus"
-                  aria-label="Ключ из PokerPlus"
-                  autocomplete="off"
-                  autocapitalize="characters"
-                  spellcheck="false"
-                />
-                <div class="profile-email-auth__actions">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusBindBtn">Привязать по ключу из Poker21</button>
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusRefreshBtn">Проверить по почте</button>
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusUnbindBtn" hidden>Отвязать</button>
-                </div>
-                <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profilePokerPlusFeedback" aria-live="polite"></span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusEmailRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusEmailLabel">Email для проверки:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusEmailValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusLinkedRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusLinkedLabel">Связанный игрок:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusLinkedValue">—</span>
-                <span class="profile-verified-badge profile-verified-badge--hidden" id="profilePokerPlusVerifiedBadge" title="PokerPlus verified">✓ Verified</span>
-              </div>
-              <div class="profile-email-auth__linked profile-email-auth__linked--avatar" id="profilePokerPlusAvatarRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusAvatarLabel">Аватар:</span>
-                <span class="profile-email-auth__value">
-                  <img class="profile-email-auth__avatar" id="profilePokerPlusAvatarImg" alt="" width="48" height="48" loading="lazy" decoding="async" />
-                </span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusBalanceRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusBalanceLabel">Баланс:</span>
-                <span class="profile-email-auth__value profile-pokerplus-balance">
-                  <span class="profile-pokerplus-balance__amount" id="profilePokerPlusBalanceValue">—</span>
-                  <button type="button" class="profile-pokerplus-balance__toggle" id="profilePokerPlusBalanceToggle" aria-pressed="false">Показать</button>
-                </span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusRegisterRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusRegisterLabel">Дата регистрации:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusRegisterValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusPositionRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusPositionLabel">Позиция:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusPositionValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusLeagueRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusLeagueLabel">Лига:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusLeagueValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusGroupRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusGroupLabel">Группа:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusGroupValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusCountryRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusCountryLabel">Страна:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusCountryValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusRoleRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusRoleLabel">Роль:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusRoleValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusLastLoginRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusLastLoginLabel">Последний вход:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusLastLoginValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusLastIpRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusLastIpLabel">IP последнего входа:</span>
-                <span class="profile-email-auth__value" id="profilePokerPlusLastIpValue">—</span>
-              </div>
-              <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
-                <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
-                <div class="profile-pokerplus-stats-visibility" id="profilePokerPlusStatsVisibilityRow">
-                  <span class="profile-pokerplus-stats-visibility__label">Показывать другим</span>
-                  <span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать статистику другим">
-                    <button type="button" class="profile-pokerplus-stats-visibility__btn" id="profilePokerPlusStatsVisibleYes" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button>
-                    <button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" id="profilePokerPlusStatsVisibleNo" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button>
-                  </span>
-                </div>
-                <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">
-                  <span class="profile-pokerplus-stats">
-                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Рейк</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">%</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Раздачи</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♠</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Кеш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">⌁</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">MTT</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">🏆</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                    <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">SNG</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♦</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                  </span>
-                </span>
-              </div>
-            </section>
-            <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true" data-profile-club-panel>
-              <p class="profile-chat-push__title">Уведомления (PWA)</p>
-              <label class="profile-chat-push__label">
-                <input type="checkbox" class="profile-chat-push__checkbox" id="profileChatPushToggle" />
-                <span class="profile-chat-push__text">Пуш о новых сообщениях в чате</span>
-              </label>
-              <p class="profile-chat-push__hint" id="profileChatPushHint">Личные сообщения, когда приложение свернуто или закрыто (браузер Android/ПК или PWA с экрана «Домой» на iOS). Разрешите уведомления.</p>
-            </div>
-            <div class="profile-visible-to-others" data-profile-club-panel>
-              <section class="profile-section profile-tournaments">
-                <h2 class="profile-section__title" id="profileTournamentsTitle">Турниры</h2>
-                <div class="profile-cols profile-cols--three">
-                  <div class="profile-col">
-                    <div class="profile-col__name">Лига 2</div>
-                    <div class="profile-col__range">0–499₽</div>
-                  </div>
-                  <div class="profile-col">
-                    <div class="profile-col__name">Лига 1</div>
-                    <div class="profile-col__range">Турниры 500₽–2000₽</div>
-                  </div>
-                  <div class="profile-col">
-                    <div class="profile-col__name">Лига 3 хайролл</div>
-                    <div class="profile-col__range">2001₽+</div>
-                  </div>
-                </div>
-              </section>
-              <section class="profile-section profile-cash">
-                <h2 class="profile-section__title" id="profileCashTitle">Кеш</h2>
-                <div class="profile-cols profile-cols--three">
-                  <div class="profile-col">
-                    <div class="profile-col__name">Микро лимиты</div>
-                    <div class="profile-col__range">1/2₽ – 5/10₽</div>
-                  </div>
-                  <div class="profile-col">
-                    <div class="profile-col__name">Средние лимиты</div>
-                    <div class="profile-col__range">10/20₽ – 50/100₽</div>
-                  </div>
-                  <div class="profile-col">
-                    <div class="profile-col__name">Хайролл</div>
-                    <div class="profile-col__range">100/200₽+</div>
-                  </div>
-                </div>
-              </section>
-            </div>
-            </div>
-          </div>
+          <!-- Профиль грузится лениво: тяжёлый DOM живёт в html-fragments/profile.html -->
+          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html" data-html-fragment-view="profile"></div>
 
           <!-- Стримы (с главной: Игры и приложения) -->
           <div class="view" data-view="streams">
@@ -4311,82 +3605,82 @@
     </div>
 
     <!-- defer: параллельная загрузка; порядок сохранён. Telegram SDK — локально: иначе в РФ без VPN первый defer ждёт telegram.org и блокирует весь остальной JS. Обновлять: curl -o telegram-web-app.js https://telegram.org/js/telegram-web-app.js -->
-    <script defer src="./telegram-web-app.js?v=2.352"></script>
-    <script defer src="./updates-data.js?v=2.352"></script>
-    <script defer src="./poker-tasks-data.js?v=2.352"></script>
-    <script defer src="./app-auth.js?v=2.352"></script>
-    <script defer src="./app-network.js?v=2.352"></script>
-    <script defer src="./app-home-media.js?v=2.352"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=2.352"></script>
-    <script defer src="./app-rating-core.js?v=2.352"></script>
-    <script defer src="./app-chat-utils.js?v=2.352"></script>
-    <script defer src="./app-chat-render-utils.js?v=2.352"></script>
-    <script defer src="./app-chat-contacts-render.js?v=2.352"></script>
-    <script defer src="./app-chat-dialogs.js?v=2.352"></script>
-    <script defer src="./app-chat-storage.js?v=2.352"></script>
-    <script defer src="./app-chat-prefetch.js?v=2.352"></script>
-    <script defer src="./app-chat-group-pickers.js?v=2.352"></script>
-    <script defer src="./app-chat-group-add-members.js?v=2.352"></script>
-    <script defer src="./app-chat-group-create.js?v=2.352"></script>
-    <script defer src="./app-chat-group-info.js?v=2.352"></script>
-    <script defer src="./app-chat-user-modal.js?v=2.352"></script>
-    <script defer src="./app-chat-club-access.js?v=2.352"></script>
-    <script defer src="./app-chat-templates.js?v=2.352"></script>
-    <script defer src="./app-chat-message-render-helpers.js?v=2.352"></script>
-    <script defer src="./app-chat-message-builders.js?v=2.352"></script>
-    <script defer src="./app-chat-outgoing-helpers.js?v=2.352"></script>
-    <script defer src="./app-chat-general-loader.js?v=2.352"></script>
-    <script defer src="./app-chat-general-sender.js?v=2.352"></script>
-    <script defer src="./app-chat-personal-loader.js?v=2.352"></script>
-    <script defer src="./app-chat-personal-sender.js?v=2.352"></script>
-    <script defer src="./app-chat-reactions.js?v=2.352"></script>
-    <script defer src="./app-chat-edit-delete-ui.js?v=2.352"></script>
-    <script defer src="./app-chat-context-menu.js?v=2.352"></script>
-    <script defer src="./app-chat-polling.js?v=2.352"></script>
-    <script defer src="./app-chat-conversation-shell.js?v=2.352"></script>
-    <script defer src="./app-chat-tab-dialog-shell.js?v=2.352"></script>
-    <script defer src="./app-chat-open-shell.js?v=2.352"></script>
-    <script defer src="./app-chat-club-gate.js?v=2.352"></script>
-    <script defer src="./app-chat-dialogs-meta.js?v=2.352"></script>
-    <script defer src="./app-chat-contacts-loader.js?v=2.352"></script>
-    <script defer src="./app-chat-self-pins.js?v=2.352"></script>
-    <script defer src="./app-chat-friend-actions.js?v=2.352"></script>
-    <script defer src="./app-chat-unread.js?v=2.352"></script>
-    <script defer src="./app-chat-keyboard.js?v=2.352"></script>
-    <script defer src="./app-chat-auth-guard.js?v=2.352"></script>
-    <script defer src="./app-profile.js?v=2.352"></script>
-    <script defer src="./app-pwa-auth.js?v=2.352"></script>
-    <script defer src="./app-push.js?v=2.352"></script>
-    <script defer src="./app-streams.js?v=2.352"></script>
-    <script defer src="./app-video-lessons.js?v=2.352"></script>
-    <script defer src="./app-games.js?v=2.352"></script>
-    <script defer src="./app-raffles.js?v=2.352"></script>
-    <script defer src="./app-video-lessons-modals.js?v=2.352"></script>
-    <script defer src="./app-equilator.js?v=2.352"></script>
-    <script defer src="./app-club-tasks.js?v=2.352"></script>
-    <script defer src="./app-hall-fame.js?v=2.352"></script>
-    <script defer src="./app-rating.js?v=2.352"></script>
-    <script defer src="./app-rating-week-tops.js?v=2.352"></script>
-    <script defer src="./app-shell-layout.js?v=2.352"></script>
-    <script defer src="./app-navigation-scroll.js?v=2.352"></script>
-    <script defer src="./app-html-fragments.js?v=2.352"></script>
-    <script defer src="./app-webview-keyboard.js?v=2.352"></script>
-    <script defer src="./app-chat-lifecycle.js?v=2.352"></script>
-    <script defer src="./app-view-router.js?v=2.352"></script>
-    <script defer src="./app-api-tracking.js?v=2.352"></script>
-    <script defer src="./app-lazy-loader.js?v=2.352"></script>
-    <script defer src="./app.js?v=2.352"></script>
-    <script defer src="./app-section-views.js?v=2.352"></script>
-    <script defer src="./app-visitors-admin.js?v=2.352"></script>
-    <script defer src="./app-admin-reports.js?v=2.352"></script>
-    <script defer src="./app-auth-debug.js?v=2.352"></script>
-    <script defer src="./app-share-stats.js?v=2.352"></script>
-    <script defer src="./app-tracking-links.js?v=2.352"></script>
-    <script defer src="./app-cashout.js?v=2.352"></script>
-    <script defer src="./app-tournament-day.js?v=2.352"></script>
-    <script defer src="./app-updates.js?v=2.352"></script>
-    <script defer src="./winter-rating-data.js?v=2.352"></script>
-    <script defer src="./peerjs.min.js?v=2.352"></script>
+    <script defer src="./telegram-web-app.js?v=2.353"></script>
+    <script defer src="./updates-data.js?v=2.353"></script>
+    <script defer src="./poker-tasks-data.js?v=2.353"></script>
+    <script defer src="./app-auth.js?v=2.353"></script>
+    <script defer src="./app-network.js?v=2.353"></script>
+    <script defer src="./app-home-media.js?v=2.353"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=2.353"></script>
+    <script defer src="./app-rating-core.js?v=2.353"></script>
+    <script defer src="./app-chat-utils.js?v=2.353"></script>
+    <script defer src="./app-chat-render-utils.js?v=2.353"></script>
+    <script defer src="./app-chat-contacts-render.js?v=2.353"></script>
+    <script defer src="./app-chat-dialogs.js?v=2.353"></script>
+    <script defer src="./app-chat-storage.js?v=2.353"></script>
+    <script defer src="./app-chat-prefetch.js?v=2.353"></script>
+    <script defer src="./app-chat-group-pickers.js?v=2.353"></script>
+    <script defer src="./app-chat-group-add-members.js?v=2.353"></script>
+    <script defer src="./app-chat-group-create.js?v=2.353"></script>
+    <script defer src="./app-chat-group-info.js?v=2.353"></script>
+    <script defer src="./app-chat-user-modal.js?v=2.353"></script>
+    <script defer src="./app-chat-club-access.js?v=2.353"></script>
+    <script defer src="./app-chat-templates.js?v=2.353"></script>
+    <script defer src="./app-chat-message-render-helpers.js?v=2.353"></script>
+    <script defer src="./app-chat-message-builders.js?v=2.353"></script>
+    <script defer src="./app-chat-outgoing-helpers.js?v=2.353"></script>
+    <script defer src="./app-chat-general-loader.js?v=2.353"></script>
+    <script defer src="./app-chat-general-sender.js?v=2.353"></script>
+    <script defer src="./app-chat-personal-loader.js?v=2.353"></script>
+    <script defer src="./app-chat-personal-sender.js?v=2.353"></script>
+    <script defer src="./app-chat-reactions.js?v=2.353"></script>
+    <script defer src="./app-chat-edit-delete-ui.js?v=2.353"></script>
+    <script defer src="./app-chat-context-menu.js?v=2.353"></script>
+    <script defer src="./app-chat-polling.js?v=2.353"></script>
+    <script defer src="./app-chat-conversation-shell.js?v=2.353"></script>
+    <script defer src="./app-chat-tab-dialog-shell.js?v=2.353"></script>
+    <script defer src="./app-chat-open-shell.js?v=2.353"></script>
+    <script defer src="./app-chat-club-gate.js?v=2.353"></script>
+    <script defer src="./app-chat-dialogs-meta.js?v=2.353"></script>
+    <script defer src="./app-chat-contacts-loader.js?v=2.353"></script>
+    <script defer src="./app-chat-self-pins.js?v=2.353"></script>
+    <script defer src="./app-chat-friend-actions.js?v=2.353"></script>
+    <script defer src="./app-chat-unread.js?v=2.353"></script>
+    <script defer src="./app-chat-keyboard.js?v=2.353"></script>
+    <script defer src="./app-chat-auth-guard.js?v=2.353"></script>
+    <script defer src="./app-profile.js?v=2.353"></script>
+    <script defer src="./app-pwa-auth.js?v=2.353"></script>
+    <script defer src="./app-push.js?v=2.353"></script>
+    <script defer src="./app-streams.js?v=2.353"></script>
+    <script defer src="./app-video-lessons.js?v=2.353"></script>
+    <script defer src="./app-games.js?v=2.353"></script>
+    <script defer src="./app-raffles.js?v=2.353"></script>
+    <script defer src="./app-video-lessons-modals.js?v=2.353"></script>
+    <script defer src="./app-equilator.js?v=2.353"></script>
+    <script defer src="./app-club-tasks.js?v=2.353"></script>
+    <script defer src="./app-hall-fame.js?v=2.353"></script>
+    <script defer src="./app-rating.js?v=2.353"></script>
+    <script defer src="./app-rating-week-tops.js?v=2.353"></script>
+    <script defer src="./app-shell-layout.js?v=2.353"></script>
+    <script defer src="./app-navigation-scroll.js?v=2.353"></script>
+    <script defer src="./app-html-fragments.js?v=2.353"></script>
+    <script defer src="./app-webview-keyboard.js?v=2.353"></script>
+    <script defer src="./app-chat-lifecycle.js?v=2.353"></script>
+    <script defer src="./app-view-router.js?v=2.353"></script>
+    <script defer src="./app-api-tracking.js?v=2.353"></script>
+    <script defer src="./app-lazy-loader.js?v=2.353"></script>
+    <script defer src="./app.js?v=2.353"></script>
+    <script defer src="./app-section-views.js?v=2.353"></script>
+    <script defer src="./app-visitors-admin.js?v=2.353"></script>
+    <script defer src="./app-admin-reports.js?v=2.353"></script>
+    <script defer src="./app-auth-debug.js?v=2.353"></script>
+    <script defer src="./app-share-stats.js?v=2.353"></script>
+    <script defer src="./app-tracking-links.js?v=2.353"></script>
+    <script defer src="./app-cashout.js?v=2.353"></script>
+    <script defer src="./app-tournament-day.js?v=2.353"></script>
+    <script defer src="./app-updates.js?v=2.353"></script>
+    <script defer src="./winter-rating-data.js?v=2.353"></script>
+    <script defer src="./peerjs.min.js?v=2.353"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

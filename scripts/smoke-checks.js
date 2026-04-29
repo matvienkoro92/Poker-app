@@ -13,12 +13,15 @@ function read(rel) {
 const files = {
   html: read("index.html"),
   chatFragment: read("html-fragments/chat.html"),
+  hallOfFameFragment: read("html-fragments/hall-of-fame.html"),
+  profileFragment: read("html-fragments/profile.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
+  appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
@@ -469,6 +472,12 @@ add("Player card exposes Poker21, status, stats and actions", () =>
 
 add("Poker21 profile privacy/status controls are wired", () =>
   hasAll("html", [
+    'data-view="profile"',
+    'data-html-fragment="./html-fragments/profile.html"',
+    'data-html-fragment-view="profile"',
+  ]) &&
+  !has("html", 'id="profilePoker21TabBtn"') &&
+  hasAll("profileFragment", [
     'id="profilePoker21TabBtn"',
     'id="profilePokerPlusSection"',
     'id="profilePokerPlusStatsVisibleYes"',
@@ -482,6 +491,26 @@ add("Poker21 profile privacy/status controls are wired", () =>
     "Ваша статистика теперь НЕ видна другим.",
     "profileStatusVisual",
   ])
+);
+
+add("Hall of fame shell is lazy-loaded from a hydrated HTML fragment", () =>
+  hasAll("html", [
+    'data-view="hall-of-fame"',
+    'data-html-fragment="./html-fragments/hall-of-fame.html"',
+    'data-html-fragment-view="hall-of-fame"',
+  ]) &&
+  !has("html", 'id="hallOfFameView"') &&
+  hasAll("hallOfFameFragment", [
+    'id="hallOfFameView"',
+    'data-hall-panel="legends"',
+    'data-hall-panel="top2026"',
+    'data-hall-fame-share',
+  ]) &&
+  hasAll("appHallFame", [
+    "function initHallOfFamePanelShareButtons()",
+    "window.pokerInitHallOfFamePanelShareButtons",
+  ]) &&
+  has("appHtmlFragments", "pokerInitHallOfFamePanelShareButtons")
 );
 
 add("Service worker does not stale-cache explicit fresh chat requests", () =>

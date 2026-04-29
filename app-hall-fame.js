@@ -211,9 +211,10 @@ function hallFameOpenTelegramShareForSection(section) {
   });
 }
 
-(function initHallOfFamePanelShareButtons() {
+function initHallOfFamePanelShareButtons() {
   var root = document.getElementById("hallOfFameView");
-  if (!root) return;
+  if (!root || root.dataset.hallShareBound === "1") return;
+  root.dataset.hallShareBound = "1";
   root.addEventListener("click", function (e) {
     var btn = e.target && e.target.closest ? e.target.closest("[data-hall-fame-share][data-hall-fame-action]") : null;
     if (!btn) return;
@@ -238,7 +239,9 @@ function hallFameOpenTelegramShareForSection(section) {
       hallFameCopyUrlToClipboard(url);
     }
   });
-})();
+}
+window.pokerInitHallOfFamePanelShareButtons = initHallOfFamePanelShareButtons;
+initHallOfFamePanelShareButtons();
 
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;

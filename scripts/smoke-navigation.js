@@ -127,7 +127,7 @@ async function main() {
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1200);
 
-    const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "equilator", "raffles", "spring-rating"];
+    const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
       const via = await clickVisibleOrSetView(page, target);
@@ -143,7 +143,11 @@ async function main() {
       dialogs: !!document.getElementById("chatDialogsView"),
       chatGeneral: !!document.getElementById("chatGeneralView"),
       chatPersonal: !!document.getElementById("chatPersonalView"),
+      profileView: !!document.getElementById("profileView"),
+      profileStatus: !!document.getElementById("profileStatusVisual"),
       videoLessonsList: !!document.getElementById("videoLessonsList"),
+      hallOfFameView: !!document.getElementById("hallOfFameView"),
+      hallTop2026: !!document.querySelector("#hallOfFameView [data-hall-panel='top2026']"),
       equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
       winterRatingSection: !!document.getElementById("winterRatingSection"),
       modules: performance.getEntriesByType("resource")
@@ -156,7 +160,11 @@ async function main() {
     if (!state.dialogs) throw new Error("chat dialogs DOM is missing");
     if (!state.chatGeneral) throw new Error("chat general DOM is missing");
     if (!state.chatPersonal) throw new Error("chat personal DOM is missing");
+    if (!state.profileView) throw new Error("profile fragment was not hydrated");
+    if (!state.profileStatus) throw new Error("profile status DOM is missing");
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
+    if (!state.hallOfFameView) throw new Error("hall of fame fragment was not hydrated");
+    if (!state.hallTop2026) throw new Error("hall of fame top2026 panel is missing");
     if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
