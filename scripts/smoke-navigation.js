@@ -139,6 +139,9 @@ async function main() {
       heavyScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
+      hiddenImages: performance.getEntriesByType("resource")
+        .filter((entry) => /\/assets\/(?:dep-manager|dep-manager-vika|download-hero|raffles-hero)\./.test(entry.name))
+        .map((entry) => entry.name.split("/").pop()),
     }));
     if (initialLazy.initChat !== "undefined") throw new Error("initChat loaded before opening chat");
     if (initialLazy.chatScripts.length) throw new Error("chat scripts loaded before opening chat: " + initialLazy.chatScripts.join(", "));
@@ -147,6 +150,7 @@ async function main() {
     if (initialLazy.initRaffles !== "undefined") throw new Error("raffles loaded before opening raffles");
     if (initialLazy.initAdminReport !== "undefined") throw new Error("admin loaded before opening admin");
     if (initialLazy.heavyScripts.length) throw new Error("heavy lazy scripts loaded before navigation: " + initialLazy.heavyScripts.join(", "));
+    if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
     const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
     const views = [];

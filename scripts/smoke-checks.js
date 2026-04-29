@@ -877,6 +877,17 @@ add("Large unused movie assets are not shipped", () =>
   has("html", 'loading="lazy"')
 );
 
+add("Hidden cashout manager photos do not preload on home", () =>
+  !has("html", 'rel="preload" as="image" href="./assets/dep-manager.jpg"') &&
+  !has("html", 'rel="preload" as="image" href="./assets/dep-manager-vika.jpg"') &&
+  hasAll("html", [
+    'src="./assets/dep-manager.jpg"',
+    'src="./assets/dep-manager-vika.jpg"',
+    'class="cashout-image"',
+    'loading="lazy"',
+  ])
+);
+
 add("Public build stays under the mobile asset budget", () => {
   const publicBytes = dirSizeBytes(path.join(root, "public"));
   const budgetBytes = 105 * 1024 * 1024;
