@@ -14,6 +14,9 @@ const files = {
   html: read("index.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
+  appChatLifecycle: read("app-chat-lifecycle.js"),
+  appWebviewKeyboard: read("app-webview-keyboard.js"),
+  appViewRouter: read("app-view-router.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
@@ -485,6 +488,9 @@ add("JS manifest maps core app domains", () =>
     '"app-auth.js"',
     '"app-network.js"',
     '"app-pwa-auth.js"',
+    '"app-chat-lifecycle.js"',
+    '"app-webview-keyboard.js"',
+    '"app-view-router.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
     '"app-lazy-loader.js"',
@@ -496,6 +502,10 @@ add("JS manifest preserves critical load order", () => {
   return appearsBefore(order, "app-auth.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-navigation-scroll.js", "app-webview-keyboard.js") &&
+    appearsBefore(order, "app-webview-keyboard.js", "app-chat-lifecycle.js") &&
+    appearsBefore(order, "app-chat-lifecycle.js", "app-view-router.js") &&
+    appearsBefore(order, "app-view-router.js", "app.js") &&
     appearsBefore(order, "app-network.js", "app-api-tracking.js") &&
     appearsBefore(order, "app-network.js", "app.js") &&
     appearsBefore(order, "app-auth.js", "app-auth-debug.js") &&
@@ -519,6 +529,27 @@ add("Network helpers stay isolated from the app monolith", () =>
   !has("app", "function pokerFetchWithTimeout") &&
   !has("app", "function pokerFetchRetry") &&
   !has("app", "var POKER_FETCH_TIMEOUT_MS")
+);
+
+add("App monolith delegates chat lifecycle, webview keyboard, and view router", () =>
+  hasAll("appChatLifecycle", [
+    "function initChat()",
+    "window.__pokerRefreshChatUnreadForPwaBadge",
+  ]) &&
+  hasAll("appWebviewKeyboard", [
+    "var telegramIosKeyboardRootLockActive",
+    "function setTelegramIosKeyboardRootLock",
+    "(function initKeyboardLab()",
+  ]) &&
+  hasAll("appViewRouter", [
+    "function setView(viewName, navOpts)",
+    "const views = document.querySelectorAll",
+    "function pokerOpenChatFromTab",
+    "function handleViewLinkClick",
+  ]) &&
+  !has("app", "function initChat()") &&
+  !has("app", "function setView(viewName, navOpts)") &&
+  !has("app", "var telegramIosKeyboardRootLockActive")
 );
 
 add("View navigation is not gated by lazy loading", () =>

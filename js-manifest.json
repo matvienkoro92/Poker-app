@@ -11,6 +11,7 @@
       "app-network.js"
     ],
     "chat": [
+      "app-chat-lifecycle.js",
       "app-chat-utils.js",
       "app-chat-render-utils.js",
       "app-chat-contacts-render.js",
@@ -96,6 +97,8 @@
     "shell": [
       "app-shell-layout.js",
       "app-navigation-scroll.js",
+      "app-webview-keyboard.js",
+      "app-view-router.js",
       "app-network.js",
       "app-api-tracking.js",
       "app-lazy-loader.js",
