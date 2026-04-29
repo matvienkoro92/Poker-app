@@ -27,7 +27,12 @@ const files = {
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
+  redisLib: read("lib/redis.js"),
+  accountIdLib: read("lib/account-id.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
+  rafflesHandler: read("lib/api-handlers/raffles.js"),
+  respectHandler: read("lib/api-handlers/respect.js"),
+  usersHandler: read("lib/api-handlers/users.js"),
   chatWebpushNotify: read("lib/chat-webpush-notify.js"),
   chatPushAdminBroadcastHandler: read("lib/api-handlers/chat-push-admin-broadcast.js"),
   authPwaCodeHandler: read("lib/api-handlers/auth-pwa-code.js"),
@@ -485,6 +490,29 @@ add("Chat API supports fast/diff/poll responses", () =>
     "afterTime",
     "contactsMetaOnly",
   ])
+);
+
+add("Shared Redis layer owns pipeline helpers for contract-covered handlers", () =>
+  hasAll("redisLib", [
+    "function pipeline(commands, options)",
+    "function getJson(key, fallback, options)",
+    "function setJson(key, value, options)",
+    "function hgetall(key, options)",
+    "function timeout(promise, ms, context)",
+    "function normalizeRedisError(error, context)",
+    "AbortController",
+    "module.exports",
+  ]) &&
+  has("accountIdLib", 'require("./redis")') &&
+  has("chatHandler", 'require("../redis")') &&
+  has("rafflesHandler", 'require("../redis")') &&
+  has("respectHandler", 'require("../redis")') &&
+  has("usersHandler", 'require("../redis")') &&
+  !has("accountIdLib", "function redisPipeline") &&
+  !has("chatHandler", "function redisPipeline") &&
+  !has("rafflesHandler", "function redisPipeline") &&
+  !has("respectHandler", "function redisPipeline") &&
+  !has("usersHandler", "function redisPipeline")
 );
 
 add("Chat sender label hides Telegram login when a name exists", () =>
