@@ -2141,6 +2141,29 @@ function getPokerResolvedTelegramUser() {
       } catch (eKeepAuth) {}
       return;
     }
+    if (!force) {
+      try {
+        var hasStoredSessionForRestore =
+          (typeof pokerReadPwaTgSessionToken === "function" && pokerReadPwaTgSessionToken()) ||
+          (typeof pokerReadPwaVkSessionToken === "function" && pokerReadPwaVkSessionToken());
+        var authNow = window.__pokerTelegramAuth;
+        var canTryStoredSession =
+          hasStoredSessionForRestore &&
+          !(authNow && (authNow.status === "invalid" || authNow.status === "guest"));
+        if (canTryStoredSession && typeof attemptPwaSideAuthRestoreAsync === "function") {
+          try {
+            setPwaAuthIdentifyingPhase(true);
+          } catch (eIdStored) {}
+          attemptPwaSideAuthRestoreAsync().then(function (restored) {
+            try {
+              setPwaAuthIdentifyingPhase(false);
+            } catch (eIdStoredOff) {}
+            if (!restored) showUnauthorized(true);
+          });
+          return;
+        }
+      } catch (eStoredRestore) {}
+    }
     pokerSetHomeAuthResolved(false);
     if (userEl) userEl.classList.add("auth-user--hidden");
     if (shouldUseOverlayAuthScreen()) {
@@ -2979,16 +3002,37 @@ function getPokerResolvedTelegramUser() {
       return;
     }
 
-    window.__pokerTelegramAuth = { status: "verifying", user: null, error: null };
+    var restoredBeforeInitDataRefresh = false;
+    try {
+      restoredBeforeInitDataRefresh = attemptPwaSideAuthRestore(hideBootOverlay);
+    } catch (ePreInitRestore) {}
+    var hadVerifiedBeforeInitDataRefresh = restoredBeforeInitDataRefresh || hasActiveVerifiedAuthState();
+    if (!hadVerifiedBeforeInitDataRefresh) window.__pokerTelegramAuth = { status: "verifying", user: null, error: null };
     var verifyFlowGeneration = bumpAuthFlowGeneration();
-    setBannerVerifying();
-    showUnauthorized();
+    if (!hadVerifiedBeforeInitDataRefresh) setBannerVerifying();
+    if (hadVerifiedBeforeInitDataRefresh) {
+      hidePwaAuthScreen();
+      hideIdentifyingMini();
+    }
     updateHeaderGreeting();
     // В PWA держим загрузочный оверлей чуть дольше, чтобы не мигал экран входа.
     setTimeout(hideBootOverlay, isPwaStandaloneMode() ? 1600 : 200);
 
     var maxAuthAttempts = 5;
     var attempts = 0;
+    function keepRestoredAuthIfPossible() {
+      if (!hadVerifiedBeforeInitDataRefresh) return false;
+      try {
+        var authKeep = window.__pokerTelegramAuth;
+        if (!authKeep || !authKeep.user || authKeep.status !== "verified") return false;
+        updateHeaderGreeting();
+        showAuthorized(authKeep.user);
+        hideBootOverlay();
+        return true;
+      } catch (eKeepRestored) {
+        return false;
+      }
+    }
     function tryOnce() {
       if (verifyFlowGeneration !== authFlowGeneration) return;
       attempts += 1;
@@ -3024,6 +3068,7 @@ function getPokerResolvedTelegramUser() {
             return;
           }
           if (res.status === 401 || (data && String(data.error || "").indexOf("Invalid") !== -1)) {
+            if (keepRestoredAuthIfPossible()) return;
             window.__pokerTelegramAuth = { status: "invalid", user: null, error: data.error || "invalid" };
             updateHeaderGreeting();
             showUnauthorized();
@@ -3059,6 +3104,7 @@ function getPokerResolvedTelegramUser() {
             setTimeout(tryOnce, authRetryDelayMs(attempts));
             return;
           }
+          if (keepRestoredAuthIfPossible()) return;
           window.__pokerTelegramAuth = { status: "network", user: null, error: "bad_response" };
           updateHeaderGreeting();
           showUnauthorized();
@@ -3077,6 +3123,7 @@ function getPokerResolvedTelegramUser() {
             setTimeout(tryOnce, authRetryDelayMs(attempts));
             return;
           }
+          if (keepRestoredAuthIfPossible()) return;
           window.__pokerTelegramAuth = { status: "network", user: null, error: "fetch" };
           updateHeaderGreeting();
           showUnauthorized();

@@ -118,8 +118,20 @@ add("PWA auth keeps verified sessions over stale unauthorized UI", () =>
     "function hasActiveVerifiedAuthState()",
     "function showUnauthorized(force)",
     "if (!force && hasActiveVerifiedAuthState())",
+    "var hasStoredSessionForRestore =",
+    "attemptPwaSideAuthRestoreAsync().then(function (restored)",
     "var authFlowGeneration = 0",
     "var verifyFlowGeneration = bumpAuthFlowGeneration()",
+  ])
+);
+
+add("PWA Telegram startup keeps restored session during initData refresh", () =>
+  hasAll("client", [
+    "var restoredBeforeInitDataRefresh = false",
+    "restoredBeforeInitDataRefresh = attemptPwaSideAuthRestore(hideBootOverlay)",
+    "var hadVerifiedBeforeInitDataRefresh = restoredBeforeInitDataRefresh || hasActiveVerifiedAuthState()",
+    "function keepRestoredAuthIfPossible()",
+    "if (keepRestoredAuthIfPossible()) return",
   ])
 );
 
