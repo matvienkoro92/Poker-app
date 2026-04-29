@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.350">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.351">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -278,7 +278,7 @@
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/dep-manager.jpg" />
     <link rel="preload" as="image" href="./assets/dep-manager-vika.jpg" />
-    <link rel="stylesheet" href="./styles.css?v=2.350" />
+    <link rel="stylesheet" href="./styles.css?v=2.351" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -828,794 +828,8 @@
 
           </div>
 
-          <!-- Рейтинг Турнирщиков зимы: даты и итоговая таблица внутри -->
-          <div class="view" data-view="winter-rating">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
-            <section class="winter-rating" id="winterRatingSection" aria-labelledby="winterRatingTitle">
-              <div class="winter-rating__winter-decor" aria-hidden="true"><span class="winter-rating__suit">♠</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♥</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♦</span><span class="winter-rating__snow">❄</span><span class="winter-rating__suit">♣</span></div>
-              <h2 class="winter-rating__title" id="winterRatingTitle">
-                <span class="winter-rating__cup" aria-hidden="true">🏆</span>
-                <span class="winter-rating__title-text">Рейтинг Турнирщиков зимы<br /><span class="winter-rating__title-accent">на 250 000₽</span></span>
-                <span class="winter-rating__title-snow" aria-hidden="true">❄</span>
-              </h2>
-              <div class="winter-rating__spring-conditions-wrap" id="springRatingConditionsWrap">
-                <button type="button" class="winter-rating__spring-conditions-btn" id="springRatingConditionsBtn">Условия и призы</button>
-              </div>
-              <div class="winter-rating__spring-main-tabs" id="winterRatingSpringMainTabs" aria-label="Лиги рейтинга весны" hidden>
-                <button type="button" class="winter-rating__spring-main-tab winter-rating__spring-main-tab--active" data-spring-main-league="1">Лига 1</button>
-                <button type="button" class="winter-rating__spring-main-tab" data-spring-main-league="2">Лига 2</button>
-              </div>
-              <div class="winter-rating__table-caption-row" id="winterRatingTableCaptionRow">
-                <h3 class="winter-rating__table-caption"><span class="winter-rating__caption-icon" aria-hidden="true">❄</span> Итоговая таблица</h3>
-                <div class="winter-rating__counters-block">
-                  <div class="winter-rating__counters" id="winterRatingCounters" aria-live="polite">Рейтинг до 28 февраля. Загрузка…</div>
-                </div>
-              </div>
-              <div class="spring-rating-top3" id="springRatingTop3Podium" aria-label="Топ-3 рейтинга весны" hidden></div>
-              <div class="winter-rating__table-wrap" id="winterRatingTableWrap">
-                <table class="winter-rating__table" id="winterRatingTableOverall">
-                  <thead>
-                    <tr>
-                      <th>Место</th>
-                      <th>Ник</th>
-                      <th>Баллы</th>
-                      <th>Выигрыш в<br>турнирах</th>
-                    </tr>
-                  </thead>
-                  <tbody id="winterRatingTableBody"></tbody>
-                </table>
-              </div>
-              <div class="winter-rating__spring-leagues" id="winterRatingSpringLeagues" aria-label="Итоговые таблицы рейтинга весны по лигам" hidden>
-                <div class="winter-rating__spring-league winter-rating__spring-league--main" data-spring-league="1">
-                  <h3 class="winter-rating__spring-league-caption">Лига 1. Турниры от 500₽</h3>
-                  <div class="spring-rating-top3 spring-rating-top3--league" id="springRatingTop3PodiumLeague1" aria-label="Топ-3 Лига 1" hidden></div>
-                  <p class="spring-rating-final-countdown" aria-live="polite">
-                    <span class="spring-rating-final-countdown__line">Итоги 31-го мая</span>
-                    <span class="spring-rating-final-countdown__line">До итогов: <span class="spring-rating-final-countdown__days">—</span></span>
-                  </p>
-                  <div class="winter-rating__table-wrap winter-rating__table-wrap--league winter-rating__table-wrap--league1">
-                    <table class="winter-rating__table winter-rating__table--league1-prizes">
-                      <thead>
-                        <tr>
-                          <th class="winter-rating__th-place">Место</th>
-                          <th class="winter-rating__th-nick">Ник</th>
-                          <th class="winter-rating__th-points">Баллы</th>
-                          <th class="winter-rating__th-reward">Выигрыш</th>
-                          <th class="winter-rating__th-prize">Приз</th>
-                        </tr>
-                      </thead>
-                      <tbody id="winterRatingLeague1Body"></tbody>
-                    </table>
-                  </div>
-                  <p class="winter-rating__show-all-wrap winter-rating__show-all-wrap--league" id="winterRatingLeague1ShowAllWrap" style="display:none">
-                    <button type="button" class="winter-rating__show-all-btn winter-rating__show-all-btn--league" data-league="1">Ещё</button>
-                  </p>
-                  <div class="winter-rating__search-wrap winter-rating__search-wrap--league" id="winterRatingLeague1SearchWrap" style="display:none">
-                    <input type="text" class="winter-rating__search-input" id="winterRatingLeague1SearchInput" placeholder="Введите ник для поиска, как в приложении" autocomplete="off" aria-label="Поиск по нику в Лиге 1" />
-                  </div>
-                  <p class="winter-rating__spring-league-share-wrap">
-                    <button
-                      type="button"
-                      class="winter-rating__subscribe-btn rating-subscribe-btn"
-                      data-spring-league="1"
-                      id="ratingSubscribeBtn"
-                    >
-                      <span>Подписаться на Лигу 1</span>
-                    </button>
-                    <button
-                      type="button"
-                      class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__spring-league-share"
-                      data-spring-league="1"
-                      aria-label="Скопировать ссылку на рейтинг Лига 1"
-                    ><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                  </p>
-                </div>
-                <div class="winter-rating__spring-league winter-rating__spring-league--main" data-spring-league="2" style="display:none">
-                  <h3 class="winter-rating__spring-league-caption">Лига 2. Турниры от 100₽ до 500₽</h3>
-                  <div class="spring-rating-top3 spring-rating-top3--league" id="springRatingTop3PodiumLeague2" aria-label="Топ-3 Лига 2" hidden></div>
-                  <p class="spring-rating-final-countdown" aria-live="polite">
-                    <span class="spring-rating-final-countdown__line">Итоги 31-го мая</span>
-                    <span class="spring-rating-final-countdown__line">До итогов: <span class="spring-rating-final-countdown__days">—</span></span>
-                  </p>
-                  <div class="winter-rating__table-wrap winter-rating__table-wrap--league winter-rating__table-wrap--league1">
-                    <table class="winter-rating__table winter-rating__table--league1-prizes">
-                      <thead>
-                        <tr>
-                          <th class="winter-rating__th-place">Место</th>
-                          <th class="winter-rating__th-nick">Ник</th>
-                          <th class="winter-rating__th-points">Баллы</th>
-                          <th class="winter-rating__th-reward">Выигрыш</th>
-                          <th class="winter-rating__th-prize">Приз</th>
-                        </tr>
-                      </thead>
-                      <tbody id="winterRatingLeague2Body"></tbody>
-                    </table>
-                  </div>
-                  <p class="winter-rating__show-all-wrap winter-rating__show-all-wrap--league" id="winterRatingLeague2ShowAllWrap" style="display:none">
-                    <button type="button" class="winter-rating__show-all-btn winter-rating__show-all-btn--league" data-league="2">Ещё</button>
-                  </p>
-                  <div class="winter-rating__search-wrap winter-rating__search-wrap--league" id="winterRatingLeague2SearchWrap" style="display:none">
-                    <input type="text" class="winter-rating__search-input" id="winterRatingLeague2SearchInput" placeholder="Введите ник для поиска, как в приложении" autocomplete="off" aria-label="Поиск по нику в Лиге 2" />
-                  </div>
-                  <p class="winter-rating__spring-league-share-wrap">
-                    <button
-                      type="button"
-                      class="winter-rating__subscribe-btn rating-subscribe-btn"
-                      data-spring-league="2"
-                      id="ratingSubscribeBtnLeague2"
-                    >
-                      <span>Подписаться на Лигу 2</span>
-                    </button>
-                    <button
-                      type="button"
-                      class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__spring-league-share"
-                      data-spring-league="2"
-                      aria-label="Скопировать ссылку на рейтинг Лига 2"
-                    ><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-                  </p>
-                </div>
-              </div>
-              <p class="winter-rating__show-all-wrap" id="winterRatingShowAllWrap">
-                <button type="button" class="winter-rating__show-all-btn" id="winterRatingShowAllBtn">Ещё</button>
-              </p>
-              <div class="winter-rating__search-wrap" id="winterRatingSearchWrap">
-                <input type="text" class="winter-rating__search-input" id="winterRatingSearchInput" placeholder="Введите ник для поиска, как в приложении" autocomplete="off" aria-label="Поиск по нику в итоговой таблице" />
-              </div>
-              <div class="winter-rating__actions-wrap">
-                <div class="winter-rating__actions-row winter-rating__actions-row--admin winter-rating__admin-row--hidden" id="winterRatingAdminRow">
-                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifyBtn">Сообщить в чат об обновлении рейтинга</button>
-                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifySubsBtn">Разослать подписчикам рейтинга</button>
-                </div>
-                <p class="winter-rating__admin-hint" id="winterRatingNotifyHint"></p>
-              </div>
-              <p class="winter-rating__week-tops-hint">
-                Топ‑3 недели получают от клуба дополнительные бонусы: 1‑е место — билеты на турниры на 5000₽, 2‑е — билеты за 3000₽, 3‑е — билет за 1000₽.
-              </p>
-              <div class="winter-rating__week-tops-row">
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopCurrentWeekBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы текущей недели</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopCurrentWeekPreview"></span>
-                </button>
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopPastWeekBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы прошлой недели</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopPastWeekPreview"></span>
-                </button>
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopFebruaryBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы Февраля</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopFebruaryPreview"></span>
-                </button>
-              </div>
-              <div class="spring-rating-view-totals-stack" id="springRatingViewTotals" hidden>
-                <div class="spring-rating-home-promo-stats spring-rating-view-totals-panel spring-rating-view-totals-panel--april">
-                  <div class="spring-rating-view-totals__april-head">
-                    <span class="spring-rating-view-totals__month-title"><strong>Апрель</strong></span>
-                    <span class="spring-rating-view-totals__month-meta">Общий выигрыш игроков: <strong id="springRatingViewAprilTotal">—</strong></span>
-                  </div>
-                  <div class="spring-rating-view-totals__weeks-host" id="springRatingViewAprilWeeks"></div>
-                </div>
-                <div class="spring-rating-home-promo-stats spring-rating-view-totals-panel spring-rating-view-totals-panel--march">
-                  <details class="spring-rating-view-totals__month spring-rating-view-totals__month--march">
-                    <summary class="spring-rating-view-totals__month-summary">
-                      <span class="spring-rating-view-totals__month-title"><strong>Март</strong> · итоги</span>
-                      <span class="spring-rating-view-totals__month-meta">Общий выигрыш игроков: <strong id="springRatingViewMarchTotal">—</strong></span>
-                    </summary>
-                    <div class="spring-rating-view-totals__weeks-host" id="springRatingViewMarchWeeks"></div>
-                  </details>
-                </div>
-              </div>
-              <h3 class="winter-rating__dates-caption"><span class="winter-rating__caption-icon" aria-hidden="true">❄</span> Таблица по датам</h3>
-              <p class="winter-rating__dates-hint">Выберите дату в календаре</p>
-              <div class="winter-rating__dates" id="winterRatingDates">
-                <div class="winter-rating__calendar-wrap" id="winterRatingCalendarWrap" aria-hidden="true"></div>
-                <div class="winter-rating__single-top-row">
-                  <div class="winter-rating__single-top-wrap" id="winterRatingSingleTopWrap">
-                    <h4 class="winter-rating__single-top winter-rating__single-top--title" id="winterRatingSingleTopSummary">Топ выигрышей за один турнир (2026)</h4>
-                    <ul class="winter-rating__single-top-list" id="winterRatingSingleTopList"></ul>
-                  </div>
-                  <div class="winter-rating__single-top-wrap winter-rating__single-top-wrap--march" id="winterRatingMarchWinsWrap" hidden>
-                    <p class="winter-rating__single-top" id="winterRatingMarchWinsSummary"></p>
-                    <p class="winter-rating__single-top winter-rating__single-top--sublabel" id="winterRatingMarchWinsTop3Caption"></p>
-                    <ul class="winter-rating__single-top-list" id="winterRatingMarchWinsList"></ul>
-                  </div>
-                </div>
-                <!-- 28.02, 27.02, 25.02, 24.02, 23.02… -->
-                <div class="winter-rating__date-item" data-rating-date="28.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2802">28.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2802" role="region" aria-label="Рейтинг на 28.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="28.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2802"></div>
-                    <div class="winter-rating__date-share" data-rating-date="28.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 28.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="27.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2702">27.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2702" role="region" aria-label="Рейтинг на 27.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="27.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2702"></div>
-                    <div class="winter-rating__date-share" data-rating-date="27.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 27.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="25.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2502">25.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2502" role="region" aria-label="Рейтинг на 25.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="25.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2502"></div>
-                    <div class="winter-rating__date-share" data-rating-date="25.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 25.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="24.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2402">24.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2402" role="region" aria-label="Рейтинг на 24.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="24.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2402"></div>
-                    <div class="winter-rating__date-share" data-rating-date="24.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 24.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="23.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2302">23.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2302" role="region" aria-label="Рейтинг на 23.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="23.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2302"></div>
-                    <div class="winter-rating__date-share" data-rating-date="23.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 23.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="22.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2202">22.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2202" role="region" aria-label="Рейтинг на 22.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="22.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2202"></div>
-                    <div class="winter-rating__date-share" data-rating-date="22.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 22.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="21.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2102">21.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2102" role="region" aria-label="Рейтинг на 21.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="21.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2102"></div>
-                    <div class="winter-rating__date-share" data-rating-date="21.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 21.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="20.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2002">20.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2002" role="region" aria-label="Рейтинг на 20.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="20.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2002"></div>
-                    <div class="winter-rating__date-share" data-rating-date="20.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 20.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="19.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1902">19.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1902" role="region" aria-label="Рейтинг на 19.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="19.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1902"></div>
-                    <div class="winter-rating__date-share" data-rating-date="19.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 19.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="17.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1702">17.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1702" role="region" aria-label="Рейтинг на 17.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="17.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1702"></div>
-                    <div class="winter-rating__date-share" data-rating-date="17.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 17.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="16.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1602">16.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1602" role="region" aria-label="Рейтинг на 16.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="16.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1602"></div>
-                    <div class="winter-rating__date-share" data-rating-date="16.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 16.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="15.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1502">15.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1502" role="region" aria-label="Рейтинг на 15.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="15.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1502"></div>
-                    <div class="winter-rating__date-share" data-rating-date="15.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 15.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="14.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1402">14.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1402" role="region" aria-label="Рейтинг на 14.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="14.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1402"></div>
-                    <div class="winter-rating__date-share" data-rating-date="14.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 14.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="13.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1302">13.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1302" role="region" aria-label="Рейтинг на 13.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="13.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1302"></div>
-                    <div class="winter-rating__date-share" data-rating-date="13.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 13.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="12.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1202">12.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1202" role="region" aria-label="Рейтинг на 12.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="12.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1202"></div>
-                    <div class="winter-rating__date-share" data-rating-date="12.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 12.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="11.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1102">11.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1102" role="region" aria-label="Рейтинг на 11.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="11.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1102"></div>
-                    <div class="winter-rating__date-share" data-rating-date="11.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 11.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="10.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel10">10.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel10" role="region" aria-label="Рейтинг на 10.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="10.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable10"></div>
-                    <div class="winter-rating__date-share" data-rating-date="10.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 10.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="09.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel09">09.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel09" role="region" aria-label="Рейтинг на 09.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="09.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable09"></div>
-                    <div class="winter-rating__date-share" data-rating-date="09.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 09.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="08.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel08">08.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel08" role="region" aria-label="Рейтинг на 08.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="08.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable08"></div>
-                    <div class="winter-rating__date-share" data-rating-date="08.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 08.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="07.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel07">07.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel07" role="region" aria-label="Рейтинг на 07.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="07.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable07"></div>
-                    <div class="winter-rating__date-share" data-rating-date="07.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 07.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="06.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel06">06.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel06" role="region" aria-label="Рейтинг на 06.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="06.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable06"></div>
-                    <div class="winter-rating__date-share" data-rating-date="06.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 06.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="05.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel05">05.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel05" role="region" aria-label="Рейтинг на 05.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="05.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable05"></div>
-                    <div class="winter-rating__date-share" data-rating-date="05.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 05.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="04.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel04">04.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel04" role="region" aria-label="Рейтинг на 04.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="04.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable04"></div>
-                    <div class="winter-rating__date-share" data-rating-date="04.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 04.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="03.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel03">03.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel03" role="region" aria-label="Рейтинг на 03.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="03.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable03"></div>
-                    <div class="winter-rating__date-share" data-rating-date="03.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 03.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="02.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel02">02.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel02" role="region" aria-label="Рейтинг на 02.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="02.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable02"></div>
-                    <div class="winter-rating__date-share" data-rating-date="02.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 02.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="01.02.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel01">01.02.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel01" role="region" aria-label="Рейтинг на 01.02.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="01.02.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable01"></div>
-                    <div class="winter-rating__date-share" data-rating-date="01.02.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 01.02.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="31.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel3101">31.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel3101" role="region" aria-label="Рейтинг на 31.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="31.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable3101"></div>
-                    <div class="winter-rating__date-share" data-rating-date="31.01.2026"><button type="button" class="winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn" aria-label="Скопировать ссылку на рейтинг за 31.01.2026"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="30.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel3001">30.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel3001" role="region" aria-label="Рейтинг на 30.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="30.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable3001"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="29.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2901">29.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2901" role="region" aria-label="Рейтинг на 29.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="29.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2901"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="28.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2801">28.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2801" role="region" aria-label="Рейтинг на 28.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="28.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2801"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="27.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2701">27.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2701" role="region" aria-label="Рейтинг на 27.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="27.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2701"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="26.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2601">26.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2601" role="region" aria-label="Рейтинг на 26.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="26.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2601"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="25.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2501">25.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2501" role="region" aria-label="Рейтинг на 25.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="25.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2501"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="24.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2401">24.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2401" role="region" aria-label="Рейтинг на 24.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="24.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2401"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="23.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2301">23.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2301" role="region" aria-label="Рейтинг на 23.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="23.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2301"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="22.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2201">22.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2201" role="region" aria-label="Рейтинг на 22.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="22.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2201"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="21.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2101">21.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2101" role="region" aria-label="Рейтинг на 21.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="21.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2101"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="20.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2001">20.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2001" role="region" aria-label="Рейтинг на 20.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="20.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2001"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="19.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1901">19.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1901" role="region" aria-label="Рейтинг на 19.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="19.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1901"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="18.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1801">18.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1801" role="region" aria-label="Рейтинг на 18.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="18.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1801"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="17.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1701">17.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1701" role="region" aria-label="Рейтинг на 17.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="17.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1701"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="16.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1601">16.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1601" role="region" aria-label="Рейтинг на 16.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="16.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1601"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="15.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1501">15.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1501" role="region" aria-label="Рейтинг на 15.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="15.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1501"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="14.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1401">14.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1401" role="region" aria-label="Рейтинг на 14.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="14.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1401"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="13.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1301">13.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1301" role="region" aria-label="Рейтинг на 13.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="13.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1301"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="12.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1201">12.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1201" role="region" aria-label="Рейтинг на 12.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="12.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1201"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="11.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1101">11.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1101" role="region" aria-label="Рейтинг на 11.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="11.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1101"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="10.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1001">10.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1001" role="region" aria-label="Рейтинг на 10.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="10.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1001"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="09.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0901">09.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0901" role="region" aria-label="Рейтинг на 09.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="09.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0901"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="08.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0801">08.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0801" role="region" aria-label="Рейтинг на 08.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="08.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0801"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="07.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0701">07.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0701" role="region" aria-label="Рейтинг на 07.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="07.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0701"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="05.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0501">05.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0501" role="region" aria-label="Рейтинг на 05.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="05.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0501"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="04.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0401">04.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0401" role="region" aria-label="Рейтинг на 04.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="04.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0401"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="03.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0301">03.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0301" role="region" aria-label="Рейтинг на 03.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="03.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0301"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="02.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0201">02.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0201" role="region" aria-label="Рейтинг на 02.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="02.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0201"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="01.01.2026">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0101">01.01.2026</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0101" role="region" aria-label="Рейтинг на 01.01.2026">
-                    <div class="winter-rating__screenshots" data-rating-date="01.01.2026"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0101"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="31.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel3112">31.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel3112" role="region" aria-label="Рейтинг на 31.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="31.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable3112"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="30.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel3012">30.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel3012" role="region" aria-label="Рейтинг на 30.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="30.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable3012"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="29.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2912">29.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2912" role="region" aria-label="Рейтинг на 29.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="29.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2912"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="28.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2812">28.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2812" role="region" aria-label="Рейтинг на 28.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="28.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2812"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="27.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2712">27.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2712" role="region" aria-label="Рейтинг на 27.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="27.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2712"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="26.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2612">26.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2612" role="region" aria-label="Рейтинг на 26.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="26.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2612"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="25.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2512">25.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2512" role="region" aria-label="Рейтинг на 25.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="25.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2512"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="24.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2412">24.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2412" role="region" aria-label="Рейтинг на 24.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="24.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2412"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="23.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2312">23.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2312" role="region" aria-label="Рейтинг на 23.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="23.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2312"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="22.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2212">22.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2212" role="region" aria-label="Рейтинг на 22.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="22.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2212"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="21.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2112">21.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2112" role="region" aria-label="Рейтинг на 21.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="21.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2112"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="20.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel2012">20.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel2012" role="region" aria-label="Рейтинг на 20.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="20.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable2012"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="19.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1912">19.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1912" role="region" aria-label="Рейтинг на 19.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="19.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1912"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="18.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1812">18.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1812" role="region" aria-label="Рейтинг на 18.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="18.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1812"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="17.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1712">17.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1712" role="region" aria-label="Рейтинг на 17.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="17.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1712"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="16.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1612">16.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1612" role="region" aria-label="Рейтинг на 16.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="16.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1612"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="15.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1512">15.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1512" role="region" aria-label="Рейтинг на 15.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="15.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1512"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="14.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1412">14.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1412" role="region" aria-label="Рейтинг на 14.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="14.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1412"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="13.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1312">13.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1312" role="region" aria-label="Рейтинг на 13.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="13.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1312"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="12.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1212">12.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1212" role="region" aria-label="Рейтинг на 12.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="12.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1212"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="11.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1112">11.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1112" role="region" aria-label="Рейтинг на 11.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="11.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1112"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="10.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel1012">10.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel1012" role="region" aria-label="Рейтинг на 10.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="10.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable1012"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="09.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0912">09.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0912" role="region" aria-label="Рейтинг на 09.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="09.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0912"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="08.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0812">08.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0812" role="region" aria-label="Рейтинг на 08.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="08.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0812"></div>
-                  </div>
-                </div>
-                <div class="winter-rating__date-item" data-rating-date="07.12.2025">
-                  <button type="button" class="winter-rating__date-btn" aria-expanded="false" aria-controls="winterRatingPanel0712">07.12.2025</button>
-                  <div class="winter-rating__date-panel winter-rating__date-panel--hidden" id="winterRatingPanel0712" role="region" aria-label="Рейтинг на 07.12.2025">
-                    <div class="winter-rating__screenshots" data-rating-date="07.12.2025"></div>
-                    <div class="winter-rating__date-table-wrap" id="winterRatingDateTable0712"></div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
+          <!-- Рейтинг зимы/весны грузится лениво: тяжёлый DOM живёт в html-fragments/winter-rating.html -->
+          <div class="view" data-view="winter-rating" data-html-fragment="./html-fragments/winter-rating.html" data-html-fragment-view="winter-rating"></div>
 
           <!-- Рейтинг Весны: тот же контент, переносится из winter-rating при открытии -->
           <div class="view" data-view="spring-rating" id="springRatingView">
@@ -5632,82 +4846,82 @@
     </div>
 
     <!-- defer: параллельная загрузка; порядок сохранён. Telegram SDK — локально: иначе в РФ без VPN первый defer ждёт telegram.org и блокирует весь остальной JS. Обновлять: curl -o telegram-web-app.js https://telegram.org/js/telegram-web-app.js -->
-    <script defer src="./telegram-web-app.js?v=2.350"></script>
-    <script defer src="./updates-data.js?v=2.350"></script>
-    <script defer src="./poker-tasks-data.js?v=2.350"></script>
-    <script defer src="./app-auth.js?v=2.350"></script>
-    <script defer src="./app-network.js?v=2.350"></script>
-    <script defer src="./app-home-media.js?v=2.350"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=2.350"></script>
-    <script defer src="./app-rating-core.js?v=2.350"></script>
-    <script defer src="./app-chat-utils.js?v=2.350"></script>
-    <script defer src="./app-chat-render-utils.js?v=2.350"></script>
-    <script defer src="./app-chat-contacts-render.js?v=2.350"></script>
-    <script defer src="./app-chat-dialogs.js?v=2.350"></script>
-    <script defer src="./app-chat-storage.js?v=2.350"></script>
-    <script defer src="./app-chat-prefetch.js?v=2.350"></script>
-    <script defer src="./app-chat-group-pickers.js?v=2.350"></script>
-    <script defer src="./app-chat-group-add-members.js?v=2.350"></script>
-    <script defer src="./app-chat-group-create.js?v=2.350"></script>
-    <script defer src="./app-chat-group-info.js?v=2.350"></script>
-    <script defer src="./app-chat-user-modal.js?v=2.350"></script>
-    <script defer src="./app-chat-club-access.js?v=2.350"></script>
-    <script defer src="./app-chat-templates.js?v=2.350"></script>
-    <script defer src="./app-chat-message-render-helpers.js?v=2.350"></script>
-    <script defer src="./app-chat-message-builders.js?v=2.350"></script>
-    <script defer src="./app-chat-outgoing-helpers.js?v=2.350"></script>
-    <script defer src="./app-chat-general-loader.js?v=2.350"></script>
-    <script defer src="./app-chat-general-sender.js?v=2.350"></script>
-    <script defer src="./app-chat-personal-loader.js?v=2.350"></script>
-    <script defer src="./app-chat-personal-sender.js?v=2.350"></script>
-    <script defer src="./app-chat-reactions.js?v=2.350"></script>
-    <script defer src="./app-chat-edit-delete-ui.js?v=2.350"></script>
-    <script defer src="./app-chat-context-menu.js?v=2.350"></script>
-    <script defer src="./app-chat-polling.js?v=2.350"></script>
-    <script defer src="./app-chat-conversation-shell.js?v=2.350"></script>
-    <script defer src="./app-chat-tab-dialog-shell.js?v=2.350"></script>
-    <script defer src="./app-chat-open-shell.js?v=2.350"></script>
-    <script defer src="./app-chat-club-gate.js?v=2.350"></script>
-    <script defer src="./app-chat-dialogs-meta.js?v=2.350"></script>
-    <script defer src="./app-chat-contacts-loader.js?v=2.350"></script>
-    <script defer src="./app-chat-self-pins.js?v=2.350"></script>
-    <script defer src="./app-chat-friend-actions.js?v=2.350"></script>
-    <script defer src="./app-chat-unread.js?v=2.350"></script>
-    <script defer src="./app-chat-keyboard.js?v=2.350"></script>
-    <script defer src="./app-chat-auth-guard.js?v=2.350"></script>
-    <script defer src="./app-profile.js?v=2.350"></script>
-    <script defer src="./app-pwa-auth.js?v=2.350"></script>
-    <script defer src="./app-push.js?v=2.350"></script>
-    <script defer src="./app-streams.js?v=2.350"></script>
-    <script defer src="./app-video-lessons.js?v=2.350"></script>
-    <script defer src="./app-games.js?v=2.350"></script>
-    <script defer src="./app-raffles.js?v=2.350"></script>
-    <script defer src="./app-video-lessons-modals.js?v=2.350"></script>
-    <script defer src="./app-equilator.js?v=2.350"></script>
-    <script defer src="./app-club-tasks.js?v=2.350"></script>
-    <script defer src="./app-hall-fame.js?v=2.350"></script>
-    <script defer src="./app-rating.js?v=2.350"></script>
-    <script defer src="./app-rating-week-tops.js?v=2.350"></script>
-    <script defer src="./app-shell-layout.js?v=2.350"></script>
-    <script defer src="./app-navigation-scroll.js?v=2.350"></script>
-    <script defer src="./app-html-fragments.js?v=2.350"></script>
-    <script defer src="./app-webview-keyboard.js?v=2.350"></script>
-    <script defer src="./app-chat-lifecycle.js?v=2.350"></script>
-    <script defer src="./app-view-router.js?v=2.350"></script>
-    <script defer src="./app-api-tracking.js?v=2.350"></script>
-    <script defer src="./app-lazy-loader.js?v=2.350"></script>
-    <script defer src="./app.js?v=2.350"></script>
-    <script defer src="./app-section-views.js?v=2.350"></script>
-    <script defer src="./app-visitors-admin.js?v=2.350"></script>
-    <script defer src="./app-admin-reports.js?v=2.350"></script>
-    <script defer src="./app-auth-debug.js?v=2.350"></script>
-    <script defer src="./app-share-stats.js?v=2.350"></script>
-    <script defer src="./app-tracking-links.js?v=2.350"></script>
-    <script defer src="./app-cashout.js?v=2.350"></script>
-    <script defer src="./app-tournament-day.js?v=2.350"></script>
-    <script defer src="./app-updates.js?v=2.350"></script>
-    <script defer src="./winter-rating-data.js?v=2.350"></script>
-    <script defer src="./peerjs.min.js?v=2.350"></script>
+    <script defer src="./telegram-web-app.js?v=2.351"></script>
+    <script defer src="./updates-data.js?v=2.351"></script>
+    <script defer src="./poker-tasks-data.js?v=2.351"></script>
+    <script defer src="./app-auth.js?v=2.351"></script>
+    <script defer src="./app-network.js?v=2.351"></script>
+    <script defer src="./app-home-media.js?v=2.351"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=2.351"></script>
+    <script defer src="./app-rating-core.js?v=2.351"></script>
+    <script defer src="./app-chat-utils.js?v=2.351"></script>
+    <script defer src="./app-chat-render-utils.js?v=2.351"></script>
+    <script defer src="./app-chat-contacts-render.js?v=2.351"></script>
+    <script defer src="./app-chat-dialogs.js?v=2.351"></script>
+    <script defer src="./app-chat-storage.js?v=2.351"></script>
+    <script defer src="./app-chat-prefetch.js?v=2.351"></script>
+    <script defer src="./app-chat-group-pickers.js?v=2.351"></script>
+    <script defer src="./app-chat-group-add-members.js?v=2.351"></script>
+    <script defer src="./app-chat-group-create.js?v=2.351"></script>
+    <script defer src="./app-chat-group-info.js?v=2.351"></script>
+    <script defer src="./app-chat-user-modal.js?v=2.351"></script>
+    <script defer src="./app-chat-club-access.js?v=2.351"></script>
+    <script defer src="./app-chat-templates.js?v=2.351"></script>
+    <script defer src="./app-chat-message-render-helpers.js?v=2.351"></script>
+    <script defer src="./app-chat-message-builders.js?v=2.351"></script>
+    <script defer src="./app-chat-outgoing-helpers.js?v=2.351"></script>
+    <script defer src="./app-chat-general-loader.js?v=2.351"></script>
+    <script defer src="./app-chat-general-sender.js?v=2.351"></script>
+    <script defer src="./app-chat-personal-loader.js?v=2.351"></script>
+    <script defer src="./app-chat-personal-sender.js?v=2.351"></script>
+    <script defer src="./app-chat-reactions.js?v=2.351"></script>
+    <script defer src="./app-chat-edit-delete-ui.js?v=2.351"></script>
+    <script defer src="./app-chat-context-menu.js?v=2.351"></script>
+    <script defer src="./app-chat-polling.js?v=2.351"></script>
+    <script defer src="./app-chat-conversation-shell.js?v=2.351"></script>
+    <script defer src="./app-chat-tab-dialog-shell.js?v=2.351"></script>
+    <script defer src="./app-chat-open-shell.js?v=2.351"></script>
+    <script defer src="./app-chat-club-gate.js?v=2.351"></script>
+    <script defer src="./app-chat-dialogs-meta.js?v=2.351"></script>
+    <script defer src="./app-chat-contacts-loader.js?v=2.351"></script>
+    <script defer src="./app-chat-self-pins.js?v=2.351"></script>
+    <script defer src="./app-chat-friend-actions.js?v=2.351"></script>
+    <script defer src="./app-chat-unread.js?v=2.351"></script>
+    <script defer src="./app-chat-keyboard.js?v=2.351"></script>
+    <script defer src="./app-chat-auth-guard.js?v=2.351"></script>
+    <script defer src="./app-profile.js?v=2.351"></script>
+    <script defer src="./app-pwa-auth.js?v=2.351"></script>
+    <script defer src="./app-push.js?v=2.351"></script>
+    <script defer src="./app-streams.js?v=2.351"></script>
+    <script defer src="./app-video-lessons.js?v=2.351"></script>
+    <script defer src="./app-games.js?v=2.351"></script>
+    <script defer src="./app-raffles.js?v=2.351"></script>
+    <script defer src="./app-video-lessons-modals.js?v=2.351"></script>
+    <script defer src="./app-equilator.js?v=2.351"></script>
+    <script defer src="./app-club-tasks.js?v=2.351"></script>
+    <script defer src="./app-hall-fame.js?v=2.351"></script>
+    <script defer src="./app-rating.js?v=2.351"></script>
+    <script defer src="./app-rating-week-tops.js?v=2.351"></script>
+    <script defer src="./app-shell-layout.js?v=2.351"></script>
+    <script defer src="./app-navigation-scroll.js?v=2.351"></script>
+    <script defer src="./app-html-fragments.js?v=2.351"></script>
+    <script defer src="./app-webview-keyboard.js?v=2.351"></script>
+    <script defer src="./app-chat-lifecycle.js?v=2.351"></script>
+    <script defer src="./app-view-router.js?v=2.351"></script>
+    <script defer src="./app-api-tracking.js?v=2.351"></script>
+    <script defer src="./app-lazy-loader.js?v=2.351"></script>
+    <script defer src="./app.js?v=2.351"></script>
+    <script defer src="./app-section-views.js?v=2.351"></script>
+    <script defer src="./app-visitors-admin.js?v=2.351"></script>
+    <script defer src="./app-admin-reports.js?v=2.351"></script>
+    <script defer src="./app-auth-debug.js?v=2.351"></script>
+    <script defer src="./app-share-stats.js?v=2.351"></script>
+    <script defer src="./app-tracking-links.js?v=2.351"></script>
+    <script defer src="./app-cashout.js?v=2.351"></script>
+    <script defer src="./app-tournament-day.js?v=2.351"></script>
+    <script defer src="./app-updates.js?v=2.351"></script>
+    <script defer src="./winter-rating-data.js?v=2.351"></script>
+    <script defer src="./peerjs.min.js?v=2.351"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

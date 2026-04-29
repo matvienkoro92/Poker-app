@@ -595,7 +595,7 @@ add("Heavy video lessons HTML is lazy-loaded from a fragment", () =>
     "pokerInitVideoLessonsModals",
   ]) &&
   hasAll("appViewRouter", [
-    "pokerEnsureViewHtml(viewName)",
+    "pokerEnsureViewHtml(htmlViewName)",
     "nextOpts.htmlReady = true",
   ]) &&
   fs.existsSync(path.join(root, "html-fragments", "video-lessons.html"))
@@ -608,10 +608,26 @@ add("Equilator HTML is lazy-loaded from a fragment", () =>
   ]) &&
   !has("html", 'id="equilatorCalcBtn"') &&
   hasAll("appViewRouter", [
-    "pokerEnsureViewHtml(viewName)",
+    "pokerEnsureViewHtml(htmlViewName)",
     "if (viewName === \"equilator\") initEquilator();",
   ]) &&
   fs.existsSync(path.join(root, "html-fragments", "equilator.html"))
+);
+
+add("Winter rating HTML is lazy-loaded from a fragment", () =>
+  hasAll("html", [
+    'data-view="winter-rating"',
+    'data-html-fragment="./html-fragments/winter-rating.html"',
+    'data-view="spring-rating"',
+    'id="springRatingSectionPlaceholder"',
+  ]) &&
+  !has("html", 'id="winterRatingSection"') &&
+  hasAll("appViewRouter", [
+    'var htmlViewName = viewName === "spring-rating" ? "winter-rating" : viewName;',
+    "pokerEnsureViewHtml(htmlViewName)",
+    'if (viewName === "spring-rating")',
+  ]) &&
+  fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );
 
 add("View navigation is not gated by lazy loading", () =>

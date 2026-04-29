@@ -90,7 +90,8 @@ function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   try {
     if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
-      var htmlReady = window.pokerEnsureViewHtml(viewName);
+      var htmlViewName = viewName === "spring-rating" ? "winter-rating" : viewName;
+      var htmlReady = window.pokerEnsureViewHtml(htmlViewName);
       if (htmlReady && typeof htmlReady.then === "function") {
         htmlReady.then(function () {
           var nextOpts = {};

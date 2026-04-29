@@ -143,6 +143,7 @@ async function main() {
       dialogs: !!document.getElementById("chatDialogsView"),
       videoLessonsList: !!document.getElementById("videoLessonsList"),
       equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
+      winterRatingSection: !!document.getElementById("winterRatingSection"),
       modules: performance.getEntriesByType("resource")
         .filter((entry) => /app-(chat-lifecycle|webview-keyboard|view-router)\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
@@ -153,6 +154,7 @@ async function main() {
     if (!state.dialogs) throw new Error("chat dialogs DOM is missing");
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
     if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
+    if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
