@@ -13,6 +13,7 @@ function read(rel) {
 const files = {
   html: read("index.html"),
   app: read("app.js"),
+  appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
   chatWebpushNotify: read("lib/chat-webpush-notify.js"),
@@ -239,6 +240,20 @@ add("Chat API supports fast/diff/poll responses", () =>
 add("Chat sender label hides Telegram login when a name exists", () =>
   has("chatHandler", "if (nameParts) return nameParts;") &&
   !has("chatHandler", 'return nameParts + " · " + nickDisplay')
+);
+
+add("Schedule keeps weekly, day and daily tournament order", () =>
+  hasAll("html", [
+    'schedule-section--week-tournament',
+    "Турнир Недели Нокаут Меджик</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00",
+    "Турниры дня в 18:00 МСК",
+    '<tr class="schedule-row--freeroll"><td>Суббота</td><td><span class="schedule-freeroll-name">Фриролл</span>',
+    "<tr><td>PKO/MKO</td><td>300₽</td><td>R:300₽</td><td>25 000₽</td><td>17:00</td></tr>",
+    "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
+  ]) &&
+  has("appTournamentDay", 'guarantee: "300 000₽"') &&
+  !has("html", "schedule-section--xpoker-freerolls") &&
+  !has("html", "Rebuy (19:00)")
 );
 
 add("Player card exposes Poker21, status, stats and actions", () =>

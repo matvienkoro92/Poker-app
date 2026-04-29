@@ -186,6 +186,37 @@
 }
 
 /* Турнир дня — выделенная секция и таблица */
+.schedule-section--week-tournament {
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(15, 23, 42, 0.12));
+  border: 1px solid rgba(245, 158, 11, 0.42);
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.12);
+}
+.schedule-section--week-tournament .schedule-section__title {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.schedule-table-wrap--week-tournament {
+  border: 2px solid rgba(245, 158, 11, 0.44);
+  background: rgba(15, 23, 42, 0.68);
+}
+.schedule-section--week-tournament .schedule-table th {
+  background: rgba(245, 158, 11, 0.22);
+  color: rgba(255, 255, 255, 0.95);
+}
+[data-theme="light"] .schedule-section--week-tournament {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(255, 248, 240, 0.8));
+  border-color: rgba(217, 119, 6, 0.42);
+}
+[data-theme="light"] .schedule-table-wrap--week-tournament {
+  background: rgba(255, 248, 240, 0.9);
+  border-color: rgba(217, 119, 6, 0.42);
+}
+[data-theme="light"] .schedule-section--week-tournament .schedule-table th {
+  background: rgba(245, 158, 11, 0.18);
+  color: var(--text);
+}
 .schedule-section--tournament-day {
   margin-top: 20px;
   padding: 16px;
@@ -239,8 +270,14 @@
   background: rgba(251, 146, 60, 0.35) !important;
   font-weight: 600;
 }
+.schedule-row--freeroll td {
+  background: rgba(34, 197, 94, 0.08);
+}
 [data-theme="light"] .schedule-row--today td {
   background: rgba(255, 237, 213, 0.95) !important;
+}
+[data-theme="light"] .schedule-row--freeroll td {
+  background: rgba(220, 252, 231, 0.55);
 }
 .schedule-tournament-day-trophy-inline {
   display: inline-block;
@@ -744,4 +781,3 @@
 .streams-remote-video {
   max-height: 280px;
 }
-

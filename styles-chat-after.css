@@ -1303,8 +1303,12 @@ html.app-view-home .feature--rating-spring-promo:hover,
 }
 
 .schedule-freeroll-name {
-  font-weight: 800;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #86efac;
+}
+[data-theme="light"] .schedule-freeroll-name {
+  color: #15803d;
 }
 
 .tournament-day-actions-row {
