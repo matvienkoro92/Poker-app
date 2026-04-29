@@ -15,6 +15,8 @@ const files = {
   app: read("app.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
+  authPwaCodeHandler: read("lib/api-handlers/auth-pwa-code.js"),
+  telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
 };
 
 const checks = [];
@@ -136,6 +138,24 @@ add("PWA session has IndexedDB fallback before login gate", () =>
     "function pokerReadPwaSessionRecordAsync(key)",
     "function attemptPwaSideAuthRestoreAsync(hideBootOverlay)",
     "attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored)",
+  ])
+);
+
+add("PWA Telegram code requests use current auth and avoid stale username binds", () =>
+  hasAll("client", [
+    'pokerApiAuthJsonBody({ action: "request", username: username })',
+    'pokerApiAuthJsonBody({ action: "verify", username: username, code: code, password: passwordValue() })',
+  ]) &&
+  hasAll("authPwaCodeHandler", [
+    "resolveTelegramIdentity",
+    "memberIdFromIdentity",
+    "pruneDuplicateUsernameMappings",
+    "Для этого @username найдено несколько старых привязок",
+  ]) &&
+  hasAll("telegramBotWebhookHandler", [
+    "usernameRedisCommands",
+    "HGETALL",
+    "commands.push([\"HDEL\", USERNAMES_KEY, key])",
   ])
 );
 

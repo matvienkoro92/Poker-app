@@ -1314,7 +1314,11 @@ function getPokerResolvedTelegramUser() {
         fetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "login", username: username, password: passwordValue() }),
+          body: JSON.stringify(
+            typeof pokerApiAuthJsonBody === "function"
+              ? pokerApiAuthJsonBody({ action: "login", username: username, password: passwordValue() })
+              : { action: "login", username: username, password: passwordValue() }
+          ),
         })
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
           .then(function (data) {
@@ -1373,7 +1377,11 @@ function getPokerResolvedTelegramUser() {
         fetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "request", username: username }),
+          body: JSON.stringify(
+            typeof pokerApiAuthJsonBody === "function"
+              ? pokerApiAuthJsonBody({ action: "request", username: username })
+              : { action: "request", username: username }
+          ),
         })
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
           .then(function (data) {
@@ -1424,7 +1432,11 @@ function getPokerResolvedTelegramUser() {
       fetch(base + "/api/auth-pwa-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", username: username, code: code, password: passwordValue() }),
+        body: JSON.stringify(
+          typeof pokerApiAuthJsonBody === "function"
+            ? pokerApiAuthJsonBody({ action: "verify", username: username, code: code, password: passwordValue() })
+            : { action: "verify", username: username, code: code, password: passwordValue() }
+        ),
       })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
         .then(function (data) {
