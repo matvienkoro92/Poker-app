@@ -13,6 +13,7 @@ function read(rel) {
 const files = {
   html: read("index.html"),
   app: read("app.js"),
+  appNetwork: read("app-network.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
@@ -468,6 +469,7 @@ add("JS manifest maps core app domains", () =>
   hasAll("jsManifest", [
     '"entrypoint": "index.html"',
     '"auth":',
+    '"network":',
     '"chat":',
     '"rating":',
     '"tournament":',
@@ -481,6 +483,7 @@ add("JS manifest maps core app domains", () =>
     '"tracking":',
     '"auth-debug":',
     '"app-auth.js"',
+    '"app-network.js"',
     '"app-pwa-auth.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
@@ -491,6 +494,10 @@ add("JS manifest maps core app domains", () =>
 add("JS manifest preserves critical load order", () => {
   const order = indexScriptOrder();
   return appearsBefore(order, "app-auth.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-auth.js", "app-network.js") &&
+    appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-network.js", "app-api-tracking.js") &&
+    appearsBefore(order, "app-network.js", "app.js") &&
     appearsBefore(order, "app-auth.js", "app-auth-debug.js") &&
     appearsBefore(order, "app-chat-utils.js", "app-chat-render-utils.js") &&
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
@@ -501,6 +508,18 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
+
+add("Network helpers stay isolated from the app monolith", () =>
+  hasAll("appNetwork", [
+    "var POKER_NET_ERR",
+    "var POKER_FETCH_TIMEOUT_MS",
+    "function pokerFetchWithTimeout",
+    "function pokerFetchRetry",
+  ]) &&
+  !has("app", "function pokerFetchWithTimeout") &&
+  !has("app", "function pokerFetchRetry") &&
+  !has("app", "var POKER_FETCH_TIMEOUT_MS")
+);
 
 add("View navigation is not gated by lazy loading", () =>
   !has("html", 'type="application/poker-lazy"') &&

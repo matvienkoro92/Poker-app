@@ -7,6 +7,9 @@
       "app-pwa-auth.js",
       "app-auth-debug.js"
     ],
+    "network": [
+      "app-network.js"
+    ],
     "chat": [
       "app-chat-utils.js",
       "app-chat-render-utils.js",
@@ -93,6 +96,7 @@
     "shell": [
       "app-shell-layout.js",
       "app-navigation-scroll.js",
+      "app-network.js",
       "app-api-tracking.js",
       "app-lazy-loader.js",
       "app.js",
