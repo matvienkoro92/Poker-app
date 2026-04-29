@@ -789,6 +789,14 @@ function getPokerResolvedTelegramUser() {
     return "";
   }
 
+  function pokerAuthFetch(url, init) {
+    var opts = Object.assign({ cache: "no-store" }, init || {});
+    if (typeof pokerFetchRetry === "function") {
+      return pokerFetchRetry(url, opts, { timeoutMs: 15000, maxAttempts: 3, retryDelayMs: 500 });
+    }
+    return fetch(url, opts);
+  }
+
   /** localhost / file / IP — виджет Login даёт «Bot domain invalid», домен должен совпадать с BotFather */
   function isPwaAuthLocalHost() {
     try {
@@ -872,7 +880,7 @@ function getPokerResolvedTelegramUser() {
     if (!base) return;
     setBannerVerifying();
     showUnauthorized();
-    fetch(base + "/api/auth-vk-pwa", {
+    pokerAuthFetch(base + "/api/auth-vk-pwa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code: code, redirect_uri: redirectUri }),
@@ -1321,7 +1329,7 @@ function getPokerResolvedTelegramUser() {
           return;
         }
         setHint(pwaAuthT("checkingPassword"), false);
-        fetch(base + "/api/auth-pwa-code", {
+        pokerAuthFetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
@@ -1388,7 +1396,7 @@ function getPokerResolvedTelegramUser() {
           hint.classList.add("auth-banner__code-hint--hidden");
           hint.classList.remove("auth-banner__code-hint--error");
         }
-        fetch(base + "/api/auth-pwa-code", {
+        pokerAuthFetch(base + "/api/auth-pwa-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
@@ -1443,7 +1451,7 @@ function getPokerResolvedTelegramUser() {
         verifyBtn.textContent = pwaAuthT("verifying");
       }
       if (registerSubmitBtn) registerSubmitBtn.disabled = true;
-      fetch(base + "/api/auth-pwa-code", {
+      pokerAuthFetch(base + "/api/auth-pwa-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -1884,7 +1892,7 @@ function getPokerResolvedTelegramUser() {
         syncAuthModeUi();
         var email = normalizeEmailInput();
         setEmailHint(pwaAuthT("emailCheckingPassword"), false);
-        fetch(base + "/api/auth-email", {
+        pokerAuthFetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1957,7 +1965,7 @@ function getPokerResolvedTelegramUser() {
         var email = normalizeEmailInput();
         resetEmailRegisterVerification();
         setEmailHint(pwaAuthT("emailSendingCode"), false);
-        fetch(base + "/api/auth-email", {
+        pokerAuthFetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1985,7 +1993,7 @@ function getPokerResolvedTelegramUser() {
         var email = normalizeEmailInput();
         var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
         setEmailHint(pwaAuthT("emailCheckingCode"), false);
-        fetch(base + "/api/auth-email", {
+        pokerAuthFetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2032,7 +2040,7 @@ function getPokerResolvedTelegramUser() {
           return;
         }
         setEmailHint(pwaAuthT("emailCheckingCode"), false);
-        fetch(base + "/api/auth-email", {
+        pokerAuthFetch(base + "/api/auth-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -2537,7 +2545,7 @@ function getPokerResolvedTelegramUser() {
     }
     setBannerVerifying();
     showUnauthorized();
-    fetch(base + "/api/auth-telegram-login", {
+    pokerAuthFetch(base + "/api/auth-telegram-login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(

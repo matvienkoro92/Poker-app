@@ -374,6 +374,20 @@ add("Email login prefers the linked email account over stale device hints", () =
   ])
 );
 
+add("PWA account auth requests use retrying no-store fetch", () =>
+  hasAll("client", [
+    "function pokerAuthFetch(url, init)",
+    'Object.assign({ cache: "no-store" }',
+    "pokerFetchRetry(url, opts",
+    'pokerAuthFetch(base + "/api/auth-email"',
+    'pokerAuthFetch(base + "/api/auth-pwa-code"',
+    'pokerAuthFetch(base + "/api/auth-telegram-login"',
+  ]) &&
+  !has("client", 'fetch(base + "/api/auth-email"') &&
+  !has("client", 'fetch(base + "/api/auth-pwa-code"') &&
+  !has("client", 'fetch(base + "/api/auth-telegram-login"')
+);
+
 add("Admin push broadcast can choose a click target section", () =>
   hasAll("html", [
     'id="globalModalsFragmentHost"',
