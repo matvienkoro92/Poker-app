@@ -129,14 +129,26 @@ async function main() {
 
     const initialLazy = await page.evaluate(() => ({
       initChat: typeof window.initChat,
+      initWinterRating: typeof window.initWinterRating,
+      initVideoLessons: typeof window.initVideoLessons,
+      initRaffles: typeof window.initRaffles,
+      initAdminReport: typeof window.pokerInitAdminReportModal,
       chatScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
+        .map((entry) => entry.name.split("/").pop()),
+      heavyScripts: performance.getEntriesByType("resource")
+        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
     }));
     if (initialLazy.initChat !== "undefined") throw new Error("initChat loaded before opening chat");
     if (initialLazy.chatScripts.length) throw new Error("chat scripts loaded before opening chat: " + initialLazy.chatScripts.join(", "));
+    if (initialLazy.initWinterRating !== "undefined") throw new Error("rating loaded before opening rating");
+    if (initialLazy.initVideoLessons !== "undefined") throw new Error("media loaded before opening media");
+    if (initialLazy.initRaffles !== "undefined") throw new Error("raffles loaded before opening raffles");
+    if (initialLazy.initAdminReport !== "undefined") throw new Error("admin loaded before opening admin");
+    if (initialLazy.heavyScripts.length) throw new Error("heavy lazy scripts loaded before navigation: " + initialLazy.heavyScripts.join(", "));
 
-    const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
+    const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
       const via = await clickVisibleOrSetView(page, target);
@@ -147,6 +159,9 @@ async function main() {
     }
 
     await page.evaluate(() => {
+      if (typeof window.pokerLoadDomainScripts === "function") {
+        return window.pokerLoadDomainScripts("admin").then(() => window.pokerEnsureGlobalModalsHtml());
+      }
       if (typeof window.pokerEnsureGlobalModalsHtml !== "function") {
         throw new Error("pokerEnsureGlobalModalsHtml is not available");
       }
@@ -179,6 +194,9 @@ async function main() {
       chatScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
+      lazyDomainScripts: performance.getEntriesByType("resource")
+        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .map((entry) => entry.name.split("/").pop()),
     }));
 
     if (state.setView !== "function") throw new Error("setView is not a function");
@@ -201,6 +219,7 @@ async function main() {
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat lazy scripts were not loaded on chat open");
+    if (state.lazyDomainScripts.length < 12) throw new Error("heavy lazy domains were not loaded through navigation: " + state.lazyDomainScripts.join(", "));
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
     console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state }, null, 2));

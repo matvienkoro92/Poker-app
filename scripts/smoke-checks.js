@@ -75,6 +75,21 @@ function localRootScriptFilesFromIndex() {
   return [...new Set(out)];
 }
 
+function localStartupScriptFilesFromIndex() {
+  const out = [];
+  const re = /<script\b([^>]*)\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const attrs = match[1] || "";
+    if (/type=["']application\/poker-lazy["']/i.test(attrs)) continue;
+    const file = stripAssetUrl(match[2]);
+    if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+    if (file.includes("/") || !file.endsWith(".js")) continue;
+    out.push(file);
+  }
+  return [...new Set(out)];
+}
+
 function localAssetVersionsFromIndex() {
   const out = [];
   const re = /\b(?:href|src)=["']\.\/([^"']+\.(?:css|js))(?:\?v=([^"']+))?["']/gi;
@@ -758,6 +773,33 @@ add("Chat JavaScript domain is lazy-loaded", () =>
   ])
 );
 
+add("Heavy JavaScript domains are lazy-loaded", () => {
+  const startup = localStartupScriptFilesFromIndex();
+  const lazyDomains = [
+    ["rating", ["app-hall-fame.js", "app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js"]],
+    ["media", ["app-streams.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "peerjs.min.js"]],
+    ["games", ["app-games.js", "app-club-tasks.js"]],
+    ["admin", ["app-visitors-admin.js", "app-admin-reports.js", "app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js"]],
+    ["tournament", ["app-tournament-day.js"]],
+    ["raffles", ["app-raffles.js"]],
+  ];
+  return lazyDomains.every(([domain, scripts]) =>
+    scripts.every((file) =>
+      !startup.includes(file) &&
+      files.html.includes(`type="application/poker-lazy" data-poker-lazy-domain="${domain}" src="./${file}`)
+    )
+  ) && hasAll("appLazyLoader", [
+    '"bonus-game": ["games"]',
+    '"plasterer-game": ["games"]',
+    'preloadDomainsOnIdle(["tournament"])',
+  ]);
+});
+
+add("Startup root JavaScript count stays lean for Telegram WebView", () => {
+  const startup = localStartupScriptFilesFromIndex();
+  return startup.length > 0 && startup.length <= 25;
+});
+
 add("Primary view route chain has DOM targets and click wiring", () => {
   const route = ["home", "chat", "download", "cashout", "profile", "home", "raffles", "spring-rating"];
   const views = htmlViewNames();
@@ -769,7 +811,7 @@ add("Primary view route chain has DOM targets and click wiring", () => {
       "navItems.forEach(function (item)",
       "var target = item.dataset.viewTarget",
       "setView(target)",
-      'if (target === "download") setDownloadPage("main")',
+      'if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main")',
       "function pokerOpenChatFromTab()",
       'setView("chat")',
       'typeof window.chatShowDialogs === "function"',

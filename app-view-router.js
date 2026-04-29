@@ -4,6 +4,19 @@
 const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-back)");
 const footer = document.querySelector(".card__footer");
 
+function setDownloadPage(pageName) {
+  var downloadPages = document.querySelectorAll("[data-download-page]");
+  downloadPages.forEach(function (page) {
+    if (page.dataset.downloadPage === pageName) {
+      page.classList.add("download-page--active");
+    } else {
+      page.classList.remove("download-page--active");
+    }
+  });
+  var dlCc = typeof pokerGetDownloadCardContentScrollEl === "function" ? pokerGetDownloadCardContentScrollEl() : null;
+  if (dlCc) dlCc.scrollTop = 0;
+}
+
 function pokerGetViewNodes() {
   return document.querySelectorAll("[data-view]");
 }
@@ -312,7 +325,7 @@ function setView(viewName, navOpts) {
       footer.classList.remove("card__footer--hidden");
       fetchVisitorStatsOnly();
       if (typeof fetchRaffleBadge === "function") fetchRaffleBadge();
-      tryChillRadioPlay();
+      if (typeof tryChillRadioPlay === "function") tryChillRadioPlay();
     } else {
       footer.classList.add("card__footer--hidden");
     }
@@ -551,12 +564,14 @@ function setView(viewName, navOpts) {
   }
   if (viewName === "bonus-game") {
     initBonusGame();
-    if (bonusPikhaninaInterval) clearInterval(bonusPikhaninaInterval);
-    bonusPikhaninaInterval = setInterval(function () {
-      updatePikhaninaStats();
-      updateBonusStats();
-    }, 60000);
-  } else if (bonusPikhaninaInterval) {
+    if (typeof bonusPikhaninaInterval !== "undefined" && bonusPikhaninaInterval) clearInterval(bonusPikhaninaInterval);
+    if (typeof updatePikhaninaStats === "function" && typeof updateBonusStats === "function") {
+      bonusPikhaninaInterval = setInterval(function () {
+        updatePikhaninaStats();
+        updateBonusStats();
+      }, 60000);
+    }
+  } else if (typeof bonusPikhaninaInterval !== "undefined" && bonusPikhaninaInterval) {
     clearInterval(bonusPikhaninaInterval);
     bonusPikhaninaInterval = null;
   }
@@ -862,7 +877,7 @@ navItems.forEach(function (item) {
     var target = item.dataset.viewTarget;
     if (target) {
       setView(target);
-      if (target === "download") setDownloadPage("main");
+      if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main");
     }
   });
 });
@@ -907,7 +922,7 @@ function pokerOpenChatFromTab() {
 
 document.addEventListener("click", function (e) {
   var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
-  if (interactive && !e.target.closest("audio, [aria-hidden=\"true\"]")) playClickSound();
+  if (interactive && !e.target.closest("audio, [aria-hidden=\"true\"]") && typeof playClickSound === "function") playClickSound();
 }, true);
 
 (function scrollVsTap() {
@@ -1059,5 +1074,15 @@ document.addEventListener("click", function (e) {
   var view = link.getAttribute("data-view-target");
   var page = link.getAttribute("data-download-page");
   if (view) setView(view);
-  if (page) setDownloadPage(page);
+  if (page && typeof setDownloadPage === "function") setDownloadPage(page);
+});
+
+document.addEventListener("click", function (e) {
+  var appBtn = e.target.closest("[data-download-app]");
+  if (appBtn) {
+    var app = appBtn.dataset.downloadApp;
+    if (app) setDownloadPage(app);
+    return;
+  }
+  if (e.target.closest("[data-download-back]")) setDownloadPage("main");
 });

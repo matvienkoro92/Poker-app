@@ -68,11 +68,33 @@
     streams: ["media"],
     "video-lessons": ["media"],
     equilator: ["media"],
+    "bonus-game": ["games"],
+    "cooler-game": ["games"],
+    "plasterer-game": ["games"],
+    "poker-tasks": ["games"],
     "hall-of-fame": ["rating", "tournament"],
     schedule: ["tournament"],
     cashout: ["cashout"],
     "keyboard-lab": ["admin"],
   };
+
+  function preloadDomainsOnIdle(domains) {
+    var run = function () {
+      domains.reduce(function (chain, domain) {
+        return chain.then(function () {
+          return loadDomainScripts(domain).catch(function (err) {
+            if (typeof console !== "undefined" && console.warn) console.warn("lazy preload", domain, err);
+          });
+        });
+      }, Promise.resolve());
+    };
+    var ric = window.requestIdleCallback || function (cb) {
+      return setTimeout(cb, 3500);
+    };
+    setTimeout(function () {
+      ric(run, { timeout: 9000 });
+    }, 3500);
+  }
 
   window.pokerLoadDomainScripts = loadDomainScripts;
   window.pokerEnsureViewScripts = function (viewName) {
@@ -86,4 +108,6 @@
       return true;
     });
   };
+
+  preloadDomainsOnIdle(["tournament"]);
 })();

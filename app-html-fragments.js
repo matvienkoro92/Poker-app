@@ -100,10 +100,16 @@
         ? e.target.closest("#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
         : null;
       if (!target || !document.getElementById("globalModalsFragmentHost")) return;
+      var needsAdminScripts = !!(target.closest && target.closest("#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn"));
+      var scriptsReady = needsAdminScripts && typeof window.pokerLoadDomainScripts === "function"
+        ? window.pokerLoadDomainScripts("admin")
+        : Promise.resolve(true);
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
-      window.pokerEnsureGlobalModalsHtml().then(function () {
+      scriptsReady.then(function () {
+        return window.pokerEnsureGlobalModalsHtml();
+      }).then(function () {
         try {
           if (originalTarget && originalTarget.dispatchEvent) {
             originalTarget.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
