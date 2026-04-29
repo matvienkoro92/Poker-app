@@ -249,41 +249,74 @@ var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
 /** PWA: режим «гость» (без авторизации, но можно смотреть). */
 var POKER_PWA_GUEST_KEY = "poker_pwa_guest";
 
-function pokerReadPwaTgSessionToken() {
+function pokerReadAuthCookie(name) {
   try {
-    var raw = localStorage.getItem(POKER_PWA_TG_SESSION_KEY);
-    if (!raw) return "";
-    var o = JSON.parse(raw);
-    return o && o.token ? String(o.token) : "";
-  } catch (e) {
-    // Падение localStorage (например, приватный режим / запрет хранения).
-    try {
-      var rawS = sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY);
-      if (!rawS) return "";
-      var oS = JSON.parse(rawS);
-      return oS && oS.token ? String(oS.token) : "";
-    } catch (e2) {
-      return "";
+    var key = encodeURIComponent(name) + "=";
+    var parts = String(document.cookie || "").split("; ");
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].indexOf(key) === 0) return decodeURIComponent(parts[i].slice(key.length));
     }
+  } catch (e) {}
+  return "";
+}
+
+function pokerWriteAuthCookie(name, value) {
+  try {
+    var secure = window.location && window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie =
+      encodeURIComponent(name) +
+      "=" +
+      encodeURIComponent(String(value || "")) +
+      "; Max-Age=2592000; Path=/; SameSite=Lax" +
+      secure;
+  } catch (e) {}
+}
+
+function pokerClearAuthCookie(name) {
+  try {
+    var secure = window.location && window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = encodeURIComponent(name) + "=; Max-Age=0; Path=/; SameSite=Lax" + secure;
+  } catch (e) {}
+}
+
+function pokerParsePwaSessionRaw(raw, requireUser) {
+  if (!raw) return null;
+  try {
+    var o = JSON.parse(raw);
+    if (!o || !o.token) return null;
+    if (requireUser && (!o.user || o.user.id == null)) return null;
+    return o;
+  } catch (e) {
+    return null;
   }
 }
 
-function pokerReadPwaVkSessionToken() {
+function pokerReadPwaTgSessionToken() {
+  var o = null;
   try {
-    var raw = localStorage.getItem(POKER_PWA_VK_SESSION_KEY);
-    if (!raw) return "";
-    var o = JSON.parse(raw);
-    return o && o.token ? String(o.token) : "";
-  } catch (e) {
-    try {
-      var rawS = sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY);
-      if (!rawS) return "";
-      var oS = JSON.parse(rawS);
-      return oS && oS.token ? String(oS.token) : "";
-    } catch (e2) {
-      return "";
-    }
-  }
+    o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY), false);
+    if (o && o.token) return String(o.token);
+  } catch (e) {}
+  try {
+    o = pokerParsePwaSessionRaw(sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY), false);
+    if (o && o.token) return String(o.token);
+  } catch (e2) {}
+  o = pokerParsePwaSessionRaw(pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY), false);
+  return o && o.token ? String(o.token) : "";
+}
+
+function pokerReadPwaVkSessionToken() {
+  var o = null;
+  try {
+    o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY), false);
+    if (o && o.token) return String(o.token);
+  } catch (e) {}
+  try {
+    o = pokerParsePwaSessionRaw(sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY), false);
+    if (o && o.token) return String(o.token);
+  } catch (e2) {}
+  o = pokerParsePwaSessionRaw(pokerReadAuthCookie(POKER_PWA_VK_SESSION_KEY), false);
+  return o && o.token ? String(o.token) : "";
 }
 
 function pokerSavePwaTgSession(token, userObj, sessionExtra) {
@@ -292,6 +325,8 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   if (sessionExtra && sessionExtra.authMethod) rec.authMethod = String(sessionExtra.authMethod).trim().toLowerCase();
   var payload = JSON.stringify(rec);
   var ok = false;
+  pokerWriteAuthCookie(POKER_PWA_TG_SESSION_KEY, payload);
+  pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
     localStorage.setItem(POKER_PWA_TG_SESSION_KEY, payload);
@@ -315,6 +350,8 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
 function pokerSavePwaVkSession(token, userObj) {
   var payload = JSON.stringify({ token: token, user: userObj, authMethod: "vk" });
   var ok = false;
+  pokerWriteAuthCookie(POKER_PWA_VK_SESSION_KEY, payload);
+  pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
     localStorage.setItem(POKER_PWA_VK_SESSION_KEY, payload);
@@ -337,40 +374,26 @@ function pokerSavePwaVkSession(token, userObj) {
 
 /** Полная запись сессии TG для восстановления при старте (localStorage и, при откате save, sessionStorage). */
 function pokerReadPwaTgSessionRecord() {
-  function parseRaw(raw) {
-    if (!raw) return null;
-    try {
-      var o = JSON.parse(raw);
-      if (o && o.token && o.user && o.user.id != null) return o;
-    } catch (eP) {}
-    return null;
-  }
   try {
-    var oL = parseRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY));
+    var oL = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY), true);
     if (oL) return oL;
   } catch (e1) {}
   try {
-    return parseRaw(sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY));
+    var oS = pokerParsePwaSessionRaw(sessionStorage.getItem(POKER_PWA_TG_SESSION_KEY), true);
+    if (oS) return oS;
   } catch (e2) {}
-  return null;
+  return pokerParsePwaSessionRaw(pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY), true);
 }
 function pokerReadPwaVkSessionRecord() {
-  function parseRaw(raw) {
-    if (!raw) return null;
-    try {
-      var o = JSON.parse(raw);
-      if (o && o.token && o.user && o.user.id != null) return o;
-    } catch (eP) {}
-    return null;
-  }
   try {
-    var oL = parseRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY));
+    var oL = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY), true);
     if (oL) return oL;
   } catch (e1) {}
   try {
-    return parseRaw(sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY));
+    var oS = pokerParsePwaSessionRaw(sessionStorage.getItem(POKER_PWA_VK_SESSION_KEY), true);
+    if (oS) return oS;
   } catch (e2) {}
-  return null;
+  return pokerParsePwaSessionRaw(pokerReadAuthCookie(POKER_PWA_VK_SESSION_KEY), true);
 }
 
 function pwaSessionPersistenceWarning() {

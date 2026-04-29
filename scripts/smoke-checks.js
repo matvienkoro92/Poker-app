@@ -116,6 +116,17 @@ add("PWA auth keeps verified sessions over stale unauthorized UI", () =>
   ])
 );
 
+add("PWA session has cookie fallback for storage-hostile browsers", () =>
+  hasAll("client", [
+    "function pokerReadAuthCookie(name)",
+    "function pokerWriteAuthCookie(name, value)",
+    "function pokerClearAuthCookie(name)",
+    "pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY)",
+    "pokerReadAuthCookie(POKER_PWA_VK_SESSION_KEY)",
+    "pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY)",
+  ])
+);
+
 add("Chat shell has dialog, general and conversation views", () =>
   hasAll("html", [
     'id="chatDialogsView"',

@@ -348,6 +348,12 @@ function pokerClearSessionsAndReloadForLogin() {
   try { localStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (e2) {}
   try { sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY); } catch (eS) {}
   try { sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY); } catch (eS2) {}
+  try {
+    if (typeof pokerClearAuthCookie === "function") {
+      pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
+      pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
+    }
+  } catch (eCookie) {}
   try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
   try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
   try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}
