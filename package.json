@@ -16,6 +16,7 @@
     "redis:audit": "node scripts/redis-schema-audit.js",
     "redis:cleanup": "node scripts/redis-cleanup-backfill.js",
     "redis:cleanup:apply": "node scripts/redis-cleanup-backfill.js --apply",
+    "assets:optimize": "node scripts/optimize-assets.js",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",
@@ -25,5 +26,8 @@
     "avatars:assign-missing:apply": "node scripts/assign-random-preset-avatars.js --apply",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

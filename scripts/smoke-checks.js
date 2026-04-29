@@ -14,6 +14,7 @@ const files = {
   html: read("index.html"),
   chatFragment: read("html-fragments/chat.html"),
   hallOfFameFragment: read("html-fragments/hall-of-fame.html"),
+  videoLessonsFragment: read("html-fragments/video-lessons.html"),
   profileFragment: read("html-fragments/profile.html"),
   globalModalsFragment: read("html-fragments/global-modals.html"),
   app: read("app.js"),
@@ -871,11 +872,34 @@ add("CSS manifest owns every split stylesheet", () => {
 add("Large unused movie assets are not shipped", () =>
   !fs.existsSync(path.join(root, "assets", "rat_2.mov")) &&
   !fs.existsSync(path.join(root, "public", "assets", "rat_2.mov")) &&
+  !fs.existsSync(path.join(root, "public", "assets", "README.md")) &&
   has("html", 'src="./assets/download-hero.png"') &&
+  has("html", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
+  has("html", 'srcset="./assets/download-hero.webp" type="image/webp"') &&
   !has("html", 'rel="preload" as="image" href="./assets/download-hero.png"') &&
   has("html", 'class="download-image"') &&
   has("html", 'loading="lazy"')
 );
+
+add("Modern image variants exist for heavy visual assets", () => {
+  const assets = [
+    "download-hero",
+    "raffles-hero",
+    "video-lessons-coach-nikolay",
+    "gazette-frankl-vaaar-march8",
+    "coach-review-screen-01",
+    "student-mikhail-gataulin-telegram-review",
+  ];
+  return assets.every((name) =>
+    fs.existsSync(path.join(root, "assets", name + ".webp")) &&
+    fs.existsSync(path.join(root, "assets", name + ".avif")) &&
+    fs.existsSync(path.join(root, "public", "assets", name + ".webp")) &&
+    fs.existsSync(path.join(root, "public", "assets", name + ".avif"))
+  ) &&
+    has("html", 'srcset="./assets/raffles-hero.avif" type="image/avif"') &&
+    has("videoLessonsFragment", 'srcset="./assets/video-lessons-coach-nikolay.avif" type="image/avif"') &&
+    has("globalModalsFragment", 'srcset="./assets/gazette-frankl-vaaar-march8.avif" type="image/avif"');
+});
 
 add("Hidden cashout manager photos do not preload on home", () =>
   !has("html", 'rel="preload" as="image" href="./assets/dep-manager.jpg"') &&
@@ -890,7 +914,7 @@ add("Hidden cashout manager photos do not preload on home", () =>
 
 add("Public build stays under the mobile asset budget", () => {
   const publicBytes = dirSizeBytes(path.join(root, "public"));
-  const budgetBytes = 105 * 1024 * 1024;
+  const budgetBytes = 80 * 1024 * 1024;
   return publicBytes > 0 && publicBytes <= budgetBytes;
 });
 
