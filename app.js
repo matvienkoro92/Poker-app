@@ -628,6 +628,12 @@ function pokerTryConsumePendingManagerFromCashout() {
   window.chatOpenConvFromDialogs(pm.userId, pm.userName || "Менеджер");
 }
 
+function pokerChatDomainScriptsReady() {
+  return typeof initChatUserModals === "function" &&
+    typeof initChatGeneralLoader === "function" &&
+    typeof initChatPersonalLoader === "function";
+}
+
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   if (!navOpts.__lazyReady && typeof window.pokerEnsureViewScripts === "function") {
@@ -830,7 +836,7 @@ function setView(viewName, navOpts) {
     if (viewName === "home") {
       footer.classList.remove("card__footer--hidden");
       fetchVisitorStatsOnly();
-      fetchRaffleBadge();
+      if (typeof fetchRaffleBadge === "function") fetchRaffleBadge();
       tryChillRadioPlay();
     } else {
       footer.classList.add("card__footer--hidden");
@@ -852,7 +858,7 @@ function setView(viewName, navOpts) {
         idleChatBoot(runHomeChatBoot);
       }
     } catch (eChatBootHome) {}
-    if (!window.chatListenersAttached && typeof initChat === "function") {
+    if (!window.chatListenersAttached && typeof initChat === "function" && pokerChatDomainScriptsReady()) {
       var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
       idle(function () { initChat(); });
     }
@@ -11406,13 +11412,14 @@ document.addEventListener("visibilitychange", function () {
   }, 500);
 });
 
-if (typeof initChat === "function") initChat();
+if (typeof initChat === "function" && pokerChatDomainScriptsReady()) initChat();
 if (typeof initPokerShowsPlayer === "function") initPokerShowsPlayer();
 
 (function preinitChat() {
   var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 150); };
   idle(function () {
     if (window.chatListenersAttached) return;
+    if (!pokerChatDomainScriptsReady()) return;
     if (typeof initChat === "function") initChat();
   });
 })();

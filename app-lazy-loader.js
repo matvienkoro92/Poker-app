@@ -77,7 +77,7 @@
   window.pokerLoadDomainScripts = loadDomainScripts;
   window.pokerEnsureViewScripts = function (viewName) {
     var domains = viewDomains[String(viewName || "")] || [];
-    if (!domains.length) return Promise.resolve(false);
+    if (!domains.length) return false;
     return domains.reduce(function (chain, domain) {
       return chain.then(function () {
         return loadDomainScripts(domain);
