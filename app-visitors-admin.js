@@ -42,6 +42,16 @@
         if (typeof updateVisitorCounter === "function") updateVisitorCounter();
       } catch (eVisAd) {}
     }
+    function pokerIsKnownClientAdmin() {
+      var user =
+        typeof getPokerResolvedTelegramUser === "function"
+          ? getPokerResolvedTelegramUser()
+          : window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe
+            ? window.Telegram.WebApp.initDataUnsafe.user
+            : null;
+      var id = user && user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+      return id === "388008256" || id === "2144406710" || id === "1897001087";
+    }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
     try {
@@ -52,6 +62,9 @@
     } catch (e) {}
     if (pokerShouldShowHomeTopVersionForSpecialUser()) {
       showKeyboardLabOnly();
+    }
+    if (pokerIsKnownClientAdmin()) {
+      showAdminUi();
     }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
