@@ -1,0 +1,54 @@
+          <div class="view" data-view="equilator">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <h1 class="title">Эквилятор</h1>
+            <p class="equilator-intro">Выберите ваши карты и все 5 карт борда (флоп, терн, ривер). Эквити считается методом Монте-Карло.</p>
+            <div class="equilator-form">
+              <div class="equilator-section equilator-hands-section">
+                <div class="equilator-hands-row">
+                  <div class="equilator-hero-block">
+                    <h2 class="equilator-section__title equilator-hand-label">Вы</h2>
+                    <div class="equilator-cards" id="equilatorHeroCards">
+                      <div class="equilator-slot-wrap">
+                        <button type="button" class="equilator-card-slot" id="equilatorSlotHero1" data-equilator-slot="hero1" aria-label="Карта 1 — нажмите для выбора"><span class="equilator-card-slot__text">—</span></button>
+                        <button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="hero1" aria-label="Сбросить карту">×</button>
+                      </div>
+                      <div class="equilator-slot-wrap">
+                        <button type="button" class="equilator-card-slot" id="equilatorSlotHero2" data-equilator-slot="hero2" aria-label="Карта 2 — нажмите для выбора"><span class="equilator-card-slot__text">—</span></button>
+                        <button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="hero2" aria-label="Сбросить карту">×</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="equilator-opp-block">
+                    <div class="equilator-opp-list" id="equilatorOppCards"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="equilator-section">
+                <h2 class="equilator-section__title">Борд</h2>
+                <div class="equilator-board-row">
+                  <span class="equilator-board-label">Борд</span>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard1" data-equilator-slot="board1" aria-label="Борд карта 1"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board1" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard2" data-equilator-slot="board2" aria-label="Борд карта 2"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board2" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard3" data-equilator-slot="board3" aria-label="Борд карта 3"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board3" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard4" data-equilator-slot="board4" aria-label="Борд карта 4"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board4" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard5" data-equilator-slot="board5" aria-label="Борд карта 5"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board5" aria-label="Сбросить карту">×</button></div>
+                </div>
+              </div>
+              <div class="equilator-section">
+                <button type="button" class="equilator-add-player-btn" id="equilatorAddPlayerBtn">+ Добавить игрока</button>
+              </div>
+              <div class="equilator-picker-wrap equilator-picker-wrap--hidden" id="equilatorPickerWrap" aria-hidden="true">
+                <p class="equilator-picker-title" id="equilatorPickerTitle">Выберите карту</p>
+                <div class="equilator-picker-grid" id="equilatorPickerGrid"></div>
+                <button type="button" class="equilator-picker-close" id="equilatorPickerClose">Закрыть</button>
+              </div>
+              <button type="button" class="primary-button" id="equilatorCalcBtn">Рассчитать эквити</button>
+            </div>
+            <div class="equilator-result equilator-result--hidden" id="equilatorResult">
+              <h2 class="equilator-result__title">Результат</h2>
+              <p class="equilator-result__line"><span class="equilator-result__label">Моё эквити на победу:</span> <strong id="equilatorWinPct">—</strong></p>
+              <div id="equilatorOppEquityLines"></div>
+              <p class="equilator-result__line"><span class="equilator-result__label">Ничья:</span> <strong id="equilatorTiePct">—</strong></p>
+              <p class="equilator-result__meta" id="equilatorResultMeta">—</p>
+            </div>
+          </div>

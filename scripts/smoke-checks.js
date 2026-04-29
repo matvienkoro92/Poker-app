@@ -601,6 +601,19 @@ add("Heavy video lessons HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "video-lessons.html"))
 );
 
+add("Equilator HTML is lazy-loaded from a fragment", () =>
+  hasAll("html", [
+    'data-view="equilator"',
+    'data-html-fragment="./html-fragments/equilator.html"',
+  ]) &&
+  !has("html", 'id="equilatorCalcBtn"') &&
+  hasAll("appViewRouter", [
+    "pokerEnsureViewHtml(viewName)",
+    "if (viewName === \"equilator\") initEquilator();",
+  ]) &&
+  fs.existsSync(path.join(root, "html-fragments", "equilator.html"))
+);
+
 add("View navigation is not gated by lazy loading", () =>
   !has("html", 'type="application/poker-lazy"') &&
   !has("client", "pokerEnsureViewScripts(viewName)") &&

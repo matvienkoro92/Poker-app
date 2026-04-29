@@ -127,7 +127,7 @@ async function main() {
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1200);
 
-    const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "raffles", "spring-rating"];
+    const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "equilator", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
       const via = await clickVisibleOrSetView(page, target);
@@ -142,6 +142,7 @@ async function main() {
       initChat: typeof initChat,
       dialogs: !!document.getElementById("chatDialogsView"),
       videoLessonsList: !!document.getElementById("videoLessonsList"),
+      equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
       modules: performance.getEntriesByType("resource")
         .filter((entry) => /app-(chat-lifecycle|webview-keyboard|view-router)\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
@@ -151,6 +152,7 @@ async function main() {
     if (state.initChat !== "function") throw new Error("initChat is not a function");
     if (!state.dialogs) throw new Error("chat dialogs DOM is missing");
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
+    if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
