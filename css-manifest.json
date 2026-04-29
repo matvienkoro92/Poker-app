@@ -1,5 +1,47 @@
 {
   "entrypoint": "styles.css",
+  "ownership": {
+    "base": {
+      "owner": "shell",
+      "scope": "reset, tokens, global typography, shared primitives"
+    },
+    "auth": {
+      "owner": "auth",
+      "scope": "PWA login, auth gates, standalone login state"
+    },
+    "home": {
+      "owner": "home",
+      "scope": "home screen sections, home modals, planner, home rating promo"
+    },
+    "tournament": {
+      "owner": "tournament",
+      "scope": "tournament day cards and transitional home tournament overrides"
+    },
+    "chat": {
+      "owner": "chat",
+      "scope": "chat shell, dialogs, messages, composer, threads, overlays"
+    },
+    "rating": {
+      "owner": "rating",
+      "scope": "rating pages, tables, learning/games pages, rating modals"
+    },
+    "hall": {
+      "owner": "hall-of-fame",
+      "scope": "hall shell, hall players, footer, rating lightbox"
+    },
+    "profile": {
+      "owner": "profile",
+      "scope": "profile, avatar, poker21 meta, status/social, profile modals"
+    },
+    "admin": {
+      "owner": "admin",
+      "scope": "admin-only panels and admin controls"
+    },
+    "layout": {
+      "owner": "shell",
+      "scope": "global layout, app chrome, tabbar, responsive shell"
+    }
+  },
   "domains": {
     "base": ["styles-base.css"],
     "auth": ["styles-auth.css", "styles-pwa.css"],

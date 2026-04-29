@@ -175,6 +175,33 @@ function localCssImportsFromStyles() {
   return out;
 }
 
+function cssManifestData() {
+  try {
+    return JSON.parse(files.cssManifest);
+  } catch (err) {
+    return {};
+  }
+}
+
+function cssManifestDomainFiles() {
+  const parsed = cssManifestData();
+  const domains = parsed && parsed.domains && typeof parsed.domains === "object" ? parsed.domains : {};
+  const out = [];
+  Object.keys(domains).forEach((name) => {
+    const list = Array.isArray(domains[name]) ? domains[name] : [];
+    list.forEach((file) => {
+      if (/^styles.*\.css$/.test(file)) out.push(file);
+    });
+  });
+  return [...new Set(out)].sort();
+}
+
+function localStyleFilesFromRoot() {
+  return fs.readdirSync(root)
+    .filter((name) => /^styles.*\.css$/.test(name))
+    .sort();
+}
+
 function dirSizeBytes(dir) {
   let total = 0;
   if (!fs.existsSync(dir)) return 0;
@@ -614,6 +641,20 @@ add("Build output contains every local CSS import from styles.css", () => {
     fs.existsSync(path.join(root, file)) &&
     fs.existsSync(path.join(publicDir, file))
   );
+});
+
+add("CSS manifest owns every split stylesheet", () => {
+  const parsed = cssManifestData();
+  const domains = parsed && parsed.domains && typeof parsed.domains === "object" ? parsed.domains : {};
+  const ownership = parsed && parsed.ownership && typeof parsed.ownership === "object" ? parsed.ownership : {};
+  const domainNames = Object.keys(domains);
+  const manifestFiles = cssManifestDomainFiles();
+  const rootCssFiles = localStyleFilesFromRoot().filter((file) => file !== "styles.css");
+  return parsed.entrypoint === "styles.css" &&
+    domainNames.length > 0 &&
+    domainNames.every((name) => ownership[name] && ownership[name].owner && ownership[name].scope) &&
+    rootCssFiles.every((file) => manifestFiles.includes(file)) &&
+    manifestFiles.every((file) => fs.existsSync(path.join(root, file)));
 });
 
 add("Large unused movie assets are not shipped", () =>
