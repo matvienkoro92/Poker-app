@@ -99,7 +99,7 @@ add("PWA service worker is versioned", () =>
 );
 
 add("PWA saved session restores before empty initData login gate", () =>
-  has("client", /if \(!initData\) \{\s*if \(attemptPwaSideAuthRestore\(hideBootOverlay\)\) return;/)
+  has("client", /if \(!initData\) \{\s*attemptPwaSideAuthRestoreAsync\(hideBootOverlay\)\.then\(function \(restored\) \{\s*if \(restored\) return;/)
 );
 
 add("PWA email login does not force a post-auth reload", () =>
@@ -126,6 +126,16 @@ add("PWA session has cookie fallback for storage-hostile browsers", () =>
     "pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY)",
     "pokerReadAuthCookie(POKER_PWA_VK_SESSION_KEY)",
     "pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY)",
+  ])
+);
+
+add("PWA session has IndexedDB fallback before login gate", () =>
+  hasAll("client", [
+    "function pokerOpenPwaAuthDb()",
+    "function pokerWritePwaSessionToIdb(key, payload)",
+    "function pokerReadPwaSessionRecordAsync(key)",
+    "function attemptPwaSideAuthRestoreAsync(hideBootOverlay)",
+    "attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored)",
   ])
 );
 

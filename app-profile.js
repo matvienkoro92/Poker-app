@@ -354,6 +354,12 @@ function pokerClearSessionsAndReloadForLogin() {
       pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
     }
   } catch (eCookie) {}
+  try {
+    if (typeof pokerClearPwaSessionFromIdb === "function") {
+      pokerClearPwaSessionFromIdb(POKER_PWA_TG_SESSION_KEY);
+      pokerClearPwaSessionFromIdb(POKER_PWA_VK_SESSION_KEY);
+    }
+  } catch (eIdb) {}
   try { localStorage.removeItem(POKER_PWA_GUEST_KEY); } catch (eGuest) {}
   try { sessionStorage.removeItem("poker_dt_id"); } catch (e3) {}
   try { sessionStorage.removeItem("poker_p21_id"); } catch (e4) {}

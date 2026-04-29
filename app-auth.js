@@ -248,6 +248,8 @@ var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
 /** PWA: режим «гость» (без авторизации, но можно смотреть). */
 var POKER_PWA_GUEST_KEY = "poker_pwa_guest";
+var POKER_PWA_IDB_NAME = "poker_pwa_auth";
+var POKER_PWA_IDB_STORE = "sessions";
 
 function pokerReadAuthCookie(name) {
   try {
@@ -346,6 +348,91 @@ function pokerMinimalPwaSessionCookiePayload(token, authMethod, sessionExtra) {
   return JSON.stringify(rec);
 }
 
+function pokerOpenPwaAuthDb() {
+  return new Promise(function (resolve) {
+    try {
+      if (!("indexedDB" in window)) {
+        resolve(null);
+        return;
+      }
+      var req = indexedDB.open(POKER_PWA_IDB_NAME, 1);
+      req.onupgradeneeded = function () {
+        try {
+          var db = req.result;
+          if (db && !db.objectStoreNames.contains(POKER_PWA_IDB_STORE)) db.createObjectStore(POKER_PWA_IDB_STORE);
+        } catch (eUpgrade) {}
+      };
+      req.onsuccess = function () { resolve(req.result || null); };
+      req.onerror = function () { resolve(null); };
+      req.onblocked = function () { resolve(null); };
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+function pokerWritePwaSessionToIdb(key, payload) {
+  try {
+    pokerOpenPwaAuthDb().then(function (db) {
+      if (!db) return;
+      try {
+        var tx = db.transaction(POKER_PWA_IDB_STORE, "readwrite");
+        tx.objectStore(POKER_PWA_IDB_STORE).put(String(payload || ""), key);
+        tx.oncomplete = tx.onerror = tx.onabort = function () {
+          try { db.close(); } catch (eClose) {}
+        };
+      } catch (eTx) {
+        try { db.close(); } catch (eClose2) {}
+      }
+    });
+  } catch (e) {}
+}
+
+function pokerReadPwaSessionFromIdb(key) {
+  return pokerOpenPwaAuthDb().then(function (db) {
+    if (!db) return "";
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(POKER_PWA_IDB_STORE, "readonly");
+        var req = tx.objectStore(POKER_PWA_IDB_STORE).get(key);
+        req.onsuccess = function () { resolve(req.result != null ? String(req.result) : ""); };
+        req.onerror = function () { resolve(""); };
+        tx.oncomplete = tx.onerror = tx.onabort = function () {
+          try { db.close(); } catch (eClose) {}
+        };
+      } catch (eTx) {
+        try { db.close(); } catch (eClose2) {}
+        resolve("");
+      }
+    });
+  }).catch(function () { return ""; });
+}
+
+function pokerClearPwaSessionFromIdb(key) {
+  try {
+    pokerOpenPwaAuthDb().then(function (db) {
+      if (!db) return;
+      try {
+        var tx = db.transaction(POKER_PWA_IDB_STORE, "readwrite");
+        tx.objectStore(POKER_PWA_IDB_STORE).delete(key);
+        tx.oncomplete = tx.onerror = tx.onabort = function () {
+          try { db.close(); } catch (eClose) {}
+        };
+      } catch (eTx) {
+        try { db.close(); } catch (eClose2) {}
+      }
+    });
+  } catch (e) {}
+}
+
+function pokerReadPwaSessionRecordAsync(key) {
+  return pokerReadPwaSessionFromIdb(key).then(function (raw) {
+    return pokerParsePwaSessionRaw(raw, true);
+  }).catch(function () {
+    return null;
+  });
+}
+
 function pokerReadPwaTgSessionToken() {
   var o = null;
   try {
@@ -382,6 +469,8 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   var ok = false;
   pokerWriteAuthCookie(POKER_PWA_TG_SESSION_KEY, pokerMinimalPwaSessionCookiePayload(token, rec.authMethod || "telegram", sessionExtra));
   pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
+  pokerWritePwaSessionToIdb(POKER_PWA_TG_SESSION_KEY, payload);
+  pokerClearPwaSessionFromIdb(POKER_PWA_VK_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
     localStorage.setItem(POKER_PWA_TG_SESSION_KEY, payload);
@@ -407,6 +496,8 @@ function pokerSavePwaVkSession(token, userObj) {
   var ok = false;
   pokerWriteAuthCookie(POKER_PWA_VK_SESSION_KEY, pokerMinimalPwaSessionCookiePayload(token, "vk"));
   pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
+  pokerWritePwaSessionToIdb(POKER_PWA_VK_SESSION_KEY, payload);
+  pokerClearPwaSessionFromIdb(POKER_PWA_TG_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
     localStorage.setItem(POKER_PWA_VK_SESSION_KEY, payload);

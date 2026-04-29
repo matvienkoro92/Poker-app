@@ -2793,6 +2793,40 @@ function getPokerResolvedTelegramUser() {
     return false;
   }
 
+  function restorePwaSideAuthRecord(record, opts) {
+    var options = opts || {};
+    if (!record || !record.user || record.user.id == null || !record.token) return false;
+    var u = normalizeVerifiedUser(record.user, null);
+    var _authRestore = { status: "verified", user: u, error: null };
+    if (record.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
+    window.__pokerTelegramAuth = _authRestore;
+    pokerMaybeRememberMemberIdFromUser(u);
+    pokerSetAuthMethod(record.authMethod || (options.vk ? "vk" : "telegram"));
+    updateHeaderGreeting();
+    showAuthorized(u);
+    loadHeaderAvatar();
+    if (typeof options.hideBootOverlay === "function") options.hideBootOverlay();
+    try {
+      window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, vk: !!options.vk } }));
+    } catch (ePwaRestoreDispatch) {}
+    return true;
+  }
+
+  function attemptPwaSideAuthRestoreAsync(hideBootOverlay) {
+    if (attemptPwaSideAuthRestore(hideBootOverlay)) return Promise.resolve(true);
+    if (typeof pokerReadPwaSessionRecordAsync !== "function") return Promise.resolve(false);
+    return pokerReadPwaSessionRecordAsync(POKER_PWA_TG_SESSION_KEY)
+      .then(function (so) {
+        if (restorePwaSideAuthRecord(so, { hideBootOverlay: hideBootOverlay })) return true;
+        return pokerReadPwaSessionRecordAsync(POKER_PWA_VK_SESSION_KEY).then(function (soV) {
+          return restorePwaSideAuthRecord(soV, { hideBootOverlay: hideBootOverlay, vk: true });
+        });
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
   /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */
   function runPwaStandaloneUnidentifiedFlow(hideBootOverlay) {
     showPwaAuthScreen();
@@ -2828,7 +2862,13 @@ function getPokerResolvedTelegramUser() {
         } catch (eF) {}
       }
     }
-    setTimeout(finishPwaStandaloneIdentifyUi, PWA_AUTH_IDENTIFY_MIN_MS);
+    attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
+      if (restored) {
+        setPwaAuthIdentifyingPhase(false);
+        return;
+      }
+      setTimeout(finishPwaStandaloneIdentifyUi, PWA_AUTH_IDENTIFY_MIN_MS);
+    });
     /* Фолбэк: если основной таймер не отработал или фаза залипла — снять «идентификацию» и показать кнопки входа. */
     setTimeout(function () {
       try {
@@ -2854,37 +2894,41 @@ function getPokerResolvedTelegramUser() {
     }
 
     if (!wtg) {
-      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
-      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
-      updateHeaderGreeting();
-      showUnauthorized();
-      resetBannerForPwaLogin();
-      mountTelegramLoginWidgetForPwa();
-      setTimeout(hideBootOverlay, 120);
+      attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
+        if (restored) return;
+        window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
+        updateHeaderGreeting();
+        showUnauthorized();
+        resetBannerForPwaLogin();
+        mountTelegramLoginWidgetForPwa();
+        setTimeout(hideBootOverlay, 120);
+      });
       return;
     }
 
     if (!initData) {
-      if (attemptPwaSideAuthRestore(hideBootOverlay)) return;
-      window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
-      updateHeaderGreeting();
-      showUnauthorized();
-      resetBannerForPwaLogin();
-      hideIdentifyingMini();
-      if (userUnsafe && bannerText) {
-        bannerText.textContent =
-          "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
-      }
-      mountTelegramLoginWidgetForPwa();
-      if (banner) {
-        banner.classList.remove("auth-banner--verifying");
-        if (shouldSuppressMiniAppPwaLoginBanner()) {
-          banner.classList.add("auth-banner--hidden");
-        } else {
-          banner.classList.remove("auth-banner--hidden");
+      attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
+        if (restored) return;
+        window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
+        updateHeaderGreeting();
+        showUnauthorized();
+        resetBannerForPwaLogin();
+        hideIdentifyingMini();
+        if (userUnsafe && bannerText) {
+          bannerText.textContent =
+            "Пустой initData в Mini App — это не про токен на сервере: Telegram не передал подпись сессии. Чаще всего страницу открыли обычной ссылкой из чата, а не кнопкой Web App у бота. Закройте мини-приложение и откройте снова из меню/кнопки бота; пока не получится — войдите через виджет ниже или «отдельное окно».";
         }
-      }
-      setTimeout(hideBootOverlay, 120);
+        mountTelegramLoginWidgetForPwa();
+        if (banner) {
+          banner.classList.remove("auth-banner--verifying");
+          if (shouldSuppressMiniAppPwaLoginBanner()) {
+            banner.classList.add("auth-banner--hidden");
+          } else {
+            banner.classList.remove("auth-banner--hidden");
+          }
+        }
+        setTimeout(hideBootOverlay, 120);
+      });
       return;
     }
 
