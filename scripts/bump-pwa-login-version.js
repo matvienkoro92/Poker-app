@@ -27,6 +27,10 @@ if (minor >= 1000) {
   minor = 0;
 }
 const next = `${nextMajor}.${String(minor).padStart(3, "0")}`;
-const out = html.replace(re, `data-app-version="${next}"`);
+let out = html.replace(re, `data-app-version="${next}"`);
+out = out.replace(
+  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js)))\?v=[^"#]+(")/g,
+  `$1?v=${next}$2`
+);
 fs.writeFileSync(indexPath, out, "utf8");
 console.log(`bump-pwa-login-version: ${m[1]}.${m[2]} → ${next}`);

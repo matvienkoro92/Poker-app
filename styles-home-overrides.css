@@ -207,6 +207,8 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 .app.app--view-home .home-freeroll-schedule__title,
 .app.app--view-home .home-freeroll-schedule__meta {
@@ -289,6 +291,10 @@
   overflow: visible;
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   min-height: 48px;
   padding: 8px 12px;
   border: 1px solid rgba(255, 220, 150, 0.9);
@@ -329,6 +335,7 @@
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn span {
   display: inline-block;
   max-width: 11.5em;
+  min-width: 0;
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
   content: "🎁";
@@ -338,6 +345,64 @@
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
   flex: 0 0 auto;
   font-size: 27px;
+}
+
+@media (min-width: 621px) and (max-width: 900px) {
+  .app.app--view-home .tournament-day-home-dual {
+    gap: 12px;
+    padding: 16px 12px 18px;
+  }
+  .app.app--view-home .tournament-day-home-dual::before {
+    transform: translateX(-6px);
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-head {
+    grid-template-columns: 54px minmax(0, 1fr);
+    column-gap: 10px;
+    padding: 10px 8px 14px;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-heading,
+  .app.app--view-home .tournament-day-home-wrap--freeroll .tournament-day-block__home-heading {
+    font-size: 22px;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-block__countdown {
+    font-size: 18px;
+  }
+  .app.app--view-home .home-freeroll-schedule__row {
+    grid-template-columns: 42px minmax(0, 1fr) 16px;
+    gap: 8px;
+    padding: 8px;
+  }
+  .app.app--view-home .home-freeroll-schedule__title,
+  .app.app--view-home .home-freeroll-schedule__meta {
+    font-size: 15px;
+  }
+  .app.app--view-home .home-freeroll-schedule__meta::before {
+    content: "";
+  }
+  .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat {
+    grid-template-columns: 40px minmax(0, 0.85fr) minmax(0, 1.15fr);
+    min-height: 52px;
+    padding: 10px 12px;
+  }
+  .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat-value {
+    font-size: 24px;
+  }
+  .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat-value--time {
+    font-size: 17px;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn {
+    min-height: 48px;
+    font-size: 23px;
+    line-height: 1.05;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn::before,
+  .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::before,
+  .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
+    font-size: 29px;
+  }
+  .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn span {
+    max-width: 9.5em;
+  }
 }
 
 @media (max-width: 620px) {

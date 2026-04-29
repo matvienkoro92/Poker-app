@@ -191,6 +191,25 @@
   min-height: 44px;
   cursor: pointer;
 }
+.auth-debug-modal__actions {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.auth-debug-modal__output {
+  max-height: min(58vh, 520px);
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #e5e7eb;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .tracking-links-admin__form {
   margin-bottom: 16px;
 }

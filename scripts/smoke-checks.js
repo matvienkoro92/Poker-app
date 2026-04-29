@@ -23,6 +23,7 @@ const files = {
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
   pwaSessionLib: read("lib/poker-pwa-session.js"),
   cssManifest: read("css-manifest.json"),
+  bumpPwaVersion: read("scripts/bump-pwa-login-version.js"),
 };
 
 const checks = [];
@@ -150,8 +151,16 @@ add("PWA Telegram startup keeps restored session during initData refresh", () =>
 
 add("PWA auth scripts are cache-busted after session fixes", () =>
   hasAll("html", [
-    './app-auth.js?v=2',
-    './app-pwa-auth.js?v=2',
+    './app-auth.js?v=',
+    './app-pwa-auth.js?v=',
+  ])
+);
+
+add("PWA version bump also cache-busts local CSS and JS assets", () =>
+  hasAll("bumpPwaVersion", [
+    "data-app-version",
+    "(?:href|src)",
+    "?v=${next}",
   ])
 );
 
@@ -377,6 +386,25 @@ add("CSS manifest maps split home and tournament domains", () =>
     '"styles-home-modals.css"',
     '"styles-home-planner.css"',
     '"styles-home-tournament.css"',
+    '"styles-chat-after-shell.css"',
+    '"styles-chat-after-modals.css"',
+    '"styles-chat-after-responsive.css"',
+    '"styles-rating-tables.css"',
+    '"styles-rating-modals.css"',
+    '"styles-rating-late.css"',
+  ])
+);
+
+add("Admin auth debug panel is wired", () =>
+  hasAll("html", [
+    'id="adminAuthDebugBtn"',
+    'id="adminAuthDebugModal"',
+    './app-auth-debug.js?v=',
+  ]) &&
+  hasAll("client", [
+    "window.__pokerCollectAuthDebug",
+    "pokerReadPwaSessionRecordAsync",
+    "adminAuthDebugOutput",
   ])
 );
 

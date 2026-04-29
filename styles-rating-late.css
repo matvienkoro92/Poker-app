@@ -1,0 +1,730 @@
+/* Rating CSS: late responsive and cross-rating overrides.
+ * Extracted from styles-rating-tables-modals.css; keep import order in styles-rating-tables-modals.css stable. */
+
+  background: rgba(251, 191, 36, 0.28);
+}
+.spring-rating-info-modal__title {
+  margin: 0 36px 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.spring-rating-info-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #fbbf24;
+}
+.spring-rating-info-modal__leagues {
+  margin: 0 0 14px;
+  padding: 12px;
+  background: rgba(251, 191, 36, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+[data-theme="light"] .spring-rating-info-modal__leagues {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.spring-rating-info-modal__league-block {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+.spring-rating-info-modal__league-block:last-child {
+  margin-bottom: 0;
+}
+.spring-rating-info-modal__league-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #fbbf24;
+}
+.spring-rating-info-modal__league-sub {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.spring-rating-info-modal__league-prizes {
+  margin: 0 0 0 18px;
+  padding: 0;
+  list-style: disc;
+  color: #e2e8f0;
+}
+.spring-rating-info-modal__league-prizes li {
+  margin-bottom: 2px;
+}
+.spring-rating-info-modal__intro {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.spring-rating-info-modal__points {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+.spring-rating-info-modal__note {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-style: italic;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+[data-theme="light"] .spring-rating-info-modal__inner {
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.22), 0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(245, 158, 11, 0.15);
+}
+[data-theme="light"] .spring-rating-info-modal__close {
+  background: rgba(0, 0, 0, 0.08);
+  color: #78350f;
+}
+[data-theme="light"] .spring-rating-info-modal__close:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+[data-theme="light"] .spring-rating-info-modal__title {
+  color: #78350f;
+}
+[data-theme="light"] .spring-rating-info-modal__subtitle {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-info-modal__league-block,
+[data-theme="light"] .spring-rating-info-modal__league-prizes,
+[data-theme="light"] .spring-rating-info-modal__points {
+  color: #451a03;
+}
+[data-theme="light"] .spring-rating-info-modal__league-title {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-info-modal__league-sub {
+  color: #78350f;
+}
+[data-theme="light"] .spring-rating-info-modal__intro {
+  color: #451a03;
+}
+[data-theme="light"] .spring-rating-info-modal__note {
+  color: #92400e;
+}
+
+/* Модалка «Рейтинг МТТ осени 2025» — осенняя палитра */
+.autumn-rating-2025-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.autumn-rating-2025-modal.autumn-rating-2025-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.autumn-rating-2025-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 15, 8, 0.88);
+  cursor: pointer;
+}
+.autumn-rating-2025-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(41, 37, 36, 0.98) 0%, rgba(28, 25, 23, 0.99) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(251, 146, 60, 0.45);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.15), 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 24px rgba(234, 88, 12, 0.15);
+}
+.autumn-rating-2025-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fde68a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.autumn-rating-2025-modal__close:hover {
+  background: rgba(251, 146, 60, 0.25);
+  color: #fff;
+}
+.autumn-rating-2025-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fed7aa;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.autumn-rating-2025-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #fdba74;
+  text-align: center;
+  line-height: 1.4;
+}
+.autumn-rating-2025-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.autumn-rating-2025-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+.autumn-rating-2025-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #a8a29e;
+  line-height: 1.35;
+}
+.autumn-rating-2025-modal__prose {
+  margin-bottom: 16px;
+}
+.autumn-rating-2025-modal__prose p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e7e5e4;
+}
+.autumn-rating-2025-modal__prose p:last-child {
+  margin-bottom: 0;
+}
+.autumn-rating-2025-modal__top-heading {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fdba74;
+  text-align: center;
+}
+.autumn-rating-2025-modal__top-hint {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: #a8a29e;
+  text-align: center;
+}
+.autumn-rating-2025-modal__table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+.autumn-rating-2025-modal__table {
+  width: 100%;
+  min-width: 300px;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #f5f5f4;
+}
+.autumn-rating-2025-modal__table th,
+.autumn-rating-2025-modal__table td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(120, 113, 108, 0.35);
+  vertical-align: top;
+}
+.autumn-rating-2025-modal__table th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fdba74;
+  background: rgba(154, 52, 18, 0.25);
+}
+.autumn-rating-2025-modal__table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+.autumn-rating-2025-modal__table tbody tr:first-child td {
+  font-weight: 700;
+  color: #fde68a;
+}
+.autumn-rating-2025-modal__table td:first-child {
+  font-weight: 700;
+  color: #fdba74;
+  width: 1.75em;
+}
+[data-theme="light"] .autumn-rating-2025-modal__backdrop {
+  background: rgba(67, 20, 7, 0.45);
+}
+[data-theme="light"] .autumn-rating-2025-modal__inner {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffedd5 40%, #fed7aa 100%);
+  border-color: rgba(234, 88, 12, 0.4);
+  box-shadow: 0 8px 32px rgba(154, 52, 18, 0.2);
+}
+[data-theme="light"] .autumn-rating-2025-modal__close {
+  background: rgba(255, 255, 255, 0.85);
+  color: #9a3412;
+}
+[data-theme="light"] .autumn-rating-2025-modal__title {
+  color: #9a3412;
+}
+[data-theme="light"] .autumn-rating-2025-modal__subtitle {
+  color: #c2410c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__figcaption {
+  color: #78716c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__prose p {
+  color: #44403c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__top-heading {
+  color: #c2410c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__top-hint {
+  color: #78716c;
+}
+[data-theme="light"] .autumn-rating-2025-modal__table-wrap {
+  border-color: rgba(234, 88, 12, 0.25);
+  background: rgba(255, 255, 255, 0.6);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table {
+  color: #292524;
+}
+[data-theme="light"] .autumn-rating-2025-modal__table th,
+[data-theme="light"] .autumn-rating-2025-modal__table td {
+  border-bottom-color: rgba(251, 146, 60, 0.25);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table th {
+  color: #9a3412;
+  background: rgba(254, 215, 170, 0.6);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table tbody tr:nth-child(even) {
+  background: rgba(255, 247, 237, 0.5);
+}
+[data-theme="light"] .autumn-rating-2025-modal__table tbody tr:first-child td {
+  color: #b45309;
+}
+
+/* Модалки «Кубок лета 2024/2025» — оболочка: небо, солнце, бирюза */
+.summer-rating-2024-modal,
+.summer-rating-2025-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.summer-rating-2024-modal.summer-rating-2024-modal--open,
+.summer-rating-2025-modal.summer-rating-2025-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.summer-rating-2024-modal__backdrop,
+.summer-rating-2025-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 44, 62, 0.88);
+  cursor: pointer;
+}
+.summer-rating-2024-modal__inner,
+.summer-rating-2025-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(21, 94, 117, 0.97) 0%, rgba(15, 23, 42, 0.98) 55%, rgba(30, 41, 59, 0.99) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 0 1px rgba(253, 224, 71, 0.12), 0 12px 40px rgba(0, 0, 0, 0.45), 0 4px 28px rgba(34, 211, 238, 0.12);
+}
+.summer-rating-2024-modal__close,
+.summer-rating-2025-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fef08a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.summer-rating-2024-modal__close:hover,
+.summer-rating-2025-modal__close:hover {
+  background: rgba(34, 211, 238, 0.25);
+  color: #fff;
+}
+.summer-rating-2024-modal__title,
+.summer-rating-2025-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.summer-rating-2024-modal__subtitle,
+.summer-rating-2025-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #a5f3fc;
+  text-align: center;
+  line-height: 1.4;
+}
+/* Лето 2024: модалка с фото кубка */
+.summer-rating-2024-modal__inner {
+  max-height: min(90vh, 760px);
+}
+.summer-rating-2024-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.summer-rating-2024-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(253, 224, 71, 0.25);
+}
+.summer-rating-2024-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.summer-rating-2025-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.summer-rating-2025-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(253, 224, 71, 0.25);
+}
+.summer-rating-2025-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.summer-rating-2025-modal__prose {
+  margin-bottom: 18px;
+}
+.summer-rating-2025-modal__prose p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.summer-rating-2025-modal__prose p:last-child {
+  margin-bottom: 0;
+}
+.summer-rating-2025-modal__totals-heading {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fef08a;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.summer-rating-2025-modal__podium {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.summer-rating-2025-modal__place {
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  background: rgba(0, 0, 0, 0.18);
+}
+.summer-rating-2025-modal__place--1 {
+  border-color: rgba(253, 224, 71, 0.45);
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.35), rgba(15, 23, 42, 0.5));
+}
+.summer-rating-2025-modal__place--2 {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+.summer-rating-2025-modal__place--3 {
+  border-color: rgba(180, 83, 9, 0.35);
+}
+.summer-rating-2025-modal__place-line {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #f8fafc;
+}
+.summer-rating-2025-modal__bullets {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+.summer-rating-2025-modal__bullets li {
+  margin-bottom: 4px;
+}
+.summer-rating-2025-modal__rest-wrap {
+  border-radius: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px 14px;
+}
+.summer-rating-2025-modal__rest-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a5f3fc;
+  text-align: center;
+}
+.summer-rating-2025-modal__rest-list {
+  margin: 0;
+  padding-left: 1.35em;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.summer-rating-2025-modal__rest-list li {
+  margin-bottom: 4px;
+}
+[data-theme="light"] .summer-rating-2024-modal__backdrop,
+[data-theme="light"] .summer-rating-2025-modal__backdrop {
+  background: rgba(14, 116, 144, 0.35);
+}
+[data-theme="light"] .summer-rating-2024-modal__inner,
+[data-theme="light"] .summer-rating-2025-modal__inner {
+  background: linear-gradient(180deg, #f0fdfa 0%, #ccfbf1 40%, #99f6e4 100%);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 8px 32px rgba(14, 116, 144, 0.15);
+}
+[data-theme="light"] .summer-rating-2024-modal__close,
+[data-theme="light"] .summer-rating-2025-modal__close {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2024-modal__title,
+[data-theme="light"] .summer-rating-2025-modal__title {
+  color: #b45309;
+}
+[data-theme="light"] .summer-rating-2024-modal__subtitle,
+[data-theme="light"] .summer-rating-2025-modal__subtitle {
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2024-modal__figcaption,
+[data-theme="light"] .summer-rating-2025-modal__figcaption {
+  color: #64748b;
+}
+[data-theme="light"] .summer-rating-2025-modal__prose p {
+  color: #334155;
+}
+[data-theme="light"] .summer-rating-2025-modal__totals-heading {
+  color: #c2410c;
+}
+[data-theme="light"] .summer-rating-2025-modal__place {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+[data-theme="light"] .summer-rating-2025-modal__place--1 {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.9), rgba(255, 255, 255, 0.85));
+  border-color: rgba(245, 158, 11, 0.4);
+}
+[data-theme="light"] .summer-rating-2025-modal__place-line {
+  color: #0f172a;
+}
+[data-theme="light"] .summer-rating-2025-modal__bullets {
+  color: #475569;
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-wrap {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(6, 182, 212, 0.28);
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-title {
+  color: #0e7490;
+}
+[data-theme="light"] .summer-rating-2025-modal__rest-list {
+  color: #334155;
+}
+
+/* Модалка «Весна 2024» — Рыбнадзор, кубок турнирщика весны */
+.spring-rating-2024-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.spring-rating-2024-modal.spring-rating-2024-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.spring-rating-2024-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 40, 28, 0.88);
+  cursor: pointer;
+}
+.spring-rating-2024-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, rgba(6, 78, 59, 0.97) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border-radius: 16px;
+  padding: 20px 14px 22px;
+  padding-top: 48px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  box-shadow: 0 0 0 1px rgba(167, 243, 208, 0.12), 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.spring-rating-2024-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: #a7f3d0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.spring-rating-2024-modal__close:hover {
+  background: rgba(52, 211, 153, 0.25);
+  color: #fff;
+}
+.spring-rating-2024-modal__title {
+  margin: 0 0 6px;
+  padding: 0 32px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #a7f3d0;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.spring-rating-2024-modal__subtitle {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #6ee7b7;
+  text-align: center;
+  line-height: 1.4;
+}
+.spring-rating-2024-modal__figure {
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: center;
+}
+.spring-rating-2024-modal__photo {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(52, 211, 153, 0.25);
+}
+.spring-rating-2024-modal__figcaption {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.spring-rating-2024-modal__prose {
+  margin: 0;
+}
+.spring-rating-2024-modal__prose p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #ecfdf5;
+  text-align: center;
+}
+[data-theme="light"] .spring-rating-2024-modal__backdrop {
+  background: rgba(6, 95, 70, 0.35);
+}
+[data-theme="light"] .spring-rating-2024-modal__inner {
+  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  border-color: rgba(5, 150, 105, 0.4);
+}
+[data-theme="light"] .spring-rating-2024-modal__close {
+  background: rgba(255, 255, 255, 0.9);
+  color: #047857;
+}
+[data-theme="light"] .spring-rating-2024-modal__title {
+  color: #065f46;
+}
+[data-theme="light"] .spring-rating-2024-modal__subtitle {
+  color: #047857;
+}
+[data-theme="light"] .spring-rating-2024-modal__figcaption {
+  color: #64748b;
+}
+[data-theme="light"] .spring-rating-2024-modal__prose p {
+  color: #14532d;
+}
+

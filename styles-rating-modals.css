@@ -1,0 +1,803 @@
+/* Rating CSS: player, date and info modal surfaces.
+ * Extracted from styles-rating-tables-modals.css; keep import order in styles-rating-tables-modals.css stable. */
+
+}
+[data-theme="light"] .winter-rating__spring-league-share-wrap .winter-rating__share-btn.winter-rating__share-btn--copy-icon {
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
+}
+[data-theme="light"] .winter-rating__spring-league-share-wrap .winter-rating__share-btn.winter-rating__share-btn--copy-icon:hover {
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+}
+.winter-rating__nick-btn {
+  font: inherit;
+  font-size: inherit;
+  color: #bae6fd;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: left;
+}
+.winter-rating__nick-btn:hover {
+  opacity: 0.9;
+}
+[data-theme="light"] .winter-rating__nick-btn {
+  color: #0284c7;
+}
+
+/* Модалка сводки по игроку — в стиле покерного клуба */
+.winter-rating-player-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.78);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.winter-rating-player-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.winter-rating-player-modal__inner {
+  position: relative;
+  max-width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  background: linear-gradient(175deg, #1a2332 0%, #0f1923 50%, #0d161c 100%);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+[data-theme="light"] .winter-rating-player-modal__inner {
+  background: linear-gradient(175deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+.winter-rating-player-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s ease;
+}
+.winter-rating-player-modal__close:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+.winter-rating-player-modal__back {
+  margin: 0 0 14px;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+[data-theme="light"] .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
+  color: #0f172a;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border-color: rgba(251, 191, 36, 0.9);
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
+}
+[data-theme="light"] .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon:hover {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+}
+.winter-rating-player-modal__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.winter-rating-player-modal__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  min-width: 0;
+}
+.winter-rating-player-modal__toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.winter-rating-player-modal__filter {
+  flex-shrink: 0;
+  min-width: 0;
+}
+.winter-rating-player-modal__filter select {
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  color: var(--text);
+  min-width: 140px;
+  max-width: 100%;
+}
+.winter-rating-player-modal__sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.winter-rating-player-modal__sort button {
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.winter-rating-player-modal__sort-dir {
+  min-width: 36px;
+  font-size: 16px;
+  line-height: 1;
+}
+.winter-rating-player-modal__table-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  margin-top: 12px;
+  max-width: 100%;
+}
+.winter-rating-player-modal__table {
+  margin: 0;
+}
+/* Остальные колонки — в одну строку; «Турнир» с переносом (см. ниже) */
+.winter-rating-player-modal__table th:not(.winter-rating-player-modal__th-tournament),
+.winter-rating-player-modal__table td:not(.winter-rating-player-modal__td-tournament) {
+  white-space: nowrap;
+  vertical-align: top;
+}
+.winter-rating-player-modal__table th:first-child,
+.winter-rating-player-modal__table td:first-child {
+  min-width: 5.5rem;
+}
+.winter-rating-player-modal__table th:nth-last-child(1),
+.winter-rating-player-modal__table tbody td:nth-last-child(1),
+.winter-rating-player-modal__table tfoot td:nth-last-child(1) {
+  text-align: right;
+  min-width: 6.5rem;
+}
+.winter-rating-player-modal__table .winter-rating-player-modal__tr--month-start td {
+  border-top: 2px solid var(--border-subtle);
+  padding-top: 10px;
+}
+.winter-rating-player-modal__table tr.winter-rating-player-modal__tr--reward-mid td {
+  background-color: rgba(251, 146, 60, 0.35);
+}
+.winter-rating-player-modal__table tr.winter-rating-player-modal__tr--reward-high td {
+  background-color: rgba(34, 197, 94, 0.35);
+}
+.winter-rating-player-modal__table tfoot tr.winter-rating-player-modal__total-row td {
+  border-top: 2px solid var(--border-subtle);
+  padding-top: 10px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+}
+.winter-rating-player-modal__table .winter-rating-player-modal__total-label {
+  text-align: right;
+}
+.winter-rating-player-modal__table .winter-rating-player-modal__total-value {
+  text-align: left;
+}
+.winter-rating-player-modal__empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.winter-rating-player-modal__summary {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--card-bg);
+}
+.winter-rating-player-modal__table-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.winter-rating-player-modal__summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: var(--text);
+}
+.winter-rating-player-modal__summary-table td {
+  padding: 6px 10px 6px 0;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.winter-rating-player-modal__summary-table tr:last-child td {
+  border-bottom: none;
+}
+.winter-rating-player-modal__summary-label {
+  color: var(--text-muted);
+}
+.winter-rating-player-modal__summary-value {
+  text-align: right;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.winter-rating-player-modal__summary-total-row .winter-rating-player-modal__summary-label {
+  font-weight: 600;
+  color: var(--text);
+}
+.winter-rating-player-modal__summary-total-row .winter-rating-player-modal__summary-value {
+  font-weight: 600;
+}
+.winter-rating-player-modal__summary-months-sep td {
+  padding-top: 10px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: none;
+}
+.winter-rating-player-modal__summary-line {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text);
+}
+.winter-rating-player-modal__summary-line:last-child {
+  margin-bottom: 0;
+}
+.winter-rating-player-modal__summary-total {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.winter-rating-player-modal__show-all-wrap {
+  margin-top: 10px;
+  text-align: center;
+}
+.winter-rating-player-modal__show-all-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--block-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.winter-rating-player-modal__show-all-btn:hover {
+  background: var(--card-bg);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+.winter-rating-player-modal__nick-line {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.winter-rating-player-modal__nick-line span {
+  font-weight: 600;
+  color: var(--text);
+}
+.winter-rating-player-modal__share-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+}
+.winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon:hover {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 0 6px 22px rgba(251, 191, 36, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon::before {
+  display: none;
+}
+.winter-rating-player-modal__share-btn {
+  display: inline-block;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.winter-rating-player-modal__share-btn:hover {
+  background: var(--block-bg);
+}
+.winter-rating-player-modal__share-telegram-btn {
+  color: #0f172a;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+.winter-rating-player-modal__share-telegram-btn:hover {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  border-color: rgba(251, 191, 36, 1);
+  box-shadow: 0 6px 22px rgba(251, 191, 36, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.winter-rating-player-modal__share-telegram-btn::before {
+  display: none;
+}
+/* Колонка «Турнир» — перенос текста, без обрезки многоточием */
+.winter-rating-player-modal__th-tournament,
+.winter-rating-player-modal__td-tournament {
+  min-width: 8rem;
+  max-width: min(52vw, 280px);
+  width: auto;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  vertical-align: top;
+}
+/* «Турниры за все время»: название турнира — 6ch в одну строку (без переноса), обрезка … */
+.winter-rating-player-modal--all-time .winter-rating-player-modal__td-tournament {
+  min-width: 6ch;
+  max-width: 6ch;
+  width: 6ch;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.winter-rating-player-modal--all-time .winter-rating-player-modal__th-tournament {
+  min-width: 6ch;
+  max-width: 7.5ch;
+  width: 7.5ch;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+/* Модалка игрока в стиле газеты (при открытии из «Заносов недели») */
+.winter-rating-player-modal--gazette .winter-rating-player-modal__inner {
+  background: #f4e4c1;
+  background-image:
+    linear-gradient(rgba(139, 90, 43, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 90, 43, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #2c1810;
+  font-family: Georgia, "Times New Roman", serif;
+  box-shadow:
+    inset 0 0 60px rgba(139, 90, 43, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(139, 90, 43, 0.3);
+  border: none;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__close {
+  background: rgba(139, 90, 43, 0.15);
+  border: 1px solid rgba(139, 90, 43, 0.35);
+  color: #2c1810;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__close:hover {
+  background: rgba(139, 90, 43, 0.25);
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__title {
+  color: #2c1810;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__empty {
+  color: #5c4033;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table {
+  color: #2c1810;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table th,
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table td {
+  border-color: rgba(139, 90, 43, 0.35);
+  color: #2c1810;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table thead th {
+  color: #5c4033;
+  font-weight: 700;
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table tr.winter-rating-player-modal__tr--reward-mid td {
+  background-color: rgba(234, 88, 12, 0.25);
+}
+.winter-rating-player-modal--gazette .winter-rating-player-modal__table tr.winter-rating-player-modal__tr--reward-high td {
+  background-color: rgba(22, 163, 74, 0.3);
+}
+
+/* Топ-3 рейтинга весны: подиум над таблицей */
+.spring-rating-top3 {
+  margin: 16px 0 20px;
+  padding: 16px 12px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(251, 191, 36, 0.58);
+  border-radius: 16px;
+  box-shadow: 0 8px 26px rgba(2, 6, 23, 0.34), 0 0 18px rgba(251, 191, 36, 0.13);
+}
+.spring-rating-top3[hidden] {
+  display: none !important;
+}
+.spring-rating-top3--league {
+  margin-top: 8px;
+}
+.spring-rating-top3__title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 14px;
+}
+.spring-rating-top3__podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.spring-rating-top3__card {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.46);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035), 0 8px 18px rgba(2, 6, 23, 0.22);
+}
+.spring-rating-top3__card--first {
+  max-width: 130px;
+  margin-bottom: 8px;
+  background: rgba(15, 23, 42, 0.99);
+  border-color: rgba(251, 191, 36, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.12), 0 8px 20px rgba(2, 6, 23, 0.26), 0 0 18px rgba(251, 191, 36, 0.18);
+}
+.spring-rating-top3__rank {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+.spring-rating-top3__card--first .spring-rating-top3__rank {
+  font-size: 18px;
+  color: #fbbf24;
+}
+.spring-rating-top3__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(251, 191, 36, 0.2);
+  border: 2px solid rgba(251, 191, 36, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.spring-rating-top3__card--first .spring-rating-top3__avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+}
+.spring-rating-top3__nick {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f8fafc;
+  text-align: center;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.spring-rating-top3__stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+.spring-rating-top3__points {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+.spring-rating-top3__reward {
+  color: #fcd34d;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.48);
+}
+.spring-rating-top3__nick-btn {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px;
+  opacity: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+[data-theme="light"] .spring-rating-top3 {
+  background: linear-gradient(180deg, rgba(254, 243, 199, 0.95), rgba(253, 230, 138, 0.9));
+  border-color: rgba(245, 158, 11, 0.4);
+}
+[data-theme="light"] .spring-rating-top3__title {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-top3__card {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .spring-rating-top3__card--first {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+[data-theme="light"] .spring-rating-top3__rank,
+[data-theme="light"] .spring-rating-top3__nick {
+  color: #1e293b;
+}
+[data-theme="light"] .spring-rating-top3__card--first .spring-rating-top3__rank {
+  color: #b45309;
+}
+[data-theme="light"] .spring-rating-top3__avatar {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #78350f;
+}
+[data-theme="light"] .spring-rating-top3__points {
+  color: #475569;
+}
+[data-theme="light"] .spring-rating-top3__reward {
+  color: #b45309;
+}
+
+/* Модалка «Рейтинг турнирщиков весны» — в стиле кнопки весны (slate + amber) */
+.spring-rating-info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.spring-rating-info-modal.spring-rating-info-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.spring-rating-info-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: pointer;
+}
+.spring-rating-info-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  max-height: 85vh;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(51, 65, 85, 0.96));
+  border-radius: 16px;
+  padding: 20px 16px 20px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.2), 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 20px rgba(251, 191, 36, 0.12);
+}
+/* Модалка «Предсказание на день» — стиль похоже на весенний рейтинг, но компактнее */
+.daily-prediction-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.daily-prediction-modal.daily-prediction-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.daily-prediction-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+.daily-prediction-modal__inner {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  max-height: 80vh;
+  overflow: auto;
+  background: radial-gradient(circle at 0 0, rgba(129, 140, 248, 0.4), transparent 60%), radial-gradient(circle at 100% 0, rgba(244, 114, 182, 0.4), transparent 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+  border-radius: 16px;
+  padding: 20px 16px 18px;
+  border: 1px solid rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(129, 140, 248, 0.35),
+    0 12px 40px rgba(15, 23, 42, 0.9),
+    0 4px 18px rgba(129, 140, 248, 0.4);
+}
+.daily-prediction-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  font-size: 20px;
+  cursor: pointer;
+}
+.daily-prediction-modal__title {
+  margin: 0 32px 10px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #e5e7eb;
+  text-align: left;
+}
+.daily-prediction-modal__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e5e7eb;
+}
+[data-theme="light"] .daily-prediction-modal__inner {
+  background: linear-gradient(180deg, #fef9c3, #ffe4e6);
+  border-color: rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(129, 140, 248, 0.35),
+    0 12px 40px rgba(148, 163, 184, 0.6),
+    0 4px 18px rgba(129, 140, 248, 0.4);
+}
+[data-theme="light"] .daily-prediction-modal__title,
+[data-theme="light"] .daily-prediction-modal__text {
+  color: #1f2937;
+}
+[data-theme="light"] .daily-prediction-modal__close {
+  background: rgba(248, 250, 252, 0.9);
+  color: #111827;
+}
+.daily-prediction-modal__actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.daily-prediction-modal__timer {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.daily-prediction-modal__share-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ecfdf5;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.5);
+}
+.daily-prediction-modal__share-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.6);
+}
+[data-theme="light"] .daily-prediction-modal__inner {
+  background: linear-gradient(180deg, #fef9c3, #ffe4e6);
+  border-color: rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(129, 140, 248, 0.35),
+    0 12px 40px rgba(148, 163, 184, 0.6),
+    0 4px 18px rgba(129, 140, 248, 0.4);
+}
+[data-theme="light"] .daily-prediction-modal__title,
+[data-theme="light"] .daily-prediction-modal__text {
+  color: #1f2937;
+}
+[data-theme="light"] .daily-prediction-modal__close {
+  background: rgba(248, 250, 252, 0.9);
+  color: #111827;
+}
+
+/* Бейдж предсказания: внизу справа внутри кнопки */
+.feature__badge--bottom-right {
+  top: auto;
+  bottom: -4px;
+  right: -4px;
+}
+[data-theme="light"] .daily-prediction-modal__inner {
+  background: linear-gradient(180deg, #fef9c3, #ffe4e6);
+  border-color: rgba(129, 140, 248, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(129, 140, 248, 0.35),
+    0 12px 40px rgba(148, 163, 184, 0.6),
+    0 4px 18px rgba(129, 140, 248, 0.4);
+}
+[data-theme="light"] .daily-prediction-modal__title,
+[data-theme="light"] .daily-prediction-modal__text {
+  color: #1f2937;
+}
+[data-theme="light"] .daily-prediction-modal__close {
+  background: rgba(248, 250, 252, 0.9);
+  color: #111827;
+}
+.spring-rating-info-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(251, 191, 36, 0.15);
+  color: #f8fafc;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.spring-rating-info-modal__close:hover {

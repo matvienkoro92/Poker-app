@@ -1,0 +1,833 @@
+/* Chat after CSS: shared chat layout states and keyboard corrections.
+ * Extracted from styles-chat-after.css; keep import order in styles-chat-after.css stable. */
+
+/* Legacy post-chat home, learning and video lesson rules.
+ * Extracted from styles-chat.css; keep import order in styles-chat.css stable. */
+
+.download-title {
+  text-align: center;
+}
+
+.download-quote {
+  margin: 0 0 14px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text);
+  font-style: italic;
+  text-align: center;
+}
+
+.tournament-day-block {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(249, 115, 22, 0.1));
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 16px;
+}
+.tournament-day-block--home .tournament-day-block__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  justify-content: center;
+  overflow: hidden;
+}
+.tournament-day-block__badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 1px 4px;
+  margin-bottom: 0;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #ea580c);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(251, 146, 60, 0.4);
+}
+.tournament-day-block--home .tournament-day-block__name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tournament-day-block--home .tournament-day-block__meta {
+  font-size: 9px;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tournament-day-block--home .tournament-day-block__meta .tournament-day-block__timer {
+  font-weight: 600;
+  color: var(--accent);
+}
+.tournament-day-block__cta {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.2);
+  line-height: 1.2;
+}
+.tournament-day-block--home:hover .tournament-day-block__cta {
+  background: linear-gradient(90deg, #fdba74 0%, #f97316 50%, #ea580c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(249, 115, 22, 0.3);
+}
+[data-theme="light"] .tournament-day-block__cta {
+  background: linear-gradient(90deg, #fb923c 0%, #ea580c 50%, #b45309 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+[data-theme="light"] .tournament-day-block--home:hover .tournament-day-block__cta {
+  background: linear-gradient(90deg, #fdba74 0%, #f97316 50%, #ea580c 100%);
+}
+.tournament-day-block__cols {
+  display: flex;
+  gap: 12px;
+}
+.tournament-day-block__col {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+.tournament-day-block__col-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.tournament-day-block__col-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.tournament-day-block__timer {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.tournament-day-block__satellite {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+.tournament-day-block__satellite-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.tournament-day-block__satellite-details {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.features {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.features-row--half {
+  display: flex;
+  gap: 10px;
+}
+.features-row--half .feature {
+  flex: 1;
+  min-width: 0;
+}
+
+.features-row--full {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.features-row--full .feature {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+
+.features-row--three {
+  display: flex;
+  gap: 8px;
+}
+.features-row--three .feature {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  gap: 8px;
+}
+.features-row--three .feature__icon {
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+}
+.features-row--three .feature__title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.features-row--three .feature__text {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.features-row--three .feature--rating-promo {
+  padding: 8px 10px !important;
+}
+.features-row--three .feature--rating-three {
+  font-size: 10px;
+}
+.features-row--three .feature--rating-three .feature__title {
+  font-size: 10px;
+  line-height: 1.2;
+}
+.features-row--three .feature--rating-three .feature__title-line2 {
+  font-size: 9px;
+  margin-top: 0.1em;
+}
+.features-row--three .feature--rating-three .feature__icon {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.feature--rating-spring-full .feature__title {
+  font-size: 14px !important;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.feature__title--center {
+  text-align: center;
+  width: 100%;
+}
+.feature__title--uppercase {
+  text-transform: uppercase;
+}
+/* Промо «Рейтинг весны»: 4 строки без принудительного uppercase */
+.feature__title--spring-promo-lines {
+  text-transform: none;
+}
+.feature--rating-spring-full .feature__title-snowflake {
+  margin-right: 0.25em;
+  opacity: 0.95;
+}
+.feature--rating-spring-full .feature__title-line1,
+.feature--rating-spring-full .feature__title-prize,
+.feature--rating-spring-full .feature__title-line3 {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.05em;
+  margin-bottom: 0.05em;
+}
+.feature--rating-spring-full .feature__title-line1 {
+  font-size: 0.78em;
+  white-space: nowrap;
+  margin-top: 0;
+}
+.feature__title-prize {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #f97316;
+  white-space: nowrap;
+}
+.feature--rating-spring-full .feature__title-line3 {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+[data-theme="light"] .feature__title-prize {
+  color: #ea580c;
+}
+.feature--rating-spring-full .feature__title-line2 {
+  display: block;
+  margin-top: 0.15em;
+}
+.feature--rating-spring-full.feature--rating-promo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px !important;
+  min-height: 72px;
+  box-sizing: border-box;
+}
+.feature--rating-spring-full .feature__cup {
+  font-size: 50px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.feature--rating-spring-full .feature__cup--left {
+  margin-right: 12px;
+}
+.feature--rating-spring-full .feature__cup--right {
+  margin-left: 12px;
+}
+.feature--rating-spring-full .feature__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.35;
+  min-width: 0;
+  overflow: hidden;
+}
+.feature--rating-spring-full .feature__title {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Узкие экраны: кнопка «Рейтинг турнирщиков» — 3 строки, кубки меньше; сохраняем читаемый текст и отступы */
+@media (max-width: 400px) {
+  .feature--rating-spring-full.feature--rating-promo {
+    padding: 10px 16px !important;
+    min-height: 64px;
+  }
+  .feature--rating-spring-full .feature__title {
+    font-size: 11px !important;
+    line-height: 1.28;
+    text-align: center;
+  }
+  .feature--rating-spring-full .feature__title-line1 {
+    font-size: 0.8em;
+  }
+  .feature--rating-spring-full .feature__body {
+    line-height: 1.28;
+  }
+  .feature--rating-spring-full .feature__title-line1,
+  .feature--rating-spring-full .feature__title-prize,
+  .feature--rating-spring-full .feature__title-line3 {
+    text-align: center;
+  }
+  .feature--rating-spring-full .feature__title-prize {
+    font-size: 1.2em;
+    white-space: nowrap;
+  }
+  .feature--rating-spring-full .feature__title-line3 {
+    font-size: 0.9em;
+  }
+  .feature--rating-spring-full .feature__cup {
+    font-size: 36px;
+  }
+  .feature--rating-spring-full .feature__cup--left {
+    margin-right: 8px;
+  }
+  .feature--rating-spring-full .feature__cup--right {
+    margin-left: 8px;
+  }
+  .features-section-title {
+    font-size: 13px;
+    margin-top: 14px;
+  }
+  .features {
+    margin-top: 14px;
+    gap: 8px;
+  }
+  .games-apps-grid .feature__title {
+    font-size: 11px;
+  }
+  .games-apps-grid .games-apps-grid__promo-learn .feature__title {
+    font-size: 12px;
+  }
+  .games-apps-grid .games-apps-grid__promo-learn .feature__desc {
+    font-size: 10px;
+  }
+  .games-apps-grid .games-apps-grid__promo-learn .feature__icon-emoji {
+    font-size: 24px;
+  }
+}
+@media (max-width: 360px) {
+  .feature--rating-spring-full.feature--rating-promo {
+    padding: 10px 14px !important;
+  }
+  .feature--rating-spring-full .feature__title {
+    font-size: 10px !important;
+  }
+  .feature--rating-spring-full .feature__title-line1 {
+    font-size: 0.75em;
+  }
+  .feature--rating-spring-full .feature__title-prize {
+    font-size: 1.08em;
+  }
+  .feature--rating-spring-full .feature__title-line3 {
+    font-size: 0.88em;
+  }
+  .feature--rating-spring-full .feature__cup {
+    font-size: 32px;
+  }
+  .games-apps-grid .games-apps-grid__promo-learn .feature__title {
+    font-size: 11px;
+  }
+  .games-apps-grid .games-apps-grid__promo-learn .feature__desc {
+    font-size: 9px;
+  }
+}
+@media (max-width: 320px) {
+  .feature--rating-spring-full.feature--rating-promo {
+    padding: 8px 12px !important;
+  }
+  .feature--rating-spring-full .feature__title {
+    font-size: 9px !important;
+  }
+  .feature--rating-spring-full .feature__title-line1 {
+    font-size: 0.68em;
+  }
+  .feature--rating-spring-full .feature__title-prize {
+    font-size: 0.98em;
+  }
+  .feature--rating-spring-full .feature__title-line3 {
+    font-size: 0.82em;
+  }
+  .feature--rating-spring-full .feature__cup {
+    font-size: 28px;
+  }
+  .feature--rating-spring-full .feature__cup--left {
+    margin-right: 6px;
+  }
+  .feature--rating-spring-full .feature__cup--right {
+    margin-left: 6px;
+  }
+}
+@media (max-width: 300px) {
+  .feature--rating-spring-full.feature--rating-promo {
+    padding: 6px 10px !important;
+    min-height: 58px;
+  }
+  .feature--rating-spring-full .feature__title {
+    font-size: 8px !important;
+    line-height: 1.26;
+  }
+  .feature--rating-spring-full .feature__title-line1 {
+    font-size: 0.65em;
+  }
+  .feature--rating-spring-full .feature__title-prize {
+    font-size: 0.92em;
+  }
+  .feature--rating-spring-full .feature__title-line3 {
+    font-size: 0.78em;
+  }
+  .feature--rating-spring-full .feature__cup {
+    font-size: 24px;
+  }
+  .feature--rating-spring-full .feature__cup--left {
+    margin-right: 5px;
+  }
+  .feature--rating-spring-full .feature__cup--right {
+    margin-left: 5px;
+  }
+}
+@media (max-width: 280px) {
+  .feature--rating-spring-full.feature--rating-promo {
+    padding: 6px 8px !important;
+    min-height: 54px;
+  }
+  .feature--rating-spring-full .feature__title {
+    font-size: 7px !important;
+    line-height: 1.24;
+  }
+  .feature--rating-spring-full .feature__title-line1 {
+    font-size: 0.6em;
+  }
+  .feature--rating-spring-full .feature__title-prize {
+    font-size: 0.85em;
+  }
+  .feature--rating-spring-full .feature__title-line3 {
+    font-size: 0.72em;
+  }
+  .feature--rating-spring-full .feature__title-snowflake {
+    margin-right: 0.2em;
+  }
+  .feature--rating-spring-full .feature__cup {
+    font-size: 22px;
+  }
+  .feature--rating-spring-full .feature__cup--left {
+    margin-right: 4px;
+  }
+  .feature--rating-spring-full .feature__cup--right {
+    margin-left: 4px;
+  }
+}
+
+.feature--rating-promo {
+  padding: 9px 10px !important;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-width: 1px !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25) !important;
+}
+.feature--rating-promo .feature__icon {
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+}
+.feature--rating-promo .feature__title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.feature--rating-promo .feature__title-line2 {
+  display: block;
+  margin-top: 0.05em;
+}
+.feature--rating-promo .feature__title-accent {
+  color: var(--accent);
+  font-weight: 700;
+  padding: 0 2px;
+  border-radius: 2px;
+  background: var(--accent-soft);
+}
+.feature--rating-promo .feature__text {
+  font-size: 11px;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature--rating-promo {
+  border: 1px solid rgba(120, 113, 108, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35) !important;
+}
+/* Главная: кнопка рейтинга — оформление в стиле зимы (холодная палитра, лёд, снег) */
+.view--active[data-view="home"] .feature.feature--link.feature--rating-promo,
+html.app-view-home .feature.feature--link.feature--rating-promo {
+  border: 1px solid rgba(186, 230, 253, 0.6) !important;
+  border-radius: 22px !important;
+  max-width: 100%;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.98)) !important;
+  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.25),
+              0 4px 20px rgba(56, 189, 248, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+.view--active[data-view="home"] .feature.feature--link.feature--rating-promo:hover,
+html.app-view-home .feature.feature--link.feature--rating-promo:hover {
+  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.35),
+              0 6px 24px rgba(56, 189, 248, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+.view--active[data-view="home"] .feature--rating-promo .feature__title-prize,
+html.app-view-home .feature--rating-promo .feature__title-prize {
+  color: #7dd3fc !important;
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.4);
+}
+.view--active[data-view="home"] .feature--rating-spring-promo .feature__title-prize--spring,
+html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #fbbf24 !important;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+}
+[data-theme="light"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo,
+[data-theme="light"] html.app-view-home .feature.feature--link.feature--rating-promo {
+  border: 1px solid rgba(56, 189, 248, 0.5) !important;
+  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%) !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2),
+              0 4px 16px rgba(56, 189, 248, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo:hover,
+[data-theme="light"] html.app-view-home .feature.feature--link.feature--rating-promo:hover {
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35),
+              0 6px 20px rgba(56, 189, 248, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature--rating-promo .feature__title-prize,
+[data-theme="light"] html.app-view-home .feature--rating-promo .feature__title-prize {
+  color: #0284c7 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature--rating-spring-promo .feature__title-prize--spring,
+[data-theme="light"] html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #b45309 !important;
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature--rating-promo .feature__title-accent {
+  color: #0284c7;
+  background: rgba(56, 189, 248, 0.2);
+}
+
+/* Кнопка «Рейтинг Весны» на главной — в стиле главной (slate + amber), поярче */
+.view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo {
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(51, 65, 85, 0.88)) !important;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.22),
+              0 4px 20px rgba(251, 191, 36, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+.view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover,
+html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
+              0 6px 24px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+.feature--rating-spring-promo.feature--rating-promo {
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  border-radius: 22px !important;
+  max-width: 100%;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(51, 65, 85, 0.88)) !important;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.22),
+              0 4px 20px rgba(251, 191, 36, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+.view--active[data-view="home"] .feature--rating-spring-promo:hover,
+html.app-view-home .feature--rating-spring-promo:hover,
+.feature--rating-spring-promo:hover {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35),
+              0 6px 24px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+.feature--rating-spring-promo .feature__title-line1,
+.feature--rating-spring-promo .feature__title-line3--spring {
+  color: #f8fafc !important;
+}
+.feature--rating-spring-promo .feature__title-prize--spring {
+  color: #fbbf24 !important;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+}
+.feature--rating-spring-promo .feature__title-updated {
+  display: block;
+  width: 100%;
+  margin-top: 0.1em;
+  margin-left: 0;
+  padding: 0 2px;
+  box-sizing: border-box;
+  font-weight: 400;
+  color: rgba(248, 250, 252, 0.5);
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+[data-theme="light"] .feature--rating-spring-promo .feature__title-updated {
+  color: rgba(30, 41, 59, 0.5);
+}
+.feature--rating-spring-promo .feature__title-leaf {
+  margin-left: 0.2em;
+  opacity: 0.95;
+  vertical-align: middle;
+}
+/* Компактная высота и кубки: 4 строки заголовка в промо «Рейтинг весны» */
+.feature--rating-spring-promo.feature--rating-promo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px !important;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+.feature--rating-spring-promo .feature__cup {
+  font-size: clamp(18px, 8vmin, 38px);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.feature--rating-spring-promo .feature__cup--left {
+  margin-right: clamp(4px, 2vw, 12px);
+}
+.feature--rating-spring-promo .feature__cup--right {
+  margin-left: clamp(4px, 2vw, 12px);
+}
+.feature--rating-spring-promo .feature__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.22;
+  flex: 1 1 0;
+  min-width: 0;
+  /* не обрезаем текст между кубками — переносим строки */
+  overflow: visible;
+}
+.feature--rating-spring-promo .feature__title {
+  min-width: 0;
+  overflow: visible;
+  font-size: clamp(7.5px, 2.35vw, 10px) !important;
+  font-weight: 700;
+}
+.feature--rating-spring-promo .feature__title-line1,
+.feature--rating-spring-promo .feature__title-prize,
+.feature--rating-spring-promo .feature__title-line3--spring {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+/* Разный кегль по строкам (от базы .feature__title): короче текст — крупнее, чтобы визуальная ширина строк была близка */
+.feature--rating-spring-promo .feature__title-line1 {
+  font-size: 1em;
+  line-height: 1.18;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.feature--rating-spring-promo .feature__title-prize {
+  font-size: 1.55em;
+  line-height: 1.12;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  color: #fdba74;
+}
+.feature--rating-spring-promo .feature__title-line3--spring {
+  font-size: 1.34em;
+  line-height: 1.14;
+  margin-top: 0.04em;
+  color: #f8fafc !important;
+  letter-spacing: 0.03em;
+  text-align: center;
+  white-space: nowrap;
+}
+.feature--rating-spring-promo .feature__title-updated {
+  font-size: 1.14em;
+  line-height: 1.15;
+}
+[data-theme="light"] .feature--rating-spring-promo .feature__title-line1,
+[data-theme="light"] .feature--rating-spring-promo .feature__title-line3--spring {
+  color: #78350f !important;
+}
+[data-theme="light"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="light"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="light"] .feature--rating-spring-promo.feature--rating-promo {
+  border: 1px solid rgba(249, 115, 22, 0.55) !important;
+  background: linear-gradient(145deg, #ffedd5 0%, #fdba74 52%, #fb923c 100%) !important;
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.22),
+              0 4px 16px rgba(249, 115, 22, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+[data-theme="light"] .feature--rating-spring-promo .feature__title {
+  color: #78350f;
+}
+[data-theme="light"] .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #b45309 !important;
+  text-shadow: none;
+}
+/* Обычная ночная тема: рейтинг не должен наследовать тёмно-золотую кнопку. */
+[data-theme="dark"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="dark"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo,
+[data-theme="dark"] .feature--rating-spring-promo.feature--rating-promo {
+  border: 1px solid rgba(186, 230, 253, 0.6) !important;
+  background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.98)) !important;
+  box-shadow:
+    0 0 0 1px rgba(186, 230, 253, 0.25),
+    0 4px 20px rgba(56, 189, 248, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+[data-theme="dark"] .view--active[data-view="home"] .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover,
+[data-theme="dark"] html.app-view-home .feature.feature--link.feature--rating-promo.feature--rating-spring-promo:hover,
+[data-theme="dark"] .feature--rating-spring-promo.feature--rating-promo:hover {
+  box-shadow:
+    0 0 0 1px rgba(186, 230, 253, 0.35),
+    0 6px 24px rgba(56, 189, 248, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+[data-theme="dark"] .feature--rating-spring-promo .feature__title-prize--spring {
+  color: #7dd3fc !important;
+  text-shadow: 0 0 12px rgba(125, 211, 252, 0.4);
+}
+/* Узкие экраны — ещё компактнее, до 4 строк в промо */
+@media (max-width: 400px) {
+  .feature--rating-spring-promo.feature--rating-promo {
+    padding: 8px 12px !important;
+    min-height: 52px;
+  }
+  .feature--rating-spring-promo .feature__title {
+    font-size: 9px !important;
+    line-height: 1.22;
+  }
+  .feature--rating-spring-promo .feature__title-line1 {
+    font-size: 1em;
+  }
+  .feature--rating-spring-promo .feature__body {
+    line-height: 1.22;
+  }
+  .feature--rating-spring-promo .feature__cup {
+    font-size: 30px;
+  }
+  .feature--rating-spring-promo .feature__cup--left {
+    margin-right: 7px;
+  }
+  .feature--rating-spring-promo .feature__cup--right {
+    margin-left: 7px;
+  }
+}
+@media (max-width: 360px) {
+  .feature--rating-spring-promo.feature--rating-promo {
+    padding: 8px 11px !important;
+    min-height: 50px;
+  }
+  .feature--rating-spring-promo .feature__title {
+    font-size: 8.5px !important;
+  }
+  .feature--rating-spring-promo .feature__cup {
+    font-size: 28px;
+  }
+}
+@media (max-width: 320px) {
+  .feature--rating-spring-promo.feature--rating-promo {
+    padding: 7px 10px !important;
+    min-height: 48px;
+  }
+  .feature--rating-spring-promo .feature__title {
+    font-size: 8px !important;
+  }
+  .feature--rating-spring-promo .feature__cup {
+    font-size: 26px;
+  }
+  .feature--rating-spring-promo .feature__cup--left {
+    margin-right: 6px;
+  }
+  .feature--rating-spring-promo .feature__cup--right {
+    margin-left: 6px;
+  }
+}
+@media (max-width: 300px) {
+  .feature--rating-spring-promo.feature--rating-promo {
+    padding: 6px 9px !important;
+    min-height: 46px;
+  }
+  .feature--rating-spring-promo .feature__title {
+    font-size: 7.5px !important;
+    line-height: 1.2;
+  }
+  .feature--rating-spring-promo .feature__cup {
+    font-size: 22px;
+  }
+  .feature--rating-spring-promo .feature__cup--left {
+    margin-right: 5px;
+  }
+  .feature--rating-spring-promo .feature__cup--right {
+    margin-left: 5px;
+  }
+}
+@media (max-width: 280px) {
+  .feature--rating-spring-promo.feature--rating-promo {
+    padding: 6px 8px !important;
+    min-height: 44px;
+  }
+  .feature--rating-spring-promo .feature__title {
+    font-size: 7px !important;
+    line-height: 1.2;
+  }
+  .feature--rating-spring-promo .feature__cup {
+    font-size: 22px;
+  }
+  .feature--rating-spring-promo .feature__cup--left {
+    margin-right: 4px;
+  }
+  .feature--rating-spring-promo .feature__cup--right {

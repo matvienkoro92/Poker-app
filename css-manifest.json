@@ -25,6 +25,9 @@
       "styles-chat-dialogs-groups.css",
       "styles-chat-threads-contacts.css",
       "styles-chat-after.css",
+      "styles-chat-after-shell.css",
+      "styles-chat-after-modals.css",
+      "styles-chat-after-responsive.css",
       "styles-chat-overlays.css"
     ],
     "rating": [
@@ -33,6 +36,9 @@
       "styles-rating-raffles.css",
       "styles-rating-home-download.css",
       "styles-rating-tables-modals.css",
+      "styles-rating-tables.css",
+      "styles-rating-modals.css",
+      "styles-rating-late.css",
       "styles-rating-chat-modals.css"
     ],
     "hall": [
