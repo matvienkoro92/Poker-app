@@ -89,6 +89,27 @@ function pokerChatDomainScriptsReady() {
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   try {
+    if (!navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
+      var scriptsReady = window.pokerEnsureViewScripts(viewName);
+      if (scriptsReady && typeof scriptsReady.then === "function") {
+        scriptsReady.then(function () {
+          var nextOptsScripts = {};
+          Object.keys(navOpts).forEach(function (key) {
+            nextOptsScripts[key] = navOpts[key];
+          });
+          nextOptsScripts.scriptsReady = true;
+          setView(viewName, nextOptsScripts);
+        }).catch(function (err) {
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+            window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
+          }
+          if (typeof console !== "undefined" && console.warn) console.warn("view script domain", err);
+        });
+        return;
+      }
+    }
+  } catch (eScriptView) {}
+  try {
     if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
       var htmlViewName = viewName === "spring-rating" ? "winter-rating" : viewName;
       var htmlReady = window.pokerEnsureViewHtml(htmlViewName);

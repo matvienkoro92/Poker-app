@@ -531,15 +531,41 @@ function initProfileKeyboardViewportCleanup() {
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
 if (tg) {
-  tg.ready();
-  if (tg.expand) tg.expand();
-  if (typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes();
+  try {
+    if (typeof tg.showAlert === "function" && !tg.__pokerSafeShowAlertWrapped) {
+      var pokerRawTelegramShowAlert = tg.showAlert.bind(tg);
+      tg.showAlert = function (message, callback) {
+        try {
+          return pokerRawTelegramShowAlert(message, callback);
+        } catch (eAlert) {
+          if (typeof callback === "function") {
+            try {
+              callback();
+            } catch (eCb) {}
+          }
+          return null;
+        }
+      };
+      tg.__pokerSafeShowAlertWrapped = true;
+    }
+  } catch (eWrapAlert) {}
+  try {
+    tg.ready();
+  } catch (eTgReady) {}
+  try {
+    if (tg.expand) tg.expand();
+  } catch (eTgExpandInit) {}
+  try {
+    if (typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes();
+  } catch (eTgSwipes) {}
   var currentTheme = document.documentElement.getAttribute("data-theme");
   var isLight = currentTheme === "light";
   var isGold = currentTheme === "gold";
   var isNeon = currentTheme === "neon";
   /* Совпадает с --overscroll-canvas / initTheme (резинка сверху не белая) */
-  if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : isGold ? "#05070d" : isNeon ? "#020611" : "#0f172a");
+  try {
+    if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : isGold ? "#05070d" : isNeon ? "#020611" : "#0f172a");
+  } catch (eTgBg) {}
   // По ссылке t.me/Poker_dvatuza_bot/DvaTuza всегда открываем в полный экран.
   // Повторные вызовы expand() с задержкой и при событиях помогают развернуть на части устройств.
   function tryExpand() {

@@ -127,6 +127,15 @@ async function main() {
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1200);
 
+    const initialLazy = await page.evaluate(() => ({
+      initChat: typeof window.initChat,
+      chatScripts: performance.getEntriesByType("resource")
+        .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
+        .map((entry) => entry.name.split("/").pop()),
+    }));
+    if (initialLazy.initChat !== "undefined") throw new Error("initChat loaded before opening chat");
+    if (initialLazy.chatScripts.length) throw new Error("chat scripts loaded before opening chat: " + initialLazy.chatScripts.join(", "));
+
     const route = ["chat", "download", "cashout", "profile", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
@@ -167,6 +176,9 @@ async function main() {
       modules: performance.getEntriesByType("resource")
         .filter((entry) => /app-(chat-lifecycle|webview-keyboard|view-router)\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
+      chatScripts: performance.getEntriesByType("resource")
+        .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
+        .map((entry) => entry.name.split("/").pop()),
     }));
 
     if (state.setView !== "function") throw new Error("setView is not a function");
@@ -188,6 +200,7 @@ async function main() {
     if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
+    if (state.chatScripts.length < 20) throw new Error("chat lazy scripts were not loaded on chat open");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
     console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state }, null, 2));

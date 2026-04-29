@@ -22,6 +22,7 @@ const files = {
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
+  appLazyLoader: read("app-lazy-loader.js"),
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
@@ -728,13 +729,32 @@ add("Winter rating HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );
 
-add("View navigation is not gated by lazy loading", () =>
-  !has("html", 'type="application/poker-lazy"') &&
-  !has("client", "pokerEnsureViewScripts(viewName)") &&
+add("View navigation gates lazy domains before activating heavy views", () =>
+  has("html", 'type="application/poker-lazy"') &&
+  has("client", "pokerEnsureViewScripts(viewName)") &&
   hasAll("client", [
     "function setView(viewName, navOpts)",
+    "nextOptsScripts.scriptsReady = true",
     "navItems.forEach(function (item)",
     "setView(target)",
+  ])
+);
+
+add("Chat JavaScript domain is lazy-loaded", () =>
+  hasAll("html", [
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js',
+  ]) &&
+  !has("html", '<script defer src="./app-chat-utils.js') &&
+  !has("html", '<script defer src="./app-chat-lifecycle.js') &&
+  hasAll("appLazyLoader", [
+    "data-poker-lazy-domain",
+    "window.pokerLoadDomainScripts = loadDomainScripts",
+    "window.pokerEnsureViewScripts = function (viewName)",
+  ]) &&
+  hasAll("appViewRouter", [
+    "pokerEnsureViewScripts(viewName)",
+    "scriptsReady",
   ])
 );
 
