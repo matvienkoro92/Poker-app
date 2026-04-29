@@ -370,8 +370,150 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
 }
 
+async function testChatCoreInvariants() {
+  const core = require(path.join(root, "lib", "chat-core.js"));
+  const storage = require(path.join(root, "lib", "chat-storage.js"));
+  const access = require(path.join(root, "lib", "chat-access.js"));
+  const groups = require(path.join(root, "lib", "chat-groups.js"));
+  const groupMembers = require(path.join(root, "lib", "chat-group-members.js"));
+  const messageEnrichment = require(path.join(root, "lib", "chat-message-enrichment.js"));
+  const pagination = require(path.join(root, "lib", "chat-pagination.js"));
+  const threadStore = require(path.join(root, "lib", "chat-thread-store.js"));
+  const unread = require(path.join(root, "lib", "chat-unread.js"));
+  const notifications = require(path.join(root, "lib", "chat-notifications.js"));
+
+  assert.strictEqual(core.isGroupChatId("group_abcdefgh"), true, "valid group id is accepted");
+  assert.strictEqual(core.isGroupChatId("group_short"), false, "short group id is rejected");
+  assert.strictEqual(core.normalizePeerChatUserId("1001"), "tg_1001", "numeric peer becomes tg id");
+  assert.strictEqual(core.normalizePeerChatUserId("tg_1001"), "tg_1001", "tg peer stays stable");
+  assert.strictEqual(core.normalizePeerChatUserId("vk_99"), "vk_99", "vk peer stays stable");
+  assert.strictEqual(core.normalizePeerChatUserId("tg_roman"), "tg_388008256", "roman alias is normalized");
+  assert.strictEqual(core.normalizeStoredMessageFromId("1001"), "tg_1001", "legacy message sender becomes tg id");
+  assert.strictEqual(core.normalizeStoredMessageFromId("guest_1"), "guest_1", "guest sender stays stable");
+  assert.strictEqual(core.convKey("tg_2", "tg_10"), "poker_app:chat:10_2", "conversation key preserves old lexical order");
+  assert.strictEqual(
+    core.chatMessageIsNewerThanLastViewed("2026-01-01T00:00:01.000Z", "2026-01-01T00:00:00Z"),
+    true,
+    "newer message beats cursor",
+  );
+  assert.strictEqual(
+    core.mergeReadCursors("2026-01-01T00:00:00Z", "2026-01-01T00:00:01.000Z"),
+    "2026-01-01T00:00:01.000Z",
+    "newer cursor wins",
+  );
+  assert.strictEqual(storage.groupMetaKey("group_abcdefgh"), "poker_app:chat_group_meta:group_abcdefgh", "group meta key is stable");
+  assert.strictEqual(storage.groupMsgsKey("group_abcdefgh"), "poker_app:chat_group_msgs:group_abcdefgh", "group message key is stable");
+  assert.strictEqual(storage.userChatGroupsKey("tg_1001"), "poker_app:user_chat_groups:tg_1001", "user group index key is stable");
+  assert.strictEqual(
+    storage.threadMetaKeyByStorageKey("poker_app:chat:1_2"),
+    "poker_app:chat_thread_meta:poker_app:chat:1_2",
+    "thread meta key is stable",
+  );
+  assert.strictEqual(
+    storage.buildThreadPreviewText({ fromName: "Player", text: "hello     world" }),
+    "Player: hello world",
+    "thread preview compacts text",
+  );
+  assert.strictEqual(access.CLUB_CHAT_PENDING_KEY, "poker_app:club_chat_pending", "club pending key is stable");
+  assert.strictEqual(unread.unreadHashKey("tg_1001"), "poker_app:chat_unread:tg_1001", "unread hash key is stable");
+  assert.strictEqual(
+    notifications.buildClubChatMiniAppLink("https://t.me/Poker_dvatuza_bot/DvaTuza)"),
+    "https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=club_chat",
+    "club chat mini app link trims legacy closing paren",
+  );
+  const unreadCommands = [];
+  const redisPipeline = async (commands) => {
+    unreadCommands.push(...commands);
+    return commands.map(() => ({ result: 1 }));
+  };
+  await unread.incrementThreadUnreadForRecipients(redisPipeline, ["tg_2", "tg_2", "tg_3"], "tg_1");
+  assert.deepStrictEqual(
+    unreadCommands,
+    [
+      ["HINCRBY", "poker_app:chat_unread:tg_2", "tg_1", 1],
+      ["HINCRBY", "poker_app:chat_unread:tg_3", "tg_1", 1],
+    ],
+    "thread unread increments unique recipients",
+  );
+  assert.strictEqual(groups.sanitizeGroupTitle("  Team\u0007 Alpha  "), "Team Alpha", "group title strips control chars");
+  assert.strictEqual(groups.sanitizeGroupDescription("x".repeat(2500)).length, 2000, "group description is capped");
+  assert.strictEqual(groups.sanitizeGroupAvatarInput("https://example.com/a.png"), null, "group avatar only accepts data images");
+  assert.strictEqual(groups.groupMetaHasMember({ members: ["1001"] }, "tg_1001"), true, "group membership normalizes legacy ids");
+  assert.strictEqual(groups.readGroupMetaOnlyFlag({ query: { metaOnly: "1" } }), true, "group meta flag is recognized");
+  assert.strictEqual(groups.readContactsMetaOnlyFlag({ query: { contactsmetaonly: "1" } }), true, "contacts meta flag is recognized");
+  const messages = [{ from: "1001", replyTo: { from: "tg_1002" } }];
+  assert.deepStrictEqual(messageEnrichment.collectMessageFromIdsForAlias(messages), ["1001", "tg_1002"], "message ids include replies");
+  messageEnrichment.applyPeerChatDisplayNamesToMessages(messages, { tg_1001: "One", tg_1002: "Two" });
+  assert.strictEqual(messages[0].fromName, "One", "display name applies to sender");
+  assert.strictEqual(messages[0].replyTo.fromName, "Two", "display name applies to reply sender");
+  messageEnrichment.applyViewerFriendAliasesToMessages(messages, { tg_1001: "Alias One" });
+  assert.strictEqual(messages[0].fromName, "Alias One", "friend alias overrides display name");
+  const pageMessages = [
+    { id: "1", time: "2026-01-01T00:00:00.000Z" },
+    { id: "2", time: "2026-01-01T00:00:01.000Z" },
+    { id: "3", time: "2026-01-01T00:00:02.000Z" },
+  ];
+  assert.deepStrictEqual(pagination.filterMessagesAfterCursor(pageMessages, "1").map((m) => m.id), ["2", "3"], "after id cursor slices newer messages");
+  assert.deepStrictEqual(
+    pagination.sliceMessagesBeforeCursor(pageMessages, "3", "", 1),
+    { messages: [{ id: "2", time: "2026-01-01T00:00:01.000Z" }], hasMoreBefore: true },
+    "before cursor returns bounded previous page",
+  );
+  const memberRows = await groupMembers.buildGroupMembersPublicList({
+    chatLastSeenHash: "seen",
+    chatLastSeenIsoFromRedisRaw: (raw) => raw ? new Date(Number(raw)).toISOString() : null,
+    chatOnlineKey: "online",
+    creatorId: "tg_1002",
+    friendAliasKeyPrefix: "alias:",
+    getAvatars: async () => ({ tg_1001: "avatar" }),
+    getChatDisplayNameMapForIds: async () => ({ tg_1001: "Display One" }),
+    getDtIds: async () => ({ tg_1001: "ID100001" }),
+    getP21Ids: async () => ({ tg_1001: "P21-1" }),
+    getPokerPlusVerifiedIds: async () => ({ tg_1001: true }),
+    isAdmin: (id) => id === "tg_1002",
+    memberIds: ["tg_1001", "tg_1001", "tg_1002"],
+    minScore: 10,
+    myId: "tg_1001",
+    normalizeLegacyAccountDisplayLabel: (value) => String(value || "").replace(/^tg_/, ""),
+    redisPipeline: async (commands) => {
+      const cmd = commands[0] || [];
+      if (cmd[0] === "HMGET" && cmd[1] === "seen") return [{ result: ["0", "1000"] }];
+      if (cmd[0] === "HMGET" && cmd[1] === "alias:tg_1001") return [{ result: ["Alias One", null] }];
+      if (cmd[0] === "HMGET") return [{ result: ["one", "two"] }];
+      return commands.map((c) => ({ result: c[2] === "tg_1001" ? "11" : "0" }));
+    },
+    sanitizeFriendContactNameForChat: (value) => String(value || "").trim(),
+    usernamesKey: "usernames",
+  });
+  assert.strictEqual(memberRows.length, 2, "group member rows are de-duplicated");
+  assert.strictEqual(memberRows[0].name, "Alias One", "member alias wins");
+  assert.strictEqual(memberRows[0].online, true, "member online score is applied");
+  assert.strictEqual(memberRows[1].isGroupCreator, true, "group creator is marked");
+  const storeCommands = [];
+  const storeRedis = async (commands) => {
+    storeCommands.push(...commands);
+    if (commands[0] && commands[0][0] === "HGET") return [{ result: JSON.stringify({ id: "m1", text: "hi" }) }];
+    if (commands[0] && commands[0][0] === "LPOS") return [{ result: 0 }];
+    return commands.map(() => ({ result: 1 }));
+  };
+  await threadStore.writeThreadMeta(storeRedis, "thread", { id: "m1", time: "2026-01-01T00:00:00Z", fromName: "A", text: "hello" });
+  assert.deepStrictEqual(
+    storeCommands.slice(0, 3),
+    [
+      ["HSET", "poker_app:chat_thread_meta:thread", "lastMessageTime", "2026-01-01T00:00:00Z"],
+      ["HSET", "poker_app:chat_thread_meta:thread", "lastMessageId", "m1"],
+      ["HSET", "poker_app:chat_thread_meta:thread", "lastMessagePreview", "A: hello"],
+    ],
+    "thread meta writes stable fields",
+  );
+  const located = await threadStore.locateThreadMessageById(storeRedis, "thread", "m1");
+  assert.strictEqual(located.found, true, "thread locate finds indexed message");
+  assert.strictEqual(located.fromIndex, true, "thread locate uses index when present");
+}
+
 async function main() {
   const tests = [
+    ["chat core invariants", testChatCoreInvariants],
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],

@@ -284,6 +284,21 @@ function applyContactsApiResponse(data, opts) {
           attachDialogButtons: window.chatAttachDialogButtons,
         })) return;
       } catch (eContactsRender) {
+        try {
+          console.error("[chat] contacts list render failed", {
+            message: eContactsRender && eContactsRender.message ? eContactsRender.message : String(eContactsRender),
+            stack: eContactsRender && eContactsRender.stack ? String(eContactsRender.stack).slice(0, 600) : "",
+            contactsCount: contactsForList && contactsForList.length,
+            firstContact: contactsForList && contactsForList[0]
+              ? {
+                  id: contactsForList[0].id,
+                  name: contactsForList[0].name,
+                  isGroupChat: contactsForList[0].isGroupChat,
+                  statusLevel: contactsForList[0].statusLevel,
+                }
+              : null,
+          });
+        } catch (eContactsRenderLog) {}
         clearContactsLoadingSkeletonFallback("Не удалось отрисовать список диалогов");
         return;
       }
