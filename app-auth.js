@@ -284,11 +284,66 @@ function pokerParsePwaSessionRaw(raw, requireUser) {
   try {
     var o = JSON.parse(raw);
     if (!o || !o.token) return null;
-    if (requireUser && (!o.user || o.user.id == null)) return null;
+    if (requireUser && (!o.user || o.user.id == null)) {
+      var restoredUser = pokerBuildUserFromPwaSessionToken(o.token, o.authMethod === "vk");
+      if (!restoredUser) return null;
+      o.user = restoredUser;
+    }
     return o;
   } catch (e) {
     return null;
   }
+}
+
+function pokerDecodePwaSessionPayload(token) {
+  try {
+    var s = String(token || "");
+    var dot = s.lastIndexOf(".");
+    if (dot < 0) return null;
+    var payload = s.slice(0, dot);
+    var data = JSON.parse(payload);
+    if (!data || data.exp == null) return null;
+    if (Math.floor(Date.now() / 1000) > Number(data.exp)) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function pokerBuildUserFromPwaSessionToken(token, isVk) {
+  var data = pokerDecodePwaSessionPayload(token);
+  if (!data) return null;
+  if (isVk) {
+    if (data.vid == null) return null;
+    return {
+      id: Number(data.vid),
+      memberId: "vk_" + String(data.vid),
+      username: data.dm || "",
+      first_name: data.fn || "",
+      last_name: data.ln || "",
+      photo_url: data.ph || "",
+      is_vk: true
+    };
+  }
+  if (data.uid == null) return null;
+  return {
+    id: Number(data.uid),
+    memberId: data.mid || ("tg_" + String(data.uid)),
+    username: data.un || "",
+    first_name: data.fn || "",
+    last_name: data.ln || "",
+    photo_url: "",
+    language_code: "",
+    is_premium: false
+  };
+}
+
+function pokerMinimalPwaSessionCookiePayload(token, authMethod, sessionExtra) {
+  var rec = { token: token };
+  var method = String(authMethod || "").trim().toLowerCase();
+  if (method) rec.authMethod = method;
+  if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
+  return JSON.stringify(rec);
 }
 
 function pokerReadPwaTgSessionToken() {
@@ -325,7 +380,7 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   if (sessionExtra && sessionExtra.authMethod) rec.authMethod = String(sessionExtra.authMethod).trim().toLowerCase();
   var payload = JSON.stringify(rec);
   var ok = false;
-  pokerWriteAuthCookie(POKER_PWA_TG_SESSION_KEY, payload);
+  pokerWriteAuthCookie(POKER_PWA_TG_SESSION_KEY, pokerMinimalPwaSessionCookiePayload(token, rec.authMethod || "telegram", sessionExtra));
   pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
@@ -350,7 +405,7 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
 function pokerSavePwaVkSession(token, userObj) {
   var payload = JSON.stringify({ token: token, user: userObj, authMethod: "vk" });
   var ok = false;
-  pokerWriteAuthCookie(POKER_PWA_VK_SESSION_KEY, payload);
+  pokerWriteAuthCookie(POKER_PWA_VK_SESSION_KEY, pokerMinimalPwaSessionCookiePayload(token, "vk"));
   pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);

@@ -121,6 +121,8 @@ add("PWA session has cookie fallback for storage-hostile browsers", () =>
     "function pokerReadAuthCookie(name)",
     "function pokerWriteAuthCookie(name, value)",
     "function pokerClearAuthCookie(name)",
+    "function pokerMinimalPwaSessionCookiePayload(token, authMethod, sessionExtra)",
+    "function pokerBuildUserFromPwaSessionToken(token, isVk)",
     "pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY)",
     "pokerReadAuthCookie(POKER_PWA_VK_SESSION_KEY)",
     "pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY)",
