@@ -1,4 +1,4 @@
-(function initShareStatsAdminModal() {
+function initShareStatsAdminModal() {
   var SHARE_BUTTON_LABELS = {
     tournament_day: "Турнир дня (поделиться)",
     daily_prediction: "Предсказание на день",
@@ -19,6 +19,8 @@
   var backdrop = document.getElementById("shareStatsAdminModalBackdrop");
   var tbody = document.getElementById("shareStatsAdminTableBody");
   if (!btn || !modal || !tbody) return;
+  if (btn.dataset.shareStatsBound === "1") return;
+  btn.dataset.shareStatsBound = "1";
   function closeShareStatsModal() {
     modal.setAttribute("aria-hidden", "true");
     if (document.body) document.body.style.overflow = "";
@@ -56,4 +58,6 @@
   btn.addEventListener("click", openShareStatsModal);
   if (closeBtn) closeBtn.addEventListener("click", closeShareStatsModal);
   if (backdrop) backdrop.addEventListener("click", closeShareStatsModal);
-})();
+}
+window.pokerInitShareStatsAdminModal = initShareStatsAdminModal;
+initShareStatsAdminModal();

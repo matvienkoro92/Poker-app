@@ -1,4 +1,4 @@
-(function initAdminReportModal() {
+function initAdminReportModal() {
   var btn = document.getElementById("adminReportBtn");
   var modal = document.getElementById("adminReportModal");
   var closeBtn = document.getElementById("adminReportModalClose");
@@ -12,6 +12,8 @@
   var editingReportId = null;
   var editingReport = null;
   if (!btn || !modal) return;
+  if (btn.dataset.adminReportBound === "1") return;
+  btn.dataset.adminReportBound = "1";
 
   var VIKA_AUTHOR_ID = "tg_1897001087";
   var VIKA_TELEGRAM_NUM = 1897001087;
@@ -829,14 +831,18 @@
         });
     });
   }
-})();
+}
+window.pokerInitAdminReportModal = initAdminReportModal;
+initAdminReportModal();
 
-(function initBroadcastReportsModal() {
+function initBroadcastReportsModal() {
   var btn = document.getElementById("adminBroadcastReportsBtn");
   var modal = document.getElementById("broadcastReportsModal");
   var closeBtn = document.getElementById("broadcastReportsModalClose");
   var backdrop = document.getElementById("broadcastReportsModalBackdrop");
   if (!btn || !modal) return;
+  if (btn.dataset.broadcastReportsBound === "1") return;
+  btn.dataset.broadcastReportsBound = "1";
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     if (document.body) document.body.style.overflow = "";
@@ -848,4 +854,6 @@
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
-})();
+}
+window.pokerInitBroadcastReportsModal = initBroadcastReportsModal;
+initBroadcastReportsModal();

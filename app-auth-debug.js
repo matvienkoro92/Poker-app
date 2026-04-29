@@ -136,6 +136,8 @@
   function bind() {
     var btn = $("adminAuthDebugBtn");
     if (!btn) return;
+    if (btn.dataset.authDebugBound === "1") return;
+    btn.dataset.authDebugBound = "1";
     btn.addEventListener("click", function () { setOpen(true); });
     var closeBtn = $("adminAuthDebugModalClose");
     var backdrop = $("adminAuthDebugModalBackdrop");
@@ -149,5 +151,6 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();
+  window.pokerInitAuthDebugModal = bind;
   window.__pokerCollectAuthDebug = collectAuthDebug;
 })();

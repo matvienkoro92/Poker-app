@@ -1,4 +1,4 @@
-(function initTrackingLinksAdminModal() {
+function initTrackingLinksAdminModal() {
   var openBtn = document.getElementById("adminTrackingLinksBtn");
   var modal = document.getElementById("trackingLinksAdminModal");
   var closeBtn = document.getElementById("trackingLinksAdminModalClose");
@@ -18,6 +18,8 @@
   var visTitle = document.getElementById("trackingLinksVisitorsTitle");
   var visTbody = document.getElementById("trackingLinksVisitorsTableBody");
   if (!openBtn || !modal || !tbody) return;
+  if (openBtn.dataset.trackingLinksBound === "1") return;
+  openBtn.dataset.trackingLinksBound = "1";
 
   function esc(s) {
     if (s == null) return "";
@@ -392,4 +394,6 @@
       copyUrlWithFeedback(text);
     });
   }
-})();
+}
+window.pokerInitTrackingLinksAdminModal = initTrackingLinksAdminModal;
+initTrackingLinksAdminModal();

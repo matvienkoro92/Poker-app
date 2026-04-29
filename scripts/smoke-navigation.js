@@ -137,6 +137,14 @@ async function main() {
       if (view !== target) throw new Error(`Expected ${target}, got ${view}`);
     }
 
+    await page.evaluate(() => {
+      if (typeof window.pokerEnsureGlobalModalsHtml !== "function") {
+        throw new Error("pokerEnsureGlobalModalsHtml is not available");
+      }
+      return window.pokerEnsureGlobalModalsHtml();
+    });
+    await page.waitForTimeout(250);
+
     const state = await page.evaluate(() => ({
       setView: typeof setView,
       initChat: typeof initChat,
@@ -148,6 +156,10 @@ async function main() {
       videoLessonsList: !!document.getElementById("videoLessonsList"),
       hallOfFameView: !!document.getElementById("hallOfFameView"),
       hallTop2026: !!document.querySelector("#hallOfFameView [data-hall-panel='top2026']"),
+      globalModalsHost: !!document.getElementById("globalModalsFragmentHost"),
+      adminReportModal: !!document.getElementById("adminReportModal"),
+      visitorsAdminModal: !!document.getElementById("visitorsAdminModal"),
+      imageLightbox: !!document.getElementById("imageLightbox"),
       equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
       winterRatingSection: !!document.getElementById("winterRatingSection"),
       modules: performance.getEntriesByType("resource")
@@ -165,6 +177,10 @@ async function main() {
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
     if (!state.hallOfFameView) throw new Error("hall of fame fragment was not hydrated");
     if (!state.hallTop2026) throw new Error("hall of fame top2026 panel is missing");
+    if (state.globalModalsHost) throw new Error("global modals host was not replaced");
+    if (!state.adminReportModal) throw new Error("admin report modal fragment was not hydrated");
+    if (!state.visitorsAdminModal) throw new Error("visitors admin modal fragment was not hydrated");
+    if (!state.imageLightbox) throw new Error("image lightbox fragment was not hydrated");
     if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");

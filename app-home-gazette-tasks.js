@@ -2726,14 +2726,15 @@ function runGazetteAndTasksInit() {
     resizePlannerComposer();
   })();
 
-  (function initPartnershipModal() {
+  function initPartnershipModal() {
     var modal = document.getElementById("partnershipModal");
     var backdrop = document.getElementById("partnershipModalBackdrop");
     var closeBtn = document.getElementById("partnershipModalClose");
     var track = document.getElementById("partnershipModalTrack");
     var indicator = document.getElementById("partnershipPageIndicator");
     var openBtn = document.getElementById("partnershipOpenBtn");
-    if (!modal || !track || !indicator) return;
+    if (!modal || !track || !indicator || modal.dataset.partnershipBound === "1") return;
+    modal.dataset.partnershipBound = "1";
     var partnershipAssets = ["partnership-intro.jpg", "partnership-step1.jpg", "partnership-step2.jpg", "partnership-step3.jpg", "partnership-cost.jpg"];
     var imgs = modal.querySelectorAll(".partnership-modal__img");
     for (var i = 0; i < imgs.length && i < partnershipAssets.length; i++) {
@@ -2777,7 +2778,9 @@ function runGazetteAndTasksInit() {
         } else window.open(link.href, "_blank");
       }
     });
-  })();
+  }
+  window.pokerInitPartnershipModal = initPartnershipModal;
+  initPartnershipModal();
 
   (function initPokerTasksMtt() {
     var startScreen = document.getElementById("pokerTasksStartScreen");

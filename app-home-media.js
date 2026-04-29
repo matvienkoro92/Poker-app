@@ -12,7 +12,7 @@ function getAssetUrl(relativePath) {
 }
 
 // Лайтбокс: одиночные фото + галереи (МТТ 6 скринов, ученики тренера, сетка отзывов) со стрелками и ←/→
-(function initImageLightbox() {
+function initImageLightbox() {
   var lightbox = document.getElementById("imageLightbox");
   var lightboxImg = lightbox ? lightbox.querySelector(".image-lightbox__img") : null;
   var lightboxCaption = lightbox ? lightbox.querySelector(".image-lightbox__caption") : null;
@@ -21,7 +21,8 @@ function getAssetUrl(relativePath) {
   var prevBtn = lightbox ? lightbox.querySelector(".image-lightbox__prev") : null;
   var nextBtn = lightbox ? lightbox.querySelector(".image-lightbox__next") : null;
   var counterEl = lightbox ? lightbox.querySelector(".image-lightbox__counter") : null;
-  if (!lightbox || !lightboxImg) return;
+  if (!lightbox || !lightboxImg || lightbox.dataset.imageLightboxBound === "1") return;
+  lightbox.dataset.imageLightboxBound = "1";
 
   var galleryList = null;
   var galleryIndex = 0;
@@ -535,4 +536,6 @@ function getAssetUrl(relativePath) {
       }
     }
   }, true);
-})();
+}
+window.pokerInitImageLightbox = initImageLightbox;
+initImageLightbox();

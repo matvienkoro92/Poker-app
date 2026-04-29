@@ -830,9 +830,16 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function pokerInitVisitorsAdminUi() {
     checkAdminAndShowVisitorsButton();
     var btn = document.getElementById("adminVisitorsBtn");
+    if (btn && btn.dataset.visitorsAdminBound !== "1") {
+      btn.dataset.visitorsAdminBound = "1";
+      btn.addEventListener("click", openVisitorsModal);
+    }
+    var modal = document.getElementById("visitorsAdminModal");
+    if (modal && modal.dataset.visitorsAdminModalBound === "1") return;
+    if (modal) modal.dataset.visitorsAdminModalBound = "1";
     var showListBtn = document.getElementById("visitorsAdminShowListBtn");
     var closeBtn = document.getElementById("visitorsAdminModalClose");
     var backdrop = document.getElementById("visitorsAdminModalBackdrop");
@@ -840,7 +847,6 @@
     var broadcastModalClose = document.getElementById("visitorsBroadcastModalClose");
     var broadcastModalBackdrop = document.getElementById("visitorsBroadcastModalBackdrop");
     var broadcastSendBtn = document.getElementById("visitorsBroadcastSendBtn");
-    if (btn) btn.addEventListener("click", openVisitorsModal);
     if (showListBtn) showListBtn.addEventListener("click", renderVisitorsList);
     if (closeBtn) closeBtn.addEventListener("click", closeVisitorsModal);
     if (backdrop) backdrop.addEventListener("click", closeVisitorsModal);
@@ -896,5 +902,12 @@
         });
       }
     });
-  });
+  }
+
+  window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", pokerInitVisitorsAdminUi);
+  } else {
+    pokerInitVisitorsAdminUi();
+  }
 })();

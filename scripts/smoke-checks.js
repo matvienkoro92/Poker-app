@@ -15,6 +15,7 @@ const files = {
   chatFragment: read("html-fragments/chat.html"),
   hallOfFameFragment: read("html-fragments/hall-of-fame.html"),
   profileFragment: read("html-fragments/profile.html"),
+  globalModalsFragment: read("html-fragments/global-modals.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
@@ -144,7 +145,14 @@ function htmlViewTargets() {
   const out = [];
   const re = /\bdata-view-target=["']([^"']+)["']/gi;
   let match;
-  while ((match = re.exec(files.html))) out.push(match[1]);
+  const text = [
+    files.html,
+    files.chatFragment,
+    files.hallOfFameFragment,
+    files.profileFragment,
+    files.globalModalsFragment,
+  ].join("\n");
+  while ((match = re.exec(text))) out.push(match[1]);
   return out;
 }
 
@@ -368,10 +376,18 @@ add("Email login prefers the linked email account over stale device hints", () =
 
 add("Admin push broadcast can choose a click target section", () =>
   hasAll("html", [
+    'id="globalModalsFragmentHost"',
+    'data-html-fragment="./html-fragments/global-modals.html"',
+  ]) &&
+  !has("html", 'id="adminPushAllTargetSelect"') &&
+  hasAll("globalModalsFragment", [
     'id="adminPushAllTargetSelect"',
     'value="./?startapp=schedule"',
     'value="./?startapp=raffles"',
     'value="./?startapp=spring_rating"',
+    'id="adminReportModal"',
+    'id="visitorsAdminModal"',
+    'id="trackingLinksAdminModal"',
   ]) &&
   hasAll("client", [
     "adminPushAllTargetSelect",
@@ -460,7 +476,7 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
 );
 
 add("Player card exposes Poker21, status, stats and actions", () =>
-  hasAll("html", [
+  hasAll("globalModalsFragment", [
     'id="chatUserModal"',
     'id="chatUserModalP21"',
     'id="chatUserModalStatusScale"',
@@ -511,6 +527,30 @@ add("Hall of fame shell is lazy-loaded from a hydrated HTML fragment", () =>
     "window.pokerInitHallOfFamePanelShareButtons",
   ]) &&
   has("appHtmlFragments", "pokerInitHallOfFamePanelShareButtons")
+);
+
+add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
+  hasAll("html", [
+    'id="globalModalsFragmentHost"',
+    'data-html-fragment="./html-fragments/global-modals.html"',
+  ]) &&
+  !has("html", 'id="adminReportModal"') &&
+  !has("html", 'id="imageLightbox"') &&
+  hasAll("globalModalsFragment", [
+    'id="adminReportModal"',
+    'id="broadcastReportsModal"',
+    'id="visitorsAdminModal"',
+    'id="shareStatsAdminModal"',
+    'id="trackingLinksAdminModal"',
+    'id="imageLightbox"',
+    'id="partnershipModal"',
+  ]) &&
+  hasAll("appHtmlFragments", [
+    "pokerEnsureGlobalModalsHtml",
+    "pokerInitAdminReportModal",
+    "pokerInitVisitorsAdminUi",
+    "pokerInitImageLightbox",
+  ])
 );
 
 add("Service worker does not stale-cache explicit fresh chat requests", () =>
@@ -806,13 +846,16 @@ add("CSS manifest maps split home and tournament domains", () =>
 );
 
 add("Admin auth debug panel is wired", () =>
-  hasAll("html", [
+  hasAll("globalModalsFragment", [
     'id="adminAuthDebugBtn"',
     'id="adminAuthDebugModal"',
+  ]) &&
+  hasAll("html", [
     './app-auth-debug.js?v=',
   ]) &&
   hasAll("client", [
     "window.__pokerCollectAuthDebug",
+    "window.pokerInitAuthDebugModal",
     "pokerReadPwaSessionRecordAsync",
     "adminAuthDebugOutput",
   ])
