@@ -156,6 +156,7 @@ function getPokerResolvedTelegramUser() {
         invalidServerResponse: "Некорректный ответ сервера",
         sentTelegramCode: "Код отправлен в Telegram.",
         sendCodeFailed: "Не удалось отправить код.",
+        telegramPasswordSetupHint: "Пароль для этого Telegram ещё не задан. Нажмите «Получить код», введите код из бота и задайте пароль.",
         passwordsMismatch: "Пароли не совпадают.",
         enterTelegramCode: "Введите 6-значный код из Telegram.",
         codeNotVerified: "Код не подтверждён.",
@@ -214,6 +215,7 @@ function getPokerResolvedTelegramUser() {
         invalidServerResponse: "Invalid server response",
         sentTelegramCode: "The code was sent to Telegram.",
         sendCodeFailed: "Unable to send the code.",
+        telegramPasswordSetupHint: "This Telegram account does not have a password yet. Tap “Get code”, enter the bot code, and create a password.",
         passwordsMismatch: "Passwords do not match.",
         enterTelegramCode: "Enter the 6-digit code from Telegram.",
         codeNotVerified: "The code could not be verified.",
@@ -1303,6 +1305,12 @@ function getPokerResolvedTelegramUser() {
       if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
       if (registerBottomRow) registerBottomRow.style.display = registerMode ? "flex" : "none";
     }
+    function switchTelegramToPasswordSetup() {
+      authMode = "register";
+      syncAuthModeUi();
+      setHint(pwaAuthT("telegramPasswordSetupHint"), true);
+      if (sendBtn && sendBtn.focus) sendBtn.focus();
+    }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
         authMode = "login";
@@ -1347,6 +1355,10 @@ function getPokerResolvedTelegramUser() {
               try {
                 window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
               } catch (ePwDispatch) {}
+              return;
+            }
+            if (data && data.passwordSetupRequired) {
+              switchTelegramToPasswordSetup();
               return;
             }
             setHint((data && data.error) || pwaAuthT("loginFailed"), true);

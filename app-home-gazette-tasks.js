@@ -3456,6 +3456,7 @@ function runGazetteAndTasksInit() {
       equilator: "equilator",
       cashout: "cashout",
       profile: "profile",
+      streams: "streams",
       learn_play_hub: "learn-play-hub",
       bonus_game: "bonus-game",
       plasterer_game: "plasterer-game",
@@ -3926,6 +3927,7 @@ function runGazetteAndTasksInit() {
         }
       } catch (ePushHistory) {}
       pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
+      if (startApp !== "club_chat" && startApp !== "club_chat_dm") return;
       if (startApp === "club_chat_dm" && withPeer) {
         try {
           if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {

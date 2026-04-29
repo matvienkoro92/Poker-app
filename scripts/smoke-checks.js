@@ -15,6 +15,8 @@ const files = {
   app: read("app.js"),
   sw: read("sw.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
+  chatWebpushNotify: read("lib/chat-webpush-notify.js"),
+  chatPushAdminBroadcastHandler: read("lib/api-handlers/chat-push-admin-broadcast.js"),
   authPwaCodeHandler: read("lib/api-handlers/auth-pwa-code.js"),
   authEmailHandler: read("lib/api-handlers/auth-email.js"),
   telegramBotWebhookHandler: read("lib/api-handlers/telegram-bot-webhook.js"),
@@ -165,8 +167,31 @@ add("Email login prefers the linked email account over stale device hints", () =
   hasAll("client", [
     "function switchEmailToPasswordSetup()",
     "emailPasswordSetupHint",
+    "function switchTelegramToPasswordSetup()",
+    "telegramPasswordSetupHint",
     "data && data.passwordSetupRequired",
   ])
+);
+
+add("Admin push broadcast can choose a click target section", () =>
+  hasAll("html", [
+    'id="adminPushAllTargetSelect"',
+    'value="./?startapp=schedule"',
+    'value="./?startapp=raffles"',
+    'value="./?startapp=spring_rating"',
+  ]) &&
+  hasAll("client", [
+    "adminPushAllTargetSelect",
+    "openUrl: openUrl",
+    'streams: "streams"',
+    'if (startApp !== "club_chat" && startApp !== "club_chat_dm") return;',
+  ]) &&
+  hasAll("chatWebpushNotify", [
+    "normalizeAdminPushOpenUrl",
+    "ADMIN_PUSH_ALLOWED_STARTAPPS",
+    "hall_fame_top2026",
+  ]) &&
+  has("chatPushAdminBroadcastHandler", "openUrl")
 );
 
 add("Chat shell has dialog, general and conversation views", () =>

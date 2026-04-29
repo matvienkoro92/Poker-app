@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.323">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.324">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -4925,6 +4925,23 @@
             <span class="visitors-admin-modal__broadcast-label-text">Текст пуша</span>
             <textarea id="adminPushAllBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
             <span class="admin-chat-push-all__remain" id="adminPushAllBodyRemain" aria-live="polite"></span>
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Куда вести по клику</span>
+            <select id="adminPushAllTargetSelect" class="visitors-admin-modal__broadcast-input admin-chat-push-all__target-select">
+              <option value="./?startapp=club_chat">Чат</option>
+              <option value="./?startapp=schedule">Расписание</option>
+              <option value="./?startapp=raffles">Розыгрыши</option>
+              <option value="./?startapp=spring_rating">Рейтинг</option>
+              <option value="./?startapp=hall_fame_top2026">Зал славы</option>
+              <option value="./?startapp=streams">Стримы</option>
+              <option value="./?startapp=video_lessons">Видеоуроки</option>
+              <option value="./?startapp=learn_play_hub">Научиться играть</option>
+              <option value="./?startapp=download">Скачать PWA</option>
+              <option value="./?startapp=cashout">Касса</option>
+              <option value="./?startapp=profile">Профиль</option>
+              <option value="./">Главная</option>
+            </select>
           </label>
           <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushAllSendBtn">Отправить всем</button>
         </div>

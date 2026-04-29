@@ -376,8 +376,10 @@
     var wrap = document.getElementById("adminPushAllSubsWrap");
     var listEl = document.getElementById("adminPushAllSubsList");
     var toggleBtn = document.getElementById("adminPushAllShowSubsBtn");
+    var targetSelect = document.getElementById("adminPushAllTargetSelect");
     if (titleEl) titleEl.value = "";
     if (textEl) textEl.value = "";
+    if (targetSelect) targetSelect.value = "./?startapp=club_chat";
     window.__adminPushAllTitleMax = 80;
     window.__adminPushAllBodyMax = 200;
     window.__adminPushAllSubs = [];
@@ -433,12 +435,14 @@
   function sendAdminPushAll() {
     var titleEl = document.getElementById("adminPushAllTitleInput");
     var textEl = document.getElementById("adminPushAllBodyInput");
+    var targetSelect = document.getElementById("adminPushAllTargetSelect");
     var btn = document.getElementById("adminPushAllSendBtn");
     var hint = document.getElementById("adminPushAllHint");
     var title = (titleEl && titleEl.value) || "";
     title = String(title).trim();
     var text = (textEl && textEl.value) || "";
     text = String(text).trim();
+    var openUrl = targetSelect && targetSelect.value ? String(targetSelect.value).trim() : "./?startapp=club_chat";
     if (!title || !text) {
       var tgNeed = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       if (tgNeed && tgNeed.showAlert) tgNeed.showAlert("Укажите заголовок и текст пуша");
@@ -456,7 +460,7 @@
     fetch(base + "/api/chat-push-admin-broadcast", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({ title: title, text: text })),
+      body: JSON.stringify(pokerApiAuthJsonBody({ title: title, text: text, openUrl: openUrl })),
     })
       .then(function (r) {
         return r.json();
