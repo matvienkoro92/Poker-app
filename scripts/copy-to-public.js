@@ -32,6 +32,27 @@ function localScriptFilesFromIndex() {
   return out;
 }
 
+function scriptFilesFromJsManifest() {
+  const manifestPath = path.join(root, 'js-manifest.json');
+  if (!fs.existsSync(manifestPath)) return [];
+  const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const domains = parsed && parsed.domains && typeof parsed.domains === 'object' ? parsed.domains : {};
+  const out = [];
+  function addList(list) {
+    if (!Array.isArray(list)) return;
+    list.forEach((file) => {
+      if (typeof file === 'string' && /^[^/]+\.js$/.test(file)) out.push(file);
+    });
+  }
+  Object.keys(domains).forEach((name) => {
+    if (name === 'adminModules') return;
+    addList(domains[name]);
+  });
+  const adminModules = domains.adminModules && typeof domains.adminModules === 'object' ? domains.adminModules : {};
+  Object.keys(adminModules).forEach((name) => addList(adminModules[name]));
+  return out;
+}
+
 const baseFiles = [
   'index.html',
   'styles.css',
@@ -45,7 +66,7 @@ const cssPartFiles = fs
   .readdirSync(root)
   .filter((name) => /^styles-.+\.css$/.test(name))
   .sort();
-const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex()))];
+const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
 const dirsToCopy = ['assets'];
 const blockedAssetExtensions = new Set(['.mov']);
 

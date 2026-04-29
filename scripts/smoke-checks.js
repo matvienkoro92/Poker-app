@@ -109,8 +109,34 @@ function jsManifestFiles() {
   return [...new Set(out)].sort();
 }
 
+function jsManifestDomainMap() {
+  let parsed;
+  try {
+    parsed = JSON.parse(files.jsManifest);
+  } catch (err) {
+    return {};
+  }
+  return parsed && parsed.domains && typeof parsed.domains === "object" ? parsed.domains : {};
+}
+
 function indexScriptOrder() {
   return localRootScriptFilesFromIndex();
+}
+
+function htmlViewNames() {
+  const out = new Set();
+  const re = /<[^>]+\bclass=["'][^"']*\bview\b[^"']*["'][^>]*\bdata-view=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) out.add(match[1]);
+  return out;
+}
+
+function htmlViewTargets() {
+  const out = [];
+  const re = /\bdata-view-target=["']([^"']+)["']/gi;
+  let match;
+  while ((match = re.exec(files.html))) out.push(match[1]);
+  return out;
 }
 
 function appearsBefore(list, before, after) {
@@ -143,6 +169,17 @@ function localCssImportsFromStyles() {
   }
   walk("styles.css");
   return out;
+}
+
+function dirSizeBytes(dir) {
+  let total = 0;
+  if (!fs.existsSync(dir)) return 0;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) total += dirSizeBytes(p);
+    else total += fs.statSync(p).size;
+  }
+  return total;
 }
 
 files.client = localRootScriptFilesFromIndex()
@@ -475,6 +512,52 @@ add("View navigation is not gated by lazy loading", () =>
   ])
 );
 
+add("Primary view route chain has DOM targets and click wiring", () => {
+  const route = ["home", "chat", "download", "cashout", "profile", "home", "raffles", "spring-rating"];
+  const views = htmlViewNames();
+  const targets = htmlViewTargets();
+  const requiredTargets = ["home", "chat", "download", "cashout", "profile", "raffles", "spring-rating"];
+  return route.every((view) => views.has(view)) &&
+    requiredTargets.every((view) => targets.includes(view)) &&
+    hasAll("client", [
+      "navItems.forEach(function (item)",
+      "var target = item.dataset.viewTarget",
+      "setView(target)",
+      'if (target === "download") setDownloadPage("main")',
+      "function pokerOpenChatFromTab()",
+      'setView("chat")',
+      'typeof window.chatShowDialogs === "function"',
+    ]);
+});
+
+add("Lazy loader maps key routed views to manifest domains", () => {
+  const domains = jsManifestDomainMap();
+  return hasAll("client", [
+    "window.pokerLoadDomainScripts = loadDomainScripts",
+    "window.pokerEnsureViewScripts = function (viewName)",
+    'chat: ["chat"]',
+    '"spring-rating": ["rating"]',
+    'raffles: ["raffles"]',
+    'cashout: ["cashout"]',
+  ]) &&
+    Array.isArray(domains.chat) &&
+    Array.isArray(domains.rating) &&
+    Array.isArray(domains.raffles) &&
+    Array.isArray(domains.profile) &&
+    domains.chat.includes("app-chat-contacts-loader.js") &&
+    domains.rating.includes("app-rating.js") &&
+    domains.raffles.includes("app-raffles.js") &&
+    domains.profile.includes("app-cashout.js");
+});
+
+add("JS manifest files exist in root and build output", () => {
+  const publicDir = path.join(root, "public");
+  return jsManifestFiles().every((file) =>
+    fs.existsSync(path.join(root, file)) &&
+    fs.existsSync(path.join(publicDir, file))
+  );
+});
+
 add("Build output contains every local CSS import from styles.css", () => {
   const publicDir = path.join(root, "public");
   return localCssImportsFromStyles().every((file) =>
@@ -491,6 +574,12 @@ add("Large unused movie assets are not shipped", () =>
   has("html", 'class="download-image"') &&
   has("html", 'loading="lazy"')
 );
+
+add("Public build stays under the mobile asset budget", () => {
+  const publicBytes = dirSizeBytes(path.join(root, "public"));
+  const budgetBytes = 105 * 1024 * 1024;
+  return publicBytes > 0 && publicBytes <= budgetBytes;
+});
 
 add("CSS domain entrypoints cover auth and tournament styles", () =>
   localCssImportsFromStyles().includes("styles-auth.css") &&
