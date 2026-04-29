@@ -156,6 +156,8 @@ async function main() {
       videoLessonsList: !!document.getElementById("videoLessonsList"),
       hallOfFameView: !!document.getElementById("hallOfFameView"),
       hallTop2026: !!document.querySelector("#hallOfFameView [data-hall-panel='top2026']"),
+      bottomNav: !!document.querySelector(".bottom-nav"),
+      bottomNavVisible: !!document.querySelector(".bottom-nav") && getComputedStyle(document.querySelector(".bottom-nav")).visibility !== "hidden",
       globalModalsHost: !!document.getElementById("globalModalsFragmentHost"),
       adminReportModal: !!document.getElementById("adminReportModal"),
       visitorsAdminModal: !!document.getElementById("visitorsAdminModal"),
@@ -177,6 +179,8 @@ async function main() {
     if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
     if (!state.hallOfFameView) throw new Error("hall of fame fragment was not hydrated");
     if (!state.hallTop2026) throw new Error("hall of fame top2026 panel is missing");
+    if (!state.bottomNav) throw new Error("bottom nav is missing from initial DOM");
+    if (!state.bottomNavVisible) throw new Error("bottom nav is not visible");
     if (state.globalModalsHost) throw new Error("global modals host was not replaced");
     if (!state.adminReportModal) throw new Error("admin report modal fragment was not hydrated");
     if (!state.visitorsAdminModal) throw new Error("visitors admin modal fragment was not hydrated");

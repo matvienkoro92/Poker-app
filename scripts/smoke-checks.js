@@ -547,9 +547,12 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   hasAll("html", [
     'id="globalModalsFragmentHost"',
     'data-html-fragment="./html-fragments/global-modals.html"',
+    '<nav class="bottom-nav"',
+    'id="chatNavBtn"',
   ]) &&
   !has("html", 'id="adminReportModal"') &&
   !has("html", 'id="imageLightbox"') &&
+  !has("globalModalsFragment", '<nav class="bottom-nav"') &&
   hasAll("globalModalsFragment", [
     'id="adminReportModal"',
     'id="broadcastReportsModal"',

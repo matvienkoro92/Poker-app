@@ -1791,34 +1791,6 @@
     </div>
 
     <!-- Вне #app: таб-бар position:fixed — иначе в PWA/iOS при скролле html он «ездит» до resize (см. overflow:hidden у #app) -->
-    <nav class="bottom-nav" role="navigation">
-      <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
-        <span class="bottom-nav__icon">🏠</span>
-        <span class="bottom-nav__label" id="bottomNavHomeLabel">Главная</span>
-      </button>
-      <div class="bottom-nav__chat-wrap">
-        <button type="button" class="bottom-nav__item" data-view-target="chat" id="chatNavBtn" aria-label="Чаты">
-          <span class="bottom-nav__icon-wrap">
-            <span class="bottom-nav__icon">💬</span>
-            <span class="bottom-nav__badge" id="chatNavBadge" aria-label="Непрочитанных сообщений">0</span>
-          </span>
-          <span class="bottom-nav__label" id="chatNavLabel">Чаты</span>
-        </button>
-      </div>
-      <button type="button" class="bottom-nav__item" data-view-target="download">
-        <span class="bottom-nav__icon">📥</span>
-        <span class="bottom-nav__label" id="bottomNavDownloadLabel">Скачать</span>
-      </button>
-      <button type="button" class="bottom-nav__item" data-view-target="cashout">
-        <span class="bottom-nav__icon">💳</span>
-        <span class="bottom-nav__label" id="bottomNavCashoutLabel">Депозит</span>
-      </button>
-      <button type="button" class="bottom-nav__item" data-view-target="profile">
-        <span class="bottom-nav__icon">👤</span>
-        <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
-      </button>
-    </nav>
-
     <!-- Вне #app: fixed-оверлей не режется overflow и кнопки всегда получают клики -->
     <div class="winter-rating-lightbox" id="winterRatingLightbox" aria-hidden="true" role="dialog" aria-label="Увеличенный скрин">
       <img class="winter-rating-lightbox__img" src="" alt="" />
