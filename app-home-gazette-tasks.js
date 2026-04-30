@@ -2375,7 +2375,7 @@ function runGazetteAndTasksInit() {
     }
     function syncVisibility() {
       if (!isPlannerAllowedUser()) {
-        openBtn.classList.add("welcome-planner-icon--hidden");
+        openBtn.classList.remove("welcome-planner-icon--hidden");
         closePlannerModal();
         return;
       }
