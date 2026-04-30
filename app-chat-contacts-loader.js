@@ -172,9 +172,14 @@ function loadContacts(opts) {
   try {
     pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
   } catch (eHydCt) {}
+  var isFullContactsLoad = !opts.metaOnly && !opts.waitForChange;
+  if (isFullContactsLoad && window.__pokerChatContactsFullLoadInFlight) {
+    return;
+  }
   var url = buildContactsRequestUrl(opts);
   var contactsFetchGen = (window.__pokerContactsFetchGen || 0) + 1;
   window.__pokerContactsFetchGen = contactsFetchGen;
+  if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = true;
   var contactsInstantFromCache = false;
   var metaOnly = !!opts.metaOnly;
 function applyContactsApiResponse(data, opts) {
@@ -340,6 +345,7 @@ function applyContactsApiResponse(data, opts) {
       return r.json();
     })
     .then(function (data) {
+      if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
       var contactsFetchDataState = pokerPrepareChatContactsFetchData(data, {
         metaOnly: metaOnly,
@@ -363,6 +369,7 @@ function applyContactsApiResponse(data, opts) {
       });
     })
     .catch(function () {
+      if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
       pokerHandleChatContactsFetchError({
         contactsInstantFromCache: contactsInstantFromCache,

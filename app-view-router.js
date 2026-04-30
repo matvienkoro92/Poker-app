@@ -640,7 +640,7 @@ function setView(viewName, navOpts) {
     if (typeof updateChatNavDot === "function") updateChatNavDot();
     if (window.chatListenersAttached && typeof window.chatRefresh === "function") {
       window.chatRefresh();
-    } else {
+    } else if (typeof initChat === "function") {
       initChat();
     }
     try {
@@ -894,7 +894,7 @@ navItems.forEach(function (item) {
 });
 
 function pokerFinalizeChatFromTabOpen() {
-  [0, 80, 240, 700].forEach(function (delay) {
+  [0, 80, 240, 700, 1400, 2400].forEach(function (delay) {
     setTimeout(function () {
       try {
         if (typeof initChat === "function" && !window.chatListenersAttached) initChat();
@@ -910,6 +910,18 @@ function pokerFinalizeChatFromTabOpen() {
           window.chatShowDialogs();
         }
       } catch (eShowChatTab) {}
+      try {
+        var contacts = document.getElementById("chatContacts");
+        var clubPreview = document.getElementById("chatDialogClubPreview");
+        var contactsStuck = !!(contacts && contacts.querySelector && contacts.querySelector(".chat-empty--skeleton"));
+        var clubPreviewStuck = !!(clubPreview && clubPreview.classList && clubPreview.classList.contains("chat-dialog-item__preview--skeleton"));
+        if (!contactsStuck && !clubPreviewStuck) return;
+        if (typeof window.__pokerKickChatContactsLoad === "function") {
+          window.__pokerKickChatContactsLoad({ forceRerender: true });
+        } else if (typeof window.__pokerReloadChatContacts === "function") {
+          window.__pokerReloadChatContacts({ forceRerender: true });
+        }
+      } catch (eKickChatContactsTab) {}
     }, delay);
   });
 }
