@@ -6469,11 +6469,11 @@ function initChat() {
           }
           if (isPwaIosDockFinal) {
             /*
-             * iOS PWA бывает в двух режимах: где WK сам сжимает layout viewport, и где клавиатура
-             * накрывает fixed-низ. Старый bottom=0 ломал второй режим: поле оставалось под клавиатурой.
-             * Используем рассчитанное перекрытие, но держим разумный потолок ниже по стеку.
+             * iOS PWA: рабочая схема держит fixed-композер у нижней кромки layout viewport,
+             * а подъём даёт CSS fallback/visualViewport. Если добавить coverPx в JS-bottom,
+             * получаются гонки: строка то не доезжает, то улетает выше клавиатуры.
              */
-            bottomPx = Math.max(bottomPx, getChatComposerMandatoryBottomOffsetPx());
+            bottomPx = getChatComposerMandatoryBottomOffsetPx();
           }
         } catch (eBm) {}
         try {
@@ -6607,39 +6607,11 @@ function initChat() {
         target.style.setProperty("width", "100%", "important");
         target.style.setProperty("max-width", "100%", "important");
         target.style.setProperty("box-sizing", "border-box", "important");
-        target.style.setProperty("z-index", "2147483000", "important");
+        target.style.setProperty("z-index", "120", "important");
         target.style.setProperty("bottom", bottomPx + "px", "important");
         try {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
-      }
-      function preDockPwaChatComposerOnTouch(focusTarget) {
-        try {
-          if (
-            isTelegramChatRuntime() ||
-            typeof pokerPwaStandaloneForKeyboardInset !== "function" ||
-            !pokerPwaStandaloneForKeyboardInset() ||
-            typeof isIosLikeForChatViewport !== "function" ||
-            !isIosLikeForChatViewport() ||
-            !isChatThreadComposerKeyboardDom(focusTarget)
-          ) {
-            return;
-          }
-          setChatKeyboardOpenClasses(true);
-          clearPendingChatKeyboardDismissTimers();
-          window.__pokerChatKeyboardFocusAtMs = Date.now();
-          window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
-          attachPwaChatThreadRootScrollLock();
-          var ih = window.innerHeight || 0;
-          var base = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
-          if (base < 260) base = ih || base;
-          var cover = Math.round(base * 0.34);
-          if (cover < 180 && base > 360) cover = 180;
-          if (cover > 320) cover = 320;
-          document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, cover) + "px");
-          applyChatThreadComposerKeyboardDockFromCover(cover, focusTarget);
-          updateChatMessagesKeyboardPad();
-        } catch (ePreDockPwa) {}
       }
       /**
        * Telegram Mini App: общий/личный тред с фокусом на композере — отдельный конвейер без visualViewport.
@@ -7636,7 +7608,6 @@ function initChat() {
               var ihTs = window.innerHeight || 0;
               if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
             } catch (eTsBl) {}
-            preDockPwaChatComposerOnTouch(ta);
           },
           { passive: false }
         );
