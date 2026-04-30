@@ -26,6 +26,12 @@
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
     }
     function showAdminUi() {
+      try {
+        var auth = window.__pokerTelegramAuth || {};
+        auth.adminAccess = true;
+        if (!auth.status) auth.status = "verified";
+        window.__pokerTelegramAuth = auth;
+      } catch (eAdminAuth) {}
       var footerStats = document.getElementById("footerVisitorStatsWrap");
       if (footerStats) footerStats.removeAttribute("hidden");
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
@@ -38,6 +44,7 @@
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
+      if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
       try {
         if (typeof updateVisitorCounter === "function") updateVisitorCounter();
       } catch (eVisAd) {}
@@ -91,6 +98,12 @@
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     fetch(base + "/api/visitors-list" + q)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok && data.isAdmin) showAdminUi();
+      })
+      .catch(function () {});
+    fetch(base + "/api/raffles" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.isAdmin) showAdminUi();
