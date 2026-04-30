@@ -43,14 +43,29 @@
       } catch (eVisAd) {}
     }
     function pokerIsKnownClientAdmin() {
-      var user =
-        typeof getPokerResolvedTelegramUser === "function"
-          ? getPokerResolvedTelegramUser()
-          : window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe
-            ? window.Telegram.WebApp.initDataUnsafe.user
-            : null;
-      var id = user && user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
-      return id === "388008256" || id === "2144406710" || id === "1897001087";
+      var users = [];
+      try {
+        var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+        if (resolved) users.push(resolved);
+      } catch (eResolved) {}
+      try {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+          users.push(window.Telegram.WebApp.initDataUnsafe.user);
+        }
+      } catch (eTg) {}
+      try {
+        var auth = window.__pokerTelegramAuth;
+        if (auth && auth.user) users.push(auth.user);
+      } catch (eAuth) {}
+      try {
+        var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (rec && rec.user) users.push(rec.user);
+      } catch (eRec) {}
+      for (var i = 0; i < users.length; i++) {
+        var id = users[i] && users[i].id != null ? String(users[i].id).replace(/^tg_/, "").trim() : "";
+        if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+      }
+      return false;
     }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
@@ -905,6 +920,7 @@
   }
 
   window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
+  window.addEventListener("poker-telegram-auth", checkAdminAndShowVisitorsButton);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", pokerInitVisitorsAdminUi);
   } else {

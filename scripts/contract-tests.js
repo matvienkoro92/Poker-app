@@ -250,6 +250,7 @@ function sessions() {
     user: signPwaSession({ id: 1001, username: "player", first_name: "Player" }, BOT_TOKEN),
     peer: signPwaSession({ id: 1002, username: "peer", first_name: "Peer" }, BOT_TOKEN),
     admin: signPwaSession({ id: 388008256, username: "admin", first_name: "Admin" }, BOT_TOKEN),
+    adminSecondary: signPwaSession({ id: 2144406710, username: "admin_two", first_name: "Admin Two" }, BOT_TOKEN),
   };
 }
 
@@ -280,6 +281,24 @@ async function testAuthAndAdmin(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create raffle");
   assert.ok(r.body && r.body.ok && r.body.raffle && r.body.raffle.id, "create returns raffle");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.adminSecondary,
+    action: "create",
+    title: "Second admin raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    idemKey: "contract-create-secondary-admin",
+  }));
+  assert.strictEqual(r.statusCode, 200, "secondary known admin can create raffle");
+
+  const plannerAccess = require(path.join(root, "lib", "gazette-planner-access"));
+  assert.strictEqual(
+    plannerAccess.isGazettePlannerEditor({ id: 2144406710, telegramUsername: "", pwaUsername: null }),
+    true,
+    "secondary known admin can use gazette planner",
+  );
 }
 
 async function testChatSendEditDelete() {

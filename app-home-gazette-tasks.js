@@ -1063,11 +1063,10 @@ function runGazetteAndTasksInit() {
     var PLANNER_SOLO_USERNAMES = { polyapineapple: true };
     /**
      * Доступ по числовому Telegram id, если username в WebApp пустой (скрыт в настройках).
-     * 388008256 — @roman1_matvienko (см. TELEGRAM_ADMIN / чат). Для @Roman1787443 при необходимости
-     * добавьте его user id из @userinfobot в этот объект.
+     * Штатные админы тоже видят общий планер: это важно для контроля задач без отдельной выдачи роли.
      * Для @polyapineapple при скрытом username задайте тот же id, что в env GAZETTE_EDITOR_PLANNER_POLY_TELEGRAM_ID на сервере.
      */
-    var PLANNER_ALLOWED_TELEGRAM_IDS = { 388008256: true };
+    var PLANNER_ALLOWED_TELEGRAM_IDS = { 388008256: true, 2144406710: true, 1897001087: true };
     /** Числовой id Telegram для @polyapineapple, если username скрыт (должен совпадать с серверным env). */
     var PLANNER_POLY_TELEGRAM_ID = null;
     var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
@@ -1136,15 +1135,30 @@ function runGazetteAndTasksInit() {
       var ua = plannerAuthUsernameLower();
       if (ua && (PLANNER_SOLO_USERNAMES[ua] || PLANNER_ROMAN_SHARED_USERNAMES[ua])) return true;
       var user = getPlannerTelegramUser();
-      if (!user) return false;
-      var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
-      if (u && PLANNER_SOLO_USERNAMES[u]) return true;
-      if (u && PLANNER_ROMAN_SHARED_USERNAMES[u]) return true;
-      if (user.id == null) return false;
-      var idNum = Number(user.id);
-      if (isNaN(idNum)) return false;
-      if (PLANNER_POLY_TELEGRAM_ID != null && idNum === PLANNER_POLY_TELEGRAM_ID) return true;
-      return !!PLANNER_ALLOWED_TELEGRAM_IDS[idNum];
+      if (user) {
+        var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+        if (u && PLANNER_SOLO_USERNAMES[u]) return true;
+        if (u && PLANNER_ROMAN_SHARED_USERNAMES[u]) return true;
+        if (user.id != null) {
+          var idNum = Number(user.id);
+          if (!isNaN(idNum)) {
+            if (PLANNER_POLY_TELEGRAM_ID != null && idNum === PLANNER_POLY_TELEGRAM_ID) return true;
+            if (PLANNER_ALLOWED_TELEGRAM_IDS[idNum]) return true;
+          }
+        }
+      }
+      try {
+        var authCandidates = [];
+        var auth = window.__pokerTelegramAuth;
+        if (auth && auth.user) authCandidates.push(auth.user);
+        var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (rec && rec.user) authCandidates.push(rec.user);
+        for (var i = 0; i < authCandidates.length; i++) {
+          var id = authCandidates[i] && authCandidates[i].id != null ? Number(authCandidates[i].id) : NaN;
+          if (!isNaN(id) && PLANNER_ALLOWED_TELEGRAM_IDS[id]) return true;
+        }
+      } catch (eAuthIds) {}
+      return false;
     }
     function plannerStorageKey() {
       if (!isPlannerAllowedUser()) return null;
