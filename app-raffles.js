@@ -872,6 +872,9 @@ function initRaffles() {
   function applyRafflesData(data, switchToCompleted) {
         if (!data || !data.ok) return;
         rafflesIsAdmin = !!data.isAdmin;
+        if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
+          window.pokerMarkAdminAccess("raffles");
+        }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
         var raw = data.raffles || [];
         var seen = {};
@@ -882,6 +885,9 @@ function initRaffles() {
           return true;
         });
         rafflesIsAdmin = !!data.isAdmin;
+        if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
+          window.pokerMarkAdminAccess("raffles");
+        }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
         if (raffleAdminActions) {
           raffleAdminActions.classList.toggle("raffle-admin-actions--hidden", !rafflesIsAdmin);

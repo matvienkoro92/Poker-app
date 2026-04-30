@@ -463,6 +463,38 @@ function pokerReadPwaVkSessionToken() {
   return o && o.token ? String(o.token) : "";
 }
 
+function pokerMarkAdminAccess(source) {
+  try {
+    var auth = window.__pokerTelegramAuth || {};
+    auth.adminAccess = true;
+    if (!auth.status) auth.status = "verified";
+    window.__pokerTelegramAuth = auth;
+  } catch (eAuth) {}
+  try {
+    var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+    if (rec && rec.token && rec.user && typeof pokerSavePwaTgSession === "function") {
+      pokerSavePwaTgSession(rec.token, rec.user, {
+        authMethod: rec.authMethod || "telegram",
+        gazettePlannerAccess: rec.gazettePlannerAccess === true,
+        adminAccess: true,
+      });
+    }
+  } catch (eSave) {}
+  try {
+    window.dispatchEvent(new CustomEvent("poker-admin-access", { detail: { source: source || "" } }));
+  } catch (eAdminEvent) {}
+  try {
+    if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
+  } catch (eRecheck) {}
+  try {
+    if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
+  } catch (ePlanner) {}
+}
+
+try {
+  window.pokerMarkAdminAccess = pokerMarkAdminAccess;
+} catch (eExportAdmin) {}
+
 function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   var rec = { token: token, user: userObj };
   if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;

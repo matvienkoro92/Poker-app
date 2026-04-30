@@ -117,6 +117,9 @@ function loadGeneral(opts) {
         window.__pokerGeneralPollRev = data.pollRev;
       }
       setChatIsAdmin(!!data.isAdmin);
+      if (data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+        window.pokerMarkAdminAccess("chat-general");
+      }
       var chatIsAdmin = !!data.isAdmin;
       if (data.clubChatAccess != null) setClubChatAccess(data.clubChatAccess);
       if (data.clubChatPendingReviewCount != null) {

@@ -123,6 +123,9 @@ function loadMessages(opts) {
         window.__pokerPersonalPollRev = data.pollRev;
       }
       if (data.isAdmin !== undefined) setChatIsAdmin(!!data.isAdmin);
+      if (data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+        window.pokerMarkAdminAccess("chat-personal");
+      }
       setChatPeerTypingActive(!!data.peerTyping);
       var prevPersonalMessages =
         getChatWithUserId() && personalMessagesCache[getChatWithUserId()] && Array.isArray(personalMessagesCache[getChatWithUserId()])

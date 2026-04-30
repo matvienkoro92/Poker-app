@@ -192,6 +192,9 @@ function applyContactsApiResponse(data, opts) {
     var forceRerender = !!opts.forceRerender;
     if (data && data.ok) {
       setChatIsAdmin(!!data.isAdmin);
+      if (data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+        window.pokerMarkAdminAccess("chat-contacts");
+      }
       if (data.clubChatAccess) setClubChatAccess(data.clubChatAccess);
       if (data.clubChatPendingReviewCount != null) {
         window.chatClubPendingReviewCount = Math.max(0, parseInt(data.clubChatPendingReviewCount, 10) || 0);

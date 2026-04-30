@@ -927,6 +927,7 @@
 
   window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
   window.addEventListener("poker-telegram-auth", checkAdminAndShowVisitorsButton);
+  window.addEventListener("poker-admin-access", checkAdminAndShowVisitorsButton);
   window.addEventListener("pageshow", checkAdminAndShowVisitorsButton);
   setTimeout(checkAdminAndShowVisitorsButton, 500);
   setTimeout(checkAdminAndShowVisitorsButton, 1500);

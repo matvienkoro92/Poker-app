@@ -4739,6 +4739,9 @@ function initChat() {
   function ingestBootstrapGeneralSnapshot(data) {
     if (!data || !data.ok) return;
     chatIsAdmin = !!data.isAdmin;
+    if (data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+      window.pokerMarkAdminAccess("chat-bootstrap");
+    }
     if (data.clubChatAccess != null) clubChatAccess = data.clubChatAccess;
     if (data.clubChatPendingReviewCount != null) {
       window.chatClubPendingReviewCount = Math.max(0, parseInt(data.clubChatPendingReviewCount, 10) || 0);
