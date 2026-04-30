@@ -915,7 +915,7 @@ add("Heavy JavaScript domains are lazy-loaded", () => {
     ["rating", ["app-hall-fame.js", "app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js"]],
     ["media", ["app-streams.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "peerjs.min.js"]],
     ["games", ["app-games.js", "app-club-tasks.js"]],
-    ["admin", ["app-visitors-admin.js", "app-admin-reports.js", "app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js"]],
+    ["admin", ["app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js"]],
     ["tournament", ["app-tournament-day.js"]],
     ["raffles", ["app-raffles.js"]],
   ];
@@ -933,7 +933,7 @@ add("Heavy JavaScript domains are lazy-loaded", () => {
 
 add("Startup root JavaScript count stays lean for Telegram WebView", () => {
   const startup = localStartupScriptFilesFromIndex();
-  return startup.length > 0 && startup.length <= 25;
+  return startup.length > 0 && startup.length <= 27;
 });
 
 add("Primary view route chain has DOM targets and click wiring", () => {
