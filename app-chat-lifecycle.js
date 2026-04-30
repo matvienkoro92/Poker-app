@@ -6369,12 +6369,11 @@ function initChat() {
           }
           if (isPwaIosDockFinal) {
             /*
-             * iOS PWA: WKWebView обычно уже поднимает layout viewport вместе с клавиатурой.
-             * Если ещё и добавлять высоту клавиатуры в fixed bottom, композер «улетает» сильно вверх.
-             * Здесь докуем строку почти к текущему низу viewport, с постоянным маленьким зазором.
-             * Так мы убираем дёргания от повторных пересчётов coverPx во время анимации клавиатуры.
+             * iOS PWA бывает в двух режимах: где WK сам сжимает layout viewport, и где клавиатура
+             * накрывает fixed-низ. Старый bottom=0 ломал второй режим: поле оставалось под клавиатурой.
+             * Используем рассчитанное перекрытие, но держим разумный потолок ниже по стеку.
              */
-            bottomPx = getChatComposerMandatoryBottomOffsetPx();
+            bottomPx = Math.max(bottomPx, getChatComposerMandatoryBottomOffsetPx());
           }
         } catch (eBm) {}
         try {
