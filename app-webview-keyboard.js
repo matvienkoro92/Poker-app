@@ -136,13 +136,29 @@ window.addEventListener("resize", function () {
       }
     } catch (eKbLabVars) {}
   }
-  function keyboardLabScrollComposerIntoView(behavior) {
+  function keyboardLabKeepLayoutVisible() {
     keyboardLabSyncKeyboardVars();
     try {
-      composerEl.scrollIntoView({ block: "end", behavior: behavior || "auto" });
+      var cardContent = view.closest ? view.closest(".card__content") : null;
+      if (cardContent && cardContent.scrollTop > 0) cardContent.scrollTop = 0;
+    } catch (eKbLabCardScroll) {}
+    try {
+      var docScroller = document.scrollingElement || document.documentElement || document.body;
+      if (docScroller && docScroller.scrollTop > 0) docScroller.scrollTop = 0;
+      if (window.scrollY > 0) window.scrollTo(0, 0);
+    } catch (eKbLabDocScroll) {}
+    try {
+      streamEl.scrollTop = Math.max(0, streamEl.scrollHeight - streamEl.clientHeight);
+    } catch (eKbLabStreamScroll) {}
+  }
+  function keyboardLabLetUserScroll() {
+    keyboardLabSyncKeyboardVars();
+    try {
+      var cardContent = view.closest ? view.closest(".card__content") : null;
+      if (cardContent && cardContent.scrollTop < 0) cardContent.scrollTop = 0;
     } catch (eKbLabScrollModern) {
       try {
-        composerEl.scrollIntoView(false);
+        streamEl.scrollTop = streamEl.scrollHeight;
       } catch (eKbLabScrollLegacy) {}
     }
   }
@@ -161,7 +177,8 @@ window.addEventListener("resize", function () {
       keyboardLabEnsureTicker();
       [0, 80, 180, 360, 650].forEach(function (ms) {
         setTimeout(function () {
-          keyboardLabScrollComposerIntoView(ms ? "auto" : "smooth");
+          if (ms < 200) keyboardLabKeepLayoutVisible();
+          else keyboardLabLetUserScroll();
           keyboardLabUpdateMetrics("kb-open");
         }, ms);
       });
