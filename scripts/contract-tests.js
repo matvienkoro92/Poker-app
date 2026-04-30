@@ -299,6 +299,17 @@ async function testAuthAndAdmin(redis) {
     true,
     "secondary known admin can use gazette planner",
   );
+  const apiAuth = require(path.join(root, "lib", "api-auth"));
+  assert.strictEqual(apiAuth.isAdminUsername("roman1_matvienko"), true, "roman1 username is admin");
+  assert.strictEqual(apiAuth.isAdminEmail("matvienkoro92@gmail.com"), true, "roman1 email is admin");
+  assert.strictEqual(
+    apiAuth.isAdminIdentity({ id: 0, pwaUsername: "roman1_matvienko", adminAccess: false }, "mail_ID000001"),
+    true,
+    "admin username grants API admin identity",
+  );
+  const pwa = require(path.join(root, "lib", "poker-pwa-session"));
+  const adminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "", adminAccess: true }, BOT_TOKEN);
+  assert.strictEqual(pwa.verifyPwaSessionToken(adminToken, BOT_TOKEN).adminAccess, true, "pwa session carries admin access");
 }
 
 async function testChatSendEditDelete() {
