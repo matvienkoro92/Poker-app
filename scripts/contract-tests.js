@@ -332,6 +332,13 @@ async function testAuthAndAdmin(redis) {
   const pwa = require(path.join(root, "lib", "poker-pwa-session"));
   const adminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "", adminAccess: true }, BOT_TOKEN);
   assert.strictEqual(pwa.verifyPwaSessionToken(adminToken, BOT_TOKEN).adminAccess, true, "pwa session carries admin access");
+  const reportAccess = require(path.join(root, "lib", "admin-report-access"));
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 388008256, telegramUsername: "roman1787443" }, "tg_388008256"), false, "roman1787443 cannot access admin reports");
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 2144406710, telegramUsername: "" }, "tg_2144406710"), true, "anna can access admin reports");
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, pwaUsername: "roman1_matvienko" }, "mail_ID000001"), true, "roman1 can access admin reports by username");
+  assert.strictEqual(reportAccess.isAdminReportEmail("matvienkoro92@gmail.com"), true, "roman1 can access admin reports by email");
+  const reportToken = pwa.signPwaSession({ id: 2144406710, username: "anna", adminReportAccess: true }, BOT_TOKEN);
+  assert.strictEqual(pwa.verifyPwaSessionToken(reportToken, BOT_TOKEN).adminReportAccess, true, "pwa session carries admin report access");
 }
 
 async function testChatSendEditDelete() {

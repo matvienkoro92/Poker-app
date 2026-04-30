@@ -100,6 +100,7 @@ function getPokerResolvedTelegramUser() {
           var tgAuth = { status: "verified", user: tgUser, error: null };
           if (tgRecord.gazettePlannerAccess === true) tgAuth.gazettePlannerAccess = true;
           if (tgRecord.adminAccess === true) tgAuth.adminAccess = true;
+          if (tgRecord.adminReportAccess === true) tgAuth.adminReportAccess = true;
           window.__pokerTelegramAuth = tgAuth;
           pokerMaybeRememberMemberIdFromUser(tgUser);
           pokerSetAuthMethod(tgRecord.authMethod || "telegram");
@@ -1382,6 +1383,7 @@ function getPokerResolvedTelegramUser() {
                   {
                     gazettePlannerAccess: data.gazettePlannerAccess === true,
                     adminAccess: data.adminAccess === true,
+                    adminReportAccess: data.adminReportAccess === true,
                     authMethod: "telegram",
                   }
                 )
@@ -1391,6 +1393,7 @@ function getPokerResolvedTelegramUser() {
               var _authPwaPassword = { status: "verified", user: u, error: null };
               if (data.gazettePlannerAccess === true) _authPwaPassword.gazettePlannerAccess = true;
               if (data.adminAccess === true) _authPwaPassword.adminAccess = true;
+              if (data.adminReportAccess === true) _authPwaPassword.adminReportAccess = true;
               window.__pokerTelegramAuth = _authPwaPassword;
               pokerSetAuthMethod("telegram");
               updateHeaderGreeting();
@@ -1509,6 +1512,7 @@ function getPokerResolvedTelegramUser() {
                 {
                   gazettePlannerAccess: data.gazettePlannerAccess === true,
                   adminAccess: data.adminAccess === true,
+                  adminReportAccess: data.adminReportAccess === true,
                   authMethod: "telegram",
                 }
               )
@@ -1518,6 +1522,7 @@ function getPokerResolvedTelegramUser() {
             var _authPwaCode = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authPwaCode.gazettePlannerAccess = true;
             if (data.adminAccess === true) _authPwaCode.adminAccess = true;
+            if (data.adminReportAccess === true) _authPwaCode.adminReportAccess = true;
             window.__pokerTelegramAuth = _authPwaCode;
             pokerSetAuthMethod("telegram");
             updateHeaderGreeting();
@@ -1966,6 +1971,7 @@ function getPokerResolvedTelegramUser() {
                   {
                     gazettePlannerAccess: data.gazettePlannerAccess === true,
                     adminAccess: data.adminAccess === true,
+                    adminReportAccess: data.adminReportAccess === true,
                     authMethod: "email",
                   }
                 )
@@ -1976,6 +1982,7 @@ function getPokerResolvedTelegramUser() {
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
               if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
               if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
+              if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
               pokerMaybeRememberMemberIdFromUser(u);
               pokerSetAuthMethod("email");
               updateHeaderGreeting();
@@ -2121,6 +2128,7 @@ function getPokerResolvedTelegramUser() {
                   {
                     gazettePlannerAccess: data.gazettePlannerAccess === true,
                     adminAccess: data.adminAccess === true,
+                    adminReportAccess: data.adminReportAccess === true,
                     authMethod: "email",
                   }
                 )
@@ -2131,6 +2139,7 @@ function getPokerResolvedTelegramUser() {
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
               if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
               if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
+              if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
               pokerMaybeRememberMemberIdFromUser(u);
               pokerSetAuthMethod("email");
               updateHeaderGreeting();
@@ -2632,6 +2641,7 @@ function getPokerResolvedTelegramUser() {
               {
                 gazettePlannerAccess: data.gazettePlannerAccess === true,
                 adminAccess: data.adminAccess === true,
+                adminReportAccess: data.adminReportAccess === true,
                 authMethod: "telegram",
               }
             )
@@ -2641,6 +2651,7 @@ function getPokerResolvedTelegramUser() {
           var _authTgWidget = { status: "verified", user: u, error: null };
           if (data.gazettePlannerAccess === true) _authTgWidget.gazettePlannerAccess = true;
           if (data.adminAccess === true) _authTgWidget.adminAccess = true;
+          if (data.adminReportAccess === true) _authTgWidget.adminReportAccess = true;
           window.__pokerTelegramAuth = _authTgWidget;
           pokerMaybeRememberMemberIdFromUser(u);
           pokerSetAuthMethod("telegram");
@@ -2888,6 +2899,7 @@ function getPokerResolvedTelegramUser() {
         var _authRestore = { status: "verified", user: uP, error: null };
         if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
         if (so.adminAccess === true) _authRestore.adminAccess = true;
+        if (so.adminReportAccess === true) _authRestore.adminReportAccess = true;
         window.__pokerTelegramAuth = _authRestore;
         pokerMaybeRememberMemberIdFromUser(uP);
         pokerSetAuthMethod(so.authMethod || "telegram");
@@ -2927,6 +2939,7 @@ function getPokerResolvedTelegramUser() {
     var _authRestore = { status: "verified", user: u, error: null };
     if (record.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
     if (record.adminAccess === true) _authRestore.adminAccess = true;
+    if (record.adminReportAccess === true) _authRestore.adminReportAccess = true;
     window.__pokerTelegramAuth = _authRestore;
     try {
       if (options.vk) {
@@ -2936,6 +2949,7 @@ function getPokerResolvedTelegramUser() {
           authMethod: record.authMethod || "telegram",
           gazettePlannerAccess: record.gazettePlannerAccess === true,
           adminAccess: record.adminAccess === true,
+          adminReportAccess: record.adminReportAccess === true,
         });
       }
     } catch (eRehydratePwaAuth) {}
@@ -3158,6 +3172,7 @@ function getPokerResolvedTelegramUser() {
             var _authMini = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authMini.gazettePlannerAccess = true;
             if (data.adminAccess === true) _authMini.adminAccess = true;
+            if (data.adminReportAccess === true) _authMini.adminReportAccess = true;
             window.__pokerTelegramAuth = _authMini;
             pokerMaybeRememberMemberIdFromUser(u);
             pokerSetAuthMethod("telegram");
@@ -3169,6 +3184,7 @@ function getPokerResolvedTelegramUser() {
                   {
                     gazettePlannerAccess: data.gazettePlannerAccess === true,
                     adminAccess: data.adminAccess === true,
+                    adminReportAccess: data.adminReportAccess === true,
                   }
                 )
               )

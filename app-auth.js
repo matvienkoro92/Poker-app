@@ -292,6 +292,10 @@ function pokerParsePwaSessionRaw(raw, requireUser) {
       if (!restoredUser) return null;
       o.user = restoredUser;
     }
+    try {
+      var payload = pokerDecodePwaSessionPayload(o.token);
+      if (payload && payload.rpt === true) o.adminReportAccess = true;
+    } catch (eRpt) {}
     return o;
   } catch (e) {
     return null;
@@ -347,6 +351,7 @@ function pokerMinimalPwaSessionCookiePayload(token, authMethod, sessionExtra) {
   if (method) rec.authMethod = method;
   if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
   if (sessionExtra && sessionExtra.adminAccess) rec.adminAccess = true;
+  if (sessionExtra && sessionExtra.adminReportAccess) rec.adminReportAccess = true;
   return JSON.stringify(rec);
 }
 
@@ -489,6 +494,7 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   var rec = { token: token, user: userObj };
   if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
   if (sessionExtra && sessionExtra.adminAccess) rec.adminAccess = true;
+  if (sessionExtra && sessionExtra.adminReportAccess) rec.adminReportAccess = true;
   if (sessionExtra && sessionExtra.authMethod) rec.authMethod = String(sessionExtra.authMethod).trim().toLowerCase();
   var payload = JSON.stringify(rec);
   var ok = false;
