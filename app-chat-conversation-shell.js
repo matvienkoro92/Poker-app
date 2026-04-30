@@ -67,6 +67,9 @@ function setChatConversationOpenClass(on) {
     if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
   } catch (eConvPad) {}
 }
+try {
+  window.pokerSetChatConversationOpenClass = setChatConversationOpenClass;
+} catch (eExposeConvClass) {}
 
 function showList() {
   try {

@@ -59,6 +59,22 @@ function initChatTabDialogShell(opts) {
   var pokerFlushBottomNavAndViewportAfterChatChrome = typeof opts.pokerFlushBottomNavAndViewportAfterChatChrome === "function" ? opts.pokerFlushBottomNavAndViewportAfterChatChrome : null;
   var closeSwitcherDropdown = typeof opts.closeSwitcherDropdown === "function" ? opts.closeSwitcherDropdown : function () {};
 
+function setChatThreadChromeOpen(on) {
+  try {
+    if (typeof window.pokerSetChatConversationOpenClass === "function") {
+      window.pokerSetChatConversationOpenClass(!!on);
+      return;
+    }
+  } catch (eThreadChromeGlobal) {}
+  try {
+    if (document.body && document.body.classList) document.body.classList.toggle("chat-conversation-open", !!on);
+    if (document.documentElement && document.documentElement.classList) document.documentElement.classList.toggle("chat-conversation-open", !!on);
+  } catch (eThreadChromeClass) {}
+  try {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (eThreadChromePad) {}
+}
+
 function setTab(tab) {
   pokerPushOpenTraceTransition("setTab-call", String(tab || ""));
   if (tab === "dialogs") {
@@ -117,6 +133,7 @@ function setTab(tab) {
   }
   if (getDialogsView()) getDialogsView().classList.add("chat-dialogs-view--hidden");
   if (tab === "general") {
+    setChatThreadChromeOpen(true);
     if (getGeneralView()) { getGeneralView().classList.remove("chat-general-view--hidden"); getGeneralView().style.display = ""; }
     if (getPersonalView()) getPersonalView().classList.add("chat-personal-view--hidden");
     if (getAdminsView()) getAdminsView().classList.add("chat-admins-view--hidden");
@@ -180,9 +197,11 @@ function setTab(tab) {
     if (getGeneralView()) { getGeneralView().classList.add("chat-general-view--hidden"); getGeneralView().style.display = "none"; }
     if (getPersonalView()) getPersonalView().classList.remove("chat-personal-view--hidden");
     if (getAdminsView()) getAdminsView().classList.add("chat-admins-view--hidden");
+    if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden")) setChatThreadChromeOpen(true);
     setScrollPersonalToBottomOnNextRender(true);
     if (!window.__pokerSuppressSetTabPersonalLoad) loadMessages();
   } else if (tab === "admins") {
+    setChatThreadChromeOpen(false);
     if (getGeneralView()) { getGeneralView().classList.add("chat-general-view--hidden"); getGeneralView().style.display = "none"; }
     if (getPersonalView()) getPersonalView().classList.add("chat-personal-view--hidden");
     if (getAdminsView()) getAdminsView().classList.remove("chat-admins-view--hidden");
@@ -290,6 +309,7 @@ function showDialogs() {
     pokerResetChatDialogsViewportArtifacts();
   } catch (eDlgReset) {}
   setChatActiveTab("dialogs");
+  setChatThreadChromeOpen(false);
   setChatWithUserId(null);
   setChatPeerVerified(false);
   setChatPeerTypingActive(false);

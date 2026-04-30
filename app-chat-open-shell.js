@@ -85,6 +85,21 @@ function openClubChat() {
     });
   } catch (eDlgResetRaf) {}
 }
+function setChatThreadChromeOpen(on) {
+  try {
+    if (typeof window.pokerSetChatConversationOpenClass === "function") {
+      window.pokerSetChatConversationOpenClass(!!on);
+      return;
+    }
+  } catch (eThreadChromeGlobal) {}
+  try {
+    if (document.body && document.body.classList) document.body.classList.toggle("chat-conversation-open", !!on);
+    if (document.documentElement && document.documentElement.classList) document.documentElement.classList.toggle("chat-conversation-open", !!on);
+  } catch (eThreadChromeClass) {}
+  try {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (eThreadChromePad) {}
+}
   function openClubChatShell() {
     try {
       updateGeneralInputLocked(false);
@@ -96,6 +111,7 @@ function openClubChat() {
       getGeneralView().style.display = "";
     }
     if (getPersonalView()) getPersonalView().classList.add("chat-personal-view--hidden");
+    setChatThreadChromeOpen(true);
     window.chatGeneralUnread = false;
     setChatActiveTab("general");
     setScrollGeneralToBottomOnNextRender(true);
@@ -176,6 +192,7 @@ function openPushDmImmediate(userId, userName, peerP21Id, peerAvatarOpt) {
       if (getPersonalView()) getPersonalView().classList.remove("chat-personal-view--hidden");
       if (getListView()) getListView().classList.add("chat-list-view--hidden");
       if (getConvView()) getConvView().classList.remove("chat-conv-view--hidden");
+      setChatThreadChromeOpen(true);
       setChatActiveTab("personal");
       setChatWithUserId(uid);
       setChatWithUserName(userName || uid);
@@ -193,6 +210,7 @@ function openPushDmImmediate(userId, userName, peerP21Id, peerAvatarOpt) {
   if (getPersonalView()) getPersonalView().classList.remove("chat-personal-view--hidden");
   if (getListView()) getListView().classList.add("chat-list-view--hidden");
   if (getConvView()) getConvView().classList.remove("chat-conv-view--hidden");
+  setChatThreadChromeOpen(true);
   setChatActiveTab("personal");
   setChatWithUserId(uid);
   setChatWithUserName(userName || uid);
