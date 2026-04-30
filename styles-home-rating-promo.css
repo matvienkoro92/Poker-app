@@ -26,7 +26,7 @@ html.app-view-home .card::before {
 .app.app--view-home .home-welcome-outline,
 html.app-view-home .home-welcome-outline {
   position: relative;
-  /* Кнопка «Рейтинг весны» в потоке после hero-row; нижняя линия рамки ::before — посередине шапки промо (высота через --home-welcome-outline-frame-h). */
+  /* Кнопка «Рейтинг весны» в потоке после hero-row; рамка ::before обнимает промо целиком (высота через --home-welcome-outline-frame-h). */
   z-index: auto;
   margin-top: -2mm;
   /* Поскольку «на главной» у .card нет обычной рамки (border убран),
@@ -39,8 +39,8 @@ html.app-view-home .home-welcome-outline {
   /* Справа/сверху/снизу — как раньше; слева +8px к базовым 10px для основного контента (кнопка рейтинга компенсирует через переменные) */
   --home-outline-pad-x: 10px;
   --home-outline-pad-left: 18px;
-  /* Снизу: зазор 30px до блока «Следующий фриролл» задаёт margin-top у .tournament-day-home-dual */
-  padding: calc(2mm + 10px) var(--home-outline-pad-x) 0 var(--home-outline-pad-left);
+  /* Снизу оставляем воздух внутри рамки, чтобы кнопка рейтинга не сидела на нижней линии. */
+  padding: calc(2mm + 10px) var(--home-outline-pad-x) 18px var(--home-outline-pad-left);
 }
 html.app--telegram-miniapp .app.app--view-home .home-welcome-outline,
 html.app--telegram-miniapp.app-view-home .home-welcome-outline {
