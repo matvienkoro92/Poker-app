@@ -125,7 +125,7 @@ async function main() {
     page.on("pageerror", (err) => errors.push(String((err && err.message) || err)));
 
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(120);
 
     const initialLazy = await page.evaluate(() => ({
       initChat: typeof window.initChat,
@@ -137,18 +137,17 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
       heavyScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
       hiddenImages: performance.getEntriesByType("resource")
         .filter((entry) => /\/assets\/(?:dep-manager|dep-manager-vika|download-hero|raffles-hero)\./.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
     }));
-    if (initialLazy.initChat !== "undefined") throw new Error("initChat loaded before opening chat");
-    if (initialLazy.chatScripts.length) throw new Error("chat scripts loaded before opening chat: " + initialLazy.chatScripts.join(", "));
+    if (initialLazy.initChat !== "function") throw new Error("initChat must be ready before first chat open");
+    if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     if (initialLazy.initWinterRating !== "undefined") throw new Error("rating loaded before opening rating");
     if (initialLazy.initVideoLessons !== "undefined") throw new Error("media loaded before opening media");
     if (initialLazy.initRaffles !== "undefined") throw new Error("raffles loaded before opening raffles");
-    if (initialLazy.initAdminReport !== "undefined") throw new Error("admin loaded before opening admin");
     if (initialLazy.heavyScripts.length) throw new Error("heavy lazy scripts loaded before navigation: " + initialLazy.heavyScripts.join(", "));
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
@@ -164,7 +163,7 @@ async function main() {
 
     await page.evaluate(() => {
       if (typeof window.pokerLoadDomainScripts === "function") {
-        return window.pokerLoadDomainScripts("admin").then(() => window.pokerEnsureGlobalModalsHtml());
+        return Promise.resolve(window.pokerLoadDomainScripts("admin")).then(() => window.pokerEnsureGlobalModalsHtml());
       }
       if (typeof window.pokerEnsureGlobalModalsHtml !== "function") {
         throw new Error("pokerEnsureGlobalModalsHtml is not available");

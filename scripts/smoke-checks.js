@@ -891,13 +891,12 @@ add("View navigation gates lazy domains before activating heavy views", () =>
   ])
 );
 
-add("Chat JavaScript domain is lazy-loaded", () =>
+add("Chat JavaScript domain is eager-loaded before router", () =>
   hasAll("html", [
-    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-utils.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
   ]) &&
-  !has("html", '<script defer src="./app-chat-utils.js') &&
-  !has("html", '<script defer src="./app-chat-lifecycle.js') &&
+  !has("html", 'type="application/poker-lazy" data-poker-lazy-domain="chat"') &&
   hasAll("appLazyLoader", [
     "data-poker-lazy-domain",
     "window.pokerLoadDomainScripts = loadDomainScripts",
