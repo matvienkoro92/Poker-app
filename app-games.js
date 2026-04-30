@@ -230,6 +230,8 @@ function closeDailyPredictionModal() {
   var btn = document.getElementById("dailyPredictionBtn");
   var modal = document.getElementById("dailyPredictionModal");
   if (!btn || !modal) return;
+  if (modal.dataset.dailyPredictionBound === "1") return;
+  modal.dataset.dailyPredictionBound = "1";
   var closeBtn = modal.querySelector(".daily-prediction-modal__close");
   var backdrop = modal.querySelector(".daily-prediction-modal__backdrop");
   var shareBtn = document.getElementById("dailyPredictionShareBtn");
@@ -274,7 +276,47 @@ function closeDailyPredictionModal() {
   });
   // Обновляем бейдж при инициализации
   updateDailyPredictionBadge();
-})(); 
+})();
+window.pokerInitDailyPredictionModal = function () {
+  var btn = document.getElementById("dailyPredictionBtn");
+  var modal = document.getElementById("dailyPredictionModal");
+  if (!btn || !modal || modal.dataset.dailyPredictionBound === "1") return;
+  modal.dataset.dailyPredictionBound = "1";
+  var closeBtn = modal.querySelector(".daily-prediction-modal__close");
+  var backdrop = modal.querySelector(".daily-prediction-modal__backdrop");
+  var shareBtn = document.getElementById("dailyPredictionShareBtn");
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    openDailyPredictionModal();
+  });
+  if (closeBtn) closeBtn.addEventListener("click", function () { closeDailyPredictionModal(); });
+  if (backdrop) backdrop.addEventListener("click", function () { closeDailyPredictionModal(); });
+  if (shareBtn && !shareBtn._bound) {
+    shareBtn._bound = true;
+    shareBtn.addEventListener("click", function () {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var predictionTextEl = document.getElementById("dailyPredictionText");
+      var prediction = predictionTextEl ? predictionTextEl.textContent.trim() : "";
+      var link =
+        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("daily_prediction") : "";
+      var shortText = "Моё покерное предсказание на сегодня:";
+      if (prediction) shortText += "\n\n" + prediction;
+      shortText += "\n\nПосмотрите своё предсказание здесь.";
+      var shareUrl =
+        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shortText) : "";
+      pokerTryPwaWebShare({ text: shortText + "\n\n" + link, url: link }).then(function (pwaOk) {
+        if (pwaOk) return;
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.openTelegramLink && shareUrl) tg.openTelegramLink(shareUrl);
+        else if (shareUrl) window.open(shareUrl, "_blank", "noopener");
+      });
+    });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeDailyPredictionModal();
+  });
+  updateDailyPredictionBadge();
+};
 
 (function initChatNavDropdown() {
   window.closeChatNavDropdown = function () {};
@@ -1104,4 +1146,3 @@ document.getElementById("plastererPlayAgainBtn")?.addEventListener("click", func
     resultEl.className = "randomizer-result randomizer-result--ok";
   });
 })();
-

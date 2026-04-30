@@ -10,25 +10,29 @@
   }
 
   function runFragmentHooks(viewName) {
-    try {
-      if (viewName === "video-lessons" && typeof window.pokerInitVideoLessonsModals === "function") {
-        window.pokerInitVideoLessonsModals();
+    function safeCall(fn) {
+      try {
+        if (typeof fn === "function") fn();
+      } catch (eHook) {}
+    }
+    if (viewName === "video-lessons") safeCall(window.pokerInitVideoLessonsModals);
+    if (viewName === "hall-of-fame") safeCall(window.pokerInitHallOfFamePanelShareButtons);
+    if (viewName === "global-modals") {
+      if (!window.__pokerHomeGlobalModalsReinitDone && typeof window.runGazetteAndTasksInit === "function") {
+        window.__pokerHomeGlobalModalsReinitDone = true;
+        safeCall(window.runGazetteAndTasksInit);
       }
-      if (viewName === "hall-of-fame" && typeof window.pokerInitHallOfFamePanelShareButtons === "function") {
-        window.pokerInitHallOfFamePanelShareButtons();
-      }
-      if (viewName === "global-modals") {
-        if (typeof window.pokerInitAdminReportModal === "function") window.pokerInitAdminReportModal();
-        if (typeof window.pokerInitBroadcastReportsModal === "function") window.pokerInitBroadcastReportsModal();
-        if (typeof window.pokerInitVisitorsAdminUi === "function") window.pokerInitVisitorsAdminUi();
-        if (typeof window.pokerInitShareStatsAdminModal === "function") window.pokerInitShareStatsAdminModal();
-        if (typeof window.pokerInitTrackingLinksAdminModal === "function") window.pokerInitTrackingLinksAdminModal();
-        if (typeof window.pokerInitAuthDebugModal === "function") window.pokerInitAuthDebugModal();
-        if (typeof window.pokerInitRomanGazetteTaskPlanner === "function") window.pokerInitRomanGazetteTaskPlanner();
-        if (typeof window.pokerInitImageLightbox === "function") window.pokerInitImageLightbox();
-        if (typeof window.pokerInitPartnershipModal === "function") window.pokerInitPartnershipModal();
-      }
-    } catch (eHooks) {}
+      safeCall(window.pokerInitAdminReportModal);
+      safeCall(window.pokerInitBroadcastReportsModal);
+      safeCall(window.pokerInitVisitorsAdminUi);
+      safeCall(window.pokerInitShareStatsAdminModal);
+      safeCall(window.pokerInitTrackingLinksAdminModal);
+      safeCall(window.pokerInitAuthDebugModal);
+      safeCall(window.pokerInitRomanGazetteTaskPlanner);
+      safeCall(window.pokerInitDailyPredictionModal);
+      safeCall(window.pokerInitImageLightbox);
+      safeCall(window.pokerInitPartnershipModal);
+    }
   }
 
   function hydrateHost(host, html, viewName) {
@@ -97,14 +101,20 @@
   document.addEventListener(
     "click",
     function (e) {
+      if (e.__pokerLazyRedispatched) return;
       var target = e.target && e.target.closest
-        ? e.target.closest("#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
+        ? e.target.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
         : null;
-      if (!target || !document.getElementById("globalModalsFragmentHost")) return;
+      if (!target) return;
       var needsAdminScripts = !!(target.closest && target.closest("#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn"));
-      var scriptsReady = needsAdminScripts && typeof window.pokerLoadDomainScripts === "function"
-        ? window.pokerLoadDomainScripts("admin")
-        : Promise.resolve(true);
+      var needsGamesScripts = !!(target.closest && target.closest("#dailyPredictionBtn"));
+      var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
+      if (!hasGlobalModalsHost && !needsAdminScripts && !needsGamesScripts) return;
+      var scriptsReady = Promise.resolve(true);
+      if (typeof window.pokerLoadDomainScripts === "function") {
+        if (needsAdminScripts) scriptsReady = scriptsReady.then(function () { return window.pokerLoadDomainScripts("admin"); });
+        if (needsGamesScripts) scriptsReady = scriptsReady.then(function () { return window.pokerLoadDomainScripts("games"); });
+      }
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
@@ -113,7 +123,9 @@
       }).then(function () {
         try {
           if (originalTarget && originalTarget.dispatchEvent) {
-            originalTarget.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+            var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });
+            ev.__pokerLazyRedispatched = true;
+            originalTarget.dispatchEvent(ev);
           } else {
             target.click();
           }
