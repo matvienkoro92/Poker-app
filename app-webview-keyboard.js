@@ -97,7 +97,80 @@ window.addEventListener("resize", function () {
   var composerEl = document.getElementById("keyboardLabComposer");
   var sendBtnEl = document.getElementById("keyboardLabSendBtn");
   if (!view || !metricsEl || !streamEl || !textareaEl || !composerEl || !sendBtnEl) return;
+  var labEl = composerEl.closest ? composerEl.closest(".keyboard-lab") : null;
   var ticker = null;
+  var keyboardActive = false;
+  var keyboardClassClearTimer = null;
+  function keyboardLabViewportInset() {
+    var inset = 0;
+    try {
+      var vv = window.visualViewport || null;
+      if (vv) {
+        inset = Math.max(
+          0,
+          Math.round((window.innerHeight || 0) - (Number(vv.height) || 0) - (Number(vv.offsetTop) || 0))
+        );
+      }
+    } catch (eKbLabInset) {}
+    if (keyboardActive && inset < 80) {
+      inset = Math.max(inset, Math.round((window.innerHeight || 0) * 0.38));
+    }
+    return inset;
+  }
+  function keyboardLabSyncKeyboardVars() {
+    var inset = keyboardLabViewportInset();
+    var composerHeight = 70;
+    try {
+      composerHeight = Math.max(60, Math.round(composerEl.getBoundingClientRect().height || 70));
+    } catch (eKbLabComposerHeight) {}
+    try {
+      document.documentElement.style.setProperty("--keyboard-lab-keyboard-inset", inset + "px");
+      document.body.style.setProperty("--keyboard-lab-keyboard-inset", inset + "px");
+      document.documentElement.style.setProperty("--keyboard-lab-composer-height", composerHeight + "px");
+      document.body.style.setProperty("--keyboard-lab-composer-height", composerHeight + "px");
+      view.style.setProperty("--keyboard-lab-keyboard-inset", inset + "px");
+      view.style.setProperty("--keyboard-lab-composer-height", composerHeight + "px");
+      if (labEl) {
+        labEl.style.setProperty("--keyboard-lab-keyboard-inset", inset + "px");
+        labEl.style.setProperty("--keyboard-lab-composer-height", composerHeight + "px");
+      }
+    } catch (eKbLabVars) {}
+  }
+  function keyboardLabScrollComposerIntoView(behavior) {
+    keyboardLabSyncKeyboardVars();
+    try {
+      composerEl.scrollIntoView({ block: "end", behavior: behavior || "auto" });
+    } catch (eKbLabScrollModern) {
+      try {
+        composerEl.scrollIntoView(false);
+      } catch (eKbLabScrollLegacy) {}
+    }
+  }
+  function keyboardLabSetKeyboardOpen(active) {
+    keyboardActive = !!active;
+    if (keyboardClassClearTimer) {
+      clearTimeout(keyboardClassClearTimer);
+      keyboardClassClearTimer = null;
+    }
+    try {
+      document.documentElement.classList.toggle("keyboard-lab-keyboard-open", keyboardActive);
+      document.body.classList.toggle("keyboard-lab-keyboard-open", keyboardActive);
+    } catch (eKbLabClass) {}
+    keyboardLabSyncKeyboardVars();
+    if (keyboardActive) {
+      keyboardLabEnsureTicker();
+      [0, 80, 180, 360, 650].forEach(function (ms) {
+        setTimeout(function () {
+          keyboardLabScrollComposerIntoView(ms ? "auto" : "smooth");
+          keyboardLabUpdateMetrics("kb-open");
+        }, ms);
+      });
+    } else {
+      keyboardClassClearTimer = setTimeout(function () {
+        keyboardLabSyncKeyboardVars();
+      }, 180);
+    }
+  }
   function keyboardLabActiveLabel() {
     var active = document.activeElement;
     if (!active) return "none";
@@ -183,9 +256,11 @@ window.addEventListener("resize", function () {
   });
   textareaEl.addEventListener("focus", function () {
     keyboardLabEnsureTicker();
+    keyboardLabSetKeyboardOpen(true);
     keyboardLabUpdateMetrics("focus");
   });
   textareaEl.addEventListener("blur", function () {
+    keyboardLabSetKeyboardOpen(false);
     keyboardLabUpdateMetrics("blur");
   });
   textareaEl.addEventListener("touchstart", function () {
@@ -206,14 +281,17 @@ window.addEventListener("resize", function () {
   if (window.visualViewport && window.visualViewport.addEventListener) {
     window.visualViewport.addEventListener("resize", function () {
       keyboardLabEnsureTicker();
+      keyboardLabSyncKeyboardVars();
       keyboardLabUpdateMetrics("vv-resize");
     });
     window.visualViewport.addEventListener("scroll", function () {
       keyboardLabEnsureTicker();
+      keyboardLabSyncKeyboardVars();
       keyboardLabUpdateMetrics("vv-scroll");
     });
   }
   window.addEventListener("resize", function () {
+    keyboardLabSyncKeyboardVars();
     keyboardLabUpdateMetrics("win-resize");
   });
   window.addEventListener("scroll", function () {

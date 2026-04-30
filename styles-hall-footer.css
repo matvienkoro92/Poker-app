@@ -104,6 +104,8 @@
 }
 
 .keyboard-lab {
+  --keyboard-lab-keyboard-inset: 0px;
+  --keyboard-lab-composer-height: 70px;
   min-height: calc(100dvh - 110px);
   display: flex;
   flex-direction: column;
@@ -157,6 +159,8 @@
   overflow: auto;
   padding-bottom: 8px;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .keyboard-lab__bubble {
   max-width: 92%;
@@ -212,4 +216,53 @@
   background: linear-gradient(180deg, #fb923c, #f97316);
   color: #fff7ed;
   font-size: 22px;
+}
+
+body[data-view="keyboard-lab"] .card__content {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+body[data-view="keyboard-lab"] .view--active[data-view="keyboard-lab"] {
+  min-height: 100%;
+}
+
+html.keyboard-lab-keyboard-open,
+body.keyboard-lab-keyboard-open {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .card__content {
+  scroll-padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 28px);
+  padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 28px);
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab {
+  min-height: calc(100dvh + var(--keyboard-lab-keyboard-inset, 0px));
+  padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 20px);
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__stream {
+  overflow-y: auto;
+  padding-bottom: calc(var(--keyboard-lab-composer-height, 70px) + 24px);
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__composer {
+  position: fixed;
+  left: calc(env(safe-area-inset-left, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  bottom: max(10px, calc(var(--keyboard-lab-keyboard-inset, 0px) + 10px));
+  z-index: 2147483000;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: none !important;
 }
