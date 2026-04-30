@@ -7055,6 +7055,49 @@ function initChat() {
           window.__pokerChatPwaSettleToBottomAfterKeyboard = false;
         }
         var isTelegramChatFocus = isTelegramChatRuntime();
+        function runPwaChatComposerDockPass(label) {
+          if (!isIosPwaChatKb || !isChatThreadComposerKeyboardDom(focusTarget)) return;
+          try {
+            scrollDocumentToZero();
+          } catch (ePwaDockScroll0) {}
+          try {
+            syncPwaChatVisualViewportInset();
+          } catch (ePwaDockSync0) {}
+          try {
+            var targetArea =
+              chatActiveTab === "personal"
+                ? document.getElementById("chatPersonalInputArea")
+                : document.getElementById("chatGeneralInputArea");
+            if (!targetArea) return;
+            var vvDock = window.visualViewport || null;
+            var ihDock = window.innerHeight || 0;
+            var baseDock = Number(window.__pokerChatInnerHBaseline) || ihDock || 0;
+            var coverDock = 0;
+            if (vvDock && ihDock > 0) {
+              coverDock = Math.max(
+                coverDock,
+                Math.round(ihDock - (Number(vvDock.offsetTop) || 0) - (Number(vvDock.height) || 0))
+              );
+            }
+            if (baseDock > 260 && ihDock > 0) {
+              coverDock = Math.max(coverDock, Math.round(baseDock - ihDock));
+            }
+            /*
+             * В iOS PWA первые кадры focus часто ещё не дают корректный visualViewport,
+             * но клавиатура уже накрывает fixed-низ. Если dock не появился, даём временный
+             * нижний floor; последующие vv-события уточнят bottom.
+             */
+            if (coverDock < 96 && targetArea && !targetArea.classList.contains("chat-input-area--vv-dock")) {
+              coverDock = Math.max(coverDock, Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
+            }
+            if (coverDock >= 72) {
+              applyChatThreadComposerKeyboardDockFromCover(coverDock);
+            }
+          } catch (ePwaDockPass) {}
+          try {
+            collectChatOverscrollSnapshot("focus:pwa-dock:" + (label || ""), focusTarget);
+          } catch (ePwaDockSnap) {}
+        }
         if (!isIosPwaChatKb) {
           syncPwaChatVisualViewportInset();
           if (!isTelegramChatFocus) {
@@ -7067,8 +7110,15 @@ function initChat() {
         }
         if (isIosChatKb) {
           if (isIosPwaChatKb) {
+            runPwaChatComposerDockPass("now");
             requestAnimationFrame(function () {
+              runPwaChatComposerDockPass("raf1");
               syncPwaChatVisualViewportInset();
+            });
+            [80, 180, 360, 700].forEach(function (ms) {
+              setTimeout(function () {
+                runPwaChatComposerDockPass("t" + ms);
+              }, ms);
             });
           } else if (!isTelegramChatFocus) {
             setTimeout(function () {
