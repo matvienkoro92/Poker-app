@@ -201,6 +201,27 @@ function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peer
     getMessagesEl().innerHTML = '<p class="chat-empty">Загрузка...</p>';
     getMessagesEl().scrollTop = 0;
   }
+  [1600, 4200].forEach(function (delay) {
+    setTimeout(function () {
+      try {
+        if (!getChatWithUserId() || !peerChatIdsEqual(getChatWithUserId(), userId)) return;
+        if (!getConvView() || getConvView().classList.contains("chat-conv-view--hidden")) return;
+        var messagesEl = getMessagesEl();
+        if (!messagesEl) return;
+        if (!/Загрузка|Loading/i.test(String(messagesEl.textContent || ""))) return;
+        renderMessages([]);
+        setLastPersonalMessagesSig(personalRenderSignature(userId || "", [], false));
+        updateChatHeaderStats();
+      } catch (eConvLoadingFallback) {
+        try {
+          var fallbackMessagesEl = getMessagesEl();
+          if (fallbackMessagesEl && /Загрузка|Loading/i.test(String(fallbackMessagesEl.textContent || ""))) {
+            fallbackMessagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
+          }
+        } catch (eConvLoadingFallbackHtml) {}
+      }
+    }, delay);
+  });
   try {
     pokerSchedulePushDmHeaderHydrate(userId);
   } catch (eHdrConvSched) {}
