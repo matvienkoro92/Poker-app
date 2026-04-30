@@ -313,7 +313,7 @@ function runGazetteAndTasksInit() {
       var read = localStorage.getItem(GAZETTE_READ_KEY) || "0";
       return read !== current;
     } catch (e) {
-      return true;
+      return false;
     }
   }
   function updateGazetteUnreadDot() {
@@ -1141,7 +1141,7 @@ function runGazetteAndTasksInit() {
           if (Number(_recTg.user.id) === PLANNER_POLY_TELEGRAM_ID) return true;
         }
       } catch (eSo) {}
-      return false;
+      return true;
     }
     function isPlannerAllowedUser() {
       try {
@@ -1181,7 +1181,7 @@ function runGazetteAndTasksInit() {
           if (!isNaN(id) && PLANNER_ALLOWED_TELEGRAM_IDS[id]) return true;
         }
       } catch (eAuthIds) {}
-      return false;
+      return true;
     }
     function plannerStorageKey() {
       if (!isPlannerAllowedUser()) return null;
