@@ -299,6 +299,21 @@ async function testAuthAndAdmin(redis) {
     true,
     "secondary known admin can use gazette planner",
   );
+  assert.strictEqual(
+    plannerAccess.isGazettePlannerEditor({ id: 0, telegramUsername: "roman1787443", pwaUsername: null }),
+    true,
+    "roman1787443 can use shared gazette planner",
+  );
+  assert.strictEqual(
+    plannerAccess.isGazettePlannerEditor({ id: 0, telegramUsername: "polyapineapple", pwaUsername: null }),
+    true,
+    "polyapineapple can use solo gazette planner",
+  );
+  assert.strictEqual(
+    plannerAccess.isGazettePlannerEditor({ id: 0, telegramUsername: "unknown_player", pwaUsername: null }),
+    false,
+    "unknown user cannot use gazette planner",
+  );
   const apiAuth = require(path.join(root, "lib", "api-auth"));
   assert.strictEqual(apiAuth.isAdminUsername("roman1_matvienko"), true, "roman1 username is admin");
   assert.strictEqual(apiAuth.isAdminUsername("roman1787443"), false, "editor username is not full admin");

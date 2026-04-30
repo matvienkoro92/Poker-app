@@ -1183,7 +1183,7 @@ function runGazetteAndTasksInit() {
           if (!isNaN(id) && PLANNER_ALLOWED_TELEGRAM_IDS[id]) return true;
         }
       } catch (eAuthIds) {}
-      return true;
+      return false;
     }
     function plannerStorageKey() {
       if (!isPlannerAllowedUser()) return null;
