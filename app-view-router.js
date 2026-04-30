@@ -141,6 +141,10 @@ function setView(viewName, navOpts) {
      html.chat-keyboard-open (overflow:hidden), inset и таббар «парит» с зазором снизу до главной. */
   if (prevView === "chat" && viewName !== "chat") {
     try {
+      if (document.body && document.body.classList) document.body.classList.remove("chat-conversation-open");
+      if (document.documentElement && document.documentElement.classList) document.documentElement.classList.remove("chat-conversation-open");
+    } catch (eChatConvClassLeave) {}
+    try {
       var compLeave = document.getElementById("chatSharedComposer");
       if (compLeave && document.activeElement === compLeave && typeof compLeave.blur === "function") compLeave.blur();
       var dlgLeave = document.getElementById("chatFindByIdInputDialogs");

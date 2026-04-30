@@ -54,6 +54,20 @@ function initChatConversationShell(opts) {
   var mountChatComposer = typeof opts.mountChatComposer === "function" ? opts.mountChatComposer : function () {};
   var syncChatInertForIosAccessory = typeof opts.syncChatInertForIosAccessory === "function" ? opts.syncChatInertForIosAccessory : function () {};
 
+function setChatConversationOpenClass(on) {
+  try {
+    if (document.body && document.body.classList) {
+      document.body.classList.toggle("chat-conversation-open", !!on);
+    }
+    if (document.documentElement && document.documentElement.classList) {
+      document.documentElement.classList.toggle("chat-conversation-open", !!on);
+    }
+  } catch (eConvClass) {}
+  try {
+    if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+  } catch (eConvPad) {}
+}
+
 function showList() {
   try {
     pokerPushOpenStateDebug("showList-enter", "");
@@ -77,6 +91,7 @@ function showList() {
     }
   } catch (eForceList) {}
   pokerPushOpenTraceTransition("showList-commit", "");
+  setChatConversationOpenClass(false);
   setChatWithUserId(null);
   if (getConvTitle()) getConvTitle().textContent = "";
   setChatConvTitleIdText("");
@@ -169,6 +184,7 @@ function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peer
   if (voicePrevP) voicePrevP.classList.remove("chat-voice-preview--visible");
   if (getListView()) getListView().classList.add("chat-list-view--hidden");
   if (getConvView()) getConvView().classList.remove("chat-conv-view--hidden");
+  setChatConversationOpenClass(true);
   try {
     var convTop = document.querySelector("#chatConvView .chat-conv-top");
     if (convTop) {

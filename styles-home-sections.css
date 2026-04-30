@@ -656,6 +656,14 @@ html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard
   /* Без анимации: иначе ~200ms таббар «уезжает», вёрстка чата пересчитывается и лента визуально прыгает вверх—вниз при первом входе в тред. */
   transition: none !important;
 }
+body[data-view="chat"].chat-conversation-open .bottom-nav,
+html.chat-conversation-open body[data-view="chat"] .bottom-nav {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: none !important;
+}
 /* Личка: верхний inset у #app — под шапку диалога у кромки экрана */
 .app:has(.view--active[data-view="chat"]):has(.chat-conv-view:not(.chat-conv-view--hidden)) {
   padding-bottom: 0;
