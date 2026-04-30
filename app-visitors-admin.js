@@ -11,6 +11,66 @@
       .replace(/"/g, "&quot;");
   }
 
+  function collectAdminIdentityCandidates() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.user) users.push(auth.user);
+    } catch (eAuth) {}
+    try {
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.user) users.push(rec.user);
+    } catch (eRec) {}
+    return users;
+  }
+
+  function isKnownAdminUser(user) {
+    if (!user) return false;
+    var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+    if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+    var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+    if (username === "roman1_matvienko") return true;
+    var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
+    return email === "matvienkoro92@gmail.com";
+  }
+
+  function renderHomeAdminIdentityStatus(forceVisible) {
+    var el = document.getElementById("homeAdminVersionTop");
+    if (!el) return;
+    var version = document.documentElement.getAttribute("data-app-version") || "";
+    var authAdmin = false;
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.adminAccess === true) authAdmin = true;
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.adminAccess === true) authAdmin = true;
+    } catch (eAuthFlag) {}
+    var candidates = collectAdminIdentityCandidates();
+    var shown = null;
+    var knownAdmin = authAdmin;
+    for (var i = 0; i < candidates.length; i++) {
+      if (!shown && candidates[i]) shown = candidates[i];
+      if (isKnownAdminUser(candidates[i])) knownAdmin = true;
+    }
+    var parts = [];
+    if (version) parts.push("Version " + version);
+    parts.push("admin: " + (knownAdmin ? "да" : "проверяется"));
+    if (shown && shown.username) parts.push("@" + String(shown.username).replace(/^@+/, "").trim());
+    if (shown && shown.id != null) parts.push("id " + String(shown.id).replace(/^tg_/, "").trim());
+    if (shown && shown.email) parts.push(String(shown.email).trim());
+    el.textContent = parts.join(" · ");
+    if (forceVisible || knownAdmin) el.classList.remove("home-admin-version--hidden");
+  }
+
   function checkAdminAndShowVisitorsButton() {
     var wrap = document.getElementById("footerAdminVisitorsWrap");
     var keyboardLabWrap = document.getElementById("footerKeyboardLabWrap");
@@ -19,10 +79,10 @@
     var reportBtn = document.getElementById("adminReportBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
-    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn) return;
+    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !homeAdminVersion) return;
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
-      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
+      renderHomeAdminIdentityStatus(true);
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
     }
     function showAdminUi() {
@@ -35,7 +95,7 @@
       var footerStats = document.getElementById("footerVisitorStatsWrap");
       if (footerStats) footerStats.removeAttribute("hidden");
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
-      if (homeAdminVersion) homeAdminVersion.classList.remove("home-admin-version--hidden");
+      renderHomeAdminIdentityStatus(true);
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
@@ -56,34 +116,9 @@
         var recFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
         if (recFlag && recFlag.adminAccess === true) return true;
       } catch (eFlag) {}
-      var users = [];
-      try {
-        var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
-        if (resolved) users.push(resolved);
-      } catch (eResolved) {}
-      try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-          users.push(window.Telegram.WebApp.initDataUnsafe.user);
-        }
-      } catch (eTg) {}
-      try {
-        var auth = window.__pokerTelegramAuth;
-        if (auth && auth.user) users.push(auth.user);
-      } catch (eAuth) {}
-      try {
-        var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-        if (rec && rec.user) users.push(rec.user);
-      } catch (eRec) {}
+      var users = collectAdminIdentityCandidates();
       for (var i = 0; i < users.length; i++) {
-        var id = users[i] && users[i].id != null ? String(users[i].id).replace(/^tg_/, "").trim() : "";
-        if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
-        var username =
-          users[i] && users[i].username != null
-            ? String(users[i].username).replace(/^@+/, "").trim().toLowerCase()
-            : "";
-        if (username === "roman1_matvienko") return true;
-        var email = users[i] && users[i].email != null ? String(users[i].email).trim().toLowerCase() : "";
-        if (email === "matvienkoro92@gmail.com") return true;
+        if (isKnownAdminUser(users[i])) return true;
       }
       return false;
     }
@@ -95,7 +130,7 @@
         return;
       }
     } catch (e) {}
-    if (pokerShouldShowHomeTopVersionForSpecialUser()) {
+    if (typeof pokerShouldShowHomeTopVersionForSpecialUser === "function" && pokerShouldShowHomeTopVersionForSpecialUser()) {
       showKeyboardLabOnly();
     }
     if (pokerIsKnownClientAdmin()) {
@@ -116,6 +151,7 @@
         if (data && data.ok && data.isAdmin) showAdminUi();
       })
       .catch(function () {});
+    renderHomeAdminIdentityStatus(false);
   }
 
   var MONTH_NAMES = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
@@ -946,6 +982,7 @@
   }
 
   window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
+  window.pokerRenderHomeAdminIdentityStatus = renderHomeAdminIdentityStatus;
   window.addEventListener("poker-telegram-auth", checkAdminAndShowVisitorsButton);
   window.addEventListener("poker-admin-access", checkAdminAndShowVisitorsButton);
   window.addEventListener("pageshow", checkAdminAndShowVisitorsButton);

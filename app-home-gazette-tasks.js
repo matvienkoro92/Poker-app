@@ -1143,7 +1143,7 @@ function runGazetteAndTasksInit() {
           if (Number(_recTg.user.id) === PLANNER_POLY_TELEGRAM_ID) return true;
         }
       } catch (eSo) {}
-      return true;
+      return false;
     }
     function isPlannerAllowedUser() {
       try {
@@ -2358,6 +2358,7 @@ function runGazetteAndTasksInit() {
         });
       } catch (eRz) {}
     }
+    window.pokerOpenRomanTaskPlanner = openPlannerModal;
     function closePlannerModal() {
       romanPlannerStopLiveSync();
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
@@ -2766,6 +2767,33 @@ function runGazetteAndTasksInit() {
   }
   window.pokerInitRomanGazetteTaskPlanner = initRomanGazetteTaskPlanner;
   initRomanGazetteTaskPlanner();
+  if (!window.__pokerRomanPlannerDelegatedOpenBound) {
+    window.__pokerRomanPlannerDelegatedOpenBound = true;
+    document.addEventListener(
+      "click",
+      function (ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest("#romanTaskPlannerOpenBtn") : null;
+        if (!btn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        var ensure =
+          typeof window.pokerEnsureGlobalModalsHtml === "function"
+            ? window.pokerEnsureGlobalModalsHtml()
+            : Promise.resolve(true);
+        Promise.resolve(ensure)
+          .then(function () {
+            if (typeof window.pokerInitRomanGazetteTaskPlanner === "function") {
+              window.pokerInitRomanGazetteTaskPlanner();
+            }
+            if (typeof window.pokerOpenRomanTaskPlanner === "function") {
+              window.pokerOpenRomanTaskPlanner();
+            }
+          })
+          .catch(function () {});
+      },
+      true
+    );
+  }
 
   function initPartnershipModal() {
     var modal = document.getElementById("partnershipModal");
