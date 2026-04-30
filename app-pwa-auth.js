@@ -1348,13 +1348,18 @@ function getPokerResolvedTelegramUser() {
                 !pokerSavePwaTgSession(
                   data.pwaSession,
                   data.user,
-                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
+                  {
+                    gazettePlannerAccess: data.gazettePlannerAccess === true,
+                    adminAccess: data.adminAccess === true,
+                    authMethod: "telegram",
+                  }
                 )
               )
                 pwaSessionPersistenceWarning();
               pokerSavePwaGuestMode(false);
               var _authPwaPassword = { status: "verified", user: u, error: null };
               if (data.gazettePlannerAccess === true) _authPwaPassword.gazettePlannerAccess = true;
+              if (data.adminAccess === true) _authPwaPassword.adminAccess = true;
               window.__pokerTelegramAuth = _authPwaPassword;
               pokerSetAuthMethod("telegram");
               updateHeaderGreeting();
@@ -1470,13 +1475,18 @@ function getPokerResolvedTelegramUser() {
               !pokerSavePwaTgSession(
                 data.pwaSession,
                 data.user,
-                data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
+                {
+                  gazettePlannerAccess: data.gazettePlannerAccess === true,
+                  adminAccess: data.adminAccess === true,
+                  authMethod: "telegram",
+                }
               )
             )
               pwaSessionPersistenceWarning();
             pokerSavePwaGuestMode(false);
             var _authPwaCode = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authPwaCode.gazettePlannerAccess = true;
+            if (data.adminAccess === true) _authPwaCode.adminAccess = true;
             window.__pokerTelegramAuth = _authPwaCode;
             pokerSetAuthMethod("telegram");
             updateHeaderGreeting();
@@ -1922,13 +1932,19 @@ function getPokerResolvedTelegramUser() {
                 !pokerSavePwaTgSession(
                   data.pwaSession,
                   data.user,
-                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "email" } : { authMethod: "email" }
+                  {
+                    gazettePlannerAccess: data.gazettePlannerAccess === true,
+                    adminAccess: data.adminAccess === true,
+                    authMethod: "email",
+                  }
                 )
               ) {
                 pwaSessionPersistenceWarning();
               }
               pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+              if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
+              if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
               pokerMaybeRememberMemberIdFromUser(u);
               pokerSetAuthMethod("email");
               updateHeaderGreeting();
@@ -2071,13 +2087,19 @@ function getPokerResolvedTelegramUser() {
                 !pokerSavePwaTgSession(
                   data.pwaSession,
                   data.user,
-                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "email" } : { authMethod: "email" }
+                  {
+                    gazettePlannerAccess: data.gazettePlannerAccess === true,
+                    adminAccess: data.adminAccess === true,
+                    authMethod: "email",
+                  }
                 )
               ) {
                 pwaSessionPersistenceWarning();
               }
               pokerSavePwaGuestMode(false);
               window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+              if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
+              if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
               pokerMaybeRememberMemberIdFromUser(u);
               pokerSetAuthMethod("email");
               updateHeaderGreeting();
@@ -2576,13 +2598,18 @@ function getPokerResolvedTelegramUser() {
             !pokerSavePwaTgSession(
               data.pwaSession,
               data.user,
-              data.gazettePlannerAccess === true ? { gazettePlannerAccess: true, authMethod: "telegram" } : { authMethod: "telegram" }
+              {
+                gazettePlannerAccess: data.gazettePlannerAccess === true,
+                adminAccess: data.adminAccess === true,
+                authMethod: "telegram",
+              }
             )
           )
             pwaSessionPersistenceWarning();
           pokerSavePwaGuestMode(false);
           var _authTgWidget = { status: "verified", user: u, error: null };
           if (data.gazettePlannerAccess === true) _authTgWidget.gazettePlannerAccess = true;
+          if (data.adminAccess === true) _authTgWidget.adminAccess = true;
           window.__pokerTelegramAuth = _authTgWidget;
           pokerMaybeRememberMemberIdFromUser(u);
           pokerSetAuthMethod("telegram");
@@ -2829,6 +2856,7 @@ function getPokerResolvedTelegramUser() {
         var uP = normalizeVerifiedUser(so.user, null);
         var _authRestore = { status: "verified", user: uP, error: null };
         if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
+        if (so.adminAccess === true) _authRestore.adminAccess = true;
         window.__pokerTelegramAuth = _authRestore;
         pokerMaybeRememberMemberIdFromUser(uP);
         pokerSetAuthMethod(so.authMethod || "telegram");
@@ -2867,6 +2895,7 @@ function getPokerResolvedTelegramUser() {
     var u = normalizeVerifiedUser(record.user, null);
     var _authRestore = { status: "verified", user: u, error: null };
     if (record.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
+    if (record.adminAccess === true) _authRestore.adminAccess = true;
     window.__pokerTelegramAuth = _authRestore;
     try {
       if (options.vk) {
@@ -2875,6 +2904,7 @@ function getPokerResolvedTelegramUser() {
         pokerSavePwaTgSession(record.token, record.user, {
           authMethod: record.authMethod || "telegram",
           gazettePlannerAccess: record.gazettePlannerAccess === true,
+          adminAccess: record.adminAccess === true,
         });
       }
     } catch (eRehydratePwaAuth) {}
@@ -3053,6 +3083,7 @@ function getPokerResolvedTelegramUser() {
             var u = normalizeVerifiedUser(data.user, userUnsafe);
             var _authMini = { status: "verified", user: u, error: null };
             if (data.gazettePlannerAccess === true) _authMini.gazettePlannerAccess = true;
+            if (data.adminAccess === true) _authMini.adminAccess = true;
             window.__pokerTelegramAuth = _authMini;
             pokerMaybeRememberMemberIdFromUser(u);
             pokerSetAuthMethod("telegram");
@@ -3061,7 +3092,10 @@ function getPokerResolvedTelegramUser() {
                 !pokerSavePwaTgSession(
                   data.pwaSession,
                   data.user,
-                  data.gazettePlannerAccess === true ? { gazettePlannerAccess: true } : null
+                  {
+                    gazettePlannerAccess: data.gazettePlannerAccess === true,
+                    adminAccess: data.adminAccess === true,
+                  }
                 )
               )
                 pwaSessionPersistenceWarning();

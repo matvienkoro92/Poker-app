@@ -43,6 +43,12 @@
       } catch (eVisAd) {}
     }
     function pokerIsKnownClientAdmin() {
+      try {
+        var authFlag = window.__pokerTelegramAuth;
+        if (authFlag && authFlag.adminAccess === true) return true;
+        var recFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (recFlag && recFlag.adminAccess === true) return true;
+      } catch (eFlag) {}
       var users = [];
       try {
         var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
@@ -921,6 +927,10 @@
 
   window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
   window.addEventListener("poker-telegram-auth", checkAdminAndShowVisitorsButton);
+  window.addEventListener("pageshow", checkAdminAndShowVisitorsButton);
+  setTimeout(checkAdminAndShowVisitorsButton, 500);
+  setTimeout(checkAdminAndShowVisitorsButton, 1500);
+  setTimeout(checkAdminAndShowVisitorsButton, 3500);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", pokerInitVisitorsAdminUi);
   } else {

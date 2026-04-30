@@ -109,12 +109,26 @@
     });
   };
 
-  window.addEventListener("poker-telegram-auth", function (ev) {
-    var detail = ev && ev.detail ? ev.detail : {};
-    if (detail.verified === false) return;
+  function loadAdminDomainSoon() {
     loadDomainScripts("admin").catch(function (err) {
       if (typeof console !== "undefined" && console.warn) console.warn("lazy auth admin", err);
     });
+  }
+
+  window.addEventListener("poker-telegram-auth", function (ev) {
+    var detail = ev && ev.detail ? ev.detail : {};
+    if (detail.verified === false) return;
+    loadAdminDomainSoon();
+  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      setTimeout(loadAdminDomainSoon, 250);
+    }, { once: true });
+  } else {
+    setTimeout(loadAdminDomainSoon, 250);
+  }
+  window.addEventListener("pageshow", function () {
+    setTimeout(loadAdminDomainSoon, 250);
   });
 
   preloadDomainsOnIdle(["tournament"]);

@@ -1128,8 +1128,10 @@ function runGazetteAndTasksInit() {
     function isPlannerAllowedUser() {
       try {
         var _ap = window.__pokerTelegramAuth;
+        if (_ap && _ap.adminAccess === true) return true;
         if (_ap && _ap.gazettePlannerAccess === true) return true;
         var _recTg = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (_recTg && _recTg.adminAccess === true) return true;
         if (_recTg && _recTg.gazettePlannerAccess === true) return true;
       } catch (ePlAllow) {}
       var ua = plannerAuthUsernameLower();
