@@ -6613,6 +6613,34 @@ function initChat() {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
       }
+      function preDockPwaChatComposerOnTouch(focusTarget) {
+        try {
+          if (
+            isTelegramChatRuntime() ||
+            typeof pokerPwaStandaloneForKeyboardInset !== "function" ||
+            !pokerPwaStandaloneForKeyboardInset() ||
+            typeof isIosLikeForChatViewport !== "function" ||
+            !isIosLikeForChatViewport() ||
+            !isChatThreadComposerKeyboardDom(focusTarget)
+          ) {
+            return;
+          }
+          setChatKeyboardOpenClasses(true);
+          clearPendingChatKeyboardDismissTimers();
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
+          attachPwaChatThreadRootScrollLock();
+          var ih = window.innerHeight || 0;
+          var base = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
+          if (base < 260) base = ih || base;
+          var cover = Math.round(base * 0.34);
+          if (cover < 180 && base > 360) cover = 180;
+          if (cover > 320) cover = 320;
+          document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, cover) + "px");
+          applyChatThreadComposerKeyboardDockFromCover(cover, focusTarget);
+          updateChatMessagesKeyboardPad();
+        } catch (ePreDockPwa) {}
+      }
       /**
        * Telegram Mini App: общий/личный тред с фокусом на композере — отдельный конвейер без visualViewport.
        * Высота перекрытия: viewportStableHeight − viewportHeight; резервы winLoss / lastGood; dock + pad.
@@ -7608,6 +7636,7 @@ function initChat() {
               var ihTs = window.innerHeight || 0;
               if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
             } catch (eTsBl) {}
+            preDockPwaChatComposerOnTouch(ta);
           },
           { passive: false }
         );
