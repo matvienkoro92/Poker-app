@@ -106,21 +106,12 @@
         ? e.target.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
         : null;
       if (!target) return;
-      var needsAdminScripts = !!(target.closest && target.closest("#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn"));
-      var needsGamesScripts = !!(target.closest && target.closest("#dailyPredictionBtn"));
       var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
-      if (!hasGlobalModalsHost && !needsAdminScripts && !needsGamesScripts) return;
-      var scriptsReady = Promise.resolve(true);
-      if (typeof window.pokerLoadDomainScripts === "function") {
-        if (needsAdminScripts) scriptsReady = scriptsReady.then(function () { return window.pokerLoadDomainScripts("admin"); });
-        if (needsGamesScripts) scriptsReady = scriptsReady.then(function () { return window.pokerLoadDomainScripts("games"); });
-      }
+      if (!hasGlobalModalsHost) return;
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
-      scriptsReady.then(function () {
-        return window.pokerEnsureGlobalModalsHtml();
-      }).then(function () {
+      Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
         try {
           if (originalTarget && originalTarget.dispatchEvent) {
             var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });

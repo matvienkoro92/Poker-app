@@ -28,7 +28,6 @@ const files = {
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
-  appLazyLoader: read("app-lazy-loader.js"),
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
@@ -718,7 +717,6 @@ add("JS manifest maps core app domains", () =>
     '"app-view-router.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
-    '"app-lazy-loader.js"',
   ])
 );
 
@@ -743,7 +741,6 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
     appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
     appearsBefore(order, "app-rating-core.js", "app-rating.js") &&
-    appearsBefore(order, "app-lazy-loader.js", "app.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
@@ -880,12 +877,12 @@ add("Winter rating HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );
 
-add("View navigation gates lazy domains before activating heavy views", () =>
-  has("html", 'type="application/poker-lazy"') &&
-  has("client", "pokerEnsureViewScripts(viewName)") &&
+add("View navigation activates views without JavaScript lazy gates", () =>
+  !has("html", 'type="application/poker-lazy"') &&
+  !has("client", "pokerEnsureViewScripts(viewName)") &&
+  !has("client", "pokerLoadDomainScripts") &&
   hasAll("client", [
     "function setView(viewName, navOpts)",
-    "nextOptsScripts.scriptsReady = true",
     "navItems.forEach(function (item)",
     "setView(target)",
   ])
@@ -897,41 +894,26 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
     'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
   ]) &&
   !has("html", 'type="application/poker-lazy" data-poker-lazy-domain="chat"') &&
-  hasAll("appLazyLoader", [
-    "data-poker-lazy-domain",
-    "window.pokerLoadDomainScripts = loadDomainScripts",
-    "window.pokerEnsureViewScripts = function (viewName)",
-  ]) &&
-  hasAll("appViewRouter", [
-    "pokerEnsureViewScripts(viewName)",
-    "scriptsReady",
-  ])
+  !has("html", "app-lazy-loader.js") &&
+  !has("appViewRouter", "pokerEnsureViewScripts")
 );
 
-add("Heavy JavaScript domains are lazy-loaded", () => {
+add("Heavy JavaScript domains are eager-loaded", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const lazyDomains = [
-    ["rating", ["app-hall-fame.js", "app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js"]],
-    ["media", ["app-streams.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "peerjs.min.js"]],
-    ["games", ["app-games.js", "app-club-tasks.js"]],
-    ["admin", ["app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js"]],
-    ["raffles", ["app-raffles.js"]],
+  const eagerFiles = [
+    "app-hall-fame.js", "app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js",
+    "app-streams.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "peerjs.min.js",
+    "app-games.js", "app-club-tasks.js", "app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js",
+    "app-raffles.js",
   ];
-  return lazyDomains.every(([domain, scripts]) =>
-    scripts.every((file) =>
-      !startup.includes(file) &&
-      files.html.includes(`type="application/poker-lazy" data-poker-lazy-domain="${domain}" src="./${file}`)
-    )
-  ) && hasAll("appLazyLoader", [
-    '"bonus-game": ["games"]',
-    '"plasterer-game": ["games"]',
-    "window.pokerEnsureViewScripts = function (viewName)",
-  ]);
+  return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`defer data-poker-eager-domain=`) && files.html.includes(`src="./${file}`)) &&
+    !has("html", 'type="application/poker-lazy"') &&
+    !has("html", "app-lazy-loader.js");
 });
 
-add("Startup root JavaScript count stays lean for Telegram WebView", () => {
+add("Startup root JavaScript includes every eager app module", () => {
   const startup = localStartupScriptFilesFromIndex();
-  return startup.length > 0 && startup.length <= 28;
+  return startup.length >= 60 && startup.includes("app.js") && startup.includes("app-chat-lifecycle.js");
 });
 
 add("Primary view route chain has DOM targets and click wiring", () => {
@@ -952,17 +934,9 @@ add("Primary view route chain has DOM targets and click wiring", () => {
     ]);
 });
 
-add("Lazy loader maps key routed views to manifest domains", () => {
+add("JS manifest still maps key domains for build ownership", () => {
   const domains = jsManifestDomainMap();
-  return hasAll("client", [
-    "window.pokerLoadDomainScripts = loadDomainScripts",
-    "window.pokerEnsureViewScripts = function (viewName)",
-    'chat: ["chat"]',
-    '"spring-rating": ["rating"]',
-    'raffles: ["raffles"]',
-    'cashout: ["cashout"]',
-  ]) &&
-    Array.isArray(domains.chat) &&
+  return Array.isArray(domains.chat) &&
     Array.isArray(domains.rating) &&
     Array.isArray(domains.raffles) &&
     Array.isArray(domains.profile) &&

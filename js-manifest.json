@@ -73,11 +73,21 @@
       "auth-debug"
     ],
     "adminModules": {
-      "visitors": ["app-visitors-admin.js"],
-      "broadcasts": ["app-share-stats.js"],
-      "reports": ["app-admin-reports.js"],
-      "tracking": ["app-tracking-links.js"],
-      "auth-debug": ["app-auth-debug.js"]
+      "visitors": [
+        "app-visitors-admin.js"
+      ],
+      "broadcasts": [
+        "app-share-stats.js"
+      ],
+      "reports": [
+        "app-admin-reports.js"
+      ],
+      "tracking": [
+        "app-tracking-links.js"
+      ],
+      "auth-debug": [
+        "app-auth-debug.js"
+      ]
     },
     "home": [
       "app-home-init.js",
@@ -105,7 +115,6 @@
       "app-view-router.js",
       "app-network.js",
       "app-api-tracking.js",
-      "app-lazy-loader.js",
       "app.js",
       "app-section-views.js"
     ]
