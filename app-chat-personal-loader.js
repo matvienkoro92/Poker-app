@@ -181,7 +181,10 @@ function loadMessages(opts) {
   }
   pokerFetchPersonalJson(url, { timeoutMs: opts.waitForChange ? getChatLongPollTimeoutMs() + 5000 : PERSONAL_FETCH_TIMEOUT_MS, peer: loadForPeer })
     .then(function (data) {
-    if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
+    if (
+      loadPersonalSeq !== window.__pokerLoadPersonalSeq &&
+      (!peerChatIdsEqual(getChatWithUserId(), loadForPeer) || !getConvView() || getConvView().classList.contains("chat-conv-view--hidden"))
+    ) return;
     if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
     if (data && data.notModified === true && data.pollRev) {
       if (typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
@@ -487,7 +490,10 @@ function loadMessages(opts) {
           at: Date.now(),
         };
       } catch (eTracePersonalErr) {}
-      if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
+      if (
+        loadPersonalSeq !== window.__pokerLoadPersonalSeq &&
+        (!peerChatIdsEqual(getChatWithUserId(), loadForPeer) || !getConvView() || getConvView().classList.contains("chat-conv-view--hidden"))
+      ) return;
       if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
       if (!opts.waitForChange && (Number(opts.__retryCount || 0) || 0) < 2) {
         var retryCount = Number(opts.__retryCount || 0) || 0;

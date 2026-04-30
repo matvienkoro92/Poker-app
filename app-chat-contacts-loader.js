@@ -431,7 +431,7 @@ function applyContactsApiResponse(data, opts) {
           forceRerender: true,
         }));
       } catch (eFastRichContactsStart) {}
-    }, 1200);
+    }, 80);
   }
   pokerFetchContactsJson(url, { timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS })
     .then(function (data) {
