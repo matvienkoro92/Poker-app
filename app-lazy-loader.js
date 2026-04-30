@@ -109,5 +109,14 @@
     });
   };
 
+  window.addEventListener("poker-telegram-auth", function (ev) {
+    var detail = ev && ev.detail ? ev.detail : {};
+    if (detail.verified === false) return;
+    loadDomainScripts("admin").catch(function (err) {
+      if (typeof console !== "undefined" && console.warn) console.warn("lazy auth admin", err);
+    });
+  });
+
   preloadDomainsOnIdle(["tournament"]);
+  preloadDomainsOnIdle(["admin"]);
 })();
