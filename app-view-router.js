@@ -348,7 +348,18 @@ function setView(viewName, navOpts) {
     } catch (eChatBootHome) {}
     if (!window.chatListenersAttached && typeof initChat === "function") {
       var idle = window.requestIdleCallback || function (cb) { setTimeout(cb, 100); };
-      idle(function () { initChat(); });
+      idle(function () {
+        var canInitHomeChat = false;
+        try {
+          canInitHomeChat = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+        } catch (eHomeChatCred) {}
+        if (!canInitHomeChat && window.Telegram && window.Telegram.WebApp) {
+          try {
+            canInitHomeChat = !!String(window.Telegram.WebApp.initData || "");
+          } catch (eHomeChatTg) {}
+        }
+        if (canInitHomeChat) initChat();
+      });
     }
     try {
       if (typeof pokerUpdateHomeWelcomeOutlineFrame === "function") {

@@ -2346,6 +2346,18 @@ function initChat() {
     window.__pokerKickChatContactsLoad = function (opts) {
       return loadContacts(opts || {});
     };
+    if (!window.__pokerChatAuthReloadBound) {
+      window.__pokerChatAuthReloadBound = true;
+      window.addEventListener("poker-telegram-auth", function () {
+        setTimeout(function () {
+          try {
+            if (typeof window.__pokerKickChatContactsLoad === "function") {
+              window.__pokerKickChatContactsLoad({ forceRerender: true });
+            }
+          } catch (eAuthReloadContacts) {}
+        }, 0);
+      });
+    }
   } catch (eExposeContactsKick) {}
 
   var chatClubGate = initChatClubGate({

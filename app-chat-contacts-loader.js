@@ -306,6 +306,10 @@ function applyContactsApiResponse(data, opts) {
         return;
       }
       clearContactsLoadingSkeletonFallback(showFriendsOnly ? "Здесь будут друзья, с которыми у вас уже есть личные диалоги." : "Диалогов пока нет");
+    } else if (!metaOnly && data && data.ok === false) {
+      var errText = data && data.error ? String(data.error) : "";
+      var authLike = /auth|login|credential|initData|треб|войд/i.test(errText);
+      clearContactsLoadingSkeletonFallback(authLike ? "Войдите в аккаунт, чтобы увидеть список диалогов." : "Не удалось загрузить список диалогов");
     }
   }
   try {
