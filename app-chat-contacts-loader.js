@@ -42,6 +42,7 @@ function initChatContactsLoader(opts) {
   var pokerHandleChatContactsFetchError = typeof opts.pokerHandleChatContactsFetchError === "function" ? opts.pokerHandleChatContactsFetchError : function () {};
   var pokerChatRecordTrace = typeof opts.pokerChatRecordTrace === "function" ? opts.pokerChatRecordTrace : function () {};
   var pokerChatScheduleLongPoll = typeof opts.pokerChatScheduleLongPoll === "function" ? opts.pokerChatScheduleLongPoll : function () {};
+  var CONTACTS_FETCH_TIMEOUT_MS = 9000;
 
 function clearContactsLoadingSkeletonFallback(text) {
   var el = getContactsEl();
@@ -72,6 +73,49 @@ function buildContactsRequestUrl(opts) {
     extra += "&wait=1&waitTimeoutMs=" + encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS));
   }
   return base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=contacts" + lastViewedParam + extra;
+}
+
+function pokerFetchContactsJson(url, opts) {
+  opts = opts || {};
+  var timeoutMs = Number(opts.timeoutMs) || CONTACTS_FETCH_TIMEOUT_MS;
+  var controller = null;
+  var timeoutId = null;
+  var fetchOpts = { cache: "no-store" };
+  try {
+    if (typeof AbortController !== "undefined") {
+      controller = new AbortController();
+      fetchOpts.signal = controller.signal;
+      timeoutId = setTimeout(function () {
+        try {
+          controller.abort();
+        } catch (eAbortContacts) {}
+      }, timeoutMs);
+    }
+  } catch (eAbortSetup) {}
+  try {
+    window.__pokerChatContactsLastFetch = {
+      url: String(url || "").replace(/(initData|pwaSession|pwaVkSession)=([^&]*)/g, "$1=***"),
+      startedAt: Date.now(),
+      timeoutMs: timeoutMs,
+    };
+  } catch (eTraceContactsStart) {}
+  return fetch(url, fetchOpts)
+    .then(function (r) {
+      return r.json();
+    })
+    .then(function (data) {
+      try {
+        window.__pokerChatContactsLastFetchDone = {
+          ok: !!(data && data.ok),
+          contacts: data && Array.isArray(data.contacts) ? data.contacts.length : null,
+          doneAt: Date.now(),
+        };
+      } catch (eTraceContactsDone) {}
+      return data;
+    })
+    .finally(function () {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
 }
 
 function mergeContactsMetaPayload(fullData, metaData) {
@@ -340,10 +384,7 @@ function applyContactsApiResponse(data, opts) {
     applyContactsApiResponse: applyContactsApiResponse,
     fireContactsLoaded: fireContactsLoaded,
   });
-  fetch(url, { cache: "no-store" })
-    .then(function (r) {
-      return r.json();
-    })
+  pokerFetchContactsJson(url, { timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS })
     .then(function (data) {
       if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
@@ -368,9 +409,26 @@ function applyContactsApiResponse(data, opts) {
         fireContactsLoaded: fireContactsLoaded,
       });
     })
-    .catch(function () {
+    .catch(function (err) {
       if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
+      try {
+        window.__pokerChatContactsLastError = {
+          message: err && err.message ? String(err.message) : String(err || ""),
+          name: err && err.name ? String(err.name) : "",
+          at: Date.now(),
+        };
+      } catch (eTraceContactsErr) {}
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
+      if (isFullContactsLoad) {
+        var retryCount = Number(opts.__retryCount || 0) || 0;
+        if (retryCount < 2) {
+          setTimeout(function () {
+            try {
+              loadContacts(Object.assign({}, opts, { __retryCount: retryCount + 1, forceRerender: true }));
+            } catch (eRetryContacts) {}
+          }, retryCount === 0 ? 600 : 1500);
+        }
+      }
       pokerHandleChatContactsFetchError({
         contactsInstantFromCache: contactsInstantFromCache,
         contactsEl: getContactsEl(),
