@@ -13,7 +13,7 @@ html.app-view-home .home-welcome-outline::before {
   left: 0;
   right: 0;
   bottom: auto;
-  /* Нижняя линия рамки проходит ниже кнопки «Рейтинг турнирщиков», а не сквозь неё (--home-welcome-outline-frame-h задаёт app.js). */
+  /* Нижняя линия рамки проходит по середине кнопки «Рейтинг турнирщиков» (--home-welcome-outline-frame-h задаёт app.js). */
   height: var(--home-welcome-outline-frame-h, 100%);
   box-sizing: border-box;
   border: 1px solid var(--card-border);

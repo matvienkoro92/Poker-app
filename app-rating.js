@@ -244,18 +244,19 @@ function renderSpringRatingViewTotalsWeeks() {
       })
       .join("");
 }
-/** Нижняя обводка welcome-блока: линия проходит ниже промо «Рейтинг турнирщиков», чтобы кнопка не лежала на рамке */
+/** Нижняя обводка welcome-блока: линия проходит по середине промо «Рейтинг турнирщиков» */
 function pokerUpdateHomeWelcomeOutlineFrame() {
   try {
     if (!document.body || document.body.getAttribute("data-view") !== "home") return;
     var homeView = document.querySelector(".view--active[data-view=\"home\"]");
     var outline = homeView && homeView.querySelector(".home-welcome-outline");
-    var promo = outline && outline.querySelector(".spring-rating-home-promo-unified");
-    if (!outline || !promo) return;
+    var header = outline && outline.querySelector(".spring-rating-home-promo-unified__header");
+    if (!outline || !header) return;
     var oRect = outline.getBoundingClientRect();
-    var pRect = promo.getBoundingClientRect();
-    if (!(oRect.height > 8) || !(pRect.height > 4)) return;
-    var hPx = pRect.bottom - oRect.top + 12;
+    var hRect = header.getBoundingClientRect();
+    if (!(oRect.height > 8) || !(hRect.height > 4)) return;
+    var midY = hRect.top + hRect.height / 2;
+    var hPx = midY - oRect.top;
     hPx = Math.max(56, Math.min(hPx, oRect.height - 4));
     outline.style.setProperty("--home-welcome-outline-frame-h", Math.round(hPx * 100) / 100 + "px");
     pokerEnsureHomeWelcomeOutlineFrameObserver(outline);
