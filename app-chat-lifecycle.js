@@ -5289,6 +5289,8 @@ function initChat() {
       }
       function pokerPwaStandaloneForKeyboardInset() {
         return (
+          !!(document.documentElement && document.documentElement.classList && document.documentElement.classList.contains("poker-ios-pwa")) ||
+          !!(document.documentElement && document.documentElement.classList && document.documentElement.classList.contains("poker-android-pwa")) ||
           !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
           !!(window.navigator && window.navigator.standalone)
         );
@@ -6346,6 +6348,21 @@ function initChat() {
         }
         var gap = getChatComposerKeyboardGapPx();
         var coverNum = Math.max(0, Math.round(Number(coverPx) || 0));
+        try {
+          if (
+            coverNum < 96 &&
+            !isTelegramChatRuntime() &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport() &&
+            isChatThreadComposerKeyboardDom()
+          ) {
+            var ihFloorDock = window.innerHeight || 0;
+            var baseFloorDock = Math.max(ihFloorDock, Number(window.__pokerChatInnerHBaseline) || 0);
+            if (baseFloorDock > 260) coverNum = Math.max(coverNum, Math.round(baseFloorDock * 0.34));
+          }
+        } catch (ePwaDockFloorAlways) {}
         var bottomPx = coverNum + gap;
         var pwaAccessoryInset = 0;
         var prevB = null;
@@ -7104,7 +7121,7 @@ function initChat() {
              * но клавиатура уже накрывает fixed-низ. Если dock не появился, даём временный
              * нижний floor; последующие vv-события уточнят bottom.
              */
-            if (coverDock < 96 && targetArea && !targetArea.classList.contains("chat-input-area--vv-dock")) {
+            if (coverDock < 96 && targetArea) {
               coverDock = Math.max(coverDock, Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
             }
             try {
