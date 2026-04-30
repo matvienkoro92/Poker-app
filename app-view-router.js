@@ -893,9 +893,8 @@ navItems.forEach(function (item) {
   });
 });
 
-function pokerOpenChatFromTab() {
-  setView("chat");
-  [0, 80, 240].forEach(function (delay) {
+function pokerFinalizeChatFromTabOpen() {
+  [0, 80, 240, 700].forEach(function (delay) {
     setTimeout(function () {
       try {
         if (typeof initChat === "function" && !window.chatListenersAttached) initChat();
@@ -915,10 +914,51 @@ function pokerOpenChatFromTab() {
   });
 }
 
+function pokerOpenChatFromTab() {
+  if (window.__pokerChatTabOpenInFlight) return;
+  window.__pokerChatTabOpenInFlight = true;
+  setTimeout(function () {
+    window.__pokerChatTabOpenInFlight = false;
+  }, 900);
+  function activateChatNow() {
+    try {
+      setView("chat", { htmlReady: true, scriptsReady: true });
+    } catch (eSetChatImmediate) {
+      try { setView("chat"); } catch (eSetChatFallback) {}
+    }
+    var scriptsReady = typeof window.pokerEnsureViewScripts === "function"
+      ? window.pokerEnsureViewScripts("chat")
+      : false;
+    Promise.resolve(scriptsReady)
+      .then(function () {
+        pokerFinalizeChatFromTabOpen();
+      })
+      .catch(function () {
+        pokerFinalizeChatFromTabOpen();
+      });
+  }
+  try {
+    var htmlReady = typeof window.pokerEnsureViewHtml === "function"
+      ? window.pokerEnsureViewHtml("chat")
+      : false;
+    if (htmlReady && typeof htmlReady.then === "function") {
+      htmlReady.then(activateChatNow).catch(function () {
+        setView("chat");
+        pokerFinalizeChatFromTabOpen();
+      });
+      return;
+    }
+  } catch (eChatHtml) {}
+  activateChatNow();
+}
+
 (function bindChatTabFastOpen() {
   var btn = document.getElementById("chatNavBtn");
   if (!btn || btn.__pokerFastOpenBound) return;
   btn.__pokerFastOpenBound = true;
+  btn.addEventListener("pointerdown", function () {
+    pokerOpenChatFromTab();
+  }, { passive: true });
   btn.addEventListener("touchend", function (e) {
     e.preventDefault();
     e.stopPropagation();
