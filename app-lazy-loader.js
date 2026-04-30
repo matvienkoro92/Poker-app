@@ -229,6 +229,5 @@
   setTimeout(function () {
     Promise.resolve(loadDomainScripts("games")).catch(function () {});
   }, 1300);
-  preloadDomainsOnIdle(["tournament"]);
   preloadDomainsOnIdle(["admin"]);
 })();
