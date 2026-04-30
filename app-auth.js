@@ -29,7 +29,18 @@ function isTelegramChatRuntime() {
     }
   } catch (eRootTgRuntime) {}
   try {
-    if (window.Telegram && window.Telegram.WebApp) return true;
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (!tg) return false;
+    if (tg.initData && String(tg.initData).trim()) return true;
+    if (
+      tg.initDataUnsafe &&
+      (tg.initDataUnsafe.user ||
+        (tg.initDataUnsafe.start_param != null && String(tg.initDataUnsafe.start_param).trim()))
+    ) {
+      return true;
+    }
+    var platform = String(tg.platform || "").trim().toLowerCase();
+    return !!(platform && platform !== "unknown");
   } catch (eWebAppTgRuntime) {}
   return false;
 }
