@@ -999,7 +999,7 @@ function runGazetteAndTasksInit() {
   })();
   }
 
-  (function initRomanGazetteTaskPlanner() {
+  function initRomanGazetteTaskPlanner() {
     var plannerModal = document.getElementById("romanTaskPlannerModal");
     var plannerBackdrop = document.getElementById("romanTaskPlannerModalBackdrop");
     var plannerClose = document.getElementById("romanTaskPlannerModalClose");
@@ -1010,6 +1010,8 @@ function runGazetteAndTasksInit() {
     var input = document.getElementById("romanTaskInput");
     var importantCheckbox = document.getElementById("romanTaskImportantCheckbox");
     if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
+    if (plannerModal.dataset.romanTaskPlannerBound === "1") return;
+    plannerModal.dataset.romanTaskPlannerBound = "1";
     var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
     function readPlannerTabStorage() {
       try {
@@ -2761,7 +2763,9 @@ function runGazetteAndTasksInit() {
     syncVisibility();
     updatePlannerHintText();
     resizePlannerComposer();
-  })();
+  }
+  window.pokerInitRomanGazetteTaskPlanner = initRomanGazetteTaskPlanner;
+  initRomanGazetteTaskPlanner();
 
   function initPartnershipModal() {
     var modal = document.getElementById("partnershipModal");
