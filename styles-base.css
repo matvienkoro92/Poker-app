@@ -34,6 +34,7 @@
   --app-back-btn-min-height: 40px;
   /* iOS / PWA: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
   --chat-vv-inset: 0px;
+  --chat-keyboard-fallback-inset: 0px;
   --chat-safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --chat-composer-edge-gap: 2px;
   /* iOS: доп. подъём над системной панелью «стрелки / Готово» (только там, где WebKit её показывает) */

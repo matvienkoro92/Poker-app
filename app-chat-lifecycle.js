@@ -5676,6 +5676,7 @@ function initChat() {
             setChatKeyboardOpenClasses(false);
             /* Сначала явный 0 — сброс кэша calc()/композитинга; remove на следующем кадре. */
             doc.style.setProperty("--chat-vv-inset", "0px");
+            doc.style.setProperty("--chat-keyboard-fallback-inset", "0px");
             doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
         try {
@@ -5749,6 +5750,7 @@ function initChat() {
             pokerStripForcedViewportShellHeights();
             try {
               doc.style.removeProperty("--chat-vv-inset");
+              doc.style.removeProperty("--chat-keyboard-fallback-inset");
               doc.style.removeProperty("--chat-ios-accessory-inset");
             } catch (e2) {}
             try {
@@ -6525,6 +6527,7 @@ function initChat() {
         var doc = document.documentElement;
         hideTelegramMiniAppChatThreadDebugOverlay();
         doc.style.removeProperty("--chat-vv-inset");
+        doc.style.removeProperty("--chat-keyboard-fallback-inset");
         doc.style.removeProperty("--chat-ios-accessory-inset");
         if (opts.clearPad) clearChatMessagesKeyboardPad();
         if (opts.stripComposer) stripChatInputAreaTransforms();
@@ -7090,6 +7093,9 @@ function initChat() {
             if (coverDock < 96 && targetArea && !targetArea.classList.contains("chat-input-area--vv-dock")) {
               coverDock = Math.max(coverDock, Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
             }
+            try {
+              document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, Math.round(coverDock)) + "px");
+            } catch (ePwaFallbackInset) {}
             if (coverDock >= 72) {
               applyChatThreadComposerKeyboardDockFromCover(coverDock);
             }
