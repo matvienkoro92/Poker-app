@@ -1102,6 +1102,21 @@ function runGazetteAndTasksInit() {
       } catch (eRec) {}
       return "";
     }
+    function plannerAuthEmailLower() {
+      try {
+        var _ap = window.__pokerTelegramAuth;
+        if (_ap && _ap.user && _ap.user.email != null) {
+          return String(_ap.user.email).trim().toLowerCase();
+        }
+      } catch (eAuEmail) {}
+      try {
+        var _rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (_rec && _rec.user && _rec.user.email != null) {
+          return String(_rec.user.email).trim().toLowerCase();
+        }
+      } catch (eRecEmail) {}
+      return "";
+    }
     function normUser() {
       var user = getPlannerTelegramUser();
       var u = user && user.username ? String(user.username) : "";
@@ -1139,11 +1154,14 @@ function runGazetteAndTasksInit() {
       } catch (ePlAllow) {}
       var ua = plannerAuthUsernameLower();
       if (ua && (PLANNER_SOLO_USERNAMES[ua] || PLANNER_ROMAN_SHARED_USERNAMES[ua])) return true;
+      if (ua === "roman1_matvienko") return true;
+      if (plannerAuthEmailLower() === "matvienkoro92@gmail.com") return true;
       var user = getPlannerTelegramUser();
       if (user) {
         var u = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
         if (u && PLANNER_SOLO_USERNAMES[u]) return true;
         if (u && PLANNER_ROMAN_SHARED_USERNAMES[u]) return true;
+        if (u === "roman1_matvienko") return true;
         if (user.id != null) {
           var idNum = Number(user.id);
           if (!isNaN(idNum)) {

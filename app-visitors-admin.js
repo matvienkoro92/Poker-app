@@ -77,6 +77,13 @@
       for (var i = 0; i < users.length; i++) {
         var id = users[i] && users[i].id != null ? String(users[i].id).replace(/^tg_/, "").trim() : "";
         if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+        var username =
+          users[i] && users[i].username != null
+            ? String(users[i].username).replace(/^@+/, "").trim().toLowerCase()
+            : "";
+        if (username === "roman1_matvienko") return true;
+        var email = users[i] && users[i].email != null ? String(users[i].email).trim().toLowerCase() : "";
+        if (email === "matvienkoro92@gmail.com") return true;
       }
       return false;
     }
