@@ -122,6 +122,40 @@ function syncChatContactStatusMeta(btn, level, isVerified) {
   }
 }
 
+function syncChatContactAvatar(btn, c) {
+  if (!btn || !c) return;
+  var current = btn.querySelector(".chat-contact__avatar");
+  var isGroupRow = !!c.isGroupChat;
+  var avatar = c.avatar != null && String(c.avatar).trim() ? String(c.avatar).trim() : "";
+  var initial = btn.dataset && btn.dataset.chatInitial ? btn.dataset.chatInitial : (isGroupRow ? "\uD83D\uDC65" : "?");
+  if (avatar) {
+    var img = current && current.tagName === "IMG" ? current : document.createElement("img");
+    img.className = "chat-contact__avatar" + (isGroupRow ? " chat-contact__avatar--group" : "");
+    if (img.getAttribute("src") !== avatar) img.setAttribute("src", avatar);
+    img.alt = "";
+    img.width = 40;
+    img.height = 40;
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.onerror = function () {
+      var place = document.createElement("span");
+      place.className = "chat-contact__avatar chat-contact__avatar--placeholder" + (isGroupRow ? " chat-contact__avatar--group" : "");
+      place.textContent = initial;
+      if (img.parentNode) img.parentNode.replaceChild(place, img);
+    };
+    if (current !== img) {
+      if (current && current.parentNode) current.parentNode.replaceChild(img, current);
+      else btn.insertBefore(img, btn.firstChild || null);
+    }
+    return;
+  }
+  if (!current || current.tagName !== "IMG") return;
+  var fallback = document.createElement("span");
+  fallback.className = "chat-contact__avatar chat-contact__avatar--placeholder" + (isGroupRow ? " chat-contact__avatar--group" : "");
+  fallback.textContent = initial;
+  if (current.parentNode) current.parentNode.replaceChild(fallback, current);
+}
+
 function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRender) {
   if (!block || !Array.isArray(contactsForList) || !contactsForList.length) return false;
   var wraps = block.querySelectorAll(".chat-contact-swipe");
@@ -159,6 +193,7 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
     btn.setAttribute("data-chat-friend", isFriendContact ? "1" : "0");
     btn.setAttribute("data-chat-group", isGroupRow ? "1" : "0");
     btn.dataset.chatOnline = c.online ? "1" : "0";
+    syncChatContactAvatar(btn, c);
     if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
     else {
       try { delete btn.dataset.chatVerified; } catch (eVerDel) {}
