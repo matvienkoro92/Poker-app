@@ -773,6 +773,9 @@ function runGazetteAndTasksInit() {
         })
         .then(function (res) {
           if (res.ok && res.data && res.data.ok && Array.isArray(res.data.comments)) {
+            if (res.data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+              window.pokerMarkAdminAccess("gazette-comments");
+            }
             renderGazetteCommentsFeed(feed, res.data.comments, !!res.data.isAdmin);
           } else {
             renderGazetteCommentsFeed(feed, [], false);
@@ -4370,6 +4373,9 @@ function runGazetteAndTasksInit() {
         })
         .then(function (res) {
           if (res.ok && res.data && res.data.ok && Array.isArray(res.data.comments)) {
+            if (res.data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
+              window.pokerMarkAdminAccess("vpn-proxy-comments");
+            }
             renderVpnProxyFeed(feed, res.data.comments, !!res.data.isAdmin);
           } else {
             renderVpnProxyFeed(feed, [], false);

@@ -392,6 +392,9 @@ function initVideoLessonsReviewsModal() {
       .then(function (res) {
         if (res.ok && res.data && res.data.ok && Array.isArray(res.data.reviews)) {
           reviewsFeedIsAdmin = !!res.data.isAdmin;
+          if (reviewsFeedIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
+            window.pokerMarkAdminAccess("video-lesson-reviews");
+          }
           renderReviews(mergeReviews(res.data.reviews, local), reviewsFeedIsAdmin);
         } else {
           reviewsFeedIsAdmin = false;

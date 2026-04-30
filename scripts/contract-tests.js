@@ -301,11 +301,18 @@ async function testAuthAndAdmin(redis) {
   );
   const apiAuth = require(path.join(root, "lib", "api-auth"));
   assert.strictEqual(apiAuth.isAdminUsername("roman1_matvienko"), true, "roman1 username is admin");
+  assert.strictEqual(apiAuth.isAdminUsername("roman1787443"), false, "editor username is not full admin");
   assert.strictEqual(apiAuth.isAdminEmail("matvienkoro92@gmail.com"), true, "roman1 email is admin");
+  assert.strictEqual(apiAuth.isAdminEmail("other@example.com"), false, "unknown email is not admin");
   assert.strictEqual(
     apiAuth.isAdminIdentity({ id: 0, pwaUsername: "roman1_matvienko", adminAccess: false }, "mail_ID000001"),
     true,
     "admin username grants API admin identity",
+  );
+  assert.strictEqual(
+    apiAuth.isAdminIdentity({ id: 0, pwaUsername: "player", adminAccess: false }, "mail_ID000002"),
+    false,
+    "unknown identity is not admin",
   );
   const pwa = require(path.join(root, "lib", "poker-pwa-session"));
   const adminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "", adminAccess: true }, BOT_TOKEN);
