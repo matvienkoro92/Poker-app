@@ -771,8 +771,7 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   bottom: max(
     calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + var(--chat-composer-edge-gap, 2px)),
-    calc(var(--chat-keyboard-fallback-inset, 0px) + var(--chat-composer-edge-gap, 2px)),
-    calc(38dvh + var(--chat-composer-edge-gap, 2px))
+    calc(var(--chat-keyboard-fallback-inset, 0px) + var(--chat-composer-edge-gap, 2px))
   ) !important;
   width: auto !important;
   max-width: calc(100% - (2 * var(--chat-composer-edge-gap, 2px))) !important;
