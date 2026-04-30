@@ -6363,7 +6363,7 @@ function initChat() {
        * coverPx — высота полосы под visual viewport (клавиатура / IME), от низа layout viewport.
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
-      function applyChatThreadComposerKeyboardDockFromCover(coverPx) {
+      function applyChatThreadComposerKeyboardDockFromCover(coverPx, focusTarget) {
         collectChatOverscrollSnapshot("dock:enter", { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
         if (hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
@@ -6394,7 +6394,7 @@ function initChat() {
           } catch (eTk0) {}
           return;
         }
-        if (!isChatThreadComposerKeyboardDom()) {
+        if (!isChatThreadComposerKeyboardDom(focusTarget)) {
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatTmaDockTabKey = null;
@@ -6423,7 +6423,7 @@ function initChat() {
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport() &&
-            isChatThreadComposerKeyboardDom()
+            isChatThreadComposerKeyboardDom(focusTarget)
           ) {
             var ihFloorDock = window.innerHeight || 0;
             var baseFloorDock = Math.max(ihFloorDock, Number(window.__pokerChatInnerHBaseline) || 0);
@@ -7196,7 +7196,7 @@ function initChat() {
               document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, Math.round(coverDock)) + "px");
             } catch (ePwaFallbackInset) {}
             if (coverDock >= 72) {
-              applyChatThreadComposerKeyboardDockFromCover(coverDock);
+              applyChatThreadComposerKeyboardDockFromCover(coverDock, focusTarget);
             }
           } catch (ePwaDockPass) {}
           try {
