@@ -112,8 +112,7 @@ function clearPersonalLoadingFallback(peerId, text) {
   try {
     var currentText = String(el.textContent || "");
     if (!/Загрузка|Loading/i.test(currentText)) return;
-    renderMessages([]);
-    setLastPersonalMessagesSig(personalRenderSignature(peerId || "", [], false));
+    el.innerHTML = '<p class="chat-empty">' + escapeHtml(text || "Загружаем сообщения…") + "</p>";
     setTimeout(function () {
       try {
         updateChatHeaderStats();
@@ -158,14 +157,25 @@ function loadMessages(opts) {
     }
   }
   var fastGroupQs = isGroupLoad ? "&skipPresence=1" : "";
+  var bareOpen = !opts.waitForChange && !usePersonalDiff && !opts.__fullOpen;
   var fastOpenQs = !opts.waitForChange && !usePersonalDiff ? "&fastOpen=1" : "";
+  if (bareOpen) fastOpenQs += "&messagesBare=1";
   var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + fastOpenQs + pollQs + diffQs;
+  if (bareOpen) {
+    setTimeout(function () {
+      try {
+        if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
+        if (!getConvView() || getConvView().classList.contains("chat-conv-view--hidden")) return;
+        loadMessages(Object.assign({}, opts, { __fullOpen: true, __fallbackTimerStarted: true }));
+      } catch (ePersonalFullOpenStart) {}
+    }, 900);
+  }
   if (!opts.waitForChange && !usePersonalDiff && !opts.__fallbackTimerStarted) {
     setTimeout(function () {
       try {
         if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
         if (!getConvView() || getConvView().classList.contains("chat-conv-view--hidden")) return;
-        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+        clearPersonalLoadingFallback(loadForPeer, "Загружаем сообщения…");
       } catch (ePersonalFallbackTimer) {}
     }, 2200);
   }
@@ -461,7 +471,7 @@ function loadMessages(opts) {
             loadMessages(Object.assign({}, opts, { __retryCount: apiRetry + 1, __fallbackTimerStarted: true }));
           } catch (ePersonalApiRetry) {}
         }, apiRetry ? 1800 : 700);
-        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+        clearPersonalLoadingFallback(loadForPeer, "Загружаем сообщения…");
       } else {
         getMessagesEl().innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
       }
@@ -486,7 +496,7 @@ function loadMessages(opts) {
             loadMessages(Object.assign({}, opts, { __retryCount: retryCount + 1, __fallbackTimerStarted: true }));
           } catch (ePersonalRetry) {}
         }, retryCount ? 1800 : 700);
-        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+        clearPersonalLoadingFallback(loadForPeer, "Загружаем сообщения…");
         return;
       }
       if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden") && getMessagesEl()) {

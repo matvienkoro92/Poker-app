@@ -209,14 +209,13 @@ function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peer
         var messagesEl = getMessagesEl();
         if (!messagesEl) return;
         if (!/Загрузка|Loading/i.test(String(messagesEl.textContent || ""))) return;
-        renderMessages([]);
-        setLastPersonalMessagesSig(personalRenderSignature(userId || "", [], false));
+        messagesEl.innerHTML = '<p class="chat-empty">Загружаем сообщения…</p>';
         updateChatHeaderStats();
       } catch (eConvLoadingFallback) {
         try {
           var fallbackMessagesEl = getMessagesEl();
           if (fallbackMessagesEl && /Загрузка|Loading/i.test(String(fallbackMessagesEl.textContent || ""))) {
-            fallbackMessagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
+            fallbackMessagesEl.innerHTML = '<p class="chat-empty">Загружаем сообщения…</p>';
           }
         } catch (eConvLoadingFallbackHtml) {}
       }
