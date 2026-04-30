@@ -99,11 +99,41 @@ function pokerFetchPersonalJson(url, opts) {
   } catch (eTracePersonalStart) {}
   return fetch(url, fetchOpts)
     .then(function (r) {
-      return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; });
+      return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }).then(function (data) {
+        if (data && typeof data === "object" && !data.httpStatus) data.httpStatus = r.status;
+        if (data && typeof data === "object" && r && r.ok === false) data.httpOk = false;
+        return data;
+      });
     })
     .finally(function () {
       if (timeoutId) clearTimeout(timeoutId);
     });
+}
+
+function personalMessagesHasRenderedContent() {
+  var el = getMessagesEl();
+  if (!el) return false;
+  try {
+    var text = String(el.textContent || "").trim();
+    if (!text) return false;
+    if (/^(Загрузка|Loading|Загружаем сообщения)/i.test(text)) return false;
+    return true;
+  } catch (eRenderedContent) {
+    return false;
+  }
+}
+
+function shouldKeepPersonalThreadOnError(opts, peerId) {
+  opts = opts || {};
+  if (opts.waitForChange) return true;
+  if (personalMessagesHasRenderedContent()) return true;
+  try {
+    var cache = peerId && personalMessagesCache[peerId] && Array.isArray(personalMessagesCache[peerId])
+      ? personalMessagesCache[peerId]
+      : [];
+    if (cache.length) return true;
+  } catch (eCacheKeep) {}
+  return false;
 }
 
 function clearPersonalLoadingFallback(peerId, text) {
@@ -509,6 +539,9 @@ function loadMessages(opts) {
           partial: !!data.partial,
         });
       }
+    } else if (shouldKeepPersonalThreadOnError(opts, loadForPeer)) {
+      if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
+      return;
     } else if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden") && getMessagesEl()) {
       if (!opts.waitForChange && (Number(opts.__retryCount || 0) || 0) < 2) {
         var apiRetry = Number(opts.__retryCount || 0) || 0;
@@ -546,6 +579,10 @@ function loadMessages(opts) {
           } catch (ePersonalRetry) {}
         }, retryCount ? 1800 : 700);
         clearPersonalLoadingFallback(loadForPeer, "Загружаем сообщения…");
+        return;
+      }
+      if (shouldKeepPersonalThreadOnError(opts, loadForPeer)) {
+        if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
         return;
       }
       if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden") && getMessagesEl()) {
