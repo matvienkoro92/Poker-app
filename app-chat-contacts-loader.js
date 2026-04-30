@@ -67,6 +67,7 @@ function buildContactsRequestUrl(opts) {
   } catch (eLvCt) {}
   var extra = opts.metaOnly ? "&contactsMetaOnly=1" : "";
   if (opts.fastList) extra += "&contactsFast=1";
+  if (opts.fastBare) extra += "&contactsBare=1";
   if (opts.metaOnly && window.__pokerContactsMetaPollRev) {
     extra += "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
   }
@@ -413,12 +414,24 @@ function applyContactsApiResponse(data, opts) {
         if (!contacts || !contacts.querySelector || !contacts.querySelector(".chat-empty--skeleton")) return;
         loadContacts(Object.assign({}, opts, {
           fastList: true,
+          fastBare: true,
           __fastShadowStarted: true,
           __retryCount: 0,
           forceRerender: true,
         }));
       } catch (eFastContactsStart) {}
-    }, 900);
+    }, 0);
+    setTimeout(function () {
+      try {
+        loadContacts(Object.assign({}, opts, {
+          fastList: true,
+          fastBare: false,
+          __fastShadowStarted: true,
+          __retryCount: 0,
+          forceRerender: true,
+        }));
+      } catch (eFastRichContactsStart) {}
+    }, 1200);
   }
   pokerFetchContactsJson(url, { timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS })
     .then(function (data) {
