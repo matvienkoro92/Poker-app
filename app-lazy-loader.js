@@ -52,6 +52,7 @@
       var s = document.createElement("script");
       s.src = src;
       s.defer = true;
+      s.async = false;
       s.setAttribute("data-poker-loaded-src", key);
       s.onload = function () {
         loaded[key] = true;
@@ -69,11 +70,11 @@
     var scripts = collectDomainScripts(domain);
     if (!scripts.length) return Promise.resolve();
     if (isDomainLoaded(domain)) return true;
-    return scripts.reduce(function (chain, src) {
-      return chain.then(function () {
-        return loadScript(src);
-      });
-    }, Promise.resolve());
+    return Promise.all(scripts.map(function (src) {
+      return loadScript(src);
+    })).then(function () {
+      return true;
+    });
   }
 
   var viewDomains = {
