@@ -237,18 +237,66 @@ body.keyboard-lab-keyboard-open {
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .card__content {
-  scroll-padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 28px);
-  padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 28px);
+  height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
+  max-height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
+  overflow: hidden !important;
+  padding-bottom: 0;
+  scroll-padding-bottom: 0;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab {
-  min-height: calc(100dvh + var(--keyboard-lab-keyboard-inset, 0px));
-  padding-bottom: calc(var(--keyboard-lab-keyboard-inset, 0px) + var(--keyboard-lab-composer-height, 70px) + 20px);
+  height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
+  min-height: 0;
+  max-height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
+  gap: 8px;
+  padding: 8px 14px calc(var(--keyboard-lab-composer-height, 70px) + 14px);
+  overflow: hidden;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__hero {
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__eyebrow {
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__title {
+  font-size: 22px;
+  line-height: 1;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__subtitle {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__metrics {
+  flex: 0 0 auto;
+  max-height: min(160px, 30dvh);
+  overflow: auto;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 10px;
+  line-height: 1.32;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__stream {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  padding-bottom: calc(var(--keyboard-lab-composer-height, 70px) + 24px);
+  padding-bottom: 10px;
+  scroll-padding-bottom: 10px;
+}
+
+body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__bubble {
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.32;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__composer {
