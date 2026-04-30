@@ -25,6 +25,21 @@
     return out;
   }
 
+  function isScriptLoaded(src) {
+    var key = scriptKey(src);
+    if (!key) return true;
+    return !!(loaded[key] || document.querySelector('script[data-poker-loaded-src="' + key.replace(/"/g, '\\"') + '"]'));
+  }
+
+  function isDomainLoaded(domain) {
+    var scripts = collectDomainScripts(domain);
+    if (!scripts.length) return true;
+    for (var i = 0; i < scripts.length; i++) {
+      if (!isScriptLoaded(scripts[i])) return false;
+    }
+    return true;
+  }
+
   function loadScript(src) {
     var key = scriptKey(src);
     if (!key) return Promise.resolve();
@@ -53,6 +68,7 @@
   function loadDomainScripts(domain) {
     var scripts = collectDomainScripts(domain);
     if (!scripts.length) return Promise.resolve();
+    if (isDomainLoaded(domain)) return true;
     return scripts.reduce(function (chain, src) {
       return chain.then(function () {
         return loadScript(src);
@@ -82,7 +98,7 @@
     var run = function () {
       domains.reduce(function (chain, domain) {
         return chain.then(function () {
-          return loadDomainScripts(domain).catch(function (err) {
+          return Promise.resolve(loadDomainScripts(domain)).catch(function (err) {
             if (typeof console !== "undefined" && console.warn) console.warn("lazy preload", domain, err);
           });
         });
@@ -96,10 +112,76 @@
     }, 3500);
   }
 
+  function ensureViewHtmlSoft(viewName) {
+    try {
+      if (typeof window.pokerEnsureViewHtml !== "function") return Promise.resolve(false);
+      var htmlReady = window.pokerEnsureViewHtml(viewName);
+      if (htmlReady && typeof htmlReady.then === "function") return htmlReady.catch(function () { return false; });
+      return Promise.resolve(!!htmlReady);
+    } catch (eHtml) {
+      return Promise.resolve(false);
+    }
+  }
+
+  function ensureGlobalModalsSoft() {
+    try {
+      if (typeof window.pokerEnsureGlobalModalsHtml !== "function") return Promise.resolve(false);
+      return window.pokerEnsureGlobalModalsHtml().catch(function () { return false; });
+    } catch (eModals) {
+      return Promise.resolve(false);
+    }
+  }
+
+  function prewarmView(viewName) {
+    var view = String(viewName || "").trim();
+    if (!view) return;
+    var htmlView = view === "spring-rating" ? "winter-rating" : view;
+    try {
+      var scriptsReady = window.pokerEnsureViewScripts ? window.pokerEnsureViewScripts(view) : Promise.resolve(false);
+      Promise.resolve(scriptsReady)
+        .then(function () {
+          return ensureViewHtmlSoft(htmlView);
+        })
+        .catch(function () {});
+    } catch (eView) {}
+  }
+
+  function prewarmHomeAction(target) {
+    if (!target || !target.closest) return;
+    if (target.closest("#dailyPredictionBtn")) {
+      Promise.resolve(loadDomainScripts("games")).catch(function () {});
+      ensureGlobalModalsSoft();
+      return;
+    }
+    if (
+      target.closest(
+        "#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,#adminVisitorsBtn,#adminReportBtn,#adminBroadcastReportsBtn"
+      )
+    ) {
+      ensureGlobalModalsSoft();
+    }
+  }
+
+  function prewarmFromPointer(ev) {
+    var target = ev && ev.target && ev.target.closest ? ev.target : null;
+    if (!target) return;
+    var nav = target.closest("[data-view-target]");
+    if (nav) prewarmView(nav.getAttribute("data-view-target"));
+    prewarmHomeAction(target);
+  }
+
   window.pokerLoadDomainScripts = loadDomainScripts;
   window.pokerEnsureViewScripts = function (viewName) {
     var domains = viewDomains[String(viewName || "")] || [];
     if (!domains.length) return false;
+    var allLoaded = true;
+    for (var i = 0; i < domains.length; i++) {
+      if (!isDomainLoaded(domains[i])) {
+        allLoaded = false;
+        break;
+      }
+    }
+    if (allLoaded) return true;
     return domains.reduce(function (chain, domain) {
       return chain.then(function () {
         return loadDomainScripts(domain);
@@ -109,8 +191,11 @@
     });
   };
 
+  document.addEventListener("pointerdown", prewarmFromPointer, { passive: true, capture: true });
+  document.addEventListener("touchstart", prewarmFromPointer, { passive: true, capture: true });
+
   function loadAdminDomainSoon() {
-    loadDomainScripts("admin").catch(function (err) {
+    Promise.resolve(loadDomainScripts("admin")).catch(function (err) {
       if (typeof console !== "undefined" && console.warn) console.warn("lazy auth admin", err);
     });
   }
@@ -131,6 +216,19 @@
     setTimeout(loadAdminDomainSoon, 250);
   });
 
+  setTimeout(function () {
+    ensureGlobalModalsSoft();
+    ensureViewHtmlSoft("winter-rating");
+  }, 450);
+  setTimeout(function () {
+    prewarmView("chat");
+  }, 650);
+  setTimeout(function () {
+    prewarmView("spring-rating");
+  }, 900);
+  setTimeout(function () {
+    Promise.resolve(loadDomainScripts("games")).catch(function () {});
+  }, 1300);
   preloadDomainsOnIdle(["tournament"]);
   preloadDomainsOnIdle(["admin"]);
 })();
