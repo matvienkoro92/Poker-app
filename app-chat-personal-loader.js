@@ -70,6 +70,62 @@ function initChatPersonalLoader(opts) {
   var updateUnreadDots = typeof opts.updateUnreadDots === "function" ? opts.updateUnreadDots : function () {};
   var renderMessages = typeof opts.renderMessages === "function" ? opts.renderMessages : function () {};
   var fastPrependChatMessages = typeof opts.fastPrependChatMessages === "function" ? opts.fastPrependChatMessages : function () { return false; };
+  var PERSONAL_FETCH_TIMEOUT_MS = 14000;
+
+function pokerFetchPersonalJson(url, opts) {
+  opts = opts || {};
+  var timeoutMs = Number(opts.timeoutMs) || PERSONAL_FETCH_TIMEOUT_MS;
+  var controller = null;
+  var timeoutId = null;
+  var fetchOpts = { cache: "no-store" };
+  try {
+    if (typeof AbortController !== "undefined") {
+      controller = new AbortController();
+      fetchOpts.signal = controller.signal;
+      timeoutId = setTimeout(function () {
+        try {
+          controller.abort();
+        } catch (eAbortPersonal) {}
+      }, timeoutMs);
+    }
+  } catch (eAbortPersonalSetup) {}
+  try {
+    window.__pokerChatPersonalLastFetch = {
+      peer: String(opts.peer || ""),
+      url: String(url || "").replace(/(initData|pwaSession|pwaVkSession)=([^&]*)/g, "$1=***"),
+      startedAt: Date.now(),
+      timeoutMs: timeoutMs,
+    };
+  } catch (eTracePersonalStart) {}
+  return fetch(url, fetchOpts)
+    .then(function (r) {
+      return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; });
+    })
+    .finally(function () {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
+}
+
+function clearPersonalLoadingFallback(peerId, text) {
+  var el = getMessagesEl();
+  if (!el) return;
+  try {
+    var currentText = String(el.textContent || "");
+    if (!/Загрузка|Loading/i.test(currentText)) return;
+    renderMessages([]);
+    setLastPersonalMessagesSig(personalRenderSignature(peerId || "", [], false));
+    setTimeout(function () {
+      try {
+        updateChatHeaderStats();
+        updateUnreadDots();
+      } catch (ePersonalFallbackUi) {}
+    }, 0);
+  } catch (ePersonalFallback) {
+    try {
+      el.innerHTML = '<p class="chat-empty">' + escapeHtml(text || "Сообщений пока нет") + "</p>";
+    } catch (ePersonalFallbackHtml) {}
+  }
+}
 
 function loadMessages(opts) {
   opts = opts || {};
@@ -104,8 +160,16 @@ function loadMessages(opts) {
   var fastGroupQs = isGroupLoad ? "&skipPresence=1" : "";
   var fastOpenQs = !opts.waitForChange && !usePersonalDiff ? "&fastOpen=1" : "";
   var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + fastOpenQs + pollQs + diffQs;
-  fetch(url, { cache: "no-store" })
-    .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
+  if (!opts.waitForChange && !usePersonalDiff && !opts.__fallbackTimerStarted) {
+    setTimeout(function () {
+      try {
+        if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
+        if (!getConvView() || getConvView().classList.contains("chat-conv-view--hidden")) return;
+        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+      } catch (ePersonalFallbackTimer) {}
+    }, 2200);
+  }
+  pokerFetchPersonalJson(url, { timeoutMs: opts.waitForChange ? getChatLongPollTimeoutMs() + 5000 : PERSONAL_FETCH_TIMEOUT_MS, peer: loadForPeer })
     .then(function (data) {
     if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
     if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
@@ -390,13 +454,41 @@ function loadMessages(opts) {
         });
       }
     } else if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden") && getMessagesEl()) {
-      getMessagesEl().innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
+      if (!opts.waitForChange && (Number(opts.__retryCount || 0) || 0) < 2) {
+        var apiRetry = Number(opts.__retryCount || 0) || 0;
+        setTimeout(function () {
+          try {
+            loadMessages(Object.assign({}, opts, { __retryCount: apiRetry + 1, __fallbackTimerStarted: true }));
+          } catch (ePersonalApiRetry) {}
+        }, apiRetry ? 1800 : 700);
+        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+      } else {
+        getMessagesEl().innerHTML = '<p class="chat-empty">' + escapeHtml((data && data.error) || "Ошибка загрузки") + "</p>";
+      }
       if (opts.waitForChange) pokerChatScheduleLongPoll("personal", 1200);
     }
   })
-    .catch(function () {
+    .catch(function (err) {
+      try {
+        window.__pokerChatPersonalLastError = {
+          peer: String(loadForPeer || ""),
+          message: err && err.message ? String(err.message) : String(err || ""),
+          name: err && err.name ? String(err.name) : "",
+          at: Date.now(),
+        };
+      } catch (eTracePersonalErr) {}
       if (loadPersonalSeq !== window.__pokerLoadPersonalSeq) return;
       if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
+      if (!opts.waitForChange && (Number(opts.__retryCount || 0) || 0) < 2) {
+        var retryCount = Number(opts.__retryCount || 0) || 0;
+        setTimeout(function () {
+          try {
+            loadMessages(Object.assign({}, opts, { __retryCount: retryCount + 1, __fallbackTimerStarted: true }));
+          } catch (ePersonalRetry) {}
+        }, retryCount ? 1800 : 700);
+        clearPersonalLoadingFallback(loadForPeer, "Сообщений пока нет");
+        return;
+      }
       if (getConvView() && !getConvView().classList.contains("chat-conv-view--hidden") && getMessagesEl()) {
         getMessagesEl().innerHTML = '<p class="chat-empty">' + escapeHtml(POKER_NET_ERR) + "</p>";
       }
