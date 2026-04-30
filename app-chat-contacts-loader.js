@@ -42,7 +42,7 @@ function initChatContactsLoader(opts) {
   var pokerHandleChatContactsFetchError = typeof opts.pokerHandleChatContactsFetchError === "function" ? opts.pokerHandleChatContactsFetchError : function () {};
   var pokerChatRecordTrace = typeof opts.pokerChatRecordTrace === "function" ? opts.pokerChatRecordTrace : function () {};
   var pokerChatScheduleLongPoll = typeof opts.pokerChatScheduleLongPoll === "function" ? opts.pokerChatScheduleLongPoll : function () {};
-  var CONTACTS_FETCH_TIMEOUT_MS = 9000;
+  var CONTACTS_FETCH_TIMEOUT_MS = 32000;
 
 function clearContactsLoadingSkeletonFallback(text) {
   var el = getContactsEl();
@@ -66,6 +66,7 @@ function buildContactsRequestUrl(opts) {
     lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
   } catch (eLvCt) {}
   var extra = opts.metaOnly ? "&contactsMetaOnly=1" : "";
+  if (opts.fastList) extra += "&contactsFast=1";
   if (opts.metaOnly && window.__pokerContactsMetaPollRev) {
     extra += "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
   }
@@ -217,13 +218,15 @@ function loadContacts(opts) {
     pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
   } catch (eHydCt) {}
   var isFullContactsLoad = !opts.metaOnly && !opts.waitForChange;
-  if (isFullContactsLoad && window.__pokerChatContactsFullLoadInFlight) {
+  if (isFullContactsLoad && !opts.fastList && window.__pokerChatContactsFullLoadInFlight) {
     return;
   }
   var url = buildContactsRequestUrl(opts);
-  var contactsFetchGen = (window.__pokerContactsFetchGen || 0) + 1;
-  window.__pokerContactsFetchGen = contactsFetchGen;
-  if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = true;
+  var contactsFetchGen = opts.fastList
+    ? (window.__pokerContactsFetchGen || 0)
+    : (window.__pokerContactsFetchGen || 0) + 1;
+  if (!opts.fastList) window.__pokerContactsFetchGen = contactsFetchGen;
+  if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = true;
   var contactsInstantFromCache = false;
   var metaOnly = !!opts.metaOnly;
 function applyContactsApiResponse(data, opts) {
@@ -358,7 +361,26 @@ function applyContactsApiResponse(data, opts) {
     } else if (!metaOnly && data && data.ok === false) {
       var errText = data && data.error ? String(data.error) : "";
       var authLike = /auth|login|credential|initData|треб|войд/i.test(errText);
-      clearContactsLoadingSkeletonFallback(authLike ? "Войдите в аккаунт, чтобы увидеть список диалогов." : "Не удалось загрузить список диалогов");
+      if (authLike) {
+        clearContactsLoadingSkeletonFallback("Войдите в аккаунт, чтобы увидеть список диалогов.");
+      } else {
+        try {
+          window.__pokerChatContactsLastApiError = {
+            error: errText,
+            at: Date.now(),
+          };
+        } catch (eContactsApiErrTrace) {}
+        var apiRetryCount = Number(opts.__retryCount || 0) || 0;
+        if (apiRetryCount < 4) {
+          setTimeout(function () {
+            try {
+              loadContacts(Object.assign({}, opts, { __retryCount: apiRetryCount + 1, forceRerender: true }));
+            } catch (eRetryContactsApiFalse) {}
+          }, Math.min(6000, 700 * Math.pow(2, apiRetryCount)));
+        } else {
+          clearContactsLoadingSkeletonFallback("Повторяем загрузку списка диалогов…");
+        }
+      }
     }
   }
   try {
@@ -384,9 +406,23 @@ function applyContactsApiResponse(data, opts) {
     applyContactsApiResponse: applyContactsApiResponse,
     fireContactsLoaded: fireContactsLoaded,
   });
+  if (isFullContactsLoad && !opts.fastList && !opts.__fastShadowStarted) {
+    setTimeout(function () {
+      try {
+        var contacts = getContactsEl();
+        if (!contacts || !contacts.querySelector || !contacts.querySelector(".chat-empty--skeleton")) return;
+        loadContacts(Object.assign({}, opts, {
+          fastList: true,
+          __fastShadowStarted: true,
+          __retryCount: 0,
+          forceRerender: true,
+        }));
+      } catch (eFastContactsStart) {}
+    }, 900);
+  }
   pokerFetchContactsJson(url, { timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS })
     .then(function (data) {
-      if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
+      if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
       var contactsFetchDataState = pokerPrepareChatContactsFetchData(data, {
         metaOnly: metaOnly,
@@ -410,7 +446,7 @@ function applyContactsApiResponse(data, opts) {
       });
     })
     .catch(function (err) {
-      if (isFullContactsLoad) window.__pokerChatContactsFullLoadInFlight = false;
+      if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = false;
       try {
         window.__pokerChatContactsLastError = {
           message: err && err.message ? String(err.message) : String(err || ""),
@@ -421,16 +457,20 @@ function applyContactsApiResponse(data, opts) {
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
       if (isFullContactsLoad) {
         var retryCount = Number(opts.__retryCount || 0) || 0;
-        if (retryCount < 2) {
+        if (retryCount < 4) {
           setTimeout(function () {
             try {
-              loadContacts(Object.assign({}, opts, { __retryCount: retryCount + 1, forceRerender: true }));
+              loadContacts(Object.assign({}, opts, {
+                __retryCount: retryCount + 1,
+                fastList: retryCount < 2 ? true : !!opts.fastList,
+                forceRerender: true,
+              }));
             } catch (eRetryContacts) {}
-          }, retryCount === 0 ? 600 : 1500);
+          }, Math.min(6000, 700 * Math.pow(2, retryCount)));
         }
       }
       pokerHandleChatContactsFetchError({
-        contactsInstantFromCache: contactsInstantFromCache,
+        contactsInstantFromCache: contactsInstantFromCache || (isFullContactsLoad && (Number(opts.__retryCount || 0) || 0) < 4),
         contactsEl: getContactsEl(),
         waitForChange: opts.waitForChange,
         metaOnly: metaOnly,
