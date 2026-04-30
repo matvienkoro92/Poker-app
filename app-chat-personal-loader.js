@@ -195,6 +195,23 @@ function loadMessages(opts) {
       return;
     }
     if (data && data.ok) {
+      if (
+        data.messagesBare === true &&
+        Array.isArray(data.messages) &&
+        data.messages.length === 0 &&
+        !opts.__fullOpen &&
+        !opts.waitForChange &&
+        !usePersonalDiff
+      ) {
+        setTimeout(function () {
+          try {
+            if (!peerChatIdsEqual(getChatWithUserId(), loadForPeer)) return;
+            if (!getConvView() || getConvView().classList.contains("chat-conv-view--hidden")) return;
+            loadMessages(Object.assign({}, opts, { __fullOpen: true, __fallbackTimerStarted: true }));
+          } catch (ePersonalBareEmptyFull) {}
+        }, 0);
+        return;
+      }
       setPersonalHasMoreBefore(loadForPeer, !!data.hasMoreBefore);
       if (data.pollRev && typeof data.pollRev === "string") {
         window.__pokerPersonalPollRev = data.pollRev;
