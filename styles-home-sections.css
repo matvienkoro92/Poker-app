@@ -751,7 +751,7 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
-  bottom: max(calc(env(safe-area-inset-bottom, 0px) + 10px + var(--chat-composer-edge-gap, 2px)), calc(var(--chat-vv-inset, 0px) + var(--chat-ios-accessory-inset, 0px) + var(--chat-composer-edge-gap, 2px))) !important;
+  bottom: calc(38dvh + var(--chat-composer-edge-gap, 2px)) !important;
   width: auto !important;
   max-width: 100% !important;
   z-index: 120 !important;
@@ -760,8 +760,6 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
 }
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
-html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area,
 html.poker-android-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.poker-android-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area,
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"].chat-conversation-open .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
@@ -781,6 +779,10 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
   transform: none !important;
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
+}
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  bottom: calc(38dvh + var(--chat-composer-edge-gap, 2px)) !important;
 }
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,

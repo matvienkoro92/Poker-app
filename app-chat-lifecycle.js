@@ -5636,7 +5636,7 @@ function initChat() {
         window.__pokerChatPwaRootScrollLockRaf = null;
         window.__pokerChatPwaRootScrollLockTimer = null;
       }
-      function attachPwaChatThreadRootScrollLock() {
+      function attachPwaChatThreadRootScrollLock(focusTarget) {
         try {
           if (
             isTelegramChatRuntime() ||
@@ -5644,15 +5644,16 @@ function initChat() {
             !pokerPwaStandaloneForKeyboardInset() ||
             typeof isIosLikeForChatViewport !== "function" ||
             !isIosLikeForChatViewport() ||
-            !isChatThreadComposerKeyboardDom()
+            !isChatThreadComposerKeyboardDom(focusTarget)
           ) {
             return;
           }
+          window.__pokerChatPwaRootScrollLockActive = true;
           if (!window.__pokerChatPwaRootScrollLockHandler) {
             window.__pokerChatPwaRootScrollLockHandler = function () {
+              if (!window.__pokerChatPwaRootScrollLockActive) return;
               if (!document.body || !document.body.classList.contains("chat-keyboard-open")) return;
               if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
-              if (typeof isChatThreadComposerKeyboardDom === "function" && !isChatThreadComposerKeyboardDom()) return;
               if (window.__pokerChatPwaRootScrollLockRaf) return;
               var rafLock = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
               window.__pokerChatPwaRootScrollLockRaf = rafLock(function () {
@@ -5731,6 +5732,9 @@ function initChat() {
       function finalizeChatKeyboardDismiss() {
         clearPendingChatKeyboardDismissTimers();
         detachPwaChatThreadRootScrollLock();
+        try {
+          window.__pokerChatPwaRootScrollLockActive = false;
+        } catch (ePwaRootInactive) {}
         try {
           window.__pokerChatKeyboardOpeningUntil = 0;
         } catch (eOpenReset) {}
@@ -7126,6 +7130,9 @@ function initChat() {
           window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
         } catch (eDockOn) {}
         try {
+          attachPwaChatThreadRootScrollLock(focusTarget);
+        } catch (ePwaRootLockFocus) {}
+        try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
         requestAnimationFrame(function () {
@@ -7158,7 +7165,7 @@ function initChat() {
         var isTelegramChatFocus = isTelegramChatRuntime();
         function runPwaChatComposerDockPass(label) {
           if (!isIosPwaChatKb || !isChatThreadComposerKeyboardDom(focusTarget)) return;
-          attachPwaChatThreadRootScrollLock();
+          attachPwaChatThreadRootScrollLock(focusTarget);
           try {
             scrollDocumentToZero();
           } catch (ePwaDockScroll0) {}
