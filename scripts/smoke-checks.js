@@ -297,7 +297,12 @@ add("PWA service worker is versioned", () =>
 );
 
 add("PWA saved session restores before empty initData login gate", () =>
-  has("client", /if \(!initData\) \{\s*attemptPwaSideAuthRestoreAsync\(hideBootOverlay\)\.then\(function \(restored\) \{\s*if \(restored\) return;/)
+  hasAll("client", [
+    "function restoreSavedPwaAuthBeforeGate()",
+    "var restoredAtStart = restoreSavedPwaAuthBeforeGate();",
+    "if (!initData) {",
+    "if (restoredAtStart) {",
+  ])
 );
 
 add("PWA email login does not force a post-auth reload", () =>

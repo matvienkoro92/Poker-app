@@ -91,6 +91,37 @@ function getPokerResolvedTelegramUser() {
   var profileLangEnBtn = document.getElementById("profileLangEnBtn");
   var authFlowGeneration = 0;
 
+  function restoreSavedPwaAuthBeforeGate() {
+    try {
+      if (typeof pokerReadPwaTgSessionRecord === "function") {
+        var tgRecord = pokerReadPwaTgSessionRecord();
+        if (tgRecord && tgRecord.user && tgRecord.user.id != null && tgRecord.token) {
+          var tgUser = normalizeVerifiedUser(tgRecord.user, null);
+          var tgAuth = { status: "verified", user: tgUser, error: null };
+          if (tgRecord.gazettePlannerAccess === true) tgAuth.gazettePlannerAccess = true;
+          if (tgRecord.adminAccess === true) tgAuth.adminAccess = true;
+          window.__pokerTelegramAuth = tgAuth;
+          pokerMaybeRememberMemberIdFromUser(tgUser);
+          pokerSetAuthMethod(tgRecord.authMethod || "telegram");
+          return true;
+        }
+      }
+    } catch (eRestoreTgEarly) {}
+    try {
+      if (typeof pokerReadPwaVkSessionRecord === "function") {
+        var vkRecord = pokerReadPwaVkSessionRecord();
+        if (vkRecord && vkRecord.user && vkRecord.user.id != null && vkRecord.token) {
+          var vkUser = normalizeVerifiedUser(vkRecord.user, null);
+          window.__pokerTelegramAuth = { status: "verified", user: vkUser, error: null };
+          pokerMaybeRememberMemberIdFromUser(vkUser);
+          pokerSetAuthMethod(vkRecord.authMethod || "vk");
+          return true;
+        }
+      }
+    } catch (eRestoreVkEarly) {}
+    return false;
+  }
+
   function bumpAuthFlowGeneration() {
     authFlowGeneration += 1;
     return authFlowGeneration;
@@ -2937,6 +2968,21 @@ function getPokerResolvedTelegramUser() {
 
   /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */
   function runPwaStandaloneUnidentifiedFlow(hideBootOverlay) {
+    if (restoreSavedPwaAuthBeforeGate()) {
+      updateHeaderGreeting();
+      try {
+        var restoredAuth = window.__pokerTelegramAuth;
+        if (restoredAuth && restoredAuth.user) {
+          showAuthorized(restoredAuth.user);
+          loadHeaderAvatar();
+          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: restoredAuth.user, pwa: true, restored: true } }));
+        }
+      } catch (eEarlyStandaloneRestore) {}
+      try {
+        if (typeof hideBootOverlay === "function") hideBootOverlay();
+      } catch (eEarlyStandaloneBoot) {}
+      return;
+    }
     showPwaAuthScreen();
     setPwaAuthIdentifyingPhase(true);
     try {
@@ -2996,12 +3042,27 @@ function getPokerResolvedTelegramUser() {
     var initData = wtg && wtg.initData ? String(wtg.initData) : "";
     var userUnsafe = wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user;
 
+    var restoredAtStart = restoreSavedPwaAuthBeforeGate();
+
     if (isPwaStandaloneAuth()) {
       runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
       return;
     }
 
     if (!wtg) {
+      if (restoredAtStart) {
+        updateHeaderGreeting();
+        try {
+          var authNoTg = window.__pokerTelegramAuth;
+          if (authNoTg && authNoTg.user) {
+            showAuthorized(authNoTg.user);
+            loadHeaderAvatar();
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: authNoTg.user, pwa: true, restored: true } }));
+          }
+        } catch (eRestoreNoTg) {}
+        setTimeout(hideBootOverlay, 80);
+        return;
+      }
       attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
         if (restored) return;
         window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
@@ -3015,6 +3076,19 @@ function getPokerResolvedTelegramUser() {
     }
 
     if (!initData) {
+      if (restoredAtStart) {
+        updateHeaderGreeting();
+        try {
+          var authNoInit = window.__pokerTelegramAuth;
+          if (authNoInit && authNoInit.user) {
+            showAuthorized(authNoInit.user);
+            loadHeaderAvatar();
+            window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: authNoInit.user, pwa: true, restored: true } }));
+          }
+        } catch (eRestoreNoInit) {}
+        setTimeout(hideBootOverlay, 80);
+        return;
+      }
       attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
         if (restored) return;
         window.__pokerTelegramAuth = { status: "no_init_data", user: null, error: null };
