@@ -254,6 +254,32 @@ function loadMessages(opts) {
       messages = mergeOptimisticPersonalIntoMessages(messages);
       messages = mergeIncomingPushPersonalIntoMessages(messages, loadForPeer);
       messages = dedupePersonalMessagesForRender(messages);
+      if (Array.isArray(messages) && !getChatIsEditingMessage()) {
+        try {
+          var earlyMessagesEl = getMessagesEl();
+          var earlyNeedsRender = !!(
+            earlyMessagesEl &&
+            /Загрузка|Loading/i.test(String(earlyMessagesEl.textContent || ""))
+          );
+          if (earlyNeedsRender) {
+            var earlySig = personalRenderSignature(getChatWithUserId() || loadForPeer || "", messages, data.partial === true);
+            personalMessagesCache[getChatWithUserId() || loadForPeer] = messages.slice();
+            personalMessagesCacheMeta[getChatWithUserId() || loadForPeer] = { ts: Date.now(), source: "live-early" };
+            setLastPersonalMessagesSig(earlySig);
+            renderMessages(messages);
+            try {
+              pokerWritePersonalPeerSnapshotToDisk(getChatWithUserId() || loadForPeer, messages);
+            } catch (eSnapEarlyP) {}
+          }
+        } catch (eEarlyPersonalRender) {
+          try {
+            window.__pokerChatPersonalLastRenderError = {
+              message: eEarlyPersonalRender && eEarlyPersonalRender.message ? String(eEarlyPersonalRender.message) : String(eEarlyPersonalRender || ""),
+              at: Date.now(),
+            };
+          } catch (eTraceEarlyRender) {}
+        }
+      }
       if (
         window._pendingPersonalMessage &&
         window._pendingPersonalWith &&
