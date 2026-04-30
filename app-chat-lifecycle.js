@@ -5608,6 +5608,72 @@ function initChat() {
       function attachTelegramMiniAppChatThreadRootScrollLock() {
         return;
       }
+      function pwaChatThreadRootScrollToZero() {
+        try {
+          if (window.scrollY) window.scrollTo(0, 0);
+        } catch (eWinScroll0) {}
+        try {
+          var se = document.scrollingElement;
+          if (se && se.scrollTop !== 0) se.scrollTop = 0;
+        } catch (eSeScroll0) {}
+        try {
+          if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
+        } catch (eHtmlScroll0) {}
+        try {
+          if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
+        } catch (eBodyScroll0) {}
+      }
+      function detachPwaChatThreadRootScrollLock() {
+        try {
+          if (window.__pokerChatPwaRootScrollLockHandler) {
+            window.removeEventListener("scroll", window.__pokerChatPwaRootScrollLockHandler, true);
+          }
+        } catch (ePwaRootScrollDetach) {}
+        try {
+          if (window.__pokerChatPwaRootScrollLockTimer) clearTimeout(window.__pokerChatPwaRootScrollLockTimer);
+        } catch (ePwaRootTimerDetach) {}
+        window.__pokerChatPwaRootScrollLockHandler = null;
+        window.__pokerChatPwaRootScrollLockRaf = null;
+        window.__pokerChatPwaRootScrollLockTimer = null;
+      }
+      function attachPwaChatThreadRootScrollLock() {
+        try {
+          if (
+            isTelegramChatRuntime() ||
+            typeof pokerPwaStandaloneForKeyboardInset !== "function" ||
+            !pokerPwaStandaloneForKeyboardInset() ||
+            typeof isIosLikeForChatViewport !== "function" ||
+            !isIosLikeForChatViewport() ||
+            !isChatThreadComposerKeyboardDom()
+          ) {
+            return;
+          }
+          if (!window.__pokerChatPwaRootScrollLockHandler) {
+            window.__pokerChatPwaRootScrollLockHandler = function () {
+              if (!document.body || !document.body.classList.contains("chat-keyboard-open")) return;
+              if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+              if (typeof isChatThreadComposerKeyboardDom === "function" && !isChatThreadComposerKeyboardDom()) return;
+              if (window.__pokerChatPwaRootScrollLockRaf) return;
+              var rafLock = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+              window.__pokerChatPwaRootScrollLockRaf = rafLock(function () {
+                window.__pokerChatPwaRootScrollLockRaf = null;
+                pwaChatThreadRootScrollToZero();
+              });
+            };
+            window.addEventListener("scroll", window.__pokerChatPwaRootScrollLockHandler, true);
+          }
+          pwaChatThreadRootScrollToZero();
+          [40, 120, 260, 520].forEach(function (ms) {
+            setTimeout(function () {
+              try {
+                if (!document.body || !document.body.classList.contains("chat-keyboard-open")) return;
+                if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+                pwaChatThreadRootScrollToZero();
+              } catch (ePwaRootLockTick) {}
+            }, ms);
+          });
+        } catch (ePwaRootLock) {}
+      }
       function repairChatFocusViewportOverscroll(focusTarget) {
         return;
       }
@@ -5664,6 +5730,7 @@ function initChat() {
       }
       function finalizeChatKeyboardDismiss() {
         clearPendingChatKeyboardDismissTimers();
+        detachPwaChatThreadRootScrollLock();
         try {
           window.__pokerChatKeyboardOpeningUntil = 0;
         } catch (eOpenReset) {}
@@ -7091,6 +7158,7 @@ function initChat() {
         var isTelegramChatFocus = isTelegramChatRuntime();
         function runPwaChatComposerDockPass(label) {
           if (!isIosPwaChatKb || !isChatThreadComposerKeyboardDom(focusTarget)) return;
+          attachPwaChatThreadRootScrollLock();
           try {
             scrollDocumentToZero();
           } catch (ePwaDockScroll0) {}
