@@ -3675,7 +3675,7 @@ function initChat() {
     pokerSchedulePushDmHeaderHydrate: function (peerId) {
       if (typeof pokerSchedulePushDmHeaderHydrate === "function") return pokerSchedulePushDmHeaderHydrate(peerId);
     },
-    loadMessages: loadMessages,
+    loadMessages: function (opts) { return loadMessages(opts); },
     mountChatComposer: mountChatComposer,
     syncChatInertForIosAccessory: syncChatInertForIosAccessory,
   });
