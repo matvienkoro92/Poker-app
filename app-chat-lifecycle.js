@@ -4964,7 +4964,7 @@ function initChat() {
       function updateChatMessagesKeyboardPad() {
         logChatKeyboardDebug("pad-enter");
         collectChatOverscrollSnapshot("pad:enter");
-        if (isTelegramChatRuntime()) {
+        if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
           clearChatMessagesKeyboardPad();
           hardResetTelegramChatMessagesKeyboardPad();
           logChatKeyboardDebug("pad-tg-hardoff");
@@ -5228,6 +5228,7 @@ function initChat() {
         }
       }
       function enforceTelegramChatDefaultComposerState() {
+        if (shouldUseTelegramChatThreadVisualViewportDock()) return false;
         if (!isTelegramChatDefaultMode()) return false;
         try {
           clearChatKeyboardViewportState();
@@ -5906,6 +5907,7 @@ function initChat() {
       }
       function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
         if (!isTelegramChatRuntime()) return false;
+        if (shouldUseTelegramChatThreadVisualViewportDock(focusTarget)) return false;
         if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
         var directComposer = null;
         var shouldSnapToLatest = false;
@@ -6047,6 +6049,18 @@ function initChat() {
       }
       function isTelegramMiniAppChatThreadIos() {
         return false;
+      }
+      function shouldUseTelegramChatThreadVisualViewportDock(focusTarget) {
+        try {
+          return (
+            isTelegramChatRuntime() &&
+            isIosLikeForChatViewport() &&
+            !isChatPhysicalKeyboardContext() &&
+            isChatThreadComposerKeyboardDom(focusTarget)
+          );
+        } catch (eTgThreadDockMode) {
+          return false;
+        }
       }
       function isPassiveTelegramIosChatThread() {
         return false;
@@ -6284,7 +6298,7 @@ function initChat() {
         collectChatOverscrollSnapshot("dock:enter", { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
         if (hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
-        if (isTelegramChatRuntime()) {
+        if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatThreadDockBottomCssPx = 0;
@@ -6509,7 +6523,7 @@ function initChat() {
         target.style.setProperty("width", "100%", "important");
         target.style.setProperty("max-width", "100%", "important");
         target.style.setProperty("box-sizing", "border-box", "important");
-        target.style.setProperty("z-index", "120", "important");
+        target.style.setProperty("z-index", "2147483000", "important");
         target.style.setProperty("bottom", bottomPx + "px", "important");
         try {
           window.__pokerChatTmaDockTabKey = tabKey;
@@ -6543,7 +6557,7 @@ function initChat() {
         if (enforceTelegramChatDefaultComposerState()) return;
         var dvNoVv = String(document.body.getAttribute("data-view") || "");
         var useThreadDockFallback =
-          isChatThreadComposerKeyboardDom() && !isTelegramChatRuntime();
+          isChatThreadComposerKeyboardDom() && (!isTelegramChatRuntime() || shouldUseTelegramChatThreadVisualViewportDock());
         var ihFb = window.innerHeight || 0;
         var capFb = Math.min(520, Math.round(ihFb * 0.55));
         var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
@@ -6598,7 +6612,7 @@ function initChat() {
           return;
         }
         if (enforceTelegramChatDefaultComposerState()) return;
-        if (isTelegramChatRuntime()) {
+        if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
           clearChatMessagesKeyboardPad();
           hardResetTelegramChatMessagesKeyboardPad();
           stripChatInputAreaTransforms();
@@ -6643,7 +6657,7 @@ function initChat() {
         var tg = isTelegramChatRuntime();
         var tw = tg && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         var useThreadDock =
-          isChatThreadComposerKeyboardDom() && !tg;
+          isChatThreadComposerKeyboardDom() && (!tg || shouldUseTelegramChatThreadVisualViewportDock());
         /* Telegram: innerHeight иногда совпадает с visualViewport — overlap≈0; stable−height даёт высоту клавиатуры. */
         if (tg && tw) {
           var tgvH = Number(tw.viewportHeight);
@@ -6948,7 +6962,7 @@ function initChat() {
         collectChatOverscrollSnapshot("focus:start", focusTarget);
         if (hardDisableChatComposerViewportLift(focusTarget, "focus:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
-        if (isTelegramChatRuntime()) {
+        if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock(focusTarget)) {
           try {
             clearPendingChatKeyboardDismissTimers();
             resetChatKeyboardDockRuntimeState();
