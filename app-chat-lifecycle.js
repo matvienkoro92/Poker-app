@@ -7678,7 +7678,9 @@ function initChat() {
           );
         if (isIosPwaChatKb) {
           try {
-            setPwaIosChatEarlyKeyboardFallback("focus");
+            if (!isChatThreadComposerKeyboardDom(focusTarget)) {
+              setPwaIosChatEarlyKeyboardFallback("focus");
+            }
           } catch (ePwaEarlyFocus) {}
         }
         try {
@@ -7726,6 +7728,11 @@ function initChat() {
               try {
                 liveViewportReadyDockPass = clearPwaIosChatEarlyKeyboardFallbackIfViewportLive();
               } catch (eLiveDockPass) {}
+              var focusAgeDockPass = Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0);
+              if (!liveViewportReadyDockPass && focusAgeDockPass < 120) {
+                collectChatOverscrollSnapshot("focus:pwa-dock:wait-live:" + (label || ""), focusTarget);
+                return;
+              }
               coverDock = Math.max(
                 coverDock,
                 liveViewportReadyDockPass ? 0 : getPwaIosChatEarlyKeyboardCoverPx(),
@@ -7765,10 +7772,8 @@ function initChat() {
         }
         if (isIosChatKb) {
           if (isIosPwaChatKb) {
-            runPwaChatComposerDockPass("now");
             requestAnimationFrame(function () {
-              runPwaChatComposerDockPass("raf1");
-              syncPwaChatVisualViewportInset();
+              collectChatOverscrollSnapshot("focus:pwa-dock:raf-wait", focusTarget);
             });
             [80, 180, 360, 700, 1200, 1900].forEach(function (ms) {
               setTimeout(function () {
