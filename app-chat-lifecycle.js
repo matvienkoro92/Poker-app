@@ -364,7 +364,18 @@ function initChat() {
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
   function shouldShowChatKeyboardDebugPanel() {
-    return false;
+    try {
+      var pwaIos =
+        document.documentElement &&
+        document.documentElement.classList &&
+        document.documentElement.classList.contains("poker-ios-pwa");
+      if (!pwaIos) return false;
+      if (chatIsAdmin) return true;
+      if (window.localStorage && localStorage.getItem("poker_chat_keyboard_debug") === "1") return true;
+      return /(?:\?|&)chatKeyboardDebug=1(?:&|$)/.test(String(location.search || ""));
+    } catch (eDbgShow) {
+      return false;
+    }
   }
   function isChatKeyboardDebugTarget(node) {
     try {
@@ -540,6 +551,8 @@ function initChat() {
       lines.push(
         "pos:" + snap.areaPos +
           " bottom:" + snap.areaBottom +
+          " dock:" + (Number(window.__pokerChatThreadDockBottomCssPx) || 0) + "/" + (Number(window.__pokerChatLastAppliedDockBottom) || 0) +
+          " wd:" + Math.max(0, Math.round(((Number(window.__pokerChatPwaDockWatchdogUntil) || 0) - Date.now()) / 100)) +
           " pad:" + snap.msgPad +
           " scr:" + snap.msgScroll + "/" + snap.msgScrollH + "/" + snap.msgClientH +
           " winY:" + snap.winY
@@ -565,6 +578,9 @@ function initChat() {
       lines.push(item);
     });
     var floatingPanel = ensureChatKeyboardDebugFloatingPanel();
+    try {
+      document.documentElement.classList.add("chat-keyboard-debug-on");
+    } catch (eDbgCls) {}
     if (floatingPanel) {
       floatingPanel.textContent = lines.join("\n");
       floatingPanel.hidden = false;

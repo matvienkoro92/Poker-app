@@ -1069,6 +1069,13 @@ html.app--telegram-miniapp .chat-keyboard-debug--floating,
 html.poker-telegram-miniapp .chat-keyboard-debug--floating {
   display: block !important;
 }
+html.poker-ios-pwa.chat-keyboard-debug-on .chat-keyboard-debug {
+  display: block !important;
+  max-height: 112px;
+  overflow: auto;
+  pointer-events: none;
+  opacity: 0.9;
+}
 html.app--telegram-miniapp #chatGeneralKeyboardDebug,
 html.poker-telegram-miniapp #chatGeneralKeyboardDebug,
 html.app--telegram-miniapp #chatPersonalKeyboardDebug,
