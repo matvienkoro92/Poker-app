@@ -38,6 +38,8 @@
   background: rgba(15, 23, 42, 0.52);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   vertical-align: middle;
+  z-index: 4;
+  pointer-events: auto;
 }
 .profile-lang-switch__btn {
   min-width: 38px;
@@ -337,8 +339,9 @@
 }
 .profile-hero-card__respect-btn {
   position: absolute;
-  top: 72px;
-  right: 3px;
+  top: 66px;
+  right: 0;
+  z-index: 4;
 }
 .profile-hero-card__id {
   max-width: 100%;
@@ -463,14 +466,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  width: 38px;
-  min-width: 38px;
-  height: 28px;
+  gap: 4px;
+  width: 52px;
+  min-width: 52px;
+  height: 40px;
   margin: 0;
-  padding: 0 4px;
+  padding: 0 8px;
   box-sizing: border-box;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
@@ -480,6 +483,8 @@
   border: 1px solid rgba(251, 146, 60, 0.28);
   border-radius: 10px;
   cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -496,13 +501,13 @@
   outline-offset: 2px;
 }
 .profile-avatar-block__respect-val {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   color: #f8fafc;
 }
 .profile-avatar-block__respect-icon {
   color: #fb923c;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1;
 }
 .profile-avatar-block__img:hover {
@@ -713,4 +718,3 @@ body.profile-avatar-choice-open {
     width: min(360px, 100%);
   }
 }
-

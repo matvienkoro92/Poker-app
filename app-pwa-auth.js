@@ -279,13 +279,16 @@ function getPokerResolvedTelegramUser() {
     var locale = getPwaAuthLocale();
     var identifyingText = document.getElementById("pwaAuthIdentifyingText");
     var langSwitch = document.getElementById("pwaAuthLangSwitch");
+    var liveProfileLangSwitch = document.getElementById("profileLangSwitch");
+    var liveProfileLangRuBtn = document.getElementById("profileLangRuBtn");
+    var liveProfileLangEnBtn = document.getElementById("profileLangEnBtn");
     if (identifyingText) identifyingText.textContent = pwaAuthT("identifying");
     if (langSwitch) langSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
-    if (profileLangSwitch) profileLangSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
+    if (liveProfileLangSwitch) liveProfileLangSwitch.setAttribute("aria-label", pwaAuthT("langSwitchAria"));
     if (pwaAuthLangRuBtn) pwaAuthLangRuBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "ru");
     if (pwaAuthLangEnBtn) pwaAuthLangEnBtn.classList.toggle("pwa-auth-screen__lang-btn--active", locale === "en");
-    if (profileLangRuBtn) profileLangRuBtn.classList.toggle("profile-lang-switch__btn--active", locale === "ru");
-    if (profileLangEnBtn) profileLangEnBtn.classList.toggle("profile-lang-switch__btn--active", locale === "en");
+    if (liveProfileLangRuBtn) liveProfileLangRuBtn.classList.toggle("profile-lang-switch__btn--active", locale === "ru");
+    if (liveProfileLangEnBtn) liveProfileLangEnBtn.classList.toggle("profile-lang-switch__btn--active", locale === "en");
   }
   function syncProfileLanguageUi() {
     var locale = getPwaAuthLocale();
@@ -579,6 +582,16 @@ function getPokerResolvedTelegramUser() {
   if (profileLangEnBtn) {
     profileLangEnBtn.addEventListener("click", function () {
       setPwaAuthLocale("en");
+    });
+  }
+  if (!window.__pokerProfileLangSwitchDelegatedBound) {
+    window.__pokerProfileLangSwitchDelegatedBound = true;
+    document.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("#profileLangRuBtn,#profileLangEnBtn") : null;
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setPwaAuthLocale(btn.id === "profileLangEnBtn" ? "en" : "ru");
     });
   }
   syncPwaAuthLanguageUi();
