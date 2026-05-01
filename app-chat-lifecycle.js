@@ -5589,17 +5589,65 @@ function initChat() {
           return 0;
         }
       }
+      var PWA_IOS_CHAT_KEYBOARD_COVER_STORAGE_KEY = "poker_chat_pwa_ios_keyboard_cover_v1";
+      function readStoredPwaIosChatKeyboardCoverPx() {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return 0;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
+          if (!window.localStorage) return 0;
+          var raw = window.localStorage.getItem(PWA_IOS_CHAT_KEYBOARD_COVER_STORAGE_KEY);
+          if (!raw) return 0;
+          var parsed = null;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (eStoredJson) {
+            parsed = Number(raw) || 0;
+          }
+          var cover = typeof parsed === "number" ? parsed : Number(parsed && parsed.cover) || 0;
+          if (cover < 260 || cover > 460) return 0;
+          var storedAt = typeof parsed === "object" && parsed ? Number(parsed.t) || 0 : 0;
+          if (storedAt > 0 && Date.now() - storedAt > 1000 * 60 * 60 * 24 * 21) return 0;
+          var storedWidth = typeof parsed === "object" && parsed ? Number(parsed.w) || 0 : 0;
+          var curWidth = window.screen && window.screen.width ? Number(window.screen.width) || 0 : 0;
+          if (storedWidth > 0 && curWidth > 0 && Math.abs(storedWidth - curWidth) > 2) return 0;
+          return Math.round(cover);
+        } catch (eReadStoredCover) {
+          return 0;
+        }
+      }
+      function writeStoredPwaIosChatKeyboardCoverPx(coverPx) {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return;
+          if (!window.localStorage) return;
+          var cover = Math.round(Number(coverPx) || 0);
+          if (cover < 260 || cover > 460) return;
+          window.localStorage.setItem(
+            PWA_IOS_CHAT_KEYBOARD_COVER_STORAGE_KEY,
+            JSON.stringify({
+              cover: cover,
+              t: Date.now(),
+              w: window.screen && window.screen.width ? Number(window.screen.width) || 0 : 0,
+              h: window.screen && window.screen.height ? Number(window.screen.height) || 0 : 0
+            })
+          );
+        } catch (eWriteStoredCover) {}
+      }
       function getPwaIosChatEarlyKeyboardCoverPx() {
         try {
           if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return 0;
           if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
           if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
+          var storedCover = readStoredPwaIosChatKeyboardCoverPx();
+          if (storedCover > 0) return storedCover;
           var ihNow = window.innerHeight || 0;
           var base = Math.max(ihNow, Number(window.__pokerChatInnerHBaseline) || 0);
           if (base < 260) return 0;
-          var cover = Math.round(base * 0.43);
+          var cover = Math.round(base * 0.36);
           if (ihNow > 0 && base - ihNow > 80) cover = Math.max(cover, Math.round(base - ihNow));
-          return Math.min(430, Math.max(320, cover));
+          return Math.min(390, Math.max(320, cover));
         } catch (eEarlyCover) {
           return 0;
         }
@@ -6816,6 +6864,21 @@ function initChat() {
         try {
           window.__pokerChatThreadDockBottomCssPx = bottomPx;
         } catch (eDockPx) {}
+        try {
+          if (
+            coverNum >= 260 &&
+            coverNum <= 460 &&
+            bottomPx >= 260 &&
+            (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport() &&
+            isChatThreadComposerKeyboardDom(focusTarget || document.activeElement)
+          ) {
+            writeStoredPwaIosChatKeyboardCoverPx(coverNum);
+          }
+        } catch (eStorePwaCover) {}
           try {
             updateTelegramMiniAppChatThreadDebugOverlay("apply", { cover: coverNum, bottom: bottomPx });
           } catch (eDbgApply) {}
@@ -7498,11 +7561,6 @@ function initChat() {
         try {
           attachPwaChatThreadRootScrollLock(focusTarget);
         } catch (ePwaRootLockFocus) {}
-        if (isIosPwaChatKb) {
-          try {
-            setPwaIosChatEarlyKeyboardFallback("focus");
-          } catch (ePwaEarlyFocus) {}
-        }
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
@@ -7532,6 +7590,11 @@ function initChat() {
               pokerPwaStandaloneForKeyboardInset()
             )
           );
+        if (isIosPwaChatKb) {
+          try {
+            setPwaIosChatEarlyKeyboardFallback("focus");
+          } catch (ePwaEarlyFocus) {}
+        }
         try {
           window.__pokerChatPwaSettleToBottomAfterKeyboard =
             false;
