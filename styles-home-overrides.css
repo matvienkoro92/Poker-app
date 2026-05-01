@@ -96,7 +96,7 @@
 }
 
 .app.app--view-home .header-greeting__arrow {
-  color: rgba(251, 191, 36, 0.9);
+  display: none !important;
 }
 
 .app.app--view-home .theme-toggle,
