@@ -294,13 +294,30 @@ document.body.addEventListener("click", function (e) {
     var source = reactionPickerEl && reactionPickerEl.dataset.source;
     var withId = reactionPickerEl && reactionPickerEl.dataset.with;
     if (msgId && pickerEmoji.dataset.emoji) {
-      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      var activeBeforeReaction = document.activeElement || null;
+      var keepPersonalComposerFocus =
+        source === "personal" &&
+        activeBeforeReaction &&
+        activeBeforeReaction.tagName === "TEXTAREA" &&
+        activeBeforeReaction.closest &&
+        activeBeforeReaction.closest("#chatPersonalInputArea");
+      if (!keepPersonalComposerFocus && activeBeforeReaction && activeBeforeReaction.blur) activeBeforeReaction.blur();
       sendReaction(msgId, pickerEmoji.dataset.emoji, source || "general", withId || "");
       if (currentReactionPickerClose) {
         currentReactionPickerClose();
       } else if (reactionPickerEl) {
         reactionPickerEl.classList.add("chat-reaction-picker--hidden");
         reactionPickerEl.setAttribute("aria-hidden", "true");
+      }
+      if (keepPersonalComposerFocus) {
+        setTimeout(function () {
+          try {
+            if (document.body && document.body.getAttribute("data-view") !== "chat") return;
+            if (!activeBeforeReaction.disabled && !activeBeforeReaction.hidden && activeBeforeReaction.focus) {
+              activeBeforeReaction.focus({ preventScroll: true });
+            }
+          } catch (eKeepReactionFocus) {}
+        }, 0);
       }
     }
   }
