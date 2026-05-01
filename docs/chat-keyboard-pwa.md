@@ -35,6 +35,28 @@
 - `styles-home-sections.css` — поздние PWA/iOS keyboard overrides для composer, header и messages.
 - `styles-chat-threads.css` и `styles-chat-threads-contacts-responsive.css` — базовый layout тредов и шапок.
 
+## Решение Самозакрытия Клавиатуры
+
+Финальная подтвержденная причина самопроизвольного закрытия keyboard в iOS PWA была не в `blur` как таковом, а в конфликте между native opening textarea и нашим root-scroll-lock.
+
+Во время первых кадров после `touchstart/focus` приложение несколько раз принудительно вызывало root-scroll reset:
+
+- `attachPwaChatThreadRootScrollLock()` включался сразу при фокусе composer;
+- `pwaChatThreadRootScrollToZero()` делал `window.scrollTo(0, 0)` и сбрасывал `document.scrollingElement/html/body.scrollTop`;
+- дополнительные delayed-проходы выполнялись через `40/120/260/520 ms`;
+- параллельно iOS/WKWebView еще открывал native keyboard и автоскроллил focused textarea.
+
+На iOS PWA такой программный root scroll в момент открытия keyboard может отменить native keyboard session: клавиатура закрывается, но наш JS уже успел поставить `chat-keyboard-open` и `chat-input-area--vv-dock`, поэтому composer остается поднятым без клавиатуры.
+
+Фикс в `51b37f3` / `2.511`:
+
+- добавлен `shouldSkipPwaChatRootScrollDuringComposerOpen(focusTarget)`;
+- `pwaChatThreadRootScrollToZero(focusTarget)` больше не трогает root scroll, пока открыт стартовый hold окна keyboard composer;
+- защита проверяет именно iOS PWA chat thread composer, `chat-keyboard-open`, `__pokerChatKeyboardOpeningUntil` и свежий `__pokerChatKeyboardFocusAtMs`;
+- после окна открытия обычная очистка scroll-артефактов остается доступной.
+
+Практическое правило: во время открытия iOS PWA composer нельзя вызывать `window.scrollTo(0, 0)`, сбрасывать `html/body.scrollTop` или запускать аналогичный root-scroll cleanup. Сначала нужно дать iOS завершить native keyboard opening, а уже потом чистить root/shell артефакты, если они реально остались.
+
 Текущие версии/коммиты вокруг расследования:
 
 - `9fda0bd` / `2.423` — стабилизация PWA composer lift.
@@ -48,6 +70,7 @@
 - `9381a10` / `2.431` — fixed header при iOS PWA keyboard.
 - `94eccbb` / `2.432` — ранний `chat-keyboard-open` на `touchstart`.
 - `b54f7fd` / `2.433` — расширенная диагностика `Keyboard Lab`.
+- `51b37f3` / `2.511` — запрет root-scroll reset во время открытия iOS PWA composer; устранил самозакрытие клавиатуры.
 
 ## Диагностика
 
@@ -75,12 +98,14 @@
 - В списке диалогов нижний tabbar должен оставаться; в конкретном чате tabbar скрывается, чтобы не мешать composer.
 - Нельзя одновременно использовать несколько независимых источников подъема composer (`JS bottom`, `--chat-vv-inset`, `--chat-keyboard-fallback-inset`, `dvh fallback`) без четкого приоритета. Это дает две высоты.
 - Нельзя завязывать критический старт keyboard-state только на `document.activeElement`: на iOS PWA focus/activeElement может запаздывать.
+- Нельзя делать root-scroll reset во время opening hold iOS PWA composer: это может закрыть native keyboard, оставив composer в dock-состоянии.
 - Любой новый фикс должен проверяться по `Keyboard Lab` метрикам, а не только визуально.
 
 ## Что Не Делать
 
 - Не возвращать большой JS `bottom = keyboardCover + gap` для iOS PWA без подтверждения метриками: это уже давало "улетает выше".
 - Не убирать CSS fallback полностью, пока нет надежного раннего события и стабильного layout viewport.
+- Не вызывать `window.scrollTo(0, 0)`, `scrollMainDocumentToTop()` или прямой сброс `html/body.scrollTop` в первые кадры после `touchstart/focus` chat composer на iOS PWA.
 - Не чинить PWA iOS и Telegram Mini App одной веткой: `telegram-web-app.js` может существовать в PWA, но это не значит, что среда является Telegram runtime.
 - Не менять общий chat CSS без учета порядка импортов: поздние правила в `styles-home-sections.css` перебивают split chat CSS.
 
