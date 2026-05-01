@@ -79,7 +79,9 @@ function pokerInitWinterRatingWeekTops() {
   var modalBackdrop = document.getElementById("winterRatingWeekTopModalBackdrop");
   var shareBtn = document.getElementById("winterRatingWeekTopShareBtn");
   var prizeInfo = document.getElementById("winterRatingWeekTopPrizeInfo");
-  if (!pastBtn || !currentBtn || !pastPreview || !currentPreview || !modal || !modalTitle || !listEl) return;
+  var hasWeekTopControls = !!(pastBtn && currentBtn && pastPreview && currentPreview && modal && modalTitle && listEl);
+  var hasSingleTopTarget = !!((singleTopSummary && singleTopList) || (hallFameSingleTopSummary && hallFameSingleTopList));
+  if (!hasWeekTopControls && !hasSingleTopTarget) return;
   var currentModalDates = null;
   var currentModalLinkType = null;
   var februaryDatesCache = null;
@@ -225,8 +227,8 @@ function pokerInitWinterRatingWeekTops() {
     var currentTop = getTopByDates(CURRENT_WEEK_DATES);
     var febDates = isSpringRatingMode() ? getMarchDatesFromData() : getFebruaryDatesFromData();
     var febTop = febDates.length ? getTopByDates(febDates) : [];
-    currentPreview.innerHTML = currentTop.length ? previewHtml(currentTop) : "";
-    pastPreview.innerHTML = pastTop.length ? previewHtml(pastTop) : "";
+    if (currentPreview) currentPreview.innerHTML = currentTop.length ? previewHtml(currentTop) : "";
+    if (pastPreview) pastPreview.innerHTML = pastTop.length ? previewHtml(pastTop) : "";
     if (febPreview) {
       febPreview.innerHTML = febTop.length ? previewHtml(febTop, 3) : "";
     }
@@ -530,19 +532,21 @@ function pokerInitWinterRatingWeekTops() {
   }
   // Кнопки «Поделиться» для весенних лиг находятся внутри блоков лиг (winter-rating__spring-league-share),
   // отдельная общая кнопка под итоговой таблицей отключена.
-  window.openWinterRatingWeekTopModal = function (kind) {
-    if (kind === "current") openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
-    else if (kind === "past") openModal("Топы прошлой недели", GAZETTE_DATES, "past");
-    else if (kind === "feb") {
-      if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
-      else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
-    }
-  };
+  if (hasWeekTopControls) {
+    window.openWinterRatingWeekTopModal = function (kind) {
+      if (kind === "current") openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
+      else if (kind === "past") openModal("Топы прошлой недели", GAZETTE_DATES, "past");
+      else if (kind === "feb") {
+        if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
+        else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
+      }
+    };
+  }
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     if (document.body) document.body.style.overflow = "";
   }
-  if (currentBtn.getAttribute("data-rating-week-top-bound") !== "1") {
+  if (currentBtn && currentBtn.getAttribute("data-rating-week-top-bound") !== "1") {
     currentBtn.setAttribute("data-rating-week-top-bound", "1");
     currentBtn.addEventListener("click", function () {
     if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
@@ -557,7 +561,7 @@ function pokerInitWinterRatingWeekTops() {
     openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
     });
   }
-  if (pastBtn.getAttribute("data-rating-week-top-bound") !== "1") {
+  if (pastBtn && pastBtn.getAttribute("data-rating-week-top-bound") !== "1") {
     pastBtn.setAttribute("data-rating-week-top-bound", "1");
     pastBtn.addEventListener("click", function () {
       openModal("Топы прошлой недели", GAZETTE_DATES, "past");
@@ -587,7 +591,7 @@ function pokerInitWinterRatingWeekTops() {
     modalBackdrop.setAttribute("data-rating-week-top-bound", "1");
     modalBackdrop.addEventListener("click", closeModal);
   }
-  if (listEl.getAttribute("data-rating-week-top-bound") !== "1") {
+  if (listEl && listEl.getAttribute("data-rating-week-top-bound") !== "1") {
     listEl.setAttribute("data-rating-week-top-bound", "1");
     listEl.addEventListener("click", function (e) {
     var btn = e.target && e.target.closest ? e.target.closest(".winter-rating__nick-btn") : null;

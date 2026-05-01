@@ -35,6 +35,12 @@ function showHallOfFamePanel(section, opts) {
     else panel.setAttribute("hidden", "");
   });
   setHallOfFameSubtabActive(section);
+  if (section === "top2026") {
+    try {
+      if (typeof window.pokerInitWinterRatingWeekTops === "function") window.pokerInitWinterRatingWeekTops();
+      if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
+    } catch (eTop2026Init) {}
+  }
 
   function applyHallFameScroll() {
     setMainDocumentScrollY(clampMainDocumentScrollY(restoreY));
