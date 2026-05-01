@@ -6143,6 +6143,7 @@ function initChat() {
       }
       function hardDisableChatComposerViewportLift(focusTarget, stageLabel) {
         if (!isTelegramChatRuntime()) return false;
+        if (isPokerIosPwaKeyboardRuntime()) return false;
         if (shouldUseTelegramChatThreadVisualViewportDock(focusTarget)) return false;
         if (!isHardDisabledChatComposerFlowTarget(focusTarget)) return false;
         var directComposer = null;
