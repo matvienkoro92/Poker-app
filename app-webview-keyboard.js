@@ -208,15 +208,44 @@ window.addEventListener("resize", function () {
       var docRect = document.documentElement && document.documentElement.getBoundingClientRect ? document.documentElement.getBoundingClientRect() : null;
       var safeBottom = 0;
       var chatSafeBottom = 0;
+      var chatVvInset = "";
+      var chatFallbackInset = "";
+      var chatInputLift = "";
       var rootStyle = null;
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      function nodeMetric(selector) {
+        try {
+          var node = document.querySelector(selector);
+          if (!node || !node.getBoundingClientRect) return "n/a";
+          var rect = node.getBoundingClientRect();
+          var cs = window.getComputedStyle ? getComputedStyle(node) : null;
+          var cls = node.classList || null;
+          return (
+            Math.round(rect.top) + "+" + Math.round(rect.height) +
+            " b" + Math.round((window.innerHeight || 0) - rect.bottom) +
+            " " + (cs ? String(cs.position || "") : "") +
+            " top=" + (cs ? String(cs.top || "") : "") +
+            " bot=" + (cs ? String(cs.bottom || "") : "") +
+            " dock=" + (cls && cls.contains("chat-input-area--vv-dock") ? "1" : "0")
+          );
+        } catch (eNodeMetric) {
+          return "err";
+        }
+      }
       try {
         rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
         safeBottom = Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("padding-bottom")) || 0);
         chatSafeBottom = Math.round(parseFloat(rootStyle && rootStyle.getPropertyValue("--chat-safe-area-bottom")) || 0);
+        chatVvInset = String(rootStyle && rootStyle.getPropertyValue("--chat-vv-inset") || "").trim();
+        chatFallbackInset = String(rootStyle && rootStyle.getPropertyValue("--chat-keyboard-fallback-inset") || "").trim();
+        chatInputLift = String(rootStyle && rootStyle.getPropertyValue("--chat-input-lift") || "").trim();
       } catch (eKbLabCss) {}
       metricsEl.textContent = [
         "src: " + String(source || "tick"),
+        "viewName: " + String(document.body && document.body.getAttribute("data-view") || "") +
+          " cls: hKb=" + (document.documentElement.classList.contains("chat-keyboard-open") ? "1" : "0") +
+          " bKb=" + (document.body.classList.contains("chat-keyboard-open") ? "1" : "0") +
+          " iosPwa=" + (document.documentElement.classList.contains("poker-ios-pwa") ? "1" : "0"),
         "ih: " + (window.innerHeight || 0) +
           " iw: " + (window.innerWidth || 0),
         "vv: " +
@@ -240,7 +269,13 @@ window.addEventListener("resize", function () {
           " vh/vsh: " +
           (tg ? Math.round(Number(tg.viewportHeight) || 0) : 0) + "/" +
           (tg ? Math.round(Number(tg.viewportStableHeight) || 0) : 0),
-        "css: safe=" + safeBottom + " chatSafe=" + chatSafeBottom,
+        "css: safe=" + safeBottom + " chatSafe=" + chatSafeBottom +
+          " vv=" + (chatVvInset || "0") +
+          " fb=" + (chatFallbackInset || "0") +
+          " lift=" + (chatInputLift || "0"),
+        "chatHdr: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header'),
+        "chatMsgs: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages'),
+        "chatCmp: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area'),
         "active: " + keyboardLabActiveLabel()
       ].join("\n");
     } catch (eKbLabMetrics) {
