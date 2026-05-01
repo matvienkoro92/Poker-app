@@ -111,15 +111,13 @@
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
+      if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
       if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
       try {
         if (typeof updateVisitorCounter === "function") updateVisitorCounter();
       } catch (eVisAd) {}
-    }
-    function showAdminReportUi() {
-      if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
     }
     function pokerIsKnownClientAdmin() {
       try {
@@ -134,25 +132,11 @@
       }
       return false;
     }
-    function pokerIsKnownAdminReportClient() {
-      try {
-        var authFlag = window.__pokerTelegramAuth;
-        if (authFlag && authFlag.adminReportAccess === true) return true;
-        var recFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-        if (recFlag && recFlag.adminReportAccess === true) return true;
-      } catch (eFlag) {}
-      var users = collectAdminIdentityCandidates();
-      for (var i = 0; i < users.length; i++) {
-        if (isKnownAdminReportUser(users[i])) return true;
-      }
-      return false;
-    }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
     try {
       if (typeof window !== "undefined" && window.location && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
         showAdminUi();
-        showAdminReportUi();
         return;
       }
     } catch (e) {}
@@ -161,9 +145,6 @@
     }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
-    }
-    if (pokerIsKnownAdminReportClient()) {
-      showAdminReportUi();
     } else if (reportBtn) {
       reportBtn.classList.add("header-admin-report--hidden");
     }
