@@ -1890,6 +1890,34 @@ function initProfileRespectVotersButton() {
   });
 }
 
+function pokerRemoveFriendFromOpenFriendsList(userId, chatUserId) {
+  var listEl = document.getElementById("friendsListModalList");
+  if (!listEl) return false;
+  var ids = [userId, chatUserId].map(function (id) {
+    return String(id || "").trim();
+  }).filter(Boolean);
+  if (!ids.length) return false;
+  var removed = false;
+  listEl.querySelectorAll(".friends-list-modal__item").forEach(function (item) {
+    var itemUserId = String(item.getAttribute("data-user-id") || "").trim();
+    var itemChatUserId = String(item.getAttribute("data-chat-user-id") || "").trim();
+    if (ids.indexOf(itemUserId) !== -1 || ids.indexOf(itemChatUserId) !== -1) {
+      item.remove();
+      removed = true;
+    }
+  });
+  if (!removed) return false;
+  var remaining = listEl.querySelectorAll(".friends-list-modal__item").length;
+  if (remaining === 0) {
+    listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Пока нет друзей</p>";
+  }
+  try {
+    if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(remaining);
+  } catch (eFriendCount) {}
+  return true;
+}
+window.pokerRemoveFriendFromOpenFriendsList = pokerRemoveFriendFromOpenFriendsList;
+
 function initProfileFriends() {
   var btn = document.getElementById("profileFriendsBtn");
   var modal = document.getElementById("friendsListModal");
@@ -2020,15 +2048,12 @@ function initProfileFriends() {
                 })
                 .then(function (d) {
                   if (d && d.ok) {
-                    item.remove();
+                    pokerRemoveFriendFromOpenFriendsList(
+                      item.getAttribute("data-user-id"),
+                      item.getAttribute("data-chat-user-id")
+                    );
                     if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
                     if (typeof window.chatRefresh === "function") window.chatRefresh();
-                    if (!listEl.querySelector(".friends-list-modal__item")) {
-                      listEl.innerHTML = "<p class=\"friends-list-modal__empty\">Пока нет друзей</p>";
-                      try {
-                        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(0);
-                      } catch (eLM) {}
-                    }
                   } else {
                     removeBtn.disabled = false;
                     if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");

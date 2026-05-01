@@ -604,6 +604,9 @@ if (chatUserModalEl) {
               modalAvatarPlaceholder.textContent = (tdRm || "И")[0];
             }
             updateChatUserModalFriendState(false, null);
+            if (typeof window.pokerRemoveFriendFromOpenFriendsList === "function") {
+              window.pokerRemoveFriendFromOpenFriendsList(chatUserModalUserId);
+            }
             if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
             if (typeof window.chatRefresh === "function") window.chatRefresh();
             updateCurrentPeerTitle(chatUserModalUserId, tdRm);
