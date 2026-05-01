@@ -6473,11 +6473,11 @@ function initChat() {
           }
           if (isPwaIosDockFinal) {
             /*
-             * iOS PWA: рабочая схема держит fixed-композер у нижней кромки layout viewport,
-             * а подъём даёт CSS fallback/visualViewport. Если добавить coverPx в JS-bottom,
-             * получаются гонки: строка то не доезжает, то улетает выше клавиатуры.
+             * iOS PWA: когда включён vv-dock, inline bottom сильнее CSS fallback.
+             * Поэтому dock обязан сам держать композер над клавиатурой, иначе строка остаётся
+             * у нижней кромки layout viewport и закрывается клавиатурой.
              */
-            bottomPx = getChatComposerMandatoryBottomOffsetPx();
+            bottomPx = Math.max(bottomPx, coverNum + getChatComposerKeyboardGapPx());
           }
         } catch (eBm) {}
         try {
