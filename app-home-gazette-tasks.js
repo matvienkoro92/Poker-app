@@ -2804,7 +2804,13 @@ function runGazetteAndTasksInit() {
     var openBtn = document.getElementById("partnershipOpenBtn");
     if (!modal || !track || !indicator || modal.dataset.partnershipBound === "1") return;
     modal.dataset.partnershipBound = "1";
-    var partnershipAssets = ["partnership-intro.jpg", "partnership-step1.jpg", "partnership-step2.jpg", "partnership-step3.jpg", "partnership-cost.jpg"];
+    var partnershipAssets = [
+      "partnership-2026-overview.jpg",
+      "partnership-2026-step1.jpg",
+      "partnership-2026-step2.jpg",
+      "partnership-2026-step3.jpg",
+      "partnership-2026-cost.jpg"
+    ];
     var imgs = modal.querySelectorAll(".partnership-modal__img");
     for (var i = 0; i < imgs.length && i < partnershipAssets.length; i++) {
       imgs[i].src = getAssetUrl(partnershipAssets[i]);
