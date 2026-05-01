@@ -443,6 +443,34 @@ function initChat() {
       return null;
     }
   }
+  function getChatKeyboardDebugStableState() {
+    try {
+      var area = getActiveChatInputArea();
+      var cs = area && window.getComputedStyle ? getComputedStyle(area) : null;
+      var isDocked =
+        !!(
+          area &&
+          area.classList &&
+          area.classList.contains("chat-input-area--vv-dock") &&
+          cs &&
+          cs.position === "fixed"
+        );
+      if (isDocked) return "docked";
+      if (document.body && document.body.classList && document.body.classList.contains("chat-keyboard-open")) return "flow";
+      var active = document.activeElement;
+      if (
+        active &&
+        active.closest &&
+        active.closest(".chat-input-area") &&
+        String(active.tagName || "").toUpperCase() === "TEXTAREA"
+      ) {
+        return "focused";
+      }
+      return "closed";
+    } catch (eDbgStable) {
+      return "unknown";
+    }
+  }
   function getActiveChatInputArea() {
     if (chatActiveTab === "general" && generalView && !generalView.classList.contains("chat-general-view--hidden")) {
       return chatGeneralInputArea || null;
@@ -529,6 +557,7 @@ function initChat() {
         safeBottom: safeBottom,
         version: String(document.documentElement.getAttribute("data-app-version") || ""),
         iosPwa: document.documentElement.classList.contains("poker-ios-pwa") ? 1 : 0,
+        stableState: getChatKeyboardDebugStableState(),
         winY: Math.round(window.scrollY || 0),
         active: getChatKeyboardDebugNodeLabel(active),
         areaNode: getChatKeyboardDebugNodeLabel(area),
@@ -572,6 +601,7 @@ function initChat() {
         "pos:" + snap.areaPos +
           " bottom:" + snap.areaBottom +
           " dock:" + (Number(window.__pokerChatThreadDockBottomCssPx) || 0) + "/" + (Number(window.__pokerChatLastAppliedDockBottom) || 0) +
+          " state:" + snap.stableState +
           " wd:" + Math.max(0, Math.round(((Number(window.__pokerChatPwaDockWatchdogUntil) || 0) - Date.now()) / 100)) +
           " pad:" + snap.msgPad +
           " scr:" + snap.msgScroll + "/" + snap.msgScrollH + "/" + snap.msgClientH +
@@ -3842,7 +3872,8 @@ function initChat() {
       var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
       var scrollEl = document.scrollingElement || document.documentElement || document.body;
       var payload = {
-        stage: stage || "",
+        event: stage || "",
+        state: getChatKeyboardDebugStableState(),
         focus: getChatKeyboardDebugNodeLabel(focusTarget || document.activeElement),
         activeTab: chatActiveTab || "",
         mounted: chatComposerMounted || "",
