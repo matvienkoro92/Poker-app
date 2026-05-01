@@ -836,7 +836,7 @@ html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
-  bottom: calc(var(--chat-ios-pwa-thread-composer-bottom, clamp(220px, 36vh, 372px)) + var(--chat-composer-edge-gap, 2px)) !important;
+  bottom: calc(var(--chat-ios-pwa-thread-composer-bottom, clamp(268px, calc(36vh + 48px), 420px)) + var(--chat-composer-edge-gap, 2px)) !important;
   width: auto !important;
   max-width: calc(100% - (2 * var(--chat-composer-edge-gap, 2px))) !important;
   z-index: 2147483000 !important;

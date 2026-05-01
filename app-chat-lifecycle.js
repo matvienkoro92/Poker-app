@@ -7306,9 +7306,23 @@ function initChat() {
             if (screenLong > 260 && screenLong < 1400) base = Math.max(base, screenLong);
           } catch (eCssDockScreenBase) {}
           if (base < 260) base = Math.max(260, ih || 0);
-          var minBottom = base < 740 ? 220 : 238;
-          var maxBottom = base > 900 ? 372 : 344;
-          var bottom = Math.round(base * 0.36);
+          /*
+           * iOS PWA shows the system input accessory bar above the keyboard, but this
+           * CSS-only dock intentionally keeps --chat-ios-accessory-inset disabled to
+           * avoid the old double-keyboard jumps. Include that bar in the locked dock
+           * point instead, so composer and feed stay in one coordinate system.
+           */
+          var accessoryLift = 48;
+          try {
+            var shortSideLift = Math.min(Number(window.screen && window.screen.width) || 0, Number(window.screen && window.screen.height) || 0);
+            var longSideLift = Math.max(Number(window.screen && window.screen.width) || 0, Number(window.screen && window.screen.height) || 0, base);
+            if (longSideLift >= 880) accessoryLift = 54;
+            else if (shortSideLift > 0 && shortSideLift <= 375) accessoryLift = 46;
+            if (base < 720) accessoryLift = Math.min(accessoryLift, 42);
+          } catch (eCssDockAccessoryLift) {}
+          var minBottom = (base < 740 ? 220 : 238) + accessoryLift;
+          var maxBottom = (base > 900 ? 372 : 344) + accessoryLift;
+          var bottom = Math.round(base * 0.36) + accessoryLift;
           bottom = Math.max(minBottom, Math.min(maxBottom, bottom));
           window.__pokerChatIosPwaComposerBottomLockPx = bottom;
           return bottom;
