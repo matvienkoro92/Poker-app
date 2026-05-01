@@ -6480,7 +6480,11 @@ function initChat() {
         try {
           hardChatTarget = isHardDisabledChatComposerFlowTarget();
         } catch (eHardShiftTarget) {}
-        if (!isTelegramChatRuntime() && !hardChatTarget) {
+        var telegramChatRuntime = false;
+        try {
+          telegramChatRuntime = isTelegramChatRuntime();
+        } catch (eTgRuntimeShift) {}
+        if (!telegramChatRuntime && !hardChatTarget) {
           clearTelegramChatRootShiftCompensation();
           return;
         }
@@ -6495,6 +6499,11 @@ function initChat() {
             : generalView && !generalView.classList.contains("chat-general-view--hidden")
               ? generalView
               : null;
+        if (!telegramChatRuntime && hardChatTarget && target === generalView) {
+          /* В PWA общий чат докует composer отдельным fixed-слоем; transform на всей view тащит вниз и шапку. */
+          target = null;
+          shiftPx = 0;
+        }
         [generalView, convView].forEach(function (node) {
           if (!node || !node.style) return;
           if (node === target && shiftPx > 8) {
