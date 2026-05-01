@@ -8356,12 +8356,17 @@ function initChat() {
         }
       });
     });
-    if (backBtn) backBtn.addEventListener("click", function (e) {
+    function handleConvBack(e) {
       e.preventDefault();
       e.stopPropagation();
+      if (e.type === "touchend" && window.__touchWasScroll && window.__touchWasScroll()) return;
       pokerPushOpenSetCaller("conv-back-btn");
       showDialogs();
-    });
+    }
+    if (backBtn) {
+      backBtn.addEventListener("touchend", handleConvBack, { passive: false });
+      backBtn.addEventListener("click", handleConvBack);
+    }
     var convProfileOpenBtn = document.getElementById("chatConvProfileOpenBtn");
     if (convProfileOpenBtn) {
       convProfileOpenBtn.addEventListener("click", function (e) {
@@ -9417,12 +9422,17 @@ function initChat() {
   }
   updateAdminShiftOnline();
 
-  if (chatGeneralBackBtn) chatGeneralBackBtn.addEventListener("click", function (e) {
+  function handleChatGeneralBack(e) {
     e.preventDefault();
     e.stopPropagation();
+    if (e.type === "touchend" && window.__touchWasScroll && window.__touchWasScroll()) return;
     pokerPushOpenSetCaller("general-back-btn");
     showDialogs();
-  });
+  }
+  if (chatGeneralBackBtn) {
+    chatGeneralBackBtn.addEventListener("touchend", handleChatGeneralBack, { passive: false });
+    chatGeneralBackBtn.addEventListener("click", handleChatGeneralBack);
+  }
   var chatGeneralTitleBtn = document.getElementById("chatGeneralTitleBtn");
   if (chatGeneralTitleBtn) {
     chatGeneralTitleBtn.addEventListener("click", function (e) {

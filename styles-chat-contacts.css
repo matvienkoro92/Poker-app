@@ -110,6 +110,10 @@
   cursor: pointer;
   text-align: center;
   text-decoration: none;
+  position: relative;
+  z-index: 5;
+  touch-action: manipulation;
+  user-select: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
   appearance: none;
@@ -548,10 +552,10 @@ body[data-view="chat"]
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 40px;
-  width: 40px;
-  min-width: 40px;
-  max-width: 40px;
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
   min-height: var(--chat-general-header-strip-min-height);
   height: var(--chat-general-header-strip-min-height);
   max-height: var(--chat-general-header-strip-min-height);
@@ -561,7 +565,7 @@ body[data-view="chat"]
   font-weight: 700;
   line-height: 0;
   letter-spacing: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -668,10 +672,10 @@ body[data-view="chat"]
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 40px;
-  width: 40px;
-  min-width: 40px;
-  max-width: 40px;
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
   min-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   max-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
@@ -681,7 +685,7 @@ body[data-view="chat"]
   font-weight: 700;
   line-height: 0;
   letter-spacing: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.2);

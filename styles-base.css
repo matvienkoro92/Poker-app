@@ -31,7 +31,7 @@
   --app-gutter: var(--screen-gutter-x);
   --card-padding-x: var(--screen-gutter-x);
   /* Единая высота кнопок «Назад» / «На главную» и строки с «← Чаты» в чате */
-  --app-back-btn-min-height: 40px;
+  --app-back-btn-min-height: 44px;
   /* iOS / PWA: подъём панели ввода над клавиатурой (задаётся из JS по visualViewport) */
   --chat-vv-inset: 0px;
   --chat-keyboard-fallback-inset: 0px;

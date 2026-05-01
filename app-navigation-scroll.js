@@ -120,18 +120,21 @@ var pokerLastMainScrollUserIntentAt = 0;
     pokerLastMainScrollUserIntentAt = Date.now();
   }
   try {
-    window.addEventListener("touchstart", mark, { passive: true });
-    window.addEventListener("touchmove", mark, { passive: true });
-    window.addEventListener("wheel", mark, { passive: true });
-    window.addEventListener("pointerdown", mark, { passive: true });
+    window.addEventListener("touchstart", mark, { passive: true, capture: true });
+    window.addEventListener("touchmove", mark, { passive: true, capture: true });
+    window.addEventListener("wheel", mark, { passive: true, capture: true });
+    window.addEventListener("pointerdown", mark, { passive: true, capture: true });
+    document.addEventListener("scroll", mark, { passive: true, capture: true });
   } catch (eBindMainScrollIntent) {}
 })();
 
 function pokerScheduleScrollMainDocumentToTop(delay, expectedView) {
   var scheduledAt = Date.now();
+  var startY = getMainDocumentScrollY();
   setTimeout(function () {
     if (pokerLastMainScrollUserIntentAt >= scheduledAt) return;
     if (expectedView && document.body && document.body.getAttribute && document.body.getAttribute("data-view") !== expectedView) return;
+    if (getMainDocumentScrollY() > Math.max(2, startY + 2)) return;
     scrollMainDocumentToTop();
   }, Math.max(0, Number(delay) || 0));
 }

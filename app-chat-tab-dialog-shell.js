@@ -247,6 +247,15 @@ function showDialogs() {
   try {
     pokerPushOpenStateDebug("showDialogs-enter", callerLabel ? "src=" + callerLabel : "");
   } catch (eShowDialogsDbg0) {}
+  try {
+    var recentDialogOpenAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
+    var isBackFromChatChrome = callerLabel === "conv-back-btn" || callerLabel === "general-back-btn";
+    if (isBackFromChatChrome && recentDialogOpenAt && Date.now() - recentDialogOpenAt < 700) {
+      window.__pokerLastShowDialogsReason = "ignored-recent-open-back";
+      pokerPushOpenDebug("showDialogs-recent-open-back-ignored", String(window.__pokerChatDialogOpenIntentPeer || ""));
+      return;
+    }
+  } catch (eRecentOpenBack) {}
   var pendingPeerDialogsCommit = "";
   try {
     var pendingDirectDlg = window.__pendingOpenChatPersonalFromDeepLink;

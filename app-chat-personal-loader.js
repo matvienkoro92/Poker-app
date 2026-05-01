@@ -374,7 +374,9 @@ function loadMessages(opts) {
             data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
           setChatConvTitleIdText(titleP21 || "");
           setChatPeerVerified(data.otherPokerPlusVerified === true);
-          setChatConvTitleFish(data.otherStatusLevel != null ? data.otherStatusLevel : "");
+          if (data.otherStatusLevel != null && String(data.otherStatusLevel).trim() !== "") {
+            setChatConvTitleFish(data.otherStatusLevel);
+          }
           updateConvTypingUi();
         }
       }

@@ -1004,6 +1004,26 @@ document.addEventListener("click", function (e) {
 
 var viewHandledInTouchend = false;
 
+document.addEventListener("touchend", function (e) {
+  if (!e.target || !e.target.closest) return;
+  if (window.__touchWasScroll && window.__touchWasScroll()) return;
+  var backBtn = e.target.closest(".bonus-game-back[data-view-target]");
+  if (backBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    viewHandledInTouchend = true;
+    var target = backBtn.getAttribute("data-view-target");
+    if (target) setView(target, { fromBack: true });
+    return;
+  }
+  if (e.target.closest("[data-download-back]")) {
+    e.preventDefault();
+    e.stopPropagation();
+    viewHandledInTouchend = true;
+    setDownloadPage("main");
+  }
+}, { passive: false });
+
 /** Клик по UI голоса в чате: <audio class="chat-msg__voice"> (в т.ч. кнопка play внутри UA shadow) или обёртка .chat-msg__voice-wrap. */
 function pokerEventPathHasChatVoiceUi(e) {
   try {
