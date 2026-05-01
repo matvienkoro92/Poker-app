@@ -695,6 +695,27 @@ function initChat() {
             var target = event && event.target ? event.target : null;
             if (!isChatKeyboardDebugTarget(target) && !(target && target.closest && target.closest('.view[data-view="chat"]'))) return;
             logChatKeyboardDebug("focusin*", getChatKeyboardDebugNodeLabel(target));
+            try {
+              if (
+                target &&
+                String(target.tagName || "").toUpperCase() === "TEXTAREA" &&
+                target.closest &&
+                target.closest(".chat-input-area") &&
+                !isTelegramChatRuntime() &&
+                typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+                pokerPwaStandaloneForKeyboardInset() &&
+                typeof isIosLikeForChatViewport === "function" &&
+                isIosLikeForChatViewport()
+              ) {
+                chatComposerEl = target;
+                if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(target);
+                setTimeout(function () {
+                  try {
+                    onChatInputFocus(target);
+                  } catch (ePwaFocusInActivate) {}
+                }, 0);
+              }
+            } catch (ePwaFocusInFallback) {}
           },
           true
         );
@@ -1150,7 +1171,20 @@ function initChat() {
         directComposer.style.removeProperty("display");
         directComposer.style.removeProperty("pointer-events");
       } catch (eComposerAreaPrep) {}
-      if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) return;
+      if (target === directComposer || (target && directComposer.contains && directComposer.contains(target))) {
+        try {
+          if (
+            !isTelegramChatRuntime() &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+          ) {
+            onChatInputFocus(directComposer);
+          }
+        } catch (ePwaDirectTargetFocus) {}
+        return;
+      }
       var isEarlyGesture = !!(event && (event.type === "touchstart" || event.type === "pointerdown"));
       try {
         if (directComposer.focus) directComposer.focus({ preventScroll: true });
