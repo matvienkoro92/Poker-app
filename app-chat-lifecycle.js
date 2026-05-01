@@ -370,6 +370,7 @@ function initChat() {
         document.documentElement.classList &&
         document.documentElement.classList.contains("poker-ios-pwa");
       if (!pwaIos) return false;
+      return true;
       if (chatIsAdmin) return true;
       if (window.localStorage && localStorage.getItem("poker_chat_keyboard_debug") === "1") return true;
       return /(?:\?|&)chatKeyboardDebug=1(?:&|$)/.test(String(location.search || ""));
@@ -922,6 +923,7 @@ function initChat() {
       }
       try {
         if (typeof bindChatComposerInputEvents === "function") bindChatComposerInputEvents(chatGeneralComposerEl);
+        if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(chatGeneralComposerEl);
       } catch (eBindGenComposer) {}
     }
     if (!chatPersonalComposerEl) {
@@ -931,6 +933,7 @@ function initChat() {
       }
       try {
         if (typeof bindChatComposerInputEvents === "function") bindChatComposerInputEvents(chatPersonalComposerEl);
+        if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(chatPersonalComposerEl);
       } catch (eBindPersonalComposer) {}
     }
     try {
@@ -1151,6 +1154,19 @@ function initChat() {
       var isEarlyGesture = !!(event && (event.type === "touchstart" || event.type === "pointerdown"));
       try {
         if (directComposer.focus) directComposer.focus({ preventScroll: true });
+        if (
+          !isTelegramChatRuntime() &&
+          typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+          pokerPwaStandaloneForKeyboardInset() &&
+          typeof isIosLikeForChatViewport === "function" &&
+          isIosLikeForChatViewport()
+        ) {
+          setTimeout(function () {
+            try {
+              onChatInputFocus(directComposer);
+            } catch (ePwaAreaFocusActivate) {}
+          }, 0);
+        }
         if (!isEarlyGesture) {
           var len = String(directComposer.value || "").length;
           if (typeof directComposer.setSelectionRange === "function") directComposer.setSelectionRange(len, len);
