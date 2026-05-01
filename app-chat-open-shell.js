@@ -273,6 +273,27 @@ function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVer
   } catch (eOpenConvIntent) {}
   var openConvIsGroup = String(userId).indexOf("group_") === 0;
   if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
+  function ensureDialogConvShellStable() {
+    try {
+      if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();
+      if (getDialogsView()) getDialogsView().classList.add("chat-dialogs-view--hidden");
+      if (getGeneralView()) {
+        getGeneralView().classList.add("chat-general-view--hidden");
+        getGeneralView().style.display = "none";
+      }
+      if (getPersonalView()) getPersonalView().classList.remove("chat-personal-view--hidden");
+      if (getListView()) getListView().classList.add("chat-list-view--hidden");
+      if (getConvView()) getConvView().classList.remove("chat-conv-view--hidden");
+      setChatThreadChromeOpen(true);
+      setChatActiveTab("personal");
+      setChatWithUserId(userId);
+      setChatWithUserName(userName || userId);
+      updateChatHeaderStats();
+      updateUnreadDots();
+      syncChatInertForIosAccessory();
+      pokerChatRefreshLongPollTargets();
+    } catch (eDialogConvStable) {}
+  }
   try {
     var myOpenConvId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
     if (myOpenConvId && !openConvIsGroup && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(userId, myOpenConvId)) {
@@ -308,6 +329,20 @@ function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVer
     pokerPushOpenStateDebug("openConvFromDialogs-done", String(userId || ""));
   } catch (eOpenConvDbg1) {}
   pokerChatRefreshLongPollTargets();
+  [140, 420, 900].forEach(function (ms) {
+    setTimeout(function () {
+      try {
+        var convVisible = !!(getConvView() && !getConvView().classList.contains("chat-conv-view--hidden"));
+        var samePeer = !!(getChatWithUserId() && peerChatIdsEqual(getChatWithUserId(), userId));
+        if (convVisible && samePeer && getChatActiveTab() === "personal") return;
+        pokerPushOpenDebug("openConvFromDialogs-stabilize", String(userId || "") + " @" + ms);
+        ensureDialogConvShellStable();
+        if (typeof loadMessages === "function" && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {
+          loadMessages();
+        }
+      } catch (eOpenConvStabilize) {}
+    }, ms);
+  });
   if (window.__pendingDepositMessage && getChatComposerEl()) {
     getChatComposerDrafts().personal = String(window.__pendingDepositMessage);
     getChatComposerEl().value = getChatComposerDrafts().personal;

@@ -616,8 +616,8 @@ add("Poker21 profile privacy/status controls are wired", () =>
   ]) &&
   hasAll("client", [
     "window.pokerApplyPokerPlusStatsVisible",
-    "Ваша статистика теперь видна другим.",
-    "Ваша статистика теперь НЕ видна другим.",
+    "Отвязать аккаунт Poker21 от профиля?",
+    "Обновить",
     "profileStatusVisual",
   ])
 );

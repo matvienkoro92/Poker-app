@@ -249,10 +249,19 @@ function showDialogs() {
   } catch (eShowDialogsDbg0) {}
   try {
     var recentDialogOpenAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
+    var recentDialogOpenPeer = String(window.__pokerChatDialogOpenIntentPeer || "");
     var isBackFromChatChrome = callerLabel === "conv-back-btn" || callerLabel === "general-back-btn";
-    if (isBackFromChatChrome && recentDialogOpenAt && Date.now() - recentDialogOpenAt < 700) {
-      window.__pokerLastShowDialogsReason = "ignored-recent-open-back";
-      pokerPushOpenDebug("showDialogs-recent-open-back-ignored", String(window.__pokerChatDialogOpenIntentPeer || ""));
+    var recentOpenAge = recentDialogOpenAt ? Date.now() - recentDialogOpenAt : Infinity;
+    var recentOpenFresh = !!(recentDialogOpenAt && recentOpenAge < 1800);
+    if (
+      recentOpenFresh &&
+      recentDialogOpenPeer &&
+      (!isBackFromChatChrome || recentOpenAge < 700 || getChatWithUserId())
+    ) {
+      window.__pokerLastShowDialogsReason = isBackFromChatChrome ? "ignored-recent-open-back" : "ignored-recent-open";
+      pokerPushOpenDebug("showDialogs-recent-open-ignored", recentDialogOpenPeer);
+      setChatActiveTab("personal");
+      if (!getChatWithUserId()) setChatWithUserId(normalizePeerIdForChat(recentDialogOpenPeer));
       return;
     }
   } catch (eRecentOpenBack) {}

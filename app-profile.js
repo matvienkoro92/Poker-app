@@ -776,7 +776,7 @@ function initProfilePokerPlus() {
         } else {
           pokerProfileUserInfoCache = null;
           pokerProfileUserInfoCacheAt = 0;
-          setFeedback(nextVisible ? "Ваша статистика теперь видна другим." : "Ваша статистика теперь НЕ видна другим.", false);
+          setFeedback("", false);
         }
       })
       .catch(function () {
@@ -1087,6 +1087,10 @@ function initProfilePokerPlus() {
   function unbindPokerPlus() {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var confirmed =
+      typeof window.confirm !== "function" ||
+      window.confirm("Отвязать аккаунт Poker21 от профиля?");
+    if (!confirmed) return;
     if (!state.isVerified || state.isGuest) {
       setFeedback("Сначала войдите в аккаунт.", true);
       return;

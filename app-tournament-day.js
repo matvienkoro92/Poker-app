@@ -21,6 +21,12 @@ var HOME_FREEROLL_SCHEDULE = [
   { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, R:250₽ / A:500₽, гарантия 100 000₽." }
 ];
 
+var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [
+  { day: "Пн", dow: 1, title: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Вт", dow: 2, title: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
+  { day: "Чт", dow: 4, title: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 }
+];
+
 function pokerGetMskDowAndMinutes(now) {
   now = now || new Date();
   var dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
@@ -66,9 +72,7 @@ function pokerGetDownloadTournamentDayInfo(now) {
 }
 
 function pokerGetDownloadXpokerFreerollInfo(now) {
-  var item = pokerFindNextFreerollItem(HOME_FREEROLL_SCHEDULE.filter(function (slot) {
-    return slot && slot.roomPage === "xpoker";
-  }), now || new Date());
+  var item = pokerFindNextFreerollItem(DOWNLOAD_XPOKER_FREEROLL_SCHEDULE, now || new Date());
   if (!item) return "X-poker · 17:00 МСК";
   return item.day + ", " + item.time + " · " + item.title;
 }

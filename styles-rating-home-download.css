@@ -374,6 +374,21 @@ a.home-mini-icon-item {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.download-app-group--poker21 {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: linear-gradient(180deg, rgba(127, 29, 29, 0.24), rgba(15, 23, 42, 0.34));
+}
+
+.download-app-group--xpoker {
+  border-color: rgba(125, 211, 252, 0.28);
+  background: linear-gradient(180deg, rgba(14, 116, 144, 0.16), rgba(15, 23, 42, 0.34));
 }
 
 .download-app-group .download-app {
@@ -513,6 +528,21 @@ a.home-mini-icon-item {
   background: rgba(248, 250, 252, 0.9);
   border-color: rgba(148, 163, 184, 0.36);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="light"] .download-app-group {
+  background: rgba(248, 250, 252, 0.74);
+  border-color: rgba(148, 163, 184, 0.32);
+}
+
+[data-theme="light"] .download-app-group--poker21 {
+  background: rgba(254, 242, 242, 0.86);
+  border-color: rgba(248, 113, 113, 0.34);
+}
+
+[data-theme="light"] .download-app-group--xpoker {
+  background: rgba(240, 249, 255, 0.86);
+  border-color: rgba(14, 165, 233, 0.28);
 }
 
 [data-theme="light"] .download-app-subinfo__label {
