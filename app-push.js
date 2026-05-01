@@ -31,7 +31,26 @@ function pokerChatPushClientSupported() {
   try {
     var root = document.documentElement;
     if (!root || !root.classList) return;
-    root.classList.toggle("poker-telegram-miniapp", !!(window.Telegram && window.Telegram.WebApp));
+    var standalone = false;
+    try {
+      standalone =
+        (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) ||
+        (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches) ||
+        !!(window.navigator && window.navigator.standalone);
+    } catch (eStandalone) {}
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    var realTelegram = false;
+    if (tg && !standalone) {
+      realTelegram = !!(
+        (tg.initData && String(tg.initData).trim()) ||
+        (tg.initDataUnsafe &&
+          (tg.initDataUnsafe.user ||
+            (tg.initDataUnsafe.start_param != null && String(tg.initDataUnsafe.start_param).trim()))) ||
+        (tg.platform && String(tg.platform).trim().toLowerCase() !== "unknown")
+      );
+    }
+    root.classList.toggle("poker-telegram-miniapp", realTelegram);
   } catch (e) {}
 })();
 

@@ -830,11 +830,13 @@
   line-height: 1.12;
 }
 
-/* iOS PWA keyboard fallback: this file is the late chat layer, so it wins over flow-layout resets. */
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:focus-within,
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:has(textarea:focus),
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:focus-within,
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:has(textarea:focus) {
+/* iOS PWA keyboard fallback: late chat layer, independent of Telegram shim classes. */
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area,
+html.poker-ios-pwa body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:focus-within,
+html.poker-ios-pwa body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:has(textarea:focus),
+html.poker-ios-pwa body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:focus-within,
+html.poker-ios-pwa body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:has(textarea:focus) {
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
@@ -849,4 +851,5 @@ html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body
   transform: none !important;
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
+  --chat-input-lift: 0px !important;
 }

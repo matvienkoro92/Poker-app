@@ -19,6 +19,19 @@ function isTelegramWebApp() {
 
 function isTelegramChatRuntime() {
   try {
+    if (
+      (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      !!(window.navigator && window.navigator.standalone) ||
+      (document.documentElement &&
+        document.documentElement.classList &&
+        (document.documentElement.classList.contains("poker-ios-pwa") ||
+          document.documentElement.classList.contains("poker-android-pwa")))
+    ) {
+      return false;
+    }
+  } catch (ePwaRuntimeGuard) {}
+  try {
     var root = document.documentElement;
     if (
       root &&

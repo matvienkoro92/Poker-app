@@ -5353,6 +5353,7 @@ function initChat() {
         }
       }
       function enforceTelegramChatDefaultComposerState() {
+        if (isPokerIosPwaKeyboardRuntime()) return false;
         if (shouldUseTelegramChatThreadVisualViewportDock()) return false;
         if (!isTelegramChatDefaultMode()) return false;
         try {
@@ -5710,7 +5711,7 @@ function initChat() {
       function setChatKeyboardOpenClasses(open) {
         try {
           if (enforceTelegramChatDefaultComposerState()) return;
-          if (isTelegramChatRuntime()) {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
             clearChatKeyboardViewportState({ keepInsets: true });
             clearChatMessagesKeyboardPad();
             stripChatInputAreaTransforms();
