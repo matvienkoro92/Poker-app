@@ -32,6 +32,7 @@
       safeCall(window.pokerInitDailyPredictionModal);
       safeCall(window.pokerInitImageLightbox);
       safeCall(window.pokerInitPartnershipModal);
+      safeCall(window.initHomeFreerollModal);
     }
   }
 

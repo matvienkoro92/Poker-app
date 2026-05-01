@@ -94,6 +94,7 @@ function renderHomeFreerollSchedule() {
 function openHomeFreerollModal(item) {
   var modal = document.getElementById("homeFreerollModal");
   if (!modal || !item) return;
+  initHomeFreerollModal();
   var dayEl = document.getElementById("homeFreerollModalDay");
   var titleEl = document.getElementById("homeFreerollModalTitle");
   var metaEl = document.getElementById("homeFreerollModalMeta");
@@ -141,6 +142,7 @@ function initHomeFreerollModal() {
     });
   }
 }
+window.initHomeFreerollModal = initHomeFreerollModal;
 
 function updateTournamentDayBlock() {
   try {
