@@ -15,6 +15,9 @@ function setDownloadPage(pageName) {
   });
   var dlCc = typeof pokerGetDownloadCardContentScrollEl === "function" ? pokerGetDownloadCardContentScrollEl() : null;
   if (dlCc) dlCc.scrollTop = 0;
+  try {
+    if (typeof window.pokerUpdateDownloadInfoSubsections === "function") window.pokerUpdateDownloadInfoSubsections();
+  } catch (eDownloadInfo) {}
 }
 
 function pokerGetViewNodes() {

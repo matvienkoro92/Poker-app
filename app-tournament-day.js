@@ -21,6 +21,66 @@ var HOME_FREEROLL_SCHEDULE = [
   { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, R:250₽ / A:500₽, гарантия 100 000₽." }
 ];
 
+function pokerGetMskDowAndMinutes(now) {
+  now = now || new Date();
+  var dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  var dow = dowMap[now.toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" })];
+  var hm = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Moscow",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(now).split(":");
+  return {
+    dow: dow !== undefined ? dow : now.getDay(),
+    minutes: Number(hm[0]) * 60 + Number(hm[1])
+  };
+}
+
+function pokerFindNextFreerollItem(items, now) {
+  items = Array.isArray(items) ? items : HOME_FREEROLL_SCHEDULE;
+  if (!items.length) return null;
+  var msk = pokerGetMskDowAndMinutes(now || new Date());
+  var best = null;
+  var bestDelta = Infinity;
+  items.forEach(function (item) {
+    var dayDelta = (Number(item.dow) - msk.dow + 7) % 7;
+    var itemMinutes = Number(item.hour || 0) * 60 + Number(item.minute || 0);
+    var totalDelta = dayDelta * 1440 + (itemMinutes - msk.minutes);
+    if (totalDelta < 0) totalDelta += 7 * 1440;
+    if (totalDelta < bestDelta) {
+      bestDelta = totalDelta;
+      best = item;
+    }
+  });
+  return best;
+}
+
+function pokerGetDownloadTournamentDayInfo(now) {
+  now = now || new Date();
+  var msk = pokerGetMskDowAndMinutes(now);
+  var dow = msk.dow;
+  if (msk.minutes >= 21 * 60) dow = (dow + 1) % 7;
+  var t = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow] || TOURNAMENT_OF_DAY_BY_WEEKDAY[0];
+  return t.name + " · " + t.guarantee + " · 18:00 МСК";
+}
+
+function pokerGetDownloadXpokerFreerollInfo(now) {
+  var item = pokerFindNextFreerollItem(HOME_FREEROLL_SCHEDULE.filter(function (slot) {
+    return slot && slot.roomPage === "xpoker";
+  }), now || new Date());
+  if (!item) return "X-poker · 17:00 МСК";
+  return item.day + ", " + item.time + " · " + item.title;
+}
+
+function pokerUpdateDownloadInfoSubsections() {
+  var poker21El = document.getElementById("downloadPoker21TournamentInfo");
+  var xpokerEl = document.getElementById("downloadXpokerFreerollInfo");
+  if (poker21El) poker21El.textContent = pokerGetDownloadTournamentDayInfo(new Date());
+  if (xpokerEl) xpokerEl.textContent = pokerGetDownloadXpokerFreerollInfo(new Date());
+}
+window.pokerUpdateDownloadInfoSubsections = pokerUpdateDownloadInfoSubsections;
+
 /** Короткое имя дня недели по календарю Москвы для момента utcMs (Date или число). */
 function pokerMskWeekdayShortAt(utcMs) {
   var wk = new Date(utcMs).toLocaleDateString("en-US", { timeZone: "Europe/Moscow", weekday: "short" });
@@ -35,27 +95,8 @@ function renderHomeFreerollSchedule() {
   el.innerHTML = "";
   var nextIndex = -1;
   try {
-    var now = new Date();
-    var dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-    var nowDow = dowMap[new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" })];
-    var nowHm = new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Europe/Moscow",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    }).format(now).split(":");
-    var nowMinutes = Number(nowHm[0]) * 60 + Number(nowHm[1]);
-    var bestDelta = Infinity;
-    HOME_FREEROLL_SCHEDULE.forEach(function (item, idx) {
-      var dayDelta = (item.dow - nowDow + 7) % 7;
-      var itemMinutes = item.hour * 60 + item.minute;
-      var totalDelta = dayDelta * 1440 + (itemMinutes - nowMinutes);
-      if (totalDelta < 0) totalDelta += 7 * 1440;
-      if (totalDelta < bestDelta) {
-        bestDelta = totalDelta;
-        nextIndex = idx;
-      }
-    });
+    var nextItem = pokerFindNextFreerollItem(HOME_FREEROLL_SCHEDULE, new Date());
+    nextIndex = HOME_FREEROLL_SCHEDULE.indexOf(nextItem);
   } catch (eNextFreeroll) {}
   HOME_FREEROLL_SCHEDULE.forEach(function (item) {
     var row = document.createElement("div");
@@ -152,6 +193,7 @@ function updateTournamentDayBlock() {
   try {
     initHomeFreerollModal();
     renderHomeFreerollSchedule();
+    pokerUpdateDownloadInfoSubsections();
   } catch (eHomeFreerolls) {}
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);

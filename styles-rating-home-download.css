@@ -369,6 +369,17 @@ a.home-mini-icon-item {
   gap: 10px;
 }
 
+.download-app-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.download-app-group .download-app {
+  width: 100%;
+}
+
 .download-app {
   position: relative;
   border: none;
@@ -465,6 +476,51 @@ a.home-mini-icon-item {
 .download-app--pppoker:active,
 .download-app--supremapoker:active {
   box-shadow: none;
+}
+
+.download-app-subinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 66px;
+  padding: 10px 11px;
+  border-radius: 12px;
+  color: rgba(226, 232, 240, 0.92);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.66));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.download-app-subinfo__label {
+  font-size: 10px;
+  line-height: 1.15;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: rgba(250, 204, 21, 0.82);
+}
+
+.download-app-subinfo__text {
+  font-size: 12px;
+  line-height: 1.24;
+  font-weight: 750;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+[data-theme="light"] .download-app-subinfo {
+  color: rgba(30, 41, 59, 0.88);
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(148, 163, 184, 0.36);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="light"] .download-app-subinfo__label {
+  color: #a16207;
+}
+
+[data-theme="light"] .download-app-subinfo__text {
+  color: rgba(15, 23, 42, 0.9);
 }
 
 .download-layout__media {
@@ -1420,4 +1476,3 @@ html.app-view-home .feature--rating-spring-promo .feature__title-prize--spring {
 [data-theme="light"] html.app-view-home .feature--rating-spring-promo .feature__cup {
   color: #ea580c;
 }
-
