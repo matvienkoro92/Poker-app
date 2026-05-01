@@ -152,7 +152,7 @@ html[data-theme="gold"] body,
   --block-bg-solid: #0b1220;
   --block-bg-gradient: linear-gradient(145deg, rgba(21, 28, 42, 0.96), rgba(6, 10, 18, 0.98));
   --btn-on-accent: #090d16;
-  --nav-bg: linear-gradient(180deg, rgba(5, 7, 13, 0.35), rgba(5, 7, 13, 0.94));
+  --nav-bg: linear-gradient(180deg, #101522 0%, #070a12 46%, #05070d 100%);
   --nav-item-bg: linear-gradient(180deg, rgba(22, 28, 42, 0.95), rgba(5, 8, 15, 0.98));
   --chat-input-field-bg: rgba(11, 18, 32, 0.86);
   --chat-input-textarea-bg: rgba(5, 8, 15, 0.9);
