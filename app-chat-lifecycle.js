@@ -7922,21 +7922,26 @@ function initChat() {
         try {
           if (!shouldHoldIosPwaChatComposerFocus(target)) return false;
           clearPendingChatKeyboardDismissTimers();
-          setChatKeyboardOpenClasses(true);
-          attachPwaChatThreadRootScrollLock(target);
-          setPwaIosChatEarlyKeyboardFallback("blur-hold:" + (label || ""));
+          try {
+            document.documentElement.classList.add("chat-keyboard-open");
+            document.body.classList.add("chat-keyboard-open");
+          } catch (ePwaHoldCls) {}
           window.__pokerChatKeyboardOpeningUntil = Math.max(Number(window.__pokerChatKeyboardOpeningUntil) || 0, Date.now() + 900);
-          [0, 70, 170].forEach(function (ms) {
+          var nowHold = Date.now();
+          var lastHold = Number(window.__pokerChatPwaLastBlurHoldAt) || 0;
+          window.__pokerChatPwaLastBlurHoldAt = nowHold;
+          if (nowHold - lastHold > 420) {
             setTimeout(function () {
               try {
                 if (!shouldHoldIosPwaChatComposerFocus(target)) return;
                 if (document.activeElement === target) return;
                 if (target.disabled || target.hidden) return;
+                if (!isChatKeyboardLayoutEffectivelyClosed()) return;
                 if (target.focus) target.focus({ preventScroll: true });
-                forceIosPwaChatTextareaDock(target, "blur-hold:" + (label || "") + ":" + ms);
+                forceIosPwaChatTextareaDock(target, "blur-hold:" + (label || "") + ":140");
               } catch (ePwaRefocusHold) {}
-            }, ms);
-          });
+            }, 140);
+          }
           collectChatOverscrollSnapshot("blur:hold-pwa-focus:" + (label || ""), target);
           return true;
         } catch (eHoldPwaBlur) {
