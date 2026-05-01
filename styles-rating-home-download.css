@@ -722,21 +722,76 @@ body[data-view="cashout"] .cashout-manager-actions {
 }
 
 body[data-view="cashout"] .cashout-manager-btn {
-  min-height: 46px;
+  position: relative;
+  min-height: 74px;
+  padding: 14px 12px;
   border-radius: 14px;
+  font-size: 14px;
   font-weight: 850;
   letter-spacing: 0;
+  text-transform: uppercase;
+  overflow: hidden;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+body[data-view="cashout"] .cashout-manager-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 body[data-view="cashout"] .cashout-manager-btn--here {
-  background: linear-gradient(to top, #ea580c, #fb923c);
-  box-shadow: 0 10px 22px rgba(251, 146, 60, 0.22);
+  color: #fff;
+  background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+  border: 1px solid rgba(254, 202, 202, 0.5);
+  box-shadow:
+    0 6px 20px rgba(185, 28, 28, 0.4),
+    0 0 20px rgba(254, 202, 202, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+body[data-view="cashout"] .cashout-manager-btn--here:hover,
+body[data-view="cashout"] .cashout-manager-btn--here:focus-visible {
+  color: #fff;
+  background: linear-gradient(145deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  border-color: rgba(254, 226, 226, 0.7);
+  box-shadow:
+    0 12px 32px rgba(185, 28, 28, 0.5),
+    0 0 24px rgba(254, 202, 202, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 body[data-view="cashout"] .cashout-manager-btn--tg {
-  color: #93c5fd;
-  border-color: rgba(147, 197, 253, 0.32);
-  background: rgba(15, 23, 42, 0.42);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+
+body[data-view="cashout"] .cashout-manager-btn--tg::before {
+  display: none;
+}
+
+body[data-view="cashout"] .cashout-manager-btn--tg:hover,
+body[data-view="cashout"] .cashout-manager-btn--tg:focus-visible {
+  color: var(--text);
+  background: rgba(248, 250, 252, 0.06);
+  border-color: rgba(248, 250, 252, 0.28);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+body[data-view="cashout"] .cashout-manager-btn:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 430px) {

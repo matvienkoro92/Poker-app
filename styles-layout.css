@@ -673,6 +673,32 @@ body[data-view="profile"] #app.app .card .card__content {
   padding-right: var(--card-padding-x) !important;
   box-sizing: border-box !important;
 }
+
+html:has(body[data-view="download"]),
+html.app-view-download-html-scroll,
+html:has(body[data-view="cashout"]),
+html.app-view-cashout-html-scroll,
+html:has(body[data-view="profile"]),
+html.app-view-profile-html-scroll,
+html:has(body[data-view="download"]) body,
+html.app-view-download-html-scroll body,
+html:has(body[data-view="cashout"]) body,
+html.app-view-cashout-html-scroll body,
+html:has(body[data-view="profile"]) body,
+html.app-view-profile-html-scroll body,
+body[data-view="download"] #app.app .card .card__content,
+body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content {
+  overscroll-behavior-y: auto !important;
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active:not([data-download-page="main"]),
+body[data-view="cashout"] .cashout-manager-block {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* Главная: margin-top: -2mm у .home-welcome-outline + overflow-y:auto на .card__content обрезали верхнюю линию рамки (::before) */
 body[data-view="home"] #app.app .card .card__content {
   padding-top: calc(2mm + 8px) !important;

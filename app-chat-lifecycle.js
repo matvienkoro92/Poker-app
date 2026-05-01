@@ -5681,10 +5681,34 @@ function initChat() {
           if (cover <= 0) return 0;
           document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", cover + "px");
           window.__pokerChatPwaEarlyKeyboardCover = cover;
+          window.__pokerChatPwaEarlyKeyboardCoverAt = Date.now();
           collectChatOverscrollSnapshot("pwa-early-fallback:" + (label || ""), { cover: cover });
           return cover;
         } catch (eEarlyFallback) {
           return 0;
+        }
+      }
+      function clearPwaIosChatEarlyKeyboardFallbackIfViewportLive() {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          var vv = window.visualViewport || null;
+          var ih = window.innerHeight || 0;
+          if (!vv || ih <= 0) return false;
+          var vvh = Number(vv.height) || 0;
+          var offsetTop = Number(vv.offsetTop) || 0;
+          var cover = Math.max(0, Math.round(ih - offsetTop - vvh));
+          var base = Number(window.__pokerChatInnerHBaseline) || 0;
+          var winLoss = base > 260 && ih > 0 ? Math.max(0, Math.round(base - ih)) : 0;
+          var liveCover = Math.max(cover, winLoss);
+          if (liveCover < 72) return false;
+          document.documentElement.style.removeProperty("--chat-keyboard-fallback-inset");
+          window.__pokerChatPwaEarlyKeyboardCover = 0;
+          window.__pokerChatPwaEarlyKeyboardCoverAt = 0;
+          return true;
+        } catch (eClearEarlyFallback) {
+          return false;
         }
       }
       /** PWA/WK: pokerPulseChatFixedViewportHeightAfterKeyboard или гонка кадров оставляют height/min-height на html/body — «отступ» снизу и весь экран сжат до смены раздела */
@@ -6764,6 +6788,19 @@ function initChat() {
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
+            try {
+              if (clearPwaIosChatEarlyKeyboardFallbackIfViewportLive()) earlyPwaCover = 0;
+            } catch (eClearEarlyDock) {}
+          }
+          if (
+            earlyPwaCover > 0 &&
+            earlyPwaAge < 900 &&
+            (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+          ) {
             coverNum = Math.max(coverNum, earlyPwaCover);
           }
         } catch (ePwaEarlyCoverDock) {}
@@ -7357,6 +7394,9 @@ function initChat() {
           coverPxDock = Math.max(coverPxDock, heightLoss);
         }
         if (useThreadDock) {
+          try {
+            clearPwaIosChatEarlyKeyboardFallbackIfViewportLive();
+          } catch (eClearEarlyBeforeDock) {}
           /*
            * iOS PWA: в standalone/WK visualViewport и innerHeight иногда схлопываются вместе,
            * raw cover остаётся около 0, хотя inset выше уже распознал открытую клавиатуру.
@@ -7418,7 +7458,12 @@ function initChat() {
               if (pwaMinCover >= 72 && coverPxDock < pwaMinCover) coverPxDock = pwaMinCover;
               var pwaEarlyCoverFloor = getPwaIosChatEarlyKeyboardCoverPx();
               var pwaEarlyAgeFloor = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-              if (pwaEarlyCoverFloor >= 96 && pwaEarlyAgeFloor < 900 && coverPxDock < pwaEarlyCoverFloor) {
+              if (
+                pwaEarlyCoverFloor >= 96 &&
+                pwaEarlyAgeFloor < 260 &&
+                coverPxDock < pwaEarlyCoverFloor &&
+                !clearPwaIosChatEarlyKeyboardFallbackIfViewportLive()
+              ) {
                 coverPxDock = pwaEarlyCoverFloor;
               }
             } catch (ePwaCoverFloor) {}
@@ -7677,10 +7722,24 @@ function initChat() {
              * нижний floor; последующие vv-события уточнят bottom.
              */
             if (coverDock < 96 && targetArea) {
-              coverDock = Math.max(coverDock, getPwaIosChatEarlyKeyboardCoverPx(), Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
+              var liveViewportReadyDockPass = false;
+              try {
+                liveViewportReadyDockPass = clearPwaIosChatEarlyKeyboardFallbackIfViewportLive();
+              } catch (eLiveDockPass) {}
+              coverDock = Math.max(
+                coverDock,
+                liveViewportReadyDockPass ? 0 : getPwaIosChatEarlyKeyboardCoverPx(),
+                liveViewportReadyDockPass ? 0 : Math.round(Math.max(baseDock, ihDock || 0) * 0.34)
+              );
             } else if (targetArea) {
               var pwaEarlyCoverDockPass = getPwaIosChatEarlyKeyboardCoverPx();
-              if (pwaEarlyCoverDockPass >= 96) coverDock = Math.max(coverDock, pwaEarlyCoverDockPass);
+              if (
+                pwaEarlyCoverDockPass >= 96 &&
+                Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0) < 260 &&
+                !clearPwaIosChatEarlyKeyboardFallbackIfViewportLive()
+              ) {
+                coverDock = Math.max(coverDock, pwaEarlyCoverDockPass);
+              }
             }
             try {
               document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, Math.round(coverDock)) + "px");
