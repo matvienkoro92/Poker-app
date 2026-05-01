@@ -6103,12 +6103,22 @@ function initChat() {
         if (!target) return false;
         var isComposerTarget = false;
         try {
+          if (
+            isPokerIosPwaKeyboardRuntime() &&
+            String(target.tagName || "").toUpperCase() === "TEXTAREA" &&
+            target.closest &&
+            target.closest(".chat-input-area")
+          ) {
+            isComposerTarget = true;
+          }
+          if (!isComposerTarget) {
           isComposerTarget =
             target === chatComposerEl ||
             target === chatGeneralComposerEl ||
             target === chatPersonalComposerEl ||
             (!!chatGeneralComposerMount && chatGeneralComposerMount.contains(target)) ||
             (!!chatPersonalComposerMount && chatPersonalComposerMount.contains(target));
+          }
         } catch (eTgt) {}
         if (!isComposerTarget) return false;
         var gen = generalView && !generalView.classList.contains("chat-general-view--hidden");
@@ -6737,6 +6747,13 @@ function initChat() {
           tabKey = "p";
         }
         var target0 = tabKey === "g" ? g : tabKey === "p" ? p : null;
+        if (!target0 && isPokerIosPwaKeyboardRuntime()) {
+          try {
+            var dockFocusNode = focusTarget || document.activeElement;
+            target0 = dockFocusNode && dockFocusNode.closest ? dockFocusNode.closest(".chat-input-area") : null;
+            if (target0) tabKey = target0 === g ? "g" : target0 === p ? "p" : "focus";
+          } catch (ePwaFocusAreaDock) {}
+        }
         var reuseFixedDock =
           !!tabKey &&
           target0 &&
@@ -6750,7 +6767,7 @@ function initChat() {
               window.__pokerChatTmaDockTabKey === tabKey
             ) ||
             (
-              !isTelegramChatRuntime() &&
+              (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
               typeof pokerPwaStandaloneForKeyboardInset === "function" &&
               pokerPwaStandaloneForKeyboardInset()
             )
