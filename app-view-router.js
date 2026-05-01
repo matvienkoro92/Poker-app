@@ -479,7 +479,7 @@ function setView(viewName, navOpts) {
         } catch (eSetViewDbg4) {}
         window.__pokerPendingChatDeepLinkNeedsLateFlush = true;
       } else if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) {
-      } else if (typeof window.chatShowDialogs === "function") {
+      } else if (!pokerShouldSkipAutoShowChatDialogs("setView-refresh-path") && typeof window.chatShowDialogs === "function") {
         window.chatShowDialogs();
       }
     }
@@ -633,6 +633,7 @@ function setView(viewName, navOpts) {
       if (
         !window.__pendingOpenClubChatGeneral &&
         !window.__pendingOpenChatPersonalFromDeepLink &&
+        !pokerShouldSkipAutoShowChatDialogs("setView-enter") &&
         typeof window.chatShowDialogs === "function"
       ) {
         setTimeout(function () {
@@ -642,6 +643,7 @@ function setView(viewName, navOpts) {
               document.body.getAttribute("data-view") === "chat" &&
               !window.__pendingOpenClubChatGeneral &&
               !window.__pendingOpenChatPersonalFromDeepLink &&
+              !pokerShouldSkipAutoShowChatDialogs("setView-enter-later") &&
               typeof window.chatShowDialogs === "function"
             ) {
               window.chatShowDialogs();
@@ -660,7 +662,7 @@ function setView(viewName, navOpts) {
               window.__pokerKickChatContactsLoad({ forceRerender: true });
             } else if (typeof window.__pokerReloadChatContacts === "function") {
               window.__pokerReloadChatContacts({ forceRerender: true });
-            } else if (typeof window.chatShowDialogs === "function") {
+            } else if (!pokerShouldSkipAutoShowChatDialogs("contacts-kick:" + delay) && typeof window.chatShowDialogs === "function") {
               window.chatShowDialogs();
             }
           } catch (eChatContactsKick) {}
@@ -912,6 +914,7 @@ function pokerFinalizeChatFromTabOpen() {
           document.body.getAttribute("data-view") === "chat" &&
           !window.__pendingOpenClubChatGeneral &&
           !window.__pendingOpenChatPersonalFromDeepLink &&
+          !pokerShouldSkipAutoShowChatDialogs("tab-finalize:" + delay) &&
           typeof window.chatShowDialogs === "function"
         ) {
           window.chatShowDialogs();
@@ -931,6 +934,35 @@ function pokerFinalizeChatFromTabOpen() {
       } catch (eKickChatContactsTab) {}
     }, delay);
   });
+}
+
+function pokerShouldSkipAutoShowChatDialogs(label) {
+  try {
+    var intentAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
+    var intentFresh = !!(intentAt && Date.now() - intentAt < 5000);
+    var conv = document.getElementById("chatConvView");
+    var personal = document.getElementById("chatPersonalView");
+    var general = document.getElementById("chatGeneralView");
+    var convVisible = !!(conv && !conv.classList.contains("chat-conv-view--hidden"));
+    var personalVisible = !!(personal && !personal.classList.contains("chat-personal-view--hidden"));
+    var generalVisible = !!(
+      general &&
+      !general.classList.contains("chat-general-view--hidden") &&
+      general.style.display !== "none"
+    );
+    var chromeOpen = !!(
+      document.body &&
+      document.body.classList &&
+      document.body.classList.contains("chat-conversation-open")
+    );
+    var skip = !!(intentFresh || convVisible || personalVisible || generalVisible || chromeOpen);
+    if (skip && typeof pokerPushOpenStateDebug === "function") {
+      pokerPushOpenStateDebug("auto-show-dialogs-skipped", String(label || ""));
+    }
+    return skip;
+  } catch (eAutoShowGuard) {
+    return false;
+  }
 }
 
 function pokerOpenChatFromTab() {

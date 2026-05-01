@@ -252,11 +252,11 @@ function showDialogs() {
     var recentDialogOpenPeer = String(window.__pokerChatDialogOpenIntentPeer || "");
     var isBackFromChatChrome = callerLabel === "conv-back-btn" || callerLabel === "general-back-btn";
     var recentOpenAge = recentDialogOpenAt ? Date.now() - recentDialogOpenAt : Infinity;
-    var recentOpenFresh = !!(recentDialogOpenAt && recentOpenAge < 1800);
+    var recentOpenFresh = !!(recentDialogOpenAt && recentOpenAge < 5000);
     if (
       recentOpenFresh &&
       recentDialogOpenPeer &&
-      (!isBackFromChatChrome || recentOpenAge < 700 || getChatWithUserId())
+      (!isBackFromChatChrome || recentOpenAge < 700)
     ) {
       window.__pokerLastShowDialogsReason = isBackFromChatChrome ? "ignored-recent-open-back" : "ignored-recent-open";
       pokerPushOpenDebug("showDialogs-recent-open-ignored", recentDialogOpenPeer);
