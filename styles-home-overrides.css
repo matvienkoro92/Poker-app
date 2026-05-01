@@ -32,8 +32,10 @@
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
   align-items: center;
   gap: 10px;
-  margin: 0 0 4px;
-  padding: 7px 8px;
+  margin: 0 calc(-1 * var(--card-padding-x)) 4px;
+  width: calc(100% + (2 * var(--card-padding-x)));
+  box-sizing: border-box;
+  padding: 7px var(--card-padding-x);
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 24px;
   background:
@@ -149,7 +151,8 @@
 
 @media (max-width: 400px) {
   .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
-    padding: 6px 7px;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
   .app.app--view-home .logo__image {
     width: 40px;
