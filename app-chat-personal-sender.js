@@ -327,7 +327,20 @@ function sendMessage(overrideText) {
         focusChatComposerForDesktop();
       } else {
         setTimeout(function () {
-          try { getChatComposerEl().blur(); } catch (e) {}
+          try {
+            var composerAfterSend = getChatComposerEl && getChatComposerEl();
+            if (
+              composerAfterSend &&
+              document.body &&
+              document.body.getAttribute("data-view") === "chat" &&
+              getChatComposerMounted &&
+              getChatComposerMounted() === "personal" &&
+              !composerAfterSend.disabled &&
+              !composerAfterSend.hidden
+            ) {
+              if (composerAfterSend.focus) composerAfterSend.focus({ preventScroll: true });
+            }
+          } catch (e) {}
         }, 50);
         setTimeout(function () {
           try {
