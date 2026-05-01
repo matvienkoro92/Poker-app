@@ -100,6 +100,7 @@ function initChat() {
   var chatDialogClub = document.getElementById("chatDialogClub");
   var convTitle = document.getElementById("chatConvTitle");
   var convTitleFish = document.getElementById("chatConvTitleFish");
+  var convTitleLevel = document.getElementById("chatConvTitleLevel");
   var convTitleId = document.getElementById("chatConvTitleId");
   var convVerifiedBadge = document.getElementById("chatConvVerifiedBadge");
   var convGroupDescEl = document.getElementById("chatConvGroupDesc");
@@ -117,18 +118,27 @@ function initChat() {
       convTitleFish.hidden = true;
       convTitleFish.removeAttribute("src");
       convTitleFish.removeAttribute("data-status-fish-level");
+      if (convTitleLevel) {
+        convTitleLevel.hidden = true;
+        convTitleLevel.textContent = "";
+        convTitleLevel.removeAttribute("data-status-level");
+      }
       return;
     }
     convTitleFish.src = pokerProfileStatusFishSrc(fishLevel);
     convTitleFish.setAttribute("data-status-fish-level", String(fishLevel));
     convTitleFish.hidden = false;
+    if (convTitleLevel) {
+      convTitleLevel.textContent = "Уровень: " + String(fishLevel);
+      convTitleLevel.setAttribute("data-status-level", String(fishLevel));
+      convTitleLevel.hidden = false;
+    }
   }
   function syncChatConvTitleMetaVisibility() {
     var wrap = convTitleId && convTitleId.closest ? convTitleId.closest(".chat-conv-peer-title-chip__id") : null;
     if (!wrap) return;
     var hasId = !!(convTitleId && String(convTitleId.textContent || "").trim());
-    var hasVerified = !!(convVerifiedBadge && !convVerifiedBadge.classList.contains("chat-verified-badge--hidden"));
-    wrap.hidden = !(hasId || hasVerified);
+    wrap.hidden = !hasId;
   }
   function setChatConvTitleIdText(value) {
     if (!convTitleId) return;

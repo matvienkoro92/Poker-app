@@ -723,6 +723,13 @@ button.chat-conv-group-add-btn[hidden] {
   width: 21px;
   height: 21px;
 }
+.chat-conv-peer-title-chip__level {
+  margin-left: 0;
+  font-size: 11px;
+}
+.chat-conv-peer-title-chip__level[hidden] {
+  display: none !important;
+}
 .chat-verified-badge {
   display: inline-flex;
   align-items: center;
