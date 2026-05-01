@@ -630,6 +630,7 @@ function initProfilePokerPlus() {
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
   var statsVisibleYes = document.getElementById("profilePokerPlusStatsVisibleYes");
   var statsVisibleNo = document.getElementById("profilePokerPlusStatsVisibleNo");
+  var statsVisibilityState = document.getElementById("profilePokerPlusStatsVisibilityState");
   var statusLinkHint = document.getElementById("profileStatusLinkHint");
   var profileStatusProgressText = document.getElementById("profileStatusProgressText");
   var profileStatusTitle = document.getElementById("profileStatusTitle");
@@ -739,6 +740,13 @@ function initProfilePokerPlus() {
     statsVisibleNo.setAttribute("aria-pressed", pokerPlusStatsVisibleToOthers ? "false" : "true");
     statsVisibleYes.disabled = !!saving;
     statsVisibleNo.disabled = !!saving;
+    if (statsVisibilityState) {
+      statsVisibilityState.textContent = pokerPlusStatsVisibleToOthers
+        ? "Статистика доступна другим игрокам."
+        : "Статистика скрыта от других игроков.";
+      statsVisibilityState.classList.toggle("profile-pokerplus-stats-visibility__state--visible", pokerPlusStatsVisibleToOthers);
+      statsVisibilityState.classList.toggle("profile-pokerplus-stats-visibility__state--hidden", !pokerPlusStatsVisibleToOthers);
+    }
   }
 
   function applyPokerPlusStatsVisible(value) {
