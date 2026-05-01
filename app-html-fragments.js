@@ -98,6 +98,30 @@
     return loading[src];
   };
 
+  (function pokerEagerHydrateGlobalModals() {
+    function run() {
+      try {
+        if (document.getElementById("globalModalsFragmentHost")) {
+          window.pokerEnsureGlobalModalsHtml();
+        } else {
+          runFragmentHooks("global-modals");
+        }
+      } catch (eEagerGlobalModals) {}
+    }
+    function schedule() {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(run, { timeout: 900 });
+        return;
+      }
+      setTimeout(run, 120);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", schedule, { once: true });
+    } else {
+      schedule();
+    }
+  })();
+
   document.addEventListener(
     "click",
     function (e) {
