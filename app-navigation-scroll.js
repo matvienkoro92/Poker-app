@@ -128,13 +128,24 @@ var pokerLastMainScrollUserIntentAt = 0;
   } catch (eBindMainScrollIntent) {}
 })();
 
+function pokerGetLastMainScrollUserIntentAt() {
+  return pokerLastMainScrollUserIntentAt || 0;
+}
+window.pokerGetLastMainScrollUserIntentAt = pokerGetLastMainScrollUserIntentAt;
+
+function pokerHasRecentMainScrollUserIntent(ms) {
+  return Date.now() - pokerGetLastMainScrollUserIntentAt() < (Number(ms) || 0);
+}
+window.pokerHasRecentMainScrollUserIntent = pokerHasRecentMainScrollUserIntent;
+
 function pokerScheduleScrollMainDocumentToTop(delay, expectedView) {
   var scheduledAt = Date.now();
   var startY = getMainDocumentScrollY();
   setTimeout(function () {
     if (pokerLastMainScrollUserIntentAt >= scheduledAt) return;
+    if (pokerHasRecentMainScrollUserIntent(900)) return;
     if (expectedView && document.body && document.body.getAttribute && document.body.getAttribute("data-view") !== expectedView) return;
-    if (getMainDocumentScrollY() > Math.max(2, startY + 2)) return;
+    if (Math.abs(getMainDocumentScrollY() - startY) > 2) return;
     scrollMainDocumentToTop();
   }, Math.max(0, Number(delay) || 0));
 }

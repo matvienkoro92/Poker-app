@@ -820,20 +820,32 @@ function setView(viewName, navOpts) {
     };
     if (restoreScrollOnEnter && Object.prototype.hasOwnProperty.call(viewScrollMemory, viewName)) {
       var yBack = viewScrollMemory[viewName];
-      rafScroll(function () {
+      var restoreScheduledAt = Date.now();
+      var restoreMainScrollIfStillIdle = function () {
+        try {
+          if (
+            typeof window.pokerGetLastMainScrollUserIntentAt === "function" &&
+            window.pokerGetLastMainScrollUserIntentAt() >= restoreScheduledAt
+          ) {
+            return;
+          }
+        } catch (eRestoreIntent) {}
         setMainDocumentScrollY(yBack);
+      };
+      rafScroll(function () {
+        restoreMainScrollIfStillIdle();
         rafScroll(function () {
-          setMainDocumentScrollY(yBack);
+          restoreMainScrollIfStillIdle();
         });
       });
       setTimeout(function () {
-        setMainDocumentScrollY(yBack);
+        restoreMainScrollIfStillIdle();
       }, 0);
       setTimeout(function () {
-        setMainDocumentScrollY(yBack);
+        restoreMainScrollIfStillIdle();
       }, 50);
       setTimeout(function () {
-        setMainDocumentScrollY(yBack);
+        restoreMainScrollIfStillIdle();
       }, 120);
     } else {
       scrollMainDocumentToTop();
