@@ -1251,6 +1251,32 @@ function initChat() {
             isIosLikeForChatViewport() &&
             isChatThreadComposerKeyboardDom(pwaComposer);
         } catch (ePwaAreaModeCheck) {}
+        if (isIosPwaThreadComposerArea && event) {
+          var evType = String(event.type || "");
+          var pointerType = String(event.pointerType || "");
+          var nowAreaFocus = Date.now();
+          var lastAreaFocusAt = Number(window.__pokerChatPwaAreaFocusGestureAt) || 0;
+          var lastAreaFocusTarget = window.__pokerChatPwaAreaFocusGestureTarget || null;
+          var directComposerTap = !!(target === pwaComposer || (target && pwaComposer.contains && pwaComposer.contains(target)));
+          if (evType === "pointerdown" && pointerType && pointerType !== "mouse") {
+            window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
+            window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
+            return;
+          }
+          if (evType === "click" && lastAreaFocusTarget === pwaComposer && nowAreaFocus - lastAreaFocusAt < 900) {
+            try {
+              if (!directComposerTap && event.preventDefault) event.preventDefault();
+            } catch (ePwaAreaClickPrevent) {}
+            return;
+          }
+          if (evType === "touchstart") {
+            window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
+            window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
+            try {
+              if (!directComposerTap && event.preventDefault) event.preventDefault();
+            } catch (ePwaAreaTouchPrevent) {}
+          }
+        }
         if (isIosPwaThreadComposerArea && (target === pwaComposer || (target && pwaComposer.contains && pwaComposer.contains(target)))) {
           return;
         }
@@ -7313,9 +7339,10 @@ function initChat() {
         try {
           if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
           if (document.activeElement !== focusTarget) return false;
-          if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return true;
           var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-          return focusAge > 650;
+          if (focusAge < 950) return false;
+          if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return true;
+          return focusAge > 1450;
         } catch (ePwaDockNow) {
           return false;
         }
