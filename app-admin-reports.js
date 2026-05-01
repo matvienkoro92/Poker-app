@@ -18,6 +18,59 @@ function initAdminReportModal() {
   var VIKA_AUTHOR_ID = "tg_1897001087";
   var VIKA_TELEGRAM_NUM = 1897001087;
 
+  function canViewSentReports() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.adminAccess === true) return true;
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.adminAccess === true) return true;
+    } catch (eAuth) {}
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
+      if (authUser) users.push(authUser);
+    } catch (eAuthUser) {}
+    try {
+      var recUser = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (recUser && recUser.user) users.push(recUser.user);
+    } catch (eRecUser) {}
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i] || {};
+      var id = u.id != null ? String(u.id).replace(/^tg_/, "").trim() : "";
+      if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+      var username = u.username != null ? String(u.username).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1_matvienko") return true;
+      var email = u.email != null ? String(u.email).trim().toLowerCase() : "";
+      if (email === "matvienkoro92@gmail.com") return true;
+    }
+    return false;
+  }
+
+  function syncSentReportsAccess() {
+    var allowed = canViewSentReports();
+    if (tabs && tabs.length) {
+      tabs.forEach(function (tab) {
+        if (tab.getAttribute("data-admin-report-tab") === "sent") tab.hidden = !allowed;
+      });
+    }
+    if (panels && panels.length) {
+      panels.forEach(function (panel) {
+        if (panel.getAttribute("data-admin-report-panel") === "sent") panel.hidden = !allowed;
+      });
+    }
+    if (!allowed && sentList) sentList.innerHTML = "";
+    return allowed;
+  }
+
   /** Суммирует доп. строки отчёта в map по названию (без дубля с extraFields + legacy). */
   function mergeReportExtrasIntoMap(map, r) {
     if (!r || !map) return;
@@ -119,6 +172,7 @@ function initAdminReportModal() {
 
   function setActiveTab(name) {
     if (!tabs || !panels) return;
+    if (name === "sent" && !canViewSentReports()) name = "form";
     tabs.forEach(function (tab) {
       var isActive = tab.getAttribute("data-admin-report-tab") === name;
       tab.classList.toggle("admin-report-tab--active", isActive);
@@ -160,6 +214,10 @@ function initAdminReportModal() {
 
   function loadSentReports() {
     if (!sentList) return;
+    if (!canViewSentReports()) {
+      sentList.innerHTML = "";
+      return;
+    }
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
@@ -605,6 +663,7 @@ function initAdminReportModal() {
   function openModal() {
     modal.setAttribute("aria-hidden", "false");
     if (document.body) document.body.style.overflow = "hidden";
+    var mayViewSent = syncSentReportsAccess();
     editingReportId = null;
     editingReport = null;
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
@@ -612,7 +671,7 @@ function initAdminReportModal() {
     if (dateEl) dateEl.textContent = info.label;
     setActiveTab("form");
     fillReportForm(null);
-    loadSentReports();
+    if (mayViewSent) loadSentReports();
   }
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
@@ -621,6 +680,7 @@ function initAdminReportModal() {
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
+        if (name === "sent" && !canViewSentReports()) return;
         setActiveTab(name);
         if (name === "sent") loadSentReports();
       });
@@ -819,8 +879,13 @@ function initAdminReportModal() {
             editingReportId = null;
             editingReport = null;
             if (submitBtn) submitBtn.textContent = "Отправить отчёт";
-            loadSentReports();
-            setActiveTab("sent");
+            fillReportForm(null);
+            if (canViewSentReports()) {
+              loadSentReports();
+              setActiveTab("sent");
+            } else if (tg && tg.showAlert) {
+              tg.showAlert("Отчёт отправлен.");
+            }
           } else {
             if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка отправки.");
           }
