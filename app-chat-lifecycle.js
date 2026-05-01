@@ -7338,12 +7338,35 @@ function initChat() {
       function shouldApplyIosPwaChatComposerDockNow(focusTarget) {
         try {
           if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
-          if (document.activeElement !== focusTarget) return false;
+          if (!isIosPwaChatComposerLikelyActiveSession(focusTarget)) return false;
           var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           if (focusAge < 950) return false;
           if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return true;
           return focusAge > 1450;
         } catch (ePwaDockNow) {
+          return false;
+        }
+      }
+      function isIosPwaChatComposerLikelyActiveSession(focusTarget) {
+        try {
+          if (!focusTarget || !isChatThreadComposerKeyboardDom(focusTarget)) return false;
+          if (document.activeElement === focusTarget) return true;
+          if (isRecentIosPwaChatComposerUserDismiss()) return false;
+          var active = document.activeElement || null;
+          if (
+            active &&
+            active !== document.body &&
+            active !== document.documentElement &&
+            String(active.tagName || "").toUpperCase() !== "BODY" &&
+            String(active.tagName || "").toUpperCase() !== "HTML"
+          ) {
+            var tag = String(active.tagName || "").toUpperCase();
+            if ((tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") && active !== focusTarget) return false;
+          }
+          var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+          if (focusAge > 0 && focusAge < 3200 && (focusTarget === chatComposerEl || isChatThreadComposerKeyboardDom(focusTarget))) return true;
+          return false;
+        } catch (ePwaLikelyActive) {
           return false;
         }
       }
@@ -7371,7 +7394,7 @@ function initChat() {
               focusNode = chatComposerEl;
             }
           } catch (eCssOnlyFocusFallback) {}
-          if (document.activeElement !== focusNode) return false;
+          if (!isIosPwaChatComposerLikelyActiveSession(focusNode)) return false;
           var area = focusNode && focusNode.closest ? focusNode.closest(".chat-input-area") : null;
           if (!area) return false;
           var bottomPx = getCssOnlyIosPwaChatComposerBottomPx();
@@ -8123,7 +8146,7 @@ function initChat() {
         var isTelegramChatFocus = isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime();
         function runPwaChatComposerDockPass(label) {
           if (!isIosPwaChatKb || !isChatThreadComposerKeyboardDom(focusTarget)) return;
-          if (document.activeElement !== focusTarget) {
+          if (!isIosPwaChatComposerLikelyActiveSession(focusTarget)) {
             collectChatOverscrollSnapshot("focus:pwa-dock:skip-inactive:" + (label || ""), focusTarget);
             return;
           }
