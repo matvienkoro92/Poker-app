@@ -256,7 +256,7 @@ function showDialogs() {
     if (
       recentOpenFresh &&
       recentDialogOpenPeer &&
-      (!isBackFromChatChrome || recentOpenAge < 700)
+      (!isBackFromChatChrome || recentOpenAge < 120)
     ) {
       window.__pokerLastShowDialogsReason = isBackFromChatChrome ? "ignored-recent-open-back" : "ignored-recent-open";
       pokerPushOpenDebug("showDialogs-recent-open-ignored", recentDialogOpenPeer);
