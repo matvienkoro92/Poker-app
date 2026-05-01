@@ -145,16 +145,28 @@
 }
 .chat-voice-preview__send {
   margin-left: auto;
-  padding: 6px 14px;
-  border: none;
-  border-radius: 8px;
-  background: var(--accent);
+  min-width: 38px;
+  min-height: 32px;
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.42), transparent 34%),
+    linear-gradient(145deg, #fbbf24 0%, #fb923c 44%, #ea580c 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease;
 }
-.chat-voice-preview__send:hover { opacity: 0.9; }
+.chat-voice-preview__send:hover {
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow: 0 10px 22px rgba(234, 88, 12, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+.chat-voice-preview__send:active {
+  transform: translateY(1px) scale(0.97);
+}
 .chat-voice-preview__stop-btn {
   margin-left: 8px;
   padding: 4px 12px;
@@ -1011,6 +1023,84 @@ img.chat-contact__avatar {
   color: #fca5a5;
   animation: chat-voice-pulse 1s ease-in-out infinite;
 }
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--icon {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.44), transparent 34%),
+    linear-gradient(145deg, #fbbf24 0%, #fb923c 43%, #ea580c 100%);
+  color: #fffaf0;
+  box-shadow:
+    0 10px 24px rgba(234, 88, 12, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(124, 45, 18, 0.22);
+  text-shadow: 0 1px 3px rgba(124, 45, 18, 0.34);
+  transition:
+    transform 0.14s ease,
+    filter 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--icon:hover {
+  opacity: 1;
+  filter: brightness(1.06) saturate(1.06);
+  box-shadow:
+    0 12px 28px rgba(234, 88, 12, 0.36),
+    0 3px 10px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 rgba(124, 45, 18, 0.2);
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--icon:active {
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(0.98);
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--icon:focus-visible,
+.chat-voice-preview__send:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.38),
+    0 12px 28px rgba(234, 88, 12, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--mic {
+  border-color: rgba(251, 146, 60, 0.48);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 58%, rgba(124, 45, 18, 0.92) 100%);
+  color: #fed7aa;
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.32),
+    0 0 0 1px rgba(251, 146, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.36);
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-send-btn--mic:hover {
+  border-color: rgba(251, 191, 36, 0.62);
+  filter: brightness(1.08) saturate(1.04);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.36),
+    0 0 0 1px rgba(251, 146, 60, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.view--active[data-view="chat"] .chat-send-btn.chat-voice-btn--recording {
+  border-color: rgba(248, 113, 113, 0.7);
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.24), transparent 34%),
+    linear-gradient(145deg, #dc2626 0%, #991b1b 100%);
+  color: #fff1f2;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 10px 24px rgba(127, 29, 29, 0.38);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-send-btn.chat-send-btn--mic {
+  border-color: rgba(234, 88, 12, 0.28);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.78), transparent 34%),
+    linear-gradient(145deg, #fff7ed 0%, #fed7aa 54%, #fb923c 100%);
+  color: #9a3412;
+  box-shadow:
+    0 8px 20px rgba(234, 88, 12, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  text-shadow: none;
+}
 
 .chat-emoji-btn {
   position: absolute;
@@ -1074,4 +1164,3 @@ img.chat-contact__avatar {
 .chat-emoji-picker__emoji:hover {
   background: rgba(148, 163, 184, 0.2);
 }
-
