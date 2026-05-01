@@ -246,16 +246,24 @@
 .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card {
   border: 1px solid rgba(186, 230, 253, 0.6) !important;
   border-radius: 22px !important;
-  background: linear-gradient(145deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.98)) !important;
-  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.25),
-              0 4px 20px rgba(56, 189, 248, 0.15),
-              inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(186, 230, 253, 0.26), transparent 34%),
+    linear-gradient(145deg, rgba(30, 58, 95, 0.96), rgba(15, 23, 42, 0.99)) !important;
+  box-shadow:
+              0 0 0 1px rgba(186, 230, 253, 0.28),
+              0 12px 28px rgba(8, 47, 73, 0.34),
+              0 4px 20px rgba(56, 189, 248, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18),
+              inset 0 -14px 24px rgba(2, 6, 23, 0.28) !important;
 }
 .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover,
 .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover {
-  box-shadow: 0 0 0 1px rgba(186, 230, 253, 0.35),
-              0 6px 24px rgba(56, 189, 248, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+              0 0 0 1px rgba(186, 230, 253, 0.4),
+              0 16px 34px rgba(8, 47, 73, 0.4),
+              0 8px 28px rgba(56, 189, 248, 0.24),
+              inset 0 1px 0 rgba(255, 255, 255, 0.22),
+              inset 0 -14px 24px rgba(2, 6, 23, 0.24) !important;
 }
 .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize,
 .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize {
@@ -265,16 +273,24 @@
 [data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card,
 [data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card {
   border: 1px solid rgba(56, 189, 248, 0.5) !important;
-  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%) !important;
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2),
-              0 4px 16px rgba(56, 189, 248, 0.12),
-              inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%) !important;
+  box-shadow:
+              0 0 0 1px rgba(56, 189, 248, 0.22),
+              0 12px 24px rgba(14, 116, 144, 0.14),
+              0 4px 16px rgba(56, 189, 248, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.98),
+              inset 0 -12px 22px rgba(14, 165, 233, 0.12) !important;
 }
 [data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover,
 [data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card:hover {
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35),
-              0 6px 20px rgba(56, 189, 248, 0.18),
-              inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  box-shadow:
+              0 0 0 1px rgba(56, 189, 248, 0.38),
+              0 14px 28px rgba(14, 116, 144, 0.16),
+              0 6px 22px rgba(56, 189, 248, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 1),
+              inset 0 -12px 22px rgba(14, 165, 233, 0.1) !important;
 }
 [data-theme="light"] .view--active[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize,
 [data-theme="light"] .view[data-view="hall-of-fame"] .hall-of-fame__winter-rating-card .feature__title-prize {
