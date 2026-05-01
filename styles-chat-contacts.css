@@ -549,15 +549,15 @@ body[data-view="chat"]
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   pointer-events: auto;
   position: relative;
-  z-index: 8;
+  z-index: 18;
   align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 44px;
-  width: 44px;
-  min-width: 44px;
-  max-width: 44px;
+  flex: 0 0 54px;
+  width: 54px;
+  min-width: 54px;
+  max-width: 54px;
   min-height: var(--chat-general-header-strip-min-height);
   height: var(--chat-general-header-strip-min-height);
   max-height: var(--chat-general-header-strip-min-height);
@@ -589,8 +589,8 @@ body[data-view="chat"]
 .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back::before {
   content: "";
   position: absolute;
-  inset: -9px -12px;
-  border-radius: 22px;
+  inset: -10px -14px;
+  border-radius: 24px;
 }
 .chat-general-header__title-btn {
   pointer-events: auto;
@@ -681,14 +681,14 @@ body[data-view="chat"]
 .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back {
   pointer-events: auto;
   position: relative;
-  z-index: 8;
+  z-index: 18;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 44px;
-  width: 44px;
-  min-width: 44px;
-  max-width: 44px;
+  flex: 0 0 54px;
+  width: 54px;
+  min-width: 54px;
+  max-width: 54px;
   min-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));
   max-height: var(--chat-general-header-strip-min-height, var(--app-back-btn-min-height));

@@ -9059,14 +9059,19 @@ function initChat() {
         }
       });
     });
+    var lastConvBackAt = 0;
     function handleConvBack(e) {
       e.preventDefault();
       e.stopPropagation();
+      var now = Date.now();
+      if (now - lastConvBackAt < 450) return;
       if (e.type === "touchend" && window.__touchWasScroll && window.__touchWasScroll()) return;
+      lastConvBackAt = now;
       pokerPushOpenSetCaller("conv-back-btn");
       showDialogs();
     }
     if (backBtn) {
+      backBtn.addEventListener("touchstart", handleConvBack, { passive: false });
       backBtn.addEventListener("touchend", handleConvBack, { passive: false });
       backBtn.addEventListener("click", handleConvBack);
     }
@@ -10125,14 +10130,19 @@ function initChat() {
   }
   updateAdminShiftOnline();
 
+  var lastChatGeneralBackAt = 0;
   function handleChatGeneralBack(e) {
     e.preventDefault();
     e.stopPropagation();
+    var now = Date.now();
+    if (now - lastChatGeneralBackAt < 450) return;
     if (e.type === "touchend" && window.__touchWasScroll && window.__touchWasScroll()) return;
+    lastChatGeneralBackAt = now;
     pokerPushOpenSetCaller("general-back-btn");
     showDialogs();
   }
   if (chatGeneralBackBtn) {
+    chatGeneralBackBtn.addEventListener("touchstart", handleChatGeneralBack, { passive: false });
     chatGeneralBackBtn.addEventListener("touchend", handleChatGeneralBack, { passive: false });
     chatGeneralBackBtn.addEventListener("click", handleChatGeneralBack);
   }
