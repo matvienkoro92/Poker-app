@@ -103,6 +103,7 @@ Smoke закрепляет, что эти домены больше не воз�
 - Исправлялись проблемы первого клика, chat tabbar, init dialogs, auth/network retry и исчезающего tabbar.
 - Чатовые dialogs и lifecycle защищены lazy-loading smoke-проверками.
 - По iOS PWA keyboard/chat composer добавлена отдельная документация `chat-keyboard-pwa.md` и расширенная диагностика `Keyboard Lab`: теперь видны классы keyboard-state, CSS-переменные, header/messages/composer rect/computed styles и root/shell scroll.
+- Серия правок от 2026-05-01 задокументирована в `2026-05-01-stability-worklog.md`: первый фокус, выезд keyboard/composer, задержки кликов, видимость отчетов только админам и повторная инициализация rating top wins после lazy hydration.
 
 ## Текущее состояние
 
