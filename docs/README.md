@@ -9,6 +9,7 @@ Current documentation:
 - `project-tasks.md` - active backlog under the `ЗАДАЧИ` label.
 - `progress-summary.md` - current summary of completed quality/performance/architecture work and remaining priorities.
 - `frontend-map.md` - current frontend file ownership map.
+- `chat-keyboard-pwa.md` - iOS PWA chat keyboard investigation, current fixes, diagnostics, and invariants.
 - `../CRON-SETUP.md` - cron setup notes.
 - `../CARD_COLORS.md` - card suit color convention used by the project.
 - `../assets/README.md` - asset folder naming notes.

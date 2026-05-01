@@ -27,6 +27,7 @@
 - `app-chat-general-loader.js`, `app-chat-general-sender.js`, `app-chat-personal-loader.js`, `app-chat-personal-sender.js` — загрузка и отправка сообщений общего/личного чата.
 - `app-chat-message-builders.js`, `app-chat-message-render-helpers.js`, `app-chat-outgoing-helpers.js`, `app-chat-reactions.js`, `app-chat-edit-delete-ui.js`, `app-chat-context-menu.js` — рендер сообщений, outgoing placeholders, реакции, edit/delete и context menu.
 - `app-chat-conversation-shell.js`, `app-chat-tab-dialog-shell.js`, `app-chat-open-shell.js`, `app-chat-keyboard.js`, `app-chat-polling.js`, `app-chat-auth-guard.js` — оболочка диалогов, открытие чатов, keyboard/WebView fixes, polling и защита авторизации.
+- `app-webview-keyboard.js` — общие WebView/iOS keyboard helpers и `Keyboard Lab`; при PWA iOS chat regressions сначала смотреть `docs/chat-keyboard-pwa.md` и расширенные метрики lab.
 - `app-chat-group-pickers.js`, `app-chat-group-add-members.js`, `app-chat-group-create.js`, `app-chat-group-info.js` — групповые чаты.
 - `app-chat-user-modal.js`, `app-chat-club-access.js`, `app-chat-club-gate.js`, `app-chat-self-pins.js`, `app-chat-friend-actions.js`, `app-chat-unread.js` — профиль участника, доступ в клубный чат, закрепы, друзья и unread-индикаторы.
 
@@ -86,6 +87,14 @@
 - `styles-layout.css` — bottom nav, boot overlay и поздние scroll/layout fallbacks.
 - `styles-chat-overlays.css` — поздние skeleton/iOS compose overlay правила.
 - `styles-home-overrides.css` — поздние home tournament/freeroll overrides.
+
+## iOS PWA Chat Keyboard
+
+- Документ расследования: `docs/chat-keyboard-pwa.md`.
+- Основная логика: `app-chat-lifecycle.js` (`chat-keyboard-open`, focus/touch/blur, root-scroll lock, composer dock).
+- Диагностика: `app-webview-keyboard.js` (`Keyboard Lab` показывает `chatHdr`, `chatMsgs`, `chatCmp`, CSS-переменные и root/shell scroll).
+- Поздние CSS overrides: `styles-home-sections.css`; порядок каскада важен, потому что эти правила перебивают split chat CSS.
+- Не смешивать PWA iOS и Telegram Mini App ветки: наличие `window.Telegram.WebApp` в PWA не равно Telegram runtime.
 
 ## Next Development Rules
 

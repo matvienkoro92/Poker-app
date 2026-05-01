@@ -102,6 +102,7 @@ Smoke закрепляет, что эти домены больше не воз�
 - Закреплен smoke на tabbar и ключевые переходы.
 - Исправлялись проблемы первого клика, chat tabbar, init dialogs, auth/network retry и исчезающего tabbar.
 - Чатовые dialogs и lifecycle защищены lazy-loading smoke-проверками.
+- По iOS PWA keyboard/chat composer добавлена отдельная документация `chat-keyboard-pwa.md` и расширенная диагностика `Keyboard Lab`: теперь видны классы keyboard-state, CSS-переменные, header/messages/composer rect/computed styles и root/shell scroll.
 
 ## Текущее состояние
 
@@ -115,6 +116,7 @@ Smoke закрепляет, что эти домены больше не воз�
 
 ### P1
 
+- Закончить стабилизацию iOS PWA chat keyboard по метрикам из `Keyboard Lab`, а не визуально: проверить, что `chat-keyboard-open`, fixed header, composer bottom и root-scroll включаются в одном сценарии.
 - Расширить backend contract tests:
   - friends;
   - auth-email / auth-pwa-code;
