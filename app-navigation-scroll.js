@@ -199,13 +199,9 @@ function scrollHomeToTop() {
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
     scrollHomeToTop();
-    pokerScheduleScrollMainDocumentToTop(50, "home");
-    pokerScheduleScrollMainDocumentToTop(300, "home");
   });
 } else {
   scrollHomeToTop();
-  pokerScheduleScrollMainDocumentToTop(50, "home");
-  pokerScheduleScrollMainDocumentToTop(300, "home");
 }
 window.addEventListener("pageshow", function (e) {
   if (e && e.persisted) scrollHomeToTop();

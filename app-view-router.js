@@ -850,7 +850,7 @@ function setView(viewName, navOpts) {
     } else {
       scrollMainDocumentToTop();
       /* Чат: только синхронный сброс — повторный rAF доводил окно и давал «вверх—вниз» в первые сотни мс вместе с лентой. */
-      if (viewName !== "chat") {
+      if (viewName !== "chat" && viewName !== "home") {
         rafScroll(function () {
           if (typeof window.pokerScheduleScrollMainDocumentToTop === "function") {
             window.pokerScheduleScrollMainDocumentToTop(0);
