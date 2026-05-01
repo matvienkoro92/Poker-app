@@ -73,7 +73,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 /* Свой профиль: нельзя голосовать за себя — только список проголосовавших */
 .respect-voters-modal--no-vote .respect-voters-modal__actions {
@@ -81,7 +81,7 @@
 }
 .respect-voters-modal__btn {
   flex: 1;
-  min-width: 120px;
+  min-width: 0;
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 600;

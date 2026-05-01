@@ -12,8 +12,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  align-items: stretch;
 }
 .chat-user-modal__respect-btn {
+  min-width: 0;
   min-height: 56px;
   padding: 8px 12px;
   font-size: 14px;
@@ -149,4 +151,3 @@
   transform: translateY(-1px);
   filter: brightness(1.06);
 }
-
