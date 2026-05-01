@@ -2042,6 +2042,15 @@ function initProfileFriends() {
                   : true;
               if (!confirmed) return;
               removeBtn.disabled = true;
+              var removedSnapshot = item.cloneNode(true);
+              var nextSibling = item.nextSibling;
+              var removedUserId = item.getAttribute("data-user-id");
+              var removedChatUserId = item.getAttribute("data-chat-user-id");
+              if (typeof pokerRemoveLocalFriendFromChatContacts === "function") {
+                pokerRemoveLocalFriendFromChatContacts(removedUserId || removedChatUserId);
+              } else {
+                pokerRemoveFriendFromOpenFriendsList(removedUserId, removedChatUserId);
+              }
               fetch(base + "/api/friends", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
@@ -2052,20 +2061,45 @@ function initProfileFriends() {
                 })
                 .then(function (d) {
                   if (d && d.ok) {
-                    pokerRemoveFriendFromOpenFriendsList(
-                      item.getAttribute("data-user-id"),
-                      item.getAttribute("data-chat-user-id")
-                    );
                     if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
                     if (typeof window.chatRefresh === "function") window.chatRefresh();
                   } else {
                     removeBtn.disabled = false;
+                    var alreadyRestored = false;
+                    try {
+                      listEl.querySelectorAll(".friends-list-modal__item").forEach(function (row) {
+                        if (
+                          String(row.getAttribute("data-user-id") || "") === String(removedUserId || "") ||
+                          String(row.getAttribute("data-chat-user-id") || "") === String(removedChatUserId || "")
+                        ) {
+                          alreadyRestored = true;
+                        }
+                      });
+                    } catch (eFriendRestoreCheck) {}
+                    if (removedSnapshot && listEl && !alreadyRestored) {
+                      var emptyEl = listEl.querySelector(".friends-list-modal__empty");
+                      if (emptyEl) emptyEl.remove();
+                      if (nextSibling && nextSibling.parentNode === listEl) listEl.insertBefore(removedSnapshot, nextSibling);
+                      else listEl.appendChild(removedSnapshot);
+                    }
+                    if (typeof pokerApplyLocalFriendToChatContacts === "function") {
+                      pokerApplyLocalFriendToChatContacts(removedUserId || removedChatUserId, removedSnapshot ? removedSnapshot.getAttribute("data-user-name") || "" : "");
+                    }
                     if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
                     else if (typeof alert === "function") alert((d && d.error) || "Ошибка");
                   }
                 })
                 .catch(function () {
                   removeBtn.disabled = false;
+                  if (removedSnapshot && listEl && !listEl.contains(removedSnapshot)) {
+                    var emptyElCatch = listEl.querySelector(".friends-list-modal__empty");
+                    if (emptyElCatch) emptyElCatch.remove();
+                    if (nextSibling && nextSibling.parentNode === listEl) listEl.insertBefore(removedSnapshot, nextSibling);
+                    else listEl.appendChild(removedSnapshot);
+                  }
+                  if (typeof pokerApplyLocalFriendToChatContacts === "function") {
+                    pokerApplyLocalFriendToChatContacts(removedUserId || removedChatUserId, removedSnapshot ? removedSnapshot.getAttribute("data-user-name") || "" : "");
+                  }
                   if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
                   else if (typeof alert === "function") alert(POKER_NET_ERR);
                 });

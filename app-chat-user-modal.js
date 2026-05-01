@@ -580,6 +580,22 @@ if (chatUserModalEl) {
       if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalRemoveFriend.disabled) return;
       if (!confirm("Убрать этого человека из друзей? В чатах снова будет отображаться логин.")) return;
       modalRemoveFriend.disabled = true;
+      var prevContactName = chatUserModalContactName;
+      var prevTitle = chatUserModalUserName;
+      var tdRmOptimistic = chatUserModalPeerLogin || chatUserModalUserName || "Игрок";
+      chatUserModalContactName = "";
+      if (modalTitle) modalTitle.textContent = tdRmOptimistic;
+      chatUserModalUserName = tdRmOptimistic;
+      if (modalLoginSub) {
+        modalLoginSub.textContent = "";
+        modalLoginSub.hidden = true;
+      }
+      updateChatUserModalFriendState(false, null);
+      if (typeof pokerRemoveLocalFriendFromChatContacts === "function") pokerRemoveLocalFriendFromChatContacts(chatUserModalUserId);
+      if (typeof window.pokerRemoveFriendFromOpenFriendsList === "function") {
+        window.pokerRemoveFriendFromOpenFriendsList(chatUserModalUserId);
+      }
+      updateCurrentPeerTitle(chatUserModalUserId, tdRmOptimistic);
       fetch(base + "/api/friends", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -610,10 +626,44 @@ if (chatUserModalEl) {
             if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
             if (typeof window.chatRefresh === "function") window.chatRefresh();
             updateCurrentPeerTitle(chatUserModalUserId, tdRm);
-          } else if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+          } else {
+            chatUserModalContactName = prevContactName;
+            chatUserModalUserName = prevTitle;
+            if (modalTitle) modalTitle.textContent = prevContactName || prevTitle || "Игрок";
+            if (modalLoginSub) {
+              if (prevContactName && chatUserModalPeerLogin) {
+                modalLoginSub.textContent = chatUserModalPeerLogin;
+                modalLoginSub.hidden = false;
+              } else {
+                modalLoginSub.textContent = "";
+                modalLoginSub.hidden = true;
+              }
+            }
+            updateChatUserModalFriendState(true, prevContactName || prevTitle);
+            if (typeof pokerApplyLocalFriendToChatContacts === "function") {
+              pokerApplyLocalFriendToChatContacts(chatUserModalUserId, prevContactName || prevTitle || "");
+            }
+            if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+          }
         })
         .catch(function () {
           modalRemoveFriend.disabled = false;
+          chatUserModalContactName = prevContactName;
+          chatUserModalUserName = prevTitle;
+          if (modalTitle) modalTitle.textContent = prevContactName || prevTitle || "Игрок";
+          if (modalLoginSub) {
+            if (prevContactName && chatUserModalPeerLogin) {
+              modalLoginSub.textContent = chatUserModalPeerLogin;
+              modalLoginSub.hidden = false;
+            } else {
+              modalLoginSub.textContent = "";
+              modalLoginSub.hidden = true;
+            }
+          }
+          updateChatUserModalFriendState(true, prevContactName || prevTitle);
+          if (typeof pokerApplyLocalFriendToChatContacts === "function") {
+            pokerApplyLocalFriendToChatContacts(chatUserModalUserId, prevContactName || prevTitle || "");
+          }
         });
     });
   }
