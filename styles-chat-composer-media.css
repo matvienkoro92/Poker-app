@@ -1091,6 +1091,46 @@ img.chat-contact__avatar {
 .chat-input-wrap:not(.chat-input-wrap--single) .chat-input--textarea {
   display: block;
 }
+.view--active[data-view="chat"] .chat-input-wrap {
+  gap: 7px;
+}
+.view--active[data-view="chat"] .chat-input--textarea {
+  border-color: rgba(251, 146, 60, 0.32);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(251, 191, 36, 0.1), transparent 36%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94));
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  caret-color: #fb923c;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+.view--active[data-view="chat"] .chat-input--textarea:focus {
+  outline: none;
+  border-color: rgba(251, 191, 36, 0.58);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(251, 146, 60, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-input--textarea {
+  border-color: rgba(234, 88, 12, 0.24);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(251, 191, 36, 0.2), transparent 36%),
+    linear-gradient(145deg, #ffffff, #fff7ed);
+  box-shadow:
+    0 8px 20px rgba(234, 88, 12, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  caret-color: #ea580c;
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-input--textarea:focus {
+  border-color: rgba(234, 88, 12, 0.48);
+  box-shadow:
+    0 10px 22px rgba(234, 88, 12, 0.13),
+    0 0 0 3px rgba(234, 88, 12, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
 .chat-send-btn {
   flex-shrink: 0;
   padding: 8px 14px;
@@ -1291,6 +1331,76 @@ img.chat-contact__avatar {
 }
 .chat-emoji-btn:hover {
   background: rgba(148, 163, 184, 0.15);
+}
+.view--active[data-view="chat"] .chat-attach-btn,
+.view--active[data-view="chat"] .chat-emoji-btn {
+  border: 1px solid rgba(251, 146, 60, 0.24);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.15), transparent 34%),
+    linear-gradient(145deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+  color: #fed7aa;
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.34);
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+.view--active[data-view="chat"] .chat-attach-btn {
+  border-radius: 13px;
+  font-size: 17px;
+}
+.view--active[data-view="chat"] .chat-emoji-btn {
+  width: 30px;
+  height: 30px;
+  right: 53px;
+  bottom: 7px;
+  font-size: 19px;
+}
+.view--active[data-view="chat"] .chat-attach-btn:hover,
+.view--active[data-view="chat"] .chat-emoji-btn:hover {
+  border-color: rgba(251, 191, 36, 0.42);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.2), transparent 34%),
+    linear-gradient(145deg, rgba(51, 65, 85, 0.98), rgba(30, 41, 59, 0.96));
+  filter: brightness(1.06) saturate(1.04);
+  box-shadow:
+    0 9px 22px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.view--active[data-view="chat"] .chat-attach-btn:active,
+.view--active[data-view="chat"] .chat-emoji-btn:active {
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(0.98);
+}
+.view--active[data-view="chat"] .chat-attach-btn:focus-visible,
+.view--active[data-view="chat"] .chat-emoji-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.34),
+    0 9px 22px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-attach-btn,
+[data-theme="light"] .view--active[data-view="chat"] .chat-emoji-btn {
+  border-color: rgba(234, 88, 12, 0.2);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.75), transparent 34%),
+    linear-gradient(145deg, #ffffff, #ffedd5);
+  color: #9a3412;
+  box-shadow:
+    0 7px 18px rgba(234, 88, 12, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  text-shadow: none;
+}
+[data-theme="light"] .view--active[data-view="chat"] .chat-attach-btn:hover,
+[data-theme="light"] .view--active[data-view="chat"] .chat-emoji-btn:hover {
+  border-color: rgba(234, 88, 12, 0.34);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.86), transparent 34%),
+    linear-gradient(145deg, #ffffff, #fed7aa);
+  box-shadow:
+    0 9px 22px rgba(234, 88, 12, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 
 .chat-emoji-picker {
