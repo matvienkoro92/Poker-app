@@ -6522,9 +6522,9 @@ function initChat() {
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx, focusTarget) {
         collectChatOverscrollSnapshot("dock:enter", focusTarget, { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
-        if (hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
+        if (!isPokerIosPwaKeyboardRuntime() && hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
-        if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
+        if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatThreadDockBottomCssPx = 0;
@@ -6533,7 +6533,7 @@ function initChat() {
           } catch (eTgDockOff) {}
           return;
         }
-        if (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock()) {
+        if (!isPokerIosPwaKeyboardRuntime() && (isPassiveTelegramIosChatThread() || shouldDisableTelegramIosChatKeyboardDock())) {
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatThreadDockBottomCssPx = 0;
@@ -6561,7 +6561,7 @@ function initChat() {
           } catch (eTk1) {}
           return;
         }
-        if (shouldDisableTelegramIosChatKeyboardDock()) {
+        if (!isPokerIosPwaKeyboardRuntime() && shouldDisableTelegramIosChatKeyboardDock()) {
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatThreadDockBottomCssPx = 0;
@@ -6598,7 +6598,7 @@ function initChat() {
         } catch (ePwaDockAcc) {}
         try {
           var ihLim = window.innerHeight || 0;
-          var isTgDock = isTelegramChatRuntime();
+          var isTgDock = isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime();
           var iosDock = typeof isIosLikeForChatViewport === "function" && isIosLikeForChatViewport();
           var focusAgeDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           var isPwaIosDockFinal =
@@ -6639,7 +6639,7 @@ function initChat() {
         try {
           prevB = window.__pokerChatLastAppliedDockBottom;
           var isPwaIosDock =
-            !isTelegramChatRuntime() &&
+            (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
@@ -6669,6 +6669,7 @@ function initChat() {
             prevB != null &&
             prevB > 0 &&
             isTelegramChatRuntime() &&
+            !isPokerIosPwaKeyboardRuntime() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
@@ -6681,6 +6682,7 @@ function initChat() {
             prevB != null &&
             prevB > 0 &&
             isTelegramChatRuntime() &&
+            !isPokerIosPwaKeyboardRuntime() &&
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
@@ -6701,7 +6703,7 @@ function initChat() {
         if (pwaAccessoryInset > 0) {
           try {
             var isPwaIosAcc =
-              !isTelegramChatRuntime() &&
+              (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
               typeof pokerPwaStandaloneForKeyboardInset === "function" &&
               pokerPwaStandaloneForKeyboardInset() &&
               typeof isIosLikeForChatViewport === "function" &&
