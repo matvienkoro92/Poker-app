@@ -580,6 +580,7 @@ html.vpn-proxy-modal-open {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #17120d !important;
 }
 .gazette-front__headline-sub {
   font-size: 11px;
@@ -587,6 +588,7 @@ html.vpn-proxy-modal-open {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   margin-top: 2px;
+  color: #2c1810;
 }
 .gazette-front__grid {
   display: grid;
@@ -662,12 +664,14 @@ html.vpn-proxy-modal-open {
   font-weight: 800;
   line-height: 1.2;
   margin: 0 0 6px;
+  color: #2c1810 !important;
 }
 .gazette-front__title-small {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.25;
   margin: 0 0 4px;
+  color: #7c3f1d;
 }
 .gazette-front__thumb,
 .gazette-front__thumb-small {
@@ -692,11 +696,22 @@ html.vpn-proxy-modal-open {
   font-size: 11px;
   line-height: 1.35;
   margin: 0 0 4px;
+  color: #5c4033;
 }
 .gazette-front__lead-small {
   font-size: 10px;
   line-height: 1.35;
   margin: 0;
+  color: #8a5526;
+}
+
+.gazette-modal__paper .gazette-modal__masthead {
+  color: #2c1810 !important;
+}
+
+.gazette-modal__paper .gazette-front__title {
+  color: #2c1810 !important;
+  text-shadow: none !important;
 }
 .gazette-front__lead::first-letter,
 .gazette-front__lead-small::first-letter {
@@ -919,4 +934,3 @@ html.vpn-proxy-modal-open {
   background: rgba(251, 191, 36, 0.28);
   border-color: rgba(251, 191, 36, 0.5);
 }
-
