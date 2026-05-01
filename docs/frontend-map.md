@@ -4,8 +4,11 @@
 
 ## App Entry
 
-- `index.html` — DOM всех экранов, boot overlay, PWA auth shell и порядок подключения клиентских скриптов.
-- `app.js` — оставшийся общий слой: тема, сетевые helpers, textarea autosize, boot helpers, радио/PWA install, `setView`, общая навигация экранов и финальная склейка чата/авторизации.
+- `index.html` — shell SPA, легкие view hosts, boot overlay, PWA auth shell и порядок подключения клиентских скриптов. Тяжелые разделы живут в `html-fragments/`.
+- `app.js` — тонкий bootstrap/orchestration слой: early rating/lightbox init, raffle badge fetch, visitor tracking bootstrap, final chat preinit.
+- `app-shared-helpers.js` — textarea autosize, boot overlay network state, member-id hints и shared debug noops.
+- `app-home-init.js` — тема, радио, start button, raffle badge, home/task click listeners.
+- `app-pwa-open-handlers.js` — PWA install/share, auth event retry, open-from-push и foreground visibility sync.
 - `app-shell-layout.js` — измерение app shell, нижнего таббара и safe-area отступов.
 - `app-navigation-scroll.js` — восстановление и синхронизация скролла при переходах между view.
 - `app-api-tracking.js` — клиентские helpers для visitor/section tracking.
@@ -15,6 +18,7 @@
 - `app-auth.js` — Telegram/PWA/VK auth helpers, API auth query/body, startapp parsing, share/link helpers.
 - `app-pwa-auth.js` — экран входа PWA, Telegram Login Widget, восстановление PWA-сессии, guest mode и визуальная логика auth shell.
 - `app-push.js` — Web Push подписка, синхронизация пушей и PWA badge/chat push helpers.
+- `app-pwa-open-handlers.js` — PWA install/share и retry открытия личного чата после auth/open-from-push.
 
 ## Chat
 
@@ -86,6 +90,6 @@
 ## Next Development Rules
 
 - Новый крупный JS-код добавлять рядом с доменом, а не обратно в `app.js`.
-- `app.js` трогать в основном для общей склейки, `setView`, boot и truly shared helpers.
+- `app.js` трогать только для минимальной bootstrap-склейки; router/home/PWA/shared helpers уже вынесены.
 - CSS переносить между файлами только после визуальной проверки: порядок каскада сейчас сохранен импортами.
 - После изменений запускать `npm run build`, `node scripts/check-js-syntax.js`, `npm run smoke`.

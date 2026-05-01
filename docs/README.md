@@ -7,6 +7,8 @@ Current documentation:
 - `pokerplus-integration-for-vendor.md` - Poker21 verification / PokerPlus API details for the external Poker21 developer.
 - `identity-invariants.md` - account identity contract for `dtId`, channel ids, legacy keys, and aliases.
 - `project-tasks.md` - active backlog under the `ЗАДАЧИ` label.
+- `progress-summary.md` - current summary of completed quality/performance/architecture work and remaining priorities.
+- `frontend-map.md` - current frontend file ownership map.
 - `../CRON-SETUP.md` - cron setup notes.
 - `../CARD_COLORS.md` - card suit color convention used by the project.
 - `../assets/README.md` - asset folder naming notes.

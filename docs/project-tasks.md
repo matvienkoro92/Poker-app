@@ -4,6 +4,13 @@
 
 ## Done
 
+- Переведены тяжелые JS-домены в lazy-loading: chat, rating, media/video, games, admin, tournaments, raffles.
+- Вынесены тяжелые HTML-разделы в fragments: chat, profile, video-lessons, hall-of-fame, equilator, winter-rating, raffles, download, global modals.
+- Разобран `app.js`: router, chat lifecycle, webview keyboard, network, shared helpers, home init и PWA/open handlers живут в отдельных `app-*.js`.
+- Добавлен общий Redis layer `lib/redis.js`; локальные pipeline-клоны в handlers/scripts убраны.
+- Добавлены backend contract tests без реального Redis: auth/admin, chat, raffles, respect, profile/users.
+- Добавлен smoke на tabbar/key routes, lazy HTML/JS, CSS ownership, assets/public size и Redis layer.
+- Проведен asset pass: тяжелые картинки получили WebP/AVIF, крупные unused movie/assets хвосты исключены из shipping.
 - Закрыт `/api/account-debug`: endpoint доступен только admin.
 - Починен route `twitch-viewers`: handler добавлен и маршрут живой.
 - Исправлен поиск пользователя по username в `lib/api-handlers/users.js`: `DT_IDS_KEY` импортирован, profile-ключи читаются через актуальный account id.
@@ -12,5 +19,7 @@
 
 ## P1
 
-- Продолжить дробить `app.js`, сначала зоны chat, profile, auth.
-- Начать дробить `styles.css` по feature-зонам.
+- Расширить backend contract tests: friends, auth-email/auth-pwa-code, tracking links, push subscribe/broadcast, gazette/rating notifications.
+- Продолжить HTML split: cashout, schedule, streams, poker-tasks/games, крупные части global modals.
+- Дочистить `app.js`: visitor tracking, early rating/lightbox bootstrap, popstate/bootstrap orchestration.
+- Дочистить CSS ownership: уменьшить after/prelude/overrides, отделить download/raffles/learning/games от общего rating CSS.

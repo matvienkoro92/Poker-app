@@ -13,12 +13,17 @@
 ## Структура
 
 - `index.html` — единственная HTML-страница SPA
-- `styles.css` — оформление и адаптивная верстка
-- `app.js` — основная клиентская логика
+- `html-fragments/` — тяжелые разделы и модалки, которые догружаются лениво
+- `styles.css` — CSS entrypoint; ownership описан в `css-manifest.json`
+- `app.js` — тонкий bootstrap; основная клиентская логика разнесена по доменным `app-*.js`
+- `js-manifest.json` — карта JS-доменов и lazy-loading
 - `api/[[...slug]].js` — единая точка входа API на Vercel
 - `lib/api-handlers/` — обработчики API
+- `lib/redis.js` — общий Redis слой поверх Upstash REST API
 - `lib/pokerplus.js` — клиент PokerPlus/Poker21 API для верификации
 - `scripts/copy-to-public.js` — сборка статики в `public/`
+- `scripts/contract-tests.js` — backend contract tests без реального Redis
+- `docs/progress-summary.md` — актуальный итог сделанных архитектурных/quality работ
 - `docs/pokerplus-integration-for-vendor.md` — актуальная документация по интеграции Poker21/PokerPlus
 
 ## Локальный запуск
