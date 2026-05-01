@@ -5450,10 +5450,27 @@ function initChat() {
           } catch (eAppSh) {}
         } catch (eSh) {}
       }
+      function shouldPreserveActivePwaChatDock(node) {
+        try {
+          if (!node) return false;
+          if (isTelegramChatRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          if (!document.body.classList.contains("chat-keyboard-open")) return false;
+          var active = document.activeElement;
+          if (!active || !node.contains(active)) return false;
+          if (!isChatThreadComposerKeyboardDom(active)) return false;
+          return node.classList && node.classList.contains("chat-input-area--vv-dock");
+        } catch (ePreserveDock) {
+          return false;
+        }
+      }
       function stripChatInputAreaTransforms() {
         try {
           document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
             if (!node || !node.style) return;
+            if (shouldPreserveActivePwaChatDock(node)) return;
             /* Явный ноль + reflow — иначе на части WK/TG слой остаётся сдвинутым, снизу «лишнее» место. */
             node.style.setProperty("transform", "translate3d(0, 0, 0)", "");
             try {
