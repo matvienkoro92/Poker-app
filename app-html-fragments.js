@@ -16,7 +16,11 @@
       } catch (eHook) {}
     }
     if (viewName === "video-lessons") safeCall(window.pokerInitVideoLessonsModals);
-    if (viewName === "hall-of-fame") safeCall(window.pokerInitHallOfFamePanelShareButtons);
+    if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);
+    if (viewName === "hall-of-fame") {
+      safeCall(window.pokerInitHallOfFamePanelShareButtons);
+      safeCall(window.pokerInitWinterRatingWeekTops);
+    }
     if (viewName === "global-modals") {
       if (!window.__pokerHomeGlobalModalsReinitDone && typeof window.runGazetteAndTasksInit === "function") {
         window.__pokerHomeGlobalModalsReinitDone = true;

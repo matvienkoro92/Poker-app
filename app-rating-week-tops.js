@@ -61,7 +61,7 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
 }
 
 // Рейтинг: кнопки «Топы прошлой недели» и «Топы текущей недели» (в кнопке — топ-3, по клику — модалка с полным списком)
-(function initWinterRatingWeekTops() {
+function pokerInitWinterRatingWeekTops() {
   var pastBtn = document.getElementById("winterRatingTopPastWeekBtn");
   var currentBtn = document.getElementById("winterRatingTopCurrentWeekBtn");
   var febBtn = document.getElementById("winterRatingTopFebruaryBtn");
@@ -275,6 +275,8 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     }
   }
   (function initSingleTopLightboxClicks() {
+    if (window.__pokerSingleTopLightboxClicksBound) return;
+    window.__pokerSingleTopLightboxClicksBound = true;
     document.addEventListener("click", function (e) {
       var t = e.target;
       if (!t || !t.closest) return;
@@ -401,7 +403,8 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
         .catch(function () {});
     };
 
-    if (btn) {
+    if (btn && btn.getAttribute("data-rating-notify-bound") !== "1") {
+      btn.setAttribute("data-rating-notify-bound", "1");
       btn.addEventListener("click", function () {
         sendRequest(
           btn,
@@ -419,7 +422,8 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
         );
       });
     }
-    if (subsBtn) {
+    if (subsBtn && subsBtn.getAttribute("data-rating-subs-notify-bound") !== "1") {
+      subsBtn.setAttribute("data-rating-subs-notify-bound", "1");
       subsBtn.addEventListener("click", function () {
         sendRequest(
           subsBtn,
@@ -538,7 +542,9 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     modal.setAttribute("aria-hidden", "true");
     if (document.body) document.body.style.overflow = "";
   }
-  currentBtn.addEventListener("click", function () {
+  if (currentBtn.getAttribute("data-rating-week-top-bound") !== "1") {
+    currentBtn.setAttribute("data-rating-week-top-bound", "1");
+    currentBtn.addEventListener("click", function () {
     if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var sep = SPRING_TOP_LINK_BASE.indexOf("?") >= 0 ? "&" : "?";
@@ -549,11 +555,16 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
       return;
     }
     openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
-  });
-  pastBtn.addEventListener("click", function () {
-    openModal("Топы прошлой недели", GAZETTE_DATES, "past");
-  });
-  if (febBtn) {
+    });
+  }
+  if (pastBtn.getAttribute("data-rating-week-top-bound") !== "1") {
+    pastBtn.setAttribute("data-rating-week-top-bound", "1");
+    pastBtn.addEventListener("click", function () {
+      openModal("Топы прошлой недели", GAZETTE_DATES, "past");
+    });
+  }
+  if (febBtn && febBtn.getAttribute("data-rating-week-top-bound") !== "1") {
+    febBtn.setAttribute("data-rating-week-top-bound", "1");
     febBtn.addEventListener("click", function () {
       if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
@@ -568,9 +579,17 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
       else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
     });
   }
-  if (modalClose) modalClose.addEventListener("click", closeModal);
-  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
-  listEl.addEventListener("click", function (e) {
+  if (modalClose && modalClose.getAttribute("data-rating-week-top-bound") !== "1") {
+    modalClose.setAttribute("data-rating-week-top-bound", "1");
+    modalClose.addEventListener("click", closeModal);
+  }
+  if (modalBackdrop && modalBackdrop.getAttribute("data-rating-week-top-bound") !== "1") {
+    modalBackdrop.setAttribute("data-rating-week-top-bound", "1");
+    modalBackdrop.addEventListener("click", closeModal);
+  }
+  if (listEl.getAttribute("data-rating-week-top-bound") !== "1") {
+    listEl.setAttribute("data-rating-week-top-bound", "1");
+    listEl.addEventListener("click", function (e) {
     var btn = e.target && e.target.closest ? e.target.closest(".winter-rating__nick-btn") : null;
     if (!btn || !btn.dataset.nick) return;
     e.preventDefault();
@@ -579,5 +598,8 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     } else if (typeof openWinterRatingPlayerModal === "function") {
       openWinterRatingPlayerModal(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
     }
-  });
-})();
+    });
+  }
+}
+window.pokerInitWinterRatingWeekTops = pokerInitWinterRatingWeekTops;
+pokerInitWinterRatingWeekTops();

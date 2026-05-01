@@ -1716,6 +1716,7 @@ function initWinterRating() {
       ? function (fn) { window.requestIdleCallback(fn, { timeout: 600 }); }
       : function (fn) { setTimeout(fn, 0); };
     schedPrev(function () {
+      if (typeof window.pokerInitWinterRatingWeekTops === "function") window.pokerInitWinterRatingWeekTops();
       if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
       if (typeof updateSpringRatingHomePromoStats === "function") updateSpringRatingHomePromoStats();
     });
