@@ -14,7 +14,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
 ];
 
 var HOME_FREEROLL_SCHEDULE = [
-  { day: "Сб", dow: 6, title: "Фриролл · 100 000₽", meta: "R:250₽ / A:500₽", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, R:250₽ / A:500₽, гарантия 100 000₽." }
+  { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Вт", dow: 2, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Главный недельный фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, гарантия 1 000 000₽." },
+  { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
+  { day: "Сб", dow: 6, title: "Приз 100 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход бесплатный, R:250₽ / A:500₽, гарантия 100 000₽." }
 ];
 
 /** Короткое имя дня недели по календарю Москвы для момента utcMs (Date или число). */
@@ -216,9 +220,26 @@ function updateTournamentDayBlock() {
     var nextStart = new Date(Date.UTC(nextDay.y, nextDay.m, nextDay.d, startUtcH, 0, 0, 0));
     return { t: tInfo, target: nextStart, label: "" };
   }
-  /** Карточка «Следующий фриролл»: ближайший субботний фриролл 18:00 МСК. */
+  function getFreerollTournamentInfo(item) {
+    if (!item) return TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
+    return {
+      name: item.room === "X-poker" ? "Фриролл X-poker" : "Фриролл",
+      buyin: item.room === "Poker21" && item.dow === 6 ? "Бесплатно · R:250₽ / A:500₽" : "0₽",
+      guarantee: item.dow === 3 ? "1 000 000₽" : "100 000₽"
+    };
+  }
+  /** Карточка «Следующий фриролл»: ближайший слот из списка фрироллов на главной. */
   function getNextFreerollState(now) {
-    return getNextWeekdayFreerollSlot(now, 6, TOURNAMENT_OF_DAY_BY_WEEKDAY[6]);
+    var best = null;
+    HOME_FREEROLL_SCHEDULE.forEach(function (item) {
+      var startUtcH = Number(item.hour) - 3;
+      var slot = getNextWeekdayFreerollSlot(now, item.dow, getFreerollTournamentInfo(item), {
+        startUtcHour: startUtcH,
+        endRegUtcHour: startUtcH + 3
+      });
+      if (!best || slot.target < best.target) best = slot;
+    });
+    return best || getNextWeekdayFreerollSlot(now, 6, TOURNAMENT_OF_DAY_BY_WEEKDAY[6]);
   }
   function formatMskHmForDate(utcDate) {
     try {
