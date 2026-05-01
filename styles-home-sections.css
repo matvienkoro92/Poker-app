@@ -764,8 +764,8 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
 }
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:focus-within,
-html.poker-ios-pwa:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:focus-within {
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area:focus-within,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area:focus-within {
   position: fixed !important;
   left: calc(env(safe-area-inset-left, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
   right: calc(env(safe-area-inset-right, 0px) + var(--chat-composer-edge-gap, 2px)) !important;
