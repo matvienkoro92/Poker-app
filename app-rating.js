@@ -989,6 +989,24 @@ function openWinterRatingPlayerModal(nick, options) {
   document.body.style.overflow = "hidden";
 }
 
+function openWinterRatingPlayerModalReady(nick, options) {
+  if (!nick) return;
+  if (document.getElementById("winterRatingPlayerModal")) {
+    openWinterRatingPlayerModal(nick, options);
+    return;
+  }
+  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+    Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
+      openWinterRatingPlayerModal(nick, options);
+    }).catch(function () {
+      openWinterRatingPlayerModal(nick, options);
+    });
+    return;
+  }
+  openWinterRatingPlayerModal(nick, options);
+}
+window.openWinterRatingPlayerModalReady = openWinterRatingPlayerModalReady;
+
 function closeWinterRatingPlayerModal() {
   var modal = document.getElementById("winterRatingPlayerModal");
   if (modal) {
@@ -1586,7 +1604,7 @@ function initWinterRatingPlayerModal() {
     var link = e.target && e.target.closest ? e.target.closest(".hall-of-fame__legend-link") : null;
     if (!link || !link.dataset.nick) return;
     e.preventDefault();
-    if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(link.dataset.nick);
+    if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(link.dataset.nick);
   });
 })();
 
@@ -1971,7 +1989,7 @@ function initWinterRating() {
       bodyEl.removeEventListener("click", bodyEl._leagueNickClick);
       bodyEl._leagueNickClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".winter-rating__nick-btn");
-        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(btn.dataset.nick);
+        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
       };
       bodyEl.addEventListener("click", bodyEl._leagueNickClick);
     }
@@ -2055,7 +2073,7 @@ function initWinterRating() {
       sectionEl.setAttribute("data-spring-top3-inited", "1");
       sectionEl.addEventListener("click", function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".spring-rating-top3__nick-btn");
-        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(btn.dataset.nick);
+        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
       });
     }
     if (isSpringRatingMode()) {
@@ -2121,7 +2139,7 @@ function initWinterRating() {
     }
     tbody.addEventListener("click", function (e) {
       var btn = e.target && e.target.closest(".winter-rating__nick-btn");
-      if (btn && btn.dataset.nick) openWinterRatingPlayerModal(btn.dataset.nick);
+      if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
     });
     var tableWrap = document.getElementById("winterRatingTableWrap");
     var showAllWrap = document.getElementById("winterRatingShowAllWrap");

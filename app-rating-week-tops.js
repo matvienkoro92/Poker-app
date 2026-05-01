@@ -574,6 +574,10 @@ function singleTopResolveLightboxControlTags(esc, r, nickN, rewN, nickEscaped) {
     var btn = e.target && e.target.closest ? e.target.closest(".winter-rating__nick-btn") : null;
     if (!btn || !btn.dataset.nick) return;
     e.preventDefault();
-    if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
+    if (typeof openWinterRatingPlayerModalReady === "function") {
+      openWinterRatingPlayerModalReady(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
+    } else if (typeof openWinterRatingPlayerModal === "function") {
+      openWinterRatingPlayerModal(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
+    }
   });
 })();
