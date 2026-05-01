@@ -5394,6 +5394,10 @@ function initChat() {
           }
         }
         try {
+          if (Number(window.__pokerChatSendKeepFocusUntil || 0) > Date.now()) {
+            var sendKeepPrevPad = Number(window.__pokerChatMessagesKeyboardPadLast) || 0;
+            if (sendKeepPrevPad > 28 && pad < sendKeepPrevPad - 8) pad = sendKeepPrevPad;
+          }
           if (cssOnlyPwaPad && barFixed) {
             var cssOnlyPwaPadAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
             var lockedCssOnlyPwaPad = Number(window.__pokerChatPwaOpeningMessagesPad) || 0;
@@ -6277,10 +6281,23 @@ function initChat() {
           if (!target) target = chatComposerEl || chatSharedComposerEl;
           if (!target || String(target.tagName || "").toUpperCase() !== "TEXTAREA") return false;
           if (target.disabled || target.hidden) return false;
+          var wasActive = document.activeElement === target;
+          var keyboardWasOpen = !!(document.body.classList && document.body.classList.contains("chat-keyboard-open"));
+          var prevFocusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+          var prevOpeningUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+          var prevDockBottom = Number(window.__pokerChatThreadDockBottomCssPx) || 0;
+          var prevLastDockBottom = Number(window.__pokerChatLastAppliedDockBottom) || 0;
+          var prevPad = Number(window.__pokerChatMessagesKeyboardPadLast) || 0;
           clearPendingChatKeyboardDismissTimers();
           window.__pokerChatPwaUserDismissAt = 0;
-          window.__pokerChatKeyboardFocusAtMs = Date.now();
-          window.__pokerChatKeyboardOpeningUntil = Math.max(Number(window.__pokerChatKeyboardOpeningUntil) || 0, Date.now() + 900);
+          window.__pokerChatSendKeepFocusUntil = Date.now() + 900;
+          if (wasActive && keyboardWasOpen) {
+            window.__pokerChatKeyboardFocusAtMs = prevFocusAt || Date.now() - 1200;
+            window.__pokerChatKeyboardOpeningUntil = prevOpeningUntil > Date.now() ? prevOpeningUntil : 0;
+          } else {
+            window.__pokerChatKeyboardFocusAtMs = Date.now();
+            window.__pokerChatKeyboardOpeningUntil = Math.max(prevOpeningUntil, Date.now() + 900);
+          }
           chatComposerEl = target;
           try {
             target.removeAttribute("tabindex");
@@ -6297,7 +6314,11 @@ function initChat() {
             if (typeof resizeChatTextarea === "function") resizeChatTextarea(target);
           } catch (eSendResize) {}
           try {
-            if (document.activeElement === target) {
+            if (wasActive && keyboardWasOpen && document.activeElement === target) {
+              if (prevDockBottom > 0) window.__pokerChatThreadDockBottomCssPx = prevDockBottom;
+              if (prevLastDockBottom > 0) window.__pokerChatLastAppliedDockBottom = prevLastDockBottom;
+              if (prevPad > 0) window.__pokerChatMessagesKeyboardPadLast = prevPad;
+            } else if (document.activeElement === target) {
               if (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) {
                 setChatKeyboardOpenClasses(true);
               }
@@ -7272,6 +7293,14 @@ function initChat() {
             if (focusAgePwaDock > 0 && focusAgePwaDock < 1400 && Math.abs(bottomPx - prevB) < 3) {
               bottomPx = prevB;
             }
+          }
+          if (
+            prevB != null &&
+            prevB > 0 &&
+            Number(window.__pokerChatSendKeepFocusUntil || 0) > Date.now() &&
+            bottomPx < prevB - 6
+          ) {
+            bottomPx = prevB;
           }
           if (
             prevB != null &&
