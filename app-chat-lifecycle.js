@@ -1214,6 +1214,44 @@ function initChat() {
       if (mode === "personal" && chatActiveTab !== "personal") return;
       var target = event && event.target ? event.target : null;
       if (shouldIgnoreAreaFocusTarget(target)) return;
+      if (!isTelegramChatRuntime()) {
+        var pwaComposer =
+          (area.querySelector && area.querySelector("textarea.chat-input--textarea, textarea.chat-input")) ||
+          getDirectChatComposer(mode) ||
+          chatSharedComposerEl;
+        if (!pwaComposer) return;
+        chatComposerEl = pwaComposer;
+        try {
+          pwaComposer.disabled = false;
+          pwaComposer.hidden = false;
+          pwaComposer.removeAttribute("tabindex");
+          pwaComposer.removeAttribute("aria-hidden");
+          pwaComposer.style.removeProperty("display");
+          pwaComposer.style.removeProperty("pointer-events");
+        } catch (ePwaComposerPrep) {}
+        try {
+          if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(pwaComposer);
+        } catch (ePwaBindKb) {}
+        try {
+          if (pwaComposer.focus) pwaComposer.focus();
+        } catch (ePwaFocusFirst) {
+          try {
+            if (pwaComposer.focus) pwaComposer.focus({ preventScroll: true });
+          } catch (ePwaFocusSecond) {}
+        }
+        try {
+          if (
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+          ) {
+            onChatInputFocus(pwaComposer);
+            forceIosPwaChatTextareaDock(pwaComposer, "area-gesture-focus");
+          }
+        } catch (ePwaAreaGestureActivate) {}
+        return;
+      }
       if (!ensureTelegramDedicatedChatComposers()) return;
       forceDetachSharedChatComposerForTelegram();
       var directComposer = getDirectTelegramChatComposer(mode);
