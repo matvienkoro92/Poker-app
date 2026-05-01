@@ -8027,6 +8027,7 @@ function initChat() {
       function shouldDeferChatKeyboardFinalizeForFocus() {
         if (shouldUseNativeTelegramIosChatComposerFlow()) return false;
         if (!isAnyChatKeyboardChromeFocus(document.activeElement)) return false;
+        if (isIosPwaChatComposerOpeningHoldActive(document.activeElement)) return true;
         if (pokerPwaBlurProceedDespiteDomFocus()) return false;
         return !isChatKeyboardLayoutEffectivelyClosed();
       }
@@ -8049,6 +8050,17 @@ function initChat() {
           return false;
         }
       }
+      function isIosPwaChatComposerOpeningHoldActive(target) {
+        try {
+          if (!shouldHoldIosPwaChatComposerFocus(target || document.activeElement || chatComposerEl)) return false;
+          var now = Date.now();
+          var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+          var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+          return !!(openingUntil > now || (focusAt > 0 && now - focusAt < 1500));
+        } catch (ePwaOpeningHold) {
+          return false;
+        }
+      }
       function refocusIosPwaChatComposerAfterTransientBlur(target, label) {
         try {
           if (!shouldHoldIosPwaChatComposerFocus(target)) return false;
@@ -8065,6 +8077,11 @@ function initChat() {
               try {
                 if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
                 if (isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) {
+                  if (isIosPwaChatComposerOpeningHoldActive(target)) {
+                    setChatKeyboardOpenClasses(true);
+                    if (!target.disabled && !target.hidden && target.focus) target.focus({ preventScroll: true });
+                    return;
+                  }
                   finalizeChatKeyboardDismiss();
                   return;
                 }
@@ -8138,7 +8155,9 @@ function initChat() {
           var deferBlur =
             isAnyChatKeyboardChromeFocus(active) &&
             !isChatKeyboardLayoutEffectivelyClosed(pwaBlurCleanup ? { ignoreDockBottom: true } : null);
-          if (deferBlur && pokerPwaBlurProceedDespiteDomFocus()) deferBlur = false;
+          var openingHoldBlur = pwaBlurCleanup && isIosPwaChatComposerOpeningHoldActive(active || focusTarget || chatComposerEl);
+          if (openingHoldBlur) deferBlur = true;
+          else if (deferBlur && pokerPwaBlurProceedDespiteDomFocus()) deferBlur = false;
           if (deferBlur) return;
           var el = getVisibleMessagesEl();
           var anchorFromBottom = 0;
