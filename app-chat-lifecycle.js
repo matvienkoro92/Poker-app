@@ -6521,7 +6521,7 @@ function initChat() {
        * bottom = coverPx + getChatComposerKeyboardGapPx().
        */
       function applyChatThreadComposerKeyboardDockFromCover(coverPx, focusTarget) {
-        collectChatOverscrollSnapshot("dock:enter", { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
+        collectChatOverscrollSnapshot("dock:enter", focusTarget, { cover: Math.max(0, Math.round(Number(coverPx) || 0)) });
         if (hardDisableChatComposerViewportLift(document.activeElement, "dock:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
         if (isTelegramChatRuntime() && !shouldUseTelegramChatThreadVisualViewportDock()) {
@@ -6552,6 +6552,9 @@ function initChat() {
           return;
         }
         if (!isChatThreadComposerKeyboardDom(focusTarget)) {
+          collectChatOverscrollSnapshot("dock:skip-target", focusTarget, {
+            cover: Math.max(0, Math.round(Number(coverPx) || 0))
+          });
           stripChatInputAreaTransforms();
           try {
             window.__pokerChatTmaDockTabKey = null;
