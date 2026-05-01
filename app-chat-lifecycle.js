@@ -5953,7 +5953,26 @@ function initChat() {
       function attachTelegramMiniAppChatThreadRootScrollLock() {
         return;
       }
-      function pwaChatThreadRootScrollToZero() {
+      function shouldSkipPwaChatRootScrollDuringComposerOpen(focusTarget) {
+        try {
+          if (isTelegramChatRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var target = focusTarget || document.activeElement || chatComposerEl;
+          if (!isChatThreadComposerKeyboardDom(target)) return false;
+          var now = Date.now();
+          var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+          var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+          if (openingUntil > now) return true;
+          if (focusAt > 0 && now - focusAt < 1800) return true;
+          return false;
+        } catch (ePwaRootSkip) {
+          return false;
+        }
+      }
+      function pwaChatThreadRootScrollToZero(focusTarget) {
+        if (shouldSkipPwaChatRootScrollDuringComposerOpen(focusTarget)) return false;
         try {
           if (window.scrollY) window.scrollTo(0, 0);
         } catch (eWinScroll0) {}
@@ -5967,6 +5986,7 @@ function initChat() {
         try {
           if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
         } catch (eBodyScroll0) {}
+        return true;
       }
       function detachPwaChatThreadRootScrollLock() {
         try {
@@ -6003,18 +6023,18 @@ function initChat() {
               var rafLock = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
               window.__pokerChatPwaRootScrollLockRaf = rafLock(function () {
                 window.__pokerChatPwaRootScrollLockRaf = null;
-                pwaChatThreadRootScrollToZero();
+                pwaChatThreadRootScrollToZero(focusTarget);
               });
             };
             window.addEventListener("scroll", window.__pokerChatPwaRootScrollLockHandler, true);
           }
-          pwaChatThreadRootScrollToZero();
+          pwaChatThreadRootScrollToZero(focusTarget);
           [40, 120, 260, 520].forEach(function (ms) {
             setTimeout(function () {
               try {
                 if (!document.body || !document.body.classList.contains("chat-keyboard-open")) return;
                 if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
-                pwaChatThreadRootScrollToZero();
+                pwaChatThreadRootScrollToZero(focusTarget);
               } catch (ePwaRootLockTick) {}
             }, ms);
           });
