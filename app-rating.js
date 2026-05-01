@@ -278,6 +278,43 @@ function pokerEnsureHomeWelcomeOutlineFrameObserver(outline) {
     }
   } catch (eRo) {}
 }
+function pokerScheduleHomeWelcomeOutlineFrameUpdates() {
+  try {
+    if (typeof pokerUpdateHomeWelcomeOutlineFrame !== "function") return;
+    var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+    [0, 80, 180, 360, 700, 1200].forEach(function (ms) {
+      setTimeout(function () {
+        try {
+          pokerUpdateHomeWelcomeOutlineFrame();
+          raf(function () {
+            try {
+              pokerUpdateHomeWelcomeOutlineFrame();
+            } catch (eRafHomeOutline) {}
+          });
+        } catch (eHomeOutlineTick) {}
+      }, ms);
+    });
+  } catch (eHomeOutlineSchedule) {}
+}
+(function initHomeWelcomeOutlineFrameStartupSync() {
+  try {
+    pokerScheduleHomeWelcomeOutlineFrameUpdates();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", pokerScheduleHomeWelcomeOutlineFrameUpdates, { once: true });
+    } else {
+      setTimeout(pokerScheduleHomeWelcomeOutlineFrameUpdates, 0);
+    }
+    window.addEventListener("load", pokerScheduleHomeWelcomeOutlineFrameUpdates, { once: true });
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
+      document.fonts.ready.then(pokerScheduleHomeWelcomeOutlineFrameUpdates).catch(function () {});
+    }
+    var heroImg = document.querySelector(".view[data-view=\"home\"] .hero__image");
+    if (heroImg && !heroImg.complete) {
+      heroImg.addEventListener("load", pokerScheduleHomeWelcomeOutlineFrameUpdates, { once: true });
+      heroImg.addEventListener("error", pokerScheduleHomeWelcomeOutlineFrameUpdates, { once: true });
+    }
+  } catch (eHomeOutlineStartup) {}
+})();
 function getSpringRatingMarchTopWins() {
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
   var allWins = [];
