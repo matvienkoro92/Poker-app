@@ -617,6 +617,10 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages > .chat-msg:last-child {
   margin-bottom: max(88px, calc(56px + env(safe-area-inset-bottom, 0px))) !important;
 }
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-general-view .chat-messages > .chat-msg:last-child,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) .view--active[data-view="chat"] .chat-conv-view .chat-container .chat-messages > .chat-msg:last-child {
+  margin-bottom: 6px !important;
+}
 /* При вводе сообщения (клавиатура открыта) — просто блокируем прокрутку, без перерисовки всего экрана,
    чтобы не было дёрганий и белых вспышек. */
 html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) {

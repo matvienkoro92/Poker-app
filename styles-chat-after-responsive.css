@@ -867,3 +867,8 @@ html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not
   scroll-padding-top: var(--chat-thread-inner-gap, 8px) !important;
   overflow-anchor: none !important;
 }
+
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages > .chat-msg:last-child,
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages > .chat-msg:last-child {
+  margin-bottom: 6px !important;
+}
