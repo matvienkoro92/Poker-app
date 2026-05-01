@@ -604,7 +604,6 @@ function initProfilePokerPlus() {
   var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
   var linkedValue = document.getElementById("profilePokerPlusLinkedValue");
-  var verifiedBadge = document.getElementById("profilePokerPlusVerifiedBadge");
   var avatarRow = document.getElementById("profilePokerPlusAvatarRow");
   var avatarImg = document.getElementById("profilePokerPlusAvatarImg");
   var balanceRow = document.getElementById("profilePokerPlusBalanceRow");
@@ -917,7 +916,6 @@ function initProfilePokerPlus() {
       if (lastLoginRow) lastLoginRow.hidden = true;
       if (lastIpRow) lastIpRow.hidden = true;
       hidePokerPlusStats();
-      if (verifiedBadge) verifiedBadge.classList.add("profile-verified-badge--hidden");
       if (avatarImg) avatarImg.removeAttribute("src");
       try { window.__pokerPlusUserId = ""; } catch (eClearPpId) {}
       updateProfileHeroPokerPlusId("");
@@ -934,6 +932,7 @@ function initProfilePokerPlus() {
       linkedValue.innerHTML =
         '<span class="profile-pokerplus-player-name">' +
         escapeHtml(playerName) +
+        (playerId ? '<span class="profile-pokerplus-player-verified" aria-label="Аккаунт Poker21 подтвержден">✓</span>' : "") +
         '</span><span class="profile-pokerplus-player-id">' +
         escapeHtml(playerId ? "ID " + playerId : "ID —") +
         "</span>";
@@ -944,7 +943,6 @@ function initProfilePokerPlus() {
     }
     try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
     updateProfileHeroPokerPlusId(p.pokerPlusUserId);
-    if (verifiedBadge) verifiedBadge.classList.toggle("profile-verified-badge--hidden", !(linked && p.pokerPlusUserId));
     pokerPlusBalanceRaw = pokerPlusText(p.balance);
     renderPokerPlusBalance();
     var avatarUrl = pokerPlusText(p.avatarUrl);
