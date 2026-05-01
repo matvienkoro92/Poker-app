@@ -1246,6 +1246,11 @@ function initChat() {
             typeof isIosLikeForChatViewport === "function" &&
             isIosLikeForChatViewport()
           ) {
+            try {
+              var ihPwaArea = window.innerHeight || 0;
+              if (ihPwaArea > 200) window.__pokerChatInnerHBaseline = Math.max(Number(window.__pokerChatInnerHBaseline) || 0, ihPwaArea);
+            } catch (ePwaAreaBase) {}
+            setPwaIosChatEarlyKeyboardFallback("area-gesture");
             onChatInputFocus(pwaComposer);
             forceIosPwaChatTextareaDock(pwaComposer, "area-gesture-focus");
           }
@@ -5584,6 +5589,33 @@ function initChat() {
           return 0;
         }
       }
+      function getPwaIosChatEarlyKeyboardCoverPx() {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return 0;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
+          var ihNow = window.innerHeight || 0;
+          var base = Math.max(ihNow, Number(window.__pokerChatInnerHBaseline) || 0);
+          if (base < 260) return 0;
+          var cover = Math.round(base * 0.43);
+          if (ihNow > 0 && base - ihNow > 80) cover = Math.max(cover, Math.round(base - ihNow));
+          return Math.min(430, Math.max(320, cover));
+        } catch (eEarlyCover) {
+          return 0;
+        }
+      }
+      function setPwaIosChatEarlyKeyboardFallback(label) {
+        try {
+          var cover = getPwaIosChatEarlyKeyboardCoverPx();
+          if (cover <= 0) return 0;
+          document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", cover + "px");
+          window.__pokerChatPwaEarlyKeyboardCover = cover;
+          collectChatOverscrollSnapshot("pwa-early-fallback:" + (label || ""), { cover: cover });
+          return cover;
+        } catch (eEarlyFallback) {
+          return 0;
+        }
+      }
       /** PWA/WK: pokerPulseChatFixedViewportHeightAfterKeyboard или гонка кадров оставляют height/min-height на html/body — «отступ» снизу и весь экран сжат до смены раздела */
       function pokerStripForcedViewportShellHeights() {
         try {
@@ -6640,6 +6672,21 @@ function initChat() {
             if (baseFloorDock > 260) coverNum = Math.max(coverNum, Math.round(baseFloorDock * 0.34));
           }
         } catch (ePwaDockFloorAlways) {}
+        try {
+          var earlyPwaCover = Number(window.__pokerChatPwaEarlyKeyboardCover) || 0;
+          var earlyPwaAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+          if (
+            earlyPwaCover > 0 &&
+            earlyPwaAge < 900 &&
+            (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) &&
+            typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+            pokerPwaStandaloneForKeyboardInset() &&
+            typeof isIosLikeForChatViewport === "function" &&
+            isIosLikeForChatViewport()
+          ) {
+            coverNum = Math.max(coverNum, earlyPwaCover);
+          }
+        } catch (ePwaEarlyCoverDock) {}
         var bottomPx = coverNum + gap;
         var pwaAccessoryInset = 0;
         var prevB = null;
@@ -7451,6 +7498,11 @@ function initChat() {
         try {
           attachPwaChatThreadRootScrollLock(focusTarget);
         } catch (ePwaRootLockFocus) {}
+        if (isIosPwaChatKb) {
+          try {
+            setPwaIosChatEarlyKeyboardFallback("focus");
+          } catch (ePwaEarlyFocus) {}
+        }
         try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
@@ -7954,7 +8006,7 @@ function initChat() {
                 window.__pokerChatKeyboardFocusAtMs = Date.now();
                 window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
                 attachPwaChatThreadRootScrollLock(ta);
-                document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", "38dvh");
+                setPwaIosChatEarlyKeyboardFallback("touchstart");
                 pwaChatThreadRootScrollToZero();
               }
             } catch (ePwaTouchKeyboardState) {}
