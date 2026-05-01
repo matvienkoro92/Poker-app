@@ -79,6 +79,20 @@ function setTab(tab) {
   pokerPushOpenTraceTransition("setTab-call", String(tab || ""));
   if (tab === "dialogs") {
     try {
+      var dialogsIntentAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
+      var dialogsIntentPeer = String(window.__pokerChatDialogOpenIntentPeer || "");
+      var dialogsIntentFresh = !!(dialogsIntentAt && Date.now() - dialogsIntentAt < 3500);
+      var dialogsConvVisible = !!(getConvView() && !getConvView().classList.contains("chat-conv-view--hidden"));
+      if ((getChatWithUserId() || dialogsIntentPeer) && (dialogsConvVisible || dialogsIntentFresh)) {
+        pokerPushOpenDebug("setTab-dialogs-open-intent-blocked", String(getChatWithUserId() || dialogsIntentPeer || ""));
+        if (!getChatWithUserId() && dialogsIntentPeer) setChatWithUserId(normalizePeerIdForChat(dialogsIntentPeer));
+        setChatActiveTab("personal");
+        tab = "personal";
+      }
+    } catch (eSetTabDialogsOpenIntent) {}
+  }
+  if (tab === "dialogs") {
+    try {
       var pendingDialogsDirect = window.__pendingOpenChatPersonalFromDeepLink;
       var pendingDialogsPeer =
         pendingDialogsDirect && pendingDialogsDirect.userId != null

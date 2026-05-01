@@ -8263,6 +8263,18 @@ function initChat() {
           }
         }
       } catch (eChatRefreshPending) {}
+      try {
+        var refreshIntentAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
+        var refreshIntentPeer = String(window.__pokerChatDialogOpenIntentPeer || "");
+        var refreshIntentFresh = !!(refreshIntentAt && Date.now() - refreshIntentAt < 3500);
+        var refreshConvVisible = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
+        var refreshHasPersonalPeer = !!(chatWithUserId || (refreshIntentFresh && refreshIntentPeer));
+        if (chatActiveTab === "dialogs" && refreshHasPersonalPeer && (refreshConvVisible || refreshIntentFresh)) {
+          pokerPushOpenTraceTransition("chatRefresh-keep-personal", String(chatWithUserId || refreshIntentPeer || ""));
+          chatActiveTab = "personal";
+          if (!chatWithUserId && refreshIntentPeer) chatWithUserId = refreshIntentPeer;
+        }
+      } catch (eChatRefreshKeepPersonal) {}
       /* Сначала setTab — для general выставится scrollGeneralToBottomOnNextRender; иначе отрисовка кэша шла с флагом false и лента мелькала «сверху», затем loadGeneral прокручивал вниз. */
       pokerPushOpenTraceTransition("chatRefresh-before-setTab", String(chatActiveTab || ""));
       setTab(chatActiveTab);

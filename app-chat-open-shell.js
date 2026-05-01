@@ -267,6 +267,10 @@ function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVer
     pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
   } catch (eOpenConvDbg0) {}
   if (!userId) return;
+  try {
+    window.__pokerChatDialogOpenIntentAt = Date.now();
+    window.__pokerChatDialogOpenIntentPeer = String(userId || "");
+  } catch (eOpenConvIntent) {}
   var openConvIsGroup = String(userId).indexOf("group_") === 0;
   if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;
   try {
