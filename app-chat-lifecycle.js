@@ -5511,6 +5511,11 @@ function initChat() {
       }
       function resetChatKeyboardDockRuntimeState() {
         try {
+          if (window.__pokerChatPwaDockWatchdogTimer) {
+            clearInterval(window.__pokerChatPwaDockWatchdogTimer);
+            window.__pokerChatPwaDockWatchdogTimer = null;
+          }
+          window.__pokerChatPwaDockWatchdogUntil = 0;
           window.__pokerChatKeyboardFocusAtMs = 0;
           window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatTgKeyboardCoverLast = null;
@@ -6637,6 +6642,53 @@ function initChat() {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
       }
+      function ensurePwaChatDockWatchdog(focusTarget) {
+        try {
+          if (isTelegramChatRuntime()) return;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return;
+          if (!isChatThreadComposerKeyboardDom(focusTarget)) return;
+          window.__pokerChatPwaDockWatchdogUntil = Date.now() + 2800;
+          if (window.__pokerChatPwaDockWatchdogTimer) return;
+          window.__pokerChatPwaDockWatchdogTimer = setInterval(function () {
+            try {
+              if (Date.now() > (Number(window.__pokerChatPwaDockWatchdogUntil) || 0)) {
+                clearInterval(window.__pokerChatPwaDockWatchdogTimer);
+                window.__pokerChatPwaDockWatchdogTimer = null;
+                return;
+              }
+              if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
+              if (!document.body.classList.contains("chat-keyboard-open")) return;
+              var active = document.activeElement;
+              if (!isChatThreadComposerKeyboardDom(active || focusTarget)) return;
+              var targetArea =
+                chatActiveTab === "personal"
+                  ? document.getElementById("chatPersonalInputArea") || (convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null)
+                  : document.getElementById("chatGeneralInputArea");
+              if (!targetArea) return;
+              var bottom = Math.round(Number(window.__pokerChatThreadDockBottomCssPx) || Number(window.__pokerChatLastAppliedDockBottom) || 0);
+              if (bottom < 72) return;
+              var cs = window.getComputedStyle ? getComputedStyle(targetArea) : null;
+              var currentBottom = cs ? Math.round(parseFloat(cs.bottom) || 0) : 0;
+              var needsRepair =
+                !targetArea.classList.contains("chat-input-area--vv-dock") ||
+                (cs && cs.position !== "fixed") ||
+                currentBottom < Math.max(48, bottom - 24);
+              if (!needsRepair) return;
+              targetArea.classList.add("chat-input-area--vv-dock");
+              targetArea.style.setProperty("position", "fixed", "important");
+              targetArea.style.setProperty("left", "0", "important");
+              targetArea.style.setProperty("right", "0", "important");
+              targetArea.style.setProperty("width", "100%", "important");
+              targetArea.style.setProperty("max-width", "100%", "important");
+              targetArea.style.setProperty("box-sizing", "border-box", "important");
+              targetArea.style.setProperty("z-index", "120", "important");
+              targetArea.style.setProperty("bottom", bottom + "px", "important");
+              collectChatOverscrollSnapshot("pwa-dock-watchdog", { bottom: bottom, current: currentBottom });
+            } catch (ePwaDockWatchdogTick) {}
+          }, 80);
+        } catch (ePwaDockWatchdog) {}
+      }
       /**
        * Telegram Mini App: общий/личный тред с фокусом на композере — отдельный конвейер без visualViewport.
        * Высота перекрытия: viewportStableHeight − viewportHeight; резервы winLoss / lastGood; dock + pad.
@@ -7224,6 +7276,7 @@ function initChat() {
             } catch (ePwaFallbackInset) {}
             if (coverDock >= 72) {
               applyChatThreadComposerKeyboardDockFromCover(coverDock, focusTarget);
+              ensurePwaChatDockWatchdog(focusTarget);
             }
           } catch (ePwaDockPass) {}
           try {
@@ -7247,7 +7300,7 @@ function initChat() {
               runPwaChatComposerDockPass("raf1");
               syncPwaChatVisualViewportInset();
             });
-            [80, 180, 360, 700].forEach(function (ms) {
+            [80, 180, 360, 700, 1200, 1900].forEach(function (ms) {
               setTimeout(function () {
                 runPwaChatComposerDockPass("t" + ms);
               }, ms);
