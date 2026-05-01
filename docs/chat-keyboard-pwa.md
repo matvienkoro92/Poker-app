@@ -109,9 +109,74 @@
 - Не чинить PWA iOS и Telegram Mini App одной веткой: `telegram-web-app.js` может существовать в PWA, но это не значит, что среда является Telegram runtime.
 - Не менять общий chat CSS без учета порядка импортов: поздние правила в `styles-home-sections.css` перебивают split chat CSS.
 
+## Итоговая Зафиксированная Схема После Финальных Правок
+
+Дата фиксации: 2026-05-02. Этот раздел описывает рабочее состояние после серии правок `2.521` - `2.527`, когда пользовательская проверка подтвердила: composer поднимается на нужное место, лента и шапки не дергаются, клавиатура не закрывается сама, а возврат в приложение больше не должен накапливать вторую высоту клавиатуры.
+
+### Что Сработало Для iOS PWA Keyboard/Composer
+
+- Основной режим для iOS PWA chat thread: `CSS-only dock` через `shouldUseCssOnlyIosPwaChatComposerDock()` и `applyCssOnlyIosPwaChatComposerDock()`.
+- Для этого режима `--chat-vv-inset` намеренно ставится в `0px`, а `--chat-ios-accessory-inset` удаляется. Это важно: старый общий accessory inset вместе с fixed bottom давал двойной учет клавиатуры.
+- Единственный источник высоты composer в этом режиме: `--chat-ios-pwa-thread-composer-bottom`, рассчитанный в `getCssOnlyIosPwaChatComposerBottomPx()`.
+- В расчет bottom добавлен отдельный `accessoryLift` под белую iOS input accessory bar. После пользовательской проверки добавлен тонкий `fineLift = 4`, чтобы composer стоял чуть выше панели.
+- CSS fallback в `styles-home-sections.css` и `styles-chat-after-responsive.css` поднят синхронно: `clamp(272px, calc(36vh + 52px), 424px)`. Это страховка до того, как JS успел выставить переменную.
+- `updateChatMessagesKeyboardPad()` для CSS-only PWA берет тот же locked bottom (`__pokerChatIosPwaComposerBottomLockPx` / `__pokerChatThreadDockBottomCssPx`), поэтому лента и composer живут в одной системе координат.
+- Задержка старта dock уменьшена: если `visualViewport` уже подтверждает открытую клавиатуру, dock можно применять примерно после `180ms`; если viewport еще не готов, остается защитная пауза. Это убрало ощущение, что строка поднимается только через секунду.
+
+### Что Сработало Против Самозакрытия Клавиатуры
+
+- Не делать root-scroll reset во время opening hold iOS PWA composer. Это остается главным правилом.
+- `shouldSkipPwaChatRootScrollDuringComposerOpen()` защищает первые кадры native keyboard session от `window.scrollTo(0, 0)` и сброса `html/body.scrollTop`.
+- `finalizeIosPwaChatThreadClosedKeyboard()` должен срабатывать только когда viewport реально выглядит закрытым. Нельзя считать keyboard закрытой только по временному `activeElement`/focus-скачку.
+- Pointer-dismiss оставлен только для явного клика вне composer/emoji/attach/context/scroll-bottom controls. Он не должен реагировать на события внутри строки ввода.
+
+### Что Сработало При Сворачивании И Возврате В PWA
+
+- При `visibilitychange hidden` и `pagehide` нужно сбрасывать именно визуальный dock-state iOS PWA: классы `chat-keyboard-open`, `chat-input-area--vv-dock`, CSS-переменные keyboard/composer и locked bottom.
+- При этом нельзя принудительно чистить текст или ломать содержание composer.
+- При `pageshow`, `visibilitychange visible` и `window focus` dock собирается заново только если активная textarea еще есть и `isIosPwaChatThreadKeyboardOpenConfirmed()` подтверждает открытую клавиатуру.
+- Это предотвращает накопление второй высоты клавиатуры после сценария: нажал composer -> свернул приложение -> вернулся.
+
+### Что Сработало Для Навигации В Чате
+
+- Первый вход в личный/групповой диалог защищен от delayed refresh, который мог вернуть пользователя в список диалогов.
+- Back-кнопки в чате получили более надежную touch/hit-area обработку, чтобы первый tap на iPhone не терялся.
+- Header личного/общего чата держится отдельно от keyboard composer dock: шапка не должна участвовать в нижнем подъеме composer.
+
+### Что Сработало Для Друзей И Контактов
+
+- Удаление друга теперь optimistic: локальный UI обновляется сразу, а не ждет полного reload contacts.
+- В `pokerRemoveLocalFriendFromChatContacts()` удаление идет по связке id: `userId`, `chatUserId`, `accountId`, `id`, `__friendAccountId` и нормализованные варианты. Это важно, потому что список чатов и список друзей могут ссылаться на одного игрока разными id.
+- Открытая модалка друзей тоже чистится сразу через `pokerRemoveFriendFromOpenFriendsList()`.
+- При ошибке API локальное состояние возвращается через `pokerApplyLocalFriendToChatContacts()`.
+
+### Что Можно Менять Аккуратно
+
+- Визуал кнопок composer (`.chat-send-btn`, `.chat-send-btn--mic`, `.chat-voice-preview__send`) можно менять CSS-ом, если не трогать id, текстовые переключатели, классы состояния и обработчики в JS.
+- Цвета/тени кнопок безопасны, пока не меняются размеры `36px` для основной action column и не меняется ширина `.chat-composer-actions`; иначе можно задеть позицию emoji/scroll-bottom.
+
+### Коммиты Финального Стабильного Блока
+
+- `5758def` / `2.521` — стабилизация iOS PWA focus gesture.
+- `8f94c70` / `2.522` — восстановление active composer lift session.
+- `c88cde2` / `2.523` — поднятие composer над iOS accessory bar.
+- `541e0a6` / `2.524` — точная настройка высоты `+4px` и более ранний dock после подтвержденного viewport.
+- `ac4021e` / `2.525` — сброс dock-state при уходе PWA в background и пересборка при возврате.
+- `684204e` / `2.526` — чисто визуальная полировка кнопок отправки/микрофона без изменения функционала.
+- `9a3dfe3` / `2.527` — optimistic удаление друзей из списков и кэшей по всем связанным id.
+
+### Финальные Инварианты
+
+- Для iOS PWA thread composer должен быть один нижний источник правды: `--chat-ios-pwa-thread-composer-bottom`.
+- `--chat-ios-accessory-inset` не включать обратно в CSS-only dock, иначе высок риск двойной клавиатуры.
+- Root scroll cleanup запрещен в первые кадры открытия keyboard.
+- Background/foreground должен сбрасывать старый dock перед пересборкой.
+- Лента сообщений должна получать padding из того же locked bottom, что и composer.
+- Любая правка keyboard должна проверяться сценариями: первый tap, личный чат, общий чат, закрытие keyboard, сворачивание/возврат, повторный tap, tap вне composer.
+
 ## Следующий Шаг
 
-Если проблема повторяется после `2.433`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту:
+Если проблема повторяется после `2.527`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту:
 
 - если `hKb/bKb = 0` — чинить ранний trigger keyboard-state;
 - если `chatCmp position != fixed` — чинить selector/cascade;
