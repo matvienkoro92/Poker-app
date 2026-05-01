@@ -380,7 +380,6 @@ function initChat() {
         document.documentElement.classList &&
         document.documentElement.classList.contains("poker-ios-pwa");
       if (!pwaIos) return false;
-      return true;
       if (chatIsAdmin) return true;
       if (window.localStorage && localStorage.getItem("poker_chat_keyboard_debug") === "1") return true;
       return /(?:\?|&)chatKeyboardDebug=1(?:&|$)/.test(String(location.search || ""));
