@@ -48,6 +48,9 @@
   gap: 9px;
   min-width: 0;
   padding: 2px 0;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app.app--view-home .logo__image {
@@ -116,6 +119,12 @@
 
 .app.app--view-home .radio-toggle .radio-toggle__label {
   color: rgba(255, 247, 237, 0.94);
+}
+
+.app.app--view-home button.welcome-home-title-btn.title {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
