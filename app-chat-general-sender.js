@@ -311,23 +311,16 @@ function sendGeneral(overrideText) {
         getChatComposerEl().value = "";
         try { resizeChatTextarea(getChatComposerEl()); } catch (e) {}
         try { updateGeneralSendBtnIcon(); } catch (e) {}
-        if (shouldAutoFocusChatComposerOnDesktop()) {
+        if (typeof window.__pokerKeepChatComposerFocusAfterSend === "function") {
+          window.__pokerKeepChatComposerFocusAfterSend("general");
+        } else if (shouldAutoFocusChatComposerOnDesktop()) {
           focusChatComposerForDesktop();
         } else {
           setTimeout(function () {
-            try { getChatComposerEl().blur(); } catch (e) {}
-          }, 50);
-          setTimeout(function () {
             try {
-              if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
-                  !window.__pokerIsChatKeyboardLayoutEffectivelyClosed()) {
-                return;
-              }
-              if (typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
-                window.__pokerFinalizeChatKeyboardDismiss();
-              }
-            } catch (eKbSend) {}
-          }, 220);
+              if (getChatComposerEl() && getChatComposerEl().focus) getChatComposerEl().focus({ preventScroll: true });
+            } catch (eFocusSendG) {}
+          }, 50);
         }
       }
       setGeneralReplyTo(null);

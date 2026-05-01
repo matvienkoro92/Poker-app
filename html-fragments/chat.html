@@ -10,7 +10,12 @@
                 <div class="chat-find-by-id chat-find-by-id--dialogs chat-find-by-id--in-dialogs-scroll">
                   <div class="chat-find-row">
                     <div class="chat-find-input-wrap chat-find-input-wrap--with-icon">
-                      <span class="chat-find-input-icon" aria-hidden="true">🔍</span>
+                      <span class="chat-find-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="7"></circle>
+                          <path d="m20 20-3.8-3.8"></path>
+                        </svg>
+                      </span>
                       <input type="text" class="chat-input chat-find-input" id="chatFindByIdInputDialogs" placeholder="Введите ID игрока или его ник в тг" maxlength="35" autocomplete="off" aria-autocomplete="list" aria-controls="chatFindSuggestList" aria-expanded="false" />
                       <div class="chat-find-suggest chat-find-suggest--hidden" id="chatFindSuggest" role="listbox" aria-hidden="true">
                         <div class="chat-find-suggest__list" id="chatFindSuggestList"></div>

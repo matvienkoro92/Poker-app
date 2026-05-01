@@ -6263,6 +6263,59 @@ function initChat() {
           window.__pokerChatDismissTimers = [];
         } catch (eDismissClear) {}
       }
+      function keepChatComposerFocusAfterSend(mode) {
+        try {
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var wantedMode = mode === "general" || mode === "personal" ? mode : chatComposerMounted || chatActiveTab;
+          if (wantedMode !== "general" && wantedMode !== "personal") return false;
+          var target = null;
+          if (wantedMode === "general") {
+            target = chatGeneralComposerEl || (chatGeneralComposerMount && chatGeneralComposerMount.querySelector("textarea"));
+          } else {
+            target = chatPersonalComposerEl || (chatPersonalComposerMount && chatPersonalComposerMount.querySelector("textarea"));
+          }
+          if (!target) target = chatComposerEl || chatSharedComposerEl;
+          if (!target || String(target.tagName || "").toUpperCase() !== "TEXTAREA") return false;
+          if (target.disabled || target.hidden) return false;
+          clearPendingChatKeyboardDismissTimers();
+          window.__pokerChatPwaUserDismissAt = 0;
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = Math.max(Number(window.__pokerChatKeyboardOpeningUntil) || 0, Date.now() + 900);
+          chatComposerEl = target;
+          try {
+            target.removeAttribute("tabindex");
+            target.removeAttribute("aria-hidden");
+          } catch (eSendPrep) {}
+          try {
+            if (document.activeElement !== target && target.focus) target.focus({ preventScroll: true });
+          } catch (eSendFocus1) {
+            try {
+              if (document.activeElement !== target && target.focus) target.focus();
+            } catch (eSendFocus2) {}
+          }
+          try {
+            if (typeof resizeChatTextarea === "function") resizeChatTextarea(target);
+          } catch (eSendResize) {}
+          try {
+            if (document.activeElement === target) {
+              if (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) {
+                setChatKeyboardOpenClasses(true);
+              }
+              if (typeof onChatInputFocus === "function") onChatInputFocus(target);
+            }
+          } catch (eSendFocusState) {}
+          try {
+            if (typeof updateChatMessagesKeyboardPad === "function") updateChatMessagesKeyboardPad();
+          } catch (eSendPad) {}
+          try {
+            if (typeof syncPwaChatVisualViewportInset === "function") syncPwaChatVisualViewportInset();
+          } catch (eSendSync) {}
+          return document.activeElement === target;
+        } catch (eKeepSendFocus) {
+          return false;
+        }
+      }
+      window.__pokerKeepChatComposerFocusAfterSend = keepChatComposerFocusAfterSend;
       function finalizeChatKeyboardDismiss() {
         clearPendingChatKeyboardDismissTimers();
         detachPwaChatThreadRootScrollLock();
@@ -9456,6 +9509,17 @@ function initChat() {
       if (btn[key]) return;
       btn[key] = true;
       var lastInvoke = 0;
+      function keepComposerFocusOnPress(e) {
+        try {
+          if (e && typeof e.preventDefault === "function") e.preventDefault();
+          var mode = btn === generalSendBtnRef || (btn && btn.id === "chatGeneralSendBtn") ? "general" : "personal";
+          if (typeof window.__pokerKeepChatComposerFocusAfterSend === "function") {
+            window.__pokerKeepChatComposerFocusAfterSend(mode);
+          } else if (chatComposerEl && chatComposerEl.focus) {
+            chatComposerEl.focus({ preventScroll: true });
+          }
+        } catch (eKeepPress) {}
+      }
       function invoke(e) {
         if (e && typeof e.preventDefault === "function") e.preventDefault();
         var now = Date.now();
@@ -9466,6 +9530,13 @@ function initChat() {
         } catch (eInv) {}
         run();
       }
+      btn.addEventListener("pointerdown", function (e) {
+        if (e && e.isPrimary === false) return;
+        keepComposerFocusOnPress(e);
+      }, { passive: false, capture: true });
+      btn.addEventListener("mousedown", function (e) {
+        keepComposerFocusOnPress(e);
+      }, { capture: true });
       btn.addEventListener("click", function (e) {
         invoke(e);
       });

@@ -440,28 +440,86 @@ button.chat-group-info-modal__add-members-icon-btn[hidden] {
 .chat-find-input-wrap--with-icon .chat-find-input {
   width: 100%;
   box-sizing: border-box;
-  padding-left: 40px;
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  min-height: 44px;
+  padding-left: 44px;
+  padding-right: 14px;
+  border-radius: 15px;
+  color: rgba(248, 250, 252, 0.96);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.045)),
+    rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 22px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(14px) saturate(1.18);
+  -webkit-backdrop-filter: blur(14px) saturate(1.18);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 .chat-find-input-wrap--with-icon .chat-find-input::placeholder {
-  font-style: italic;
-  color: var(--text-muted);
-  opacity: 0.9;
+  color: rgba(203, 213, 225, 0.72);
+  opacity: 1;
+}
+.chat-find-input-wrap--with-icon .chat-find-input:hover {
+  border-color: rgba(251, 146, 60, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.055)),
+    rgba(15, 23, 42, 0.56);
+}
+.chat-find-input-wrap--with-icon .chat-find-input:focus {
+  border-color: rgba(251, 146, 60, 0.64);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 3px rgba(249, 115, 22, 0.16),
+    0 10px 24px rgba(0, 0, 0, 0.18);
+  outline: none;
+}
+.chat-find-input-wrap--with-icon:focus-within .chat-find-input-icon {
+  color: #fed7aa;
+  opacity: 1;
 }
 [data-theme="light"] .chat-find-input-wrap--with-icon .chat-find-input {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(148, 163, 184, 0.35);
+  color: #172033;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 237, 0.62)),
+    rgba(255, 255, 255, 0.82);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 8px 20px rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .chat-find-input-wrap--with-icon .chat-find-input::placeholder {
+  color: rgba(100, 116, 139, 0.78);
+}
+[data-theme="light"] .chat-find-input-wrap--with-icon .chat-find-input:hover {
+  border-color: rgba(249, 115, 22, 0.38);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 247, 237, 0.76)),
+    rgba(255, 255, 255, 0.9);
 }
 .chat-find-input-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 18px;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(226, 232, 240, 0.72);
+  line-height: 0;
   pointer-events: none;
-  opacity: 0.7;
+  opacity: 0.86;
+  transition: color 0.16s ease, opacity 0.16s ease, transform 0.16s ease;
+}
+.chat-find-input-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+[data-theme="light"] .chat-find-input-icon {
+  color: rgba(100, 116, 139, 0.86);
 }
 .chat-find-by-id--dialogs .chat-find-input { width: 100%; box-sizing: border-box; }
 .chat-find-suggest {

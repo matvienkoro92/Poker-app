@@ -11,7 +11,7 @@
 .chat-find-by-id--in-dialogs-scroll {
   margin-top: 4px;
   margin-bottom: 10px;
-  padding: 0 var(--chat-side-pad, 3px);
+  padding: 0 max(var(--chat-side-pad, 3px), 4px);
   position: relative;
   z-index: 2;
 }
@@ -30,16 +30,16 @@
 .chat-find-new-group-btn {
   position: relative;
   flex-shrink: 0;
-  width: 46px;
-  min-width: 46px;
+  width: 44px;
+  min-width: 44px;
   height: auto;
   min-height: 44px;
   align-self: stretch;
   border-radius: 15px;
-  border: 1px solid rgba(251, 146, 60, 0.56);
+  border: 1px solid rgba(255, 237, 213, 0.5);
   background:
-    radial-gradient(circle at 30% 18%, rgba(255, 237, 213, 0.42), transparent 30%),
-    linear-gradient(145deg, #fb923c 0%, #f97316 46%, #c2410c 100%);
+    radial-gradient(circle at 34% 18%, rgba(255, 237, 213, 0.66), transparent 34%),
+    linear-gradient(145deg, #fdba74 0%, #f97316 46%, #9a3412 100%);
   color: transparent;
   font-size: 0;
   font-weight: 800;
@@ -52,9 +52,10 @@
   justify-content: center;
   box-sizing: border-box;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 24px rgba(249, 115, 22, 0.25),
-    0 2px 10px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -10px 18px rgba(154, 52, 18, 0.14),
+    0 12px 26px rgba(249, 115, 22, 0.3),
+    0 2px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
@@ -65,11 +66,11 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 18px;
+  width: 17px;
   height: 3px;
   border-radius: 999px;
   background: #fff;
-  box-shadow: 0 1px 8px rgba(124, 45, 18, 0.3);
+  box-shadow: 0 1px 8px rgba(124, 45, 18, 0.34);
   transform: translate(-50%, -50%);
 }
 .chat-find-new-group-btn::after {
@@ -79,9 +80,10 @@
 .chat-find-new-group-btn:focus {
   border-color: rgba(255, 237, 213, 0.62);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    0 12px 30px rgba(249, 115, 22, 0.34),
-    0 4px 14px rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -10px 18px rgba(154, 52, 18, 0.1),
+    0 14px 32px rgba(249, 115, 22, 0.38),
+    0 4px 16px rgba(0, 0, 0, 0.24);
   filter: saturate(1.05) brightness(1.03);
   outline: none;
 }
@@ -94,8 +96,9 @@
     radial-gradient(circle at 30% 18%, rgba(255, 247, 237, 0.7), transparent 30%),
     linear-gradient(145deg, #fb923c 0%, #f97316 48%, #ea580c 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    0 10px 22px rgba(249, 115, 22, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    inset 0 -10px 18px rgba(154, 52, 18, 0.1),
+    0 10px 22px rgba(249, 115, 22, 0.24),
     0 2px 10px rgba(15, 23, 42, 0.08);
 }
 .chat-contact-swipe--group .chat-contact-swipe__panel {
