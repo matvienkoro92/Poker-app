@@ -840,10 +840,19 @@ function setView(viewName, navOpts) {
       /* Чат: только синхронный сброс — повторный rAF доводил окно и давал «вверх—вниз» в первые сотни мс вместе с лентой. */
       if (viewName !== "chat") {
         rafScroll(function () {
+          if (typeof window.pokerScheduleScrollMainDocumentToTop === "function") {
+            window.pokerScheduleScrollMainDocumentToTop(0);
+            return;
+          }
           scrollMainDocumentToTop();
         });
-        setTimeout(scrollMainDocumentToTop, 0);
-        setTimeout(scrollMainDocumentToTop, 50);
+        if (typeof window.pokerScheduleScrollMainDocumentToTop === "function") {
+          window.pokerScheduleScrollMainDocumentToTop(0);
+          window.pokerScheduleScrollMainDocumentToTop(50);
+        } else {
+          setTimeout(scrollMainDocumentToTop, 0);
+          setTimeout(scrollMainDocumentToTop, 50);
+        }
       }
     }
   }

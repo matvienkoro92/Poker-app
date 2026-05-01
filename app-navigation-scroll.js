@@ -114,6 +114,29 @@ function setMainDocumentScrollY(y) {
   } catch (e2) {}
 }
 
+var pokerLastMainScrollUserIntentAt = 0;
+(function pokerBindMainScrollUserIntent() {
+  function mark() {
+    pokerLastMainScrollUserIntentAt = Date.now();
+  }
+  try {
+    window.addEventListener("touchstart", mark, { passive: true });
+    window.addEventListener("touchmove", mark, { passive: true });
+    window.addEventListener("wheel", mark, { passive: true });
+    window.addEventListener("pointerdown", mark, { passive: true });
+  } catch (eBindMainScrollIntent) {}
+})();
+
+function pokerScheduleScrollMainDocumentToTop(delay, expectedView) {
+  var scheduledAt = Date.now();
+  setTimeout(function () {
+    if (pokerLastMainScrollUserIntentAt >= scheduledAt) return;
+    if (expectedView && document.body && document.body.getAttribute && document.body.getAttribute("data-view") !== expectedView) return;
+    scrollMainDocumentToTop();
+  }, Math.max(0, Number(delay) || 0));
+}
+window.pokerScheduleScrollMainDocumentToTop = pokerScheduleScrollMainDocumentToTop;
+
 function clampMainDocumentScrollY(y) {
   try {
     y = Math.max(0, Number(y) || 0);
@@ -148,13 +171,13 @@ function scrollHomeToTop() {
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
     scrollHomeToTop();
-    setTimeout(scrollHomeToTop, 50);
-    setTimeout(scrollHomeToTop, 300);
+    pokerScheduleScrollMainDocumentToTop(50, "home");
+    pokerScheduleScrollMainDocumentToTop(300, "home");
   });
 } else {
   scrollHomeToTop();
-  setTimeout(scrollHomeToTop, 50);
-  setTimeout(scrollHomeToTop, 300);
+  pokerScheduleScrollMainDocumentToTop(50, "home");
+  pokerScheduleScrollMainDocumentToTop(300, "home");
 }
 window.addEventListener("pageshow", function (e) {
   if (e && e.persisted) scrollHomeToTop();
