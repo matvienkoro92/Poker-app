@@ -1243,27 +1243,43 @@ function initChat() {
         try {
           if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(pwaComposer);
         } catch (ePwaBindKb) {}
+        var isIosPwaThreadComposerArea = false;
         try {
-          if (pwaComposer.focus) pwaComposer.focus();
-        } catch (ePwaFocusFirst) {
-          try {
-            if (pwaComposer.focus) pwaComposer.focus({ preventScroll: true });
-          } catch (ePwaFocusSecond) {}
-        }
-        try {
-          if (
+          isIosPwaThreadComposerArea =
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
             pokerPwaStandaloneForKeyboardInset() &&
             typeof isIosLikeForChatViewport === "function" &&
-            isIosLikeForChatViewport()
-          ) {
+            isIosLikeForChatViewport() &&
+            isChatThreadComposerKeyboardDom(pwaComposer);
+        } catch (ePwaAreaModeCheck) {}
+        if (isIosPwaThreadComposerArea && (target === pwaComposer || (target && pwaComposer.contains && pwaComposer.contains(target)))) {
+          return;
+        }
+        try {
+          if (isIosPwaThreadComposerArea) {
+            setChatKeyboardOpenClasses(true);
+            clearPendingChatKeyboardDismissTimers();
+            if (!window.__pokerChatKeyboardFocusAtMs || Date.now() - Number(window.__pokerChatKeyboardFocusAtMs) > 260) {
+              window.__pokerChatKeyboardFocusAtMs = Date.now();
+            }
+            window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
+            applyCssOnlyIosPwaChatComposerDock(pwaComposer, "area-prefocus");
+          }
+        } catch (ePwaAreaPrefocusDock) {}
+        try {
+          if (pwaComposer.focus) pwaComposer.focus({ preventScroll: true });
+        } catch (ePwaFocusFirst) {
+          try {
+            if (pwaComposer.focus) pwaComposer.focus();
+          } catch (ePwaFocusSecond) {}
+        }
+        try {
+          if (isIosPwaThreadComposerArea) {
             try {
               var ihPwaArea = window.innerHeight || 0;
               if (ihPwaArea > 200) window.__pokerChatInnerHBaseline = Math.max(Number(window.__pokerChatInnerHBaseline) || 0, ihPwaArea);
             } catch (ePwaAreaBase) {}
             if (markPwaIosChatFocusActivation(pwaComposer, "area-gesture", 260)) {
-              setPwaIosChatEarlyKeyboardFallback("area-gesture");
-              onChatInputFocus(pwaComposer);
               forceIosPwaChatTextareaDock(pwaComposer, "area-gesture-focus");
             }
           }
@@ -5196,6 +5212,7 @@ function initChat() {
         var bh = 0;
         var btm = 0;
         var tmaFlowPad = false;
+        var cssOnlyPwaPad = false;
         try {
           if (barEl) {
             tmaFlowPad = isTelegramMiniAppChatThreadIos() && isChatThreadComposerKeyboardDom();
@@ -5203,6 +5220,22 @@ function initChat() {
             if (barFixed) {
               bh = barEl.offsetHeight || 72;
               btm = parseFloat(window.getComputedStyle(barEl).bottom) || 0;
+              try {
+                cssOnlyPwaPad =
+                  isIosPwaPad &&
+                  typeof shouldUseCssOnlyIosPwaChatComposerDock === "function" &&
+                  shouldUseCssOnlyIosPwaChatComposerDock(document.activeElement || chatComposerEl) &&
+                  barEl.classList.contains("chat-input-area--vv-dock");
+                if (!cssOnlyPwaPad && isIosPwaPad && chatComposerEl) {
+                  cssOnlyPwaPad =
+                    shouldUseCssOnlyIosPwaChatComposerDock(chatComposerEl) &&
+                    barEl.classList.contains("chat-input-area--vv-dock");
+                }
+                if (cssOnlyPwaPad) {
+                  var cssOnlyPwaBottom = Math.round(Number(window.__pokerChatIosPwaComposerBottomLockPx) || Number(window.__pokerChatThreadDockBottomCssPx) || 0);
+                  if (cssOnlyPwaBottom > 0) btm = cssOnlyPwaBottom;
+                }
+              } catch (eCssOnlyPwaPadDetect) {}
               /*
                * TMA + fixed-композер: padding ленты совпадает с bottom из applyChatThreadComposerKeyboardDockFromCover (__pokerChatThreadDockBottomCssPx).
                * Иначе getComputedStyle даёт 0 на кадре или подмешивается сырой vv — лента и строка дёргаются разными величинами.
@@ -5290,7 +5323,11 @@ function initChat() {
               } catch (ePwaRectPad) {}
               /* Для scroll range нужен не только видимый блок composer, но и его фиксированный bottom:
                * иначе последнее сообщение визуально уходит под строку и не докручивается до края. */
-              pad = Math.max(10, Math.round(Math.max(bh, pwaComposerLift) + Math.max(0, btm) - 18));
+              if (cssOnlyPwaPad) {
+                pad = Math.max(28, Math.round(Math.max(bh, pwaComposerLift) + Math.max(0, btm) + gap));
+              } else {
+                pad = Math.max(10, Math.round(Math.max(bh, pwaComposerLift) + Math.max(0, btm) - 18));
+              }
             } else if (isThreadComposerDock) {
               pad = Math.max(28, Math.round(bh + gap));
             } else {
@@ -5331,7 +5368,16 @@ function initChat() {
           }
         }
         try {
-          if (isIosPwaPad && barFixed) {
+          if (cssOnlyPwaPad && barFixed) {
+            var cssOnlyPwaPadAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            var lockedCssOnlyPwaPad = Number(window.__pokerChatPwaOpeningMessagesPad) || 0;
+            if (cssOnlyPwaPadAge > 0 && cssOnlyPwaPadAge < 1400) {
+              if (lockedCssOnlyPwaPad > 28) pad = lockedCssOnlyPwaPad;
+              else window.__pokerChatPwaOpeningMessagesPad = pad;
+            } else if (cssOnlyPwaPadAge >= 1400) {
+              window.__pokerChatPwaOpeningMessagesPad = null;
+            }
+          } else if (isIosPwaPad && barFixed) {
             var pwaPadAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
             var prevPwaPad = Number(window.__pokerChatMessagesKeyboardPadLast) || 0;
             if (prevPwaPad > 28 && pwaPadAge > 0 && pwaPadAge < 900) {
@@ -5348,6 +5394,17 @@ function initChat() {
             cover: Number(window.__pokerChatTgKeyboardCoverLast) || 0
           });
         } catch (eDbgPad) {}
+        try {
+          if (box.style && String(box.style.paddingBottom || "") === pad + "px") {
+            logChatKeyboardDebug("pad-same", "pad=" + pad + " btm=" + btm + " fixed=" + (barFixed ? 1 : 0));
+            collectChatOverscrollSnapshot("pad:same", {
+              pad: pad,
+              btm: btm,
+              fixed: barFixed ? 1 : 0
+            });
+            return;
+          }
+        } catch (ePadSameCheck) {}
         box.style.paddingBottom = pad + "px";
         logChatKeyboardDebug("pad-set", "pad=" + pad + " btm=" + btm + " fixed=" + (barFixed ? 1 : 0));
         collectChatOverscrollSnapshot("pad:set", {
@@ -5407,6 +5464,7 @@ function initChat() {
         if (opts.keepInsets) return;
         try {
           doc.style.removeProperty("--chat-vv-inset");
+          doc.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
           doc.style.removeProperty("--chat-ios-accessory-inset");
         } catch (eDocVars) {}
       }
@@ -5695,6 +5753,15 @@ function initChat() {
       }
       function setPwaIosChatEarlyKeyboardFallback(label) {
         try {
+          if (
+            typeof shouldUseCssOnlyIosPwaChatComposerDock === "function" &&
+            shouldUseCssOnlyIosPwaChatComposerDock(chatComposerEl || document.activeElement)
+          ) {
+            document.documentElement.style.removeProperty("--chat-keyboard-fallback-inset");
+            window.__pokerChatPwaEarlyKeyboardCover = 0;
+            window.__pokerChatPwaEarlyKeyboardCoverAt = 0;
+            return 0;
+          }
           var cover = getPwaIosChatEarlyKeyboardCoverPx();
           if (cover <= 0) return 0;
           document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", cover + "px");
@@ -5855,6 +5922,8 @@ function initChat() {
           if (!opts.preserveActivePwaDock) window.__pokerChatPwaDockWatchdogUntil = 0;
           if (!opts.preserveActivePwaDock) window.__pokerChatKeyboardFocusAtMs = 0;
           if (!opts.preserveActivePwaDock) window.__pokerChatLastAppliedDockBottom = null;
+          if (!opts.preserveActivePwaDock) window.__pokerChatIosPwaComposerBottomLockPx = null;
+          if (!opts.preserveActivePwaDock) window.__pokerChatPwaOpeningMessagesPad = null;
           window.__pokerChatTgKeyboardCoverLast = null;
           if (!opts.preserveActivePwaDock) window.__pokerChatThreadDockBottomCssPx = null;
           window.__pokerChatTmaDockTabKey = null;
@@ -5869,6 +5938,11 @@ function initChat() {
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
             window.__pokerChatVvInsetDebounceTimer = null;
+          }
+          if (!opts.preserveActivePwaDock) {
+            try {
+              document.documentElement.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
+            } catch (ePwaCssDockVarReset) {}
           }
         } catch (eDockReset) {}
       }
@@ -6137,6 +6211,7 @@ function initChat() {
             /* Сначала явный 0 — сброс кэша calc()/композитинга; remove на следующем кадре. */
             doc.style.setProperty("--chat-vv-inset", "0px");
             doc.style.setProperty("--chat-keyboard-fallback-inset", "0px");
+            doc.style.setProperty("--chat-ios-pwa-thread-composer-bottom", "0px");
             doc.style.setProperty("--chat-ios-accessory-inset", "0px");
         } catch (eCls) {}
         try {
@@ -6211,6 +6286,7 @@ function initChat() {
             try {
               doc.style.removeProperty("--chat-vv-inset");
               doc.style.removeProperty("--chat-keyboard-fallback-inset");
+              doc.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
               doc.style.removeProperty("--chat-ios-accessory-inset");
             } catch (e2) {}
             try {
@@ -6826,6 +6902,9 @@ function initChat() {
           } catch (eDbgFlow) {}
           return;
         }
+        if (applyCssOnlyIosPwaChatComposerDock(focusTarget, "apply")) {
+          return;
+        }
         var gap = getChatComposerKeyboardGapPx();
         var coverNum = Math.max(0, Math.round(Number(coverPx) || 0));
         try {
@@ -7085,6 +7164,110 @@ function initChat() {
           window.__pokerChatTmaDockTabKey = tabKey;
         } catch (eTkSet) {}
       }
+      function shouldUseCssOnlyIosPwaChatComposerDock(focusTarget) {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var target = focusTarget || document.activeElement || chatComposerEl;
+          if (!isChatThreadComposerKeyboardDom(target) && chatComposerEl && isChatThreadComposerKeyboardDom(chatComposerEl)) {
+            target = chatComposerEl;
+          }
+          return isChatThreadComposerKeyboardDom(target);
+        } catch (eCssOnlyDockCheck) {
+          return false;
+        }
+      }
+      function getCssOnlyIosPwaChatComposerBottomPx() {
+        try {
+          var now = Date.now();
+          var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+          var locked = Math.round(Number(window.__pokerChatIosPwaComposerBottomLockPx) || 0);
+          if (locked > 0 && (!focusAt || now - focusAt < 2600)) return locked;
+          var ih = window.innerHeight || 0;
+          var base = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
+          try {
+            var vv = window.visualViewport || null;
+            if (vv) {
+              var vvPack = Math.round((Number(vv.height) || 0) + (Number(vv.offsetTop) || 0));
+              if (vvPack > 0) base = Math.max(base, vvPack);
+            }
+          } catch (eCssDockVvBase) {}
+          try {
+            var sw = window.screen && window.screen.width ? Number(window.screen.width) || 0 : 0;
+            var sh = window.screen && window.screen.height ? Number(window.screen.height) || 0 : 0;
+            var screenLong = Math.max(sw, sh);
+            if (screenLong > 260 && screenLong < 1400) base = Math.max(base, screenLong);
+          } catch (eCssDockScreenBase) {}
+          if (base < 260) base = Math.max(260, ih || 0);
+          var minBottom = base < 740 ? 232 : 252;
+          var maxBottom = base > 900 ? 390 : 362;
+          var bottom = Math.round(base * 0.38);
+          bottom = Math.max(minBottom, Math.min(maxBottom, bottom));
+          window.__pokerChatIosPwaComposerBottomLockPx = bottom;
+          return bottom;
+        } catch (eCssDockBottom) {
+          return 0;
+        }
+      }
+      function applyCssOnlyIosPwaChatComposerDock(focusTarget, label) {
+        try {
+          if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
+          var focusNode = focusTarget || document.activeElement || chatComposerEl;
+          try {
+            if (
+              (!focusNode || !focusNode.closest || !focusNode.closest(".chat-input-area")) &&
+              chatComposerEl &&
+              isChatThreadComposerKeyboardDom(chatComposerEl)
+            ) {
+              focusNode = chatComposerEl;
+            }
+          } catch (eCssOnlyFocusFallback) {}
+          var area = focusNode && focusNode.closest ? focusNode.closest(".chat-input-area") : null;
+          if (!area) return false;
+          var bottomPx = getCssOnlyIosPwaChatComposerBottomPx();
+          document.documentElement.classList.add("chat-keyboard-open");
+          document.body.classList.add("chat-keyboard-open");
+          try {
+            document.documentElement.style.setProperty("--chat-vv-inset", "0px");
+            if (bottomPx > 0) document.documentElement.style.setProperty("--chat-ios-pwa-thread-composer-bottom", bottomPx + "px");
+            document.documentElement.style.removeProperty("--chat-keyboard-fallback-inset");
+            document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+          } catch (eCssOnlyVars) {}
+          area.classList.add("chat-input-area--vv-dock");
+          area.style.removeProperty("position");
+          area.style.removeProperty("left");
+          area.style.removeProperty("right");
+          area.style.removeProperty("width");
+          area.style.removeProperty("max-width");
+          area.style.removeProperty("box-sizing");
+          area.style.removeProperty("z-index");
+          area.style.removeProperty("bottom");
+          area.style.removeProperty("top");
+          area.style.removeProperty("margin-bottom");
+          area.style.removeProperty("transform");
+          try {
+            area.style.removeProperty("-webkit-transform");
+          } catch (eCssOnlyWebkitTransform) {}
+          try {
+            var cssBottom = bottomPx || (window.getComputedStyle ? Math.round(parseFloat(getComputedStyle(area).bottom) || 0) : 0);
+            window.__pokerChatThreadDockBottomCssPx = cssBottom;
+            window.__pokerChatLastAppliedDockBottom = cssBottom;
+          } catch (eCssOnlyBottom) {
+            window.__pokerChatThreadDockBottomCssPx = 0;
+          }
+          if (!window.__pokerChatKeyboardFocusAtMs) window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = Math.max(Number(window.__pokerChatKeyboardOpeningUntil) || 0, Date.now() + 900);
+          try {
+            updateChatMessagesKeyboardPad();
+          } catch (eCssOnlyPad) {}
+          collectChatOverscrollSnapshot("css-only-pwa-dock:" + (label || ""), focusNode);
+          return true;
+        } catch (eCssOnlyDock) {
+          return false;
+        }
+      }
       function forceIosPwaChatTextareaDock(textarea, label) {
         try {
           if (!textarea || !textarea.closest) return false;
@@ -7100,6 +7283,10 @@ function initChat() {
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
           var area = textarea.closest(".chat-input-area");
           if (!area) return false;
+          if (applyCssOnlyIosPwaChatComposerDock(textarea, label || "force")) {
+            ensurePwaChatDockWatchdog(textarea);
+            return true;
+          }
           var ih = window.innerHeight || 0;
           var base = Math.max(ih, Number(window.__pokerChatInnerHBaseline) || 0);
           var cover = 0;
@@ -7158,6 +7345,10 @@ function initChat() {
               if (!document.body.classList.contains("chat-keyboard-open")) return;
               var active = document.activeElement;
               if (!isChatThreadComposerKeyboardDom(active || focusTarget)) return;
+              if (shouldUseCssOnlyIosPwaChatComposerDock(active || focusTarget)) {
+                applyCssOnlyIosPwaChatComposerDock(active || focusTarget, "watchdog");
+                return;
+              }
               var targetArea =
                 chatActiveTab === "personal"
                   ? document.getElementById("chatPersonalInputArea") || (convView && convView.querySelector ? convView.querySelector(".chat-container .chat-input-area") : null)
@@ -7199,6 +7390,7 @@ function initChat() {
         hideTelegramMiniAppChatThreadDebugOverlay();
         doc.style.removeProperty("--chat-vv-inset");
         doc.style.removeProperty("--chat-keyboard-fallback-inset");
+        doc.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
         doc.style.removeProperty("--chat-ios-accessory-inset");
         if (opts.clearPad) clearChatMessagesKeyboardPad();
         if (opts.stripComposer) stripChatInputAreaTransforms();
@@ -7289,6 +7481,10 @@ function initChat() {
         }
         if (!document.body.classList.contains("chat-keyboard-open")) {
           resetChatVisualViewportState({ stripComposer: true, updateBaseline: true });
+          return;
+        }
+        if (shouldUseCssOnlyIosPwaChatComposerDock(document.activeElement || chatComposerEl)) {
+          applyCssOnlyIosPwaChatComposerDock(document.activeElement || chatComposerEl, "vv-sync-css-only");
           return;
         }
         try {
@@ -7720,6 +7916,11 @@ function initChat() {
           attachPwaChatThreadRootScrollLock(focusTarget);
         } catch (ePwaRootLockFocus) {}
         try {
+          if (shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) {
+            applyCssOnlyIosPwaChatComposerDock(focusTarget, "focus");
+          }
+        } catch (eCssOnlyFocusDock) {}
+        try {
           updateTelegramMiniAppChatThreadDebugOverlay("focus");
         } catch (eDbgFocus) {}
         requestAnimationFrame(function () {
@@ -7764,6 +7965,11 @@ function initChat() {
         var isTelegramChatFocus = isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime();
         function runPwaChatComposerDockPass(label) {
           if (!isIosPwaChatKb || !isChatThreadComposerKeyboardDom(focusTarget)) return;
+          if (shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) {
+            applyCssOnlyIosPwaChatComposerDock(focusTarget, "dock-pass:" + (label || ""));
+            ensurePwaChatDockWatchdog(focusTarget);
+            return;
+          }
           attachPwaChatThreadRootScrollLock(focusTarget);
           try {
             scrollDocumentToZero();
@@ -7819,6 +8025,14 @@ function initChat() {
               ) {
                 coverDock = Math.max(coverDock, pwaEarlyCoverDockPass);
               }
+            }
+            if (shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) {
+              try {
+                document.documentElement.style.removeProperty("--chat-keyboard-fallback-inset");
+              } catch (ePwaCssOnlyFallback) {}
+              applyCssOnlyIosPwaChatComposerDock(focusTarget, "dock-pass:" + (label || ""));
+              ensurePwaChatDockWatchdog(focusTarget);
+              return;
             }
             try {
               document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, Math.round(coverDock)) + "px");
@@ -7903,10 +8117,14 @@ function initChat() {
                 vvCoalesceRaf = rafVv(function () {
                   vvCoalesceRaf = null;
                   try {
-                    syncPwaChatVisualViewportInset();
+                    if (shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) {
+                      applyCssOnlyIosPwaChatComposerDock(focusTarget, "vv-raf");
+                    } else {
+                      syncPwaChatVisualViewportInset();
+                    }
                   } catch (eVvIm) {}
                   try {
-                    repairChatFocusViewportOverscroll(focusTarget);
+                    if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) repairChatFocusViewportOverscroll(focusTarget);
                   } catch (eVvRepairRaf) {}
                   collectChatOverscrollSnapshot("vv:raf", focusTarget);
                 });
@@ -7917,6 +8135,7 @@ function initChat() {
                 typeof isChatThreadComposerKeyboardDom === "function" &&
                 isChatThreadComposerKeyboardDom();
               if (!skipVv220 && isHardDisabledChatComposerFlowTarget(focusTarget)) skipVv220 = true;
+              if (!skipVv220 && shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) skipVv220 = true;
               if (!skipVv220) {
                 if (window.__pokerChatVvInsetDebounceTimer) clearTimeout(window.__pokerChatVvInsetDebounceTimer);
                 window.__pokerChatVvInsetDebounceTimer = setTimeout(function () {
@@ -8350,7 +8569,11 @@ function initChat() {
                 window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
                 attachPwaChatThreadRootScrollLock(ta);
                 if (markPwaIosChatFocusActivation(ta, "touchstart", 160)) {
-                  setPwaIosChatEarlyKeyboardFallback("touchstart");
+                  if (shouldUseCssOnlyIosPwaChatComposerDock(ta)) {
+                    applyCssOnlyIosPwaChatComposerDock(ta, "touchstart");
+                  } else {
+                    setPwaIosChatEarlyKeyboardFallback("touchstart");
+                  }
                 }
                 pwaChatThreadRootScrollToZero(ta);
               }
