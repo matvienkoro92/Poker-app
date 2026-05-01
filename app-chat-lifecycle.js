@@ -7320,9 +7320,10 @@ function initChat() {
             else if (shortSideLift > 0 && shortSideLift <= 375) accessoryLift = 46;
             if (base < 720) accessoryLift = Math.min(accessoryLift, 42);
           } catch (eCssDockAccessoryLift) {}
-          var minBottom = (base < 740 ? 220 : 238) + accessoryLift;
-          var maxBottom = (base > 900 ? 372 : 344) + accessoryLift;
-          var bottom = Math.round(base * 0.36) + accessoryLift;
+          var fineLift = 4;
+          var minBottom = (base < 740 ? 220 : 238) + accessoryLift + fineLift;
+          var maxBottom = (base > 900 ? 372 : 344) + accessoryLift + fineLift;
+          var bottom = Math.round(base * 0.36) + accessoryLift + fineLift;
           bottom = Math.max(minBottom, Math.min(maxBottom, bottom));
           window.__pokerChatIosPwaComposerBottomLockPx = bottom;
           return bottom;
@@ -7354,9 +7355,9 @@ function initChat() {
           if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
           if (!isIosPwaChatComposerLikelyActiveSession(focusTarget)) return false;
           var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
-          if (focusAge < 950) return false;
-          if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return true;
-          return focusAge > 1450;
+          if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return focusAge >= 180;
+          if (focusAge < 620) return false;
+          return focusAge > 900;
         } catch (ePwaDockNow) {
           return false;
         }
