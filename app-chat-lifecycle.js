@@ -5331,6 +5331,16 @@ function initChat() {
           }
         }
         try {
+          if (isIosPwaPad && barFixed) {
+            var pwaPadAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            var prevPwaPad = Number(window.__pokerChatMessagesKeyboardPadLast) || 0;
+            if (prevPwaPad > 28 && pwaPadAge > 0 && pwaPadAge < 900) {
+              if (pad > prevPwaPad + 14) pad = prevPwaPad + 14;
+              else if (pad < prevPwaPad - 8) pad = prevPwaPad - 8;
+            }
+          }
+        } catch (ePwaPadStabilize) {}
+        try {
           window.__pokerChatMessagesKeyboardPadLast = pad;
           updateTelegramMiniAppChatThreadDebugOverlay("pad", {
             pad: pad,
@@ -5376,10 +5386,14 @@ function initChat() {
         }
       }
       function scrollDocumentToZero() {
+        try {
+          if (shouldSkipPwaChatRootScrollDuringComposerOpen()) return false;
+        } catch (eSkipDocZero) {}
         var se = document.scrollingElement;
         if (se && se.scrollTop !== 0) se.scrollTop = 0;
         if (document.documentElement && document.documentElement.scrollTop !== 0) document.documentElement.scrollTop = 0;
         if (document.body && document.body.scrollTop !== 0) document.body.scrollTop = 0;
+        return true;
       }
       function clearChatKeyboardViewportState(options) {
         var opts = options || {};
@@ -6919,6 +6933,9 @@ function initChat() {
               : 2;
           if (prevB != null && prevB > 0 && isPwaIosDock) {
             var focusAgePwaDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            if (focusAgePwaDock > 0 && focusAgePwaDock < 900 && bottomPx > prevB + 10) {
+              bottomPx = prevB + 10;
+            }
             if (bottomPx < 72 && focusAgePwaDock > 0 && focusAgePwaDock < 2200) {
               bottomPx = prevB;
             }
