@@ -5,12 +5,19 @@
 function pokerIsActiveIosPwaChatComposerKeyboard() {
   try {
     if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
-    if (!document.body.classList.contains("chat-keyboard-open")) return false;
     if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
     if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
     var active = document.activeElement;
     if (!active || String(active.tagName || "").toUpperCase() !== "TEXTAREA") return false;
     if (!active.closest || !active.closest(".chat-input-area")) return false;
+    if (document.body.classList.contains("chat-keyboard-open")) {
+      if (
+        typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+        window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })
+      ) return false;
+      return true;
+    }
+    if (Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) return true;
     if (
       typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
       window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })
