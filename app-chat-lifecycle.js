@@ -5831,17 +5831,18 @@ function initChat() {
           if (p) p.classList.remove("chat-input-area--vv-dock");
         } catch (eDockCls) {}
       }
-      function resetChatKeyboardDockRuntimeState() {
+      function resetChatKeyboardDockRuntimeState(options) {
+        var opts = options || {};
         try {
-          if (window.__pokerChatPwaDockWatchdogTimer) {
+          if (!opts.preserveActivePwaDock && window.__pokerChatPwaDockWatchdogTimer) {
             clearInterval(window.__pokerChatPwaDockWatchdogTimer);
             window.__pokerChatPwaDockWatchdogTimer = null;
           }
-          window.__pokerChatPwaDockWatchdogUntil = 0;
-          window.__pokerChatKeyboardFocusAtMs = 0;
-          window.__pokerChatLastAppliedDockBottom = null;
+          if (!opts.preserveActivePwaDock) window.__pokerChatPwaDockWatchdogUntil = 0;
+          if (!opts.preserveActivePwaDock) window.__pokerChatKeyboardFocusAtMs = 0;
+          if (!opts.preserveActivePwaDock) window.__pokerChatLastAppliedDockBottom = null;
           window.__pokerChatTgKeyboardCoverLast = null;
-          window.__pokerChatThreadDockBottomCssPx = null;
+          if (!opts.preserveActivePwaDock) window.__pokerChatThreadDockBottomCssPx = null;
           window.__pokerChatTmaDockTabKey = null;
           window.__pokerChatTmaThreadLastInnerHeight = null;
           window.__pokerChatTmaThreadFocusSession = null;
@@ -5850,7 +5851,7 @@ function initChat() {
             window.__pokerChatTmaThreadSyncTimer = null;
           }
           window.__pokerChatTmaThreadSyncRafPending = false;
-          clearChatComposerDockClass();
+          if (!opts.preserveActivePwaDock) clearChatComposerDockClass();
           if (window.__pokerChatVvInsetDebounceTimer) {
             clearTimeout(window.__pokerChatVvInsetDebounceTimer);
             window.__pokerChatVvInsetDebounceTimer = null;
@@ -7662,7 +7663,12 @@ function initChat() {
         setChatKeyboardOpenClasses(true);
         try {
           clearPendingChatKeyboardDismissTimers();
-          resetChatKeyboardDockRuntimeState();
+          var preservePwaDockOnFocus = false;
+          try {
+            var focusAreaPwa = focusTarget && focusTarget.closest ? focusTarget.closest(".chat-input-area") : null;
+            preservePwaDockOnFocus = !!(focusAreaPwa && shouldPreserveActivePwaChatDock(focusAreaPwa));
+          } catch (ePreservePwaFocusDock) {}
+          resetChatKeyboardDockRuntimeState({ preserveActivePwaDock: preservePwaDockOnFocus });
           window.__pokerChatKeyboardFocusAtMs = Date.now();
           window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
         } catch (eDockOn) {}
@@ -8061,6 +8067,20 @@ function initChat() {
           return false;
         }
       }
+      function scheduleIosPwaComposerFinalizeIfStillClosed(target, label, delayMs) {
+        try {
+          var delay = Math.max(120, Number(delayMs) || 260);
+          setTimeout(function () {
+            try {
+              if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
+              if (document.activeElement === target) return;
+              if (!isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return;
+              collectChatOverscrollSnapshot("pwa-finalize-still-closed:" + (label || ""), target);
+              finalizeChatKeyboardDismiss();
+            } catch (eFinalizeStillClosed) {}
+          }, delay);
+        } catch (eScheduleFinalizeStillClosed) {}
+      }
       function refocusIosPwaChatComposerAfterTransientBlur(target, label) {
         try {
           if (!shouldHoldIosPwaChatComposerFocus(target)) return false;
@@ -8078,8 +8098,7 @@ function initChat() {
                 if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
                 if (isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) {
                   if (isIosPwaChatComposerOpeningHoldActive(target)) {
-                    setChatKeyboardOpenClasses(true);
-                    if (!target.disabled && !target.hidden && target.focus) target.focus({ preventScroll: true });
+                    scheduleIosPwaComposerFinalizeIfStillClosed(target, label || "opening-hold", 260);
                     return;
                   }
                   finalizeChatKeyboardDismiss();
