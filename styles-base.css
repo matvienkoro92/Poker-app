@@ -710,6 +710,31 @@ body {
   overscroll-behavior-y: none;
 }
 
+button,
+[role="button"],
+a[href],
+label,
+summary,
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[data-view-target],
+[data-open-image-lightbox],
+[data-open-pdf-viewer] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+a[href],
+label,
+summary,
+select {
+  cursor: pointer;
+}
+
 /* Отступ сверху: safe-area + зазор под шапку (в TG задаётся JS по contentSafeAreaInset, см. .app--tg-content-inset) */
 .app {
   position: relative;
