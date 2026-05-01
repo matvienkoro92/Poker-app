@@ -7615,6 +7615,24 @@ function initChat() {
               var ihTs = window.innerHeight || 0;
               if (ihTs > 200) window.__pokerChatInnerHBaseline = ihTs;
             } catch (eTsBl) {}
+            try {
+              if (
+                !isTelegramChatRuntime() &&
+                typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+                pokerPwaStandaloneForKeyboardInset() &&
+                typeof isIosLikeForChatViewport === "function" &&
+                isIosLikeForChatViewport() &&
+                isChatThreadComposerKeyboardDom(ta)
+              ) {
+                setChatKeyboardOpenClasses(true);
+                clearPendingChatKeyboardDismissTimers();
+                window.__pokerChatKeyboardFocusAtMs = Date.now();
+                window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
+                attachPwaChatThreadRootScrollLock(ta);
+                document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", "38dvh");
+                pwaChatThreadRootScrollToZero();
+              }
+            } catch (ePwaTouchKeyboardState) {}
           },
           { passive: false }
         );
