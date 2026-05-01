@@ -6869,13 +6869,10 @@ function initChat() {
             if (bottomPx < 72 && focusAgePwaDock > 0 && focusAgePwaDock < 2200) {
               bottomPx = prevB;
             }
-            if (focusAgePwaDock > 0 && focusAgePwaDock < 900) {
-              var minBottomPwa = Math.max(0, prevB - 1);
-              var maxBottomPwa = prevB + 1;
-              if (bottomPx < minBottomPwa) bottomPx = minBottomPwa;
-              if (bottomPx > maxBottomPwa) bottomPx = maxBottomPwa;
+            if (focusAgePwaDock > 0 && focusAgePwaDock < 700 && bottomPx < prevB - 8) {
+              bottomPx = prevB - 8;
             }
-            if (focusAgePwaDock > 0 && focusAgePwaDock < 1400 && Math.abs(bottomPx - prevB) < 4) {
+            if (focusAgePwaDock > 0 && focusAgePwaDock < 1400 && Math.abs(bottomPx - prevB) < 3) {
               bottomPx = prevB;
             }
           }
