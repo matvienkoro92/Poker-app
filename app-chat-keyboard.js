@@ -2,7 +2,26 @@
  * После клавиатуры / смены «тред ↔ диалоги» на iOS иногда залипают transform таббара и visualViewport —
  * таббар висит выше низа с чёрной полосой. Сбрасываем инлайн, expand, resize, пересчитываем pad.
  */
+function pokerIsActiveIosPwaChatComposerKeyboard() {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
+    if (!document.body.classList.contains("chat-keyboard-open")) return false;
+    if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+    if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+    var active = document.activeElement;
+    if (!active || String(active.tagName || "").toUpperCase() !== "TEXTAREA") return false;
+    if (!active.closest || !active.closest(".chat-input-area")) return false;
+    if (
+      typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+      window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })
+    ) return false;
+    return true;
+  } catch (eActivePwaChatKeyboard) {
+    return false;
+  }
+}
 function pokerFlushBottomNavAndViewportAfterChatChrome() {
+  if (pokerIsActiveIosPwaChatComposerKeyboard()) return;
   try {
     pokerApplyBottomTabbarPad._lastPad = null;
   } catch (eInvPad) {}
@@ -135,6 +154,7 @@ function pokerNukeIosKeyboardViewportArtifacts(opts) {
         !!(cvN && !cvN.classList.contains("chat-conv-view--hidden"));
     }
   } catch (eTh) {}
+  if (pokerIsActiveIosPwaChatComposerKeyboard()) return;
   /* vv.scrollTo / expand на каждом resize visualViewport ломают обычный скролл на главной и др. — только чат или явный сброс после клавиатуры. */
   var doVvRepair = resetMainScroll || isChatView;
   try {

@@ -5959,8 +5959,15 @@ function initChat() {
           if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
           if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          if (!document.body.classList.contains("chat-keyboard-open")) return false;
           var target = focusTarget || document.activeElement || chatComposerEl;
           if (!isChatThreadComposerKeyboardDom(target)) return false;
+          try {
+            if (!isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return true;
+          } catch (ePwaRootLayoutOpen) {}
+          try {
+            if ((Number(window.__pokerChatThreadDockBottomCssPx) || 0) > 24) return true;
+          } catch (ePwaRootDockOpen) {}
           var now = Date.now();
           var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
           var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
@@ -8328,7 +8335,7 @@ function initChat() {
                 if (markPwaIosChatFocusActivation(ta, "touchstart", 160)) {
                   setPwaIosChatEarlyKeyboardFallback("touchstart");
                 }
-                pwaChatThreadRootScrollToZero();
+                pwaChatThreadRootScrollToZero(ta);
               }
             } catch (ePwaTouchKeyboardState) {}
           },
