@@ -301,6 +301,7 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   display: none !important;
 }
 .chat-contacts-filter__tab {
+  position: relative;
   min-width: 0;
   margin: 0;
   min-height: 36px;
@@ -349,6 +350,29 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
   box-shadow:
     0 2px 10px color-mix(in srgb, var(--accent) 32%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+[data-theme="gold"] .chat-contacts-filter__tab--active {
+  color: #fff7d6;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 236, 178, 0.28), transparent 58%),
+    linear-gradient(180deg, #d79a2b 0%, #a76712 52%, #6f3d06 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 213, 122, 0.72),
+    0 6px 18px rgba(217, 142, 30, 0.36),
+    inset 0 1px 0 rgba(255, 246, 205, 0.42),
+    inset 0 -2px 0 rgba(255, 207, 99, 0.62);
+  text-shadow: 0 1px 1px rgba(43, 22, 2, 0.72);
+}
+[data-theme="gold"] .chat-contacts-filter__tab--active::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffe08a;
+  box-shadow: 0 0 10px rgba(255, 207, 99, 0.78);
 }
 [data-theme="light"] .chat-contacts-filter__tab--active {
   box-shadow:
