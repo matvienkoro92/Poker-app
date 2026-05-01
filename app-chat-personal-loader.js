@@ -355,12 +355,24 @@ function loadMessages(opts) {
           if (getConvTitle()) setTextContentIfChanged(getConvTitle(), titleName);
         }
       }
+      var peerPokerPlusVerifiedFromPayload = !isGrpThread && data.otherPokerPlusVerified === true;
+      if (!peerPokerPlusVerifiedFromPayload && !isGrpThread && Array.isArray(messages) && messages.length && getChatWithUserId()) {
+        for (var pvMi = messages.length - 1; pvMi >= 0; pvMi--) {
+          var pvMsg = messages[pvMi];
+          if (!pvMsg || !pvMsg.from) continue;
+          if (!peerChatIdsEqual(pvMsg.from, getChatWithUserId())) continue;
+          if (pvMsg.fromPokerPlusVerified === true) {
+            peerPokerPlusVerifiedFromPayload = true;
+            break;
+          }
+        }
+      }
       if (!isGrpThread && Array.isArray(messages) && messages.length && getChatWithUserId()) {
         messages = enrichPersonalThreadPeerMeta(messages, getChatWithUserId(), {
           fromName: getChatWithUserName() || "",
           fromAvatar: getChatWithPeerAvatarUrl() || "",
           fromP21Id: data.otherP21Id != null ? data.otherP21Id : "",
-          fromPokerPlusVerified: data.otherPokerPlusVerified === true,
+          fromPokerPlusVerified: peerPokerPlusVerifiedFromPayload,
         });
       }
       var pt = data.participantsCount != null ? data.participantsCount : "—";
@@ -373,7 +385,7 @@ function loadMessages(opts) {
           var titleP21 =
             data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
           setChatConvTitleIdText(titleP21 || "");
-          setChatPeerVerified(data.otherPokerPlusVerified === true);
+          if (peerPokerPlusVerifiedFromPayload) setChatPeerVerified(true);
           if (data.otherStatusLevel != null && String(data.otherStatusLevel).trim() !== "") {
             setChatConvTitleFish(data.otherStatusLevel);
           }
