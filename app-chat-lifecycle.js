@@ -5616,6 +5616,21 @@ function initChat() {
           return 0;
         }
       }
+      function getPwaIosChatComputedKeyboardCoverFloorPx() {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return 0;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
+          var ihNow = window.innerHeight || 0;
+          var base = Math.max(ihNow, Number(window.__pokerChatInnerHBaseline) || 0);
+          if (base < 260) return 0;
+          var cover = Math.round(base * 0.36);
+          if (ihNow > 0 && base - ihNow > 80) cover = Math.max(cover, Math.round(base - ihNow));
+          return Math.min(390, Math.max(320, cover));
+        } catch (eComputedCoverFloor) {
+          return 0;
+        }
+      }
       function writeStoredPwaIosChatKeyboardCoverPx(coverPx) {
         try {
           if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return;
@@ -5624,6 +5639,8 @@ function initChat() {
           if (!window.localStorage) return;
           var cover = Math.round(Number(coverPx) || 0);
           if (cover < 260 || cover > 460) return;
+          var floor = getPwaIosChatComputedKeyboardCoverFloorPx();
+          if (floor > 0 && cover < floor - 18) return;
           window.localStorage.setItem(
             PWA_IOS_CHAT_KEYBOARD_COVER_STORAGE_KEY,
             JSON.stringify({
@@ -5641,13 +5658,10 @@ function initChat() {
           if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
           if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
           var storedCover = readStoredPwaIosChatKeyboardCoverPx();
+          var floorCover = getPwaIosChatComputedKeyboardCoverFloorPx();
+          if (storedCover > 0 && floorCover > 0) return Math.max(storedCover, floorCover);
           if (storedCover > 0) return storedCover;
-          var ihNow = window.innerHeight || 0;
-          var base = Math.max(ihNow, Number(window.__pokerChatInnerHBaseline) || 0);
-          if (base < 260) return 0;
-          var cover = Math.round(base * 0.36);
-          if (ihNow > 0 && base - ihNow > 80) cover = Math.max(cover, Math.round(base - ihNow));
-          return Math.min(390, Math.max(320, cover));
+          return floorCover;
         } catch (eEarlyCover) {
           return 0;
         }
@@ -6876,7 +6890,11 @@ function initChat() {
             isIosLikeForChatViewport() &&
             isChatThreadComposerKeyboardDom(focusTarget || document.activeElement)
           ) {
-            writeStoredPwaIosChatKeyboardCoverPx(coverNum);
+            var storeFocusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            var storeFloor = getPwaIosChatComputedKeyboardCoverFloorPx();
+            if (!(storeFocusAge > 0 && storeFocusAge < 700 && storeFloor > 0 && coverNum < storeFloor - 6)) {
+              writeStoredPwaIosChatKeyboardCoverPx(coverNum);
+            }
           }
         } catch (eStorePwaCover) {}
           try {
@@ -7380,6 +7398,11 @@ function initChat() {
             try {
               var pwaMinCover = Math.max(0, Math.round(inset - getPwaChatThreadAccessoryInsetPx()));
               if (pwaMinCover >= 72 && coverPxDock < pwaMinCover) coverPxDock = pwaMinCover;
+              var pwaEarlyCoverFloor = getPwaIosChatEarlyKeyboardCoverPx();
+              var pwaEarlyAgeFloor = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+              if (pwaEarlyCoverFloor >= 96 && pwaEarlyAgeFloor < 900 && coverPxDock < pwaEarlyCoverFloor) {
+                coverPxDock = pwaEarlyCoverFloor;
+              }
             } catch (ePwaCoverFloor) {}
           }
           /*
@@ -7636,7 +7659,10 @@ function initChat() {
              * нижний floor; последующие vv-события уточнят bottom.
              */
             if (coverDock < 96 && targetArea) {
-              coverDock = Math.max(coverDock, Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
+              coverDock = Math.max(coverDock, getPwaIosChatEarlyKeyboardCoverPx(), Math.round(Math.max(baseDock, ihDock || 0) * 0.34));
+            } else if (targetArea) {
+              var pwaEarlyCoverDockPass = getPwaIosChatEarlyKeyboardCoverPx();
+              if (pwaEarlyCoverDockPass >= 96) coverDock = Math.max(coverDock, pwaEarlyCoverDockPass);
             }
             try {
               document.documentElement.style.setProperty("--chat-keyboard-fallback-inset", Math.max(0, Math.round(coverDock)) + "px");
