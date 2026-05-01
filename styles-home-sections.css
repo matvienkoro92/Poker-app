@@ -784,6 +784,22 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
   bottom: calc(38dvh + var(--chat-composer-edge-gap, 2px)) !important;
 }
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header {
+  position: fixed !important;
+  top: env(safe-area-inset-top, 0px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  transform: none !important;
+  z-index: 2147482500 !important;
+  pointer-events: auto !important;
+}
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages {
+  padding-top: max(96px, calc(env(safe-area-inset-top, 0px) + 62px)) !important;
+  scroll-padding-top: max(96px, calc(env(safe-area-inset-top, 0px) + 62px)) !important;
+}
 html.app--telegram-miniapp body[data-view="chat"] .chat-general-view .chat-input-area,
 html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view .chat-container .chat-input-area,
 html.app--telegram-miniapp .view--active[data-view="chat"] .chat-general-view .chat-input-area,
