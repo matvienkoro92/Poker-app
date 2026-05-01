@@ -363,17 +363,6 @@ html.poker-ios-pwa body[data-view="chat"] .chat-dialogs-list {
     inset 0 -2px 0 rgba(255, 207, 99, 0.62);
   text-shadow: 0 1px 1px rgba(43, 22, 2, 0.72);
 }
-[data-theme="gold"] .chat-contacts-filter__tab--active::after {
-  content: "";
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 4px;
-  height: 3px;
-  border-radius: 999px;
-  background: #ffe08a;
-  box-shadow: 0 0 10px rgba(255, 207, 99, 0.78);
-}
 [data-theme="light"] .chat-contacts-filter__tab--active {
   box-shadow:
     0 1px 6px color-mix(in srgb, var(--accent) 26%, transparent),
