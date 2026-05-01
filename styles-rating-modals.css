@@ -568,8 +568,10 @@
   inset: 0;
   z-index: 4;
   padding: 0;
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
   cursor: pointer;
   border-radius: 12px;
   opacity: 1;
