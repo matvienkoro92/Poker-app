@@ -109,8 +109,8 @@
   min-height: calc(100dvh - 110px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   background:
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 35%),
@@ -119,7 +119,7 @@
 .keyboard-lab__hero {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 .keyboard-lab__eyebrow {
   margin: 0;
@@ -130,20 +130,20 @@
 }
 .keyboard-lab__title {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1.05;
   color: #f8fafc;
 }
 .keyboard-lab__subtitle {
   margin: 0;
   color: #cbd5e1;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.28;
 }
 .keyboard-lab__metrics {
-  border-radius: 14px;
-  padding: 10px 12px;
-  font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font: 10px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: #fef2f2;
   background: rgba(127, 29, 29, 0.78);
   border: 1px solid rgba(254, 202, 202, 0.22);
@@ -155,7 +155,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow: auto;
   padding-bottom: 8px;
   overscroll-behavior: contain;
@@ -164,8 +164,10 @@
 }
 .keyboard-lab__bubble {
   max-width: 92%;
-  border-radius: 18px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 9px 12px;
+  font-size: 13px;
+  line-height: 1.25;
   color: #e2e8f0;
   background: rgba(30, 41, 59, 0.92);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
@@ -248,8 +250,8 @@ body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab {
   height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
   min-height: 0;
   max-height: calc(100dvh - var(--keyboard-lab-keyboard-inset, 0px));
-  gap: 8px;
-  padding: 8px 14px calc(var(--keyboard-lab-composer-height, 70px) + 14px);
+  gap: 5px;
+  padding: 6px 14px calc(var(--keyboard-lab-composer-height, 70px) + 8px);
   overflow: hidden;
 }
 
@@ -264,23 +266,23 @@ body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__eyebrow
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__title {
-  font-size: 22px;
+  font-size: 19px;
   line-height: 1;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__subtitle {
-  font-size: 12px;
-  line-height: 1.25;
+  font-size: 11px;
+  line-height: 1.18;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__metrics {
   flex: 0 0 auto;
-  max-height: min(160px, 30dvh);
+  max-height: min(130px, 26dvh);
   overflow: auto;
   border-radius: 12px;
-  padding: 8px 10px;
-  font-size: 10px;
-  line-height: 1.32;
+  padding: 7px 9px;
+  font-size: 9px;
+  line-height: 1.2;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -293,10 +295,10 @@ body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__stream 
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__bubble {
-  border-radius: 14px;
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.32;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.22;
 }
 
 body.keyboard-lab-keyboard-open[data-view="keyboard-lab"] .keyboard-lab__composer {

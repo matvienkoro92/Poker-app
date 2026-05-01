@@ -211,6 +211,10 @@ window.addEventListener("resize", function () {
       var chatVvInset = "";
       var chatFallbackInset = "";
       var chatInputLift = "";
+      var labInset = "";
+      var labComposerHeight = "";
+      var labBottomCss = "";
+      var labDockGap = "";
       var rootStyle = null;
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       function nodeMetric(selector) {
@@ -239,45 +243,56 @@ window.addEventListener("resize", function () {
         chatVvInset = String(rootStyle && rootStyle.getPropertyValue("--chat-vv-inset") || "").trim();
         chatFallbackInset = String(rootStyle && rootStyle.getPropertyValue("--chat-keyboard-fallback-inset") || "").trim();
         chatInputLift = String(rootStyle && rootStyle.getPropertyValue("--chat-input-lift") || "").trim();
+        labInset = String(rootStyle && rootStyle.getPropertyValue("--keyboard-lab-keyboard-inset") || "").trim();
+        labComposerHeight = String(rootStyle && rootStyle.getPropertyValue("--keyboard-lab-composer-height") || "").trim();
+        var composerStyle = window.getComputedStyle ? getComputedStyle(composerEl) : null;
+        labBottomCss = String(composerStyle && composerStyle.getPropertyValue("bottom") || "").trim();
+        labDockGap = Math.round((window.innerHeight || 0) - composerRect.bottom) + "px";
       } catch (eKbLabCss) {}
-      metricsEl.textContent = [
+      var chatHdrMetric = nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header');
+      var chatMsgsMetric = nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages');
+      var chatCmpMetric = nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area');
+      var lines = [
         "src: " + String(source || "tick"),
         "viewName: " + String(document.body && document.body.getAttribute("data-view") || "") +
           " cls: hKb=" + (document.documentElement.classList.contains("chat-keyboard-open") ? "1" : "0") +
           " bKb=" + (document.body.classList.contains("chat-keyboard-open") ? "1" : "0") +
+          " labKb=" + (document.body.classList.contains("keyboard-lab-keyboard-open") ? "1" : "0") +
           " iosPwa=" + (document.documentElement.classList.contains("poker-ios-pwa") ? "1" : "0"),
-        "ih: " + (window.innerHeight || 0) +
-          " iw: " + (window.innerWidth || 0),
-        "vv: " +
+        "win/vv/tg: " + (window.innerHeight || 0) + "x" + (window.innerWidth || 0) +
+          " / " +
           (vv ? Math.round(Number(vv.height) || 0) : 0) + "/" +
           (vv ? Math.round(Number(vv.offsetTop) || 0) : 0) + "/" +
           (vv ? Math.round(Number(vv.pageTop) || 0) : 0) + "/" +
-          (vv ? Math.round(Number(vv.scale) || 0) : 0),
-        "view: " + Math.round(viewRect.top) + "+" + Math.round(viewRect.height),
+          (vv ? Math.round(Number(vv.scale) || 0) : 0) +
+          " / " + (tg ? Math.round(Number(tg.viewportHeight) || 0) : 0) + "/" +
+          (tg ? Math.round(Number(tg.viewportStableHeight) || 0) : 0),
+        "view/cmp: " + Math.round(viewRect.top) + "+" + Math.round(viewRect.height) +
+          " / " + Math.round(composerRect.top) + "+" + Math.round(composerRect.height) +
+          " gap=" + labDockGap,
         "cmp: " + Math.round(composerRect.top) + "+" + Math.round(composerRect.height) +
           " ta: " + Math.round(taRect.top) + "+" + Math.round(taRect.height),
-        "shell: " + (shellRect ? Math.round(shellRect.top) + "+" + Math.round(shellRect.height) : "n/a"),
-        "body/doc: " +
+        "shell/body/doc: " + (shellRect ? Math.round(shellRect.top) + "+" + Math.round(shellRect.height) : "n/a") + " / " +
           (bodyRect ? Math.round(bodyRect.top) + "+" + Math.round(bodyRect.height) : "n/a") +
           " / " +
           (docRect ? Math.round(docRect.top) + "+" + Math.round(docRect.height) : "n/a"),
         "scroll: " +
           Math.round((scrollEl && scrollEl.scrollTop) || 0) +
           " winY: " + Math.round(window.scrollY || 0),
-        "tg: " +
-          (tg ? "1" : "0") +
-          " vh/vsh: " +
-          (tg ? Math.round(Number(tg.viewportHeight) || 0) : 0) + "/" +
-          (tg ? Math.round(Number(tg.viewportStableHeight) || 0) : 0),
         "css: safe=" + safeBottom + " chatSafe=" + chatSafeBottom +
           " vv=" + (chatVvInset || "0") +
           " fb=" + (chatFallbackInset || "0") +
           " lift=" + (chatInputLift || "0"),
-        "chatHdr: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header'),
-        "chatMsgs: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages'),
-        "chatCmp: " + nodeMetric('body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area, body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area'),
+        "lab: inset=" + (labInset || "0") +
+          " h=" + (labComposerHeight || "0") +
+          " bottom=" + (labBottomCss || "0") +
+          " gap=" + labDockGap,
         "active: " + keyboardLabActiveLabel()
-      ].join("\n");
+      ];
+      if (chatHdrMetric !== "n/a" || chatMsgsMetric !== "n/a" || chatCmpMetric !== "n/a") {
+        lines.push("chat: h=" + chatHdrMetric + " m=" + chatMsgsMetric + " c=" + chatCmpMetric);
+      }
+      metricsEl.textContent = lines.join("\n");
     } catch (eKbLabMetrics) {
       metricsEl.textContent = "keyboard-lab metrics error";
     }

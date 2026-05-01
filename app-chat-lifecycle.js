@@ -6496,6 +6496,9 @@ function initChat() {
               : 2;
           if (prevB != null && prevB > 0 && isPwaIosDock) {
             var focusAgePwaDock = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+            if (bottomPx < 72 && focusAgePwaDock > 0 && focusAgePwaDock < 2200) {
+              bottomPx = prevB;
+            }
             if (focusAgePwaDock > 0 && focusAgePwaDock < 900) {
               var minBottomPwa = Math.max(0, prevB - 1);
               var maxBottomPwa = prevB + 1;
