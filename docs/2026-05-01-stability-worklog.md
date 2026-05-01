@@ -30,6 +30,15 @@
 - `2.473` / `9126012` — кнопка отчетов видна только реальным админам.
 - `2.474` / `b04d77c` — повторная инициализация rating top wins после lazy hydration.
 - `2.475` — этот документационный срез.
+- `2.476` / `f0d18f5` — стабилизация мобильных back-кнопок, защиты от ложного возврата из личного/группового чата в список, фиксация метаданных игрока в шапке диалога.
+- `2.477` / `385deb1` — защита главной от первого scroll snapback вверх после входа/возврата в раздел.
+- `2.478` / `fd28701` — Hall of Fame `top2026`: список топ выигрышей теперь рендерится даже без активной winter-rating страницы.
+- `2.479` / `20eaddf` — шапка личного чата показывает имя, PokerPlus verification badge, уровень и рыбку в одной строке.
+- `2.480` / `1208a7f` — iOS PWA keyboard dock: шапка общего/группового/личного треда фиксируется сверху и не сползает вниз при поднятии composer.
+- `2.481` / `f4c995c` — активная вкладка `Все` / `Друзья` в списке чатов стала явно видимой в темно-золотой теме.
+- `2.482` / `c2d3f0b` — модалка партнерства получила 5 новых сжатых изображений, старые `partnership-*.jpg` удалены.
+- `2.483` / `af9e4eb` — удален лишний underline у активной вкладки `Все` / `Друзья`, оставлено только цветовое выделение.
+- `2.484` / `547c014` — verification badge в шапке личного чата больше не пропадает после загрузки сообщений.
 
 ## Implementation Notes
 
@@ -51,6 +60,49 @@
 - `app-rating-week-tops.js` переведен на явную функцию `window.pokerInitWinterRatingWeekTops`.
 - Инициализация идемпотентная: повторный вызов после HTML fragment hydration не должен дублировать listeners.
 - `app-html-fragments.js` вызывает reinit для `winter-rating`, чтобы блок "Топ выигрышей за один турнир" появлялся и после первого lazy-open.
+- `app-rating-week-tops.js` также поддерживает hall-only container `hallFameSingleTopList`: Hall of Fame `top2026` не зависит от наличия controls winter rating.
+- `app-hall-fame.js` вызывает и обновляет single top list при открытии панели `top2026`.
+
+### Chat Header Meta
+
+- Шапка личного диалога в `html-fragments/chat.html` содержит отдельные элементы:
+  - `#chatConvVerifiedBadge` — PokerPlus verification badge в строке имени.
+  - `#chatConvTitleLevel` — текстовый уровень игрока.
+  - `#chatConvTitleFish` — fish/status icon.
+  - `#chatConvTitleId` — P21 id во второй строке.
+- `app-chat-lifecycle.js` связывает уровень и fish через `setChatConvTitleFish(level)`: если уровень очищается, очищаются и level/fish; если уровень есть, показываются оба.
+- `app-chat-personal-loader.js` не должен сбрасывать verification badge пустым/ложным `otherPokerPlusVerified` после того, как verified уже пришел из списка чатов или из сообщений.
+- Для verified в личке действует правило "true can promote, missing/false must not demote known header state" внутри открытого peer.
+- Для групповых чатов `showConv` по-прежнему очищает personal-only метаданные: verification, level/fish и личный P21 id не должны протекать в group thread.
+
+### Chat Navigation And Scroll
+
+- Back-кнопки в чате получили увеличенную hit area и touch handling, чтобы первый tap на iPhone не терялся.
+- Открытие personal/group conversation защищено от delayed refresh, который раньше мог вернуть пользователя назад в dialogs list.
+- Home scroll restore теперь учитывает user scroll intent: если пользователь уже начал скроллить, delayed scroll-to-top отменяется.
+- При iOS PWA keyboard-open шапки `.chat-general-header` и `.chat-conv-top` фиксируются в верхней части viewport, а composer докуется отдельно.
+
+### Chat Dialogs UI
+
+- В темно-золотой теме active state `Все` / `Друзья` использует более контрастную золотую заливку, glow/border и text shadow.
+- Дополнительный `::after` underline был удален: цветового выделения достаточно, линия визуально перегружала tabs.
+
+### Partnership Modal Assets
+
+- 5 новых изображений сжаты через `sharp` в JPEG 760x760:
+  - `assets/partnership-2026-overview.jpg` — ~62 KB.
+  - `assets/partnership-2026-step1.jpg` — ~56 KB.
+  - `assets/partnership-2026-step2.jpg` — ~64 KB.
+  - `assets/partnership-2026-step3.jpg` — ~55 KB.
+  - `assets/partnership-2026-cost.jpg` — ~61 KB.
+- Старые файлы удалены:
+  - `assets/partnership-intro.jpg`
+  - `assets/partnership-step1.jpg`
+  - `assets/partnership-step2.jpg`
+  - `assets/partnership-step3.jpg`
+  - `assets/partnership-cost.jpg`
+- `html-fragments/global-modals.html` и prefetch list в `app-home-gazette-tasks.js` должны ссылаться только на `partnership-2026-*`.
+- В модалке сохраняется 5 листов: overview, step 1, step 2, step 3, cost/contact.
 
 ### Admin Reports
 
@@ -76,9 +128,14 @@
 - Composer поднимается сразу к клавиатуре и не застревает по пути.
 - Лента сообщений освобождает место под composer/keyboard без скачка.
 - Header личного и общего чата остается на своем месте.
+- Header не сползает вниз при поднятии composer в iOS PWA.
+- В личном чате после загрузки сообщений остаются видимыми verification badge, level и fish, если эти данные были известны при открытии.
 - Keyboard не закрывается сама после открытия.
 - При закрытии keyboard composer возвращается вниз.
 - Tabbar, hall of fame и rating открываются без ощутимой паузы.
+- Hall of Fame `top2026` показывает список топ выигрышей 2026.
+- На списке чатов active tab `Все` / `Друзья` очевиден, но без underline.
+- Модалка партнерства показывает 5 новых сжатых изображений, старые assets нигде не используются.
 - Не-админ не видит кнопку отчетов.
 - Rating top wins отображается после первого открытия рейтинга и после перехода между разделами.
 
