@@ -119,12 +119,26 @@ var pokerLastMainScrollUserIntentAt = 0;
   function mark() {
     pokerLastMainScrollUserIntentAt = Date.now();
   }
+  function bindPanelScrollIntent() {
+    try {
+      var card = document.querySelector("main.card");
+      var panel = card ? card.querySelector(".card__content") : null;
+      if (!panel || panel.dataset.pokerScrollIntentBound === "1") return;
+      panel.dataset.pokerScrollIntentBound = "1";
+      panel.addEventListener("scroll", mark, { passive: true });
+      panel.addEventListener("touchmove", mark, { passive: true });
+      panel.addEventListener("wheel", mark, { passive: true });
+      panel.addEventListener("pointerdown", mark, { passive: true });
+    } catch (ePanelScrollIntent) {}
+  }
   try {
     window.addEventListener("touchstart", mark, { passive: true, capture: true });
     window.addEventListener("touchmove", mark, { passive: true, capture: true });
     window.addEventListener("wheel", mark, { passive: true, capture: true });
     window.addEventListener("pointerdown", mark, { passive: true, capture: true });
     document.addEventListener("scroll", mark, { passive: true, capture: true });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindPanelScrollIntent);
+    else bindPanelScrollIntent();
   } catch (eBindMainScrollIntent) {}
 })();
 

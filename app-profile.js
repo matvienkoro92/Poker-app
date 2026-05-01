@@ -631,11 +631,15 @@ function initProfilePokerPlus() {
   var statsVisibleYes = document.getElementById("profilePokerPlusStatsVisibleYes");
   var statsVisibleNo = document.getElementById("profilePokerPlusStatsVisibleNo");
   var statusLinkHint = document.getElementById("profileStatusLinkHint");
+  var profileStatusProgressText = document.getElementById("profileStatusProgressText");
+  var profileStatusTitle = document.getElementById("profileStatusTitle");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
   var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
   var pokerPlusBalanceRaw = "";
   var pokerPlusBalanceVisible = false;
   var pokerPlusStatsVisibleToOthers = false;
+  var pokerPlusProfileLinked = false;
+  var pokerPlusProfileLoading = false;
   try {
     pokerPlusBalanceVisible = localStorage.getItem(POKERPLUS_BALANCE_VISIBLE_KEY) === "1";
   } catch (eReadPpBalanceVisible) {}
@@ -681,10 +685,21 @@ function initProfilePokerPlus() {
   function setProfileStatusLoading(loading) {
     var statusSection = document.getElementById("profileStatusSection");
     var statusLoading = document.getElementById("profileStatusLoading");
+    pokerPlusProfileLoading = !!loading;
     if (statusSection && statusSection.classList) {
       statusSection.classList.toggle("profile-status--loading", !!loading);
     }
     if (statusLoading) statusLoading.hidden = !loading;
+    updateProfileStatusTextVisibility();
+  }
+
+  function updateProfileStatusTextVisibility() {
+    if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
+    if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || !pokerPlusProfileLinked;
+    if (statusLinkHint) {
+      var state = auth();
+      statusLinkHint.hidden = !!pokerPlusProfileLoading || !!pokerPlusProfileLinked || !state.isVerified || !!state.isGuest;
+    }
   }
 
   function pokerPlusWholeNumber(value) {
@@ -862,11 +877,9 @@ function initProfilePokerPlus() {
   }
 
   function setPokerPlusLinkedMode(linked) {
+    pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
-    if (statusLinkHint) {
-      var state = auth();
-      statusLinkHint.hidden = !!linked || !state.isVerified || !!state.isGuest;
-    }
+    updateProfileStatusTextVisibility();
     input.hidden = !!linked;
     bindBtn.hidden = !!linked;
     refreshBtn.hidden = false;
