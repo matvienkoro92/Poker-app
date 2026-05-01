@@ -6581,7 +6581,7 @@ function initChat() {
             if (
               target &&
               target.closest &&
-              target.closest(".chat-input-area, .chat-emoji-panel, .chat-attach-dropdown, .chat-context-menu, .chat-scroll-bottom-btn")
+              target.closest(".chat-input-area, .chat-emoji-panel, .chat-attach-dropdown, .chat-context-menu, .chat-scroll-bottom-btn, .chat-back-btn")
             ) {
               return;
             }

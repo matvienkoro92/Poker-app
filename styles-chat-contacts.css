@@ -548,6 +548,8 @@ body[data-view="chat"]
 /* «Назад» и сегменты: нейтральное стекло, без акцентного цвета */
 .chat-general-header .chat-back-btn.chat-general-header__toolbar-back {
   pointer-events: auto;
+  position: relative;
+  z-index: 8;
   align-self: center;
   display: inline-flex;
   align-items: center;
@@ -567,6 +569,8 @@ body[data-view="chat"]
   letter-spacing: 0;
   border-radius: 18px;
   box-sizing: border-box;
+  overflow: visible;
+  touch-action: manipulation;
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(248, 250, 252, 0.88);
@@ -580,6 +584,13 @@ body[data-view="chat"]
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.18);
   color: #fff;
+}
+.chat-general-header .chat-back-btn.chat-general-header__toolbar-back::before,
+.chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back::before {
+  content: "";
+  position: absolute;
+  inset: -9px -12px;
+  border-radius: 22px;
 }
 .chat-general-header__title-btn {
   pointer-events: auto;
@@ -669,6 +680,8 @@ body[data-view="chat"]
 /* Личные сообщения: «Назад» — те же значения, что у .chat-general-header__toolbar-back */
 .chat-conv-top .chat-back-btn.chat-conv-top__toolbar-back {
   pointer-events: auto;
+  position: relative;
+  z-index: 8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -687,6 +700,8 @@ body[data-view="chat"]
   letter-spacing: 0;
   border-radius: 18px;
   box-sizing: border-box;
+  overflow: visible;
+  touch-action: manipulation;
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(248, 250, 252, 0.88);
