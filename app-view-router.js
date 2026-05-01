@@ -968,8 +968,14 @@ function pokerOpenChatFromTab() {
 
 document.addEventListener("click", function (e) {
   var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
-  if (interactive && !e.target.closest("audio, [aria-hidden=\"true\"]") && typeof playClickSound === "function") playClickSound();
-}, true);
+  if (!interactive || e.target.closest("audio, [aria-hidden=\"true\"]") || typeof playClickSound !== "function") return;
+  var defer = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
+  defer(function () {
+    try {
+      playClickSound();
+    } catch (eClickSound) {}
+  });
+}, false);
 
 (function scrollVsTap() {
   var touchStartX = 0;

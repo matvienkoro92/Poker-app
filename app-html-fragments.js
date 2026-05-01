@@ -123,6 +123,52 @@
     }
   })();
 
+  (function pokerEagerHydratePrimaryViews() {
+    var queue = [
+      "chat",
+      "download",
+      "profile",
+      "winter-rating",
+      "hall-of-fame",
+      "raffles",
+      "video-lessons",
+      "equilator"
+    ];
+    var index = 0;
+    function runNext(deadline) {
+      var started = Date.now();
+      while (index < queue.length) {
+        var viewName = queue[index++];
+        try {
+          window.pokerEnsureViewHtml(viewName);
+        } catch (eViewHydrate) {}
+        if (
+          deadline &&
+          typeof deadline.timeRemaining === "function" &&
+          deadline.timeRemaining() < 8
+        ) break;
+        if (!deadline && Date.now() - started > 18) break;
+      }
+      if (index >= queue.length) return;
+      schedule(runNext);
+    }
+    function schedule(fn) {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(fn, { timeout: 700 });
+      } else {
+        setTimeout(fn, 80);
+      }
+    }
+    function start() {
+      schedule(runNext);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start, { once: true });
+    } else {
+      start();
+    }
+  })();
+
   document.addEventListener(
     "click",
     function (e) {
