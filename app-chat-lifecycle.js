@@ -772,13 +772,15 @@ function initChat() {
               ) {
                 chatComposerEl = target;
                 if (typeof bindChatComposerKeyboardEvents === "function") bindChatComposerKeyboardEvents(target);
-                forceIosPwaChatTextareaDock(target, "focusin");
-                setTimeout(function () {
-                  try {
-                    onChatInputFocus(target);
-                    forceIosPwaChatTextareaDock(target, "focusin-late");
-                  } catch (ePwaFocusInActivate) {}
-                }, 0);
+                if (markPwaIosChatFocusActivation(target, "focusin", 260)) {
+                  forceIosPwaChatTextareaDock(target, "focusin");
+                  setTimeout(function () {
+                    try {
+                      onChatInputFocus(target);
+                      forceIosPwaChatTextareaDock(target, "focusin-late");
+                    } catch (ePwaFocusInActivate) {}
+                  }, 0);
+                }
               }
             } catch (ePwaFocusInFallback) {}
           },
@@ -1259,9 +1261,11 @@ function initChat() {
               var ihPwaArea = window.innerHeight || 0;
               if (ihPwaArea > 200) window.__pokerChatInnerHBaseline = Math.max(Number(window.__pokerChatInnerHBaseline) || 0, ihPwaArea);
             } catch (ePwaAreaBase) {}
-            setPwaIosChatEarlyKeyboardFallback("area-gesture");
-            onChatInputFocus(pwaComposer);
-            forceIosPwaChatTextareaDock(pwaComposer, "area-gesture-focus");
+            if (markPwaIosChatFocusActivation(pwaComposer, "area-gesture", 260)) {
+              setPwaIosChatEarlyKeyboardFallback("area-gesture");
+              onChatInputFocus(pwaComposer);
+              forceIosPwaChatTextareaDock(pwaComposer, "area-gesture-focus");
+            }
           }
         } catch (ePwaAreaGestureActivate) {}
         return;
@@ -5711,6 +5715,27 @@ function initChat() {
           return false;
         }
       }
+      function markPwaIosChatFocusActivation(target, label, cooldownMs) {
+        try {
+          if (!target || !target.closest || !isChatThreadComposerKeyboardDom(target)) return false;
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          var now = Date.now();
+          var lastAt = Number(window.__pokerChatPwaFocusActivationAt) || 0;
+          var lastTarget = window.__pokerChatPwaFocusActivationTarget || null;
+          var cooldown = Math.max(80, Number(cooldownMs) || 220);
+          if (lastTarget === target && lastAt && now - lastAt < cooldown) {
+            collectChatOverscrollSnapshot("pwa-focus-activation-skip:" + (label || ""), target);
+            return false;
+          }
+          window.__pokerChatPwaFocusActivationAt = now;
+          window.__pokerChatPwaFocusActivationTarget = target;
+          return true;
+        } catch (eMarkPwaFocusActivation) {
+          return true;
+        }
+      }
       /** PWA/WK: pokerPulseChatFixedViewportHeightAfterKeyboard или гонка кадров оставляют height/min-height на html/body — «отступ» снизу и весь экран сжат до смены раздела */
       function pokerStripForcedViewportShellHeights() {
         try {
@@ -8237,10 +8262,14 @@ function initChat() {
               ) {
                 setChatKeyboardOpenClasses(true);
                 clearPendingChatKeyboardDismissTimers();
-                window.__pokerChatKeyboardFocusAtMs = Date.now();
+                if (!window.__pokerChatKeyboardFocusAtMs || Date.now() - Number(window.__pokerChatKeyboardFocusAtMs) > 260) {
+                  window.__pokerChatKeyboardFocusAtMs = Date.now();
+                }
                 window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
                 attachPwaChatThreadRootScrollLock(ta);
-                setPwaIosChatEarlyKeyboardFallback("touchstart");
+                if (markPwaIosChatFocusActivation(ta, "touchstart", 160)) {
+                  setPwaIosChatEarlyKeyboardFallback("touchstart");
+                }
                 pwaChatThreadRootScrollToZero();
               }
             } catch (ePwaTouchKeyboardState) {}
