@@ -28,18 +28,7 @@
     inset 0 0 28px rgba(255, 198, 74, 0.035);
 }
 
-/* Home refresh: cleaner glass surfaces and a stronger first-screen hierarchy. */
-.app.app--view-home .card:has(.view--active[data-view="home"]) {
-  background:
-    linear-gradient(155deg, rgba(8, 13, 26, 0.99) 0%, rgba(14, 24, 46, 0.99) 54%, rgba(9, 18, 31, 0.99) 100%) !important;
-}
-
-.app.app--view-home .card:has(.view--active[data-view="home"])::after {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 22%),
-    linear-gradient(155deg, rgba(8, 13, 26, 0.99) 0%, rgba(14, 24, 46, 0.99) 54%, rgba(9, 18, 31, 0.99) 100%);
-}
-
+/* Home header refresh: keep the page body unchanged, polish only the top bar. */
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
   align-items: center;
   gap: 10px;
@@ -129,216 +118,7 @@
   color: rgba(255, 247, 237, 0.94);
 }
 
-.app.app--view-home .home-welcome-outline {
-  margin-top: 8px;
-  padding: 18px var(--home-outline-pad-x) 44px var(--home-outline-pad-left);
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02)),
-    linear-gradient(145deg, rgba(14, 24, 46, 0.96), rgba(7, 13, 25, 0.98));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.13),
-    0 24px 70px rgba(0, 0, 0, 0.25);
-}
-
-.app.app--view-home .home-welcome-outline::before {
-  border-color: rgba(247, 216, 151, 0.36);
-  border-radius: 28px;
-  box-shadow:
-    inset 0 0 0 1px rgba(94, 234, 212, 0.06),
-    0 0 28px rgba(251, 191, 36, 0.06);
-}
-
-.app.app--view-home .welcome-title-row {
-  gap: 10px;
-  margin-top: 0;
-}
-
-.app.app--view-home button.welcome-home-title-btn.title {
-  font-size: clamp(24px, 6.9vw, 32px);
-  font-weight: 900;
-  letter-spacing: 0;
-  line-height: 1.02;
-  color: #ffe7ae;
-  text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.34),
-    0 12px 32px rgba(251, 191, 36, 0.14);
-}
-
-.app.app--view-home .subtitle {
-  max-width: 92%;
-  margin-top: 16px;
-  font-size: 14px;
-  line-height: 1.35;
-  color: rgba(226, 232, 240, 0.74);
-}
-
-.app.app--view-home .home-admin-version {
-  color: rgba(226, 232, 240, 0.58);
-}
-
-.app.app--view-home .welcome-title-row__actions {
-  gap: 10px;
-}
-
-.app.app--view-home .welcome-home-icon-tile {
-  width: 50px;
-  height: 50px;
-  border-radius: 18px;
-  border-width: 1px;
-  border-color: rgba(247, 216, 151, 0.33);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.035)),
-    rgba(12, 20, 36, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 12px 28px rgba(0, 0, 0, 0.24);
-}
-
-.app.app--view-home .welcome-home-icon-tile:hover {
-  border-color: rgba(94, 234, 212, 0.42);
-  background:
-    linear-gradient(180deg, rgba(94, 234, 212, 0.12), rgba(255, 255, 255, 0.045)),
-    rgba(12, 20, 36, 0.84);
-}
-
-.app.app--view-home .hero-row {
-  align-items: center;
-  gap: 14px;
-  margin-top: 22px;
-}
-
-.app.app--view-home .hero__link {
-  width: min(96%, 310px);
-  margin-left: clamp(2px, 2.2%, 10px);
-  border: 1px solid rgba(247, 216, 151, 0.42);
-  background: linear-gradient(150deg, #201915, #0c1424 64%, #07111e);
-  box-shadow:
-    0 0 0 7px rgba(247, 216, 151, 0.045),
-    0 0 24px rgba(251, 191, 36, 0.18),
-    0 22px 55px rgba(0, 0, 0, 0.48);
-}
-
-.app.app--view-home .hero__link::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-}
-
-.app.app--view-home .home-mini-icons {
-  gap: 9px;
-  margin-right: 0;
-}
-
-.app.app--view-home .home-mini-icon-item {
-  width: 60px;
-  min-height: 61px;
-  padding: 7px 5px 6px;
-  border-radius: 19px;
-  border-color: rgba(247, 216, 151, 0.32);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.035)),
-    rgba(11, 18, 33, 0.76);
-  color: #ffe7ae;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.13),
-    0 12px 26px rgba(0, 0, 0, 0.24);
-}
-
-.app.app--view-home .home-mini-icon-item:hover {
-  border-color: rgba(94, 234, 212, 0.5);
-  background:
-    linear-gradient(180deg, rgba(94, 234, 212, 0.11), rgba(255, 255, 255, 0.045)),
-    rgba(11, 18, 33, 0.84);
-}
-
-.app.app--view-home .home-mini-icon {
-  width: 30px;
-  height: 30px;
-  font-size: 21px;
-  color: #ffc86b;
-}
-
-.app.app--view-home .home-mini-icon--telegram svg {
-  width: 30px;
-  height: 30px;
-}
-
-.app.app--view-home .home-mini-icon__label {
-  max-width: 58px;
-  font-size: 5.2px;
-  font-weight: 800;
-  letter-spacing: 0.015em;
-  line-height: 1.05;
-  color: rgba(255, 247, 237, 0.82);
-  white-space: nowrap;
-  overflow-wrap: normal;
-}
-
-.app.app--view-home .home-mini-icon-item .feature__badge {
-  right: -4px;
-  bottom: -4px;
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.32);
-}
-
-.app.app--view-home .home-welcome-outline .features--home-rating-on-border {
-  margin-top: 28px;
-}
-
-.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-wrap {
-  max-width: min(90vw, 318px);
-}
-
-.app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
-  border-radius: 25px;
-  border-color: rgba(247, 216, 151, 0.4);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)),
-    linear-gradient(145deg, rgba(19, 30, 50, 0.94), rgba(10, 16, 28, 0.96));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 0 0 1px rgba(94, 234, 212, 0.05),
-    0 16px 38px rgba(0, 0, 0, 0.3);
-}
-
-.app.app--view-home .feature--rating-spring-promo .feature__title-line1,
-.app.app--view-home .feature--rating-spring-promo .feature__title-line3--spring {
-  color: rgba(255, 247, 237, 0.95);
-}
-
-.app.app--view-home .feature--rating-spring-promo .feature__title-prize--spring {
-  color: #ffc86b;
-  text-shadow: 0 10px 28px rgba(251, 191, 36, 0.18);
-}
-
-.app.app--view-home .tournament-day-home-dual {
-  margin-top: 26px;
-  border-radius: 26px;
-  border-color: rgba(247, 216, 151, 0.28);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
-    rgba(8, 13, 26, 0.72);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.11),
-    0 20px 48px rgba(0, 0, 0, 0.24);
-}
-
-[data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) {
-  background: linear-gradient(150deg, #fffaf0 0%, #eef6f3 48%, #fff1dc 100%) !important;
-}
-
-[data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"])::after {
-  background: linear-gradient(150deg, #fffaf0 0%, #eef6f3 48%, #fff1dc 100%);
-}
-
-[data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
-[data-theme="light"] .app.app--view-home .home-welcome-outline,
-[data-theme="light"] .app.app--view-home .home-mini-icon-item,
-[data-theme="light"] .app.app--view-home .welcome-home-icon-tile {
+[data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
   border-color: rgba(15, 23, 42, 0.11);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.64)),
@@ -349,20 +129,13 @@
 }
 
 [data-theme="light"] .app.app--view-home .logo__title,
-[data-theme="light"] .app.app--view-home button.welcome-home-title-btn.title,
 [data-theme="light"] .app.app--view-home .header-greeting {
   color: #37230c;
   text-shadow: none;
 }
 
-[data-theme="light"] .app.app--view-home .logo__subtitle,
-[data-theme="light"] .app.app--view-home .subtitle,
-[data-theme="light"] .app.app--view-home .home-mini-icon__label {
+[data-theme="light"] .app.app--view-home .logo__subtitle {
   color: rgba(51, 65, 85, 0.72);
-}
-
-[data-theme="light"] .app.app--view-home .home-mini-icon {
-  color: #d97706;
 }
 
 @media (max-width: 400px) {
@@ -391,23 +164,6 @@
   .app.app--view-home .radio-toggle {
     min-width: 68px;
     padding: 0 7px;
-  }
-  .app.app--view-home .home-welcome-outline {
-    --home-outline-pad-x: 11px;
-    --home-outline-pad-left: 14px;
-    padding-top: 15px;
-  }
-  .app.app--view-home .hero-row {
-    gap: 8px;
-  }
-  .app.app--view-home .home-mini-icon-item {
-    width: 56px;
-    min-height: 58px;
-    border-radius: 17px;
-  }
-  .app.app--view-home .home-mini-icon__label {
-    max-width: 54px;
-    font-size: 5px;
   }
 }
 .app.app--view-home .tournament-day-home-dual::before {
