@@ -192,8 +192,16 @@ var viewScrollMemory = Object.create(null);
 /** Прокрутка окна отдельно по каждой вкладке зала славы */
 var hallFamePanelScrollMemory = Object.create(null);
 
-function scrollHomeToTop() {
+function scrollHomeToTop(force) {
   if (!document.body || (document.body.getAttribute && document.body.getAttribute("data-view") !== "home")) return;
+  if (!force) {
+    try {
+      if (getMainDocumentScrollY() > 2) return;
+    } catch (eHomeScrollY) {}
+    try {
+      if (typeof pokerHasRecentMainScrollUserIntent === "function" && pokerHasRecentMainScrollUserIntent(2500)) return;
+    } catch (eHomeScrollIntent) {}
+  }
   scrollMainDocumentToTop();
 }
 if (document.readyState === "loading") {
@@ -204,5 +212,5 @@ if (document.readyState === "loading") {
   scrollHomeToTop();
 }
 window.addEventListener("pageshow", function (e) {
-  if (e && e.persisted) scrollHomeToTop();
+  if (e && e.persisted) scrollHomeToTop(true);
 });
