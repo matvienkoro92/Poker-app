@@ -6416,6 +6416,96 @@ function initChat() {
         }
       }
       window.__pokerForcePwaChatKeyboardCleanupIfClosed = forcePwaChatKeyboardCleanupIfClosed;
+      function isIosPwaChatThreadLifecycleDockActive() {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var active = document.activeElement || null;
+          if (active && isChatThreadComposerKeyboardDom(active)) return true;
+          var docked = document.querySelector(
+            ".chat-general-view .chat-input-area.chat-input-area--vv-dock, .chat-container .chat-input-area.chat-input-area--vv-dock"
+          );
+          return !!docked || !!(document.body && document.body.classList.contains("chat-keyboard-open"));
+        } catch (ePwaLifecycleActive) {
+          return false;
+        }
+      }
+      function suspendIosPwaChatThreadDockForPageLifecycle(label) {
+        try {
+          if (!isIosPwaChatThreadLifecycleDockActive()) return false;
+          window.__pokerChatPwaLifecycleSuspendAt = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = 0;
+          detachPwaChatThreadRootScrollLock();
+          try {
+            window.__pokerChatPwaRootScrollLockActive = false;
+          } catch (ePwaLifecycleRootOff) {}
+          resetChatKeyboardDockRuntimeState();
+          setChatKeyboardOpenClasses(false);
+          try {
+            document.documentElement.style.removeProperty("--chat-vv-inset");
+            document.documentElement.style.removeProperty("--chat-keyboard-fallback-inset");
+            document.documentElement.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
+            document.documentElement.style.removeProperty("--chat-ios-accessory-inset");
+          } catch (ePwaLifecycleVars) {}
+          stripChatInputAreaTransforms();
+          clearChatMessagesKeyboardPad();
+          collectChatOverscrollSnapshot("pwa-lifecycle-suspend:" + (label || ""), document.activeElement || chatComposerEl);
+          return true;
+        } catch (ePwaLifecycleSuspend) {
+          return false;
+        }
+      }
+      function resumeIosPwaChatThreadDockAfterPageLifecycle(label) {
+        try {
+          if (document.hidden) return false;
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var active = document.activeElement || null;
+          if (!active || !isChatThreadComposerKeyboardDom(active)) return false;
+          if (!isIosPwaChatThreadKeyboardOpenConfirmed(active)) return false;
+          window.__pokerChatKeyboardFocusAtMs = Date.now() - 220;
+          window.__pokerChatKeyboardOpeningUntil = Date.now() + 700;
+          document.documentElement.classList.add("chat-keyboard-open");
+          document.body.classList.add("chat-keyboard-open");
+          var applied = applyCssOnlyIosPwaChatComposerDock(active, "lifecycle-resume:" + (label || ""));
+          if (applied) {
+            attachPwaChatThreadRootScrollLock(active);
+            ensurePwaChatDockWatchdog(active);
+          }
+          return applied;
+        } catch (ePwaLifecycleResume) {
+          return false;
+        }
+      }
+      if (!window.__pokerIosPwaChatThreadLifecycleDockBound) {
+        window.__pokerIosPwaChatThreadLifecycleDockBound = true;
+        var schedulePwaLifecycleResume = function (label) {
+          [60, 180, 360, 700].forEach(function (ms) {
+            setTimeout(function () {
+              resumeIosPwaChatThreadDockAfterPageLifecycle(label + ":t" + ms);
+            }, ms);
+          });
+        };
+        document.addEventListener("visibilitychange", function () {
+          try {
+            if (document.hidden) suspendIosPwaChatThreadDockForPageLifecycle("visibility-hidden");
+            else schedulePwaLifecycleResume("visibility-visible");
+          } catch (ePwaLifecycleVis) {}
+        });
+        window.addEventListener("pagehide", function () {
+          suspendIosPwaChatThreadDockForPageLifecycle("pagehide");
+        });
+        window.addEventListener("pageshow", function () {
+          schedulePwaLifecycleResume("pageshow");
+        });
+        window.addEventListener("focus", function () {
+          schedulePwaLifecycleResume("window-focus");
+        });
+      }
       /* iOS/WKWebView: blur и высота visualViewport обновляются с задержкой — снимаем «хвост» подъёма, когда vv снова полноэкранный */
       if (!window.__pokerChatVvPostKeyboardCleanupAttached && window.visualViewport && window.visualViewport.addEventListener) {
         window.__pokerChatVvPostKeyboardCleanupAttached = true;
