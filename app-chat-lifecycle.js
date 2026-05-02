@@ -9147,15 +9147,26 @@ function initChat() {
       e.stopPropagation();
       var now = Date.now();
       if (now - lastConvBackAt < 450) return;
-      if (e.type === "touchend" && window.__touchWasScroll && window.__touchWasScroll()) return;
+      if ((e.type === "touchend" || e.type === "pointerup") && window.__touchWasScroll && window.__touchWasScroll()) return;
       lastConvBackAt = now;
       pokerPushOpenSetCaller("conv-back-btn");
       showDialogs();
     }
+    function handleConvBackFromHeader(e) {
+      var target = e.target && e.target.closest ? e.target.closest("#chatBackBtn, .chat-conv-top__toolbar-back") : null;
+      if (!target) return;
+      handleConvBack(e);
+    }
     if (backBtn) {
+      backBtn.addEventListener("pointerdown", handleConvBack, { passive: false, capture: true });
       backBtn.addEventListener("touchstart", handleConvBack, { passive: false });
       backBtn.addEventListener("touchend", handleConvBack, { passive: false });
       backBtn.addEventListener("click", handleConvBack);
+    }
+    var convTopEl = document.querySelector("#chatConvView .chat-conv-top");
+    if (convTopEl) {
+      convTopEl.addEventListener("pointerdown", handleConvBackFromHeader, { passive: false, capture: true });
+      convTopEl.addEventListener("click", handleConvBackFromHeader, true);
     }
     var convProfileOpenBtn = document.getElementById("chatConvProfileOpenBtn");
     if (convProfileOpenBtn) {

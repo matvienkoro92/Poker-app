@@ -927,6 +927,36 @@
   z-index: 30;
 }
 
+/* Personal chat back: keep the expanded hit target above the header glass. */
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
+  pointer-events: auto !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top-inner {
+  pointer-events: auto !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back {
+  position: relative;
+  z-index: 80 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back::before,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back::after {
+  z-index: 1;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-header,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-peer-title-chip,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-group-add-btn,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-peer-avatar-wrap {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+}
+
 html[data-theme="gold"].app-view-home
   .home-welcome-outline
   .features--home-rating-on-border
