@@ -14,6 +14,7 @@
     permissions: null,
     pushConfigured: false,
     source: "api",
+    showAllPlayers: false,
   };
 
   function esc(s) {
@@ -57,11 +58,10 @@
     { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
     { key: "needs_touch", label: "Пора написать", desc: "Есть депозит без игры, нет push/бот-канала или давно не было CRM-касания.", match: needsTouch },
     { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
-    { key: "deposited_no_game", label: "Депозит без игры", desc: "Есть депозит, но нет события игры за выбранный период.", match: function (p) { var pd = periodData(p); return pd.deposits > 0 && pd.games <= 0; } },
     { key: "no_deposit", label: "Без депозита в CRM", desc: "За выбранный период в CRM-журнале нет депозитов.", match: function (p) { return periodData(p).deposits <= 0; } },
-    { key: "active_7", label: "Активность 7 дней", desc: "Есть игра, депозит или сообщение за последние 7 дней.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.games > 0 || pd.deposits > 0 || pd.messages > 0; } },
+    { key: "active_7", label: "Активность CRM 7д", desc: "Есть событие CRM за последние 7 дней: игра, депозит или сообщение.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.games > 0 || pd.deposits > 0 || pd.messages > 0; } },
     { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
-    { key: "tournament", label: "Турнирные", desc: "Интерес к MTT, bounty, рейтингу или розыгрышам.", match: function (p) { return hasTag(p, "турниры") || hasTag(p, "MTT") || hasTag(p, "bounty") || hasTag(p, "рейтинг") || hasTag(p, "розыгрыши"); } },
+    { key: "tournament", label: "Турнирные по тегам", desc: "Только игроки с явными CRM-тегами/каналами: турниры, MTT, bounty, рейтинг или розыгрыши.", match: function (p) { return hasTag(p, "турниры") || hasTag(p, "MTT") || hasTag(p, "bounty") || hasTag(p, "рейтинг") || hasTag(p, "розыгрыши"); } },
   ];
 
   function hasTag(p, tag) {
@@ -159,12 +159,14 @@
     var el = document.getElementById("playerCrmList");
     if (!el) return;
     var items = filteredPlayers().sort(sortForWork);
+    var total = items.length;
+    var visibleItems = state.showAllPlayers ? items : items.slice(0, 50);
     if (!state.selectedId && items[0]) state.selectedId = items[0].id;
     if (!items.length) {
       el.innerHTML = "<div class=\"player-crm__timeline-item\">По этому фильтру пока пусто.</div>";
       return;
     }
-    el.innerHTML = items.map(function (p) {
+    el.innerHTML = visibleItems.map(function (p) {
       var pd = periodData(p);
       var cls = "player-crm__player" + (p.id === state.selectedId ? " player-crm__player--active" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-player=\"" + esc(p.id) + "\">" +
@@ -172,7 +174,9 @@
         "<span class=\"player-crm__player-meta\">" + esc(p.handle) + " · " + esc(p.source) + " · " + esc(p.manager) + "</span>" +
         "<span class=\"player-crm__player-note\">" + esc(pd.games) + " игр в CRM · " + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
         "</button>";
-    }).join("");
+    }).join("") + (!state.showAllPlayers && total > visibleItems.length
+      ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать всех " + esc(total) + "</button>"
+      : "");
   }
 
   function selectedPlayer() {
@@ -645,6 +649,7 @@
       if (filter) {
         state.filter = filter.getAttribute("data-crm-filter") || "all";
         state.selectedId = "";
+        state.showAllPlayers = false;
         renderAll();
         return;
       }
@@ -667,7 +672,13 @@
         state.filter = useSeg.getAttribute("data-crm-use-segment") || "all";
         state.tab = "base";
         state.selectedId = "";
+        state.showAllPlayers = false;
         renderAll();
+        return;
+      }
+      if (e.target && e.target.id === "playerCrmShowAllBtn") {
+        state.showAllPlayers = true;
+        renderList();
         return;
       }
       var broadSeg = e.target.closest("[data-crm-broadcast-segment]");
@@ -686,6 +697,7 @@
       search.addEventListener("input", function () {
         state.search = search.value || "";
         state.selectedId = "";
+        state.showAllPlayers = false;
         renderList();
         renderDetail();
       });
@@ -694,6 +706,7 @@
     if (period) {
       period.addEventListener("change", function () {
         state.period = period.value || "30";
+        state.showAllPlayers = false;
         renderAll();
       });
     }

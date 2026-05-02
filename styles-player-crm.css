@@ -217,6 +217,16 @@
   border-color: rgba(56, 189, 248, 0.72);
   box-shadow: inset 3px 0 0 #38bdf8;
 }
+.player-crm__show-all {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  border-radius: 8px;
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+}
 .player-crm__player-head,
 .player-crm__section-head,
 .player-crm__detail-head {
