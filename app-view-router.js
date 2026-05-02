@@ -66,7 +66,8 @@ function pokerSyncInertForViewScreensOnly() {
   var longScrollInit =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame";
+    viewName === "hall-of-fame" ||
+    viewName === "player-crm";
   document.documentElement.classList.toggle("app-view-long-scroll", longScrollInit);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScrollInit);
 })();
@@ -780,7 +781,8 @@ function setView(viewName, navOpts) {
   var longScroll =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame";
+    viewName === "hall-of-fame" ||
+    viewName === "player-crm";
   document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   /* Видеоуроки: внутренний scrollport в .card__content (как профиль); класс app-view-video-lessons-html-scroll — см. styles.css */

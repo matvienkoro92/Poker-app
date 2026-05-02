@@ -1,0 +1,120 @@
+<div class="view" data-view="player-crm" id="playerCrmView">
+  <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+  <section class="player-crm" aria-labelledby="playerCrmTitle">
+    <header class="player-crm__hero">
+      <div class="player-crm__hero-copy">
+        <p class="player-crm__eyebrow">Админ · поток игроков</p>
+        <h2 class="player-crm__title" id="playerCrmTitle">CRM игроков</h2>
+        <p class="player-crm__subtitle">Очередь касаний, активность по периодам, депозиты, сегменты и бот/push-рассылки.</p>
+      </div>
+      <div class="player-crm__hero-tools">
+        <label class="player-crm__period">
+          <span>Период</span>
+          <select id="playerCrmPeriodSelect">
+            <option value="7">7 дней</option>
+            <option value="30" selected>30 дней</option>
+            <option value="90">90 дней</option>
+          </select>
+        </label>
+        <button type="button" class="player-crm__ghost-btn" id="playerCrmRefreshBtn">Обновить</button>
+      </div>
+    </header>
+
+    <nav class="player-crm__tabs" aria-label="CRM разделы">
+      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="queue">Очередь</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="base">База</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="segments">Сегменты</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="analytics">Аналитика</button>
+    </nav>
+
+    <div class="player-crm__stats" id="playerCrmStats"></div>
+
+    <div class="player-crm__workbench">
+      <aside class="player-crm__panel player-crm__panel--left">
+        <div class="player-crm__filters">
+          <input type="search" class="player-crm__search" id="playerCrmSearch" placeholder="Поиск: ник, тег, источник" autocomplete="off" />
+          <div class="player-crm__chips" id="playerCrmFilterChips"></div>
+        </div>
+        <div class="player-crm__list" id="playerCrmList" aria-live="polite"></div>
+      </aside>
+
+      <main class="player-crm__panel player-crm__panel--main">
+        <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="queue">
+          <div class="player-crm__section-head">
+            <h3>Кому писать сейчас</h3>
+            <span id="playerCrmQueueCount">—</span>
+          </div>
+          <div class="player-crm__queue" id="playerCrmQueue"></div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="base">
+          <div class="player-crm__section-head">
+            <h3>Карточка игрока</h3>
+            <span id="playerCrmSelectedHint">—</span>
+          </div>
+          <div class="player-crm__detail" id="playerCrmDetail"></div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="segments">
+          <div class="player-crm__section-head">
+            <h3>Сегменты</h3>
+            <span>авто-группы по активности</span>
+          </div>
+          <div class="player-crm__segments" id="playerCrmSegments"></div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="broadcast">
+          <div class="player-crm__section-head">
+            <h3>Рассылка</h3>
+            <span id="playerCrmBroadcastAudience">—</span>
+          </div>
+          <div class="player-crm__broadcast">
+            <div class="player-crm__form-grid">
+              <label>
+                <span>Группа</span>
+                <select id="playerCrmBroadcastSegment"></select>
+              </label>
+              <label>
+                <span>Канал</span>
+                <select id="playerCrmBroadcastChannel">
+                  <option value="bot">Бот</option>
+                  <option value="push">Push</option>
+                  <option value="bot_push">Бот + push</option>
+                </select>
+              </label>
+            </div>
+            <label class="player-crm__message-label">
+              <span>Сообщение</span>
+              <textarea id="playerCrmBroadcastText" rows="6" maxlength="900">Сегодня есть хорошие столы и турнирный движ. Если хочешь зайти, напиши менеджеру — подберём игру по лимиту.</textarea>
+            </label>
+            <div class="player-crm__broadcast-actions">
+              <button type="button" class="player-crm__primary-btn" id="playerCrmBroadcastPrepareBtn">Подготовить рассылку</button>
+              <button type="button" class="player-crm__danger-btn" id="playerCrmBroadcastSendBtn">Отправить сейчас</button>
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastPreviewBtn">Пересчитать</button>
+            </div>
+            <div class="player-crm__send-result" id="playerCrmBroadcastResult" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="analytics">
+          <div class="player-crm__section-head">
+            <h3>Аналитика</h3>
+            <span id="playerCrmAnalyticsPeriod">30 дней</span>
+          </div>
+          <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
+          <div class="player-crm__import">
+            <div class="player-crm__section-head">
+              <h3>Импорт событий</h3>
+              <span>accountId,type,amount,date,note</span>
+            </div>
+            <textarea id="playerCrmImportText" rows="5" placeholder="ID123456,game,0,2026-05-02,играл вечерний стол"></textarea>
+            <div class="player-crm__broadcast-actions">
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmImportBtn">Импортировать события</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </section>
+</div>

@@ -21,6 +21,7 @@
       safeCall(window.pokerInitHallOfFamePanelShareButtons);
       safeCall(window.pokerInitWinterRatingWeekTops);
     }
+    if (viewName === "player-crm") safeCall(window.pokerInitPlayerCrm);
     if (viewName === "global-modals") {
       if (!window.__pokerHomeGlobalModalsReinitDone && typeof window.runGazetteAndTasksInit === "function") {
         window.__pokerHomeGlobalModalsReinitDone = true;
@@ -137,7 +138,8 @@
       "hall-of-fame",
       "raffles",
       "video-lessons",
-      "equilator"
+      "equilator",
+      "player-crm"
     ];
     var index = 0;
     function runNext(deadline) {

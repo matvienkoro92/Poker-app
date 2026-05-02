@@ -94,6 +94,16 @@
 | `poker_app:track_links:vd:<slug>` | HASH | tracking | Visitor dedupe. |
 | `poker_app:pikhanina_claimed_count` | STRING | pikhanina | Claimed count resettable script key. |
 
+## Player CRM
+
+| Key | Type | Owner | Purpose |
+| --- | --- | --- | --- |
+| `poker_app:crm_player_overrides` | HASH `accountId -> JSON` | `player-crm.js` | Ручные CRM-поля игрока: статус, менеджер, источник, теги, заметка, исключение из рассылок. |
+| `poker_app:crm_activity_events:<accountId>` | LIST JSON | `player-crm.js` | CRM-журнал событий игрока: депозит, игра, сообщение; используется для периодов 7/30/90 дней. |
+| `poker_app:crm_touches:<accountId>` | LIST JSON | `player-crm.js` | История CRM-касаний игрока: канал, сегмент, кампания, превью текста; используется антиспамом. |
+| `poker_app:crm_campaigns` | LIST JSON | `player-crm.js` | Последние черновики и отправленные CRM-кампании по бот/push-каналам. |
+| `poker_app:crm_imports` | LIST JSON | `player-crm.js` | Метаданные последних импортов CRM-событий. |
+
 ## Legacy / Audit Notes
 
 - `tg_roman` in chat partners is legacy and should be migrated/removed when `tg_388008256` is present.
