@@ -143,8 +143,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   color: currentColor;
 }
 .bottom-nav__icon svg {
-  width: 22px;
-  height: 22px;
+  width: 23px;
+  height: 23px;
   display: block;
   fill: none;
   stroke: currentColor;
@@ -152,6 +152,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1.5px 1px rgba(15, 23, 42, 0.26));
 }
 .bottom-nav__icon-fill {
   fill: currentColor;
@@ -161,8 +162,30 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 .bottom-nav__icon-fill--soft {
   opacity: 0.18;
 }
+.bottom-nav__icon-fill--soft[style*="url"] {
+  opacity: 0.62;
+}
+.bottom-nav__icon-depth {
+  fill: rgba(15, 23, 42, 0.24);
+  stroke: none;
+}
+.bottom-nav__icon-shine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0.72;
+}
 .bottom-nav__item--active .bottom-nav__icon-fill--soft {
   opacity: 0.3;
+}
+.bottom-nav__item--active .bottom-nav__icon-fill--soft[style*="url"] {
+  opacity: 0.78;
+}
+.bottom-nav__item--active .bottom-nav__icon svg {
+  filter:
+    drop-shadow(0 1.5px 1px rgba(67, 34, 6, 0.32))
+    drop-shadow(0 0 5px rgba(255, 231, 168, 0.3));
 }
 .bottom-nav__dot {
   position: absolute;

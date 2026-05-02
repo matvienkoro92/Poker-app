@@ -1067,6 +1067,7 @@ function initChat() {
     return null;
   }
   function getDirectChatComposer(mode) {
+    if (!shouldUseDedicatedTelegramIosChatComposer()) return null;
     if (!ensureDirectChatComposers()) return null;
     if (mode === "general") return chatGeneralComposerEl || null;
     if (mode === "personal") return chatPersonalComposerEl || null;
@@ -6778,10 +6779,6 @@ function initChat() {
               markIosPwaChatComposerKeepAlive(target, "composer-chrome", 1200);
               return;
             }
-            if (target && target.closest && target.closest(".chat-messages, .chat-messages-wrap")) {
-              markIosPwaChatComposerKeepAlive(target, "messages-scroll", 1600);
-              return;
-            }
             var active = document.activeElement;
             if (active && isChatThreadComposerKeyboardDom(active) && active.blur) active.blur();
             window.__pokerChatPwaUserDismissAt = Date.now();
@@ -9355,14 +9352,12 @@ function initChat() {
       handleConvBack(e);
     }
     if (backBtn) {
-      backBtn.addEventListener("pointerdown", handleConvBack, { passive: false, capture: true });
       backBtn.addEventListener("touchstart", handleConvBack, { passive: false });
       backBtn.addEventListener("touchend", handleConvBack, { passive: false });
       backBtn.addEventListener("click", handleConvBack);
     }
     var convTopEl = document.querySelector("#chatConvView .chat-conv-top");
     if (convTopEl) {
-      convTopEl.addEventListener("pointerdown", handleConvBackFromHeader, { passive: false, capture: true });
       convTopEl.addEventListener("click", handleConvBackFromHeader, true);
     }
     var convProfileOpenBtn = document.getElementById("chatConvProfileOpenBtn");
