@@ -139,6 +139,24 @@
 - Не-админ не видит кнопку отчетов.
 - Rating top wins отображается после первого открытия рейтинга и после перехода между разделами.
 
+## Addendum 2026-05-03
+
+Последний пакет правок закрывает три связанных класса регрессий в уже открытом mobile chat/composer состоянии.
+
+- Emoji controls теперь документируются как часть composer chrome: tap по emoji button или emoji picker не должен уводить focus с активной chat textarea и не должен закрывать native keyboard.
+- `app-chat-lifecycle.js` должен хранить textarea focus в touch/mobile emoji context через `shouldPreserveChatEmojiComposerFocus()` и родственные guards. Pointer-dismiss/blur cleanup не должны считать emoji tap кликом вне ввода.
+- Лента сообщений должна подниматься не только когда она строго на самом дне. Если пользователь слегка отскоролил ленту вверх, `updateChatMessagesKeyboardPad()` должен сохранить bottom-distance ощущение и поднять `scrollTop` на дельту нового keyboard/composer padding, не snap-ясь к последнему сообщению.
+- Для iOS PWA/CSS-only dock это особенно важно: snap может быть отключен, но near-bottom anchored lift все равно должен освобождать место под поднятый composer.
+- Cashout manager images (`dep-manager.jpg`, `dep-manager-vika.jpg`) не должны грузиться из скрытого DOM до входа в cashout. Initial markup хранит путь в `data-src`, а `updateCashoutManager()` гидрирует `src` только на активном cashout view.
+- Router entry for cashout должен вызывать `updateCashoutManager()` до инициализации формы, чтобы картинка активного менеджера появилась при открытии раздела без ранней загрузки скрытых assets.
+
+Проверки для этого пакета:
+
+- `node scripts/check-js-syntax.js`
+- `npm run build`
+- `npm run smoke`
+- `npm run smoke:nav`
+
 ## Remaining Risks
 
 - iOS PWA keyboard остается чувствительным к версии iOS, режиму standalone, predictive bar и моменту `visualViewport` resize.

@@ -10,6 +10,12 @@ Current documentation:
 - `progress-summary.md` - current summary of completed quality/performance/architecture work and remaining priorities.
 - `frontend-map.md` - current frontend file ownership map.
 - `chat-keyboard-pwa.md` - iOS PWA chat keyboard investigation, current fixes, diagnostics, and invariants.
+- `2026-05-03-product-engineering-audit.md` - product UX and engineering audit with scores, verification results, and nearest fixes.
+- `2026-05-03-telegram-chat-worklog.md` - Telegram chat fixes: composer focus, back buttons, dark-gold theme, dialog metadata, DM header hydration, native close clearance, and version/push discipline.
+- `2026-05-03-raffles-chat-stability.md` - raffle admin actions, PWA/Telegram confirm split, raffle loading performance, chat debug overlay, emoji/composer focus, and quick chat back/send edge cases.
+- `2026-05-03-ui-chat-product-worklog.md` - profile/home/download/chat/theme/rating product fixes through app version `2.572`.
+- `2026-05-03-ui-scroll-crm-worklog.md` - current UI/scroll/CRM notes: home theme visuals, tabbar icon rules, panel scrollports, cashout lazy images, CRM API mode, raffles performance, and keyboard debug gating.
+- `2026-05-03-ui-worklog.md` - chat search/new-group polish, rating promo volume, and version bump/push notes.
 - `2026-05-01-stability-worklog.md` - worklog for the May 1 stability pass: iOS PWA keyboard, tap latency, admin reports, and rating hydration.
 - `../CRON-SETUP.md` - cron setup notes.
 - `../CARD_COLORS.md` - card suit color convention used by the project.

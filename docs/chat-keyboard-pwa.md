@@ -174,9 +174,111 @@
 - Лента сообщений должна получать padding из того же locked bottom, что и composer.
 - Любая правка keyboard должна проверяться сценариями: первый tap, личный чат, общий чат, закрытие keyboard, сворачивание/возврат, повторный tap, tap вне composer.
 
+## Дополнение 2026-05-03: Emoji, Partial Scroll Lift, Hidden Assets
+
+Этот блок фиксирует свежие регрессии вокруг уже поднятого composer и клавиатуры. Их важно держать как часть keyboard/composer contract, потому что все три бага проявлялись не как отдельная верстка, а как нарушение состояния активного чата.
+
+### Emoji Focus Contract
+
+- Кнопка emoji и элементы picker считаются частью composer chrome. Tap по `.chat-emoji-btn`, `.chat-emoji-picker`, `.chat-emoji-picker__emoji` и связанным controls не должен закрывать native keyboard, если до тапа была активна chat textarea.
+- `app-chat-lifecycle.js` должен сохранять активный composer textarea через `isChatEmojiComposerTextarea()`, `isTouchChatEmojiFocusContext()` и `shouldPreserveChatEmojiComposerFocus()`.
+- На touch/mobile событиях emoji controls нужно предотвращать focus-steal: native focus должен остаться на textarea, а picker/emoji action должны выполняться поверх открытой клавиатуры.
+- Этот guard нельзя сужать только до iOS PWA или Telegram runtime. Практически важный критерий - touch/mobile chat composer context с активной или недавно активной textarea.
+- Pointer-dismiss и blur-cleanup должны игнорировать события внутри composer/emoji/attach/context/scroll-bottom controls. Emoji tap - не сигнал "пользователь ушел из ввода".
+
+### Partial Scroll Lift Contract
+
+- `updateChatMessagesKeyboardPad()` не должен ограничиваться сменой `padding-bottom`. Если лента слегка отскроллена вверх и не находится строго на самом дне, новый padding сам по себе не поднимет видимые сообщения вместе с composer.
+- Перед изменением padding нужно сохранить `scrollTop`, предыдущий keyboard/composer pad и bottom gap. После роста pad, если пользователь находится близко к низу, нужно поднять scroll позицию примерно на дельту pad.
+- Важная разница: near-bottom anchored lift не должен принудительно snap-ить ленту к последнему сообщению. Он сохраняет пользовательскую дистанцию от низа, но освобождает место под поднятый composer.
+- Для iOS PWA/CSS-only dock, где обычный snap часто намеренно отключен, near-bottom lift все равно нужен. Иначе composer визуально поднимается, а лента остается под ним.
+- Практический threshold для "слегка отскоролено вверх" должен быть шире, чем строгий bottom epsilon: ориентир - сотни пикселей или доля `clientHeight`, а не только `<= 2px`.
+
+### Hidden Asset Contract
+
+- Smoke navigation может ловить скрытые assets, которые грузятся до входа в их view. Последний пример - `dep-manager.jpg` и `dep-manager-vika.jpg` из cashout-раздела.
+- Скрытые view-specific изображения не должны иметь обычный `src` в initial DOM. Использовать `data-src` и гидрировать `src` только при входе в соответствующий view.
+- Для cashout `app-view-router.js` должен вызывать `updateCashoutManager()` при входе в `viewName === "cashout"`, а `app-cashout.js` должен выставлять manager image `src` только когда `body[data-view="cashout"]`.
+- Это правило особенно важно для `smoke:nav`: preloaded hidden images считаются регрессией, даже если визуально раздел работает.
+
+### Проверка После Таких Правок
+
+- `node scripts/check-js-syntax.js`
+- `npm run build`
+- `npm run smoke`
+- `npm run smoke:nav`
+
+## Дополнение 2026-05-03: Resting Composer, Re-Armed Bottom Follow, Emoji Height
+
+Этот блок уточняет contract после правок `2.570` и `2.572`. Главная идея: состояние composer делится на два разных режима, которые нельзя смешивать.
+
+- Открытая keyboard: emoji/chrome controls должны сохранять активный composer и не закрывать клавиатуру.
+- Закрытая keyboard, composer внизу: emoji/chrome controls не должны заново поднимать composer только из-за старого `activeElement` или emoji-only значения.
+
+### Resting Composer И Cleanup Закрытой Keyboard
+
+- `pokerRepairClosedChatComposerRestingState(reason)` в `app-chat-keyboard.js` - общий repair для случаев, когда клавиатура уже закрыта, а composer/лента оставили stale dock-state.
+- Repair чистит `chat-keyboard-open`, `chat-vv-lift`, `chat-input-area--vv-dock`, inline `position/bottom/transform`, CSS-переменные `--chat-vv-inset`, `--chat-keyboard-fallback-inset`, `--chat-ios-pwa-thread-composer-bottom`, `--chat-ios-accessory-inset` и inline `padding-bottom` у `.chat-messages`.
+- `styles-chat-after-responsive.css` задает нижний resting reserve для общего и личного треда. В закрытом состоянии composer не должен стоять вплотную к нижней кромке, особенно на iPhone safe-area.
+- Pointer-dismiss в `app-chat-lifecycle.js` должен сначала выставить dismiss flags (`__pokerChatPwaUserDismissAt`, сброс opening/keepAlive), затем вызвать `blur()`, затем дать быстрый и поздний cleanup. Это защищает от состояния "клавиатура уехала, composer остался наверху".
+- Tap по `.chat-messages`/`.chat-messages-wrap` вне controls не должен ставить keep-alive. Это явное снятие фокуса, а не продолжение ввода.
+
+### Re-Armed Bottom Follow После Ручного Скролла
+
+- Старый `__pokerChatOpeningStickBottom` включался при первом открытии треда, но после ручного scroll up выключался и не включался обратно при возврате вниз. Итог: пользователь снова у последних сообщений, но следующий focus composer не поднимает ленту.
+- `rememberChatMessagesBottomAffinity(el)` запоминает возврат пользователя к низу с расширенным порогом `CHAT_SCROLL_BOTTOM_REARM_PX = 220`.
+- `chatMessagesShouldFollowKeyboardLift(el)` используется перед применением keyboard padding/dock. Это важно делать до изменения padding, потому что после padding distance-to-bottom уже искажен.
+- `scheduleChatKeyboardBottomFollow(el, reason)` несколько кадров дотягивает ленту к `scrollHeight` после focus/pad. Это покрывает асинхронность `visualViewport`, fixed composer и пересчета высоты ленты.
+- Явный жест вверх должен вызывать `clearChatMessagesKeyboardBottomFollow(el)`, чтобы чтение старых сообщений не перебивалось автоскроллом.
+
+### Emoji Height Contract
+
+- Emoji являются содержимым сообщения, но не являются текстом для расчета высоты composer.
+- `app-chat-lifecycle.js` нормализует значение для замера через `chatComposerValueForHeight(value)`: удаляются emoji ranges, variation selectors и zero-width joiner. Реальная `textarea.value` не меняется.
+- `chatComposerValueHasTextForHeight(value)` отвечает только на вопрос "есть ли текст, который должен влиять на высоту".
+- `app-shared-helpers.js` поддерживает `pokerAutosizeTextarea(ta, { measureValue })`. Это позволяет хранить одно значение в textarea, а измерять высоту по другому.
+- Правила высоты:
+  - emoji-only -> `44px`, `overflowY = hidden`;
+  - текст + emoji -> высота считается по тексту без emoji;
+  - длинный обычный текст -> autosize до `140px` как раньше.
+- `shouldPreserveChatEmojiComposerFocus()` не должен считать один только `document.activeElement === textarea` причиной для повторного dock, если `isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })` говорит, что keyboard закрыта.
+
+### Версии, Коммиты, Проверки
+
+- `080d1b2` / `2.570` / `build 1.719` - resting bottom reserve, repair закрытой keyboard, pointer-dismiss cleanup.
+- `920740f` / `2.572` / `build 1.720` - re-armed bottom follow после ручного скролла, emoji не будит закрытый dock, emoji не увеличивает высоту composer.
+- `2.571` относится к промежуточному player CRM изменению, поэтому следующий chat composer блок зафиксирован как `2.572`.
+- Проверки для этих сценариев:
+  - `node --check app-chat-keyboard.js`;
+  - `node --check app-chat-lifecycle.js`;
+  - `node --check app-shared-helpers.js`;
+  - `git diff --check`;
+  - `npm run build`;
+  - Playwright smoke: dismiss outside -> composer возвращается вниз;
+  - Playwright smoke: scroll down -> scroll up -> scroll down -> focus/pad -> bottom gap `0`;
+  - Playwright smoke: 25 emoji -> textarea `44px`, длинный текст -> autosize до `140px`.
+
+### Push И Version Bump
+
+- Если `node scripts/bump-pwa-login-version.js` или `npm run bump:pwa-version` уже выполнен вручную перед commit, push делать через `SKIP_PWA_VERSION_BUMP=1 git push origin main`.
+- Иначе pre-push hook добавит еще один `+0.001`, и версия уйдет на лишний шаг.
+- Chat visible build marker в `html-fragments/chat.html` обновлять вместе с пользовательскими chat composer фиксами, чтобы скриншоты из главного чата можно было связать с конкретным rollout.
+
+## Дополнение 2026-05-03: Keyboard Debug Overlay
+
+Красная diagnostic-панель внизу чата предназначена только для локальной отладки keyboard/composer. Она не должна автоматически включаться у админов или игроков в production.
+
+- Источник регрессии: у части пользователей в `localStorage` оставался старый `poker_chat_keyboard_debug=1`, а код также мог показывать панель для `chatIsAdmin`.
+- Production/PWA/Telegram runtime должен очищать старый `localStorage.poker_chat_keyboard_debug` и возвращать `false`, если нет явно разрешенной debug-среды.
+- Разрешенные способы включения:
+  - localhost / `127.0.0.1` / `0.0.0.0` / empty hostname;
+  - явный URL-флаг `?chatKeyboardDebug=1`.
+- Admin status сам по себе не является причиной показывать debug-панель.
+- Если похожая красная панель снова появляется у пользователя, первым делом проверять `shouldShowChatKeyboardDebugPanel()` и `isChatKeyboardDebugAllowedEnvironment()` в `app-chat-lifecycle.js`, а не CSS.
+
 ## Следующий Шаг
 
-Если проблема повторяется после `2.527`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту:
+Если проблема повторяется после `2.572`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту:
 
 - если `hKb/bKb = 0` — чинить ранний trigger keyboard-state;
 - если `chatCmp position != fixed` — чинить selector/cascade;

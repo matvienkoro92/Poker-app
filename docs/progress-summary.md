@@ -83,6 +83,7 @@ Smoke закрепляет, что эти домены больше не воз�
 - admin-only;
 - chat send/edit/delete;
 - raffle join/leave;
+- raffle admin delete;
 - respect vote/withdraw;
 - profile/user lookup.
 
@@ -103,7 +104,19 @@ Smoke закрепляет, что эти домены больше не воз�
 - Исправлялись проблемы первого клика, chat tabbar, init dialogs, auth/network retry и исчезающего tabbar.
 - Чатовые dialogs и lifecycle защищены lazy-loading smoke-проверками.
 - По iOS PWA keyboard/chat composer добавлена отдельная документация `chat-keyboard-pwa.md` и расширенная диагностика `Keyboard Lab`: теперь видны классы keyboard-state, CSS-переменные, header/messages/composer rect/computed styles и root/shell scroll.
+- В `chat-keyboard-pwa.md` добавлен блок `2026-05-03: Resting Composer, Re-Armed Bottom Follow, Emoji Height`: зафиксированы правила для закрытого composer state, tap outside dismiss, возврата к низу после ручного scroll up/down, emoji-only высоты textarea и ручного version bump перед push.
 - Серия правок от 2026-05-01 задокументирована в `2026-05-01-stability-worklog.md`: первый фокус, выезд keyboard/composer, задержки кликов, видимость отчетов только админам и повторная инициализация rating top wins после lazy hydration.
+- Серия Telegram/chat правок от 2026-05-03 задокументирована в `2026-05-03-telegram-chat-worklog.md`: composer focus после отправки, hit-area back-кнопок, dark-gold Telegram theme, кликабельность инструкции, быстрые dialog metadata, DM header hydration и отступ chat header под нативную кнопку `Закрыть`.
+- Серия raffle/chat-stability правок от 2026-05-03 задокументирована в `2026-05-03-raffles-chat-stability.md`: admin delete/cancel теперь не зависят от ложного `Telegram.WebApp` в PWA, admin-запросы используют PWA/auth body, stale fallback listeners очищаются при reinit, загрузка розыгрышей сначала показывает активный блок, а тяжелый completed archive/leaders рендерится отложенно.
+- Серия продуктовых/UI правок до версии `2.572` задокументирована в `2026-05-03-ui-chat-product-worklog.md`: профиль, первый скролл главной, download/freerolls, friends, темы, газета, spring rating, raffles/admin, Player CRM и актуальная стабилизация chat composer.
+- Красная chat keyboard debug-панель больше не должна появляться у игроков/админов в production только из-за старого `localStorage`: включение разрешено на localhost или явным `?chatKeyboardDebug=1`, а production runtime очищает старый флаг.
+
+### UI Polish
+
+- Верхняя строка списка чатов получила стабильный SVG-поиск, стеклянное поле ввода, объемную кнопку `+` для нового группового чата и боковые отступы `2px`.
+- Промо "Рейтинг турнирщиков" получило общий объемный слой: верхний блик, мягкую нижнюю тень, hover lift, active press и усиленные кубки.
+- Зимняя карточка рейтинга в Hall of Fame отдельно усилена фоном и тенями для dark/gold и light theme.
+- Серия UI-правок и версия `2.541` задокументированы в `2026-05-03-ui-worklog.md`.
 
 ## Текущее состояние
 
