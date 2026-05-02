@@ -68,8 +68,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 .bottom-nav__item {
   flex: 1;
   min-width: 0;
-  max-width: 120px;
-  min-height: 50px;
+  max-width: 96px;
+  min-height: 46px;
   border: 1px solid transparent;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 58%),
@@ -79,9 +79,9 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 5px 7px;
-  border-radius: 13px;
+  gap: 2px;
+  padding: 5px 4px 6px;
+  border-radius: 20px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -126,7 +126,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 .bottom-nav__item:nth-child(3),
 .bottom-nav__chat-wrap .bottom-nav__item {
   font-size: 10px;
-  padding: 6px 8px 7px;
+  padding: 5px 5px 6px;
 }
 
 .bottom-nav__icon-wrap {
@@ -134,12 +134,12 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   display: inline-flex;
 }
 .bottom-nav__icon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 999px;
   color: currentColor;
   background:
     radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 42%),
@@ -200,8 +200,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 
 .bottom-nav__item:nth-child(3) .bottom-nav__icon,
 .bottom-nav__chat-wrap .bottom-nav__icon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 }
 
 .bottom-nav__item--active {
@@ -284,7 +284,7 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
   position: relative;
   flex: 1;
   min-width: 0;
-  max-width: 120px;
+  max-width: 96px;
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -313,8 +313,8 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
     max-width: none;
-    min-height: 48px;
-    padding: 6px 2px 7px;
+    min-height: 44px;
+    padding: 5px 2px 6px;
     font-size: 10px;
     letter-spacing: 0.02em;
   }
@@ -333,13 +333,13 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
     font-size: 9px;
-    min-height: 46px;
-    padding: 5px 1px 6px;
-    border-radius: 11px;
+    min-height: 42px;
+    padding: 4px 1px 5px;
+    border-radius: 18px;
   }
   .bottom-nav__icon {
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
   }
   .bottom-nav__emoji {
     font-size: 16px;
