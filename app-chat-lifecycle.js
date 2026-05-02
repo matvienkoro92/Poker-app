@@ -6779,15 +6779,29 @@ function initChat() {
               markIosPwaChatComposerKeepAlive(target, "composer-chrome", 1200);
               return;
             }
-            var active = document.activeElement;
-            if (active && isChatThreadComposerKeyboardDom(active) && active.blur) active.blur();
             window.__pokerChatPwaUserDismissAt = Date.now();
             window.__pokerChatKeyboardOpeningUntil = 0;
+            window.__pokerChatPwaFocusKeepAliveUntil = 0;
+            window.__pokerChatPwaFocusKeepAliveTarget = null;
+            window.__pokerChatPwaFocusKeepAliveReason = "";
+            var active = document.activeElement;
+            if (active && isChatThreadComposerKeyboardDom(active) && active.blur) active.blur();
             setTimeout(function () {
               try {
                 forcePwaChatKeyboardCleanupIfClosed();
+                if (typeof pokerRepairClosedChatComposerRestingState === "function") {
+                  pokerRepairClosedChatComposerRestingState("outside-pointer-dismiss");
+                }
               } catch (ePwaPointerDismissCleanup) {}
             }, 80);
+            setTimeout(function () {
+              try {
+                forcePwaChatKeyboardCleanupIfClosed();
+                if (typeof pokerRepairClosedChatComposerRestingState === "function") {
+                  pokerRepairClosedChatComposerRestingState("outside-pointer-dismiss-late");
+                }
+              } catch (ePwaPointerDismissCleanupLate) {}
+            }, 320);
           } catch (ePwaPointerDismiss) {}
         };
         document.addEventListener("pointerdown", pwaThreadPointerDismiss, true);
@@ -6820,9 +6834,6 @@ function initChat() {
               } catch (ePreventComposerMove) {}
               return;
             }
-            if (target.closest(".chat-messages, .chat-messages-wrap")) {
-              markIosPwaChatComposerKeepAlive(target, "messages-touchmove", 1600);
-            }
           },
           { capture: true, passive: false }
         );
@@ -6834,8 +6845,6 @@ function initChat() {
             if (!target || !target.closest) return;
             if (target.closest(".chat-input-area, .chat-emoji-btn, .chat-emoji-picker")) {
               markIosPwaChatComposerKeepAlive(target, "composer-pointerdown", 1200);
-            } else if (target.closest(".chat-messages, .chat-messages-wrap")) {
-              markIosPwaChatComposerKeepAlive(target, "messages-pointerdown", 1600);
             }
           },
           true

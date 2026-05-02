@@ -883,3 +883,20 @@ html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:
 html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages > .chat-msg:last-child {
   margin-bottom: 6px !important;
 }
+
+/* Resting chat composer: one bottom reserve for general and personal threads.
+ * Earlier rules mixed 6px Telegram padding, 12px thread padding and a <=430px-only
+ * safe-area floor, so some closed-keyboard viewports left the composer on the edge. */
+html:not(.chat-keyboard-open) body:not(.chat-keyboard-open)[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html:not(.chat-keyboard-open) body:not(.chat-keyboard-open)[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area,
+html:not(.chat-keyboard-open) .view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+html:not(.chat-keyboard-open) .view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+  padding-bottom: max(32px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 14px)) !important;
+}
+
+html:not(.chat-keyboard-open) body:not(.chat-keyboard-open)[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages,
+html:not(.chat-keyboard-open) body:not(.chat-keyboard-open)[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages,
+html:not(.chat-keyboard-open) .view--active[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-messages,
+html:not(.chat-keyboard-open) .view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-messages {
+  scroll-padding-bottom: max(92px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 74px));
+}

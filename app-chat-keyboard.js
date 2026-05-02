@@ -27,8 +27,92 @@ function pokerIsActiveIosPwaChatComposerKeyboard() {
     return false;
   }
 }
+function pokerRepairClosedChatComposerRestingState(reason) {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
+    if (pokerIsActiveIosPwaChatComposerKeyboard()) return false;
+    var root = document.documentElement;
+    var body = document.body;
+    var active = document.activeElement || null;
+    var activeInChatChrome = !!(
+      active &&
+      active.closest &&
+      active.closest(".chat-input-area, .chat-find-by-id, .chat-emoji-picker, .chat-attach-dropdown")
+    );
+    var keyboardOpenClass = !!(
+      (root && root.classList && root.classList.contains("chat-keyboard-open")) ||
+      (body && body.classList && body.classList.contains("chat-keyboard-open"))
+    );
+    var layoutClosed = true;
+    try {
+      if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function") {
+        layoutClosed = !!window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true });
+      } else if (window.visualViewport) {
+        var ih = window.innerHeight || 0;
+        var vv = window.visualViewport;
+        var vvh = Number(vv.height) || 0;
+        layoutClosed = !!(ih > 0 && vvh > 0 && vvh >= ih - 16);
+      }
+    } catch (eClosedCheck) {}
+    if (keyboardOpenClass && !layoutClosed) return false;
+    if (keyboardOpenClass && activeInChatChrome && Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) return false;
+    if (keyboardOpenClass && typeof window.__pokerFinalizeChatKeyboardDismiss === "function") {
+      try {
+        window.__pokerFinalizeChatKeyboardDismiss();
+        return true;
+      } catch (eFinalizeClosed) {}
+    }
+    try {
+      if (root && root.classList) root.classList.remove("chat-keyboard-open", "chat-vv-lift", "chat-keyboard-open--tma-flow");
+      if (body && body.classList) body.classList.remove("chat-keyboard-open", "chat-keyboard-open--tma-flow");
+    } catch (eClsClosed) {}
+    try {
+      if (root && root.style) {
+        root.style.removeProperty("--chat-vv-inset");
+        root.style.removeProperty("--chat-keyboard-fallback-inset");
+        root.style.removeProperty("--chat-ios-pwa-thread-composer-bottom");
+        root.style.removeProperty("--chat-ios-accessory-inset");
+      }
+    } catch (eVarsClosed) {}
+    try {
+      document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area").forEach(function (node) {
+        if (!node || !node.style) return;
+        node.classList.remove("chat-input-area--vv-dock");
+        [
+          "position",
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "width",
+          "max-width",
+          "box-sizing",
+          "z-index",
+          "margin-bottom",
+          "transform",
+          "-webkit-transform",
+          "will-change"
+        ].forEach(function (prop) {
+          try { node.style.removeProperty(prop); } catch (eRmProp) {}
+        });
+      });
+    } catch (eAreasClosed) {}
+    try {
+      document.querySelectorAll(".chat-messages").forEach(function (el) {
+        if (el && el.style) el.style.removeProperty("padding-bottom");
+      });
+    } catch (eMsgsClosed) {}
+    return true;
+  } catch (eRestingRepair) {
+    return false;
+  }
+}
+window.pokerRepairClosedChatComposerRestingState = pokerRepairClosedChatComposerRestingState;
 function pokerFlushBottomNavAndViewportAfterChatChrome() {
   if (pokerIsActiveIosPwaChatComposerKeyboard()) return;
+  try {
+    pokerRepairClosedChatComposerRestingState("flush");
+  } catch (eRestFlush) {}
   try {
     pokerApplyBottomTabbarPad._lastPad = null;
   } catch (eInvPad) {}
@@ -92,6 +176,9 @@ function pokerFlushBottomNavAndViewportAfterChatChrome() {
 
 function pokerResetChatDialogsViewportArtifacts() {
   try {
+    try {
+      pokerRepairClosedChatComposerRestingState("dialogs-reset");
+    } catch (eRestDialogs) {}
     var root = document.documentElement;
     var body = document.body;
     var nodes = [
