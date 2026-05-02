@@ -87,6 +87,7 @@ function initRaffles() {
   var rafflesIsAdmin = false;
   var myRaffleUserId = null;
   var raffleFeedbackTimer = null;
+  var rafflesFocusedActiveId = null;
 
   function showRaffleFeedback(message, kind) {
     if (!message) return;
@@ -667,6 +668,16 @@ function initRaffles() {
     if (/[zZ]$/.test(value) || /[+-]\d\d:\d\d$/.test(value)) return new Date(value);
     return new Date(value + ":00+03:00");
   }
+
+  function clearRafflesCache() {
+    try {
+      if (typeof window !== "undefined") window._rafflesCache = null;
+    } catch (e) {}
+  }
+
+  function focusRaffleAfterMutation(raffleId) {
+    rafflesFocusedActiveId = raffleId ? String(raffleId) : null;
+  }
   function formatMoscowDateTimeLocalForInput(date) {
     if (!date) return "";
     try {
@@ -948,8 +959,19 @@ function initRaffles() {
           return endB - endA;
         });
 
-        // Вкладка «Активные»: показываем ровно один текущий розыгрыш (как в карточке ниже)
-        var active = activeList[0] || null;
+        // Вкладка «Активные»: показываем один розыгрыш. После админского создания держим
+        // фокус на созданном id, иначе сортировка могла показать другой активный розыгрыш.
+        var active = null;
+        if (rafflesFocusedActiveId) {
+          for (var afi = 0; afi < activeList.length; afi++) {
+            if (String(activeList[afi].id || "") === rafflesFocusedActiveId) {
+              active = activeList[afi];
+              break;
+            }
+          }
+          if (!active) rafflesFocusedActiveId = null;
+        }
+        if (!active) active = activeList[0] || null;
         var activeCount = active ? 1 : 0;
         var activeSumRub = active ? getRaffleTotalPrize(active) : 0;
         if (rafflesTabActiveCount) rafflesTabActiveCount.textContent = String(activeCount);
@@ -1489,10 +1511,36 @@ function initRaffles() {
     return raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other";
   }
 
+  function getRaffleTournamentSelectedOption(select) {
+    if (!select || select.selectedIndex < 0) return null;
+    return select.options[select.selectedIndex] || null;
+  }
+
+  function getRaffleTournamentBuyin(select) {
+    var opt = getRaffleTournamentSelectedOption(select);
+    if (!opt) return 0;
+    var raw = opt.getAttribute("data-price");
+    if (raw == null || raw === "") raw = opt.value;
+    var n = parseFloat(String(raw).replace(",", "."));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function getRaffleTournamentName(select) {
+    var opt = getRaffleTournamentSelectedOption(select);
+    if (!opt) return "";
+    return (opt.getAttribute("data-name") || opt.textContent || "").trim();
+  }
+
   function setupTournamentDaySelect() {
     var select = document.getElementById("raffleTicketTournamentSelect");
     if (!select || select._tournamentDaySetupDone) return;
     select._tournamentDaySetupDone = true;
+    Array.prototype.forEach.call(select.options || [], function (opt) {
+      if (!opt) return;
+      if (opt.value !== "" && opt.value !== "custom" && !opt.hasAttribute("data-price")) {
+        opt.setAttribute("data-price", opt.value);
+      }
+    });
 
     // Поднять группу «Турнир дня» наверх
     var groups = select.querySelectorAll("optgroup");
@@ -1530,7 +1578,7 @@ function initRaffles() {
       }
     }
     if (todayOpt) {
-      select.value = todayOpt.value;
+      todayOpt.selected = true;
       if (todayOpt.textContent.indexOf("сегодня") === -1) {
         todayOpt.textContent = todayOpt.textContent + " — сегодня";
       }
@@ -1644,7 +1692,7 @@ function initRaffles() {
       var c = Math.max(0, parseInt(raffleTicketWinnersCount.value, 10) || 0);
       var buyin = 0;
       if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value && raffleTicketTournamentSelect.value !== "custom") {
-        buyin = parseFloat(raffleTicketTournamentSelect.value) || 0;
+        buyin = getRaffleTournamentBuyin(raffleTicketTournamentSelect);
       } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom" && raffleTicketCustomPrice && raffleTicketCustomPrice.value) {
         buyin = parseFloat(raffleTicketCustomPrice.value) || 0;
       }
@@ -1658,7 +1706,7 @@ function initRaffles() {
         var cnt = countInput ? Math.max(0, parseInt(countInput.value, 10) || 0) : 0;
         var buyin = 0;
         if (groupSelect && groupSelect.value && groupSelect.value !== "custom") {
-          buyin = parseFloat(groupSelect.value) || 0;
+          buyin = getRaffleTournamentBuyin(groupSelect);
         } else if (groupSelect && groupSelect.value === "custom") {
           var customPrice = rows[i].querySelector(".raffle-ticket-group-custom-price");
           if (customPrice && customPrice.value) buyin = parseFloat(customPrice.value) || 0;
@@ -1792,6 +1840,8 @@ function initRaffles() {
           raffleDuplicateResetUi();
           if (data && data.ok && data.raffle) {
             if (createForm) createForm.classList.add("raffle-create-form--hidden");
+            focusRaffleAfterMutation(data.raffle.id);
+            clearRafflesCache();
             loadRaffles();
             if (!data.idempotentReplay) {
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш повторён");
@@ -1864,16 +1914,15 @@ function initRaffles() {
           totalWinners = c;
           var singleBuyin = 0;
           if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value && raffleTicketTournamentSelect.value !== "custom") {
-            singleBuyin = parseFloat(raffleTicketTournamentSelect.value) || 0;
+            singleBuyin = getRaffleTournamentBuyin(raffleTicketTournamentSelect);
           } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom" && raffleTicketCustomPrice && raffleTicketCustomPrice.value) {
             singleBuyin = parseFloat(raffleTicketCustomPrice.value) || 0;
           }
           var singleTournamentName = "";
           if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.value === "custom") {
             singleTournamentName = raffleTicketCustomName ? raffleTicketCustomName.value.trim() : "";
-          } else if (raffleTicketTournamentSelect && raffleTicketTournamentSelect.selectedIndex >= 0) {
-            var singleOpt = raffleTicketTournamentSelect.options[raffleTicketTournamentSelect.selectedIndex];
-            singleTournamentName = (singleOpt && (singleOpt.getAttribute("data-name") || singleOpt.textContent || "").trim()) || "";
+          } else if (raffleTicketTournamentSelect) {
+            singleTournamentName = getRaffleTournamentName(raffleTicketTournamentSelect);
           }
           var singlePrizeText = singleBuyin > 0 ? "Беккинг-билет " + (singleBuyin % 1 === 0 ? singleBuyin : singleBuyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
           var singlePrize = singlePrizeText + (singleTournamentName ? " — " + singleTournamentName : "");
@@ -1886,7 +1935,7 @@ function initRaffles() {
             var cnt = countInput ? Math.max(0, parseInt(countInput.value, 10) || 0) : 0;
             var groupBuyin = 0;
             if (groupSelect && groupSelect.value && groupSelect.value !== "custom") {
-              groupBuyin = parseFloat(groupSelect.value) || 0;
+              groupBuyin = getRaffleTournamentBuyin(groupSelect);
             } else if (groupSelect && groupSelect.value === "custom") {
               var groupCustomPrice = rows[i].querySelector(".raffle-ticket-group-custom-price");
               if (groupCustomPrice && groupCustomPrice.value) groupBuyin = parseFloat(groupCustomPrice.value) || 0;
@@ -1895,9 +1944,8 @@ function initRaffles() {
             if (groupSelect && groupSelect.value === "custom") {
               var groupCustomName = rows[i].querySelector(".raffle-ticket-group-custom-name");
               groupTournamentName = groupCustomName ? groupCustomName.value.trim() : "";
-            } else if (groupSelect && groupSelect.selectedIndex >= 0) {
-              var groupOpt = groupSelect.options[groupSelect.selectedIndex];
-              groupTournamentName = (groupOpt && (groupOpt.getAttribute("data-name") || groupOpt.textContent || "").trim()) || "";
+            } else if (groupSelect) {
+              groupTournamentName = getRaffleTournamentName(groupSelect);
             }
             var groupPrizeText = groupBuyin > 0 ? "Беккинг-билет " + (groupBuyin % 1 === 0 ? groupBuyin : groupBuyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
             var groupPrize = groupPrizeText + (groupTournamentName ? " — " + groupTournamentName : "");
@@ -1970,6 +2018,8 @@ function initRaffles() {
           raffleCreateResetUi();
           if (data && data.ok && data.raffle) {
             createForm.classList.add("raffle-create-form--hidden");
+            focusRaffleAfterMutation(data.raffle.id);
+            clearRafflesCache();
             loadRaffles();
             if (!data.idempotentReplay) {
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш создан");
@@ -2013,6 +2063,8 @@ function initRaffles() {
           .then(function (data) {
             raffleCompleteBtn.disabled = false;
             if (data && data.ok) {
+              if (currentRaffleId) focusRaffleAfterMutation(null);
+              clearRafflesCache();
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш завершён. Победители определены.");
               loadRaffles(true);
             } else if (tg && tg.showAlert) {
@@ -2059,6 +2111,8 @@ function initRaffles() {
           .then(function (data) {
             raffleCancelBtn.disabled = false;
             if (data && data.ok) {
+              if (currentRaffleId) focusRaffleAfterMutation(null);
+              clearRafflesCache();
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш отменён");
               loadRaffles();
             } else if (tg && tg.showAlert) {
@@ -2114,6 +2168,8 @@ function initRaffles() {
         .then(function (data) {
           raffleUpdateEndBtn.disabled = false;
           if (data && data.ok) {
+            if (data.raffle && data.raffle.id) focusRaffleAfterMutation(data.raffle.id);
+            clearRafflesCache();
             if (tg && tg.showAlert) tg.showAlert("Время итогов обновлено");
             loadRaffles();
           } else if (tg && tg.showAlert) {
@@ -2139,11 +2195,12 @@ function initRaffles() {
         return;
       }
       var doDelete = function () {
+        var deletingRaffleId = currentRaffleId;
         raffleDeleteBtn.disabled = true;
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: currentRaffleId })),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: deletingRaffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -2151,6 +2208,9 @@ function initRaffles() {
           .then(function (data) {
             raffleDeleteBtn.disabled = false;
             if (data && data.ok) {
+              if (rafflesFocusedActiveId === deletingRaffleId) focusRaffleAfterMutation(null);
+              if (currentRaffleId === deletingRaffleId) currentRaffleId = null;
+              clearRafflesCache();
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш удалён");
               loadRaffles();
             } else if (tg && tg.showAlert) {
@@ -2194,11 +2254,12 @@ function initRaffles() {
       var raffleId = btn.getAttribute("data-raffle-id") || "";
       if (!raffleId) return;
       var doDelete = function () {
+        var deletingRaffleId = raffleId;
         btn.disabled = true;
         fetch(base + "/api/raffles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: raffleId })),
+          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: deletingRaffleId })),
         })
           .then(function (r) {
             return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
@@ -2206,6 +2267,8 @@ function initRaffles() {
           .then(function (data) {
             btn.disabled = false;
             if (data && data.ok) {
+              if (rafflesFocusedActiveId === deletingRaffleId) focusRaffleAfterMutation(null);
+              clearRafflesCache();
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш удалён");
               loadRaffles();
             } else if (tg && tg.showAlert) {
