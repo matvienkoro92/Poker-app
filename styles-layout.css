@@ -1055,7 +1055,20 @@ body[data-view="player-crm"] #app.app .card {
   display: flex !important;
   flex-direction: column !important;
 }
+body[data-view="player-crm"] #app.app .card .card__header {
+  display: none !important;
+}
+body[data-view="player-crm"] #app.app .card::before,
+body[data-view="player-crm"] #app.app .card::after {
+  display: none !important;
+  content: none !important;
+}
+body[data-view="player-crm"] #app.app .card .bg-decor {
+  display: none !important;
+}
 body[data-view="player-crm"] #app.app .card .card__content {
+  position: relative !important;
+  z-index: 2 !important;
   flex: 1 1 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
@@ -1083,4 +1096,35 @@ body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"],
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
+  position: fixed !important;
+  z-index: 1000 !important;
+  inset: 0 0 var(--app-bottom-tabbar-pad) 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  padding: max(12px, env(safe-area-inset-top, 0px)) var(--screen-gutter-x) 18px !important;
+  box-sizing: border-box !important;
+  background:
+    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
+    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
+}
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] > .bonus-game-back {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 3 !important;
+}
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] .player-crm {
+  width: min(1120px, 100%) !important;
+  max-width: 100% !important;
 }
