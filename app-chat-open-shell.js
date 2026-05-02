@@ -267,6 +267,7 @@ function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVer
     pokerPushOpenStateDebug("openConvFromDialogs-enter", String(userId || ""));
   } catch (eOpenConvDbg0) {}
   if (!userId) return;
+  var openBackSeq = Number(window.__pokerChatConvBackSeq || 0) || 0;
   try {
     window.__pokerChatDialogOpenIntentAt = Date.now();
     window.__pokerChatDialogOpenIntentPeer = String(userId || "");
@@ -332,6 +333,7 @@ function openConvFromDialogs(userId, userName, peerP21Id, peerAvatarOpt, peerVer
   [140, 420, 900].forEach(function (ms) {
     setTimeout(function () {
       try {
+        if ((Number(window.__pokerChatConvBackSeq || 0) || 0) !== openBackSeq) return;
         var convVisible = !!(getConvView() && !getConvView().classList.contains("chat-conv-view--hidden"));
         var samePeer = !!(getChatWithUserId() && peerChatIdsEqual(getChatWithUserId(), userId));
         if (convVisible && samePeer && getChatActiveTab() === "personal") return;

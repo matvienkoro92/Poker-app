@@ -1,8 +1,14 @@
 function initRaffles() {
   if (initRaffles.__listenersBound === true) {
-    if (typeof initRaffles.__reload === "function") initRaffles.__reload();
-    return;
+    var currentRoot = document.querySelector('.view[data-view="raffles"]');
+    if (currentRoot && initRaffles.__boundRoot === currentRoot) {
+      if (typeof initRaffles.__reload === "function") initRaffles.__reload();
+      return;
+    }
+    initRaffles.__listenersBound = false;
+    initRaffles.__profileOpenDelegate = false;
   }
+  var rafflesRoot = document.querySelector('.view[data-view="raffles"]');
   var base = getApiBase();
   var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -2233,10 +2239,14 @@ function initRaffles() {
     });
   }
 
-  if (rafflesCompleted && base && pokerApiHasCredential()) {
+  if (rafflesCompleted) {
     rafflesCompleted.addEventListener("click", function (e) {
       var winnerBtn = e.target.closest(".raffle-winner-btn");
       if (winnerBtn && rafflesIsAdmin) {
+        if (!base || !pokerApiHasCredential()) {
+          if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+          return;
+        }
         var rid = winnerBtn.getAttribute("data-raffle-id");
         var wid = winnerBtn.getAttribute("data-winner-user-id");
         var row = winnerBtn.closest(".raffle-winner-row");
@@ -2251,6 +2261,10 @@ function initRaffles() {
       if (!rafflesIsAdmin) return;
       var btn = e.target.closest(".raffle-completed-card__delete-btn");
       if (!btn) return;
+      if (!base || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+        return;
+      }
       var raffleId = btn.getAttribute("data-raffle-id") || "";
       if (!raffleId) return;
       var doDelete = function () {
@@ -2440,6 +2454,7 @@ function initRaffles() {
   })();
 
   initRaffles.__listenersBound = true;
+  initRaffles.__boundRoot = rafflesRoot;
   initRaffles.__reload = function () {
     loadRaffles();
   };

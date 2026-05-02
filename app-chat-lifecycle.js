@@ -9343,6 +9343,9 @@ function initChat() {
       if (now - lastConvBackAt < 450) return;
       if ((e.type === "touchend" || e.type === "pointerup") && window.__touchWasScroll && window.__touchWasScroll()) return;
       lastConvBackAt = now;
+      try {
+        window.__pokerChatConvBackSeq = (Number(window.__pokerChatConvBackSeq || 0) || 0) + 1;
+      } catch (eConvBackSeq) {}
       pokerPushOpenSetCaller("conv-back-btn");
       showDialogs();
     }
@@ -9930,10 +9933,21 @@ function initChat() {
       if (btn[key]) return;
       btn[key] = true;
       var lastInvoke = 0;
+      function sendButtonMode() {
+        return btn === generalSendBtnRef || (btn && btn.id === "chatGeneralSendBtn") ? "general" : "personal";
+      }
+      function hasSendableContent(mode) {
+        try {
+          flushChatComposerToDrafts();
+        } catch (eFlushSendable) {}
+        if (mode === "general") return !!(getChatGeneralText().trim() || generalImage || generalVoice || generalDocument);
+        return !!(getChatPersonalText().trim() || personalImage || personalVoice || personalDocument);
+      }
       function keepComposerFocusOnPress(e) {
         try {
           if (e && typeof e.preventDefault === "function") e.preventDefault();
-          var mode = btn === generalSendBtnRef || (btn && btn.id === "chatGeneralSendBtn") ? "general" : "personal";
+          var mode = sendButtonMode();
+          if (hasSendableContent(mode)) return;
           if (typeof window.__pokerKeepChatComposerFocusAfterSend === "function") {
             window.__pokerKeepChatComposerFocusAfterSend(mode);
           } else if (chatComposerEl && chatComposerEl.focus) {
