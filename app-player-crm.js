@@ -3,9 +3,9 @@
   var state = {
     loaded: false,
     loading: false,
-    tab: "queue",
+    tab: "bot",
     period: "30",
-    filter: "needs_touch",
+    filter: "has_bot",
     search: "",
     selectedId: "",
     players: [],
@@ -55,27 +55,14 @@
 
   var segments = [
     { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
-    { key: "needs_touch", label: "Пора написать", desc: "Нет push/бот-канала или давно не было CRM-касания.", match: needsTouch },
+    { key: "has_bot", label: "Подписан на бот", desc: "Игрок связан с Telegram-ботом и доступен для бот-рассылки.", match: function (p) { return !!(p.channels && p.channels.bot); } },
     { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
-    { key: "no_deposit", label: "Без депозита в CRM", desc: "За выбранный период в CRM-журнале нет депозитов.", match: function (p) { return periodData(p).deposits <= 0; } },
-    { key: "active_7", label: "Активность CRM 7д", desc: "Есть депозит или сообщение в CRM за последние 7 дней.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.deposits > 0 || pd.messages > 0; } },
+    { key: "active_30", label: "Активность CRM 30д", desc: "Есть депозит или сообщение в CRM за последние 30 дней.", match: function (p) { var old = state.period; state.period = "30"; var pd = periodData(p); state.period = old; return pd.deposits > 0 || pd.messages > 0; } },
     { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
   ];
 
   function hasTag(p, tag) {
     return (p.tags || []).map(function (t) { return String(t).toLowerCase(); }).indexOf(String(tag).toLowerCase()) >= 0;
-  }
-
-  function needsTouch(p) {
-    if (!(p.channels && (p.channels.bot || p.channels.push))) return true;
-    if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return true;
-    return false;
-  }
-
-  function touchReason(p) {
-    if (!(p.channels && (p.channels.bot || p.channels.push))) return "Нет доступного бот/push-канала, лучше связать Telegram или push.";
-    if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return "Давно не было CRM-касания.";
-    return "Есть активность, можно проверить диалог.";
   }
 
   function segmentByKey(key) {
@@ -120,10 +107,10 @@
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
-    var needs = players.filter(needsTouch).length;
+    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
     var stats = [
       ["Игроков в базе", players.length],
-      ["Пора написать", needs],
+      ["Подписан на бот", botSubscribers],
       ["Депозиты за " + state.period + "д", money(deposits)],
       ["Сообщения за " + state.period + "д", messages],
     ];
@@ -133,8 +120,8 @@
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = state.period + " дней";
     var queueCount = document.getElementById("playerCrmQueueCount");
-    if (queueCount) queueCount.textContent = needs + " задач";
-    return { active: players.length, needs: needs, deposits: deposits, messages: messages };
+    if (queueCount) queueCount.textContent = botSubscribers + " игроков";
+    return { active: players.length, botSubscribers: botSubscribers, deposits: deposits, messages: messages };
   }
 
   function renderChips() {
@@ -261,14 +248,14 @@
   function renderQueue() {
     var el = document.getElementById("playerCrmQueue");
     if (!el) return;
-    var items = state.players.filter(needsTouch).sort(sortForWork);
+    var items = segmentPlayers("has_bot").sort(sortForWork);
     if (!items.length) {
-      el.innerHTML = "<div class=\"player-crm__timeline-item\">Сейчас нет срочных касаний.</div>";
+      el.innerHTML = "<div class=\"player-crm__timeline-item\">Подписок на бот пока нет.</div>";
       return;
     }
     el.innerHTML = items.map(function (p) {
       return "<article class=\"player-crm__queue-item\">" +
-        "<div><p class=\"player-crm__queue-title\">" + esc(p.name) + "</p><p class=\"player-crm__queue-reason\">" + esc(touchReason(p)) + "</p></div>" +
+        "<div><p class=\"player-crm__queue-title\">" + esc(p.name) + "</p><p class=\"player-crm__queue-reason\">Доступен для бот-рассылки" + (p.handle ? " · " + esc(p.handle) : "") + "</p></div>" +
         "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-open-player=\"" + esc(p.id) + "\">Открыть</button>" +
       "</article>";
     }).join("");
@@ -292,7 +279,7 @@
   function renderBroadcastOptions() {
     var sel = document.getElementById("playerCrmBroadcastSegment");
     if (!sel) return;
-    var prev = sel.value || state.filter || "needs_touch";
+    var prev = sel.value || state.filter || "has_bot";
     sel.innerHTML = segments.map(function (seg) {
       return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + "</option>";
     }).join("");
@@ -450,7 +437,7 @@
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var textEl = document.getElementById("playerCrmBroadcastText");
     var out = document.getElementById("playerCrmBroadcastResult");
-    var segment = segEl ? segEl.value : "needs_touch";
+    var segment = segEl ? segEl.value : "has_bot";
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var players = segmentPlayers(segment);
@@ -633,7 +620,7 @@
     root.addEventListener("click", function (e) {
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
-        state.tab = tab.getAttribute("data-crm-tab") || "queue";
+        state.tab = tab.getAttribute("data-crm-tab") || "bot";
         syncTabs();
         return;
       }
@@ -675,7 +662,7 @@
       }
       var broadSeg = e.target.closest("[data-crm-broadcast-segment]");
       if (broadSeg) {
-        var seg = broadSeg.getAttribute("data-crm-broadcast-segment") || "needs_touch";
+        var seg = broadSeg.getAttribute("data-crm-broadcast-segment") || "has_bot";
         var sel = document.getElementById("playerCrmBroadcastSegment");
         if (sel) sel.value = seg;
         state.tab = "broadcast";

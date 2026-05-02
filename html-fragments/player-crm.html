@@ -5,7 +5,7 @@
       <div class="player-crm__hero-copy">
         <p class="player-crm__eyebrow">Админ · поток игроков</p>
         <h2 class="player-crm__title" id="playerCrmTitle">CRM игроков</h2>
-        <p class="player-crm__subtitle">Очередь касаний, активность по периодам, депозиты, сегменты и бот/push-рассылки.</p>
+        <p class="player-crm__subtitle">Активность по периодам, депозиты, бот/push-каналы, сегменты и рассылки.</p>
       </div>
       <div class="player-crm__hero-tools">
         <label class="player-crm__period">
@@ -21,7 +21,7 @@
     </header>
 
     <nav class="player-crm__tabs" aria-label="CRM разделы">
-      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="queue">Очередь</button>
+      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="bot">Бот</button>
       <button type="button" class="player-crm__tab" data-crm-tab="base">База</button>
       <button type="button" class="player-crm__tab" data-crm-tab="segments">Сегменты</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
@@ -40,9 +40,9 @@
       </aside>
 
       <main class="player-crm__panel player-crm__panel--main">
-        <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="queue">
+        <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="bot">
           <div class="player-crm__section-head">
-            <h3>Кому писать сейчас</h3>
+            <h3>Подписан на бот</h3>
             <span id="playerCrmQueueCount">—</span>
           </div>
           <div class="player-crm__queue" id="playerCrmQueue"></div>
@@ -108,7 +108,7 @@
               <h3>Импорт событий</h3>
               <span>accountId,type,amount,date,note</span>
             </div>
-            <textarea id="playerCrmImportText" rows="5" placeholder="ID123456,game,0,2026-05-02,играл вечерний стол"></textarea>
+            <textarea id="playerCrmImportText" rows="5" placeholder="ID123456,deposit,5000,2026-05-02,импорт из кассы"></textarea>
             <div class="player-crm__broadcast-actions">
               <button type="button" class="player-crm__ghost-btn" id="playerCrmImportBtn">Импортировать события</button>
             </div>
