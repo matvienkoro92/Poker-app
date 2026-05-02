@@ -112,7 +112,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .home-wel
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
   align-items: center;
   gap: 10px;
-  margin: 0 calc(-1 * var(--card-padding-x)) 4px;
+  margin: 0 calc(-1 * var(--card-padding-x)) 0;
   width: calc(100% + (2 * var(--card-padding-x)));
   box-sizing: border-box;
   padding: 7px var(--card-padding-x);
@@ -380,9 +380,9 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   border-radius: 20px !important;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.075), transparent 48%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%),
-    var(--home-promo-card) !important;
+    radial-gradient(ellipse at 18% 4%, rgba(255, 231, 168, 0.045), transparent 34%),
+    radial-gradient(ellipse at 86% 6%, rgba(255, 198, 74, 0.026), transparent 36%),
+    linear-gradient(158deg, rgba(4, 5, 8, 0.94), rgba(8, 11, 17, 0.9) 48%, rgba(3, 4, 7, 0.94) 78%, rgba(1, 2, 4, 0.96)) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -18px 28px rgba(0, 0, 0, 0.12),

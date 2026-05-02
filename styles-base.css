@@ -148,9 +148,12 @@ html[data-theme="gold"] body,
   --bg-blur-gradient:
     radial-gradient(circle at 18% 0%, rgba(214, 163, 84, 0.065), transparent 32%),
     linear-gradient(145deg, rgba(5, 8, 15, 0.98), rgba(2, 4, 9, 0.98));
-  --block-bg: rgba(10, 16, 28, 0.74);
-  --block-bg-solid: #0b1220;
-  --block-bg-gradient: linear-gradient(145deg, rgba(21, 28, 42, 0.96), rgba(6, 10, 18, 0.98));
+  --block-bg: rgba(4, 6, 10, 0.86);
+  --block-bg-solid: #05070d;
+  --block-bg-gradient:
+    radial-gradient(ellipse at 18% 0%, rgba(255, 231, 168, 0.045), transparent 34%),
+    radial-gradient(ellipse at 86% 6%, rgba(255, 198, 74, 0.026), transparent 36%),
+    linear-gradient(158deg, rgba(4, 5, 8, 0.94), rgba(8, 11, 17, 0.9) 48%, rgba(3, 4, 7, 0.94) 78%, rgba(1, 2, 4, 0.96));
   --btn-on-accent: #090d16;
   --nav-bg: linear-gradient(180deg, #101522 0%, #070a12 46%, #05070d 100%);
   --nav-item-bg: linear-gradient(180deg, rgba(22, 28, 42, 0.95), rgba(5, 8, 15, 0.98));
