@@ -9,18 +9,20 @@
   font-weight: 750;
 }
 .chat-user-modal__respect-btn-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: stretch;
 }
 .chat-user-modal__respect-btn {
+  flex: 1 1 0;
   min-width: 0;
-  min-height: 56px;
-  padding: 8px 12px;
-  font-size: 14px;
-  line-height: 1.15;
+  min-height: 46px;
+  padding: 7px 8px;
+  font-size: clamp(11px, 3vw, 13px);
+  line-height: 1.05;
   font-weight: 850;
+  white-space: nowrap;
   color: rgba(248, 250, 252, 0.94);
   background:
     radial-gradient(circle at 15% 0%, rgba(125, 211, 252, 0.13), transparent 42%),
@@ -46,6 +48,25 @@
   opacity: 0.78;
   cursor: not-allowed;
 }
+[data-theme="light"] .chat-user-modal__respect-btn {
+  color: #1f2937;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(251, 146, 60, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(255, 250, 243, 0.96), rgba(255, 237, 213, 0.82));
+  border-color: rgba(217, 119, 6, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 7px 16px rgba(180, 83, 9, 0.08);
+}
+[data-theme="light"] .chat-user-modal__respect-btn:hover:not(:disabled) {
+  border-color: rgba(217, 119, 6, 0.4);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(251, 146, 60, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(254, 215, 170, 0.84));
+}
+[data-theme="light"] .chat-user-modal__respect-btn:disabled {
+  color: rgba(100, 116, 139, 0.76);
+  background: rgba(248, 250, 252, 0.68);
+  border-color: rgba(148, 163, 184, 0.26);
+}
 .chat-user-modal__friend-row {
   margin-top: 8px;
   display: flex;
@@ -59,6 +80,9 @@
   width: 100%;
 }
 .chat-user-modal__edit-friend-name {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
   min-height: 42px;
   padding: 7px 12px;
@@ -72,11 +96,23 @@
   cursor: pointer;
   box-sizing: border-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  text-align: center;
 }
 .chat-user-modal__edit-friend-name:hover:not(:disabled) {
   color: #f8fafc;
   border-color: rgba(148, 163, 184, 0.44);
   background: rgba(51, 65, 85, 0.62);
+}
+[data-theme="light"] .chat-user-modal__edit-friend-name {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+[data-theme="light"] .chat-user-modal__edit-friend-name:hover:not(:disabled) {
+  color: #1f2937;
+  background: rgba(255, 247, 237, 0.9);
+  border-color: rgba(217, 119, 6, 0.32);
 }
 .chat-user-modal__remove-friend {
   min-width: 0;
@@ -101,9 +137,11 @@
 [data-theme="light"] .chat-user-modal__remove-friend {
   color: #b91c1c;
   border-color: rgba(185, 28, 28, 0.35);
+  background: rgba(254, 242, 242, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
 }
 [data-theme="light"] .chat-user-modal__remove-friend:hover:not(:disabled) {
-  background: rgba(185, 28, 28, 0.08);
+  background: rgba(254, 226, 226, 0.88);
 }
 .chat-user-modal__friend-btn {
   grid-column: 1 / -1;
@@ -122,6 +160,16 @@
 }
 .chat-user-modal__friend-btn:hover:not(:disabled) {
   background: rgba(51, 65, 85, 0.66);
+}
+[data-theme="light"] .chat-user-modal__friend-btn {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+[data-theme="light"] .chat-user-modal__friend-btn:hover:not(:disabled) {
+  background: rgba(255, 247, 237, 0.92);
+  border-color: rgba(217, 119, 6, 0.32);
 }
 .chat-user-modal__friend-btn:disabled,
 .chat-user-modal__friend-btn--added {
