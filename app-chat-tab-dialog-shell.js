@@ -244,19 +244,31 @@ function setTab(tab) {
 function showDialogs() {
   var callerLabel = pokerPushOpenConsumeCaller();
   if (callerLabel) window.__pokerLastShowDialogsCaller = callerLabel;
+  var isBackFromChatChrome = callerLabel === "conv-back-btn" || callerLabel === "general-back-btn";
+  if (isBackFromChatChrome) {
+    try {
+      window.__pokerChatDialogOpenIntentAt = 0;
+      window.__pokerChatDialogOpenIntentPeer = "";
+      window.__pokerForcePushDmPeer = "";
+      window.__pokerForcePushDmPeerUntil = 0;
+      window.__pokerForceAllowPendingPushConvOpen = false;
+      window.__pendingOpenChatPersonalFromDeepLink = null;
+      window.__pokerPendingChatDeepLinkNeedsLateFlush = false;
+      window.__pendingOpenClubChatGeneral = false;
+    } catch (eBackClear) {}
+  }
   try {
     pokerPushOpenStateDebug("showDialogs-enter", callerLabel ? "src=" + callerLabel : "");
   } catch (eShowDialogsDbg0) {}
   try {
     var recentDialogOpenAt = Number(window.__pokerChatDialogOpenIntentAt || 0);
     var recentDialogOpenPeer = String(window.__pokerChatDialogOpenIntentPeer || "");
-    var isBackFromChatChrome = callerLabel === "conv-back-btn" || callerLabel === "general-back-btn";
     var recentOpenAge = recentDialogOpenAt ? Date.now() - recentDialogOpenAt : Infinity;
     var recentOpenFresh = !!(recentDialogOpenAt && recentOpenAge < 5000);
     if (
       recentOpenFresh &&
       recentDialogOpenPeer &&
-      (!isBackFromChatChrome || recentOpenAge < 120)
+      !isBackFromChatChrome
     ) {
       window.__pokerLastShowDialogsReason = isBackFromChatChrome ? "ignored-recent-open-back" : "ignored-recent-open";
       pokerPushOpenDebug("showDialogs-recent-open-ignored", recentDialogOpenPeer);
@@ -270,7 +282,7 @@ function showDialogs() {
     var pendingDirectDlg = window.__pendingOpenChatPersonalFromDeepLink;
     var pendingDirectPeerDlg =
       pendingDirectDlg && pendingDirectDlg.userId != null ? String(pendingDirectDlg.userId).trim() : "";
-    if (pendingDirectPeerDlg) {
+    if (pendingDirectPeerDlg && !isBackFromChatChrome) {
       window.__pokerLastShowDialogsReason = "pending-direct";
       pokerPushOpenDebug("showDialogs-direct-blocked", pendingDirectPeerDlg);
       setChatActiveTab("personal");
@@ -282,15 +294,16 @@ function showDialogs() {
       }
     }
     var pendingPeerDlgHard = pokerGetActivePushDmTarget();
-    pendingPeerDialogsCommit = pendingPeerDlgHard || "";
+    pendingPeerDialogsCommit = isBackFromChatChrome ? "" : (pendingPeerDlgHard || "");
     window.__pokerLastShowDialogsReason = pendingPeerDlgHard ? "pending-hard" : "";
-    if (pendingPeerDlgHard) {
+    if (pendingPeerDlgHard && !isBackFromChatChrome) {
       pokerPushOpenDebug("showDialogs-hard-blocked", pendingPeerDlgHard);
       if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) return;
     }
     var forcedPeerDlg = window.__pokerForcePushDmPeer;
     var forcedUntilDlg = Number(window.__pokerForcePushDmPeerUntil || 0);
     if (
+      !isBackFromChatChrome &&
       forcedPeerDlg &&
       forcedUntilDlg > Date.now() &&
       typeof window.chatOpenConvFromDialogs === "function"
@@ -302,7 +315,11 @@ function showDialogs() {
     }
   } catch (eForceDialogs) {}
   try {
-    if (typeof window.__pokerFlushPendingChatDeepLink === "function" && window.__pokerFlushPendingChatDeepLink()) {
+    if (
+      !isBackFromChatChrome &&
+      typeof window.__pokerFlushPendingChatDeepLink === "function" &&
+      window.__pokerFlushPendingChatDeepLink()
+    ) {
       window.__pokerLastShowDialogsReason = "flush-pending";
       return;
     }

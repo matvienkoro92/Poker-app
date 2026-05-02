@@ -1,9 +1,23 @@
 function pokerPushOpenDebug(step, extra) {}
 
-function pokerPushOpenSetCaller(label) {}
+function pokerPushOpenSetCaller(label) {
+  try {
+    window.__pokerPushOpenCaller = label ? String(label) : "";
+    window.__pokerPushOpenCallerAt = Date.now();
+  } catch (e) {}
+}
 
 function pokerPushOpenConsumeCaller() {
-  return "";
+  try {
+    var label = window.__pokerPushOpenCaller ? String(window.__pokerPushOpenCaller) : "";
+    var at = Number(window.__pokerPushOpenCallerAt || 0);
+    window.__pokerPushOpenCaller = "";
+    window.__pokerPushOpenCallerAt = 0;
+    if (label && at && Date.now() - at > 2500) return "";
+    return label;
+  } catch (e) {
+    return "";
+  }
 }
 
 function pokerPushOpenStateDebug(step, extra) {}
