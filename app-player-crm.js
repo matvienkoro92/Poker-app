@@ -47,7 +47,6 @@
   function periodData(p) {
     var k = String(state.period || "30");
     return {
-      games: p.games && p.games[k] != null ? p.games[k] : 0,
       deposits: p.deposits && p.deposits[k] != null ? p.deposits[k] : 0,
       depositCount: p.depositCount && p.depositCount[k] != null ? p.depositCount[k] : 0,
       messages: p.messages && p.messages[k] != null ? p.messages[k] : 0,
@@ -56,12 +55,11 @@
 
   var segments = [
     { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
-    { key: "needs_touch", label: "Пора написать", desc: "Есть депозит без игры, нет push/бот-канала или давно не было CRM-касания.", match: needsTouch },
+    { key: "needs_touch", label: "Пора написать", desc: "Нет push/бот-канала или давно не было CRM-касания.", match: needsTouch },
     { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
     { key: "no_deposit", label: "Без депозита в CRM", desc: "За выбранный период в CRM-журнале нет депозитов.", match: function (p) { return periodData(p).deposits <= 0; } },
-    { key: "active_7", label: "Активность CRM 7д", desc: "Есть событие CRM за последние 7 дней: игра, депозит или сообщение.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.games > 0 || pd.deposits > 0 || pd.messages > 0; } },
+    { key: "active_7", label: "Активность CRM 7д", desc: "Есть депозит или сообщение в CRM за последние 7 дней.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.deposits > 0 || pd.messages > 0; } },
     { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
-    { key: "tournament", label: "Турнирные по тегам", desc: "Только игроки с явными CRM-тегами/каналами: турниры, MTT, bounty, рейтинг или розыгрыши.", match: function (p) { return hasTag(p, "турниры") || hasTag(p, "MTT") || hasTag(p, "bounty") || hasTag(p, "рейтинг") || hasTag(p, "розыгрыши"); } },
   ];
 
   function hasTag(p, tag) {
@@ -69,16 +67,12 @@
   }
 
   function needsTouch(p) {
-    var pd = periodData(p);
-    if (pd.deposits > 0 && pd.games <= 0) return true;
     if (!(p.channels && (p.channels.bot || p.channels.push))) return true;
     if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return true;
     return false;
   }
 
   function touchReason(p) {
-    var pd = periodData(p);
-    if (pd.deposits > 0 && pd.games <= 0) return "Есть депозит в CRM-журнале, но нет события игры за выбранный период.";
     if (!(p.channels && (p.channels.bot || p.channels.push))) return "Нет доступного бот/push-канала, лучше связать Telegram или push.";
     if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return "Давно не было CRM-касания.";
     return "Есть активность, можно проверить диалог.";
@@ -109,9 +103,7 @@
 
   function sortForWork(a, b) {
     function score(p) {
-      var pd = periodData(p);
       var s = 0;
-      if (pd.deposits > 0 && pd.games <= 0) s += 60;
       if (!(p.channels && (p.channels.bot || p.channels.push))) s += 35;
       if (hasTag(p, "VIP")) s += 25;
       if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) s += 20;
@@ -127,13 +119,13 @@
     var players = state.players;
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
-    var games = pd.reduce(function (sum, x) { return sum + x.games; }, 0);
+    var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var needs = players.filter(needsTouch).length;
     var stats = [
       ["Игроков в базе", players.length],
       ["Пора написать", needs],
       ["Депозиты за " + state.period + "д", money(deposits)],
-      ["Игр за " + state.period + "д", games],
+      ["Сообщения за " + state.period + "д", messages],
     ];
     el.innerHTML = stats.map(function (it) {
       return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span><span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
@@ -142,7 +134,7 @@
     if (anaPeriod) anaPeriod.textContent = state.period + " дней";
     var queueCount = document.getElementById("playerCrmQueueCount");
     if (queueCount) queueCount.textContent = needs + " задач";
-    return { active: players.length, needs: needs, deposits: deposits, games: games };
+    return { active: players.length, needs: needs, deposits: deposits, messages: messages };
   }
 
   function renderChips() {
@@ -172,7 +164,7 @@
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-player=\"" + esc(p.id) + "\">" +
         "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span></span>" +
         "<span class=\"player-crm__player-meta\">" + esc(p.handle) + " · " + esc(p.source) + " · " + esc(p.manager) + "</span>" +
-        "<span class=\"player-crm__player-note\">" + esc(pd.games) + " игр в CRM · " + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
+        "<span class=\"player-crm__player-note\">" + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
         "</button>";
     }).join("") + (!state.showAllPlayers && total > visibleItems.length
       ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать всех " + esc(total) + "</button>"
@@ -205,8 +197,8 @@
       "</div>" +
       "<div>" + (p.tags || []).map(function (t) { return "<span class=\"player-crm__tag\">" + esc(t) + "</span>"; }).join("") + "</div>" +
       "<div class=\"player-crm__metrics\">" +
-        metric("Игр " + state.period + "д", pd.games) +
         metric("Депозит " + state.period + "д", money(pd.deposits)) +
+        metric("Депозитов", pd.depositCount) +
         metric("Средний депозит", avg ? money(avg) : "—") +
         metric("Сообщений", pd.messages) +
       "</div>" +
@@ -242,10 +234,10 @@
         "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" id=\"playerCrmLinkIdentityBtn\">Связать ID</button></div>" +
         "<h4 class=\"player-crm__edit-title\">Быстрое событие</h4>" +
         "<div class=\"player-crm__form-grid\">" +
-          "<label><span>Тип</span><select id=\"playerCrmEventType\"><option value=\"deposit\">Депозит</option><option value=\"game\">Игра</option><option value=\"message\">Сообщение</option></select></label>" +
+          "<label><span>Тип</span><select id=\"playerCrmEventType\"><option value=\"deposit\">Депозит</option><option value=\"message\">Сообщение</option></select></label>" +
           "<label><span>Сумма</span><input id=\"playerCrmEventAmount\" type=\"number\" inputmode=\"numeric\" min=\"0\" placeholder=\"0\" /></label>" +
         "</div>" +
-        "<label class=\"player-crm__message-label\"><span>Комментарий к событию</span><input id=\"playerCrmEventNote\" placeholder=\"например: импорт из кассы / играл PLO\" /></label>" +
+        "<label class=\"player-crm__message-label\"><span>Комментарий к событию</span><input id=\"playerCrmEventNote\" placeholder=\"например: импорт из кассы / написал в бот\" /></label>" +
         "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" id=\"playerCrmAddEventBtn\">Добавить событие</button></div>" +
       "</div>" +
       "<div class=\"player-crm__timeline\">" +
@@ -334,9 +326,9 @@
     var rows = state.sourceAnalytics || [];
     if (!rows.length) return "<p class=\"player-crm__detail-muted\">Источники появятся после загрузки живой базы.</p>";
     return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
-      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Игры 30д</th><th>Депозиты 30д</th><th>Fee</th><th>Push</th>" +
+      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Депозиты 30д</th><th>Fee</th><th>Push</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(r.games30 || 0) + "</td><td>" + esc(money(r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
+        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(money(r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
 
