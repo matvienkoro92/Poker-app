@@ -17,6 +17,20 @@
   function normalizeTheme(value) {
     return THEMES.indexOf(value) !== -1 ? value : DEFAULT_THEME;
   }
+  function isTelegramThemeRuntime() {
+    try {
+      if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) return true;
+    } catch (eIsTgThemeFn) {}
+    try {
+      var root = document.documentElement;
+      return !!(
+        root &&
+        root.classList &&
+        (root.classList.contains("app--telegram-miniapp") || root.classList.contains("poker-telegram-miniapp"))
+      );
+    } catch (eIsTgThemeClass) {}
+    return false;
+  }
   function applyBg() {
     var current = normalizeTheme(document.documentElement.getAttribute("data-theme"));
     var isLight = current === "light";
@@ -34,8 +48,17 @@
     paintRoot(document.body);
     paintRoot(document.getElementById("app"));
   }
-  var stored = localStorage.getItem("poker_theme");
-  var theme = normalizeTheme(stored);
+  var forceTelegramGoldTheme = isTelegramThemeRuntime();
+  var stored = "";
+  try {
+    stored = localStorage.getItem("poker_theme");
+  } catch (eReadTheme) {}
+  var theme = forceTelegramGoldTheme ? DEFAULT_THEME : normalizeTheme(stored);
+  if (forceTelegramGoldTheme) {
+    try {
+      localStorage.setItem("poker_theme", DEFAULT_THEME);
+    } catch (eWriteTelegramTheme) {}
+  }
   document.documentElement.setAttribute("data-theme", theme);
   applyBg();
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
