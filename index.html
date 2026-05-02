@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.548">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="2.549">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -276,7 +276,7 @@
     <link rel="manifest" href="./manifest.json?v=2.006" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/hall-of-fame-hero.jpg" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=2.548" />
+    <link rel="stylesheet" href="./styles.css?v=2.549" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home { background: #0f172a !important; background-color: #0f172a !important; }
@@ -1294,8 +1294,10 @@
       <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
         <span class="bottom-nav__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M3.75 10.8 12 4.25l8.25 6.55" />
-            <path d="M5.75 9.7v9.05h4.1v-5.1h4.3v5.1h4.1V9.7" />
+            <path class="bottom-nav__icon-fill bottom-nav__icon-fill--soft" d="M5.2 10.25 12 4.85l6.8 5.4v8.45H5.2Z" />
+            <path d="M4.15 10.65 12 4.4l7.85 6.25" />
+            <path d="M6.35 9.85v8.85h3.75v-4.75h3.8v4.75h3.75V9.85" />
+            <path d="M10 8.4h4" />
           </svg>
         </span>
         <span class="bottom-nav__label" id="bottomNavHomeLabel">Главная</span>
@@ -1305,8 +1307,10 @@
           <span class="bottom-nav__icon-wrap">
             <span class="bottom-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" focusable="false">
-                <path d="M7.4 18.25 4 20l.85-3.65A7.55 7.55 0 0 1 3.5 12c0-4 3.8-7.25 8.5-7.25S20.5 8 20.5 12 16.7 19.25 12 19.25a9.7 9.7 0 0 1-4.6-1Z" />
-                <path d="M8.25 11.15h7.5M8.25 14.05h4.85" />
+                <path class="bottom-nav__icon-fill bottom-nav__icon-fill--soft" d="M5.2 7.25h11.6a3.1 3.1 0 0 1 3.1 3.1v2.6a3.1 3.1 0 0 1-3.1 3.1h-4.35L8.6 18.9v-2.85H5.2a3.1 3.1 0 0 1-3.1-3.1v-2.6a3.1 3.1 0 0 1 3.1-3.1Z" />
+                <path d="M5.4 6.95h11.35a3.15 3.15 0 0 1 3.15 3.15v2.75A3.15 3.15 0 0 1 16.75 16h-4.2L8.45 19v-3H5.4a3.15 3.15 0 0 1-3.15-3.15V10.1A3.15 3.15 0 0 1 5.4 6.95Z" />
+                <path d="M8.25 10.9h.05M11.95 10.9H12M15.65 10.9h.05" />
+                <path d="M9.2 13.45h5.6" />
               </svg>
             </span>
             <span class="bottom-nav__badge" id="chatNavBadge" aria-label="Непрочитанных сообщений">0</span>
@@ -1317,9 +1321,11 @@
       <button type="button" class="bottom-nav__item" data-view-target="download">
         <span class="bottom-nav__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M12 4.5v9" />
-            <path d="m7.85 9.7 4.15 4.15 4.15-4.15" />
-            <path d="M5.25 14.75v3.5c0 .7.55 1.25 1.25 1.25h11c.7 0 1.25-.55 1.25-1.25v-3.5" />
+            <path class="bottom-nav__icon-fill bottom-nav__icon-fill--soft" d="M6.05 15.1h11.9v3.55H6.05Z" />
+            <path d="M12 4.25v9.35" />
+            <path d="m7.8 9.75 4.2 4.2 4.2-4.2" />
+            <path d="M5.25 14.85v3.35c0 .72.58 1.3 1.3 1.3h10.9c.72 0 1.3-.58 1.3-1.3v-3.35" />
+            <path d="M6.9 6.45 5.85 5.4M17.1 6.45l1.05-1.05" />
           </svg>
         </span>
         <span class="bottom-nav__label" id="bottomNavDownloadLabel">Скачать</span>
@@ -1327,9 +1333,12 @@
       <button type="button" class="bottom-nav__item" data-view-target="cashout">
         <span class="bottom-nav__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
-            <rect x="3.75" y="6.25" width="16.5" height="11.5" rx="2.2" />
-            <path d="M3.75 10h16.5" />
-            <path d="M7.25 14.55h3.6" />
+            <path class="bottom-nav__icon-fill bottom-nav__icon-fill--soft" d="M4.2 7.2h15.6v10.9H4.2Z" />
+            <rect x="3.6" y="6.5" width="16.8" height="11.3" rx="2.25" />
+            <path d="M3.6 10.05h16.8" />
+            <path d="M8 14.25h4" />
+            <path d="M16.45 13.35c.85 0 1.55.7 1.55 1.55s-.7 1.55-1.55 1.55-1.55-.7-1.55-1.55.7-1.55 1.55-1.55Z" />
+            <path d="M16.45 14.25v1.3M15.8 14.9h1.3" />
           </svg>
         </span>
         <span class="bottom-nav__label" id="bottomNavCashoutLabel">Депозит</span>
@@ -1337,91 +1346,93 @@
       <button type="button" class="bottom-nav__item" data-view-target="profile">
         <span class="bottom-nav__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
-            <circle cx="12" cy="8.35" r="3.35" />
-            <path d="M5.25 19.25c.8-3.6 3.25-5.45 6.75-5.45s5.95 1.85 6.75 5.45" />
+            <path class="bottom-nav__icon-fill bottom-nav__icon-fill--soft" d="M7.15 19.35c.78-3.05 2.55-4.6 4.85-4.6s4.07 1.55 4.85 4.6Z" />
+            <path d="M8.4 6.95 10.55 9l1.45-3.25L13.45 9l2.15-2.05-.55 4.25h-6.1Z" />
+            <circle cx="12" cy="11.35" r="2.85" />
+            <path d="M5.85 19.25c.86-3.45 3.08-5.15 6.15-5.15s5.29 1.7 6.15 5.15" />
           </svg>
         </span>
         <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
       </button>
     </nav>
-    <script defer src="./telegram-web-app.js?v=2.548"></script>
-    <script defer src="./updates-data.js?v=2.548"></script>
-    <script defer src="./poker-tasks-data.js?v=2.548"></script>
-    <script defer src="./app-auth.js?v=2.548"></script>
-    <script defer src="./app-network.js?v=2.548"></script>
-    <script defer src="./app-shared-helpers.js?v=2.548"></script>
-    <script defer src="./app-home-init.js?v=2.548"></script>
-    <script defer src="./app-home-media.js?v=2.548"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=2.548"></script>
-    <script defer src="./app-rating-core.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-render-utils.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-render.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-storage.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-prefetch.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-pickers.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-add-members.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-create.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-info.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-user-modal.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-club-access.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-templates.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-helpers.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-message-builders.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-outgoing-helpers.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-general-loader.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-general-sender.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-loader.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-sender.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-reactions.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-edit-delete-ui.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-context-menu.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-polling.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-conversation-shell.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-tab-dialog-shell.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-open-shell.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-club-gate.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs-meta.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-loader.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-self-pins.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-friend-actions.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-unread.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-auth-guard.js?v=2.548"></script>
-    <script defer src="./app-profile.js?v=2.548"></script>
-    <script defer src="./app-pwa-auth.js?v=2.548"></script>
-    <script defer src="./app-push.js?v=2.548"></script>
-    <script defer src="./app-pwa-open-handlers.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-streams.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-video-lessons.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-games.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-video-lessons-modals.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-equilator.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-club-tasks.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-hall-fame.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=2.548"></script>
-    <script defer src="./app-shell-layout.js?v=2.548"></script>
-    <script defer src="./app-navigation-scroll.js?v=2.548"></script>
-    <script defer src="./app-html-fragments.js?v=2.548"></script>
-    <script defer src="./app-webview-keyboard.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js?v=2.548"></script>
-    <script defer src="./app-view-router.js?v=2.548"></script>
-    <script defer src="./app-api-tracking.js?v=2.548"></script>
-    <script defer src="./app.js?v=2.548"></script>
-    <script defer src="./app-section-views.js?v=2.548"></script>
-    <script defer src="./app-visitors-admin.js?v=2.548"></script>
-    <script defer src="./app-admin-reports.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-auth-debug.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-share-stats.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./app-tracking-links.js?v=2.548"></script>
-    <script defer src="./app-cashout.js?v=2.548"></script>
-    <script defer src="./app-tournament-day.js?v=2.548"></script>
-    <script defer src="./app-updates.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./winter-rating-data.js?v=2.548"></script>
-    <script defer data-poker-eager-domain="app" src="./peerjs.min.js?v=2.548"></script>
+    <script defer src="./telegram-web-app.js?v=2.549"></script>
+    <script defer src="./updates-data.js?v=2.549"></script>
+    <script defer src="./poker-tasks-data.js?v=2.549"></script>
+    <script defer src="./app-auth.js?v=2.549"></script>
+    <script defer src="./app-network.js?v=2.549"></script>
+    <script defer src="./app-shared-helpers.js?v=2.549"></script>
+    <script defer src="./app-home-init.js?v=2.549"></script>
+    <script defer src="./app-home-media.js?v=2.549"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=2.549"></script>
+    <script defer src="./app-rating-core.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-render-utils.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-render.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-storage.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-prefetch.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-pickers.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-add-members.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-create.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-info.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-user-modal.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-club-access.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-templates.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-helpers.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-message-builders.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-outgoing-helpers.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-general-loader.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-general-sender.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-loader.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-sender.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-reactions.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-edit-delete-ui.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-context-menu.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-polling.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-conversation-shell.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-tab-dialog-shell.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-open-shell.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-club-gate.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs-meta.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-loader.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-self-pins.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-friend-actions.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-unread.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-auth-guard.js?v=2.549"></script>
+    <script defer src="./app-profile.js?v=2.549"></script>
+    <script defer src="./app-pwa-auth.js?v=2.549"></script>
+    <script defer src="./app-push.js?v=2.549"></script>
+    <script defer src="./app-pwa-open-handlers.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-streams.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-video-lessons.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-games.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-video-lessons-modals.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-equilator.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-club-tasks.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-hall-fame.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=2.549"></script>
+    <script defer src="./app-shell-layout.js?v=2.549"></script>
+    <script defer src="./app-navigation-scroll.js?v=2.549"></script>
+    <script defer src="./app-html-fragments.js?v=2.549"></script>
+    <script defer src="./app-webview-keyboard.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js?v=2.549"></script>
+    <script defer src="./app-view-router.js?v=2.549"></script>
+    <script defer src="./app-api-tracking.js?v=2.549"></script>
+    <script defer src="./app.js?v=2.549"></script>
+    <script defer src="./app-section-views.js?v=2.549"></script>
+    <script defer src="./app-visitors-admin.js?v=2.549"></script>
+    <script defer src="./app-admin-reports.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-auth-debug.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-share-stats.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./app-tracking-links.js?v=2.549"></script>
+    <script defer src="./app-cashout.js?v=2.549"></script>
+    <script defer src="./app-tournament-day.js?v=2.549"></script>
+    <script defer src="./app-updates.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./winter-rating-data.js?v=2.549"></script>
+    <script defer data-poker-eager-domain="app" src="./peerjs.min.js?v=2.549"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

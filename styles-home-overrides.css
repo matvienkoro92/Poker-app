@@ -2,11 +2,75 @@
  * Extracted from styles.css; keep import order in styles.css stable. */
 
 /* Home tournament / freeroll promo: dark gold board, matching the new visual reference. */
+html[data-theme="gold"].app-view-home,
+html[data-theme="gold"].app-view-home body,
+html[data-theme="gold"] body[data-view="home"] {
+  background:
+    radial-gradient(circle at 16% -8%, rgba(214, 163, 84, 0.13), transparent 34%),
+    radial-gradient(circle at 88% 8%, rgba(246, 213, 138, 0.08), transparent 30%),
+    linear-gradient(145deg, #020306 0%, #050403 45%, #010204 100%) !important;
+  background-color: #020306 !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(214, 163, 84, 0.11), transparent 34%),
+    radial-gradient(circle at 82% 12%, rgba(145, 92, 20, 0.12), transparent 32%),
+    linear-gradient(160deg, #020306 0%, #060503 46%, #010204 100%) !important;
+  background-color: #020306 !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home > .bg-gradient,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home > .bg-gradient {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(246, 213, 138, 0.18), transparent 42%),
+    radial-gradient(circle at 90% 8%, rgba(214, 163, 84, 0.12), transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(91, 60, 22, 0.16), transparent 52%) !important;
+  opacity: 0.5 !important;
+  filter: blur(10px) saturate(112%);
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home > .bg-blur,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home > .bg-blur {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(214, 163, 84, 0.09), transparent 35%),
+    linear-gradient(150deg, rgba(2, 3, 6, 0.98), rgba(7, 5, 3, 0.97) 54%, rgba(1, 2, 4, 0.99)) !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .card,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(214, 163, 84, 0.09), transparent 30%),
+    linear-gradient(160deg, rgba(3, 4, 7, 0.98), rgba(8, 6, 4, 0.98) 52%, rgba(2, 3, 5, 0.99)) !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .card__header,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card__header,
+html[data-theme="gold"].app-view-home #app.app.app--view-home .card__content,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card__content {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(214, 163, 84, 0.08), transparent 34%),
+    linear-gradient(160deg, rgba(3, 4, 7, 0.98), rgba(7, 5, 3, 0.98) 56%, rgba(2, 3, 5, 0.99)) !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .home-welcome-outline,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .home-welcome-outline {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(214, 163, 84, 0.09), transparent 32%),
+    linear-gradient(160deg, rgba(4, 5, 8, 0.9), rgba(7, 5, 3, 0.86) 58%, rgba(2, 3, 5, 0.92)) !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .home-welcome-outline::before,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .home-welcome-outline::before {
+  border-color: rgba(214, 163, 84, 0.46) !important;
+}
+
 .app.app--view-home .tournament-day-home-dual {
   --home-promo-gold: #ffc64a;
   --home-promo-orange: #ff9f1a;
   --home-promo-line: rgba(255, 198, 74, 0.34);
-  --home-promo-card: rgba(7, 16, 30, 0.9);
+  --home-promo-card: rgba(8, 6, 4, 0.92);
   --home-promo-card-soft: rgba(255, 255, 255, 0.045);
   display: grid;
   grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr);
@@ -20,7 +84,7 @@
   background:
     radial-gradient(circle at 18% 0%, rgba(255, 198, 74, 0.15), transparent 34%),
     radial-gradient(circle at 84% 0%, rgba(255, 159, 26, 0.1), transparent 36%),
-    linear-gradient(145deg, rgba(6, 15, 28, 0.99), rgba(2, 9, 20, 0.97) 58%, rgba(8, 18, 34, 0.99));
+    linear-gradient(145deg, rgba(8, 6, 4, 0.99), rgba(3, 4, 7, 0.98) 58%, rgba(10, 7, 4, 0.99));
   box-shadow:
     0 18px 42px rgba(0, 0, 0, 0.34),
     0 0 26px rgba(255, 159, 26, 0.12),
@@ -44,6 +108,17 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 18px 46px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+  border-color: rgba(214, 163, 84, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 240, 200, 0.075), rgba(255, 240, 200, 0.018)),
+    rgba(5, 5, 6, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.1),
+    0 18px 46px rgba(0, 0, 0, 0.28);
 }
 
 .app.app--view-home .logo.logo--welcome {
