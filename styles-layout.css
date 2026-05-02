@@ -827,6 +827,28 @@ body[data-view="video-lessons"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
 }
 
+/*
+ * Небольшой запас для коротких scrollport-экранов: на «Скачать», «Депозит» и
+ * клубной вкладке профиля контент почти влезает, и без хвоста палец не может
+ * уверенно дотянуть последний блок над таббаром.
+ */
+:root {
+  --app-short-panel-overscroll-extra: 44px;
+}
+
+body[data-view="download"] #app.app .card .card__content,
+body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content {
+  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
+  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
+}
+body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
+body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
+body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"] {
+  min-height: calc(100% + var(--app-short-panel-overscroll-extra)) !important;
+  box-sizing: border-box !important;
+}
+
 body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
 body[data-view="download"] .download-page--active:not([data-download-page="main"]),
 body[data-view="cashout"] .cashout-manager-block {
@@ -858,6 +880,24 @@ body[data-view="home"] #app.app .card .card__content {
       calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
     ) !important;
   }
+  html:has(body[data-view="download"]) .card .card__content,
+  html.app-view-download-html-scroll .card .card__content,
+  body[data-view="download"] #app.app .card .card__content,
+  html:has(body[data-view="cashout"]) .card .card__content,
+  html.app-view-cashout-html-scroll .card .card__content,
+  body[data-view="cashout"] #app.app .card .card__content,
+  html:has(body[data-view="profile"]) .card .card__content,
+  html.app-view-profile-html-scroll .card .card__content,
+  body[data-view="profile"] #app.app .card .card__content {
+    padding-bottom: max(
+      calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+      calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
+    ) !important;
+    scroll-padding-bottom: max(
+      calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+      calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
+    ) !important;
+  }
 }
 /* Тот же нижний floor, что у standalone PWA, после выравнивания .bottom-nav (без лишнего padding-bottom на iOS PWA). */
 html.poker-ios-pwa:has(body[data-view="home"]) .card .card__content,
@@ -875,6 +915,24 @@ html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {
   padding-bottom: max(
     var(--app-bottom-tabbar-pad, 105px),
     calc(74px + max(34px, env(safe-area-inset-bottom, 0px)))
+  ) !important;
+}
+html.poker-ios-pwa:has(body[data-view="download"]) .card .card__content,
+html.poker-ios-pwa.app-view-download-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="cashout"]) .card .card__content,
+html.poker-ios-pwa.app-view-cashout-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="cashout"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
+html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {
+  padding-bottom: max(
+    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
+  ) !important;
+  scroll-padding-bottom: max(
+    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
   ) !important;
 }
 
