@@ -27,7 +27,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 0;
+  gap: 6px;
   flex-wrap: nowrap;
   z-index: 1001;
   pointer-events: auto;
@@ -81,7 +81,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   justify-content: center;
   gap: 3px;
   padding: 6px 5px 7px;
-  border-radius: 18px;
+  border-radius: 13px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -108,7 +108,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   transform: translate3d(0, -1px, 0);
 }
 .bottom-nav__item:active {
-  transform: translate3d(0, 0, 0) scale(0.97);
+  transform: translate3d(0, 0, 0) scale(0.98);
 }
 .bottom-nav__item:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent) 68%, white);
@@ -139,7 +139,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 10px;
   color: currentColor;
   background:
     radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 42%),
@@ -211,9 +211,9 @@ html.app--tg-bottom-nav-inset .bottom-nav {
     radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.34), transparent 48%),
     linear-gradient(135deg, #f97316, #fb923c);
   box-shadow:
-    0 10px 24px rgba(248, 113, 22, 0.34),
+    0 6px 16px rgba(248, 113, 22, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
-  transform: translate3d(0, -2px, 0);
+  transform: translate3d(0, 0, 0);
 }
 .bottom-nav__item--active .bottom-nav__icon {
   background:
@@ -242,8 +242,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   color: #fff3cf;
   text-shadow: 0 1px 0 rgba(67, 34, 6, 0.42);
   box-shadow:
-    0 8px 22px rgba(180, 83, 9, 0.34),
-    0 0 20px rgba(255, 198, 74, 0.24),
+    0 6px 16px rgba(180, 83, 9, 0.26),
+    0 0 14px rgba(255, 198, 74, 0.18),
     inset 0 1px 0 rgba(255, 250, 232, 0.62),
     inset 0 -10px 18px rgba(54, 27, 5, 0.22);
 }
@@ -263,8 +263,8 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active {
   color: #fff3cf;
   text-shadow: 0 1px 0 rgba(67, 34, 6, 0.42);
   box-shadow:
-    0 8px 22px rgba(180, 83, 9, 0.34),
-    0 0 20px rgba(255, 198, 74, 0.24),
+    0 6px 16px rgba(180, 83, 9, 0.26),
+    0 0 14px rgba(255, 198, 74, 0.18),
     inset 0 1px 0 rgba(255, 250, 232, 0.62),
     inset 0 -10px 18px rgba(54, 27, 5, 0.22);
 }
@@ -308,6 +308,7 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
   .bottom-nav {
     padding-left: 6px;
     padding-right: 6px;
+    gap: 4px;
   }
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
@@ -334,7 +335,7 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
     font-size: 9px;
     min-height: 46px;
     padding: 5px 1px 6px;
-    border-radius: 16px;
+    border-radius: 11px;
   }
   .bottom-nav__icon {
     width: 25px;
