@@ -620,7 +620,7 @@ function getPokerResolvedTelegramUser() {
     return isPwaStandaloneMode();
   }
   function shouldUseOverlayAuthScreen() {
-    return isPwaStandaloneMode() || isTelegramWebApp();
+    return isPwaStandaloneMode();
   }
   /**
    * Не показываем карточку «Верификация для входа в PWA» внутри клиента Telegram (Mini App / WebView).
@@ -2423,6 +2423,7 @@ function getPokerResolvedTelegramUser() {
 
     function handleOpenInstructionModal(e) {
       if (e && typeof e.preventDefault === "function") e.preventDefault();
+      if (e && typeof e.stopPropagation === "function") e.stopPropagation();
       openModal();
     }
     function handleOpenAccountAuth(e) {
@@ -2432,6 +2433,8 @@ function getPokerResolvedTelegramUser() {
       }
     }
     openBtn.onclick = handleOpenInstructionModal;
+    openBtn.addEventListener("pointerdown", handleOpenInstructionModal, { passive: false, capture: true });
+    openBtn.addEventListener("touchstart", handleOpenInstructionModal, { passive: false });
     openBtn.addEventListener("click", handleOpenInstructionModal);
     if (authBtn) {
       authBtn.onclick = handleOpenAccountAuth;
