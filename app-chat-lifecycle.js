@@ -9642,9 +9642,39 @@ function initChat() {
         return chatComposerEl || chatSharedComposerEl || null;
       }
     }
+    function isChatEmojiComposerTextarea(ta) {
+      try {
+        return !!(
+          ta &&
+          String(ta.tagName || "").toUpperCase() === "TEXTAREA" &&
+          ta.closest &&
+          ta.closest(".chat-input-area") &&
+          !ta.disabled &&
+          !ta.hidden
+        );
+      } catch (eEmojiComposerTextarea) {
+        return false;
+      }
+    }
+    function isTouchChatEmojiFocusContext() {
+      try {
+        if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
+      } catch (eEmojiPhysicalCtx) {}
+      try {
+        if ((navigator.maxTouchPoints || 0) > 0) return true;
+        if (/Android|iPad|iPhone|iPod/i.test(navigator.userAgent || "")) return true;
+      } catch (eEmojiTouchCtx) {}
+      try {
+        if (isTelegramChatRuntime()) return true;
+      } catch (eEmojiTgCtx) {}
+      try {
+        if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) return true;
+      } catch (eEmojiPwaCtx) {}
+      return false;
+    }
     function shouldPreserveChatEmojiComposerFocus(ta) {
       try {
-        if (!ta || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+        if (!isChatEmojiComposerTextarea(ta) || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
         var now = Date.now();
         var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
         var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
@@ -9657,6 +9687,7 @@ function initChat() {
           (focusAt > 0 && now - focusAt < 1800) ||
           document.activeElement === ta;
         if (!keyboardRecentlyHeld) return false;
+        if (isTouchChatEmojiFocusContext()) return true;
         if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
           if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
           return !!(ta.closest && ta.closest(".chat-input-area"));

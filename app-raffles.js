@@ -11,6 +11,13 @@ function initRaffles() {
       if (typeof initRaffles.__reload === "function") initRaffles.__reload();
       return;
     }
+    if (initRaffles.__activeAdminFallbackRoot && initRaffles.__activeAdminFallbackHandler) {
+      try {
+        initRaffles.__activeAdminFallbackRoot.removeEventListener("click", initRaffles.__activeAdminFallbackHandler);
+      } catch (eRemoveRaffleAdminFallback) {}
+      initRaffles.__activeAdminFallbackRoot = null;
+      initRaffles.__activeAdminFallbackHandler = null;
+    }
     initRaffles.__listenersBound = false;
     initRaffles.__profileOpenDelegate = false;
   }
@@ -124,6 +131,34 @@ function initRaffles() {
     } else if (typeof alert === "function") {
       alert(message);
     }
+  }
+
+  function raffleCanUseTelegramPopup() {
+    try {
+      return !!(
+        tg &&
+        typeof tg.showConfirm === "function" &&
+        typeof isTelegramWebApp === "function" &&
+        isTelegramWebApp()
+      );
+    } catch (eRaffleTgPopup) {
+      return false;
+    }
+  }
+
+  function confirmRaffleAdminAction(message, onOk) {
+    if (typeof onOk !== "function") return;
+    if (raffleCanUseTelegramPopup()) {
+      tg.showConfirm(message, function (ok) {
+        if (ok) onOk();
+      });
+      return;
+    }
+    if (typeof window.confirm === "function") {
+      if (window.confirm(message)) onOk();
+      return;
+    }
+    onOk();
   }
 
   // Подписка на уведомления о новых розыгрышах
@@ -1359,8 +1394,9 @@ function initRaffles() {
     if (!rafflesRetryFailedBroadcastBtn) return;
     function runRetryFailedBroadcast() {
       if (window.__pokerRaffleSubsBroadcastInFlight) return;
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert && typeof isTelegramWebApp === "function" && isTelegramWebApp()) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+        else showRaffleFeedback("Войдите в приложение (Telegram или PWA).", "err");
         return;
       }
       window.__pokerRaffleSubsBroadcastInFlight = true;
@@ -1377,7 +1413,7 @@ function initRaffles() {
         typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
-      var payload = Object.assign({ initData: initData, retryFailedOnly: true }, extra, {
+      var payload = Object.assign(pokerGuestOrAuthedPostBody({ retryFailedOnly: true }), extra, {
         broadcastIdempotencyKey: retryIdemKey,
       });
       fetch(base + "/api/raffle-manual-subscribers", {
@@ -1435,21 +1471,18 @@ function initRaffles() {
     rafflesRetryFailedBroadcastBtn.addEventListener("click", function () {
       var msg =
         "Дослать тем же текстом всем из списка подписчиков, кому в прошлый раз не было успешной доставки (в т.ч. если оборвалось по таймауту)? Заблокировавших бота пропускаем.";
-      if (tg && typeof tg.showConfirm === "function") {
-        tg.showConfirm(msg, function (ok) {
-          if (ok) runRetryFailedBroadcast();
-        });
-      } else if (window.confirm(msg)) {
+      confirmRaffleAdminAction(msg, function () {
         runRetryFailedBroadcast();
-      }
+      });
     });
   })();
 
   (function initRafflesPurgeBlockedSubscribers() {
     if (!rafflesPurgeBlockedSubsBtn) return;
     function runPurge() {
-      if (!base || !initData) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        if (tg && tg.showAlert && typeof isTelegramWebApp === "function" && isTelegramWebApp()) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+        else showRaffleFeedback("Войдите в приложение (Telegram или PWA).", "err");
         return;
       }
       var btn = rafflesPurgeBlockedSubsBtn;
@@ -1463,7 +1496,7 @@ function initRaffles() {
       fetch(base + "/api/raffle-manual-subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, purgeBlockedSubscribers: true }),
+        body: JSON.stringify(pokerGuestOrAuthedPostBody({ purgeBlockedSubscribers: true })),
       })
         .then(raffleManualSubscribersParseResponse)
         .then(function (data) {
@@ -1509,13 +1542,9 @@ function initRaffles() {
     rafflesPurgeBlockedSubsBtn.addEventListener("click", function () {
       var msg =
         "Проверить всех подписчиков розыгрышей через Telegram и удалить из списка тех, кто заблокировал бота или недоступен? Счётчик «Разослать подписчикам (N)» обновится.";
-      if (tg && typeof tg.showConfirm === "function") {
-        tg.showConfirm(msg, function (ok) {
-          if (ok) runPurge();
-        });
-      } else if (window.confirm(msg)) {
+      confirmRaffleAdminAction(msg, function () {
         runPurge();
-      }
+      });
     });
   })();
 
@@ -2088,14 +2117,10 @@ function initRaffles() {
             if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
-      if (tg && tg.showConfirm) {
-        tg.showConfirm("Завершить розыгрыш сейчас и определить победителей? Приём заявок будет остановлен.", function (ok) {
-          if (ok) doComplete();
-        });
-      } else {
-        var sure = window.confirm("Завершить розыгрыш сейчас и определить победителей? Приём заявок будет остановлен.");
-        if (sure) doComplete();
-      }
+      confirmRaffleAdminAction(
+        "Завершить розыгрыш сейчас и определить победителей? Приём заявок будет остановлен.",
+        doComplete
+      );
     });
   }
 
@@ -2136,14 +2161,7 @@ function initRaffles() {
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
     };
-    if (tg && tg.showConfirm) {
-      tg.showConfirm(confirmMessage, function (ok) {
-        if (ok) doAction();
-      });
-    } else {
-      var sure = window.confirm(confirmMessage);
-      if (sure) doAction();
-    }
+    confirmRaffleAdminAction(confirmMessage, doAction);
   }
 
   function cancelActiveRaffle(button) {
@@ -2235,16 +2253,18 @@ function initRaffles() {
     });
   }
 
-  if (rafflesRoot && !rafflesRoot.__pokerActiveRaffleAdminFallbackBound) {
-    rafflesRoot.__pokerActiveRaffleAdminFallbackBound = true;
-    rafflesRoot.addEventListener("click", function (e) {
+  if (rafflesRoot) {
+    var activeRaffleAdminFallbackHandler = function (e) {
       if (!e || e.__pokerRaffleAdminHandled) return;
       var btn = e.target && e.target.closest ? e.target.closest("#raffleCancelBtn, #raffleDeleteBtn") : null;
       if (!btn || !rafflesRoot.contains(btn)) return;
       e.__pokerRaffleAdminHandled = true;
       if (btn.id === "raffleCancelBtn") cancelActiveRaffle(btn);
       else if (btn.id === "raffleDeleteBtn") deleteActiveRaffle(btn);
-    });
+    };
+    rafflesRoot.addEventListener("click", activeRaffleAdminFallbackHandler);
+    initRaffles.__activeAdminFallbackRoot = rafflesRoot;
+    initRaffles.__activeAdminFallbackHandler = activeRaffleAdminFallbackHandler;
   }
 
   if (rafflesCompleted) {
@@ -2302,14 +2322,7 @@ function initRaffles() {
             if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           });
       };
-      if (tg && tg.showConfirm) {
-        tg.showConfirm("Удалить этот завершённый розыгрыш окончательно?", function (ok) {
-          if (ok) doDelete();
-        });
-      } else {
-        var sure = window.confirm("Точно удалить этот завершённый розыгрыш окончательно?");
-        if (sure) doDelete();
-      }
+      confirmRaffleAdminAction("Удалить этот завершённый розыгрыш окончательно?", doDelete);
     });
   }
 

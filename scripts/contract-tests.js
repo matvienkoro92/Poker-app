@@ -281,6 +281,15 @@ async function testAuthAndAdmin(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create raffle");
   assert.ok(r.body && r.body.ok && r.body.raffle && r.body.raffle.id, "create returns raffle");
+  const createdRaffleId = r.body.raffle.id;
+
+  r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "delete", raffleId: createdRaffleId }));
+  assert.strictEqual(r.statusCode, 403, "raffle delete is admin-only");
+
+  r = await call(raffles, req("POST", {}, { pwaSession: s.admin, action: "delete", raffleId: createdRaffleId }));
+  assert.strictEqual(r.statusCode, 200, "admin can delete raffle");
+  assert.strictEqual(redis.kv.has("poker_app:raffle:" + createdRaffleId), false, "delete removes raffle record");
+  assert.strictEqual(redis.l("poker_app:raffle_ids").includes(createdRaffleId), false, "delete removes raffle id from index");
 
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.adminSecondary,
