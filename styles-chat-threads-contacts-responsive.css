@@ -222,6 +222,12 @@ html.app--tg-content-inset body[data-view="chat"] {
   --chat-thread-header-safe-top: 0px;
 }
 
+html.app--telegram-miniapp body[data-view="chat"],
+html.poker-telegram-miniapp body[data-view="chat"] {
+  --chat-telegram-native-close-clearance: clamp(56px, 15vw, 72px);
+  --chat-thread-header-safe-top: var(--chat-telegram-native-close-clearance);
+}
+
 body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden),
 body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) {
   display: flex !important;
@@ -255,6 +261,13 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-t
   padding-left: 0 !important;
   padding-right: 0 !important;
   padding-bottom: var(--chat-thread-inner-gap) !important;
+}
+
+html.app--telegram-miniapp body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
+html.poker-telegram-miniapp body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
+html.app--telegram-miniapp .view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
+html.poker-telegram-miniapp .view--active[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
+  padding-top: var(--chat-telegram-native-close-clearance, 64px) !important;
 }
 
 body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top-inner {
@@ -792,4 +805,3 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
   letter-spacing: 0.02em;
 }
 .chat-contact__dt { font-size: 12px; color: var(--text-muted); font-family: monospace; }
-
