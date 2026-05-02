@@ -134,58 +134,35 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   display: inline-flex;
 }
 .bottom-nav__icon {
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   color: currentColor;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 42%),
+    rgba(255, 255, 255, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.16);
 }
-.bottom-nav__icon svg {
-  width: 23px;
-  height: 23px;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.85;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 1.5px 1px rgba(15, 23, 42, 0.26));
-}
-.bottom-nav__icon-fill {
-  fill: currentColor;
-  stroke: none;
-  vector-effect: none;
-}
-.bottom-nav__icon-fill--soft {
-  opacity: 0.18;
-}
-.bottom-nav__icon-fill--soft[style*="url"] {
-  opacity: 0.62;
-}
-.bottom-nav__icon-depth {
-  fill: rgba(15, 23, 42, 0.24);
-  stroke: none;
-}
-.bottom-nav__icon-shine {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.72);
-  stroke-width: 1.1;
-  stroke-linecap: round;
-  opacity: 0.72;
-}
-.bottom-nav__item--active .bottom-nav__icon-fill--soft {
-  opacity: 0.3;
-}
-.bottom-nav__item--active .bottom-nav__icon-fill--soft[style*="url"] {
-  opacity: 0.78;
-}
-.bottom-nav__item--active .bottom-nav__icon svg {
+.bottom-nav__emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0;
+  transform: translateY(0.5px);
   filter:
-    drop-shadow(0 1.5px 1px rgba(67, 34, 6, 0.32))
-    drop-shadow(0 0 5px rgba(255, 231, 168, 0.3));
+    saturate(0.98)
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.16))
+    drop-shadow(0 1.5px 1px rgba(15, 23, 42, 0.22));
 }
 .bottom-nav__dot {
   position: absolute;
@@ -223,8 +200,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 
 .bottom-nav__item:nth-child(3) .bottom-nav__icon,
 .bottom-nav__chat-wrap .bottom-nav__icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
 }
 
 .bottom-nav__item--active {
@@ -239,9 +216,21 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   transform: translate3d(0, -2px, 0);
 }
 .bottom-nav__item--active .bottom-nav__icon {
-  background: rgba(255, 255, 255, 0.15);
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.36), transparent 44%),
+    rgba(255, 255, 255, 0.18);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 14px rgba(67, 34, 6, 0.22);
+}
+.bottom-nav__item--active .bottom-nav__emoji {
+  transform: translateY(0.5px) scale(1.06);
+  filter:
+    saturate(1.04)
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.2))
+    drop-shadow(0 0 5px rgba(255, 231, 168, 0.3))
+    drop-shadow(0 1.5px 1px rgba(67, 34, 6, 0.3));
 }
 
 [data-theme="gold"] .bottom-nav__item.bottom-nav__item--active {
@@ -261,7 +250,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 [data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
   background: rgba(255, 245, 215, 0.14);
 }
-[data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+[data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji {
   filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
 }
 html.app-view-home .bottom-nav__item.bottom-nav__item--active,
@@ -282,7 +271,13 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active {
 html.app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
 body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
   background: rgba(255, 245, 215, 0.14);
-  filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
+}
+html.app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji,
+body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji {
+  filter:
+    saturate(1.04)
+    drop-shadow(0 0 5px rgba(255, 198, 74, 0.42))
+    drop-shadow(0 1.5px 1px rgba(67, 34, 6, 0.3));
 }
 
 .bottom-nav__chat-wrap {
@@ -326,12 +321,11 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__i
     max-width: none;
   }
   .bottom-nav__icon {
-    width: 24px;
-    height: 24px;
+    width: 27px;
+    height: 27px;
   }
-  .bottom-nav__icon svg {
-    width: 21px;
-    height: 21px;
+  .bottom-nav__emoji {
+    font-size: 17px;
   }
 }
 @media (max-width: 360px) {
@@ -343,12 +337,11 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__i
     border-radius: 16px;
   }
   .bottom-nav__icon {
-    width: 22px;
-    height: 22px;
+    width: 25px;
+    height: 25px;
   }
-  .bottom-nav__icon svg {
-    width: 19px;
-    height: 19px;
+  .bottom-nav__emoji {
+    font-size: 16px;
   }
 }
 
