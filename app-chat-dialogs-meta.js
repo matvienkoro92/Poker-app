@@ -120,6 +120,9 @@ function enrichPersonalThreadPeerMeta(messages, peerId, fallbackMeta) {
       if (m.fromRespect !== undefined && m.fromRespect !== null) meta.fromRespect = m.fromRespect;
     }
     if (meta.fromPokerPlusVerified !== true && m.fromPokerPlusVerified === true) meta.fromPokerPlusVerified = true;
+    if ((meta.fromStatusLevel == null || String(meta.fromStatusLevel).trim() === "") && m.fromStatusLevel != null && String(m.fromStatusLevel).trim() !== "") {
+      meta.fromStatusLevel = String(m.fromStatusLevel).trim();
+    }
   }
   if (!meta.fromName && meta.fromDtId) meta.fromName = meta.fromDtId;
   for (var j = 0; j < list.length; j++) {
@@ -139,6 +142,13 @@ function enrichPersonalThreadPeerMeta(messages, peerId, fallbackMeta) {
       row.fromRespect = meta.fromRespect;
     }
     if (meta.fromPokerPlusVerified === true) row.fromPokerPlusVerified = true;
+    if (
+      meta.fromStatusLevel != null &&
+      String(meta.fromStatusLevel).trim() !== "" &&
+      (row.fromStatusLevel == null || String(row.fromStatusLevel).trim() === "")
+    ) {
+      row.fromStatusLevel = meta.fromStatusLevel;
+    }
   }
   return list;
 }

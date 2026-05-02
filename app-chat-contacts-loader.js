@@ -42,6 +42,10 @@ function initChatContactsLoader(opts) {
   var pokerHandleChatContactsFetchError = typeof opts.pokerHandleChatContactsFetchError === "function" ? opts.pokerHandleChatContactsFetchError : function () {};
   var pokerChatRecordTrace = typeof opts.pokerChatRecordTrace === "function" ? opts.pokerChatRecordTrace : function () {};
   var pokerChatScheduleLongPoll = typeof opts.pokerChatScheduleLongPoll === "function" ? opts.pokerChatScheduleLongPoll : function () {};
+  var pokerMergeChatPeerMetaIntoContactsData = typeof opts.pokerMergeChatPeerMetaIntoContactsData === "function" ? opts.pokerMergeChatPeerMetaIntoContactsData : function (data) { return data; };
+  var pokerRememberChatPeerMetaFromContactsData = typeof opts.pokerRememberChatPeerMetaFromContactsData === "function" ? opts.pokerRememberChatPeerMetaFromContactsData : function () {};
+  var pokerHydrateOpenDmHeaderFromContacts = typeof opts.pokerHydrateOpenDmHeaderFromContacts === "function" ? opts.pokerHydrateOpenDmHeaderFromContacts : function () {};
+  var getChatWithUserId = typeof opts.getChatWithUserId === "function" ? opts.getChatWithUserId : function () { return ""; };
   var CONTACTS_FETCH_TIMEOUT_MS = 32000;
 
 function clearContactsLoadingSkeletonFallback(text) {
@@ -240,6 +244,14 @@ function applyContactsApiResponse(data, opts) {
     if (typeof pokerSanitizeContactsPayloadForUi === "function") {
       data = pokerSanitizeContactsPayloadForUi(data);
     }
+    if (data && data.ok && Array.isArray(data.contacts)) {
+      try {
+        data = pokerMergeChatPeerMetaIntoContactsData(data) || data;
+      } catch (eContactsPeerMetaMerge) {}
+      try {
+        pokerRememberChatPeerMetaFromContactsData(data);
+      } catch (eContactsPeerMetaRemember) {}
+    }
     var fromFilterOnly = !!opts.fromFilterOnly;
     var fromInstantCache = !!opts.fromInstantCache;
     var forceRerender = !!opts.forceRerender;
@@ -328,6 +340,10 @@ function applyContactsApiResponse(data, opts) {
           updatePreviewText: updateClubChatPreviewText,
         });
       } catch (eContactsMetaState) {}
+      try {
+        var openPeerId = getChatWithUserId();
+        if (openPeerId) pokerHydrateOpenDmHeaderFromContacts(openPeerId);
+      } catch (eContactsHeaderHydrate) {}
       try {
         if (pokerRenderChatContactsListResult({
           contactsEl: getContactsEl(),
@@ -451,6 +467,8 @@ function applyContactsApiResponse(data, opts) {
       data = contactsFetchDataState.data;
       pokerCompleteChatContactsFetchData(data, {
         metaOnly: metaOnly,
+        fastList: !!opts.fastList,
+        fastBare: !!opts.fastBare,
         waitForChange: opts.waitForChange,
         applyContactsApiResponse: applyContactsApiResponse,
         scheduleLongPoll: pokerChatScheduleLongPoll,

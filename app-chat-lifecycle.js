@@ -2559,10 +2559,132 @@ function initChat() {
     pokerHandleChatContactsFetchError: pokerHandleChatContactsFetchError,
     pokerChatRecordTrace: pokerChatRecordTrace,
     pokerChatScheduleLongPoll: pokerChatScheduleLongPoll,
+    pokerMergeChatPeerMetaIntoContactsData: typeof pokerMergeChatPeerMetaIntoContactsData === "function" ? pokerMergeChatPeerMetaIntoContactsData : null,
+    pokerRememberChatPeerMetaFromContactsData: typeof pokerRememberChatPeerMetaFromContactsData === "function" ? pokerRememberChatPeerMetaFromContactsData : null,
+    pokerHydrateOpenDmHeaderFromContacts: hydrateOpenDmHeaderFromContactsLocal,
+    getChatWithUserId: function () { return chatWithUserId; },
   });
   var buildContactsRequestUrl = chatContactsLoader.buildContactsRequestUrl;
   var mergeContactsMetaPayload = chatContactsLoader.mergeContactsMetaPayload;
   var loadContacts = chatContactsLoader.loadContacts;
+  function findChatContactByPeerIdLocal(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return null;
+    var data = window.__pokerLastContactsApiData;
+    if ((!data || !Array.isArray(data.contacts) || data.contacts.length === 0) && typeof pokerTryReadContactsCache === "function") {
+      try {
+        var cached = pokerTryReadContactsCache();
+        if (cached && cached.ok && Array.isArray(cached.contacts)) data = cached;
+      } catch (eChatPeerLocalCache) {}
+    }
+    if (!data || !Array.isArray(data.contacts)) return null;
+    for (var i = 0; i < data.contacts.length; i++) {
+      var c = data.contacts[i];
+      if (!c || c.id == null) continue;
+      if (peerChatIdsEqual(c.id, pid)) return c;
+    }
+    return null;
+  }
+  function hydrateOpenDmHeaderFromContactsLocal(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return false;
+    var found = findChatContactByPeerIdLocal(pid);
+    var cachedMeta = null;
+    try {
+      cachedMeta = typeof pokerGetCachedChatPeerMeta === "function" ? pokerGetCachedChatPeerMeta(pid) : null;
+    } catch (eChatPeerLocalMeta) {}
+    if (!found && cachedMeta) found = Object.assign({ id: pid }, cachedMeta);
+    if (!found) return false;
+    try {
+      var resolvedName = found.contactName || found.name || (cachedMeta && (cachedMeta.contactName || cachedMeta.name)) || "";
+      if (resolvedName) {
+        chatWithUserName = resolvedName;
+        if (convTitle) setTextContentIfChanged(convTitle, resolvedName);
+      }
+      var resolvedP21Id = found.p21Id != null ? found.p21Id : cachedMeta && cachedMeta.p21Id != null ? cachedMeta.p21Id : "";
+      setChatConvTitleIdText(resolvedP21Id);
+      if ((found.pokerPlusVerified === true) || (cachedMeta && cachedMeta.pokerPlusVerified === true)) setChatPeerVerified(true);
+      var resolvedStatusLevel = found.statusLevel != null ? found.statusLevel : cachedMeta && cachedMeta.statusLevel != null ? cachedMeta.statusLevel : "";
+      if (resolvedStatusLevel != null && String(resolvedStatusLevel).trim() !== "") setChatConvTitleFish(resolvedStatusLevel);
+      var resolvedAvatar = found.avatar != null && String(found.avatar).trim()
+        ? String(found.avatar).trim()
+        : cachedMeta && cachedMeta.avatar != null && String(cachedMeta.avatar).trim()
+          ? String(cachedMeta.avatar).trim()
+          : "";
+      if (resolvedAvatar) {
+        chatWithPeerAvatarUrl = resolvedAvatar;
+        applyConvPeerAvatarHeader(resolvedAvatar, chatWithUserName || resolvedName || pid);
+      } else if (chatWithUserName || resolvedName) {
+        applyConvPeerAvatarHeader("", chatWithUserName || resolvedName || pid);
+      }
+      pokerPushOpenDebug("header-hydrated-local", pid);
+      return true;
+    } catch (eChatPeerLocalHydrate) {}
+    return false;
+  }
+  function scheduleDmHeaderHydrateLocal(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return;
+    try {
+      if (hydrateOpenDmHeaderFromContactsLocal(pid)) return;
+    } catch (eChatPeerLocalHydrateCache) {}
+    try {
+      clearTimeout(window.__pokerPushDmHeaderHydrateTimer || 0);
+    } catch (eChatPeerLocalHydrateClr) {}
+    window.__pokerPushDmHeaderHydrateTimer = setTimeout(function () {
+      try {
+        if (hydrateOpenDmHeaderFromContactsLocal(pid)) return;
+        loadContacts({
+          metaOnly: true,
+          onLoaded: function () {
+            try {
+              if (hydrateOpenDmHeaderFromContactsLocal(pid)) return;
+              hydrateOpenDmHeaderFromProfileLocal(pid);
+            } catch (eChatPeerLocalHydrateLoaded) {}
+          },
+        });
+      } catch (eChatPeerLocalHydrateLoad) {}
+    }, 80);
+  }
+  function hydrateOpenDmHeaderFromProfileLocal(peerId) {
+    var pid = peerId != null ? String(peerId).trim() : "";
+    if (!pid) return false;
+    fetch(base + "/api/users?userId=" + encodeURIComponent(pid) + pokerApiAuthQuery("&"))
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false }; });
+      })
+      .then(function (data) {
+        try {
+          if (!data || !data.ok) return;
+          if (!chatWithUserId || !peerChatIdsEqual(chatWithUserId, pid)) return;
+          var profileName =
+            data.contactName != null && String(data.contactName).trim()
+              ? String(data.contactName).trim()
+              : data.chatDisplayName != null && String(data.chatDisplayName).trim()
+                ? String(data.chatDisplayName).trim()
+                : data.userName != null && String(data.userName).trim()
+                  ? String(data.userName).trim()
+                  : "";
+          if (profileName) {
+            chatWithUserName = profileName;
+            if (convTitle) setTextContentIfChanged(convTitle, profileName);
+          }
+          setChatConvTitleIdText(data.p21Id != null ? data.p21Id : "");
+          if (data.pokerPlusVerified === true) setChatPeerVerified(true);
+          if (data.statusLevel != null && String(data.statusLevel).trim() !== "") setChatConvTitleFish(data.statusLevel);
+          var profileAvatar = data.avatar != null && String(data.avatar).trim() ? String(data.avatar).trim() : "";
+          if (profileAvatar) {
+            chatWithPeerAvatarUrl = profileAvatar;
+            applyConvPeerAvatarHeader(profileAvatar, chatWithUserName || profileName || pid);
+          } else if (profileName) {
+            applyConvPeerAvatarHeader("", profileName);
+          }
+          pokerPushOpenDebug("header-profile-hydrated-local", pid);
+        } catch (eChatPeerLocalProfileApply) {}
+      })
+      .catch(function () {});
+    return true;
+  }
   try {
     window.__pokerReloadChatContacts = loadContacts;
     window.__pokerKickChatContactsLoad = function (opts) {
@@ -3886,17 +4008,13 @@ function initChat() {
     applyConvPeerAvatarHeader: applyConvPeerAvatarHeader,
     applyConvGroupDescription: applyConvGroupDescription,
     getInlineChatHeaderTopOffsetPx: getInlineChatHeaderTopOffsetPx,
-    pokerHydrateOpenDmHeaderFromContacts: function (peerId) {
-      if (typeof pokerHydrateOpenDmHeaderFromContacts === "function") return pokerHydrateOpenDmHeaderFromContacts(peerId);
-    },
+    pokerHydrateOpenDmHeaderFromContacts: hydrateOpenDmHeaderFromContactsLocal,
     pokerHydrateChatSnapshotsFromDisk: pokerHydrateChatSnapshotsFromDisk,
     getPersonalMessagesSnapshotForOpen: getPersonalMessagesSnapshotForOpen,
     pokerMessagesForFastOpenSnapshot: pokerMessagesForFastOpenSnapshot,
     personalRenderSignature: personalRenderSignature,
     renderMessages: renderMessages,
-    pokerSchedulePushDmHeaderHydrate: function (peerId) {
-      if (typeof pokerSchedulePushDmHeaderHydrate === "function") return pokerSchedulePushDmHeaderHydrate(peerId);
-    },
+    pokerSchedulePushDmHeaderHydrate: scheduleDmHeaderHydrateLocal,
     loadMessages: function (opts) { return loadMessages(opts); },
     mountChatComposer: mountChatComposer,
     syncChatInertForIosAccessory: syncChatInertForIosAccessory,

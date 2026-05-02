@@ -1,5 +1,129 @@
 var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v7";
 var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
+function pokerChatPeerMetaIdVariants(peerId) {
+  var raw = peerId != null ? String(peerId).trim() : "";
+  var ids = [];
+  function add(value) {
+    var s = value != null ? String(value).trim() : "";
+    if (!s) return;
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i] === s) return;
+    }
+    ids.push(s);
+  }
+  add(raw);
+  try {
+    if (typeof normalizePeerIdForChat === "function") add(normalizePeerIdForChat(raw));
+  } catch (ePeerMetaNorm) {}
+  return ids;
+}
+function pokerChatPeerMetaKey(peerId) {
+  var ids = pokerChatPeerMetaIdVariants(peerId);
+  return ids.length ? ids[ids.length - 1] : "";
+}
+function pokerChatPeerMetaValue(value) {
+  return value != null && String(value).trim() !== "" ? String(value).trim() : "";
+}
+function pokerChatPeerMetaFromContact(contact) {
+  if (!contact || contact.id == null) return null;
+  var id = pokerChatPeerMetaValue(contact.id);
+  if (!id || (contact.isGroupChat && String(id).indexOf("group_") === 0)) return null;
+  var meta = { id: id };
+  var name = pokerChatPeerMetaValue(contact.name);
+  var contactName = pokerChatPeerMetaValue(contact.contactName);
+  var avatar = pokerChatPeerMetaValue(contact.avatar);
+  var p21Id = pokerChatPeerMetaValue(contact.p21Id);
+  var statusLevel = pokerChatPeerMetaValue(contact.statusLevel);
+  if (name && name !== id) meta.name = name;
+  if (contactName && contactName !== id) meta.contactName = contactName;
+  if (avatar) meta.avatar = avatar;
+  if (p21Id) meta.p21Id = p21Id;
+  if (statusLevel) meta.statusLevel = statusLevel;
+  if (contact.pokerPlusVerified === true) meta.pokerPlusVerified = true;
+  return meta;
+}
+function pokerRememberChatPeerMetaFromContact(contact) {
+  var meta = pokerChatPeerMetaFromContact(contact);
+  if (!meta) return false;
+  var hasUseful = !!(meta.name || meta.contactName || meta.avatar || meta.p21Id || meta.statusLevel || meta.pokerPlusVerified);
+  if (!hasUseful) return false;
+  window.__pokerChatPeerMetaById = window.__pokerChatPeerMetaById || {};
+  var variants = pokerChatPeerMetaIdVariants(meta.id);
+  for (var i = 0; i < variants.length; i++) {
+    var key = variants[i];
+    var prev = window.__pokerChatPeerMetaById[key] || {};
+    window.__pokerChatPeerMetaById[key] = Object.assign({}, prev, meta, { id: key });
+  }
+  return true;
+}
+function pokerRememberChatPeerMetaFromContactsData(data) {
+  if (!data || !Array.isArray(data.contacts)) return;
+  for (var i = 0; i < data.contacts.length; i++) pokerRememberChatPeerMetaFromContact(data.contacts[i]);
+}
+function pokerGetCachedChatPeerMeta(peerId) {
+  var ids = pokerChatPeerMetaIdVariants(peerId);
+  try {
+    if (window.__pokerChatPeerMetaById) {
+      for (var i = 0; i < ids.length; i++) {
+        if (window.__pokerChatPeerMetaById[ids[i]]) return window.__pokerChatPeerMetaById[ids[i]];
+      }
+    }
+  } catch (ePeerMetaMem) {}
+  try {
+    var cached = typeof pokerTryReadContactsCache === "function" ? pokerTryReadContactsCache() : null;
+    if (cached && Array.isArray(cached.contacts)) {
+      pokerRememberChatPeerMetaFromContactsData(cached);
+      if (window.__pokerChatPeerMetaById) {
+        for (var j = 0; j < ids.length; j++) {
+          if (window.__pokerChatPeerMetaById[ids[j]]) return window.__pokerChatPeerMetaById[ids[j]];
+        }
+      }
+    }
+  } catch (ePeerMetaCache) {}
+  return null;
+}
+function pokerApplyChatPeerMetaToContact(contact, meta) {
+  if (!contact || !meta) return contact;
+  var id = contact.id != null ? String(contact.id).trim() : "";
+  function needsText(value) {
+    var s = value != null ? String(value).trim() : "";
+    return !s || (id && s === id);
+  }
+  if (needsText(contact.name) && meta.name) contact.name = meta.name;
+  if (needsText(contact.contactName) && meta.contactName) contact.contactName = meta.contactName;
+  if ((contact.avatar == null || String(contact.avatar).trim() === "") && meta.avatar) contact.avatar = meta.avatar;
+  if ((contact.p21Id == null || String(contact.p21Id).trim() === "") && meta.p21Id) contact.p21Id = meta.p21Id;
+  if ((contact.statusLevel == null || String(contact.statusLevel).trim() === "") && meta.statusLevel) contact.statusLevel = meta.statusLevel;
+  if (contact.pokerPlusVerified !== true && meta.pokerPlusVerified === true) contact.pokerPlusVerified = true;
+  return contact;
+}
+function pokerMergeChatPeerMetaIntoContactsData(data) {
+  if (!data || !Array.isArray(data.contacts)) return data;
+  var changed = false;
+  for (var i = 0; i < data.contacts.length; i++) {
+    var c = data.contacts[i];
+    if (!c || c.id == null || c.isGroupChat) continue;
+    var before = JSON.stringify({
+      name: c.name,
+      contactName: c.contactName,
+      avatar: c.avatar,
+      p21Id: c.p21Id,
+      statusLevel: c.statusLevel,
+      pokerPlusVerified: c.pokerPlusVerified,
+    });
+    pokerApplyChatPeerMetaToContact(c, pokerGetCachedChatPeerMeta(c.id));
+    var after = JSON.stringify({
+      name: c.name,
+      contactName: c.contactName,
+      avatar: c.avatar,
+      p21Id: c.p21Id,
+      statusLevel: c.statusLevel,
+      pokerPlusVerified: c.pokerPlusVerified,
+    });
+    if (before !== after) changed = true;
+  }
+  return changed ? Object.assign({}, data, { contacts: data.contacts }) : data;
+}
 function pokerGetChatContactsListFilter() {
   try {
     var raw = sessionStorage.getItem(POKER_CHAT_CONTACTS_LIST_FILTER_KEY);
@@ -673,7 +797,7 @@ function pokerCompleteChatContactsFetchData(data, opts) {
   opts = opts || {};
   var metaOnly = !!opts.metaOnly;
   try {
-    if (data && data.ok) pokerWriteContactsCache(data);
+    if (data && data.ok && !opts.fastBare) pokerWriteContactsCache(data);
   } catch (eSav) {}
   if (typeof opts.applyContactsApiResponse === "function") opts.applyContactsApiResponse(data);
   if (opts.waitForChange && metaOnly && typeof opts.scheduleLongPoll === "function") {

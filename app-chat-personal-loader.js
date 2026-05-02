@@ -368,11 +368,16 @@ function loadMessages(opts) {
         }
       }
       if (!isGrpThread && Array.isArray(messages) && messages.length && getChatWithUserId()) {
+        var peerCachedMetaForMessages = null;
+        try {
+          peerCachedMetaForMessages = typeof pokerGetCachedChatPeerMeta === "function" ? pokerGetCachedChatPeerMeta(getChatWithUserId()) : null;
+        } catch (ePeerCachedMetaMsg) {}
         messages = enrichPersonalThreadPeerMeta(messages, getChatWithUserId(), {
           fromName: getChatWithUserName() || "",
           fromAvatar: getChatWithPeerAvatarUrl() || "",
           fromP21Id: data.otherP21Id != null ? data.otherP21Id : "",
           fromPokerPlusVerified: peerPokerPlusVerifiedFromPayload,
+          fromStatusLevel: data.otherStatusLevel != null ? data.otherStatusLevel : peerCachedMetaForMessages && peerCachedMetaForMessages.statusLevel != null ? peerCachedMetaForMessages.statusLevel : "",
         });
       }
       var pt = data.participantsCount != null ? data.participantsCount : "—";
