@@ -303,12 +303,6 @@ document.body.addEventListener("click", function (e) {
         activeBeforeReaction.closest("#chatPersonalInputArea");
       if (!keepPersonalComposerFocus && activeBeforeReaction && activeBeforeReaction.blur) activeBeforeReaction.blur();
       sendReaction(msgId, pickerEmoji.dataset.emoji, source || "general", withId || "");
-      if (currentReactionPickerClose) {
-        currentReactionPickerClose();
-      } else if (reactionPickerEl) {
-        reactionPickerEl.classList.add("chat-reaction-picker--hidden");
-        reactionPickerEl.setAttribute("aria-hidden", "true");
-      }
       if (keepPersonalComposerFocus) {
         setTimeout(function () {
           try {

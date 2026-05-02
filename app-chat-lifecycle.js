@@ -9698,7 +9698,7 @@ function initChat() {
     }
     function schedulePreserveChatEmojiComposerFocus(ta, label) {
       if (!ta) return;
-      var delays = [0, 80, 180];
+      var delays = [0, 80, 180, 360, 700];
       delays.forEach(function (delay) {
         setTimeout(function () {
           preserveChatEmojiComposerFocus(ta, label);
@@ -9775,6 +9775,7 @@ function initChat() {
         btn.type = "button";
         btn.className = "chat-emoji-picker__emoji";
         btn.textContent = emoji;
+        btn.tabIndex = -1;
         btn.setAttribute("aria-label", "Вставить " + emoji);
         var emojiTouchHandledAt = 0;
         btn.addEventListener("pointerdown", function (e) {
@@ -9791,7 +9792,6 @@ function initChat() {
           if (!preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-touchend")) return;
           emojiTouchHandledAt = Date.now();
           if (chatEmojiPickerTargetInput) insertEmojiAtCursor(chatEmojiPickerTargetInput, emoji);
-          hideChatEmojiPicker();
         }, { passive: false });
         btn.addEventListener("click", function (e) {
           if (Date.now() - emojiTouchHandledAt < 700) {
@@ -9802,7 +9802,6 @@ function initChat() {
           preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-click");
           e.stopPropagation();
           if (chatEmojiPickerTargetInput) insertEmojiAtCursor(chatEmojiPickerTargetInput, emoji);
-          hideChatEmojiPicker();
         });
         chatEmojiPickerGrid.appendChild(btn);
       });
@@ -9811,6 +9810,7 @@ function initChat() {
     function bindEmojiButton(btn, templatesChannel) {
       if (!btn || !chatEmojiPicker) return;
       if (templatesChannel !== "general" && templatesChannel !== "personal") return;
+      btn.tabIndex = -1;
       var longPressTimer = null;
       var longPressTriggered = false;
       var touchTapHandledAt = 0;
@@ -9872,6 +9872,10 @@ function initChat() {
         if (e && e.isPrimary === false) return;
         preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-pointerdown");
       }, { passive: false, capture: true });
+      btn.addEventListener("pointerup", function (e) {
+        if (e && e.isPrimary === false) return;
+        preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-pointerup");
+      }, { passive: false, capture: true });
       btn.addEventListener("touchend", function (e) {
         clearLongPressTimer();
         if (!preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-touchend")) return;
@@ -9887,6 +9891,9 @@ function initChat() {
       btn.addEventListener("mousedown", function (e) {
         preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-mousedown");
         startLongPress();
+      });
+      btn.addEventListener("focus", function () {
+        schedulePreserveChatEmojiComposerFocus(getEmojiTargetInput(), "emoji-btn-focus");
       });
       btn.addEventListener("mouseup", function () { clearLongPressTimer(); });
       btn.addEventListener("mouseleave", function () { clearLongPressTimer(); });
