@@ -5,23 +5,19 @@
 html[data-theme="gold"].app-view-home,
 html[data-theme="gold"].app-view-home body,
 html[data-theme="gold"] body[data-view="home"] {
-  background:
+  --home-gold-canvas-bg:
     radial-gradient(ellipse at 14% -10%, rgba(255, 231, 168, 0.13), transparent 36%),
     radial-gradient(ellipse at 92% 4%, rgba(255, 198, 74, 0.07), transparent 34%),
     radial-gradient(ellipse at 72% 44%, rgba(214, 163, 84, 0.045), transparent 42%),
     radial-gradient(ellipse at 48% 116%, rgba(255, 231, 168, 0.055), transparent 48%),
-    linear-gradient(150deg, #030407 0%, #070a10 38%, #030407 68%, #010204 100%) !important;
+    linear-gradient(150deg, #030407 0%, #070a10 38%, #030407 68%, #010204 100%);
+  background: var(--home-gold-canvas-bg) !important;
   background-color: #030407 !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home {
-  background:
-    radial-gradient(ellipse at 17% -4%, rgba(255, 231, 168, 0.12), transparent 36%),
-    radial-gradient(ellipse at 86% 10%, rgba(255, 198, 74, 0.068), transparent 34%),
-    radial-gradient(ellipse at 70% 48%, rgba(214, 163, 84, 0.04), transparent 44%),
-    radial-gradient(ellipse at 50% 104%, rgba(255, 231, 168, 0.052), transparent 50%),
-    linear-gradient(155deg, #030407 0%, #070a11 42%, #030407 70%, #010204 100%) !important;
+  background: var(--home-gold-canvas-bg) !important;
   background-color: #030407 !important;
 }
 
@@ -39,37 +35,24 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home > .bg-gra
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home > .bg-blur,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home > .bg-blur {
-  background:
-    radial-gradient(ellipse at 16% -4%, rgba(255, 231, 168, 0.06), transparent 36%),
-    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.035), transparent 38%),
-    linear-gradient(150deg, rgba(3, 4, 7, 0.99), rgba(7, 10, 16, 0.97) 46%, rgba(3, 4, 7, 0.99) 78%, rgba(1, 2, 4, 0.99)) !important;
+  background: var(--home-gold-canvas-bg) !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card {
-  background:
-    radial-gradient(ellipse at 18% -2%, rgba(255, 231, 168, 0.05), transparent 34%),
-    radial-gradient(ellipse at 84% 8%, rgba(255, 198, 74, 0.03), transparent 36%),
-    linear-gradient(158deg, rgba(3, 4, 7, 0.99), rgba(7, 10, 16, 0.98) 46%, rgba(3, 4, 7, 0.99) 76%, rgba(1, 2, 4, 0.99)) !important;
+  background: var(--home-gold-canvas-bg) !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card:has(.view--active[data-view="home"])::after,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"])::after {
-  background:
-    radial-gradient(ellipse at 16% -4%, rgba(255, 231, 168, 0.055), transparent 36%),
-    radial-gradient(ellipse at 88% 8%, rgba(255, 198, 74, 0.035), transparent 38%),
-    radial-gradient(ellipse at 50% 110%, rgba(255, 231, 168, 0.03), transparent 52%),
-    linear-gradient(155deg, rgba(3, 4, 7, 0.99), rgba(7, 10, 16, 0.98) 46%, rgba(3, 4, 7, 0.99) 76%, rgba(1, 2, 4, 0.99)) !important;
+  background: var(--home-gold-canvas-bg) !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card__header,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card__header,
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card__content,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card__content {
-  background:
-    radial-gradient(ellipse at 18% 0%, rgba(255, 231, 168, 0.04), transparent 34%),
-    radial-gradient(ellipse at 86% 10%, rgba(255, 198, 74, 0.026), transparent 38%),
-    linear-gradient(158deg, rgba(3, 4, 7, 0.99), rgba(7, 10, 16, 0.98) 48%, rgba(3, 4, 7, 0.99) 76%, rgba(1, 2, 4, 0.99)) !important;
+  background: var(--home-gold-canvas-bg) !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .home-welcome-outline,
