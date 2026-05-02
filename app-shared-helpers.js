@@ -72,7 +72,7 @@ function pokerAutosizeTextarea(ta, opts) {
     try {
       mirror.style.tabSize = cs.tabSize;
     } catch (eTs) {}
-    var val = ta.value;
+    var val = opts.measureValue != null ? String(opts.measureValue) : ta.value;
     if (!val) {
       mirror.textContent = "\u00a0";
     } else if (val.slice(-1) === "\n") {
