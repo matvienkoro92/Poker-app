@@ -1004,3 +1004,83 @@ body[data-view="hall-of-fame"] #app.app .card .card__content {
     scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
   }
 }
+
+/*
+ * CRM игроков — админский длинный экран: scrollport на .card__content.
+ * Body-scroll в Telegram/WebView на этом экране может не стартовать, как у «Скачать»/«Зал славы».
+ */
+html:has(body[data-view="player-crm"]),
+html.app-view-player-crm-html-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+}
+html:has(body[data-view="player-crm"]) body,
+html:has(body[data-view="player-crm"]) body.app-view-long-scroll,
+html.app-view-player-crm-html-scroll body,
+html.app-view-player-crm-html-scroll body.app-view-long-scroll {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 0 !important;
+}
+body[data-view="player-crm"] #app.app {
+  flex: 1 1 0 !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+}
+body[data-view="player-crm"] #app.app .card {
+  flex: 1 1 0 !important;
+  flex-shrink: 1 !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  margin-left: calc(-1 * var(--card-padding-x)) !important;
+  margin-right: calc(-1 * var(--card-padding-x)) !important;
+  width: calc(100% + 2 * var(--card-padding-x)) !important;
+  max-width: none !important;
+  padding-left: var(--card-padding-x) !important;
+  padding-right: var(--card-padding-x) !important;
+  box-sizing: border-box !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"] {
+  display: block !important;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}

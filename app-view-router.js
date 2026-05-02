@@ -60,14 +60,14 @@ function pokerSyncInertForViewScreensOnly() {
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
+  document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   document.documentElement.classList.remove("app-view-vl-html-scroll");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* long-scroll без главной и без «Скачать»: внутренний scrollport в .card__content (как у главной). */
+  /* long-scroll без главной/CRM и без «Скачать»: прокрутка через body для старых длинных экранов. */
   var longScrollInit =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame" ||
-    viewName === "player-crm";
+    viewName === "hall-of-fame";
   document.documentElement.classList.toggle("app-view-long-scroll", longScrollInit);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScrollInit);
 })();
@@ -777,12 +777,11 @@ function setView(viewName, navOpts) {
     }
   }
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную сюда не включать (ломает скролл). */
+  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную/CRM сюда не включать. */
   var longScroll =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
-    viewName === "hall-of-fame" ||
-    viewName === "player-crm";
+    viewName === "hall-of-fame";
   document.documentElement.classList.toggle("app-view-long-scroll", longScroll);
   if (document.body) document.body.classList.toggle("app-view-long-scroll", longScroll);
   /* Видеоуроки: внутренний scrollport в .card__content (как профиль); класс app-view-video-lessons-html-scroll — см. styles.css */
@@ -798,6 +797,7 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
+  document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
   try {

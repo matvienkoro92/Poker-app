@@ -44,11 +44,11 @@ function pokerIsDownloadViewActive() {
   }
 }
 
-/** Скролл документа перенесён в .card__content на «Скачать», главную, депозит, рейтинг весны, розыгрыши, профиль, видеоуроки и «Зал славы» (локальный Chrome / единый UX). */
+/** Скролл документа перенесён в .card__content на длинных/панельных экранах (локальный Chrome / единый UX). */
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "raffles" && v !== "profile" && v !== "video-lessons") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "raffles" && v !== "profile" && v !== "video-lessons" && v !== "player-crm") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {

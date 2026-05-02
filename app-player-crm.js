@@ -13,7 +13,7 @@
     sourceAnalytics: [],
     permissions: null,
     pushConfigured: false,
-    source: "demo",
+    source: "api",
   };
 
   function esc(s) {
@@ -35,6 +35,7 @@
   }
 
   function daysLabel(n) {
+    if (n == null || Number(n) >= 999) return "—";
     var d = Math.max(0, Number(n) || 0);
     if (d === 0) return "сегодня";
     if (d === 1) return "1 день";
@@ -52,155 +53,15 @@
     };
   }
 
-  function makePlayer(id, name, handle, status, tags, source, manager, days, values) {
-    return {
-      id: id,
-      name: name,
-      handle: handle,
-      status: status,
-      tags: tags,
-      source: source,
-      manager: manager,
-      lastGameDays: days.game,
-      lastDepositDays: days.deposit,
-      lastMessageDays: days.message,
-      lastReplyDays: days.reply,
-      trend: values.trend,
-      games: values.games,
-      deposits: values.deposits,
-      depositCount: values.depositCount,
-      messages: values.messages,
-      botOpenRate: values.botOpenRate,
-      pushOpenRate: values.pushOpenRate,
-      note: values.note,
-      timeline: values.timeline,
-    };
-  }
-
-  function demoPlayers() {
-    return [
-      makePlayer("crm-001", "Сергей Fast", "@fastserg", "active", ["VIP", "кэш", "дорогой лид"], "TG реклама", "Марина", { game: 2, deposit: 2, message: 1, reply: 1 }, {
-        trend: "растёт",
-        games: { 7: 5, 30: 18, 90: 47 },
-        deposits: { 7: 96000, 30: 334000, 90: 870000 },
-        depositCount: { 7: 3, 30: 9, 90: 24 },
-        messages: { 7: 4, 30: 12, 90: 34 },
-        botOpenRate: 88,
-        pushOpenRate: 61,
-        note: "Хорошо реагирует на конкретный стол и быстрый вход.",
-        timeline: ["2 дня назад депозит 40 000 ₽", "3 дня назад играл PLO5", "7 дней назад открыл турнирную рассылку"],
-      }),
-      makePlayer("crm-002", "Андрей Новик", "@and_novik", "ready", ["новичок", "ждет игру"], "Фриролл", "Роман", { game: 99, deposit: 1, message: 0, reply: 0 }, {
-        trend: "новый",
-        games: { 7: 0, 30: 0, 90: 0 },
-        deposits: { 7: 7000, 30: 7000, 90: 7000 },
-        depositCount: { 7: 1, 30: 1, 90: 1 },
-        messages: { 7: 7, 30: 7, 90: 7 },
-        botOpenRate: 100,
-        pushOpenRate: 0,
-        note: "Пополнил, но ещё не дошёл до первой игры.",
-        timeline: ["сегодня спросил про лимиты", "вчера депозит 7 000 ₽", "3 дня назад пришёл с фриролла"],
-      }),
-      makePlayer("crm-003", "Лена River", "@river_lena", "sleeping", ["турниры", "просела"], "Канал", "Марина", { game: 18, deposit: 31, message: 14, reply: 12 }, {
-        trend: "падает",
-        games: { 7: 0, 30: 2, 90: 19 },
-        deposits: { 7: 0, 30: 0, 90: 126000 },
-        depositCount: { 7: 0, 30: 0, 90: 7 },
-        messages: { 7: 0, 30: 2, 90: 9 },
-        botOpenRate: 63,
-        pushOpenRate: 47,
-        note: "Была активна в турнирах, лучше звать на расписание недели.",
-        timeline: ["18 дней не играла", "31 день без депозита", "последний клик по рассылке 22 дня назад"],
-      }),
-      makePlayer("crm-004", "Илья МТТ", "@ilya_mtt", "dialog", ["MTT", "сомневается"], "Лендинг", "Роман", { game: 99, deposit: 99, message: 2, reply: 2 }, {
-        trend: "прогрев",
-        games: { 7: 0, 30: 0, 90: 0 },
-        deposits: { 7: 0, 30: 0, 90: 0 },
-        depositCount: { 7: 0, 30: 0, 90: 0 },
-        messages: { 7: 5, 30: 5, 90: 5 },
-        botOpenRate: 71,
-        pushOpenRate: 0,
-        note: "Спрашивал гарантии и расписание, ушёл думать.",
-        timeline: ["2 дня назад ответил на условия", "4 дня назад спросил про MTT", "5 дней назад регистрация"],
-      }),
-      makePlayer("crm-005", "Макс 6max", "@max6max", "active", ["кэш", "регуляр"], "Рекомендация", "Дима", { game: 1, deposit: 6, message: 1, reply: 1 }, {
-        trend: "стабилен",
-        games: { 7: 8, 30: 27, 90: 73 },
-        deposits: { 7: 34000, 30: 149000, 90: 456000 },
-        depositCount: { 7: 2, 30: 8, 90: 19 },
-        messages: { 7: 6, 30: 18, 90: 41 },
-        botOpenRate: 79,
-        pushOpenRate: 52,
-        note: "Играет часто, не любит общие рассылки, лучше персонально.",
-        timeline: ["вчера играл NLH", "6 дней назад депозит 20 000 ₽", "8 дней назад получил персональный инвайт"],
-      }),
-      makePlayer("crm-006", "Олег Deep", "@deepoleg", "sleeping", ["VIP", "реактивация"], "TG реклама", "Марина", { game: 34, deposit: 46, message: 28, reply: 25 }, {
-        trend: "падает",
-        games: { 7: 0, 30: 0, 90: 11 },
-        deposits: { 7: 0, 30: 0, 90: 290000 },
-        depositCount: { 7: 0, 30: 0, 90: 5 },
-        messages: { 7: 0, 30: 1, 90: 8 },
-        botOpenRate: 42,
-        pushOpenRate: 29,
-        note: "Был крупный игрок. Нужен мягкий персональный возврат.",
-        timeline: ["34 дня не играл", "46 дней без депозита", "последняя активность после крупного турнира"],
-      }),
-      makePlayer("crm-007", "Никита PLO", "@plo_nikita", "ready", ["PLO", "готов играть"], "Чат TG", "Дима", { game: 9, deposit: 3, message: 0, reply: 0 }, {
-        trend: "растёт",
-        games: { 7: 1, 30: 5, 90: 5 },
-        deposits: { 7: 18000, 30: 54000, 90: 54000 },
-        depositCount: { 7: 1, 30: 3, 90: 3 },
-        messages: { 7: 8, 30: 11, 90: 11 },
-        botOpenRate: 91,
-        pushOpenRate: 66,
-        note: "Просит PLO-стол, если есть состав — писать сразу.",
-        timeline: ["сегодня спросил про PLO", "3 дня назад депозит 18 000 ₽", "9 дней назад первая игра"],
-      }),
-      makePlayer("crm-008", "Влад Классик", "@vladclassic", "closed", ["не подходит"], "Лендинг", "Роман", { game: 99, deposit: 99, message: 21, reply: 21 }, {
-        trend: "закрыт",
-        games: { 7: 0, 30: 0, 90: 0 },
-        deposits: { 7: 0, 30: 0, 90: 0 },
-        depositCount: { 7: 0, 30: 0, 90: 0 },
-        messages: { 7: 0, 30: 2, 90: 2 },
-        botOpenRate: 0,
-        pushOpenRate: 0,
-        note: "Не наш формат, не включать в рассылки.",
-        timeline: ["21 день назад закрыт менеджером", "отказался от условий"],
-      }),
-      makePlayer("crm-009", "Катя Bounty", "@kat_bounty", "active", ["турниры", "bounty"], "Канал", "Марина", { game: 4, deposit: 5, message: 3, reply: 3 }, {
-        trend: "стабилен",
-        games: { 7: 3, 30: 14, 90: 36 },
-        deposits: { 7: 22000, 30: 118000, 90: 312000 },
-        depositCount: { 7: 2, 30: 7, 90: 18 },
-        messages: { 7: 2, 30: 8, 90: 21 },
-        botOpenRate: 84,
-        pushOpenRate: 58,
-        note: "Лучше всего конвертируется на bounty-анонсы.",
-        timeline: ["4 дня назад турнир", "5 дней назад депозит 12 000 ₽", "открыла 3 из 4 последних рассылок"],
-      }),
-      makePlayer("crm-010", "Павел Holdem", "@pavel_holdem", "new", ["новый", "без депозита"], "Реклама", "Дима", { game: 99, deposit: 99, message: 1, reply: 1 }, {
-        trend: "новый",
-        games: { 7: 0, 30: 0, 90: 0 },
-        deposits: { 7: 0, 30: 0, 90: 0 },
-        depositCount: { 7: 0, 30: 0, 90: 0 },
-        messages: { 7: 3, 30: 3, 90: 3 },
-        botOpenRate: 100,
-        pushOpenRate: 0,
-        note: "Новый лид, нужно довести до первого депозита.",
-        timeline: ["вчера спросил как начать", "вчера пришёл с рекламы"],
-      }),
-    ];
-  }
-
   var segments = [
-    { key: "all", label: "Все", desc: "Вся база без исключения.", match: function (p) { return p.status !== "closed"; } },
-    { key: "needs_touch", label: "Пора написать", desc: "Новые, готовые к игре, просевшие и те, кто ждёт ответа.", match: needsTouch },
-    { key: "new_no_deposit", label: "Новые без депозита", desc: "Есть диалог, но нет первого депозита.", match: function (p) { return p.status !== "closed" && periodData(p).deposits <= 0 && (p.status === "new" || p.status === "dialog"); } },
-    { key: "deposited_no_game", label: "Депозит без игры", desc: "Пополнили, но не дошли до первой/следующей игры.", match: function (p) { return p.status !== "closed" && periodData(p).deposits > 0 && p.lastGameDays > 7; } },
-    { key: "inactive_14", label: "Не играли 14+ дней", desc: "Реактивация игроков с паузой по игре.", match: function (p) { return p.status !== "closed" && p.lastGameDays >= 14; } },
-    { key: "vip_drop", label: "VIP просели", desc: "Крупные игроки без игры или депозита.", match: function (p) { return p.status !== "closed" && hasTag(p, "VIP") && (p.lastGameDays >= 14 || p.lastDepositDays >= 21); } },
-    { key: "active_7", label: "Активные 7 дней", desc: "Играли или пополняли на этой неделе.", match: function (p) { return p.status !== "closed" && (p.lastGameDays <= 7 || p.lastDepositDays <= 7); } },
-    { key: "tournament", label: "Турнирные", desc: "Интерес к MTT, bounty и расписанию.", match: function (p) { return p.status !== "closed" && (hasTag(p, "турниры") || hasTag(p, "MTT") || hasTag(p, "bounty")); } },
+    { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
+    { key: "needs_touch", label: "Пора написать", desc: "Есть депозит без игры, нет push/бот-канала или давно не было CRM-касания.", match: needsTouch },
+    { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
+    { key: "deposited_no_game", label: "Депозит без игры", desc: "Есть депозит, но нет события игры за выбранный период.", match: function (p) { var pd = periodData(p); return pd.deposits > 0 && pd.games <= 0; } },
+    { key: "no_deposit", label: "Без депозита в CRM", desc: "За выбранный период в CRM-журнале нет депозитов.", match: function (p) { return periodData(p).deposits <= 0; } },
+    { key: "active_7", label: "Активность 7 дней", desc: "Есть игра, депозит или сообщение за последние 7 дней.", match: function (p) { var old = state.period; state.period = "7"; var pd = periodData(p); state.period = old; return pd.games > 0 || pd.deposits > 0 || pd.messages > 0; } },
+    { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
+    { key: "tournament", label: "Турнирные", desc: "Интерес к MTT, bounty, рейтингу или розыгрышам.", match: function (p) { return hasTag(p, "турниры") || hasTag(p, "MTT") || hasTag(p, "bounty") || hasTag(p, "рейтинг") || hasTag(p, "розыгрыши"); } },
   ];
 
   function hasTag(p, tag) {
@@ -208,46 +69,19 @@
   }
 
   function needsTouch(p) {
-    if (p.status === "closed") return false;
-    if (p.status === "new" || p.status === "ready") return true;
-    if (p.lastMessageDays <= 1 && p.lastReplyDays <= 1 && p.status !== "active") return true;
-    if (p.lastGameDays >= 14) return true;
-    if (p.lastDepositDays <= 7 && p.lastGameDays > 7) return true;
-    if (hasTag(p, "VIP") && p.lastDepositDays >= 21) return true;
+    var pd = periodData(p);
+    if (pd.deposits > 0 && pd.games <= 0) return true;
+    if (!(p.channels && (p.channels.bot || p.channels.push))) return true;
+    if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return true;
     return false;
   }
 
   function touchReason(p) {
-    if (p.status === "new") return "Новый лид: быстро дать условия и довести до первого депозита.";
-    if (p.status === "ready") return "Готов играть: нужен конкретный стол, время или менеджерский пинг.";
-    if (p.lastDepositDays <= 7 && p.lastGameDays > 7) return "Депозит уже есть, но до игры не дошёл.";
-    if (hasTag(p, "VIP") && p.lastDepositDays >= 21) return "VIP просел по депозитам, лучше персональное сообщение.";
-    if (p.lastGameDays >= 14) return "Не играл " + daysLabel(p.lastGameDays) + ", подходит для реактивации.";
-    return "Есть активность в переписке, нужно не потерять диалог.";
-  }
-
-  function statusLabel(s) {
-    var map = {
-      new: "Новый",
-      dialog: "В диалоге",
-      ready: "Готов играть",
-      active: "Активный",
-      sleeping: "Спящий",
-      closed: "Закрыт",
-    };
-    return map[s] || s;
-  }
-
-  function statusOptions(active) {
-    return ["new", "dialog", "ready", "active", "sleeping", "closed"].map(function (s) {
-      return "<option value=\"" + esc(s) + "\"" + (s === active ? " selected" : "") + ">" + esc(statusLabel(s)) + "</option>";
-    }).join("");
-  }
-
-  function statusBadgeClass(p) {
-    if (p.status === "active" || p.status === "ready") return "player-crm__badge player-crm__badge--good";
-    if (p.status === "sleeping" || p.status === "closed") return "player-crm__badge player-crm__badge--risk";
-    return "player-crm__badge";
+    var pd = periodData(p);
+    if (pd.deposits > 0 && pd.games <= 0) return "Есть депозит в CRM-журнале, но нет события игры за выбранный период.";
+    if (!(p.channels && (p.channels.bot || p.channels.push))) return "Нет доступного бот/push-канала, лучше связать Telegram или push.";
+    if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) return "Давно не было CRM-касания.";
+    return "Есть активность, можно проверить диалог.";
   }
 
   function segmentByKey(key) {
@@ -268,19 +102,19 @@
     var q = String(state.search || "").trim().toLowerCase();
     return segmentPlayers(state.filter).filter(function (p) {
       if (!q) return true;
-      var hay = [p.name, p.handle, p.status, p.source, p.manager, p.note].concat(p.tags || []).join(" ").toLowerCase();
+      var hay = [p.name, p.handle, p.source, p.manager, p.note].concat(p.tags || []).join(" ").toLowerCase();
       return hay.indexOf(q) >= 0;
     });
   }
 
   function sortForWork(a, b) {
     function score(p) {
+      var pd = periodData(p);
       var s = 0;
-      if (p.status === "new") s += 70;
-      if (p.status === "ready") s += 65;
-      if (p.lastDepositDays <= 7 && p.lastGameDays > 7) s += 55;
-      if (hasTag(p, "VIP") && p.lastGameDays >= 14) s += 50;
-      if (p.lastGameDays >= 14) s += 30;
+      if (pd.deposits > 0 && pd.games <= 0) s += 60;
+      if (!(p.channels && (p.channels.bot || p.channels.push))) s += 35;
+      if (hasTag(p, "VIP")) s += 25;
+      if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) s += 20;
       s -= Math.min(20, p.lastReplyDays || 0);
       return s;
     }
@@ -290,14 +124,13 @@
   function renderStats() {
     var el = document.getElementById("playerCrmStats");
     if (!el) return;
-    var active = state.players.filter(function (p) { return p.status !== "closed"; });
-    var pd = active.map(periodData);
+    var players = state.players;
+    var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var games = pd.reduce(function (sum, x) { return sum + x.games; }, 0);
-    var needs = active.filter(needsTouch).length;
-    var inactive = active.filter(function (p) { return p.lastGameDays >= 14; }).length;
+    var needs = players.filter(needsTouch).length;
     var stats = [
-      ["Игроков в базе", active.length],
+      ["Игроков в базе", players.length],
       ["Пора написать", needs],
       ["Депозиты за " + state.period + "д", money(deposits)],
       ["Игр за " + state.period + "д", games],
@@ -309,7 +142,7 @@
     if (anaPeriod) anaPeriod.textContent = state.period + " дней";
     var queueCount = document.getElementById("playerCrmQueueCount");
     if (queueCount) queueCount.textContent = needs + " задач";
-    return { active: active.length, needs: needs, inactive: inactive, deposits: deposits, games: games };
+    return { active: players.length, needs: needs, deposits: deposits, games: games };
   }
 
   function renderChips() {
@@ -335,9 +168,9 @@
       var pd = periodData(p);
       var cls = "player-crm__player" + (p.id === state.selectedId ? " player-crm__player--active" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-player=\"" + esc(p.id) + "\">" +
-        "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span><span class=\"" + statusBadgeClass(p) + "\">" + esc(statusLabel(p.status)) + "</span></span>" +
+        "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span></span>" +
         "<span class=\"player-crm__player-meta\">" + esc(p.handle) + " · " + esc(p.source) + " · " + esc(p.manager) + "</span>" +
-        "<span class=\"player-crm__player-note\">" + esc(pd.games) + " игр · " + esc(money(pd.deposits)) + " · не играл " + esc(daysLabel(p.lastGameDays)) + "</span>" +
+        "<span class=\"player-crm__player-note\">" + esc(pd.games) + " игр в CRM · " + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
         "</button>";
     }).join("");
   }
@@ -360,12 +193,11 @@
       return;
     }
     var pd = periodData(p);
-    if (hint) hint.textContent = p.handle + " · " + statusLabel(p.status);
+    if (hint) hint.textContent = p.handle || p.accountId || p.id || "игрок";
     var avg = pd.depositCount ? Math.round(pd.deposits / pd.depositCount) : 0;
     el.innerHTML =
       "<div class=\"player-crm__detail-head\">" +
         "<div><h3 class=\"player-crm__detail-title\">" + esc(p.name) + "</h3><div class=\"player-crm__detail-muted\">" + esc(p.handle) + " · " + esc(p.source) + " · менеджер " + esc(p.manager) + "</div></div>" +
-        "<span class=\"" + statusBadgeClass(p) + "\">" + esc(statusLabel(p.status)) + "</span>" +
       "</div>" +
       "<div>" + (p.tags || []).map(function (t) { return "<span class=\"player-crm__tag\">" + esc(t) + "</span>"; }).join("") + "</div>" +
       "<div class=\"player-crm__metrics\">" +
@@ -375,8 +207,8 @@
         metric("Сообщений", pd.messages) +
       "</div>" +
       "<div class=\"player-crm__metrics\">" +
-        metric("Последняя игра", daysLabel(p.lastGameDays)) +
         metric("Последний депозит", daysLabel(p.lastDepositDays)) +
+        metric("Последнее сообщение", daysLabel(p.lastMessageDays)) +
         metric("Открытия бота", pct(p.botOpenRate)) +
         metric("Открытия push", pct(p.pushOpenRate)) +
       "</div>" +
@@ -390,7 +222,6 @@
       "<div class=\"player-crm__edit\" data-crm-edit-player=\"" + esc(p.accountId || p.id) + "\">" +
         "<h4 class=\"player-crm__edit-title\">CRM-поля</h4>" +
         "<div class=\"player-crm__form-grid\">" +
-          "<label><span>Статус</span><select id=\"playerCrmEditStatus\">" + statusOptions(p.status) + "</select></label>" +
           "<label><span>Менеджер</span><input id=\"playerCrmEditManager\" value=\"" + esc(p.manager || "") + "\" /></label>" +
           "<label><span>Источник</span><input id=\"playerCrmEditSource\" value=\"" + esc(p.source || "") + "\" /></label>" +
           "<label><span>Теги через запятую</span><input id=\"playerCrmEditTags\" value=\"" + esc((p.tags || []).join(", ")) + "\" /></label>" +
@@ -441,7 +272,7 @@
     }
     el.innerHTML = items.map(function (p) {
       return "<article class=\"player-crm__queue-item\">" +
-        "<div><p class=\"player-crm__queue-title\">" + esc(p.name) + " · " + esc(statusLabel(p.status)) + "</p><p class=\"player-crm__queue-reason\">" + esc(touchReason(p)) + "</p></div>" +
+        "<div><p class=\"player-crm__queue-title\">" + esc(p.name) + "</p><p class=\"player-crm__queue-reason\">" + esc(touchReason(p)) + "</p></div>" +
         "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-open-player=\"" + esc(p.id) + "\">Открыть</button>" +
       "</article>";
     }).join("");
@@ -466,7 +297,7 @@
     var sel = document.getElementById("playerCrmBroadcastSegment");
     if (!sel) return;
     var prev = sel.value || state.filter || "needs_touch";
-    sel.innerHTML = segments.filter(function (s) { return s.key !== "closed"; }).map(function (seg) {
+    sel.innerHTML = segments.map(function (seg) {
       return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + "</option>";
     }).join("");
     sel.value = segmentByKey(prev).key;
@@ -485,17 +316,11 @@
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
     if (!el) return;
-    var active = state.players.filter(function (p) { return p.status !== "closed"; });
-    var byStatus = ["new", "dialog", "ready", "active", "sleeping"].map(function (s) {
-      return { label: statusLabel(s), value: active.filter(function (p) { return p.status === s; }).length };
-    });
-    var maxStatus = Math.max(1, byStatus.reduce(function (m, x) { return Math.max(m, x.value); }, 0));
     var segRows = segments.filter(function (s) { return s.key !== "all"; }).map(function (s) {
       return { label: s.label, value: segmentPlayers(s.key).length };
     });
     var maxSeg = Math.max(1, segRows.reduce(function (m, x) { return Math.max(m, x.value); }, 0));
     el.innerHTML =
-      "<div class=\"player-crm__segment-card\"><h4>По статусам</h4>" + bars(byStatus, maxStatus) + "</div>" +
       "<div class=\"player-crm__segment-card\"><h4>По рабочим сегментам</h4>" + bars(segRows, maxSeg) + "</div>" +
       "<div class=\"player-crm__segment-card\"><h4>Источники</h4>" + renderSourceAnalytics() + "</div>" +
       "<div class=\"player-crm__segment-card\"><h4>Последние CRM-кампании</h4>" + renderCampaigns() + "</div>";
@@ -505,9 +330,9 @@
     var rows = state.sourceAnalytics || [];
     if (!rows.length) return "<p class=\"player-crm__detail-muted\">Источники появятся после загрузки живой базы.</p>";
     return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
-      "<th>Источник</th><th>Игроки</th><th>Активные</th><th>Нужны касания</th><th>Визиты</th><th>Игры 30д</th><th>Депозиты 30д</th><th>Fee</th><th>Push</th>" +
+      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Игры 30д</th><th>Депозиты 30д</th><th>Fee</th><th>Push</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.active || 0) + "</td><td>" + esc(r.needsTouch || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(r.games30 || 0) + "</td><td>" + esc(money(r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
+        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(r.games30 || 0) + "</td><td>" + esc(money(r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
 
@@ -581,8 +406,11 @@
       hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     } catch (eCred) {}
     if (!base || !hasCred) {
-      state.players = demoPlayers();
-      state.source = "demo";
+      state.players = [];
+      state.campaigns = [];
+      state.sourceAnalytics = [];
+      state.permissions = null;
+      state.source = "no-auth";
       state.loading = false;
       state.loaded = true;
       renderAll();
@@ -599,19 +427,19 @@
           state.pushConfigured = data.pushConfigured === true;
           state.source = data.source || "api";
         } else {
-          state.players = demoPlayers();
+          state.players = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
           state.permissions = null;
-          state.source = "demo";
+          state.source = "empty";
         }
       })
       .catch(function () {
-        state.players = demoPlayers();
+        state.players = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
         state.permissions = null;
-        state.source = "demo";
+        state.source = "error";
       })
       .then(function () {
         state.loading = false;
@@ -649,7 +477,7 @@
       hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     } catch (eCred) {}
     if (!base || !hasCred) {
-      if (out) out.textContent = "Нет авторизации/API: локально доступен только просмотр демо-аудитории (" + players.length + " игроков).";
+      if (out) out.textContent = "Нет авторизации/API: живая аудитория недоступна.";
       return;
     }
     fetch(base + "/api/player-crm", {
@@ -701,7 +529,6 @@
     var payload = {
       action: "save_player",
       accountId: p.accountId || p.id,
-      status: val("playerCrmEditStatus"),
       manager: val("playerCrmEditManager"),
       source: val("playerCrmEditSource"),
       tags: val("playerCrmEditTags"),
