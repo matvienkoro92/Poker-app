@@ -508,6 +508,9 @@ html.poker-telegram-miniapp .chat-contacts .chat-guest-cta {
   line-height: 1;
   white-space: nowrap;
 }
+[data-theme="light"] .chat-msg__status-level {
+  color: #64748b;
+}
 .chat-msg__verified {
   display: inline-flex;
   align-items: center;

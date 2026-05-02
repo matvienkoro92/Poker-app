@@ -632,6 +632,37 @@
   font-weight: 900;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
+[data-theme="light"] .profile-hero-card .profile-status {
+  border-color: rgba(217, 119, 6, 0.34);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(14, 165, 233, 0.08), transparent 30%),
+    radial-gradient(circle at 88% 22%, rgba(250, 204, 21, 0.14), transparent 32%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 248, 237, 0.8));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 10px 24px rgba(217, 119, 6, 0.08);
+}
+
+[data-theme="light"] .profile-hero-card .profile-status__title,
+[data-theme="light"] .profile-hero-card .profile-status__progress-text,
+[data-theme="light"] .profile-hero-card .profile-status__hint,
+[data-theme="light"] .profile-hero-card .profile-status__loading {
+  color: #6b3f0b;
+  text-shadow: none;
+}
+
+[data-theme="light"] .profile-hero-card .profile-status__title::before,
+[data-theme="light"] .profile-hero-card .profile-status__title::after {
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.34);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+}
+
+[data-theme="light"] .profile-hero-card .profile-friends__btn {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.56);
+  border-color: rgba(148, 163, 184, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+}
 .profile-friends__btn:hover {
   background: rgba(255, 255, 255, 0.08);
 }
@@ -688,4 +719,3 @@
 [data-theme="light"] .profile-chat-push__checkbox {
   accent-color: #c2410c;
 }
-

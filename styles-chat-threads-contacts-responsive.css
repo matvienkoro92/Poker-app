@@ -683,6 +683,9 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
   line-height: 1;
   white-space: nowrap;
 }
+[data-theme="light"] .chat-contact__status-level {
+  color: #64748b;
+}
 .chat-contact__name-stack {
   display: flex;
   flex-direction: column;

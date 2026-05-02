@@ -761,6 +761,70 @@ body[data-view="cashout"] .cashout-manager-block > .subtitle {
   letter-spacing: 0;
 }
 
+[data-theme="light"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="light"] body[data-view="download"] .download-page--active:not([data-download-page="main"]),
+[data-theme="light"] body[data-view="cashout"] .cashout-manager-block {
+  border-color: rgba(251, 146, 60, 0.28);
+  background:
+    radial-gradient(circle at 96% 4%, rgba(251, 146, 60, 0.1), transparent 28%),
+    radial-gradient(circle at 8% 0%, rgba(255, 237, 213, 0.76), transparent 32%),
+    linear-gradient(145deg, rgba(255, 250, 243, 0.98), rgba(255, 237, 213, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84), 0 14px 32px rgba(234, 88, 12, 0.08);
+}
+
+[data-theme="light"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout::after,
+[data-theme="light"] body[data-view="download"] .download-page--active:not([data-download-page="main"])::after,
+[data-theme="light"] body[data-view="cashout"] .cashout-manager-block::after {
+  color: rgba(194, 65, 12, 0.04);
+}
+
+[data-theme="light"] body[data-view="download"] .download-title,
+[data-theme="light"] body[data-view="cashout"] .title,
+[data-theme="light"] body[data-view="cashout"] .cashout-manager-block > .subtitle {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+[data-theme="light"] body[data-view="download"] .download-quote {
+  border-color: rgba(251, 146, 60, 0.24);
+  background: rgba(255, 255, 255, 0.56);
+  color: #7c2d12;
+}
+
+[data-theme="light"] body[data-view="download"] .download-app--xpoker,
+[data-theme="light"] body[data-view="download"] .download-app--pppoker,
+[data-theme="light"] body[data-view="download"] .download-app--supremapoker {
+  border-color: rgba(148, 163, 184, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 44%),
+    linear-gradient(145deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.9));
+  color: #1f2937;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+[data-theme="light"] body[data-view="download"] .download-app--xpoker::before,
+[data-theme="light"] body[data-view="download"] .download-app--pppoker::before,
+[data-theme="light"] body[data-view="download"] .download-app--supremapoker::before {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] body[data-view="download"] .download-image,
+[data-theme="light"] body[data-view="cashout"] .cashout-image {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(255, 250, 243, 0.92);
+  box-shadow: 0 0 24px rgba(234, 88, 12, 0.12), inset 0 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] body[data-view="cashout"] .cashout-now-subtitle {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.08);
+  color: #16a34a;
+}
+
+[data-theme="light"] body[data-view="cashout"] .cashout-text {
+  color: #334155;
+}
+
 body[data-view="cashout"] .cashout-manager-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
