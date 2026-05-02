@@ -1,7 +1,13 @@
 function initRaffles() {
   if (initRaffles.__listenersBound === true) {
     var currentRoot = document.querySelector('.view[data-view="raffles"]');
-    if (currentRoot && initRaffles.__boundRoot === currentRoot) {
+    var sameRoot = currentRoot && initRaffles.__boundRoot === currentRoot;
+    var sameControls =
+      document.getElementById("raffleCancelBtn") === initRaffles.__boundRaffleCancelBtn &&
+      document.getElementById("raffleDeleteBtn") === initRaffles.__boundRaffleDeleteBtn &&
+      document.getElementById("raffleCompleteBtn") === initRaffles.__boundRaffleCompleteBtn &&
+      document.getElementById("rafflesCompleted") === initRaffles.__boundRafflesCompleted;
+    if (sameRoot && sameControls) {
       if (typeof initRaffles.__reload === "function") initRaffles.__reload();
       return;
     }
@@ -2093,51 +2099,84 @@ function initRaffles() {
     });
   }
 
-  if (raffleCancelBtn) {
-    raffleCancelBtn.addEventListener("click", function () {
-      if (!rafflesIsAdmin) return;
-      if (!currentRaffleId) {
-        if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
-        return;
-      }
-      if (!base || !pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
-        return;
-      }
-      var doCancel = function () {
-        raffleCancelBtn.disabled = true;
-        fetch(base + "/api/raffles", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "cancel", raffleId: currentRaffleId })),
+  function runActiveRaffleAdminAction(action, button, confirmMessage, successMessage, errorMessage, afterOk) {
+    if (!rafflesIsAdmin) return;
+    if (!currentRaffleId) {
+      if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
+      return;
+    }
+    if (!base || !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      return;
+    }
+    var doAction = function () {
+      var raffleIdForAction = currentRaffleId;
+      if (button) button.disabled = true;
+      fetch(base + "/api/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: action, raffleId: raffleIdForAction })),
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
         })
-          .then(function (r) {
-            return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
-          })
-          .then(function (data) {
-            raffleCancelBtn.disabled = false;
-            if (data && data.ok) {
-              if (currentRaffleId) focusRaffleAfterMutation(null);
-              clearRafflesCache();
-              if (tg && tg.showAlert) tg.showAlert("Розыгрыш отменён");
-              loadRaffles();
-            } else if (tg && tg.showAlert) {
-              tg.showAlert((data && data.error) || "Ошибка отмены розыгрыша");
-            }
-          })
-          .catch(function () {
-            raffleCancelBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-          });
-      };
-      if (tg && tg.showConfirm) {
-        tg.showConfirm("Отменить розыгрыш? Это действие нельзя будет отменить.", function (ok) {
-          if (ok) doCancel();
+        .then(function (data) {
+          if (button) button.disabled = false;
+          if (data && data.ok) {
+            if (typeof afterOk === "function") afterOk(raffleIdForAction, data);
+            clearRafflesCache();
+            if (tg && tg.showAlert) tg.showAlert(successMessage);
+            loadRaffles();
+          } else if (tg && tg.showAlert) {
+            tg.showAlert((data && data.error) || errorMessage);
+          }
+        })
+        .catch(function () {
+          if (button) button.disabled = false;
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
-      } else {
-        var sure = window.confirm("Точно отменить этот розыгрыш? Это действие нельзя будет отменить.");
-        if (sure) doCancel();
+    };
+    if (tg && tg.showConfirm) {
+      tg.showConfirm(confirmMessage, function (ok) {
+        if (ok) doAction();
+      });
+    } else {
+      var sure = window.confirm(confirmMessage);
+      if (sure) doAction();
+    }
+  }
+
+  function cancelActiveRaffle(button) {
+    runActiveRaffleAdminAction(
+      "cancel",
+      button || raffleCancelBtn,
+      "Отменить розыгрыш? Это действие нельзя будет отменить.",
+      "Розыгрыш отменён",
+      "Ошибка отмены розыгрыша",
+      function () {
+        if (currentRaffleId) focusRaffleAfterMutation(null);
       }
+    );
+  }
+
+  function deleteActiveRaffle(button) {
+    runActiveRaffleAdminAction(
+      "delete",
+      button || raffleDeleteBtn,
+      "Удалить этот розыгрыш окончательно?",
+      "Розыгрыш удалён",
+      "Ошибка удаления розыгрыша",
+      function (deletedRaffleId) {
+        if (rafflesFocusedActiveId === deletedRaffleId) focusRaffleAfterMutation(null);
+        if (currentRaffleId === deletedRaffleId) currentRaffleId = null;
+      }
+    );
+  }
+
+  if (raffleCancelBtn) {
+    raffleCancelBtn.addEventListener("click", function (e) {
+      if (e) e.__pokerRaffleAdminHandled = true;
+      cancelActiveRaffle(raffleCancelBtn);
     });
   }
 
@@ -2190,52 +2229,21 @@ function initRaffles() {
   }
 
   if (raffleDeleteBtn) {
-    raffleDeleteBtn.addEventListener("click", function () {
-      if (!rafflesIsAdmin) return;
-      if (!currentRaffleId) {
-        if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
-        return;
-      }
-      if (!base || !pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
-        return;
-      }
-      var doDelete = function () {
-        var deletingRaffleId = currentRaffleId;
-        raffleDeleteBtn.disabled = true;
-        fetch(base + "/api/raffles", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "delete", raffleId: deletingRaffleId })),
-        })
-          .then(function (r) {
-            return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
-          })
-          .then(function (data) {
-            raffleDeleteBtn.disabled = false;
-            if (data && data.ok) {
-              if (rafflesFocusedActiveId === deletingRaffleId) focusRaffleAfterMutation(null);
-              if (currentRaffleId === deletingRaffleId) currentRaffleId = null;
-              clearRafflesCache();
-              if (tg && tg.showAlert) tg.showAlert("Розыгрыш удалён");
-              loadRaffles();
-            } else if (tg && tg.showAlert) {
-              tg.showAlert((data && data.error) || "Ошибка удаления розыгрыша");
-            }
-          })
-          .catch(function () {
-            raffleDeleteBtn.disabled = false;
-            if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-          });
-      };
-      if (tg && tg.showConfirm) {
-        tg.showConfirm("Удалить этот розыгрыш окончательно?", function (ok) {
-          if (ok) doDelete();
-        });
-      } else {
-        var sure = window.confirm("Точно удалить этот розыгрыш окончательно?");
-        if (sure) doDelete();
-      }
+    raffleDeleteBtn.addEventListener("click", function (e) {
+      if (e) e.__pokerRaffleAdminHandled = true;
+      deleteActiveRaffle(raffleDeleteBtn);
+    });
+  }
+
+  if (rafflesRoot && !rafflesRoot.__pokerActiveRaffleAdminFallbackBound) {
+    rafflesRoot.__pokerActiveRaffleAdminFallbackBound = true;
+    rafflesRoot.addEventListener("click", function (e) {
+      if (!e || e.__pokerRaffleAdminHandled) return;
+      var btn = e.target && e.target.closest ? e.target.closest("#raffleCancelBtn, #raffleDeleteBtn") : null;
+      if (!btn || !rafflesRoot.contains(btn)) return;
+      e.__pokerRaffleAdminHandled = true;
+      if (btn.id === "raffleCancelBtn") cancelActiveRaffle(btn);
+      else if (btn.id === "raffleDeleteBtn") deleteActiveRaffle(btn);
     });
   }
 
@@ -2455,6 +2463,10 @@ function initRaffles() {
 
   initRaffles.__listenersBound = true;
   initRaffles.__boundRoot = rafflesRoot;
+  initRaffles.__boundRaffleCancelBtn = raffleCancelBtn;
+  initRaffles.__boundRaffleDeleteBtn = raffleDeleteBtn;
+  initRaffles.__boundRaffleCompleteBtn = raffleCompleteBtn;
+  initRaffles.__boundRafflesCompleted = rafflesCompleted;
   initRaffles.__reload = function () {
     loadRaffles();
   };
