@@ -21,7 +21,7 @@ function setDownloadPage(pageName) {
 }
 
 function pokerGetViewNodes() {
-  return document.querySelectorAll("[data-view]");
+  return document.querySelectorAll(".view[data-view]");
 }
 
 /** Inert только у экранов .view — не у body[data-view] и пр., иначе весь документ (в т.ч. .bottom-nav) перестаёт получать клики. */
@@ -226,6 +226,8 @@ function setView(viewName, navOpts) {
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
+    document.body.classList.remove("view--active");
+    document.documentElement.classList.remove("view--active");
     try {
       if (typeof window.__pokerSyncProfileGuestWebsiteMode === "function") {
         window.__pokerSyncProfileGuestWebsiteMode();

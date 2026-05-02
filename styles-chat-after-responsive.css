@@ -845,6 +845,17 @@ html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
   --chat-input-lift: 0px !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area textarea,
+html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area textarea {
+  touch-action: manipulation !important;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header,

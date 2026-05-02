@@ -801,6 +801,16 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
   bottom: calc(var(--chat-ios-pwa-thread-composer-bottom, clamp(272px, calc(36vh + 52px), 424px)) + var(--chat-composer-edge-gap, 2px)) !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area textarea,
+html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area textarea {
+  touch-action: manipulation !important;
+  -webkit-user-select: text;
+  user-select: text;
 }
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header {

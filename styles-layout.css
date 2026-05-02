@@ -14,7 +14,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 8px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
+  padding: 9px max(12px, var(--app-gutter), env(safe-area-inset-right, 0px))
     max(6px, env(safe-area-inset-bottom, 0px)) max(12px, var(--app-gutter), env(safe-area-inset-left, 0px));
   min-height: 56px;
   /* Непрозрачная база + градиент: иначе под backdrop-filter на iOS при скролле/PWA «просвечивает» лента */
@@ -23,7 +23,7 @@
   /* backdrop-filter + оверскролл в WKWebView дают «отрыв» таббара от низа — только сплошная подложка */
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  border-top: 1px solid rgba(148, 163, 184, 0.32);
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -69,26 +69,50 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   flex: 1;
   min-width: 0;
   max-width: 120px;
-  border: none;
-  border-radius: 12px;
-  background: var(--nav-item-bg);
+  min-height: 50px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 58%),
+    var(--nav-item-bg);
   color: var(--text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 6px 4px 8px;
-  border-radius: 999px;
+  gap: 3px;
+  padding: 6px 5px 7px;
+  border-radius: 18px;
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   line-height: 1.2;
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
   overflow: visible;
   box-sizing: border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 1px 0 rgba(255, 255, 255, 0.02);
+  transform: translate3d(0, 0, 0);
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+.bottom-nav__item:hover {
+  color: var(--text);
+  border-color: rgba(148, 163, 184, 0.24);
+  transform: translate3d(0, -1px, 0);
+}
+.bottom-nav__item:active {
+  transform: translate3d(0, 0, 0) scale(0.97);
+}
+.bottom-nav__item:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 68%, white);
+  outline-offset: 2px;
 }
 .bottom-nav__item .bottom-nav__label {
   line-height: 1.2;
@@ -102,15 +126,32 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 .bottom-nav__item:nth-child(3),
 .bottom-nav__chat-wrap .bottom-nav__item {
   font-size: 10px;
-  padding: 6px 8px 8px;
+  padding: 6px 8px 7px;
 }
 
 .bottom-nav__icon-wrap {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
 }
 .bottom-nav__icon {
-  font-size: 18px;
+  width: 25px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: currentColor;
+}
+.bottom-nav__icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 .bottom-nav__dot {
   position: absolute;
@@ -125,8 +166,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 .bottom-nav__dot.bottom-nav__dot--on { display: block; }
 .bottom-nav__badge {
   position: absolute;
-  top: -6px;
-  right: -8px;
+  top: -7px;
+  right: -10px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
@@ -137,6 +178,8 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   border-radius: 9px;
   background: #ef4444;
   color: #fff;
+  border: 2px solid var(--overscroll-canvas);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.32);
   display: none;
   box-sizing: border-box;
 }
@@ -146,13 +189,25 @@ html.app--tg-bottom-nav-inset .bottom-nav {
 
 .bottom-nav__item:nth-child(3) .bottom-nav__icon,
 .bottom-nav__chat-wrap .bottom-nav__icon {
-  font-size: 20px;
+  width: 26px;
+  height: 26px;
 }
 
 .bottom-nav__item--active {
-  color: var(--btn-on-accent);
-  background: linear-gradient(135deg, #f97316, #fb923c);
-  box-shadow: 0 8px 18px rgba(248, 113, 22, 0.6);
+  color: #fff8ed;
+  border-color: rgba(251, 146, 60, 0.55);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.34), transparent 48%),
+    linear-gradient(135deg, #f97316, #fb923c);
+  box-shadow:
+    0 10px 24px rgba(248, 113, 22, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  transform: translate3d(0, -2px, 0);
+}
+.bottom-nav__item--active .bottom-nav__icon {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 [data-theme="gold"] .bottom-nav__item.bottom-nav__item--active {
@@ -168,6 +223,9 @@ html.app--tg-bottom-nav-inset .bottom-nav {
     0 0 20px rgba(255, 198, 74, 0.24),
     inset 0 1px 0 rgba(255, 250, 232, 0.62),
     inset 0 -10px 18px rgba(54, 27, 5, 0.22);
+}
+[data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+  background: rgba(255, 245, 215, 0.14);
 }
 [data-theme="gold"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
   filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
@@ -189,6 +247,7 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active {
 }
 html.app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
 body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+  background: rgba(255, 245, 215, 0.14);
   filter: drop-shadow(0 0 5px rgba(255, 198, 74, 0.42));
 }
 
@@ -224,7 +283,8 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__i
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
     max-width: none;
-    padding: 6px 2px 8px;
+    min-height: 48px;
+    padding: 6px 2px 7px;
     font-size: 10px;
     letter-spacing: 0.02em;
   }
@@ -232,25 +292,29 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__i
     max-width: none;
   }
   .bottom-nav__icon {
-    font-size: 16px;
+    width: 24px;
+    height: 24px;
   }
-  .bottom-nav__item:nth-child(3) .bottom-nav__icon,
-  .bottom-nav__chat-wrap .bottom-nav__icon {
-    font-size: 18px;
+  .bottom-nav__icon svg {
+    width: 21px;
+    height: 21px;
   }
 }
 @media (max-width: 360px) {
   .bottom-nav__item,
   .bottom-nav__chat-wrap .bottom-nav__item {
     font-size: 9px;
-    padding: 4px 1px 6px;
+    min-height: 46px;
+    padding: 5px 1px 6px;
+    border-radius: 16px;
   }
   .bottom-nav__icon {
-    font-size: 14px;
+    width: 22px;
+    height: 22px;
   }
-  .bottom-nav__item:nth-child(3) .bottom-nav__icon,
-  .bottom-nav__chat-wrap .bottom-nav__icon {
-    font-size: 16px;
+  .bottom-nav__icon svg {
+    width: 19px;
+    height: 19px;
   }
 }
 
@@ -610,11 +674,11 @@ body[data-view="spring-rating"] #app.app,
 body[data-view="raffles"] #app.app,
 body[data-view="profile"] #app.app,
 body[data-view="video-lessons"] #app.app {
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   align-self: stretch !important;
   min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -629,18 +693,23 @@ body[data-view="spring-rating"] #app.app .card,
 body[data-view="raffles"] #app.app .card,
 body[data-view="profile"] #app.app .card,
 body[data-view="video-lessons"] #app.app .card {
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
+  flex-shrink: 1 !important;
   width: 100% !important;
   max-width: 420px !important;
   min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
 }
 body[data-view="video-lessons"] #app.app .card .card__content {
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -655,9 +724,11 @@ body[data-view="cashout"] #app.app .card .card__content,
 body[data-view="spring-rating"] #app.app .card .card__content,
 body[data-view="raffles"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content {
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -674,22 +745,59 @@ body[data-view="profile"] #app.app .card .card__content {
   box-sizing: border-box !important;
 }
 
+body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
+body[data-view="home"] #app.app .card .card__content > .view--active[data-view="home"],
+body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
+body[data-view="spring-rating"] #app.app .card .card__content > .view--active[data-view="spring-rating"],
+body[data-view="raffles"] #app.app .card .card__content > .view--active[data-view="raffles"],
+body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
+body[data-view="video-lessons"] #app.app .card .card__content > .view--active[data-view="video-lessons"] {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 html:has(body[data-view="download"]),
 html.app-view-download-html-scroll,
+html:has(body[data-view="home"]),
+html.app-view-home-html-scroll,
 html:has(body[data-view="cashout"]),
 html.app-view-cashout-html-scroll,
+html:has(body[data-view="spring-rating"]),
+html.app-view-spring-rating-html-scroll,
+html:has(body[data-view="raffles"]),
+html.app-view-raffles-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
+html:has(body[data-view="video-lessons"]),
+html.app-view-video-lessons-html-scroll,
 html:has(body[data-view="download"]) body,
 html.app-view-download-html-scroll body,
+html:has(body[data-view="home"]) body,
+html.app-view-home-html-scroll body,
 html:has(body[data-view="cashout"]) body,
 html.app-view-cashout-html-scroll body,
+html:has(body[data-view="spring-rating"]) body,
+html.app-view-spring-rating-html-scroll body,
+html:has(body[data-view="raffles"]) body,
+html.app-view-raffles-html-scroll body,
 html:has(body[data-view="profile"]) body,
 html.app-view-profile-html-scroll body,
+html:has(body[data-view="video-lessons"]) body,
+html.app-view-video-lessons-html-scroll body {
+  overscroll-behavior-y: none !important;
+}
+
 body[data-view="download"] #app.app .card .card__content,
+body[data-view="home"] #app.app .card .card__content,
 body[data-view="cashout"] #app.app .card .card__content,
-body[data-view="profile"] #app.app .card .card__content {
-  overscroll-behavior-y: auto !important;
+body[data-view="spring-rating"] #app.app .card .card__content,
+body[data-view="raffles"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content,
+body[data-view="video-lessons"] #app.app .card .card__content {
+  overscroll-behavior-y: contain !important;
 }
 
 body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
@@ -712,6 +820,9 @@ body[data-view="home"] #app.app .card .card__content {
   html:has(body[data-view="download"]) .card .card__content,
   html.app-view-download-html-scroll .card .card__content,
   body[data-view="download"] #app.app .card .card__content,
+  html:has(body[data-view="cashout"]) .card .card__content,
+  html.app-view-cashout-html-scroll .card .card__content,
+  body[data-view="cashout"] #app.app .card .card__content,
   html:has(body[data-view="profile"]) .card .card__content,
   html.app-view-profile-html-scroll .card .card__content,
   body[data-view="profile"] #app.app .card .card__content {
@@ -728,6 +839,9 @@ html.poker-ios-pwa body[data-view="home"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="download"]) .card .card__content,
 html.poker-ios-pwa.app-view-download-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="cashout"]) .card .card__content,
+html.poker-ios-pwa.app-view-cashout-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="cashout"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
 html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {

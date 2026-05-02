@@ -375,20 +375,20 @@ a.home-mini-icon-item {
   gap: 8px;
   min-width: 0;
   padding: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(214, 163, 84, 0.24);
   border-radius: 16px;
-  background: rgba(15, 23, 42, 0.34);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background: rgba(13, 17, 26, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.05);
 }
 
 .download-app-group--poker21 {
-  border-color: rgba(248, 113, 113, 0.34);
-  background: linear-gradient(180deg, rgba(127, 29, 29, 0.24), rgba(15, 23, 42, 0.34));
+  border-color: rgba(246, 213, 138, 0.42);
+  background: linear-gradient(180deg, rgba(91, 60, 22, 0.32), rgba(13, 17, 26, 0.7));
 }
 
 .download-app-group--xpoker {
-  border-color: rgba(125, 211, 252, 0.28);
-  background: linear-gradient(180deg, rgba(14, 116, 144, 0.16), rgba(15, 23, 42, 0.34));
+  border-color: rgba(214, 163, 84, 0.3);
+  background: linear-gradient(180deg, rgba(38, 47, 61, 0.36), rgba(13, 17, 26, 0.64));
 }
 
 .download-app-group .download-app {
@@ -401,8 +401,8 @@ a.home-mini-icon-item {
   min-height: 74px;
   border-radius: 14px;
   padding: 14px 12px;
-  background: linear-gradient(145deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.78));
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(145deg, rgba(20, 24, 34, 0.94), rgba(7, 10, 17, 0.96));
+  border: 1px solid rgba(214, 163, 84, 0.32);
   color: var(--text);
   font-size: 14px;
   font-weight: 850;
@@ -416,24 +416,24 @@ a.home-mini-icon-item {
     transform 0.2s ease,
     border-color 0.2s ease;
   box-shadow:
-    0 10px 22px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 10px 22px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 240, 200, 0.05);
 }
 .download-app::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  background: linear-gradient(180deg, rgba(255, 240, 200, 0.1) 0%, transparent 52%);
   pointer-events: none;
   border-radius: inherit;
 }
 .download-app:hover {
-  background: linear-gradient(145deg, rgba(51, 65, 85, 0.86), rgba(30, 41, 59, 0.82));
-  border-color: rgba(125, 211, 252, 0.36);
+  background: linear-gradient(145deg, rgba(37, 31, 21, 0.96), rgba(13, 17, 26, 0.98));
+  border-color: rgba(246, 213, 138, 0.58);
   box-shadow:
-    0 14px 28px rgba(14, 165, 233, 0.16),
-    0 0 0 1px rgba(248, 250, 252, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 14px 28px rgba(214, 163, 84, 0.16),
+    0 0 0 1px rgba(255, 240, 200, 0.08),
+    inset 0 1px 0 rgba(255, 240, 200, 0.1);
   transform: translateY(-2px);
   color: var(--btn-on-accent);
 }
@@ -445,33 +445,33 @@ a.home-mini-icon-item {
 }
 
 .download-app--poker21 {
-  background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
-  border: 1px solid rgba(254, 202, 202, 0.5);
-  color: #fff;
+  background: linear-gradient(145deg, #f6d58a 0%, #d6a354 54%, #8f5f20 100%);
+  border: 1px solid rgba(255, 236, 181, 0.68);
+  color: #171008;
   box-shadow:
-    0 6px 20px rgba(185, 28, 28, 0.4),
-    0 0 20px rgba(254, 202, 202, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 8px 24px rgba(214, 163, 84, 0.28),
+    0 0 18px rgba(246, 213, 138, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .download-app--poker21:hover {
-  background: linear-gradient(145deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
-  border-color: rgba(254, 226, 226, 0.7);
+  background: linear-gradient(145deg, #ffe8a6 0%, #e8b967 54%, #a06a22 100%);
+  border-color: rgba(255, 244, 204, 0.78);
   box-shadow:
-    0 12px 32px rgba(185, 28, 28, 0.5),
-    0 0 24px rgba(254, 202, 202, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    0 12px 30px rgba(214, 163, 84, 0.34),
+    0 0 24px rgba(246, 213, 138, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
   transform: translateY(-2px);
-  color: #fff;
+  color: #171008;
 }
 
 /* Xpoker / PPPoker / Supremapoker: только обводка, без цветной заливки */
 .download-app--xpoker,
 .download-app--pppoker,
 .download-app--supremapoker {
-  background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(145deg, rgba(13, 17, 26, 0.66), rgba(6, 8, 13, 0.72));
+  border: 1px solid rgba(214, 163, 84, 0.32);
   color: var(--text);
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.035);
 }
 .download-app--xpoker::before,
 .download-app--pppoker::before,
@@ -481,9 +481,9 @@ a.home-mini-icon-item {
 .download-app--xpoker:hover,
 .download-app--pppoker:hover,
 .download-app--supremapoker:hover {
-  background: rgba(248, 250, 252, 0.06);
-  border-color: rgba(248, 250, 252, 0.28);
-  box-shadow: none;
+  background: linear-gradient(145deg, rgba(37, 31, 21, 0.78), rgba(13, 17, 26, 0.86));
+  border-color: rgba(246, 213, 138, 0.54);
+  box-shadow: 0 10px 24px rgba(214, 163, 84, 0.12);
   color: var(--text);
   transform: translateY(-2px);
 }
@@ -500,11 +500,11 @@ a.home-mini-icon-item {
   min-height: 66px;
   padding: 10px 11px;
   border-radius: 12px;
-  color: rgba(226, 232, 240, 0.92);
+  color: rgba(244, 234, 214, 0.92);
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.66));
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    linear-gradient(180deg, rgba(11, 14, 22, 0.82), rgba(5, 7, 12, 0.78));
+  border: 1px solid rgba(214, 163, 84, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.04);
   pointer-events: none;
 }
 
@@ -513,14 +513,14 @@ a.home-mini-icon-item {
   line-height: 1.15;
   font-weight: 850;
   text-transform: uppercase;
-  color: rgba(250, 204, 21, 0.82);
+  color: rgba(246, 213, 138, 0.9);
 }
 
 .download-app-subinfo__text {
   font-size: 12px;
   line-height: 1.24;
   font-weight: 750;
-  color: rgba(248, 250, 252, 0.94);
+  color: rgba(250, 244, 231, 0.96);
 }
 
 [data-theme="light"] .download-app-subinfo {
@@ -551,6 +551,34 @@ a.home-mini-icon-item {
 
 [data-theme="light"] .download-app-subinfo__text {
   color: rgba(15, 23, 42, 0.9);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app {
+  background: linear-gradient(145deg, rgba(20, 24, 34, 0.94), rgba(7, 10, 17, 0.96)) !important;
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  color: var(--text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.05), 0 10px 22px rgba(0, 0, 0, 0.26) !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app:hover {
+  background: linear-gradient(145deg, rgba(37, 31, 21, 0.96), rgba(13, 17, 26, 0.98)) !important;
+  border-color: rgba(246, 213, 138, 0.58) !important;
+  color: #ffe9b5 !important;
+  box-shadow: 0 14px 28px rgba(214, 163, 84, 0.16), inset 0 1px 0 rgba(255, 240, 200, 0.1) !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app--poker21 {
+  background: linear-gradient(145deg, #f6d58a 0%, #d6a354 54%, #8f5f20 100%) !important;
+  border-color: rgba(255, 236, 181, 0.68) !important;
+  color: #171008 !important;
+  box-shadow: 0 8px 24px rgba(214, 163, 84, 0.28), 0 0 18px rgba(246, 213, 138, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app--poker21:hover {
+  background: linear-gradient(145deg, #ffe8a6 0%, #e8b967 54%, #a06a22 100%) !important;
+  border-color: rgba(255, 244, 204, 0.78) !important;
+  color: #171008 !important;
+  box-shadow: 0 12px 30px rgba(214, 163, 84, 0.34), 0 0 24px rgba(246, 213, 138, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.34) !important;
 }
 
 .download-layout__media {
@@ -612,13 +640,13 @@ body[data-view="download"] .download-page--active:not([data-download-page="main"
 body[data-view="cashout"] .cashout-manager-block {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(125, 211, 252, 0.22);
+  border: 1px solid rgba(214, 163, 84, 0.34);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 96% 4%, rgba(34, 197, 94, 0.15), transparent 26%),
-    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.12), transparent 28%),
-    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 18px 46px rgba(0, 0, 0, 0.28);
+    radial-gradient(circle at 96% 4%, rgba(214, 163, 84, 0.16), transparent 28%),
+    radial-gradient(circle at 8% 0%, rgba(246, 213, 138, 0.1), transparent 30%),
+    linear-gradient(145deg, rgba(13, 17, 26, 0.98), rgba(4, 6, 11, 0.99));
+  box-shadow: inset 0 0 0 1px rgba(255, 240, 200, 0.04), 0 18px 46px rgba(0, 0, 0, 0.3);
 }
 
 body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
@@ -633,7 +661,7 @@ body[data-view="cashout"] .cashout-manager-block::after {
   position: absolute;
   right: 16px;
   top: 46px;
-  color: rgba(148, 163, 184, 0.06);
+  color: rgba(246, 213, 138, 0.055);
   font-size: clamp(54px, 12vw, 132px);
   font-weight: 900;
   line-height: 1;
@@ -651,10 +679,10 @@ body[data-view="cashout"] .cashout-manager-block > * {
 body[data-view="download"] .download-quote {
   margin: 0 0 12px;
   padding: 10px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid rgba(214, 163, 84, 0.24);
   border-radius: 14px;
-  background: rgba(15, 23, 42, 0.38);
-  color: rgba(203, 213, 225, 0.82);
+  background: rgba(9, 12, 19, 0.5);
+  color: rgba(244, 234, 214, 0.78);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -663,7 +691,26 @@ body[data-view="download"] .download-image,
 body[data-view="cashout"] .cashout-image {
   max-width: 270px;
   border-radius: 50%;
-  border: 1px solid rgba(74, 222, 128, 0.46);
+  border: 1px solid rgba(246, 213, 138, 0.44);
+  background: rgba(7, 10, 17, 0.92);
+  box-shadow: 0 0 28px rgba(214, 163, 84, 0.18), inset 0 0 0 10px rgba(7, 10, 17, 0.68);
+}
+
+body[data-view="cashout"] .cashout-manager-block {
+  border-color: rgba(125, 211, 252, 0.22);
+  background:
+    radial-gradient(circle at 96% 4%, rgba(34, 197, 94, 0.15), transparent 26%),
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+
+body[data-view="cashout"] .cashout-manager-block::after {
+  color: rgba(148, 163, 184, 0.06);
+}
+
+body[data-view="cashout"] .cashout-image {
+  border-color: rgba(74, 222, 128, 0.46);
   background: rgba(15, 23, 42, 0.9);
   box-shadow: 0 0 28px rgba(52, 211, 153, 0.22), inset 0 0 0 10px rgba(15, 23, 42, 0.64);
 }
@@ -750,22 +797,22 @@ body[data-view="cashout"] .cashout-manager-btn::before {
 
 body[data-view="cashout"] .cashout-manager-btn--here {
   color: #fff;
-  background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
-  border: 1px solid rgba(254, 202, 202, 0.5);
+  background: linear-gradient(145deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+  border: 1px solid rgba(187, 247, 208, 0.5);
   box-shadow:
-    0 6px 20px rgba(185, 28, 28, 0.4),
-    0 0 20px rgba(254, 202, 202, 0.15),
+    0 6px 20px rgba(22, 163, 74, 0.4),
+    0 0 20px rgba(187, 247, 208, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 body[data-view="cashout"] .cashout-manager-btn--here:hover,
 body[data-view="cashout"] .cashout-manager-btn--here:focus-visible {
   color: #fff;
-  background: linear-gradient(145deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
-  border-color: rgba(254, 226, 226, 0.7);
+  background: linear-gradient(145deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  border-color: rgba(220, 252, 231, 0.7);
   box-shadow:
-    0 12px 32px rgba(185, 28, 28, 0.5),
-    0 0 24px rgba(254, 202, 202, 0.2),
+    0 12px 32px rgba(22, 163, 74, 0.5),
+    0 0 24px rgba(187, 247, 208, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
 }
