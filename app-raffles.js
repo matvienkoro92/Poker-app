@@ -107,6 +107,7 @@ function initRaffles() {
   var myRaffleUserId = null;
   var raffleFeedbackTimer = null;
   var rafflesFocusedActiveId = null;
+  var rafflesCompletedRenderSeq = 0;
 
   function showRaffleFeedback(message, kind) {
     if (!message) return;
@@ -1050,14 +1051,16 @@ function initRaffles() {
 
         if (switchToCompleted && typeof setRafflesTab === "function") setRafflesTab("completed");
 
-        // Вкладка «Завершённые»: количество розыгрышей и сумма разыгранная за все время (₽)
+        // Вкладка «Завершённые»: счётчики обновляем сразу, а тяжёлую разметку списка
+        // откладываем, чтобы активный розыгрыш появлялся без ожидания большого архива.
         var completedCount = completed.length;
         var completedSumRub = completed.reduce(function (s, r) { return s + getRaffleTotalPrize(r); }, 0);
         if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = String(completedCount);
         if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = formatRaffleSum(completedSumRub);
-        renderRaffleWinnerLeaders(completed);
 
-        if (rafflesCompleted) {
+        function renderCompletedRafflesPanel() {
+          renderRaffleWinnerLeaders(completed);
+          if (!rafflesCompleted) return;
           if (completed.length > 0) {
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");
             rafflesCompleted.innerHTML = completed.map(function (raffle) {
@@ -1092,6 +1095,20 @@ function initRaffles() {
             rafflesCompleted.innerHTML = "";
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.remove("raffle-empty--hidden");
           }
+        }
+        var completedPanelVisible =
+          !!(
+            switchToCompleted ||
+            (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden"))
+          );
+        if (completedPanelVisible) {
+          renderCompletedRafflesPanel();
+        } else {
+          var completedRenderSeq = ++rafflesCompletedRenderSeq;
+          setTimeout(function () {
+            if (completedRenderSeq !== rafflesCompletedRenderSeq) return;
+            renderCompletedRafflesPanel();
+          }, 0);
         }
   }
 

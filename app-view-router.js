@@ -552,6 +552,9 @@ function setView(viewName, navOpts) {
     initProfileChatPush();
   }
   if (viewName === "cashout") {
+    try {
+      if (typeof updateCashoutManager === "function") updateCashoutManager();
+    } catch (eCashoutManagerView) {}
     initCashoutDepositForm();
   }
   if (viewName === "streams") {

@@ -373,14 +373,30 @@ function initChat() {
   var templatesHintPersonal = document.getElementById("chatTemplatesHintPersonal");
   if (!generalView || !personalView || !generalMessages) return;
   if (!chatComposerEl || !chatGeneralComposerMount || !chatPersonalComposerMount || !chatComposerPool) return;
+  function isChatKeyboardDebugAllowedEnvironment() {
+    try {
+      var h = (window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+      if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "") return true;
+      return /(?:\?|&)chatKeyboardDebug=1(?:&|$)/.test(String(location.search || ""));
+    } catch (eDbgEnv) {
+      return false;
+    }
+  }
   function shouldShowChatKeyboardDebugPanel() {
     try {
+      if (!isChatKeyboardDebugAllowedEnvironment()) {
+        try {
+          if (window.localStorage && localStorage.getItem("poker_chat_keyboard_debug")) {
+            localStorage.removeItem("poker_chat_keyboard_debug");
+          }
+        } catch (eDbgStorageClear) {}
+        return false;
+      }
       var pwaIos =
         document.documentElement &&
         document.documentElement.classList &&
         document.documentElement.classList.contains("poker-ios-pwa");
       if (!pwaIos) return false;
-      if (chatIsAdmin) return true;
       if (window.localStorage && localStorage.getItem("poker_chat_keyboard_debug") === "1") return true;
       return /(?:\?|&)chatKeyboardDebug=1(?:&|$)/.test(String(location.search || ""));
     } catch (eDbgShow) {
