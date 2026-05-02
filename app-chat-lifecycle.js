@@ -9643,7 +9643,10 @@ function initChat() {
       try {
         if (!ta || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
         if (!document.body.classList.contains("chat-keyboard-open")) return false;
-        if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+        if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
+          if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
+          return !!(ta.closest && ta.closest(".chat-input-area"));
+        }
         if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
         if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
         return !!(ta.closest && ta.closest(".chat-input-area"));
@@ -9655,7 +9658,10 @@ function initChat() {
       try {
         if (String(document.body.getAttribute("data-view") || "") !== "chat") return false;
         if (!document.body.classList.contains("chat-keyboard-open")) return false;
-        if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+        if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
+          if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
+          return true;
+        }
         if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
         if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
         return true;
@@ -9690,6 +9696,15 @@ function initChat() {
         return false;
       }
     }
+    function schedulePreserveChatEmojiComposerFocus(ta, label) {
+      if (!ta) return;
+      var delays = [0, 80, 180];
+      delays.forEach(function (delay) {
+        setTimeout(function () {
+          preserveChatEmojiComposerFocus(ta, label);
+        }, delay);
+      });
+    }
     function preventEmojiFocusSteal(event, ta, label) {
       var targetInput = ta || chatEmojiPickerTargetInput || getVisibleChatComposerTextarea("");
       var preserved = preserveChatEmojiComposerFocus(targetInput, label);
@@ -9707,6 +9722,22 @@ function initChat() {
       } catch (ePreventEmojiFocus) {}
       return true;
     }
+    function syncChatComposerAfterEmojiInsert(ta) {
+      try {
+        chatComposerEl = ta;
+        if (typeof flushChatComposerToDrafts === "function") flushChatComposerToDrafts();
+      } catch (eEmojiFlush) {}
+      try {
+        var inputEvent = typeof Event === "function" ? new Event("input", { bubbles: true }) : null;
+        if (inputEvent) ta.dispatchEvent(inputEvent);
+      } catch (eEmojiInputEvent) {}
+      try {
+        if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
+      } catch (eEmojiGenSend) {}
+      try {
+        if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
+      } catch (eEmojiPersonalSend) {}
+    }
     function insertEmojiAtCursor(ta, emoji) {
       if (!ta) return;
       var start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
@@ -9723,8 +9754,9 @@ function initChat() {
         try { ta.focus(); } catch (eEmojiInsertFocus2) {}
       }
       if (typeof resizeChatTextarea === "function") resizeChatTextarea(ta);
-      if (ta === chatComposerEl) flushChatComposerToDrafts();
+      syncChatComposerAfterEmojiInsert(ta);
       preserveChatEmojiComposerFocus(ta, "emoji-insert");
+      schedulePreserveChatEmojiComposerFocus(ta, "emoji-insert");
     }
     function hideChatEmojiPicker() {
       if (!chatEmojiPicker) return;
@@ -9745,6 +9777,10 @@ function initChat() {
         btn.textContent = emoji;
         btn.setAttribute("aria-label", "Вставить " + emoji);
         var emojiTouchHandledAt = 0;
+        btn.addEventListener("pointerdown", function (e) {
+          if (e && e.isPrimary === false) return;
+          preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-pointerdown");
+        }, { passive: false, capture: true });
         btn.addEventListener("mousedown", function (e) {
           preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-mousedown");
         });
@@ -9804,6 +9840,7 @@ function initChat() {
           chatEmojiPicker.style.top = (rect.top - 206) + "px";
           chatEmojiPicker.classList.remove("chat-emoji-picker--hidden");
           chatEmojiPicker.setAttribute("aria-hidden", "false");
+          schedulePreserveChatEmojiComposerFocus(targetInput, "emoji-toggle-open");
           chatEmojiPickerClose = function (ev) {
             if (ev.target && !chatEmojiPicker.contains(ev.target) && ev.target !== btn && !btn.contains(ev.target)) {
               hideChatEmojiPicker();
@@ -9831,6 +9868,10 @@ function initChat() {
         preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-touchstart");
         startLongPress();
       }, { passive: false });
+      btn.addEventListener("pointerdown", function (e) {
+        if (e && e.isPrimary === false) return;
+        preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-pointerdown");
+      }, { passive: false, capture: true });
       btn.addEventListener("touchend", function (e) {
         clearLongPressTimer();
         if (!preventEmojiFocusSteal(e, getEmojiTargetInput(), "emoji-btn-touchend")) return;
