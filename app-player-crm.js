@@ -1133,6 +1133,15 @@
     if (!html) return hideChartTooltip();
     tip.innerHTML = html;
     tip.hidden = false;
+    var guide = card.querySelector("#playerCrmChartGuideLine");
+    if (guide) {
+      var bandX = Number(target.getAttribute("x")) || 0;
+      var bandW = Number(target.getAttribute("width")) || 0;
+      var guideX = bandX + bandW / 2;
+      guide.setAttribute("x1", guideX.toFixed(1));
+      guide.setAttribute("x2", guideX.toFixed(1));
+      guide.removeAttribute("hidden");
+    }
     var rect = card.getBoundingClientRect();
     var x = Math.max(8, Math.min(rect.width - 220, event.clientX - rect.left + 12));
     var y = Math.max(8, event.clientY - rect.top - 16);
@@ -1143,6 +1152,8 @@
   function hideChartTooltip() {
     var tip = document.getElementById("playerCrmChartTooltip");
     if (tip) tip.hidden = true;
+    var guide = document.getElementById("playerCrmChartGuideLine");
+    if (guide) guide.setAttribute("hidden", "hidden");
   }
 
   function showChatModalLoading() {
@@ -1224,6 +1235,7 @@
       "<div class=\"player-crm__chart-scroll\"><svg class=\"player-crm__chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"CRM график по дням\">" +
         "<g class=\"player-crm__chart-grid\">" + grid + "</g>" +
         "<g class=\"player-crm__chart-lines\">" + lines + "</g>" +
+        "<line class=\"player-crm__chart-guide\" id=\"playerCrmChartGuideLine\" x1=\"" + padL + "\" y1=\"" + padT + "\" x2=\"" + padL + "\" y2=\"" + (padT + plotH) + "\" hidden=\"hidden\" />" +
         "<g class=\"player-crm__chart-hover\">" + hoverBands + "</g>" +
         "<g class=\"player-crm__chart-ticks\">" + ticks + "</g>" +
       "</svg></div>" +
