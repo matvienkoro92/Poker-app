@@ -10,6 +10,7 @@ function pokerIsActiveIosPwaChatComposerKeyboard() {
     var active = document.activeElement;
     if (!active || String(active.tagName || "").toUpperCase() !== "TEXTAREA") return false;
     if (!active.closest || !active.closest(".chat-input-area")) return false;
+    if (pokerIsIosPwaChatComposerOpeningProtected(active)) return true;
     if (document.body.classList.contains("chat-keyboard-open")) {
       if (
         typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
@@ -27,6 +28,25 @@ function pokerIsActiveIosPwaChatComposerKeyboard() {
     return false;
   }
 }
+function pokerIsIosPwaChatComposerOpeningProtected(active) {
+  try {
+    if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
+    if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+    if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+    if (!active || !active.closest || !active.closest(".chat-input-area")) return false;
+    var now = Date.now();
+    var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+    var manualUntil = Number(window.__pokerChatManualFocusIntentUntil) || 0;
+    var keepAliveUntil = Number(window.__pokerChatPwaFocusKeepAliveUntil) || 0;
+    var keepAliveTarget = window.__pokerChatPwaFocusKeepAliveTarget || null;
+    var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+    if (manualUntil > now) return true;
+    if (openingUntil > now) return true;
+    if (keepAliveUntil > now && (!keepAliveTarget || keepAliveTarget === active)) return true;
+    if (focusAt > 0 && now - focusAt < 2200) return true;
+  } catch (eOpeningProtected) {}
+  return false;
+}
 function pokerRepairClosedChatComposerRestingState(reason) {
   try {
     if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
@@ -43,6 +63,7 @@ function pokerRepairClosedChatComposerRestingState(reason) {
       (root && root.classList && root.classList.contains("chat-keyboard-open")) ||
       (body && body.classList && body.classList.contains("chat-keyboard-open"))
     );
+    if (activeInChatChrome && pokerIsIosPwaChatComposerOpeningProtected(active)) return false;
     var layoutClosed = true;
     try {
       if (typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function") {

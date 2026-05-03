@@ -9010,6 +9010,16 @@ function initChat() {
               (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) ||
               (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone());
             if (pwaShell && String(document.body.getAttribute("data-view") || "") === "chat" && isChatThreadComposerKeyboardDom()) {
+              var activePwaComposer = document.activeElement || chatComposerEl;
+              var pwaFocusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+              var pwaFocusAge = pwaFocusAt > 0 ? Date.now() - pwaFocusAt : 0;
+              if (
+                activePwaComposer &&
+                isChatThreadComposerKeyboardDom(activePwaComposer) &&
+                (isPwaChatManualFocusIntentActive(activePwaComposer) ||
+                  isIosPwaChatComposerOpeningHoldActive(activePwaComposer) ||
+                  (pwaFocusAge > 0 && pwaFocusAge < 1800))
+              ) return false;
               var baseLinePwa = Number(window.__pokerChatInnerHBaseline) || 0;
               var winLossPwa = baseLinePwa > 260 && ih > 0 ? Math.max(0, Math.round(baseLinePwa - ih)) : 0;
               var dockBottomPwa = Number(window.__pokerChatThreadDockBottomCssPx) || 0;
@@ -9127,6 +9137,7 @@ function initChat() {
             try {
               if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
               if (document.activeElement === target) return;
+              if (isPwaChatManualFocusIntentActive(target) || isIosPwaChatComposerOpeningHoldActive(target)) return;
               if (!isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return;
               collectChatOverscrollSnapshot("pwa-finalize-still-closed:" + (label || ""), target);
               finalizeChatKeyboardDismiss();
@@ -9173,7 +9184,14 @@ function initChat() {
               try {
                 if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
                 if (document.activeElement === target) return;
-                if (isRecentIosPwaChatComposerUserDismiss() || isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) {
+                if (isPwaChatManualFocusIntentActive(target) || isIosPwaChatComposerOpeningHoldActive(target)) {
+                  if (!target.disabled && !target.hidden && target.focus) {
+                    try { target.focus({ preventScroll: true }); } catch (ePwaRefocusAgain1) { try { target.focus(); } catch (ePwaRefocusAgain2) {} }
+                  }
+                  return;
+                }
+                var cleanupFocusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+                if (isRecentIosPwaChatComposerUserDismiss() || (cleanupFocusAge > 2200 && isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true }))) {
                   finalizeChatKeyboardDismiss();
                 }
               } catch (ePwaRefocusFallbackCleanup) {}
@@ -9290,6 +9308,8 @@ function initChat() {
         /* iOS: blur и visualViewport обновляются не синхронно — повторяем сброс, иначе поле ввода «остаётся выше». */
         [90, 280, 520, 880, 1350, 2200].forEach(function (ms) {
           var timerId = setTimeout(function () {
+            if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
+            if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
             if (shouldDeferChatKeyboardFinalizeForFocus()) return;
             finalizeChatKeyboardDismiss();
           }, ms);
