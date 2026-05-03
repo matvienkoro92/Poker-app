@@ -90,6 +90,25 @@
             <h3>Зарегистрированные</h3>
             <span>почта и Telegram-бот</span>
           </div>
+          <div class="player-crm__form-grid player-crm__registration-filters">
+            <label>
+              <span>Показать</span>
+              <select id="playerCrmRegistrationMethod">
+                <option value="all">Все</option>
+                <option value="email">Почта</option>
+                <option value="telegram">Telegram-бот</option>
+              </select>
+            </label>
+            <label>
+              <span>Сортировать</span>
+              <select id="playerCrmRegistrationSort">
+                <option value="name">Имя</option>
+                <option value="email">Email</option>
+                <option value="telegram">Telegram-логин</option>
+                <option value="method">Способ</option>
+              </select>
+            </label>
+          </div>
           <div class="player-crm__registrations" id="playerCrmRegistrations"></div>
         </section>
 

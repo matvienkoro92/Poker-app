@@ -12,6 +12,8 @@
     selectedId: "",
     players: [],
     registeredAccounts: [],
+    registrationMethod: "all",
+    registrationSort: "name",
     pokerPlusAccounts: [],
     pokerPlusLevelMin: "",
     pokerPlusLevelMax: "",
@@ -166,6 +168,8 @@
       ["Сообщений в главном чате", pair(chat.generalMessages), pairHint],
       ["Личных диалогов", pair(chat.personalDialogs), pairHint],
       ["Групповых чатов", pair(chat.groupChats), pairHint],
+      ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint],
+      ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint],
     ];
     function statCard(it) {
       return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
@@ -308,33 +312,66 @@
     var list = Array.isArray(methods) ? methods : [];
     var out = [];
     if (list.indexOf("email") >= 0) out.push("Почта");
-    if (list.indexOf("telegram") >= 0) out.push("Telegram-бот");
+    if (list.indexOf("telegram") >= 0) out.push("Telegram");
     return out.length ? out.join(" + ") : "—";
+  }
+
+  function registrationTelegramLabel(row) {
+    if (!row) return "—";
+    if (row.telegramUsername) return row.telegramUsername;
+    if (Array.isArray(row.telegramIds) && row.telegramIds.length) return row.telegramIds.join(", ");
+    return "—";
+  }
+
+  function filteredRegistrations() {
+    var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
+    if (state.registrationMethod === "email") {
+      rows = rows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; });
+    } else if (state.registrationMethod === "telegram") {
+      rows = rows.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; });
+    }
+    var sort = state.registrationSort || "name";
+    rows.sort(function (a, b) {
+      function val(row) {
+        if (sort === "email") return row.email || "";
+        if (sort === "telegram") return registrationTelegramLabel(row);
+        if (sort === "method") return registrationMethodLabel(row.methods);
+        return row.name || row.accountId || "";
+      }
+      return String(val(a)).toLowerCase().localeCompare(String(val(b)).toLowerCase(), "ru");
+    });
+    return rows;
   }
 
   function renderRegistrations() {
     var el = document.getElementById("playerCrmRegistrations");
     if (!el) return;
-    var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
-    var emailCount = rows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
-    var telegramCount = rows.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
-    if (!rows.length) {
+    var allRows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var rows = filteredRegistrations();
+    var emailCount = allRows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
+    var telegramCount = allRows.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
+    if (!allRows.length) {
       el.innerHTML = "<div class=\"player-crm__timeline-item\">Зарегистрированных аккаунтов по почте или Telegram-боту пока нет.</div>";
       return;
     }
     var summary =
       "<div class=\"player-crm__metrics player-crm__metrics--registrations\">" +
-        metric("Всего", intFmt(rows.length)) +
+        metric("Показано", intFmt(rows.length)) +
+        metric("Всего", intFmt(allRows.length)) +
         metric("Через почту", intFmt(emailCount)) +
         metric("Через Telegram-бот", intFmt(telegramCount)) +
       "</div>";
+    if (!rows.length) {
+      el.innerHTML = summary + "<div class=\"player-crm__timeline-item\">По этому фильтру пусто.</div>";
+      return;
+    }
     var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Способ</th><th>Email</th><th>Telegram</th><th>Имя</th>" +
+      "<th>Аккаунт</th><th>Регистрация</th><th>Email</th><th>Telegram-логин</th><th>Имя</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
-        var tg = r.telegramUsername || (Array.isArray(r.telegramIds) && r.telegramIds.length ? r.telegramIds.join(", ") : "—");
+        var tg = registrationTelegramLabel(r);
         return "<tr>" +
           "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
-          "<td>" + esc(registrationMethodLabel(r.methods)) + "</td>" +
+          "<td>" + esc(tg !== "—" ? tg : registrationMethodLabel(r.methods)) + "</td>" +
           "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(tg) + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
@@ -466,6 +503,7 @@
   }
 
   function renderAll() {
+    syncTabCounts();
     renderStats();
     renderChips();
     renderList();
@@ -477,6 +515,13 @@
     renderAnalytics();
     syncPeriodInputs();
     syncTabs();
+  }
+
+  function syncTabCounts() {
+    var regTab = document.querySelector("[data-crm-tab=\"registrations\"]");
+    var pokerTab = document.querySelector("[data-crm-tab=\"pokerplus\"]");
+    if (regTab) regTab.textContent = "Регистрации · " + intFmt((state.registeredAccounts || []).length);
+    if (pokerTab) pokerTab.textContent = "Poker21 · " + intFmt((state.pokerPlusAccounts || []).length);
   }
 
   function syncTabs() {
@@ -910,6 +955,16 @@
       state.showAllPlayers = false;
       syncPeriodInputs();
       loadCrmData();
+    });
+    var registrationMethod = document.getElementById("playerCrmRegistrationMethod");
+    if (registrationMethod) registrationMethod.addEventListener("change", function () {
+      state.registrationMethod = registrationMethod.value || "all";
+      renderRegistrations();
+    });
+    var registrationSort = document.getElementById("playerCrmRegistrationSort");
+    if (registrationSort) registrationSort.addEventListener("change", function () {
+      state.registrationSort = registrationSort.value || "name";
+      renderRegistrations();
     });
     [
       ["playerCrmPokerLevelMin", "pokerPlusLevelMin"],
