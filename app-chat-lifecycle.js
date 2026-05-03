@@ -7192,7 +7192,10 @@ function initChat() {
               preservePwaComposerKeyboardFromGesture(document.activeElement || chatComposerEl, "composer-hit-area", 1400);
               return;
             }
-            window.__pokerChatPwaUserDismissAt = Date.now();
+            var pointerDismissAt = Date.now();
+            var pointerDismissSeq = (Number(window.__pokerChatPwaPointerDismissSeq) || 0) + 1;
+            window.__pokerChatPwaPointerDismissSeq = pointerDismissSeq;
+            window.__pokerChatPwaUserDismissAt = pointerDismissAt;
             window.__pokerChatManualFocusIntentUntil = 0;
             window.__pokerChatManualFocusIntentTarget = null;
             window.__pokerChatKeyboardOpeningUntil = 0;
@@ -7201,20 +7204,29 @@ function initChat() {
             window.__pokerChatPwaFocusKeepAliveReason = "";
             var active = document.activeElement;
             if (active && isChatThreadComposerKeyboardDom(active) && active.blur) active.blur();
-            setTimeout(function () {
+            function runPointerDismissCleanup(label) {
               try {
+                if ((Number(window.__pokerChatPwaPointerDismissSeq) || 0) !== pointerDismissSeq) return;
+                if ((Number(window.__pokerChatPwaUserDismissAt) || 0) !== pointerDismissAt) return;
+                var reopenTarget = document.activeElement || chatComposerEl;
+                if (isPwaChatManualFocusIntentActive(reopenTarget)) return;
+                if (isIosPwaChatComposerOpeningHoldActive(reopenTarget)) return;
+                if (Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) return;
+                if (Number(window.__pokerChatPwaFocusKeepAliveUntil) > Date.now()) return;
                 forcePwaChatKeyboardCleanupIfClosed();
                 if (typeof pokerRepairClosedChatComposerRestingState === "function") {
-                  pokerRepairClosedChatComposerRestingState("outside-pointer-dismiss");
+                  pokerRepairClosedChatComposerRestingState(label);
                 }
+              } catch (ePwaPointerDismissCleanupRun) {}
+            }
+            setTimeout(function () {
+              try {
+                runPointerDismissCleanup("outside-pointer-dismiss");
               } catch (ePwaPointerDismissCleanup) {}
             }, 80);
             setTimeout(function () {
               try {
-                forcePwaChatKeyboardCleanupIfClosed();
-                if (typeof pokerRepairClosedChatComposerRestingState === "function") {
-                  pokerRepairClosedChatComposerRestingState("outside-pointer-dismiss-late");
-                }
+                runPointerDismissCleanup("outside-pointer-dismiss-late");
               } catch (ePwaPointerDismissCleanupLate) {}
             }, 320);
           } catch (ePwaPointerDismiss) {}
