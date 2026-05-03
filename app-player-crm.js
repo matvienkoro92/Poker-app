@@ -3,6 +3,7 @@
   var state = {
     loaded: false,
     loading: false,
+    loadingScope: "",
     tab: "overview",
     period: "30",
     dateFrom: "",
@@ -208,6 +209,10 @@
   function renderStats() {
     var el = document.getElementById("playerCrmStats");
     if (!el) return;
+    if (state.loading && state.loadingScope !== "chart") {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
+      return;
+    }
     if (state.crmError) {
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.crmError) + "</div>";
       return;
@@ -925,6 +930,10 @@
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
     if (!el) return;
+    if (state.loading && state.loadingScope !== "data") {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка графика…</div>";
+      return;
+    }
     el.innerHTML = renderChartAnalytics();
   }
 
@@ -1105,9 +1114,17 @@
     }
   }
 
-  function loadCrmData() {
+  function showCrmLoading(scope) {
+    state.loadingScope = scope || "all";
+    state.crmError = "";
+    renderStats();
+    renderAnalytics();
+  }
+
+  function loadCrmData(scope) {
     if (state.loading) return Promise.resolve(false);
     state.loading = true;
+    showCrmLoading(scope || "all");
     var base = getApiBaseSafe();
     var hasCred = false;
     try {
@@ -1125,6 +1142,7 @@
       state.source = "no-auth";
       state.crmError = "CRM не загрузилась: нет авторизации. Войди по email владельца CRM.";
       state.loading = false;
+      state.loadingScope = "";
       state.loaded = true;
       renderAll();
       return Promise.resolve(true);
@@ -1196,6 +1214,7 @@
       })
       .then(function () {
         state.loading = false;
+        state.loadingScope = "";
         state.loaded = true;
         renderAll();
         return true;
@@ -1618,7 +1637,7 @@
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
-        loadCrmData();
+        loadCrmData("data");
       });
     }
     var dateFrom = document.getElementById("playerCrmDateFrom");
@@ -1628,7 +1647,7 @@
       normalizeDateRange("from");
       state.showAllPlayers = false;
       syncPeriodInputs();
-      loadCrmData();
+      loadCrmData("data");
     });
     var dateTo = document.getElementById("playerCrmDateTo");
     if (dateTo) dateTo.addEventListener("change", function () {
@@ -1637,7 +1656,7 @@
       normalizeDateRange("to");
       state.showAllPlayers = false;
       syncPeriodInputs();
-      loadCrmData();
+      loadCrmData("data");
     });
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     if (chartPeriod) {
@@ -1645,7 +1664,7 @@
         state.chartPeriod = chartPeriod.value || "30";
         if (state.chartPeriod === "custom") setDefaultChartDates();
         syncPeriodInputs();
-        loadCrmData();
+        loadCrmData("chart");
       });
     }
     var chartDateFrom = document.getElementById("playerCrmChartDateFrom");
@@ -1654,7 +1673,7 @@
       state.chartPeriod = "custom";
       normalizeChartDateRange("from");
       syncPeriodInputs();
-      loadCrmData();
+      loadCrmData("chart");
     });
     var chartDateTo = document.getElementById("playerCrmChartDateTo");
     if (chartDateTo) chartDateTo.addEventListener("change", function () {
@@ -1662,7 +1681,7 @@
       state.chartPeriod = "custom";
       normalizeChartDateRange("to");
       syncPeriodInputs();
-      loadCrmData();
+      loadCrmData("chart");
     });
     var registrationMethod = document.getElementById("playerCrmRegistrationMethod");
     if (registrationMethod) registrationMethod.addEventListener("change", function () {

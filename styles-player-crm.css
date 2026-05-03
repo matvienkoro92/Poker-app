@@ -259,6 +259,11 @@
   background: rgba(127, 29, 29, 0.18);
   color: #fecaca;
 }
+.player-crm__notice--loading {
+  border-color: rgba(248, 217, 138, 0.42);
+  background: rgba(248, 217, 138, 0.1);
+  color: var(--text);
+}
 .player-crm__stat,
 .player-crm__panel,
 .player-crm__segment-card,
