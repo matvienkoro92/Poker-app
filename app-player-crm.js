@@ -139,7 +139,7 @@
     if (!el) return;
     var items = filteredPlayers().sort(sortForWork);
     var total = items.length;
-    var visibleItems = state.showAllPlayers ? items : items.slice(0, 50);
+    var visibleItems = state.showAllPlayers ? items : items.slice(0, 15);
     if (!state.selectedId && items[0]) state.selectedId = items[0].id;
     if (!items.length) {
       el.innerHTML = "<div class=\"player-crm__timeline-item\">По этому фильтру пока пусто.</div>";

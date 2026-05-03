@@ -175,17 +175,12 @@
 }
 .player-crm__workbench {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 .player-crm__panel {
   min-width: 0;
   padding: 12px;
-}
-.player-crm__panel--left {
-  position: sticky;
-  top: 10px;
-  align-self: start;
 }
 .player-crm__filters {
   display: grid;
@@ -200,6 +195,7 @@
 .player-crm__list {
   display: grid;
   gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .player-crm__player {
   display: grid;
@@ -463,11 +459,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .player-crm__workbench,
+  .player-crm__list,
   .player-crm__form-grid {
     grid-template-columns: 1fr;
-  }
-  .player-crm__panel--left {
-    position: static;
   }
   .player-crm__queue-item {
     grid-template-columns: 1fr;
