@@ -447,6 +447,8 @@ button.player-crm__stat:focus-visible,
   display: grid;
   place-items: center;
   padding: 14px;
+  overflow: hidden;
+  touch-action: none;
 }
 .player-crm__dialog-modal[hidden] {
   display: none;
@@ -462,7 +464,10 @@ button.player-crm__stat:focus-visible,
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   width: min(920px, 100%);
+  height: min(760px, calc(100dvh - 28px));
   max-height: min(760px, calc(100vh - 28px));
+  max-height: min(760px, calc(100dvh - 28px));
+  min-height: 0;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 8px;
@@ -502,9 +507,17 @@ button.player-crm__stat:focus-visible,
   line-height: 1;
 }
 .player-crm__dialog-modal-body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.player-crm__modal-content {
   min-height: 0;
   overflow: auto;
-  padding: 10px;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 .player-crm__modal-actions {

@@ -295,7 +295,7 @@
     var rows = registrationRowsByMethod(method);
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">По этому способу регистрации пока пусто.</div>";
     var visibleRows = state.showAllRegistrationModal ? rows : rows.slice(0, 15);
-    return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
       "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
       "</tr></thead><tbody>" + visibleRows.map(function (r) {
         var tg = registrationTelegramLabel(r);
@@ -311,7 +311,7 @@
           ? "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-show-all-registrations>Показать всех " + esc(intFmt(rows.length)) + "</button>"
           : "") +
         "<button type=\"button\" class=\"player-crm__primary-btn\" data-crm-export-registrations>Выгрузить</button>" +
-      "</div>";
+      "</div></div>";
   }
 
   function renderRegistrationModal() {
