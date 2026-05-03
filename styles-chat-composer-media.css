@@ -1406,6 +1406,8 @@ img.chat-contact__avatar {
 .chat-emoji-picker {
   position: fixed;
   z-index: 1001;
+  box-sizing: border-box;
+  max-width: calc(100vw - 16px);
   padding: 10px;
   background: rgba(15, 23, 42, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.35);

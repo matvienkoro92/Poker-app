@@ -6394,6 +6394,7 @@ function initChat() {
           var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
           var active = document.activeElement || null;
           var activeComposer = !!(active && isChatThreadComposerKeyboardDom(active));
+          if (isPwaChatManualFocusIntentActive(target)) return false;
           if (isIosPwaChatComposerOpeningHoldActive(target)) return false;
           if (activeComposer && (openingUntil > Date.now() || (focusAge > 0 && focusAge < 1250))) return false;
           return ratio > 0.9 && belowVv < 22 && heightLoss < 72 && winLoss < 72;
@@ -6553,6 +6554,15 @@ function initChat() {
           if (!target) target = chatComposerEl || chatSharedComposerEl;
           if (!target || String(target.tagName || "").toUpperCase() !== "TEXTAREA") return false;
           if (target.disabled || target.hidden) return false;
+          try {
+            var suppressUntil = Number(window.__pokerChatSuppressFocusAfterEmojiOnlySendUntil) || 0;
+            var suppressMode = String(window.__pokerChatSuppressFocusAfterEmojiOnlySendMode || "");
+            if (suppressUntil > Date.now() && (!suppressMode || suppressMode === wantedMode)) {
+              window.__pokerChatSuppressFocusAfterEmojiOnlySendUntil = 0;
+              window.__pokerChatSuppressFocusAfterEmojiOnlySendMode = "";
+              return false;
+            }
+          } catch (eSendEmojiOnlySuppress) {}
           var wasActive = document.activeElement === target;
           var keyboardWasOpen = !!(document.body.classList && document.body.classList.contains("chat-keyboard-open"));
           var prevFocusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
@@ -6615,6 +6625,10 @@ function initChat() {
         try {
           window.__pokerChatPwaRootScrollLockActive = false;
         } catch (ePwaRootInactive) {}
+        try {
+          window.__pokerChatManualFocusIntentUntil = 0;
+          window.__pokerChatManualFocusIntentTarget = null;
+        } catch (eManualIntentClear) {}
         try {
           window.__pokerChatKeyboardOpeningUntil = 0;
         } catch (eOpenReset) {}
@@ -7786,6 +7800,23 @@ function initChat() {
           return false;
         }
       }
+      function isPwaChatManualFocusIntentActive(focusTarget) {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          var until = Number(window.__pokerChatManualFocusIntentUntil) || 0;
+          if (until <= Date.now()) return false;
+          var intentTarget = window.__pokerChatManualFocusIntentTarget || null;
+          var target = focusTarget || document.activeElement || chatComposerEl || intentTarget;
+          if (!target || !isChatThreadComposerKeyboardDom(target)) return false;
+          if (intentTarget && intentTarget !== target) return false;
+          return true;
+        } catch (eManualIntentActive) {
+          return false;
+        }
+      }
       function getCssOnlyIosPwaChatComposerBottomPx() {
         try {
           var now = Date.now();
@@ -7856,6 +7887,7 @@ function initChat() {
         try {
           if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
           if (!isIosPwaChatComposerLikelyActiveSession(focusTarget)) return false;
+          if (isPwaChatManualFocusIntentActive(focusTarget)) return true;
           var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return focusAge >= 180;
           if (focusAge < 620) return false;
@@ -9303,7 +9335,36 @@ function initChat() {
             window.__pokerChatPwaFocusKeepAliveUntil = 0;
             window.__pokerChatPwaFocusKeepAliveTarget = null;
             window.__pokerChatPwaFocusKeepAliveReason = "";
+            if (
+              !isTelegramChatRuntime() &&
+              typeof pokerPwaStandaloneForKeyboardInset === "function" &&
+              pokerPwaStandaloneForKeyboardInset() &&
+              typeof isIosLikeForChatViewport === "function" &&
+              isIosLikeForChatViewport() &&
+              isChatThreadComposerKeyboardDom(ta)
+            ) {
+              var nowIntent = Date.now();
+              window.__pokerChatManualFocusIntentUntil = nowIntent + 2200;
+              window.__pokerChatManualFocusIntentTarget = ta;
+              window.__pokerChatKeyboardFocusAtMs = nowIntent;
+              window.__pokerChatKeyboardOpeningUntil = nowIntent + 1400;
+            }
           } catch (eManualFocusIntent) {}
+        }
+        function scheduleManualFocusDockPass(label) {
+          try {
+            if (!isPwaChatManualFocusIntentActive(ta)) return;
+            [0, 80, 180, 360].forEach(function (delay) {
+              setTimeout(function () {
+                try {
+                  if (!isPwaChatManualFocusIntentActive(ta)) return;
+                  chatComposerEl = ta;
+                  if (typeof onChatInputFocus === "function") onChatInputFocus(ta);
+                  if (typeof forceIosPwaChatTextareaDock === "function") forceIosPwaChatTextareaDock(ta, label || "manual-focus");
+                } catch (eManualDockPass) {}
+              }, delay);
+            });
+          } catch (eScheduleManualDock) {}
         }
         ta.addEventListener(
           "touchstart",
@@ -9340,6 +9401,7 @@ function initChat() {
                 window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
               }
             } catch (ePwaTouchKeyboardState) {}
+            scheduleManualFocusDockPass("textarea-touchstart");
           },
           { passive: false }
         );
@@ -9354,6 +9416,7 @@ function initChat() {
             }
           }
           onChatInputFocus(ta);
+          scheduleManualFocusDockPass("textarea-focus");
         });
         ta.addEventListener("blur", function () {
           chatComposerEl = ta;
@@ -10155,16 +10218,55 @@ function initChat() {
         } catch (eEmojiModeInput) {}
         return modeInput || getVisibleChatComposerTextarea(templatesChannel);
       }
+      function positionEmojiPicker() {
+        try {
+          var rect = btn.getBoundingClientRect();
+          var vv = window.visualViewport || null;
+          var margin = 8;
+          var gap = 8;
+          var viewLeft = vv ? Math.max(0, Number(vv.offsetLeft) || 0) : 0;
+          var viewTop = vv ? Math.max(0, Number(vv.offsetTop) || 0) : 0;
+          var viewWidth = Math.max(240, Math.round((vv && Number(vv.width)) || window.innerWidth || document.documentElement.clientWidth || 320));
+          var viewHeight = Math.max(220, Math.round((vv && Number(vv.height)) || window.innerHeight || document.documentElement.clientHeight || 480));
+          var viewRight = viewLeft + viewWidth;
+          var viewBottom = viewTop + viewHeight;
+          var maxPickerWidth = Math.max(224, viewWidth - margin * 2);
+          chatEmojiPicker.style.width = Math.min(304, maxPickerWidth) + "px";
+          chatEmojiPicker.style.maxWidth = maxPickerWidth + "px";
+          var grid = chatEmojiPicker.querySelector ? chatEmojiPicker.querySelector(".chat-emoji-picker__grid") : null;
+          if (grid) {
+            var roomAbove = Math.max(96, rect.top - viewTop - gap - margin * 2);
+            var roomBelow = Math.max(96, viewBottom - rect.bottom - gap - margin * 2);
+            var gridMax = Math.max(104, Math.min(180, Math.max(roomAbove, roomBelow) - 24));
+            grid.style.maxHeight = gridMax + "px";
+          }
+          var pickerRect = chatEmojiPicker.getBoundingClientRect();
+          var pickerWidth = Math.max(224, Math.round(pickerRect.width || 304));
+          var pickerHeight = Math.max(120, Math.round(pickerRect.height || 224));
+          var left = rect.right - pickerWidth;
+          left = Math.max(viewLeft + margin, Math.min(left, viewRight - pickerWidth - margin));
+          var topAbove = rect.top - pickerHeight - gap;
+          var topBelow = rect.bottom + gap;
+          var top = topAbove >= viewTop + margin ? topAbove : topBelow;
+          top = Math.max(viewTop + margin, Math.min(top, viewBottom - pickerHeight - margin));
+          chatEmojiPicker.style.left = Math.round(left) + "px";
+          chatEmojiPicker.style.top = Math.round(top) + "px";
+        } catch (eEmojiPickerPosition) {
+          var fallbackRect = btn.getBoundingClientRect();
+          chatEmojiPicker.style.left = Math.max(8, Math.min(fallbackRect.right - 304, window.innerWidth - 312)) + "px";
+          chatEmojiPicker.style.top = Math.max(8, fallbackRect.top - 224) + "px";
+        }
+      }
       function toggleEmojiPicker() {
         var targetInput = getEmojiTargetInput();
         preserveChatEmojiComposerFocus(targetInput, "emoji-toggle");
         if (chatEmojiPicker.classList.contains("chat-emoji-picker--hidden")) {
           chatEmojiPickerTargetInput = targetInput;
           chatEmojiPickerOpenedVia = btn;
-          var rect = btn.getBoundingClientRect();
-          chatEmojiPicker.style.left = Math.max(8, Math.min(rect.right - 160, window.innerWidth - 268)) + "px";
-          chatEmojiPicker.style.top = (rect.top - 206) + "px";
+          chatEmojiPicker.style.visibility = "hidden";
           chatEmojiPicker.classList.remove("chat-emoji-picker--hidden");
+          positionEmojiPicker();
+          chatEmojiPicker.style.visibility = "";
           chatEmojiPicker.setAttribute("aria-hidden", "false");
           schedulePreserveChatEmojiComposerFocus(targetInput, "emoji-toggle-open");
           chatEmojiPickerClose = function (ev) {
@@ -10266,6 +10368,21 @@ function initChat() {
         if (mode === "general") return !!(getChatGeneralText().trim() || generalImage || generalVoice || generalDocument);
         return !!(getChatPersonalText().trim() || personalImage || personalVoice || personalDocument);
       }
+      function markEmojiOnlySendFocusSuppression(mode) {
+        try {
+          var composer =
+            mode === "general"
+              ? (chatGeneralComposerEl || (chatGeneralComposerMount && chatGeneralComposerMount.querySelector("textarea")))
+              : (chatPersonalComposerEl || (chatPersonalComposerMount && chatPersonalComposerMount.querySelector("textarea")));
+          if (!composer) composer = chatComposerEl || chatSharedComposerEl;
+          var text = mode === "general" ? getChatGeneralText() : getChatPersonalText();
+          if (!String(text || "").trim()) return;
+          if (typeof chatComposerValueHasTextForHeight === "function" && chatComposerValueHasTextForHeight(text)) return;
+          if (!composer || isChatEmojiKeyboardOpenForComposer(composer)) return;
+          window.__pokerChatSuppressFocusAfterEmojiOnlySendUntil = Date.now() + 2500;
+          window.__pokerChatSuppressFocusAfterEmojiOnlySendMode = mode;
+        } catch (eEmojiOnlySendSuppress) {}
+      }
       function keepComposerFocusOnPress(e) {
         try {
           if (e && typeof e.preventDefault === "function") e.preventDefault();
@@ -10286,6 +10403,7 @@ function initChat() {
         try {
           flushChatComposerToDrafts();
         } catch (eInv) {}
+        markEmojiOnlySendFocusSuppression(sendButtonMode());
         run();
       }
       btn.addEventListener("pointerdown", function (e) {
