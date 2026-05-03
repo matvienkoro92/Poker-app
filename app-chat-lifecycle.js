@@ -9294,10 +9294,22 @@ function initChat() {
       function bindChatComposerKeyboardEvents(ta) {
         if (!ta || ta.__pokerChatKeyboardEventsBound) return;
         ta.__pokerChatKeyboardEventsBound = true;
+        function markComposerManualFocusIntent() {
+          try {
+            if (!ta || String(ta.tagName || "").toUpperCase() !== "TEXTAREA") return;
+            if (!ta.closest || !ta.closest(".chat-input-area")) return;
+            if (String(document.body.getAttribute("data-view") || "") !== "chat") return;
+            window.__pokerChatPwaUserDismissAt = 0;
+            window.__pokerChatPwaFocusKeepAliveUntil = 0;
+            window.__pokerChatPwaFocusKeepAliveTarget = null;
+            window.__pokerChatPwaFocusKeepAliveReason = "";
+          } catch (eManualFocusIntent) {}
+        }
         ta.addEventListener(
           "touchstart",
           function (event) {
             chatComposerEl = ta;
+            markComposerManualFocusIntent();
             if (shouldUseTelegramIosComposeOverlay() && !chatIosComposeOverlayOpening) {
               var modeTouch = ta === chatGeneralComposerEl ? "general" : ta === chatPersonalComposerEl ? "personal" : chatActiveTab;
               if (openTelegramIosComposeOverlay(modeTouch === "general" ? "general" : "personal")) {
@@ -9333,6 +9345,7 @@ function initChat() {
         );
         ta.addEventListener("focus", function () {
           chatComposerEl = ta;
+          markComposerManualFocusIntent();
           if (shouldUseTelegramIosComposeOverlay() && !chatIosComposeOverlayOpening) {
             var modeFocus = ta === chatGeneralComposerEl ? "general" : ta === chatPersonalComposerEl ? "personal" : chatActiveTab;
             if (openTelegramIosComposeOverlay(modeFocus === "general" ? "general" : "personal")) {
@@ -9847,6 +9860,37 @@ function initChat() {
       } catch (eEmojiPwaCtx) {}
       return false;
     }
+    function isChatEmojiKeyboardOpenForComposer(ta) {
+      try {
+        if (!isChatEmojiComposerTextarea(ta)) return false;
+        var now = Date.now();
+        var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+        var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+        var keepAliveUntil = Number(window.__pokerChatPwaFocusKeepAliveUntil) || 0;
+        var activeKeyboardSignal =
+          document.body.classList.contains("chat-keyboard-open") ||
+          document.documentElement.classList.contains("chat-keyboard-open") ||
+          openingUntil > now ||
+          keepAliveUntil > now ||
+          (document.activeElement === ta && focusAt > 0 && now - focusAt < 1800);
+        if (!activeKeyboardSignal) return false;
+        try {
+          if (typeof isChatKeyboardLayoutEffectivelyClosed === "function" && isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return false;
+        } catch (eEmojiOpenClosedCheck) {}
+        return true;
+      } catch (eEmojiKeyboardOpen) {
+        return false;
+      }
+    }
+    function shouldHandleChatEmojiEventWithoutComposerFocus(ta) {
+      try {
+        if (!isTouchChatEmojiFocusContext()) return false;
+        if (!isChatEmojiComposerTextarea(ta)) return false;
+        return String(document.body.getAttribute("data-view") || "") === "chat";
+      } catch (eEmojiNoFocusEvent) {
+        return false;
+      }
+    }
 	    function shouldPreserveChatEmojiComposerFocus(ta) {
 	      try {
 	        if (!isChatEmojiComposerTextarea(ta) || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
@@ -9869,7 +9913,7 @@ function initChat() {
 	            if (typeof isChatKeyboardLayoutEffectivelyClosed === "function" && isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return false;
 	          } catch (eEmojiClosedFocus) {}
 	        }
-	        if (isTouchChatEmojiFocusContext()) return true;
+	        if (isTouchChatEmojiFocusContext()) return isChatEmojiKeyboardOpenForComposer(ta);
         if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
           if (typeof isChatPhysicalKeyboardContext === "function" && isChatPhysicalKeyboardContext()) return false;
           return !!(ta.closest && ta.closest(".chat-input-area"));
@@ -9972,6 +10016,7 @@ function initChat() {
         } catch (eEmojiGuardKeepAlive) {}
         preserved = true;
       }
+      if (!preserved && shouldHandleChatEmojiEventWithoutComposerFocus(targetInput)) preserved = true;
       if (!preserved) return false;
       try {
         if (event && event.preventDefault) event.preventDefault();
@@ -10016,6 +10061,7 @@ function initChat() {
 	    }
 	    function insertEmojiAtCursor(ta, emoji) {
 	      if (!ta) return;
+      var shouldRestoreFocusAfterEmoji = !isTouchChatEmojiFocusContext() || isChatEmojiKeyboardOpenForComposer(ta);
       var start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
       var end = ta.selectionEnd != null ? ta.selectionEnd : start;
       var text = ta.value;
@@ -10024,15 +10070,19 @@ function initChat() {
       if (newText.length > maxLen) newText = newText.slice(0, maxLen);
       ta.value = newText;
       ta.selectionStart = ta.selectionEnd = Math.min(start + emoji.length, newText.length);
-      try {
-        ta.focus({ preventScroll: true });
-      } catch (eEmojiInsertFocus1) {
-        try { ta.focus(); } catch (eEmojiInsertFocus2) {}
+      if (shouldRestoreFocusAfterEmoji) {
+        try {
+          ta.focus({ preventScroll: true });
+        } catch (eEmojiInsertFocus1) {
+          try { ta.focus(); } catch (eEmojiInsertFocus2) {}
+        }
       }
 	      if (typeof resizeChatTextarea === "function") resizeChatTextarea(ta);
 	      syncChatComposerAfterEmojiInsert(ta);
-      preserveChatEmojiComposerFocus(ta, "emoji-insert");
-      schedulePreserveChatEmojiComposerFocus(ta, "emoji-insert");
+      if (shouldRestoreFocusAfterEmoji) {
+        preserveChatEmojiComposerFocus(ta, "emoji-insert");
+        schedulePreserveChatEmojiComposerFocus(ta, "emoji-insert");
+      }
     }
     function hideChatEmojiPicker() {
       if (!chatEmojiPicker) return;

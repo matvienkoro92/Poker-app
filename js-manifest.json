@@ -106,6 +106,9 @@
     "raffles": [
       "app-raffles.js"
     ],
+    "playerCrm": [
+      "app-player-crm.js"
+    ],
     "shell": [
       "app-shell-layout.js",
       "app-navigation-scroll.js",

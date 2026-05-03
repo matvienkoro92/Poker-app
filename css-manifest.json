@@ -37,6 +37,10 @@
       "owner": "admin",
       "scope": "admin-only panels and admin controls"
     },
+    "playerCrm": {
+      "owner": "admin",
+      "scope": "player CRM admin view"
+    },
     "layout": {
       "owner": "shell",
       "scope": "global layout, app chrome, tabbar, responsive shell"
@@ -117,6 +121,9 @@
     "admin": [
       "styles-admin.css"
     ],
+    "playerCrm": [
+      "styles-player-crm.css"
+    ],
     "layout": [
       "styles-layout.css"
     ]
@@ -184,6 +191,11 @@
     "admin": [
       "base",
       "admin",
+      "layout"
+    ],
+    "player-crm": [
+      "base",
+      "playerCrm",
       "layout"
     ]
   }
