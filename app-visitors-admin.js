@@ -56,7 +56,7 @@
   function isCrmOwnerUser(user) {
     if (!user) return false;
     var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
-    return email === "matvienkoro92@gmail.com";
+    return email === "matvienkoro92@gmail.com" || email === "matvienko.r2@yandex.ru";
   }
 
   function userCanOpenCrm() {

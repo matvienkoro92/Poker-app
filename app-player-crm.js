@@ -785,7 +785,7 @@
       state.chatStats = null;
       state.permissions = null;
       state.source = "no-auth";
-      state.crmError = "CRM не загрузилась: нет авторизации. Войди по email matvienkoro92@gmail.com.";
+      state.crmError = "CRM не загрузилась: нет авторизации. Войди по email владельца CRM.";
       state.loading = false;
       state.loaded = true;
       renderAll();
@@ -831,7 +831,7 @@
           state.permissions = null;
           state.source = data && data.__status === 403 ? "forbidden" : "empty";
           state.crmError = data && data.__status === 403
-            ? ((data.error || "CRM доступна только matvienkoro92@gmail.com") + ". Если ты уже вошёл под этой почтой, выйди и войди по email ещё раз.")
+            ? ((data.error || "CRM доступна только владельцам") + ". Если ты уже вошёл под нужной почтой, выйди и войди по email ещё раз.")
             : ((data && data.error) || "CRM не загрузилась: API не вернул живые данные.");
         }
       })
