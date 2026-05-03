@@ -84,14 +84,16 @@
   gap: 8px;
 }
 .footer-admin-visitors--lab {
-  justify-content: center;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin: 0 0 0 auto;
 }
 .footer-admin-visitors--hidden {
   display: none !important;
 }
 .footer-admin-visitors__btn {
-  font-size: 12px;
-  padding: 6px 12px;
+  font-size: 10px;
+  padding: 5px 9px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
   background: var(--block-bg);
