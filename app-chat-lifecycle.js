@@ -1351,7 +1351,15 @@ function initChat() {
             window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
             window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
             try {
-              if (!directComposerTap && event.preventDefault) event.preventDefault();
+              var preventAreaTouchDefault = false;
+              try {
+                preventAreaTouchDefault =
+                  !directComposerTap &&
+                  document.body.classList.contains("chat-keyboard-open") &&
+                  typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+                  !window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true });
+              } catch (ePwaAreaTouchDefaultCheck) {}
+              if (preventAreaTouchDefault && event.preventDefault) event.preventDefault();
             } catch (ePwaAreaTouchPrevent) {}
           }
         }
@@ -7092,7 +7100,7 @@ function initChat() {
               if (!area) continue;
               var rect = area.getBoundingClientRect();
               if (!rect || rect.width <= 0 || rect.height <= 0) continue;
-              if (x >= rect.left - 10 && x <= rect.right + 10 && y >= rect.top - 12 && y <= rect.bottom + 12) return true;
+              if (x >= rect.left - 10 && x <= rect.right + 10 && y >= rect.top && y <= rect.bottom + 6) return true;
             }
           } catch (eComposerHitTest) {}
           return false;
@@ -7176,13 +7184,6 @@ function initChat() {
               preservePwaComposerKeyboardFromGesture(document.activeElement || chatComposerEl, "composer-hit-area", 1400);
               return;
             }
-            try {
-              var freshFocusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
-              if (freshFocusAt > 0 && Date.now() - freshFocusAt < 650 && Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) {
-                preservePwaComposerKeyboardFromGesture(document.activeElement || chatComposerEl, "fresh-open-dismiss-guard", 1200);
-                return;
-              }
-            } catch (eFreshOpenDismissGuard) {}
             window.__pokerChatPwaUserDismissAt = Date.now();
             window.__pokerChatManualFocusIntentUntil = 0;
             window.__pokerChatManualFocusIntentTarget = null;
