@@ -151,6 +151,38 @@
     return state.chartPeriod + " дней";
   }
 
+  function periodOptionsHtml(current) {
+    var options = [
+      ["7", "7 дней"],
+      ["30", "30 дней"],
+      ["90", "90 дней"],
+      ["current_week", "Текущая неделя"],
+      ["last_week", "Прошлая неделя"],
+      ["current_month", "Текущий месяц"],
+      ["last_month", "Прошлый месяц"],
+      ["all", "За все время"],
+      ["custom", "Даты"],
+    ];
+    return options.map(function (it) {
+      return "<option value=\"" + esc(it[0]) + "\"" + (String(current || "30") === it[0] ? " selected" : "") + ">" + esc(it[1]) + "</option>";
+    }).join("");
+  }
+
+  function renderModalPeriodControls() {
+    var showDates = state.period === "custom";
+    return "<div class=\"player-crm__modal-period-row\" aria-label=\"Период модалки\">" +
+      "<label class=\"player-crm__period\"><span>Период</span><select data-crm-modal-period>" + periodOptionsHtml(state.period || "30") + "</select></label>" +
+      "<label class=\"player-crm__period player-crm__modal-date-field" + (showDates ? " player-crm__modal-date-field--visible" : "") + "\"><span>С</span><span class=\"player-crm__date-control\">" +
+        "<input type=\"date\" inputmode=\"none\" value=\"" + esc(state.dateFrom || "") + "\" max=\"" + esc(state.dateTo || "") + "\" data-crm-modal-date-from />" +
+        "<button type=\"button\" class=\"player-crm__date-picker-btn\" data-crm-modal-date-picker=\"from\" aria-label=\"Выбрать дату начала\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z\"></path></svg></button>" +
+      "</span></label>" +
+      "<label class=\"player-crm__period player-crm__modal-date-field" + (showDates ? " player-crm__modal-date-field--visible" : "") + "\"><span>По</span><span class=\"player-crm__date-control\">" +
+        "<input type=\"date\" inputmode=\"none\" value=\"" + esc(state.dateTo || "") + "\" min=\"" + esc(state.dateFrom || "") + "\" data-crm-modal-date-to />" +
+        "<button type=\"button\" class=\"player-crm__date-picker-btn\" data-crm-modal-date-picker=\"to\" aria-label=\"Выбрать дату окончания\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z\"></path></svg></button>" +
+      "</span></label>" +
+    "</div>";
+  }
+
   function periodData(p) {
     var k = periodKey();
     return {
@@ -315,7 +347,7 @@
         (active ? renderManagerConversation(row, key) : "") +
       "</div>";
     }).join("") : empty;
-    return "<div class=\"player-crm__manager-dialogs\" aria-label=\"" + esc(title) + "\">" + body + "</div>";
+    return renderModalPeriodControls() + "<div class=\"player-crm__manager-dialogs\" aria-label=\"" + esc(title) + "\">" + body + "</div>";
   }
 
   function renderManagerDialogModal() {
@@ -773,9 +805,9 @@
   function renderGeneralMessagesModalList() {
     var chat = state.chatStats || {};
     var rows = chat.generalMessages && Array.isArray(chat.generalMessages.authors) ? chat.generalMessages.authors : [];
-    if (!rows.length) return "<div class=\"player-crm__timeline-item\">За выбранный период сообщений в главном чате пока нет.</div>";
+    if (!rows.length) return renderModalPeriodControls() + "<div class=\"player-crm__timeline-item\">За выбранный период сообщений в главном чате пока нет.</div>";
     var visibleRows = state.showAllGeneralMessagesModal ? rows : rows.slice(0, 10);
-    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
+    return renderModalPeriodControls() + "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
       "<th>Игрок</th><th>ID</th><th>Сообщений</th>" +
       "</tr></thead><tbody>" + visibleRows.map(function (r) {
         return "<tr>" +
@@ -1023,6 +1055,21 @@
   function hideChartTooltip() {
     var tip = document.getElementById("playerCrmChartTooltip");
     if (tip) tip.hidden = true;
+  }
+
+  function showChatModalLoading() {
+    var html = renderModalPeriodControls() + "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
+    var generalBody = document.getElementById("playerCrmGeneralMessagesModalBody");
+    var managerBody = document.getElementById("playerCrmManagerDialogBody");
+    if (state.generalMessagesModalOpen && generalBody) generalBody.innerHTML = html;
+    if (state.chatDialogManager && managerBody) managerBody.innerHTML = html;
+  }
+
+  function reloadCrmDataFromModal() {
+    state.showAllGeneralMessagesModal = false;
+    syncPeriodInputs();
+    showChatModalLoading();
+    loadCrmData("data");
   }
 
   function renderChartAnalytics() {
@@ -1665,6 +1712,15 @@
         openDatePicker(document.getElementById(datePicker.getAttribute("data-crm-date-picker") || ""));
         return;
       }
+      var modalDatePicker = e.target.closest("[data-crm-modal-date-picker]");
+      if (modalDatePicker) {
+        e.preventDefault();
+        var input = modalDatePicker.getAttribute("data-crm-modal-date-picker") === "to"
+          ? modalDatePicker.closest(".player-crm__modal-period-row").querySelector("[data-crm-modal-date-to]")
+          : modalDatePicker.closest(".player-crm__modal-period-row").querySelector("[data-crm-modal-date-from]");
+        openDatePicker(input);
+        return;
+      }
       var broadSeg = e.target.closest("[data-crm-broadcast-segment]");
       if (broadSeg) {
         var seg = broadSeg.getAttribute("data-crm-broadcast-segment") || "has_bot";
@@ -1765,6 +1821,27 @@
         state[pair[1]] = input.value || "";
         renderPokerPlusAccounts();
       });
+    });
+    root.addEventListener("change", function (e) {
+      if (e.target.closest("[data-crm-modal-period]")) {
+        state.period = e.target.value || "30";
+        if (state.period === "custom") setDefaultDates();
+        reloadCrmDataFromModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-modal-date-from]")) {
+        state.dateFrom = e.target.value || "";
+        state.period = "custom";
+        normalizeDateRange("from");
+        reloadCrmDataFromModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-modal-date-to]")) {
+        state.dateTo = e.target.value || "";
+        state.period = "custom";
+        normalizeDateRange("to");
+        reloadCrmDataFromModal();
+      }
     });
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
     if (broadcastSegment) broadcastSegment.addEventListener("change", updateBroadcastAudience);
