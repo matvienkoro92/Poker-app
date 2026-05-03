@@ -1754,8 +1754,6 @@
         renderPokerPlusAccounts();
       });
     });
-    var refresh = document.getElementById("playerCrmRefreshBtn");
-    if (refresh) refresh.addEventListener("click", loadCrmData);
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
     if (broadcastSegment) broadcastSegment.addEventListener("change", updateBroadcastAudience);
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
