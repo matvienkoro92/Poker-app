@@ -982,6 +982,50 @@
     return "<div class=\"player-crm__chart-summary\"><h4>Сводка прироста по датам</h4>" + table + undatedBlock + "</div>";
   }
 
+  function enabledChartSeries() {
+    var chart = state.chartAnalytics || {};
+    var series = Array.isArray(chart.series) ? chart.series : [];
+    return series.filter(function (s) {
+      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
+    });
+  }
+
+  function renderChartTooltipContent(idx) {
+    var chart = state.chartAnalytics || {};
+    var labels = Array.isArray(chart.labels) ? chart.labels : [];
+    var label = labels[idx];
+    if (!label) return "";
+    var rows = enabledChartSeries().map(function (s) {
+      var color = chartColors[s.key] || "#e5e7eb";
+      var value = Number((s.values || [])[idx]) || 0;
+      return "<span><i style=\"--line-color:" + esc(color) + "\"></i><b>" + esc(s.label || s.key) + "</b><strong>" + esc(intFmt(value)) + "</strong></span>";
+    }).join("");
+    if (!rows) rows = "<em>Нет включенных линий</em>";
+    return "<div class=\"player-crm__chart-tooltip-date\">" + esc(label) + "</div><div class=\"player-crm__chart-tooltip-values\">" + rows + "</div>";
+  }
+
+  function showChartTooltip(target, event) {
+    var tip = document.getElementById("playerCrmChartTooltip");
+    var card = target && target.closest(".player-crm__chart-card");
+    if (!tip || !card) return;
+    var idx = Number(target.getAttribute("data-crm-chart-point"));
+    if (!Number.isFinite(idx)) return hideChartTooltip();
+    var html = renderChartTooltipContent(idx);
+    if (!html) return hideChartTooltip();
+    tip.innerHTML = html;
+    tip.hidden = false;
+    var rect = card.getBoundingClientRect();
+    var x = Math.max(8, Math.min(rect.width - 220, event.clientX - rect.left + 12));
+    var y = Math.max(8, event.clientY - rect.top - 16);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+
+  function hideChartTooltip() {
+    var tip = document.getElementById("playerCrmChartTooltip");
+    if (tip) tip.hidden = true;
+  }
+
   function renderChartAnalytics() {
     var chart = state.chartAnalytics || {};
     var labels = Array.isArray(chart.labels) ? chart.labels : [];
@@ -1027,6 +1071,11 @@
       return "<polyline points=\"" + points(s.values || []) + "\" style=\"--line-color:" + esc(color) + "\" />" +
         "<circle cx=\"" + x(labels.length - 1).toFixed(1) + "\" cy=\"" + y((s.values || [0])[labels.length - 1] || 0).toFixed(1) + "\" r=\"4\" style=\"--line-color:" + esc(color) + "\" />";
     }).join("");
+    var hoverBands = labels.map(function (_, idx) {
+      var left = idx === 0 ? padL : (x(idx - 0.5));
+      var right = idx === labels.length - 1 ? width - padR : x(idx + 0.5);
+      return "<rect data-crm-chart-point=\"" + idx + "\" x=\"" + left.toFixed(1) + "\" y=\"" + padT + "\" width=\"" + Math.max(8, right - left).toFixed(1) + "\" height=\"" + plotH + "\" />";
+    }).join("");
     var legend = series.map(function (s) {
       var hasDates = s.hasDates !== false;
       var checked = hasDates && state.chartSeriesEnabled[s.key] !== false ? " checked" : "";
@@ -1041,8 +1090,10 @@
       "<div class=\"player-crm__chart-scroll\"><svg class=\"player-crm__chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"CRM график по дням\">" +
         "<g class=\"player-crm__chart-grid\">" + grid + "</g>" +
         "<g class=\"player-crm__chart-lines\">" + lines + "</g>" +
+        "<g class=\"player-crm__chart-hover\">" + hoverBands + "</g>" +
         "<g class=\"player-crm__chart-ticks\">" + ticks + "</g>" +
       "</svg></div>" +
+      "<div class=\"player-crm__chart-tooltip\" id=\"playerCrmChartTooltip\" hidden></div>" +
       "<div class=\"player-crm__chart-toggles\">" + legend + "</div>" +
       renderChartSummary(chart, series) +
     "</div>";
@@ -1734,6 +1785,15 @@
         renderAnalytics();
       }
     });
+    root.addEventListener("mousemove", function (e) {
+      var point = e.target.closest("[data-crm-chart-point]");
+      if (point) {
+        showChartTooltip(point, e);
+      } else if (!e.target.closest(".player-crm__chart-card")) {
+        hideChartTooltip();
+      }
+    });
+    root.addEventListener("mouseleave", hideChartTooltip);
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && state.registrationModalMethod) closeRegistrationModal();
       if (e.key === "Escape" && state.pokerPlusModalOpen) closePokerPlusModal();

@@ -683,6 +683,7 @@ button.player-crm__stat:focus-visible,
   max-width: 100%;
 }
 .player-crm__chart-card {
+  position: relative;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -728,6 +729,63 @@ button.player-crm__stat:focus-visible,
   fill: var(--line-color);
   stroke: rgba(15, 23, 42, 0.95);
   stroke-width: 2;
+}
+.player-crm__chart-hover rect {
+  fill: transparent;
+  cursor: crosshair;
+}
+.player-crm__chart-tooltip {
+  position: absolute;
+  z-index: 3;
+  width: min(230px, calc(100% - 16px));
+  padding: 10px;
+  border: 1px solid rgba(248, 217, 138, 0.38);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.96);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+.player-crm__chart-tooltip[hidden] {
+  display: none;
+}
+.player-crm__chart-tooltip-date {
+  margin-bottom: 7px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+.player-crm__chart-tooltip-values {
+  display: grid;
+  gap: 5px;
+}
+.player-crm__chart-tooltip-values span {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.player-crm__chart-tooltip-values i {
+  width: 10px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line-color);
+}
+.player-crm__chart-tooltip-values b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-crm__chart-tooltip-values strong {
+  color: var(--text);
+  font-size: 13px;
+}
+.player-crm__chart-tooltip-values em {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: normal;
 }
 .player-crm__chart-toggles {
   display: flex;
