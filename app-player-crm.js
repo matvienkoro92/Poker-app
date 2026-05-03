@@ -29,6 +29,7 @@
     permissions: null,
     pushConfigured: false,
     source: "api",
+    crmError: "",
     showAllPlayers: false,
   };
 
@@ -152,6 +153,10 @@
   function renderStats() {
     var el = document.getElementById("playerCrmStats");
     if (!el) return;
+    if (state.crmError) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.crmError) + "</div>";
+      return;
+    }
     var players = state.players;
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
@@ -780,13 +785,25 @@
       state.chatStats = null;
       state.permissions = null;
       state.source = "no-auth";
+      state.crmError = "CRM не загрузилась: нет авторизации. Войди по email matvienkoro92@gmail.com.";
       state.loading = false;
       state.loaded = true;
       renderAll();
       return Promise.resolve(true);
     }
     return fetch(base + "/api/player-crm" + crmQuery())
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.json()
+          .then(function (data) {
+            data = data || {};
+            data.__httpOk = r.ok;
+            data.__status = r.status;
+            return data;
+          })
+          .catch(function () {
+            return { ok: false, __httpOk: r.ok, __status: r.status, error: "CRM не вернула данные." };
+          });
+      })
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.players)) {
           state.players = data.players;
@@ -798,6 +815,7 @@
           state.permissions = data.permissions || null;
           state.pushConfigured = data.pushConfigured === true;
           state.source = data.source || "api";
+          state.crmError = "";
           if (data.range && data.range.key === "custom") {
             state.period = "custom";
             state.dateFrom = data.range.from || state.dateFrom;
@@ -811,7 +829,10 @@
           state.sourceAnalytics = [];
           state.chatStats = null;
           state.permissions = null;
-          state.source = "empty";
+          state.source = data && data.__status === 403 ? "forbidden" : "empty";
+          state.crmError = data && data.__status === 403
+            ? ((data.error || "CRM доступна только matvienkoro92@gmail.com") + ". Если ты уже вошёл под этой почтой, выйди и войди по email ещё раз.")
+            : ((data && data.error) || "CRM не загрузилась: API не вернул живые данные.");
         }
       })
       .catch(function () {
@@ -823,6 +844,7 @@
         state.chatStats = null;
         state.permissions = null;
         state.source = "error";
+        state.crmError = "CRM не загрузилась: ошибка сети или API.";
       })
       .then(function () {
         state.loading = false;
