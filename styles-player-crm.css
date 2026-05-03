@@ -134,6 +134,13 @@
   resize: vertical;
   line-height: 1.45;
 }
+.player-crm__tabs-title {
+  margin: 2px 0 7px;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.15;
+}
 .player-crm__tabs {
   margin: 0 0 12px;
 }
