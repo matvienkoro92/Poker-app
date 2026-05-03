@@ -56,6 +56,13 @@
   font-size: 12px;
   font-weight: 700;
 }
+.player-crm__date-field {
+  display: none;
+  min-width: 142px;
+}
+.player-crm__date-field--visible {
+  display: grid;
+}
 .player-crm select,
 .player-crm input,
 .player-crm textarea {

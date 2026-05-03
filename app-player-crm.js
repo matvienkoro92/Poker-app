@@ -5,6 +5,8 @@
     loading: false,
     tab: "overview",
     period: "30",
+    dateFrom: "",
+    dateTo: "",
     filter: "has_bot",
     search: "",
     selectedId: "",
@@ -44,8 +46,31 @@
     return d + " дней";
   }
 
+  function isoDate(d) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  function setDefaultDates() {
+    var to = new Date();
+    var from = new Date();
+    from.setDate(from.getDate() - 29);
+    if (!state.dateTo) state.dateTo = isoDate(to);
+    if (!state.dateFrom) state.dateFrom = isoDate(from);
+  }
+
+  function periodKey() {
+    return state.period === "custom" ? "custom" : String(state.period || "30");
+  }
+
+  function periodLabel() {
+    if (state.period === "custom") {
+      return state.dateFrom && state.dateTo ? state.dateFrom + " — " + state.dateTo : "выбранные даты";
+    }
+    return state.period + " дней";
+  }
+
   function periodData(p) {
-    var k = String(state.period || "30");
+    var k = periodKey();
     return {
       deposits: p.deposits && p.deposits[k] != null ? p.deposits[k] : 0,
       depositCount: p.depositCount && p.depositCount[k] != null ? p.depositCount[k] : 0,
@@ -57,7 +82,7 @@
     { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
     { key: "has_bot", label: "Подписан на бот", desc: "Игрок связан с Telegram-ботом и доступен для бот-рассылки.", match: function (p) { return !!(p.channels && p.channels.bot); } },
     { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
-    { key: "active_30", label: "Активность CRM 30д", desc: "Есть депозит или сообщение в CRM за последние 30 дней.", match: function (p) { var old = state.period; state.period = "30"; var pd = periodData(p); state.period = old; return pd.deposits > 0 || pd.messages > 0; } },
+    { key: "active_30", label: "Активность CRM", desc: "Есть депозит или сообщение в CRM за выбранный период.", match: function (p) { var pd = periodData(p); return pd.deposits > 0 || pd.messages > 0; } },
     { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
   ];
 
@@ -111,14 +136,14 @@
     var stats = [
       ["Игроков в базе", players.length],
       ["Подписан на бот", botSubscribers],
-      ["Депозиты за " + state.period + "д", money(deposits)],
-      ["Сообщения за " + state.period + "д", messages],
+      ["Депозиты", money(deposits)],
+      ["Сообщения", messages],
     ];
     el.innerHTML = stats.map(function (it) {
       return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span><span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
     }).join("");
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
-    if (anaPeriod) anaPeriod.textContent = state.period + " дней";
+    if (anaPeriod) anaPeriod.textContent = periodLabel();
     return { active: players.length, botSubscribers: botSubscribers, deposits: deposits, messages: messages };
   }
 
@@ -182,7 +207,7 @@
       "</div>" +
       "<div>" + (p.tags || []).map(function (t) { return "<span class=\"player-crm__tag\">" + esc(t) + "</span>"; }).join("") + "</div>" +
       "<div class=\"player-crm__metrics\">" +
-        metric("Депозит " + state.period + "д", money(pd.deposits)) +
+        metric("Депозит", money(pd.deposits)) +
         metric("Депозитов", pd.depositCount) +
         metric("Средний депозит", avg ? money(avg) : "—") +
         metric("Сообщений", pd.messages) +
@@ -252,7 +277,7 @@
       return "<article class=\"player-crm__segment-card\">" +
         "<h4>" + esc(seg.label) + "</h4>" +
         "<p>" + esc(seg.desc) + "</p>" +
-        "<div class=\"player-crm__segment-actions\"><span class=\"player-crm__badge\">" + players.length + " игроков</span><span class=\"player-crm__detail-muted\">" + esc(money(dep)) + " за " + esc(state.period) + "д</span></div>" +
+        "<div class=\"player-crm__segment-actions\"><span class=\"player-crm__badge\">" + players.length + " игроков</span><span class=\"player-crm__detail-muted\">" + esc(money(dep)) + " · " + esc(periodLabel()) + "</span></div>" +
         "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-use-segment=\"" + esc(seg.key) + "\">Открыть список</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-broadcast-segment=\"" + esc(seg.key) + "\">Рассылка</button></div>" +
       "</article>";
     }).join("");
@@ -295,9 +320,9 @@
     var rows = state.sourceAnalytics || [];
     if (!rows.length) return "<p class=\"player-crm__detail-muted\">Источники появятся после загрузки живой базы.</p>";
     return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
-      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Депозиты 30д</th><th>Fee</th><th>Push</th>" +
+      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Депозиты</th><th>Fee</th><th>Push</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(money(r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
+        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(money(r.depositsPeriod != null ? r.depositsPeriod : r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
 
@@ -323,6 +348,7 @@
     renderSegments();
     renderBroadcastOptions();
     renderAnalytics();
+    syncPeriodInputs();
     syncTabs();
   }
 
@@ -380,7 +406,7 @@
       renderAll();
       return Promise.resolve(true);
     }
-    return fetch(base + "/api/player-crm" + authQuerySafe())
+    return fetch(base + "/api/player-crm" + crmQuery())
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.players)) {
@@ -390,6 +416,11 @@
           state.permissions = data.permissions || null;
           state.pushConfigured = data.pushConfigured === true;
           state.source = data.source || "api";
+          if (data.range && data.range.key === "custom") {
+            state.period = "custom";
+            state.dateFrom = data.range.from || state.dateFrom;
+            state.dateTo = data.range.to || state.dateTo;
+          }
         } else {
           state.players = [];
           state.campaigns = [];
@@ -453,6 +484,8 @@
         channel: channel,
         text: text,
         audienceIds: players.map(function (p) { return p.accountId || p.id; }),
+        period: state.period === "custom" ? "30" : state.period,
+        range: requestRange(),
       })),
     })
       .then(function (r) { return r.json(); })
@@ -582,6 +615,37 @@
     return el ? el.value || "" : "";
   }
 
+  function requestRange() {
+    return state.period === "custom" && state.dateFrom && state.dateTo
+      ? { from: state.dateFrom, to: state.dateTo }
+      : null;
+  }
+
+  function crmQuery() {
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    if (state.period === "custom") {
+      setDefaultDates();
+      q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);
+    } else {
+      q += sep + "period=" + encodeURIComponent(state.period || "30");
+    }
+    return q;
+  }
+
+  function syncPeriodInputs() {
+    var period = document.getElementById("playerCrmPeriodSelect");
+    var from = document.getElementById("playerCrmDateFrom");
+    var to = document.getElementById("playerCrmDateTo");
+    if (period) period.value = state.period || "30";
+    if (from) from.value = state.dateFrom || "";
+    if (to) to.value = state.dateTo || "";
+    var showDates = state.period === "custom";
+    document.querySelectorAll(".player-crm__date-field").forEach(function (el) {
+      el.classList.toggle("player-crm__date-field--visible", showDates);
+    });
+  }
+
   function channelLabel(channel) {
     if (channel === "push") return "push";
     if (channel === "bot_push") return "бот + push";
@@ -660,10 +724,28 @@
     if (period) {
       period.addEventListener("change", function () {
         state.period = period.value || "30";
+        if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
-        renderAll();
+        syncPeriodInputs();
+        loadCrmData();
       });
     }
+    var dateFrom = document.getElementById("playerCrmDateFrom");
+    if (dateFrom) dateFrom.addEventListener("change", function () {
+      state.dateFrom = dateFrom.value || "";
+      state.period = "custom";
+      state.showAllPlayers = false;
+      syncPeriodInputs();
+      loadCrmData();
+    });
+    var dateTo = document.getElementById("playerCrmDateTo");
+    if (dateTo) dateTo.addEventListener("change", function () {
+      state.dateTo = dateTo.value || "";
+      state.period = "custom";
+      state.showAllPlayers = false;
+      syncPeriodInputs();
+      loadCrmData();
+    });
     var refresh = document.getElementById("playerCrmRefreshBtn");
     if (refresh) refresh.addEventListener("click", loadCrmData);
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
@@ -687,6 +769,7 @@
 
   function pokerInitPlayerCrm() {
     bindOnce();
+    syncPeriodInputs();
     if (!state.loaded) loadCrmData();
     else renderAll();
   }
