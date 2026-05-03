@@ -146,6 +146,7 @@
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
     var chat = state.chatStats || {};
+    var pairHint = "Всего / за " + periodLabel();
     function pair(row) {
       return intFmt(row && row.total) + " / " + intFmt(row && row.period);
     }
@@ -154,13 +155,23 @@
       ["Подписан на бот", botSubscribers],
       ["Депозиты", money(deposits)],
       ["Сообщения", messages],
-      ["Сообщений в главном чате", pair(chat.generalMessages)],
-      ["Личных диалогов", pair(chat.personalDialogs)],
-      ["Групповых чатов", pair(chat.groupChats)],
     ];
-    el.innerHTML = stats.map(function (it) {
-      return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span><span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
-    }).join("");
+    var chatStats = [
+      ["Сообщений в главном чате", pair(chat.generalMessages), pairHint],
+      ["Личных диалогов", pair(chat.personalDialogs), pairHint],
+      ["Групповых чатов", pair(chat.groupChats), pairHint],
+    ];
+    function statCard(it) {
+      return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+        (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
+        "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
+    }
+    el.innerHTML =
+      "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
+      "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
+        "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
+        "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
+      "</section>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = periodLabel();
     return { active: players.length, botSubscribers: botSubscribers, deposits: deposits, messages: messages };
