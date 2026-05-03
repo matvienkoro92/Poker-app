@@ -838,8 +838,7 @@ button.player-crm__stat:focus-visible,
   padding-top: 12px;
   border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
-.player-crm__chart-summary h4,
-.player-crm__chart-undated h4 {
+.player-crm__chart-summary h4 {
   margin: 0;
   color: var(--text);
   font-size: 15px;
@@ -866,38 +865,6 @@ button.player-crm__stat:focus-visible,
 .player-crm__chart-summary-table th {
   color: var(--text-muted);
   font-weight: 800;
-}
-.player-crm__chart-undated {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-  padding: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 8px;
-  background: rgba(2, 6, 23, 0.25);
-}
-.player-crm__chart-undated > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.player-crm__chart-undated span {
-  display: grid;
-  gap: 2px;
-  min-width: 120px;
-  padding: 8px 10px;
-  border: 1px solid rgba(248, 217, 138, 0.22);
-  border-radius: 8px;
-}
-.player-crm__chart-undated small {
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-.player-crm__chart-undated strong {
-  color: var(--text);
-  font-size: 18px;
 }
 .player-crm__import {
   display: grid;

@@ -972,14 +972,7 @@
         return "<tr><td>" + esc(formatChartDate(row.date)) + "</td>" + cells + "<td><strong>" + esc(intFmt(total)) + "</strong></td></tr>";
       }).join("") + "</tbody></table></div>" :
       "<div class=\"player-crm__timeline-item\">" + (datedSeries.length ? "За выбранный период нет прироста с датой." : "Выберите хотя бы одну галочку, чтобы увидеть линии и сводку.") + "</div>";
-    var undated = chart.undated || {};
-    var undatedItems = series.filter(function (s) {
-      return s.hasDates === false && Number(undated[s.key]) > 0;
-    }).map(function (s) {
-      return "<span><small>" + esc(s.label || s.key) + "</small><strong>" + esc(intFmt(undated[s.key])) + "</strong></span>";
-    }).join("");
-    var undatedBlock = undatedItems ? "<div class=\"player-crm__chart-undated\"><h4>Остаток без даты</h4><div>" + undatedItems + "</div></div>" : "";
-    return "<div class=\"player-crm__chart-summary\"><h4>Сводка прироста по датам</h4>" + table + undatedBlock + "</div>";
+    return "<div class=\"player-crm__chart-summary\"><h4>Сводка прироста по датам</h4>" + table + "</div>";
   }
 
   function enabledChartSeries() {
