@@ -94,13 +94,7 @@
       if (!shown && candidates[i]) shown = candidates[i];
       if (isKnownAdminUser(candidates[i])) knownAdmin = true;
     }
-    var parts = [];
-    if (version) parts.push("Version " + version);
-    parts.push("admin: " + (knownAdmin ? "да" : "проверяется"));
-    if (shown && shown.username) parts.push("@" + String(shown.username).replace(/^@+/, "").trim());
-    if (shown && shown.id != null) parts.push("id " + String(shown.id).replace(/^tg_/, "").trim());
-    if (shown && shown.email) parts.push(String(shown.email).trim());
-    el.textContent = parts.join(" · ");
+    el.textContent = version ? "Version " + version : "";
     if (forceVisible || knownAdmin) el.classList.remove("home-admin-version--hidden");
   }
 
