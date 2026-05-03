@@ -6349,9 +6349,10 @@ function initChat() {
           if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
           if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
-          if (!document.body.classList.contains("chat-keyboard-open")) return false;
           var target = focusTarget || document.activeElement || chatComposerEl;
           if (!isChatThreadComposerKeyboardDom(target)) return false;
+          if (isPwaChatManualFocusIntentActive(target)) return true;
+          if (isIosPwaChatComposerOpeningHoldActive(target)) return true;
           try {
             if (!isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return true;
           } catch (ePwaRootLayoutOpen) {}
@@ -6362,7 +6363,7 @@ function initChat() {
           var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
           var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
           if (openingUntil > now) return true;
-          if (focusAt > 0 && now - focusAt < 1800) return true;
+          if (focusAt > 0 && now - focusAt < 2600) return true;
           return false;
         } catch (ePwaRootSkip) {
           return false;
@@ -8727,7 +8728,7 @@ function initChat() {
           }
           attachPwaChatThreadRootScrollLock(focusTarget);
           try {
-            scrollDocumentToZero();
+            if (!shouldSkipPwaChatRootScrollDuringComposerOpen(focusTarget)) scrollDocumentToZero();
           } catch (ePwaDockScroll0) {}
           try {
             syncPwaChatVisualViewportInset();
