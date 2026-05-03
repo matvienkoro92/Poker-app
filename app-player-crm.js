@@ -29,11 +29,11 @@
     sourceAnalytics: [],
     chartAnalytics: null,
     chartSeriesEnabled: {
-      players: false,
-      registrations: false,
+      players: true,
+      registrations: true,
       poker21: true,
-      bot: false,
-      push: false,
+      bot: true,
+      push: true,
       deposits: true,
       crmMessages: true,
       generalMessages: true,
@@ -934,8 +934,8 @@
     }).map(function (s) {
       return "<span><small>" + esc(s.label || s.key) + "</small><strong>" + esc(intFmt(undated[s.key])) + "</strong></span>";
     }).join("");
-    var undatedBlock = undatedItems ? "<div class=\"player-crm__chart-undated\"><h4>Без даты роста</h4><div>" + undatedItems + "</div></div>" : "";
-    return "<div class=\"player-crm__chart-summary\"><h4>Прирост по датам</h4>" + table + undatedBlock + "</div>";
+    var undatedBlock = undatedItems ? "<div class=\"player-crm__chart-undated\"><h4>Остаток без даты</h4><div>" + undatedItems + "</div></div>" : "";
+    return "<div class=\"player-crm__chart-summary\"><h4>Сводка прироста по датам</h4>" + table + undatedBlock + "</div>";
   }
 
   function renderChartAnalytics() {
