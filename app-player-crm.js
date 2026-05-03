@@ -20,6 +20,7 @@
     showAllRegistrationModal: false,
     pokerPlusModalOpen: false,
     generalMessagesModalOpen: false,
+    showAllGeneralMessagesModal: false,
     botModalOpen: false,
     pushModalOpen: false,
     registrationMethod: "all",
@@ -773,15 +774,19 @@
     var chat = state.chatStats || {};
     var rows = chat.generalMessages && Array.isArray(chat.generalMessages.authors) ? chat.generalMessages.authors : [];
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">За выбранный период сообщений в главном чате пока нет.</div>";
+    var visibleRows = state.showAllGeneralMessagesModal ? rows : rows.slice(0, 10);
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
       "<th>Игрок</th><th>ID</th><th>Сообщений</th>" +
-      "</tr></thead><tbody>" + rows.slice(0, 10).map(function (r) {
+      "</tr></thead><tbody>" + visibleRows.map(function (r) {
         return "<tr>" +
           "<td>" + esc(r.name || "—") + "</td>" +
           "<td>" + esc(r.handle || r.id || "—") + "</td>" +
           "<td>" + esc(intFmt(r.count || 0)) + "</td>" +
         "</tr>";
-      }).join("") + "</tbody></table></div></div>";
+      }).join("") + "</tbody></table></div>" +
+      (!state.showAllGeneralMessagesModal && rows.length > 10
+        ? "<div class=\"player-crm__modal-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-show-all-general-messages>Показать всех " + esc(intFmt(rows.length)) + "</button></div>"
+        : "") + "</div>";
   }
 
   function renderGeneralMessagesModal() {
@@ -804,6 +809,7 @@
 
   function closeGeneralMessagesModal() {
     state.generalMessagesModalOpen = false;
+    state.showAllGeneralMessagesModal = false;
     renderStats();
     renderGeneralMessagesModal();
   }
@@ -1591,6 +1597,7 @@
       }
       if (e.target.closest("[data-crm-general-messages-modal]")) {
         state.generalMessagesModalOpen = true;
+        state.showAllGeneralMessagesModal = false;
         renderStats();
         renderGeneralMessagesModal();
         return;
@@ -1628,6 +1635,11 @@
       }
       if (e.target.closest("[data-crm-export-registrations]")) {
         exportRegistrationModalRows();
+        return;
+      }
+      if (e.target.closest("[data-crm-show-all-general-messages]")) {
+        state.showAllGeneralMessagesModal = true;
+        renderGeneralMessagesModal();
         return;
       }
       var managerDialogs = e.target.closest("[data-crm-manager-dialogs]");
