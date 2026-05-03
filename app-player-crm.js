@@ -554,12 +554,6 @@
     }, "Связки ID сохранены.");
   }
 
-  function importCrmEvents() {
-    var text = val("playerCrmImportText");
-    if (!text.trim()) return;
-    postCrmAction({ action: "import_events", csv: text }, "Импорт событий выполнен.");
-  }
-
   function postCrmAction(payload, okText) {
     var base = getApiBaseSafe();
     var out = document.getElementById("playerCrmBroadcastResult");
@@ -684,8 +678,6 @@
     if (broadcastPrepare) broadcastPrepare.addEventListener("click", prepareBroadcast);
     var broadcastSend = document.getElementById("playerCrmBroadcastSendBtn");
     if (broadcastSend) broadcastSend.addEventListener("click", sendBroadcastNow);
-    var importBtn = document.getElementById("playerCrmImportBtn");
-    if (importBtn) importBtn.addEventListener("click", importCrmEvents);
     root.addEventListener("click", function (e) {
       if (e.target && e.target.id === "playerCrmSavePlayerBtn") saveSelectedPlayer();
       if (e.target && e.target.id === "playerCrmAddEventBtn") addSelectedEvent();
