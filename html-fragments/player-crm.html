@@ -17,11 +17,25 @@
         </label>
         <label class="player-crm__period player-crm__date-field">
           <span>С</span>
-          <input id="playerCrmDateFrom" type="date" />
+          <span class="player-crm__date-control">
+            <input id="playerCrmDateFrom" type="date" inputmode="none" />
+            <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateFrom" aria-label="Выбрать дату начала">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+              </svg>
+            </button>
+          </span>
         </label>
         <label class="player-crm__period player-crm__date-field">
           <span>По</span>
-          <input id="playerCrmDateTo" type="date" />
+          <span class="player-crm__date-control">
+            <input id="playerCrmDateTo" type="date" inputmode="none" />
+            <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateTo" aria-label="Выбрать дату окончания">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+              </svg>
+            </button>
+          </span>
         </label>
         <button type="button" class="player-crm__ghost-btn" id="playerCrmRefreshBtn">Обновить</button>
       </div>

@@ -84,6 +84,49 @@
   min-height: 40px;
   padding: 0 11px;
 }
+.player-crm input[type="date"] {
+  color-scheme: dark;
+}
+[data-theme="light"] .player-crm input[type="date"] {
+  color-scheme: light;
+}
+.player-crm__date-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  align-items: stretch;
+}
+.player-crm__date-control input {
+  border-radius: 8px 0 0 8px;
+}
+.player-crm__date-picker-btn {
+  display: grid;
+  min-height: 40px;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: rgba(15, 23, 42, 0.86);
+  color: var(--text);
+  cursor: pointer;
+}
+[data-theme="light"] .player-crm__date-picker-btn {
+  background: rgba(255, 255, 255, 0.96);
+}
+.player-crm__date-picker-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+.player-crm__date-picker-btn:hover,
+.player-crm__date-picker-btn:focus-visible {
+  border-color: rgba(245, 158, 11, 0.65);
+  color: var(--accent);
+  outline: none;
+}
 .player-crm textarea {
   min-height: 132px;
   padding: 11px;

@@ -63,6 +63,13 @@
     if (!state.dateFrom) state.dateFrom = isoDate(from);
   }
 
+  function normalizeDateRange(changed) {
+    if (!state.dateFrom || !state.dateTo) return;
+    if (state.dateFrom <= state.dateTo) return;
+    if (changed === "from") state.dateTo = state.dateFrom;
+    else state.dateFrom = state.dateTo;
+  }
+
   function periodKey() {
     return state.period === "custom" ? "custom" : String(state.period || "30");
   }
@@ -654,12 +661,30 @@
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
     if (period) period.value = state.period || "30";
-    if (from) from.value = state.dateFrom || "";
-    if (to) to.value = state.dateTo || "";
+    if (from) {
+      from.value = state.dateFrom || "";
+      from.max = state.dateTo || "";
+    }
+    if (to) {
+      to.value = state.dateTo || "";
+      to.min = state.dateFrom || "";
+    }
     var showDates = state.period === "custom";
     document.querySelectorAll(".player-crm__date-field").forEach(function (el) {
       el.classList.toggle("player-crm__date-field--visible", showDates);
     });
+  }
+
+  function openDatePicker(input) {
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+        return;
+      } catch (err) {}
+    }
+    input.click();
   }
 
   function channelLabel(channel) {
@@ -715,6 +740,12 @@
         renderList();
         return;
       }
+      var datePicker = e.target.closest("[data-crm-date-picker]");
+      if (datePicker) {
+        e.preventDefault();
+        openDatePicker(document.getElementById(datePicker.getAttribute("data-crm-date-picker") || ""));
+        return;
+      }
       var broadSeg = e.target.closest("[data-crm-broadcast-segment]");
       if (broadSeg) {
         var seg = broadSeg.getAttribute("data-crm-broadcast-segment") || "has_bot";
@@ -750,6 +781,7 @@
     if (dateFrom) dateFrom.addEventListener("change", function () {
       state.dateFrom = dateFrom.value || "";
       state.period = "custom";
+      normalizeDateRange("from");
       state.showAllPlayers = false;
       syncPeriodInputs();
       loadCrmData();
@@ -758,6 +790,7 @@
     if (dateTo) dateTo.addEventListener("change", function () {
       state.dateTo = dateTo.value || "";
       state.period = "custom";
+      normalizeDateRange("to");
       state.showAllPlayers = false;
       syncPeriodInputs();
       loadCrmData();
