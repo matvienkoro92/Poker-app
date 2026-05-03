@@ -103,6 +103,8 @@ function initChat() {
   var convTitleLevel = document.getElementById("chatConvTitleLevel");
   var convTitleId = document.getElementById("chatConvTitleId");
   var convVerifiedBadge = document.getElementById("chatConvVerifiedBadge");
+  var chatConvTitleIdPeerId = "";
+  var chatConvTitleP21ByPeer = {};
   var convGroupDescEl = document.getElementById("chatConvGroupDesc");
   /** Описание группы не дублируем под шапкой чата — только в модалке «Информация о группе». */
   function applyConvGroupDescription() {
@@ -140,9 +142,68 @@ function initChat() {
     var hasId = !!(convTitleId && String(convTitleId.textContent || "").trim());
     wrap.hidden = !hasId;
   }
+  function normalizeChatConvTitlePeerId(peerId) {
+    var raw = peerId != null ? String(peerId).trim() : "";
+    if (!raw) return "";
+    try {
+      if (typeof normalizePeerIdForChat === "function") return normalizePeerIdForChat(raw);
+    } catch (eTitlePeerNorm) {}
+    return raw;
+  }
+  function getOpenPersonalTitlePeerId() {
+    try {
+      if (!chatWithUserId || String(chatWithUserId).indexOf("group_") === 0) return "";
+      if (convView && convView.classList && convView.classList.contains("chat-conv-view--hidden")) return "";
+      return normalizeChatConvTitlePeerId(chatWithUserId);
+    } catch (eTitlePeerOpen) {
+      return "";
+    }
+  }
+  function isChatConvTitleTransientMeta(value) {
+    var s = value != null ? String(value).trim() : "";
+    return s === "печатает…" || s === "typing…";
+  }
+  function rememberChatConvTitleP21Id(peerId, value) {
+    var key = normalizeChatConvTitlePeerId(peerId);
+    var clean = value != null ? String(value).trim() : "";
+    if (!key || !clean || isChatConvTitleTransientMeta(clean)) return "";
+    chatConvTitleP21ByPeer[key] = clean;
+    chatConvTitleIdPeerId = key;
+    return clean;
+  }
+  function resolveChatConvTitleP21Id(peerId) {
+    var key = normalizeChatConvTitlePeerId(peerId);
+    if (!key) return "";
+    try {
+      var current = convTitleId ? String(convTitleId.textContent || "").trim() : "";
+      if (
+        current &&
+        !isChatConvTitleTransientMeta(current) &&
+        chatConvTitleIdPeerId &&
+        (
+          chatConvTitleIdPeerId === key ||
+          (typeof peerChatIdsEqual === "function" && peerChatIdsEqual(chatConvTitleIdPeerId, key))
+        )
+      ) return current;
+    } catch (eTitleCurrent) {}
+    if (chatConvTitleP21ByPeer[key]) return chatConvTitleP21ByPeer[key];
+    try {
+      var meta = typeof pokerGetCachedChatPeerMeta === "function" ? pokerGetCachedChatPeerMeta(key) : null;
+      if (meta && meta.p21Id != null && String(meta.p21Id).trim()) return rememberChatConvTitleP21Id(key, meta.p21Id);
+    } catch (eTitleCached) {}
+    return "";
+  }
   function setChatConvTitleIdText(value) {
     if (!convTitleId) return;
     var clean = value != null ? String(value).trim() : "";
+    var peerKey = getOpenPersonalTitlePeerId();
+    if (peerKey && clean && !isChatConvTitleTransientMeta(clean)) {
+      clean = rememberChatConvTitleP21Id(peerKey, clean);
+    } else if (peerKey && !clean) {
+      clean = resolveChatConvTitleP21Id(peerKey);
+    } else if (!peerKey && !clean) {
+      chatConvTitleIdPeerId = "";
+    }
     setTextContentIfChanged(convTitleId, clean);
     syncChatConvTitleMetaVisibility();
   }
@@ -2459,8 +2520,13 @@ function initChat() {
     if (chatActiveTab !== "personal" || !chatWithUserId || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
     if (String(chatWithUserId).indexOf("group_") === 0) return;
     if (chatPeerTypingActive) {
-      setTextContentIfChanged(convTitleId, "печатает…");
-      syncChatConvTitleMetaVisibility();
+      var stableP21 = resolveChatConvTitleP21Id(chatWithUserId);
+      if (stableP21) {
+        setChatConvTitleIdText(stableP21);
+      } else {
+        setTextContentIfChanged(convTitleId, "печатает…");
+        syncChatConvTitleMetaVisibility();
+      }
     }
   }
   function pokerChatSendTypingState(active) {

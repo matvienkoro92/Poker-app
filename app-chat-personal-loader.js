@@ -367,11 +367,13 @@ function loadMessages(opts) {
           }
         }
       }
-      if (!isGrpThread && Array.isArray(messages) && messages.length && getChatWithUserId()) {
-        var peerCachedMetaForMessages = null;
+      var peerCachedMetaForMessages = null;
+      if (!isGrpThread && getChatWithUserId()) {
         try {
           peerCachedMetaForMessages = typeof pokerGetCachedChatPeerMeta === "function" ? pokerGetCachedChatPeerMeta(getChatWithUserId()) : null;
         } catch (ePeerCachedMetaMsg) {}
+      }
+      if (!isGrpThread && Array.isArray(messages) && messages.length && getChatWithUserId()) {
         messages = enrichPersonalThreadPeerMeta(messages, getChatWithUserId(), {
           fromName: getChatWithUserName() || "",
           fromAvatar: getChatWithPeerAvatarUrl() || "",
@@ -388,7 +390,34 @@ function loadMessages(opts) {
           setChatConvTitleIdText(pt !== "—" ? String(pt) + " уч." : "");
         } else {
           var titleP21 =
-            data.otherP21Id != null && String(data.otherP21Id).trim() !== "" ? String(data.otherP21Id).trim() : null;
+            data.otherP21Id != null && String(data.otherP21Id).trim() !== ""
+              ? String(data.otherP21Id).trim()
+              : peerCachedMetaForMessages && peerCachedMetaForMessages.p21Id != null && String(peerCachedMetaForMessages.p21Id).trim() !== ""
+                ? String(peerCachedMetaForMessages.p21Id).trim()
+                : "";
+          if (!titleP21 && Array.isArray(messages) && messages.length && getChatWithUserId()) {
+            for (var p21Mi = messages.length - 1; p21Mi >= 0; p21Mi--) {
+              var p21Msg = messages[p21Mi];
+              if (!p21Msg || !p21Msg.from) continue;
+              if (!peerChatIdsEqual(p21Msg.from, getChatWithUserId())) continue;
+              if (p21Msg.fromP21Id != null && String(p21Msg.fromP21Id).trim() !== "") {
+                titleP21 = String(p21Msg.fromP21Id).trim();
+                break;
+              }
+            }
+          }
+          if (titleP21 && typeof pokerRememberChatPeerMetaFromContact === "function") {
+            try {
+              pokerRememberChatPeerMetaFromContact({
+                id: getChatWithUserId(),
+                name: getChatWithUserName() || "",
+                avatar: getChatWithPeerAvatarUrl() || "",
+                p21Id: titleP21,
+                pokerPlusVerified: peerPokerPlusVerifiedFromPayload,
+                statusLevel: data.otherStatusLevel,
+              });
+            } catch (eRememberTitleP21) {}
+          }
           setChatConvTitleIdText(titleP21 || "");
           if (peerPokerPlusVerifiedFromPayload) setChatPeerVerified(true);
           if (data.otherStatusLevel != null && String(data.otherStatusLevel).trim() !== "") {
