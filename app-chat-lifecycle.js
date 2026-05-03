@@ -6756,6 +6756,8 @@ function initChat() {
         try {
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
           if (!document.body.classList.contains("chat-keyboard-open")) return false;
+          if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return false;
+          if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return false;
           if (finalizeIosPwaChatThreadClosedKeyboard(document.activeElement || chatComposerEl, "force-cleanup")) return true;
           var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
           if (openingUntil > Date.now()) return false;
@@ -6871,6 +6873,8 @@ function initChat() {
         window.__pokerChatVvPostKeyboardCleanupAttached = true;
         var vvPostKbTimer = null;
         function onVvAfterKeyboardMaybeClosed() {
+          if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return;
+          if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return;
           if (forcePwaChatKeyboardCleanupIfClosed()) return;
           if (document.body.classList.contains("chat-keyboard-open")) return;
           var ih = window.innerHeight || 0;
@@ -6879,6 +6883,8 @@ function initChat() {
           if (!ih || vvh < ih - 12) return;
           clearTimeout(vvPostKbTimer);
           vvPostKbTimer = setTimeout(function () {
+            if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return;
+            if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return;
             if (document.body.classList.contains("chat-keyboard-open")) return;
             var ih2 = window.innerHeight || 0;
             var vvh2 = Number(window.visualViewport.height) || 0;
@@ -6947,6 +6953,8 @@ function initChat() {
               return;
             }
             window.__pokerChatPwaUserDismissAt = Date.now();
+            window.__pokerChatManualFocusIntentUntil = 0;
+            window.__pokerChatManualFocusIntentTarget = null;
             window.__pokerChatKeyboardOpeningUntil = 0;
             window.__pokerChatPwaFocusKeepAliveUntil = 0;
             window.__pokerChatPwaFocusKeepAliveTarget = null;
@@ -9295,6 +9303,8 @@ function initChat() {
           window.__pokerChatDismissTimers.push(setTimeout(function () {
             try {
               if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
+                if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
+                if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
                 finalizeChatKeyboardDismiss();
               }
             } catch (eKbFs) {}
@@ -9303,6 +9313,8 @@ function initChat() {
           setTimeout(function () {
             try {
               if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
+                if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
+                if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
                 finalizeChatKeyboardDismiss();
               }
             } catch (eKbFs) {}
@@ -9314,6 +9326,8 @@ function initChat() {
             try {
               if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
               if (refocusIosPwaChatComposerAfterTransientBlur(focusTarget || chatComposerEl, "timer" + ms)) return;
+              if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
+              if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
               finalizeChatKeyboardDismiss();
             } catch (ePwaFin) {}
           }, ms);
@@ -10167,17 +10181,41 @@ function initChat() {
         btn.tabIndex = -1;
         btn.setAttribute("aria-label", "Вставить " + emoji);
         var emojiTouchHandledAt = 0;
+        var emojiTouchStartY = 0;
+        var emojiTouchMoved = false;
         btn.addEventListener("pointerdown", function (e) {
           if (e && e.isPrimary === false) return;
-          preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-pointerdown");
+          try {
+            if (e && e.stopPropagation) e.stopPropagation();
+          } catch (eEmojiPointerStop) {}
         }, { passive: false, capture: true });
         btn.addEventListener("mousedown", function (e) {
           preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-mousedown");
         });
         btn.addEventListener("touchstart", function (e) {
-          preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-touchstart");
-        }, { passive: false });
+          emojiTouchMoved = false;
+          try {
+            var t = e && e.touches && e.touches[0] ? e.touches[0] : null;
+            emojiTouchStartY = t ? Number(t.clientY) || 0 : 0;
+          } catch (eEmojiTouchStartY) {
+            emojiTouchStartY = 0;
+          }
+          try {
+            if (e && e.stopPropagation) e.stopPropagation();
+          } catch (eEmojiTouchStartStop) {}
+        }, { passive: true });
+        btn.addEventListener("touchmove", function (e) {
+          try {
+            var t = e && e.touches && e.touches[0] ? e.touches[0] : null;
+            var y = t ? Number(t.clientY) || 0 : 0;
+            if (emojiTouchStartY && Math.abs(y - emojiTouchStartY) > 8) emojiTouchMoved = true;
+          } catch (eEmojiTouchMove) {}
+        }, { passive: true });
         btn.addEventListener("touchend", function (e) {
+          if (emojiTouchMoved) {
+            emojiTouchMoved = false;
+            return;
+          }
           if (!preventEmojiFocusSteal(e, chatEmojiPickerTargetInput, "emoji-picker-touchend")) return;
           emojiTouchHandledAt = Date.now();
           if (chatEmojiPickerTargetInput) insertEmojiAtCursor(chatEmojiPickerTargetInput, emoji);

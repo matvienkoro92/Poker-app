@@ -1424,6 +1424,9 @@ img.chat-contact__avatar {
   gap: 4px;
   max-height: 180px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .chat-emoji-picker__emoji {
   width: 32px;
@@ -1438,6 +1441,7 @@ img.chat-contact__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 .chat-emoji-picker__emoji:hover {
   background: rgba(148, 163, 184, 0.2);
