@@ -772,17 +772,44 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__section-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
   padding-bottom: 9px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 }
+.player-crm__section-head > div {
+  min-width: 0;
+}
 .player-crm__section-head h3 {
   margin: 0;
   color: var(--accent);
   font-size: 20px;
+}
+.player-crm__section-head span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+.player-crm__send-section-btn {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 8px 12px;
+  border: 1px solid rgba(248, 217, 138, 0.46);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.28);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.player-crm__send-section-btn:hover,
+.player-crm__send-section-btn:focus-visible {
+  border-color: rgba(248, 217, 138, 0.72);
+  background: rgba(248, 217, 138, 0.12);
 }
 .player-crm__queue,
 .player-crm__segments,

@@ -58,8 +58,11 @@
       <main class="player-crm__panel player-crm__panel--main">
         <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="overview">
           <div class="player-crm__section-head">
-            <h3>График</h3>
-            <span id="playerCrmAnalyticsPeriod">30 дней</span>
+            <div>
+              <h3>График</h3>
+              <span id="playerCrmAnalyticsPeriod">30 дней</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="overview">Отправить</button>
           </div>
           <div class="player-crm__chart-period-row" aria-label="Период графика">
             <label class="player-crm__period">
@@ -104,8 +107,11 @@
 
         <section class="player-crm__tab-panel" data-crm-panel="players">
           <div class="player-crm__section-head">
-            <h3>Игроки</h3>
-            <span>по 15 в списке</span>
+            <div>
+              <h3>Игроки</h3>
+              <span>по 15 в списке</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="players">Отправить</button>
           </div>
           <div class="player-crm__players-grid">
             <aside class="player-crm__players-list">
@@ -120,8 +126,11 @@
 
         <section class="player-crm__tab-panel" data-crm-panel="registrations">
           <div class="player-crm__section-head">
-            <h3>Зарегистрированные</h3>
-            <span>почта и Telegram-бот</span>
+            <div>
+              <h3>Зарегистрированные</h3>
+              <span>почта и Telegram-бот</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="registrations">Отправить</button>
           </div>
           <div class="player-crm__form-grid player-crm__registration-filters">
             <label>
@@ -147,8 +156,11 @@
 
         <section class="player-crm__tab-panel" data-crm-panel="pokerplus">
           <div class="player-crm__section-head">
-            <h3>Poker21</h3>
-            <span>подтверждённые аккаунты</span>
+            <div>
+              <h3>Poker21</h3>
+              <span>подтверждённые аккаунты</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="pokerplus">Отправить</button>
           </div>
           <div class="player-crm__form-grid player-crm__pokerplus-filters">
             <label>
@@ -173,16 +185,22 @@
 
         <section class="player-crm__tab-panel" data-crm-panel="segments">
           <div class="player-crm__section-head">
-            <h3>Сегменты</h3>
-            <span>авто-группы по активности</span>
+            <div>
+              <h3>Сегменты</h3>
+              <span>авто-группы по активности</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="segments">Отправить</button>
           </div>
           <div class="player-crm__segments" id="playerCrmSegments"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="broadcast">
           <div class="player-crm__section-head">
-            <h3>Рассылка</h3>
-            <span id="playerCrmBroadcastAudience">—</span>
+            <div>
+              <h3>Рассылка</h3>
+              <span id="playerCrmBroadcastAudience">—</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="broadcast">Отправить</button>
           </div>
           <div class="player-crm__broadcast">
             <div class="player-crm__form-grid">
