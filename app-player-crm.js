@@ -157,8 +157,9 @@
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
     var registrations = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
-    var registrationEmailCount = registrations.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
-    var registrationTelegramCount = registrations.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
+    var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
+    var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
+    var registrationBothCount = registrationRowsByMethod("both").length;
     var chat = state.chatStats || {};
     var pairHint = "Всего / за " + periodLabel();
     function pair(row) {
@@ -183,8 +184,9 @@
         return "<div class=\"player-crm__stat player-crm__stat--registration\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(intFmt(registrations.length)) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
-            "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Через логин Telegram</small><strong>" + esc(intFmt(registrationTelegramCount)) + "</strong></button>" +
-            "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Через email</small><strong>" + esc(intFmt(registrationEmailCount)) + "</strong></button>" +
+            "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
+            "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Только email</small><strong>" + esc(intFmt(registrationEmailOnlyCount)) + "</strong></button>" +
+            "<button type=\"button\" data-crm-registrations-modal=\"both\"><small>И то и то</small><strong>" + esc(intFmt(registrationBothCount)) + "</strong></button>" +
           "</span></div>";
       }
       var tag = it[3] ? "button" : "div";
@@ -253,16 +255,28 @@
     renderManagerDialogModal();
   }
 
+  function hasRegistrationMethod(row, method) {
+    return !!(row && row.methods && row.methods.indexOf(method) >= 0);
+  }
+
   function registrationModalTitle(method) {
-    return method === "telegram" ? "Зареганы через логин Telegram" : "Зареганы через email";
+    if (method === "both") return "Есть Telegram и email";
+    return method === "telegram" ? "Только через логин Telegram" : "Только через email";
   }
 
   function registrationRowsByMethod(method) {
     var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
-    rows = rows.filter(function (r) { return r.methods && r.methods.indexOf(method) >= 0; });
+    rows = rows.filter(function (r) {
+      var hasEmail = hasRegistrationMethod(r, "email");
+      var hasTelegram = hasRegistrationMethod(r, "telegram");
+      if (method === "both") return hasEmail && hasTelegram;
+      if (method === "email") return hasEmail && !hasTelegram;
+      if (method === "telegram") return hasTelegram && !hasEmail;
+      return hasEmail || hasTelegram;
+    });
     rows.sort(function (a, b) {
       function val(row) {
-        return method === "email"
+        return method === "email" || method === "both"
           ? row.email || row.name || row.accountId || ""
           : registrationTelegramLabel(row) || row.name || row.accountId || "";
       }
@@ -275,15 +289,13 @@
     var rows = registrationRowsByMethod(method);
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">По этому способу регистрации пока пусто.</div>";
     return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>" + esc(method === "email" ? "Email" : "Telegram-логин") + "</th><th>Второй канал</th><th>Имя</th>" +
+      "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
         var tg = registrationTelegramLabel(r);
-        var main = method === "email" ? (r.email || "—") : tg;
-        var second = method === "email" ? tg : (r.email || "—");
         return "<tr>" +
           "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
-          "<td>" + esc(main || "—") + "</td>" +
-          "<td>" + esc(second || "—") + "</td>" +
+          "<td>" + esc(tg || "—") + "</td>" +
+          "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
@@ -296,7 +308,7 @@
     var bodyEl = document.getElementById("playerCrmRegistrationModalBody");
     if (!modal || !bodyEl) return;
     var method = state.registrationModalMethod;
-    if (method !== "email" && method !== "telegram") {
+    if (method !== "email" && method !== "telegram" && method !== "both") {
       modal.hidden = true;
       if (document.body && !state.chatDialogManager) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
@@ -498,8 +510,9 @@
     if (!el) return;
     var allRows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
     var rows = filteredRegistrations();
-    var emailCount = allRows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
-    var telegramCount = allRows.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
+    var emailOnlyCount = registrationRowsByMethod("email").length;
+    var telegramOnlyCount = registrationRowsByMethod("telegram").length;
+    var bothCount = registrationRowsByMethod("both").length;
     if (!allRows.length) {
       el.innerHTML = "<div class=\"player-crm__timeline-item\">Зарегистрированных аккаунтов по почте или Telegram-боту пока нет.</div>";
       return;
@@ -508,8 +521,9 @@
       "<div class=\"player-crm__metrics player-crm__metrics--registrations\">" +
         metric("Показано", intFmt(rows.length)) +
         metric("Всего", intFmt(allRows.length)) +
-        metric("Через почту", intFmt(emailCount)) +
-        metric("Через Telegram-бот", intFmt(telegramCount)) +
+        metric("Только почта", intFmt(emailOnlyCount)) +
+        metric("Только Telegram", intFmt(telegramOnlyCount)) +
+        metric("И то и то", intFmt(bothCount)) +
       "</div>";
     if (!rows.length) {
       el.innerHTML = summary + "<div class=\"player-crm__timeline-item\">По этому фильтру пусто.</div>";
