@@ -710,12 +710,14 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__chart-grid text,
 .player-crm__chart-ticks text {
-  fill: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 900;
   text-anchor: middle;
 }
 .player-crm__chart-grid text {
+  fill: var(--text-muted);
+  font-size: 15px;
   text-anchor: start;
 }
 .player-crm__chart-lines polyline {

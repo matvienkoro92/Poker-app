@@ -1028,11 +1028,11 @@
       return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
     });
     var width = 960;
-    var height = 320;
-    var padL = 56;
+    var height = 340;
+    var padL = 72;
     var padR = 18;
     var padT = 20;
-    var padB = 46;
+    var padB = 58;
     var plotW = width - padL - padR;
     var plotH = height - padT - padB;
     var max = enabledSeries.reduce(function (m, s) {
@@ -1052,12 +1052,12 @@
       var gy = padT + plotH - part * plotH;
       var value = Math.round(max * part);
       return "<line x1=\"" + padL + "\" y1=\"" + gy.toFixed(1) + "\" x2=\"" + (width - padR) + "\" y2=\"" + gy.toFixed(1) + "\" />" +
-        "<text x=\"10\" y=\"" + (gy + 4).toFixed(1) + "\">" + esc(intFmt(value)) + "</text>";
+        "<text x=\"12\" y=\"" + (gy + 5).toFixed(1) + "\">" + esc(intFmt(value)) + "</text>";
     }).join("");
     var step = Math.max(1, Math.ceil(labels.length / 6));
     var ticks = labels.map(function (label, idx) {
       if (idx !== 0 && idx !== labels.length - 1 && idx % step !== 0) return "";
-      return "<text x=\"" + x(idx).toFixed(1) + "\" y=\"" + (height - 14) + "\">" + esc(String(label).slice(5)) + "</text>";
+      return "<text x=\"" + x(idx).toFixed(1) + "\" y=\"" + (height - 18) + "\">" + esc(String(label).slice(5)) + "</text>";
     }).join("");
     var lines = enabledSeries.map(function (s) {
       var color = chartColors[s.key] || "#e5e7eb";
