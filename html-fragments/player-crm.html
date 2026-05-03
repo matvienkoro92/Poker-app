@@ -44,6 +44,7 @@
     <nav class="player-crm__tabs" aria-label="CRM разделы">
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="overview">Обзор</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players">Игроки</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="registrations">Регистрации</button>
       <button type="button" class="player-crm__tab" data-crm-tab="segments">Сегменты</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
     </nav>
@@ -81,6 +82,14 @@
               <div class="player-crm__detail" id="playerCrmDetail"></div>
             </section>
           </div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="registrations">
+          <div class="player-crm__section-head">
+            <h3>Зарегистрированные</h3>
+            <span>почта и Telegram-бот</span>
+          </div>
+          <div class="player-crm__registrations" id="playerCrmRegistrations"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="segments">

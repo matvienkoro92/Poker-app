@@ -413,6 +413,10 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
+.player-crm__metrics--registrations {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
 .player-crm__metric {
   padding: 10px;
 }
@@ -518,6 +522,9 @@
   min-width: 680px;
   border-collapse: collapse;
   font-size: 12px;
+}
+.player-crm__registrations-table {
+  min-width: 760px;
 }
 .player-crm__source-table th,
 .player-crm__source-table td {

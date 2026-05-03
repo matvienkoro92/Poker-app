@@ -11,6 +11,7 @@
     search: "",
     selectedId: "",
     players: [],
+    registeredAccounts: [],
     campaigns: [],
     sourceAnalytics: [],
     chatStats: null,
@@ -298,6 +299,45 @@
     return "<div class=\"player-crm__metric\"><span>" + esc(label) + "</span><strong>" + esc(value) + "</strong></div>";
   }
 
+  function registrationMethodLabel(methods) {
+    var list = Array.isArray(methods) ? methods : [];
+    var out = [];
+    if (list.indexOf("email") >= 0) out.push("Почта");
+    if (list.indexOf("telegram") >= 0) out.push("Telegram-бот");
+    return out.length ? out.join(" + ") : "—";
+  }
+
+  function renderRegistrations() {
+    var el = document.getElementById("playerCrmRegistrations");
+    if (!el) return;
+    var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var emailCount = rows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
+    var telegramCount = rows.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
+    if (!rows.length) {
+      el.innerHTML = "<div class=\"player-crm__timeline-item\">Зарегистрированных аккаунтов по почте или Telegram-боту пока нет.</div>";
+      return;
+    }
+    var summary =
+      "<div class=\"player-crm__metrics player-crm__metrics--registrations\">" +
+        metric("Всего", intFmt(rows.length)) +
+        metric("Через почту", intFmt(emailCount)) +
+        metric("Через Telegram-бот", intFmt(telegramCount)) +
+      "</div>";
+    var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
+      "<th>Аккаунт</th><th>Способ</th><th>Email</th><th>Telegram</th><th>Имя</th>" +
+      "</tr></thead><tbody>" + rows.map(function (r) {
+        var tg = r.telegramUsername || (Array.isArray(r.telegramIds) && r.telegramIds.length ? r.telegramIds.join(", ") : "—");
+        return "<tr>" +
+          "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
+          "<td>" + esc(registrationMethodLabel(r.methods)) + "</td>" +
+          "<td>" + esc(r.email || "—") + "</td>" +
+          "<td>" + esc(tg) + "</td>" +
+          "<td>" + esc(r.name || "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div>";
+    el.innerHTML = summary + table;
+  }
+
   function renderSegments() {
     var el = document.getElementById("playerCrmSegments");
     if (!el) return;
@@ -367,6 +407,7 @@
     renderChips();
     renderList();
     renderDetail();
+    renderRegistrations();
     renderSegments();
     renderBroadcastOptions();
     renderAnalytics();
@@ -419,6 +460,7 @@
     } catch (eCred) {}
     if (!base || !hasCred) {
       state.players = [];
+      state.registeredAccounts = [];
       state.campaigns = [];
       state.sourceAnalytics = [];
       state.chatStats = null;
@@ -434,6 +476,7 @@
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.players)) {
           state.players = data.players;
+          state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
           state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
           state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
           state.chatStats = data.chatStats || null;
@@ -447,6 +490,7 @@
           }
         } else {
           state.players = [];
+          state.registeredAccounts = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
           state.chatStats = null;
@@ -456,6 +500,7 @@
       })
       .catch(function () {
         state.players = [];
+        state.registeredAccounts = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
         state.chatStats = null;
