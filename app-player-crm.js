@@ -180,9 +180,9 @@
       ["Poker21", intFmt((state.pokerPlusAccounts || []).length), "привязали аккаунт", "pokerplus"],
       ["Подписан на бот", botSubscribers],
       ["Депозиты", money(deposits)],
-      ["Сообщения в чате", intFmt(generalMessagesPeriod), periodLabel(), "generalMessages"],
     ];
     var chatStats = [
+      ["Сообщения в чате", intFmt(generalMessagesPeriod), periodLabel(), "generalMessages"],
       ["Сообщений в главном чате", pair(chat.generalMessages), pairHint],
       ["Личных диалогов", pair(chat.personalDialogs), pairHint],
       ["Групповых чатов", pair(chat.groupChats), pairHint],
@@ -708,7 +708,7 @@
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">За выбранный период сообщений в главном чате пока нет.</div>";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
       "<th>Игрок</th><th>ID</th><th>Сообщений</th>" +
-      "</tr></thead><tbody>" + rows.map(function (r) {
+      "</tr></thead><tbody>" + rows.slice(0, 10).map(function (r) {
         return "<tr>" +
           "<td>" + esc(r.name || "—") + "</td>" +
           "<td>" + esc(r.handle || r.id || "—") + "</td>" +
