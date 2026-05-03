@@ -6496,6 +6496,13 @@ function initChat() {
           var timerId = setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
             try {
+              var reopenTarget = document.activeElement || chatComposerEl;
+              if (isPwaChatManualFocusIntentActive(reopenTarget)) return;
+              if (isIosPwaChatComposerOpeningHoldActive(reopenTarget)) return;
+              if (Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) return;
+              if (Number(window.__pokerChatPwaFocusKeepAliveUntil) > Date.now()) return;
+            } catch (eDismissReopenGuard) {}
+            try {
               if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
                 pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
               }
@@ -7003,6 +7010,62 @@ function initChat() {
       );
       if (!window.__pokerIosPwaChatThreadDismissPointerBound) {
         window.__pokerIosPwaChatThreadDismissPointerBound = true;
+        var eventHitsChatComposerArea = function (event) {
+          try {
+            if (!event) return false;
+            var point = null;
+            if (event.touches && event.touches[0]) point = event.touches[0];
+            else if (event.changedTouches && event.changedTouches[0]) point = event.changedTouches[0];
+            else point = event;
+            var x = Number(point.clientX);
+            var y = Number(point.clientY);
+            if (!isFinite(x) || !isFinite(y)) return false;
+            var areas = document.querySelectorAll(".chat-general-view .chat-input-area, .chat-container .chat-input-area");
+            for (var i = 0; i < areas.length; i += 1) {
+              var area = areas[i];
+              if (!area) continue;
+              var rect = area.getBoundingClientRect();
+              if (!rect || rect.width <= 0 || rect.height <= 0) continue;
+              if (x >= rect.left - 10 && x <= rect.right + 10 && y >= rect.top - 12 && y <= rect.bottom + 12) return true;
+            }
+          } catch (eComposerHitTest) {}
+          return false;
+        };
+        var preservePwaComposerKeyboardFromGesture = function (target, label, durationMs) {
+          try {
+            var composer = target;
+            if (!isChatThreadComposerKeyboardDom(composer)) {
+              composer = chatComposerEl || (document.activeElement && isChatThreadComposerKeyboardDom(document.activeElement) ? document.activeElement : null);
+            }
+            if (!composer || !isChatThreadComposerKeyboardDom(composer)) return false;
+            var now = Date.now();
+            chatComposerEl = composer;
+            window.__pokerChatPwaUserDismissAt = 0;
+            window.__pokerChatManualFocusIntentUntil = now + Math.max(700, Number(durationMs) || 1400);
+            window.__pokerChatManualFocusIntentTarget = composer;
+            window.__pokerChatKeyboardFocusAtMs = now;
+            window.__pokerChatKeyboardOpeningUntil = now + Math.max(700, Number(durationMs) || 1400);
+            if (typeof markIosPwaChatComposerKeepAlive === "function") {
+              markIosPwaChatComposerKeepAlive(composer, label || "gesture-keep-keyboard", Math.max(700, Number(durationMs) || 1400));
+            }
+            try {
+              if (composer.focus) composer.focus({ preventScroll: true });
+            } catch (eGestureFocus1) {
+              try { if (composer.focus) composer.focus(); } catch (eGestureFocus2) {}
+            }
+            try {
+              if (document.activeElement === composer && typeof maybeApplyCssOnlyIosPwaChatComposerDock === "function") {
+                maybeApplyCssOnlyIosPwaChatComposerDock(composer, label || "gesture-keep-keyboard");
+              }
+            } catch (eGestureDock) {}
+            try {
+              if (typeof updateChatMessagesKeyboardPad === "function") updateChatMessagesKeyboardPad();
+            } catch (eGesturePad) {}
+            return true;
+          } catch (eGestureKeepKeyboard) {
+            return false;
+          }
+        };
         var pwaThreadPointerDismiss = function (event) {
           try {
             if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
@@ -7018,6 +7081,7 @@ function initChat() {
                 chatEmojiPickerTargetInput ||
                 (isChatThreadComposerKeyboardDom(document.activeElement) ? document.activeElement : null) ||
                 chatComposerEl;
+              preservePwaComposerKeyboardFromGesture(emojiFocusTarget, "emoji-picker-outside", 1600);
               hideChatEmojiPicker();
               window.__pokerChatEmojiPickerClosedByOutsideAt = Date.now();
               if (emojiFocusTarget && isChatThreadComposerKeyboardDom(emojiFocusTarget)) {
@@ -7042,6 +7106,17 @@ function initChat() {
               markIosPwaChatComposerKeepAlive(target, "composer-chrome", 1200);
               return;
             }
+            if (eventHitsChatComposerArea(event)) {
+              preservePwaComposerKeyboardFromGesture(document.activeElement || chatComposerEl, "composer-hit-area", 1400);
+              return;
+            }
+            try {
+              var freshFocusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+              if (freshFocusAt > 0 && Date.now() - freshFocusAt < 650 && Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) {
+                preservePwaComposerKeyboardFromGesture(document.activeElement || chatComposerEl, "fresh-open-dismiss-guard", 1200);
+                return;
+              }
+            } catch (eFreshOpenDismissGuard) {}
             window.__pokerChatPwaUserDismissAt = Date.now();
             window.__pokerChatManualFocusIntentUntil = 0;
             window.__pokerChatManualFocusIntentTarget = null;
