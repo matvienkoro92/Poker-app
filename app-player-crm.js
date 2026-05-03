@@ -173,7 +173,6 @@
     var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
     var registrationBothCount = registrationRowsByMethod("both").length;
     var chat = state.chatStats || {};
-    var generalMessagesPeriod = chat.generalMessages && chat.generalMessages.period != null ? chat.generalMessages.period : 0;
     var pairHint = "Всего / за " + periodLabel();
     function pair(row) {
       return intFmt(row && row.total) + " / " + intFmt(row && row.period);
@@ -187,8 +186,7 @@
       ["Депозиты", money(deposits)],
     ];
     var chatStats = [
-      ["Сообщения в чате", intFmt(generalMessagesPeriod), periodLabel(), "generalMessages"],
-      ["Сообщений в главном чате", pair(chat.generalMessages), pairHint],
+      ["Сообщений в главном чате", pair(chat.generalMessages), pairHint, "generalMessages"],
       ["Личных диалогов", pair(chat.personalDialogs), pairHint],
       ["Групповых чатов", pair(chat.groupChats), pairHint],
       ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint, "anna"],
@@ -211,8 +209,8 @@
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "generalMessages") {
-        return "<button type=\"button\" class=\"player-crm__stat" + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">Сообщения в чате</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(periodLabel()) + "</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "push") {
