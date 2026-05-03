@@ -184,6 +184,7 @@
       ["Групповых чатов", pair(chat.groupChats), pairHint],
       ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint, "anna"],
       ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint, "vika"],
+      ["Все остальные диалоги", pair(chat.managerDialogs && chat.managerDialogs.other), pairHint, "other"],
     ];
     function statCard(it) {
       if (it[3] === "registrations") {
@@ -220,8 +221,8 @@
     var data = chat.managerDialogs && key ? chat.managerDialogs[key] : null;
     if (!data) return "";
     var rows = Array.isArray(data.dialogs) ? data.dialogs : [];
-    var title = key === "vika" ? "Диалоги Вики" : "Диалоги Ани";
-    var empty = "<div class=\"player-crm__timeline-item\">У этого менеджера пока нет диалогов.</div>";
+    var title = key === "vika" ? "Диалоги Вики" : key === "other" ? "Все остальные диалоги" : "Диалоги Ани";
+    var empty = "<div class=\"player-crm__timeline-item\">В этом разделе пока нет диалогов.</div>";
     var body = rows.length ? rows.map(function (row) {
       var active = state.selectedManagerDialogId === row.id;
       return "<div class=\"player-crm__manager-dialog-wrap\">" +
@@ -247,7 +248,7 @@
       if (document.body && !state.registrationModalMethod) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
-    if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : "Диалоги Ани";
+    if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : state.chatDialogManager === "other" ? "Все остальные диалоги" : "Диалоги Ани";
     if (subtitleEl) subtitleEl.textContent = "Сообщений всего / за " + periodLabel();
     bodyEl.innerHTML = html;
     modal.hidden = false;
@@ -378,8 +379,8 @@
     var messages = Array.isArray(row.messages) ? row.messages : [];
     var empty = "<div class=\"player-crm__conversation-empty\">Сообщений за выбранный период в этом диалоге нет.</div>";
     var body = messages.length ? messages.map(function (msg) {
-      var mine = String(msg.from || "") === (key === "vika" ? "tg_1897001087" : "tg_2144406710");
-      var who = mine ? managerDisplayName(key) : (msg.fromName || row.name || row.handle || "Игрок");
+      var mine = key !== "other" && String(msg.from || "") === (key === "vika" ? "tg_1897001087" : "tg_2144406710");
+      var who = mine ? managerDisplayName(key) : (msg.fromName || msg.from || row.name || row.handle || "Игрок");
       var media = msg.image ? " [фото]" : msg.voice ? " [голосовое]" : msg.document ? " [" + (msg.documentName || "документ") + "]" : "";
       return "<div class=\"player-crm__conversation-msg" + (mine ? " player-crm__conversation-msg--manager" : "") + "\">" +
         "<span><strong>" + esc(who) + "</strong><time>" + esc(msg.time ? new Date(msg.time).toLocaleString("ru-RU") : "") + "</time></span>" +
