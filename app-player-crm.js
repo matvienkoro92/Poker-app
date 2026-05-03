@@ -944,10 +944,6 @@
   }
 
   function syncTabCounts() {
-    var regTab = document.querySelector("[data-crm-tab=\"registrations\"]");
-    var pokerTab = document.querySelector("[data-crm-tab=\"pokerplus\"]");
-    if (regTab) regTab.textContent = "Регистрации · " + intFmt((state.registeredAccounts || []).length);
-    if (pokerTab) pokerTab.textContent = "Poker21 · " + intFmt((state.pokerPlusAccounts || []).length);
   }
 
   function syncTabs() {
