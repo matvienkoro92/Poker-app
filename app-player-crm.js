@@ -26,6 +26,16 @@
     pokerPlusDateTo: "",
     campaigns: [],
     sourceAnalytics: [],
+    chartAnalytics: null,
+    chartSeriesEnabled: {
+      players: true,
+      registrations: true,
+      poker21: true,
+      bot: false,
+      push: false,
+      deposits: true,
+      generalMessages: true,
+    },
     chatStats: null,
     chatDialogManager: "",
     selectedManagerDialogId: "",
@@ -833,23 +843,77 @@
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
     if (!el) return;
-    var segRows = segments.filter(function (s) { return s.key !== "all"; }).map(function (s) {
-      return { label: s.label, value: segmentPlayers(s.key).length };
-    });
-    var maxSeg = Math.max(1, segRows.reduce(function (m, x) { return Math.max(m, x.value); }, 0));
-    el.innerHTML =
-      "<div class=\"player-crm__segment-card\"><h4>По рабочим сегментам</h4>" + bars(segRows, maxSeg) + "</div>" +
-      "<div class=\"player-crm__segment-card\"><h4>Источники</h4>" + renderSourceAnalytics() + "</div>";
+    el.innerHTML = renderChartAnalytics();
   }
 
-  function renderSourceAnalytics() {
-    var rows = state.sourceAnalytics || [];
-    if (!rows.length) return "<p class=\"player-crm__detail-muted\">Источники появятся после загрузки живой базы.</p>";
-    return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
-      "<th>Источник</th><th>Игроки</th><th>Визиты</th><th>Депозиты</th><th>Fee</th><th>Push</th>" +
-      "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(money(r.depositsPeriod != null ? r.depositsPeriod : r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
-      }).join("") + "</tbody></table></div>";
+  var chartColors = {
+    players: "#f8d98a",
+    registrations: "#60a5fa",
+    poker21: "#c084fc",
+    bot: "#34d399",
+    push: "#f472b6",
+    deposits: "#f59e0b",
+    generalMessages: "#38bdf8",
+  };
+
+  function renderChartAnalytics() {
+    var chart = state.chartAnalytics || {};
+    var labels = Array.isArray(chart.labels) ? chart.labels : [];
+    var series = Array.isArray(chart.series) ? chart.series : [];
+    if (!labels.length || !series.length) return "<div class=\"player-crm__timeline-item\">График появится после загрузки данных.</div>";
+    var enabledSeries = series.filter(function (s) { return state.chartSeriesEnabled[s.key] !== false; });
+    if (!enabledSeries.length) enabledSeries = [series[0]];
+    var width = 960;
+    var height = 320;
+    var padL = 56;
+    var padR = 18;
+    var padT = 20;
+    var padB = 46;
+    var plotW = width - padL - padR;
+    var plotH = height - padT - padB;
+    var max = enabledSeries.reduce(function (m, s) {
+      return Math.max(m, Math.max.apply(null, (s.values || []).map(function (v) { return Number(v) || 0; })));
+    }, 0);
+    max = Math.max(1, max);
+    function x(i) {
+      return padL + (labels.length <= 1 ? 0 : (i / (labels.length - 1)) * plotW);
+    }
+    function y(v) {
+      return padT + plotH - ((Number(v) || 0) / max) * plotH;
+    }
+    function points(values) {
+      return labels.map(function (_, idx) { return x(idx).toFixed(1) + "," + y(values[idx] || 0).toFixed(1); }).join(" ");
+    }
+    var grid = [0, 0.25, 0.5, 0.75, 1].map(function (part) {
+      var gy = padT + plotH - part * plotH;
+      var value = Math.round(max * part);
+      return "<line x1=\"" + padL + "\" y1=\"" + gy.toFixed(1) + "\" x2=\"" + (width - padR) + "\" y2=\"" + gy.toFixed(1) + "\" />" +
+        "<text x=\"10\" y=\"" + (gy + 4).toFixed(1) + "\">" + esc(intFmt(value)) + "</text>";
+    }).join("");
+    var step = Math.max(1, Math.ceil(labels.length / 6));
+    var ticks = labels.map(function (label, idx) {
+      if (idx !== 0 && idx !== labels.length - 1 && idx % step !== 0) return "";
+      return "<text x=\"" + x(idx).toFixed(1) + "\" y=\"" + (height - 14) + "\">" + esc(String(label).slice(5)) + "</text>";
+    }).join("");
+    var lines = enabledSeries.map(function (s) {
+      var color = chartColors[s.key] || "#e5e7eb";
+      return "<polyline points=\"" + points(s.values || []) + "\" style=\"--line-color:" + esc(color) + "\" />" +
+        "<circle cx=\"" + x(labels.length - 1).toFixed(1) + "\" cy=\"" + y((s.values || [0])[labels.length - 1] || 0).toFixed(1) + "\" r=\"4\" style=\"--line-color:" + esc(color) + "\" />";
+    }).join("");
+    var legend = series.map(function (s) {
+      var checked = state.chartSeriesEnabled[s.key] !== false ? " checked" : "";
+      var color = chartColors[s.key] || "#e5e7eb";
+      return "<label class=\"player-crm__chart-toggle\"><input type=\"checkbox\" data-crm-chart-series=\"" + esc(s.key) + "\"" + checked + " />" +
+        "<span class=\"player-crm__chart-swatch\" style=\"--line-color:" + esc(color) + "\"></span><span>" + esc(s.label || s.key) + "</span></label>";
+    }).join("");
+    return "<div class=\"player-crm__chart-card\">" +
+      "<div class=\"player-crm__chart-scroll\"><svg class=\"player-crm__chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"CRM график по дням\">" +
+        "<g class=\"player-crm__chart-grid\">" + grid + "</g>" +
+        "<g class=\"player-crm__chart-lines\">" + lines + "</g>" +
+        "<g class=\"player-crm__chart-ticks\">" + ticks + "</g>" +
+      "</svg></div>" +
+      "<div class=\"player-crm__chart-toggles\">" + legend + "</div>" +
+    "</div>";
   }
 
   function bars(rows, max) {
@@ -935,6 +999,7 @@
       state.pokerPlusAccounts = [];
       state.campaigns = [];
       state.sourceAnalytics = [];
+      state.chartAnalytics = null;
       state.chatStats = null;
       state.permissions = null;
       state.source = "no-auth";
@@ -964,6 +1029,7 @@
           state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
           state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
           state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
+          state.chartAnalytics = data.chartAnalytics || null;
           state.chatStats = data.chatStats || null;
           state.permissions = data.permissions || null;
           state.pushConfigured = data.pushConfigured === true;
@@ -980,6 +1046,7 @@
           state.pokerPlusAccounts = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
+          state.chartAnalytics = null;
           state.chatStats = null;
           state.permissions = null;
           state.source = data && data.__status === 403 ? "forbidden" : "empty";
@@ -994,6 +1061,7 @@
         state.pokerPlusAccounts = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
+        state.chartAnalytics = null;
         state.chatStats = null;
         state.permissions = null;
         state.source = "error";
@@ -1454,6 +1522,11 @@
       if (e.target && e.target.id === "playerCrmSavePlayerBtn") saveSelectedPlayer();
       if (e.target && e.target.id === "playerCrmAddEventBtn") addSelectedEvent();
       if (e.target && e.target.id === "playerCrmLinkIdentityBtn") linkSelectedIdentity();
+      var chartToggle = e.target.closest("[data-crm-chart-series]");
+      if (chartToggle) {
+        state.chartSeriesEnabled[chartToggle.getAttribute("data-crm-chart-series") || ""] = chartToggle.checked;
+        renderAnalytics();
+      }
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && state.registrationModalMethod) closeRegistrationModal();
