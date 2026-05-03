@@ -115,13 +115,6 @@
               </div>
               <div class="player-crm__list" id="playerCrmList" aria-live="polite"></div>
             </aside>
-            <section class="player-crm__player-card">
-              <div class="player-crm__section-head">
-                <h3>Карточка игрока</h3>
-                <span id="playerCrmSelectedHint">—</span>
-              </div>
-              <div class="player-crm__detail" id="playerCrmDetail"></div>
-            </section>
           </div>
         </section>
 
@@ -302,6 +295,20 @@
           <button type="button" class="player-crm__dialog-modal-close" data-crm-close-bot-modal aria-label="Закрыть">×</button>
         </div>
         <div class="player-crm__dialog-modal-body" id="playerCrmBotModalBody"></div>
+      </section>
+    </div>
+
+    <div class="player-crm__dialog-modal" id="playerCrmPlayerModal" hidden>
+      <div class="player-crm__dialog-modal-backdrop" data-crm-close-player-modal></div>
+      <section class="player-crm__dialog-modal-panel player-crm__dialog-modal-panel--player" aria-modal="true" role="dialog" aria-labelledby="playerCrmPlayerModalTitle">
+        <div class="player-crm__dialog-modal-head">
+          <div>
+            <h3 id="playerCrmPlayerModalTitle">Карточка игрока</h3>
+            <span id="playerCrmPlayerModalSubtitle">—</span>
+          </div>
+          <button type="button" class="player-crm__dialog-modal-close" data-crm-close-player-modal aria-label="Закрыть">×</button>
+        </div>
+        <div class="player-crm__dialog-modal-body" id="playerCrmPlayerModalBody"></div>
       </section>
     </div>
   </section>

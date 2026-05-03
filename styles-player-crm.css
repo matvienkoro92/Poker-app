@@ -547,6 +547,10 @@ button.player-crm__stat:focus-visible,
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+.player-crm__modal-content--player {
+  display: grid;
+  gap: 12px;
+}
 .player-crm__modal-actions {
   display: flex;
   flex-wrap: wrap;
@@ -591,7 +595,7 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__players-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
