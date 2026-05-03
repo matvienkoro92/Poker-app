@@ -283,8 +283,10 @@
       ["Все остальные диалоги", pair(chat.managerDialogs && chat.managerDialogs.other), pairHint, "other"],
     ];
     function statCard(it) {
+      var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
+      var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
       if (it[3] === "registrations") {
-        return "<div class=\"player-crm__stat player-crm__stat--registration\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
+        return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(intFmt(registrations.length)) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
@@ -293,21 +295,21 @@
           "</span></div>";
       }
       if (it[3] === "pokerplus") {
-        return "<button type=\"button\" class=\"player-crm__stat" + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
           "<span class=\"player-crm__stat-hint\">привязали аккаунт</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "generalMessages") {
-        return "<button type=\"button\" class=\"player-crm__stat" + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "bot") {
-        return "<button type=\"button\" class=\"player-crm__stat" + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Подписан на бот</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Подписан на бот</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "push") {
-        return "<button type=\"button\" class=\"player-crm__stat" + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Подписан на push</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Подписан на push</span>" +
           "<span class=\"player-crm__stat-hint\">уведомления</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
@@ -315,7 +317,7 @@
       var typeAttr = it[3] ? " type=\"button\"" : "";
       var managerAttr = it[3] ? " data-crm-manager-dialogs=\"" + esc(it[3]) + "\"" : "";
       var activeCls = it[3] && state.chatDialogManager === it[3] ? " player-crm__stat--active" : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__stat" + activeCls + "\"" + managerAttr + "><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+      return "<" + tag + typeAttr + " class=\"player-crm__stat" + toneCls + activeCls + "\"" + managerAttr + "><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
         (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
         "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
     }
