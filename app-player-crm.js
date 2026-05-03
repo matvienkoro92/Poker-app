@@ -3,7 +3,7 @@
   var state = {
     loaded: false,
     loading: false,
-    tab: "bot",
+    tab: "overview",
     period: "30",
     filter: "has_bot",
     search: "",
@@ -119,8 +119,6 @@
     }).join("");
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = state.period + " дней";
-    var queueCount = document.getElementById("playerCrmQueueCount");
-    if (queueCount) queueCount.textContent = botSubscribers + " игроков";
     return { active: players.length, botSubscribers: botSubscribers, deposits: deposits, messages: messages };
   }
 
@@ -245,22 +243,6 @@
     return "<div class=\"player-crm__metric\"><span>" + esc(label) + "</span><strong>" + esc(value) + "</strong></div>";
   }
 
-  function renderQueue() {
-    var el = document.getElementById("playerCrmQueue");
-    if (!el) return;
-    var items = segmentPlayers("has_bot").sort(sortForWork);
-    if (!items.length) {
-      el.innerHTML = "<div class=\"player-crm__timeline-item\">Подписок на бот пока нет.</div>";
-      return;
-    }
-    el.innerHTML = items.map(function (p) {
-      return "<article class=\"player-crm__queue-item\">" +
-        "<div><p class=\"player-crm__queue-title\">" + esc(p.name) + "</p><p class=\"player-crm__queue-reason\">Доступен для бот-рассылки" + (p.handle ? " · " + esc(p.handle) : "") + "</p></div>" +
-        "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-open-player=\"" + esc(p.id) + "\">Открыть</button>" +
-      "</article>";
-    }).join("");
-  }
-
   function renderSegments() {
     var el = document.getElementById("playerCrmSegments");
     if (!el) return;
@@ -337,7 +319,6 @@
     renderStats();
     renderChips();
     renderList();
-    renderQueue();
     renderDetail();
     renderSegments();
     renderBroadcastOptions();
@@ -620,7 +601,7 @@
     root.addEventListener("click", function (e) {
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
-        state.tab = tab.getAttribute("data-crm-tab") || "bot";
+        state.tab = tab.getAttribute("data-crm-tab") || "overview";
         syncTabs();
         return;
       }
@@ -635,21 +616,21 @@
       var player = e.target.closest("[data-crm-player]");
       if (player) {
         state.selectedId = player.getAttribute("data-crm-player") || "";
-        state.tab = "base";
+        state.tab = "players";
         renderAll();
         return;
       }
       var open = e.target.closest("[data-crm-open-player]");
       if (open) {
         state.selectedId = open.getAttribute("data-crm-open-player") || "";
-        state.tab = "base";
+        state.tab = "players";
         renderAll();
         return;
       }
       var useSeg = e.target.closest("[data-crm-use-segment]");
       if (useSeg) {
         state.filter = useSeg.getAttribute("data-crm-use-segment") || "all";
-        state.tab = "base";
+        state.tab = "players";
         state.selectedId = "";
         state.showAllPlayers = false;
         renderAll();

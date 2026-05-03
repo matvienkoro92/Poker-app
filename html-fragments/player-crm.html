@@ -21,31 +21,55 @@
     </header>
 
     <nav class="player-crm__tabs" aria-label="CRM разделы">
-      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="bot">Бот</button>
-      <button type="button" class="player-crm__tab" data-crm-tab="base">База</button>
+      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="overview">Обзор</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="players">Игроки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="segments">Сегменты</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
-      <button type="button" class="player-crm__tab" data-crm-tab="analytics">Аналитика</button>
     </nav>
 
     <div class="player-crm__stats" id="playerCrmStats"></div>
 
     <div class="player-crm__workbench">
       <main class="player-crm__panel player-crm__panel--main">
-        <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="bot">
+        <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="overview">
           <div class="player-crm__section-head">
-            <h3>Подписан на бот</h3>
-            <span id="playerCrmQueueCount">—</span>
+            <h3>Обзор</h3>
+            <span id="playerCrmAnalyticsPeriod">30 дней</span>
           </div>
-          <div class="player-crm__queue" id="playerCrmQueue"></div>
+          <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
+          <div class="player-crm__import">
+            <div class="player-crm__section-head">
+              <h3>Импорт событий</h3>
+              <span>accountId,type,amount,date,note</span>
+            </div>
+            <textarea id="playerCrmImportText" rows="5" placeholder="ID123456,deposit,5000,2026-05-02,импорт из кассы"></textarea>
+            <div class="player-crm__broadcast-actions">
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmImportBtn">Импортировать события</button>
+            </div>
+          </div>
         </section>
 
-        <section class="player-crm__tab-panel" data-crm-panel="base">
+        <section class="player-crm__tab-panel" data-crm-panel="players">
           <div class="player-crm__section-head">
-            <h3>Карточка игрока</h3>
-            <span id="playerCrmSelectedHint">—</span>
+            <h3>Игроки</h3>
+            <span>по 15 в списке</span>
           </div>
-          <div class="player-crm__detail" id="playerCrmDetail"></div>
+          <div class="player-crm__players-grid">
+            <aside class="player-crm__players-list">
+              <div class="player-crm__filters">
+                <input type="search" class="player-crm__search" id="playerCrmSearch" placeholder="Поиск: ник, тег, источник" autocomplete="off" />
+                <div class="player-crm__chips" id="playerCrmFilterChips"></div>
+              </div>
+              <div class="player-crm__list" id="playerCrmList" aria-live="polite"></div>
+            </aside>
+            <section class="player-crm__player-card">
+              <div class="player-crm__section-head">
+                <h3>Карточка игрока</h3>
+                <span id="playerCrmSelectedHint">—</span>
+              </div>
+              <div class="player-crm__detail" id="playerCrmDetail"></div>
+            </section>
+          </div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="segments">
@@ -88,37 +112,7 @@
             <div class="player-crm__send-result" id="playerCrmBroadcastResult" aria-live="polite"></div>
           </div>
         </section>
-
-        <section class="player-crm__tab-panel" data-crm-panel="analytics">
-          <div class="player-crm__section-head">
-            <h3>Аналитика</h3>
-            <span id="playerCrmAnalyticsPeriod">30 дней</span>
-          </div>
-          <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
-          <div class="player-crm__import">
-            <div class="player-crm__section-head">
-              <h3>Импорт событий</h3>
-              <span>accountId,type,amount,date,note</span>
-            </div>
-            <textarea id="playerCrmImportText" rows="5" placeholder="ID123456,deposit,5000,2026-05-02,импорт из кассы"></textarea>
-            <div class="player-crm__broadcast-actions">
-              <button type="button" class="player-crm__ghost-btn" id="playerCrmImportBtn">Импортировать события</button>
-            </div>
-          </div>
-        </section>
       </main>
-
-      <aside class="player-crm__panel player-crm__panel--players">
-        <div class="player-crm__section-head">
-          <h3>Игроки</h3>
-          <span>по 15 в списке</span>
-        </div>
-        <div class="player-crm__filters">
-          <input type="search" class="player-crm__search" id="playerCrmSearch" placeholder="Поиск: ник, тег, источник" autocomplete="off" />
-          <div class="player-crm__chips" id="playerCrmFilterChips"></div>
-        </div>
-        <div class="player-crm__list" id="playerCrmList" aria-live="polite"></div>
-      </aside>
     </div>
   </section>
 </div>
