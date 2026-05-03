@@ -121,11 +121,21 @@
     return state.period === "custom" ? "custom" : String(state.period || "30");
   }
 
+  function periodText(key) {
+    if (key === "current_week") return "текущая неделя";
+    if (key === "last_week") return "прошлая неделя";
+    if (key === "current_month") return "текущий месяц";
+    if (key === "last_month") return "прошлый месяц";
+    return "";
+  }
+
   function periodLabel() {
     if (state.period === "all") return "за все время";
     if (state.period === "custom") {
       return state.dateFrom && state.dateTo ? state.dateFrom + " — " + state.dateTo : "выбранные даты";
     }
+    var text = periodText(state.period);
+    if (text) return text;
     return state.period + " дней";
   }
 
@@ -134,6 +144,8 @@
     if (state.chartPeriod === "custom") {
       return state.chartDateFrom && state.chartDateTo ? state.chartDateFrom + " — " + state.chartDateTo : "выбранные даты";
     }
+    var text = periodText(state.chartPeriod);
+    if (text) return text;
     return state.chartPeriod + " дней";
   }
 
