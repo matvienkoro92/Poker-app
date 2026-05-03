@@ -400,10 +400,9 @@ function openHallFishRatingModal() {
 }
 
 function initHallFishRatingModal() {
-  var root = document.getElementById("hallOfFameView");
-  if (!root || root.dataset.hallFishBound === "1") return;
-  root.dataset.hallFishBound = "1";
-  root.addEventListener("click", function (e) {
+  if (window.__pokerHallFishRatingBound) return;
+  window.__pokerHallFishRatingBound = true;
+  document.addEventListener("click", function (e) {
     var openBtn = e.target && e.target.closest ? e.target.closest("#hallFishRatingBtn") : null;
     if (openBtn) {
       e.preventDefault();
