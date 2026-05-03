@@ -277,6 +277,50 @@ button.player-crm__stat:focus-visible,
   line-height: 1;
   font-weight: 800;
 }
+.player-crm__stat--registration {
+  display: grid;
+  gap: 6px;
+}
+.player-crm__stat-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+.player-crm__stat-mini-grid button {
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.26);
+  border-radius: 7px;
+  background: rgba(2, 6, 23, 0.22);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+[data-theme="light"] .player-crm__stat-mini-grid button {
+  background: rgba(241, 245, 249, 0.78);
+}
+.player-crm__stat-mini-grid button:hover,
+.player-crm__stat-mini-grid button:focus-visible {
+  border-color: rgba(245, 158, 11, 0.66);
+  outline: none;
+}
+.player-crm__stat-mini-grid small,
+.player-crm__stat-mini-grid strong {
+  display: block;
+}
+.player-crm__stat-mini-grid small {
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+.player-crm__stat-mini-grid strong {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1;
+}
 .player-crm__manager-dialogs {
   display: grid;
   gap: 7px;

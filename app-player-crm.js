@@ -12,6 +12,7 @@
     selectedId: "",
     players: [],
     registeredAccounts: [],
+    registrationModalMethod: "",
     registrationMethod: "all",
     registrationSort: "name",
     pokerPlusAccounts: [],
@@ -155,6 +156,9 @@
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
+    var registrations = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var registrationEmailCount = registrations.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; }).length;
+    var registrationTelegramCount = registrations.filter(function (r) { return r.methods && r.methods.indexOf("telegram") >= 0; }).length;
     var chat = state.chatStats || {};
     var pairHint = "Всего / за " + periodLabel();
     function pair(row) {
@@ -162,6 +166,7 @@
     }
     var stats = [
       ["Игроков в базе", players.length],
+      ["Зарегано", registrations.length, "", "registrations"],
       ["Подписан на бот", botSubscribers],
       ["Депозиты", money(deposits)],
       ["Сообщения", messages],
@@ -174,6 +179,14 @@
       ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint, "vika"],
     ];
     function statCard(it) {
+      if (it[3] === "registrations") {
+        return "<div class=\"player-crm__stat player-crm__stat--registration\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
+          "<span class=\"player-crm__stat-value\">" + esc(intFmt(registrations.length)) + "</span>" +
+          "<span class=\"player-crm__stat-mini-grid\">" +
+            "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Через логин Telegram</small><strong>" + esc(intFmt(registrationTelegramCount)) + "</strong></button>" +
+            "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Через email</small><strong>" + esc(intFmt(registrationEmailCount)) + "</strong></button>" +
+          "</span></div>";
+      }
       var tag = it[3] ? "button" : "div";
       var typeAttr = it[3] ? " type=\"button\"" : "";
       var managerAttr = it[3] ? " data-crm-manager-dialogs=\"" + esc(it[3]) + "\"" : "";
@@ -223,7 +236,7 @@
     var html = renderManagerDialogsList();
     if (!state.chatDialogManager || !html) {
       modal.hidden = true;
-      if (document.body) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.registrationModalMethod) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : "Диалоги Ани";
@@ -238,6 +251,68 @@
     state.selectedManagerDialogId = "";
     renderStats();
     renderManagerDialogModal();
+  }
+
+  function registrationModalTitle(method) {
+    return method === "telegram" ? "Зареганы через логин Telegram" : "Зареганы через email";
+  }
+
+  function registrationRowsByMethod(method) {
+    var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
+    rows = rows.filter(function (r) { return r.methods && r.methods.indexOf(method) >= 0; });
+    rows.sort(function (a, b) {
+      function val(row) {
+        return method === "email"
+          ? row.email || row.name || row.accountId || ""
+          : registrationTelegramLabel(row) || row.name || row.accountId || "";
+      }
+      return String(val(a)).toLowerCase().localeCompare(String(val(b)).toLowerCase(), "ru");
+    });
+    return rows;
+  }
+
+  function renderRegistrationModalList(method) {
+    var rows = registrationRowsByMethod(method);
+    if (!rows.length) return "<div class=\"player-crm__timeline-item\">По этому способу регистрации пока пусто.</div>";
+    return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
+      "<th>Аккаунт</th><th>" + esc(method === "email" ? "Email" : "Telegram-логин") + "</th><th>Второй канал</th><th>Имя</th>" +
+      "</tr></thead><tbody>" + rows.map(function (r) {
+        var tg = registrationTelegramLabel(r);
+        var main = method === "email" ? (r.email || "—") : tg;
+        var second = method === "email" ? tg : (r.email || "—");
+        return "<tr>" +
+          "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
+          "<td>" + esc(main || "—") + "</td>" +
+          "<td>" + esc(second || "—") + "</td>" +
+          "<td>" + esc(r.name || "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
+  function renderRegistrationModal() {
+    var modal = document.getElementById("playerCrmRegistrationModal");
+    var titleEl = document.getElementById("playerCrmRegistrationModalTitle");
+    var subtitleEl = document.getElementById("playerCrmRegistrationModalSubtitle");
+    var bodyEl = document.getElementById("playerCrmRegistrationModalBody");
+    if (!modal || !bodyEl) return;
+    var method = state.registrationModalMethod;
+    if (method !== "email" && method !== "telegram") {
+      modal.hidden = true;
+      if (document.body && !state.chatDialogManager) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    var rows = registrationRowsByMethod(method);
+    if (titleEl) titleEl.textContent = registrationModalTitle(method);
+    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " аккаунтов";
+    bodyEl.innerHTML = renderRegistrationModalList(method);
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function closeRegistrationModal() {
+    state.registrationModalMethod = "";
+    renderStats();
+    renderRegistrationModal();
   }
 
   function managerDisplayName(key) {
@@ -591,6 +666,7 @@
     syncPeriodInputs();
     syncTabs();
     renderManagerDialogModal();
+    renderRegistrationModal();
   }
 
   function syncTabCounts() {
@@ -981,6 +1057,17 @@
         closeManagerDialogModal();
         return;
       }
+      if (e.target.closest("[data-crm-close-registration-modal]")) {
+        closeRegistrationModal();
+        return;
+      }
+      var registrationModal = e.target.closest("[data-crm-registrations-modal]");
+      if (registrationModal) {
+        state.registrationModalMethod = registrationModal.getAttribute("data-crm-registrations-modal") || "";
+        renderStats();
+        renderRegistrationModal();
+        return;
+      }
       var managerDialogs = e.target.closest("[data-crm-manager-dialogs]");
       if (managerDialogs) {
         var managerKey = managerDialogs.getAttribute("data-crm-manager-dialogs") || "";
@@ -1100,6 +1187,7 @@
       if (e.target && e.target.id === "playerCrmLinkIdentityBtn") linkSelectedIdentity();
     });
     document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && state.registrationModalMethod) closeRegistrationModal();
       if (e.key === "Escape" && state.chatDialogManager) closeManagerDialogModal();
     });
   }
