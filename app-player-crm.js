@@ -16,6 +16,7 @@
     showAllRegistrationModal: false,
     pokerPlusModalOpen: false,
     generalMessagesModalOpen: false,
+    botModalOpen: false,
     pushModalOpen: false,
     registrationMethod: "all",
     registrationSort: "name",
@@ -191,7 +192,7 @@
       ["Игроков в базе", players.length],
       ["Зарегано", registrations.length, "", "registrations"],
       ["Poker21", intFmt((state.pokerPlusAccounts || []).length), "привязали аккаунт", "pokerplus"],
-      ["Подписан на бот", botSubscribers],
+      ["Подписан на бот", botSubscribers, "", "bot"],
       ["Подписан на push", pushSubscribers, "уведомления", "push"],
       ["Депозиты", money(deposits)],
     ];
@@ -221,6 +222,10 @@
       if (it[3] === "generalMessages") {
         return "<button type=\"button\" class=\"player-crm__stat" + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
+          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
+      }
+      if (it[3] === "bot") {
+        return "<button type=\"button\" class=\"player-crm__stat" + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Подписан на бот</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "push") {
@@ -277,7 +282,7 @@
     var html = renderManagerDialogsList();
     if (!state.chatDialogManager || !html) {
       modal.hidden = true;
-      if (document.body && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.botModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : state.chatDialogManager === "other" ? "Все остальные диалоги" : "Диалоги Ани";
@@ -356,7 +361,7 @@
     var method = state.registrationModalMethod;
     if (method !== "email" && method !== "telegram" && method !== "both") {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.botModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var rows = registrationRowsByMethod(method);
@@ -704,7 +709,7 @@
     if (!modal || !bodyEl) return;
     if (!state.pokerPlusModalOpen) {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.generalMessagesModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.generalMessagesModalOpen && !state.botModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
@@ -742,7 +747,7 @@
     if (!modal || !bodyEl) return;
     if (!state.generalMessagesModalOpen) {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.botModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var chat = state.chatStats || {};
@@ -759,17 +764,16 @@
     renderGeneralMessagesModal();
   }
 
-  function pushSubscribersRows() {
+  function channelSubscribersRows(channel) {
     return (Array.isArray(state.players) ? state.players.slice() : [])
-      .filter(function (p) { return !!(p.channels && p.channels.push); })
+      .filter(function (p) { return !!(p.channels && p.channels[channel]); })
       .sort(function (a, b) {
         return String(a.name || a.handle || a.id || "").localeCompare(String(b.name || b.handle || b.id || ""), "ru");
       });
   }
 
-  function renderPushModalList() {
-    var rows = pushSubscribersRows();
-    if (!rows.length) return "<div class=\"player-crm__timeline-item\">Подписанных на push пока нет.</div>";
+  function renderChannelSubscribersTable(rows, emptyText) {
+    if (!rows.length) return "<div class=\"player-crm__timeline-item\">" + esc(emptyText) + "</div>";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
       "<th>Игрок</th><th>Telegram</th><th>ID</th><th>Источник</th>" +
       "</tr></thead><tbody>" + rows.map(function (p) {
@@ -782,6 +786,45 @@
       }).join("") + "</tbody></table></div></div>";
   }
 
+  function botSubscribersRows() {
+    return channelSubscribersRows("bot");
+  }
+
+  function renderBotModalList() {
+    return renderChannelSubscribersTable(botSubscribersRows(), "Подписанных на бот пока нет.");
+  }
+
+  function renderBotModal() {
+    var modal = document.getElementById("playerCrmBotModal");
+    var subtitleEl = document.getElementById("playerCrmBotModalSubtitle");
+    var bodyEl = document.getElementById("playerCrmBotModalBody");
+    if (!modal || !bodyEl) return;
+    if (!state.botModalOpen) {
+      modal.hidden = true;
+      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.pushModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    var rows = botSubscribersRows();
+    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " игроков";
+    bodyEl.innerHTML = renderBotModalList();
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function closeBotModal() {
+    state.botModalOpen = false;
+    renderStats();
+    renderBotModal();
+  }
+
+  function pushSubscribersRows() {
+    return channelSubscribersRows("push");
+  }
+
+  function renderPushModalList() {
+    return renderChannelSubscribersTable(pushSubscribersRows(), "Подписанных на push пока нет.");
+  }
+
   function renderPushModal() {
     var modal = document.getElementById("playerCrmPushModal");
     var subtitleEl = document.getElementById("playerCrmPushModalSubtitle");
@@ -789,7 +832,7 @@
     if (!modal || !bodyEl) return;
     if (!state.pushModalOpen) {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.botModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var rows = pushSubscribersRows();
@@ -940,6 +983,7 @@
     renderRegistrationModal();
     renderPokerPlusModal();
     renderGeneralMessagesModal();
+    renderBotModal();
     renderPushModal();
   }
 
@@ -1362,6 +1406,10 @@
         closeGeneralMessagesModal();
         return;
       }
+      if (e.target.closest("[data-crm-close-bot-modal]")) {
+        closeBotModal();
+        return;
+      }
       if (e.target.closest("[data-crm-close-push-modal]")) {
         closePushModal();
         return;
@@ -1370,6 +1418,12 @@
         state.generalMessagesModalOpen = true;
         renderStats();
         renderGeneralMessagesModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-bot-modal]")) {
+        state.botModalOpen = true;
+        renderStats();
+        renderBotModal();
         return;
       }
       if (e.target.closest("[data-crm-push-modal]")) {
@@ -1528,6 +1582,7 @@
       if (e.key === "Escape" && state.registrationModalMethod) closeRegistrationModal();
       if (e.key === "Escape" && state.pokerPlusModalOpen) closePokerPlusModal();
       if (e.key === "Escape" && state.generalMessagesModalOpen) closeGeneralMessagesModal();
+      if (e.key === "Escape" && state.botModalOpen) closeBotModal();
       if (e.key === "Escape" && state.pushModalOpen) closePushModal();
       if (e.key === "Escape" && state.chatDialogManager) closeManagerDialogModal();
     });
