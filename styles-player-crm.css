@@ -185,16 +185,16 @@
 }
 .player-crm__stats {
   display: grid;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 9px;
+  margin-bottom: 10px;
 }
 .player-crm__stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 7px;
 }
 .player-crm__stats-section {
-  padding-top: 12px;
+  padding-top: 9px;
   border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 .player-crm__stats-section-head {
@@ -202,12 +202,12 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 .player-crm__stats-section-head h3 {
   margin: 0;
   color: var(--accent);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.15;
 }
 .player-crm__stats-section-head span {
@@ -234,7 +234,8 @@
   background: rgba(255, 255, 255, 0.86);
 }
 .player-crm__stat {
-  padding: 11px 12px;
+  min-height: 72px;
+  padding: 8px 9px;
   color: inherit;
   font: inherit;
   text-align: left;
@@ -251,21 +252,21 @@ button.player-crm__stat:focus-visible,
 .player-crm__stat-label {
   display: block;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
 }
 .player-crm__stat-hint {
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 }
 .player-crm__stat-value {
   display: block;
-  margin-top: 5px;
-  font-size: 22px;
+  margin-top: 4px;
+  font-size: 18px;
   line-height: 1;
   font-weight: 800;
 }
@@ -627,7 +628,7 @@ button.player-crm__stat:focus-visible,
   }
   .player-crm__stats-grid,
   .player-crm__metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .player-crm__workbench,
   .player-crm__players-grid,
@@ -645,7 +646,7 @@ button.player-crm__stat:focus-visible,
 @media (max-width: 420px) {
   .player-crm__stats-grid,
   .player-crm__metrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .player-crm__tab {
     flex: 1 1 calc(50% - 8px);
