@@ -13,6 +13,7 @@
     players: [],
     campaigns: [],
     sourceAnalytics: [],
+    chatStats: null,
     permissions: null,
     pushConfigured: false,
     source: "api",
@@ -35,6 +36,10 @@
 
   function pct(n) {
     return Math.round(Number(n) || 0) + "%";
+  }
+
+  function intFmt(n) {
+    return Math.round(Number(n) || 0).toLocaleString("ru-RU");
   }
 
   function daysLabel(n) {
@@ -133,11 +138,18 @@
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
+    var chat = state.chatStats || {};
+    function pair(row) {
+      return intFmt(row && row.total) + " / " + intFmt(row && row.period);
+    }
     var stats = [
       ["Игроков в базе", players.length],
       ["Подписан на бот", botSubscribers],
       ["Депозиты", money(deposits)],
       ["Сообщения", messages],
+      ["Сообщений в главном чате", pair(chat.generalMessages)],
+      ["Личных диалогов", pair(chat.personalDialogs)],
+      ["Групповых чатов", pair(chat.groupChats)],
     ];
     el.innerHTML = stats.map(function (it) {
       return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span><span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
@@ -399,6 +411,7 @@
       state.players = [];
       state.campaigns = [];
       state.sourceAnalytics = [];
+      state.chatStats = null;
       state.permissions = null;
       state.source = "no-auth";
       state.loading = false;
@@ -413,6 +426,7 @@
           state.players = data.players;
           state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
           state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
+          state.chatStats = data.chatStats || null;
           state.permissions = data.permissions || null;
           state.pushConfigured = data.pushConfigured === true;
           state.source = data.source || "api";
@@ -425,6 +439,7 @@
           state.players = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
+          state.chatStats = null;
           state.permissions = null;
           state.source = "empty";
         }
@@ -433,6 +448,7 @@
         state.players = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
+        state.chatStats = null;
         state.permissions = null;
         state.source = "error";
       })
