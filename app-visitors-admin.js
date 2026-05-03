@@ -53,6 +53,29 @@
     return email === "matvienkoro92@gmail.com";
   }
 
+  function isCrmOwnerUser(user) {
+    if (!user) return false;
+    var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
+    return email === "matvienkoro92@gmail.com";
+  }
+
+  function userCanOpenCrm() {
+    var users = collectAdminIdentityCandidates();
+    for (var i = 0; i < users.length; i++) {
+      if (isCrmOwnerUser(users[i])) return true;
+    }
+    return false;
+  }
+
+  function syncCrmButtonAccess() {
+    var btn = document.getElementById("adminCrmBtn");
+    if (!btn) return;
+    var allowed = userCanOpenCrm();
+    btn.hidden = !allowed;
+    btn.toggleAttribute("aria-hidden", !allowed);
+    btn.disabled = !allowed;
+  }
+
   function renderHomeAdminIdentityStatus(forceVisible) {
     var el = document.getElementById("homeAdminVersionTop");
     if (!el) return;
@@ -107,6 +130,7 @@
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
+      syncCrmButtonAccess();
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
@@ -164,6 +188,7 @@
       })
       .catch(function () {});
     renderHomeAdminIdentityStatus(false);
+    syncCrmButtonAccess();
   }
 
   var MONTH_NAMES = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
@@ -970,6 +995,17 @@
     if (adminPushAllBodyInp) {
       adminPushAllBodyInp.addEventListener("input", refreshAdminPushAllRemainInputs);
       adminPushAllBodyInp.addEventListener("keyup", refreshAdminPushAllRemainInputs);
+    }
+    var adminCrmBtn = document.getElementById("adminCrmBtn");
+    if (adminCrmBtn && adminCrmBtn.dataset.crmAccessBound !== "1") {
+      adminCrmBtn.dataset.crmAccessBound = "1";
+      adminCrmBtn.addEventListener("click", function (e) {
+        if (userCanOpenCrm()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        syncCrmButtonAccess();
+      });
+      syncCrmButtonAccess();
     }
     try {
       window.pokerRecheckAdminFooter = checkAdminAndShowVisitorsButton;
