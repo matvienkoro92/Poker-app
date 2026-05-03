@@ -249,5 +249,178 @@ function initHallOfFamePanelShareButtons() {
 window.pokerInitHallOfFamePanelShareButtons = initHallOfFamePanelShareButtons;
 initHallOfFamePanelShareButtons();
 
+var hallFishRatingRowsCache = null;
+
+function hallFishEsc(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function hallFishGetApiBase() {
+  try {
+    return typeof getApiBase === "function" ? getApiBase() : "";
+  } catch (eBase) {
+    return "";
+  }
+}
+
+function hallFishAuthQuery() {
+  try {
+    return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+  } catch (eQuery) {
+    return "?initData=";
+  }
+}
+
+function hallFishHasCredential() {
+  try {
+    return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+  } catch (eCred) {
+    return false;
+  }
+}
+
+function hallFishEnsureModal() {
+  var modal = document.getElementById("hallFishRatingModal");
+  if (modal) return modal;
+  modal = document.createElement("div");
+  modal.className = "hall-fish-modal";
+  modal.id = "hallFishRatingModal";
+  modal.hidden = true;
+  modal.innerHTML =
+    '<div class="hall-fish-modal__backdrop" data-hall-fish-close></div>' +
+    '<section class="hall-fish-modal__panel" role="dialog" aria-modal="true" aria-labelledby="hallFishRatingTitle">' +
+      '<div class="hall-fish-modal__head">' +
+        '<div><h3 class="hall-fish-modal__title" id="hallFishRatingTitle">Игроки по уровню</h3><span class="hall-fish-modal__subtitle" id="hallFishRatingSubtitle">—</span></div>' +
+        '<button type="button" class="hall-fish-modal__close" data-hall-fish-close aria-label="Закрыть">×</button>' +
+      '</div>' +
+      '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
+    '</section>';
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function hallFishRegistrationMap(rows) {
+  var map = {};
+  (Array.isArray(rows) ? rows : []).forEach(function (row) {
+    var id = String((row && (row.accountId || row.dtId)) || "").trim();
+    if (id) map[id] = row;
+  });
+  return map;
+}
+
+function hallFishTelegramLabel(row) {
+  if (!row) return "";
+  if (row.telegramUsername) return String(row.telegramUsername).replace(/^@?/, "@");
+  if (Array.isArray(row.telegramIds) && row.telegramIds.length) return row.telegramIds[0];
+  return "";
+}
+
+function hallFishRowsFromCrmData(data) {
+  var registrations = hallFishRegistrationMap(data && data.registeredAccounts);
+  return (Array.isArray(data && data.pokerPlusAccounts) ? data.pokerPlusAccounts : [])
+    .map(function (row) {
+      var accountId = String((row && row.accountId) || "").trim();
+      var reg = registrations[accountId] || null;
+      var level = Number(row && row.level) || 0;
+      return {
+        accountId: accountId,
+        name: String((reg && reg.name) || (row && row.nickname) || accountId || "").trim(),
+        telegram: hallFishTelegramLabel(reg),
+        level: level,
+        fee: Number(row && row.fee) || 0,
+      };
+    })
+    .filter(function (row) { return row.level > 0; })
+    .sort(function (a, b) {
+      return b.level - a.level || b.fee - a.fee || String(a.name).localeCompare(String(b.name), "ru");
+    });
+}
+
+function hallFishRenderRows(rows) {
+  if (!rows.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с уровнем.</div>';
+  return '<div class="hall-fish-level-list">' + rows.map(function (row, idx) {
+    return '<div class="hall-fish-level-row">' +
+      '<span class="hall-fish-level-row__rank">' + hallFishEsc(idx + 1) + '</span>' +
+      '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
+      '<span class="hall-fish-level-row__tg">' + hallFishEsc(row.telegram || "без TG") + '</span></span>' +
+      '<span class="hall-fish-level-row__level">' + hallFishEsc(row.level) + ' ур.</span>' +
+      '<img class="hall-fish-level-row__fish" src="./assets/fish-king.png" alt="" aria-hidden="true" />' +
+    '</div>';
+  }).join("") + '</div>';
+}
+
+function hallFishSetModalState(message, rows) {
+  var modal = hallFishEnsureModal();
+  var subtitle = document.getElementById("hallFishRatingSubtitle");
+  var body = document.getElementById("hallFishRatingBody");
+  if (subtitle) subtitle.textContent = rows ? rows.length + " игроков" : "загрузка";
+  if (body) body.innerHTML = rows ? hallFishRenderRows(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  modal.hidden = false;
+  if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+}
+
+function hallFishCloseModal() {
+  var modal = document.getElementById("hallFishRatingModal");
+  if (modal) modal.hidden = true;
+  if (document.body) document.body.classList.remove("player-crm-dialog-modal-open");
+}
+
+function hallFishLoadRows() {
+  if (hallFishRatingRowsCache) return Promise.resolve(hallFishRatingRowsCache);
+  var base = hallFishGetApiBase();
+  if (!base || !hallFishHasCredential()) return Promise.reject(new Error("no-auth"));
+  var q = hallFishAuthQuery();
+  q += (q.indexOf("?") >= 0 ? "&" : "?") + "period=all&chartPeriod=all";
+  return fetch(base + "/api/player-crm" + q)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
+      hallFishRatingRowsCache = hallFishRowsFromCrmData(data);
+      return hallFishRatingRowsCache;
+    });
+}
+
+function openHallFishRatingModal() {
+  hallFishSetModalState("Загрузка…");
+  hallFishLoadRows()
+    .then(function (rows) {
+      hallFishSetModalState("", rows);
+    })
+    .catch(function () {
+      var body = document.getElementById("hallFishRatingBody");
+      var subtitle = document.getElementById("hallFishRatingSubtitle");
+      if (subtitle) subtitle.textContent = "нет доступа";
+      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Войди под CRM-доступом.</div>';
+    });
+}
+
+function initHallFishRatingModal() {
+  var root = document.getElementById("hallOfFameView");
+  if (!root || root.dataset.hallFishBound === "1") return;
+  root.dataset.hallFishBound = "1";
+  root.addEventListener("click", function (e) {
+    var openBtn = e.target && e.target.closest ? e.target.closest("#hallFishRatingBtn") : null;
+    if (openBtn) {
+      e.preventDefault();
+      openHallFishRatingModal();
+      return;
+    }
+  });
+  document.addEventListener("click", function (e) {
+    if (e.target && e.target.closest && e.target.closest("[data-hall-fish-close]")) hallFishCloseModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hallFishCloseModal();
+  });
+}
+
+window.pokerInitHallFishRatingModal = initHallFishRatingModal;
+initHallFishRatingModal();
+
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;

@@ -19,6 +19,7 @@
     if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);
     if (viewName === "hall-of-fame") {
       safeCall(window.pokerInitHallOfFamePanelShareButtons);
+      safeCall(window.pokerInitHallFishRatingModal);
       safeCall(window.pokerInitWinterRatingWeekTops);
     }
     if (viewName === "player-crm") safeCall(window.pokerInitPlayerCrm);
