@@ -6726,6 +6726,16 @@ function initChat() {
           return false;
         }
       }
+      function clearPwaChatKeyboardOpenHolds(label) {
+        try {
+          window.__pokerChatPwaScrolledOpenHoldUntil = 0;
+          window.__pokerChatPwaScrolledOpenTarget = null;
+          window.__pokerChatPwaScrolledOpenLabel = "";
+          window.__pokerChatPwaColdOpenHoldUntil = 0;
+          window.__pokerChatPwaColdOpenTarget = null;
+          window.__pokerChatPwaClearedOpenHoldsLabel = label || "";
+        } catch (eClearPwaOpenHolds) {}
+      }
       function shouldAbortPwaChatKeyboardCleanupForOpening(target, label) {
         try {
           if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
@@ -6762,6 +6772,9 @@ function initChat() {
           return false;
         }
       }
+      try {
+        window.__pokerShouldAbortPwaChatKeyboardCleanupForOpening = shouldAbortPwaChatKeyboardCleanupForOpening;
+      } catch (eExposePwaCleanupGuard) {}
       function isChatComposerVirtualKeyboardOpenForRetention(target) {
         try {
           if (!target || String(target.tagName || "").toUpperCase() !== "TEXTAREA") return false;
@@ -6912,6 +6925,7 @@ function initChat() {
           return false;
         }
         markPwaChatKeyboardDismissCleanup("finalize");
+        clearPwaChatKeyboardOpenHolds("finalize");
         clearPendingChatKeyboardDismissTimers();
         detachPwaChatThreadRootScrollLock();
         try {
@@ -7351,6 +7365,7 @@ function initChat() {
             window.__pokerChatPwaFocusKeepAliveUntil = 0;
             window.__pokerChatPwaFocusKeepAliveTarget = null;
             window.__pokerChatPwaFocusKeepAliveReason = "";
+            clearPwaChatKeyboardOpenHolds("outside-pointer-dismiss");
             var active = document.activeElement;
             if (active && isChatThreadComposerKeyboardDom(active) && active.blur) active.blur();
             function runPointerDismissCleanup(label) {

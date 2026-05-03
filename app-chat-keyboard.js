@@ -8,13 +8,14 @@ function pokerIsActiveIosPwaChatComposerKeyboard() {
     if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
     if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
     var active = document.activeElement;
-    if (!active || String(active.tagName || "").toUpperCase() !== "TEXTAREA") return false;
-    if (!active.closest || !active.closest(".chat-input-area")) return false;
-    if (pokerIsIosPwaChatComposerOpeningProtected(active)) return true;
+    var candidate = pokerGetIosPwaChatComposerCandidate(active);
+    if (!candidate) return false;
+    if (pokerIsIosPwaChatComposerOpeningProtected(candidate)) return true;
     if (document.body.classList.contains("chat-keyboard-open")) {
       if (
         typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
-        window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })
+        window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true }) &&
+        !pokerIsIosPwaChatComposerOpeningProtected(candidate)
       ) return false;
       return true;
     }
@@ -28,20 +29,55 @@ function pokerIsActiveIosPwaChatComposerKeyboard() {
     return false;
   }
 }
+function pokerGetIosPwaChatComposerCandidate(active) {
+  try {
+    var nodes = [
+      active,
+      window.__pokerChatManualFocusIntentTarget,
+      window.__pokerChatPwaFocusKeepAliveTarget,
+      window.__pokerChatPwaScrolledOpenTarget,
+      window.__pokerChatPwaColdOpenTarget,
+      window.__pokerChatPwaLastOpenIntentTarget,
+      document.querySelector(".chat-general-view .chat-input-area.chat-input-area--vv-dock textarea, .chat-container .chat-input-area.chat-input-area--vv-dock textarea")
+    ];
+    for (var i = 0; i < nodes.length; i += 1) {
+      var node = nodes[i];
+      if (!node || String(node.tagName || "").toUpperCase() !== "TEXTAREA") continue;
+      if (!node.closest || !node.closest(".chat-input-area")) continue;
+      return node;
+    }
+  } catch (eFindPwaComposer) {}
+  return null;
+}
 function pokerIsIosPwaChatComposerOpeningProtected(active) {
   try {
     if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
     if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
     if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+    active = pokerGetIosPwaChatComposerCandidate(active);
     if (!active || !active.closest || !active.closest(".chat-input-area")) return false;
+    var dismissAt = Number(window.__pokerChatPwaUserDismissAt) || 0;
+    if (dismissAt && Date.now() - dismissAt < 900) return false;
     var now = Date.now();
     var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
     var manualUntil = Number(window.__pokerChatManualFocusIntentUntil) || 0;
+    var manualTarget = window.__pokerChatManualFocusIntentTarget || null;
     var keepAliveUntil = Number(window.__pokerChatPwaFocusKeepAliveUntil) || 0;
     var keepAliveTarget = window.__pokerChatPwaFocusKeepAliveTarget || null;
-    if (manualUntil > now) return true;
+    var scrolledOpenUntil = Number(window.__pokerChatPwaScrolledOpenHoldUntil) || 0;
+    var scrolledOpenTarget = window.__pokerChatPwaScrolledOpenTarget || null;
+    var coldOpenUntil = Number(window.__pokerChatPwaColdOpenHoldUntil) || 0;
+    var coldOpenTarget = window.__pokerChatPwaColdOpenTarget || null;
+    var lastOpenAt = Number(window.__pokerChatPwaLastOpenIntentAt) || 0;
+    var lastOpenTarget = window.__pokerChatPwaLastOpenIntentTarget || null;
+    var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+    if (manualUntil > now && (!manualTarget || manualTarget === active)) return true;
     if (openingUntil > now) return true;
     if (keepAliveUntil > now && (!keepAliveTarget || keepAliveTarget === active)) return true;
+    if (scrolledOpenUntil > now && (!scrolledOpenTarget || scrolledOpenTarget === active)) return true;
+    if (coldOpenUntil > now && (!coldOpenTarget || coldOpenTarget === active)) return true;
+    if (lastOpenAt > 0 && now - lastOpenAt < 2200 && (!lastOpenTarget || lastOpenTarget === active)) return true;
+    if (focusAt > 0 && now - focusAt < 1800) return true;
   } catch (eOpeningProtected) {}
   return false;
 }
@@ -49,6 +85,15 @@ function pokerRepairClosedChatComposerRestingState(reason) {
   try {
     if (!document.body || document.body.getAttribute("data-view") !== "chat") return false;
     if (pokerIsActiveIosPwaChatComposerKeyboard()) return false;
+    try {
+      if (
+        typeof window.__pokerShouldAbortPwaChatKeyboardCleanupForOpening === "function" &&
+        window.__pokerShouldAbortPwaChatKeyboardCleanupForOpening(
+          pokerGetIosPwaChatComposerCandidate(document.activeElement),
+          "keyboard-repair:" + (reason || "")
+        )
+      ) return false;
+    } catch (eKeyboardRepairOpenGuard) {}
     var root = document.documentElement;
     var body = document.body;
     var active = document.activeElement || null;
