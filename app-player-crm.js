@@ -331,8 +331,7 @@
     var maxSeg = Math.max(1, segRows.reduce(function (m, x) { return Math.max(m, x.value); }, 0));
     el.innerHTML =
       "<div class=\"player-crm__segment-card\"><h4>По рабочим сегментам</h4>" + bars(segRows, maxSeg) + "</div>" +
-      "<div class=\"player-crm__segment-card\"><h4>Источники</h4>" + renderSourceAnalytics() + "</div>" +
-      "<div class=\"player-crm__segment-card\"><h4>Последние CRM-кампании</h4>" + renderCampaigns() + "</div>";
+      "<div class=\"player-crm__segment-card\"><h4>Источники</h4>" + renderSourceAnalytics() + "</div>";
   }
 
   function renderSourceAnalytics() {
@@ -343,13 +342,6 @@
       "</tr></thead><tbody>" + rows.map(function (r) {
         return "<tr><td>" + esc(r.source || "—") + "</td><td>" + esc(r.players || 0) + "</td><td>" + esc(r.visits || 0) + "</td><td>" + esc(money(r.depositsPeriod != null ? r.depositsPeriod : r.deposits30 || 0)) + "</td><td>" + esc(money(r.fee || 0)) + "</td><td>" + esc(r.push || 0) + "</td></tr>";
       }).join("") + "</tbody></table></div>";
-  }
-
-  function renderCampaigns() {
-    if (!state.campaigns || !state.campaigns.length) return "<p class=\"player-crm__detail-muted\">Пока нет сохранённых кампаний.</p>";
-    return state.campaigns.slice(0, 8).map(function (c) {
-      return "<div class=\"player-crm__timeline-item\"><strong>" + esc(c.status || "draft") + "</strong> · " + esc(c.segment || "segment") + " · " + esc(c.channel || "bot") + " · аудитория " + esc(c.audience || 0) + " · бот " + esc(c.sentBot || 0) + " · push " + esc(c.sentPush || 0) + "</div>";
-    }).join("");
   }
 
   function bars(rows, max) {
