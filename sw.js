@@ -1,8 +1,9 @@
 /* PWA: installability + push; GET /api/chat uses stale-while-revalidate unless caller explicitly asks for a fresh fetch. */
 var POKER_CHAT_API_CACHE = "poker-chat-api-v3";
 var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1"];
-var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v1";
-var POKER_CHAT_NOTIFY_WAV = "./assets/chat-push-notify.wav";
+var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v2";
+var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1"];
+var POKER_CHAT_NOTIFY_WAV = "./assets/chat-push-notify.wav?v=icq-1";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
@@ -19,7 +20,9 @@ self.addEventListener("activate", function (e) {
     Promise.all(
       POKER_CHAT_API_OLD_CACHES.map(function (name) {
         return caches.delete(name).catch(function () {});
-      })
+      }).concat(POKER_PUSH_ASSETS_OLD_CACHES.map(function (name) {
+        return caches.delete(name).catch(function () {});
+      }))
     ).then(function () {
       return self.clients.claim();
     })
@@ -76,7 +79,7 @@ self.addEventListener("fetch", function (event) {
 
 function pokerSwNotifyClientsChatSound() {
   var base = self.location.origin || "";
-  var url = base + "/assets/chat-push-notify.wav";
+  var url = base + "/assets/chat-push-notify.wav?v=icq-1";
   return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (cs) {
     var i;
     for (i = 0; i < cs.length; i++) {

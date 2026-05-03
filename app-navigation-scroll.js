@@ -68,6 +68,12 @@ function pokerGetDownloadCardContentScrollEl() {
 /** Сброс прокрутки окна (html/body) — при смене экрана иначе остаётся Y с предыдущей страницы. */
 function scrollMainDocumentToTop() {
   try {
+    if (
+      typeof pokerIsActiveIosPwaChatComposerKeyboard === "function" &&
+      pokerIsActiveIosPwaChatComposerKeyboard()
+    ) {
+      return;
+    }
     var dl = pokerGetPanelScrollCardContentEl();
     if (dl) dl.scrollTop = 0;
     if (typeof window.scrollTo === "function") {

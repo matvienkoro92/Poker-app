@@ -1343,7 +1343,15 @@ function initChat() {
           }
           if (evType === "click" && lastAreaFocusTarget === pwaComposer && nowAreaFocus - lastAreaFocusAt < 900) {
             try {
-              if (!directComposerTap && event.preventDefault) event.preventDefault();
+              var preventAreaClickDefault = false;
+              try {
+                preventAreaClickDefault =
+                  !directComposerTap &&
+                  document.body.classList.contains("chat-keyboard-open") &&
+                  typeof window.__pokerIsChatKeyboardLayoutEffectivelyClosed === "function" &&
+                  !window.__pokerIsChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true });
+              } catch (ePwaAreaClickDefaultCheck) {}
+              if (preventAreaClickDefault && event.preventDefault) event.preventDefault();
             } catch (ePwaAreaClickPrevent) {}
             return;
           }
