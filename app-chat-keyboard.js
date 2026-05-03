@@ -39,11 +39,9 @@ function pokerIsIosPwaChatComposerOpeningProtected(active) {
     var manualUntil = Number(window.__pokerChatManualFocusIntentUntil) || 0;
     var keepAliveUntil = Number(window.__pokerChatPwaFocusKeepAliveUntil) || 0;
     var keepAliveTarget = window.__pokerChatPwaFocusKeepAliveTarget || null;
-    var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
     if (manualUntil > now) return true;
     if (openingUntil > now) return true;
     if (keepAliveUntil > now && (!keepAliveTarget || keepAliveTarget === active)) return true;
-    if (focusAt > 0 && now - focusAt < 2200) return true;
   } catch (eOpeningProtected) {}
   return false;
 }
