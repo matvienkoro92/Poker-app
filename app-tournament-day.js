@@ -108,6 +108,9 @@ function renderHomeFreerollSchedule() {
     row.className = "home-freeroll-schedule__row";
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
+    if (item.room === "Poker21") {
+      row.classList.add("home-freeroll-schedule__row--poker21");
+    }
     if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
       row.classList.add("home-freeroll-schedule__row--next");
     }
