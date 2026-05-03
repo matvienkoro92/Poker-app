@@ -29,12 +29,13 @@
     sourceAnalytics: [],
     chartAnalytics: null,
     chartSeriesEnabled: {
-      players: true,
-      registrations: true,
+      players: false,
+      registrations: false,
       poker21: true,
       bot: false,
       push: false,
       deposits: true,
+      crmMessages: true,
       generalMessages: true,
     },
     chatStats: null,
@@ -896,16 +897,58 @@
     bot: "#34d399",
     push: "#f472b6",
     deposits: "#f59e0b",
+    crmMessages: "#a3e635",
     generalMessages: "#38bdf8",
   };
+
+  function formatChartDate(value) {
+    var parts = String(value || "").split("-");
+    if (parts.length !== 3) return String(value || "");
+    return parts[2] + "." + parts[1];
+  }
+
+  function renderChartSummary(chart, series) {
+    var datedSeries = series.filter(function (s) {
+      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
+    });
+    if (!datedSeries.length) {
+      datedSeries = series.filter(function (s) { return s.hasDates !== false; });
+    }
+    var rows = Array.isArray(chart.summary) ? chart.summary : [];
+    var table = rows.length && datedSeries.length ? "<div class=\"player-crm__chart-summary-table-wrap\"><table class=\"player-crm__chart-summary-table\"><thead><tr><th>Дата</th>" +
+      datedSeries.map(function (s) { return "<th>" + esc(s.label || s.key) + "</th>"; }).join("") +
+      "<th>Итого</th></tr></thead><tbody>" +
+      rows.slice(0, 20).map(function (row) {
+        var total = 0;
+        var cells = datedSeries.map(function (s) {
+          var value = Number(row[s.key]) || 0;
+          total += value;
+          return "<td>" + esc(intFmt(value)) + "</td>";
+        }).join("");
+        return "<tr><td>" + esc(formatChartDate(row.date)) + "</td>" + cells + "<td><strong>" + esc(intFmt(total)) + "</strong></td></tr>";
+      }).join("") + "</tbody></table></div>" :
+      "<div class=\"player-crm__timeline-item\">За выбранный период нет прироста с датой.</div>";
+    var undated = chart.undated || {};
+    var undatedItems = series.filter(function (s) {
+      return s.hasDates === false && Number(undated[s.key]) > 0;
+    }).map(function (s) {
+      return "<span><small>" + esc(s.label || s.key) + "</small><strong>" + esc(intFmt(undated[s.key])) + "</strong></span>";
+    }).join("");
+    var undatedBlock = undatedItems ? "<div class=\"player-crm__chart-undated\"><h4>Без даты роста</h4><div>" + undatedItems + "</div></div>" : "";
+    return "<div class=\"player-crm__chart-summary\"><h4>Прирост по датам</h4>" + table + undatedBlock + "</div>";
+  }
 
   function renderChartAnalytics() {
     var chart = state.chartAnalytics || {};
     var labels = Array.isArray(chart.labels) ? chart.labels : [];
     var series = Array.isArray(chart.series) ? chart.series : [];
     if (!labels.length || !series.length) return "<div class=\"player-crm__timeline-item\">График появится после загрузки данных.</div>";
-    var enabledSeries = series.filter(function (s) { return state.chartSeriesEnabled[s.key] !== false; });
-    if (!enabledSeries.length) enabledSeries = [series[0]];
+    var enabledSeries = series.filter(function (s) {
+      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
+    });
+    if (!enabledSeries.length) {
+      enabledSeries = series.filter(function (s) { return s.hasDates !== false; }).slice(0, 1);
+    }
     var width = 960;
     var height = 320;
     var padL = 56;
@@ -944,10 +987,14 @@
         "<circle cx=\"" + x(labels.length - 1).toFixed(1) + "\" cy=\"" + y((s.values || [0])[labels.length - 1] || 0).toFixed(1) + "\" r=\"4\" style=\"--line-color:" + esc(color) + "\" />";
     }).join("");
     var legend = series.map(function (s) {
-      var checked = state.chartSeriesEnabled[s.key] !== false ? " checked" : "";
+      var hasDates = s.hasDates !== false;
+      var checked = hasDates && state.chartSeriesEnabled[s.key] !== false ? " checked" : "";
+      var disabled = hasDates ? "" : " disabled";
+      var cls = hasDates ? "player-crm__chart-toggle" : "player-crm__chart-toggle player-crm__chart-toggle--disabled";
       var color = chartColors[s.key] || "#e5e7eb";
-      return "<label class=\"player-crm__chart-toggle\"><input type=\"checkbox\" data-crm-chart-series=\"" + esc(s.key) + "\"" + checked + " />" +
-        "<span class=\"player-crm__chart-swatch\" style=\"--line-color:" + esc(color) + "\"></span><span>" + esc(s.label || s.key) + "</span></label>";
+      var hint = hasDates ? "" : " · нет даты";
+      return "<label class=\"" + cls + "\"><input type=\"checkbox\" data-crm-chart-series=\"" + esc(s.key) + "\"" + checked + disabled + " />" +
+        "<span class=\"player-crm__chart-swatch\" style=\"--line-color:" + esc(color) + "\"></span><span>" + esc((s.label || s.key) + hint) + "</span></label>";
     }).join("");
     return "<div class=\"player-crm__chart-card\">" +
       "<div class=\"player-crm__chart-scroll\"><svg class=\"player-crm__chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"CRM график по дням\">" +
@@ -956,6 +1003,7 @@
         "<g class=\"player-crm__chart-ticks\">" + ticks + "</g>" +
       "</svg></div>" +
       "<div class=\"player-crm__chart-toggles\">" + legend + "</div>" +
+      renderChartSummary(chart, series) +
     "</div>";
   }
 
