@@ -371,6 +371,76 @@ button.player-crm__stat:focus-visible,
   line-height: 1.35;
   white-space: pre-wrap;
 }
+.player-crm-dialog-modal-open {
+  overflow: hidden;
+}
+.player-crm__dialog-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+.player-crm__dialog-modal[hidden] {
+  display: none;
+}
+.player-crm__dialog-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(6px);
+}
+.player-crm__dialog-modal-panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(920px, 100%);
+  max-height: min(760px, calc(100vh - 28px));
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.96);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.34);
+}
+[data-theme="light"] .player-crm__dialog-modal-panel {
+  background: rgba(255, 255, 255, 0.98);
+}
+.player-crm__dialog-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+.player-crm__dialog-modal-head h3 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 18px;
+}
+.player-crm__dialog-modal-head span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.player-crm__dialog-modal-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.55);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+.player-crm__dialog-modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+  -webkit-overflow-scrolling: touch;
+}
 .player-crm__workbench {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

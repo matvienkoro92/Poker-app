@@ -187,7 +187,6 @@
       "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
-        renderManagerDialogsList() +
       "</section>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = periodLabel();
@@ -212,10 +211,33 @@
         (active ? renderManagerConversation(row, key) : "") +
       "</div>";
     }).join("") : empty;
-    return "<div class=\"player-crm__manager-dialogs\">" +
-      "<div class=\"player-crm__manager-dialogs-head\"><h4>" + esc(title) + "</h4><span>Сообщений всего / за " + esc(periodLabel()) + "</span></div>" +
-      body +
-    "</div>";
+    return "<div class=\"player-crm__manager-dialogs\" aria-label=\"" + esc(title) + "\">" + body + "</div>";
+  }
+
+  function renderManagerDialogModal() {
+    var modal = document.getElementById("playerCrmManagerDialogModal");
+    var titleEl = document.getElementById("playerCrmManagerDialogTitle");
+    var subtitleEl = document.getElementById("playerCrmManagerDialogSubtitle");
+    var bodyEl = document.getElementById("playerCrmManagerDialogBody");
+    if (!modal || !bodyEl) return;
+    var html = renderManagerDialogsList();
+    if (!state.chatDialogManager || !html) {
+      modal.hidden = true;
+      if (document.body) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : "Диалоги Ани";
+    if (subtitleEl) subtitleEl.textContent = "Сообщений всего / за " + periodLabel();
+    bodyEl.innerHTML = html;
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function closeManagerDialogModal() {
+    state.chatDialogManager = "";
+    state.selectedManagerDialogId = "";
+    renderStats();
+    renderManagerDialogModal();
   }
 
   function managerDisplayName(key) {
@@ -568,6 +590,7 @@
     renderAnalytics();
     syncPeriodInputs();
     syncTabs();
+    renderManagerDialogModal();
   }
 
   function syncTabCounts() {
@@ -954,12 +977,17 @@
         renderList();
         return;
       }
+      if (e.target.closest("[data-crm-close-dialog-modal]")) {
+        closeManagerDialogModal();
+        return;
+      }
       var managerDialogs = e.target.closest("[data-crm-manager-dialogs]");
       if (managerDialogs) {
         var managerKey = managerDialogs.getAttribute("data-crm-manager-dialogs") || "";
         state.chatDialogManager = state.chatDialogManager === managerKey ? "" : managerKey;
         state.selectedManagerDialogId = "";
         renderStats();
+        renderManagerDialogModal();
         return;
       }
       var managerDialog = e.target.closest("[data-crm-manager-dialog-id]");
@@ -967,7 +995,7 @@
         state.selectedManagerDialogId = state.selectedManagerDialogId === managerDialog.getAttribute("data-crm-manager-dialog-id")
           ? ""
           : managerDialog.getAttribute("data-crm-manager-dialog-id");
-        renderStats();
+        renderManagerDialogModal();
         return;
       }
       var datePicker = e.target.closest("[data-crm-date-picker]");
@@ -1070,6 +1098,9 @@
       if (e.target && e.target.id === "playerCrmSavePlayerBtn") saveSelectedPlayer();
       if (e.target && e.target.id === "playerCrmAddEventBtn") addSelectedEvent();
       if (e.target && e.target.id === "playerCrmLinkIdentityBtn") linkSelectedIdentity();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && state.chatDialogManager) closeManagerDialogModal();
     });
   }
 
