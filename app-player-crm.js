@@ -87,10 +87,12 @@
   }
 
   function periodKey() {
+    if (state.period === "all") return "all";
     return state.period === "custom" ? "custom" : String(state.period || "30");
   }
 
   function periodLabel() {
+    if (state.period === "all") return "за все время";
     if (state.period === "custom") {
       return state.dateFrom && state.dateTo ? state.dateFrom + " — " + state.dateTo : "выбранные даты";
     }
@@ -1190,6 +1192,8 @@
     if (state.period === "custom") {
       setDefaultDates();
       q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);
+    } else if (state.period === "all") {
+      q += sep + "period=all";
     } else {
       q += sep + "period=" + encodeURIComponent(state.period || "30");
     }
