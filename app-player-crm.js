@@ -23,6 +23,7 @@
     sourceAnalytics: [],
     chatStats: null,
     chatDialogManager: "",
+    selectedManagerDialogId: "",
     permissions: null,
     pushConfigured: false,
     source: "api",
@@ -202,13 +203,39 @@
     var title = key === "vika" ? "Диалоги Вики" : "Диалоги Ани";
     var empty = "<div class=\"player-crm__timeline-item\">У этого менеджера пока нет диалогов.</div>";
     var body = rows.length ? rows.map(function (row) {
-      return "<div class=\"player-crm__manager-dialog\">" +
-        "<span><strong>" + esc(row.name || row.handle || row.id || "—") + "</strong><small>" + esc([row.handle, row.dtId || row.id].filter(Boolean).join(" · ")) + "</small></span>" +
-        "<span>" + esc(intFmt(row.totalMessages)) + " / " + esc(intFmt(row.periodMessages)) + "</span>" +
+      var active = state.selectedManagerDialogId === row.id;
+      return "<div class=\"player-crm__manager-dialog-wrap\">" +
+        "<button type=\"button\" class=\"player-crm__manager-dialog" + (active ? " player-crm__manager-dialog--active" : "") + "\" data-crm-manager-dialog-id=\"" + esc(row.id || "") + "\">" +
+          "<span><strong>" + esc(row.name || row.handle || row.id || "—") + "</strong><small>" + esc([row.handle, row.dtId || row.id].filter(Boolean).join(" · ")) + "</small></span>" +
+          "<span>" + esc(intFmt(row.totalMessages)) + " / " + esc(intFmt(row.periodMessages)) + "</span>" +
+        "</button>" +
+        (active ? renderManagerConversation(row, key) : "") +
       "</div>";
     }).join("") : empty;
     return "<div class=\"player-crm__manager-dialogs\">" +
       "<div class=\"player-crm__manager-dialogs-head\"><h4>" + esc(title) + "</h4><span>Сообщений всего / за " + esc(periodLabel()) + "</span></div>" +
+      body +
+    "</div>";
+  }
+
+  function managerDisplayName(key) {
+    return key === "vika" ? "Вика" : "Аня";
+  }
+
+  function renderManagerConversation(row, key) {
+    var messages = Array.isArray(row.messages) ? row.messages : [];
+    var empty = "<div class=\"player-crm__conversation-empty\">Сообщений за выбранный период в этом диалоге нет.</div>";
+    var body = messages.length ? messages.map(function (msg) {
+      var mine = String(msg.from || "") === (key === "vika" ? "tg_1897001087" : "tg_2144406710");
+      var who = mine ? managerDisplayName(key) : (msg.fromName || row.name || row.handle || "Игрок");
+      var media = msg.image ? " [фото]" : msg.voice ? " [голосовое]" : msg.document ? " [" + (msg.documentName || "документ") + "]" : "";
+      return "<div class=\"player-crm__conversation-msg" + (mine ? " player-crm__conversation-msg--manager" : "") + "\">" +
+        "<span><strong>" + esc(who) + "</strong><time>" + esc(msg.time ? new Date(msg.time).toLocaleString("ru-RU") : "") + "</time></span>" +
+        "<p>" + esc((msg.text || "").trim() || media.trim() || "Сообщение") + "</p>" +
+      "</div>";
+    }).join("") : empty;
+    return "<div class=\"player-crm__conversation\">" +
+      "<div class=\"player-crm__conversation-head\">Переписка: " + esc(row.name || row.handle || row.id || "—") + "</div>" +
       body +
     "</div>";
   }
@@ -931,6 +958,15 @@
       if (managerDialogs) {
         var managerKey = managerDialogs.getAttribute("data-crm-manager-dialogs") || "";
         state.chatDialogManager = state.chatDialogManager === managerKey ? "" : managerKey;
+        state.selectedManagerDialogId = "";
+        renderStats();
+        return;
+      }
+      var managerDialog = e.target.closest("[data-crm-manager-dialog-id]");
+      if (managerDialog) {
+        state.selectedManagerDialogId = state.selectedManagerDialogId === managerDialog.getAttribute("data-crm-manager-dialog-id")
+          ? ""
+          : managerDialog.getAttribute("data-crm-manager-dialog-id");
         renderStats();
         return;
       }
