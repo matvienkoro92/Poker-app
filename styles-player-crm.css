@@ -492,6 +492,12 @@ button.player-crm__stat:focus-visible,
   padding: 10px;
   -webkit-overflow-scrolling: touch;
 }
+.player-crm__modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
 .player-crm__workbench {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

@@ -13,6 +13,7 @@
     players: [],
     registeredAccounts: [],
     registrationModalMethod: "",
+    showAllRegistrationModal: false,
     registrationMethod: "all",
     registrationSort: "name",
     pokerPlusAccounts: [],
@@ -288,9 +289,10 @@
   function renderRegistrationModalList(method) {
     var rows = registrationRowsByMethod(method);
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">По этому способу регистрации пока пусто.</div>";
+    var visibleRows = state.showAllRegistrationModal ? rows : rows.slice(0, 15);
     return "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
       "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
-      "</tr></thead><tbody>" + rows.map(function (r) {
+      "</tr></thead><tbody>" + visibleRows.map(function (r) {
         var tg = registrationTelegramLabel(r);
         return "<tr>" +
           "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
@@ -298,7 +300,13 @@
           "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
         "</tr>";
-      }).join("") + "</tbody></table></div>";
+      }).join("") + "</tbody></table></div>" +
+      "<div class=\"player-crm__modal-actions\">" +
+        (!state.showAllRegistrationModal && rows.length > 15
+          ? "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-show-all-registrations>Показать всех " + esc(intFmt(rows.length)) + "</button>"
+          : "") +
+        "<button type=\"button\" class=\"player-crm__primary-btn\" data-crm-export-registrations>Выгрузить</button>" +
+      "</div>";
   }
 
   function renderRegistrationModal() {
@@ -323,8 +331,38 @@
 
   function closeRegistrationModal() {
     state.registrationModalMethod = "";
+    state.showAllRegistrationModal = false;
     renderStats();
     renderRegistrationModal();
+  }
+
+  function csvCell(value) {
+    var s = value == null ? "" : String(value);
+    return "\"" + s.replace(/"/g, "\"\"") + "\"";
+  }
+
+  function exportRegistrationModalRows() {
+    var method = state.registrationModalMethod;
+    if (method !== "email" && method !== "telegram" && method !== "both") return;
+    var rows = registrationRowsByMethod(method);
+    var lines = [["accountId", "telegramLogin", "email", "name"].map(csvCell).join(",")];
+    rows.forEach(function (r) {
+      lines.push([
+        r.accountId || r.dtId || "",
+        registrationTelegramLabel(r) === "—" ? "" : registrationTelegramLabel(r),
+        r.email || "",
+        r.name || "",
+      ].map(csvCell).join(","));
+    });
+    var blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "crm-registrations-" + method + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   function managerDisplayName(key) {
@@ -1078,8 +1116,18 @@
       var registrationModal = e.target.closest("[data-crm-registrations-modal]");
       if (registrationModal) {
         state.registrationModalMethod = registrationModal.getAttribute("data-crm-registrations-modal") || "";
+        state.showAllRegistrationModal = false;
         renderStats();
         renderRegistrationModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-show-all-registrations]")) {
+        state.showAllRegistrationModal = true;
+        renderRegistrationModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-export-registrations]")) {
+        exportRegistrationModalRows();
         return;
       }
       var managerDialogs = e.target.closest("[data-crm-manager-dialogs]");
