@@ -22,6 +22,7 @@
     campaigns: [],
     sourceAnalytics: [],
     chatStats: null,
+    chatDialogManager: "",
     permissions: null,
     pushConfigured: false,
     source: "api",
@@ -168,23 +169,48 @@
       ["Сообщений в главном чате", pair(chat.generalMessages), pairHint],
       ["Личных диалогов", pair(chat.personalDialogs), pairHint],
       ["Групповых чатов", pair(chat.groupChats), pairHint],
-      ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint],
-      ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint],
+      ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint, "anna"],
+      ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint, "vika"],
     ];
     function statCard(it) {
-      return "<div class=\"player-crm__stat\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+      var tag = it[3] ? "button" : "div";
+      var typeAttr = it[3] ? " type=\"button\"" : "";
+      var managerAttr = it[3] ? " data-crm-manager-dialogs=\"" + esc(it[3]) + "\"" : "";
+      var activeCls = it[3] && state.chatDialogManager === it[3] ? " player-crm__stat--active" : "";
+      return "<" + tag + typeAttr + " class=\"player-crm__stat" + activeCls + "\"" + managerAttr + "><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
         (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
-        "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></div>";
+        "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
     }
     el.innerHTML =
       "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
       "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
+        renderManagerDialogsList() +
       "</section>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = periodLabel();
     return { active: players.length, botSubscribers: botSubscribers, deposits: deposits, messages: messages };
+  }
+
+  function renderManagerDialogsList() {
+    var key = state.chatDialogManager;
+    var chat = state.chatStats || {};
+    var data = chat.managerDialogs && key ? chat.managerDialogs[key] : null;
+    if (!data) return "";
+    var rows = Array.isArray(data.dialogs) ? data.dialogs : [];
+    var title = key === "vika" ? "Диалоги Вики" : "Диалоги Ани";
+    var empty = "<div class=\"player-crm__timeline-item\">У этого менеджера пока нет диалогов.</div>";
+    var body = rows.length ? rows.map(function (row) {
+      return "<div class=\"player-crm__manager-dialog\">" +
+        "<span><strong>" + esc(row.name || row.handle || row.id || "—") + "</strong><small>" + esc([row.handle, row.dtId || row.id].filter(Boolean).join(" · ")) + "</small></span>" +
+        "<span>" + esc(intFmt(row.totalMessages)) + " / " + esc(intFmt(row.periodMessages)) + "</span>" +
+      "</div>";
+    }).join("") : empty;
+    return "<div class=\"player-crm__manager-dialogs\">" +
+      "<div class=\"player-crm__manager-dialogs-head\"><h4>" + esc(title) + "</h4><span>Сообщений всего / за " + esc(periodLabel()) + "</span></div>" +
+      body +
+    "</div>";
   }
 
   function renderChips() {
@@ -899,6 +925,13 @@
       if (e.target && e.target.id === "playerCrmShowAllBtn") {
         state.showAllPlayers = true;
         renderList();
+        return;
+      }
+      var managerDialogs = e.target.closest("[data-crm-manager-dialogs]");
+      if (managerDialogs) {
+        var managerKey = managerDialogs.getAttribute("data-crm-manager-dialogs") || "";
+        state.chatDialogManager = state.chatDialogManager === managerKey ? "" : managerKey;
+        renderStats();
         return;
       }
       var datePicker = e.target.closest("[data-crm-date-picker]");
