@@ -526,6 +526,12 @@
 .player-crm__registrations-table {
   min-width: 760px;
 }
+.player-crm__pokerplus-table {
+  min-width: 920px;
+}
+.player-crm__pokerplus-filters {
+  margin-bottom: 12px;
+}
 .player-crm__source-table th,
 .player-crm__source-table td {
   padding: 8px 9px;

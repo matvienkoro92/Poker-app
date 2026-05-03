@@ -45,6 +45,7 @@
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="overview">Обзор</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players">Игроки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="registrations">Регистрации</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="pokerplus">Poker21</button>
       <button type="button" class="player-crm__tab" data-crm-tab="segments">Сегменты</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
     </nav>
@@ -90,6 +91,32 @@
             <span>почта и Telegram-бот</span>
           </div>
           <div class="player-crm__registrations" id="playerCrmRegistrations"></div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="pokerplus">
+          <div class="player-crm__section-head">
+            <h3>Poker21</h3>
+            <span>подтверждённые аккаунты</span>
+          </div>
+          <div class="player-crm__form-grid player-crm__pokerplus-filters">
+            <label>
+              <span>Уровень от</span>
+              <input id="playerCrmPokerLevelMin" type="number" inputmode="numeric" min="1" max="55" placeholder="1" />
+            </label>
+            <label>
+              <span>Уровень до</span>
+              <input id="playerCrmPokerLevelMax" type="number" inputmode="numeric" min="1" max="55" placeholder="55" />
+            </label>
+            <label>
+              <span>Привязка с</span>
+              <input id="playerCrmPokerDateFrom" type="date" inputmode="none" />
+            </label>
+            <label>
+              <span>Привязка по</span>
+              <input id="playerCrmPokerDateTo" type="date" inputmode="none" />
+            </label>
+          </div>
+          <div class="player-crm__pokerplus" id="playerCrmPokerPlusAccounts"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="segments">

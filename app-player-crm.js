@@ -12,6 +12,11 @@
     selectedId: "",
     players: [],
     registeredAccounts: [],
+    pokerPlusAccounts: [],
+    pokerPlusLevelMin: "",
+    pokerPlusLevelMax: "",
+    pokerPlusDateFrom: "",
+    pokerPlusDateTo: "",
     campaigns: [],
     sourceAnalytics: [],
     chatStats: null,
@@ -338,6 +343,64 @@
     el.innerHTML = summary + table;
   }
 
+  function dateOnly(iso) {
+    return String(iso || "").slice(0, 10);
+  }
+
+  function filteredPokerPlusAccounts() {
+    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    var min = parseInt(state.pokerPlusLevelMin, 10);
+    var max = parseInt(state.pokerPlusLevelMax, 10);
+    var from = state.pokerPlusDateFrom || "";
+    var to = state.pokerPlusDateTo || "";
+    return rows.filter(function (r) {
+      var level = Number(r.level) || 0;
+      var linked = dateOnly(r.linkedAt);
+      if (Number.isFinite(min) && level < min) return false;
+      if (Number.isFinite(max) && level > max) return false;
+      if (from && (!linked || linked < from)) return false;
+      if (to && (!linked || linked > to)) return false;
+      return true;
+    });
+  }
+
+  function renderPokerPlusAccounts() {
+    var el = document.getElementById("playerCrmPokerPlusAccounts");
+    if (!el) return;
+    var all = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    var rows = filteredPokerPlusAccounts();
+    if (!all.length) {
+      el.innerHTML = "<div class=\"player-crm__timeline-item\">Подтверждённых аккаунтов Poker21 пока нет.</div>";
+      return;
+    }
+    var avgLevel = rows.length ? Math.round(rows.reduce(function (sum, r) { return sum + (Number(r.level) || 0); }, 0) / rows.length) : 0;
+    var summary =
+      "<div class=\"player-crm__metrics player-crm__metrics--registrations\">" +
+        metric("Показано", intFmt(rows.length)) +
+        metric("Всего", intFmt(all.length)) +
+        metric("Средний уровень", avgLevel || "—") +
+      "</div>";
+    if (!rows.length) {
+      el.innerHTML = summary + "<div class=\"player-crm__timeline-item\">По этим фильтрам пусто.</div>";
+      return;
+    }
+    var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
+      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата привязки</th><th>Email</th>" +
+      "</tr></thead><tbody>" + rows.map(function (r) {
+        return "<tr>" +
+          "<td>" + esc(r.accountId || "—") + "</td>" +
+          "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
+          "<td>" + esc(r.nickname || "—") + "</td>" +
+          "<td>" + esc(r.level || "—") + "</td>" +
+          "<td>" + esc(money(r.fee || 0)) + "</td>" +
+          "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
+          "<td>" + esc(dateOnly(r.linkedAt) || "—") + "</td>" +
+          "<td>" + esc(r.email || "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div>";
+    el.innerHTML = summary + table;
+  }
+
   function renderSegments() {
     var el = document.getElementById("playerCrmSegments");
     if (!el) return;
@@ -408,6 +471,7 @@
     renderList();
     renderDetail();
     renderRegistrations();
+    renderPokerPlusAccounts();
     renderSegments();
     renderBroadcastOptions();
     renderAnalytics();
@@ -461,6 +525,7 @@
     if (!base || !hasCred) {
       state.players = [];
       state.registeredAccounts = [];
+      state.pokerPlusAccounts = [];
       state.campaigns = [];
       state.sourceAnalytics = [];
       state.chatStats = null;
@@ -477,6 +542,7 @@
         if (data && data.ok && Array.isArray(data.players)) {
           state.players = data.players;
           state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
+          state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
           state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
           state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
           state.chatStats = data.chatStats || null;
@@ -491,6 +557,7 @@
         } else {
           state.players = [];
           state.registeredAccounts = [];
+          state.pokerPlusAccounts = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
           state.chatStats = null;
@@ -501,6 +568,7 @@
       .catch(function () {
         state.players = [];
         state.registeredAccounts = [];
+        state.pokerPlusAccounts = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
         state.chatStats = null;
@@ -842,6 +910,23 @@
       state.showAllPlayers = false;
       syncPeriodInputs();
       loadCrmData();
+    });
+    [
+      ["playerCrmPokerLevelMin", "pokerPlusLevelMin"],
+      ["playerCrmPokerLevelMax", "pokerPlusLevelMax"],
+      ["playerCrmPokerDateFrom", "pokerPlusDateFrom"],
+      ["playerCrmPokerDateTo", "pokerPlusDateTo"],
+    ].forEach(function (pair) {
+      var input = document.getElementById(pair[0]);
+      if (!input) return;
+      input.addEventListener("input", function () {
+        state[pair[1]] = input.value || "";
+        renderPokerPlusAccounts();
+      });
+      input.addEventListener("change", function () {
+        state[pair[1]] = input.value || "";
+        renderPokerPlusAccounts();
+      });
     });
     var refresh = document.getElementById("playerCrmRefreshBtn");
     if (refresh) refresh.addEventListener("click", loadCrmData);
