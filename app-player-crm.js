@@ -89,6 +89,13 @@
     return d.toISOString().slice(0, 10);
   }
 
+  function localDateKey(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
   function setDefaultDates() {
     var to = new Date();
     var from = new Date();
@@ -140,6 +147,55 @@
     var text = periodText(state.period);
     if (text) return text;
     return state.period + " дней";
+  }
+
+  function selectedPeriodRange() {
+    if (state.period === "all") return null;
+    if (state.period === "custom") {
+      return state.dateFrom && state.dateTo ? { from: state.dateFrom, to: state.dateTo } : null;
+    }
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (state.period === "current_week") {
+      var day = today.getDay() || 7;
+      var currentWeekFrom = new Date(today);
+      currentWeekFrom.setDate(today.getDate() - day + 1);
+      return { from: localDateKey(currentWeekFrom), to: localDateKey(today) };
+    }
+    if (state.period === "last_week") {
+      var lastDay = today.getDay() || 7;
+      var lastWeekTo = new Date(today);
+      lastWeekTo.setDate(today.getDate() - lastDay);
+      var lastWeekFrom = new Date(lastWeekTo);
+      lastWeekFrom.setDate(lastWeekTo.getDate() - 6);
+      return { from: localDateKey(lastWeekFrom), to: localDateKey(lastWeekTo) };
+    }
+    if (state.period === "current_month") {
+      return { from: localDateKey(new Date(today.getFullYear(), today.getMonth(), 1)), to: localDateKey(today) };
+    }
+    if (state.period === "last_month") {
+      return {
+        from: localDateKey(new Date(today.getFullYear(), today.getMonth() - 1, 1)),
+        to: localDateKey(new Date(today.getFullYear(), today.getMonth(), 0)),
+      };
+    }
+    var days = Math.max(1, Number(state.period) || 30);
+    var from = new Date(today);
+    from.setDate(today.getDate() - days + 1);
+    return { from: localDateKey(from), to: localDateKey(today) };
+  }
+
+  function dateInSelectedPeriod(iso) {
+    if (state.period === "all") return true;
+    var range = selectedPeriodRange();
+    var d = dateOnly(iso);
+    return !!(range && d && d >= range.from && d <= range.to);
+  }
+
+  function playersInSelectedPeriodByDate(field) {
+    return (Array.isArray(state.players) ? state.players : []).filter(function (p) {
+      return dateInSelectedPeriod(p && p[field]);
+    });
   }
 
   function chartPeriodLabel() {
@@ -255,9 +311,11 @@
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
-    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length;
-    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push); }).length;
-    var registrations = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
+    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
+    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
+    var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
+    var pokerPlusPeriodRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
     var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
     var registrationBothCount = registrationRowsByMethod("both").length;
@@ -267,12 +325,12 @@
       return intFmt(row && row.total) + " / " + intFmt(row && row.period);
     }
     var stats = [
-      ["Игроков в базе", players.length],
-      ["Зарегано", registrations.length, "", "registrations"],
-      ["Poker21", intFmt((state.pokerPlusAccounts || []).length), "привязали аккаунт", "pokerplus"],
-      ["Подписан на бот", botSubscribers, "", "bot"],
-      ["Подписан на push", pushSubscribers, "уведомления", "push"],
-      ["Депозиты", money(deposits)],
+      ["Игроков в базе", periodPlayers.length, periodLabel()],
+      ["Зарегано", registrations.length, periodLabel(), "registrations"],
+      ["Poker21", intFmt(pokerPlusPeriodRows.length), "привязали · " + periodLabel(), "pokerplus"],
+      ["Подписан на бот", botSubscribers, periodLabel(), "bot"],
+      ["Подписан на push", pushSubscribers, "уведомления · " + periodLabel(), "push"],
+      ["Депозиты", money(deposits), periodLabel()],
     ];
     var chatStats = [
       ["Сообщений в главном чате", pair(chat.generalMessages), pairHint, "generalMessages"],
@@ -287,6 +345,7 @@
       var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
       if (it[3] === "registrations") {
         return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(intFmt(registrations.length)) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
@@ -306,6 +365,7 @@
       }
       if (it[3] === "bot") {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Подписан на бот</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "push") {
@@ -390,6 +450,7 @@
 
   function registrationRowsByMethod(method) {
     var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
+    rows = rows.filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     rows = rows.filter(function (r) {
       var hasEmail = hasRegistrationMethod(r, "email");
       var hasTelegram = hasRegistrationMethod(r, "telegram");
@@ -446,7 +507,7 @@
     }
     var rows = registrationRowsByMethod(method);
     if (titleEl) titleEl.textContent = registrationModalTitle(method);
-    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " аккаунтов";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " аккаунтов";
     bodyEl.innerHTML = renderRegistrationModalList(method);
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -668,6 +729,7 @@
 
   function filteredRegistrations() {
     var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
+    rows = rows.filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     if (state.registrationMethod === "email") {
       rows = rows.filter(function (r) { return r.methods && r.methods.indexOf("email") >= 0; });
     } else if (state.registrationMethod === "telegram") {
@@ -689,7 +751,7 @@
   function renderRegistrations() {
     var el = document.getElementById("playerCrmRegistrations");
     if (!el) return;
-    var allRows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var allRows = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     var rows = filteredRegistrations();
     var emailOnlyCount = registrationRowsByMethod("email").length;
     var telegramOnlyCount = registrationRowsByMethod("telegram").length;
@@ -784,7 +846,7 @@
   }
 
   function renderPokerPlusModalList() {
-    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">Привязанных аккаунтов Poker21 пока нет.</div>";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
       "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата привязки</th><th>Email</th>" +
@@ -812,8 +874,8 @@
       if (document.body && !state.chatDialogManager && !state.registrationModalMethod && !state.generalMessagesModalOpen && !state.botModalOpen && !state.pushModalOpen && !state.playerModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
-    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
-    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " аккаунтов";
+    var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " аккаунтов";
     bodyEl.innerHTML = renderPokerPlusModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -871,7 +933,10 @@
 
   function channelSubscribersRows(channel) {
     return (Array.isArray(state.players) ? state.players.slice() : [])
-      .filter(function (p) { return !!(p.channels && p.channels[channel]); })
+      .filter(function (p) {
+        var field = channel === "push" ? "pushSubscribedAt" : "botSubscribedAt";
+        return !!(p.channels && p.channels[channel]) && dateInSelectedPeriod(p[field]);
+      })
       .sort(function (a, b) {
         return String(a.name || a.handle || a.id || "").localeCompare(String(b.name || b.handle || b.id || ""), "ru");
       });
@@ -910,7 +975,7 @@
       return;
     }
     var rows = botSubscribersRows();
-    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " игроков";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " игроков";
     bodyEl.innerHTML = renderBotModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -941,7 +1006,7 @@
       return;
     }
     var rows = pushSubscribersRows();
-    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " игроков";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " игроков";
     bodyEl.innerHTML = renderPushModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
