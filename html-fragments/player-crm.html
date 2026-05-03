@@ -58,6 +58,40 @@
             <h3>График</h3>
             <span id="playerCrmAnalyticsPeriod">30 дней</span>
           </div>
+          <div class="player-crm__chart-period-row" aria-label="Период графика">
+            <label class="player-crm__period">
+              <span>Дата графика</span>
+              <select id="playerCrmChartPeriodSelect">
+                <option value="7">7 дней</option>
+                <option value="30" selected>30 дней</option>
+                <option value="90">90 дней</option>
+                <option value="all">За все время</option>
+                <option value="custom">Даты</option>
+              </select>
+            </label>
+            <label class="player-crm__period player-crm__chart-date-field">
+              <span>С</span>
+              <span class="player-crm__date-control">
+                <input id="playerCrmChartDateFrom" type="date" inputmode="none" />
+                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmChartDateFrom" aria-label="Выбрать дату начала графика">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                  </svg>
+                </button>
+              </span>
+            </label>
+            <label class="player-crm__period player-crm__chart-date-field">
+              <span>По</span>
+              <span class="player-crm__date-control">
+                <input id="playerCrmChartDateTo" type="date" inputmode="none" />
+                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmChartDateTo" aria-label="Выбрать дату окончания графика">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                  </svg>
+                </button>
+              </span>
+            </label>
+          </div>
           <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
         </section>
 

@@ -66,6 +66,26 @@
 .player-crm__date-field--visible {
   display: grid;
 }
+.player-crm__chart-period-row {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.18);
+}
+.player-crm__chart-period-row .player-crm__period {
+  min-width: 160px;
+}
+.player-crm__chart-date-field {
+  display: none;
+}
+.player-crm__chart-date-field--visible {
+  display: grid;
+}
 .player-crm select,
 .player-crm input,
 .player-crm textarea {

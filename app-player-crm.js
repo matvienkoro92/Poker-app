@@ -7,6 +7,9 @@
     period: "30",
     dateFrom: "",
     dateTo: "",
+    chartPeriod: "30",
+    chartDateFrom: "",
+    chartDateTo: "",
     filter: "has_bot",
     search: "",
     selectedId: "",
@@ -91,11 +94,26 @@
     if (!state.dateFrom) state.dateFrom = isoDate(from);
   }
 
+  function setDefaultChartDates() {
+    var to = new Date();
+    var from = new Date();
+    from.setDate(from.getDate() - 29);
+    if (!state.chartDateTo) state.chartDateTo = isoDate(to);
+    if (!state.chartDateFrom) state.chartDateFrom = isoDate(from);
+  }
+
   function normalizeDateRange(changed) {
     if (!state.dateFrom || !state.dateTo) return;
     if (state.dateFrom <= state.dateTo) return;
     if (changed === "from") state.dateTo = state.dateFrom;
     else state.dateFrom = state.dateTo;
+  }
+
+  function normalizeChartDateRange(changed) {
+    if (!state.chartDateFrom || !state.chartDateTo) return;
+    if (state.chartDateFrom <= state.chartDateTo) return;
+    if (changed === "from") state.chartDateTo = state.chartDateFrom;
+    else state.chartDateFrom = state.chartDateTo;
   }
 
   function periodKey() {
@@ -109,6 +127,14 @@
       return state.dateFrom && state.dateTo ? state.dateFrom + " — " + state.dateTo : "выбранные даты";
     }
     return state.period + " дней";
+  }
+
+  function chartPeriodLabel() {
+    if (state.chartPeriod === "all") return "за все время";
+    if (state.chartPeriod === "custom") {
+      return state.chartDateFrom && state.chartDateTo ? state.chartDateFrom + " — " + state.chartDateTo : "выбранные даты";
+    }
+    return state.chartPeriod + " дней";
   }
 
   function periodData(p) {
@@ -249,7 +275,7 @@
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
       "</section>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
-    if (anaPeriod) anaPeriod.textContent = periodLabel();
+    if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
     return { active: players.length, botSubscribers: botSubscribers, pushSubscribers: pushSubscribers, deposits: deposits, messages: messages };
   }
 
@@ -911,9 +937,6 @@
     var datedSeries = series.filter(function (s) {
       return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
     });
-    if (!datedSeries.length) {
-      datedSeries = series.filter(function (s) { return s.hasDates !== false; });
-    }
     var rows = Array.isArray(chart.summary) ? chart.summary : [];
     var table = rows.length && datedSeries.length ? "<div class=\"player-crm__chart-summary-table-wrap\"><table class=\"player-crm__chart-summary-table\"><thead><tr><th>Дата</th>" +
       datedSeries.map(function (s) { return "<th>" + esc(s.label || s.key) + "</th>"; }).join("") +
@@ -927,7 +950,7 @@
         }).join("");
         return "<tr><td>" + esc(formatChartDate(row.date)) + "</td>" + cells + "<td><strong>" + esc(intFmt(total)) + "</strong></td></tr>";
       }).join("") + "</tbody></table></div>" :
-      "<div class=\"player-crm__timeline-item\">За выбранный период нет прироста с датой.</div>";
+      "<div class=\"player-crm__timeline-item\">" + (datedSeries.length ? "За выбранный период нет прироста с датой." : "Выберите хотя бы одну галочку, чтобы увидеть линии и сводку.") + "</div>";
     var undated = chart.undated || {};
     var undatedItems = series.filter(function (s) {
       return s.hasDates === false && Number(undated[s.key]) > 0;
@@ -946,9 +969,6 @@
     var enabledSeries = series.filter(function (s) {
       return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
     });
-    if (!enabledSeries.length) {
-      enabledSeries = series.filter(function (s) { return s.hasDates !== false; }).slice(0, 1);
-    }
     var width = 960;
     var height = 320;
     var padL = 56;
@@ -1127,6 +1147,13 @@
             state.period = "custom";
             state.dateFrom = data.range.from || state.dateFrom;
             state.dateTo = data.range.to || state.dateTo;
+          }
+          if (data.chartRange && data.chartRange.key === "custom") {
+            state.chartPeriod = "custom";
+            state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
+            state.chartDateTo = data.chartRange.to || state.chartDateTo;
+          } else if (data.chartRange && data.chartRange.key) {
+            state.chartPeriod = String(data.chartRange.key);
           }
         } else {
           state.players = [];
@@ -1351,6 +1378,15 @@
     } else {
       q += sep + "period=" + encodeURIComponent(state.period || "30");
     }
+    sep = "&";
+    if (state.chartPeriod === "custom") {
+      setDefaultChartDates();
+      q += sep + "chartFrom=" + encodeURIComponent(state.chartDateFrom) + "&chartTo=" + encodeURIComponent(state.chartDateTo);
+    } else if (state.chartPeriod === "all") {
+      q += sep + "chartPeriod=all";
+    } else {
+      q += sep + "chartPeriod=" + encodeURIComponent(state.chartPeriod || "30");
+    }
     return q;
   }
 
@@ -1358,6 +1394,9 @@
     var period = document.getElementById("playerCrmPeriodSelect");
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
+    var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
+    var chartFrom = document.getElementById("playerCrmChartDateFrom");
+    var chartTo = document.getElementById("playerCrmChartDateTo");
     if (period) period.value = state.period || "30";
     if (from) {
       from.value = state.dateFrom || "";
@@ -1370,6 +1409,19 @@
     var showDates = state.period === "custom";
     document.querySelectorAll(".player-crm__date-field").forEach(function (el) {
       el.classList.toggle("player-crm__date-field--visible", showDates);
+    });
+    if (chartPeriod) chartPeriod.value = state.chartPeriod || "30";
+    if (chartFrom) {
+      chartFrom.value = state.chartDateFrom || "";
+      chartFrom.max = state.chartDateTo || "";
+    }
+    if (chartTo) {
+      chartTo.value = state.chartDateTo || "";
+      chartTo.min = state.chartDateFrom || "";
+    }
+    var showChartDates = state.chartPeriod === "custom";
+    document.querySelectorAll(".player-crm__chart-date-field").forEach(function (el) {
+      el.classList.toggle("player-crm__chart-date-field--visible", showChartDates);
     });
   }
 
@@ -1572,6 +1624,31 @@
       state.period = "custom";
       normalizeDateRange("to");
       state.showAllPlayers = false;
+      syncPeriodInputs();
+      loadCrmData();
+    });
+    var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
+    if (chartPeriod) {
+      chartPeriod.addEventListener("change", function () {
+        state.chartPeriod = chartPeriod.value || "30";
+        if (state.chartPeriod === "custom") setDefaultChartDates();
+        syncPeriodInputs();
+        loadCrmData();
+      });
+    }
+    var chartDateFrom = document.getElementById("playerCrmChartDateFrom");
+    if (chartDateFrom) chartDateFrom.addEventListener("change", function () {
+      state.chartDateFrom = chartDateFrom.value || "";
+      state.chartPeriod = "custom";
+      normalizeChartDateRange("from");
+      syncPeriodInputs();
+      loadCrmData();
+    });
+    var chartDateTo = document.getElementById("playerCrmChartDateTo");
+    if (chartDateTo) chartDateTo.addEventListener("change", function () {
+      state.chartDateTo = chartDateTo.value || "";
+      state.chartPeriod = "custom";
+      normalizeChartDateRange("to");
       syncPeriodInputs();
       loadCrmData();
     });
