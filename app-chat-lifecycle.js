@@ -1337,6 +1337,7 @@ function initChat() {
           var lastAreaFocusTarget = window.__pokerChatPwaAreaFocusGestureTarget || null;
           var directComposerTap = !!(target === pwaComposer || (target && pwaComposer.contains && pwaComposer.contains(target)));
           if (evType === "pointerdown" && pointerType && pointerType !== "mouse") {
+            markPwaChatKeyboardOpenIntent(pwaComposer, "area-pointerdown");
             window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
             window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
             return;
@@ -1356,6 +1357,7 @@ function initChat() {
             return;
           }
           if (evType === "touchstart") {
+            markPwaChatKeyboardOpenIntent(pwaComposer, "area-touchstart");
             window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
             window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
             try {
@@ -1380,6 +1382,7 @@ function initChat() {
               window.__pokerChatKeyboardFocusAtMs = Date.now();
             }
             window.__pokerChatKeyboardOpeningUntil = Date.now() + 1200;
+            markPwaChatKeyboardOpenIntent(pwaComposer, "area-prefocus");
           }
         } catch (ePwaAreaPrefocusDock) {}
         try {
@@ -6186,6 +6189,7 @@ function initChat() {
           if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
           if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
           if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          markPwaChatKeyboardOpenIntent(target, label || "focus-activation");
           var now = Date.now();
           var lastAt = Number(window.__pokerChatPwaFocusActivationAt) || 0;
           var lastTarget = window.__pokerChatPwaFocusActivationTarget || null;
@@ -6477,6 +6481,7 @@ function initChat() {
           var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
           var active = document.activeElement || null;
           var activeComposer = !!(active && isChatThreadComposerKeyboardDom(active));
+          if (shouldAbortPwaChatKeyboardCleanupForOpening(target, "viewport-clearly-closed")) return false;
           if (isPwaChatManualFocusIntentActive(target)) return false;
           if (isIosPwaChatComposerOpeningHoldActive(target)) return false;
           if (activeComposer && (openingUntil > Date.now() || (focusAge > 0 && focusAge < 1250))) return false;
@@ -6488,6 +6493,7 @@ function initChat() {
       function finalizeIosPwaChatThreadClosedKeyboard(focusTarget, label) {
         try {
           var active = document.activeElement;
+          if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || active || chatComposerEl, "closed-finalize")) return false;
           if (active && isIosPwaChatComposerOpeningHoldActive(active)) return false;
           if (!isIosPwaChatThreadViewportClearlyClosed(focusTarget)) return false;
           collectChatOverscrollSnapshot("pwa-closed-finalize:" + (label || ""), focusTarget || document.activeElement || chatComposerEl);
@@ -6574,11 +6580,14 @@ function initChat() {
       }
       function scheduleChatKeyboardPostDismissPasses(delays) {
         if (!Array.isArray(delays)) return;
+        var dismissCleanupSeq = Number(window.__pokerChatKeyboardCleanupSeq) || 0;
         delays.forEach(function (ms) {
           var timerId = setTimeout(function () {
+            if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== dismissCleanupSeq) return;
             if (document.body.classList.contains("chat-keyboard-open")) return;
             try {
               var reopenTarget = document.activeElement || chatComposerEl;
+              if (shouldAbortPwaChatKeyboardCleanupForOpening(reopenTarget, "post-dismiss")) return;
               if (isPwaChatManualFocusIntentActive(reopenTarget)) return;
               if (isIosPwaChatComposerOpeningHoldActive(reopenTarget)) return;
               if (Number(window.__pokerChatKeyboardOpeningUntil) > Date.now()) return;
@@ -6629,6 +6638,66 @@ function initChat() {
           });
           window.__pokerChatDismissTimers = [];
         } catch (eDismissClear) {}
+      }
+      function markPwaChatKeyboardOpenIntent(target, label) {
+        try {
+          if (!target || !isChatThreadComposerKeyboardDom(target)) return 0;
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return 0;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return 0;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return 0;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return 0;
+          var now = Date.now();
+          window.__pokerChatKeyboardSessionSeq = (Number(window.__pokerChatKeyboardSessionSeq) || 0) + 1;
+          window.__pokerChatKeyboardCleanupSeq = (Number(window.__pokerChatKeyboardCleanupSeq) || 0) + 1;
+          window.__pokerChatPwaPointerDismissSeq = (Number(window.__pokerChatPwaPointerDismissSeq) || 0) + 1;
+          window.__pokerChatPwaUserDismissAt = 0;
+          window.__pokerChatPwaLastOpenIntentAt = now;
+          window.__pokerChatPwaLastOpenIntentTarget = target;
+          window.__pokerChatPwaLastOpenIntentLabel = label || "";
+          clearPendingChatKeyboardDismissTimers();
+          return Number(window.__pokerChatKeyboardSessionSeq) || 0;
+        } catch (ePwaOpenIntent) {
+          return 0;
+        }
+      }
+      function markPwaChatKeyboardDismissCleanup(label) {
+        try {
+          window.__pokerChatKeyboardCleanupSeq = (Number(window.__pokerChatKeyboardCleanupSeq) || 0) + 1;
+          window.__pokerChatKeyboardDismissCleanupLabel = label || "";
+          return Number(window.__pokerChatKeyboardCleanupSeq) || 0;
+        } catch (ePwaDismissSeq) {
+          return 0;
+        }
+      }
+      function shouldAbortPwaChatKeyboardCleanupForOpening(target, label) {
+        try {
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          if (isRecentIosPwaChatComposerUserDismiss()) return false;
+          var active = document.activeElement || null;
+          var composer = target || active || chatComposerEl || window.__pokerChatManualFocusIntentTarget || window.__pokerChatPwaLastOpenIntentTarget;
+          if (!isChatThreadComposerKeyboardDom(composer) && active && isChatThreadComposerKeyboardDom(active)) composer = active;
+          if (!isChatThreadComposerKeyboardDom(composer) && chatComposerEl && isChatThreadComposerKeyboardDom(chatComposerEl)) composer = chatComposerEl;
+          if (!isChatThreadComposerKeyboardDom(composer)) return false;
+          var now = Date.now();
+          var openingUntil = Number(window.__pokerChatKeyboardOpeningUntil) || 0;
+          var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+          var keepAliveUntil = Number(window.__pokerChatPwaFocusKeepAliveUntil) || 0;
+          var keepAliveTarget = window.__pokerChatPwaFocusKeepAliveTarget || null;
+          var lastOpenIntentAt = Number(window.__pokerChatPwaLastOpenIntentAt) || 0;
+          var lastOpenTarget = window.__pokerChatPwaLastOpenIntentTarget || null;
+          if (isPwaChatManualFocusIntentActive(composer)) return true;
+          if (isIosPwaChatComposerOpeningHoldActive(composer)) return true;
+          if (keepAliveUntil > now && (!keepAliveTarget || keepAliveTarget === composer)) return true;
+          if (openingUntil > now && (!active || active === composer || active === document.body || active === document.documentElement)) return true;
+          if (focusAt > 0 && now - focusAt < 1800 && active === composer) return true;
+          if (lastOpenIntentAt > 0 && now - lastOpenIntentAt < 1800 && (!lastOpenTarget || lastOpenTarget === composer)) return true;
+          return false;
+        } catch (eAbortPwaCleanup) {
+          return false;
+        }
       }
       function isChatComposerVirtualKeyboardOpenForRetention(target) {
         try {
@@ -6773,7 +6842,13 @@ function initChat() {
         }
       }
       window.__pokerKeepChatComposerFocusAfterSend = keepChatComposerFocusAfterSend;
-      function finalizeChatKeyboardDismiss() {
+      function finalizeChatKeyboardDismiss(options) {
+        var finalizeOptions = options || {};
+        if (!finalizeOptions.force && shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "finalize")) {
+          collectChatOverscrollSnapshot("finalize:skip-active-opening", document.activeElement || chatComposerEl);
+          return false;
+        }
+        markPwaChatKeyboardDismissCleanup("finalize");
         clearPendingChatKeyboardDismissTimers();
         detachPwaChatThreadRootScrollLock();
         try {
@@ -6850,6 +6925,7 @@ function initChat() {
             setTimeout(function () {
               try {
                 if (document.body.classList.contains("chat-keyboard-open")) return;
+                if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "finalize-strip")) return;
               } catch (eKbChk) {}
               pokerStripForcedViewportShellHeights();
             }, ms);
@@ -6869,6 +6945,7 @@ function initChat() {
             setTimeout(fn, 16);
           };
           raf(function () {
+            if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "finalize-raf")) return;
             stripChatInputAreaTransforms();
             pokerStripForcedViewportShellHeights();
             try {
@@ -6901,15 +6978,18 @@ function initChat() {
         try {
           setTimeout(function () {
             if (document.body.classList.contains("chat-keyboard-open")) return;
+            if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "finalize-flush")) return;
             if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") pokerFlushBottomNavAndViewportAfterChatChrome();
           }, 180);
         } catch (eFlushKb2) {}
+        return true;
       }
       window.__pokerFinalizeChatKeyboardDismiss = finalizeChatKeyboardDismiss;
       function forcePwaChatKeyboardCleanupIfClosed() {
         try {
           if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
           if (!document.body.classList.contains("chat-keyboard-open")) return false;
+          if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "force-cleanup")) return false;
           if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return false;
           if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return false;
           if (finalizeIosPwaChatThreadClosedKeyboard(document.activeElement || chatComposerEl, "force-cleanup")) return true;
@@ -7027,6 +7107,7 @@ function initChat() {
         window.__pokerChatVvPostKeyboardCleanupAttached = true;
         var vvPostKbTimer = null;
         function onVvAfterKeyboardMaybeClosed() {
+          if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "vv-post")) return;
           if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return;
           if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return;
           if (forcePwaChatKeyboardCleanupIfClosed()) return;
@@ -7036,7 +7117,10 @@ function initChat() {
           /* iPhone 15: vv иногда близок к полной высоте, но 28px порог не срабатывает — ловим с 12px. */
           if (!ih || vvh < ih - 12) return;
           clearTimeout(vvPostKbTimer);
+          var vvCleanupSeq = Number(window.__pokerChatKeyboardCleanupSeq) || 0;
           vvPostKbTimer = setTimeout(function () {
+            if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== vvCleanupSeq) return;
+            if (shouldAbortPwaChatKeyboardCleanupForOpening(document.activeElement || chatComposerEl, "vv-post-late")) return;
             if (isPwaChatManualFocusIntentActive(document.activeElement || chatComposerEl)) return;
             if (isIosPwaChatComposerOpeningHoldActive(document.activeElement || chatComposerEl)) return;
             if (document.body.classList.contains("chat-keyboard-open")) return;
@@ -7122,6 +7206,7 @@ function initChat() {
             if (!composer || !isChatThreadComposerKeyboardDom(composer)) return false;
             var now = Date.now();
             chatComposerEl = composer;
+            markPwaChatKeyboardOpenIntent(composer, label || "gesture-keep-keyboard");
             window.__pokerChatPwaUserDismissAt = 0;
             window.__pokerChatManualFocusIntentUntil = now + Math.max(700, Number(durationMs) || 1400);
             window.__pokerChatManualFocusIntentTarget = composer;
@@ -7195,6 +7280,7 @@ function initChat() {
             var pointerDismissAt = Date.now();
             var pointerDismissSeq = (Number(window.__pokerChatPwaPointerDismissSeq) || 0) + 1;
             window.__pokerChatPwaPointerDismissSeq = pointerDismissSeq;
+            markPwaChatKeyboardDismissCleanup("outside-pointer-dismiss");
             window.__pokerChatPwaUserDismissAt = pointerDismissAt;
             window.__pokerChatManualFocusIntentUntil = 0;
             window.__pokerChatManualFocusIntentTarget = null;
@@ -8814,6 +8900,7 @@ function initChat() {
         collectChatOverscrollSnapshot("focus:start", focusTarget);
         if (hardDisableChatComposerViewportLift(focusTarget, "focus:hard-disabled")) return;
         if (enforceTelegramChatDefaultComposerState()) return;
+        markPwaChatKeyboardOpenIntent(focusTarget, "focus");
         if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime() && !shouldUseTelegramChatThreadVisualViewportDock(focusTarget)) {
           try {
             clearPendingChatKeyboardDismissTimers();
@@ -9362,6 +9449,7 @@ function initChat() {
             if (active && isChatThreadComposerKeyboardDom(active)) composer = active;
           }
           if (!composer || !isChatThreadComposerKeyboardDom(composer)) return false;
+          markPwaChatKeyboardOpenIntent(composer, label || "keep-alive");
           window.__pokerChatPwaFocusKeepAliveTarget = composer;
           window.__pokerChatPwaFocusKeepAliveUntil = Date.now() + Math.max(450, Number(durationMs) || 1200);
           window.__pokerChatPwaFocusKeepAliveReason = label || "";
@@ -9387,11 +9475,14 @@ function initChat() {
       function scheduleIosPwaComposerFinalizeIfStillClosed(target, label, delayMs) {
         try {
           var delay = Math.max(120, Number(delayMs) || 260);
+          var finalizeClosedSeq = Number(window.__pokerChatKeyboardCleanupSeq) || 0;
           setTimeout(function () {
             try {
+              if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== finalizeClosedSeq) return;
               if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
               if (document.activeElement === target) return;
               if (isPwaChatManualFocusIntentActive(target) || isIosPwaChatComposerOpeningHoldActive(target)) return;
+              if (shouldAbortPwaChatKeyboardCleanupForOpening(target, "finalize-still-closed")) return;
               if (!isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) return;
               collectChatOverscrollSnapshot("pwa-finalize-still-closed:" + (label || ""), target);
               finalizeChatKeyboardDismiss();
@@ -9406,14 +9497,17 @@ function initChat() {
           var layoutClosedNow = isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true });
           var focusAgeNow = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
           if (layoutClosedNow && focusAgeNow > 1900) return false;
+          markPwaChatKeyboardOpenIntent(target, "blur-hold:" + (label || ""));
           clearPendingChatKeyboardDismissTimers();
           window.__pokerChatKeyboardOpeningUntil = Math.max(Number(window.__pokerChatKeyboardOpeningUntil) || 0, Date.now() + 900);
+          var blurHoldCleanupSeq = Number(window.__pokerChatKeyboardCleanupSeq) || 0;
           var nowHold = Date.now();
           var lastHold = Number(window.__pokerChatPwaLastBlurHoldAt) || 0;
           window.__pokerChatPwaLastBlurHoldAt = nowHold;
           if (nowHold - lastHold > 320) {
             setTimeout(function () {
               try {
+                if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurHoldCleanupSeq) return;
                 if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
                 if (isRecentIosPwaChatComposerUserDismiss()) return;
                 if (document.activeElement === target) {
@@ -9422,6 +9516,7 @@ function initChat() {
                   return;
                 }
                 if (!isIosPwaChatComposerOpeningHoldActive(target) && isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) {
+                  if (shouldAbortPwaChatKeyboardCleanupForOpening(target, "blur-hold-closed")) return;
                   finalizeChatKeyboardDismiss();
                   return;
                 }
@@ -9436,9 +9531,11 @@ function initChat() {
             }, 90);
             setTimeout(function () {
               try {
+                if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurHoldCleanupSeq) return;
                 if (!target || String(document.body.getAttribute("data-view") || "") !== "chat") return;
                 if (document.activeElement === target) return;
                 if (isRecentIosPwaChatComposerUserDismiss() || isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })) {
+                  if (shouldAbortPwaChatKeyboardCleanupForOpening(target, "blur-hold-fallback")) return;
                   finalizeChatKeyboardDismiss();
                 }
               } catch (ePwaRefocusFallbackCleanup) {}
@@ -9493,7 +9590,10 @@ function initChat() {
           window.visualViewport.removeEventListener("scroll", viewportResizeScrollHandler);
           viewportResizeScrollHandler = null;
         }
+        var blurCleanupSeq = Number(window.__pokerChatKeyboardCleanupSeq) || 0;
         function runBlurCleanup() {
+          if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurCleanupSeq) return;
+          if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || chatComposerEl, "blur-cleanup")) return;
           var active = document.activeElement;
           var pwaBlurCleanup =
             typeof pokerPwaStandaloneForKeyboardInset === "function" &&
@@ -9555,6 +9655,8 @@ function initChat() {
         /* iOS: blur и visualViewport обновляются не синхронно — повторяем сброс, иначе поле ввода «остаётся выше». */
         [90, 280, 520, 880, 1350, 2200].forEach(function (ms) {
           var timerId = setTimeout(function () {
+            if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurCleanupSeq) return;
+            if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || chatComposerEl, "blur-timer" + ms)) return;
             if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
             if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
             if (shouldDeferChatKeyboardFinalizeForFocus()) return;
@@ -9569,6 +9671,8 @@ function initChat() {
           if (!Array.isArray(window.__pokerChatDismissTimers)) window.__pokerChatDismissTimers = [];
           window.__pokerChatDismissTimers.push(setTimeout(function () {
             try {
+              if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurCleanupSeq) return;
+              if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || chatComposerEl, "blur-long")) return;
               if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
                 if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
                 if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
@@ -9579,6 +9683,8 @@ function initChat() {
         } catch (eBlurTimerLong) {
           setTimeout(function () {
             try {
+              if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurCleanupSeq) return;
+              if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || chatComposerEl, "blur-long-fallback")) return;
               if (typeof pokerPwaStandaloneForKeyboardInset === "function" && pokerPwaStandaloneForKeyboardInset()) {
                 if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
                 if (isIosPwaChatComposerOpeningHoldActive(focusTarget || chatComposerEl)) return;
@@ -9591,6 +9697,8 @@ function initChat() {
         [550, 1100].forEach(function (ms) {
           var timerId = setTimeout(function () {
             try {
+              if ((Number(window.__pokerChatKeyboardCleanupSeq) || 0) !== blurCleanupSeq) return;
+              if (shouldAbortPwaChatKeyboardCleanupForOpening(focusTarget || chatComposerEl, "pwa-blur-timer" + ms)) return;
               if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return;
               if (refocusIosPwaChatComposerAfterTransientBlur(focusTarget || chatComposerEl, "timer" + ms)) return;
               if (isPwaChatManualFocusIntentActive(focusTarget || chatComposerEl)) return;
@@ -9625,6 +9733,7 @@ function initChat() {
               isChatThreadComposerKeyboardDom(ta)
             ) {
               var nowIntent = Date.now();
+              markPwaChatKeyboardOpenIntent(ta, "manual-focus-intent");
               window.__pokerChatManualFocusIntentUntil = nowIntent + 2200;
               window.__pokerChatManualFocusIntentTarget = ta;
               window.__pokerChatKeyboardFocusAtMs = nowIntent;
