@@ -168,6 +168,9 @@
   letter-spacing: 0.01em;
 }
 .player-crm__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
   margin: 0 0 12px;
   padding: 5px;
   border: 1px solid rgba(167, 139, 92, 0.24);
@@ -196,12 +199,16 @@
   color: var(--text);
 }
 .player-crm__tab {
-  min-height: 34px;
+  width: 100%;
+  min-height: 42px;
   padding: 0 14px;
-  border-color: transparent;
-  background: transparent;
-  color: var(--text-muted);
+  border-color: rgba(199, 163, 106, 0.2);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(2, 6, 23, 0.34)),
+    rgba(15, 23, 42, 0.34);
+  color: rgba(255, 237, 213, 0.8);
   font-size: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 214, 0.04);
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 .player-crm__tab--active,
@@ -212,6 +219,12 @@
     rgba(15, 23, 42, 0.38);
   color: #fff7df;
   box-shadow: inset 0 1px 0 rgba(255, 240, 214, 0.08);
+}
+.player-crm__tab:hover,
+.player-crm__tab:focus-visible {
+  border-color: rgba(199, 163, 106, 0.42);
+  color: #fff7df;
+  outline: none;
 }
 [data-theme="light"] .player-crm__tab--active,
 [data-theme="light"] .player-crm__chip--active {
