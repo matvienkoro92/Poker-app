@@ -14,6 +14,7 @@
     registeredAccounts: [],
     registrationModalMethod: "",
     showAllRegistrationModal: false,
+    pokerPlusModalOpen: false,
     registrationMethod: "all",
     registrationSort: "name",
     pokerPlusAccounts: [],
@@ -174,6 +175,7 @@
     var stats = [
       ["Игроков в базе", players.length],
       ["Зарегано", registrations.length, "", "registrations"],
+      ["Poker21", intFmt((state.pokerPlusAccounts || []).length), "привязали аккаунт", "pokerplus"],
       ["Подписан на бот", botSubscribers],
       ["Депозиты", money(deposits)],
       ["Сообщения", messages],
@@ -195,6 +197,11 @@
             "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Только email</small><strong>" + esc(intFmt(registrationEmailOnlyCount)) + "</strong></button>" +
             "<button type=\"button\" data-crm-registrations-modal=\"both\"><small>И то и то</small><strong>" + esc(intFmt(registrationBothCount)) + "</strong></button>" +
           "</span></div>";
+      }
+      if (it[3] === "pokerplus") {
+        return "<button type=\"button\" class=\"player-crm__stat" + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
+          "<span class=\"player-crm__stat-hint\">привязали аккаунт</span>" +
+          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       var tag = it[3] ? "button" : "div";
       var typeAttr = it[3] ? " type=\"button\"" : "";
@@ -245,7 +252,7 @@
     var html = renderManagerDialogsList();
     if (!state.chatDialogManager || !html) {
       modal.hidden = true;
-      if (document.body && !state.registrationModalMethod) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.registrationModalMethod && !state.pokerPlusModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     if (titleEl) titleEl.textContent = state.chatDialogManager === "vika" ? "Диалоги Вики" : state.chatDialogManager === "other" ? "Все остальные диалоги" : "Диалоги Ани";
@@ -324,7 +331,7 @@
     var method = state.registrationModalMethod;
     if (method !== "email" && method !== "telegram" && method !== "both") {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.pokerPlusModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var rows = registrationRowsByMethod(method);
@@ -646,6 +653,48 @@
     el.innerHTML = summary + table;
   }
 
+  function renderPokerPlusModalList() {
+    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    if (!rows.length) return "<div class=\"player-crm__timeline-item\">Привязанных аккаунтов Poker21 пока нет.</div>";
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
+      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата привязки</th><th>Email</th>" +
+      "</tr></thead><tbody>" + rows.map(function (r) {
+        return "<tr>" +
+          "<td>" + esc(r.accountId || "—") + "</td>" +
+          "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
+          "<td>" + esc(r.nickname || "—") + "</td>" +
+          "<td>" + esc(r.level || "—") + "</td>" +
+          "<td>" + esc(money(r.fee || 0)) + "</td>" +
+          "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
+          "<td>" + esc(dateOnly(r.linkedAt) || "—") + "</td>" +
+          "<td>" + esc(r.email || "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div></div>";
+  }
+
+  function renderPokerPlusModal() {
+    var modal = document.getElementById("playerCrmPokerPlusModal");
+    var subtitleEl = document.getElementById("playerCrmPokerPlusModalSubtitle");
+    var bodyEl = document.getElementById("playerCrmPokerPlusModalBody");
+    if (!modal || !bodyEl) return;
+    if (!state.pokerPlusModalOpen) {
+      modal.hidden = true;
+      if (document.body && !state.chatDialogManager && !state.registrationModalMethod) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    if (subtitleEl) subtitleEl.textContent = intFmt(rows.length) + " аккаунтов";
+    bodyEl.innerHTML = renderPokerPlusModalList();
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function closePokerPlusModal() {
+    state.pokerPlusModalOpen = false;
+    renderStats();
+    renderPokerPlusModal();
+  }
+
   function renderSegments() {
     var el = document.getElementById("playerCrmSegments");
     if (!el) return;
@@ -725,6 +774,7 @@
     syncTabs();
     renderManagerDialogModal();
     renderRegistrationModal();
+    renderPokerPlusModal();
   }
 
   function syncTabCounts() {
@@ -1136,6 +1186,16 @@
         closeRegistrationModal();
         return;
       }
+      if (e.target.closest("[data-crm-close-pokerplus-modal]")) {
+        closePokerPlusModal();
+        return;
+      }
+      if (e.target.closest("[data-crm-pokerplus-modal]")) {
+        state.pokerPlusModalOpen = true;
+        renderStats();
+        renderPokerPlusModal();
+        return;
+      }
       var registrationModal = e.target.closest("[data-crm-registrations-modal]");
       if (registrationModal) {
         state.registrationModalMethod = registrationModal.getAttribute("data-crm-registrations-modal") || "";
@@ -1273,6 +1333,7 @@
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && state.registrationModalMethod) closeRegistrationModal();
+      if (e.key === "Escape" && state.pokerPlusModalOpen) closePokerPlusModal();
       if (e.key === "Escape" && state.chatDialogManager) closeManagerDialogModal();
     });
   }
