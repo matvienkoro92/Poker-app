@@ -268,22 +268,6 @@ function hallFishGetApiBase() {
   }
 }
 
-function hallFishAuthQuery() {
-  try {
-    return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-  } catch (eQuery) {
-    return "?initData=";
-  }
-}
-
-function hallFishHasCredential() {
-  try {
-    return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
-  } catch (eCred) {
-    return false;
-  }
-}
-
 function hallFishEnsureModal() {
   var modal = document.getElementById("hallFishRatingModal");
   if (modal) return modal;
@@ -321,6 +305,22 @@ function hallFishTelegramLabel(row) {
 }
 
 function hallFishRowsFromCrmData(data) {
+  if (Array.isArray(data && data.levelRows)) {
+    return data.levelRows
+      .map(function (row) {
+        return {
+          accountId: String((row && row.accountId) || "").trim(),
+          name: String((row && row.name) || "").trim(),
+          telegram: String((row && row.telegram) || "").trim(),
+          level: Number(row && row.level) || 0,
+          fee: Number(row && row.fee) || 0,
+        };
+      })
+      .filter(function (row) { return row.level > 0; })
+      .sort(function (a, b) {
+        return b.level - a.level || b.fee - a.fee || String(a.name).localeCompare(String(b.name), "ru");
+      });
+  }
   var registrations = hallFishRegistrationMap(data && data.registeredAccounts);
   return (Array.isArray(data && data.pokerPlusAccounts) ? data.pokerPlusAccounts : [])
     .map(function (row) {
@@ -358,7 +358,7 @@ function hallFishSetModalState(message, rows) {
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var body = document.getElementById("hallFishRatingBody");
-  if (subtitle) subtitle.textContent = rows ? rows.length + " игроков" : "загрузка";
+  if (subtitle) subtitle.textContent = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
   if (body) body.innerHTML = rows ? hallFishRenderRows(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -373,9 +373,8 @@ function hallFishCloseModal() {
 function hallFishLoadRows() {
   if (hallFishRatingRowsCache) return Promise.resolve(hallFishRatingRowsCache);
   var base = hallFishGetApiBase();
-  if (!base || !hallFishHasCredential()) return Promise.reject(new Error("no-auth"));
-  var q = hallFishAuthQuery();
-  q += (q.indexOf("?") >= 0 ? "&" : "?") + "period=all&chartPeriod=all";
+  if (!base) return Promise.reject(new Error("no-api-base"));
+  var q = "?publicLevels=1";
   return fetch(base + "/api/player-crm" + q)
     .then(function (r) { return r.json(); })
     .then(function (data) {
@@ -394,8 +393,8 @@ function openHallFishRatingModal() {
     .catch(function () {
       var body = document.getElementById("hallFishRatingBody");
       var subtitle = document.getElementById("hallFishRatingSubtitle");
-      if (subtitle) subtitle.textContent = "нет доступа";
-      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Войди под CRM-доступом.</div>';
+      if (subtitle) subtitle.textContent = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
+      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
     });
 }
 
