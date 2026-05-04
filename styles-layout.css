@@ -1150,11 +1150,25 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px) !important;
 }
 
+body:not([data-view="player-crm"]) #playerCrmView,
+#playerCrmView:not(.view--active) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 body[data-view="player-crm"] #playerCrmView.view--active,
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active {
+  z-index: 2147483000 !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
 }
 
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {

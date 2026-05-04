@@ -47,7 +47,10 @@ function pokerForcePlayerCrmVisible() {
   try {
     isCrmView = document.body && document.body.getAttribute("data-view") === "player-crm";
   } catch (eBodyView) {}
-  if (!active && !isCrmView) return;
+  if (!active && !isCrmView) {
+    pokerResetPlayerCrmForcedVisibility();
+    return;
+  }
   var h = 0;
   try {
     h = window.visualViewport && window.visualViewport.height ? Number(window.visualViewport.height) : 0;
@@ -72,6 +75,9 @@ function pokerForcePlayerCrmVisible() {
   root.style.setProperty("display", "block", "important");
   root.style.setProperty("visibility", "visible", "important");
   root.style.setProperty("opacity", "1", "important");
+  root.style.setProperty("z-index", "2147483000", "important");
+  root.style.setProperty("pointer-events", "auto", "important");
+  root.style.setProperty("isolation", "isolate", "important");
   if (section) {
     section.style.setProperty("display", "block", "important");
     section.style.setProperty("visibility", "visible", "important");
@@ -79,6 +85,49 @@ function pokerForcePlayerCrmVisible() {
     section.style.setProperty("position", "relative", "important");
     section.style.setProperty("z-index", "2", "important");
     section.style.setProperty("min-height", "240px", "important");
+    section.style.setProperty("transform", "none", "important");
+  }
+}
+
+function pokerResetPlayerCrmForcedVisibility() {
+  var root = document.getElementById("playerCrmView");
+  if (!root) return;
+  var section = root.querySelector(".player-crm");
+  [
+    "position",
+    "top",
+    "right",
+    "bottom",
+    "left",
+    "min-height",
+    "height",
+    "max-height",
+    "overflow-y",
+    "display",
+    "visibility",
+    "opacity",
+    "z-index",
+    "pointer-events",
+    "isolation"
+  ].forEach(function (prop) {
+    try {
+      root.style.removeProperty(prop);
+    } catch (eRootStyle) {}
+  });
+  if (section) {
+    [
+      "display",
+      "visibility",
+      "opacity",
+      "position",
+      "z-index",
+      "min-height",
+      "transform"
+    ].forEach(function (prop) {
+      try {
+        section.style.removeProperty(prop);
+      } catch (eSectionStyle) {}
+    });
   }
 }
 
@@ -328,6 +377,9 @@ function setView(viewName, navOpts) {
       view.classList.remove("view--active");
     }
   });
+  if (viewName !== "player-crm") {
+    pokerResetPlayerCrmForcedVisibility();
+  }
   try {
     pokerSyncInertForViewScreensOnly();
   } catch (eInactiveViewsInert) {}
