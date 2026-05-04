@@ -215,6 +215,11 @@ if (chatUserModalEl) {
       "</span></span>"
     );
   }
+  function chatUserModalNonNegativeStatHtml(label, value, suffix) {
+    var n = Number(value);
+    if (isFinite(n) && n < 0) return "";
+    return chatUserModalStatHtml(label, value, suffix);
+  }
   function renderChatUserModalPlayerStats(data) {
     if (!modalPlayerStats) return;
     if (!data || data.pokerPlusStatsVisible !== true) {
@@ -226,9 +231,9 @@ if (chatUserModalEl) {
     modalPlayerStats.innerHTML =
       chatUserModalStatHtml("Рейк", st.fee, "") +
       chatUserModalStatHtml("Раздачи", st.hands, "") +
-      chatUserModalStatHtml("Кеш", st.winnings, "") +
-      chatUserModalStatHtml("MTT", st.mttWinnings, "") +
-      chatUserModalStatHtml("SNG", st.sngWinnings, "");
+      chatUserModalNonNegativeStatHtml("Кеш", st.winnings, "") +
+      chatUserModalNonNegativeStatHtml("MTT", st.mttWinnings, "") +
+      chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "");
   }
   function openChatUserModalById(id, name, avatarUrl) {
     var userName = name || "Игрок";
@@ -302,14 +307,12 @@ if (chatUserModalEl) {
           if (personalText) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
           else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
         }
-        var modalStatusLevel =
-          data && data.level != null
-            ? data.level
-            : data && data.pokerPlusVerified === true
-              ? 1
-              : null;
+        var modalStatusLevel = data && data.level != null ? data.level : null;
         if (modalLevelText && modalStatusLevel != null) {
           modalLevelText.textContent = "Уровень " + modalStatusLevel + " из 55";
+          modalLevelText.hidden = false;
+        } else if (modalLevelText) {
+          modalLevelText.textContent = "Обновите свой уровень во вкладке Профиль Poker21";
           modalLevelText.hidden = false;
         }
         if (modalStatusLevel != null) {

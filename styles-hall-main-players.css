@@ -484,6 +484,7 @@
   font-size: 18px;
   font-weight: 1000;
   text-align: right;
+  white-space: nowrap;
 }
 .hall-fish-level-row__fish {
   width: 46px;
@@ -507,7 +508,7 @@
     border-radius: 16px;
   }
   .hall-fish-level-row {
-    grid-template-columns: 32px minmax(0, 1fr) 56px 42px;
+    grid-template-columns: 32px minmax(0, 1fr) 78px 42px;
     gap: 7px;
     padding: 8px;
   }

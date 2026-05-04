@@ -369,6 +369,16 @@ function hallFishStatusFishSrc(level) {
   return "./assets/profile-status-fish-level-" + (fishLevel < 10 ? "0" : "") + fishLevel + ".png";
 }
 
+function hallFishEnsureProfileModal() {
+  if (typeof window.openChatUserModalById === "function") return true;
+  if (typeof initChatUserModals !== "function") return false;
+  initChatUserModals({
+    base: hallFishGetApiBase(),
+    tg: window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null,
+  });
+  return typeof window.openChatUserModalById === "function";
+}
+
 function hallFishSetModalState(message, rows) {
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
@@ -431,7 +441,7 @@ function initHallFishRatingModal() {
     var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id]") : null;
     if (!row) return;
     var userId = String(row.getAttribute("data-user-id") || "").trim();
-    if (!userId || typeof window.openChatUserModalById !== "function") return;
+    if (!userId || !hallFishEnsureProfileModal()) return;
     e.preventDefault();
     hallFishCloseModal();
     window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null);
