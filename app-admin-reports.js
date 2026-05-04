@@ -624,13 +624,16 @@ function initAdminReportModal() {
             var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             function doDelete(reportId) {
               var base = typeof getApiBase === "function" ? getApiBase() : "";
-              if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+              if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+                if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы удалить отчёт.");
+                return;
+              }
               var delBody =
                 typeof pokerGuestOrAuthedPostBody === "function"
-                  ? pokerGuestOrAuthedPostBody({ id: reportId })
-                  : { id: reportId };
+                  ? pokerGuestOrAuthedPostBody({ action: "delete", id: reportId })
+                  : { action: "delete", id: reportId };
               fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
-                method: "DELETE",
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(delBody)
               })
@@ -643,10 +646,10 @@ function initAdminReportModal() {
                   if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
                 });
             }
-            if (tg && tg.showConfirm) {
+            if (typeof confirm === "function") {
+              if (confirm("Удалить этот отчёт?")) doDelete(id);
+            } else if (tg && tg.showConfirm) {
               tg.showConfirm("Удалить этот отчёт?", function (ok) { if (ok) doDelete(id); });
-            } else if (typeof confirm === "function" && confirm("Удалить этот отчёт?")) {
-              doDelete(id);
             }
           });
         });
