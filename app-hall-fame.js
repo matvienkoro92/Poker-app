@@ -344,14 +344,29 @@ function hallFishRowsFromCrmData(data) {
 function hallFishRenderRows(rows) {
   if (!rows.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с уровнем.</div>';
   return '<div class="hall-fish-level-list">' + rows.map(function (row, idx) {
-    return '<div class="hall-fish-level-row">' +
+    var userId = String(row.accountId || "").trim();
+    var name = row.name || row.telegram || "Игрок";
+    return '<button type="button" class="hall-fish-level-row" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
       '<span class="hall-fish-level-row__rank">' + hallFishEsc(idx + 1) + '</span>' +
       '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
       '<span class="hall-fish-level-row__tg">' + hallFishEsc(row.telegram || "без TG") + '</span></span>' +
       '<span class="hall-fish-level-row__level">' + hallFishEsc(row.level) + ' ур.</span>' +
-      '<img class="hall-fish-level-row__fish" src="./assets/fish-king.png" alt="" aria-hidden="true" />' +
-    '</div>';
+      '<img class="hall-fish-level-row__fish" src="' + hallFishEsc(hallFishStatusFishSrc(row.level)) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" data-status-fish-level="' + hallFishEsc(hallFishStatusFishLevel(row.level)) + '" />' +
+    '</button>';
   }).join("") + '</div>';
+}
+
+function hallFishStatusFishLevel(level) {
+  if (typeof pokerProfileStatusFishLevel === "function") return pokerProfileStatusFishLevel(level);
+  var n = parseInt(level, 10);
+  if (!isFinite(n) || n < 1) n = 1;
+  return Math.min(55, n);
+}
+
+function hallFishStatusFishSrc(level) {
+  if (typeof pokerProfileStatusFishSrc === "function") return pokerProfileStatusFishSrc(level);
+  var fishLevel = hallFishStatusFishLevel(level);
+  return "./assets/profile-status-fish-level-" + (fishLevel < 10 ? "0" : "") + fishLevel + ".png";
 }
 
 function hallFishSetModalState(message, rows) {
@@ -411,6 +426,15 @@ function initHallFishRatingModal() {
   });
   document.addEventListener("click", function (e) {
     if (e.target && e.target.closest && e.target.closest("[data-hall-fish-close]")) hallFishCloseModal();
+  });
+  document.addEventListener("click", function (e) {
+    var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id]") : null;
+    if (!row) return;
+    var userId = String(row.getAttribute("data-user-id") || "").trim();
+    if (!userId || typeof window.openChatUserModalById !== "function") return;
+    e.preventDefault();
+    hallFishCloseModal();
+    window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") hallFishCloseModal();

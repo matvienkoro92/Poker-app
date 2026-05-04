@@ -32,6 +32,7 @@
     pokerPlusDateTo: "",
     campaigns: [],
     sourceAnalytics: [],
+    statsSummary: null,
     chartAnalytics: null,
     chartSeriesEnabled: {
       players: true,
@@ -311,6 +312,8 @@
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
+    var summary = state.statsSummary && typeof state.statsSummary === "object" ? state.statsSummary : null;
+    var summaryRegistrationCounts = summary && summary.registrationCounts && typeof summary.registrationCounts === "object" ? summary.registrationCounts : null;
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
     var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
@@ -319,18 +322,29 @@
     var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
     var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
     var registrationBothCount = registrationRowsByMethod("both").length;
+    var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
+    var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
+    var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
+    var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
+    var statPushSubscribers = summary ? Number(summary.push) || 0 : pushSubscribers;
+    var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
+    if (summaryRegistrationCounts) {
+      registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
+      registrationEmailOnlyCount = Number(summaryRegistrationCounts.email) || 0;
+      registrationBothCount = Number(summaryRegistrationCounts.both) || 0;
+    }
     var chat = state.chatStats || {};
     var pairHint = "Всего / за " + periodLabel();
     function pair(row) {
       return intFmt(row && row.total) + " / " + intFmt(row && row.period);
     }
     var stats = [
-      ["Игроков в базе", periodPlayers.length, periodLabel()],
-      ["Зарегано", registrations.length, periodLabel(), "registrations"],
-      ["Poker21", intFmt(pokerPlusPeriodRows.length), "привязали · " + periodLabel(), "pokerplus"],
-      ["Подписан на бот", botSubscribers, periodLabel(), "bot"],
-      ["Подписан на push", pushSubscribers, "уведомления · " + periodLabel(), "push"],
-      ["Депозиты", money(deposits), periodLabel()],
+      ["Игроков в базе", statPlayers, periodLabel()],
+      ["Зарегано", statRegistrations, periodLabel(), "registrations"],
+      ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
+      ["Подписан на бот", statBotSubscribers, periodLabel(), "bot"],
+      ["Подписан на push", statPushSubscribers, "уведомления · " + periodLabel(), "push"],
+      ["Депозиты", money(statDeposits), periodLabel()],
     ];
     var chatStats = [
       ["Сообщений в главном чате", pair(chat.generalMessages), pairHint, "generalMessages"],
@@ -346,7 +360,7 @@
       if (it[3] === "registrations") {
         return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(intFmt(registrations.length)) + "</span>" +
+          "<span class=\"player-crm__stat-value\">" + esc(intFmt(statRegistrations)) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
             "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Только email</small><strong>" + esc(intFmt(registrationEmailOnlyCount)) + "</strong></button>" +
@@ -1364,6 +1378,7 @@
           state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
           state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
           state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
+          state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : null;
           state.chartAnalytics = data.chartAnalytics || null;
           state.chatStats = data.chatStats || null;
           state.permissions = data.permissions || null;
@@ -1388,6 +1403,7 @@
           state.pokerPlusAccounts = [];
           state.campaigns = [];
           state.sourceAnalytics = [];
+          state.statsSummary = null;
           state.chartAnalytics = null;
           state.chatStats = null;
           state.permissions = null;
@@ -1403,6 +1419,7 @@
         state.pokerPlusAccounts = [];
         state.campaigns = [];
         state.sourceAnalytics = [];
+        state.statsSummary = null;
         state.chartAnalytics = null;
         state.chatStats = null;
         state.permissions = null;
