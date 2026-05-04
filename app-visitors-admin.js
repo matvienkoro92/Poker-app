@@ -1,6 +1,8 @@
 // Посетители (админ): кнопка в футере, модалка со списком, отправка сообщения
 (function () {
   var visitorsAdminData = null;
+  var crmAccessProbeState = "idle";
+  var crmAccessProbeKey = "";
 
   function esc(s) {
     if (s == null) return "";
@@ -59,6 +61,21 @@
     return email === "matvienkoro92@gmail.com" || email === "matvienko.r2@yandex.ru";
   }
 
+  function buildCrmAccessProbeUrl() {
+    var base = getApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return "";
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    return base + "/api/player-crm" + q + sep + "access=1";
+  }
+
+  function setCrmButtonAllowed(btn, allowed) {
+    if (!btn) return;
+    btn.hidden = !allowed;
+    btn.toggleAttribute("aria-hidden", !allowed);
+    btn.disabled = !allowed;
+  }
+
   function userCanOpenCrm() {
     var users = collectAdminIdentityCandidates();
     for (var i = 0; i < users.length; i++) {
@@ -71,9 +88,29 @@
     var btn = document.getElementById("adminCrmBtn");
     if (!btn) return;
     var allowed = userCanOpenCrm();
-    btn.hidden = !allowed;
-    btn.toggleAttribute("aria-hidden", !allowed);
-    btn.disabled = !allowed;
+    if (allowed || crmAccessProbeState === "allowed") {
+      crmAccessProbeState = "allowed";
+      setCrmButtonAllowed(btn, true);
+      return;
+    }
+    setCrmButtonAllowed(btn, false);
+    var url = buildCrmAccessProbeUrl();
+    if (!url || crmAccessProbeState === "pending") return;
+    if (crmAccessProbeState === "denied" && crmAccessProbeKey === url) return;
+    crmAccessProbeState = "pending";
+    crmAccessProbeKey = url;
+    fetch(url)
+      .then(function (r) {
+        return r.ok ? r.json() : null;
+      })
+      .then(function (data) {
+        crmAccessProbeState = data && data.ok ? "allowed" : "denied";
+        setCrmButtonAllowed(btn, crmAccessProbeState === "allowed");
+      })
+      .catch(function () {
+        crmAccessProbeState = "denied";
+        setCrmButtonAllowed(btn, false);
+      });
   }
 
   function renderHomeAdminIdentityStatus(forceVisible) {
@@ -994,7 +1031,7 @@
     if (adminCrmBtn && adminCrmBtn.dataset.crmAccessBound !== "1") {
       adminCrmBtn.dataset.crmAccessBound = "1";
       adminCrmBtn.addEventListener("click", function (e) {
-        if (userCanOpenCrm()) return;
+        if (userCanOpenCrm() || crmAccessProbeState === "allowed") return;
         e.preventDefault();
         e.stopPropagation();
         syncCrmButtonAccess();
