@@ -82,9 +82,21 @@ function pokerForcePlayerCrmVisible() {
     section.style.setProperty("display", "block", "important");
     section.style.setProperty("visibility", "visible", "important");
     section.style.setProperty("opacity", "1", "important");
-    section.style.setProperty("position", "relative", "important");
-    section.style.setProperty("z-index", "2", "important");
+    section.style.setProperty("position", "fixed", "important");
+    section.style.setProperty("top", "64px", "important");
+    section.style.setProperty("right", "0", "important");
+    section.style.setProperty("bottom", "0", "important");
+    section.style.setProperty("left", "0", "important");
+    section.style.setProperty("z-index", "2147483001", "important");
+    section.style.setProperty("width", "100%", "important");
+    section.style.setProperty("max-width", "none", "important");
     section.style.setProperty("min-height", "240px", "important");
+    section.style.setProperty("height", "auto", "important");
+    section.style.setProperty("max-height", "none", "important");
+    section.style.setProperty("overflow-y", "auto", "important");
+    section.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
+    section.style.setProperty("box-sizing", "border-box", "important");
+    section.style.setProperty("padding", "0 var(--screen-gutter-x, 14px) calc(var(--app-bottom-tabbar-pad, 105px) + 18px)", "important");
     section.style.setProperty("transform", "none", "important");
   }
 }
@@ -120,8 +132,20 @@ function pokerResetPlayerCrmForcedVisibility() {
       "visibility",
       "opacity",
       "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
       "z-index",
+      "width",
+      "max-width",
       "min-height",
+      "height",
+      "max-height",
+      "overflow-y",
+      "-webkit-overflow-scrolling",
+      "box-sizing",
+      "padding",
       "transform"
     ].forEach(function (prop) {
       try {

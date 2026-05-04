@@ -1172,8 +1172,21 @@ body[data-view="player-crm"] #playerCrmView.view--active {
 }
 
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
-  position: relative !important;
-  z-index: 2 !important;
+  position: fixed !important;
+  top: 64px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 2147483001 !important;
+  width: 100% !important;
+  max-width: none !important;
   min-height: 240px !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+  padding: 0 var(--screen-gutter-x, 14px) calc(var(--app-bottom-tabbar-pad, 105px) + 18px) !important;
   color: var(--text, #f8fafc) !important;
+  transform: none !important;
 }
