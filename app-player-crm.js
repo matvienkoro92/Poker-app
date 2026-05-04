@@ -2159,6 +2159,7 @@
   function syncCrmViewportShell() {
     var root = document.getElementById("playerCrmView");
     if (!root) return;
+    var section = root.querySelector(".player-crm");
     var active = root.classList && root.classList.contains("view--active");
     var isCrmView = false;
     try {
@@ -2185,6 +2186,17 @@
     root.style.setProperty("height", px, "important");
     root.style.setProperty("max-height", px, "important");
     root.style.setProperty("overflow-y", "auto", "important");
+    root.style.setProperty("display", "block", "important");
+    root.style.setProperty("visibility", "visible", "important");
+    root.style.setProperty("opacity", "1", "important");
+    if (section) {
+      section.style.setProperty("display", "block", "important");
+      section.style.setProperty("visibility", "visible", "important");
+      section.style.setProperty("opacity", "1", "important");
+      section.style.setProperty("position", "relative", "important");
+      section.style.setProperty("z-index", "2", "important");
+      section.style.setProperty("min-height", "240px", "important");
+    }
   }
 
   function pokerInitPlayerCrm() {

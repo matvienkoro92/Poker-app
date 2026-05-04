@@ -1149,3 +1149,17 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   max-height: 100dvh !important;
   padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px) !important;
 }
+
+body[data-view="player-crm"] #playerCrmView.view--active,
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
+  position: relative !important;
+  z-index: 2 !important;
+  min-height: 240px !important;
+  color: var(--text, #f8fafc) !important;
+}
