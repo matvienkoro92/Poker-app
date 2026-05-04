@@ -41,6 +41,7 @@ function pokerSyncInertForViewScreensOnly() {
 function pokerForcePlayerCrmVisible() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
+  pokerPortalPlayerCrmRoot(root);
   var section = root.querySelector(".player-crm");
   var active = root.classList && root.classList.contains("view--active");
   var isCrmView = false;
@@ -101,6 +102,20 @@ function pokerForcePlayerCrmVisible() {
   }
 }
 
+function pokerPortalPlayerCrmRoot(root) {
+  if (!root || !document.body || root.parentNode === document.body) return;
+  try {
+    if (!window.__pokerPlayerCrmRootPlaceholder) {
+      window.__pokerPlayerCrmRootPlaceholder = document.createComment("player-crm-view-placeholder");
+    }
+    var placeholder = window.__pokerPlayerCrmRootPlaceholder;
+    if (!placeholder.parentNode && root.parentNode) {
+      root.parentNode.insertBefore(placeholder, root);
+    }
+    document.body.appendChild(root);
+  } catch (ePortal) {}
+}
+
 function pokerResetPlayerCrmForcedVisibility() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
@@ -153,6 +168,13 @@ function pokerResetPlayerCrmForcedVisibility() {
       } catch (eSectionStyle) {}
     });
   }
+  try {
+    var placeholder = window.__pokerPlayerCrmRootPlaceholder;
+    if (placeholder && placeholder.parentNode && root.parentNode !== placeholder.parentNode) {
+      placeholder.parentNode.insertBefore(root, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    }
+  } catch (eRestoreRoot) {}
 }
 
 (function pokerInitInactiveViewsInert() {
