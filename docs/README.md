@@ -8,6 +8,7 @@ Current documentation:
 - `identity-invariants.md` - account identity contract for `dtId`, channel ids, legacy keys, and aliases.
 - `project-tasks.md` - active backlog under the `ЗАДАЧИ` label.
 - `progress-summary.md` - current summary of completed quality/performance/architecture work and remaining priorities.
+- `player-crm-dashboard.md` - актуальное описание CRM/дашборда игроков: доступ, периоды, источники данных, карточки, чат, график, модалки, рассылки и ограничения.
 - `frontend-map.md` - current frontend file ownership map.
 - `chat-keyboard-pwa.md` - iOS PWA chat keyboard investigation, current fixes, diagnostics, and invariants.
 - `2026-05-03-product-engineering-audit.md` - product UX and engineering audit with scores, verification results, and nearest fixes.
