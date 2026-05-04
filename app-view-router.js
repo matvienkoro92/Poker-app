@@ -816,6 +816,21 @@ function setView(viewName, navOpts) {
       });
     });
   }
+  if (viewName === "player-crm") {
+    try {
+      var rafCrm = window.requestAnimationFrame || function (fn) {
+        setTimeout(fn, 16);
+      };
+      rafCrm(function () {
+        if (typeof window.pokerInitPlayerCrm === "function") window.pokerInitPlayerCrm();
+        else if (typeof window.pokerSyncPlayerCrmViewportShell === "function") window.pokerSyncPlayerCrmViewportShell();
+      });
+      setTimeout(function () {
+        if (typeof window.pokerInitPlayerCrm === "function") window.pokerInitPlayerCrm();
+        else if (typeof window.pokerSyncPlayerCrmViewportShell === "function") window.pokerSyncPlayerCrmViewportShell();
+      }, 260);
+    } catch (eCrmViewInit) {}
+  }
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}

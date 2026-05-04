@@ -798,6 +798,21 @@ html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp)
   margin-bottom: 0 !important;
   padding-bottom: 4px !important;
 }
+@media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+  html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"].chat-conversation-open .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+  html.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"].chat-conversation-open .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area,
+  html.poker-android-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
+  html.poker-android-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    z-index: auto !important;
+    padding-bottom: max(32px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 14px)) !important;
+  }
+}
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-input-area,
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-container .chat-input-area {
   bottom: calc(max(var(--chat-ios-pwa-thread-composer-bottom, clamp(272px, calc(36vh + 52px), 424px)), max(34px, calc(var(--chat-safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 10px))) + var(--chat-composer-edge-gap, 2px)) !important;

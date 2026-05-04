@@ -1105,8 +1105,10 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   width: 100% !important;
   max-width: none !important;
   min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
+  height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
+  max-height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
+  max-height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -1127,4 +1129,23 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] > .bonus
 body[data-view="player-crm"] .view.view--active[data-view="player-crm"] .player-crm {
   width: min(1120px, 100%) !important;
   max-width: 100% !important;
+}
+
+/* iOS PWA/WebView can shrink the fixed CRM view to the sticky back button height
+   when the viewport height is expressed through top/bottom inset math. Keep the
+   active CRM screen explicitly viewport-tall so the content below the back arrow
+   is not clipped. */
+body[data-view="player-crm"] #app.app .card .card__content > .view.view--active[data-view="player-crm"],
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px) !important;
 }

@@ -2156,7 +2156,41 @@
     });
   }
 
+  function syncCrmViewportShell() {
+    var root = document.getElementById("playerCrmView");
+    if (!root) return;
+    var active = root.classList && root.classList.contains("view--active");
+    var isCrmView = false;
+    try {
+      isCrmView = document.body && document.body.getAttribute("data-view") === "player-crm";
+    } catch (eBodyView) {}
+    if (!active && !isCrmView) return;
+    var h = 0;
+    try {
+      h = window.visualViewport && window.visualViewport.height ? Number(window.visualViewport.height) : 0;
+    } catch (eVv) {}
+    if (!h || h < 320) {
+      try {
+        h = window.innerHeight || document.documentElement.clientHeight || 0;
+      } catch (eWinH) {}
+    }
+    if (!h || h < 320) return;
+    var px = Math.round(h) + "px";
+    root.style.setProperty("position", "fixed", "important");
+    root.style.setProperty("top", "0", "important");
+    root.style.setProperty("right", "0", "important");
+    root.style.setProperty("bottom", "auto", "important");
+    root.style.setProperty("left", "0", "important");
+    root.style.setProperty("min-height", px, "important");
+    root.style.setProperty("height", px, "important");
+    root.style.setProperty("max-height", px, "important");
+    root.style.setProperty("overflow-y", "auto", "important");
+  }
+
   function pokerInitPlayerCrm() {
+    syncCrmViewportShell();
+    setTimeout(syncCrmViewportShell, 80);
+    setTimeout(syncCrmViewportShell, 320);
     bindOnce();
     syncPeriodInputs();
     if (!state.loaded) loadCrmData();
@@ -2164,6 +2198,18 @@
   }
 
   window.pokerInitPlayerCrm = pokerInitPlayerCrm;
+  window.pokerSyncPlayerCrmViewportShell = syncCrmViewportShell;
+  window.addEventListener("resize", syncCrmViewportShell);
+  window.addEventListener("orientationchange", function () {
+    setTimeout(syncCrmViewportShell, 120);
+    setTimeout(syncCrmViewportShell, 420);
+  });
+  if (window.visualViewport) {
+    try {
+      window.visualViewport.addEventListener("resize", syncCrmViewportShell);
+      window.visualViewport.addEventListener("scroll", syncCrmViewportShell);
+    } catch (eVvBind) {}
+  }
   window.addEventListener("poker-admin-access", function () {
     if (document.body && document.body.getAttribute("data-view") === "player-crm") pokerInitPlayerCrm();
   });

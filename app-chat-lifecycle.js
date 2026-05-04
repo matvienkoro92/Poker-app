@@ -5978,6 +5978,14 @@ function initChat() {
        */
       function isChatPhysicalKeyboardContext() {
         try {
+          if (
+            window.matchMedia &&
+            window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+            (window.innerWidth || 0) >= 700 &&
+            !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "")
+          ) {
+            return true;
+          }
           var tg = window.Telegram && window.Telegram.WebApp;
           if (tg && tg.platform) {
             var p = String(tg.platform).toLowerCase();
@@ -6408,6 +6416,12 @@ function initChat() {
       function setChatKeyboardOpenClasses(open) {
         try {
           if (enforceTelegramChatDefaultComposerState()) return;
+          if (open && isChatPhysicalKeyboardContext()) {
+            clearChatKeyboardViewportState({ keepInsets: true });
+            clearChatMessagesKeyboardPad();
+            stripChatInputAreaTransforms();
+            return;
+          }
           if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) {
             clearChatKeyboardViewportState({ keepInsets: true });
             clearChatMessagesKeyboardPad();
@@ -6900,7 +6914,7 @@ function initChat() {
               if (prevLastDockBottom > 0) window.__pokerChatLastAppliedDockBottom = prevLastDockBottom;
               if (prevPad > 0) window.__pokerChatMessagesKeyboardPadLast = prevPad;
             } else if (document.activeElement === target) {
-              if (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime()) {
+              if (!isChatPhysicalKeyboardContext() && (!isTelegramChatRuntime() || isPokerIosPwaKeyboardRuntime())) {
                 setChatKeyboardOpenClasses(true);
               }
               if (typeof onChatInputFocus === "function") onChatInputFocus(target);
