@@ -57,6 +57,10 @@
 
   function isCrmOwnerUser(user) {
     if (!user) return false;
+    var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+    if (id === "5053253480") return true;
+    var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+    if (username === "roman1787443") return true;
     var email = user.email != null ? String(user.email).replace(/^@+/, "").trim().toLowerCase() : "";
     return email === "matvienkoro92@gmail.com" || email === "matvienko.r2@yandex.ru";
   }
