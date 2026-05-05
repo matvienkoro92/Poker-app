@@ -71,13 +71,14 @@ function pokerIsIosPwaChatComposerOpeningProtected(active) {
     var lastOpenAt = Number(window.__pokerChatPwaLastOpenIntentAt) || 0;
     var lastOpenTarget = window.__pokerChatPwaLastOpenIntentTarget || null;
     var focusAt = Number(window.__pokerChatKeyboardFocusAtMs) || 0;
+    if (document.activeElement === active) return true;
     if (manualUntil > now && (!manualTarget || manualTarget === active)) return true;
     if (openingUntil > now) return true;
     if (keepAliveUntil > now && (!keepAliveTarget || keepAliveTarget === active)) return true;
     if (scrolledOpenUntil > now && (!scrolledOpenTarget || scrolledOpenTarget === active)) return true;
     if (coldOpenUntil > now && (!coldOpenTarget || coldOpenTarget === active)) return true;
-    if (lastOpenAt > 0 && now - lastOpenAt < 2200 && (!lastOpenTarget || lastOpenTarget === active)) return true;
-    if (focusAt > 0 && now - focusAt < 1800) return true;
+    if (lastOpenAt > 0 && now - lastOpenAt < 3600 && (!lastOpenTarget || lastOpenTarget === active)) return true;
+    if (focusAt > 0 && now - focusAt < 3200) return true;
   } catch (eOpeningProtected) {}
   return false;
 }
