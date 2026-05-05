@@ -27,14 +27,17 @@ function initChatKeyboardDockViewportEvents(opts) {
         var useThreadDockFallback =
           isChatThreadComposerKeyboardDom() && (!isTelegramChatRuntime() || shouldUseTelegramChatThreadVisualViewportDock());
         var ihFb = window.innerHeight || 0;
-        var capFb = Math.min(520, Math.round(ihFb * 0.55));
         var baseFb = Number(window.__pokerChatInnerHBaseline) || 0;
-        var lossFb = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
-        var insetFb = Math.min(capFb, Math.max(140, Math.round(lossFb * 0.92)));
-        if (insetFb < 170) insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.36)));
-        if (chatComposerEl && document.activeElement === chatComposerEl) {
-          insetFb = Math.min(capFb, Math.max(insetFb, Math.round(ihFb * 0.38)));
-        }
+        var fallbackFb =
+          typeof pokerChatFallbackInsetMetrics === "function"
+            ? pokerChatFallbackInsetMetrics({
+                innerHeight: ihFb,
+                baseline: baseFb,
+                hasFocusedComposer: !!(chatComposerEl && document.activeElement === chatComposerEl),
+              })
+            : { loss: baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0, inset: Math.round(ihFb * 0.36) };
+        var lossFb = fallbackFb.loss;
+        var insetFb = fallbackFb.inset;
         if (dvNoVv === "profile") {
           doc.style.setProperty("--chat-vv-inset", insetFb + "px");
           if (isIosLikeForChatViewport()) doc.style.setProperty("--chat-ios-accessory-inset", "44px");
@@ -46,7 +49,7 @@ function initChatKeyboardDockViewportEvents(opts) {
           if (useThreadDockFallback) {
             doc.style.setProperty("--chat-vv-inset", "0px");
             doc.style.removeProperty("--chat-ios-accessory-inset");
-            var coverNv = baseFb > 260 && ihFb > 0 ? Math.max(0, Math.round(baseFb - ihFb)) : 0;
+            var coverNv = lossFb;
             applyChatThreadComposerKeyboardDockFromCover(coverNv);
           } else {
             doc.style.setProperty("--chat-vv-inset", insetFb + "px");
@@ -58,18 +61,16 @@ function initChatKeyboardDockViewportEvents(opts) {
       }
       function computeChatVisualViewportMetrics() {
         var vv = window.visualViewport;
-        var vvh = Number(vv.height) || 0;
-        var ih = window.innerHeight || 0;
-        var offsetTop = Number(vv.offsetTop) || 0;
-        var heightLoss = Math.max(0, Math.round(ih - vvh));
-        var overlap = Math.max(0, Math.round(ih - vvh - offsetTop));
-        if (overlap < 20 && heightLoss > overlap + 6) {
-          overlap = Math.max(overlap, Math.round(heightLoss - Math.max(0, offsetTop)));
-        }
-        if (overlap < 8 && vvh + 24 < ih) {
-          overlap = Math.max(overlap, heightLoss);
-        }
-        return { vv: vv, vvh: vvh, ih: ih, offsetTop: offsetTop, heightLoss: heightLoss, overlap: overlap };
+        var metrics =
+          typeof pokerChatVisualViewportMetrics === "function"
+            ? pokerChatVisualViewportMetrics({
+                visualViewportHeight: vv && vv.height,
+                innerHeight: window.innerHeight,
+                offsetTop: vv && vv.offsetTop,
+              })
+            : { vvh: Number(vv && vv.height) || 0, ih: window.innerHeight || 0, offsetTop: Number(vv && vv.offsetTop) || 0, heightLoss: 0, overlap: 0 };
+        metrics.vv = vv;
+        return metrics;
       }
       function syncPwaChatVisualViewportInset() {
         logChatKeyboardDebug("vv-sync-enter");

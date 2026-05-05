@@ -4,6 +4,7 @@
   "domains": {
     "auth": [
       "app-auth.js",
+      "app-pwa-auth-session.js",
       "app-pwa-auth.js",
       "app-auth-debug.js"
     ],
@@ -18,6 +19,8 @@
       "app-chat-lifecycle.js",
       "app-chat-utils.js",
       "app-chat-render-utils.js",
+      "app-chat-identity-formatters.js",
+      "app-chat-roster-ui.js",
       "app-chat-contacts-render.js",
       "app-chat-dialogs.js",
       "app-chat-storage.js",
@@ -65,6 +68,7 @@
       "app-chat-composer-send.js",
       "app-chat-presence-typing.js",
       "app-chat-bootstrap-prefetch.js",
+      "app-chat-keyboard-dock-math.js",
       "app-chat-keyboard-dock-foundation.js",
       "app-chat-keyboard-dock-lifecycle.js",
       "app-chat-keyboard-dock-composer-layout.js",
@@ -78,6 +82,7 @@
       "app-rating-view.js",
       "app-rating-view-adapter.js",
       "app-rating-spring-runtime.js",
+      "app-rating-data-registry.js",
       "app-rating.js",
       "app-rating-week-tops.js",
       "spring-rating-data.js"

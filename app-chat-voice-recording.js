@@ -243,8 +243,8 @@ function initChatVoiceRecordingRuntime(opts) {
     }
   }
 
-  bindChatSendTap(generalBtn, runGeneralSendAction);
-  bindChatSendTap(personalBtn, runPersonalSendAction);
+  bindChatSendTap(generalBtn, runGeneralSendAction, { replace: true });
+  bindChatSendTap(personalBtn, runPersonalSendAction, { replace: true });
 
   if (generalVoiceRemove && generalVoicePreviewEl) {
     generalVoiceRemove.addEventListener("click", function () {

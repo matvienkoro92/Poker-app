@@ -135,6 +135,81 @@
       ]
     },
     {
+      "name": "resolveMyChatMemberId",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-identity-formatters.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js",
+        "app-chat-friend-actions.js",
+        "app-chat-dialog-preview.js"
+      ]
+    },
+    {
+      "name": "escapeHtml",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-identity-formatters.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js",
+        "app-chat-attachments.js"
+      ]
+    },
+    {
+      "name": "syncClubChatRosterUi",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-roster-ui.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js",
+        "app-chat-view-glue.js"
+      ]
+    },
+    {
+      "name": "telegramUserDisplayName",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-session.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js",
+        "app-chat-identity-formatters.js"
+      ]
+    },
+    {
+      "name": "pokerAuthFetch",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-session.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "pokerChatVisualViewportMetrics",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock-math.js"
+      ],
+      "consumedBy": [
+        "app-chat-keyboard-dock-viewport-events.js"
+      ]
+    },
+    {
+      "name": "pokerRatingBuildSpringRowsByDate",
+      "domain": "rating",
+      "exportedBy": [
+        "app-rating-data-registry.js"
+      ],
+      "consumedBy": [
+        "app-rating.js"
+      ]
+    },
+    {
       "name": "initChatBootstrap",
       "domain": "chat",
       "exportedBy": [

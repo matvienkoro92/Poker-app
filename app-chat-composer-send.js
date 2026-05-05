@@ -124,10 +124,19 @@ function initChatComposerSendRuntime(opts) {
     } catch (eClosedKeyboardSendSuppress) {}
   }
 
-  function bindChatSendTap(btn, run) {
+  function bindChatSendTap(btn, run, options) {
     if (!btn || typeof run !== "function") return;
+    options = options || {};
     var key = "_pokerChatSendTapBound";
-    if (btn[key]) return;
+    if (btn[key]) {
+      if (!options.replace) return;
+      if (typeof btn._pokerChatSendTapUnbind === "function") {
+        try {
+          btn._pokerChatSendTapUnbind();
+        } catch (eUnbindTap) {}
+      }
+      btn[key] = false;
+    }
     btn[key] = true;
     var lastInvoke = 0;
     function sendButtonMode() {
@@ -157,25 +166,31 @@ function initChatComposerSendRuntime(opts) {
       markClosedKeyboardSendFocusSuppression(sendButtonMode());
       run();
     }
-    btn.addEventListener(
-      "pointerdown",
-      function (e) {
-        if (e && e.isPrimary === false) return;
-        keepComposerFocusOnPress(e);
-      },
-      { passive: false, capture: true }
-    );
-    btn.addEventListener("mousedown", function (e) { keepComposerFocusOnPress(e); }, { capture: true });
-    btn.addEventListener("click", function (e) { invoke(e); });
+    var pointerDownHandler = function (e) {
+      if (e && e.isPrimary === false) return;
+      keepComposerFocusOnPress(e);
+    };
+    var mouseDownHandler = function (e) { keepComposerFocusOnPress(e); };
+    var clickHandler = function (e) { invoke(e); };
+    var pointerUpHandler = function (e) {
+      if (!e.isPrimary) return;
+      if (e.pointerType === "mouse") return;
+      invoke(e);
+    };
+    btn.addEventListener("pointerdown", pointerDownHandler, { passive: false, capture: true });
+    btn.addEventListener("mousedown", mouseDownHandler, { capture: true });
+    btn.addEventListener("click", clickHandler);
     btn.addEventListener(
       "pointerup",
-      function (e) {
-        if (!e.isPrimary) return;
-        if (e.pointerType === "mouse") return;
-        invoke(e);
-      },
+      pointerUpHandler,
       { passive: false }
     );
+    btn._pokerChatSendTapUnbind = function () {
+      try { btn.removeEventListener("pointerdown", pointerDownHandler, true); } catch (eRemovePointerDown) {}
+      try { btn.removeEventListener("mousedown", mouseDownHandler, true); } catch (eRemoveMouseDown) {}
+      try { btn.removeEventListener("click", clickHandler); } catch (eRemoveClick) {}
+      try { btn.removeEventListener("pointerup", pointerUpHandler); } catch (eRemovePointerUp) {}
+    };
   }
 
   function isDirectMountedChatComposer(ta, mode) {

@@ -5,37 +5,21 @@ function isSpringRatingMode() {
 }
 /** Счётчик дней до финала весеннего рейтинга (31 мая, конец дня по локальному времени). */
 function getRatingByDate() {
-  if (isSpringRatingMode() && typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" && SPRING_RATING_TOURNAMENTS_BY_DATE && Object.keys(SPRING_RATING_TOURNAMENTS_BY_DATE).length) {
-    var byDate = {};
-    var dates = Object.keys(SPRING_RATING_TOURNAMENTS_BY_DATE);
-    for (var di = 0; di < dates.length; di++) {
-      var dateStr = dates[di];
-      var byNick = {};
-      var list = SPRING_RATING_TOURNAMENTS_BY_DATE[dateStr];
-      if (!Array.isArray(list)) continue;
-      for (var ti = 0; ti < list.length; ti++) {
-        var t = list[ti];
-        var players = t.players || [];
-        for (var pi = 0; pi < players.length; pi++) {
-          var p = players[pi];
-          var n = normalizeWinterNick(p && p.nick);
-          if (!n) continue;
-          var pts = winterRatingTournamentPlayerPoints(p);
-          var rew = p.reward != null ? Number(p.reward) : 0;
-          if (rew !== rew) rew = 0;
-          if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
-          byNick[n].points += pts;
-          byNick[n].reward += rew;
-        }
-      }
-      byDate[dateStr] = Object.keys(byNick).map(function (k) { return byNick[k]; }).filter(function (r) { return (r.points || 0) !== 0 || (r.reward || 0) !== 0; }).sort(function (a, b) { return (b.points - a.points) || (b.reward - a.reward); });
-    }
-    return byDate;
+  if (isSpringRatingMode() && typeof pokerRatingBuildSpringRowsByDate === "function") {
+    return pokerRatingBuildSpringRowsByDate();
   }
-  return typeof WINTER_RATING_BY_DATE !== "undefined" ? WINTER_RATING_BY_DATE : {};
+  return typeof pokerRatingGetWinterRowsByDate === "function"
+    ? pokerRatingGetWinterRowsByDate()
+    : typeof WINTER_RATING_BY_DATE !== "undefined"
+      ? WINTER_RATING_BY_DATE
+      : {};
 }
 function getRatingTournamentsByDate() {
-  return typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? WINTER_RATING_TOURNAMENTS_BY_DATE : {};
+  return typeof pokerRatingGetWinterTournamentsByDate === "function"
+    ? pokerRatingGetWinterTournamentsByDate()
+    : typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined"
+      ? WINTER_RATING_TOURNAMENTS_BY_DATE
+      : {};
 }
 /** Сумма всех положительных призовых (все игроки, обе лиги) по списку дат DD.MM.YYYY */
 /** Сводка март/апрель на экране рейтинга весны (перед «Таблица по датам»). На главной блок убран — элементы springRatingHomePromo* отсутствуют. */
@@ -122,8 +106,12 @@ function pokerScheduleHomeWelcomeOutlineFrameUpdates() {
 
 /** Топ-3 занос за 1 турнир за следующую неделю (16–22 марта) */
 function getRatingImages() {
-  if (isSpringRatingMode() && typeof SPRING_RATING_IMAGES_LEAGUE1 !== "undefined" && SPRING_RATING_IMAGES_LEAGUE1) return SPRING_RATING_IMAGES_LEAGUE1;
-  return typeof WINTER_RATING_IMAGES !== "undefined" ? WINTER_RATING_IMAGES : {};
+  if (isSpringRatingMode() && typeof pokerRatingGetSpringImagesByLeague === "function") return pokerRatingGetSpringImagesByLeague(1);
+  return typeof pokerRatingGetWinterImages === "function"
+    ? pokerRatingGetWinterImages()
+    : typeof WINTER_RATING_IMAGES !== "undefined"
+      ? WINTER_RATING_IMAGES
+      : {};
 }
 
 

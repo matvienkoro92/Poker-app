@@ -21,6 +21,7 @@ function updateSpringRatingFinalCountdown() {
 }
 
 function getSpringRatingTournamentsByDate() {
+  if (typeof pokerRatingGetSpringTournamentsByDate === "function") return pokerRatingGetSpringTournamentsByDate();
   return typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE : {};
 }
 
@@ -270,6 +271,7 @@ function getSpringRatingNextWeekTopWins() {
 }
 
 function getSpringRatingImagesByLeague(leagueNum) {
+  if (typeof pokerRatingGetSpringImagesByLeague === "function") return pokerRatingGetSpringImagesByLeague(leagueNum);
   if (leagueNum === 1 && typeof SPRING_RATING_IMAGES_LEAGUE1 !== "undefined") return SPRING_RATING_IMAGES_LEAGUE1 || {};
   if (leagueNum === 2 && typeof SPRING_RATING_IMAGES_LEAGUE2 !== "undefined") return SPRING_RATING_IMAGES_LEAGUE2 || {};
   return {};

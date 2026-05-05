@@ -28,7 +28,8 @@ function prefetchPersonalMessages(userId) {
   if (personalPrefetchInFlight[userId]) return;
   if (shouldUsePersonalCache(userId)) return;
   personalPrefetchInFlight[userId] = true;
-  var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
+  var apiBase = typeof getApiBase === "function" ? getApiBase() : "";
+  var url = apiBase + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
   fetch(url, { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {

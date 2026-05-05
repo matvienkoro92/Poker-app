@@ -252,7 +252,7 @@ async function main() {
     if (loadedDomainScripts.has("winter-rating-data.js")) throw new Error("winter rating data loaded during spring navigation");
 
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => document.body.getAttribute("data-view") === "winter-rating", null, { timeout: 4000 }).catch(() => {});
     views.push({
       target: "winter-rating",
       via: winterVia,

@@ -68,7 +68,8 @@ const cssPartFiles = fs
   .filter((name) => /^styles-.+\.css$/.test(name))
   .sort();
 const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
-const dirsToCopy = ['assets', 'html-fragments'];
+const dirsToCopy = ['html-fragments'];
+const assetDir = path.join(root, 'assets');
 const blockedAssetExtensions = new Set(['.mov']);
 const blockedAssetNames = new Set(['README.md']);
 
@@ -100,16 +101,70 @@ function copyDirRecursive(src, dest) {
   }
 }
 
-function removeBlockedAssetsRecursive(dir) {
-  if (!fs.existsSync(dir)) return;
-  for (const name of fs.readdirSync(dir)) {
-    const p = path.join(dir, name);
-    if (fs.statSync(p).isDirectory()) {
-      removeBlockedAssetsRecursive(p);
-    } else if (blockedAssetNames.has(name) || blockedAssetExtensions.has(path.extname(name).toLowerCase())) {
-      fs.unlinkSync(p);
+function collectAssetReferencesFromText(text) {
+  const refs = new Set();
+  const patterns = [
+    /(?:\.\/|\.\.\/|\/)?assets\/([^"'`)\s?#<>]+)/g,
+    /["'`]([^"'`]*\.(?:png|jpe?g|webp|avif|gif|svg|pdf|ico))["'`]/gi,
+  ];
+  for (const re of patterns) {
+    let match;
+    while ((match = re.exec(text))) {
+      const raw = re === patterns[0] ? match[1] : match[1];
+      const normalized = String(raw || '')
+        .replace(/^\.\/+/, '')
+        .replace(/^assets\//, '')
+        .split('#')[0]
+        .split('?')[0];
+      if (!normalized || normalized.includes('://') || normalized.startsWith('/')) continue;
+      if (normalized.includes('..')) continue;
+      refs.add(normalized);
     }
   }
+  return refs;
+}
+
+function collectReferencedAssets() {
+  const refs = new Set();
+  const scanFiles = new Set(toCopy);
+  function addDirFiles(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const name of fs.readdirSync(dir)) {
+      const p = path.join(dir, name);
+      const st = fs.statSync(p);
+      if (st.isDirectory()) addDirFiles(p);
+      else if (/\.(?:html|css|js|json|webmanifest)$/i.test(name)) scanFiles.add(path.relative(root, p));
+    }
+  }
+  addDirFiles(path.join(root, 'html-fragments'));
+  for (const rel of scanFiles) {
+    const p = path.join(root, rel);
+    if (!fs.existsSync(p) || fs.statSync(p).isDirectory()) continue;
+    const text = fs.readFileSync(p, 'utf8');
+    collectAssetReferencesFromText(text).forEach((asset) => refs.add(asset));
+  }
+  return refs;
+}
+
+function copyReferencedAssets() {
+  const destRoot = path.join(publicDir, 'assets');
+  fs.rmSync(destRoot, { recursive: true, force: true });
+  fs.mkdirSync(destRoot, { recursive: true });
+  const refs = collectReferencedAssets();
+  let copied = 0;
+  for (const rel of Array.from(refs).sort()) {
+    const src = path.join(assetDir, rel);
+    if (!src.startsWith(assetDir + path.sep)) continue;
+    if (!fs.existsSync(src) || fs.statSync(src).isDirectory()) continue;
+    const name = path.basename(src);
+    if (blockedAssetNames.has(name)) continue;
+    if (blockedAssetExtensions.has(path.extname(name).toLowerCase())) continue;
+    const dest = path.join(destRoot, rel);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+    copied += 1;
+  }
+  console.log('Copied referenced assets:', copied);
 }
 
 for (const dir of dirsToCopy) {
@@ -120,6 +175,10 @@ for (const dir of dirsToCopy) {
     copyDirRecursive(src, dest);
     console.log('Copied dir:', dir);
   }
+}
+
+if (fs.existsSync(assetDir)) {
+  copyReferencedAssets();
 }
 
 console.log('Build output is in public/');

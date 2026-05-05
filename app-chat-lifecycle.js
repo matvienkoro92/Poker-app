@@ -1343,42 +1343,6 @@ function initChat() {
     }
   }
 
-  function syncClubChatRosterUi() {
-    var title = document.getElementById("chatDialogClubTitle");
-    var titleMeta = document.getElementById("chatDialogClubParticipantsMeta");
-    var sub = document.getElementById("chatGeneralHeaderRosterMeta");
-    var access = clubChatAccess;
-    if (access === "need_apply" || access === "pending") {
-      if (title) setTextContentIfChanged(title, "Главный чат");
-      if (titleMeta) setTextContentIfChanged(titleMeta, "");
-      if (sub) {
-        sub.hidden = true;
-        sub.textContent = "";
-      }
-      return;
-    }
-    var c = window._chatGeneralCache;
-    var t = c && c.participantsCount != null ? c.participantsCount : null;
-    if (t == null) {
-      if (title) setTextContentIfChanged(title, "Главный чат");
-      if (titleMeta) setTextContentIfChanged(titleMeta, "");
-      if (sub) {
-        sub.hidden = true;
-        sub.textContent = "";
-      }
-      return;
-    }
-    if (title) setTextContentIfChanged(title, "Главный чат");
-    if (titleMeta) setTextContentIfChanged(titleMeta, String(t) + " участника");
-    if (sub) {
-      sub.textContent = "Участников: " + String(t);
-      sub.hidden = false;
-    }
-  }
-  try {
-    window.__pokerSyncClubChatRosterUi = syncClubChatRosterUi;
-  } catch (eSyncRoster) {}
-
   try {
     pokerHydrateChatSnapshotsFromDisk();
     syncClubChatRosterUi();
@@ -1427,35 +1391,6 @@ function initChat() {
     return;
   }
 
-  /** Id участника чата (tg_… / vk_…), как на сервере в поле from — пересчитываем при каждом рендере: в PWA initChat часто раньше, чем завершился вход. */
-  function resolveMyChatMemberId() {
-    try {
-      var _auth = window.__pokerTelegramAuth;
-      if (_auth && _auth.user && _auth.user.id != null && (_auth.status === "verified" || _auth.status === "dev_skip")) {
-        var u = _auth.user;
-        if (u.memberId != null && String(u.memberId).trim() !== "") return String(u.memberId).trim();
-        var raw = String(u.id);
-        if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0) return raw;
-        if (u.is_vk || u.vk) return "vk_" + raw;
-        return "tg_" + raw;
-      }
-    } catch (eA) {}
-    try {
-      var wtg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (wtg && wtg.initDataUnsafe && wtg.initDataUnsafe.user && wtg.initData && String(wtg.initData).trim()) {
-        var u0 = wtg.initDataUnsafe.user;
-        if (u0 && u0.id != null) return "tg_" + String(u0.id);
-      }
-    } catch (eT) {}
-    return null;
-  }
-  try {
-    window.__pokerResolveMyChatMemberId = resolveMyChatMemberId;
-  } catch (eExposeMyChatMemberId) {}
-
-  try {
-    window.pokerResolveMyChatMemberId = resolveMyChatMemberId;
-  } catch (ePubMy) {}
   function syncChatConvGroupAddMembersBtn() {
     var b = document.getElementById("chatConvGroupAddMembersBtn");
     if (!b) return;
@@ -1463,81 +1398,17 @@ function initChat() {
     var cred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     b.hidden = !grp || !cred;
   }
-  function resolveMyChatDisplayName() {
-    try {
-      var _cdn = window.__pokerChatDisplayName;
-      if (_cdn != null && String(_cdn).trim()) return String(_cdn).trim();
-    } catch (eCdn) {}
-    try {
-      var _auth2 = window.__pokerTelegramAuth;
-      if (_auth2 && _auth2.user && (_auth2.status === "verified" || _auth2.status === "dev_skip")) {
-        if (typeof telegramUserDisplayName === "function") {
-          var nm = telegramUserDisplayName(_auth2.user);
-          if (nm) return nm;
-        }
-        var u2 = _auth2.user;
-        if (u2.first_name) return String(u2.first_name);
-        if (u2.username && typeof pokerHideRomanTelegramUsername === "function" && !pokerHideRomanTelegramUsername(u2.username)) {
-          return String(u2.username);
-        }
-        if (u2.username) return String(u2.username);
-      }
-    } catch (eN) {}
-    try {
-      var wtgN = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (wtgN && wtgN.initDataUnsafe && wtgN.initDataUnsafe.user) {
-        var uCh = wtgN.initDataUnsafe.user;
-        return (
-          uCh.first_name ||
-          (uCh.username && typeof pokerHideRomanTelegramUsername === "function" && !pokerHideRomanTelegramUsername(uCh.username)
-            ? uCh.username
-            : "") ||
-          "Вы"
-        );
-      }
-    } catch (eTN) {}
-    return "Вы";
-  }
-
-  function escapeHtml(s) {
-    if (!s) return "";
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
   var chatVoiceMedia = typeof initChatVoiceMedia === "function" ? initChatVoiceMedia({ escapeHtml: escapeHtml }) : {};
   var pokerNormalizeVoiceDataUrl = chatVoiceMedia.pokerNormalizeVoiceDataUrl || function (dataUrl) { return dataUrl; };
   var chatVoiceMessageHtml = chatVoiceMedia.chatVoiceMessageHtml || function () { return ""; };
   var appendChatVoiceToTextWrap = chatVoiceMedia.appendChatVoiceToTextWrap || function () {};
   var chatMsgVoiceOnlyNoCaption = chatVoiceMedia.chatMsgVoiceOnlyNoCaption || function () { return false; };
-  function linkTgUsernames(escapedText) {
-    if (!escapedText) return "";
-    return String(escapedText).replace(/@([a-zA-Z0-9_]{5,32})(?![a-zA-Z0-9_])/g, function (_, u) {
-      return '<a href="https://t.me/' + escapeHtml(u) + '" class="chat-msg__tg-link">@' + escapeHtml(u) + '</a>';
-    });
-  }
-  function linkUrls(escapedText) {
-    if (!escapedText) return "";
-    return String(escapedText).replace(/(https?:\/\/[^\s<>&"']+)/g, function (url) {
-      var href = url.replace(/&amp;/g, "&");
-      return '<a href="' + escapeHtml(href).replace(/"/g, "&quot;") + '" class="chat-msg__link" target="_blank" rel="noopener noreferrer">' + url + '</a>';
-    });
-  }
-  function linkAppIds(escapedText) {
-    if (!escapedText) return "";
-    return String(escapedText).replace(/\b(ID\d{6})\b/gi, function (_, id) {
-      var idUp = id.toUpperCase();
-      return '<button type="button" class="chat-msg__id-link" data-app-id="' + escapeHtml(idUp) + '">' + escapeHtml(idUp) + '</button>';
-    });
-  }
-  function chatMessageBodyHtml(m) {
-    var raw = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;");
-    return linkTgUsernames(linkAppIds(linkUrls(raw)));
-  }
 
   window.lastGeneralStats = "";
   window.lastListStats = "";
   window.lastConvStats = "";
   window.__pokerChatNetworkOnline = !(typeof navigator !== "undefined" && navigator.onLine === false);
-  function closeSwitcherDropdown() {}  function closeSwitcherDropdown() {}
+  function closeSwitcherDropdown() {}
   /** iOS WKWebView: навигация между полями над клавиатурой. Один textarea переносится mountChatComposer; inert на поддеревьях чата при списке диалогов / общем / переписке. */
   function syncChatInertForIosAccessory() {
     try {
