@@ -166,6 +166,40 @@ function initChat() {
     var s = value != null ? String(value).trim() : "";
     return s === "печатает…" || s === "typing…";
   }
+  function setTextContentIfChanged(el, txt) {
+    if (!el) return;
+    var next = txt != null ? String(txt) : "";
+    if (el.textContent !== next) el.textContent = next;
+  }
+  function scheduleChatPostRenderSync(fn) {
+    if (typeof fn !== "function") return;
+    var run = function () {
+      try {
+        fn();
+      } catch (ePostRender) {}
+    };
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(function () {
+        setTimeout(run, 0);
+      });
+      return;
+    }
+    setTimeout(run, 0);
+  }
+  function updateChatHeaderStats() {
+    var el = document.getElementById("chatHeaderStats");
+    if (!el) return;
+    if (window.__pokerChatNetworkOnline === false) {
+      setTextContentIfChanged(el, "Нет сети");
+      return;
+    }
+    var txt = "";
+    if (chatActiveTab === "general") txt = window.lastGeneralStats || "";
+    else if (chatActiveTab === "admins") txt = "Админы";
+    else if (chatWithUserId && convView && !convView.classList.contains("chat-conv-view--hidden")) txt = window.lastConvStats || "";
+    else txt = window.lastListStats || "";
+    setTextContentIfChanged(el, txt);
+  }
   function rememberChatConvTitleP21Id(peerId, value) {
     var key = normalizeChatConvTitlePeerId(peerId);
     var clean = value != null ? String(value).trim() : "";
@@ -1153,126 +1187,34 @@ function initChat() {
     if (mode === "personal") return chatPersonalComposerEl || null;
     return chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
   }
-  function shouldUseTelegramIosComposeOverlay() {
-    return false;
-  }
-  function closeTelegramIosComposeOverlay(opts) {
-    if (!chatIosComposeOverlay) return;
-    opts = opts || {};
-    chatIosComposeOverlay.classList.add("chat-ios-compose-overlay--hidden");
-    chatIosComposeOverlay.setAttribute("aria-hidden", "true");
-    if (chatIosComposeOverlayTextarea) {
-      if (!opts.keepDraft) {
-        if (chatIosComposeOverlayMode === "general") chatComposerDrafts.general = String(chatIosComposeOverlayTextarea.value || "");
-        else if (chatIosComposeOverlayMode === "personal") chatComposerDrafts.personal = String(chatIosComposeOverlayTextarea.value || "");
-      }
-      try { chatIosComposeOverlayTextarea.blur(); } catch (eBlurOv) {}
-    }
-    if (chatIosComposeOverlayMode === "general" && chatGeneralInputArea) {
-      chatGeneralInputArea.classList.remove("chat-input-area--ios-overlay-gate");
-    } else if (chatIosComposeOverlayMode === "personal" && chatPersonalInputArea) {
-      chatPersonalInputArea.classList.remove("chat-input-area--ios-overlay-gate");
-    }
-    chatIosComposeOverlayMode = "";
-    chatIosComposeOverlayOpening = false;
-    setTelegramIosKeyboardRootLock(false);
-  }
-  function openTelegramIosComposeOverlay(mode) {
-    if (!shouldUseTelegramIosComposeOverlay()) return false;
-    if (mode !== "general" && mode !== "personal") return false;
-    chatIosComposeOverlayMode = mode;
-    chatIosComposeOverlayOpening = true;
-    if (chatIosComposeOverlayTitle) {
-      chatIosComposeOverlayTitle.textContent = mode === "general" ? "Сообщение в общий чат" : "Сообщение собеседнику";
-    }
-    var currentDraft = mode === "general" ? getChatGeneralText() : getChatPersonalText();
-    if (chatIosComposeOverlayTextarea) {
-      chatIosComposeOverlayTextarea.value = currentDraft || "";
-    }
-    if (mode === "general" && chatGeneralInputArea) {
-      chatGeneralInputArea.classList.add("chat-input-area--ios-overlay-gate");
-    } else if (mode === "personal" && chatPersonalInputArea) {
-      chatPersonalInputArea.classList.add("chat-input-area--ios-overlay-gate");
-    }
-    chatIosComposeOverlay.classList.remove("chat-ios-compose-overlay--hidden");
-    chatIosComposeOverlay.setAttribute("aria-hidden", "false");
-    setTelegramIosKeyboardRootLock(true);
-    setTimeout(function () {
-      chatIosComposeOverlayOpening = false;
-      try {
-        if (chatIosComposeOverlayTextarea) chatIosComposeOverlayTextarea.focus();
-      } catch (eFocusOverlay) {}
-    }, 30);
-    return true;
-  }
-  function submitTelegramIosComposeOverlay() {
-    if (!chatIosComposeOverlayMode || !chatIosComposeOverlayTextarea) return;
-    var text = String(chatIosComposeOverlayTextarea.value || "");
-    if (chatIosComposeOverlayMode === "general") {
-      chatComposerDrafts.general = text;
-      if (chatGeneralComposerEl) chatGeneralComposerEl.value = text;
-      if (chatComposerMounted === "general" && chatComposerEl) chatComposerEl.value = text;
-      closeTelegramIosComposeOverlay({ keepDraft: true });
-      sendGeneral(text);
-      return;
-    }
-    if (chatIosComposeOverlayMode === "personal") {
-      chatComposerDrafts.personal = text;
-      if (chatPersonalComposerEl) chatPersonalComposerEl.value = text;
-      if (chatComposerMounted === "personal" && chatComposerEl) chatComposerEl.value = text;
-      closeTelegramIosComposeOverlay({ keepDraft: true });
-      sendMessage(text);
-    }
-  }
-  [chatIosComposeOverlayBackdrop, chatIosComposeOverlayClose, chatIosComposeOverlayCancel].forEach(function (btn) {
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      closeTelegramIosComposeOverlay();
-    });
-  });
-  if (chatIosComposeOverlaySend) {
-    chatIosComposeOverlaySend.addEventListener("click", function () {
-      submitTelegramIosComposeOverlay();
-    });
-  }
-  if (chatIosComposeOverlayTextarea) {
-    chatIosComposeOverlayTextarea.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeTelegramIosComposeOverlay();
-        return;
-      }
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        submitTelegramIosComposeOverlay();
-      }
-    });
-  }
-  function bindTelegramIosComposeOverlayGate(area, mode) {
-    if (isTelegramChatRuntime()) return;
-    if (!area || area.__pokerIosOverlayGateBound) return;
-    area.__pokerIosOverlayGateBound = true;
-    function gateOpen(event) {
-      if (!shouldUseTelegramIosComposeOverlay()) return;
-      if (chatIosComposeOverlay && !chatIosComposeOverlay.classList.contains("chat-ios-compose-overlay--hidden")) return;
-      var target = event && event.target ? event.target : null;
-      if (target && target.closest) {
-        if (target.closest(".chat-attach-btn, .chat-emoji-btn, .chat-send-btn, .chat-voice-preview, .chat-image-preview, .chat-reply-preview, .chat-scroll-bottom-btn")) {
-          return;
-        }
-      }
-      if (openTelegramIosComposeOverlay(mode)) {
-        if (event) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
-    }
-    area.addEventListener("touchstart", gateOpen, { passive: false, capture: true });
-    area.addEventListener("click", gateOpen, true);
-  }
-  bindTelegramIosComposeOverlayGate(chatGeneralInputArea, "general");
-  bindTelegramIosComposeOverlayGate(chatPersonalInputArea, "personal");
+  var chatKeyboardOverlay = typeof initChatKeyboardOverlay === "function" ? initChatKeyboardOverlay({
+    chatIosComposeOverlay: chatIosComposeOverlay,
+    chatIosComposeOverlayBackdrop: chatIosComposeOverlayBackdrop,
+    chatIosComposeOverlayClose: chatIosComposeOverlayClose,
+    chatIosComposeOverlayCancel: chatIosComposeOverlayCancel,
+    chatIosComposeOverlaySend: chatIosComposeOverlaySend,
+    chatIosComposeOverlayTextarea: chatIosComposeOverlayTextarea,
+    chatIosComposeOverlayTitle: chatIosComposeOverlayTitle,
+    chatGeneralInputArea: chatGeneralInputArea,
+    chatPersonalInputArea: chatPersonalInputArea,
+    chatGeneralComposerEl: chatGeneralComposerEl,
+    chatPersonalComposerEl: chatPersonalComposerEl,
+    chatComposerDrafts: chatComposerDrafts,
+    getMode: function () { return chatIosComposeOverlayMode; },
+    setMode: function (value) { chatIosComposeOverlayMode = value; },
+    setOpening: function (value) { chatIosComposeOverlayOpening = !!value; },
+    getChatComposerMounted: function () { return chatComposerMounted; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    getChatGeneralText: function () { return getChatGeneralText(); },
+    getChatPersonalText: function () { return getChatPersonalText(); },
+    isTelegramChatRuntime: isTelegramChatRuntime,
+    sendGeneral: function (text) { return sendGeneral(text); },
+    sendMessage: function (text) { return sendMessage(text); },
+  }) : {};
+  var shouldUseTelegramIosComposeOverlay = chatKeyboardOverlay.shouldUseTelegramIosComposeOverlay || function () { return false; };
+  var openTelegramIosComposeOverlay = chatKeyboardOverlay.openTelegramIosComposeOverlay || function () { return false; };
+  var closeTelegramIosComposeOverlay = chatKeyboardOverlay.closeTelegramIosComposeOverlay || function () {};
+
   function forceDetachSharedChatComposerForTelegram() {
     if (!chatSharedComposerEl || !chatComposerPool) return;
     try {
@@ -1506,564 +1448,58 @@ function initChat() {
 
   var chatGeneralScrollBottomBtn = document.getElementById("chatGeneralScrollBottomBtn");
   var chatPersonalScrollBottomBtn = document.getElementById("chatPersonalScrollBottomBtn");
-  var CHAT_SCROLL_BOTTOM_NEAR_PX = 100;
-  var CHAT_SCROLL_BOTTOM_REARM_PX = 220;
-  var chatScrollBottomBtnRaf = null;
-  function chatMessagesBottomGap(el) {
-    if (!el) return 0;
-    try {
-      var max = Math.max(0, (Number(el.scrollHeight) || 0) - (Number(el.clientHeight) || 0));
-      return Math.max(0, max - (Number(el.scrollTop) || 0));
-    } catch (eGap) {
-      return 0;
-    }
-  }
-  function chatMessagesNearBottom(el, thresholdPx) {
-    if (!el) return true;
-    try {
-      var th = thresholdPx != null ? thresholdPx : CHAT_SCROLL_BOTTOM_NEAR_PX;
-      var max = el.scrollHeight - el.clientHeight;
-      if (max <= 8) return true;
-      return max - el.scrollTop <= th;
-    } catch (e) {
-      return true;
-    }
-  }
-  function rememberChatMessagesBottomAffinity(el) {
-    if (!el) return false;
-    var near = false;
-    try {
-      near = chatMessagesNearBottom(el, CHAT_SCROLL_BOTTOM_REARM_PX);
-      el.__pokerChatUserNearBottom = near;
-      if (near) {
-        el.__pokerChatUserReturnedBottomAt = Date.now();
-        el.__pokerChatKeyboardBottomFollowCancelledAt = 0;
-        if (!document.body.classList.contains("chat-keyboard-open")) {
-          el.__pokerChatOpeningStickBottom = true;
-        }
-      }
-    } catch (eRememberBottom) {}
-    return near;
-  }
-  function chatMessagesShouldFollowKeyboardLift(el) {
-    if (!el) return false;
-    try {
-      if (chatMessagesNearBottom(el, CHAT_SCROLL_BOTTOM_REARM_PX)) return true;
-      var returnedAt = Number(el.__pokerChatUserReturnedBottomAt) || 0;
-      var cancelledAt = Number(el.__pokerChatKeyboardBottomFollowCancelledAt) || 0;
-      if (returnedAt && returnedAt > cancelledAt && Date.now() - returnedAt < 5000) {
-        var relaxed = Math.max(CHAT_SCROLL_BOTTOM_REARM_PX, Math.round((Number(el.clientHeight) || 0) * 0.35));
-        if (chatMessagesBottomGap(el) <= relaxed) return true;
-      }
-      return !!el.__pokerChatOpeningStickBottom && chatMessagesBottomGap(el) <= Math.max(CHAT_SCROLL_BOTTOM_REARM_PX, 260);
-    } catch (eShouldFollow) {
-      return chatMessagesNearBottom(el, CHAT_SCROLL_BOTTOM_REARM_PX);
-    }
-  }
-  function clearChatMessagesKeyboardBottomFollow(el) {
-    if (!el) return;
-    try {
-      el.__pokerChatOpeningStickBottom = false;
-      el.__pokerChatUserNearBottom = false;
-      el.__pokerChatKeyboardBottomFollowUntil = 0;
-      el.__pokerChatKeyboardBottomFollowCancelledAt = Date.now();
-    } catch (eClearFollow) {}
-  }
-  function scheduleChatKeyboardBottomFollow(el, reason) {
-    if (!el || isChatPhysicalKeyboardContext()) return;
-    try {
-      el.__pokerChatOpeningStickBottom = true;
-      el.__pokerChatUserReturnedBottomAt = Date.now();
-      el.__pokerChatKeyboardBottomFollowUntil = Date.now() + 1600;
-      var token = (Number(el.__pokerChatKeyboardBottomFollowToken) || 0) + 1;
-      el.__pokerChatKeyboardBottomFollowToken = token;
-      var snap = function () {
-        try {
-          if (!el || el.__pokerChatKeyboardBottomFollowToken !== token) return;
-          if (!document.body.classList.contains("chat-keyboard-open")) return;
-          if (!el.__pokerChatOpeningStickBottom) return;
-          if (Date.now() > (Number(el.__pokerChatKeyboardBottomFollowUntil) || 0)) return;
-          el.scrollTop = el.scrollHeight;
-          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
-            window.__pokerScheduleSyncChatScrollBottomButtons();
-          }
-        } catch (eSnapFollow) {}
-      };
-      var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-      setTimeout(snap, 0);
-      raf(function () {
-        snap();
-        raf(snap);
-      });
-      [80, 180, 360, 700, 1200].forEach(function (ms) {
-        setTimeout(snap, ms);
-      });
-    } catch (eScheduleFollow) {}
-  }
-  function handleChatMessagesScrollForBottomState(el) {
-    rememberChatMessagesBottomAffinity(el);
-    scheduleSyncChatScrollBottomButtons();
-  }
-  /** Snap вниз только если пользователь у низа ленты (или идёт анимация первого открытия). Иначе догрузка img не дёргает окно. */
-  function snapChatMessagesToBottomIfPinned(messagesScrollEl) {
-    if (!messagesScrollEl) return;
-    try {
-      var wrap = messagesScrollEl.parentElement;
-      if (wrap && wrap.classList && wrap.classList.contains("chat-messages-wrap--settling")) {
-        messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
-        return;
-      }
-    } catch (eW) {}
-    if (!chatMessagesNearBottom(messagesScrollEl, CHAT_SCROLL_BOTTOM_NEAR_PX)) {
-      try {
-        if (messagesScrollEl.__pokerChatOpeningStickBottom) {
-          messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
-        }
-      } catch (eStickSnap) {}
-      return;
-    }
-    try {
-      messagesScrollEl.scrollTop = messagesScrollEl.scrollHeight;
-    } catch (eS) {}
-  }
-  /** Пока открыт диалог с «липким» низом — любой рост scrollHeight (картинки, вёрстка) снова уводит scrollTop от низа; подтягиваем. */
-  function pokerSnapChatOpeningStickToBottomIfActive(el, which) {
-    if (!el || !el.__pokerChatOpeningStickBottom) return;
-    try {
-      if (which === "general") {
-        if (chatActiveTab !== "general" || !generalView || generalView.classList.contains("chat-general-view--hidden")) return;
-      } else if (which === "personal") {
-        if (chatActiveTab !== "personal" || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
-      }
-      el.scrollTop = el.scrollHeight;
-    } catch (eSnapStick) {}
-  }
-  /** Сброс «липкого» низа только по явному жесту: иначе сравнение scrollTop с предыдущим кадром ловило ложные срабатывания при ResizeObserver/картинках. */
-  function pokerBindOpeningStickClearOnUserIntent(el) {
-    if (!el || el.__pokerOpeningStickIntentBound) return;
-    try {
-      el.__pokerOpeningStickIntentBound = true;
-    } catch (eB) {}
-    el.addEventListener(
-      "wheel",
-      function (ev) {
-        if (!el.__pokerChatOpeningStickBottom) return;
-        var dy = ev.deltaY;
-        if (typeof dy === "number" && dy < -1) clearChatMessagesKeyboardBottomFollow(el);
-      },
-      { passive: true }
-    );
-    var ty0 = null;
-    el.addEventListener(
-      "touchstart",
-      function (ev) {
-        ty0 = ev.touches && ev.touches[0] ? ev.touches[0].clientY : null;
-      },
-      { passive: true }
-    );
-    el.addEventListener(
-      "touchmove",
-      function (ev) {
-        if (!el.__pokerChatOpeningStickBottom || ty0 == null) return;
-        var y = ev.touches && ev.touches[0] ? ev.touches[0].clientY : null;
-        if (y != null && y - ty0 > 14) {
-          clearChatMessagesKeyboardBottomFollow(el);
-          ty0 = null;
-        }
-      },
-      { passive: true }
-    );
-    el.addEventListener(
-      "touchend",
-      function () {
-        ty0 = null;
-      },
-      { passive: true }
-    );
-  }
-  function syncChatScrollBottomButtons() {
-    try {
-      if (
-        chatGeneralScrollBottomBtn &&
-        chatActiveTab === "general" &&
-        generalView &&
-        !generalView.classList.contains("chat-general-view--hidden") &&
-        generalMessages
-      ) {
-        var showG = !chatMessagesNearBottom(generalMessages, CHAT_SCROLL_BOTTOM_NEAR_PX);
-        chatGeneralScrollBottomBtn.classList.toggle("chat-scroll-bottom-btn--hidden", !showG);
-        chatGeneralScrollBottomBtn.setAttribute("aria-hidden", showG ? "false" : "true");
-      } else if (chatGeneralScrollBottomBtn) {
-        chatGeneralScrollBottomBtn.classList.add("chat-scroll-bottom-btn--hidden");
-        chatGeneralScrollBottomBtn.setAttribute("aria-hidden", "true");
-      }
-    } catch (eG) {}
-    try {
-      if (
-        chatPersonalScrollBottomBtn &&
-        chatActiveTab === "personal" &&
-        convView &&
-        !convView.classList.contains("chat-conv-view--hidden") &&
-        messagesEl
-      ) {
-        var showP = !chatMessagesNearBottom(messagesEl, CHAT_SCROLL_BOTTOM_NEAR_PX);
-        chatPersonalScrollBottomBtn.classList.toggle("chat-scroll-bottom-btn--hidden", !showP);
-        chatPersonalScrollBottomBtn.setAttribute("aria-hidden", showP ? "false" : "true");
-      } else if (chatPersonalScrollBottomBtn) {
-        chatPersonalScrollBottomBtn.classList.add("chat-scroll-bottom-btn--hidden");
-        chatPersonalScrollBottomBtn.setAttribute("aria-hidden", "true");
-      }
-    } catch (eP) {}
-  }
-  function scheduleSyncChatScrollBottomButtons() {
-    if (chatScrollBottomBtnRaf != null) return;
-    chatScrollBottomBtnRaf = requestAnimationFrame(function () {
-      chatScrollBottomBtnRaf = null;
-      syncChatScrollBottomButtons();
-    });
-  }
-  try {
-    window.__pokerSyncChatScrollBottomButtons = syncChatScrollBottomButtons;
-    window.__pokerScheduleSyncChatScrollBottomButtons = scheduleSyncChatScrollBottomButtons;
-  } catch (eSbWin) {}
-  if (generalMessages) {
-    generalMessages.addEventListener("scroll", function () {
-      handleChatMessagesScrollForBottomState(generalMessages);
-    }, { passive: true });
-  }
-  if (messagesEl) {
-    messagesEl.addEventListener("scroll", function () {
-      handleChatMessagesScrollForBottomState(messagesEl);
-    }, { passive: true });
-  }
-  if (generalMessages) pokerBindOpeningStickClearOnUserIntent(generalMessages);
-  if (messagesEl) pokerBindOpeningStickClearOnUserIntent(messagesEl);
-  if (typeof ResizeObserver !== "undefined" && generalMessages) {
-    try {
-      var roG = new ResizeObserver(function () {
-        pokerSnapChatOpeningStickToBottomIfActive(generalMessages, "general");
-        scheduleSyncChatScrollBottomButtons();
-      });
-      roG.observe(generalMessages);
-    } catch (eRoG) {}
-  }
-  if (typeof ResizeObserver !== "undefined" && messagesEl) {
-    try {
-      var roP = new ResizeObserver(function () {
-        pokerSnapChatOpeningStickToBottomIfActive(messagesEl, "personal");
-        scheduleSyncChatScrollBottomButtons();
-      });
-      roP.observe(messagesEl);
-    } catch (eRoP) {}
-  }
-  window.addEventListener("resize", scheduleSyncChatScrollBottomButtons, { passive: true });
-  if (chatGeneralScrollBottomBtn) {
-    chatGeneralScrollBottomBtn.addEventListener("click", function () {
-      try {
-        if (generalMessages) {
-          generalMessages.scrollTop = generalMessages.scrollHeight;
-          rememberChatMessagesBottomAffinity(generalMessages);
-        }
-      } catch (eCG) {}
-      var twHg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (twHg && twHg.HapticFeedback && typeof twHg.HapticFeedback.impactOccurred === "function") {
-        try {
-          twHg.HapticFeedback.impactOccurred("light");
-        } catch (eHg) {}
-      }
-      scheduleSyncChatScrollBottomButtons();
-    });
-  }
-  if (chatPersonalScrollBottomBtn) {
-    chatPersonalScrollBottomBtn.addEventListener("click", function () {
-      try {
-        if (messagesEl) {
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-          rememberChatMessagesBottomAffinity(messagesEl);
-        }
-      } catch (eCP) {}
-      var twHp = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (twHp && twHp.HapticFeedback && typeof twHp.HapticFeedback.impactOccurred === "function") {
-        try {
-          twHp.HapticFeedback.impactOccurred("light");
-        } catch (eHp) {}
-      }
-      scheduleSyncChatScrollBottomButtons();
-    });
-  }
+  var chatScrollBottom = typeof initChatScrollBottom === "function" ? initChatScrollBottom({
+    generalMessages: generalMessages,
+    messagesEl: messagesEl,
+    generalView: generalView,
+    convView: convView,
+    chatGeneralScrollBottomBtn: chatGeneralScrollBottomBtn,
+    chatPersonalScrollBottomBtn: chatPersonalScrollBottomBtn,
+    getChatActiveTab: function () { return chatActiveTab; },
+    isChatPhysicalKeyboardContext: typeof isChatPhysicalKeyboardContext === "function" ? isChatPhysicalKeyboardContext : null,
+  }) : {};
+  var chatMessagesBottomGap = chatScrollBottom.chatMessagesBottomGap || function () { return 0; };
+  var chatMessagesNearBottom = chatScrollBottom.chatMessagesNearBottom || function () { return true; };
+  var chatMessagesShouldFollowKeyboardLift = chatScrollBottom.chatMessagesShouldFollowKeyboardLift || function () { return false; };
+  var rememberChatMessagesBottomAffinity = chatScrollBottom.rememberChatMessagesBottomAffinity || function () { return false; };
+  var scheduleChatKeyboardBottomFollow = chatScrollBottom.scheduleChatKeyboardBottomFollow || function () {};
+  var scheduleSyncChatScrollBottomButtons = chatScrollBottom.scheduleSyncChatScrollBottomButtons || function () {};
+  var snapChatMessagesToBottomIfPinned = chatScrollBottom.snapChatMessagesToBottomIfPinned || function () {};
 
-  function flushChatComposerToDrafts() {
-    var directGeneralComposer = getDirectTelegramChatComposer("general");
-    var directPersonalComposer = getDirectTelegramChatComposer("personal");
-    if (directGeneralComposer || directPersonalComposer) {
-      if (directGeneralComposer) chatComposerDrafts.general = directGeneralComposer.value != null ? String(directGeneralComposer.value) : "";
-      if (directPersonalComposer) chatComposerDrafts.personal = directPersonalComposer.value != null ? String(directPersonalComposer.value) : "";
-      return;
-    }
-    if (!chatComposerEl) return;
-    try {
-      if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
-        chatComposerDrafts.general = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-        return;
-      }
-      if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
-        chatComposerDrafts.personal = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-        return;
-      }
-    } catch (eFlushDom) {}
-    if (chatComposerMounted === "general") chatComposerDrafts.general = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-    else if (chatComposerMounted === "personal") chatComposerDrafts.personal = chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-  }
-  /** Текст для отправки: сначала реальный родитель textarea в DOM (флажок chatComposerMounted иногда рассинхронен с mount). */
-  function getChatGeneralText() {
-    var directComposer = getDirectTelegramChatComposer("general");
-    if (directComposer) return directComposer.value != null ? String(directComposer.value) : "";
-    if (!chatComposerEl) return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
-    try {
-      if (chatGeneralComposerMount && chatGeneralComposerMount.contains(chatComposerEl)) {
-        return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-      }
-    } catch (eGG) {}
-    if (chatComposerMounted === "general") return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-    return chatComposerDrafts.general != null ? String(chatComposerDrafts.general) : "";
-  }
-  function getChatPersonalText() {
-    var directComposer = getDirectTelegramChatComposer("personal");
-    if (directComposer) return directComposer.value != null ? String(directComposer.value) : "";
-    if (!chatComposerEl) return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
-    try {
-      if (chatPersonalComposerMount && chatPersonalComposerMount.contains(chatComposerEl)) {
-        return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-      }
-    } catch (eGP) {}
-    if (chatComposerMounted === "personal") return chatComposerEl.value != null ? String(chatComposerEl.value) : "";
-    return chatComposerDrafts.personal != null ? String(chatComposerDrafts.personal) : "";
-  }
-  function shouldAutoFocusChatComposerOnDesktop() {
-    try {
-      if (typeof window.__pokerIsChatPhysicalKeyboardContext === "function") {
-        return !!window.__pokerIsChatPhysicalKeyboardContext();
-      }
-    } catch (ePkCtx) {}
-    try {
-      if ((navigator.maxTouchPoints || 0) > 0) return false;
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "")) return false;
-    } catch (eAfUa) {}
-    return true;
-  }
-  function focusChatComposerForDesktop() {
-    if (!chatComposerEl || !shouldAutoFocusChatComposerOnDesktop()) return;
-    setTimeout(function () {
-      try {
-        if (!chatComposerEl || chatComposerMounted === "detached" || chatComposerEl.disabled) return;
-        if (chatComposerEl.focus) chatComposerEl.focus({ preventScroll: true });
-      } catch (eFocusDesk1) {
-        try {
-          if (chatComposerEl && chatComposerEl.focus) chatComposerEl.focus();
-        } catch (eFocusDesk2) {}
-      }
-    }, 0);
-  }
-  function focusChatComposerForReply(mode, messagesScrollEl) {
-    var replyMode = mode === "personal" ? "personal" : "general";
-    try {
-      mountChatComposer(replyMode);
-    } catch (eMountReplyComposer) {}
-    var targetComposer = null;
-    try {
-      targetComposer = isTelegramChatRuntime() ? getDirectTelegramChatComposer(replyMode) : chatComposerEl;
-      if (!targetComposer) targetComposer = chatComposerEl;
-    } catch (eReplyComposerFind) {
-      targetComposer = chatComposerEl;
-    }
-    if (!targetComposer) return;
-    chatComposerEl = targetComposer;
-    try {
-      targetComposer.disabled = false;
-      targetComposer.hidden = false;
-      targetComposer.removeAttribute("tabindex");
-      targetComposer.removeAttribute("aria-hidden");
-      targetComposer.style.removeProperty("display");
-      targetComposer.style.removeProperty("pointer-events");
-    } catch (eReplyComposerPrep) {}
-    var prevScrollTop = messagesScrollEl ? messagesScrollEl.scrollTop : null;
-    try {
-      targetComposer.focus({ preventScroll: true });
-    } catch (eReplyFocus1) {
-      try {
-        targetComposer.focus();
-      } catch (eReplyFocus2) {}
-    }
-    try {
-      var len = String(targetComposer.value || "").length;
-      if (typeof targetComposer.setSelectionRange === "function") targetComposer.setSelectionRange(len, len);
-    } catch (eReplyCaret) {}
-    try {
-      if (typeof window.__pokerActivateChatKeyboardViewport === "function") {
-        window.__pokerActivateChatKeyboardViewport(targetComposer);
-      }
-    } catch (eReplyKb) {}
-    requestAnimationFrame(function () {
-      try {
-        if (messagesScrollEl && prevScrollTop != null) messagesScrollEl.scrollTop = prevScrollTop;
-      } catch (eReplyScroll) {}
-      try {
-        if (typeof updateChatMessagesKeyboardPad === "function") updateChatMessagesKeyboardPad();
-      } catch (eReplyPad) {}
-      try {
-        if (typeof window.__pokerSyncPwaChatVisualViewportInset === "function") {
-          window.__pokerSyncPwaChatVisualViewportInset();
-        }
-      } catch (eReplyVv) {}
-    });
-  }
-  function mountChatComposer(mode) {
-    if (!chatSharedComposerEl || !chatComposerPool) return;
-    mode = mode || "detached";
-    var nextMounted = mode === "general" || mode === "personal" ? mode : "detached";
-    var useDedicated = (nextMounted === "general" || nextMounted === "personal") && ensureTelegramDedicatedChatComposers();
-    if (useDedicated) {
-      flushChatComposerToDrafts();
-      chatComposerMounted = nextMounted;
-      if (nextMounted === "general") {
-        chatComposerEl = chatGeneralComposerEl;
-        chatComposerEl.placeholder = "Сообщение в общий чат...";
-        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
-        chatComposerEl.value = chatComposerDrafts.general || "";
-        chatComposerEl.disabled = false;
-        chatComposerEl.removeAttribute("tabindex");
-        chatPersonalComposerEl.setAttribute("tabindex", "-1");
-        chatSharedComposerEl.setAttribute("tabindex", "-1");
-        chatSharedComposerEl.disabled = true;
-      } else if (nextMounted === "personal") {
-        chatComposerEl = chatPersonalComposerEl;
-        chatComposerEl.placeholder = "Сообщение...";
-        chatComposerEl.removeAttribute("aria-label");
-        chatComposerEl.value = chatComposerDrafts.personal || "";
-        chatComposerEl.disabled = false;
-        chatComposerEl.removeAttribute("tabindex");
-        chatGeneralComposerEl.setAttribute("tabindex", "-1");
-        chatSharedComposerEl.setAttribute("tabindex", "-1");
-        chatSharedComposerEl.disabled = true;
-      } else {
-        chatComposerEl = chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
-        chatSharedComposerEl.value = "";
-        chatSharedComposerEl.placeholder = "";
-        chatSharedComposerEl.blur();
-        chatSharedComposerEl.disabled = true;
-        chatSharedComposerEl.setAttribute("tabindex", "-1");
-        chatGeneralComposerEl.setAttribute("tabindex", "-1");
-        chatPersonalComposerEl.setAttribute("tabindex", "-1");
-      }
-      try {
-        if (nextMounted === "general" && typeof resizeChatTextarea === "function") resizeChatTextarea(chatGeneralComposerEl);
-        if (nextMounted === "personal" && typeof resizeChatTextarea === "function") resizeChatTextarea(chatPersonalComposerEl);
-      } catch (eRtDed) {}
-      try {
-        if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
-      } catch (eGd) {}
-      try {
-        if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-      } catch (ePd) {}
-      scheduleTelegramIosChatComposerOverlaySync();
-      return;
-    }
-    if (isTelegramChatRuntime()) {
-      chatComposerMounted = "detached";
-      chatComposerEl = chatActiveTab === "personal" ? chatPersonalComposerEl : chatGeneralComposerEl;
-      return;
-    }
-    chatComposerEl = chatSharedComposerEl;
-    var contained =
-      nextMounted === "detached"
-        ? chatComposerPool.contains(chatSharedComposerEl)
-        : nextMounted === "general"
-          ? chatGeneralComposerMount && chatGeneralComposerMount.contains(chatSharedComposerEl)
-          : chatPersonalComposerMount && chatPersonalComposerMount.contains(chatSharedComposerEl);
-    var same = nextMounted === chatComposerMounted && contained;
-    if (!same) {
-      flushChatComposerToDrafts();
-      chatComposerMounted = nextMounted;
-      if (nextMounted === "general" && chatGeneralComposerMount) {
-        chatGeneralComposerMount.appendChild(chatSharedComposerEl);
-        chatComposerEl.placeholder = "Сообщение в общий чат...";
-        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
-        chatComposerEl.value = chatComposerDrafts.general || "";
-        chatComposerEl.disabled = false;
-        chatComposerEl.removeAttribute("tabindex");
-      } else if (nextMounted === "personal" && chatPersonalComposerMount) {
-        chatPersonalComposerMount.appendChild(chatSharedComposerEl);
-        chatComposerEl.placeholder = "Сообщение...";
-        chatComposerEl.removeAttribute("aria-label");
-        chatComposerEl.value = chatComposerDrafts.personal || "";
-        chatComposerEl.disabled = false;
-        chatComposerEl.removeAttribute("tabindex");
-      } else {
-        chatComposerMounted = "detached";
-        chatComposerPool.appendChild(chatSharedComposerEl);
-        chatComposerEl.value = "";
-        chatComposerEl.placeholder = "";
-        chatComposerEl.blur();
-        chatComposerEl.disabled = false;
-        chatComposerEl.setAttribute("tabindex", "-1");
-      }
-    } else {
-      if (nextMounted === "general") {
-        chatComposerEl.placeholder = "Сообщение в общий чат...";
-        chatComposerEl.setAttribute("aria-label", "Сообщение в общий чат");
-        chatComposerEl.removeAttribute("tabindex");
-      } else if (nextMounted === "personal") {
-        chatComposerEl.placeholder = "Сообщение...";
-        chatComposerEl.removeAttribute("aria-label");
-        chatComposerEl.removeAttribute("tabindex");
-      } else {
-        chatComposerEl.setAttribute("tabindex", "-1");
-      }
-    }
-    try {
-      if (typeof resizeChatTextarea === "function") resizeChatTextarea(chatComposerEl);
-    } catch (eR) {}
-    try {
-      if (typeof updateGeneralSendBtnIcon === "function") updateGeneralSendBtnIcon();
-    } catch (eG) {}
-    try {
-      if (typeof updatePersonalSendBtnIcon === "function") updatePersonalSendBtnIcon();
-    } catch (eP) {}
-    scheduleTelegramIosChatComposerOverlaySync();
-    if (nextMounted === "general" || nextMounted === "personal") focusChatComposerForDesktop();
-  }
-
-  function setGeneralSendBusy(busy) {
-    if (!generalSendBtn) return;
-    /* Мгновенный UX: не уводим кнопку в "..." и не гасим её opacity во время сетевого ожидания. */
-    generalSendBtn.disabled = false;
-    generalSendBtn.classList.remove("chat-send-btn--waiting");
-    generalSendBtn.setAttribute("aria-busy", busy ? "true" : "false");
-    if (busy) {
-      generalSendBtn.textContent = "\u2191";
-      generalSendBtn.title = "Отправка…";
-      generalSendBtn.setAttribute("aria-label", "Отправка…");
-      generalSendBtn.classList.remove("chat-send-btn--mic");
-    } else {
-      updateGeneralSendBtnIcon();
-    }
-  }
-
-  function setPersonalSendBusy(busy) {
-    if (!sendBtn) return;
-    /* Мгновенный UX: не уводим кнопку в "..." и не гасим её opacity во время сетевого ожидания. */
-    sendBtn.disabled = false;
-    sendBtn.classList.remove("chat-send-btn--waiting");
-    sendBtn.setAttribute("aria-busy", busy ? "true" : "false");
-    if (busy) {
-      sendBtn.textContent = "\u2191";
-      sendBtn.title = "Отправка…";
-      sendBtn.setAttribute("aria-label", "Отправка…");
-      sendBtn.classList.remove("chat-send-btn--mic");
-    } else {
-      updatePersonalSendBtnIcon();
-    }
-  }
+  var chatComposerCore = typeof initChatComposerCore === "function" ? initChatComposerCore({
+    chatSharedComposerEl: chatSharedComposerEl,
+    chatComposerPool: chatComposerPool,
+    chatGeneralComposerMount: chatGeneralComposerMount,
+    chatPersonalComposerMount: chatPersonalComposerMount,
+    generalSendBtn: generalSendBtn,
+    sendBtn: sendBtn,
+    chatComposerDrafts: chatComposerDrafts,
+    getChatActiveTab: function () { return chatActiveTab; },
+    getChatComposerEl: function () { return chatComposerEl; },
+    setChatComposerEl: function (value) { chatComposerEl = value; },
+    getChatComposerMounted: function () { return chatComposerMounted; },
+    setChatComposerMounted: function (value) { chatComposerMounted = value; },
+    getChatGeneralComposerEl: function () { return chatGeneralComposerEl; },
+    setChatGeneralComposerEl: function (value) { chatGeneralComposerEl = value; },
+    getChatPersonalComposerEl: function () { return chatPersonalComposerEl; },
+    setChatPersonalComposerEl: function (value) { chatPersonalComposerEl = value; },
+    getDirectTelegramChatComposer: getDirectTelegramChatComposer,
+    ensureTelegramDedicatedChatComposers: ensureTelegramDedicatedChatComposers,
+    isTelegramChatRuntime: isTelegramChatRuntime,
+    scheduleTelegramIosChatComposerOverlaySync: scheduleTelegramIosChatComposerOverlaySync,
+    resizeChatTextarea: resizeChatTextarea,
+    updateGeneralSendBtnIcon: updateGeneralSendBtnIcon,
+    updatePersonalSendBtnIcon: updatePersonalSendBtnIcon,
+  }) : {};
+  var flushChatComposerToDrafts = chatComposerCore.flushChatComposerToDrafts || function () {};
+  var getChatGeneralText = chatComposerCore.getChatGeneralText || function () { return chatComposerDrafts.general || ""; };
+  var getChatPersonalText = chatComposerCore.getChatPersonalText || function () { return chatComposerDrafts.personal || ""; };
+  var focusChatComposerForDesktop = chatComposerCore.focusChatComposerForDesktop || function () {};
+  var focusChatComposerForReply = chatComposerCore.focusChatComposerForReply || function () {};
+  var mountChatComposer = chatComposerCore.mountChatComposer || function () {};
+  var setGeneralSendBusy = chatComposerCore.setGeneralSendBusy || function () {};
+  var setPersonalSendBusy = chatComposerCore.setPersonalSendBusy || function () {};
+  var shouldAutoFocusChatComposerOnDesktop = chatComposerCore.shouldAutoFocusChatComposerOnDesktop || function () { return true; };
 
   var base = getApiBase();
   /* учётные данные чата: pokerApiAuth* (Mini App initData или PWA pwaSession) */
@@ -2109,84 +1545,22 @@ function initChat() {
     syncClubChatRosterUi();
   } catch (eHydInit) {}
 
-  /** Пока экран лички/группы с peer открыт и вкладка видна — сервер не шлёт Web Push по этому треду (Redis TTL продлевается пингом). */
-  var chatDmFocusPingTimer = null;
-  var chatDmFocusSessionHeld = false;
-  var CHAT_DM_FOCUS_PING_MS = 22000;
-  /** Фон/передний план для dmFocusPing: иначе в Redis залипает «открыт тред» и сервер режет Web Push по ЛС. */
-  function pokerChatDmFocusBrowserForegroundOk() {
-    try {
-      if (typeof document === "undefined" || document.visibilityState !== "visible") return false;
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      /* В Mini App надёжнее isActive, чем document.hasFocus() (часто ложный false — не шлём пинг и не сбрасываем peer; либо наоборот). */
-      if (tg && typeof tg.isActive === "boolean") return tg.isActive;
-      if (typeof document.hasFocus === "function" && !document.hasFocus()) return false;
-      return true;
-    } catch (eFg) {
-      return false;
-    }
-  }
-  function postChatDmFocusPing(peerId) {
-    if (!peerId || typeof fetch !== "function") return;
-    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    try {
-      fetch(base + "/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerApiAuthJsonBody({ action: "dmFocusPing", with: peerId })),
-      }).catch(function () {});
-    } catch (ePing) {}
-  }
-  function stopChatDmFocusSession() {
-    if (chatDmFocusPingTimer) {
-      clearInterval(chatDmFocusPingTimer);
-      chatDmFocusPingTimer = null;
-    }
-    if (!chatDmFocusSessionHeld) return;
-    chatDmFocusSessionHeld = false;
-    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    try {
-      fetch(base + "/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pokerApiAuthJsonBody({ action: "dmFocusClear" })),
-      }).catch(function () {});
-    } catch (eClr) {}
-  }
-  function pokerUpdateChatDmFocusFromUiState() {
-    var viewChat = false;
-    try {
-      viewChat = document.body && document.body.getAttribute("data-view") === "chat";
-    } catch (eVw) {}
-    var convOpen = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-    var peer = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-    var shouldPing =
-      viewChat && pokerChatDmFocusBrowserForegroundOk() && chatActiveTab === "personal" && convOpen && !!peer;
-    if (!shouldPing) {
-      stopChatDmFocusSession();
-      return;
-    }
-    postChatDmFocusPing(peer);
-    if (!chatDmFocusPingTimer) {
-      chatDmFocusSessionHeld = true;
-      chatDmFocusPingTimer = setInterval(function () {
-        var v2 = false;
-        try {
-          v2 = document.body && document.body.getAttribute("data-view") === "chat";
-        } catch (eV2) {}
-        var fg2 = pokerChatDmFocusBrowserForegroundOk();
-        var co2 = !!(convView && !convView.classList.contains("chat-conv-view--hidden"));
-        var p2 = chatWithUserId && String(chatWithUserId).trim() ? String(chatWithUserId).trim() : "";
-        if (!v2 || !fg2 || chatActiveTab !== "personal" || !co2 || !p2) {
-          stopChatDmFocusSession();
-          return;
-        }
-        postChatDmFocusPing(p2);
-      }, CHAT_DM_FOCUS_PING_MS);
-    }
-  }
-  window.__pokerStopChatDmFocusSession = stopChatDmFocusSession;
-  window.pokerUpdateChatDmFocusFromUiState = pokerUpdateChatDmFocusFromUiState;
+  var chatPresenceTyping = typeof initChatPresenceTyping === "function" ? initChatPresenceTyping({
+    getBase: function () { return base; },
+    getChatActiveTab: function () { return chatActiveTab; },
+    getChatWithUserId: function () { return chatWithUserId; },
+    getConvView: function () { return convView; },
+    getConvTitleId: function () { return convTitleId; },
+    resolveChatConvTitleP21Id: resolveChatConvTitleP21Id,
+    setChatConvTitleIdText: setChatConvTitleIdText,
+    setTextContentIfChanged: setTextContentIfChanged,
+    syncChatConvTitleMetaVisibility: syncChatConvTitleMetaVisibility,
+  }) : {};
+  var pokerUpdateChatDmFocusFromUiState = chatPresenceTyping.pokerUpdateChatDmFocusFromUiState || function () {};
+  var updateConvTypingUi = chatPresenceTyping.updateConvTypingUi || function () {};
+  var pokerChatSendTypingState = chatPresenceTyping.pokerChatSendTypingState || function () {};
+  var pokerChatScheduleTypingStop = chatPresenceTyping.pokerChatScheduleTypingStop || function () {};
+  var clearChatTypingStopTimer = chatPresenceTyping.clearChatTypingStopTimer || function () {};
 
   initChatUserModals({
     base: base,
@@ -2290,217 +1664,11 @@ function initChat() {
     if (!s) return "";
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
-  var POKER_CHAT_VOICE_RATE_LS = "poker_chat_voice_playback_rate";
-  function pokerNormalizeChatVoiceRate(x) {
-    var n = typeof x === "number" ? x : parseFloat(String(x != null ? x : ""), 10);
-    if (n === 2 || n > 1.75) return 2;
-    if (Math.abs(n - 1.5) < 0.01 || (n > 1.25 && n < 1.75)) return 1.5;
-    return 1;
-  }
-  function pokerGetSavedVoicePlaybackRate() {
-    try {
-      return pokerNormalizeChatVoiceRate(localStorage.getItem(POKER_CHAT_VOICE_RATE_LS));
-    } catch (eR) {
-      return 1;
-    }
-  }
-  function pokerSetSavedVoicePlaybackRate(rate) {
-    try {
-      localStorage.setItem(POKER_CHAT_VOICE_RATE_LS, String(pokerNormalizeChatVoiceRate(rate)));
-    } catch (eW) {}
-  }
-  function pokerApplyChatVoicePlaybackRateGlobally(rate) {
-    var r = pokerNormalizeChatVoiceRate(rate);
-    var auds = document.querySelectorAll("audio.chat-msg__voice");
-    for (var ai = 0; ai < auds.length; ai++) {
-      try {
-        auds[ai].playbackRate = r;
-      } catch (eA) {}
-    }
-    var btns = document.querySelectorAll(".chat-msg__voice-speed-btn");
-    for (var bi = 0; bi < btns.length; bi++) {
-      var b = btns[bi];
-      var br = pokerNormalizeChatVoiceRate(b.getAttribute("data-voice-rate"));
-      var on = br === r;
-      b.classList.toggle("chat-msg__voice-speed-btn--active", on);
-      b.setAttribute("aria-pressed", on ? "true" : "false");
-    }
-  }
-  function pokerApplySavedRateToChatVoiceAudio(audioEl) {
-    if (!audioEl || !audioEl.classList || !audioEl.classList.contains("chat-msg__voice")) return;
-    try {
-      audioEl.playbackRate = pokerGetSavedVoicePlaybackRate();
-    } catch (eAudioRate) {}
-  }
-  /** FileReader/WebKit часто отдаёт data:application/octet-stream или data:video/webm — сервер ждёт data:audio/… */
-  function pokerNormalizeVoiceDataUrl(dataUrl, recorderMime) {
-    if (typeof dataUrl !== "string" || dataUrl.indexOf("data:") !== 0) return dataUrl;
-    var comma = dataUrl.indexOf(",");
-    if (comma < 0) return dataUrl;
-    var header = dataUrl.slice(0, comma);
-    var low = header.toLowerCase();
-    if (low.indexOf("audio/") !== -1) return dataUrl;
-    var payload = dataUrl.slice(comma);
-    var pickAudio = "audio/webm";
-    try {
-      var rm = recorderMime != null ? String(recorderMime).trim() : "";
-      if (/^audio\//i.test(rm)) pickAudio = rm.split(";")[0].trim();
-      else if (/mp4|m4a|aac|caf|mp4a|mpeg/i.test(rm)) pickAudio = "audio/mp4";
-    } catch (ePick) {}
-    if (/^data:video\/webm/i.test(header)) {
-      return header.replace(/^data:video\/webm/i, "data:audio/webm") + payload;
-    }
-    if (/^data:video\/mp4/i.test(header)) {
-      return header.replace(/^data:video\/mp4/i, "data:audio/mp4") + payload;
-    }
-    if (/^data:video\/quicktime/i.test(header)) {
-      return header.replace(/^data:video\/quicktime/i, "data:audio/mp4") + payload;
-    }
-    if (low.indexOf("application/octet-stream") !== -1) {
-      return "data:" + pickAudio + ";base64," + dataUrl.slice(comma + 1);
-    }
-    return dataUrl;
-  }
-  /** opts.footerToolbarHtml — время/галочки в одну строку с 1×…2× (только голос без подписи). */
-  function chatVoiceMessageHtml(voiceSrc, opts) {
-    if (!voiceSrc) return "";
-    opts = opts || {};
-    var src = escapeHtml(String(voiceSrc));
-    var r = pokerGetSavedVoicePlaybackRate();
-    function speedBtn(rate, label) {
-      var active = pokerNormalizeChatVoiceRate(rate) === r;
-      return (
-        '<button type="button" class="chat-msg__voice-speed-btn' +
-        (active ? " chat-msg__voice-speed-btn--active" : "") +
-        '" data-voice-rate="' +
-        rate +
-        '" aria-pressed="' +
-        (active ? "true" : "false") +
-        '">' +
-        label +
-        "</button>"
-      );
-    }
-    var speedInner =
-      speedBtn(1, "1×") +
-      speedBtn(1.5, "1.5×") +
-      speedBtn(2, "2×");
-    var foot = opts.footerToolbarHtml != null && String(opts.footerToolbarHtml).trim() !== ""
-      ? '<div class="chat-msg__footer chat-msg__footer--voice-toolbar">' + opts.footerToolbarHtml + "</div>"
-      : "";
-    return (
-      '<div class="chat-msg__voice-wrap">' +
-      '<audio class="chat-msg__voice" controls preload="metadata" src="' +
-      src +
-      '"></audio>' +
-      '<div class="chat-msg__voice-toolbar">' +
-      '<div class="chat-msg__voice-speed" role="group" aria-label="Скорость воспроизведения">' +
-      speedInner +
-      "</div>" +
-      foot +
-      "</div></div>"
-    );
-  }
-  function appendChatVoiceToTextWrap(textWrap, voiceUrl, voiceOpts) {
-    if (!textWrap || !voiceUrl) return;
-    voiceOpts = voiceOpts || {};
-    var wrap = document.createElement("div");
-    wrap.className = "chat-msg__voice-wrap";
-    var aud = document.createElement("audio");
-    aud.className = "chat-msg__voice";
-    aud.controls = true;
-    aud.preload = "metadata";
-    aud.src = voiceUrl;
-    pokerApplySavedRateToChatVoiceAudio(aud);
-    aud.addEventListener(
-      "loadedmetadata",
-      function onVoiceMeta() {
-        aud.removeEventListener("loadedmetadata", onVoiceMeta);
-        pokerApplySavedRateToChatVoiceAudio(aud);
-      },
-      false
-    );
-    wrap.appendChild(aud);
-    var toolbar = document.createElement("div");
-    toolbar.className = "chat-msg__voice-toolbar";
-    var speed = document.createElement("div");
-    speed.className = "chat-msg__voice-speed";
-    speed.setAttribute("role", "group");
-    speed.setAttribute("aria-label", "Скорость воспроизведения");
-    var r0 = pokerGetSavedVoicePlaybackRate();
-    function addRateBtn(rate, label) {
-      var bb = document.createElement("button");
-      bb.type = "button";
-      bb.className = "chat-msg__voice-speed-btn";
-      if (pokerNormalizeChatVoiceRate(rate) === r0) bb.className += " chat-msg__voice-speed-btn--active";
-      bb.setAttribute("data-voice-rate", String(rate));
-      bb.setAttribute("aria-pressed", pokerNormalizeChatVoiceRate(rate) === r0 ? "true" : "false");
-      bb.textContent = label;
-      speed.appendChild(bb);
-    }
-    addRateBtn(1, "1×");
-    addRateBtn(1.5, "1.5×");
-    addRateBtn(2, "2×");
-    toolbar.appendChild(speed);
-    if (voiceOpts.footerToolbarHtml != null && String(voiceOpts.footerToolbarHtml).trim() !== "") {
-      var ft = document.createElement("div");
-      ft.className = "chat-msg__footer chat-msg__footer--voice-toolbar";
-      ft.innerHTML = voiceOpts.footerToolbarHtml;
-      toolbar.appendChild(ft);
-    }
-    wrap.appendChild(toolbar);
-    textWrap.appendChild(wrap);
-  }
-  /** Голос без текста/картинки/PDF — время ставим в строку с 1×…2× под плеером. */
-  function chatMsgVoiceOnlyNoCaption(m) {
-    if (!m || !m.voice) return false;
-    if (m.image) return false;
-    if (m.document) return false;
-    var tx = m.text != null ? String(m.text).trim() : "";
-    return tx === "";
-  }
-  (function bindChatVoicePlaybackSpeed() {
-    if (window.__pokerChatVoiceRateUiBound) return;
-    window.__pokerChatVoiceRateUiBound = true;
-    document.addEventListener("click", function (e) {
-      var btn = e.target && e.target.closest && e.target.closest(".chat-msg__voice-speed-btn");
-      if (!btn) return;
-      var rate = pokerNormalizeChatVoiceRate(btn.getAttribute("data-voice-rate"));
-      e.preventDefault();
-      e.stopPropagation();
-      pokerSetSavedVoicePlaybackRate(rate);
-      pokerApplyChatVoicePlaybackRateGlobally(rate);
-    });
-    document.addEventListener("loadedmetadata", function (ev) {
-      var t = ev.target;
-      pokerApplySavedRateToChatVoiceAudio(t);
-    }, true);
-    document.addEventListener("canplay", function (ev) {
-      var t = ev.target;
-      pokerApplySavedRateToChatVoiceAudio(t);
-    }, true);
-    // WebKit / TG WebView: установка playbackRate в capture на «play» может срывать старт — после начала воспроизведения безопаснее.
-    document.addEventListener("play", function (ev) {
-      var t = ev.target;
-      if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
-      setTimeout(function () {
-        pokerApplySavedRateToChatVoiceAudio(t);
-      }, 0);
-    }, true);
-    document.addEventListener("playing", function (ev) {
-      var t = ev.target;
-      if (!t || !t.classList || !t.classList.contains("chat-msg__voice")) return;
-      function apply() {
-        pokerApplySavedRateToChatVoiceAudio(t);
-      }
-      try {
-        if (typeof requestAnimationFrame === "function") requestAnimationFrame(apply);
-        else setTimeout(apply, 0);
-      } catch (eRaf) {
-        apply();
-      }
-    });
-  })();
+  var chatVoiceMedia = typeof initChatVoiceMedia === "function" ? initChatVoiceMedia({ escapeHtml: escapeHtml }) : {};
+  var pokerNormalizeVoiceDataUrl = chatVoiceMedia.pokerNormalizeVoiceDataUrl || function (dataUrl) { return dataUrl; };
+  var chatVoiceMessageHtml = chatVoiceMedia.chatVoiceMessageHtml || function () { return ""; };
+  var appendChatVoiceToTextWrap = chatVoiceMedia.appendChatVoiceToTextWrap || function () {};
+  var chatMsgVoiceOnlyNoCaption = chatVoiceMedia.chatMsgVoiceOnlyNoCaption || function () { return false; };
   function linkTgUsernames(escapedText) {
     if (!escapedText) return "";
     return String(escapedText).replace(/@([a-zA-Z0-9_]{5,32})(?![a-zA-Z0-9_])/g, function (_, u) {
@@ -2530,84 +1698,7 @@ function initChat() {
   window.lastListStats = "";
   window.lastConvStats = "";
   window.__pokerChatNetworkOnline = !(typeof navigator !== "undefined" && navigator.onLine === false);
-  var chatPeerTypingActive = false;
-  var chatTypingLastSentAt = 0;
-  var chatTypingStopTimer = 0;
-  function setTextContentIfChanged(el, txt) {
-    if (!el) return;
-    var next = txt != null ? String(txt) : "";
-    if (el.textContent !== next) el.textContent = next;
-  }
-  function scheduleChatPostRenderSync(fn) {
-    if (typeof fn !== "function") return;
-    var run = function () {
-      try {
-        fn();
-      } catch (ePostRender) {}
-    };
-    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-      window.requestAnimationFrame(function () {
-        setTimeout(run, 0);
-      });
-      return;
-    }
-    setTimeout(run, 0);
-  }
-  function updateChatHeaderStats() {
-    var el = document.getElementById("chatHeaderStats");
-    if (!el) return;
-    if (window.__pokerChatNetworkOnline === false) {
-      setTextContentIfChanged(el, "Нет сети");
-      return;
-    }
-    var txt = "";
-    if (chatActiveTab === "general") txt = window.lastGeneralStats || "";
-    else if (chatActiveTab === "admins") txt = "Админы";
-    else if (chatWithUserId && convView && !convView.classList.contains("chat-conv-view--hidden")) txt = window.lastConvStats || "";
-    else txt = window.lastListStats || "";
-    setTextContentIfChanged(el, txt);
-  }
-  function updateConvTypingUi() {
-    if (!convTitleId) return;
-    if (chatActiveTab !== "personal" || !chatWithUserId || !convView || convView.classList.contains("chat-conv-view--hidden")) return;
-    if (String(chatWithUserId).indexOf("group_") === 0) return;
-    if (chatPeerTypingActive) {
-      var stableP21 = resolveChatConvTitleP21Id(chatWithUserId);
-      if (stableP21) {
-        setChatConvTitleIdText(stableP21);
-      } else {
-        setTextContentIfChanged(convTitleId, "печатает…");
-        syncChatConvTitleMetaVisibility();
-      }
-    }
-  }
-  function pokerChatSendTypingState(active) {
-    var on = !!active;
-    if (!chatWithUserId || String(chatWithUserId).indexOf("group_") === 0) return;
-    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    var now = Date.now();
-    if (on && now - chatTypingLastSentAt < 2500) return;
-    chatTypingLastSentAt = now;
-    fetch(base + "/api/chat", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(
-        pokerApiAuthJsonBody({
-          action: "typing",
-          with: chatWithUserId,
-          active: on ? 1 : 0,
-        })
-      ),
-    }).catch(function () {});
-  }
-  function pokerChatScheduleTypingStop() {
-    if (chatTypingStopTimer) clearTimeout(chatTypingStopTimer);
-    chatTypingStopTimer = setTimeout(function () {
-      chatTypingStopTimer = 0;
-      pokerChatSendTypingState(false);
-    }, 3200);
-  }
-  function closeSwitcherDropdown() {}
+  function closeSwitcherDropdown() {}  function closeSwitcherDropdown() {}
   /** iOS WKWebView: навигация между полями над клавиатурой. Один textarea переносится mountChatComposer; inert на поддеревьях чата при списке диалогов / общем / переписке. */
   function syncChatInertForIosAccessory() {
     try {
@@ -2660,7 +1751,7 @@ function initChat() {
     setChatWithUserId: function (value) { chatWithUserId = value; },
     getChatWithUserName: function () { return chatWithUserName; },
     setChatWithUserName: function (value) { chatWithUserName = value; },
-    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    setChatPeerTypingActive: chatPresenceTyping.setChatPeerTypingActive,
     getDialogsView: function () { return dialogsView; },
     getGeneralView: function () { return generalView; },
     getPersonalView: function () { return personalView; },
@@ -2973,7 +2064,7 @@ function initChat() {
     setChatWithUserId: function (value) { chatWithUserId = value; },
     getChatWithUserName: function () { return chatWithUserName; },
     setChatWithUserName: function (value) { chatWithUserName = value; },
-    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    setChatPeerTypingActive: chatPresenceTyping.setChatPeerTypingActive,
     getConvTitle: function () { return convTitle; },
     getChatWithPeerAvatarUrl: function () { return chatWithPeerAvatarUrl; },
     setChatWithPeerAvatarUrl: function (value) { chatWithPeerAvatarUrl = value; },
@@ -5195,7 +4286,7 @@ function initChat() {
     getPersonalHasMoreBefore: function (peerId) { return !!personalHasMoreBeforeByPeer[peerId]; },
     setPersonalHasMoreBefore: function (peerId, value) { personalHasMoreBeforeByPeer[peerId] = !!value; },
     setChatIsAdmin: function (value) { chatIsAdmin = !!value; },
-    setChatPeerTypingActive: function (value) { chatPeerTypingActive = !!value; },
+    setChatPeerTypingActive: chatPresenceTyping.setChatPeerTypingActive,
     setConvGroupCanChangeAvatar: function (value) { convGroupCanChangeAvatar = !!value; },
     getChatActiveTab: function () { return chatActiveTab; },
     getChatIsEditingMessage: function () { return chatIsEditingMessage; },
@@ -5272,8 +4363,8 @@ function initChat() {
     getChatComposerMounted: function () { return chatComposerMounted; },
     getChatComposerEl: function () { return chatComposerEl; },
     clearPersonalComposerDraft: function () { chatComposerDrafts.personal = ""; },
-    getChatTypingStopTimer: function () { return chatTypingStopTimer; },
-    setChatTypingStopTimer: function (value) { chatTypingStopTimer = value; },
+    getChatTypingStopTimer: chatPresenceTyping.getChatTypingStopTimer,
+    setChatTypingStopTimer: chatPresenceTyping.setChatTypingStopTimer,
     pokerEnsureChatTelegramVerified: typeof pokerEnsureChatTelegramVerified === "function" ? pokerEnsureChatTelegramVerified : null,
     getChatPersonalText: getChatPersonalText,
     pokerApiHasCredential: pokerApiHasCredential,
@@ -11450,10 +10541,7 @@ function initChat() {
             pokerChatSendTypingState(true);
             pokerChatScheduleTypingStop();
           } else {
-            if (chatTypingStopTimer) {
-              clearTimeout(chatTypingStopTimer);
-              chatTypingStopTimer = 0;
-            }
+            clearChatTypingStopTimer();
             pokerChatSendTypingState(false);
           }
         }
@@ -11488,10 +10576,7 @@ function initChat() {
       });
       ta.addEventListener("blur", function () {
         if (isDirectMountedChatComposer(ta, "personal") || chatComposerMounted === "personal") {
-          if (chatTypingStopTimer) {
-            clearTimeout(chatTypingStopTimer);
-            chatTypingStopTimer = 0;
-          }
+          clearChatTypingStopTimer();
           pokerChatSendTypingState(false);
         }
       });

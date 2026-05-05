@@ -26,18 +26,29 @@ const files = {
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
   appChatPushOpen: read("app-chat-push-open.js"),
+  appChatVoiceMedia: read("app-chat-voice-media.js"),
+  appChatKeyboardOverlay: read("app-chat-keyboard-overlay.js"),
+  appChatScrollBottom: read("app-chat-scroll-bottom.js"),
+  appChatComposerCore: read("app-chat-composer-core.js"),
+  appChatPresenceTyping: read("app-chat-presence-typing.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
   appLazyLoader: read("app-lazy-loader.js"),
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
+  appRating: read("app-rating.js"),
+  appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
+  appRatingWinterRuntime: read("app-rating-winter-runtime.js"),
   springRatingData: read("spring-rating-data.js"),
   winterRatingData: read("winter-rating-data.js"),
   sw: read("sw.js"),
   redisLib: read("lib/redis.js"),
   accountIdLib: read("lib/account-id.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
+  chatMessageActions: read("lib/chat-message-actions.js"),
+  chatRouteGet: read("lib/chat-route-get.js"),
+  chatRoutePost: read("lib/chat-route-post.js"),
   rafflesHandler: read("lib/api-handlers/raffles.js"),
   respectHandler: read("lib/api-handlers/respect.js"),
   usersHandler: read("lib/api-handlers/users.js"),
@@ -584,7 +595,7 @@ add("Fresh chat GET paths bypass browser/SW cache", () =>
 );
 
 add("Chat API supports fast/diff/poll responses", () =>
-  hasAll("chatHandler", [
+  hasAll("chatRouteGet", [
     "fastOpen",
     "notModified",
     "pollRev",
@@ -592,6 +603,58 @@ add("Chat API supports fast/diff/poll responses", () =>
     "afterTime",
     "contactsMetaOnly",
   ])
+);
+
+add("Chat API delegates GET and POST route handlers", () =>
+  hasAll("chatHandler", [
+    'require("../chat-route-get")',
+    'require("../chat-route-post")',
+    "createChatGetHandler(chatRouteDeps)",
+    "createChatPostHandler(chatRouteDeps)",
+    "GET: handleChatGet",
+    "POST: handleChatPost",
+  ]) &&
+  hasAll("chatRouteGet", [
+    "function createChatGetHandler",
+    "} = deps;",
+    "return async function handleChatGet",
+    "mode === \"updates\"",
+    "contactsMetaOnly",
+    "module.exports",
+  ]) &&
+  hasAll("chatRoutePost", [
+    "function createChatPostHandler",
+    "} = deps;",
+    "return async function handleChatPost",
+    "postAction === \"creategroup\"",
+    "post_general",
+    "module.exports",
+  ]) &&
+  !has("chatRouteGet", "with (deps)") &&
+  !has("chatRoutePost", "with (deps)") &&
+  !has("chatHandler", "async function handleChatGet") &&
+  !has("chatHandler", "async function handleChatPost")
+);
+
+add("Chat API delegates message mutation actions", () =>
+  hasAll("chatHandler", [
+    'require("../chat-message-actions")',
+    "createChatDeleteHandler({",
+    "createChatPatchHandler({",
+    "DELETE: handleChatDelete",
+    "PATCH: handleChatPatch",
+  ]) &&
+  hasAll("chatMessageActions", [
+    "function createChatDeleteHandler",
+    "function createChatPatchHandler",
+    "resolveMessageCommandThread",
+    "action === \"edit\"",
+    "action === \"reaction\"",
+    "action === \"typing\"",
+    "module.exports",
+  ]) &&
+  !has("chatHandler", "async function handleChatDelete") &&
+  !has("chatHandler", "async function handleChatPatch")
 );
 
 add("Shared Redis layer owns pipeline helpers for contract-covered handlers", () =>
@@ -807,10 +870,17 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-auth-guard.js", "app-chat-bootstrap.js") &&
     appearsBefore(order, "app-chat-bootstrap.js", "app-chat-dialog-actions.js") &&
     appearsBefore(order, "app-chat-dialog-actions.js", "app-chat-push-open.js") &&
-    appearsBefore(order, "app-chat-push-open.js", "app-chat-lifecycle.js") &&
+    appearsBefore(order, "app-chat-push-open.js", "app-chat-voice-media.js") &&
+    appearsBefore(order, "app-chat-voice-media.js", "app-chat-keyboard-overlay.js") &&
+    appearsBefore(order, "app-chat-keyboard-overlay.js", "app-chat-scroll-bottom.js") &&
+    appearsBefore(order, "app-chat-scroll-bottom.js", "app-chat-composer-core.js") &&
+    appearsBefore(order, "app-chat-composer-core.js", "app-chat-presence-typing.js") &&
+    appearsBefore(order, "app-chat-presence-typing.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-rating-core.js", "app-rating-spring-season.js") &&
     appearsBefore(order, "app-rating-spring-season.js", "app-rating-view.js") &&
-    appearsBefore(order, "app-rating-view.js", "app-rating.js") &&
+    appearsBefore(order, "app-rating-view.js", "app-rating-spring-runtime.js") &&
+    appearsBefore(order, "app-rating-spring-runtime.js", "app-rating-winter-runtime.js") &&
+    appearsBefore(order, "app-rating-winter-runtime.js", "app-rating.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
@@ -885,6 +955,41 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
   hasAll("appChatLifecycle", [
     "function initChat()",
     "initChatPushOpenHandlers",
+    "initChatVoiceMedia",
+    "initChatScrollBottom",
+    "initChatComposerCore",
+    "initChatPresenceTyping",
+    "initChatKeyboardOverlay",
+  ]) &&
+  hasAll("appChatVoiceMedia", [
+    "function initChatVoiceMedia",
+    "function pokerNormalizeVoiceDataUrl",
+    "function chatVoiceMessageHtml",
+    "function appendChatVoiceToTextWrap",
+    "__pokerChatVoiceRateUiBound",
+  ]) &&
+  hasAll("appChatScrollBottom", [
+    "function initChatScrollBottom",
+    "function chatMessagesNearBottom",
+    "function scheduleChatKeyboardBottomFollow",
+    "__pokerScheduleSyncChatScrollBottomButtons",
+  ]) &&
+  hasAll("appChatComposerCore", [
+    "function initChatComposerCore",
+    "function flushChatComposerToDrafts",
+    "function mountChatComposer",
+    "function setGeneralSendBusy",
+  ]) &&
+  hasAll("appChatPresenceTyping", [
+    "function initChatPresenceTyping",
+    "function pokerChatSendTypingState",
+    "function pokerUpdateChatDmFocusFromUiState",
+    "__pokerStopChatDmFocusSession",
+  ]) &&
+  hasAll("appChatKeyboardOverlay", [
+    "function initChatKeyboardOverlay",
+    "function openTelegramIosComposeOverlay",
+    "function shouldUseTelegramIosComposeOverlay",
   ]) &&
   hasAll("appChatPushOpen", [
     "window.__pokerRefreshChatUnreadForPwaBadge",
@@ -902,6 +1007,10 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "function handleViewLinkClick",
   ]) &&
   !has("app", "function initChat()") &&
+  !has("appChatLifecycle", "function chatVoiceMessageHtml") &&
+  !has("appChatLifecycle", "function chatMessagesNearBottom") &&
+  !has("appChatLifecycle", "function flushChatComposerToDrafts") &&
+  !has("appChatLifecycle", "function pokerChatSendTypingState") &&
   !has("app", "function setView(viewName, navOpts)") &&
   !has("app", "var telegramIosKeyboardRootLockActive")
 );
@@ -1004,6 +1113,11 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
     'defer data-poker-eager-domain="chat" src="./app-chat-bootstrap.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-dialog-actions.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-push-open.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-voice-media.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-overlay.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-scroll-bottom.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-composer-core.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-presence-typing.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
     'src="./app-lazy-loader.js',
   ]) &&
@@ -1064,10 +1178,36 @@ add("JS manifest still maps key domains for build ownership", () => {
     Array.isArray(domains.raffles) &&
     Array.isArray(domains.profile) &&
     domains.chat.includes("app-chat-contacts-loader.js") &&
+    domains.chat.includes("app-chat-composer-core.js") &&
+    domains.chat.includes("app-chat-presence-typing.js") &&
+    domains.chat.includes("app-chat-scroll-bottom.js") &&
     domains.rating.includes("app-rating.js") &&
+    domains.rating.includes("app-rating-spring-runtime.js") &&
+    domains.rating.includes("app-rating-winter-runtime.js") &&
     domains.raffles.includes("app-raffles.js") &&
     domains.profile.includes("app-cashout.js");
 });
+
+add("Rating runtime separates spring and winter responsibilities", () =>
+  hasAll("appRatingSpringRuntime", [
+    "function updateSpringRatingFinalCountdown",
+    "function getSpringRatingOverallByLeague",
+    "function initSpringRatingViewScrollButton",
+  ]) &&
+  hasAll("appRatingWinterRuntime", [
+    "function initWinterRating",
+    "function initWinterRatingLightbox",
+    "function renderWinterRatingTable",
+    "function openWinterRatingPlayerModal",
+  ]) &&
+  hasAll("appChatLifecycle", [
+    "initChatScrollBottom",
+  ]) &&
+  !has("appRatingSpringRuntime", "function initWinterRating") &&
+  !has("appRatingWinterRuntime", "function updateSpringRatingHomePromoStats") &&
+  !has("appRatingSpringRuntime", "function renderWinterRatingTable") &&
+  !has("appRating", "function initWinterRating")
+);
 
 add("JS manifest files exist in root and build output", () => {
   const publicDir = path.join(root, "public");

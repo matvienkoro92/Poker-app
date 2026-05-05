@@ -143,7 +143,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       heavyScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       hiddenImages: performance.getEntriesByType("resource")
         .filter((entry) => /\/assets\/(?:download-hero)\./.test(entry.name))
@@ -154,7 +154,7 @@ async function main() {
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     const startupTags = new Set(initialLazy.startupScriptTags);
     const lazyTags = new Set(initialLazy.lazyScriptTags);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-spring-runtime.js", "app-rating-winter-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
       if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
     });
     ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "winter-rating-data.js"].forEach((file) => {
@@ -167,7 +167,7 @@ async function main() {
     if (initialHeavy.has("winter-rating-data.js")) throw new Error("winter rating data should be lazy before winter navigation");
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
-    const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
+    const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
       const via = await clickVisibleOrSetView(page, target);
@@ -193,17 +193,16 @@ async function main() {
       chatPersonal: !!document.getElementById("chatPersonalView"),
       profileView: !!document.getElementById("profileView"),
       profileStatus: !!document.getElementById("profileStatusVisual"),
-      videoLessonsList: !!document.getElementById("videoLessonsList"),
-      hallOfFameView: !!document.getElementById("hallOfFameView"),
-      hallTop2026: !!document.querySelector("#hallOfFameView [data-hall-panel='top2026']"),
+      rafflesView: !!document.querySelector('[data-view="raffles"]'),
+      rafflesPanel: !!document.getElementById("rafflesPanelActive"),
+      springRatingView: !!document.getElementById("springRatingView"),
+      springRatingSection: !!document.getElementById("winterRatingSection"),
       bottomNav: !!document.querySelector(".bottom-nav"),
       bottomNavVisible: !!document.querySelector(".bottom-nav") && getComputedStyle(document.querySelector(".bottom-nav")).visibility !== "hidden",
       globalModalsHost: !!document.getElementById("globalModalsFragmentHost"),
       adminReportModal: !!document.getElementById("adminReportModal"),
       visitorsAdminModal: !!document.getElementById("visitorsAdminModal"),
       imageLightbox: !!document.getElementById("imageLightbox"),
-      equilatorCalc: !!document.getElementById("equilatorCalcBtn"),
-      winterRatingSection: !!document.getElementById("winterRatingSection"),
       modules: performance.getEntriesByType("resource")
         .filter((entry) => /app-(chat-lifecycle|webview-keyboard|view-router)\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
@@ -211,7 +210,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       eagerDomainScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
     }));
 
@@ -222,21 +221,20 @@ async function main() {
     if (!state.chatPersonal) throw new Error("chat personal DOM is missing");
     if (!state.profileView) throw new Error("profile fragment was not hydrated");
     if (!state.profileStatus) throw new Error("profile status DOM is missing");
-    if (!state.videoLessonsList) throw new Error("video lessons fragment was not hydrated");
-    if (!state.hallOfFameView) throw new Error("hall of fame fragment was not hydrated");
-    if (!state.hallTop2026) throw new Error("hall of fame top2026 panel is missing");
+    if (!state.rafflesView) throw new Error("raffles fragment was not hydrated");
+    if (!state.rafflesPanel) throw new Error("raffles active panel is missing");
+    if (!state.springRatingView) throw new Error("spring rating view is missing");
+    if (!state.springRatingSection) throw new Error("spring rating section was not hydrated");
     if (!state.bottomNav) throw new Error("bottom nav is missing from initial DOM");
     if (!state.bottomNavVisible) throw new Error("bottom nav is not visible");
     if (state.globalModalsHost) throw new Error("global modals host was not replaced");
     if (!state.adminReportModal) throw new Error("admin report modal fragment was not hydrated");
     if (!state.visitorsAdminModal) throw new Error("visitors admin modal fragment was not hydrated");
     if (!state.imageLightbox) throw new Error("image lightbox fragment was not hydrated");
-    if (!state.equilatorCalc) throw new Error("equilator fragment was not hydrated");
-    if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat scripts were not eager-loaded");
     const loadedDomainScripts = new Set(state.eagerDomainScripts);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-spring-runtime.js", "app-rating-winter-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
       if (!loadedDomainScripts.has(file)) throw new Error(`expected domain script after navigation: ${file}`);
     });
     if (loadedDomainScripts.has("winter-rating-data.js")) throw new Error("winter rating data loaded during spring navigation");

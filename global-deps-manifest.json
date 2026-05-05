@@ -108,6 +108,48 @@
       "domain": "chat",
       "exportedBy": ["app-chat-push-open.js"],
       "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatVoiceMedia",
+      "domain": "chat",
+      "exportedBy": ["app-chat-voice-media.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatKeyboardOverlay",
+      "domain": "chat",
+      "exportedBy": ["app-chat-keyboard-overlay.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatScrollBottom",
+      "domain": "chat",
+      "exportedBy": ["app-chat-scroll-bottom.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatComposerCore",
+      "domain": "chat",
+      "exportedBy": ["app-chat-composer-core.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatPresenceTyping",
+      "domain": "chat",
+      "exportedBy": ["app-chat-presence-typing.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initWinterRating",
+      "domain": "rating",
+      "exportedBy": ["app-rating-winter-runtime.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "initWinterRatingLightbox",
+      "domain": "rating",
+      "exportedBy": ["app-rating-winter-runtime.js"],
+      "consumedBy": ["app.js"]
     }
   ]
 }

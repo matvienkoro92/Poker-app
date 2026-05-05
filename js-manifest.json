@@ -49,12 +49,19 @@
       "app-chat-auth-guard.js",
       "app-chat-bootstrap.js",
       "app-chat-dialog-actions.js",
-      "app-chat-push-open.js"
+      "app-chat-push-open.js",
+      "app-chat-voice-media.js",
+      "app-chat-keyboard-overlay.js",
+      "app-chat-scroll-bottom.js",
+      "app-chat-composer-core.js",
+      "app-chat-presence-typing.js"
     ],
     "rating": [
       "app-rating-core.js",
       "app-rating-spring-season.js",
       "app-rating-view.js",
+      "app-rating-spring-runtime.js",
+      "app-rating-winter-runtime.js",
       "app-rating.js",
       "app-rating-week-tops.js",
       "spring-rating-data.js"
