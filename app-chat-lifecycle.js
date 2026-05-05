@@ -7354,10 +7354,30 @@ function initChat() {
                 chatEmojiPickerTargetInput ||
                 (isChatThreadComposerKeyboardDom(document.activeElement) ? document.activeElement : null) ||
                 chatComposerEl;
-              preservePwaComposerKeyboardFromGesture(emojiFocusTarget, "emoji-picker-outside", 1600);
+              var preserveEmojiOutsideKeyboard = false;
+              try {
+                preserveEmojiOutsideKeyboard =
+                  !!(
+                    emojiFocusTarget &&
+                    isChatThreadComposerKeyboardDom(emojiFocusTarget) &&
+                    document.body.classList.contains("chat-keyboard-open") &&
+                    typeof isChatKeyboardLayoutEffectivelyClosed === "function" &&
+                    !isChatKeyboardLayoutEffectivelyClosed({ ignoreDockBottom: true })
+                  );
+              } catch (eEmojiOutsidePreserveCheck) {}
+              if (preserveEmojiOutsideKeyboard) {
+                preservePwaComposerKeyboardFromGesture(emojiFocusTarget, "emoji-picker-outside", 1600);
+              } else {
+                try {
+                  window.__pokerChatKeyboardOpeningUntil = 0;
+                  window.__pokerChatPwaFocusKeepAliveUntil = 0;
+                  window.__pokerChatPwaFocusKeepAliveTarget = null;
+                  window.__pokerChatPwaFocusKeepAliveReason = "";
+                } catch (eEmojiOutsideClosedClear) {}
+              }
               hideChatEmojiPicker();
               window.__pokerChatEmojiPickerClosedByOutsideAt = Date.now();
-              if (emojiFocusTarget && isChatThreadComposerKeyboardDom(emojiFocusTarget)) {
+              if (preserveEmojiOutsideKeyboard && emojiFocusTarget && isChatThreadComposerKeyboardDom(emojiFocusTarget)) {
                 markIosPwaChatComposerKeepAlive(emojiFocusTarget, "emoji-picker-outside", 1300);
               }
               try {
