@@ -133,19 +133,37 @@ async function main() {
       initVideoLessons: typeof window.initVideoLessons,
       initRaffles: typeof window.initRaffles,
       initAdminReport: typeof window.pokerInitAdminReportModal,
+      startupScriptTags: Array.from(document.scripts || [])
+        .filter((script) => script.src && script.type !== "application/poker-lazy")
+        .map((script) => script.src.split("/").pop().split("?")[0]),
+      lazyScriptTags: Array.from(document.scripts || [])
+        .filter((script) => script.src && script.type === "application/poker-lazy")
+        .map((script) => script.src.split("/").pop().split("?")[0]),
       chatScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
-        .map((entry) => entry.name.split("/").pop()),
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
       heavyScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
-        .map((entry) => entry.name.split("/").pop()),
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
       hiddenImages: performance.getEntriesByType("resource")
-        .filter((entry) => /\/assets\/(?:dep-manager|dep-manager-vika|download-hero|raffles-hero)\./.test(entry.name))
+        .filter((entry) => /\/assets\/(?:download-hero)\./.test(entry.name))
         .map((entry) => entry.name.split("/").pop()),
     }));
     if (initialLazy.initChat !== "function") throw new Error("initChat must be ready before first chat open");
+    if (initialLazy.initVideoLessons === "function") throw new Error("video lessons should be lazy before navigation");
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
-    if (initialLazy.heavyScripts.length < 12) throw new Error("heavy scripts must be eager-loaded before navigation: " + initialLazy.heavyScripts.join(", "));
+    const startupTags = new Set(initialLazy.startupScriptTags);
+    const lazyTags = new Set(initialLazy.lazyScriptTags);
+    ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
+      if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
+    });
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+      if (!lazyTags.has(file)) throw new Error(`expected lazy script tag before navigation: ${file}`);
+    });
+    const initialHeavy = new Set(initialLazy.heavyScripts);
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+      if (initialHeavy.has(file)) throw new Error(`expected lazy script after navigation only: ${file}`);
+    });
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
     const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
@@ -187,13 +205,13 @@ async function main() {
       winterRatingSection: !!document.getElementById("winterRatingSection"),
       modules: performance.getEntriesByType("resource")
         .filter((entry) => /app-(chat-lifecycle|webview-keyboard|view-router)\.js/.test(entry.name))
-        .map((entry) => entry.name.split("/").pop()),
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
       chatScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
-        .map((entry) => entry.name.split("/").pop()),
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
       eagerDomainScripts: performance.getEntriesByType("resource")
         .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
-        .map((entry) => entry.name.split("/").pop()),
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
     }));
 
     if (state.setView !== "function") throw new Error("setView is not a function");
@@ -216,7 +234,10 @@ async function main() {
     if (!state.winterRatingSection) throw new Error("winter rating fragment was not hydrated");
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat scripts were not eager-loaded");
-    if (state.eagerDomainScripts.length < 12) throw new Error("heavy domains were not eager-loaded: " + state.eagerDomainScripts.join(", "));
+    const loadedDomainScripts = new Set(state.eagerDomainScripts);
+    ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+      if (!loadedDomainScripts.has(file)) throw new Error(`expected domain script after navigation: ${file}`);
+    });
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
     console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state }, null, 2));

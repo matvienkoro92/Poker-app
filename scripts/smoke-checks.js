@@ -28,6 +28,7 @@ const files = {
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
+  appLazyLoader: read("app-lazy-loader.js"),
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
   sw: read("sw.js"),
@@ -46,6 +47,7 @@ const files = {
   cssManifest: read("css-manifest.json"),
   jsManifest: read("js-manifest.json"),
   bumpPwaVersion: read("scripts/bump-pwa-login-version.js"),
+  styles: read("styles.css"),
 };
 
 const checks = [];
@@ -108,6 +110,16 @@ function localAssetVersionsFromIndex() {
     const file = stripAssetUrl(match[1]);
     if (!file || file.includes("/")) continue;
     out.push({ file, version: match[2] || "" });
+  }
+  return out;
+}
+
+function localCssImportVersionsFromStyles() {
+  const out = [];
+  const re = /@import\s+url\(["']?\.\/([^"')?#]+\.css)(?:\?v=([^"')?#]+))?["']?\)/gi;
+  let match;
+  while ((match = re.exec(files.styles || read("styles.css")))) {
+    out.push({ file: stripAssetUrl(match[1]), version: match[2] || "" });
   }
   return out;
 }
@@ -343,14 +355,17 @@ add("PWA version bump also cache-busts local CSS and JS assets", () =>
     "data-app-version",
     "(?:href|src)",
     "?v=${next}",
+    "styles.css",
+    "@import",
   ])
 );
 
-add("Local CSS and JS assets use data-app-version cache bust", () => {
+add("Local CSS, JS, and split CSS imports use data-app-version cache bust", () => {
   const versionMatch = files.html.match(/data-app-version="([^"]+)"/);
   const version = versionMatch && versionMatch[1];
   if (!version) return false;
-  return localAssetVersionsFromIndex().every((asset) => asset.version === version);
+  return localAssetVersionsFromIndex().every((asset) => asset.version === version) &&
+    localCssImportVersionsFromStyles().every((asset) => asset.version === version);
 });
 
 add("PWA session has cookie fallback for storage-hostile browsers", () =>
@@ -882,14 +897,26 @@ add("Winter rating HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );
 
-add("View navigation activates views without JavaScript lazy gates", () =>
-  !has("html", 'type="application/poker-lazy"') &&
-  !has("client", "pokerEnsureViewScripts(viewName)") &&
-  !has("client", "pokerLoadDomainScripts") &&
+add("Selected heavy views use JavaScript lazy gates", () =>
+  hasAll("html", [
+    'src="./app-lazy-loader.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons-modals.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="tools" src="./app-equilator.js',
+  ]) &&
   hasAll("client", [
+    "pokerEnsureViewScripts(viewName)",
     "function setView(viewName, navOpts)",
     "navItems.forEach(function (item)",
     "setView(target)",
+  ]) &&
+  hasAll("appLazyLoader", [
+    '"hall-of-fame": ["hall"]',
+    '"video-lessons": ["video"]',
+    '"learn-play-hub": ["video"]',
+    'equilator: ["tools"]',
+    "window.pokerEnsureViewScripts",
   ])
 );
 
@@ -897,28 +924,23 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
   hasAll("html", [
     'defer data-poker-eager-domain="chat" src="./app-chat-utils.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
+    'src="./app-lazy-loader.js',
   ]) &&
   !has("html", 'type="application/poker-lazy" data-poker-lazy-domain="chat"') &&
-  !has("html", "app-lazy-loader.js") &&
-  !has("appViewRouter", "pokerEnsureViewScripts")
+  has("appViewRouter", "pokerEnsureViewScripts")
 );
 
-add("Heavy JavaScript domains are eager-loaded", () => {
+add("Spring rating, fish game, and raffles stay eager while selected heavy domains are lazy", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const eagerFiles = [
-    "app-hall-fame.js", "app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js",
-    "app-streams.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "peerjs.min.js",
-    "app-games.js", "app-club-tasks.js", "app-auth-debug.js", "app-share-stats.js", "app-tracking-links.js",
-    "app-raffles.js",
-  ];
-  return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`defer data-poker-eager-domain=`) && files.html.includes(`src="./${file}`)) &&
-    !has("html", 'type="application/poker-lazy"') &&
-    !has("html", "app-lazy-loader.js");
+  const eagerFiles = ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js"];
+  const lazyFiles = ["app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js"];
+  return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`src="./${file}`)) &&
+    lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
 });
 
 add("Startup root JavaScript includes every eager app module", () => {
   const startup = localStartupScriptFilesFromIndex();
-  return startup.length >= 60 && startup.includes("app.js") && startup.includes("app-chat-lifecycle.js");
+  return startup.length >= 50 && startup.includes("app.js") && startup.includes("app-chat-lifecycle.js") && startup.includes("app-raffles.js");
 });
 
 add("Primary view route chain has DOM targets and click wiring", () => {

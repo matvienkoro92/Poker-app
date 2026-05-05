@@ -207,7 +207,7 @@ function loadContacts(opts) {
       getContactsEl().innerHTML =
         '<div class="chat-contacts-list-block">' +
         '<div class="chat-guest-cta">' +
-        '<p class="chat-empty chat-empty--guest-msg">Чтобы писать в чате, войдите в свой аккаунт</p>' +
+        '<p class="chat-empty chat-empty--guest-msg">Войдите, чтобы открыть диалоги и писать в главный чат.</p>' +
         '<button type="button" class="profile-exit-btn" id="chatGuestLoginBtn">Войти в аккаунт</button>' +
         "</div></div>";
       var gBtn = document.getElementById("chatGuestLoginBtn");

@@ -171,6 +171,65 @@ if (startButton) {
   });
 }
 
+(function initHomeNextAction() {
+  var box = document.getElementById("homeNextAction");
+  var kicker = document.getElementById("homeNextActionKicker");
+  var title = document.getElementById("homeNextActionTitle");
+  var text = document.getElementById("homeNextActionText");
+  var btn = document.getElementById("homeNextActionBtn");
+  if (!box || !title || !text || !btn) return;
+
+  function hasCredential() {
+    try {
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return false;
+    } catch (eGuest) {}
+    try {
+      return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    } catch (eCred) {}
+    return false;
+  }
+
+  function setCopy(state) {
+    box.setAttribute("data-state", state);
+    if (kicker) kicker.textContent = state === "auth" ? "Вы в клубе" : "Следующий шаг";
+    if (state === "auth") {
+      title.textContent = "Откройте главный чат";
+      text.textContent = "Новости, заявки и вопросы менеджерам — там.";
+      btn.textContent = "В чат";
+    } else {
+      title.textContent = "Войдите в аккаунт";
+      text.textContent = "Клуб узнает вас в чате и профиле.";
+      btn.textContent = "Войти";
+    }
+  }
+
+  function sync() {
+    setCopy(hasCredential() ? "auth" : "guest");
+  }
+
+  if (btn.dataset.homeNextActionBound !== "1") {
+    btn.dataset.homeNextActionBound = "1";
+    btn.addEventListener("click", function () {
+      if (hasCredential()) {
+        if (typeof setView === "function") setView("chat");
+        return;
+      }
+      if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") {
+        window.__pokerOpenSharedAccountAuthFlow();
+        return;
+      }
+      var authBtn = document.getElementById("siteHomeAuthBtn");
+      if (authBtn && typeof authBtn.click === "function") authBtn.click();
+    });
+  }
+
+  sync();
+  window.addEventListener("poker-telegram-auth", sync);
+  window.addEventListener("storage", sync);
+  setTimeout(sync, 300);
+  setTimeout(sync, 1200);
+})();
+
 function updateRaffleBadge(hasActive) {
   var badge = document.getElementById("raffleActiveBadge");
   if (badge) {

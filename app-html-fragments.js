@@ -135,12 +135,7 @@
       "chat",
       "download",
       "profile",
-      "winter-rating",
-      "hall-of-fame",
-      "raffles",
-      "video-lessons",
-      "equilator",
-      "player-crm"
+      "raffles"
     ];
     var index = 0;
     function runNext(deadline) {
@@ -181,16 +176,25 @@
     "click",
     function (e) {
       if (e.__pokerLazyRedispatched) return;
-      var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
-      if (!hasGlobalModalsHost) return;
       var target = e.target && e.target.closest
         ? e.target.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
         : null;
       if (!target) return;
+      var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
+      var needsLazyScripts = false;
+      try {
+        needsLazyScripts = typeof window.pokerHasGlobalModalScriptsForTarget === "function" && window.pokerHasGlobalModalScriptsForTarget(target);
+      } catch (eModalScriptNeed) {}
+      if (!hasGlobalModalsHost && !needsLazyScripts) return;
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
-      Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
+      Promise.resolve(hasGlobalModalsHost ? window.pokerEnsureGlobalModalsHtml() : true).then(function () {
+        if (typeof window.pokerEnsureGlobalModalScriptsForTarget === "function") {
+          return window.pokerEnsureGlobalModalScriptsForTarget(target);
+        }
+        return true;
+      }).then(function () {
         try {
           if (originalTarget && originalTarget.dispatchEvent) {
             var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });

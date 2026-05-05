@@ -12,8 +12,8 @@ fi
 
 node scripts/bump-pwa-login-version.js
 
-if ! git diff --quiet index.html; then
-  git add index.html
+if ! git diff --quiet index.html styles.css; then
+  git add index.html styles.css
   git commit -m "chore: bump PWA login screen version"
 fi
 

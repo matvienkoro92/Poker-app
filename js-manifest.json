@@ -51,7 +51,8 @@
     "rating": [
       "app-rating-core.js",
       "app-rating.js",
-      "app-rating-week-tops.js"
+      "app-rating-week-tops.js",
+      "winter-rating-data.js"
     ],
     "tournament": [
       "app-tournament-day.js",
@@ -101,7 +102,8 @@
       "app-video-lessons.js",
       "app-video-lessons-modals.js",
       "app-games.js",
-      "app-equilator.js"
+      "app-equilator.js",
+      "peerjs.min.js"
     ],
     "raffles": [
       "app-raffles.js"
@@ -113,6 +115,7 @@
       "app-shell-layout.js",
       "app-navigation-scroll.js",
       "app-html-fragments.js",
+      "app-lazy-loader.js",
       "app-webview-keyboard.js",
       "app-shared-helpers.js",
       "app-view-router.js",

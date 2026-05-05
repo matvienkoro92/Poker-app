@@ -28,5 +28,14 @@ jobs:
       - name: Smoke checks
         run: npm run smoke
 
+      - name: Contract tests
+        run: npm run test:contracts
+
       - name: Check JavaScript syntax
         run: npm run check:syntax
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Navigation smoke
+        run: npm run smoke:nav

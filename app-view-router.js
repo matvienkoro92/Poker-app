@@ -279,6 +279,27 @@ function setView(viewName, navOpts) {
     }
   } catch (eHtmlView) {}
   try {
+    if (!navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
+      var scriptsReady = window.pokerEnsureViewScripts(viewName);
+      if (scriptsReady && typeof scriptsReady.then === "function") {
+        scriptsReady.then(function () {
+          var nextOpts = {};
+          Object.keys(navOpts).forEach(function (key) {
+            nextOpts[key] = navOpts[key];
+          });
+          nextOpts.scriptsReady = true;
+          setView(viewName, nextOpts);
+        }).catch(function (err) {
+          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+            window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
+          }
+          if (typeof console !== "undefined" && console.warn) console.warn("view script domain", err);
+        });
+        return;
+      }
+    }
+  } catch (eScriptsView) {}
+  try {
     pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
   } catch (eSetViewDbg0) {}
   var restoreScrollOnEnter = navOpts.fromBack === true;
@@ -961,12 +982,14 @@ function setView(viewName, navOpts) {
     if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
   } catch (eTgClear) {}
   if (viewName === "hall-of-fame") {
+    var hallSection = window.__pendingHallFameSection || "legends";
+    window.__pendingHallFameSection = "";
     var rafHall = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
     };
     rafHall(function () {
       rafHall(function () {
-        if (typeof showHallOfFamePanel === "function") showHallOfFamePanel("legends");
+        if (typeof showHallOfFamePanel === "function") showHallOfFamePanel(hallSection);
       });
     });
   }

@@ -8,6 +8,7 @@
 - `app.js` — тонкий bootstrap/orchestration слой: early rating/lightbox init, raffle badge fetch, visitor tracking bootstrap, final chat preinit.
 - `app-shared-helpers.js` — textarea autosize, boot overlay network state, member-id hints и shared debug noops.
 - `app-home-init.js` — тема, радио, start button, raffle badge, home/task click listeners.
+- `app-lazy-loader.js` — доменный lazy-loading редких JS-разделов; чат, весенний рейтинг, игры/рыбка и розыгрыши остаются eager.
 - `app-pwa-open-handlers.js` — PWA install/share, auth event retry, open-from-push и foreground visibility sync.
 - `app-shell-layout.js` — измерение app shell, нижнего таббара и safe-area отступов.
 - `app-navigation-scroll.js` — восстановление и синхронизация скролла при переходах между view; panel scrollport для `download/home/cashout/spring-rating/raffles/profile/video-lessons/hall-of-fame/player-crm`.
@@ -43,16 +44,16 @@
 
 ## Rating, Games And Learning
 
-- `app-rating-core.js`, `app-rating.js`, `app-rating-week-tops.js` — рейтинги, lightbox, недельные топы, share/admin actions.
-- `app-hall-fame.js` — зал славы.
-- `app-games.js`, `app-equilator.js`, `app-club-tasks.js` — игровые и клубные инструменты.
-- `app-raffles.js` — розыгрыши; активный список рендерится первым, тяжелый архив завершенных откладывается, если вкладка не видима.
-- `app-streams.js`, `app-video-lessons.js`, `app-video-lessons-modals.js` — стримы и видеоуроки.
+- `app-rating-core.js`, `app-rating.js`, `app-rating-week-tops.js`, `winter-rating-data.js` — рейтинги, lightbox, недельные топы, share/admin actions; eager из-за весеннего рейтинга.
+- `app-games.js` — игры/рыбка и связанные быстрые действия; eager.
+- `app-raffles.js` — розыгрыши; eager, активный список рендерится первым, тяжелый архив завершенных откладывается, если вкладка не видима.
+- `app-hall-fame.js`, `app-equilator.js`, `app-club-tasks.js`, `app-streams.js`, `app-video-lessons.js`, `app-video-lessons-modals.js` — редкие тяжелые разделы, догружаются через `app-lazy-loader.js`.
 
 ## Profile And Admin
 
 - `app-profile.js` — профиль, Poker21/PokerPlus данные, аватар, статус, друзья и настройки видимости.
-- `app-visitors-admin.js`, `app-admin-reports.js`, `app-section-views.js`, `app-share-stats.js`, `app-tracking-links.js` — админские модалки, отчеты, посетители, просмотры разделов и tracking links.
+- `app-visitors-admin.js`, `app-section-views.js` — eager-админ/section bootstrap.
+- `app-admin-reports.js`, `app-share-stats.js`, `app-tracking-links.js`, `app-auth-debug.js` — админские модалки, догружаются по первому клику.
 
 ## CSS
 
@@ -105,4 +106,4 @@
 - Новый крупный JS-код добавлять рядом с доменом, а не обратно в `app.js`.
 - `app.js` трогать только для минимальной bootstrap-склейки; router/home/PWA/shared helpers уже вынесены.
 - CSS переносить между файлами только после визуальной проверки: порядок каскада сейчас сохранен импортами.
-- После изменений запускать `npm run build`, `node scripts/check-js-syntax.js`, `npm run smoke`.
+- После изменений запускать `npm run build`, `node scripts/check-js-syntax.js`, `npm run smoke`, `npm run test:contracts`; для UI-навигации — `npm run smoke:nav` и при визуальных правках `npm run smoke:visual`.

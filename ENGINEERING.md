@@ -5,12 +5,15 @@
 1. Make the smallest scoped change.
 2. Run `npm run check:syntax`.
 3. Run `npm run smoke`.
-4. Run `npm run bump:pwa-version` before every push.
-5. Run `npm run build`.
-6. Run `npm run smoke` again.
-7. Commit and push.
+4. Run `npm run test:contracts`.
+5. Run `npm run smoke:nav` for navigation/UI-route changes.
+6. Run `npm run smoke:visual` for visible UI changes.
+7. Run `npm run bump:pwa-version` before every push.
+8. Run `npm run build`.
+9. Run `npm run smoke` again.
+10. Commit and push.
 
-`npm run bump:pwa-version` increments `data-app-version` by `0.001` and updates local CSS/JS cache-bust query strings to the same version.
+`npm run bump:pwa-version` increments `data-app-version` by `0.001` and updates local CSS/JS cache-bust query strings plus `styles.css` split-CSS imports to the same version.
 
 ## Auth
 
@@ -47,6 +50,8 @@ Both manifests are copied to `public/` and checked by `npm run smoke`.
 - `home`, `media`, `raffles`, `shell`: supporting app surfaces.
 
 Critical order is protected in smoke checks. Keep `app-auth.js` before auth consumers, chat utilities before chat renderers/builders, and `app.js` before section view helpers.
+
+`app-lazy-loader.js` owns rare heavy JS domains. Chat, spring rating, games/fish and raffles stay eager; hall of fame, video/learn, equilator, streams, club tasks, player CRM and selected admin modals load by route or first click.
 
 ## CSS Domains
 

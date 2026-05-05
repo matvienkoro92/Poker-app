@@ -10,6 +10,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const indexPath = path.join(root, "index.html");
+const stylesPath = path.join(root, "styles.css");
 
 let html = fs.readFileSync(indexPath, "utf8");
 const re = /data-app-version="(\d+)\.(\d{3})"/;
@@ -37,4 +38,12 @@ out = out.replace(
   `$1?v=${next}$2`
 );
 fs.writeFileSync(indexPath, out, "utf8");
+if (fs.existsSync(stylesPath)) {
+  const styles = fs.readFileSync(stylesPath, "utf8");
+  const nextStyles = styles.replace(
+    /(@import\s+url\(["']?\.\/[^"')?#]+\.css)\?v=[^"')?#]+(["']?\))/g,
+    `$1?v=${next}$2`
+  );
+  fs.writeFileSync(stylesPath, nextStyles, "utf8");
+}
 console.log(`bump-pwa-login-version: ${m[1]}.${m[2]} → ${next}`);
