@@ -1,6 +1,8 @@
 // Chat auth guards and notification sound helpers.
 
-// PWA: короткий звук при новых сообщениях в чате.
+// Короткий звук при новых сообщениях в чате.
+var POKER_CHAT_MESSAGE_NOTIFY_SRC = "./assets/chat-message-notify.mp3?v=20260505";
+
 function pokerReadChatMessageSoundEnabled() {
   try {
     var v = localStorage.getItem("poker_chat_msg_sound");
@@ -11,7 +13,20 @@ function pokerReadChatMessageSoundEnabled() {
     return true;
   }
 }
-function pokerPlayChatMessageNotificationSound() {
+
+function pokerGetChatMessageNotificationAudio() {
+  var a = window.__pokerChatMsgAudio;
+  if (!a || a.getAttribute("data-poker-chat-msg-src") !== POKER_CHAT_MESSAGE_NOTIFY_SRC) {
+    a = new Audio(POKER_CHAT_MESSAGE_NOTIFY_SRC);
+    a.preload = "auto";
+    a.volume = 0.88;
+    a.setAttribute("data-poker-chat-msg-src", POKER_CHAT_MESSAGE_NOTIFY_SRC);
+    window.__pokerChatMsgAudio = a;
+  }
+  return a;
+}
+
+function pokerPlayChatMessageNotificationToneFallback() {
   try {
     var Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
@@ -35,6 +50,27 @@ function pokerPlayChatMessageNotificationSound() {
     mkTone(740, now, 0.06, 0.05);
     mkTone(520, now + 0.08, 0.07, 0.04);
   } catch (err) {}
+}
+
+function pokerPlayChatMessageNotificationSound() {
+  try {
+    var nowMs = Date.now();
+    if (window.__pokerChatMsgSoundLastAt && nowMs - window.__pokerChatMsgSoundLastAt < 450) return;
+    window.__pokerChatMsgSoundLastAt = nowMs;
+    var audio = pokerGetChatMessageNotificationAudio();
+    audio.pause();
+    try {
+      audio.currentTime = 0;
+    } catch (eSeek) {}
+    var p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(function () {
+        pokerPlayChatMessageNotificationToneFallback();
+      });
+    }
+  } catch (err) {
+    pokerPlayChatMessageNotificationToneFallback();
+  }
 }
 
 /** Состояние верификации Telegram для доступа к чату (см. __pokerTelegramAuth в initTelegramAuth) */

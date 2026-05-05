@@ -680,14 +680,20 @@ function initProfileChatPush() {
       var d = ev.data;
       if (!d) return;
       if (d.pokerChatPushSound) {
-        var url = d.url || "";
-        if (url) {
+        if (typeof pokerPlayChatMessageNotificationSound === "function") {
           try {
-            var a = new Audio(url);
-            a.volume = typeof d.volume === "number" ? d.volume : 0.88;
-            var p = a.play();
-            if (p && typeof p.catch === "function") p.catch(function () {});
-          } catch (ePlay) {}
+            pokerPlayChatMessageNotificationSound();
+          } catch (ePlayHelper) {}
+        } else {
+          var url = d.url || "";
+          if (url) {
+            try {
+              var a = new Audio(url);
+              a.volume = typeof d.volume === "number" ? d.volume : 0.88;
+              var p = a.play();
+              if (p && typeof p.catch === "function") p.catch(function () {});
+            } catch (ePlay) {}
+          }
         }
       }
       if (d.pokerChatPushEvent && typeof window.__pokerHandleIncomingChatPush === "function") {

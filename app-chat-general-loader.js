@@ -30,7 +30,6 @@ function initChatGeneralLoader(opts) {
   var peerChatIdsEqual = typeof opts.peerChatIdsEqual === "function" ? opts.peerChatIdsEqual : function (a, b) { return String(a) === String(b); };
   var resolveMyChatMemberId = typeof opts.resolveMyChatMemberId === "function" ? opts.resolveMyChatMemberId : function () { return ""; };
   var pokerChatMessageIsNewerThanViewed = typeof opts.pokerChatMessageIsNewerThanViewed === "function" ? opts.pokerChatMessageIsNewerThanViewed : function () { return false; };
-  var isTelegramWebApp = typeof opts.isTelegramWebApp === "function" ? opts.isTelegramWebApp : function () { return false; };
   var pokerApiHasCredential = typeof opts.pokerApiHasCredential === "function" ? opts.pokerApiHasCredential : function () { return false; };
   var pokerReadChatMessageSoundEnabled = typeof opts.pokerReadChatMessageSoundEnabled === "function" ? opts.pokerReadChatMessageSoundEnabled : function () { return false; };
   var pokerPlayChatMessageNotificationSound = typeof opts.pokerPlayChatMessageNotificationSound === "function" ? opts.pokerPlayChatMessageNotificationSound : function () {};
@@ -204,11 +203,14 @@ function loadGeneral(opts) {
           return pokerChatMessageIsNewerThanViewed(m.time, lastView) && !peerChatIdsEqual(m.from, myMemberIdForUnread);
         }).length;
       }
-      // PWA: звуковое уведомление — только когда пользователь не смотрит общий чат.
-      // (в Telegram Mini App не включаем, чтобы не конфликтовать с Telegram поведением)
-      if (!isTelegramWebApp() && pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
+      // Звуковое уведомление: фоновый unread плюс реально новый входящий месседж в открытом общем чате.
+      if (pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
         var isOnGeneral = !!(isChatViewActive && getChatActiveTab() === "general" && isGeneralScreenVisible);
-        if (!isOnGeneral && lastViewedGeneralNow != null && unreadCount > 0) {
+        var shouldSoundGeneral =
+          lastViewedGeneralNow != null &&
+          unreadCount > 0 &&
+          (!isOnGeneral || !!(prevGeneralLatest && nextGeneralLatest && nextGeneralLatest !== prevGeneralLatest));
+        if (shouldSoundGeneral) {
           var lastUnread = null;
           try {
             var unreadMsgs = messages.filter(function (m) {

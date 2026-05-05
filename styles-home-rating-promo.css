@@ -93,10 +93,10 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 300px) 74px;
+  grid-template-columns: minmax(0, 300px) 111px;
   gap: 10px;
   align-items: stretch;
-  width: min(92vw, 384px);
+  width: min(92vw, 421px);
   pointer-events: auto;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row .spring-rating-home-promo-wrap,
@@ -104,36 +104,33 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   max-width: none;
 }
 .home-fish-rating-btn {
-  width: 74px;
-  min-width: 74px;
-  min-height: 74px;
-  border: 1px solid rgba(248, 217, 138, 0.62);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(56, 189, 248, 0.22), transparent 42%),
-    linear-gradient(145deg, rgba(47, 35, 18, 0.94), rgba(6, 10, 22, 0.98));
-  box-shadow:
-    0 0 0 1px rgba(248, 217, 138, 0.18),
-    0 10px 22px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 111px;
+  min-width: 111px;
+  min-height: 111px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
 }
 .home-fish-rating-btn img {
   display: block;
   width: 100%;
   height: 100%;
-  padding: 6px;
+  padding: 0;
   object-fit: contain;
 }
 .home-fish-rating-btn:hover,
 .home-fish-rating-btn:focus-visible {
-  border-color: rgba(248, 217, 138, 0.9);
   outline: none;
-  box-shadow:
-    0 0 0 1px rgba(248, 217, 138, 0.32),
-    0 12px 28px rgba(245, 158, 11, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: none;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-unified {
@@ -175,14 +172,8 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   border-color: rgba(234, 88, 12, 0.4);
 }
 [data-theme="light"] .home-fish-rating-btn {
-  border-color: rgba(234, 88, 12, 0.38);
-  background:
-    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.95), transparent 42%),
-    linear-gradient(145deg, #fff7ed, #fffbeb);
-  box-shadow:
-    0 0 0 1px rgba(234, 88, 12, 0.12),
-    0 10px 22px rgba(154, 52, 18, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  background: transparent;
+  box-shadow: none;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-stats {
@@ -525,15 +516,14 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 @media (max-width: 430px) {
   html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,
   .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row {
-    grid-template-columns: minmax(0, 1fr) 64px;
-    width: min(92vw, 364px);
+    grid-template-columns: minmax(0, 1fr) 96px;
+    width: min(92vw, 396px);
     gap: 8px;
   }
   .home-fish-rating-btn {
-    width: 64px;
-    min-width: 64px;
-    min-height: 64px;
-    border-radius: 16px;
+    width: 96px;
+    min-width: 96px;
+    min-height: 96px;
   }
 }
 /* Зазор «Рейтинг весны» от эмблемы — margin-top у .features--home-rating-on-border */

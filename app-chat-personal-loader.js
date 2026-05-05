@@ -493,10 +493,14 @@ function loadMessages(opts) {
             return normalizePeerIdForChat(m.from) === peerNorm;
           }).length
         : 0;
-      // Звук лички (PWA и Mini App): когда открыт другой экран / другой диалог; общий чат в TWA по-прежнему без звука.
+      // Звук лички/группы: фоновый unread плюс реально новый входящий месседж в открытом диалоге.
       if (pokerApiHasCredential() && pokerReadChatMessageSoundEnabled()) {
         var isOnPersonal = !!(isChatViewActive && getChatActiveTab() === "personal" && getConvView() && !getConvView().classList.contains("chat-conv-view--hidden"));
-        if (!isOnPersonal && personalLastSet && unreadCount > 0) {
+        var shouldSoundPersonal =
+          personalLastSet &&
+          unreadCount > 0 &&
+          (!isOnPersonal || !!(prevPersonalLatest && nextPersonalLatest && nextPersonalLatest !== prevPersonalLatest));
+        if (shouldSoundPersonal) {
           var lastUnreadP = null;
           try {
             var unreadMsgsP = messages.filter(function (m) {
