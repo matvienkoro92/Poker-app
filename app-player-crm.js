@@ -342,8 +342,8 @@
       ["Игроков в базе", statPlayers, periodLabel()],
       ["Зарегано", statRegistrations, periodLabel(), "registrations"],
       ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
-      ["Подписан на бот", statBotSubscribers, periodLabel(), "bot"],
-      ["Подписан на push", statPushSubscribers, "уведомления · " + periodLabel(), "push"],
+      ["Новые подписки на бот", statBotSubscribers, periodLabel(), "bot"],
+      ["Новые push-подписки", statPushSubscribers, periodLabel(), "push"],
       ["Депозиты", money(statDeposits), periodLabel()],
     ];
     var chatStats = [
@@ -378,13 +378,13 @@
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "bot") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Подписан на бот</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Новые подписки на бот</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       if (it[3] === "push") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Подписан на push</span>" +
-          "<span class=\"player-crm__stat-hint\">уведомления</span>" +
+        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Новые push-подписки</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
       }
       var tag = it[3] ? "button" : "div";
@@ -975,7 +975,7 @@
   }
 
   function renderBotModalList() {
-    return renderChannelSubscribersTable(botSubscribersRows(), "Подписанных на бот пока нет.");
+    return renderChannelSubscribersTable(botSubscribersRows(), "Новых подписок на бот за период пока нет.");
   }
 
   function renderBotModal() {
@@ -989,7 +989,7 @@
       return;
     }
     var rows = botSubscribersRows();
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " игроков";
+    if (subtitleEl) subtitleEl.textContent = "Новые подписки · " + periodLabel() + " · " + intFmt(rows.length) + " игроков";
     bodyEl.innerHTML = renderBotModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -1006,7 +1006,7 @@
   }
 
   function renderPushModalList() {
-    return renderChannelSubscribersTable(pushSubscribersRows(), "Подписанных на push пока нет.");
+    return renderChannelSubscribersTable(pushSubscribersRows(), "Новых push-подписок за период пока нет.");
   }
 
   function renderPushModal() {
@@ -1020,7 +1020,7 @@
       return;
     }
     var rows = pushSubscribersRows();
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " игроков";
+    if (subtitleEl) subtitleEl.textContent = "Новые подписки · " + periodLabel() + " · " + intFmt(rows.length) + " игроков";
     bodyEl.innerHTML = renderPushModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -1740,8 +1740,8 @@
       "Игроков в базе: " + intFmt(periodPlayers.length),
       "Зарегано: " + intFmt(registrations.length),
       "Poker21 привязали: " + intFmt(pokerPlusRows.length),
-      "Подписан на бот: " + intFmt(botSubscribers),
-      "Подписан на push: " + intFmt(pushSubscribers),
+      "Новые подписки на бот: " + intFmt(botSubscribers),
+      "Новые push-подписки: " + intFmt(pushSubscribers),
       "Депозиты: " + money(deposits),
       "Сообщений в главном чате: " + intFmt(chat.generalMessages && chat.generalMessages.period),
     ].join("\n");

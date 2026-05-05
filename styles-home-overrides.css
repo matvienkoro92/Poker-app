@@ -135,21 +135,21 @@ html[data-theme="dark"] body[data-view="home"] #app.app.app--view-home .card__co
 }
 
 [data-theme="dark"] .app.app--view-home .tournament-day-home-dual {
-  --home-promo-gold: #7dd3fc;
-  --home-promo-orange: #38bdf8;
-  --home-promo-line: rgba(125, 211, 252, 0.28);
-  --home-promo-card: rgba(8, 22, 43, 0.94);
-  --home-promo-card-soft: rgba(186, 230, 253, 0.065);
-  border-color: rgba(125, 211, 252, 0.24);
+  --home-promo-gold: #f6c768;
+  --home-promo-orange: #fb923c;
+  --home-promo-line: rgba(246, 199, 104, 0.26);
+  --home-promo-card: rgba(19, 17, 16, 0.94);
+  --home-promo-card-soft: rgba(246, 199, 104, 0.07);
+  border-color: rgba(246, 199, 104, 0.24);
   background:
-    radial-gradient(circle at 18% 0%, rgba(56, 189, 248, 0.1), transparent 36%),
-    radial-gradient(circle at 84% 0%, rgba(125, 211, 252, 0.06), transparent 38%),
-    linear-gradient(145deg, rgba(8, 22, 43, 0.98), rgba(4, 14, 31, 0.99) 56%, rgba(2, 8, 23, 0.99));
+    radial-gradient(circle at 18% 0%, rgba(246, 199, 104, 0.09), transparent 36%),
+    radial-gradient(circle at 84% 0%, rgba(251, 146, 60, 0.045), transparent 38%),
+    linear-gradient(145deg, rgba(18, 17, 18, 0.98), rgba(10, 11, 15, 0.99) 56%, rgba(3, 5, 10, 0.99));
   box-shadow:
     0 18px 42px rgba(2, 6, 23, 0.42),
-    0 0 22px rgba(56, 189, 248, 0.09),
-    inset 0 0 0 1px rgba(186, 230, 253, 0.055),
-    inset 0 0 28px rgba(56, 189, 248, 0.045);
+    0 0 22px rgba(246, 199, 104, 0.07),
+    inset 0 0 0 1px rgba(255, 237, 213, 0.045),
+    inset 0 0 28px rgba(251, 146, 60, 0.035);
 }
 
 /* Home header refresh: keep the page body unchanged, polish only the top bar. */
@@ -413,7 +413,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   pointer-events: none;
 }
 [data-theme="dark"] .app.app--view-home .tournament-day-home-dual::before {
-  background: linear-gradient(180deg, transparent, rgba(125, 211, 252, 0.44), rgba(56, 189, 248, 0.18), transparent);
+  background: linear-gradient(180deg, transparent, rgba(246, 199, 104, 0.32), rgba(148, 163, 184, 0.14), transparent);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap {
   max-width: none;
@@ -440,13 +440,13 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
     0 12px 24px rgba(0, 0, 0, 0.18) !important;
 }
 [data-theme="dark"] .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home {
-  border-color: rgba(125, 211, 252, 0.3) !important;
+  border-color: rgba(246, 199, 104, 0.24) !important;
   background:
-    radial-gradient(ellipse at 18% 4%, rgba(125, 211, 252, 0.08), transparent 34%),
-    radial-gradient(ellipse at 86% 6%, rgba(56, 189, 248, 0.05), transparent 36%),
-    linear-gradient(158deg, rgba(8, 22, 43, 0.96), rgba(6, 18, 39, 0.94) 48%, rgba(3, 12, 29, 0.97) 78%, rgba(2, 8, 23, 0.98)) !important;
+    radial-gradient(ellipse at 18% 4%, rgba(246, 199, 104, 0.065), transparent 34%),
+    radial-gradient(ellipse at 86% 6%, rgba(148, 163, 184, 0.045), transparent 36%),
+    linear-gradient(158deg, rgba(16, 18, 22, 0.96), rgba(10, 12, 17, 0.94) 48%, rgba(7, 9, 14, 0.97) 78%, rgba(3, 5, 10, 0.98)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(186, 230, 253, 0.1),
+    inset 0 1px 0 rgba(255, 237, 213, 0.08),
     inset 0 -18px 28px rgba(2, 6, 23, 0.16),
     0 12px 24px rgba(2, 6, 23, 0.24) !important;
 }
@@ -457,10 +457,10 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
     0 0 22px rgba(255, 179, 38, 0.12) !important;
 }
 [data-theme="dark"] .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap .tournament-day-block--home:hover {
-  border-color: rgba(125, 211, 252, 0.48) !important;
+  border-color: rgba(246, 199, 104, 0.42) !important;
   box-shadow:
-    inset 0 1px 0 rgba(186, 230, 253, 0.12),
-    0 0 22px rgba(56, 189, 248, 0.15) !important;
+    inset 0 1px 0 rgba(255, 237, 213, 0.1),
+    0 0 22px rgba(246, 199, 104, 0.12) !important;
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-block__body {
   min-height: 100%;
@@ -501,14 +501,14 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   line-height: 1;
 }
 [data-theme="dark"] .app.app--view-home .tournament-day-home-dual .tournament-day-block__home-head::before {
-  border-color: rgba(125, 211, 252, 0.84);
-  color: #bae6fd;
+  border-color: rgba(246, 199, 104, 0.78);
+  color: #fde68a;
   background:
-    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.2), transparent 34%),
-    linear-gradient(180deg, rgba(125, 211, 252, 0.16), rgba(56, 189, 248, 0.06));
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(246, 199, 104, 0.14), rgba(251, 146, 60, 0.05));
   box-shadow:
-    0 0 18px rgba(56, 189, 248, 0.18),
-    inset 0 0 16px rgba(125, 211, 252, 0.14);
+    0 0 18px rgba(246, 199, 104, 0.14),
+    inset 0 0 16px rgba(246, 199, 104, 0.12);
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__home-head::before {
   content: "★";
@@ -576,11 +576,11 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
 }
 [data-theme="dark"] .app.app--view-home .home-freeroll-schedule,
 [data-theme="dark"] .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stats {
-  border-color: rgba(125, 211, 252, 0.24);
+  border-color: rgba(246, 199, 104, 0.22);
   background:
-    linear-gradient(180deg, rgba(186, 230, 253, 0.045), transparent 46%),
-    rgba(8, 22, 43, 0.48);
-  box-shadow: inset 0 0 0 1px rgba(186, 230, 253, 0.04);
+    linear-gradient(180deg, rgba(255, 237, 213, 0.035), transparent 46%),
+    rgba(9, 10, 13, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.035);
 }
 .app.app--view-home .home-freeroll-schedule__row {
   grid-template-columns: 54px minmax(0, 1fr) 22px;
@@ -595,7 +595,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
 }
 [data-theme="dark"] .app.app--view-home .home-freeroll-schedule__row + .home-freeroll-schedule__row,
 [data-theme="dark"] .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat + .tournament-day-block__stat {
-  border-color: rgba(125, 211, 252, 0.15);
+  border-color: rgba(246, 199, 104, 0.13);
 }
 .app.app--view-home .home-freeroll-schedule__row--next {
   border: 1px solid rgba(255, 198, 74, 0.86);
@@ -608,14 +608,14 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
     inset 0 0 0 1px rgba(255, 255, 255, 0.045);
 }
 [data-theme="dark"] .app.app--view-home .home-freeroll-schedule__row--next {
-  border-color: rgba(125, 211, 252, 0.72);
+  border-color: rgba(246, 199, 104, 0.58);
   background:
-    radial-gradient(circle at 0% 50%, rgba(56, 189, 248, 0.22), transparent 42%),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.18), rgba(125, 211, 252, 0.08));
+    radial-gradient(circle at 0% 50%, rgba(246, 199, 104, 0.18), transparent 42%),
+    linear-gradient(90deg, rgba(120, 70, 28, 0.24), rgba(246, 199, 104, 0.06));
   box-shadow:
-    0 0 20px rgba(56, 189, 248, 0.18),
-    inset 0 1px 0 rgba(186, 230, 253, 0.1),
-    inset 0 0 0 1px rgba(186, 230, 253, 0.045);
+    0 0 20px rgba(246, 199, 104, 0.12),
+    inset 0 1px 0 rgba(255, 237, 213, 0.08),
+    inset 0 0 0 1px rgba(255, 237, 213, 0.035);
 }
 .app.app--view-home .home-freeroll-schedule__row--next::after {
   content: "›";

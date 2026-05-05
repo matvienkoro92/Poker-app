@@ -696,6 +696,100 @@ body[data-view="cashout"] .cashout-image {
   box-shadow: 0 0 28px rgba(214, 163, 84, 0.18), inset 0 0 0 10px rgba(7, 10, 17, 0.68);
 }
 
+[data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout {
+  border-color: rgba(251, 146, 60, 0.24);
+  background:
+    radial-gradient(circle at 92% 4%, rgba(251, 146, 60, 0.095), transparent 26%),
+    radial-gradient(circle at 10% 0%, rgba(148, 163, 184, 0.065), transparent 30%),
+    linear-gradient(145deg, rgba(16, 18, 22, 0.98), rgba(5, 7, 12, 0.99));
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.025), 0 18px 46px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout::after,
+[data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout::after {
+  color: rgba(148, 163, 184, 0.045);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-group,
+[data-theme="dark"] body[data-view="download"] .download-app-group {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(8, 10, 15, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 237, 213, 0.035);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-group--poker21,
+[data-theme="dark"] body[data-view="download"] .download-app-group--poker21 {
+  border-color: rgba(251, 146, 60, 0.34);
+  background:
+    linear-gradient(180deg, rgba(124, 45, 18, 0.22), rgba(8, 10, 15, 0.68));
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-group--xpoker,
+[data-theme="dark"] body[data-view="download"] .download-app-group--xpoker {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.3), rgba(8, 10, 15, 0.64));
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-subinfo,
+[data-theme="dark"] body[data-view="download"] .download-app-subinfo {
+  color: rgba(248, 250, 252, 0.9);
+  border-color: rgba(148, 163, 184, 0.22);
+  background:
+    linear-gradient(180deg, rgba(15, 17, 22, 0.86), rgba(4, 6, 11, 0.82));
+  box-shadow: inset 0 1px 0 rgba(255, 237, 213, 0.03);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-subinfo__label,
+[data-theme="dark"] body[data-view="download"] .download-app-subinfo__label {
+  color: #fed7aa;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app-subinfo__text,
+[data-theme="dark"] body[data-view="download"] .download-app-subinfo__text {
+  color: rgba(248, 250, 252, 0.96);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app--poker21,
+[data-theme="dark"] body[data-view="download"] .download-app--poker21 {
+  border-color: rgba(251, 146, 60, 0.64) !important;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.28), transparent 48%),
+    linear-gradient(135deg, #f97316, #fb923c) !important;
+  color: #fff8ed !important;
+  box-shadow:
+    0 8px 24px rgba(248, 113, 22, 0.24),
+    0 0 18px rgba(251, 146, 60, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app--poker21:hover,
+[data-theme="dark"] body[data-view="download"] .download-app--poker21:hover {
+  border-color: rgba(253, 186, 116, 0.78) !important;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.32), transparent 48%),
+    linear-gradient(135deg, #fb923c, #f97316) !important;
+  color: #fff8ed !important;
+  box-shadow:
+    0 12px 30px rgba(248, 113, 22, 0.3),
+    0 0 24px rgba(251, 146, 60, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-app:not(.download-app--poker21),
+[data-theme="dark"] body[data-view="download"] .download-app:not(.download-app--poker21) {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: linear-gradient(145deg, rgba(12, 15, 21, 0.94), rgba(4, 6, 11, 0.96));
+  color: rgba(248, 250, 252, 0.92);
+}
+
+[data-theme="gold"] body[data-view="download"] .download-image,
+[data-theme="dark"] body[data-view="download"] .download-image {
+  border-color: rgba(148, 163, 184, 0.32);
+  background: rgba(4, 6, 11, 0.92);
+  box-shadow: 0 0 28px rgba(15, 23, 42, 0.34), inset 0 0 0 10px rgba(4, 6, 11, 0.68);
+}
+
 body[data-view="cashout"] .cashout-manager-block {
   border-color: rgba(125, 211, 252, 0.22);
   background:
@@ -905,6 +999,81 @@ body[data-view="cashout"] .cashout-manager-btn:active {
   transform: translateY(0);
 }
 
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-block,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block {
+  border-color: rgba(251, 146, 60, 0.24);
+  background:
+    radial-gradient(circle at 96% 4%, rgba(251, 146, 60, 0.095), transparent 26%),
+    radial-gradient(circle at 8% 0%, rgba(148, 163, 184, 0.065), transparent 28%),
+    linear-gradient(145deg, rgba(16, 18, 22, 0.96), rgba(4, 6, 11, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.025), 0 18px 46px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-block::after,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block::after {
+  color: rgba(148, 163, 184, 0.045);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-image,
+[data-theme="gold"] body[data-view="cashout"] .cashout-image {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(4, 6, 11, 0.92);
+  box-shadow: 0 0 28px rgba(251, 146, 60, 0.12), inset 0 0 0 10px rgba(4, 6, 11, 0.68);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-now-subtitle,
+[data-theme="gold"] body[data-view="cashout"] .cashout-now-subtitle {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(124, 45, 18, 0.18);
+  color: #fed7aa;
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--here,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here {
+  color: #fff8ed;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.28), transparent 48%),
+    linear-gradient(135deg, #f97316, #fb923c);
+  border-color: rgba(251, 146, 60, 0.64);
+  box-shadow:
+    0 8px 24px rgba(248, 113, 22, 0.24),
+    0 0 18px rgba(251, 146, 60, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--here:hover,
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--here:focus-visible,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here:hover,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here:focus-visible {
+  color: #fff8ed;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.32), transparent 48%),
+    linear-gradient(135deg, #fb923c, #f97316);
+  border-color: rgba(253, 186, 116, 0.78);
+  box-shadow:
+    0 12px 30px rgba(248, 113, 22, 0.3),
+    0 0 24px rgba(251, 146, 60, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--tg,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg {
+  color: rgba(248, 250, 252, 0.92);
+  background: linear-gradient(145deg, rgba(12, 15, 21, 0.94), rgba(4, 6, 11, 0.96));
+  border-color: rgba(148, 163, 184, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 237, 213, 0.035), 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--tg:hover,
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-btn--tg:focus-visible,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg:hover,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg:focus-visible {
+  color: #fed7aa;
+  background: linear-gradient(145deg, rgba(24, 20, 17, 0.96), rgba(8, 10, 15, 0.98));
+  border-color: rgba(251, 146, 60, 0.38);
+  box-shadow: 0 14px 28px rgba(248, 113, 22, 0.1), inset 0 1px 0 rgba(255, 237, 213, 0.06);
+}
+
 [data-theme="gold"] body[data-view="cashout"] .cashout-manager-block {
   border-color: rgba(214, 163, 84, 0.34);
   background:
@@ -958,6 +1127,58 @@ body[data-view="cashout"] .cashout-manager-btn:active {
   background: linear-gradient(145deg, rgba(37, 31, 21, 0.96), rgba(13, 17, 26, 0.98));
   border-color: rgba(246, 213, 138, 0.58);
   box-shadow: 0 14px 28px rgba(214, 163, 84, 0.16), inset 0 1px 0 rgba(255, 240, 200, 0.1);
+}
+
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block {
+  border-color: rgba(251, 146, 60, 0.24);
+  background:
+    radial-gradient(circle at 96% 4%, rgba(251, 146, 60, 0.095), transparent 26%),
+    radial-gradient(circle at 8% 0%, rgba(148, 163, 184, 0.065), transparent 28%),
+    linear-gradient(145deg, rgba(16, 18, 22, 0.96), rgba(4, 6, 11, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.025), 0 18px 46px rgba(0, 0, 0, 0.3);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block::after {
+  color: rgba(148, 163, 184, 0.045);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-image {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(4, 6, 11, 0.92);
+  box-shadow: 0 0 28px rgba(251, 146, 60, 0.12), inset 0 0 0 10px rgba(4, 6, 11, 0.68);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-now-subtitle {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: rgba(124, 45, 18, 0.18);
+  color: #fed7aa;
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here {
+  color: #fff8ed;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.28), transparent 48%),
+    linear-gradient(135deg, #f97316, #fb923c);
+  border-color: rgba(251, 146, 60, 0.64);
+  box-shadow: 0 8px 24px rgba(248, 113, 22, 0.24), 0 0 18px rgba(251, 146, 60, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here:hover,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--here:focus-visible {
+  color: #fff8ed;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.32), transparent 48%),
+    linear-gradient(135deg, #fb923c, #f97316);
+  border-color: rgba(253, 186, 116, 0.78);
+  box-shadow: 0 12px 30px rgba(248, 113, 22, 0.3), 0 0 24px rgba(251, 146, 60, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg {
+  color: rgba(248, 250, 252, 0.92);
+  background: linear-gradient(145deg, rgba(12, 15, 21, 0.94), rgba(4, 6, 11, 0.96));
+  border-color: rgba(148, 163, 184, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 237, 213, 0.035), 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg:hover,
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-btn--tg:focus-visible {
+  color: #fed7aa;
+  background: linear-gradient(145deg, rgba(24, 20, 17, 0.96), rgba(8, 10, 15, 0.98));
+  border-color: rgba(251, 146, 60, 0.38);
+  box-shadow: 0 14px 28px rgba(248, 113, 22, 0.1), inset 0 1px 0 rgba(255, 237, 213, 0.06);
 }
 
 @media (max-width: 430px) {

@@ -443,7 +443,7 @@ function initHallFishRatingModal() {
     var userId = String(row.getAttribute("data-user-id") || "").trim();
     if (!userId || !hallFishEnsureProfileModal()) return;
     e.preventDefault();
-    hallFishCloseModal();
+    e.stopPropagation();
     window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null);
   });
   document.addEventListener("keydown", function (e) {

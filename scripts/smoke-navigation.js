@@ -143,7 +143,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       heavyScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       hiddenImages: performance.getEntriesByType("resource")
         .filter((entry) => /\/assets\/(?:download-hero)\./.test(entry.name))
@@ -154,16 +154,17 @@ async function main() {
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     const startupTags = new Set(initialLazy.startupScriptTags);
     const lazyTags = new Set(initialLazy.lazyScriptTags);
-    ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
       if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
     });
-    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "winter-rating-data.js"].forEach((file) => {
       if (!lazyTags.has(file)) throw new Error(`expected lazy script tag before navigation: ${file}`);
     });
     const initialHeavy = new Set(initialLazy.heavyScripts);
     ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
       if (initialHeavy.has(file)) throw new Error(`expected lazy script after navigation only: ${file}`);
     });
+    if (initialHeavy.has("winter-rating-data.js")) throw new Error("winter rating data should be lazy before winter navigation");
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
     const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "video-lessons", "hall-of-fame", "equilator", "raffles", "spring-rating"];
@@ -210,7 +211,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       eagerDomainScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating|rating-week-tops|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
     }));
 
@@ -235,9 +236,10 @@ async function main() {
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat scripts were not eager-loaded");
     const loadedDomainScripts = new Set(state.eagerDomainScripts);
-    ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
       if (!loadedDomainScripts.has(file)) throw new Error(`expected domain script after navigation: ${file}`);
     });
+    if (loadedDomainScripts.has("winter-rating-data.js")) throw new Error("winter rating data loaded during spring navigation");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
     console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state }, null, 2));

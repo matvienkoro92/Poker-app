@@ -78,6 +78,36 @@
       "domain": "chat",
       "exportedBy": ["app-chat-lifecycle.js"],
       "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "initChatBootstrap",
+      "domain": "chat",
+      "exportedBy": ["app-chat-bootstrap.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "pokerUpdateChatAdminShiftOnline",
+      "domain": "chat",
+      "exportedBy": ["app-chat-bootstrap.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatPollingLoop",
+      "domain": "chat",
+      "exportedBy": ["app-chat-bootstrap.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatDialogActions",
+      "domain": "chat",
+      "exportedBy": ["app-chat-dialog-actions.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
+    },
+    {
+      "name": "initChatPushOpenHandlers",
+      "domain": "chat",
+      "exportedBy": ["app-chat-push-open.js"],
+      "consumedBy": ["app-chat-lifecycle.js"]
     }
   ]
 }

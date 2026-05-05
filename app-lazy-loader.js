@@ -13,6 +13,7 @@
     "learn-play-hub": ["video"],
     streams: ["streams"],
     equilator: ["tools"],
+    "winter-rating": ["rating-winter"],
     "poker-tasks": ["club-tasks"],
     "player-crm": ["player-crm"]
   };

@@ -36,7 +36,7 @@ function getWinterRatingCounters() {
   }
   return { daysPassed: daysPassed, daysLeft: daysLeft, totalDays: totalDays };
 }
-// Таблицы WINTER_RATING_BY_DATE / WINTER_RATING_IMAGES / WINTER_RATING_TOURNAMENTS_BY_DATE — в winter-rating-data.js (defer сразу после этого файла).
+// Весенние seasonal data — в spring-rating-data.js (eager), зимние таблицы — в winter-rating-data.js (lazy для winter-rating).
 
 function isSpringRatingMode() {
   return document.body && document.body.getAttribute("data-view") === "spring-rating";

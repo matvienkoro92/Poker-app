@@ -25,12 +25,15 @@ const files = {
   appHomeInit: read("app-home-init.js"),
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
+  appChatPushOpen: read("app-chat-push-open.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
   appLazyLoader: read("app-lazy-loader.js"),
   appHallFame: read("app-hall-fame.js"),
   appTournamentDay: read("app-tournament-day.js"),
+  springRatingData: read("spring-rating-data.js"),
+  winterRatingData: read("winter-rating-data.js"),
   sw: read("sw.js"),
   redisLib: read("lib/redis.js"),
   accountIdLib: read("lib/account-id.js"),
@@ -801,7 +804,13 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-utils.js", "app-chat-render-utils.js") &&
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
     appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
-    appearsBefore(order, "app-rating-core.js", "app-rating.js") &&
+    appearsBefore(order, "app-chat-auth-guard.js", "app-chat-bootstrap.js") &&
+    appearsBefore(order, "app-chat-bootstrap.js", "app-chat-dialog-actions.js") &&
+    appearsBefore(order, "app-chat-dialog-actions.js", "app-chat-push-open.js") &&
+    appearsBefore(order, "app-chat-push-open.js", "app-chat-lifecycle.js") &&
+    appearsBefore(order, "app-rating-core.js", "app-rating-spring-season.js") &&
+    appearsBefore(order, "app-rating-spring-season.js", "app-rating-view.js") &&
+    appearsBefore(order, "app-rating-view.js", "app-rating.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
@@ -875,7 +884,11 @@ add("App monolith delegates shared helpers, home init, and PWA install", () =>
 add("App monolith delegates chat lifecycle, webview keyboard, and view router", () =>
   hasAll("appChatLifecycle", [
     "function initChat()",
+    "initChatPushOpenHandlers",
+  ]) &&
+  hasAll("appChatPushOpen", [
     "window.__pokerRefreshChatUnreadForPwaBadge",
+    "window.__pokerHandleIncomingChatPush",
   ]) &&
   hasAll("appWebviewKeyboard", [
     "var telegramIosKeyboardRootLockActive",
@@ -967,6 +980,7 @@ add("Selected heavy views use JavaScript lazy gates", () =>
     'type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons-modals.js',
     'type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js',
     'type="application/poker-lazy" data-poker-lazy-domain="tools" src="./app-equilator.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js',
   ]) &&
   hasAll("client", [
     "pokerEnsureViewScripts(viewName)",
@@ -978,6 +992,7 @@ add("Selected heavy views use JavaScript lazy gates", () =>
     '"hall-of-fame": ["hall"]',
     '"video-lessons": ["video"]',
     '"learn-play-hub": ["video"]',
+    '"winter-rating": ["rating-winter"]',
     'equilator: ["tools"]',
     "window.pokerEnsureViewScripts",
   ])
@@ -986,6 +1001,9 @@ add("Selected heavy views use JavaScript lazy gates", () =>
 add("Chat JavaScript domain is eager-loaded before router", () =>
   hasAll("html", [
     'defer data-poker-eager-domain="chat" src="./app-chat-utils.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-bootstrap.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-dialog-actions.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-push-open.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
     'src="./app-lazy-loader.js',
   ]) &&
@@ -995,11 +1013,26 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
 
 add("Spring rating, fish game, and raffles stay eager while selected heavy domains are lazy", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const eagerFiles = ["app-rating.js", "app-rating-week-tops.js", "winter-rating-data.js", "app-games.js", "app-raffles.js"];
-  const lazyFiles = ["app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js"];
+  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"];
+  const lazyFiles = ["app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "winter-rating-data.js"];
   return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`src="./${file}`)) &&
     lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
 });
+
+add("Rating seasonal data is split by spring and winter", () =>
+  hasAll("springRatingData", [
+    "var SPRING_RATING_IMAGES_LEAGUE1",
+    "var SPRING_RATING_IMAGES_LEAGUE2",
+    "var SPRING_RATING_TOURNAMENTS_BY_DATE",
+  ]) &&
+  !has("springRatingData", "var WINTER_RATING_BY_DATE") &&
+  hasAll("winterRatingData", [
+    "var WINTER_RATING_BY_DATE",
+    "var WINTER_RATING_IMAGES",
+    "var WINTER_RATING_TOURNAMENTS_BY_DATE",
+  ]) &&
+  !has("winterRatingData", "var SPRING_RATING_TOURNAMENTS_BY_DATE")
+);
 
 add("Startup root JavaScript includes every eager app module", () => {
   const startup = localStartupScriptFilesFromIndex();

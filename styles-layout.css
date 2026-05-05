@@ -284,6 +284,42 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
     drop-shadow(0 1px 0 rgba(255, 244, 204, 0.26))
     drop-shadow(0 0 5px rgba(143, 95, 32, 0.28));
 }
+[data-theme="gold"].app-view-home .bottom-nav__item.bottom-nav__item--active,
+[data-theme="gold"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active,
+[data-theme="dark"].app-view-home .bottom-nav__item.bottom-nav__item--active,
+[data-theme="dark"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active {
+  color: #fff8ed;
+  border-color: rgba(251, 146, 60, 0.55);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.34), transparent 48%),
+    linear-gradient(135deg, #f97316, #fb923c);
+  text-shadow: none;
+  box-shadow:
+    0 6px 16px rgba(248, 113, 22, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+[data-theme="gold"].app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
+[data-theme="gold"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
+[data-theme="dark"].app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon,
+[data-theme="dark"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__icon {
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.36), transparent 44%),
+    rgba(255, 255, 255, 0.18);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 14px rgba(67, 34, 6, 0.22);
+}
+[data-theme="gold"].app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji,
+[data-theme="gold"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji,
+[data-theme="dark"].app-view-home .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji,
+[data-theme="dark"] body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__emoji {
+  filter:
+    saturate(1.04)
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.2))
+    drop-shadow(0 0 5px rgba(255, 231, 168, 0.3))
+    drop-shadow(0 1.5px 1px rgba(67, 34, 6, 0.3));
+}
 
 .bottom-nav__chat-wrap {
   position: relative;
