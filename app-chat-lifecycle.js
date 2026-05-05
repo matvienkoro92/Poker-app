@@ -2108,138 +2108,11 @@ function initChat() {
     });
   }
 
+  var chatMessageRenderRuntime = null;
   function renderGeneralMessages(messages) {
-    messages = (messages || []).filter(function (m) {
-      return !(m && m.clubAdmissionNotice);
-    });
-    var generalMsgWrapEarly = generalMessages ? generalMessages.parentElement : null;
-    var openingForceBottomG = scrollGeneralToBottomOnNextRender;
-    try {
-      pokerMaybeClearSelfPinIfIdMissing("general", null, messages);
-    } catch (ePinG) {}
-    if (!messages || messages.length === 0) {
-      if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
-        generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
-      }
-      generalMessages.innerHTML = '<p class="chat-empty">Нет сообщений. Напишите первым!</p>';
-      try {
-        refreshChatSelfPinBars();
-      } catch (ePinG2) {}
-      try {
-        scheduleSyncChatScrollBottomButtons();
-      } catch (eSbGE) {}
-      return;
+    if (chatMessageRenderRuntime && typeof chatMessageRenderRuntime.renderGeneralMessages === "function") {
+      return chatMessageRenderRuntime.renderGeneralMessages(messages);
     }
-    var bodyHtml = buildGeneralMessagesBodyHtml(messages);
-    var html = (generalHasMoreBefore ? renderLoadOlderButtonHtml("general") : "") + bodyHtml;
-    if (generalMsgWrapEarly && generalMsgWrapEarly.classList) {
-      generalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
-    }
-    var prevScrollTop = generalMessages.scrollTop;
-    var prevScrollHeight = generalMessages.scrollHeight;
-    var wasNearBottom = prevScrollHeight - prevScrollTop - generalMessages.clientHeight < 80;
-    generalMessages.innerHTML = html;
-    function restoreScroll(clearScrollFlag) {
-      var maxScroll = generalMessages.scrollHeight - generalMessages.clientHeight;
-      if (openingForceBottomG || wasNearBottom || maxScroll <= 0) {
-        generalMessages.scrollTop = generalMessages.scrollHeight;
-        if (clearScrollFlag && openingForceBottomG) scrollGeneralToBottomOnNextRender = false;
-      } else {
-        generalMessages.scrollTop = Math.min(prevScrollTop, Math.max(0, maxScroll));
-      }
-    }
-    if (openingForceBottomG) {
-      try {
-        if (generalMsgWrapEarly && generalMsgWrapEarly.classList && /chat-msg__image/.test(bodyHtml)) {
-          generalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
-        }
-      } catch (eSettleGFlag) {}
-      try {
-        generalMessages.scrollTop = generalMessages.scrollHeight;
-      } catch (eScG0) {}
-      var rafOpenG = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-      rafOpenG(function () {
-        applyChatMsgTallTextTimeBelowLayout(generalMessages);
-        try {
-          generalMessages.scrollTop = generalMessages.scrollHeight;
-        } catch (eScG1) {}
-        scrollGeneralToBottomOnNextRender = false;
-        try {
-          generalMessages.__pokerChatOpeningStickBottom = true;
-        } catch (eStickOG) {}
-        pinChatMessagesToBottomImagesOnly(generalMessages);
-        try {
-          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
-            window.__pokerScheduleSyncChatScrollBottomButtons();
-          }
-        } catch (eSbG) {}
-        settleChatOpeningMediaLayout(generalMessages, generalMsgWrapEarly, function () {
-          try {
-            generalMessages.scrollTop = generalMessages.scrollHeight;
-          } catch (eScG2) {}
-        });
-        rafOpenG(function () {
-          try {
-            generalMessages.scrollTop = generalMessages.scrollHeight;
-          } catch (eScG3) {}
-        });
-      });
-    } else {
-      restoreScroll(false);
-      requestAnimationFrame(function () {
-        applyChatMsgTallTextTimeBelowLayout(generalMessages);
-        restoreScroll(true);
-        if (wasNearBottom) {
-          pinChatMessagesToBottom(generalMessages, false);
-        }
-      });
-    }
-    bindChatMsgNameProfileButtons(generalMessages);
-    generalMessages.querySelectorAll("[data-chat-load-older=\"general\"]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        if (typeof window.__pokerLoadOlderGeneralMessages === "function") window.__pokerLoadOlderGeneralMessages();
-      });
-    });
-    generalMessages.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
-      row.addEventListener("click", function () {
-        var id = row.dataset.userId;
-        if (!id || !pokerApiHasCredential() || !base) return;
-        if (typeof window.pokerOpenRespectVotersModal === "function") {
-          window.pokerOpenRespectVotersModal(id);
-        }
-      });
-    });
-    generalMessages.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.dataset.msgId;
-        if (!id) return;
-        prepareChatDeleteConfirm();
-        if (!confirm("Удалить сообщение?")) return;
-        fetch(base + "/api/chat", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ messageId: id })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d && d.ok) loadGeneral();
-        });
-      });
-    });
-    generalMessages.querySelectorAll(".chat-msg__edit").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        var msgId = btn.dataset.msgId;
-        var oldText = (btn.dataset.msgText || "").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        if (!msgId) return;
-        startChatEdit("general", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
-      });
-    });
-    attachContextMenuForOthers(generalMessages, "general", generalMessages);
-    try {
-      refreshChatSelfPinBars();
-    } catch (ePinRfG) {}
-    try {
-      scheduleSyncChatScrollBottomButtons();
-    } catch (eSbG) {}
   }
 
   var chatContextMenuHandlers = initChatContextMenuHandlers({
@@ -2560,144 +2433,45 @@ function initChat() {
     }
   }
 
+  chatMessageRenderRuntime = typeof initChatMessageRenderRuntime === "function"
+    ? initChatMessageRenderRuntime({
+      generalMessages: generalMessages,
+      messagesEl: messagesEl,
+      base: base,
+      personalMessagesCache: personalMessagesCache,
+      personalHasMoreBeforeByPeer: personalHasMoreBeforeByPeer,
+      POKER_CHAT_DISK_PERSONAL_MAX_MSG: POKER_CHAT_DISK_PERSONAL_MAX_MSG,
+      getChatWithUserId: function () { return chatWithUserId; },
+      getGeneralHasMoreBefore: function () { return generalHasMoreBefore; },
+      getScrollGeneralToBottomOnNextRender: function () { return scrollGeneralToBottomOnNextRender; },
+      setScrollGeneralToBottomOnNextRender: function (value) { scrollGeneralToBottomOnNextRender = !!value; },
+      getScrollPersonalToBottomOnNextRender: function () { return scrollPersonalToBottomOnNextRender; },
+      setScrollPersonalToBottomOnNextRender: function (value) { scrollPersonalToBottomOnNextRender = !!value; },
+      buildGeneralMessagesBodyHtml: buildGeneralMessagesBodyHtml,
+      buildPersonalMessagesBodyHtml: buildPersonalMessagesBodyHtml,
+      renderLoadOlderButtonHtml: renderLoadOlderButtonHtml,
+      pokerMaybeClearSelfPinIfIdMissing: pokerMaybeClearSelfPinIfIdMissing,
+      refreshChatSelfPinBars: refreshChatSelfPinBars,
+      scheduleSyncChatScrollBottomButtons: scheduleSyncChatScrollBottomButtons,
+      applyChatMsgTallTextTimeBelowLayout: applyChatMsgTallTextTimeBelowLayout,
+      pinChatMessagesToBottomImagesOnly: pinChatMessagesToBottomImagesOnly,
+      settleChatOpeningMediaLayout: settleChatOpeningMediaLayout,
+      pinChatMessagesToBottom: pinChatMessagesToBottom,
+      bindChatMsgNameProfileButtons: bindChatMsgNameProfileButtons,
+      pokerApiHasCredential: pokerApiHasCredential,
+      pokerApiAuthJsonBody: pokerApiAuthJsonBody,
+      prepareChatDeleteConfirm: prepareChatDeleteConfirm,
+      loadGeneral: function () { return loadGeneral(); },
+      loadMessages: function () { return loadMessages(); },
+      startChatEdit: startChatEdit,
+      resolveMyChatDisplayName: resolveMyChatDisplayName,
+      attachContextMenuForOthers: attachContextMenuForOthers
+    })
+    : null;
   function renderMessages(messages) {
-    if (!messagesEl) return;
-    if (Array.isArray(messages) && messages.length > POKER_CHAT_DISK_PERSONAL_MAX_MSG) {
-      messages = messages.slice(-POKER_CHAT_DISK_PERSONAL_MAX_MSG);
-      if (chatWithUserId) personalMessagesCache[chatWithUserId] = messages;
+    if (chatMessageRenderRuntime && typeof chatMessageRenderRuntime.renderMessages === "function") {
+      return chatMessageRenderRuntime.renderMessages(messages);
     }
-    var personalMsgWrapEarly = messagesEl.parentElement;
-    var openingForceBottomP = scrollPersonalToBottomOnNextRender;
-    try {
-      pokerMaybeClearSelfPinIfIdMissing("personal", chatWithUserId, messages);
-    } catch (ePinPM) {}
-    if (!messages || messages.length === 0) {
-      if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
-        personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
-      }
-      messagesEl.innerHTML = '<p class="chat-empty">Нет сообщений.</p>';
-      try {
-        refreshChatSelfPinBars();
-      } catch (ePinPM2) {}
-      try {
-        scheduleSyncChatScrollBottomButtons();
-      } catch (eSbPE) {}
-      return;
-    }
-    var activePeerForRender = chatWithUserId ? String(chatWithUserId) : "";
-    var hasMoreBeforePersonal = !!(activePeerForRender && personalHasMoreBeforeByPeer[activePeerForRender]);
-    var bodyHtml = buildPersonalMessagesBodyHtml(messages);
-    var html = (hasMoreBeforePersonal ? renderLoadOlderButtonHtml("personal") : "") + bodyHtml;
-    if (personalMsgWrapEarly && personalMsgWrapEarly.classList) {
-      personalMsgWrapEarly.classList.remove("chat-messages-wrap--settling");
-    }
-    var prevScrollTopP = messagesEl.scrollTop;
-    var prevScrollHeightP = messagesEl.scrollHeight;
-    var wasNearBottomP = prevScrollHeightP - prevScrollTopP - messagesEl.clientHeight < 80;
-    messagesEl.innerHTML = html;
-    function restoreScrollP(clearScrollFlag) {
-      var maxScrollP = messagesEl.scrollHeight - messagesEl.clientHeight;
-      if (openingForceBottomP || wasNearBottomP || maxScrollP <= 0) {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-        if (clearScrollFlag && openingForceBottomP) scrollPersonalToBottomOnNextRender = false;
-      } else {
-        messagesEl.scrollTop = Math.min(prevScrollTopP, Math.max(0, maxScrollP));
-      }
-    }
-    if (openingForceBottomP) {
-      try {
-        if (personalMsgWrapEarly && personalMsgWrapEarly.classList && /chat-msg__image/.test(bodyHtml)) {
-          personalMsgWrapEarly.classList.add("chat-messages-wrap--settling");
-        }
-      } catch (eSettlePFlag) {}
-      try {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      } catch (eScP0) {}
-      var rafOpenP = requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-      rafOpenP(function () {
-        applyChatMsgTallTextTimeBelowLayout(messagesEl);
-        try {
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-        } catch (eScP1) {}
-        scrollPersonalToBottomOnNextRender = false;
-        try {
-          messagesEl.__pokerChatOpeningStickBottom = true;
-        } catch (eStickOP) {}
-        pinChatMessagesToBottomImagesOnly(messagesEl);
-        try {
-          if (typeof window.__pokerScheduleSyncChatScrollBottomButtons === "function") {
-            window.__pokerScheduleSyncChatScrollBottomButtons();
-          }
-        } catch (eSbP) {}
-        settleChatOpeningMediaLayout(messagesEl, personalMsgWrapEarly, function () {
-          try {
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          } catch (eScP2) {}
-        });
-        rafOpenP(function () {
-          try {
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          } catch (eScP3) {}
-        });
-      });
-    } else {
-      restoreScrollP(false);
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          applyChatMsgTallTextTimeBelowLayout(messagesEl);
-          restoreScrollP(true);
-          if (wasNearBottomP) {
-            pinChatMessagesToBottom(messagesEl, false);
-          }
-        });
-      });
-    }
-    messagesEl.querySelectorAll(".chat-msg__delete").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.dataset.msgId;
-        if (!id) return;
-        prepareChatDeleteConfirm();
-        if (!confirm("Удалить сообщение?")) return;
-        fetch(base + "/api/chat", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pokerApiAuthJsonBody({ messageId: id, with: chatWithUserId })),
-        }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d && d.ok) loadMessages();
-        });
-      });
-    });
-    messagesEl.querySelectorAll("[data-chat-load-older=\"personal\"]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        if (typeof window.__pokerLoadOlderPersonalMessages === "function") window.__pokerLoadOlderPersonalMessages();
-      });
-    });
-    messagesEl.querySelectorAll(".chat-msg__edit").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        var msgId = btn.dataset.msgId;
-        var oldText = (btn.dataset.msgText || "").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        if (!msgId) return;
-        startChatEdit("personal", msgId, oldText, resolveMyChatDisplayName() || "Игрок");
-      });
-    });
-    messagesEl.querySelectorAll(".chat-msg__respect-row[data-user-id]").forEach(function (row) {
-      row.addEventListener("click", function () {
-        var id = row.dataset.userId;
-        if (!id || !pokerApiHasCredential() || !base) return;
-        if (typeof window.pokerOpenRespectVotersModal === "function") {
-          window.pokerOpenRespectVotersModal(id);
-        }
-      });
-    });
-    attachContextMenuForOthers(messagesEl, "personal", messagesEl);
-    try {
-      refreshChatSelfPinBars();
-    } catch (ePinRfP) {}
-    try {
-      scheduleSyncChatScrollBottomButtons();
-    } catch (eSbP) {}
-    bindChatMsgNameProfileButtons(messagesEl);
   }
 
   var chatDialogPreviewRuntime = typeof initChatDialogPreviewRuntime === "function"

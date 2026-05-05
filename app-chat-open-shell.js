@@ -102,6 +102,9 @@ function setChatThreadChromeOpen(on) {
 }
   function openClubChatShell() {
     try {
+      window.__pokerChatConvBackSeq = (Number(window.__pokerChatConvBackSeq || 0) || 0) + 1;
+    } catch (eClubSeq) {}
+    try {
       updateGeneralInputLocked(false);
     } catch (eOpenG) {}
     if (typeof window.closeChatNavDropdown === "function") window.closeChatNavDropdown();

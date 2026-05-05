@@ -33,6 +33,7 @@ const files = {
   appPwaAuthLanguageUi: read("app-pwa-auth-language-ui.js"),
   appPwaAuthTelegramCode: read("app-pwa-auth-telegram-code.js"),
   appPwaAuthEmailLogin: read("app-pwa-auth-email-login.js"),
+  appPwaAuthRestore: read("app-pwa-auth-restore.js"),
   appPwaAuth: read("app-pwa-auth.js"),
   appPwaAuthKeyboardLift: read("app-pwa-auth-keyboard-lift.js"),
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
@@ -460,6 +461,7 @@ add("PWA auth scripts are cache-busted after session fixes", () =>
     './app-pwa-auth-language-ui.js?v=',
     './app-pwa-auth-telegram-code.js?v=',
     './app-pwa-auth-email-login.js?v=',
+    './app-pwa-auth-restore.js?v=',
     './app-pwa-auth.js?v=',
     './app-pwa-auth-keyboard-lift.js?v=',
   ])
@@ -992,9 +994,15 @@ add("JS manifest maps core app domains", () =>
     '"app-pwa-auth-language-ui.js"',
     '"app-pwa-auth-telegram-code.js"',
     '"app-pwa-auth-email-login.js"',
+    '"app-pwa-auth-restore.js"',
     '"app-pwa-auth.js"',
     '"app-pwa-auth-keyboard-lift.js"',
     '"app-profile-hero.js"',
+    '"app-profile-user-info.js"',
+    '"app-profile-pokerplus.js"',
+    '"app-profile-email-auth.js"',
+    '"app-profile-friends.js"',
+    '"app-profile-avatar.js"',
     '"app-chat-keyboard-debug.js"',
     '"app-chat-lifecycle.js"',
     '"app-html-fragments.js"',
@@ -1013,9 +1021,16 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-pwa-auth-i18n.js", "app-pwa-auth-language-ui.js") &&
     appearsBefore(order, "app-pwa-auth-language-ui.js", "app-pwa-auth-telegram-code.js") &&
     appearsBefore(order, "app-pwa-auth-telegram-code.js", "app-pwa-auth-email-login.js") &&
-    appearsBefore(order, "app-pwa-auth-email-login.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-pwa-auth-email-login.js", "app-pwa-auth-restore.js") &&
+    appearsBefore(order, "app-pwa-auth-restore.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-pwa-auth.js", "app-pwa-auth-keyboard-lift.js") &&
-    appearsBefore(order, "app-profile-hero.js", "app-profile.js") &&
+    appearsBefore(order, "app-profile-hero.js", "app-profile-user-info.js") &&
+    appearsBefore(order, "app-profile-user-info.js", "app-profile-pokerplus.js") &&
+    appearsBefore(order, "app-profile-pokerplus.js", "app-profile-email-auth.js") &&
+    appearsBefore(order, "app-profile-email-auth.js", "app-profile-friends.js") &&
+    appearsBefore(order, "app-profile-friends.js", "app-profile-avatar.js") &&
+    appearsBefore(order, "app-profile-avatar.js", "app-profile.js") &&
+    appearsBefore(order, "app-profile.js", "app-pwa-auth-session.js") &&
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-shared-helpers.js") &&
     appearsBefore(order, "app-shared-helpers.js", "app-home-init.js") &&
@@ -1041,6 +1056,8 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-utils.js", "app-chat-render-utils.js") &&
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
     appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
+    appearsBefore(order, "app-chat-message-builders.js", "app-chat-message-render-runtime.js") &&
+    appearsBefore(order, "app-chat-message-render-runtime.js", "app-chat-outgoing-helpers.js") &&
     appearsBefore(order, "app-chat-open-shell.js", "app-chat-open-peer-hydrate.js") &&
     appearsBefore(order, "app-chat-open-peer-hydrate.js", "app-chat-club-gate.js") &&
     appearsBefore(order, "app-chat-friend-actions.js", "app-chat-contact-swipe-actions.js") &&
@@ -1089,13 +1106,15 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-raffles-active-view.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles-formatters.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles.js", "app-raffles-share.js") &&
-    appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm.js") &&
+    appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm-charts.js") &&
+    appearsBefore(order, "app-player-crm-charts.js", "app-player-crm-reports.js") &&
+    appearsBefore(order, "app-player-crm-reports.js", "app-player-crm.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
 
-add("PWA auth shell delegates language, code, email, and keyboard modules", () =>
+add("PWA auth shell delegates language, code, email, restore, and keyboard modules", () =>
   hasAll("appPwaAuthLanguageUi", [
     "function pokerInitPwaAuthLanguageUi",
     "window.pokerInitPwaAuthLanguageUi",
@@ -1115,10 +1134,16 @@ add("PWA auth shell delegates language, code, email, and keyboard modules", () =
     "initPwaAuthVisualViewportLift",
     "--pwa-auth-vv-inset",
   ]) &&
+  hasAll("appPwaAuthRestore", [
+    "function initPwaAuthRestoreRuntime",
+    "restoreSavedPwaAuthBeforeGate",
+    "attemptPwaSideAuthRestoreAsync",
+  ]) &&
   hasAll("appPwaAuth", [
     "window.pokerInitPwaAuthLanguageUi",
     "window.pokerMountPwaUsernameCodeLogin",
     "window.pokerMountPwaEmailLogin",
+    "initPwaAuthRestoreRuntime",
   ]) &&
   !has("appPwaAuth", "function pokerMountPwaEmailLogin") &&
   !has("appPwaAuth", "function pokerMountPwaUsernameCodeLogin") &&

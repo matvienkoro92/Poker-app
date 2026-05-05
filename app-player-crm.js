@@ -1033,108 +1033,16 @@
     return players;
   }
 
-  function renderAnalytics() {
-    var el = document.getElementById("playerCrmAnalytics");
-    if (!el) return;
-    if (state.loading && state.loadingScope !== "data") {
-      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка графика…</div>";
-      return;
-    }
-    el.innerHTML = renderChartAnalytics();
-  }
-
-  var chartColors = {
-    players: "#f8d98a",
-    registrations: "#60a5fa",
-    poker21: "#c084fc",
-    bot: "#34d399",
-    push: "#f472b6",
-    deposits: "#f59e0b",
-    crmMessages: "#a3e635",
-    generalMessages: "#38bdf8",
-  };
-
-  function formatChartDate(value) {
-    var parts = String(value || "").split("-");
-    if (parts.length !== 3) return String(value || "");
-    return parts[2] + "." + parts[1];
-  }
-
-  function renderChartSummary(chart, series) {
-    var datedSeries = series.filter(function (s) {
-      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
-    });
-    var rows = Array.isArray(chart.summary) ? chart.summary : [];
-    var table = rows.length && datedSeries.length ? "<div class=\"player-crm__chart-summary-table-wrap\"><table class=\"player-crm__chart-summary-table\"><thead><tr><th>Дата</th>" +
-      datedSeries.map(function (s) { return "<th>" + esc(s.label || s.key) + "</th>"; }).join("") +
-      "<th>Итого</th></tr></thead><tbody>" +
-      rows.slice(0, 20).map(function (row) {
-        var total = 0;
-        var cells = datedSeries.map(function (s) {
-          var value = Number(row[s.key]) || 0;
-          total += value;
-          return "<td>" + esc(intFmt(value)) + "</td>";
-        }).join("");
-        return "<tr><td>" + esc(formatChartDate(row.date)) + "</td>" + cells + "<td><strong>" + esc(intFmt(total)) + "</strong></td></tr>";
-      }).join("") + "</tbody></table></div>" :
-      "<div class=\"player-crm__timeline-item\">" + (datedSeries.length ? "За выбранный период нет прироста с датой." : "Выберите хотя бы одну галочку, чтобы увидеть линии и сводку.") + "</div>";
-    return "<div class=\"player-crm__chart-summary\"><h4>Сводка прироста по датам</h4>" + table + "</div>";
-  }
-
-  function enabledChartSeries() {
-    var chart = state.chartAnalytics || {};
-    var series = Array.isArray(chart.series) ? chart.series : [];
-    return series.filter(function (s) {
-      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
-    });
-  }
-
-  function renderChartTooltipContent(idx) {
-    var chart = state.chartAnalytics || {};
-    var labels = Array.isArray(chart.labels) ? chart.labels : [];
-    var label = labels[idx];
-    if (!label) return "";
-    var rows = enabledChartSeries().map(function (s) {
-      var color = chartColors[s.key] || "#e5e7eb";
-      var value = Number((s.values || [])[idx]) || 0;
-      return "<span><i style=\"--line-color:" + esc(color) + "\"></i><b>" + esc(s.label || s.key) + "</b><strong>" + esc(intFmt(value)) + "</strong></span>";
-    }).join("");
-    if (!rows) rows = "<em>Нет включенных линий</em>";
-    return "<div class=\"player-crm__chart-tooltip-date\">" + esc(label) + "</div><div class=\"player-crm__chart-tooltip-values\">" + rows + "</div>";
-  }
-
-  function showChartTooltip(target, event) {
-    var tip = document.getElementById("playerCrmChartTooltip");
-    var card = target && target.closest(".player-crm__chart-card");
-    if (!tip || !card) return;
-    var idx = Number(target.getAttribute("data-crm-chart-point"));
-    if (!Number.isFinite(idx)) return hideChartTooltip();
-    var html = renderChartTooltipContent(idx);
-    if (!html) return hideChartTooltip();
-    tip.innerHTML = html;
-    tip.hidden = false;
-    var guide = card.querySelector("#playerCrmChartGuideLine");
-    if (guide) {
-      var bandX = Number(target.getAttribute("x")) || 0;
-      var bandW = Number(target.getAttribute("width")) || 0;
-      var guideX = bandX + bandW / 2;
-      guide.setAttribute("x1", guideX.toFixed(1));
-      guide.setAttribute("x2", guideX.toFixed(1));
-      guide.removeAttribute("hidden");
-    }
-    var rect = card.getBoundingClientRect();
-    var x = Math.max(8, Math.min(rect.width - 220, event.clientX - rect.left + 12));
-    var y = Math.max(8, event.clientY - rect.top - 16);
-    tip.style.left = x + "px";
-    tip.style.top = y + "px";
-  }
-
-  function hideChartTooltip() {
-    var tip = document.getElementById("playerCrmChartTooltip");
-    if (tip) tip.hidden = true;
-    var guide = document.getElementById("playerCrmChartGuideLine");
-    if (guide) guide.setAttribute("hidden", "hidden");
-  }
+  var playerCrmChartsRuntime = typeof initPlayerCrmChartsRuntime === "function"
+    ? initPlayerCrmChartsRuntime({
+      state: state,
+      esc: esc,
+      intFmt: intFmt
+    })
+    : {};
+  var renderAnalytics = playerCrmChartsRuntime.renderAnalytics || function () {};
+  var showChartTooltip = playerCrmChartsRuntime.showChartTooltip || function () {};
+  var hideChartTooltip = playerCrmChartsRuntime.hideChartTooltip || function () {};
 
   function showChatModalLoading() {
     var html = renderModalPeriodControls() + "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
@@ -1648,171 +1556,33 @@
     input.click();
   }
 
-  function channelLabel(channel) {
+  var playerCrmReportsRuntime = typeof initPlayerCrmReportsRuntime === "function"
+    ? initPlayerCrmReportsRuntime({
+      state: state,
+      money: money,
+      intFmt: intFmt,
+      periodLabel: periodLabel,
+      chartPeriodLabel: chartPeriodLabel,
+      periodData: periodData,
+      playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
+      dateInSelectedPeriod: dateInSelectedPeriod,
+      filteredPlayers: filteredPlayers,
+      segmentByKey: segmentByKey,
+      filteredRegistrations: filteredRegistrations,
+      registrationRowsByMethod: registrationRowsByMethod,
+      registrationTelegramLabel: registrationTelegramLabel,
+      filteredPokerPlusAccounts: filteredPokerPlusAccounts,
+      dateOnly: dateOnly,
+      segmentPlayers: segmentPlayers,
+      segments: segments
+    })
+    : {};
+  var channelLabel = playerCrmReportsRuntime.channelLabel || function (channel) {
     if (channel === "push") return "push";
     if (channel === "bot_push") return "бот + push";
     return "бот";
-  }
-
-  function copyTextToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-    var ta = document.createElement("textarea");
-    ta.value = text;
-    ta.setAttribute("readonly", "readonly");
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand("copy");
-    } finally {
-      document.body.removeChild(ta);
-    }
-    return Promise.resolve();
-  }
-
-  function notifyCrmSend(message) {
-    try {
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg && tg.showAlert) {
-        tg.showAlert(message);
-        return;
-      }
-    } catch (eTgAlert) {}
-    if (window.alert) window.alert(message);
-  }
-
-  function playerLine(p, idx) {
-    return (idx + 1) + ". " + (p.name || p.handle || p.accountId || p.id || "—") +
-      " · " + (p.handle || "без TG") +
-      " · " + (p.source || "—");
-  }
-
-  function buildOverviewReport() {
-    var players = Array.isArray(state.players) ? state.players : [];
-    var pd = players.map(periodData);
-    var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
-    var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
-    var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
-    var pokerPlusRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
-    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
-    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
-    var chat = state.chatStats || {};
-    return [
-      "CRM · График",
-      "Период данных: " + periodLabel(),
-      "Период графика: " + chartPeriodLabel(),
-      "",
-      "Игроков в базе: " + intFmt(periodPlayers.length),
-      "Зарегано: " + intFmt(registrations.length),
-      "Poker21 привязали: " + intFmt(pokerPlusRows.length),
-      "Новые подписки на бот: " + intFmt(botSubscribers),
-      "Новые push-подписки: " + intFmt(pushSubscribers),
-      "Депозиты: " + money(deposits),
-      "Сообщений в главном чате: " + intFmt(chat.generalMessages && chat.generalMessages.period),
-    ].join("\n");
-  }
-
-  function buildPlayersReport() {
-    var rows = filteredPlayers();
-    var visible = rows.slice(0, 15);
-    return [
-      "CRM · Игроки",
-      "Период: " + periodLabel(),
-      "Фильтр: " + (segmentByKey(state.filter).label || state.filter),
-      "Найдено: " + intFmt(rows.length),
-      "",
-      visible.length ? visible.map(playerLine).join("\n") : "Список пуст.",
-    ].join("\n");
-  }
-
-  function buildRegistrationsReport() {
-    var rows = filteredRegistrations();
-    var visible = rows.slice(0, 20);
-    return [
-      "CRM · Зарегистрированные",
-      "Период: " + periodLabel(),
-      "Показано: " + intFmt(rows.length),
-      "Только Telegram: " + intFmt(registrationRowsByMethod("telegram").length),
-      "Только email: " + intFmt(registrationRowsByMethod("email").length),
-      "И то и то: " + intFmt(registrationRowsByMethod("both").length),
-      "",
-      visible.length ? visible.map(function (r, idx) {
-        return (idx + 1) + ". " + (r.accountId || r.dtId || "—") +
-          " · " + (registrationTelegramLabel(r) || "—") +
-          " · " + (r.email || "—");
-      }).join("\n") : "Список пуст.",
-    ].join("\n");
-  }
-
-  function buildPokerPlusReport() {
-    var rows = filteredPokerPlusAccounts();
-    var visible = rows.slice(0, 20);
-    return [
-      "CRM · Poker21",
-      "Период: " + periodLabel(),
-      "Показано: " + intFmt(rows.length),
-      "",
-      visible.length ? visible.map(function (r, idx) {
-        return (idx + 1) + ". " + (r.nickname || r.accountId || "—") +
-          " · уровень " + (r.level || "—") +
-          " · " + (dateOnly(r.linkedAt) || "без даты");
-      }).join("\n") : "Список пуст.",
-    ].join("\n");
-  }
-
-  function buildSegmentsReport() {
-    return [
-      "CRM · Сегменты",
-      "Период: " + periodLabel(),
-      "",
-      segments.filter(function (s) { return s.key !== "all"; }).map(function (seg) {
-        var players = segmentPlayers(seg.key);
-        var dep = players.reduce(function (sum, p) { return sum + periodData(p).deposits; }, 0);
-        return seg.label + ": " + intFmt(players.length) + " игроков · " + money(dep);
-      }).join("\n"),
-    ].join("\n");
-  }
-
-  function buildBroadcastReport() {
-    var segEl = document.getElementById("playerCrmBroadcastSegment");
-    var channelEl = document.getElementById("playerCrmBroadcastChannel");
-    var textEl = document.getElementById("playerCrmBroadcastText");
-    var segment = segEl ? segEl.value : state.filter;
-    var channel = channelEl ? channelEl.value : "bot";
-    var players = segmentPlayers(segment);
-    return [
-      "CRM · Рассылка",
-      "Группа: " + (segmentByKey(segment).label || segment),
-      "Канал: " + channelLabel(channel),
-      "Получателей: " + intFmt(players.length),
-      "",
-      "Текст:",
-      String(textEl ? textEl.value : "").trim() || "—",
-    ].join("\n");
-  }
-
-  function buildCrmSectionReport(section) {
-    if (section === "players") return buildPlayersReport();
-    if (section === "registrations") return buildRegistrationsReport();
-    if (section === "pokerplus") return buildPokerPlusReport();
-    if (section === "segments") return buildSegmentsReport();
-    if (section === "broadcast") return buildBroadcastReport();
-    return buildOverviewReport();
-  }
-
-  function sendCrmSectionData(section) {
-    var text = buildCrmSectionReport(section || state.tab || "overview");
-    var title = (text.split("\n")[0] || "CRM данные").trim();
-    if (navigator.share) {
-      navigator.share({ title: title, text: text })
-        .catch(function () { return copyTextToClipboard(text).then(function () { notifyCrmSend("Данные скопированы."); }); });
-      return;
-    }
-    copyTextToClipboard(text).then(function () {
-      notifyCrmSend("Данные скопированы.");
-    });
-  }
+  };
+  var sendCrmSectionData = playerCrmReportsRuntime.sendCrmSectionData || function () {};
 
   function bindOnce() {
     var root = document.getElementById("playerCrmView");

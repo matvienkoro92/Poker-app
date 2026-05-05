@@ -754,6 +754,245 @@
       "consumedBy": [
         "app-chat-lifecycle.js"
       ]
+    },
+    {
+      "name": "updateProfileDtId",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-pwa-open-handlers.js"
+      ]
+    },
+    {
+      "name": "updateProfileExitBtnVisibility",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "loadCurrentProfileUserInfo",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "pokerReadProfileStorage",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "pokerWriteProfileStorage",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "pokerApplyProfileUserInfo",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "syncProfileEmailAuthUi",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-email-auth.js"
+      ],
+      "consumedBy": [
+        "app-profile-user-info.js"
+      ]
+    },
+    {
+      "name": "initProfileEmailAuth",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-email-auth.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerRemoveFriendFromOpenFriendsList",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-friends.js"
+      ],
+      "consumedBy": [
+        "app-chat-dialogs.js",
+        "app-chat-user-modal.js"
+      ]
+    },
+    {
+      "name": "initProfileFriends",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-friends.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "loadHeaderAvatar",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "initProfileAvatar",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "updateProfileUserMeta",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile-hero.js",
+        "app-profile-email-auth.js",
+        "app-pwa-open-handlers.js"
+      ]
+    },
+    {
+      "name": "updateProfileHeroPokerPlusId",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile-pokerplus.js"
+      ]
+    },
+    {
+      "name": "POKER_PROFILE_LINKED_EMAIL_CACHE_KEY",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile-email-auth.js"
+      ]
+    },
+    {
+      "name": "POKER_PROFILE_RESPECT_CACHE_KEY",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-user-info.js"
+      ],
+      "consumedBy": [
+        "app-profile.js"
+      ]
+    },
+    {
+      "name": "initPlayerCrmChartsRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-charts.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
+      "name": "initPlayerCrmReportsRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-reports.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
+      "name": "initPwaAuthRestoreRuntime",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-restore.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "initChatMessageRenderRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-message-render-runtime.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initProfilePokerPlus",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-pokerplus.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerApplyPokerPlusStatsVisible",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-pokerplus.js"
+      ],
+      "consumedBy": [
+        "app-profile-user-info.js"
+      ]
     }
   ]
 }

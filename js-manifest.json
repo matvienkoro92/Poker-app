@@ -9,6 +9,7 @@
       "app-pwa-auth-language-ui.js",
       "app-pwa-auth-telegram-code.js",
       "app-pwa-auth-email-login.js",
+      "app-pwa-auth-restore.js",
       "app-pwa-auth.js",
       "app-pwa-auth-keyboard-lift.js",
       "app-auth-debug.js"
@@ -40,6 +41,7 @@
       "app-chat-templates.js",
       "app-chat-message-render-helpers.js",
       "app-chat-message-builders.js",
+      "app-chat-message-render-runtime.js",
       "app-chat-outgoing-helpers.js",
       "app-chat-general-loader.js",
       "app-chat-general-sender.js",
@@ -109,6 +111,11 @@
     ],
     "profile": [
       "app-profile-hero.js",
+      "app-profile-user-info.js",
+      "app-profile-pokerplus.js",
+      "app-profile-email-auth.js",
+      "app-profile-friends.js",
+      "app-profile-avatar.js",
       "app-profile.js",
       "app-cashout.js"
     ],
@@ -174,6 +181,8 @@
     ],
     "playerCrm": [
       "app-player-crm-formatters.js",
+      "app-player-crm-charts.js",
+      "app-player-crm-reports.js",
       "app-player-crm.js"
     ],
     "shell": [

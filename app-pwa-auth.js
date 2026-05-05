@@ -32,36 +32,9 @@
   var syncProfileLanguageUi = pwaAuthLanguageUi && pwaAuthLanguageUi.syncProfile ? pwaAuthLanguageUi.syncProfile : function () {};
   var syncGlobalAppLanguageUi = pwaAuthLanguageUi && pwaAuthLanguageUi.syncGlobal ? pwaAuthLanguageUi.syncGlobal : function () {};
 
+  var pwaAuthRestoreRuntime = null;
   function restoreSavedPwaAuthBeforeGate() {
-    try {
-      if (typeof pokerReadPwaTgSessionRecord === "function") {
-        var tgRecord = pokerReadPwaTgSessionRecord();
-        if (tgRecord && tgRecord.user && tgRecord.user.id != null && tgRecord.token) {
-          var tgUser = normalizeVerifiedUser(tgRecord.user, null);
-          var tgAuth = { status: "verified", user: tgUser, error: null };
-          if (tgRecord.gazettePlannerAccess === true) tgAuth.gazettePlannerAccess = true;
-          if (tgRecord.adminAccess === true) tgAuth.adminAccess = true;
-          if (tgRecord.adminReportAccess === true) tgAuth.adminReportAccess = true;
-          window.__pokerTelegramAuth = tgAuth;
-          pokerMaybeRememberMemberIdFromUser(tgUser);
-          pokerSetAuthMethod(tgRecord.authMethod || "telegram");
-          return true;
-        }
-      }
-    } catch (eRestoreTgEarly) {}
-    try {
-      if (typeof pokerReadPwaVkSessionRecord === "function") {
-        var vkRecord = pokerReadPwaVkSessionRecord();
-        if (vkRecord && vkRecord.user && vkRecord.user.id != null && vkRecord.token) {
-          var vkUser = normalizeVerifiedUser(vkRecord.user, null);
-          window.__pokerTelegramAuth = { status: "verified", user: vkUser, error: null };
-          pokerMaybeRememberMemberIdFromUser(vkUser);
-          pokerSetAuthMethod(vkRecord.authMethod || "vk");
-          return true;
-        }
-      }
-    } catch (eRestoreVkEarly) {}
-    return false;
+    return !!(pwaAuthRestoreRuntime && pwaAuthRestoreRuntime.restoreSavedPwaAuthBeforeGate && pwaAuthRestoreRuntime.restoreSavedPwaAuthBeforeGate());
   }
 
   function isPwaStandaloneMode() {
@@ -1463,161 +1436,41 @@
    * Вынесено в одну функцию — для standalone PWA обязательно вызывать и при наличии объекта WebApp без initData
    * (в index.html всегда подключается telegram-web-app.js).
    */
+  pwaAuthRestoreRuntime = typeof initPwaAuthRestoreRuntime === "function"
+    ? initPwaAuthRestoreRuntime({
+      normalizeVerifiedUser: normalizeVerifiedUser,
+      pokerMaybeRememberMemberIdFromUser: pokerMaybeRememberMemberIdFromUser,
+      pokerSetAuthMethod: pokerSetAuthMethod,
+      updateHeaderGreeting: updateHeaderGreeting,
+      showAuthorized: showAuthorized,
+      loadHeaderAvatar: loadHeaderAvatar,
+      tryFinishVkOAuth: tryFinishVkOAuth,
+      tryFinishTelegramLoginRedirect: tryFinishTelegramLoginRedirect,
+      showPwaAuthScreen: showPwaAuthScreen,
+      setPwaAuthIdentifyingPhase: setPwaAuthIdentifyingPhase,
+      hideIdentifyingMini: hideIdentifyingMini,
+      resetBannerForPwaLogin: resetBannerForPwaLogin,
+      showPwaStandaloneEntryScreen: showPwaStandaloneEntryScreen,
+      getPwaAuthScreenEl: function () { return pwaAuthScreenEl; },
+      identifyMinMs: PWA_AUTH_IDENTIFY_MIN_MS,
+      tgSessionKey: POKER_PWA_TG_SESSION_KEY,
+      vkSessionKey: POKER_PWA_VK_SESSION_KEY
+    })
+    : null;
   function attemptPwaSideAuthRestore(hideBootOverlay) {
-    if (tryFinishVkOAuth()) return true;
-    if (tryFinishTelegramLoginRedirect()) return true;
-    try {
-      var so = pokerReadPwaTgSessionRecord();
-      if (so && so.user && so.user.id != null && so.token) {
-        var uP = normalizeVerifiedUser(so.user, null);
-        var _authRestore = { status: "verified", user: uP, error: null };
-        if (so.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
-        if (so.adminAccess === true) _authRestore.adminAccess = true;
-        if (so.adminReportAccess === true) _authRestore.adminReportAccess = true;
-        window.__pokerTelegramAuth = _authRestore;
-        pokerMaybeRememberMemberIdFromUser(uP);
-        pokerSetAuthMethod(so.authMethod || "telegram");
-        updateHeaderGreeting();
-        showAuthorized(uP);
-        loadHeaderAvatar();
-        if (typeof hideBootOverlay === "function") hideBootOverlay();
-        try {
-          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uP, pwa: true } }));
-        } catch (eP) {}
-        return true;
-      }
-    } catch (eLs) {}
-    try {
-      var soV = pokerReadPwaVkSessionRecord();
-      if (soV && soV.user && soV.user.id != null && soV.token) {
-        var uVk = normalizeVerifiedUser(soV.user, null);
-        window.__pokerTelegramAuth = { status: "verified", user: uVk, error: null };
-        pokerSetAuthMethod(soV.authMethod || "vk");
-        updateHeaderGreeting();
-        showAuthorized(uVk);
-        loadHeaderAvatar();
-        if (typeof hideBootOverlay === "function") hideBootOverlay();
-        try {
-          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: uVk, pwa: true, vk: true } }));
-        } catch (eVkLs) {}
-        return true;
-      }
-    } catch (eLsVk) {}
-    return false;
+    return !!(pwaAuthRestoreRuntime && pwaAuthRestoreRuntime.attemptPwaSideAuthRestore && pwaAuthRestoreRuntime.attemptPwaSideAuthRestore(hideBootOverlay));
   }
-
   function restorePwaSideAuthRecord(record, opts) {
-    var options = opts || {};
-    if (!record || !record.user || record.user.id == null || !record.token) return false;
-    var u = normalizeVerifiedUser(record.user, null);
-    var _authRestore = { status: "verified", user: u, error: null };
-    if (record.gazettePlannerAccess === true) _authRestore.gazettePlannerAccess = true;
-    if (record.adminAccess === true) _authRestore.adminAccess = true;
-    if (record.adminReportAccess === true) _authRestore.adminReportAccess = true;
-    window.__pokerTelegramAuth = _authRestore;
-    try {
-      if (options.vk) {
-        if (typeof pokerSavePwaVkSession === "function") pokerSavePwaVkSession(record.token, record.user);
-      } else if (typeof pokerSavePwaTgSession === "function") {
-        pokerSavePwaTgSession(record.token, record.user, {
-          authMethod: record.authMethod || "telegram",
-          gazettePlannerAccess: record.gazettePlannerAccess === true,
-          adminAccess: record.adminAccess === true,
-          adminReportAccess: record.adminReportAccess === true,
-        });
-      }
-    } catch (eRehydratePwaAuth) {}
-    pokerMaybeRememberMemberIdFromUser(u);
-    pokerSetAuthMethod(record.authMethod || (options.vk ? "vk" : "telegram"));
-    updateHeaderGreeting();
-    showAuthorized(u);
-    loadHeaderAvatar();
-    if (typeof options.hideBootOverlay === "function") options.hideBootOverlay();
-    try {
-      window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, vk: !!options.vk } }));
-    } catch (ePwaRestoreDispatch) {}
-    return true;
+    return !!(pwaAuthRestoreRuntime && pwaAuthRestoreRuntime.restorePwaSideAuthRecord && pwaAuthRestoreRuntime.restorePwaSideAuthRecord(record, opts));
   }
-
   function attemptPwaSideAuthRestoreAsync(hideBootOverlay) {
-    if (attemptPwaSideAuthRestore(hideBootOverlay)) return Promise.resolve(true);
-    if (typeof pokerReadPwaSessionRecordAsync !== "function") return Promise.resolve(false);
-    return pokerReadPwaSessionRecordAsync(POKER_PWA_TG_SESSION_KEY)
-      .then(function (so) {
-        if (restorePwaSideAuthRecord(so, { hideBootOverlay: hideBootOverlay })) return true;
-        return pokerReadPwaSessionRecordAsync(POKER_PWA_VK_SESSION_KEY).then(function (soV) {
-          return restorePwaSideAuthRecord(soV, { hideBootOverlay: hideBootOverlay, vk: true });
-        });
-      })
-      .catch(function () {
-        return false;
-      });
+    if (!pwaAuthRestoreRuntime || !pwaAuthRestoreRuntime.attemptPwaSideAuthRestoreAsync) return Promise.resolve(false);
+    return pwaAuthRestoreRuntime.attemptPwaSideAuthRestoreAsync(hideBootOverlay);
   }
-
-  /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */
   function runPwaStandaloneUnidentifiedFlow(hideBootOverlay) {
-    if (restoreSavedPwaAuthBeforeGate()) {
-      updateHeaderGreeting();
-      try {
-        var restoredAuth = window.__pokerTelegramAuth;
-        if (restoredAuth && restoredAuth.user) {
-          showAuthorized(restoredAuth.user);
-          loadHeaderAvatar();
-          window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: restoredAuth.user, pwa: true, restored: true } }));
-        }
-      } catch (eEarlyStandaloneRestore) {}
-      try {
-        if (typeof hideBootOverlay === "function") hideBootOverlay();
-      } catch (eEarlyStandaloneBoot) {}
-      return;
+    if (pwaAuthRestoreRuntime && pwaAuthRestoreRuntime.runPwaStandaloneUnidentifiedFlow) {
+      pwaAuthRestoreRuntime.runPwaStandaloneUnidentifiedFlow(hideBootOverlay);
     }
-    showPwaAuthScreen();
-    setPwaAuthIdentifyingPhase(true);
-    try {
-      if (typeof hideBootOverlay === "function") hideBootOverlay();
-    } catch (eBoot0) {}
-    if (attemptPwaSideAuthRestore(hideBootOverlay)) {
-      setPwaAuthIdentifyingPhase(false);
-      return;
-    }
-    try {
-      window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
-      updateHeaderGreeting();
-    } catch (eHdr) {}
-    function finishPwaStandaloneIdentifyUi() {
-      try {
-        showPwaStandaloneEntryScreen();
-      } catch (ePwaFlow) {
-        try {
-          setPwaAuthIdentifyingPhase(false);
-          document.body.classList.remove("pwa-auth-gated");
-          document.body.classList.remove("pwa-auth-preinit");
-        } catch (e2) {}
-        if (typeof window.__pokerHideBootOverlay === "function") {
-          try {
-            window.__pokerHideBootOverlay();
-          } catch (e3) {}
-        }
-      } finally {
-        try {
-          setPwaAuthIdentifyingPhase(false);
-        } catch (eF) {}
-      }
-    }
-    attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
-      if (restored) {
-        setPwaAuthIdentifyingPhase(false);
-        return;
-      }
-      setTimeout(finishPwaStandaloneIdentifyUi, PWA_AUTH_IDENTIFY_MIN_MS);
-    });
-    /* Фолбэк: если основной таймер не отработал или фаза залипла — снять «идентификацию» и показать кнопки входа. */
-    setTimeout(function () {
-      try {
-        if (!pwaAuthScreenEl || !pwaAuthScreenEl.classList.contains("pwa-auth-screen--identifying")) return;
-        finishPwaStandaloneIdentifyUi();
-      } catch (eWd) {}
-    }, 5000);
   }
 
   function runVerifyFlow() {
