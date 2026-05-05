@@ -829,8 +829,8 @@ html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-tel
 }
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top,
 html.poker-ios-pwa.chat-keyboard-open:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header {
-  position: relative !important;
-  top: auto !important;
+  position: sticky !important;
+  top: 0 !important;
   left: auto !important;
   right: auto !important;
   flex: 0 0 auto !important;

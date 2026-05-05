@@ -860,8 +860,8 @@ html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not
 
 html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-general-view:not(.chat-general-view--hidden) .chat-general-header,
 html.poker-ios-pwa.chat-keyboard-open body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
-  position: relative !important;
-  top: auto !important;
+  position: sticky !important;
+  top: 0 !important;
   left: auto !important;
   right: auto !important;
   flex: 0 0 auto !important;

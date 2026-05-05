@@ -9123,7 +9123,7 @@ function initChat() {
         } catch (ePwaRootLockFocus) {}
         try {
           if (shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) {
-            maybeApplyCssOnlyIosPwaChatComposerDock(focusTarget, "focus");
+            applyCssOnlyIosPwaChatComposerDock(focusTarget, "focus");
           }
         } catch (eCssOnlyFocusDock) {}
         try {
