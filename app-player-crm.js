@@ -2037,6 +2037,9 @@
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
+        try {
+          period.blur();
+        } catch (ePeriodBlur) {}
         loadCrmData("data");
       });
     }
@@ -2064,6 +2067,9 @@
         state.chartPeriod = chartPeriod.value || "30";
         if (state.chartPeriod === "custom") setDefaultChartDates();
         syncPeriodInputs();
+        try {
+          chartPeriod.blur();
+        } catch (eChartPeriodBlur) {}
         loadCrmData("chart");
       });
     }
@@ -2213,6 +2219,15 @@
       section.style.setProperty("position", "relative", "important");
       section.style.setProperty("z-index", "2", "important");
       section.style.setProperty("min-height", "240px", "important");
+      section.style.removeProperty("top");
+      section.style.removeProperty("right");
+      section.style.removeProperty("bottom");
+      section.style.removeProperty("left");
+      section.style.removeProperty("height");
+      section.style.removeProperty("max-height");
+      section.style.removeProperty("overflow-y");
+      section.style.removeProperty("-webkit-overflow-scrolling");
+      section.style.removeProperty("padding");
     }
   }
 
