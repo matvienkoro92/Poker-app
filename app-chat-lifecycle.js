@@ -9670,6 +9670,65 @@ function initChat() {
           return false;
         }
       }
+      function rescueIosPwaChatComposerBlurUnlessExplicit(target, label) {
+        try {
+          if (!target || !isChatThreadComposerKeyboardDom(target)) return false;
+          if (isRecentIosPwaChatComposerUserDismiss()) return false;
+          if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return false;
+          if (isTelegramChatRuntime() && !isPokerIosPwaKeyboardRuntime()) return false;
+          if (typeof pokerPwaStandaloneForKeyboardInset !== "function" || !pokerPwaStandaloneForKeyboardInset()) return false;
+          if (typeof isIosLikeForChatViewport !== "function" || !isIosLikeForChatViewport()) return false;
+          var active = document.activeElement || null;
+          if (
+            active &&
+            active !== document.body &&
+            active !== document.documentElement &&
+            String(active.tagName || "").toUpperCase() !== "BODY" &&
+            String(active.tagName || "").toUpperCase() !== "HTML" &&
+            active !== target
+          ) {
+            return false;
+          }
+          markPwaChatKeyboardOpenIntent(target, "blur-rescue:" + (label || ""));
+          clearPendingChatKeyboardDismissTimers();
+          window.__pokerChatPwaUserDismissAt = 0;
+          window.__pokerChatKeyboardFocusAtMs = Date.now();
+          window.__pokerChatKeyboardOpeningUntil = Date.now() + 1800;
+          window.__pokerChatManualFocusIntentUntil = Date.now() + 2200;
+          window.__pokerChatManualFocusIntentTarget = target;
+          document.documentElement.classList.add("chat-keyboard-open");
+          document.body.classList.add("chat-keyboard-open");
+          try {
+            applyCssOnlyIosPwaChatComposerDock(target, "blur-rescue:" + (label || ""));
+          } catch (eBlurRescueDock) {}
+          [0, 40, 120, 260].forEach(function (ms) {
+            setTimeout(function () {
+              try {
+                if (!target || target.disabled || target.hidden) return;
+                if (isRecentIosPwaChatComposerUserDismiss()) return;
+                if (!document.body || String(document.body.getAttribute("data-view") || "") !== "chat") return;
+                var currentActive = document.activeElement || null;
+                if (
+                  currentActive &&
+                  currentActive !== document.body &&
+                  currentActive !== document.documentElement &&
+                  String(currentActive.tagName || "").toUpperCase() !== "BODY" &&
+                  String(currentActive.tagName || "").toUpperCase() !== "HTML" &&
+                  currentActive !== target
+                ) {
+                  return;
+                }
+                if (document.activeElement !== target && target.focus) target.focus({ preventScroll: true });
+                if (document.activeElement === target) applyCssOnlyIosPwaChatComposerDock(target, "blur-rescue-t" + ms);
+              } catch (eBlurRescueTick) {}
+            }, ms);
+          });
+          collectChatOverscrollSnapshot("blur:rescue-no-explicit-dismiss:" + (label || ""), target);
+          return true;
+        } catch (eBlurRescue) {
+          return false;
+        }
+      }
       function onChatInputBlur(focusTarget) {
         logChatKeyboardDebug("blur");
         collectChatOverscrollSnapshot("blur:start");
@@ -9699,6 +9758,9 @@ function initChat() {
         }
         hideTelegramMiniAppChatThreadDebugOverlay();
         detachTelegramIosChatComposerOverlayViewportSync();
+        if (rescueIosPwaChatComposerBlurUnlessExplicit(focusTarget || chatComposerEl, "early")) {
+          return;
+        }
         if (refocusIosPwaChatComposerAfterTransientBlur(focusTarget || chatComposerEl, "early")) {
           return;
         }
