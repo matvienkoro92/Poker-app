@@ -53,6 +53,7 @@ function initChatConversationShell(opts) {
   var loadMessages = typeof opts.loadMessages === "function" ? opts.loadMessages : function () {};
   var mountChatComposer = typeof opts.mountChatComposer === "function" ? opts.mountChatComposer : function () {};
   var syncChatInertForIosAccessory = typeof opts.syncChatInertForIosAccessory === "function" ? opts.syncChatInertForIosAccessory : function () {};
+  var CHAT_OPEN_SNAPSHOT_FRESH_MS = 5000;
 
 function setChatConversationOpenClass(on) {
   try {
@@ -66,6 +67,16 @@ function setChatConversationOpenClass(on) {
   try {
     if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
   } catch (eConvPad) {}
+}
+
+function isOpenSnapshotFresh(snapshot) {
+  var meta = snapshot && snapshot.meta && typeof snapshot.meta === "object" ? snapshot.meta : null;
+  if (!meta) return false;
+  var source = String(meta.source || "");
+  if (source === "disk") return false;
+  var ts = Number(meta.ts || 0);
+  if (!ts || !isFinite(ts)) return false;
+  return Date.now() - ts <= CHAT_OPEN_SNAPSHOT_FRESH_MS;
 }
 try {
   window.pokerSetChatConversationOpenClass = setChatConversationOpenClass;
@@ -209,7 +220,7 @@ function showConv(userId, userName, peerP21IdFromContact, peerAvatarUrlOpt, peer
     pokerHydrateChatSnapshotsFromDisk();
     var openSnapshot = getPersonalMessagesSnapshotForOpen(userId);
     var openMessages = openSnapshot && Array.isArray(openSnapshot.messages) ? openSnapshot.messages : null;
-    if (openMessages && openMessages.length) {
+    if (openMessages && openMessages.length && isOpenSnapshotFresh(openSnapshot)) {
       var openMessagesCopy = pokerMessagesForFastOpenSnapshot(openMessages);
       setLastPersonalMessagesSig(personalRenderSignature(userId || "", openMessagesCopy, false));
       renderMessages(openMessagesCopy);
