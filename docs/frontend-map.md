@@ -69,10 +69,10 @@
 - `styles-chat-threads-contacts.css` — layout тредов, закрепы, шапки общего/личного чата и строки контактов.
 - `styles-chat-threads-contacts-responsive.css` — responsive thread layout и Telegram-only top clearance для chat header/back под нативную кнопку `Закрыть`.
 - `styles-chat-prelude.css`, `styles-chat-after.css` — legacy-блоки, которые пока оставлены вокруг chat-каскада для сохранения порядка.
-- `styles-rating.css` — rating CSS entrypoint; только `@import`, порядок менять осторожно.
-- `styles-rating-learning-games.css` — видеоуроки, poker tasks и игровые challenge-поверхности.
-- `styles-rating-raffles.css` — розыгрыши, tickets, участники, победители и raffle admin.
-- `styles-rating-home-download.css` — legacy home/download-блоки, которые пока оставлены перед рейтингами для сохранения порядка.
+- `styles-learning-games.css` — видеоуроки, poker tasks и игровые challenge-поверхности; импортирует legacy split `styles-rating-learning-games.css`.
+- `styles-raffles.css` — розыгрыши, tickets, участники, победители и raffle admin; импортирует legacy split `styles-rating-raffles.css`.
+- `styles-download.css` — download entrypoint и legacy home/download-блоки; импортирует `styles-rating-home-download.css`.
+- `styles-rating.css` — rating CSS entrypoint для таблиц/модалок; только `@import`, порядок менять осторожно.
 - `styles-rating-tables-modals.css` — зимний/весенний рейтинг, таблицы, podium, share/actions и rating history modals.
 - `styles-rating-chat-modals.css` — chat preview, user card и template modals, которые раньше шли после rating rules.
 - `styles-hall.css` — hall CSS entrypoint; только `@import`, порядок менять осторожно.

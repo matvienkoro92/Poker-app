@@ -58,6 +58,7 @@ const baseFiles = [
   'styles.css',
   'css-manifest.json',
   'js-manifest.json',
+  'global-deps-manifest.json',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',

@@ -17,6 +17,7 @@
 - `styles.css` — CSS entrypoint; ownership описан в `css-manifest.json`
 - `app.js` — тонкий bootstrap; основная клиентская логика разнесена по доменным `app-*.js`
 - `js-manifest.json` — карта JS-доменов и lazy-loading
+- `global-deps-manifest.json` — smoke-контракт browser globals между доменами
 - `api/[[...slug]].js` — единая точка входа API на Vercel
 - `lib/api-handlers/` — обработчики API
 - `lib/redis.js` — общий Redis слой поверх Upstash REST API

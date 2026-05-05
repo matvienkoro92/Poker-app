@@ -21,9 +21,21 @@
       "owner": "chat",
       "scope": "chat shell, dialogs, messages, composer, threads, overlays"
     },
+    "learning": {
+      "owner": "learning",
+      "scope": "learning, video lesson support styles, and small game surfaces"
+    },
+    "raffles": {
+      "owner": "raffles",
+      "scope": "raffles, tickets, participants, winners, and raffle admin surfaces"
+    },
+    "download": {
+      "owner": "download",
+      "scope": "download pages and legacy home/download selector tail"
+    },
     "rating": {
       "owner": "rating",
-      "scope": "rating pages, tables, learning/games pages, rating modals"
+      "scope": "rating pages, tables, rating modals, and rating chat modal affordances"
     },
     "hall": {
       "owner": "hall-of-fame",
@@ -86,14 +98,23 @@
       "styles-chat-after-responsive.css",
       "styles-chat-overlays.css"
     ],
-    "rating": [
-      "styles-rating.css",
+    "learning": [
+      "styles-learning-games.css",
       "styles-rating-learning-games.css",
       "styles-rating-learning.css",
       "styles-rating-games.css",
-      "styles-rating-learning-games-responsive.css",
-      "styles-rating-raffles.css",
-      "styles-rating-home-download.css",
+      "styles-rating-learning-games-responsive.css"
+    ],
+    "raffles": [
+      "styles-raffles.css",
+      "styles-rating-raffles.css"
+    ],
+    "download": [
+      "styles-download.css",
+      "styles-rating-home-download.css"
+    ],
+    "rating": [
+      "styles-rating.css",
       "styles-rating-tables-modals.css",
       "styles-rating-tables.css",
       "styles-rating-modals.css",
@@ -134,7 +155,7 @@
       "auth",
       "home",
       "tournament",
-      "rating",
+      "download",
       "layout"
     ],
     "chat": [
@@ -144,7 +165,7 @@
     ],
     "download": [
       "base",
-      "rating",
+      "download",
       "layout"
     ],
     "cashout": [
@@ -159,12 +180,37 @@
     ],
     "raffles": [
       "base",
-      "rating",
+      "raffles",
       "layout"
     ],
     "video-lessons": [
       "base",
-      "rating",
+      "learning",
+      "layout"
+    ],
+    "learn-play-hub": [
+      "base",
+      "learning",
+      "layout"
+    ],
+    "bonus-game": [
+      "base",
+      "learning",
+      "layout"
+    ],
+    "cooler-game": [
+      "base",
+      "learning",
+      "layout"
+    ],
+    "plasterer-game": [
+      "base",
+      "learning",
+      "layout"
+    ],
+    "poker-tasks": [
+      "base",
+      "learning",
       "layout"
     ],
     "hall-of-fame": [

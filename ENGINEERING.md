@@ -35,8 +35,9 @@ Manifests:
 
 - `js-manifest.json`: app module ownership by domain.
 - `css-manifest.json`: style ownership by domain.
+- `global-deps-manifest.json`: explicit browser global exports/consumers by domain.
 
-Both manifests are copied to `public/` and checked by `npm run smoke`.
+All manifests are copied to `public/` and checked by `npm run smoke`.
 
 ## JS Domains
 
@@ -57,10 +58,12 @@ Critical order is protected in smoke checks. Keep `app-auth.js` before auth cons
 
 - `styles-auth.css`: PWA/auth styles.
 - `styles-home.css`: home entrypoint split into shell, sections, modals and planner.
-- `styles-home-tournament.css`: late home tournament overrides.
+- `styles-tournament.css`: tournament day and explicit tournament/home surfaces.
 - `styles-chat.css`: chat entrypoint and split chat surfaces.
-- `styles-rating.css`: rating entrypoint and split rating surfaces.
-- `styles-tournament.css`: tournament day styles.
+- `styles-learning-games.css`: learning/video/game entrypoint.
+- `styles-raffles.css`: raffles entrypoint.
+- `styles-download.css`: download entrypoint and legacy home/download selector tail.
+- `styles-rating.css`: rating tables, rating modals and rating chat modal affordances.
 - `styles-hall.css`, `styles-profile.css`, `styles-admin.css`, `styles-layout.css`: domain surfaces.
 
 When splitting CSS, preserve cascade order. Prefer turning the old large file into an entrypoint and moving contiguous blocks into imported files; verify by comparing the old file with the concatenated split files.

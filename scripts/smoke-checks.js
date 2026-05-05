@@ -46,8 +46,10 @@ const files = {
   pwaSessionLib: read("lib/poker-pwa-session.js"),
   cssManifest: read("css-manifest.json"),
   jsManifest: read("js-manifest.json"),
+  globalDepsManifest: read("global-deps-manifest.json"),
   bumpPwaVersion: read("scripts/bump-pwa-login-version.js"),
   styles: read("styles.css"),
+  stylesRating: read("styles-rating.css"),
 };
 
 const checks = [];
@@ -179,6 +181,45 @@ function jsManifestDomainMap() {
     return {};
   }
   return parsed && parsed.domains && typeof parsed.domains === "object" ? parsed.domains : {};
+}
+
+function globalDepsManifestData() {
+  try {
+    return JSON.parse(files.globalDepsManifest);
+  } catch (err) {
+    return {};
+  }
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function fileContainsGlobalExport(rel, name) {
+  let text;
+  try {
+    text = read(rel);
+  } catch (err) {
+    return false;
+  }
+  const n = escapeRegex(name);
+  const patterns = [
+    new RegExp("\\bfunction\\s+" + n + "\\s*\\("),
+    new RegExp("\\b(?:var|let|const)\\s+" + n + "\\b"),
+    new RegExp("\\bwindow\\s*\\.\\s*" + n + "\\s*="),
+    new RegExp("\\bwindow\\s*\\[\\s*[\"']" + n + "[\"']\\s*\\]\\s*="),
+  ];
+  return patterns.some((pattern) => pattern.test(text));
+}
+
+function fileContainsGlobalConsumer(rel, name) {
+  let text;
+  try {
+    text = read(rel);
+  } catch (err) {
+    return false;
+  }
+  return new RegExp("\\b" + escapeRegex(name) + "\\b").test(text);
 }
 
 function indexScriptOrder() {
@@ -766,6 +807,28 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
 
+add("Global dependency manifest covers exported browser globals", () => {
+  const manifest = globalDepsManifestData();
+  const items = manifest && Array.isArray(manifest.globals) ? manifest.globals : [];
+  const seen = new Set();
+  return manifest.entrypoint === "index.html" &&
+    items.length >= 10 &&
+    items.every((item) => {
+      if (!item || typeof item !== "object") return false;
+      const name = typeof item.name === "string" ? item.name.trim() : "";
+      const domain = typeof item.domain === "string" ? item.domain.trim() : "";
+      const exportedBy = Array.isArray(item.exportedBy) ? item.exportedBy : [];
+      const consumedBy = Array.isArray(item.consumedBy) ? item.consumedBy : [];
+      if (!name || !domain || seen.has(domain + ":" + name)) return false;
+      seen.add(domain + ":" + name);
+      if (!exportedBy.length || !consumedBy.length) return false;
+      if (!exportedBy.every((file) => fs.existsSync(path.join(root, file)))) return false;
+      if (!consumedBy.every((file) => fs.existsSync(path.join(root, file)))) return false;
+      if (!exportedBy.some((file) => fileContainsGlobalExport(file, name))) return false;
+      return consumedBy.every((file) => fileContainsGlobalConsumer(file, name));
+    });
+});
+
 add("Network helpers stay isolated from the app monolith", () =>
   hasAll("appNetwork", [
     "var POKER_NET_ERR",
@@ -1072,6 +1135,9 @@ add("CSS manifest maps split home and tournament domains", () => {
     '"auth":',
     '"home":',
     '"tournament":',
+    '"learning":',
+    '"raffles":',
+    '"download":',
     '"styles-home-shell.css"',
     '"styles-home-sections.css"',
     '"styles-home-modals.css"',
@@ -1092,6 +1158,9 @@ add("CSS manifest maps split home and tournament domains", () => {
     '"styles-hall-main-shell.css"',
     '"styles-hall-main-players.css"',
     '"styles-hall-main-responsive.css"',
+    '"styles-learning-games.css"',
+    '"styles-raffles.css"',
+    '"styles-download.css"',
     '"styles-rating-learning.css"',
     '"styles-rating-games.css"',
     '"styles-rating-learning-games-responsive.css"',
@@ -1102,8 +1171,27 @@ add("CSS manifest maps split home and tournament domains", () => {
     views.home.includes("home") &&
     views.home.includes("tournament") &&
     views.chat.includes("chat") &&
+    views.raffles.includes("raffles") &&
+    views.download.includes("download") &&
+    views["video-lessons"].includes("learning") &&
     views["spring-rating"].includes("rating");
 });
+
+add("Rating CSS entrypoint no longer owns learning games raffles or download", () =>
+  hasAll("styles", [
+    "styles-learning-games.css?v=",
+    "styles-raffles.css?v=",
+    "styles-download.css?v=",
+    "styles-rating.css?v=",
+  ]) &&
+  !has("stylesRating", "styles-rating-learning-games.css") &&
+  !has("stylesRating", "styles-rating-raffles.css") &&
+  !has("stylesRating", "styles-rating-home-download.css") &&
+  hasAll("stylesRating", [
+    "styles-rating-tables-modals.css",
+    "styles-rating-chat-modals.css",
+  ])
+);
 
 add("Admin auth debug panel is wired", () =>
   hasAll("globalModalsFragment", [

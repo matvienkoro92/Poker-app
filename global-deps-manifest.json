@@ -1,0 +1,83 @@
+{
+  "entrypoint": "index.html",
+  "globals": [
+    {
+      "name": "pokerEnsureViewHtml",
+      "domain": "htmlFragments",
+      "exportedBy": ["app-html-fragments.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "pokerEnsureViewScripts",
+      "domain": "lazyLoader",
+      "exportedBy": ["app-lazy-loader.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "pokerEnsureGlobalModalScriptsForTarget",
+      "domain": "lazyLoader",
+      "exportedBy": ["app-lazy-loader.js"],
+      "consumedBy": ["app-html-fragments.js"]
+    },
+    {
+      "name": "resolveHallFameSectionFromStartParam",
+      "domain": "hallDeepLinks",
+      "exportedBy": ["app-lazy-loader.js", "app-hall-fame.js"],
+      "consumedBy": ["app-home-gazette-tasks.js"]
+    },
+    {
+      "name": "navigateToHallFameSection",
+      "domain": "hallDeepLinks",
+      "exportedBy": ["app-lazy-loader.js", "app-hall-fame.js"],
+      "consumedBy": ["app-home-gazette-tasks.js"]
+    },
+    {
+      "name": "initRaffles",
+      "domain": "raffles",
+      "exportedBy": ["app-raffles.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "initVideoLessons",
+      "domain": "video",
+      "exportedBy": ["app-video-lessons.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "initEquilator",
+      "domain": "tools",
+      "exportedBy": ["app-equilator.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "initStreams",
+      "domain": "streams",
+      "exportedBy": ["app-streams.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "pokerInitAdminReportModal",
+      "domain": "adminReports",
+      "exportedBy": ["app-admin-reports.js"],
+      "consumedBy": ["app-html-fragments.js"]
+    },
+    {
+      "name": "pokerInitPlayerCrm",
+      "domain": "playerCrm",
+      "exportedBy": ["app-player-crm.js"],
+      "consumedBy": ["app-html-fragments.js", "app-view-router.js"]
+    },
+    {
+      "name": "initChat",
+      "domain": "chat",
+      "exportedBy": ["app-chat-lifecycle.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "chatShowDialogs",
+      "domain": "chat",
+      "exportedBy": ["app-chat-lifecycle.js"],
+      "consumedBy": ["app-view-router.js"]
+    }
+  ]
+}

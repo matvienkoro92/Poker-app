@@ -12,6 +12,8 @@ process.env.UPSTASH_REDIS_REST_TOKEN = "mock-token";
 process.env.TELEGRAM_BOT_TOKEN = BOT_TOKEN;
 process.env.TELEGRAM_ADMIN_ID = "388008256";
 process.env.CLUB_CHAT_REQUIRE_APPLICATION = "0";
+process.env.CRON_SECRET = "contract-cron-secret";
+process.env.MINI_APP_URL = "https://t.me/Poker_dvatuza_bot/DvaTuza";
 process.env.NODE_ENV = "test";
 
 class MemoryRedis {
@@ -55,6 +57,15 @@ class MemoryRedis {
       this.kv.set(key, String(command[2] == null ? "" : command[2]));
       return this.result("OK");
     }
+    if (cmd === "SETEX") {
+      this.kv.set(key, String(command[3] == null ? "" : command[3]));
+      return this.result("OK");
+    }
+    if (cmd === "INCR") {
+      const next = (parseInt(this.kv.get(key) || "0", 10) || 0) + 1;
+      this.kv.set(key, String(next));
+      return this.result(next);
+    }
     if (cmd === "DEL") {
       let n = 0;
       for (let i = 1; i < command.length; i += 1) {
@@ -78,6 +89,13 @@ class MemoryRedis {
       }
       return this.result(count);
     }
+    if (cmd === "HSETNX") {
+      const h = this.h(key);
+      const field = String(command[2]);
+      if (h.has(field)) return this.result(0);
+      h.set(field, String(command[3] == null ? "" : command[3]));
+      return this.result(1);
+    }
     if (cmd === "HDEL") {
       const h = this.h(key);
       let count = 0;
@@ -100,6 +118,7 @@ class MemoryRedis {
       const h = this.h(key);
       return this.result(command.slice(2).map((field) => h.has(String(field)) ? h.get(String(field)) : null));
     }
+    if (cmd === "HLEN") return this.result(this.h(key).size);
     if (cmd === "LPUSH") {
       const l = this.l(key);
       for (let i = 2; i < command.length; i += 1) l.unshift(String(command[i]));
@@ -171,6 +190,7 @@ class MemoryRedis {
     }
     if (cmd === "SISMEMBER") return this.result(this.s(key).has(String(command[2])) ? 1 : 0);
     if (cmd === "SMEMBERS") return this.result(Array.from(this.s(key)));
+    if (cmd === "SCARD") return this.result(this.s(key).size);
     if (cmd === "ZADD") {
       this.z(key).set(String(command[3]), Number(command[2]) || 0);
       return this.result(1);
@@ -178,6 +198,17 @@ class MemoryRedis {
     if (cmd === "ZSCORE") {
       const z = this.z(key);
       return this.result(z.has(String(command[2])) ? String(z.get(String(command[2]))) : null);
+    }
+    if (cmd === "ZREVRANGE") {
+      const z = this.z(key);
+      let start = parseInt(command[2], 10) || 0;
+      let stop = parseInt(command[3], 10);
+      const items = Array.from(z.entries())
+        .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))
+        .map((entry) => entry[0]);
+      if (start < 0) start = items.length + start;
+      if (stop < 0) stop = items.length + stop;
+      return this.result(items.slice(Math.max(0, start), stop + 1));
     }
     return this.result(null);
   }
@@ -438,6 +469,270 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
 }
 
+async function testAuthEmailAndPwaCode(redis) {
+  process.env.RESEND_API_KEY = "contract-resend-key";
+  process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
+
+  const authEmail = loadHandler("auth-email");
+  let r = await call(authEmail, req("POST", {}, {
+    action: "request",
+    email: "Player@Test.com",
+    dtIdHint: "ID123456",
+  }));
+  assert.strictEqual(r.statusCode, 200, "email code request succeeds");
+  assert.strictEqual(r.body.sent, true, "email code request marks sent");
+
+  const emailCode = JSON.parse(redis.kv.get("poker_app:email_code:player@test.com"));
+  assert.strictEqual(emailCode.dtId, "ID123456", "email code keeps hinted account id");
+  assert.ok(/^\d{6}$/.test(emailCode.code), "email code is 6 digits");
+
+  r = await call(authEmail, req("POST", {}, {
+    action: "verify",
+    email: "player@test.com",
+    code: emailCode.code,
+  }));
+  assert.strictEqual(r.statusCode, 200, "email code can be confirmed before password setup");
+  assert.strictEqual(r.body.passwordRequired, true, "email verify asks for password setup");
+
+  r = await call(authEmail, req("POST", {}, {
+    action: "verify",
+    email: "player@test.com",
+    code: emailCode.code,
+    password: "secret123",
+  }));
+  assert.strictEqual(r.statusCode, 200, "email verify with password succeeds");
+  assert.strictEqual(r.body.dtId, "ID123456", "email verify returns account id");
+  assert.ok(r.body.pwaSession, "email verify returns PWA session");
+  assert.strictEqual(redis.h("poker_app:email_links").get("player@test.com"), "ID123456", "email verify links email");
+  assert.strictEqual(redis.kv.has("poker_app:email_code:player@test.com"), false, "email verify clears code");
+
+  r = await call(authEmail, req("POST", {}, {
+    action: "login",
+    email: "PLAYER@test.com",
+    password: "secret123",
+  }));
+  assert.strictEqual(r.statusCode, 200, "email password login succeeds");
+  assert.strictEqual(r.body.dtId, "ID123456", "email password login returns linked account");
+
+  redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
+  const authPwaCode = loadHandler("auth-pwa-code");
+  r = await call(authPwaCode, req("POST", {}, { action: "request", username: "player" }));
+  assert.strictEqual(r.statusCode, 200, "telegram PWA code request succeeds");
+  assert.strictEqual(r.body.sent, true, "telegram PWA code request marks sent");
+
+  const tgCode = JSON.parse(redis.kv.get("poker_app:pwa_login_code:player"));
+  assert.strictEqual(tgCode.userId, "tg_1001", "telegram code binds the username account");
+  assert.ok(/^\d{6}$/.test(tgCode.code), "telegram PWA code is 6 digits");
+
+  r = await call(authPwaCode, req("POST", {}, {
+    action: "verify",
+    username: "player",
+    code: tgCode.code,
+    password: "secret123",
+  }));
+  assert.strictEqual(r.statusCode, 200, "telegram PWA verify succeeds");
+  assert.ok(r.body.pwaSession, "telegram PWA verify returns session");
+  assert.strictEqual(redis.kv.has("poker_app:pwa_login_code:player"), false, "telegram PWA verify clears code");
+
+  r = await call(authPwaCode, req("POST", {}, {
+    action: "login",
+    username: "player",
+    password: "secret123",
+  }));
+  assert.strictEqual(r.statusCode, 200, "telegram PWA password login succeeds");
+  assert.strictEqual(r.body.user.username, "player", "telegram PWA login returns username");
+}
+
+async function testFriendsFlow(redis) {
+  const friends = loadHandler("friends");
+  const s = sessions();
+  redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
+
+  let r = await call(friends, req("POST", {}, {
+    pwaSession: s.user,
+    targetUserId: "tg_1002",
+    contactName: "  Buddy\u0007  ",
+  }));
+  assert.strictEqual(r.statusCode, 200, "friend add succeeds");
+
+  const myAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1001");
+  const peerAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1002");
+  assert.ok(myAccountId && peerAccountId, "friends flow creates account ids");
+  assert.strictEqual(redis.s("poker_app:friends:" + myAccountId).has(peerAccountId), true, "friend add stores normalized account id");
+  assert.strictEqual(redis.h("poker_app:friend_alias:" + myAccountId).get(peerAccountId), "Buddy", "friend alias is sanitized");
+
+  r = await call(friends, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "friend list succeeds");
+  assert.strictEqual(r.body.friends.length, 1, "friend list returns added friend");
+  assert.strictEqual(r.body.friends[0].userId, peerAccountId, "friend list exposes account id");
+  assert.strictEqual(r.body.friends[0].chatUserId, "tg_1002", "friend list resolves chat id");
+  assert.strictEqual(r.body.friends[0].userName, "@peer", "friend list resolves username");
+  assert.strictEqual(r.body.friends[0].contactName, "Buddy", "friend list returns alias");
+
+  r = await call(friends, req("DELETE", {}, { pwaSession: s.user, targetUserId: "tg_1002" }));
+  assert.strictEqual(r.statusCode, 200, "friend delete succeeds");
+  assert.strictEqual(redis.s("poker_app:friends:" + myAccountId).has(peerAccountId), false, "friend delete removes member");
+  assert.strictEqual(redis.h("poker_app:friend_alias:" + myAccountId).has(peerAccountId), false, "friend delete removes alias");
+}
+
+async function testChatPushSubscribeAndBroadcast(redis) {
+  const webpush = require("web-push");
+  const keys = webpush.generateVAPIDKeys();
+  process.env.WEBPUSH_VAPID_PUBLIC_KEY = keys.publicKey;
+  process.env.WEBPUSH_VAPID_PRIVATE_KEY = keys.privateKey;
+  process.env.WEBPUSH_CONTACT_EMAIL = "mailto:contract@example.test";
+
+  const pushSubscribe = loadHandler("chat-push-subscribe");
+  const pushAdminBroadcast = loadHandler("chat-push-admin-broadcast");
+  const s = sessions();
+
+  let r = await call(pushSubscribe, req("GET"));
+  assert.strictEqual(r.statusCode, 200, "chat push public config succeeds");
+  assert.strictEqual(r.body.pushConfigured, true, "chat push sees VAPID config");
+
+  r = await call(pushSubscribe, req("POST", {}, { pwaSession: s.user, action: "status" }));
+  assert.strictEqual(r.statusCode, 200, "chat push status succeeds");
+  assert.strictEqual(r.body.notificationsEnabled, true, "chat push status starts enabled");
+  assert.strictEqual(r.body.hasSubscription, false, "chat push status starts without subscription");
+
+  const subscription = {
+    endpoint: "https://push.example.test/contract-user-1001",
+    expirationTime: null,
+    keys: {
+      p256dh: "BN-contract-p256dh",
+      auth: "contract-auth",
+    },
+  };
+  r = await call(pushSubscribe, req("POST", {}, { pwaSession: s.user, action: "subscribe", subscription }));
+  assert.strictEqual(r.statusCode, 200, "chat push subscribe succeeds");
+  assert.strictEqual(r.body.subscribed, true, "chat push subscribe returns subscribed");
+
+  const myAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1001");
+  assert.strictEqual(redis.s("poker_app:chat_push_registry").has(myAccountId), true, "chat push registry stores account id");
+  assert.strictEqual(redis.h("poker_app:chat_push_sub:" + myAccountId).size, 1, "chat push stores subscription hash");
+
+  r = await call(pushAdminBroadcast, req("GET", { pwaSession: s.admin }));
+  assert.strictEqual(r.statusCode, 200, "admin chat push list succeeds");
+  assert.strictEqual(r.body.count, 1, "admin chat push list sees active subscriber");
+
+  r = await call(pushSubscribe, req("POST", {}, { pwaSession: s.user, action: "disable" }));
+  assert.strictEqual(r.statusCode, 200, "chat push disable succeeds");
+  assert.strictEqual(r.body.notificationsEnabled, false, "chat push disable returns disabled");
+  assert.strictEqual(redis.s("poker_app:chat_push_registry").has(myAccountId), false, "chat push disable removes registry member");
+
+  r = await call(pushAdminBroadcast, req("POST", {}, {
+    pwaSession: s.admin,
+    title: "Contract broadcast",
+    text: "Contract body",
+    openUrl: "./?startapp=club_chat",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin chat push broadcast succeeds with no active recipients");
+  assert.strictEqual(r.body.recipients, 0, "admin chat push broadcast skips disabled subscriber");
+}
+
+async function testTrackingLinksFlow() {
+  const trackingLinks = loadHandler("tracking-links");
+  const trackingHit = loadHandler("tracking-link-hit");
+  const trackingEvent = loadHandler("tracking-link-event");
+  const s = sessions();
+
+  let r = await call(trackingLinks, req("POST", {}, {
+    pwaSession: s.admin,
+    label: "Contract story",
+    params: { utm: "contract", screen: "home" },
+  }));
+  assert.strictEqual(r.statusCode, 200, "tracking link create succeeds");
+  assert.ok(/^[a-f0-9]{8}$/.test(r.body.id), "tracking link create returns slug");
+  const slug = r.body.id;
+
+  r = await call(trackingHit, req("POST", {}, {
+    ref: "ref_" + slug,
+    visitor_id: "visitor#1",
+  }));
+  assert.strictEqual(r.statusCode, 200, "tracking hit succeeds");
+  assert.strictEqual(r.body.recorded, true, "tracking hit is recorded");
+
+  r = await call(trackingEvent, req("POST", {}, {
+    ref: "ref_" + slug,
+    visitor_id: "visitor#1",
+    action: "home:open",
+    detail: "hero",
+  }));
+  assert.strictEqual(r.statusCode, 200, "tracking event succeeds");
+  assert.strictEqual(r.body.recorded, true, "tracking event is recorded");
+
+  r = await call(trackingLinks, req("GET", { pwaSession: s.admin }));
+  assert.strictEqual(r.statusCode, 200, "tracking links list succeeds");
+  assert.strictEqual(r.body.links.length, 1, "tracking links list returns created link");
+  assert.strictEqual(r.body.links[0].id, slug, "tracking links list keeps slug");
+  assert.strictEqual(r.body.links[0].totalClicks, 1, "tracking links list counts total clicks");
+  assert.strictEqual(r.body.links[0].uniqueClicks, 1, "tracking links list counts unique clicks");
+  assert.strictEqual(r.body.links[0].actionEvents, 1, "tracking links list counts events");
+  assert.strictEqual(r.body.links[0].activeVisitors, 1, "tracking links list counts active visitors");
+
+  r = await call(trackingLinks, req("GET", { pwaSession: s.admin, id: slug, visitors: "1" }));
+  assert.strictEqual(r.statusCode, 200, "tracking visitors list succeeds");
+  assert.strictEqual(r.body.visitors.length, 1, "tracking visitors list returns hit");
+  assert.strictEqual(r.body.visitors[0].visitorId, "visitor_1", "tracking visitors list sanitizes visitor id");
+  assert.strictEqual(r.body.visitors[0].activity.total, 1, "tracking visitors list includes activity total");
+  assert.strictEqual(r.body.visitors[0].activity.counts["home:open"], 1, "tracking visitors list includes action count");
+}
+
+async function testRatingGazetteNotifications(redis) {
+  const ratingSubscribe = loadHandler("rating-subscribe");
+  const gazetteSubscribe = loadHandler("gazette-subscribe");
+  const s = sessions();
+
+  let r = await call(ratingSubscribe, req("POST", {}, { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "rating subscribe succeeds");
+  assert.strictEqual(r.body.subscribed, true, "rating subscribe returns subscribed");
+  assert.strictEqual(redis.s("poker_app:rating_subscribers").has("1001"), true, "rating subscribe stores Telegram chat id");
+
+  const ratingNotify = loadHandler("rating-notify");
+  r = await call(ratingNotify, req("POST", {}, {
+    ratingId: "contract-rating-1",
+    message: "Contract rating updated",
+  }, { "x-cron-secret": "contract-cron-secret" }));
+  assert.strictEqual(r.statusCode, 200, "rating notify succeeds");
+  assert.strictEqual(r.body.sent, 1, "rating notify sends to subscriber");
+  assert.strictEqual(r.body.total, 1, "rating notify counts subscribers");
+  assert.strictEqual(redis.s("poker_app:rating_notified_ids").has("contract-rating-1"), true, "rating notify stores idempotency key");
+
+  r = await call(ratingNotify, req("POST", {}, {
+    ratingId: "contract-rating-1",
+    message: "Contract rating updated again",
+  }, { "x-cron-secret": "contract-cron-secret" }));
+  assert.strictEqual(r.statusCode, 200, "rating notify duplicate succeeds");
+  assert.strictEqual(r.body.alreadySent, true, "rating notify duplicate is idempotent");
+
+  r = await call(gazetteSubscribe, req("POST", {}, { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "gazette subscribe succeeds");
+  assert.strictEqual(r.body.subscribed, true, "gazette subscribe returns subscribed");
+  assert.strictEqual(redis.s("poker_app:gazette_subscribers").has("1001"), true, "gazette subscribe stores Telegram chat id");
+
+  const gazetteNotify = loadHandler("gazette-notify");
+  r = await call(gazetteNotify, req("POST", {}, {
+    newsId: "contract-news-1",
+    message: "Contract gazette updated",
+    headline: "Contract headline",
+    postToChat: true,
+    articleIndex: 0,
+  }, { "x-cron-secret": "contract-cron-secret" }));
+  assert.strictEqual(r.statusCode, 200, "gazette notify succeeds");
+  assert.strictEqual(r.body.sent, 1, "gazette notify sends to subscriber");
+  assert.strictEqual(r.body.total, 1, "gazette notify counts subscribers");
+  assert.strictEqual(r.body.chatPosted, true, "gazette notify can post to chat");
+  assert.strictEqual(redis.s("poker_app:gazette_notified_ids").has("contract-news-1"), true, "gazette notify stores idempotency key");
+  assert.ok(redis.l("poker_app:chat_messages").some((line) => String(line).includes("Contract headline")), "gazette notify writes chat message");
+
+  r = await call(gazetteNotify, req("POST", {}, {
+    newsId: "contract-news-1",
+    message: "Contract gazette updated again",
+  }, { "x-cron-secret": "contract-cron-secret" }));
+  assert.strictEqual(r.statusCode, 200, "gazette notify duplicate succeeds");
+  assert.strictEqual(r.body.alreadySent, true, "gazette notify duplicate is idempotent");
+}
+
 async function testChatCoreInvariants() {
   const core = require(path.join(root, "lib", "chat-core.js"));
   const storage = require(path.join(root, "lib", "chat-storage.js"));
@@ -587,6 +882,11 @@ async function main() {
     ["raffle join/leave", testRaffleJoinLeave],
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
+    ["auth email and pwa code", testAuthEmailAndPwaCode],
+    ["friends add/list/delete", testFriendsFlow],
+    ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],
+    ["tracking links hit/event/list", testTrackingLinksFlow],
+    ["rating/gazette notifications", testRatingGazetteNotifications],
   ];
   const results = [];
   for (const [name, fn] of tests) {

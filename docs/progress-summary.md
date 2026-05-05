@@ -56,9 +56,10 @@ Smoke закрепляет, что эти домены больше не воз�
 - Smoke проверяет:
   - что split CSS-файлы покрыты manifest;
   - что root CSS-файлы реально импортируются;
+  - что rating entrypoint больше не импортирует learning/games/raffles/download;
   - что build output содержит все CSS imports.
 
-Оставшиеся CSS-риски: поздние `after/prelude/overrides` файлы и смешанный домен `rating`, где еще живут learning/games/download/raffles styles.
+Оставшиеся CSS-риски: поздние `after/prelude/overrides` файлы и legacy home/download selector tail, который еще требует selector-level split.
 
 ### Redis Layer
 
@@ -135,12 +136,6 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 ### P1
 
 - Закончить стабилизацию iOS PWA chat keyboard по метрикам из `Keyboard Lab`, а не визуально: проверить, что `chat-keyboard-open`, fixed header, composer bottom и root-scroll включаются в одном сценарии.
-- Расширить backend contract tests:
-  - friends;
-  - auth-email / auth-pwa-code;
-  - tracking links;
-  - push subscribe/broadcast;
-  - gazette/rating notifications.
 - Продолжить HTML split:
   - `cashout`;
   - `schedule`;
@@ -156,7 +151,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 
 - CSS cleanup:
   - уменьшить `after/prelude/overrides`;
-  - отделить `download/raffles/learning/games` от общего `rating` CSS;
+  - продолжить selector-level split legacy home/download tail;
   - добавить visual smoke еще на несколько экранов.
 - Assets:
   - добавить smoke на максимальный размер отдельного asset;
@@ -164,8 +159,8 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 
 ## Рекомендуемый порядок следующих работ
 
-1. Расширить backend contract tests.
-2. Вынести `cashout`, `schedule`, `streams` в HTML fragments.
-3. Разнести CSS домены, начиная с `rating`.
+1. Вынести `cashout`, `schedule`, `streams` в HTML fragments.
+2. Продолжить selector-level CSS split legacy home/download tail.
+3. Дочистить implicit globals до ES modules по доменам.
 4. Дочистить `app.js` до почти чистого bootstrap.
 5. Усилить продуктовую аналитику: funnel, retention, admin CRM reports.
