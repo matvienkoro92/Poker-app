@@ -11,6 +11,10 @@
       "app-network.js"
     ],
     "chat": [
+      "app-chat-header-avatar.js",
+      "app-chat-attachments.js",
+      "app-chat-emoji-picker.js",
+      "app-chat-reply-retry-glue.js",
       "app-chat-lifecycle.js",
       "app-chat-utils.js",
       "app-chat-render-utils.js",
@@ -39,34 +43,47 @@
       "app-chat-conversation-shell.js",
       "app-chat-tab-dialog-shell.js",
       "app-chat-open-shell.js",
+      "app-chat-open-peer-hydrate.js",
       "app-chat-club-gate.js",
       "app-chat-dialogs-meta.js",
       "app-chat-contacts-loader.js",
       "app-chat-self-pins.js",
       "app-chat-friend-actions.js",
+      "app-chat-contact-swipe-actions.js",
       "app-chat-unread.js",
       "app-chat-keyboard.js",
       "app-chat-auth-guard.js",
       "app-chat-bootstrap.js",
       "app-chat-dialog-actions.js",
+      "app-chat-dialog-preview.js",
       "app-chat-push-open.js",
       "app-chat-voice-media.js",
+      "app-chat-voice-recording.js",
       "app-chat-keyboard-overlay.js",
       "app-chat-scroll-bottom.js",
       "app-chat-composer-core.js",
-      "app-chat-presence-typing.js"
+      "app-chat-composer-send.js",
+      "app-chat-presence-typing.js",
+      "app-chat-bootstrap-prefetch.js",
+      "app-chat-keyboard-dock-foundation.js",
+      "app-chat-keyboard-dock-lifecycle.js",
+      "app-chat-keyboard-dock-composer-layout.js",
+      "app-chat-keyboard-dock-viewport-events.js",
+      "app-chat-keyboard-dock.js",
+      "app-chat-view-glue.js"
     ],
     "rating": [
       "app-rating-core.js",
       "app-rating-spring-season.js",
       "app-rating-view.js",
+      "app-rating-view-adapter.js",
       "app-rating-spring-runtime.js",
-      "app-rating-winter-runtime.js",
       "app-rating.js",
       "app-rating-week-tops.js",
       "spring-rating-data.js"
     ],
     "ratingWinter": [
+      "app-rating-winter-runtime.js",
       "winter-rating-data.js"
     ],
     "tournament": [
@@ -108,6 +125,11 @@
     "home": [
       "app-home-init.js",
       "app-home-media.js",
+      "app-home-planner.js",
+      "app-home-tasks.js",
+      "app-home-deeplinks.js",
+      "app-home-club-info-modals.js",
+      "app-home-vpn-proxy-modal.js",
       "app-home-gazette-tasks.js",
       "app-club-tasks.js",
       "app-updates.js"
@@ -121,7 +143,14 @@
       "peerjs.min.js"
     ],
     "raffles": [
-      "app-raffles.js"
+      "app-raffles-subscribe.js",
+      "app-raffles-broadcast.js",
+      "app-raffles-admin-create.js",
+      "app-raffles-completed.js",
+      "app-raffles-public.js",
+      "app-raffles-active-view.js",
+      "app-raffles.js",
+      "app-raffles-share.js"
     ],
     "playerCrm": [
       "app-player-crm.js"

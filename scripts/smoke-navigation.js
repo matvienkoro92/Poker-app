@@ -90,13 +90,23 @@ function chromiumExecutablePath() {
 
 async function clickVisibleOrSetView(page, target) {
   const clicked = await page.evaluate((targetName) => {
+    function isActuallyVisible(node) {
+      if (!node || !node.getBoundingClientRect) return false;
+      const view = node.closest && node.closest(".view");
+      if (view && !view.classList.contains("view--active")) return false;
+      let cur = node;
+      while (cur && cur.nodeType === 1) {
+        if (cur.hidden || cur.getAttribute("aria-hidden") === "true") return false;
+        const style = getComputedStyle(cur);
+        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+        cur = cur.parentElement;
+      }
+      const rect = node.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0 && rect.top < window.innerHeight && rect.left < window.innerWidth;
+    }
     const els = Array.from(document.querySelectorAll("[data-view-target]"))
       .filter((node) => node.getAttribute("data-view-target") === targetName);
-    const el = els.find((node) => {
-      const rect = node.getBoundingClientRect();
-      const style = getComputedStyle(node);
-      return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
-    });
+    const el = els.find(isActuallyVisible);
     if (!el) return false;
     el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
     return true;
@@ -122,7 +132,7 @@ async function main() {
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const errors = [];
-    page.on("pageerror", (err) => errors.push(String((err && err.message) || err)));
+    page.on("pageerror", (err) => errors.push(String((err && (err.stack || err.message)) || err)));
 
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(120);
@@ -143,7 +153,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       heavyScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-share)?|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       hiddenImages: performance.getEntriesByType("resource")
         .filter((entry) => /\/assets\/(?:download-hero)\./.test(entry.name))
@@ -154,16 +164,17 @@ async function main() {
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     const startupTags = new Set(initialLazy.startupScriptTags);
     const lazyTags = new Set(initialLazy.lazyScriptTags);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-spring-runtime.js", "app-rating-winter-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
       if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
     });
-    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "winter-rating-data.js"].forEach((file) => {
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"].forEach((file) => {
       if (!lazyTags.has(file)) throw new Error(`expected lazy script tag before navigation: ${file}`);
     });
     const initialHeavy = new Set(initialLazy.heavyScripts);
     ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
       if (initialHeavy.has(file)) throw new Error(`expected lazy script after navigation only: ${file}`);
     });
+    if (initialHeavy.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime should be lazy before winter navigation");
     if (initialHeavy.has("winter-rating-data.js")) throw new Error("winter rating data should be lazy before winter navigation");
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
@@ -210,7 +221,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       eagerDomainScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-admin-create|-completed|-public|-active-view|-share)?|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
     }));
 
@@ -234,13 +245,43 @@ async function main() {
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat scripts were not eager-loaded");
     const loadedDomainScripts = new Set(state.eagerDomainScripts);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-spring-runtime.js", "app-rating-winter-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
       if (!loadedDomainScripts.has(file)) throw new Error(`expected domain script after navigation: ${file}`);
     });
+    if (loadedDomainScripts.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime loaded during spring navigation");
     if (loadedDomainScripts.has("winter-rating-data.js")) throw new Error("winter rating data loaded during spring navigation");
+
+    const winterVia = await clickVisibleOrSetView(page, "winter-rating");
+    await page.waitForTimeout(500);
+    views.push({
+      target: "winter-rating",
+      via: winterVia,
+      view: await page.evaluate(() => document.body.getAttribute("data-view")),
+    });
+    const winterState = await page.evaluate(() => ({
+      bodyView: document.body.getAttribute("data-view"),
+      section: !!document.getElementById("winterRatingSection"),
+      springClass: !!(document.getElementById("winterRatingSection") && document.getElementById("winterRatingSection").classList.contains("spring-rating")),
+      counters: typeof window.getWinterRatingCounters,
+      winterData: typeof window.WINTER_RATING_BY_DATE,
+      loadedScripts: performance.getEntriesByType("resource")
+        .filter((entry) => /app-rating-winter-runtime\.js|winter-rating-data\.js/.test(entry.name))
+        .map((entry) => entry.name.split("/").pop().split("?")[0]),
+      executedLazyScripts: Array.from(document.scripts || [])
+        .filter((script) => script.src && (script.getAttribute("data-poker-loaded") === "1" || script.getAttribute("data-poker-lazy-loaded-from")))
+        .map((script) => script.src.split("/").pop().split("?")[0]),
+    }));
+    if (winterState.bodyView !== "winter-rating") throw new Error("winter rating view did not open");
+    if (!winterState.section) throw new Error("winter rating section is missing after lazy navigation");
+    if (winterState.springClass) throw new Error("winter rating section kept spring class after lazy navigation");
+    if (winterState.counters !== "function") throw new Error("winter rating runtime did not load");
+    if (winterState.winterData === "undefined") throw new Error("winter rating data did not load");
+    const winterLoadedScripts = new Set([].concat(winterState.loadedScripts, winterState.executedLazyScripts));
+    if (!winterLoadedScripts.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime script was not fetched");
+    if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

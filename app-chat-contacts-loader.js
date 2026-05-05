@@ -402,6 +402,11 @@ function applyContactsApiResponse(data, opts) {
   }
   try {
     window.__pokerApplyContactsApiResponse = applyContactsApiResponse;
+    if (window.__pokerPendingContactsApiResponse && window.__pokerPendingContactsApiResponse.data) {
+      var pendingContactsApply = window.__pokerPendingContactsApiResponse;
+      window.__pokerPendingContactsApiResponse = null;
+      applyContactsApiResponse(pendingContactsApply.data, pendingContactsApply.opts || {});
+    }
   } catch (eExposeContactsApply) {}
   try {
     window.__pokerForceRerenderChatContactsFromCache = function () {
@@ -514,6 +519,14 @@ function applyContactsApiResponse(data, opts) {
 }
 
   return {
+    applyContactsApiResponse: function (data, opts) {
+      if (typeof window.__pokerApplyContactsApiResponse === "function") {
+        return window.__pokerApplyContactsApiResponse(data, opts);
+      }
+      try {
+        window.__pokerPendingContactsApiResponse = { data: data, opts: opts || {}, at: Date.now() };
+      } catch (eQueueContactsApply) {}
+    },
     buildContactsRequestUrl: buildContactsRequestUrl,
     mergeContactsMetaPayload: mergeContactsMetaPayload,
     loadContacts: loadContacts,

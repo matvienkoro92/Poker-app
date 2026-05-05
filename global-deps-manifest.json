@@ -4,152 +4,535 @@
     {
       "name": "pokerEnsureViewHtml",
       "domain": "htmlFragments",
-      "exportedBy": ["app-html-fragments.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "pokerEnsureViewScripts",
       "domain": "lazyLoader",
-      "exportedBy": ["app-lazy-loader.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "pokerEnsureGlobalModalScriptsForTarget",
       "domain": "lazyLoader",
-      "exportedBy": ["app-lazy-loader.js"],
-      "consumedBy": ["app-html-fragments.js"]
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
     },
     {
       "name": "resolveHallFameSectionFromStartParam",
       "domain": "hallDeepLinks",
-      "exportedBy": ["app-lazy-loader.js", "app-hall-fame.js"],
-      "consumedBy": ["app-home-gazette-tasks.js"]
+      "exportedBy": [
+        "app-lazy-loader.js",
+        "app-hall-fame.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js"
+      ]
     },
     {
       "name": "navigateToHallFameSection",
       "domain": "hallDeepLinks",
-      "exportedBy": ["app-lazy-loader.js", "app-hall-fame.js"],
-      "consumedBy": ["app-home-gazette-tasks.js"]
+      "exportedBy": [
+        "app-lazy-loader.js",
+        "app-hall-fame.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js"
+      ]
     },
     {
       "name": "initRaffles",
       "domain": "raffles",
-      "exportedBy": ["app-raffles.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-raffles.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initVideoLessons",
       "domain": "video",
-      "exportedBy": ["app-video-lessons.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-video-lessons.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initEquilator",
       "domain": "tools",
-      "exportedBy": ["app-equilator.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-equilator.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initStreams",
       "domain": "streams",
-      "exportedBy": ["app-streams.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-streams.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "pokerInitAdminReportModal",
       "domain": "adminReports",
-      "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-html-fragments.js"]
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
     },
     {
       "name": "pokerInitPlayerCrm",
       "domain": "playerCrm",
-      "exportedBy": ["app-player-crm.js"],
-      "consumedBy": ["app-html-fragments.js", "app-view-router.js"]
+      "exportedBy": [
+        "app-player-crm.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js",
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initChat",
       "domain": "chat",
-      "exportedBy": ["app-chat-lifecycle.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-chat-lifecycle.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "chatShowDialogs",
       "domain": "chat",
-      "exportedBy": ["app-chat-lifecycle.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-chat-lifecycle.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initChatBootstrap",
       "domain": "chat",
-      "exportedBy": ["app-chat-bootstrap.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-bootstrap.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "pokerUpdateChatAdminShiftOnline",
       "domain": "chat",
-      "exportedBy": ["app-chat-bootstrap.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-bootstrap.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatPollingLoop",
       "domain": "chat",
-      "exportedBy": ["app-chat-bootstrap.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-bootstrap.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatDialogActions",
       "domain": "chat",
-      "exportedBy": ["app-chat-dialog-actions.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-dialog-actions.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatPushOpenHandlers",
       "domain": "chat",
-      "exportedBy": ["app-chat-push-open.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-push-open.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatVoiceMedia",
       "domain": "chat",
-      "exportedBy": ["app-chat-voice-media.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-voice-media.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatKeyboardOverlay",
       "domain": "chat",
-      "exportedBy": ["app-chat-keyboard-overlay.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-keyboard-overlay.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatScrollBottom",
       "domain": "chat",
-      "exportedBy": ["app-chat-scroll-bottom.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-scroll-bottom.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatComposerCore",
       "domain": "chat",
-      "exportedBy": ["app-chat-composer-core.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-composer-core.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initChatPresenceTyping",
       "domain": "chat",
-      "exportedBy": ["app-chat-presence-typing.js"],
-      "consumedBy": ["app-chat-lifecycle.js"]
+      "exportedBy": [
+        "app-chat-presence-typing.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDockRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatViewGlue",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-view-glue.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     },
     {
       "name": "initWinterRating",
       "domain": "rating",
-      "exportedBy": ["app-rating-winter-runtime.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-rating-view-adapter.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "initWinterRatingLightbox",
       "domain": "rating",
-      "exportedBy": ["app-rating-winter-runtime.js"],
-      "consumedBy": ["app.js"]
+      "exportedBy": [
+        "app-rating-view-adapter.js"
+      ],
+      "consumedBy": [
+        "app.js"
+      ]
+    },
+    {
+      "name": "getWinterRatingCounters",
+      "domain": "ratingWinter",
+      "exportedBy": [
+        "app-rating-winter-runtime.js"
+      ],
+      "consumedBy": [
+        "app-rating-view-adapter.js"
+      ]
+    },
+    {
+      "name": "pokerInitHomePlanner",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-planner.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js"
+      ]
+    },
+    {
+      "name": "pokerInitHomeTasks",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-tasks.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js"
+      ]
+    },
+    {
+      "name": "pokerInitHomeDeepLinks",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-deeplinks.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js"
+      ]
+    },
+    {
+      "name": "initRafflesSubscribeRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-subscribe.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initRafflesBroadcastRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-broadcast.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initRafflesAdminCreateRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-admin-create.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initRafflesCompletedRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-completed.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initRafflesPublicRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-public.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDockFoundation",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock-foundation.js"
+      ],
+      "consumedBy": [
+        "app-chat-keyboard-dock.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDockLifecycle",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock-lifecycle.js"
+      ],
+      "consumedBy": [
+        "app-chat-keyboard-dock.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDockComposerLayout",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock-composer-layout.js"
+      ],
+      "consumedBy": [
+        "app-chat-keyboard-dock.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDockViewportEvents",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-dock-viewport-events.js"
+      ],
+      "consumedBy": [
+        "app-chat-keyboard-dock.js"
+      ]
+    },
+    {
+      "name": "initChatHeaderAvatarRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-header-avatar.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatAttachmentsRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-attachments.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatBootstrapPrefetchRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatEmojiPickerRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-emoji-picker.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatReplyRetryGlue",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-reply-retry-glue.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initHomeClubInfoModals",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-club-info-modals.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js"
+      ]
+    },
+    {
+      "name": "initHomeVpnProxyModal",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-vpn-proxy-modal.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js"
+      ]
+    },
+    {
+      "name": "initRafflesActiveViewRuntime",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-active-view.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initChatOpenPeerHydrate",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-open-peer-hydrate.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatContactSwipeActions",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-contact-swipe-actions.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatDialogPreviewRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-dialog-preview.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatComposerSendRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-composer-send.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatVoiceRecordingRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-voice-recording.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
     }
   ]
 }
