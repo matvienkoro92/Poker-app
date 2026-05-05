@@ -1100,6 +1100,10 @@ body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-
 body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"],
 body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   position: fixed !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
   z-index: 1000 !important;
   inset: 0 0 var(--app-bottom-tabbar-pad) 0 !important;
   width: 100% !important;
@@ -1109,8 +1113,7 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
   max-height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
   max-height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow: hidden !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior-y: contain !important;
   touch-action: pan-y pinch-zoom !important;
@@ -1122,9 +1125,13 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
     linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
 }
 body[data-view="player-crm"] .view.view--active[data-view="player-crm"] > .bonus-game-back {
-  position: sticky !important;
-  top: 0 !important;
+  flex: 0 0 auto !important;
+  position: relative !important;
+  top: auto !important;
   z-index: 3 !important;
+}
+body[data-view="player-crm"] #playerCrmView.view--active > .admin-section-views {
+  display: none !important;
 }
 body[data-view="player-crm"] .view.view--active[data-view="player-crm"] .player-crm {
   width: min(1120px, 100%) !important;
@@ -1147,7 +1154,7 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   height: 100dvh !important;
   max-height: 100vh !important;
   max-height: 100dvh !important;
-  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px) !important;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
 }
 
 body:not([data-view="player-crm"]) #playerCrmView,
@@ -1160,23 +1167,37 @@ body:not([data-view="player-crm"]) #playerCrmView,
 
 body[data-view="player-crm"] #playerCrmView.view--active,
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
-  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
 body[data-view="player-crm"] #playerCrmView.view--active {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
   z-index: 2147483000 !important;
   pointer-events: auto !important;
   isolation: isolate !important;
+  overflow: hidden !important;
 }
 
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
+  display: block !important;
+  flex: 1 1 auto !important;
   position: relative !important;
   z-index: 2 !important;
   width: min(1120px, 100%) !important;
   max-width: 100% !important;
-  min-height: 240px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
   box-sizing: border-box !important;
   color: var(--text, #f8fafc) !important;
   transform: none !important;
