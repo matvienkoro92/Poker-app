@@ -6,7 +6,11 @@
       "app-auth.js",
       "app-pwa-auth-session.js",
       "app-pwa-auth-i18n.js",
+      "app-pwa-auth-language-ui.js",
+      "app-pwa-auth-telegram-code.js",
+      "app-pwa-auth-email-login.js",
       "app-pwa-auth.js",
+      "app-pwa-auth-keyboard-lift.js",
       "app-auth-debug.js"
     ],
     "network": [
@@ -17,6 +21,7 @@
       "app-chat-attachments.js",
       "app-chat-emoji-picker.js",
       "app-chat-reply-retry-glue.js",
+      "app-chat-keyboard-debug.js",
       "app-chat-lifecycle.js",
       "app-chat-utils.js",
       "app-chat-render-utils.js",

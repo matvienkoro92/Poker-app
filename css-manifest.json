@@ -11,7 +11,7 @@
     },
     "home": {
       "owner": "home",
-      "scope": "home screen sections, home modals, planner, home rating promo"
+      "scope": "home screen sections, legacy home icon/feature tails, home modals, planner, home rating promo"
     },
     "tournament": {
       "owner": "tournament",
@@ -31,7 +31,7 @@
     },
     "download": {
       "owner": "download",
-      "scope": "download pages and legacy home/download selector tail"
+      "scope": "download and cashout pages"
     },
     "rating": {
       "owner": "rating",
@@ -70,6 +70,8 @@
       "styles-home.css",
       "styles-home-shell.css",
       "styles-home-sections.css",
+      "styles-home-legacy-prelude.css",
+      "styles-home-legacy-tail.css",
       "styles-home-modals.css",
       "styles-home-planner.css",
       "styles-home-rating-promo.css"
@@ -111,7 +113,7 @@
     ],
     "download": [
       "styles-download.css",
-      "styles-rating-home-download.css"
+      "styles-download-pages.css"
     ],
     "rating": [
       "styles-rating.css",
@@ -155,7 +157,6 @@
       "auth",
       "home",
       "tournament",
-      "download",
       "layout"
     ],
     "chat": [
@@ -170,6 +171,7 @@
     ],
     "cashout": [
       "base",
+      "download",
       "profile",
       "layout"
     ],

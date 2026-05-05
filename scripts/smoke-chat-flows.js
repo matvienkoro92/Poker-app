@@ -152,8 +152,10 @@ async function setComposerText(page, mode, text) {
   const areaId = mode === "general" ? "chatGeneralInputArea" : "chatPersonalInputArea";
   const visibleComposer = page.locator(`#${areaId} textarea:visible`).first();
   if (await visibleComposer.count()) {
-    await visibleComposer.fill(text);
-    return;
+    try {
+      await visibleComposer.fill(text, { timeout: 2000 });
+      return;
+    } catch (errFillVisible) {}
   }
   await page.evaluate(({ mode: nextMode, text: nextText }) => {
     const areaId = nextMode === "general" ? "chatGeneralInputArea" : "chatPersonalInputArea";

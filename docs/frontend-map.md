@@ -71,7 +71,9 @@
 - `styles-chat-prelude.css`, `styles-chat-after.css` — legacy-блоки, которые пока оставлены вокруг chat-каскада для сохранения порядка.
 - `styles-learning-games.css` — видеоуроки, poker tasks и игровые challenge-поверхности; импортирует legacy split `styles-rating-learning-games.css`.
 - `styles-raffles.css` — розыгрыши, tickets, участники, победители и raffle admin; импортирует legacy split `styles-rating-raffles.css`.
-- `styles-download.css` — download entrypoint и legacy home/download-блоки; импортирует `styles-rating-home-download.css`.
+- `styles-home-legacy-prelude.css`, `styles-home-legacy-tail.css` — legacy home icon/update/feature хвосты, вынесены из бывшего rating/download bundle без смены порядка каскада.
+- `styles-download.css` — download entrypoint; импортирует `styles-download-pages.css`.
+- `styles-download-pages.css` — download и cashout страницы.
 - `styles-rating.css` — rating CSS entrypoint для таблиц/модалок; только `@import`, порядок менять осторожно.
 - `styles-rating-tables-modals.css` — зимний/весенний рейтинг, таблицы, podium, share/actions и rating history modals.
 - `styles-rating-chat-modals.css` — chat preview, user card и template modals, которые раньше шли после rating rules.

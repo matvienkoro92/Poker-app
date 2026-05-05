@@ -206,7 +206,7 @@
         "app-pwa-auth-i18n.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-language-ui.js"
       ]
     },
     {
@@ -216,7 +216,7 @@
         "app-pwa-auth-i18n.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-language-ui.js"
       ]
     },
     {
@@ -226,7 +226,9 @@
         "app-pwa-auth-session.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth.js",
+        "app-pwa-auth-telegram-code.js",
+        "app-pwa-auth-email-login.js"
       ]
     },
     {
@@ -708,6 +710,46 @@
       "domain": "chat",
       "exportedBy": [
         "app-chat-voice-recording.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "pokerInitPwaAuthLanguageUi",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-language-ui.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "pokerMountPwaUsernameCodeLogin",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-telegram-code.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "pokerMountPwaEmailLogin",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-email-login.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "initChatKeyboardDebugRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-keyboard-debug.js"
       ],
       "consumedBy": [
         "app-chat-lifecycle.js"
