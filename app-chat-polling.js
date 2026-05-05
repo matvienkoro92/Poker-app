@@ -8,6 +8,8 @@ function initChatPolling(opts) {
   var getConvView = typeof opts.getConvView === "function" ? opts.getConvView : function () { return null; };
   var getChatWithUserId = typeof opts.getChatWithUserId === "function" ? opts.getChatWithUserId : function () { return ""; };
   var pokerApiHasCredential = typeof opts.pokerApiHasCredential === "function" ? opts.pokerApiHasCredential : function () { return false; };
+  var base = opts.base || "";
+  var pokerApiAuthQuery = typeof opts.pokerApiAuthQuery === "function" ? opts.pokerApiAuthQuery : function () { return "?"; };
   var loadGeneral = typeof opts.loadGeneral === "function" ? opts.loadGeneral : function () {};
   var loadContacts = typeof opts.loadContacts === "function" ? opts.loadContacts : function () {};
   var loadMessages = typeof opts.loadMessages === "function" ? opts.loadMessages : function () {};
@@ -23,8 +25,8 @@ var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
 var CHAT_LONG_POLL_TIMEOUT_MS = 18000;
 var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
 var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
-var chatLongPollTimers = { general: 0, personal: 0, contacts: 0 };
-var chatLongPollTokens = { general: 0, personal: 0, contacts: 0 };
+var chatLongPollTimers = { general: 0, personal: 0, contacts: 0, updates: 0 };
+var chatLongPollTokens = { general: 0, personal: 0, contacts: 0, updates: 0 };
 
 function pokerChatRequestPollBurst(scope, durationMs) {
   var key = scope === "general" || scope === "personal" || scope === "contacts" ? scope : "personal";
@@ -91,11 +93,20 @@ function pokerChatCanRunLongPoll(scope) {
       document.querySelector('[data-view="chat"].view--active')
     );
   }
+  if (scope === "updates") {
+    return !!(
+      typeof pokerApiHasCredential === "function" &&
+      pokerApiHasCredential() &&
+      document.querySelector('[data-view="chat"].view--active') &&
+      (pokerChatCanRunLongPoll("general") || pokerChatCanRunLongPoll("personal") || pokerChatCanRunLongPoll("contacts"))
+    );
+  }
   return false;
 }
 
 function pokerChatStopLongPoll(scope) {
-  var key = scope === "general" || scope === "contacts" ? scope : "personal";
+  var key = scope === "updates" ? "updates" : scope === "general" || scope === "contacts" ? scope : "personal";
+  if (key !== "updates") key = "updates";
   chatLongPollTokens[key] = (chatLongPollTokens[key] || 0) + 1;
   if (chatLongPollTimers[key]) {
     clearTimeout(chatLongPollTimers[key]);
@@ -104,26 +115,103 @@ function pokerChatStopLongPoll(scope) {
 }
 
 function pokerChatScheduleLongPoll(scope, delayMs) {
-  var key = scope === "general" || scope === "contacts" ? scope : "personal";
+  var key = "updates";
   pokerChatStopLongPoll(key);
-  if (!pokerChatCanRunLongPoll(key)) return;
+  if (!pokerChatCanRunLongPoll("updates")) return;
   var token = chatLongPollTokens[key];
   chatLongPollTimers[key] = setTimeout(function () {
     if (token !== chatLongPollTokens[key]) return;
-    if (!pokerChatCanRunLongPoll(key)) return;
-    if (key === "general") loadGeneral({ waitForChange: true });
-    else if (key === "contacts") loadContacts({ metaOnly: true, waitForChange: true });
-    else loadMessages({ waitForChange: true });
+    if (!pokerChatCanRunLongPoll("updates")) return;
+    pokerChatRunUpdatesLongPoll();
   }, Math.max(0, Number(delayMs) || 0));
 }
 
 function pokerChatRefreshLongPollTargets() {
-  if (pokerChatCanRunLongPoll("general")) pokerChatScheduleLongPoll("general", 0);
-  else pokerChatStopLongPoll("general");
-  if (pokerChatCanRunLongPoll("personal")) pokerChatScheduleLongPoll("personal", 0);
-  else pokerChatStopLongPoll("personal");
-  if (pokerChatCanRunLongPoll("contacts")) pokerChatScheduleLongPoll("contacts", 0);
-  else pokerChatStopLongPoll("contacts");
+  if (pokerChatCanRunLongPoll("updates")) pokerChatScheduleLongPoll("updates", 0);
+  else pokerChatStopLongPoll("updates");
+}
+
+function pokerChatRunUpdatesLongPoll() {
+  if (!pokerChatCanRunLongPoll("updates")) return;
+  var qs = "";
+  var hasRev = false;
+  var threadScope = "";
+  if (pokerChatCanRunLongPoll("general")) {
+    threadScope = "general";
+    if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev) {
+      qs += "&threadScope=general&threadRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
+      hasRev = true;
+    } else {
+      loadGeneral();
+    }
+  } else if (pokerChatCanRunLongPoll("personal")) {
+    threadScope = "personal";
+    if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev && getChatWithUserId()) {
+      qs +=
+        "&threadScope=personal&threadId=" +
+        encodeURIComponent(String(getChatWithUserId())) +
+        "&threadRev=" +
+        encodeURIComponent(window.__pokerPersonalPollRev);
+      hasRev = true;
+    } else {
+      loadMessages();
+    }
+  }
+  if (pokerChatCanRunLongPoll("contacts")) {
+    if (typeof window.__pokerContactsMetaPollRev === "string" && window.__pokerContactsMetaPollRev) {
+      qs += "&contactsRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
+      hasRev = true;
+    } else {
+      loadContacts({ metaOnly: true });
+    }
+  }
+  if (!hasRev) {
+    pokerChatScheduleLongPoll("updates", 1200);
+    return;
+  }
+  var url =
+    base +
+    "/api/chat" +
+    pokerApiAuthQuery("?") +
+    "&mode=updates&wait=1&waitTimeoutMs=" +
+    encodeURIComponent(String(CHAT_LONG_POLL_TIMEOUT_MS)) +
+    qs;
+  fetch(url, { cache: "no-store" })
+    .then(function (r) {
+      return r.json().catch(function () {
+        return { ok: false, error: "Ошибка ответа" };
+      });
+    })
+    .then(function (data) {
+      if (!data || !data.ok) {
+        pokerChatScheduleLongPoll("updates", 1200);
+        return;
+      }
+      if (data.threadPollRev && typeof data.threadPollRev === "string") {
+        if (threadScope === "general") window.__pokerGeneralPollRev = data.threadPollRev;
+        else if (threadScope === "personal") window.__pokerPersonalPollRev = data.threadPollRev;
+      }
+      if (data.contactsPollRev && typeof data.contactsPollRev === "string") {
+        window.__pokerContactsMetaPollRev = data.contactsPollRev;
+      }
+      if (data.trace && data.trace.serverNowMs) {
+        pokerChatRecordTrace("updates-wait", {
+          rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
+          waited: !!data.waited,
+          threadChanged: !!(data.changed && data.changed.thread),
+          contactsChanged: !!(data.changed && data.changed.contacts),
+        });
+      }
+      if (data.changed && data.changed.thread) {
+        if (threadScope === "general") loadGeneral();
+        else if (threadScope === "personal") loadMessages();
+      }
+      if (data.changed && data.changed.contacts) loadContacts({ metaOnly: true });
+      pokerChatScheduleLongPoll("updates", 0);
+    })
+    .catch(function () {
+      pokerChatScheduleLongPoll("updates", 1200);
+    });
 }
 
 function pokerChatRecordTrace(stage, data) {

@@ -3394,6 +3394,8 @@ function initChat() {
   var sendReaction = chatReactionHandlers.sendReaction;
 
   var chatPolling = initChatPolling({
+    base: base,
+    pokerApiAuthQuery: pokerApiAuthQuery,
     getDialogsView: function () { return dialogsView; },
     getChatActiveTab: function () { return chatActiveTab; },
     getGeneralView: function () { return generalView; },
