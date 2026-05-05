@@ -1367,7 +1367,7 @@ function initChat() {
           var lastAreaFocusTarget = window.__pokerChatPwaAreaFocusGestureTarget || null;
           var directComposerTap = !!(target === pwaComposer || (target && pwaComposer.contains && pwaComposer.contains(target)));
           if (evType === "pointerdown" && pointerType && pointerType !== "mouse") {
-            primeIosPwaComposerOpenFromAreaGesture(pwaComposer, "area-pointerdown", true);
+            primeIosPwaComposerOpenFromAreaGesture(pwaComposer, "area-pointerdown", !directComposerTap);
             window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
             window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
             return;
@@ -1387,7 +1387,7 @@ function initChat() {
             return;
           }
           if (evType === "touchstart") {
-            primeIosPwaComposerOpenFromAreaGesture(pwaComposer, "area-touchstart", true);
+            primeIosPwaComposerOpenFromAreaGesture(pwaComposer, "area-touchstart", !directComposerTap);
             window.__pokerChatPwaAreaFocusGestureAt = nowAreaFocus;
             window.__pokerChatPwaAreaFocusGestureTarget = pwaComposer;
             try {
@@ -8340,8 +8340,11 @@ function initChat() {
         try {
           if (!shouldUseCssOnlyIosPwaChatComposerDock(focusTarget)) return false;
           if (!isIosPwaChatComposerLikelyActiveSession(focusTarget)) return false;
-          if (isPwaChatManualFocusIntentActive(focusTarget)) return true;
           var focusAge = Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0));
+          if (isPwaChatManualFocusIntentActive(focusTarget)) {
+            if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return focusAge >= 180;
+            return focusAge > 620;
+          }
           if (isIosPwaChatThreadKeyboardOpenConfirmed(focusTarget)) return focusAge >= 180;
           if (focusAge < 620) return false;
           return focusAge > 900;
