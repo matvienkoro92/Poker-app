@@ -5302,6 +5302,10 @@ function initChat() {
     pokerChatRefreshLongPollTargets: pokerChatRefreshLongPollTargets,
     pokerChatMessageHasPersistedId: pokerChatMessageHasPersistedId,
     setLastPersonalMessagesSig: function (value) { lastPersonalMessagesSig = value; },
+    personalMessagesCache: personalMessagesCache,
+    personalMessagesCacheMeta: personalMessagesCacheMeta,
+    personalRenderSignature: personalRenderSignature,
+    renderMessages: renderMessages,
     chatCloneRetryPayload: chatCloneRetryPayload,
     markLatestOptimisticMessageFailed: markLatestOptimisticMessageFailed,
   });

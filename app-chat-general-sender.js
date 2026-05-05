@@ -342,6 +342,7 @@ function sendGeneral(overrideText) {
         var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
         if (!httpOk && !d.error) d.error = "Ошибка отправки";
         if (httpOk && d && d.ok) {
+          if (d.pollRev && typeof d.pollRev === "string") window.__pokerGeneralPollRev = d.pollRev;
           if (d.trace && d.trace.serverNowMs) {
             pokerChatRecordTrace("general-send-ack", {
               ackMs: Math.max(0, Date.now() - Number(d.trace.serverNowMs || 0)),
@@ -364,9 +365,10 @@ function sendGeneral(overrideText) {
                 setLastGeneralMessagesSig(generalMessagesSignature(msgs));
                 renderGeneralMessages(msgs);
               }
+              window._pendingGeneralMessage = null;
             }
           }
-          loadGeneral();
+          if (!msg || !pokerChatMessageHasPersistedId(msg.id)) loadGeneral();
         } else {
           chatOutgoingState.optimisticGeneralPayload = null;
           chatOutgoingState.failedGeneralPayload = chatCloneRetryPayload({

@@ -61,6 +61,10 @@ function initChatPersonalSender(opts) {
   var pokerChatRefreshLongPollTargets = typeof opts.pokerChatRefreshLongPollTargets === "function" ? opts.pokerChatRefreshLongPollTargets : function () {};
   var pokerChatMessageHasPersistedId = typeof opts.pokerChatMessageHasPersistedId === "function" ? opts.pokerChatMessageHasPersistedId : function (id) { return !!id; };
   var setLastPersonalMessagesSig = typeof opts.setLastPersonalMessagesSig === "function" ? opts.setLastPersonalMessagesSig : function () {};
+  var personalMessagesCache = opts.personalMessagesCache && typeof opts.personalMessagesCache === "object" ? opts.personalMessagesCache : {};
+  var personalMessagesCacheMeta = opts.personalMessagesCacheMeta && typeof opts.personalMessagesCacheMeta === "object" ? opts.personalMessagesCacheMeta : {};
+  var personalRenderSignature = typeof opts.personalRenderSignature === "function" ? opts.personalRenderSignature : function () { return ""; };
+  var renderMessages = typeof opts.renderMessages === "function" ? opts.renderMessages : function () {};
   var chatCloneRetryPayload = typeof opts.chatCloneRetryPayload === "function" ? opts.chatCloneRetryPayload : function () { return null; };
   var markLatestOptimisticMessageFailed = typeof opts.markLatestOptimisticMessageFailed === "function" ? opts.markLatestOptimisticMessageFailed : function () {};
 
@@ -372,6 +376,7 @@ function sendMessage(overrideText) {
       setPersonalSendBusy(false);
       hideProgress();
       if (data && data.ok) {
+        if (data.pollRev && typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
         if (data.trace && data.trace.serverNowMs) {
           pokerChatRecordTrace("personal-send-ack", {
             ackMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
@@ -385,12 +390,31 @@ function sendMessage(overrideText) {
         pokerChatRefreshLongPollTargets();
         /* Не удаляем optimistic до renderMessages: иначе пузырь пропадает на время запроса loadMessages. */
         var msg = data.message;
+        var renderedFromPost = false;
         if (msg && pokerChatMessageHasPersistedId(msg.id) && getChatWithUserId()) {
           window._pendingPersonalMessage = msg;
           window._pendingPersonalWith = getChatWithUserId();
+          var activePeer = String(getChatWithUserId() || "");
+          var sentPeer = String(personalWithOut || "");
+          if (activePeer && sentPeer && activePeer === sentPeer) {
+            var cache = personalMessagesCache[activePeer] && Array.isArray(personalMessagesCache[activePeer])
+              ? personalMessagesCache[activePeer]
+              : [];
+            var exists = cache.some(function (m) { return m && String(m.id || "") === String(msg.id || ""); });
+            var messages = exists ? cache.slice() : cache.concat([msg]);
+            personalMessagesCache[activePeer] = messages.slice();
+            personalMessagesCacheMeta[activePeer] = { ts: Date.now(), source: "post-ack" };
+            setLastPersonalMessagesSig(personalRenderSignature(activePeer, messages, false));
+            renderMessages(messages);
+            window._pendingPersonalMessage = null;
+            window._pendingPersonalWith = null;
+            renderedFromPost = true;
+          }
         }
-        setLastPersonalMessagesSig(null);
-        loadMessages();
+        if (!renderedFromPost) {
+          setLastPersonalMessagesSig(null);
+          loadMessages();
+        }
       } else {
         chatOutgoingState.optimisticPersonalPayload = null;
         if (personalWithOut) {
