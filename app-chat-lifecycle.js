@@ -1722,61 +1722,16 @@ function initChat() {
   var applyDeletedMessageToDom = chatEditDeleteUi.applyDeletedMessageToDom;
   var startChatEdit = chatEditDeleteUi.startChatEdit;
 
-
+  var chatMediaLayoutRuntime = typeof initChatMediaLayoutRuntime === "function"
+    ? initChatMediaLayoutRuntime({
+      snapChatMessagesToBottomIfPinned: snapChatMessagesToBottomIfPinned
+    })
+    : {};
   function resizeImage(file, maxW, maxH, quality) {
-    maxW = maxW || 800;
-    maxH = maxH || 800;
-    if (quality == null || isNaN(quality)) quality = 0.92;
-    /* Цель по длине base64 — укладываться в лимит chat.js (450k), без обрыва на q=0.6 */
-    var JPEG_MAX_B64 = 400000;
-    function jpegBase64Len(dataUrl) {
-      var c = dataUrl.indexOf(",");
-      return c >= 0 ? dataUrl.length - c - 1 : dataUrl.length;
+    if (chatMediaLayoutRuntime && typeof chatMediaLayoutRuntime.resizeImage === "function") {
+      return chatMediaLayoutRuntime.resizeImage(file, maxW, maxH, quality);
     }
-    return new Promise(function (resolve, reject) {
-      var img = new Image();
-      var url = URL.createObjectURL(file);
-      img.onload = function () {
-        URL.revokeObjectURL(url);
-        var w = img.width, h = img.height;
-        if (w > maxW || h > maxH) {
-          if (w > h) { h = Math.round(h * maxW / w); w = maxW; } else { w = Math.round(w * maxH / h); h = maxH; }
-        }
-        var canvas = document.createElement("canvas");
-        canvas.width = w; canvas.height = h;
-        var ctx = canvas.getContext("2d");
-        if (!ctx) { resolve(url); return; }
-        function encodeUnderLimit() {
-          var q = quality;
-          var dataUrl = null;
-          var a;
-          for (a = 0; a < 12; a++) {
-            dataUrl = canvas.toDataURL("image/jpeg", q);
-            if (jpegBase64Len(dataUrl) <= JPEG_MAX_B64) return dataUrl;
-            q = Math.max(0.74, q - 0.04);
-          }
-          return dataUrl;
-        }
-        ctx.drawImage(img, 0, 0, w, h);
-        try {
-          var out = encodeUnderLimit();
-          if (jpegBase64Len(out) > JPEG_MAX_B64) {
-            var w2 = Math.max(480, Math.round(w * 0.85));
-            var h2 = Math.max(480, Math.round(h * 0.85));
-            canvas.width = w2;
-            canvas.height = h2;
-            ctx = canvas.getContext("2d");
-            if (!ctx) { resolve(out); return; }
-            ctx.drawImage(img, 0, 0, w2, h2);
-            quality = 0.92;
-            out = encodeUnderLimit();
-          }
-          resolve(out);
-        } catch (e) { reject(e); }
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Не удалось загрузить")); };
-      img.src = url;
-    });
+    return Promise.reject(new Error("chat media layout runtime unavailable"));
   }
 
   // Уровень 1 из 55 = двойка треф (2♣), уровень 2 = тройка треф (3♣), и т.д. параллельно по колоде (трефы 1–13, бубны 14–26, черви 27–39, пики 40–52, джокеры 53–54, 55 = Бог покера).
@@ -1791,162 +1746,21 @@ function initChat() {
     var suit = n <= 13 ? "треф" : n <= 26 ? "бубны" : n <= 39 ? "черви" : "пики";
     return cardName + " " + suit;
   }
-  /** Догрузка img: лёгкий snap по load/error (без скрытия ленты и ожидания стабилизации высоты). */
   function pinChatMessagesToBottomImagesOnly(el) {
-    if (!el) return;
-    var imgs = el.querySelectorAll("img.chat-msg__image");
-    for (var ii = 0; ii < imgs.length; ii++) {
-      (function (im) {
-        if (im.complete && im.naturalHeight) return;
-        function onImg() {
-          im.removeEventListener("load", onImg);
-          im.removeEventListener("error", onImg);
-          requestAnimationFrame(function () {
-            /* Открытие: scrollHeight растёт по load картинок, scrollTop не догоняет — snapIfPinned молчит.
-               Пока пользователь не отмотал вверх, __pokerChatOpeningStickBottom держит низ. */
-            try {
-              if (el.__pokerChatOpeningStickBottom) {
-                el.scrollTop = el.scrollHeight;
-              } else {
-                snapChatMessagesToBottomIfPinned(el);
-              }
-            } catch (eSnapImg) {}
-          });
-        }
-        im.addEventListener("load", onImg);
-        im.addEventListener("error", onImg);
-      })(imgs[ii]);
+    if (chatMediaLayoutRuntime && typeof chatMediaLayoutRuntime.pinChatMessagesToBottomImagesOnly === "function") {
+      chatMediaLayoutRuntime.pinChatMessagesToBottomImagesOnly(el);
     }
   }
   function settleChatOpeningMediaLayout(el, wrapEl, onDone) {
-    if (!el) {
-      if (typeof onDone === "function") onDone();
-      return;
+    if (chatMediaLayoutRuntime && typeof chatMediaLayoutRuntime.settleChatOpeningMediaLayout === "function") {
+      chatMediaLayoutRuntime.settleChatOpeningMediaLayout(el, wrapEl, onDone);
+    } else if (typeof onDone === "function") {
+      onDone();
     }
-    var doneCalled = false;
-    function finish() {
-      if (doneCalled) return;
-      doneCalled = true;
-      try {
-        if (wrapEl && wrapEl.classList) wrapEl.classList.remove("chat-messages-wrap--settling");
-      } catch (eWrapDone) {}
-      try {
-        if (typeof onDone === "function") onDone();
-      } catch (eDoneCb) {}
-    }
-    var imgs = [];
-    try {
-      imgs = Array.prototype.slice.call(el.querySelectorAll("img.chat-msg__image"));
-    } catch (eImgs) {
-      finish();
-      return;
-    }
-    if (!imgs.length) {
-      finish();
-      return;
-    }
-    var pending = 0;
-    function markReady() {
-      pending -= 1;
-      if (pending <= 0) finish();
-    }
-    for (var i = 0; i < imgs.length; i++) {
-      var im = imgs[i];
-      if (im.complete && im.naturalHeight) continue;
-      pending += 1;
-      (function (imgNode) {
-        var settled = false;
-        function doneOne() {
-          if (settled) return;
-          settled = true;
-          try {
-            imgNode.removeEventListener("load", onLoad);
-            imgNode.removeEventListener("error", onLoad);
-          } catch (eImgOff) {}
-          markReady();
-        }
-        function onLoad() {
-          var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
-          raf(doneOne);
-        }
-        try {
-          imgNode.addEventListener("load", onLoad);
-          imgNode.addEventListener("error", onLoad);
-        } catch (eImgOn) {
-          doneOne();
-        }
-      })(im);
-    }
-    if (!pending) {
-      finish();
-      return;
-    }
-    setTimeout(finish, 260);
   }
-  /** Удерживаем низ ленты: после lazy-картинок / перерасчёта вёрстки scrollTop иначе «отстаёт» и лента прыгает вверх. */
   function pinChatMessagesToBottom(el, aggressive) {
-    if (!el) return;
-    function snap() {
-      try {
-        el.scrollTop = el.scrollHeight;
-      } catch (eSnap) {}
-    }
-    /* Тройной snap при открытии без клавиатуры даёт лишний «вверх—вниз» после renderGeneralMessages (уже выставил scroll). */
-    var tripleSnap = !aggressive || document.body.classList.contains("chat-keyboard-open");
-    if (tripleSnap) {
-      snap();
-      requestAnimationFrame(function () {
-        snap();
-        requestAnimationFrame(snap);
-      });
-    }
-    var imgs = el.querySelectorAll("img.chat-msg__image");
-    for (var ii = 0; ii < imgs.length; ii++) {
-      (function (im) {
-        if (im.complete && im.naturalHeight) return;
-        function onImg() {
-          im.removeEventListener("load", onImg);
-          im.removeEventListener("error", onImg);
-          snapChatMessagesToBottomIfPinned(el);
-          /* У низа ленты подтянуть после смещения вёрстки; при прокрутке вверх не трогаем scrollTop. */
-          if (document.body.classList.contains("chat-keyboard-open")) {
-            requestAnimationFrame(function () {
-              snapChatMessagesToBottomIfPinned(el);
-              requestAnimationFrame(function () {
-                snapChatMessagesToBottomIfPinned(el);
-              });
-            });
-          } else {
-            requestAnimationFrame(function () {
-              snapChatMessagesToBottomIfPinned(el);
-            });
-          }
-        }
-        im.addEventListener("load", onImg);
-        im.addEventListener("error", onImg);
-      })(imgs[ii]);
-    }
-    if (aggressive) {
-      /* На открытой клавиатуре оставляем «догоняющие» snap; без клавиатуры они дёргают первый вход в общий чат. */
-      if (document.body.classList.contains("chat-keyboard-open")) {
-        function snapPinned() {
-          snapChatMessagesToBottomIfPinned(el);
-        }
-        setTimeout(snapPinned, 60);
-        setTimeout(snapPinned, 200);
-        setTimeout(snapPinned, 500);
-        if (typeof window.visualViewport !== "undefined" && window.visualViewport.addEventListener) {
-          var vvPin = function () {
-            snapChatMessagesToBottomIfPinned(el);
-          };
-          window.visualViewport.addEventListener("resize", vvPin);
-          setTimeout(function () {
-            try {
-              window.visualViewport.removeEventListener("resize", vvPin);
-            } catch (eVv) {}
-          }, 1200);
-        }
-      }
+    if (chatMediaLayoutRuntime && typeof chatMediaLayoutRuntime.pinChatMessagesToBottom === "function") {
+      chatMediaLayoutRuntime.pinChatMessagesToBottom(el, aggressive);
     }
   }
   /** При длинном тексте время внизу пузыря (колонка), а не справа от последней строки. */
@@ -2297,92 +2111,32 @@ function initChat() {
     window.__pokerDebugChatFriendAction = pokerDebugChatFriendAction;
   } catch (eDbgExpose) {}
 
-
+  var chatOverscrollDebugRuntime = typeof initChatOverscrollDebugRuntime === "function"
+    ? initChatOverscrollDebugRuntime({
+      shouldShowChatKeyboardDebugPanel: shouldShowChatKeyboardDebugPanel,
+      logChatKeyboardDebug: logChatKeyboardDebug,
+      getChatKeyboardDebugSnapshot: getChatKeyboardDebugSnapshot,
+      getVisibleMessagesEl: function () { return typeof getVisibleMessagesEl === "function" ? getVisibleMessagesEl() : null; },
+      getActiveChatInputArea: getActiveChatInputArea,
+      isTelegramChatRuntime: isTelegramChatRuntime,
+      generalView: function () { return generalView; },
+      convView: function () { return convView; },
+      chatActiveTab: function () { return chatActiveTab; },
+      chatComposerMounted: function () { return chatComposerMounted; },
+      chatSharedComposerEl: function () { return chatSharedComposerEl; },
+      chatGeneralComposerEl: function () { return chatGeneralComposerEl; },
+      chatPersonalComposerEl: function () { return chatPersonalComposerEl; },
+      chatComposerEl: function () { return chatComposerEl; },
+    })
+    : {};
   function pokerDebugChatOverscroll(stage, payload) {
-    if (!shouldShowChatKeyboardDebugPanel()) return;
-    try {
-      var suffix = "";
-      if (payload && typeof payload === "object") {
-        var parts = [];
-        Object.keys(payload).forEach(function (key) {
-          var value = payload[key];
-          if (value == null || value === "") return;
-          parts.push(String(key) + "=" + String(value));
-        });
-        if (parts.length) suffix = parts.join(" ");
-      }
-      logChatKeyboardDebug(String(stage || "overscroll"), suffix);
-    } catch (eDbgOver) {}
+    if (chatOverscrollDebugRuntime && typeof chatOverscrollDebugRuntime.pokerDebugChatOverscroll === "function") {
+      chatOverscrollDebugRuntime.pokerDebugChatOverscroll(stage, payload);
+    }
   }
   function collectChatOverscrollSnapshot(stage, focusTarget, extra) {
-    if (!shouldShowChatKeyboardDebugPanel()) return;
-    try {
-      var snap = getChatKeyboardDebugSnapshot() || {};
-      var rootStyle = null;
-      try {
-        rootStyle = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
-      } catch (eDbgRootStyle) {}
-      var viewChat = document.querySelector('.view[data-view="chat"]');
-      var viewRect = viewChat && viewChat.getBoundingClientRect ? viewChat.getBoundingClientRect() : null;
-      var generalRect = generalView && generalView.getBoundingClientRect ? generalView.getBoundingClientRect() : null;
-      var convRect = convView && convView.getBoundingClientRect ? convView.getBoundingClientRect() : null;
-      var msgs = typeof getVisibleMessagesEl === "function" ? getVisibleMessagesEl() : null;
-      var msgsRect = msgs && msgs.getBoundingClientRect ? msgs.getBoundingClientRect() : null;
-      var area = getActiveChatInputArea();
-      var areaRect = area && area.getBoundingClientRect ? area.getBoundingClientRect() : null;
-      var ta =
-        (area && area.querySelector ? area.querySelector("textarea") : null) ||
-        chatGeneralComposerEl ||
-        chatPersonalComposerEl ||
-        chatComposerEl ||
-        null;
-      var taRect = ta && ta.getBoundingClientRect ? ta.getBoundingClientRect() : null;
-      var scrollEl = document.scrollingElement || document.documentElement || document.body;
-      var payload = {
-        event: stage || "",
-        state: getChatKeyboardDebugStableState(),
-        focus: getChatKeyboardDebugNodeLabel(focusTarget || document.activeElement),
-        activeTab: chatActiveTab || "",
-        mounted: chatComposerMounted || "",
-        runtimeTg: isTelegramChatRuntime() ? 1 : 0,
-        activeShared: ta === chatSharedComposerEl ? 1 : 0,
-        activeGeneral: ta === chatGeneralComposerEl ? 1 : 0,
-        activePersonal: ta === chatPersonalComposerEl ? 1 : 0,
-        view: viewRect ? Math.round(viewRect.top) + "+" + Math.round(viewRect.height) : "",
-        gen: generalRect ? Math.round(generalRect.top) + "+" + Math.round(generalRect.height) : "",
-        conv: convRect ? Math.round(convRect.top) + "+" + Math.round(convRect.height) : "",
-        msgs: msgsRect ? Math.round(msgsRect.top) + "+" + Math.round(msgsRect.height) : "",
-        area: areaRect ? Math.round(areaRect.top) + "+" + Math.round(areaRect.height) : "",
-        ta: taRect ? Math.round(taRect.top) + "+" + Math.round(taRect.height) : "",
-        msgScr: msgs ? Math.round(msgs.scrollTop || 0) : 0,
-        msgH: msgs ? Math.round(msgs.scrollHeight || 0) + "/" + Math.round(msgs.clientHeight || 0) : "",
-        rootScr: scrollEl ? Math.round(scrollEl.scrollTop || 0) : 0,
-        winY: Math.round(window.scrollY || 0),
-        vv: snap.vvh ? snap.vvh + "/" + snap.vvTop + "/" + snap.vvPageTop : "",
-        tgV: snap.tgVh ? snap.tgVh + "/" + snap.tgVs : "",
-        kb: (document.documentElement.classList.contains("chat-keyboard-open") ? 1 : 0) + "/" + (document.body.classList.contains("chat-keyboard-open") ? 1 : 0),
-        areaPos: snap.areaPos || "",
-        areaBottom: snap.areaBottom || "",
-        areaTf: snap.areaTransform || "",
-        areaCls: area && area.className ? String(area.className).replace(/\s+/g, ".") : "",
-        taId: ta && ta.id ? ta.id : "",
-        docVv: rootStyle ? String(rootStyle.getPropertyValue("--chat-vv-inset") || "").trim() : "",
-        docAcc: rootStyle ? String(rootStyle.getPropertyValue("--chat-ios-accessory-inset") || "").trim() : "",
-        dockBottom: Number(window.__pokerChatThreadDockBottomCssPx) || 0,
-        lastPad: Number(window.__pokerChatMessagesKeyboardPadLast) || 0,
-        lastCover: Number(window.__pokerChatTgKeyboardCoverLast) || 0,
-        lastDock: Number(window.__pokerChatLastAppliedDockBottom) || 0,
-        focusAge: Math.max(0, Date.now() - (Number(window.__pokerChatKeyboardFocusAtMs) || 0)),
-        openingUntil: Math.max(0, (Number(window.__pokerChatKeyboardOpeningUntil) || 0) - Date.now())
-      };
-      if (extra && typeof extra === "object") {
-        Object.keys(extra).forEach(function (key) {
-          payload[key] = extra[key];
-        });
-      }
-      pokerDebugChatOverscroll("snap", payload);
-    } catch (eDbgCollect) {
-      logChatKeyboardDebug("snap-err", String((eDbgCollect && eDbgCollect.message) || eDbgCollect || ""));
+    if (chatOverscrollDebugRuntime && typeof chatOverscrollDebugRuntime.collectChatOverscrollSnapshot === "function") {
+      chatOverscrollDebugRuntime.collectChatOverscrollSnapshot(stage, focusTarget, extra);
     }
   }
 

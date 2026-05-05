@@ -545,156 +545,48 @@
     return form ? form.querySelector(".auth-banner__verify-actions") : null;
   }
 
-  function mountAuthEnterButtons(mount, opts) {
-    opts = opts || {};
-    var standaloneMode = !!opts.standaloneMode;
-    var includeGuest = !!opts.includeGuest;
-    var mountedAttr = opts.mountedAttr || "data-pwa-enter-mounted";
-    var emailBtnId = opts.emailBtnId || "authEnterEmailBtn";
-    var telegramBtnId = opts.telegramBtnId || "authEnterTelegramBtn";
-    var guestBtnId = opts.guestBtnId || "authEnterGuestBtn";
-    var guestBlock = includeGuest
-      ? '<div class="pwa-auth-screen__guest-block">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn pwa-auth-screen__enter-btn--secondary" id="' + guestBtnId + '">' + pwaAuthT("enterGuest") + "</button>" +
-        '<p class="pwa-auth-screen__guest-note">' + pwaAuthT("guestNote") + "</p>" +
-        "</div>"
-      : "";
-    var wrapperClass = standaloneMode ? "pwa-auth-screen__enter-actions" : "auth-banner__verify-actions pwa-auth-screen__enter-actions";
-    if (!mount) return false;
-    if (mount.getAttribute(mountedAttr) === "1") return true;
-    mount.setAttribute(mountedAttr, "1");
-    mount.innerHTML =
-      '<div class="' + wrapperClass + '">' +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="' + emailBtnId + '">' + pwaAuthT("enterEmail") + "</button>" +
-        '<button type="button" class="pwa-auth-screen__enter-btn" id="' + telegramBtnId + '">' + pwaAuthT("enterTelegram") + "</button>" +
-        guestBlock +
-      "</div>";
-    var emailBtn = mount.querySelector("#" + emailBtnId);
-    var btn = mount.querySelector("#" + telegramBtnId);
-    var guestBtn = includeGuest ? mount.querySelector("#" + guestBtnId) : null;
-    if (!emailBtn || !btn || (includeGuest && !guestBtn)) return true;
-    emailBtn.addEventListener("click", function () {
-      pokerSavePwaGuestMode(false);
-      try {
-        mount.removeAttribute(mountedAttr);
-      } catch (e0) {}
-      mount.innerHTML = "";
-      mountPwaEmailLogin(mount);
-    });
-    btn.addEventListener("click", function () {
-      pokerSavePwaGuestMode(false);
-      try {
-        mount.removeAttribute(mountedAttr);
-      } catch (e) {}
-      mount.innerHTML = "";
-      var actionsMount = ensurePwaVerificationForm(mount) || mount;
-      mountPwaUsernameCodeLogin(actionsMount);
-    });
-    if (guestBtn) {
-      guestBtn.addEventListener("click", function () {
-        pokerSavePwaGuestMode(false);
-        try {
-          window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
-        } catch (eAuth) {}
-        updateHeaderGreeting();
-        updateProfileExitBtnVisibility();
-        hidePwaAuthScreen();
-        hideIdentifyingMini();
-        try {
-          if (banner) {
-            banner.classList.add("auth-banner--hidden");
-            banner.classList.remove("auth-banner--verifying");
-          }
-        } catch (eB) {}
-        try {
-          mount.innerHTML = "";
-        } catch (eM) {}
-      });
-    }
-    return true;
-  }
-
+  var pwaAuthEntryScreenRuntime = typeof initPwaAuthEntryScreenRuntime === "function"
+    ? initPwaAuthEntryScreenRuntime({
+      pwaAuthT: pwaAuthT,
+      getPwaAuthLoginMountEl: function () { return pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount"); },
+      shouldUseOverlayAuthScreen: shouldUseOverlayAuthScreen,
+      isOverlayAuthScreenActive: isOverlayAuthScreenActive,
+      ensurePwaVerificationForm: ensurePwaVerificationForm,
+      mountPwaEmailLogin: mountPwaEmailLogin,
+      mountPwaUsernameCodeLogin: mountPwaUsernameCodeLogin,
+      pokerSavePwaGuestMode: pokerSavePwaGuestMode,
+      updateHeaderGreeting: updateHeaderGreeting,
+      updateProfileExitBtnVisibility: updateProfileExitBtnVisibility,
+      hidePwaAuthScreen: hidePwaAuthScreen,
+      hideIdentifyingMini: hideIdentifyingMini,
+      showPwaAuthScreen: showPwaAuthScreen,
+      setPwaAuthIdentifyingPhase: setPwaAuthIdentifyingPhase,
+      resetBannerForPwaLogin: resetBannerForPwaLogin,
+      getBanner: function () { return banner; },
+    })
+    : {};
   function mountPwaStandaloneEnterButton() {
-    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
-    if (!m) return false;
-    return mountAuthEnterButtons(m, {
-      standaloneMode: true,
-      includeGuest: true,
-      mountedAttr: "data-pwa-enter-mounted",
-      emailBtnId: "pwaAuthEnterEmailBtn",
-      telegramBtnId: "pwaAuthEnterTelegramBtn",
-      guestBtnId: "pwaAuthEnterGuestBtn"
-    });
+    return !!(pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.mountPwaStandaloneEnterButton && pwaAuthEntryScreenRuntime.mountPwaStandaloneEnterButton());
   }
 
   function mountMiniAppAuthEnterButtons() {
-    var mount = document.getElementById("authBannerLoginMount");
-    if (!mount) return false;
-    return mountAuthEnterButtons(mount, {
-      standaloneMode: false,
-      includeGuest: false,
-      mountedAttr: "data-miniapp-auth-enter-mounted",
-      emailBtnId: "miniAppAuthEnterEmailBtn",
-      telegramBtnId: "miniAppAuthEnterTelegramBtn"
-    });
+    return !!(pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.mountMiniAppAuthEnterButtons && pwaAuthEntryScreenRuntime.mountMiniAppAuthEnterButtons());
   }
 
   function remountPwaStandaloneEnterScreen() {
-    var m = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
-    if (!m) return;
-    m.innerHTML = "";
-    try {
-      m.removeAttribute("data-pwa-enter-mounted");
-    } catch (eRm) {}
-    mountPwaStandaloneEnterButton();
+    if (pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.remountPwaStandaloneEnterScreen) pwaAuthEntryScreenRuntime.remountPwaStandaloneEnterScreen();
   }
 
   function ensureOverlayAuthEntryMounted() {
-    var mount = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
-    if (!mount) return false;
-    if (mount.querySelector(".pwa-auth-screen__enter-actions, .auth-banner__email-login, .auth-banner__code-login")) {
-      return true;
-    }
-    try {
-      mount.innerHTML = "";
-      mount.removeAttribute("data-pwa-enter-mounted");
-      mount.removeAttribute("data-pwa-widget-mounted");
-    } catch (eEnsureMount) {}
-    return !!mountPwaStandaloneEnterButton();
+    return !!(pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.ensureOverlayAuthEntryMounted && pwaAuthEntryScreenRuntime.ensureOverlayAuthEntryMounted());
   }
 
   function remountCurrentAuthEnterScreen() {
-    if (shouldUseOverlayAuthScreen() || isOverlayAuthScreenActive()) {
-      remountPwaStandaloneEnterScreen();
-      return;
-    }
-    var mount = document.getElementById("authBannerLoginMount");
-    if (!mount) return;
-    mount.innerHTML = "";
-    try {
-      mount.removeAttribute("data-miniapp-auth-enter-mounted");
-      mount.removeAttribute("data-pwa-widget-mounted");
-    } catch (eMiniRm) {}
-    mountMiniAppAuthEnterButtons();
+    if (pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.remountCurrentAuthEnterScreen) pwaAuthEntryScreenRuntime.remountCurrentAuthEnterScreen();
   }
 
   function showPwaStandaloneEntryScreen() {
-    if (!shouldUseOverlayAuthScreen()) return;
-    try {
-      showPwaAuthScreen();
-    } catch (eShowPwa) {}
-    try {
-      setPwaAuthIdentifyingPhase(false);
-    } catch (eIdOff) {}
-    try {
-      hideIdentifyingMini();
-    } catch (eMini) {}
-    try {
-      resetBannerForPwaLogin();
-    } catch (eBanner) {}
-    try {
-      remountPwaStandaloneEnterScreen();
-    } catch (eRemount) {}
+    if (pwaAuthEntryScreenRuntime && pwaAuthEntryScreenRuntime.showPwaStandaloneEntryScreen) pwaAuthEntryScreenRuntime.showPwaStandaloneEntryScreen();
   }
 
   function mountPwaEmailLogin(mount, initialMode) {

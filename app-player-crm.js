@@ -63,313 +63,50 @@
   var isoDate = pokerPlayerCrmIsoDate;
   var localDateKey = pokerPlayerCrmLocalDateKey;
 
-  function setDefaultDates() {
-    var to = new Date();
-    var from = new Date();
-    from.setDate(from.getDate() - 29);
-    if (!state.dateTo) state.dateTo = isoDate(to);
-    if (!state.dateFrom) state.dateFrom = isoDate(from);
-  }
+  var playerCrmPeriodSegmentsRuntime = typeof initPlayerCrmPeriodSegmentsRuntime === "function"
+    ? initPlayerCrmPeriodSegmentsRuntime({
+      state: state,
+      esc: esc,
+      isoDate: isoDate,
+      localDateKey: localDateKey,
+      dateOnly: dateOnly
+    })
+    : {};
+  var setDefaultDates = playerCrmPeriodSegmentsRuntime.setDefaultDates || function () {};
+  var setDefaultChartDates = playerCrmPeriodSegmentsRuntime.setDefaultChartDates || function () {};
+  var normalizeDateRange = playerCrmPeriodSegmentsRuntime.normalizeDateRange || function () {};
+  var normalizeChartDateRange = playerCrmPeriodSegmentsRuntime.normalizeChartDateRange || function () {};
+  var periodKey = playerCrmPeriodSegmentsRuntime.periodKey || function () { return "30"; };
+  var periodLabel = playerCrmPeriodSegmentsRuntime.periodLabel || function () { return ""; };
+  var selectedPeriodRange = playerCrmPeriodSegmentsRuntime.selectedPeriodRange || function () { return null; };
+  var dateInSelectedPeriod = playerCrmPeriodSegmentsRuntime.dateInSelectedPeriod || function () { return true; };
+  var playersInSelectedPeriodByDate = playerCrmPeriodSegmentsRuntime.playersInSelectedPeriodByDate || function () { return []; };
+  var chartPeriodLabel = playerCrmPeriodSegmentsRuntime.chartPeriodLabel || function () { return ""; };
+  var periodOptionsHtml = playerCrmPeriodSegmentsRuntime.periodOptionsHtml || function () { return ""; };
+  var renderModalPeriodControls = playerCrmPeriodSegmentsRuntime.renderModalPeriodControls || function () { return ""; };
+  var periodData = playerCrmPeriodSegmentsRuntime.periodData || function () { return { deposits: 0, depositCount: 0, messages: 0 }; };
+  var segments = playerCrmPeriodSegmentsRuntime.segments || [];
+  var segmentByKey = playerCrmPeriodSegmentsRuntime.segmentByKey || function (key) { return segments[0] || { key: key, label: key }; };
+  var segmentPlayers = playerCrmPeriodSegmentsRuntime.segmentPlayers || function () { return []; };
+  var filteredPlayers = playerCrmPeriodSegmentsRuntime.filteredPlayers || function () { return []; };
+  var sortForWork = playerCrmPeriodSegmentsRuntime.sortForWork || function () { return 0; };
 
-  function setDefaultChartDates() {
-    var to = new Date();
-    var from = new Date();
-    from.setDate(from.getDate() - 29);
-    if (!state.chartDateTo) state.chartDateTo = isoDate(to);
-    if (!state.chartDateFrom) state.chartDateFrom = isoDate(from);
-  }
-
-  function normalizeDateRange(changed) {
-    if (!state.dateFrom || !state.dateTo) return;
-    if (state.dateFrom <= state.dateTo) return;
-    if (changed === "from") state.dateTo = state.dateFrom;
-    else state.dateFrom = state.dateTo;
-  }
-
-  function normalizeChartDateRange(changed) {
-    if (!state.chartDateFrom || !state.chartDateTo) return;
-    if (state.chartDateFrom <= state.chartDateTo) return;
-    if (changed === "from") state.chartDateTo = state.chartDateFrom;
-    else state.chartDateFrom = state.chartDateTo;
-  }
-
-  function periodKey() {
-    if (state.period === "all") return "all";
-    return state.period === "custom" ? "custom" : String(state.period || "30");
-  }
-
-  function periodText(key) {
-    if (key === "current_week") return "текущая неделя";
-    if (key === "last_week") return "прошлая неделя";
-    if (key === "current_month") return "текущий месяц";
-    if (key === "last_month") return "прошлый месяц";
-    return "";
-  }
-
-  function periodLabel() {
-    if (state.period === "all") return "за все время";
-    if (state.period === "custom") {
-      return state.dateFrom && state.dateTo ? state.dateFrom + " — " + state.dateTo : "выбранные даты";
-    }
-    var text = periodText(state.period);
-    if (text) return text;
-    return state.period + " дней";
-  }
-
-  function selectedPeriodRange() {
-    if (state.period === "all") return null;
-    if (state.period === "custom") {
-      return state.dateFrom && state.dateTo ? { from: state.dateFrom, to: state.dateTo } : null;
-    }
-    var now = new Date();
-    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (state.period === "current_week") {
-      var day = today.getDay() || 7;
-      var currentWeekFrom = new Date(today);
-      currentWeekFrom.setDate(today.getDate() - day + 1);
-      return { from: localDateKey(currentWeekFrom), to: localDateKey(today) };
-    }
-    if (state.period === "last_week") {
-      var lastDay = today.getDay() || 7;
-      var lastWeekTo = new Date(today);
-      lastWeekTo.setDate(today.getDate() - lastDay);
-      var lastWeekFrom = new Date(lastWeekTo);
-      lastWeekFrom.setDate(lastWeekTo.getDate() - 6);
-      return { from: localDateKey(lastWeekFrom), to: localDateKey(lastWeekTo) };
-    }
-    if (state.period === "current_month") {
-      return { from: localDateKey(new Date(today.getFullYear(), today.getMonth(), 1)), to: localDateKey(today) };
-    }
-    if (state.period === "last_month") {
-      return {
-        from: localDateKey(new Date(today.getFullYear(), today.getMonth() - 1, 1)),
-        to: localDateKey(new Date(today.getFullYear(), today.getMonth(), 0)),
-      };
-    }
-    var days = Math.max(1, Number(state.period) || 30);
-    var from = new Date(today);
-    from.setDate(today.getDate() - days + 1);
-    return { from: localDateKey(from), to: localDateKey(today) };
-  }
-
-  function dateInSelectedPeriod(iso) {
-    if (state.period === "all") return true;
-    var range = selectedPeriodRange();
-    var d = dateOnly(iso);
-    return !!(range && d && d >= range.from && d <= range.to);
-  }
-
-  function playersInSelectedPeriodByDate(field) {
-    return (Array.isArray(state.players) ? state.players : []).filter(function (p) {
-      return dateInSelectedPeriod(p && p[field]);
-    });
-  }
-
-  function chartPeriodLabel() {
-    if (state.chartPeriod === "all") return "за все время";
-    if (state.chartPeriod === "custom") {
-      return state.chartDateFrom && state.chartDateTo ? state.chartDateFrom + " — " + state.chartDateTo : "выбранные даты";
-    }
-    var text = periodText(state.chartPeriod);
-    if (text) return text;
-    return state.chartPeriod + " дней";
-  }
-
-  function periodOptionsHtml(current) {
-    var options = [
-      ["7", "7 дней"],
-      ["30", "30 дней"],
-      ["90", "90 дней"],
-      ["current_week", "Текущая неделя"],
-      ["last_week", "Прошлая неделя"],
-      ["current_month", "Текущий месяц"],
-      ["last_month", "Прошлый месяц"],
-      ["all", "За все время"],
-      ["custom", "Даты"],
-    ];
-    return options.map(function (it) {
-      return "<option value=\"" + esc(it[0]) + "\"" + (String(current || "30") === it[0] ? " selected" : "") + ">" + esc(it[1]) + "</option>";
-    }).join("");
-  }
-
-  function renderModalPeriodControls() {
-    var showDates = state.period === "custom";
-    return "<div class=\"player-crm__modal-period-row\" aria-label=\"Период модалки\">" +
-      "<label class=\"player-crm__period\"><span>Период</span><select data-crm-modal-period>" + periodOptionsHtml(state.period || "30") + "</select></label>" +
-      "<label class=\"player-crm__period player-crm__modal-date-field" + (showDates ? " player-crm__modal-date-field--visible" : "") + "\"><span>С</span><span class=\"player-crm__date-control\">" +
-        "<input type=\"date\" inputmode=\"none\" value=\"" + esc(state.dateFrom || "") + "\" max=\"" + esc(state.dateTo || "") + "\" data-crm-modal-date-from />" +
-        "<button type=\"button\" class=\"player-crm__date-picker-btn\" data-crm-modal-date-picker=\"from\" aria-label=\"Выбрать дату начала\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z\"></path></svg></button>" +
-      "</span></label>" +
-      "<label class=\"player-crm__period player-crm__modal-date-field" + (showDates ? " player-crm__modal-date-field--visible" : "") + "\"><span>По</span><span class=\"player-crm__date-control\">" +
-        "<input type=\"date\" inputmode=\"none\" value=\"" + esc(state.dateTo || "") + "\" min=\"" + esc(state.dateFrom || "") + "\" data-crm-modal-date-to />" +
-        "<button type=\"button\" class=\"player-crm__date-picker-btn\" data-crm-modal-date-picker=\"to\" aria-label=\"Выбрать дату окончания\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z\"></path></svg></button>" +
-      "</span></label>" +
-    "</div>";
-  }
-
-  function periodData(p) {
-    var k = periodKey();
-    return {
-      deposits: p.deposits && p.deposits[k] != null ? p.deposits[k] : 0,
-      depositCount: p.depositCount && p.depositCount[k] != null ? p.depositCount[k] : 0,
-      messages: p.messages && p.messages[k] != null ? p.messages[k] : 0,
-    };
-  }
-
-  var segments = [
-    { key: "all", label: "Все", desc: "Вся живая база CRM.", match: function () { return true; } },
-    { key: "has_bot", label: "Подписан на бот", desc: "Игрок связан с Telegram-ботом и доступен для бот-рассылки.", match: function (p) { return !!(p.channels && p.channels.bot); } },
-    { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в CRM-журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
-    { key: "active_30", label: "Активность CRM", desc: "Есть депозит или сообщение в CRM за выбранный период.", match: function (p) { var pd = periodData(p); return pd.deposits > 0 || pd.messages > 0; } },
-    { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
-  ];
-
-  function hasTag(p, tag) {
-    return (p.tags || []).map(function (t) { return String(t).toLowerCase(); }).indexOf(String(tag).toLowerCase()) >= 0;
-  }
-
-  function segmentByKey(key) {
-    for (var i = 0; i < segments.length; i++) {
-      if (segments[i].key === key) return segments[i];
-    }
-    return segments[0];
-  }
-
-  function segmentPlayers(key) {
-    var seg = segmentByKey(key);
-    return state.players.filter(function (p) {
-      return !seg || seg.match(p);
-    });
-  }
-
-  function filteredPlayers() {
-    var q = String(state.search || "").trim().toLowerCase();
-    return segmentPlayers(state.filter).filter(function (p) {
-      if (!q) return true;
-      var hay = [p.name, p.handle, p.source, p.manager, p.note].concat(p.tags || []).join(" ").toLowerCase();
-      return hay.indexOf(q) >= 0;
-    });
-  }
-
-  function sortForWork(a, b) {
-    function score(p) {
-      var s = 0;
-      if (!(p.channels && (p.channels.bot || p.channels.push))) s += 35;
-      if (hasTag(p, "VIP")) s += 25;
-      if (p.lastTouchDays == null || Number(p.lastTouchDays) >= 7) s += 20;
-      s -= Math.min(20, p.lastReplyDays || 0);
-      return s;
-    }
-    return score(b) - score(a);
-  }
-
+  var playerCrmStatsRuntime = typeof initPlayerCrmStatsRuntime === "function"
+    ? initPlayerCrmStatsRuntime({
+      state: state,
+      esc: esc,
+      intFmt: intFmt,
+      money: money,
+      periodData: periodData,
+      periodLabel: periodLabel,
+      chartPeriodLabel: chartPeriodLabel,
+      dateInSelectedPeriod: dateInSelectedPeriod,
+      playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
+      registrationRowsByMethod: registrationRowsByMethod
+    })
+    : {};
   function renderStats() {
-    var el = document.getElementById("playerCrmStats");
-    if (!el) return;
-    if (state.loading && state.loadingScope !== "chart") {
-      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
-      return;
-    }
-    if (state.crmError) {
-      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.crmError) + "</div>";
-      return;
-    }
-    var players = state.players;
-    var pd = players.map(periodData);
-    var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
-    var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
-    var summary = state.statsSummary && typeof state.statsSummary === "object" ? state.statsSummary : null;
-    var summaryRegistrationCounts = summary && summary.registrationCounts && typeof summary.registrationCounts === "object" ? summary.registrationCounts : null;
-    var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
-    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
-    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
-    var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
-    var pokerPlusPeriodRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
-    var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
-    var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
-    var registrationBothCount = registrationRowsByMethod("both").length;
-    var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
-    var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
-    var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
-    var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
-    var statPushSubscribers = summary ? Number(summary.push) || 0 : pushSubscribers;
-    var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
-    if (summaryRegistrationCounts) {
-      registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
-      registrationEmailOnlyCount = Number(summaryRegistrationCounts.email) || 0;
-      registrationBothCount = Number(summaryRegistrationCounts.both) || 0;
-    }
-    var chat = state.chatStats || {};
-    var pairHint = "Всего / за " + periodLabel();
-    function pair(row) {
-      return intFmt(row && row.total) + " / " + intFmt(row && row.period);
-    }
-    var stats = [
-      ["Игроков в базе", statPlayers, periodLabel()],
-      ["Зарегано", statRegistrations, periodLabel(), "registrations"],
-      ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
-      ["Новые подписки на бот", statBotSubscribers, periodLabel(), "bot"],
-      ["Новые push-подписки", statPushSubscribers, periodLabel(), "push"],
-      ["Депозиты", money(statDeposits), periodLabel()],
-    ];
-    var chatStats = [
-      ["Сообщений в главном чате", pair(chat.generalMessages), pairHint, "generalMessages"],
-      ["Личных диалогов", pair(chat.personalDialogs), pairHint],
-      ["Групповых чатов", pair(chat.groupChats), pairHint],
-      ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint, "anna"],
-      ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint, "vika"],
-      ["Все остальные диалоги", pair(chat.managerDialogs && chat.managerDialogs.other), pairHint, "other"],
-    ];
-    function statCard(it) {
-      var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
-      var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
-      if (it[3] === "registrations") {
-        return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(intFmt(statRegistrations)) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid\">" +
-            "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
-            "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Только email</small><strong>" + esc(intFmt(registrationEmailOnlyCount)) + "</strong></button>" +
-            "<button type=\"button\" data-crm-registrations-modal=\"both\"><small>И то и то</small><strong>" + esc(intFmt(registrationBothCount)) + "</strong></button>" +
-          "</span></div>";
-      }
-      if (it[3] === "pokerplus") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
-          "<span class=\"player-crm__stat-hint\">привязали аккаунт</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
-      }
-      if (it[3] === "generalMessages") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
-      }
-      if (it[3] === "bot") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Новые подписки на бот</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
-      }
-      if (it[3] === "push") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Новые push-подписки</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
-      }
-      var tag = it[3] ? "button" : "div";
-      var typeAttr = it[3] ? " type=\"button\"" : "";
-      var managerAttr = it[3] ? " data-crm-manager-dialogs=\"" + esc(it[3]) + "\"" : "";
-      var activeCls = it[3] && state.chatDialogManager === it[3] ? " player-crm__stat--active" : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__stat" + toneCls + activeCls + "\"" + managerAttr + "><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
-        (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
-        "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
-    }
-    el.innerHTML =
-      "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
-      "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
-        "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
-        "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
-      "</section>";
-    var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
-    if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
-    return { active: players.length, botSubscribers: botSubscribers, pushSubscribers: pushSubscribers, deposits: deposits, messages: messages };
+    return playerCrmStatsRuntime && typeof playerCrmStatsRuntime.renderStats === "function" ? playerCrmStatsRuntime.renderStats() : null;
   }
 
   function renderManagerDialogsList() {

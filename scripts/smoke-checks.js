@@ -34,6 +34,7 @@ const files = {
   appPwaAuthTelegramCode: read("app-pwa-auth-telegram-code.js"),
   appPwaAuthEmailLogin: read("app-pwa-auth-email-login.js"),
   appPwaAuthRestore: read("app-pwa-auth-restore.js"),
+  appPwaAuthEntryScreen: read("app-pwa-auth-entry-screen.js"),
   appPwaAuth: read("app-pwa-auth.js"),
   appPwaAuthKeyboardLift: read("app-pwa-auth-keyboard-lift.js"),
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
@@ -41,6 +42,7 @@ const files = {
   appChatContactSwipeActions: read("app-chat-contact-swipe-actions.js"),
   appChatDialogPreview: read("app-chat-dialog-preview.js"),
   appChatVoiceRecording: read("app-chat-voice-recording.js"),
+  appChatMediaLayout: read("app-chat-media-layout.js"),
   appChatLifecycle: read("app-chat-lifecycle.js"),
   appChatPushOpen: read("app-chat-push-open.js"),
   appChatVoiceMedia: read("app-chat-voice-media.js"),
@@ -61,6 +63,7 @@ const files = {
   appChatEmojiPicker: read("app-chat-emoji-picker.js"),
   appChatReplyRetryGlue: read("app-chat-reply-retry-glue.js"),
   appChatKeyboardDebug: read("app-chat-keyboard-debug.js"),
+  appChatOverscrollDebug: read("app-chat-overscroll-debug.js"),
   appChatGuestGate: read("app-chat-guest-gate.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
@@ -462,6 +465,7 @@ add("PWA auth scripts are cache-busted after session fixes", () =>
     './app-pwa-auth-telegram-code.js?v=',
     './app-pwa-auth-email-login.js?v=',
     './app-pwa-auth-restore.js?v=',
+    './app-pwa-auth-entry-screen.js?v=',
     './app-pwa-auth.js?v=',
     './app-pwa-auth-keyboard-lift.js?v=',
   ])
@@ -995,6 +999,7 @@ add("JS manifest maps core app domains", () =>
     '"app-pwa-auth-telegram-code.js"',
     '"app-pwa-auth-email-login.js"',
     '"app-pwa-auth-restore.js"',
+    '"app-pwa-auth-entry-screen.js"',
     '"app-pwa-auth.js"',
     '"app-pwa-auth-keyboard-lift.js"',
     '"app-profile-hero.js"',
@@ -1002,8 +1007,11 @@ add("JS manifest maps core app domains", () =>
     '"app-profile-pokerplus.js"',
     '"app-profile-email-auth.js"',
     '"app-profile-friends.js"',
+    '"app-profile-avatar-cache.js"',
     '"app-profile-avatar.js"',
+    '"app-profile-shows.js"',
     '"app-chat-keyboard-debug.js"',
+    '"app-chat-overscroll-debug.js"',
     '"app-chat-lifecycle.js"',
     '"app-html-fragments.js"',
     '"app-webview-keyboard.js"',
@@ -1022,15 +1030,18 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-pwa-auth-language-ui.js", "app-pwa-auth-telegram-code.js") &&
     appearsBefore(order, "app-pwa-auth-telegram-code.js", "app-pwa-auth-email-login.js") &&
     appearsBefore(order, "app-pwa-auth-email-login.js", "app-pwa-auth-restore.js") &&
-    appearsBefore(order, "app-pwa-auth-restore.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-pwa-auth-restore.js", "app-pwa-auth-entry-screen.js") &&
+    appearsBefore(order, "app-pwa-auth-entry-screen.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-pwa-auth.js", "app-pwa-auth-keyboard-lift.js") &&
     appearsBefore(order, "app-profile-hero.js", "app-profile-user-info.js") &&
     appearsBefore(order, "app-profile-user-info.js", "app-profile-pokerplus.js") &&
     appearsBefore(order, "app-profile-pokerplus.js", "app-profile-email-auth.js") &&
     appearsBefore(order, "app-profile-email-auth.js", "app-profile-friends.js") &&
-    appearsBefore(order, "app-profile-friends.js", "app-profile-avatar.js") &&
+    appearsBefore(order, "app-profile-friends.js", "app-profile-avatar-cache.js") &&
+    appearsBefore(order, "app-profile-avatar-cache.js", "app-profile-avatar.js") &&
     appearsBefore(order, "app-profile-avatar.js", "app-profile.js") &&
-    appearsBefore(order, "app-profile.js", "app-pwa-auth-session.js") &&
+    appearsBefore(order, "app-profile.js", "app-profile-shows.js") &&
+    appearsBefore(order, "app-profile-shows.js", "app-pwa-auth-session.js") &&
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-shared-helpers.js") &&
     appearsBefore(order, "app-shared-helpers.js", "app-home-init.js") &&
@@ -1057,7 +1068,8 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-render-utils.js", "app-chat-message-render-helpers.js") &&
     appearsBefore(order, "app-chat-message-render-helpers.js", "app-chat-message-builders.js") &&
     appearsBefore(order, "app-chat-message-builders.js", "app-chat-message-render-runtime.js") &&
-    appearsBefore(order, "app-chat-message-render-runtime.js", "app-chat-outgoing-helpers.js") &&
+    appearsBefore(order, "app-chat-message-render-runtime.js", "app-chat-media-layout.js") &&
+    appearsBefore(order, "app-chat-media-layout.js", "app-chat-outgoing-helpers.js") &&
     appearsBefore(order, "app-chat-open-shell.js", "app-chat-open-peer-hydrate.js") &&
     appearsBefore(order, "app-chat-open-peer-hydrate.js", "app-chat-club-gate.js") &&
     appearsBefore(order, "app-chat-friend-actions.js", "app-chat-contact-swipe-actions.js") &&
@@ -1086,7 +1098,8 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-emoji-picker.js", "app-chat-reply-retry-glue.js") &&
     appearsBefore(order, "app-chat-reply-retry-glue.js", "app-chat-guest-gate.js") &&
     appearsBefore(order, "app-chat-guest-gate.js", "app-chat-keyboard-debug.js") &&
-    appearsBefore(order, "app-chat-keyboard-debug.js", "app-chat-lifecycle.js") &&
+    appearsBefore(order, "app-chat-keyboard-debug.js", "app-chat-overscroll-debug.js") &&
+    appearsBefore(order, "app-chat-overscroll-debug.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-rating-core.js", "app-rating-spring-season.js") &&
     appearsBefore(order, "app-rating-spring-season.js", "app-rating-view.js") &&
     appearsBefore(order, "app-rating-view.js", "app-rating-view-adapter.js") &&
@@ -1106,7 +1119,9 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-raffles-active-view.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles-formatters.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles.js", "app-raffles-share.js") &&
-    appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm-charts.js") &&
+    appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm-periods.js") &&
+    appearsBefore(order, "app-player-crm-periods.js", "app-player-crm-stats.js") &&
+    appearsBefore(order, "app-player-crm-stats.js", "app-player-crm-charts.js") &&
     appearsBefore(order, "app-player-crm-charts.js", "app-player-crm-reports.js") &&
     appearsBefore(order, "app-player-crm-reports.js", "app-player-crm.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
@@ -1139,11 +1154,17 @@ add("PWA auth shell delegates language, code, email, restore, and keyboard modul
     "restoreSavedPwaAuthBeforeGate",
     "attemptPwaSideAuthRestoreAsync",
   ]) &&
+  hasAll("appPwaAuthEntryScreen", [
+    "function initPwaAuthEntryScreenRuntime",
+    "function mountPwaStandaloneEnterButton",
+    "function showPwaStandaloneEntryScreen",
+  ]) &&
   hasAll("appPwaAuth", [
     "window.pokerInitPwaAuthLanguageUi",
     "window.pokerMountPwaUsernameCodeLogin",
     "window.pokerMountPwaEmailLogin",
     "initPwaAuthRestoreRuntime",
+    "initPwaAuthEntryScreenRuntime",
   ]) &&
   !has("appPwaAuth", "function pokerMountPwaEmailLogin") &&
   !has("appPwaAuth", "function pokerMountPwaUsernameCodeLogin") &&
@@ -1367,6 +1388,8 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "initChatDialogPreviewRuntime",
     "initChatComposerSendRuntime",
     "initChatVoiceRecordingRuntime",
+    "initChatMediaLayoutRuntime",
+    "initChatOverscrollDebugRuntime",
   ]) &&
   hasAll("appChatOpenPeerHydrate", [
     "function initChatOpenPeerHydrate",
@@ -1413,6 +1436,12 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "MediaRecorder",
     "chatGeneralVoiceStop",
     "chatPersonalVoiceStop",
+  ]) &&
+  hasAll("appChatMediaLayout", [
+    "function initChatMediaLayoutRuntime",
+    "function resizeImage",
+    "function settleChatOpeningMediaLayout",
+    "function pinChatMessagesToBottom",
   ]) &&
   hasAll("appChatPresenceTyping", [
     "function initChatPresenceTyping",
@@ -1497,6 +1526,11 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "function initChatKeyboardDebugRuntime",
     "function getChatKeyboardDebugSnapshot",
     "function installChatKeyboardDebugObservers",
+  ]) &&
+  hasAll("appChatOverscrollDebug", [
+    "function initChatOverscrollDebugRuntime",
+    "function pokerDebugChatOverscroll",
+    "function collectChatOverscrollSnapshot",
   ]) &&
   hasAll("appChatPushOpen", [
     "window.__pokerRefreshChatUnreadForPwaBadge",
@@ -1884,6 +1918,22 @@ add("Public build stays under the mobile asset budget", () => {
   const publicBytes = dirSizeBytes(path.join(root, "public"));
   const budgetBytes = 80 * 1024 * 1024;
   return publicBytes > 0 && publicBytes <= budgetBytes;
+});
+
+add("Individual shipped assets stay under the mobile file budget", () => {
+  const publicDir = path.join(root, "public");
+  const maxBytes = 2 * 1024 * 1024;
+  let largest = 0;
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(p);
+      else largest = Math.max(largest, fs.statSync(p).size);
+    }
+  }
+  walk(publicDir);
+  return largest > 0 && largest <= maxBytes;
 });
 
 add("CSS domain entrypoints cover auth and tournament styles", () =>

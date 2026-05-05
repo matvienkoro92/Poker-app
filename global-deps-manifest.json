@@ -862,10 +862,80 @@
       ]
     },
     {
+      "name": "POKER_PROFILE_AVATAR_PLACEHOLDER",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "POKER_PROFILE_AVATAR_PRESETS",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "pokerFindPresetAvatarById",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "pokerFindPresetAvatarIdBySrc",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "pokerReadAvatarCacheEntry",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "pokerWriteAvatarCacheEntry",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
+      "name": "pokerApplyProfileAvatarMirror",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-avatar-cache.js"
+      ],
+      "consumedBy": [
+        "app-profile-avatar.js"
+      ]
+    },
+    {
       "name": "loadHeaderAvatar",
       "domain": "profile",
       "exportedBy": [
-        "app-profile-avatar.js"
+        "app-profile-avatar-cache.js"
       ],
       "consumedBy": [
         "app-pwa-auth.js"
@@ -878,6 +948,17 @@
         "app-profile-avatar.js"
       ],
       "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "initPokerShowsPlayer",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-shows.js"
+      ],
+      "consumedBy": [
+        "app.js",
         "app-view-router.js"
       ]
     },
@@ -934,6 +1015,26 @@
       ]
     },
     {
+      "name": "initPlayerCrmPeriodSegmentsRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-periods.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
+      "name": "initPlayerCrmStatsRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-stats.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
       "name": "initPlayerCrmChartsRuntime",
       "domain": "playerCrm",
       "exportedBy": [
@@ -964,10 +1065,40 @@
       ]
     },
     {
+      "name": "initPwaAuthEntryScreenRuntime",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-entry-screen.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
       "name": "initChatMessageRenderRuntime",
       "domain": "chat",
       "exportedBy": [
         "app-chat-message-render-runtime.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatMediaLayoutRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-media-layout.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
+      "name": "initChatOverscrollDebugRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-overscroll-debug.js"
       ],
       "consumedBy": [
         "app-chat-lifecycle.js"
