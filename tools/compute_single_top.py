@@ -3,8 +3,13 @@
 import re
 from pathlib import Path
 
-DATA = Path(__file__).resolve().parent.parent / "winter-rating-data.js"
-text = DATA.read_text(encoding="utf-8")
+ROOT = Path(__file__).resolve().parent.parent
+DATA_FILES = [
+    ROOT / "winter-rating-data.js",
+    ROOT / "spring-rating-data-march.js",
+    ROOT / "spring-rating-data-april.js",
+]
+text = "\n".join(p.read_text(encoding="utf-8") for p in DATA_FILES if p.exists())
 
 
 def extract_object_after(marker: str) -> str:
@@ -96,9 +101,13 @@ def parse_tournaments(obj_src: str) -> dict[str, list]:
 
 
 winter_src = extract_object_after("var WINTER_RATING_TOURNAMENTS_BY_DATE =")
-spring_src = extract_object_after("var SPRING_RATING_TOURNAMENTS_BY_DATE =")
 winter = parse_tournaments(winter_src)
-spring = parse_tournaments(spring_src)
+spring = {}
+for marker in (
+    "var SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE =",
+    "var SPRING_RATING_TOURNAMENTS_APRIL_BY_DATE =",
+):
+    spring.update(parse_tournaments(extract_object_after(marker)))
 
 
 def norm_nick(n: str) -> str:

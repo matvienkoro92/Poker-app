@@ -153,7 +153,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       heavyScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-share)?|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-formatters|-share)?|equilator|auth-debug|share-stats|tracking-links)\.js/.test(entry.name) || /spring-rating-(?:images-league[12]|meta|data(?:-(?:march|april))?)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       hiddenImages: performance.getEntriesByType("resource")
         .filter((entry) => /\/assets\/(?:download-hero)\./.test(entry.name))
@@ -164,7 +164,7 @@ async function main() {
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     const startupTags = new Set(initialLazy.startupScriptTags);
     const lazyTags = new Set(initialLazy.lazyScriptTags);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
       if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
     });
     ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"].forEach((file) => {
@@ -221,7 +221,7 @@ async function main() {
         .filter((entry) => /app-chat-.*\.js/.test(entry.name) || /app-chat-lifecycle\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
       eagerDomainScripts: performance.getEntriesByType("resource")
-        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-admin-create|-completed|-public|-active-view|-share)?|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /(?:spring|winter)-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
+        .filter((entry) => /app-(hall-fame|rating(?:-spring-season|-spring-runtime|-winter-runtime|-view|-view-adapter|-week-tops)?|streams|video-lessons(?:-modals)?|games|club-tasks|raffles(?:-subscribe|-broadcast|-admin-create|-completed|-public|-active-view|-formatters|-share)?|equilator|visitors-admin|admin-reports|auth-debug|share-stats|tracking-links|tournament-day)\.js/.test(entry.name) || /spring-rating-(?:images-league[12]|meta|data(?:-(?:march|april))?)\.js/.test(entry.name) || /winter-rating-data\.js/.test(entry.name) || /peerjs\.min\.js/.test(entry.name))
         .map((entry) => entry.name.split("/").pop().split("?")[0]),
     }));
 
@@ -245,7 +245,7 @@ async function main() {
     if (state.modules.length < 3) throw new Error("split app modules were not loaded");
     if (state.chatScripts.length < 20) throw new Error("chat scripts were not eager-loaded");
     const loadedDomainScripts = new Set(state.eagerDomainScripts);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
       if (!loadedDomainScripts.has(file)) throw new Error(`expected domain script after navigation: ${file}`);
     });
     if (loadedDomainScripts.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime loaded during spring navigation");
@@ -262,6 +262,9 @@ async function main() {
       bodyView: document.body.getAttribute("data-view"),
       section: !!document.getElementById("winterRatingSection"),
       springClass: !!(document.getElementById("winterRatingSection") && document.getElementById("winterRatingSection").classList.contains("spring-rating")),
+      title: document.querySelector("#winterRatingSection .winter-rating__title-text")?.textContent || "",
+      springDateItems: document.querySelectorAll("#winterRatingDates .winter-rating__date-item[data-rating-season='spring']").length,
+      winterDateItems: document.querySelectorAll("#winterRatingDates .winter-rating__date-item[data-rating-season='winter']").length,
       counters: typeof window.getWinterRatingCounters,
       winterData: typeof window.WINTER_RATING_BY_DATE,
       loadedScripts: performance.getEntriesByType("resource")
@@ -274,6 +277,9 @@ async function main() {
     if (winterState.bodyView !== "winter-rating") throw new Error("winter rating view did not open");
     if (!winterState.section) throw new Error("winter rating section is missing after lazy navigation");
     if (winterState.springClass) throw new Error("winter rating section kept spring class after lazy navigation");
+    if (!/Архив рейтинга зимы/.test(winterState.title)) throw new Error("winter rating archive title is missing");
+    if (winterState.springDateItems) throw new Error("spring rating date items leaked into winter archive");
+    if (!winterState.winterDateItems) throw new Error("winter archive date items were not created dynamically");
     if (winterState.counters !== "function") throw new Error("winter rating runtime did not load");
     if (winterState.winterData === "undefined") throw new Error("winter rating data did not load");
     const winterLoadedScripts = new Set([].concat(winterState.loadedScripts, winterState.executedLazyScripts));

@@ -55,47 +55,13 @@
     showAllPlayers: false,
   };
 
-  function esc(s) {
-    if (s == null) return "";
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function money(n) {
-    var x = Math.round(Number(n) || 0);
-    return x.toLocaleString("ru-RU") + " ₽";
-  }
-
-  function pct(n) {
-    return Math.round(Number(n) || 0) + "%";
-  }
-
-  function intFmt(n) {
-    return Math.round(Number(n) || 0).toLocaleString("ru-RU");
-  }
-
-  function daysLabel(n) {
-    if (n == null || Number(n) >= 999) return "—";
-    var d = Math.max(0, Number(n) || 0);
-    if (d === 0) return "сегодня";
-    if (d === 1) return "1 день";
-    if (d > 1 && d < 5) return d + " дня";
-    return d + " дней";
-  }
-
-  function isoDate(d) {
-    return d.toISOString().slice(0, 10);
-  }
-
-  function localDateKey(d) {
-    var y = d.getFullYear();
-    var m = String(d.getMonth() + 1).padStart(2, "0");
-    var day = String(d.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + day;
-  }
+  var esc = pokerPlayerCrmEsc;
+  var money = pokerPlayerCrmMoney;
+  var pct = pokerPlayerCrmPct;
+  var intFmt = pokerPlayerCrmIntFmt;
+  var daysLabel = pokerPlayerCrmDaysLabel;
+  var isoDate = pokerPlayerCrmIsoDate;
+  var localDateKey = pokerPlayerCrmLocalDateKey;
 
   function setDefaultDates() {
     var to = new Date();

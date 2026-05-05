@@ -854,10 +854,10 @@
 
           </div>
 
-          <!-- Зимний рейтинг DOM лежит во фрагменте; весенний рейтинг использует тот же section через placeholder ниже. -->
+          <!-- Зимний рейтинг в архиве: фрагмент ленивый, архивные даты строятся рантаймом по запросу. -->
           <div class="view" data-view="winter-rating" data-html-fragment="./html-fragments/winter-rating.html" data-html-fragment-view="winter-rating"></div>
 
-          <!-- Рейтинг Весны: тот же контент, переносится из winter-rating при открытии -->
+          <!-- Рейтинг Весны: тот же легкий section переносится из winter-rating при открытии -->
           <div class="view" data-view="spring-rating" id="springRatingView">
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <button type="button" class="spring-rating-view-scroll-btn" id="springRatingViewScrollBtn" aria-label="Прокрутить рейтинг" hidden></button>
@@ -1703,6 +1703,7 @@
     <script defer src="./app-home-deeplinks.js?v=2.704"></script>
     <script defer src="./app-home-club-info-modals.js?v=2.704"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=2.704"></script>
+    <script defer src="./app-home-gazette-comments.js?v=2.704"></script>
     <script defer src="./app-home-gazette-tasks.js?v=2.704"></script>
     <script defer src="./app-rating-core.js?v=2.704"></script>
     <script defer src="./app-rating-spring-season.js?v=2.704"></script>
@@ -1768,8 +1769,10 @@
     <script defer data-poker-eager-domain="chat" src="./app-chat-view-glue.js?v=2.704"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-header-avatar.js?v=2.704"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-attachments.js?v=2.704"></script>
+    <script defer src="./app-profile-hero.js?v=2.704"></script>
     <script defer src="./app-profile.js?v=2.704"></script>
     <script defer src="./app-pwa-auth-session.js?v=2.704"></script>
+    <script defer src="./app-pwa-auth-i18n.js?v=2.704"></script>
     <script defer src="./app-pwa-auth.js?v=2.704"></script>
     <script defer src="./app-push.js?v=2.704"></script>
     <script defer src="./app-pwa-open-handlers.js?v=2.704"></script>
@@ -1782,6 +1785,7 @@
     <script defer data-poker-eager-domain="app" src="./app-raffles-completed.js?v=2.704"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-public.js?v=2.704"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-active-view.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-formatters.js?v=2.704"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=2.704"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons-modals.js?v=2.704"></script>
@@ -1798,6 +1802,7 @@
     <script defer src="./app-webview-keyboard.js?v=2.704"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-emoji-picker.js?v=2.704"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-reply-retry-glue.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-guest-gate.js?v=2.704"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js?v=2.704"></script>
     <script defer src="./app-view-router.js?v=2.704"></script>
     <script defer src="./app-api-tracking.js?v=2.704"></script>
@@ -1805,6 +1810,7 @@
     <script defer src="./app-section-views.js?v=2.704"></script>
     <script defer src="./app-visitors-admin.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=2.704"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="auth-debug" src="./app-auth-debug.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="share-stats" src="./app-share-stats.js?v=2.704"></script>
@@ -1812,6 +1818,11 @@
     <script defer src="./app-cashout.js?v=2.704"></script>
     <script defer src="./app-tournament-day.js?v=2.704"></script>
     <script defer src="./app-updates.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league1.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league2.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-meta.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data-march.js?v=2.704"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data-april.js?v=2.704"></script>
     <script defer data-poker-eager-domain="app" src="./spring-rating-data.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js?v=2.704"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js?v=2.704"></script>

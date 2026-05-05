@@ -5,6 +5,7 @@
     "auth": [
       "app-auth.js",
       "app-pwa-auth-session.js",
+      "app-pwa-auth-i18n.js",
       "app-pwa-auth.js",
       "app-auth-debug.js"
     ],
@@ -68,6 +69,7 @@
       "app-chat-composer-send.js",
       "app-chat-presence-typing.js",
       "app-chat-bootstrap-prefetch.js",
+      "app-chat-guest-gate.js",
       "app-chat-keyboard-dock-math.js",
       "app-chat-keyboard-dock-foundation.js",
       "app-chat-keyboard-dock-lifecycle.js",
@@ -85,6 +87,11 @@
       "app-rating-data-registry.js",
       "app-rating.js",
       "app-rating-week-tops.js",
+      "spring-rating-images-league1.js",
+      "spring-rating-images-league2.js",
+      "spring-rating-meta.js",
+      "spring-rating-data-march.js",
+      "spring-rating-data-april.js",
       "spring-rating-data.js"
     ],
     "ratingWinter": [
@@ -96,6 +103,7 @@
       "app-hall-fame.js"
     ],
     "profile": [
+      "app-profile-hero.js",
       "app-profile.js",
       "app-cashout.js"
     ],
@@ -135,6 +143,7 @@
       "app-home-deeplinks.js",
       "app-home-club-info-modals.js",
       "app-home-vpn-proxy-modal.js",
+      "app-home-gazette-comments.js",
       "app-home-gazette-tasks.js",
       "app-club-tasks.js",
       "app-updates.js"
@@ -154,10 +163,12 @@
       "app-raffles-completed.js",
       "app-raffles-public.js",
       "app-raffles-active-view.js",
+      "app-raffles-formatters.js",
       "app-raffles.js",
       "app-raffles-share.js"
     ],
     "playerCrm": [
+      "app-player-crm-formatters.js",
       "app-player-crm.js"
     ],
     "shell": [

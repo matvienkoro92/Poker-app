@@ -18,6 +18,7 @@ const files = {
   videoLessonsFragment: read("html-fragments/video-lessons.html"),
   rafflesFragment: read("html-fragments/raffles.html"),
   profileFragment: read("html-fragments/profile.html"),
+  winterRatingFragment: read("html-fragments/winter-rating.html"),
   globalModalsFragment: read("html-fragments/global-modals.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
@@ -53,6 +54,7 @@ const files = {
   appChatAttachments: read("app-chat-attachments.js"),
   appChatEmojiPicker: read("app-chat-emoji-picker.js"),
   appChatReplyRetryGlue: read("app-chat-reply-retry-glue.js"),
+  appChatGuestGate: read("app-chat-guest-gate.js"),
   appWebviewKeyboard: read("app-webview-keyboard.js"),
   appViewRouter: read("app-view-router.js"),
   appHtmlFragments: read("app-html-fragments.js"),
@@ -66,11 +68,17 @@ const files = {
   appRafflesCompleted: read("app-raffles-completed.js"),
   appRafflesPublic: read("app-raffles-public.js"),
   appRafflesActiveView: read("app-raffles-active-view.js"),
+  appRafflesFormatters: read("app-raffles-formatters.js"),
   appRafflesShare: read("app-raffles-share.js"),
   appRating: read("app-rating.js"),
   appRatingViewAdapter: read("app-rating-view-adapter.js"),
   appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
   appRatingWinterRuntime: read("app-rating-winter-runtime.js"),
+  springRatingImagesLeague1: read("spring-rating-images-league1.js"),
+  springRatingImagesLeague2: read("spring-rating-images-league2.js"),
+  springRatingMeta: read("spring-rating-meta.js"),
+  springRatingDataMarch: read("spring-rating-data-march.js"),
+  springRatingDataApril: read("spring-rating-data-april.js"),
   springRatingData: read("spring-rating-data.js"),
   winterRatingData: read("winter-rating-data.js"),
   sw: read("sw.js"),
@@ -441,6 +449,8 @@ add("PWA Telegram startup keeps restored session during initData refresh", () =>
 add("PWA auth scripts are cache-busted after session fixes", () =>
   hasAll("html", [
     './app-auth.js?v=',
+    './app-pwa-auth-session.js?v=',
+    './app-pwa-auth-i18n.js?v=',
     './app-pwa-auth.js?v=',
   ])
 );
@@ -967,7 +977,10 @@ add("JS manifest maps core app domains", () =>
     '"app-network.js"',
     '"app-shared-helpers.js"',
     '"app-home-init.js"',
+    '"app-home-gazette-comments.js"',
+    '"app-pwa-auth-i18n.js"',
     '"app-pwa-auth.js"',
+    '"app-profile-hero.js"',
     '"app-chat-lifecycle.js"',
     '"app-html-fragments.js"',
     '"app-webview-keyboard.js"',
@@ -981,6 +994,9 @@ add("JS manifest maps core app domains", () =>
 add("JS manifest preserves critical load order", () => {
   const order = indexScriptOrder();
   return appearsBefore(order, "app-auth.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-pwa-auth-session.js", "app-pwa-auth-i18n.js") &&
+    appearsBefore(order, "app-pwa-auth-i18n.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-profile-hero.js", "app-profile.js") &&
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-shared-helpers.js") &&
     appearsBefore(order, "app-shared-helpers.js", "app-home-init.js") &&
@@ -989,6 +1005,8 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-home-tasks.js", "app-home-deeplinks.js") &&
     appearsBefore(order, "app-home-deeplinks.js", "app-home-club-info-modals.js") &&
     appearsBefore(order, "app-home-club-info-modals.js", "app-home-vpn-proxy-modal.js") &&
+    appearsBefore(order, "app-home-vpn-proxy-modal.js", "app-home-gazette-comments.js") &&
+    appearsBefore(order, "app-home-gazette-comments.js", "app-home-gazette-tasks.js") &&
     appearsBefore(order, "app-home-vpn-proxy-modal.js", "app-home-gazette-tasks.js") &&
     appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-webview-keyboard.js") &&
@@ -1030,12 +1048,18 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-chat-header-avatar.js", "app-chat-attachments.js") &&
     appearsBefore(order, "app-chat-attachments.js", "app-chat-emoji-picker.js") &&
     appearsBefore(order, "app-chat-emoji-picker.js", "app-chat-reply-retry-glue.js") &&
-    appearsBefore(order, "app-chat-reply-retry-glue.js", "app-chat-lifecycle.js") &&
+    appearsBefore(order, "app-chat-reply-retry-glue.js", "app-chat-guest-gate.js") &&
+    appearsBefore(order, "app-chat-guest-gate.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-rating-core.js", "app-rating-spring-season.js") &&
     appearsBefore(order, "app-rating-spring-season.js", "app-rating-view.js") &&
     appearsBefore(order, "app-rating-view.js", "app-rating-view-adapter.js") &&
     appearsBefore(order, "app-rating-view-adapter.js", "app-rating-spring-runtime.js") &&
     appearsBefore(order, "app-rating-spring-runtime.js", "app-rating.js") &&
+    appearsBefore(order, "spring-rating-images-league1.js", "spring-rating-data.js") &&
+    appearsBefore(order, "spring-rating-images-league2.js", "spring-rating-data.js") &&
+    appearsBefore(order, "spring-rating-meta.js", "spring-rating-data.js") &&
+    appearsBefore(order, "spring-rating-data-march.js", "spring-rating-data.js") &&
+    appearsBefore(order, "spring-rating-data-april.js", "spring-rating-data.js") &&
     appearsBefore(order, "app-rating-winter-runtime.js", "winter-rating-data.js") &&
     appearsBefore(order, "app-raffles-subscribe.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles-broadcast.js", "app-raffles.js") &&
@@ -1043,7 +1067,9 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-raffles-completed.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles-public.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles-active-view.js", "app-raffles.js") &&
+    appearsBefore(order, "app-raffles-formatters.js", "app-raffles.js") &&
     appearsBefore(order, "app-raffles.js", "app-raffles-share.js") &&
+    appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
@@ -1260,6 +1286,7 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "initChatBootstrapPrefetchRuntime",
     "initChatEmojiPickerRuntime",
     "initChatReplyRetryGlue",
+    "initChatGuestGateRuntime",
     "initChatOpenPeerHydrate",
     "initChatContactSwipeActions",
     "initChatDialogPreviewRuntime",
@@ -1386,6 +1413,11 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
     "chatPersonalReplyPreview",
     "data-chat-retry",
   ]) &&
+  hasAll("appChatGuestGate", [
+    "function initChatGuestGateRuntime",
+    "function syncChatWebsiteGuestGate",
+    "function bindGuestAuthButton",
+  ]) &&
   hasAll("appChatPushOpen", [
     "window.__pokerRefreshChatUnreadForPwaBadge",
     "window.__pokerHandleIncomingChatPush",
@@ -1416,6 +1448,7 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
   !has("appChatLifecycle", "function bindChatContactSwipeAndPinList") &&
   !has("appChatLifecycle", "function renderDialogPreviewMessagesInto") &&
   !has("appChatLifecycle", "function bindChatSendTap") &&
+  !has("appChatLifecycle", "function isWebsiteGuestChatGateMode") &&
   !has("appChatLifecycle", "function initVoiceRecording") &&
   !has("appChatKeyboardDock", "window.__pokerKeepChatComposerFocusAfterSend") &&
   !has("appChatKeyboardDock", "function isChatKeyboardLayoutEffectivelyClosed") &&
@@ -1491,6 +1524,20 @@ add("Winter rating HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );
 
+add("Winter rating archive fragment does not ship static date DOM", () =>
+  hasAll("winterRatingFragment", [
+    'data-view="winter-rating"',
+    'id="winterRatingSection"',
+    'id="winterRatingDates"',
+    "Архив рейтинга зимы",
+  ]) &&
+  !has("winterRatingFragment", 'class="winter-rating__date-item"') &&
+  hasAll("appRatingViewAdapter", [
+    'item.setAttribute("data-rating-season", currentDateSeason);',
+    'btn.setAttribute("data-rating-toggle-bound", "1");',
+  ])
+);
+
 add("Selected heavy views use JavaScript lazy gates", () =>
   hasAll("html", [
     'src="./app-lazy-loader.js',
@@ -1543,6 +1590,7 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
     'defer data-poker-eager-domain="chat" src="./app-chat-attachments.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-emoji-picker.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-reply-retry-glue.js',
+    'defer data-poker-eager-domain="chat" src="./app-chat-guest-gate.js',
     'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
     'src="./app-lazy-loader.js',
   ]) &&
@@ -1552,17 +1600,22 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
 
 add("Spring rating, fish game, and raffles stay eager while selected heavy domains are lazy", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles.js", "app-raffles-share.js"];
+  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"];
   const lazyFiles = ["app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"];
   return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`src="./${file}`)) &&
     lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
 });
 
 add("Rating seasonal data is split by spring and winter", () =>
+  has("springRatingImagesLeague1", "var SPRING_RATING_IMAGES_LEAGUE1") &&
+  has("springRatingImagesLeague2", "var SPRING_RATING_IMAGES_LEAGUE2") &&
+  has("springRatingMeta", "var SPRING_RATING_UPDATED") &&
+  has("springRatingDataMarch", "var SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE") &&
+  has("springRatingDataApril", "var SPRING_RATING_TOURNAMENTS_APRIL_BY_DATE") &&
   hasAll("springRatingData", [
-    "var SPRING_RATING_IMAGES_LEAGUE1",
-    "var SPRING_RATING_IMAGES_LEAGUE2",
     "var SPRING_RATING_TOURNAMENTS_BY_DATE",
+    "SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE",
+    "SPRING_RATING_TOURNAMENTS_APRIL_BY_DATE",
   ]) &&
   !has("springRatingData", "var WINTER_RATING_BY_DATE") &&
   hasAll("winterRatingData", [
@@ -1622,6 +1675,7 @@ add("JS manifest still maps key domains for build ownership", () => {
     domains.chat.includes("app-chat-attachments.js") &&
     domains.chat.includes("app-chat-emoji-picker.js") &&
     domains.chat.includes("app-chat-reply-retry-glue.js") &&
+    domains.chat.includes("app-chat-guest-gate.js") &&
     domains.chat.includes("app-chat-scroll-bottom.js") &&
     domains.home.includes("app-home-club-info-modals.js") &&
     domains.home.includes("app-home-vpn-proxy-modal.js") &&

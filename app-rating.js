@@ -1,4 +1,4 @@
-// Весенние seasonal data — в spring-rating-data.js (eager), зимний runtime и таблицы — в lazy-домене rating-winter.
+// Spring seasonal data is eager but physically chunked; winter runtime and tables stay in lazy domain rating-winter.
 
 function isSpringRatingMode() {
   return document.body && document.body.getAttribute("data-view") === "spring-rating";

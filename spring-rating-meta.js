@@ -1,0 +1,1 @@
+var SPRING_RATING_UPDATED = "26 апреля";

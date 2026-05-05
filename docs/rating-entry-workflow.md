@@ -12,8 +12,8 @@
 npm run rating:snippet < /path/to/input.txt
 ```
 
-4. Вставь полученный блок в `SPRING_RATING_TOURNAMENTS_BY_DATE`.
-5. Если в сниппете есть строка `SPRING_RATING_IMAGES_LEAGUE1[...]` или `SPRING_RATING_IMAGES_LEAGUE2[...]`, перенеси файлы в соответствующий блок скринов.
+4. Вставь полученный блок в месячный файл: март в `spring-rating-data-march.js`, апрель в `spring-rating-data-april.js`.
+5. Если в сниппете есть строка `SPRING_RATING_IMAGES_LEAGUE1[...]` или `SPRING_RATING_IMAGES_LEAGUE2[...]`, перенеси файлы в `spring-rating-images-league1.js` или `spring-rating-images-league2.js`.
 6. Проверь базу:
 
 ```bash

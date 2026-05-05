@@ -6,7 +6,15 @@ const path = require("path");
 const vm = require("vm");
 
 const ROOT = path.resolve(__dirname, "..");
-const DATA_FILE = path.join(ROOT, "winter-rating-data.js");
+const DATA_FILES = [
+  "spring-rating-images-league1.js",
+  "spring-rating-images-league2.js",
+  "spring-rating-meta.js",
+  "spring-rating-data-march.js",
+  "spring-rating-data-april.js",
+  "spring-rating-data.js",
+  "winter-rating-data.js",
+].map((file) => path.join(ROOT, file));
 const ASSETS_DIR = path.join(ROOT, "assets");
 const XPOKER_POINTS = { 1: 135, 2: 110, 3: 90, 4: 70, 5: 60, 6: 50, 7: 40, 8: 30 };
 
@@ -257,10 +265,13 @@ function printSnippet() {
 }
 
 function loadData() {
-  const code = fs.readFileSync(DATA_FILE, "utf8");
   const sandbox = {};
   vm.createContext(sandbox);
-  vm.runInContext(code, sandbox, { filename: DATA_FILE });
+  DATA_FILES.forEach((file) => {
+    if (!fs.existsSync(file)) return;
+    const code = fs.readFileSync(file, "utf8");
+    vm.runInContext(code, sandbox, { filename: file });
+  });
   return sandbox;
 }
 

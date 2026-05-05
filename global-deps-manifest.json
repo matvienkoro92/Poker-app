@@ -115,6 +115,26 @@
       ]
     },
     {
+      "name": "pokerPlayerCrmEsc",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-formatters.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
+      "name": "pokerPlayerCrmLocalDateKey",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-formatters.js"
+      ],
+      "consumedBy": [
+        "app-player-crm.js"
+      ]
+    },
+    {
       "name": "initChat",
       "domain": "chat",
       "exportedBy": [
@@ -177,6 +197,26 @@
       "consumedBy": [
         "app-pwa-auth.js",
         "app-chat-identity-formatters.js"
+      ]
+    },
+    {
+      "name": "pokerPwaAuthText",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-i18n.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
+      ]
+    },
+    {
+      "name": "pokerPwaAuthI18nPack",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-i18n.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth.js"
       ]
     },
     {
@@ -510,6 +550,16 @@
       ]
     },
     {
+      "name": "initChatGuestGateRuntime",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-guest-gate.js"
+      ],
+      "consumedBy": [
+        "app-chat-lifecycle.js"
+      ]
+    },
+    {
       "name": "initChatEmojiPickerRuntime",
       "domain": "chat",
       "exportedBy": [
@@ -550,6 +600,17 @@
       ]
     },
     {
+      "name": "pokerBuildGazetteCommentItemHtml",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-gazette-comments.js"
+      ],
+      "consumedBy": [
+        "app-home-gazette-tasks.js",
+        "app-home-vpn-proxy-modal.js"
+      ]
+    },
+    {
       "name": "initRafflesActiveViewRuntime",
       "domain": "raffles",
       "exportedBy": [
@@ -557,6 +618,49 @@
       ],
       "consumedBy": [
         "app-raffles.js"
+      ]
+    },
+    {
+      "name": "pokerRafflesBuildActiveCardHeading",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-formatters.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "pokerRafflesFormatCountdown",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-formatters.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "updateProfileUserName",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-hero.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-view-router.js",
+        "app-shell-layout.js",
+        "app-pwa-open-handlers.js"
+      ]
+    },
+    {
+      "name": "initProfileNameEditor",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-hero.js"
+      ],
+      "consumedBy": [
+        "app-profile.js"
       ]
     },
     {

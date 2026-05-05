@@ -762,7 +762,7 @@ function initWinterRating() {
   if (titleTextEl) {
     titleTextEl.innerHTML = isSpringRatingMode()
       ? "Рейтинг Турнирщиков весны<br /><span class=\"winter-rating__title-accent\">На 250 000р</span>"
-      : "Рейтинг Турнирщиков зимы<br /><span class=\"winter-rating__title-accent\">на 250 000₽</span>";
+      : "Архив рейтинга зимы<br /><span class=\"winter-rating__title-accent\">на 250 000₽</span>";
   }
   window.openWinterRatingDatePanel = function (dateStr) {
     var container = document.getElementById("winterRatingDates");
@@ -1228,6 +1228,12 @@ function initWinterRating() {
     });
   }
   var dateItems = datesContainer.querySelectorAll(".winter-rating__date-item");
+  var currentDateSeason = isSpringRatingMode() ? "spring" : "winter";
+  dateItems.forEach(function (item) {
+    var itemSeason = item.getAttribute("data-rating-season") || "winter";
+    if (itemSeason !== currentDateSeason && item.parentNode === datesContainer) datesContainer.removeChild(item);
+  });
+  dateItems = datesContainer.querySelectorAll(".winter-rating__date-item");
   var byDate = getRatingByDate();
   if (typeof byDate === "object" && Object.keys(byDate).length) {
     var dates = Object.keys(byDate).sort(function (a, b) {
@@ -1246,6 +1252,7 @@ function initWinterRating() {
         var item = document.createElement("div");
         item.className = "winter-rating__date-item";
         item.setAttribute("data-rating-date", dateStr);
+        item.setAttribute("data-rating-season", currentDateSeason);
         var panelInner = isSpringRatingMode()
           ? "<div class=\"spring-rating-date-leagues\">" +
             "<div class=\"spring-rating-date-league-tabs\"><button type=\"button\" class=\"spring-rating-date-league-tab spring-rating-date-league-tab--active\" data-league=\"1\">Лига 1</button><button type=\"button\" class=\"spring-rating-date-league-tab\" data-league=\"2\">Лига 2</button></div>" +
@@ -1365,7 +1372,8 @@ function initWinterRating() {
         shareWrap.innerHTML = "<button type=\"button\" class=\"winter-rating__share-btn winter-rating__share-btn--copy-icon winter-rating__date-share-btn\" aria-label=\"Скопировать ссылку на рейтинг за " + (dateStr || "") + "\">" + shareIcon + "</button>";
         panel.appendChild(shareWrap);
       }
-      if (!alreadyInited) {
+      if (btn.getAttribute("data-rating-toggle-bound") !== "1") {
+        btn.setAttribute("data-rating-toggle-bound", "1");
         btn.addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
