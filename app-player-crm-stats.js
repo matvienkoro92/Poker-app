@@ -41,6 +41,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var visitRows = summary ? players : periodPlayers;
     var visitTotal = visitsSummary ? Number(visitsSummary.total) || 0 : visitRows.reduce(function (sum, p) { return sum + (Number(p && p.totals && p.totals.visits) || 0); }, 0);
     var visitUnique = visitsSummary ? Number(visitsSummary.unique) || 0 : visitRows.length;
+    var visitRepeat = visitsSummary && visitsSummary.repeat != null ? Number(visitsSummary.repeat) || 0 : Math.max(0, visitTotal - visitUnique);
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
@@ -81,6 +82,7 @@ function initPlayerCrmStatsRuntime(deps) {
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
           "</span></div>";
       }
       if (it[3] === "registrations") {

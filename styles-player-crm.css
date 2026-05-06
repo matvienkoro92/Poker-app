@@ -404,8 +404,8 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__stat--visits {
   display: grid;
-  gap: 8px;
-  min-height: 112px;
+  gap: 7px;
+  min-height: 140px;
 }
 .player-crm__stat-mini-grid {
   display: grid;
@@ -420,7 +420,7 @@ button.player-crm__stat:focus-visible,
   align-items: center;
   gap: 8px;
   min-width: 0;
-  min-height: 32px;
+  min-height: 30px;
   padding: 6px 8px;
   border: 1px solid rgba(199, 163, 106, 0.26);
   border-radius: 7px;
@@ -450,14 +450,14 @@ button.player-crm__stat:focus-visible,
 .player-crm__stat-mini-grid small {
   color: var(--text-muted);
   min-width: 0;
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 800;
   line-height: 1.1;
   text-transform: uppercase;
 }
 .player-crm__stat-mini-grid strong {
   margin-top: 0;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
   text-align: right;
   white-space: nowrap;
