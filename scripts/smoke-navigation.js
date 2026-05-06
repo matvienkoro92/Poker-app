@@ -90,6 +90,10 @@ function chromiumExecutablePath() {
 
 async function clickVisibleOrSetView(page, target) {
   const clicked = await page.evaluate((targetName) => {
+    if (targetName === "home" && window.__pokerPlayerCrmStandaloneOpen && typeof window.pokerClosePlayerCrmStandalone === "function") {
+      window.pokerClosePlayerCrmStandalone();
+      return true;
+    }
     function isActuallyVisible(node) {
       if (!node || !node.getBoundingClientRect) return false;
       const view = node.closest && node.closest(".view");
@@ -106,7 +110,8 @@ async function clickVisibleOrSetView(page, target) {
     }
     const selector = targetName === "player-crm" ? '[data-crm-open="player-crm"], [data-view-target]' : "[data-view-target]";
     const els = Array.from(document.querySelectorAll(selector))
-      .filter((node) => node.getAttribute("data-view-target") === targetName || node.getAttribute("data-crm-open") === targetName);
+      .filter((node) => node.getAttribute("data-view-target") === targetName || node.getAttribute("data-crm-open") === targetName)
+      .filter((node) => targetName !== "home" || !node.classList.contains("bonus-game-back"));
     const el = els.find(isActuallyVisible);
     if (!el) return false;
     el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
@@ -115,6 +120,10 @@ async function clickVisibleOrSetView(page, target) {
 
   if (!clicked) {
     await page.evaluate((targetName) => {
+      if (targetName === "player-crm" && typeof window.pokerOpenPlayerCrmFromHome === "function") {
+        window.pokerOpenPlayerCrmFromHome();
+        return;
+      }
       if (typeof setView !== "function") throw new Error("setView is not available");
       setView(targetName);
     }, target);
@@ -212,13 +221,21 @@ async function main() {
       }
       const via = await clickVisibleOrSetView(page, target);
       if (target === "player-crm") {
-        await page.waitForFunction((targetName) => document.body.getAttribute("data-view") === targetName, target, { timeout: 6000 });
+        await page.waitForFunction(() => {
+          const root = document.getElementById("playerCrmView");
+          return !!(window.__pokerPlayerCrmStandaloneOpen && root && root.classList.contains("player-crm-standalone"));
+        }, null, { timeout: 6000 });
       } else {
         await page.waitForTimeout(target === "chat" ? 1200 : 350);
       }
       const view = await page.evaluate(() => document.body.getAttribute("data-view"));
-      views.push({ target, via, view });
-      if (view !== target) throw new Error(`Expected ${target}, got ${view}`);
+      const crmStandalone = await page.evaluate(() => !!window.__pokerPlayerCrmStandaloneOpen);
+      views.push({ target, via, view, crmStandalone });
+      if (target === "player-crm") {
+        if (!crmStandalone) throw new Error("player CRM standalone overlay did not open");
+      } else if (view !== target) {
+        throw new Error(`Expected ${target}, got ${view}`);
+      }
       if (target === "player-crm") {
         await page.waitForFunction(() => typeof window.pokerInitPlayerCrm === "function", null, { timeout: 4000 });
         const crmState = await page.evaluate(() => {
@@ -227,6 +244,8 @@ async function main() {
           const rootRect = root ? root.getBoundingClientRect() : null;
           const rect = section ? section.getBoundingClientRect() : null;
           return {
+            standalone: !!window.__pokerPlayerCrmStandaloneOpen,
+            classed: !!(root && root.classList && root.classList.contains("player-crm-standalone")),
             bound: root && root.dataset.crmBound === "1",
             rootTall: !!(rootRect && rootRect.height >= Math.min(window.innerHeight || 0, 640)),
             visible: !!(section && rect && rect.width > 0 && rect.height > 0 && getComputedStyle(section).visibility !== "hidden"),
@@ -235,6 +254,7 @@ async function main() {
               !!(document.getElementById("playerCrmAnalytics") && document.getElementById("playerCrmAnalytics").textContent.trim()),
           };
         });
+        if (!crmState.standalone || !crmState.classed) throw new Error("player CRM standalone layout was not applied");
         if (!crmState.bound) throw new Error("player CRM runtime did not bind");
         if (!crmState.rootTall) throw new Error("player CRM root collapsed on mobile viewport");
         if (!crmState.visible) throw new Error("player CRM section is not visible on mobile viewport");

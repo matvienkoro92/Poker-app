@@ -63,9 +63,98 @@ function pokerGetStablePlayerCrmViewportHeight() {
 
 window.pokerGetStablePlayerCrmViewportHeight = pokerGetStablePlayerCrmViewportHeight;
 
+function pokerApplyPlayerCrmStandaloneLayout() {
+  var root = document.getElementById("playerCrmView");
+  if (!root) return;
+  pokerPortalPlayerCrmRoot(root);
+  var section = root.querySelector(".player-crm");
+  var back = root.querySelector('[data-crm-close="player-crm"], .bonus-game-back');
+  window.__pokerPlayerCrmStandaloneOpen = true;
+  root.classList.add("view--active", "player-crm-standalone");
+  root.removeAttribute("inert");
+  root.removeAttribute("aria-hidden");
+  root.style.setProperty("position", "fixed", "important");
+  root.style.setProperty("top", "0", "important");
+  root.style.setProperty("right", "0", "important");
+  root.style.setProperty("bottom", "0", "important");
+  root.style.setProperty("left", "0", "important");
+  root.style.setProperty("min-height", "0", "important");
+  root.style.setProperty("height", "auto", "important");
+  root.style.setProperty("max-height", "none", "important");
+  root.style.setProperty("overflow", "hidden", "important");
+  root.style.setProperty("display", "flex", "important");
+  root.style.setProperty("flex-direction", "column", "important");
+  root.style.setProperty("align-items", "stretch", "important");
+  root.style.setProperty("gap", "8px", "important");
+  root.style.setProperty("visibility", "visible", "important");
+  root.style.setProperty("opacity", "1", "important");
+  root.style.setProperty("z-index", "2147483600", "important");
+  root.style.setProperty("pointer-events", "auto", "important");
+  root.style.setProperty("isolation", "isolate", "important");
+  root.style.setProperty("box-sizing", "border-box", "important");
+  root.style.setProperty("padding", "12px 12px 0", "important");
+  root.style.setProperty("background", "linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%)", "important");
+  if (back) {
+    back.style.setProperty("display", "inline-flex", "important");
+    back.style.setProperty("position", "relative", "important");
+    back.style.setProperty("top", "auto", "important");
+    back.style.setProperty("left", "auto", "important");
+    back.style.setProperty("right", "auto", "important");
+    back.style.setProperty("bottom", "auto", "important");
+    back.style.setProperty("flex", "0 0 auto", "important");
+    back.style.setProperty("z-index", "3", "important");
+    back.style.setProperty("margin", "0 0 8px", "important");
+  }
+  if (section) {
+    section.style.setProperty("display", "block", "important");
+    section.style.setProperty("visibility", "visible", "important");
+    section.style.setProperty("opacity", "1", "important");
+    section.style.setProperty("flex", "1 1 auto", "important");
+    section.style.setProperty("position", "relative", "important");
+    section.style.setProperty("top", "auto", "important");
+    section.style.setProperty("right", "auto", "important");
+    section.style.setProperty("bottom", "auto", "important");
+    section.style.setProperty("left", "auto", "important");
+    section.style.setProperty("z-index", "2", "important");
+    section.style.setProperty("width", "100%", "important");
+    section.style.setProperty("max-width", "1120px", "important");
+    section.style.setProperty("min-width", "0", "important");
+    section.style.setProperty("min-height", "0", "important");
+    section.style.setProperty("height", "auto", "important");
+    section.style.setProperty("max-height", "none", "important");
+    section.style.setProperty("margin", "0 auto", "important");
+    section.style.setProperty("overflow-x", "hidden", "important");
+    section.style.setProperty("overflow-y", "auto", "important");
+    section.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
+    section.style.setProperty("overscroll-behavior-y", "contain", "important");
+    section.style.setProperty("touch-action", "pan-y pinch-zoom", "important");
+    section.style.setProperty("box-sizing", "border-box", "important");
+    section.style.setProperty("padding", "0 0 16px", "important");
+    section.style.setProperty("color", "var(--text, #f4ead6)", "important");
+    section.style.setProperty("transform", "none", "important");
+  }
+}
+
+window.pokerSyncPlayerCrmStandaloneLayout = pokerApplyPlayerCrmStandaloneLayout;
+
+function pokerRenderPlayerCrmOpeningFallback() {
+  var stats = document.getElementById("playerCrmStats");
+  var analytics = document.getElementById("playerCrmAnalytics");
+  if (stats && !stats.textContent.trim()) {
+    stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">CRM открывается. Данные появятся через несколько секунд.</div>";
+  }
+  if (analytics && !analytics.textContent.trim()) {
+    analytics.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Готовим график и сводку игроков.</div>";
+  }
+}
+
 function pokerForcePlayerCrmVisible() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
+  if (window.__pokerPlayerCrmStandaloneOpen) {
+    pokerApplyPlayerCrmStandaloneLayout();
+    return;
+  }
   pokerPortalPlayerCrmRoot(root);
   var section = root.querySelector(".player-crm");
   var active = root.classList && root.classList.contains("view--active");
@@ -129,7 +218,7 @@ function pokerSchedulePlayerCrmViewportSync() {
   [0, 32, 90, 180, 360, 720, 1200, 2200, 3600].forEach(function (delay) {
     setTimeout(function () {
       try {
-        if (document.body && document.body.getAttribute("data-view") !== "player-crm") return;
+        if (!window.__pokerPlayerCrmStandaloneOpen && document.body && document.body.getAttribute("data-view") !== "player-crm") return;
         pokerForcePlayerCrmVisible();
         if (typeof window.pokerSyncPlayerCrmViewportShell === "function") {
           window.pokerSyncPlayerCrmViewportShell();
@@ -146,7 +235,7 @@ function pokerInstallPlayerCrmBlackScreenRescue() {
   playerCrmBlackScreenRescueBound = true;
   function applyRescue() {
     try {
-      if (!document.body || document.body.getAttribute("data-view") !== "player-crm") return;
+      if (!window.__pokerPlayerCrmStandaloneOpen && (!document.body || document.body.getAttribute("data-view") !== "player-crm")) return;
       pokerForcePlayerCrmVisible();
       var root = document.getElementById("playerCrmView");
       var section = root && root.querySelector(".player-crm");
@@ -157,6 +246,10 @@ function pokerInstallPlayerCrmBlackScreenRescue() {
         rect.bottom < 180 ||
         rect.top > Math.max(180, (window.innerHeight || 0) - 220);
       if (!hidden) return;
+      if (window.__pokerPlayerCrmStandaloneOpen) {
+        pokerApplyPlayerCrmStandaloneLayout();
+        return;
+      }
       root.style.setProperty("min-height", "100vh", "important");
       root.style.setProperty("height", "100vh", "important");
       root.style.setProperty("max-height", "100vh", "important");
@@ -201,6 +294,7 @@ function pokerResetPlayerCrmForcedVisibility() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
   var section = root.querySelector(".player-crm");
+  var back = root.querySelector('[data-crm-close="player-crm"], .bonus-game-back');
   [
     "position",
     "top",
@@ -220,7 +314,10 @@ function pokerResetPlayerCrmForcedVisibility() {
     "opacity",
     "z-index",
     "pointer-events",
-    "isolation"
+    "isolation",
+    "box-sizing",
+    "padding",
+    "background"
   ].forEach(function (prop) {
     try {
       root.style.removeProperty(prop);
@@ -250,6 +347,9 @@ function pokerResetPlayerCrmForcedVisibility() {
       "box-sizing",
       "padding",
       "padding-bottom",
+      "color",
+      "overscroll-behavior-y",
+      "touch-action",
       "transform"
     ].forEach(function (prop) {
       try {
@@ -257,6 +357,24 @@ function pokerResetPlayerCrmForcedVisibility() {
       } catch (eSectionStyle) {}
     });
   }
+  if (back) {
+    [
+      "display",
+      "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "flex",
+      "z-index",
+      "margin"
+    ].forEach(function (prop) {
+      try {
+        back.style.removeProperty(prop);
+      } catch (eBackStyle) {}
+    });
+  }
+  root.classList.remove("view--active", "player-crm-standalone");
   try {
     var placeholder = window.__pokerPlayerCrmRootPlaceholder;
     if (placeholder && placeholder.parentNode && root.parentNode !== placeholder.parentNode) {
@@ -265,6 +383,23 @@ function pokerResetPlayerCrmForcedVisibility() {
     }
   } catch (eRestoreRoot) {}
 }
+
+function pokerClosePlayerCrmStandalone() {
+  playerCrmOpenToken += 1;
+  window.__pokerPlayerCrmStandaloneOpen = false;
+  if (document.documentElement) document.documentElement.classList.remove("player-crm-standalone-open");
+  if (document.body) document.body.classList.remove("player-crm-standalone-open");
+  pokerResetPlayerCrmForcedVisibility();
+  try {
+    pokerSyncInertForViewScreensOnly();
+  } catch (eCloseCrmInert) {}
+  try {
+    var active = document.querySelector('.view.view--active[data-view]');
+    if (!active && typeof setView === "function") setView("home");
+  } catch (eCloseCrmView) {}
+}
+
+window.pokerClosePlayerCrmStandalone = pokerClosePlayerCrmStandalone;
 
 (function pokerInitInactiveViewsInert() {
   function apply() {
@@ -1294,9 +1429,11 @@ function pokerWarmPlayerCrmScripts() {
 }
 
 var playerCrmOpenInFlight = false;
+var playerCrmOpenToken = 0;
 
 function pokerFinalizePlayerCrmDirectOpen() {
-  pokerForcePlayerCrmVisible();
+  pokerApplyPlayerCrmStandaloneLayout();
+  pokerRenderPlayerCrmOpeningFallback();
   pokerSchedulePlayerCrmViewportSync();
   try {
     if (typeof window.pokerInitPlayerCrm === "function") {
@@ -1307,35 +1444,19 @@ function pokerFinalizePlayerCrmDirectOpen() {
   } catch (eCrmFinalize) {}
 }
 
-function pokerOpenPlayerCrmFromHome() {
-  if (playerCrmOpenInFlight && document.body && document.body.getAttribute("data-view") === "player-crm") {
-    pokerFinalizePlayerCrmDirectOpen();
-    return;
-  }
-  playerCrmOpenInFlight = true;
-  setTimeout(function () {
-    playerCrmOpenInFlight = false;
-  }, 450);
-
-  function activateCrmNow() {
-    try {
-      setView("player-crm", { htmlReady: true, scriptsReady: true });
-    } catch (eSetCrmImmediate) {
-      try {
-        setView("player-crm");
-      } catch (eSetCrmFallback) {}
-    }
-    pokerFinalizePlayerCrmDirectOpen();
-  }
-
-  activateCrmNow();
+function pokerContinuePlayerCrmWarmOpen(openToken) {
+  if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
   var scriptsReady = pokerWarmPlayerCrmScripts();
   if (scriptsReady && typeof scriptsReady.then === "function") {
     scriptsReady.then(function () {
       [0, 40, 160, 420].forEach(function (delay) {
-        setTimeout(pokerFinalizePlayerCrmDirectOpen, delay);
+        setTimeout(function () {
+          if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
+          pokerFinalizePlayerCrmDirectOpen();
+        }, delay);
       });
     }).catch(function (err) {
+      if (openToken !== playerCrmOpenToken) return;
       playerCrmOpenInFlight = false;
       var stats = document.getElementById("playerCrmStats");
       if (stats && !stats.textContent.trim()) {
@@ -1343,30 +1464,70 @@ function pokerOpenPlayerCrmFromHome() {
       }
       if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm open", err);
     });
+  }
+}
+
+function pokerOpenPlayerCrmFromHome() {
+  if (playerCrmOpenInFlight && window.__pokerPlayerCrmStandaloneOpen) {
+    pokerFinalizePlayerCrmDirectOpen();
     return;
   }
+  playerCrmOpenInFlight = true;
+  playerCrmOpenToken += 1;
+  var openToken = playerCrmOpenToken;
+  setTimeout(function () {
+    playerCrmOpenInFlight = false;
+  }, 450);
+
+  function activateCrmNow() {
+    try {
+      var active = document.querySelector('.view.view--active[data-view]:not([data-view="player-crm"])');
+      if (!active && typeof setView === "function") setView("home", { htmlReady: true, scriptsReady: true });
+    } catch (eSetCrmImmediate) {}
+    pokerFinalizePlayerCrmDirectOpen();
+  }
+
+  activateCrmNow();
+  setTimeout(function () {
+    pokerContinuePlayerCrmWarmOpen(openToken);
+  }, 0);
 }
 
 (function bindPlayerCrmFastOpen() {
   var btn = document.querySelector('[data-crm-open="player-crm"]') || document.getElementById("adminCrmBtn");
   if (!btn || btn.__pokerPlayerCrmFastOpenBound) return;
   btn.__pokerPlayerCrmFastOpenBound = true;
-  btn.addEventListener("pointerdown", function () {
-    pokerWarmPlayerCrmScripts();
-  }, { passive: true });
   btn.addEventListener("touchend", function (e) {
     if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
     if (window.__touchWasScroll && window.__touchWasScroll()) return;
     e.preventDefault();
-    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+    else e.stopPropagation();
     pokerOpenPlayerCrmFromHome();
   }, { passive: false });
   btn.addEventListener("click", function (e) {
     if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
     e.preventDefault();
-    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+    else e.stopPropagation();
     pokerOpenPlayerCrmFromHome();
   });
+})();
+
+(function bindPlayerCrmStandaloneClose() {
+  function handle(e) {
+    var close = e.target && e.target.closest ? e.target.closest('[data-crm-close="player-crm"]') : null;
+    if (!close) return;
+    e.preventDefault();
+    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+    else e.stopPropagation();
+    pokerClosePlayerCrmStandalone();
+  }
+  document.addEventListener("click", handle, true);
+  document.addEventListener("touchend", function (e) {
+    if (window.__touchWasScroll && window.__touchWasScroll()) return;
+    handle(e);
+  }, { passive: false, capture: true });
 })();
 
 (function bindChatTabFastOpen() {

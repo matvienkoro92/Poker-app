@@ -125,6 +125,37 @@
       ]
     },
     {
+      "name": "pokerSyncPlayerCrmStandaloneLayout",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-viewport-shell.js"
+      ]
+    },
+    {
+      "name": "pokerClosePlayerCrmStandalone",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "__pokerPlayerCrmStandaloneOpen",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-player-crm-viewport-shell.js"
+      ]
+    },
+    {
       "name": "pokerPlayerCrmEsc",
       "domain": "playerCrm",
       "exportedBy": [

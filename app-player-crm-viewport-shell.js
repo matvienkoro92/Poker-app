@@ -29,6 +29,11 @@ function initPlayerCrmViewportShellRuntime() {
   function syncCrmViewportShell() {
     var root = document.getElementById("playerCrmView");
     if (!root) return;
+    var standaloneSync = window["pokerSyncPlayerCrmStandaloneLayout"];
+    if (window.__pokerPlayerCrmStandaloneOpen && typeof standaloneSync === "function") {
+      standaloneSync();
+      return;
+    }
     var section = root.querySelector(".player-crm");
     var active = root.classList && root.classList.contains("view--active");
     var isCrmView = false;

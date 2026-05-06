@@ -1459,25 +1459,33 @@ add("Large domain entrypoints stay thin after runtime split", () =>
     "window.pokerGetStablePlayerCrmViewportHeight",
     "window.screen && window.screen.height",
     "syncCrmViewportShell",
+    "window.__pokerPlayerCrmStandaloneOpen",
+    "pokerSyncPlayerCrmStandaloneLayout",
     'root.style.setProperty("z-index", "2147483000", "important")',
     'section.style.setProperty("position", "absolute", "important")',
     'section.style.setProperty("top", "max(74px',
   ]) &&
   hasAll("appViewRouter", [
     "function pokerGetStablePlayerCrmViewportHeight",
+    "function pokerApplyPlayerCrmStandaloneLayout",
     "function pokerSchedulePlayerCrmViewportSync",
     "function pokerInstallPlayerCrmBlackScreenRescue",
     "function pokerFinalizePlayerCrmDirectOpen",
+    "function pokerClosePlayerCrmStandalone",
     "function pokerOpenPlayerCrmFromHome",
+    "window.pokerClosePlayerCrmStandalone",
+    "player-crm-standalone",
+    "window.__pokerPlayerCrmStandaloneOpen",
     "pokerWarmPlayerCrmScripts",
-    'setView("player-crm", { htmlReady: true, scriptsReady: true })',
     "pokerOpenPlayerCrmFromHome();",
     '[data-crm-open="player-crm"]',
-    'target === "player-crm"',
+    '[data-crm-close="player-crm"]',
   ]) &&
+  !has("appViewRouter", 'setView("player-crm", { htmlReady: true, scriptsReady: true })') &&
   !has("appViewRouter", "scriptsReady.then(activateCrmNow)") &&
   hasAll("html", [
     'data-crm-open="player-crm"',
+    'data-crm-close="player-crm"',
     "Загрузка CRM…",
     "График загрузится после открытия CRM.",
   ]) &&

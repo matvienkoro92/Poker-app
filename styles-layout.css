@@ -1193,8 +1193,8 @@ body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
   padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
 }
 
-body:not([data-view="player-crm"]) #playerCrmView,
-#playerCrmView:not(.view--active) {
+body:not([data-view="player-crm"]) #playerCrmView:not(.player-crm-standalone),
+#playerCrmView:not(.view--active):not(.player-crm-standalone) {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -1244,5 +1244,64 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
   box-sizing: border-box !important;
   color: var(--text, #f8fafc) !important;
+  transform: none !important;
+}
+
+#playerCrmView.player-crm-standalone {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 12px 12px 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 2147483600 !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
+}
+
+#playerCrmView.player-crm-standalone > .bonus-game-back {
+  display: inline-flex !important;
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  z-index: 3 !important;
+  margin: 0 0 8px !important;
+}
+
+#playerCrmView.player-crm-standalone .player-crm {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex: 1 1 auto !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  max-width: 1120px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  box-sizing: border-box !important;
+  padding: 0 0 16px !important;
+  color: var(--text, #f4ead6) !important;
   transform: none !important;
 }
