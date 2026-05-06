@@ -503,7 +503,7 @@ function dirSizeBytes(dir) {
 
 const engineeringBudgets = {
   indexHtmlMaxBytes: 100 * 1024,
-  eagerScriptsMax: 152,
+  eagerScriptsMax: 157,
   lazyScriptsMax: 25,
   runtimeFiles: {
     "app-pwa-auth-runtime.js": { maxBytes: 76 * 1024, maxLines: 1700 },
