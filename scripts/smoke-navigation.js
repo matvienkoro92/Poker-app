@@ -238,6 +238,13 @@ async function main() {
       }
       if (target === "player-crm") {
         await page.waitForFunction(() => typeof window.pokerInitPlayerCrm === "function", null, { timeout: 4000 });
+        await page.waitForFunction(() => {
+          const stats = document.getElementById("playerCrmStats");
+          const analytics = document.getElementById("playerCrmAnalytics");
+          const statsText = stats ? String(stats.textContent || "").trim() : "";
+          const analyticsText = analytics ? String(analytics.textContent || "").trim() : "";
+          return !/Загрузка CRM/i.test(statsText) && !/График загрузится после открытия CRM/i.test(analyticsText);
+        }, null, { timeout: 5000 });
         const crmState = await page.evaluate(() => {
           const root = document.getElementById("playerCrmView");
           const section = root && root.querySelector(".player-crm");

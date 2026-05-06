@@ -53,6 +53,7 @@
     source: "api",
     crmError: "",
     showAllPlayers: false,
+    loadStartedAt: 0,
   };
 
   var esc = pokerPlayerCrmEsc;
@@ -776,8 +777,13 @@
   }
 
   function loadCrmData(scope) {
+    if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
+      state.loading = false;
+      state.loadingScope = "";
+    }
     if (state.loading) return Promise.resolve(false);
     state.loading = true;
+    state.loadStartedAt = Date.now();
     showCrmLoading(scope || "all");
     var base = getApiBaseSafe();
     var hasCred = false;
@@ -796,12 +802,21 @@
       state.source = "no-auth";
       state.crmError = "CRM не загрузилась: нет авторизации. Войди по email владельца CRM.";
       state.loading = false;
+      state.loadStartedAt = 0;
       state.loadingScope = "";
       state.loaded = true;
       renderAll();
       return Promise.resolve(true);
     }
-    return fetch(base + "/api/player-crm" + crmQuery())
+    var controller = null;
+    var timeoutId = null;
+    if (typeof AbortController !== "undefined") {
+      controller = new AbortController();
+      timeoutId = setTimeout(function () {
+        try { controller.abort(); } catch (eAbort) {}
+      }, 16000);
+    }
+    return fetch(base + "/api/player-crm" + crmQuery(), controller ? { signal: controller.signal } : undefined)
       .then(function (r) {
         return r.json()
           .then(function (data) {
@@ -854,7 +869,7 @@
           state.crmError = formatCrmLoadError(data);
         }
       })
-      .catch(function () {
+      .catch(function (error) {
         state.players = [];
         state.registeredAccounts = [];
         state.pokerPlusAccounts = [];
@@ -865,10 +880,14 @@
         state.chatStats = null;
         state.permissions = null;
         state.source = "error";
-        state.crmError = "CRM не загрузилась: ошибка сети или API.";
+        state.crmError = error && error.name === "AbortError"
+          ? "CRM не загрузилась: API отвечает слишком долго. Попробуй открыть раздел ещё раз через несколько секунд."
+          : "CRM не загрузилась: ошибка сети или API.";
       })
       .then(function () {
+        if (timeoutId) clearTimeout(timeoutId);
         state.loading = false;
+        state.loadStartedAt = 0;
         state.loadingScope = "";
         state.loaded = true;
         renderAll();
@@ -1506,6 +1525,10 @@
     setTimeout(syncCrmViewportShell, 320);
     bindOnce();
     syncPeriodInputs();
+    if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
+      state.loading = false;
+      state.loadingScope = "";
+    }
     if (!state.loaded) loadCrmData();
     else renderAll();
   }
@@ -1528,11 +1551,11 @@
   });
   if (document.readyState !== "loading") {
     setTimeout(function () {
-      if (document.getElementById("playerCrmView")) pokerInitPlayerCrm();
+      if (document.getElementById("playerCrmView") && (window.__pokerPlayerCrmStandaloneOpen || (document.body && document.body.getAttribute("data-view") === "player-crm"))) pokerInitPlayerCrm();
     }, 0);
   } else {
     document.addEventListener("DOMContentLoaded", function () {
-      if (document.getElementById("playerCrmView")) pokerInitPlayerCrm();
+      if (document.getElementById("playerCrmView") && (window.__pokerPlayerCrmStandaloneOpen || (document.body && document.body.getAttribute("data-view") === "player-crm"))) pokerInitPlayerCrm();
     });
   }
 })();

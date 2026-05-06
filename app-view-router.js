@@ -140,12 +140,20 @@ window.pokerSyncPlayerCrmStandaloneLayout = pokerApplyPlayerCrmStandaloneLayout;
 function pokerRenderPlayerCrmOpeningFallback() {
   var stats = document.getElementById("playerCrmStats");
   var analytics = document.getElementById("playerCrmAnalytics");
-  if (stats && !stats.textContent.trim()) {
+  var statsText = stats && stats.textContent ? stats.textContent.trim() : "";
+  var analyticsText = analytics && analytics.textContent ? analytics.textContent.trim() : "";
+  if (stats && (!statsText || /Загрузка CRM/i.test(statsText))) {
     stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">CRM открывается. Данные появятся через несколько секунд.</div>";
   }
-  if (analytics && !analytics.textContent.trim()) {
+  if (analytics && (!analyticsText || /График загрузится после открытия CRM/i.test(analyticsText))) {
     analytics.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Готовим график и сводку игроков.</div>";
   }
+}
+
+function pokerRenderPlayerCrmOpenError(message) {
+  var stats = document.getElementById("playerCrmStats");
+  if (!stats) return;
+  stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + (message || "CRM не догрузилась. Закрой и открой раздел ещё раз.") + "</div>";
 }
 
 function pokerForcePlayerCrmVisible() {
@@ -1447,6 +1455,10 @@ function pokerFinalizePlayerCrmDirectOpen() {
 function pokerContinuePlayerCrmWarmOpen(openToken) {
   if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
   var scriptsReady = pokerWarmPlayerCrmScripts();
+  if (typeof window.pokerInitPlayerCrm === "function") {
+    pokerFinalizePlayerCrmDirectOpen();
+    return;
+  }
   if (scriptsReady && typeof scriptsReady.then === "function") {
     scriptsReady.then(function () {
       [0, 40, 160, 420].forEach(function (delay) {
@@ -1458,13 +1470,33 @@ function pokerContinuePlayerCrmWarmOpen(openToken) {
     }).catch(function (err) {
       if (openToken !== playerCrmOpenToken) return;
       playerCrmOpenInFlight = false;
-      var stats = document.getElementById("playerCrmStats");
-      if (stats && !stats.textContent.trim()) {
-        stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">CRM открыта, данные догружаются. Обнови раздел через несколько секунд.</div>";
-      }
+      pokerRenderPlayerCrmOpenError("CRM открыта, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
       if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm open", err);
     });
+    return;
   }
+  [180, 520, 1100, 2200, 4200].forEach(function (delay, idx) {
+    setTimeout(function () {
+      if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
+      if (typeof window.pokerInitPlayerCrm === "function") {
+        pokerFinalizePlayerCrmDirectOpen();
+        return;
+      }
+      var retryReady = pokerWarmPlayerCrmScripts();
+      if (retryReady && typeof retryReady.then === "function") {
+        retryReady.then(function () {
+          if (openToken === playerCrmOpenToken && window.__pokerPlayerCrmStandaloneOpen) pokerFinalizePlayerCrmDirectOpen();
+        }).catch(function (err) {
+          if (idx === 4) pokerRenderPlayerCrmOpenError("CRM открыта, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
+          if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm retry", err);
+        });
+        return;
+      }
+      if (idx === 4 && typeof window.pokerInitPlayerCrm !== "function") {
+        pokerRenderPlayerCrmOpenError("CRM открылась, но модуль данных не стартовал. Обнови приложение и открой CRM ещё раз.");
+      }
+    }, delay);
+  });
 }
 
 function pokerOpenPlayerCrmFromHome() {
