@@ -1194,10 +1194,13 @@ button.player-crm__stat:focus-visible,
   font-size: 12px;
 }
 .player-crm__registrations-table {
-  min-width: 760px;
+  min-width: 900px;
 }
 .player-crm__pokerplus-table {
-  min-width: 920px;
+  min-width: 1040px;
+}
+.player-crm__channel-table {
+  min-width: 820px;
 }
 .player-crm__pokerplus-filters {
   margin-bottom: 12px;

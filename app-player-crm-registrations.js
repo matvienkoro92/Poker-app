@@ -5,6 +5,7 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
   var dateInSelectedPeriod = ctx.dateInSelectedPeriod;
   var periodLabel = ctx.periodLabel;
   var registrationTelegramLabel = ctx.registrationTelegramLabel;
+  var dateTime = ctx.dateTime || function () { return "—"; };
 
   function hasRegistrationMethod(row, method) {
     return !!(row && row.methods && row.methods.indexOf(method) >= 0);
@@ -42,11 +43,12 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">По этому способу регистрации пока пусто.</div>";
     var visibleRows = state.showAllRegistrationModal ? rows : rows.slice(0, 15);
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
+      "<th>Аккаунт</th><th>Дата регистрации</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
       "</tr></thead><tbody>" + visibleRows.map(function (r) {
         var tg = registrationTelegramLabel(r);
         return "<tr>" +
           "<td>" + esc(r.accountId || r.dtId || "—") + "</td>" +
+          "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
           "<td>" + esc(tg || "—") + "</td>" +
           "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
@@ -96,10 +98,11 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     var method = state.registrationModalMethod;
     if (method !== "email" && method !== "telegram" && method !== "both") return;
     var rows = registrationRowsByMethod(method);
-    var lines = [["accountId", "telegramLogin", "email", "name"].map(csvCell).join(",")];
+    var lines = [["accountId", "registeredAt", "telegramLogin", "email", "name"].map(csvCell).join(",")];
     rows.forEach(function (r) {
       lines.push([
         r.accountId || r.dtId || "",
+        dateTime(r.linkedAt) === "—" ? "" : dateTime(r.linkedAt),
         registrationTelegramLabel(r) === "—" ? "" : registrationTelegramLabel(r),
         r.email || "",
         r.name || "",

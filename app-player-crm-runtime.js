@@ -100,6 +100,7 @@
       dateInSelectedPeriod: dateInSelectedPeriod,
       periodLabel: periodLabel,
       registrationTelegramLabel: registrationTelegramLabel,
+      dateTime: dateTime,
       renderStats: function () { return renderStats(); }
     })
     : {};
@@ -416,6 +417,18 @@
     return String(iso || "").slice(0, 10);
   }
 
+  function dateTime(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return "—";
+    return d.toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
   function filteredPokerPlusAccounts() {
     var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
     var min = parseInt(state.pokerPlusLevelMin, 10);
@@ -454,7 +467,7 @@
       return;
     }
     var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата привязки</th><th>Email</th>" +
+      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата и время привязки</th><th>Email</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
         return "<tr>" +
           "<td>" + esc(r.accountId || "—") + "</td>" +
@@ -463,7 +476,7 @@
           "<td>" + esc(r.level || "—") + "</td>" +
           "<td>" + esc(money(r.fee || 0)) + "</td>" +
           "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
-          "<td>" + esc(dateOnly(r.linkedAt) || "—") + "</td>" +
+          "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
           "<td>" + esc(r.email || "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
@@ -474,7 +487,7 @@
     var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">Привязанных аккаунтов Poker21 пока нет.</div>";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата привязки</th><th>Email</th>" +
+      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата и время привязки</th><th>Email</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
         return "<tr>" +
           "<td>" + esc(r.accountId || "—") + "</td>" +
@@ -483,7 +496,7 @@
           "<td>" + esc(r.level || "—") + "</td>" +
           "<td>" + esc(money(r.fee || 0)) + "</td>" +
           "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
-          "<td>" + esc(dateOnly(r.linkedAt) || "—") + "</td>" +
+          "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
           "<td>" + esc(r.email || "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div></div>";
@@ -567,15 +580,16 @@
       });
   }
 
-  function renderChannelSubscribersTable(rows, emptyText) {
+  function renderChannelSubscribersTable(rows, emptyText, dateField, dateHeader) {
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">" + esc(emptyText) + "</div>";
-    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
-      "<th>Игрок</th><th>Telegram</th><th>ID</th><th>Источник</th>" +
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__channel-table\"><thead><tr>" +
+      "<th>Игрок</th><th>Telegram</th><th>ID</th><th>" + esc(dateHeader) + "</th><th>Источник</th>" +
       "</tr></thead><tbody>" + rows.map(function (p) {
         return "<tr>" +
           "<td>" + esc(p.name || "—") + "</td>" +
           "<td>" + esc(p.handle || "—") + "</td>" +
           "<td>" + esc(p.accountId || p.dtId || p.id || "—") + "</td>" +
+          "<td>" + esc(dateTime(p[dateField])) + "</td>" +
           "<td>" + esc(p.source || "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div></div>";
@@ -586,7 +600,7 @@
   }
 
   function renderBotModalList() {
-    return renderChannelSubscribersTable(botSubscribersRows(), "Новых подписок на бот за период пока нет.");
+    return renderChannelSubscribersTable(botSubscribersRows(), "Новых подписок на бот за период пока нет.", "botSubscribedAt", "Дата подписки");
   }
 
   function renderBotModal() {
@@ -617,7 +631,7 @@
   }
 
   function renderPushModalList() {
-    return renderChannelSubscribersTable(pushSubscribersRows(), "Новых push-подписок за период пока нет.");
+    return renderChannelSubscribersTable(pushSubscribersRows(), "Новых push-подписок за период пока нет.", "pushSubscribedAt", "Дата привязки push");
   }
 
   function renderPushModal() {
