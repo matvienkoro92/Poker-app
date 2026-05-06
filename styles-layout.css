@@ -1280,6 +1280,12 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   margin: 0 0 14px !important;
 }
 
+body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-game-back {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 #playerCrmView.player-crm-standalone .player-crm {
   display: block !important;
   visibility: visible !important;
