@@ -53,9 +53,9 @@ function initPlayerCrmStatsRuntime(deps) {
       registrationBothCount = Number(summaryRegistrationCounts.both) || 0;
     }
     var chat = state.chatStats || {};
-    var pairHint = "Всего / за " + periodLabel();
-    function pair(row) {
-      return intFmt(row && row.total) + " / " + intFmt(row && row.period);
+    var chatPeriodHint = periodLabel();
+    function periodOnly(row) {
+      return intFmt(row && row.period);
     }
     var stats = [
       ["Посещений", visitTotal, periodLabel(), "visits"],
@@ -66,12 +66,12 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Депозиты", money(statDeposits), periodLabel()],
     ];
     var chatStats = [
-      ["Сообщений в главном чате", pair(chat.generalMessages), pairHint, "generalMessages"],
-      ["Личных диалогов", pair(chat.personalDialogs), pairHint],
-      ["Групповых чатов", pair(chat.groupChats), pairHint],
-      ["Диалогов у Ани", pair(chat.managerDialogs && chat.managerDialogs.anna), pairHint, "anna"],
-      ["Диалогов у Вики", pair(chat.managerDialogs && chat.managerDialogs.vika), pairHint, "vika"],
-      ["Все остальные диалоги", pair(chat.managerDialogs && chat.managerDialogs.other), pairHint, "other"],
+      ["Сообщений в главном чате", periodOnly(chat.generalMessages), chatPeriodHint, "generalMessages"],
+      ["Личных диалогов", periodOnly(chat.personalDialogs), chatPeriodHint],
+      ["Групповых чатов", periodOnly(chat.groupChats), chatPeriodHint],
+      ["Диалогов у Ани", periodOnly(chat.managerDialogs && chat.managerDialogs.anna), chatPeriodHint, "anna"],
+      ["Диалогов у Вики", periodOnly(chat.managerDialogs && chat.managerDialogs.vika), chatPeriodHint, "vika"],
+      ["Все остальные диалоги", periodOnly(chat.managerDialogs && chat.managerDialogs.other), chatPeriodHint, "other"],
     ];
     function statCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
