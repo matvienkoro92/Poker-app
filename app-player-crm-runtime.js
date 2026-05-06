@@ -793,12 +793,12 @@
     }
     state.chartAnalytics = data.chartAnalytics || null;
     state.chatStats = data.chatStats || null;
-    if (data.range && data.range.key === "custom") {
+    if (data.range && data.range.key === "custom" && !(state.period === "yesterday" && isLocalYesterdayRange(data.range))) {
       state.period = "custom";
       state.dateFrom = data.range.from || state.dateFrom;
       state.dateTo = data.range.to || state.dateTo;
     }
-    if (data.chartRange && data.chartRange.key === "custom") {
+    if (data.chartRange && data.chartRange.key === "custom" && !(state.chartPeriod === "yesterday" && isLocalYesterdayRange(data.chartRange))) {
       state.chartPeriod = "custom";
       state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
       state.chartDateTo = data.chartRange.to || state.chartDateTo;
@@ -1122,9 +1122,28 @@
   }
 
   function requestRange() {
-    return state.period === "custom" && state.dateFrom && state.dateTo
-      ? { from: state.dateFrom, to: state.dateTo }
-      : null;
+    if (state.period === "custom" && state.dateFrom && state.dateTo) return { from: state.dateFrom, to: state.dateTo };
+    if (state.period === "yesterday") return localYesterdayRange();
+    return null;
+  }
+
+  function localDateKeyForQuery(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, "0");
+    var d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  function localYesterdayRange() {
+    var now = new Date();
+    var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    var key = localDateKeyForQuery(yesterday);
+    return { from: key, to: key };
+  }
+
+  function isLocalYesterdayRange(range) {
+    var yesterday = localYesterdayRange();
+    return !!(range && range.from === yesterday.from && range.to === yesterday.to);
   }
 
   function crmQuery(extra) {
@@ -1138,6 +1157,9 @@
     if (state.period === "custom") {
       setDefaultDates();
       q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);
+    } else if (state.period === "yesterday") {
+      var yesterday = localYesterdayRange();
+      q += sep + "from=" + encodeURIComponent(yesterday.from) + "&to=" + encodeURIComponent(yesterday.to);
     } else if (state.period === "all") {
       q += sep + "period=all";
     } else {
@@ -1147,6 +1169,9 @@
     if (state.chartPeriod === "custom") {
       setDefaultChartDates();
       q += sep + "chartFrom=" + encodeURIComponent(state.chartDateFrom) + "&chartTo=" + encodeURIComponent(state.chartDateTo);
+    } else if (state.chartPeriod === "yesterday") {
+      var chartYesterday = localYesterdayRange();
+      q += sep + "chartFrom=" + encodeURIComponent(chartYesterday.from) + "&chartTo=" + encodeURIComponent(chartYesterday.to);
     } else if (state.chartPeriod === "all") {
       q += sep + "chartPeriod=all";
     } else {

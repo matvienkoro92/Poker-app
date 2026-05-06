@@ -42,6 +42,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   }
 
   function periodText(key) {
+    if (key === "yesterday") return "вчера";
     if (key === "current_week") return "текущая неделя";
     if (key === "last_week") return "прошлая неделя";
     if (key === "current_month") return "текущий месяц";
@@ -66,6 +67,11 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     }
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (state.period === "yesterday") {
+      var yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      return { from: localDateKey(yesterday), to: localDateKey(yesterday) };
+    }
     if (state.period === "current_week") {
       var day = today.getDay() || 7;
       var currentWeekFrom = new Date(today);
@@ -122,6 +128,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     var options = [
       ["all", "За все время"],
       ["custom", "Даты"],
+      ["yesterday", "Вчера"],
       ["last_month", "Прошлый месяц"],
       ["current_month", "Текущий месяц"],
       ["last_week", "Прошлая неделя"],
