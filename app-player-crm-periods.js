@@ -43,6 +43,11 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
 
   function periodText(key) {
     if (key === "yesterday") return "вчера";
+    if (key === "month_2026_02") return "февраль";
+    if (key === "month_2026_03") return "март";
+    if (key === "month_2026_04") return "апрель";
+    if (key === "month_2026_05") return "май";
+    if (key === "period_2026_02_04") return "февраль — апрель";
     if (key === "current_week") return "текущая неделя";
     if (key === "last_week") return "прошлая неделя";
     if (key === "current_month") return "текущий месяц";
@@ -73,11 +78,24 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     return displayDate(range.from) + " — " + displayDate(range.to);
   }
 
+  function fixedPeriodRange(key) {
+    var ranges = {
+      month_2026_02: { from: "2026-02-01", to: "2026-02-28" },
+      month_2026_03: { from: "2026-03-01", to: "2026-03-31" },
+      month_2026_04: { from: "2026-04-01", to: "2026-04-30" },
+      month_2026_05: { from: "2026-05-01", to: "2026-05-31" },
+      period_2026_02_04: { from: "2026-02-01", to: "2026-04-30" },
+    };
+    return ranges[key] || null;
+  }
+
   function selectedPeriodRange() {
     if (state.period === "all") return null;
     if (state.period === "custom") {
       return state.dateFrom && state.dateTo ? { from: state.dateFrom, to: state.dateTo } : null;
     }
+    var fixed = fixedPeriodRange(state.period);
+    if (fixed) return fixed;
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     if (state.period === "yesterday") {
@@ -142,6 +160,11 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
       ["all", "За все время"],
       ["custom", "Даты"],
       ["yesterday", "Вчера"],
+      ["month_2026_02", "Февраль"],
+      ["month_2026_03", "Март"],
+      ["month_2026_04", "Апрель"],
+      ["month_2026_05", "Май"],
+      ["period_2026_02_04", "Февраль — апрель"],
       ["last_month", "Прошлый месяц"],
       ["current_month", "Текущий месяц"],
       ["last_week", "Прошлая неделя"],
@@ -235,6 +258,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     periodKey: periodKey,
     periodLabel: periodLabel,
     periodRangeLabel: periodRangeLabel,
+    fixedPeriodRange: fixedPeriodRange,
     selectedPeriodRange: selectedPeriodRange,
     dateInSelectedPeriod: dateInSelectedPeriod,
     playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
