@@ -3,6 +3,7 @@
   var state = {
     loaded: false,
     loading: false,
+    heavyLoading: false,
     loadingScope: "",
     tab: "overview",
     period: "30",
@@ -776,7 +777,69 @@
     renderAnalytics();
   }
 
+  function applyCrmData(data, heavyOnly) {
+    if (!data || !data.ok || !Array.isArray(data.players)) return false;
+    if (!heavyOnly) {
+      state.players = data.players;
+      state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
+      state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
+      state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
+      state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
+      state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : null;
+      state.permissions = data.permissions || null;
+      state.pushConfigured = data.pushConfigured === true;
+      state.source = data.source || "api";
+      state.crmError = "";
+    }
+    state.chartAnalytics = data.chartAnalytics || null;
+    state.chatStats = data.chatStats || null;
+    if (data.range && data.range.key === "custom") {
+      state.period = "custom";
+      state.dateFrom = data.range.from || state.dateFrom;
+      state.dateTo = data.range.to || state.dateTo;
+    }
+    if (data.chartRange && data.chartRange.key === "custom") {
+      state.chartPeriod = "custom";
+      state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
+      state.chartDateTo = data.chartRange.to || state.chartDateTo;
+    } else if (data.chartRange && data.chartRange.key) {
+      state.chartPeriod = String(data.chartRange.key);
+    }
+    return true;
+  }
+
+  function loadCrmHeavyData(scope) {
+    if (state.heavyLoading) return Promise.resolve(false);
+    state.heavyLoading = true;
+    renderStats();
+    renderAnalytics();
+    var base = getApiBaseSafe();
+    if (!base) {
+      state.heavyLoading = false;
+      return Promise.resolve(false);
+    }
+    return fetch(base + "/api/player-crm" + crmQuery({ mode: "heavy" }))
+      .then(function (r) {
+        return r.json().then(function (data) {
+          data = data || {};
+          data.__httpOk = r.ok;
+          data.__status = r.status;
+          return data;
+        });
+      })
+      .then(function (data) {
+        if (data && data.ok && Array.isArray(data.players)) applyCrmData(data, true);
+      })
+      .catch(function () {})
+      .then(function () {
+        state.heavyLoading = false;
+        renderAll();
+        return true;
+      });
+  }
+
   function loadCrmData(scope) {
+    if (scope === "chart" && state.loaded) return loadCrmHeavyData(scope);
     if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
       state.loading = false;
       state.loadingScope = "";
@@ -816,7 +879,8 @@
         try { controller.abort(); } catch (eAbort) {}
       }, 16000);
     }
-    return fetch(base + "/api/player-crm" + crmQuery(), controller ? { signal: controller.signal } : undefined)
+    var shouldLoadHeavy = false;
+    return fetch(base + "/api/player-crm" + crmQuery({ mode: "core" }), controller ? { signal: controller.signal } : undefined)
       .then(function (r) {
         return r.json()
           .then(function (data) {
@@ -830,31 +894,8 @@
           });
       })
       .then(function (data) {
-        if (data && data.ok && Array.isArray(data.players)) {
-          state.players = data.players;
-          state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
-          state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
-          state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
-          state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
-          state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : null;
-          state.chartAnalytics = data.chartAnalytics || null;
-          state.chatStats = data.chatStats || null;
-          state.permissions = data.permissions || null;
-          state.pushConfigured = data.pushConfigured === true;
-          state.source = data.source || "api";
-          state.crmError = "";
-          if (data.range && data.range.key === "custom") {
-            state.period = "custom";
-            state.dateFrom = data.range.from || state.dateFrom;
-            state.dateTo = data.range.to || state.dateTo;
-          }
-          if (data.chartRange && data.chartRange.key === "custom") {
-            state.chartPeriod = "custom";
-            state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
-            state.chartDateTo = data.chartRange.to || state.chartDateTo;
-          } else if (data.chartRange && data.chartRange.key) {
-            state.chartPeriod = String(data.chartRange.key);
-          }
+        if (applyCrmData(data, false)) {
+          shouldLoadHeavy = data && data.heavyPending === true;
         } else {
           state.players = [];
           state.registeredAccounts = [];
@@ -891,6 +932,7 @@
         state.loadingScope = "";
         state.loaded = true;
         renderAll();
+        if (shouldLoadHeavy) loadCrmHeavyData("heavy");
         return true;
       });
   }
@@ -1085,9 +1127,14 @@
       : null;
   }
 
-  function crmQuery() {
+  function crmQuery(extra) {
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    extra = extra && typeof extra === "object" ? extra : {};
+    if (extra.mode) {
+      q += sep + "mode=" + encodeURIComponent(extra.mode);
+      sep = "&";
+    }
     if (state.period === "custom") {
       setDefaultDates();
       q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);

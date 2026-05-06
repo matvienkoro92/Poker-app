@@ -125,7 +125,9 @@ function initPlayerCrmStatsRuntime(deps) {
       "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
       "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
-        "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>" +
+        (state.heavyLoading && !state.chatStats
+          ? "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем чатовую статистику…</div>"
+          : "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>") +
       "</section>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
