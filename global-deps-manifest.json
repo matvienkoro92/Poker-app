@@ -107,7 +107,7 @@
       "name": "pokerInitPlayerCrm",
       "domain": "playerCrm",
       "exportedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ],
       "consumedBy": [
         "app-html-fragments.js",
@@ -121,7 +121,7 @@
         "app-player-crm-formatters.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -131,7 +131,7 @@
         "app-player-crm-formatters.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -141,7 +141,8 @@
         "app-chat-lifecycle.js"
       ],
       "consumedBy": [
-        "app-view-router.js"
+        "app-view-router.js",
+        "app-shell-bootstrap.js"
       ]
     },
     {
@@ -195,7 +196,7 @@
         "app-pwa-auth-session.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js",
+        "app-pwa-auth-runtime.js",
         "app-chat-identity-formatters.js"
       ]
     },
@@ -226,7 +227,7 @@
         "app-pwa-auth-session.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js",
+        "app-pwa-auth-runtime.js",
         "app-pwa-auth-telegram-code.js",
         "app-pwa-auth-email-login.js"
       ]
@@ -388,7 +389,7 @@
         "app-rating-view-adapter.js"
       ],
       "consumedBy": [
-        "app.js"
+        "app-shell-bootstrap.js"
       ]
     },
     {
@@ -405,7 +406,7 @@
       "name": "pokerInitHomePlanner",
       "domain": "home",
       "exportedBy": [
-        "app-home-planner.js"
+        "app-home-planner-runtime.js"
       ],
       "consumedBy": [
         "app-home-gazette-tasks.js"
@@ -722,7 +723,7 @@
         "app-pwa-auth-language-ui.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -732,7 +733,7 @@
         "app-pwa-auth-telegram-code.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -742,7 +743,7 @@
         "app-pwa-auth-email-login.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -774,7 +775,7 @@
       ],
       "consumedBy": [
         "app-view-router.js",
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -938,7 +939,7 @@
         "app-profile-avatar-cache.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -958,8 +959,8 @@
         "app-profile-shows.js"
       ],
       "consumedBy": [
-        "app.js",
-        "app-view-router.js"
+        "app-view-router.js",
+        "app-shell-bootstrap.js"
       ]
     },
     {
@@ -1021,7 +1022,7 @@
         "app-player-crm-periods.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -1031,7 +1032,7 @@
         "app-player-crm-stats.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -1041,7 +1042,7 @@
         "app-player-crm-charts.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -1051,7 +1052,7 @@
         "app-player-crm-reports.js"
       ],
       "consumedBy": [
-        "app-player-crm.js"
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -1061,7 +1062,7 @@
         "app-pwa-auth-restore.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -1071,7 +1072,7 @@
         "app-pwa-auth-entry-screen.js"
       ],
       "consumedBy": [
-        "app-pwa-auth.js"
+        "app-pwa-auth-runtime.js"
       ]
     },
     {
@@ -1123,6 +1124,108 @@
       ],
       "consumedBy": [
         "app-profile-user-info.js"
+      ]
+    },
+    {
+      "name": "getVisitorId",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-visitor-id.js"
+      ],
+      "consumedBy": [
+        "app-api-tracking.js",
+        "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "updateVisitorCounter",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-api-tracking.js"
+      ],
+      "consumedBy": [
+        "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "runGazetteAndTasksInit",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-gazette-tasks.js"
+      ],
+      "consumedBy": [
+        "app-shell-bootstrap.js",
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "updateSpringRatingPromoDateFromVar",
+      "domain": "rating",
+      "exportedBy": [
+        "app-rating-view.js"
+      ],
+      "consumedBy": [
+        "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "pokerClearBodyDocumentScrollLockInline",
+      "domain": "shell",
+      "exportedBy": [
+        "app-navigation-scroll.js"
+      ],
+      "consumedBy": [
+        "app-popstate-recovery.js"
+      ]
+    },
+    {
+      "name": "initHomePlannerAccessRuntime",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-planner-access.js"
+      ],
+      "consumedBy": [
+        "app-home-planner-runtime.js"
+      ]
+    },
+    {
+      "name": "initPwaAuthModeRuntime",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-mode.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "initPwaAuthOverlayRuntime",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-overlay.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "initPlayerCrmRegistrationsRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-registrations.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-runtime.js"
+      ]
+    },
+    {
+      "name": "initPlayerCrmViewportShellRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-viewport-shell.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-runtime.js"
       ]
     }
   ]

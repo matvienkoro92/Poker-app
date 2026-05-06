@@ -1,0 +1,119 @@
+<div class="view" data-view="poker-tasks">
+            <div class="poker-tasks__start" id="pokerTasksStartScreen">
+              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">←</button>
+              <h1 class="title">Tournament Pro Challenge</h1>
+              <p class="poker-tasks__desc">80 уровней, 500+ MTT задач с прогрессивной сложностью. 5 задач в день. Таймер от нуля, бонусы за скорость и стрик.</p>
+              <div class="poker-tasks__mtt-stats" id="pokerTasksMttStats">
+                <div class="poker-tasks__mtt-stat"><span class="poker-tasks__mtt-stat-label">Уровень</span><span id="mttStatLevel">1 — Новичок</span></div>
+                <div class="poker-tasks__mtt-stat"><span class="poker-tasks__mtt-stat-label">Баллы</span><span id="mttStatPoints">0 / 100</span></div>
+                <div class="poker-tasks__mtt-stat"><span class="poker-tasks__mtt-stat-label">Сегодня</span><span id="mttStatDaily">0 / 5</span></div>
+              </div>
+              <button type="button" class="primary-button poker-tasks__start-btn" id="pokerTasksStartBtn">Начать задачи</button>
+              <div class="poker-tasks__leaderboard" id="pokerTasksLeaderboard">
+                <h3 class="poker-tasks__leaderboard-title">Рейтинг игроков</h3>
+                <div class="poker-tasks__leaderboard-table-wrap">
+                  <table class="poker-tasks__leaderboard-table">
+                    <thead>
+                      <tr><th>#</th><th>Игрок</th><th>Уровень</th><th>Баллы</th></tr>
+                    </thead>
+                    <tbody id="pokerTasksLeaderboardBody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <section class="tasks-board poker-tasks__planner" id="tasksBoard" aria-labelledby="tasksBoardTitle">
+                <div class="tasks-board__head">
+                  <h2 class="tasks-board__title" id="tasksBoardTitle">Планер задач клуба</h2>
+                  <p class="tasks-board__hint">Новые важные задачи можно сразу отправлять в отдельную колонку.</p>
+                </div>
+                <form class="tasks-create-form" id="tasksCreateForm">
+                  <label class="tasks-create-field">
+                    <span class="tasks-create-label">Новая задача</span>
+                    <input
+                      type="text"
+                      class="tasks-create-input"
+                      id="tasksCreateInput"
+                      maxlength="140"
+                      placeholder="Например: проверить структуру турниров Sunday Deep"
+                    />
+                  </label>
+                  <label class="tasks-important-toggle" for="tasksImportantCheckbox">
+                    <input type="checkbox" id="tasksImportantCheckbox" />
+                    <span>Важно</span>
+                  </label>
+                  <button type="submit" class="tasks-create-btn">Добавить</button>
+                </form>
+
+                <div class="tasks-columns">
+                  <section class="tasks-column tasks-column--important" data-tasks-status="important">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Важно</h3>
+                      <span class="tasks-column__count" id="tasksCountImportant">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListImportant"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="todo">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Надо сделать</h3>
+                      <span class="tasks-column__count" id="tasksCountTodo">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListTodo"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="doing">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">В работе</h3>
+                      <span class="tasks-column__count" id="tasksCountDoing">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListDoing"></div>
+                  </section>
+
+                  <section class="tasks-column" data-tasks-status="done">
+                    <div class="tasks-column__head">
+                      <h3 class="tasks-column__title">Выполнено</h3>
+                      <span class="tasks-column__count" id="tasksCountDone">0</span>
+                    </div>
+                    <div class="tasks-column__list" id="tasksListDone"></div>
+                  </section>
+                </div>
+              </section>
+            </div>
+            <div class="poker-streak-screen poker-streak-screen--hidden" id="pokerStreakScreen">
+              <button type="button" class="poker-streak-screen__back" id="pokerStreakBackBtn" aria-label="Назад">←</button>
+              <div class="poker-streak-header poker-streak-header--mtt">
+                <div class="poker-streak-header__row">
+                  <span id="pokerStreakLevel">Ур. 1 — Новичок</span>
+                  <span id="pokerStreakPoints">0/100</span>
+                </div>
+                <div class="poker-streak-header__row">
+                  <span id="pokerStreakDaily">Задачи: 1/5</span>
+                  <span id="pokerStreakStreak">Стрик: 0</span>
+                  <span id="pokerStreakMultiplier">×1.0</span>
+                </div>
+                <div class="poker-streak-header__timer-row">
+                  <span>Таймер:</span>
+                  <span id="pokerStreakTimer">0.0</span>
+                  <span class="poker-streak-header__speed-hint" id="pokerStreakSpeedHint">Макс. +20 за скорость</span>
+                </div>
+              </div>
+              <div class="poker-streak-progress" id="pokerStreakProgress">Задача 1 из 5</div>
+              <div class="poker-streak-content" id="pokerStreakContent">
+                <p class="poker-streak-situation" id="pokerStreakSituation"></p>
+                <div class="poker-streak-cards" id="pokerStreakCards"></div>
+                <p class="poker-streak-question" id="pokerStreakQuestion"></p>
+                <div class="poker-streak-options" id="pokerStreakOptions"></div>
+              </div>
+              <div class="poker-streak-feedback poker-streak-feedback--hidden" id="pokerStreakFeedback">
+                <div class="poker-streak-feedback__result" id="pokerStreakFeedbackResult"></div>
+                <div class="poker-streak-feedback__score" id="pokerStreakFeedbackScore"></div>
+                <p class="poker-streak-feedback__explanation" id="pokerStreakFeedbackExplanation"></p>
+                <button type="button" class="poker-streak-feedback__next primary-button" id="pokerStreakNextBtn">Следующая</button>
+              </div>
+            </div>
+            <div class="poker-streak-result-screen poker-streak-result-screen--hidden" id="pokerStreakResultScreen">
+              <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад в раздел Научиться играть">←</button>
+              <h2 class="title">Итоги сессии</h2>
+              <div class="poker-streak-result-stats" id="pokerStreakResultStats"></div>
+              <button type="button" class="primary-button" id="pokerStreakPlayAgainBtn">Ещё задачи</button>
+            </div>
+          </div>

@@ -1,0 +1,309 @@
+      <!-- Модалка «Посетители» (только админ) -->
+      <div class="visitors-admin-modal" id="visitorsAdminModal" role="dialog" aria-modal="true" aria-label="Список посетителей" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="visitorsAdminModalBackdrop"></div>
+        <div class="visitors-admin-modal__box">
+          <button type="button" class="visitors-admin-modal__close" id="visitorsAdminModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Посетители</h2>
+          <div class="visitors-admin-modal__filter-wrap" style="display:none;"></div>
+          <div class="visitors-admin-modal__stats-wrap">
+            <p class="visitors-admin-modal__stats-label">Выберите группы для рассылки:</p>
+            <div class="visitors-admin-modal__groups-row">
+              <button type="button" class="visitors-admin-modal__group-btn" id="visitorsAdminGroupVisitors" data-group="visitors" aria-pressed="false">
+                <span class="visitors-admin-modal__group-check" aria-hidden="true">☐</span>
+                <span>Уникальных всего: <strong id="visitorsAdminUnique">—</strong>, визитов: <strong id="visitorsAdminTotal">—</strong></span>
+              </button>
+              <button type="button" class="visitors-admin-modal__group-btn" id="visitorsAdminGroupGazette" data-group="gazette" aria-pressed="false">
+                <span class="visitors-admin-modal__group-check" aria-hidden="true">☐</span>
+                <span>Подписчики газеты: <strong id="visitorsAdminGazette">—</strong></span>
+              </button>
+              <button type="button" class="visitors-admin-modal__group-btn" id="visitorsAdminGroupRating" data-group="rating" aria-pressed="false">
+                <span class="visitors-admin-modal__group-check" aria-hidden="true">☐</span>
+                <span>Подписчики рейтинга: <strong id="visitorsAdminRating">—</strong></span>
+              </button>
+              <button type="button" class="visitors-admin-modal__group-btn" id="visitorsAdminGroupRaffle" data-group="raffle" aria-pressed="false">
+                <span class="visitors-admin-modal__group-check" aria-hidden="true">☐</span>
+                <span>Подписчики розыгрышей: <strong id="visitorsAdminRaffle">—</strong></span>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="visitorsAdminShowListBtn">Посмотреть</button>
+          <button type="button" class="visitors-admin-modal__broadcast-btn primary-button" id="visitorsAdminBroadcastBtn">Отправить рассылку</button>
+          <div class="visitors-admin-modal__admin-tools-row">
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminPushToAdminsBtn">Пуш админам</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminPushToAllChatSubsBtn">Пуш подписчикам чата</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminAuthDebugBtn">Auth debug</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminShareStatsBtn">Статистика кнопок</button>
+            <button type="button" class="visitors-admin-modal__share-stats-btn primary-button" id="adminTrackingLinksBtn">Создать ссылку</button>
+          </div>
+          <div class="visitors-admin-modal__list-wrap visitors-admin-modal__list-wrap--hidden" id="visitorsAdminListWrap">
+            <div class="visitors-admin-modal__list" id="visitorsAdminList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Модалка «Рассылка»: текст и картинка -->
+      <div class="visitors-admin-modal visitors-admin-modal--broadcast" id="visitorsBroadcastModal" role="dialog" aria-modal="true" aria-label="Отправить рассылку" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="visitorsBroadcastModalBackdrop"></div>
+        <div class="visitors-admin-modal__box visitors-admin-modal__box--broadcast">
+          <button type="button" class="visitors-admin-modal__close" id="visitorsBroadcastModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Рассылка</h2>
+          <p class="visitors-admin-modal__broadcast-hint" id="visitorsBroadcastHint">Выбрано групп: 0</p>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Текст сообщения</span>
+            <textarea id="visitorsBroadcastText" class="visitors-admin-modal__broadcast-text" rows="4" placeholder="Введите текст..." maxlength="4000"></textarea>
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Картинка (необязательно)</span>
+            <input type="file" id="visitorsBroadcastImageFile" class="visitors-admin-modal__broadcast-file" accept="image/*" aria-label="Прикрепить изображение" />
+            <span class="visitors-admin-modal__broadcast-file-name" id="visitorsBroadcastFileName"></span>
+          </label>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="visitorsBroadcastSendBtn">Отправить</button>
+        </div>
+      </div>
+      <!-- Модалка: Web Push только админам (PWA, подписка как у чата) -->
+      <div class="visitors-admin-modal visitors-admin-modal--broadcast" id="adminPushBroadcastModal" role="dialog" aria-modal="true" aria-label="Пуш админам" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="adminPushBroadcastModalBackdrop"></div>
+        <div class="visitors-admin-modal__box visitors-admin-modal__box--broadcast">
+          <button type="button" class="visitors-admin-modal__close" id="adminPushBroadcastModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Пуш админам</h2>
+          <p class="visitors-admin-modal__broadcast-hint" id="adminPushHint">Только для админов приложения; доставка на устройства с включённым пушем о чате (установленная PWA).</p>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Заголовок</span>
+            <input type="text" id="adminPushTitleInput" class="visitors-admin-modal__broadcast-input" maxlength="80" placeholder="Заголовок уведомления" />
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Текст пуша</span>
+            <textarea id="adminPushBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
+          </label>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushSendBtn">Отправить</button>
+        </div>
+      </div>
+      <div class="visitors-admin-modal visitors-admin-modal--broadcast" id="adminChatPushAllModal" role="dialog" aria-modal="true" aria-label="Пуш подписчикам чата" aria-hidden="true">
+        <div class="visitors-admin-modal__backdrop" id="adminChatPushAllModalBackdrop"></div>
+        <div class="visitors-admin-modal__box visitors-admin-modal__box--broadcast">
+          <button type="button" class="visitors-admin-modal__close" id="adminChatPushAllModalClose" aria-label="Закрыть">×</button>
+          <h2 class="visitors-admin-modal__title">Пуш подписчикам чата</h2>
+          <p class="visitors-admin-modal__broadcast-hint" id="adminPushAllHint">Пользователи с включёнными оповещениями о чате в профиле и сохранённой подпиской Web Push (PWA).</p>
+          <p class="admin-chat-push-all__subs-line">
+            Подписчиков: <strong id="adminPushAllCount">—</strong>
+            <button type="button" class="admin-chat-push-all__subs-btn" id="adminPushAllShowSubsBtn" aria-expanded="false">Кто подписан</button>
+          </p>
+          <div class="admin-chat-push-all__subs-wrap admin-chat-push-all__subs-wrap--hidden" id="adminPushAllSubsWrap" aria-hidden="true">
+            <div class="admin-chat-push-all__subs-list" id="adminPushAllSubsList" role="list"></div>
+          </div>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Заголовок</span>
+            <input type="text" id="adminPushAllTitleInput" class="visitors-admin-modal__broadcast-input" maxlength="80" placeholder="Заголовок уведомления" autocomplete="off" />
+            <span class="admin-chat-push-all__remain" id="adminPushAllTitleRemain" aria-live="polite"></span>
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Текст пуша</span>
+            <textarea id="adminPushAllBodyInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder="Текст уведомления" maxlength="200"></textarea>
+            <span class="admin-chat-push-all__remain" id="adminPushAllBodyRemain" aria-live="polite"></span>
+          </label>
+          <label class="visitors-admin-modal__broadcast-label">
+            <span class="visitors-admin-modal__broadcast-label-text">Куда вести по клику</span>
+            <select id="adminPushAllTargetSelect" class="visitors-admin-modal__broadcast-input admin-chat-push-all__target-select">
+              <option value="./?startapp=club_chat">Чат</option>
+              <option value="./?startapp=schedule">Расписание</option>
+              <option value="./?startapp=raffles">Розыгрыши</option>
+              <option value="./?startapp=spring_rating">Рейтинг</option>
+              <option value="./?startapp=hall_fame_top2026">Зал славы</option>
+              <option value="./?startapp=streams">Стримы</option>
+              <option value="./?startapp=video_lessons">Видеоуроки</option>
+              <option value="./?startapp=learn_play_hub">Научиться играть</option>
+              <option value="./?startapp=download">Скачать PWA</option>
+              <option value="./?startapp=cashout">Касса</option>
+              <option value="./?startapp=profile">Профиль</option>
+              <option value="./">Главная</option>
+            </select>
+          </label>
+          <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminPushAllSendBtn">Отправить всем</button>
+        </div>
+      </div>
+      <div class="share-stats-admin-modal" id="adminAuthDebugModal" role="dialog" aria-modal="true" aria-label="Auth debug" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="adminAuthDebugModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
+          <button type="button" class="share-stats-admin-modal__close" id="adminAuthDebugModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Auth debug</h2>
+          <p class="share-stats-admin-modal__hint">Состояние авторизации в этом браузере: Telegram initData, PWA-сессии, cookie, localStorage, sessionStorage и IndexedDB.</p>
+          <div class="auth-debug-modal__actions">
+            <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminAuthDebugRefreshBtn">Обновить</button>
+            <button type="button" class="visitors-admin-modal__show-btn primary-button" id="adminAuthDebugCopyBtn">Копировать</button>
+          </div>
+          <pre class="auth-debug-modal__output" id="adminAuthDebugOutput">Загрузка…</pre>
+        </div>
+      </div>
+      <!-- Модалка «Статистика кнопок Переслать» (только админ) -->
+      <div class="share-stats-admin-modal" id="shareStatsAdminModal" role="dialog" aria-modal="true" aria-label="Статистика кнопок Переслать" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="shareStatsAdminModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box">
+          <button type="button" class="share-stats-admin-modal__close" id="shareStatsAdminModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Статистика кнопок Переслать</h2>
+          <p class="share-stats-admin-modal__hint">Количество открытий «Переслать» (если сообщение было отправлено).</p>
+          <div class="share-stats-admin-modal__table-wrap">
+            <table class="share-stats-admin-modal__table">
+              <thead>
+                <tr>
+                  <th>Кнопка</th>
+                  <th>Отправок</th>
+                </tr>
+              </thead>
+              <tbody id="shareStatsAdminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Модалка: уникальные ссылки на главную (только админ) -->
+      <div class="share-stats-admin-modal" id="trackingLinksAdminModal" role="dialog" aria-modal="true" aria-label="Ссылки на главную" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="trackingLinksAdminModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
+          <button type="button" class="share-stats-admin-modal__close" id="trackingLinksAdminModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Ссылки на главную</h2>
+          <p class="share-stats-admin-modal__hint">Ссылка открывает приложение на главной. Учёт переходов по коду <code>ref_</code>. Параметры ниже — для ваших пометок в админке (кампания, источник). После перехода в этой <strong>сессии</strong> пишутся экраны (<code>view:…</code>) и клики по кнопкам с разделами (<code>open:…</code>) — см. колонки «Активн.» / «Событий» и детализацию у каждого посетителя.</p>
+          <div class="tracking-links-admin__form">
+            <label class="visitors-admin-modal__broadcast-label">
+              <span class="visitors-admin-modal__broadcast-label-text">Название (необязательно)</span>
+              <input type="text" id="trackingLinksLabelInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Например: Stories Instagram" />
+            </label>
+            <label class="visitors-admin-modal__broadcast-label">
+              <span class="visitors-admin-modal__broadcast-label-text">Параметры (JSON-объект)</span>
+              <textarea id="trackingLinksParamsInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder='{"utm_source":"instagram","campaign":"july"}'></textarea>
+            </label>
+            <button type="button" class="visitors-admin-modal__show-btn primary-button" id="trackingLinksCreateBtn">Создать ссылку</button>
+            <p class="tracking-links-admin__create-msg" id="trackingLinksCreateMsg" aria-live="polite"></p>
+            <div class="tracking-links-admin__new-url-wrap tracking-links-admin__new-url-wrap--hidden" id="trackingLinksNewUrlWrap">
+              <p class="tracking-links-admin__new-url-label">Ссылка для Mini App:</p>
+              <div class="tracking-links-admin__new-url-row">
+                <input type="text" id="trackingLinksNewUrlInput" class="visitors-admin-modal__broadcast-input" readonly />
+                <button type="button" class="visitors-admin-modal__show-btn primary-button tracking-links-admin__copy-btn" id="trackingLinksCopyUrlBtn">Копировать</button>
+              </div>
+            </div>
+          </div>
+          <h3 class="tracking-links-admin__list-title">Ваши ссылки</h3>
+          <div class="tracking-links-admin__table-wrap">
+            <table class="share-stats-admin-modal__table tracking-links-admin__table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Ссылка <span class="tracking-links-admin__th-hint">(нажмите — в буфер)</span></th>
+                  <th>Переходы</th>
+                  <th>Уник.</th>
+                  <th>Активн.</th>
+                  <th>Событий</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="trackingLinksAdminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="share-stats-admin-modal" id="trackingLinksVisitorsModal" role="dialog" aria-modal="true" aria-label="Кто перешёл по ссылке" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="trackingLinksVisitorsModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
+          <button type="button" class="share-stats-admin-modal__close" id="trackingLinksVisitorsModalClose" aria-label="Закрыть">×</button>
+          <button type="button" class="tracking-links-admin__back-btn" id="trackingLinksVisitorsBackBtn" aria-label="К списку ссылок">←</button>
+          <h2 class="share-stats-admin-modal__title" id="trackingLinksVisitorsTitle">Переходы</h2>
+          <div class="tracking-links-admin__table-wrap tracking-links-admin__table-wrap--tall">
+            <table class="share-stats-admin-modal__table">
+              <thead>
+                <tr>
+                  <th>Время (UTC)</th>
+                  <th>Посетитель</th>
+                  <th>Имя / @</th>
+                  <th>Действия в приложении</th>
+                </tr>
+              </thead>
+              <tbody id="trackingLinksVisitorsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Модалка «Отчёт за смену» (только админ, заполняется вручную) -->
+      <div class="share-stats-admin-modal" id="adminReportModal" role="dialog" aria-modal="true" aria-label="Отчёт за смену" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="adminReportModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box">
+          <button type="button" class="share-stats-admin-modal__close" id="adminReportModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Отчёт за смену</h2>
+          <p class="share-stats-admin-modal__hint">Заполните суммы по каждому полю. Отправленные отчёты появятся во вкладке «Отправленные».</p>
+          <p class="admin-report-date" id="adminReportDate"></p>
+          <div class="admin-report-tabs" role="tablist">
+            <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form">Форма</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="sent">Отправленные</button>
+          </div>
+          <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
+            <div class="admin-report-form-body" id="adminReportFormBody">
+            <div class="share-stats-admin-modal__table-wrap share-stats-admin-modal__table-wrap--matrix">
+              <table class="share-stats-admin-modal__table share-stats-admin-modal__table--matrix">
+                <thead>
+                  <tr>
+                    <th>♠</th>
+                    <th>♥</th>
+                    <th>♦</th>
+                    <th>♣</th>
+                  </tr>
+                </thead>
+                <tbody id="adminReportTableBody">
+                  <tr><td><strong>Депозит</strong></td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportDeposit" placeholder="0" /></td><td><strong>Выводы</strong></td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportCashout" placeholder="0" /></td></tr>
+                  <tr><td>Продамус</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportProdamus" placeholder="0" /></td><td>Робокасса</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportRobokassa" placeholder="0" /></td></tr>
+                  <tr><td>Рома крипта</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportRomaCrypto" placeholder="0" /></td><td>Бот крипта деп</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBotCryptoDep" placeholder="0" /></td></tr>
+                  <tr><td>Бот эксчип деп</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBotExchipDep" placeholder="0" /></td><td>Бот эксчип вывод</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBotExchipCashout" placeholder="0" /></td></tr>
+                  <tr><td>Бонусы</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBonuses" placeholder="0" /></td><td>Переводы</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportTransfers" placeholder="0" /></td></tr>
+                  <tr><td>Возврат</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportReturn" placeholder="0" /></td><td>Сергей/Марина</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportSergeyMarina" placeholder="0" /></td></tr>
+                  <tr id="adminReportRakeRow" class="admin-report-rake-row"><td colspan="2"><strong>Рейкбек</strong></td><td colspan="2"><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportRakeback" placeholder="0" /></td></tr>
+                  <tr class="admin-report-extra-row"><td><input type="text" class="admin-report-input admin-report-input--full admin-report-extra-name" enterkeyhint="next" placeholder="Доп. название" /></td><td colspan="3"><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input admin-report-extra-amount" placeholder="0" /></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button type="button" class="admin-report-add-extra-btn" id="adminReportAddExtraBtn" title="Добавить поле" aria-label="Добавить поле">+</button>
+            <button type="button" class="admin-report-submit-btn primary-button" id="adminReportSubmitBtn">Отправить отчёт</button>
+            </div>
+          </div>
+          <div class="admin-report-panel" data-admin-report-panel="sent">
+            <div class="share-stats-admin-modal__table-wrap admin-report-sent-wrap">
+              <div id="adminReportSentList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Модалка «Отчёт о рассылках» (только админ, заполняется вручную) -->
+      <div class="share-stats-admin-modal" id="broadcastReportsModal" role="dialog" aria-modal="true" aria-label="Отчёт о рассылках" aria-hidden="true">
+        <div class="share-stats-admin-modal__backdrop" id="broadcastReportsModalBackdrop"></div>
+        <div class="share-stats-admin-modal__box">
+          <button type="button" class="share-stats-admin-modal__close" id="broadcastReportsModalClose" aria-label="Закрыть">×</button>
+          <h2 class="share-stats-admin-modal__title">Отчёт о рассылках</h2>
+          <p class="share-stats-admin-modal__hint">Сводка по отправленным рассылкам. При необходимости обновляйте таблицу вручную.</p>
+          <div class="share-stats-admin-modal__table-wrap">
+            <table class="share-stats-admin-modal__table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Название / повод</th>
+                  <th>Группы</th>
+                  <th>Отправлено</th>
+                  <th>Доставлено</th>
+                  <th>Клики</th>
+                </tr>
+              </thead>
+              <tbody id="broadcastReportsTableBody">
+                <tr>
+                  <td>10.03.2026</td>
+                  <td>Розыгрыш весеннего рейтинга</td>
+                  <td>Газета + Рейтинг</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>05.03.2026</td>
+                  <td>Напоминание про турнир дня</td>
+                  <td>Посетители за месяц</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>

@@ -779,6 +779,7 @@ function setView(viewName, navOpts) {
     }
   }
   if (viewName === "poker-tasks") {
+    if (typeof window.pokerInitHomeTasks === "function") window.pokerInitHomeTasks();
     var startScreen = document.getElementById("pokerTasksStartScreen");
     var streakScreen = document.getElementById("pokerStreakScreen");
     var resultScreen = document.getElementById("pokerStreakResultScreen");

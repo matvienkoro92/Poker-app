@@ -1,0 +1,36 @@
+<div class="view" data-view="plasterer-game">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <h1 class="title">Переедь Штукатура</h1>
+            <p class="plasterer-desc">Мы остались в ХУ против Штукатура, но у него как обычно всегда 2 туза на руках. Обыграйте его. Попытки безлимитные.</p>
+            <div class="plasterer-table">
+              <div class="plasterer-hands-row">
+                <div class="plasterer-player">
+                  <div class="plasterer-avatar plasterer-avatar--player" id="plastererPlayerName">Вы</div>
+                  <div class="plasterer-cards" id="plastererPlayerCards"></div>
+                  <div class="plasterer-equity" id="plastererPlayerEquity" aria-live="polite"></div>
+                  <div class="plasterer-hand-name" id="plastererPlayerHandName" aria-live="polite"></div>
+                </div>
+                <div class="plasterer-opponent">
+                  <div class="plasterer-opponent-head">
+                    <span class="plasterer-opponent-name">Штукатур</span>
+                  </div>
+                  <div class="plasterer-cards" id="plastererOpponentCards"></div>
+                  <div class="plasterer-equity" id="plastererOpponentEquity" aria-live="polite"></div>
+                  <div class="plasterer-hand-name" id="plastererOpponentHandName" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="plasterer-board" id="plastererBoard">
+                <div class="plasterer-board-slot" id="plastererFlop0"></div>
+                <div class="plasterer-board-slot" id="plastererFlop1"></div>
+                <div class="plasterer-board-slot" id="plastererFlop2"></div>
+                <div class="plasterer-board-slot" id="plastererTurn"></div>
+                <div class="plasterer-board-slot" id="plastererRiver"></div>
+              </div>
+            </div>
+            <p class="plasterer-result" id="plastererResult" aria-live="polite"></p>
+            <div class="plasterer-actions">
+              <button type="button" class="primary-button" id="plastererDealBtn">Раздать карты</button>
+              <button type="button" class="primary-button" id="plastererSpinBtn" style="display: none;">Крути шарманку</button>
+              <button type="button" class="primary-button" id="plastererPlayAgainBtn" style="display: none;">Играть заново</button>
+            </div>
+          </div>

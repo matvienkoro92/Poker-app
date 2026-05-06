@@ -11,6 +11,9 @@
       "app-pwa-auth-email-login.js",
       "app-pwa-auth-restore.js",
       "app-pwa-auth-entry-screen.js",
+      "app-pwa-auth-mode.js",
+      "app-pwa-auth-overlay.js",
+      "app-pwa-auth-runtime.js",
       "app-pwa-auth.js",
       "app-pwa-auth-keyboard-lift.js",
       "app-auth-debug.js"
@@ -155,6 +158,8 @@
     "home": [
       "app-home-init.js",
       "app-home-media.js",
+      "app-home-planner-access.js",
+      "app-home-planner-runtime.js",
       "app-home-planner.js",
       "app-home-tasks.js",
       "app-home-deeplinks.js",
@@ -190,6 +195,9 @@
       "app-player-crm-stats.js",
       "app-player-crm-charts.js",
       "app-player-crm-reports.js",
+      "app-player-crm-registrations.js",
+      "app-player-crm-viewport-shell.js",
+      "app-player-crm-runtime.js",
       "app-player-crm.js"
     ],
     "shell": [
@@ -200,8 +208,11 @@
       "app-webview-keyboard.js",
       "app-shared-helpers.js",
       "app-view-router.js",
+      "app-popstate-recovery.js",
       "app-network.js",
+      "app-visitor-id.js",
       "app-api-tracking.js",
+      "app-shell-bootstrap.js",
       "app.js",
       "app-section-views.js"
     ]

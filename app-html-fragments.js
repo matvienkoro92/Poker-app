@@ -2,6 +2,7 @@
 // preserving existing data-view routing.
 (function () {
   var loading = Object.create(null);
+  var nestedFragmentLoading = Object.create(null);
 
   function findFragmentHost(viewName) {
     var view = String(viewName || "").trim();
@@ -55,6 +56,41 @@
     return next;
   }
 
+  function fetchNestedFragment(src) {
+    if (!nestedFragmentLoading[src]) {
+      nestedFragmentLoading[src] = fetch(src, { cache: "no-store" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("Failed to load nested HTML fragment " + src + ": " + res.status);
+          return res.text();
+        });
+    }
+    return nestedFragmentLoading[src];
+  }
+
+  function replaceGlobalModalFragmentHost(host, html) {
+    var wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    var parent = host.parentNode;
+    if (!parent) return;
+    while (wrap.firstChild) parent.insertBefore(wrap.firstChild, host);
+    parent.removeChild(host);
+  }
+
+  function hydrateGlobalModalSubfragments(root) {
+    var hosts = Array.prototype.slice.call(root.querySelectorAll("[data-global-modal-fragment]"));
+    if (!hosts.length) return Promise.resolve(root);
+    return Promise.all(hosts.map(function (host) {
+      var src = String(host.getAttribute("data-global-modal-fragment") || "").trim();
+      if (!src) return true;
+      return fetchNestedFragment(src).then(function (html) {
+        replaceGlobalModalFragmentHost(host, html);
+        return true;
+      });
+    })).then(function () {
+      return hydrateGlobalModalSubfragments(root);
+    });
+  }
+
   window.pokerEnsureViewHtml = function (viewName) {
     var host = findFragmentHost(viewName);
     if (!host) return false;
@@ -94,14 +130,16 @@
         if (!currentHost) return true;
         var wrap = document.createElement("div");
         wrap.innerHTML = html;
-        var nodes = [];
-        while (wrap.firstChild) nodes.push(wrap.removeChild(wrap.firstChild));
-        nodes.forEach(function (node) {
-          currentHost.parentNode.insertBefore(node, currentHost);
+        return hydrateGlobalModalSubfragments(wrap).then(function () {
+          var nodes = [];
+          while (wrap.firstChild) nodes.push(wrap.removeChild(wrap.firstChild));
+          nodes.forEach(function (node) {
+            currentHost.parentNode.insertBefore(node, currentHost);
+          });
+          currentHost.parentNode.removeChild(currentHost);
+          runFragmentHooks("global-modals");
+          return true;
         });
-        currentHost.parentNode.removeChild(currentHost);
-        runFragmentHooks("global-modals");
-        return true;
       });
     return loading[src];
   };

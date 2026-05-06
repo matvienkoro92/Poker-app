@@ -1,0 +1,21 @@
+
+      <div class="image-lightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-label="Просмотр изображения" aria-hidden="true">
+        <button type="button" class="image-lightbox__backdrop" aria-label="Закрыть"></button>
+        <div class="image-lightbox__content">
+          <button type="button" class="image-lightbox__prev" hidden aria-label="Предыдущее фото">‹</button>
+          <div class="image-lightbox__figure">
+            <img class="image-lightbox__img" src="" alt="" />
+            <p class="image-lightbox__caption" id="imageLightboxCaption" hidden></p>
+          </div>
+          <button type="button" class="image-lightbox__next" hidden aria-label="Следующее фото">›</button>
+          <span class="image-lightbox__counter" aria-live="polite"></span>
+          <button type="button" class="image-lightbox__close" aria-label="Закрыть">✕</button>
+        </div>
+      </div>
+      <div class="pdf-viewer" id="pdfViewer" role="dialog" aria-modal="true" aria-label="Просмотр PDF" aria-hidden="true">
+        <button type="button" class="pdf-viewer__backdrop" aria-label="Закрыть"></button>
+        <div class="pdf-viewer__content">
+          <button type="button" class="pdf-viewer__close" aria-label="Назад">←</button>
+          <iframe class="pdf-viewer__iframe" id="pdfViewerIframe" title="PDF"></iframe>
+        </div>
+      </div>

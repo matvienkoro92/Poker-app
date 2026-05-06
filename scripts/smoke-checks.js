@@ -19,12 +19,31 @@ const files = {
   rafflesFragment: read("html-fragments/raffles.html"),
   profileFragment: read("html-fragments/profile.html"),
   winterRatingFragment: read("html-fragments/winter-rating.html"),
+  bonusGameFragment: read("html-fragments/bonus-game.html"),
+  coolerGameFragment: read("html-fragments/cooler-game.html"),
+  plastererGameFragment: read("html-fragments/plasterer-game.html"),
+  learnPlayHubFragment: read("html-fragments/learn-play-hub.html"),
+  pokerTasksFragment: read("html-fragments/poker-tasks.html"),
+  cashoutFragment: read("html-fragments/cashout.html"),
+  streamsFragment: read("html-fragments/streams.html"),
+  scheduleFragment: read("html-fragments/schedule.html"),
   globalModalsFragment: read("html-fragments/global-modals.html"),
+  globalModalsMediaFragment: read("html-fragments/global-modals-media.html"),
+  globalModalsAdminFragment: read("html-fragments/global-modals-admin.html"),
+  globalModalsHomeFragment: read("html-fragments/global-modals-home.html"),
+  globalModalsChatRatingFragment: read("html-fragments/global-modals-chat-rating.html"),
+  globalModalsAccessFragment: read("html-fragments/global-modals-access.html"),
   app: read("app.js"),
   appNetwork: read("app-network.js"),
   appSharedHelpers: read("app-shared-helpers.js"),
+  appVisitorId: read("app-visitor-id.js"),
+  appVisitorIdModule: read("app-visitor-id.module.mjs"),
+  appPopstateRecovery: read("app-popstate-recovery.js"),
+  appShellBootstrap: read("app-shell-bootstrap.js"),
   appHomeInit: read("app-home-init.js"),
+  appHomePlannerAccess: read("app-home-planner-access.js"),
   appHomePlanner: read("app-home-planner.js"),
+  appHomePlannerRuntime: read("app-home-planner-runtime.js"),
   appHomeTasks: read("app-home-tasks.js"),
   appHomeDeepLinks: read("app-home-deeplinks.js"),
   appHomeClubInfoModals: read("app-home-club-info-modals.js"),
@@ -35,6 +54,9 @@ const files = {
   appPwaAuthEmailLogin: read("app-pwa-auth-email-login.js"),
   appPwaAuthRestore: read("app-pwa-auth-restore.js"),
   appPwaAuthEntryScreen: read("app-pwa-auth-entry-screen.js"),
+  appPwaAuthMode: read("app-pwa-auth-mode.js"),
+  appPwaAuthOverlay: read("app-pwa-auth-overlay.js"),
+  appPwaAuthRuntime: read("app-pwa-auth-runtime.js"),
   appPwaAuth: read("app-pwa-auth.js"),
   appPwaAuthKeyboardLift: read("app-pwa-auth-keyboard-lift.js"),
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
@@ -80,6 +102,12 @@ const files = {
   appRafflesActiveView: read("app-raffles-active-view.js"),
   appRafflesFormatters: read("app-raffles-formatters.js"),
   appRafflesShare: read("app-raffles-share.js"),
+  appPlayerCrmFormatters: read("app-player-crm-formatters.js"),
+  appPlayerCrmFormattersModule: read("app-player-crm-formatters.module.mjs"),
+  appPlayerCrmRegistrations: read("app-player-crm-registrations.js"),
+  appPlayerCrmViewportShell: read("app-player-crm-viewport-shell.js"),
+  appPlayerCrmRuntime: read("app-player-crm-runtime.js"),
+  appPlayerCrm: read("app-player-crm.js"),
   appRating: read("app-rating.js"),
   appRatingViewAdapter: read("app-rating-view-adapter.js"),
   appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
@@ -94,7 +122,12 @@ const files = {
   sw: read("sw.js"),
   redisLib: read("lib/redis.js"),
   accountIdLib: read("lib/account-id.js"),
+  chatDisplayLabel: read("lib/chat-display-label.js"),
+  chatProfileStatus: read("lib/chat-profile-status.js"),
+  chatProfileLookups: read("lib/chat-profile-lookups.js"),
+  chatReadReceipts: read("lib/chat-read-receipts.js"),
   chatHandler: read("lib/api-handlers/chat.js"),
+  chatHandlerRuntime: read("lib/api-handlers/chat-runtime.js"),
   chatMessageActions: read("lib/chat-message-actions.js"),
   chatRouteGet: read("lib/chat-route-get.js"),
   chatRouteGetUpdates: read("lib/chat-route-get-updates.js"),
@@ -119,10 +152,27 @@ const files = {
   cssManifest: read("css-manifest.json"),
   jsManifest: read("js-manifest.json"),
   globalDepsManifest: read("global-deps-manifest.json"),
+  globalDepsWindowBaseline: read("global-deps-window-baseline.json"),
   bumpPwaVersion: read("scripts/bump-pwa-login-version.js"),
+  copyToPublic: read("scripts/copy-to-public.js"),
+  checkJsSyntax: read("scripts/check-js-syntax.js"),
   styles: read("styles.css"),
+  stylesHomeLegacyTail: read("styles-home-legacy-tail.css"),
+  stylesHomeOverrides: read("styles-home-overrides.css"),
+  stylesHomeRatingPromoLegacy: read("styles-home-rating-promo-legacy.css"),
+  stylesHomeRatingPromoLate: read("styles-home-rating-promo-late.css"),
+  stylesLayoutTouchTargets: read("styles-layout-touch-targets.css"),
   stylesRating: read("styles-rating.css"),
 };
+
+files.globalModalsAll = [
+  files.globalModalsFragment,
+  files.globalModalsMediaFragment,
+  files.globalModalsAdminFragment,
+  files.globalModalsHomeFragment,
+  files.globalModalsChatRatingFragment,
+  files.globalModalsAccessFragment,
+].join("\n");
 
 const checks = [];
 
@@ -204,6 +254,12 @@ function localAppFilesFromRoot() {
     .sort();
 }
 
+function localRootModuleFilesFromRoot() {
+  return fs.readdirSync(root)
+    .filter((name) => /^app.*\.mjs$/.test(name))
+    .sort();
+}
+
 function walkJsFiles(relDir) {
   const dir = path.join(root, relDir);
   const out = [];
@@ -263,6 +319,14 @@ function globalDepsManifestData() {
   }
 }
 
+function globalDepsWindowBaselineData() {
+  try {
+    return JSON.parse(files.globalDepsWindowBaseline);
+  } catch (err) {
+    return {};
+  }
+}
+
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -294,6 +358,52 @@ function fileContainsGlobalConsumer(rel, name) {
   return new RegExp("\\b" + escapeRegex(name) + "\\b").test(text);
 }
 
+function manifestGlobalExportKeys() {
+  const manifest = globalDepsManifestData();
+  const items = manifest && Array.isArray(manifest.globals) ? manifest.globals : [];
+  const keys = new Set();
+  items.forEach((item) => {
+    if (!item || typeof item.name !== "string") return;
+    const name = item.name.trim();
+    if (!name || !Array.isArray(item.exportedBy)) return;
+    item.exportedBy.forEach((file) => {
+      if (typeof file === "string" && file.trim()) keys.add(file.trim() + ":" + name);
+    });
+  });
+  return keys;
+}
+
+function windowGlobalAssignments() {
+  const out = [];
+  const candidates = [...new Set([
+    ...localAppFilesFromRoot(),
+    ...localRootScriptFilesFromIndex(),
+    ...jsManifestFiles(),
+  ])].sort();
+  candidates.forEach((file) => {
+    let text;
+    try {
+      text = read(file);
+    } catch (err) {
+      return;
+    }
+    const re = /\bwindow\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*["']([^"']+)["']\s*\])\s*=/g;
+    let match;
+    while ((match = re.exec(text))) {
+      const name = String(match[1] || match[2] || "").trim();
+      if (!name) continue;
+      out.push({ file, name, signature: file + ":" + name });
+    }
+  });
+  return out;
+}
+
+function legacyWindowExportBaselineSet() {
+  const parsed = globalDepsWindowBaselineData();
+  const items = parsed && Array.isArray(parsed.exports) ? parsed.exports : [];
+  return new Set(items.filter((item) => typeof item === "string" && item.includes(":")));
+}
+
 function indexScriptOrder() {
   return localRootScriptFilesFromIndex();
 }
@@ -315,7 +425,7 @@ function htmlViewTargets() {
     files.chatFragment,
     files.hallOfFameFragment,
     files.profileFragment,
-    files.globalModalsFragment,
+    files.globalModalsAll,
   ].join("\n");
   while ((match = re.exec(text))) out.push(match[1]);
   return out;
@@ -389,6 +499,41 @@ function dirSizeBytes(dir) {
     else total += fs.statSync(p).size;
   }
   return total;
+}
+
+const engineeringBudgets = {
+  indexHtmlMaxBytes: 100 * 1024,
+  eagerScriptsMax: 152,
+  lazyScriptsMax: 25,
+  runtimeFiles: {
+    "app-pwa-auth-runtime.js": { maxBytes: 76 * 1024, maxLines: 1700 },
+    "app-player-crm-runtime.js": { maxBytes: 80 * 1024, maxLines: 1680 },
+    "app-home-planner-runtime.js": { maxBytes: 76 * 1024, maxLines: 1780 },
+    "lib/api-handlers/chat-runtime.js": { maxBytes: 60 * 1024, maxLines: 1450 },
+  },
+};
+
+function indexScriptLoadingStats() {
+  const stats = { eager: 0, lazy: 0, total: 0 };
+  const re = /<script\b([^>]*)\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const attrs = match[1] || "";
+    if (/type=["']application\/poker-lazy["']/i.test(attrs)) stats.lazy += 1;
+    else stats.eager += 1;
+    stats.total += 1;
+  }
+  return stats;
+}
+
+function fileLineCount(rel) {
+  return read(rel).split(/\r?\n/).length;
+}
+
+function previewList(items, limit) {
+  const head = items.slice(0, limit);
+  const rest = items.length - head.length;
+  return head.join(", ") + (rest > 0 ? ", +" + rest + " more" : "");
 }
 
 files.client = localRootScriptFilesFromIndex()
@@ -466,6 +611,9 @@ add("PWA auth scripts are cache-busted after session fixes", () =>
     './app-pwa-auth-email-login.js?v=',
     './app-pwa-auth-restore.js?v=',
     './app-pwa-auth-entry-screen.js?v=',
+    './app-pwa-auth-mode.js?v=',
+    './app-pwa-auth-overlay.js?v=',
+    './app-pwa-auth-runtime.js?v=',
     './app-pwa-auth.js?v=',
     './app-pwa-auth-keyboard-lift.js?v=',
   ])
@@ -575,7 +723,7 @@ add("Admin push broadcast can choose a click target section", () =>
     'data-html-fragment="./html-fragments/global-modals.html"',
   ]) &&
   !has("html", 'id="adminPushAllTargetSelect"') &&
-  hasAll("globalModalsFragment", [
+  hasAll("globalModalsAdminFragment", [
     'id="adminPushAllTargetSelect"',
     'value="./?startapp=schedule"',
     'value="./?startapp=raffles"',
@@ -677,6 +825,11 @@ add("Chat API supports fast/diff/poll responses", () =>
 
 add("Chat API delegates GET and POST route handlers", () =>
   hasAll("chatHandler", [
+    'module.exports = require("./chat-runtime")',
+  ]) &&
+  hasAll("chatHandlerRuntime", [
+    'require("../chat-display-label")',
+    'require("../chat-profile-status")',
     'require("../chat-route-get")',
     'require("../chat-route-post")',
     "createChatGetHandler(chatRouteDeps)",
@@ -789,12 +942,12 @@ add("Chat API delegates GET and POST route handlers", () =>
   !has("chatRoutePost", "post_general") &&
   !has("chatRoutePostSend", "tryUploadChatImageDataUrl(image, myId)") &&
   !has("chatRoutePostSend", "require(\"./chat-webpush-notify\")") &&
-  !has("chatHandler", "async function handleChatGet") &&
-  !has("chatHandler", "async function handleChatPost")
+  !has("chatHandlerRuntime", "async function handleChatGet") &&
+  !has("chatHandlerRuntime", "async function handleChatPost")
 );
 
 add("Chat API delegates message mutation actions", () =>
-  hasAll("chatHandler", [
+  hasAll("chatHandlerRuntime", [
     'require("../chat-message-actions")',
     "createChatDeleteHandler({",
     "createChatPatchHandler({",
@@ -810,8 +963,8 @@ add("Chat API delegates message mutation actions", () =>
     "action === \"typing\"",
     "module.exports",
   ]) &&
-  !has("chatHandler", "async function handleChatDelete") &&
-  !has("chatHandler", "async function handleChatPatch")
+  !has("chatHandlerRuntime", "async function handleChatDelete") &&
+  !has("chatHandlerRuntime", "async function handleChatPatch")
 );
 
 add("Shared Redis layer owns pipeline helpers for contract-covered handlers", () =>
@@ -826,12 +979,12 @@ add("Shared Redis layer owns pipeline helpers for contract-covered handlers", ()
     "module.exports",
   ]) &&
   has("accountIdLib", 'require("./redis")') &&
-  has("chatHandler", 'require("../redis")') &&
+  has("chatHandlerRuntime", 'require("../redis")') &&
   has("rafflesHandler", 'require("../redis")') &&
   has("respectHandler", 'require("../redis")') &&
   has("usersHandler", 'require("../redis")') &&
   !has("accountIdLib", "function redisPipeline") &&
-  !has("chatHandler", "function redisPipeline") &&
+  !has("chatHandlerRuntime", "function redisPipeline") &&
   !has("rafflesHandler", "function redisPipeline") &&
   !has("respectHandler", "function redisPipeline") &&
   !has("usersHandler", "function redisPipeline")
@@ -849,12 +1002,25 @@ add("Shared Redis layer has no local pipeline clones left in project code", () =
 });
 
 add("Chat sender label hides Telegram login when a name exists", () =>
-  has("chatHandler", "if (nameParts) return nameParts;") &&
-  !has("chatHandler", 'return nameParts + " · " + nickDisplay')
+  has("chatDisplayLabel", "if (nameParts) return nameParts;") &&
+  !has("chatDisplayLabel", 'return nameParts + " · " + nickDisplay') &&
+  hasAll("chatProfileStatus", [
+    "function pokerProfileStatusFromRakeServer",
+    "function pokerProfileFeeFromCachedProfile",
+    "module.exports",
+  ]) &&
+  !has("chatHandlerRuntime", "function pokerProfileStatusFromRakeServer") &&
+  !has("chatHandlerRuntime", "function buildChatDisplayName")
 );
 
 add("Schedule keeps weekly, day and daily tournament order", () =>
   hasAll("html", [
+    'data-view="schedule"',
+    'data-html-fragment="./html-fragments/schedule.html"',
+    'data-html-fragment-view="schedule"',
+  ]) &&
+  !has("html", 'schedule-section--week-tournament') &&
+  hasAll("scheduleFragment", [
     'schedule-section--week-tournament',
     "Турнир Недели Нокаут Меджик</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00",
     "Турниры дня в 18:00 МСК",
@@ -863,12 +1029,12 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
   ]) &&
   has("appTournamentDay", 'guarantee: "300 000₽"') &&
-  !has("html", "schedule-section--xpoker-freerolls") &&
-  !has("html", "Rebuy (19:00)")
+  !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
+  !has("scheduleFragment", "Rebuy (19:00)")
 );
 
 add("Player card exposes Poker21, status, stats and actions", () =>
-  hasAll("globalModalsFragment", [
+  hasAll("globalModalsChatRatingFragment", [
     'id="chatUserModal"',
     'id="chatUserModalP21"',
     'id="chatUserModalStatusScale"',
@@ -932,6 +1098,13 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   !has("html", 'id="imageLightbox"') &&
   !has("globalModalsFragment", '<nav class="bottom-nav"') &&
   hasAll("globalModalsFragment", [
+    'data-global-modal-fragment="./html-fragments/global-modals-media.html"',
+    'data-global-modal-fragment="./html-fragments/global-modals-admin.html"',
+    'data-global-modal-fragment="./html-fragments/global-modals-home.html"',
+    'data-global-modal-fragment="./html-fragments/global-modals-chat-rating.html"',
+    'data-global-modal-fragment="./html-fragments/global-modals-access.html"',
+  ]) &&
+  hasAll("globalModalsAll", [
     'id="adminReportModal"',
     'id="broadcastReportsModal"',
     'id="visitorsAdminModal"',
@@ -942,6 +1115,8 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   ]) &&
   hasAll("appHtmlFragments", [
     "pokerEnsureGlobalModalsHtml",
+    "hydrateGlobalModalSubfragments",
+    "data-global-modal-fragment",
     "pokerInitAdminReportModal",
     "pokerInitVisitorsAdminUi",
     "pokerInitImageLightbox",
@@ -960,11 +1135,43 @@ add("Service worker does not stale-cache explicit fresh chat requests", () =>
 
 add("Build output contains every local script from index.html", () => {
   const publicDir = path.join(root, "public");
-  return localRootScriptFilesFromIndex().every((file) =>
+  return localRootScriptFilesFromIndex().concat(localRootModuleFilesFromRoot()).every((file) =>
     fs.existsSync(path.join(root, file)) &&
     fs.existsSync(path.join(publicDir, file))
   );
 });
+
+add("ES module bridges keep synchronous globals and build guards", () =>
+  hasAll("appVisitorIdModule", [
+    "export function createVisitorIdRuntime",
+    "export function installVisitorIdGlobal",
+    "scope.getVisitorId = getVisitorId",
+  ]) &&
+  hasAll("appVisitorId", [
+    "function createFallbackVisitorIdRuntime",
+    'import("./app-visitor-id.module.mjs")',
+    "window.pokerVisitorIdReady",
+    "window.getVisitorId",
+  ]) &&
+  hasAll("appPlayerCrmFormattersModule", [
+    "export function pokerPlayerCrmEsc",
+    "export function installPlayerCrmFormattersGlobal",
+    "scope.pokerPlayerCrmEsc",
+  ]) &&
+  hasAll("appPlayerCrmFormatters", [
+    'import("./app-player-crm-formatters.module.mjs")',
+    "window.pokerPlayerCrmFormattersReady",
+    "scope.pokerPlayerCrmEsc",
+  ]) &&
+  hasAll("copyToPublic", [
+    "localModuleFiles",
+    ".mjs",
+  ]) &&
+  hasAll("checkJsSyntax", [
+    "localRootModuleFiles",
+    ".mjs",
+  ])
+);
 
 add("JS manifest covers every app module in the workspace", () => {
   const manifestFiles = jsManifestFiles();
@@ -993,6 +1200,9 @@ add("JS manifest maps core app domains", () =>
     '"app-network.js"',
     '"app-shared-helpers.js"',
     '"app-home-init.js"',
+    '"app-home-planner-access.js"',
+    '"app-home-planner-runtime.js"',
+    '"app-home-planner.js"',
     '"app-home-gazette-comments.js"',
     '"app-pwa-auth-i18n.js"',
     '"app-pwa-auth-language-ui.js"',
@@ -1000,6 +1210,9 @@ add("JS manifest maps core app domains", () =>
     '"app-pwa-auth-email-login.js"',
     '"app-pwa-auth-restore.js"',
     '"app-pwa-auth-entry-screen.js"',
+    '"app-pwa-auth-mode.js"',
+    '"app-pwa-auth-overlay.js"',
+    '"app-pwa-auth-runtime.js"',
     '"app-pwa-auth.js"',
     '"app-pwa-auth-keyboard-lift.js"',
     '"app-profile-hero.js"',
@@ -1015,10 +1228,17 @@ add("JS manifest maps core app domains", () =>
     '"app-chat-lifecycle.js"',
     '"app-html-fragments.js"',
     '"app-webview-keyboard.js"',
+    '"app-visitor-id.js"',
+    '"app-popstate-recovery.js"',
+    '"app-shell-bootstrap.js"',
     '"app-pwa-open-handlers.js"',
     '"app-view-router.js"',
     '"app-auth-debug.js"',
     '"app-tournament-day.js"',
+    '"app-player-crm-registrations.js"',
+    '"app-player-crm-viewport-shell.js"',
+    '"app-player-crm-runtime.js"',
+    '"app-player-crm.js"',
   ])
 );
 
@@ -1031,7 +1251,10 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-pwa-auth-telegram-code.js", "app-pwa-auth-email-login.js") &&
     appearsBefore(order, "app-pwa-auth-email-login.js", "app-pwa-auth-restore.js") &&
     appearsBefore(order, "app-pwa-auth-restore.js", "app-pwa-auth-entry-screen.js") &&
-    appearsBefore(order, "app-pwa-auth-entry-screen.js", "app-pwa-auth.js") &&
+    appearsBefore(order, "app-pwa-auth-entry-screen.js", "app-pwa-auth-mode.js") &&
+    appearsBefore(order, "app-pwa-auth-mode.js", "app-pwa-auth-overlay.js") &&
+    appearsBefore(order, "app-pwa-auth-overlay.js", "app-pwa-auth-runtime.js") &&
+    appearsBefore(order, "app-pwa-auth-runtime.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-pwa-auth.js", "app-pwa-auth-keyboard-lift.js") &&
     appearsBefore(order, "app-profile-hero.js", "app-profile-user-info.js") &&
     appearsBefore(order, "app-profile-user-info.js", "app-profile-pokerplus.js") &&
@@ -1045,7 +1268,9 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-auth.js", "app-network.js") &&
     appearsBefore(order, "app-network.js", "app-shared-helpers.js") &&
     appearsBefore(order, "app-shared-helpers.js", "app-home-init.js") &&
-    appearsBefore(order, "app-lazy-loader.js", "app-home-planner.js") &&
+    appearsBefore(order, "app-lazy-loader.js", "app-home-planner-access.js") &&
+    appearsBefore(order, "app-home-planner-access.js", "app-home-planner-runtime.js") &&
+    appearsBefore(order, "app-home-planner-runtime.js", "app-home-planner.js") &&
     appearsBefore(order, "app-home-planner.js", "app-home-tasks.js") &&
     appearsBefore(order, "app-home-tasks.js", "app-home-deeplinks.js") &&
     appearsBefore(order, "app-home-deeplinks.js", "app-home-club-info-modals.js") &&
@@ -1053,6 +1278,7 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-home-vpn-proxy-modal.js", "app-home-gazette-comments.js") &&
     appearsBefore(order, "app-home-gazette-comments.js", "app-home-gazette-tasks.js") &&
     appearsBefore(order, "app-home-vpn-proxy-modal.js", "app-home-gazette-tasks.js") &&
+    appearsBefore(order, "app-network.js", "app-pwa-auth-runtime.js") &&
     appearsBefore(order, "app-network.js", "app-pwa-auth.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-webview-keyboard.js") &&
     appearsBefore(order, "app-navigation-scroll.js", "app-html-fragments.js") &&
@@ -1060,6 +1286,11 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-webview-keyboard.js", "app-chat-lifecycle.js") &&
     appearsBefore(order, "app-chat-lifecycle.js", "app-view-router.js") &&
     appearsBefore(order, "app-pwa-open-handlers.js", "app-view-router.js") &&
+    appearsBefore(order, "app-view-router.js", "app-popstate-recovery.js") &&
+    appearsBefore(order, "app-popstate-recovery.js", "app-visitor-id.js") &&
+    appearsBefore(order, "app-visitor-id.js", "app-api-tracking.js") &&
+    appearsBefore(order, "app-api-tracking.js", "app-shell-bootstrap.js") &&
+    appearsBefore(order, "app-shell-bootstrap.js", "app.js") &&
     appearsBefore(order, "app-view-router.js", "app.js") &&
     appearsBefore(order, "app-network.js", "app-api-tracking.js") &&
     appearsBefore(order, "app-network.js", "app.js") &&
@@ -1123,7 +1354,10 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-player-crm-periods.js", "app-player-crm-stats.js") &&
     appearsBefore(order, "app-player-crm-stats.js", "app-player-crm-charts.js") &&
     appearsBefore(order, "app-player-crm-charts.js", "app-player-crm-reports.js") &&
-    appearsBefore(order, "app-player-crm-reports.js", "app-player-crm.js") &&
+    appearsBefore(order, "app-player-crm-reports.js", "app-player-crm-registrations.js") &&
+    appearsBefore(order, "app-player-crm-registrations.js", "app-player-crm-viewport-shell.js") &&
+    appearsBefore(order, "app-player-crm-viewport-shell.js", "app-player-crm-runtime.js") &&
+    appearsBefore(order, "app-player-crm-runtime.js", "app-player-crm.js") &&
     appearsBefore(order, "app.js", "app-section-views.js") &&
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
@@ -1159,16 +1393,97 @@ add("PWA auth shell delegates language, code, email, restore, and keyboard modul
     "function mountPwaStandaloneEnterButton",
     "function showPwaStandaloneEntryScreen",
   ]) &&
-  hasAll("appPwaAuth", [
+  hasAll("appPwaAuthRuntime", [
     "window.pokerInitPwaAuthLanguageUi",
     "window.pokerMountPwaUsernameCodeLogin",
     "window.pokerMountPwaEmailLogin",
     "initPwaAuthRestoreRuntime",
     "initPwaAuthEntryScreenRuntime",
   ]) &&
-  !has("appPwaAuth", "function pokerMountPwaEmailLogin") &&
-  !has("appPwaAuth", "function pokerMountPwaUsernameCodeLogin") &&
-  !has("appPwaAuth", "function initPwaAuthVisualViewportLift")
+  hasAll("appPwaAuth", [
+    "PWA auth entrypoint",
+    "Runtime lives in app-pwa-auth-runtime.js",
+  ]) &&
+  !has("appPwaAuthRuntime", "function pokerMountPwaEmailLogin") &&
+  !has("appPwaAuthRuntime", "function pokerMountPwaUsernameCodeLogin") &&
+  !has("appPwaAuthRuntime", "function initPwaAuthVisualViewportLift")
+);
+
+add("Large domain entrypoints stay thin after runtime split", () =>
+  hasAll("appHomePlanner", [
+    "Home planner entrypoint",
+    "app-home-planner-runtime.js",
+  ]) &&
+  hasAll("appHomePlannerRuntime", [
+    "function pokerInitHomePlanner",
+    "window.pokerOpenRomanTaskPlanner",
+  ]) &&
+  hasAll("appHomePlannerAccess", [
+    "function initHomePlannerAccessRuntime",
+    "plannerStorageKey",
+    "isPlannerAllowedUser",
+  ]) &&
+  !has("appHomePlannerRuntime", "function plannerStorageKey") &&
+  hasAll("appPwaAuth", [
+    "PWA auth entrypoint",
+    "app-pwa-auth-runtime.js",
+  ]) &&
+  hasAll("appPwaAuthMode", [
+    "function initPwaAuthModeRuntime",
+    "getTelegramWebAppNow",
+    "shouldUseOverlayAuthScreen",
+  ]) &&
+  hasAll("appPwaAuthOverlay", [
+    "function initPwaAuthOverlayRuntime",
+    "openOverlayAuthEntryScreen",
+    "rerenderCurrentPwaAuthScreen",
+  ]) &&
+  hasAll("appPwaAuthRuntime", [
+    "initPwaAuthModeRuntime",
+    "initPwaAuthOverlayRuntime",
+    "window.__pokerTelegramAuth",
+  ]) &&
+  !has("appPwaAuthRuntime", "function showPwaAuthScreen") &&
+  hasAll("appPlayerCrm", [
+    "Player CRM entrypoint",
+    "app-player-crm-runtime.js",
+  ]) &&
+  hasAll("appPlayerCrmRegistrations", [
+    "function initPlayerCrmRegistrationsRuntime",
+    "registrationRowsByMethod",
+    "exportRegistrationModalRows",
+  ]) &&
+  hasAll("appPlayerCrmViewportShell", [
+    "function initPlayerCrmViewportShellRuntime",
+    "syncCrmViewportShell",
+  ]) &&
+  hasAll("appPlayerCrmRuntime", [
+    "function pokerInitPlayerCrm",
+    "window.pokerInitPlayerCrm",
+  ]) &&
+  !has("appPlayerCrmRuntime", "function registrationRowsByMethod") &&
+  !has("appPlayerCrmRuntime", "function syncCrmViewportShell") &&
+  hasAll("chatHandler", [
+    'module.exports = require("./chat-runtime")',
+  ]) &&
+  hasAll("chatReadReceipts", [
+    "function createChatReadReceiptHelpers",
+    "bumpSeenCursor",
+    "applyPeerReadReceiptsToMyMessages",
+  ]) &&
+  hasAll("chatProfileLookups", [
+    "function createChatProfileLookupHelpers",
+    "getPokerProfileStatusMeta",
+    "getAvatars",
+  ]) &&
+  hasAll("chatHandlerRuntime", [
+    'require("../chat-read-receipts")',
+    'require("../chat-profile-lookups")',
+    "const chatRouteDeps =",
+    "dispatchChatRoute(chatRequest",
+  ]) &&
+  !has("chatHandlerRuntime", "async function getAvatars") &&
+  !has("chatHandlerRuntime", "function seenCursorField")
 );
 
 add("Global dependency manifest covers exported browser globals", () => {
@@ -1193,6 +1508,53 @@ add("Global dependency manifest covers exported browser globals", () => {
     });
 });
 
+add("New direct window globals are declared in the global dependency manifest", () => {
+  const manifestExports = manifestGlobalExportKeys();
+  const legacyExports = legacyWindowExportBaselineSet();
+  const unmanifested = windowGlobalAssignments()
+    .filter((item) => !manifestExports.has(item.signature));
+  const missing = unmanifested
+    .filter((item) => !legacyExports.has(item.signature))
+    .map((item) => item.signature);
+  if (missing.length) throw new Error(previewList(missing, 8));
+  return true;
+});
+
+add("Index loading stays within the static script budget", () => {
+  const stats = indexScriptLoadingStats();
+  const indexBytes = Buffer.byteLength(files.html, "utf8");
+  const failures = [];
+  if (indexBytes > engineeringBudgets.indexHtmlMaxBytes) {
+    failures.push("index.html " + indexBytes + "/" + engineeringBudgets.indexHtmlMaxBytes + " bytes");
+  }
+  if (stats.eager > engineeringBudgets.eagerScriptsMax) {
+    failures.push("eager scripts " + stats.eager + "/" + engineeringBudgets.eagerScriptsMax);
+  }
+  if (stats.lazy > engineeringBudgets.lazyScriptsMax) {
+    failures.push("lazy scripts " + stats.lazy + "/" + engineeringBudgets.lazyScriptsMax);
+  }
+  if (failures.length) throw new Error(failures.join("; "));
+  return true;
+});
+
+add("Large runtime files stay within split budgets", () => {
+  const failures = [];
+  Object.keys(engineeringBudgets.runtimeFiles).forEach((file) => {
+    const budget = engineeringBudgets.runtimeFiles[file];
+    const abs = path.join(root, file);
+    if (!fs.existsSync(abs)) {
+      failures.push(file + " missing");
+      return;
+    }
+    const bytes = fs.statSync(abs).size;
+    const lines = fileLineCount(file);
+    if (bytes > budget.maxBytes) failures.push(file + " " + bytes + "/" + budget.maxBytes + " bytes");
+    if (lines > budget.maxLines) failures.push(file + " " + lines + "/" + budget.maxLines + " lines");
+  });
+  if (failures.length) throw new Error(failures.join("; "));
+  return true;
+});
+
 add("Network helpers stay isolated from the app monolith", () =>
   hasAll("appNetwork", [
     "var POKER_NET_ERR",
@@ -1210,6 +1572,24 @@ add("App monolith delegates shared helpers, home init, and PWA install", () =>
     "function pokerAutosizeTextarea",
     "function pokerTryBootOverlayNetworkError",
     "function pokerRememberTransportMemberIdFromEnvironment",
+  ]) &&
+  hasAll("appVisitorId", [
+    "function getVisitorId",
+    "poker_visitor_id",
+    "__pokerTelegramAuth",
+  ]) &&
+  hasAll("appPopstateRecovery", [
+    'window.addEventListener("popstate"',
+    "pokerClearBodyDocumentScrollLockInline",
+  ]) &&
+  hasAll("appShellBootstrap", [
+    "function tryInitWinterRatingLightboxEarly",
+    "function pokerRunShellReadyBootstrap",
+    "runGazetteAndTasksInit",
+    "updateSpringRatingPromoDateFromVar",
+    "updateVisitorCounter",
+    "initChat",
+    "initPokerShowsPlayer",
   ]) &&
   hasAll("appHomeInit", [
     "initTheme",
@@ -1231,17 +1611,25 @@ add("App monolith delegates shared helpers, home init, and PWA install", () =>
   !has("app", "function pokerAutosizeTextarea") &&
   !has("app", "function pokerTryBootOverlayNetworkError") &&
   !has("app", "function updateRaffleBadge") &&
+  !has("app", "function getVisitorId") &&
+  !has("app", "function tryInitWinterRatingLightboxEarly") &&
+  !has("app", "popstate") &&
+  !has("app", "runGazetteAndTasksInit") &&
   !has("app", "beforeinstallprompt") &&
   !has("app", "poker-telegram-auth") &&
   !has("app", "__pendingOpenChatPersonalFromDeepLink")
 );
 
 add("Home gazette delegates Roman task planner", () =>
-  hasAll("appHomePlanner", [
+  hasAll("appHomePlannerRuntime", [
     "function pokerInitHomePlanner",
     "function initRomanGazetteTaskPlanner",
     "window.pokerInitRomanGazetteTaskPlanner",
     "window.pokerOpenRomanTaskPlanner",
+  ]) &&
+  hasAll("appHomePlanner", [
+    "Home planner entrypoint",
+    "Runtime lives in app-home-planner-runtime.js",
   ]) &&
   hasAll("appHomeGazetteTasks", [
     "function runGazetteAndTasksInit",
@@ -1249,7 +1637,7 @@ add("Home gazette delegates Roman task planner", () =>
     "pokerInitHomeTasks",
   ]) &&
   !has("appHomeGazetteTasks", "function initRomanGazetteTaskPlanner") &&
-  !has("appHomePlanner", "function initGazetteModal")
+  !has("appHomePlannerRuntime", "function initGazetteModal")
 );
 
 add("Home gazette delegates deep-link glue", () =>
@@ -1274,7 +1662,11 @@ add("Home gazette delegates task widgets", () =>
     "function initPartnershipModal",
     "function calculateMttScore",
     "function setRatingSubscribeButtonState",
+    "pokerTasksStartBound",
+    "pokerTasksChallengeBound",
+    "ratingSubscribeBound",
   ]) &&
+  has("appViewRouter", 'if (typeof window.pokerInitHomeTasks === "function") window.pokerInitHomeTasks();') &&
   hasAll("appHomeGazetteTasks", [
     "pokerInitHomeTasks",
     "initHomeClubInfoModals",
@@ -1623,6 +2015,43 @@ add("Raffles HTML is lazy-loaded from a fragment", () =>
   fs.existsSync(path.join(root, "html-fragments", "raffles.html"))
 );
 
+add("Secondary utility views are lazy-loaded from HTML fragments", () =>
+  hasAll("html", [
+    'data-view="bonus-game" data-html-fragment="./html-fragments/bonus-game.html" data-html-fragment-view="bonus-game"',
+    'data-view="cooler-game" data-html-fragment="./html-fragments/cooler-game.html" data-html-fragment-view="cooler-game"',
+    'data-view="plasterer-game" data-html-fragment="./html-fragments/plasterer-game.html" data-html-fragment-view="plasterer-game"',
+    'data-view="learn-play-hub" data-html-fragment="./html-fragments/learn-play-hub.html" data-html-fragment-view="learn-play-hub"',
+    'data-view="poker-tasks" data-html-fragment="./html-fragments/poker-tasks.html" data-html-fragment-view="poker-tasks"',
+    'data-view="cashout" data-html-fragment="./html-fragments/cashout.html" data-html-fragment-view="cashout"',
+    'data-view="streams" data-html-fragment="./html-fragments/streams.html" data-html-fragment-view="streams"',
+    'data-view="schedule" data-html-fragment="./html-fragments/schedule.html" data-html-fragment-view="schedule"',
+  ]) &&
+  !has("html", 'id="bonusGameCards"') &&
+  !has("html", 'id="coolerGameCards"') &&
+  !has("html", 'id="plastererBoard"') &&
+  !has("html", 'id="learnPlayHubInviteFriendBtn"') &&
+  !has("html", 'id="pokerTasksStartBtn"') &&
+  !has("html", 'class="cashout-manager-block"') &&
+  !has("html", 'id="streamsStartBtn"') &&
+  !has("html", 'schedule-section--week-tournament') &&
+  hasAll("bonusGameFragment", ['id="bonusGameCards"', 'data-view="bonus-game"']) &&
+  hasAll("coolerGameFragment", ['id="coolerGameCards"', 'data-view="cooler-game"']) &&
+  hasAll("plastererGameFragment", ['id="plastererBoard"', 'data-view="plasterer-game"']) &&
+  hasAll("learnPlayHubFragment", ['id="learnPlayHubInviteFriendBtn"', 'data-view="learn-play-hub"']) &&
+  hasAll("pokerTasksFragment", ['id="pokerTasksStartBtn"', 'data-view="poker-tasks"']) &&
+  hasAll("cashoutFragment", ['class="cashout-manager-block"', 'data-view="cashout"']) &&
+  hasAll("streamsFragment", ['id="streamsStartBtn"', 'data-view="streams"']) &&
+  hasAll("scheduleFragment", ['schedule-section--week-tournament', 'data-view="schedule"']) &&
+  fs.existsSync(path.join(root, "html-fragments", "bonus-game.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "cooler-game.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "plasterer-game.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "learn-play-hub.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "poker-tasks.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "cashout.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "streams.html")) &&
+  fs.existsSync(path.join(root, "html-fragments", "schedule.html"))
+);
+
 add("Winter rating HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="winter-rating"',
@@ -1676,6 +2105,37 @@ add("Selected heavy views use JavaScript lazy gates", () =>
     '"winter-rating": ["rating-winter"]',
     'equilator: ["tools"]',
     "window.pokerEnsureViewScripts",
+  ])
+);
+
+add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>
+  hasAll("appChatKeyboardDockFoundation", [
+    "__pokerChatThreadDockBottomCssPx",
+    "chat-keyboard-open",
+    "--chat-keyboard-fallback-inset",
+    "PWA_IOS_CHAT_KEYBOARD_COVER_STORAGE_KEY",
+  ]) &&
+  hasAll("appChatKeyboardDockComposerLayout", [
+    "__pokerChatKeyboardFocusAtMs",
+    "__pokerChatThreadDockBottomCssPx",
+    "collectChatOverscrollSnapshot",
+    "chat-input-area--vv-dock",
+  ]) &&
+  hasAll("appChatKeyboardDockViewportEvents", [
+    "computeChatVisualViewportMetrics",
+    "visualViewport.addEventListener",
+    "__pokerChatKeyboardFocusAtMs",
+    "__pokerChatThreadDockBottomCssPx",
+  ]) &&
+  hasAll("appChatKeyboardDebug", [
+    "__pokerChatKeyboardDebugVvBound",
+    "visualViewport.addEventListener",
+    "__pokerChatThreadDockBottomCssPx",
+  ]) &&
+  hasAll("appWebviewKeyboard", [
+    "keyboardLabUpdateMetrics",
+    "visualViewport.addEventListener",
+    "chat-keyboard-open",
   ])
 );
 
@@ -1874,6 +2334,9 @@ add("CSS manifest owns every split stylesheet", () => {
 add("Large unused movie assets are not shipped", () =>
   !fs.existsSync(path.join(root, "assets", "rat_2.mov")) &&
   !fs.existsSync(path.join(root, "public", "assets", "rat_2.mov")) &&
+  !fs.existsSync(path.join(root, "assets", "chat-push-notify.wav")) &&
+  !fs.existsSync(path.join(root, "public", "assets", "chat-push-notify.wav")) &&
+  has("client", 'var POKER_CHAT_MESSAGE_NOTIFY_SRC = "./assets/chat-message-notify.mp3?v=') &&
   !fs.existsSync(path.join(root, "public", "assets", "README.md")) &&
   has("downloadFragment", 'src="./assets/download-hero.png"') &&
   has("downloadFragment", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
@@ -1900,13 +2363,15 @@ add("Modern image variants exist for heavy visual assets", () => {
   ) &&
     has("rafflesFragment", 'srcset="./assets/raffles-hero.avif" type="image/avif"') &&
     has("videoLessonsFragment", 'srcset="./assets/video-lessons-coach-nikolay.avif" type="image/avif"') &&
-    has("globalModalsFragment", 'srcset="./assets/gazette-frankl-vaaar-march8.avif" type="image/avif"');
+    has("globalModalsHomeFragment", 'srcset="./assets/gazette-frankl-vaaar-march8.avif" type="image/avif"');
 });
 
 add("Hidden cashout manager photos do not preload on home", () =>
   !has("html", 'rel="preload" as="image" href="./assets/dep-manager.jpg"') &&
   !has("html", 'rel="preload" as="image" href="./assets/dep-manager-vika.jpg"') &&
-  hasAll("html", [
+  !has("html", 'src="./assets/dep-manager.jpg"') &&
+  !has("html", 'src="./assets/dep-manager-vika.jpg"') &&
+  hasAll("cashoutFragment", [
     'src="./assets/dep-manager.jpg"',
     'src="./assets/dep-manager-vika.jpg"',
     'class="cashout-image"',
@@ -1961,6 +2426,9 @@ add("CSS manifest maps split home and tournament domains", () => {
     '"styles-home-modals.css"',
     '"styles-home-planner.css"',
     '"styles-home-overrides.css"',
+    '"styles-home-rating-promo-legacy.css"',
+    '"styles-home-rating-promo-late.css"',
+    '"styles-layout-touch-targets.css"',
     '"styles-chat-after-shell.css"',
     '"styles-chat-after-modals.css"',
     '"styles-chat-after-responsive.css"',
@@ -2004,6 +2472,9 @@ add("Rating CSS entrypoint no longer owns learning games raffles or download", (
     "styles-download.css?v=",
     "styles-home-legacy-prelude.css?v=",
     "styles-home-legacy-tail.css?v=",
+    "styles-home-rating-promo-legacy.css?v=",
+    "styles-layout-touch-targets.css?v=",
+    "styles-home-rating-promo-late.css?v=",
     "styles-rating.css?v=",
   ]) &&
   !has("stylesRating", "styles-rating-learning-games.css") &&
@@ -2016,8 +2487,29 @@ add("Rating CSS entrypoint no longer owns learning games raffles or download", (
   ])
 );
 
+add("Late CSS ownership keeps home rating and shared controls out of tournament overrides", () =>
+  !has("stylesHomeLegacyTail", "feature--rating-spring-promo") &&
+  !has("stylesHomeLegacyTail", "spring-rating-home-promo-unified") &&
+  !has("stylesHomeOverrides", "feature--rating-spring-promo") &&
+  !has("stylesHomeOverrides", "spring-rating-home-promo-unified") &&
+  !has("stylesHomeOverrides", "bonus-game-back") &&
+  hasAll("stylesHomeRatingPromoLegacy", [
+    "feature--rating-spring-promo",
+    "spring-rating-home-promo-unified",
+  ]) &&
+  hasAll("stylesHomeRatingPromoLate", [
+    "features--home-rating-on-border",
+    "spring-rating-home-promo-unified",
+  ]) &&
+  hasAll("stylesLayoutTouchTargets", [
+    "bonus-game-back",
+    "chat-conv-top__toolbar-back",
+    "raffle-winner-leaders-modal__close",
+  ])
+);
+
 add("Admin auth debug panel is wired", () =>
-  hasAll("globalModalsFragment", [
+  hasAll("globalModalsAdminFragment", [
     'id="adminAuthDebugBtn"',
     'id="adminAuthDebugModal"',
   ]) &&
@@ -2035,12 +2527,17 @@ add("Admin auth debug panel is wired", () =>
 const failures = [];
 for (const check of checks) {
   let ok = false;
+  let error = null;
   try {
     ok = !!check.fn();
   } catch (err) {
+    error = err;
     ok = false;
   }
-  if (!ok) failures.push(check.name);
+  if (!ok) {
+    const message = error && error.message ? ": " + error.message : "";
+    failures.push(check.name + message);
+  }
 }
 
 if (failures.length) {

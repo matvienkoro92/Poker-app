@@ -67,7 +67,11 @@ const cssPartFiles = fs
   .readdirSync(root)
   .filter((name) => /^styles-.+\.css$/.test(name))
   .sort();
-const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
+const localModuleFiles = fs
+  .readdirSync(root)
+  .filter((name) => /^app.*\.mjs$/.test(name))
+  .sort();
+const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localModuleFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
 const dirsToCopy = ['html-fragments'];
 const assetDir = path.join(root, 'assets');
 const blockedAssetExtensions = new Set(['.mov']);
@@ -133,7 +137,7 @@ function collectReferencedAssets() {
       const p = path.join(dir, name);
       const st = fs.statSync(p);
       if (st.isDirectory()) addDirFiles(p);
-      else if (/\.(?:html|css|js|json|webmanifest)$/i.test(name)) scanFiles.add(path.relative(root, p));
+      else if (/\.(?:html|css|js|mjs|json|webmanifest)$/i.test(name)) scanFiles.add(path.relative(root, p));
     }
   }
   addDirFiles(path.join(root, 'html-fragments'));

@@ -1,0 +1,165 @@
+/* Shared reliable touch targets for floating back/close controls. */
+
+/* Bigger, reliable touch targets for floating back/close controls in dialogs. */
+:is(
+  .bonus-game-back,
+  .download-back,
+  .chat-back-btn,
+  .gazette-modal__back,
+  .pdf-viewer__close,
+  .winter-rating-player-modal__back,
+  .poker-streak-screen__back,
+  .poker-task-screen__back,
+  .tracking-links-admin__back-btn,
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .home-freeroll-modal__close,
+  .chat-club-access-modal__x,
+  .chat-create-group-modal__close,
+  .chat-group-info-modal__close,
+  .chat-ios-compose-overlay__close,
+  .profile-avatar-choice-modal__close,
+  .profile-fish-collection-modal__close,
+  .raffle-winner-leaders-modal__close,
+  .partnership-modal__close
+) {
+  min-width: 44px;
+  min-height: 44px;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:is(
+  .bonus-game-back,
+  .download-back,
+  .chat-back-btn,
+  .gazette-modal__back,
+  .pdf-viewer__close,
+  .winter-rating-player-modal__back,
+  .poker-streak-screen__back,
+  .poker-task-screen__back,
+  .tracking-links-admin__back-btn,
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .home-freeroll-modal__close,
+  .chat-club-access-modal__x,
+  .chat-create-group-modal__close,
+  .chat-group-info-modal__close,
+  .chat-ios-compose-overlay__close,
+  .profile-avatar-choice-modal__close,
+  .profile-fish-collection-modal__close,
+  .raffle-winner-leaders-modal__close,
+  .partnership-modal__close
+)::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  pointer-events: auto;
+}
+
+:is(
+  .gazette-modal__back,
+  .pdf-viewer__close,
+  .winter-rating-player-modal__back,
+  .tracking-links-admin__back-btn,
+  .club-charter-modal__close,
+  .gazette-modal__close,
+  .roman-task-planner-modal__close,
+  .video-lessons__coach-modal-close,
+  .winter-rating-player-modal__close,
+  .daily-prediction-modal__close,
+  .spring-rating-info-modal__close,
+  .autumn-rating-2025-modal__close,
+  .summer-rating-2024-modal__close,
+  .summer-rating-2025-modal__close,
+  .spring-rating-2024-modal__close,
+  .chat-dialog-preview-modal__close,
+  .chat-user-modal__close,
+  .winter-rating-week-top-modal__close,
+  .winter-rating-date-modal__close,
+  .share-stats-admin-modal__close,
+  .visitors-admin-modal__close,
+  .respect-voters-modal__close,
+  .friends-list-modal__close,
+  .image-lightbox__close,
+  .home-freeroll-modal__close,
+  .chat-club-access-modal__x,
+  .chat-create-group-modal__close,
+  .chat-group-info-modal__close,
+  .chat-ios-compose-overlay__close,
+  .profile-avatar-choice-modal__close,
+  .profile-fish-collection-modal__close,
+  .raffle-winner-leaders-modal__close,
+  .partnership-modal__close
+) {
+  position: absolute;
+  z-index: 30;
+}
+
+/* Personal chat back: keep the expanded hit target above the header glass. */
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
+  pointer-events: auto !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top-inner {
+  pointer-events: auto !important;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back {
+  position: relative;
+  z-index: 80 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back::before,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top__toolbar-back::after {
+  z-index: 1;
+}
+
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-header,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-peer-title-chip,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-group-add-btn,
+body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-peer-avatar-wrap {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+}

@@ -72,9 +72,11 @@
       "styles-home-sections.css",
       "styles-home-legacy-prelude.css",
       "styles-home-legacy-tail.css",
+      "styles-home-rating-promo-legacy.css",
       "styles-home-modals.css",
       "styles-home-planner.css",
-      "styles-home-rating-promo.css"
+      "styles-home-rating-promo.css",
+      "styles-home-rating-promo-late.css"
     ],
     "tournament": [
       "styles-tournament.css",
@@ -148,7 +150,8 @@
       "styles-player-crm.css"
     ],
     "layout": [
-      "styles-layout.css"
+      "styles-layout.css",
+      "styles-layout-touch-targets.css"
     ]
   },
   "views": {

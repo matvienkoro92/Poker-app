@@ -33,6 +33,12 @@ function localRootScriptFilesFromIndex() {
   return out.length ? out : ["app.js"];
 }
 
+function localRootModuleFiles() {
+  return fs.readdirSync(root)
+    .filter((name) => /^app.*\.mjs$/.test(name))
+    .sort();
+}
+
 function walk(relPath) {
   const abs = path.join(root, relPath);
   if (!fs.existsSync(abs)) return;
@@ -45,10 +51,11 @@ function walk(relPath) {
     }
     return;
   }
-  if (stat.isFile() && relPath.endsWith(".js")) files.push(relPath);
+  if (stat.isFile() && (relPath.endsWith(".js") || relPath.endsWith(".mjs"))) files.push(relPath);
 }
 
 for (const rel of localRootScriptFilesFromIndex()) walk(rel);
+for (const rel of localRootModuleFiles()) walk(rel);
 for (const rel of roots) walk(rel);
 const uniqueFiles = [...new Set(files)].sort();
 

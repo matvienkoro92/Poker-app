@@ -159,7 +159,19 @@ async function main() {
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1200);
 
-    const views = ["home", "chat", "download", "cashout", "profile", "video-lessons", "spring-rating"];
+    const views = [
+      "home",
+      "chat",
+      "download",
+      "cashout",
+      "profile",
+      "poker-tasks",
+      "schedule",
+      "streams",
+      "learn-play-hub",
+      "video-lessons",
+      "spring-rating",
+    ];
     const results = [];
     for (const view of views) {
       await showView(page, view);

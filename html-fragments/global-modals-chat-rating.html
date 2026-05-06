@@ -1,0 +1,497 @@
+      <div class="winter-rating-week-top-modal" id="winterRatingWeekTopModal" role="dialog" aria-modal="true" aria-labelledby="winterRatingWeekTopModalTitle" aria-label="Топы за неделю" aria-hidden="true">
+        <div class="winter-rating-week-top-modal__backdrop" id="winterRatingWeekTopModalBackdrop"></div>
+        <div class="winter-rating-week-top-modal__inner">
+          <button type="button" class="winter-rating-week-top-modal__close" id="winterRatingWeekTopModalClose" aria-label="Закрыть">×</button>
+          <h3 class="winter-rating-week-top-modal__title" id="winterRatingWeekTopModalTitle">Топы прошлой недели</h3>
+          <p class="winter-rating-week-top-modal__prize" id="winterRatingWeekTopPrizeInfo" aria-hidden="true">
+            Топ‑3 текущей недели получают дополнительные бонусы от клуба: 1‑е место — билеты на турниры на 5000₽, 2‑е — билеты за 3000₽, 3‑е — билет за 1000₽.
+          </p>
+          <div class="winter-rating-week-top-modal__list" id="winterRatingWeekTopList"></div>
+          <p class="winter-rating-week-top-modal__share-row">
+            <button type="button" class="winter-rating-week-top-modal__share-btn winter-rating__share-btn winter-rating__share-btn--copy-icon" id="winterRatingWeekTopShareBtn" aria-label="Скопировать ссылку на топ недели"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+          </p>
+        </div>
+      </div>
+      <div class="winter-rating-date-modal" id="winterRatingDateModal" role="dialog" aria-modal="true" aria-labelledby="winterRatingDateModalTitle" aria-label="Рейтинг на дату" aria-hidden="true">
+        <div class="winter-rating-date-modal__backdrop" id="winterRatingDateModalBackdrop"></div>
+        <div class="winter-rating-date-modal__inner">
+          <button type="button" class="winter-rating-date-modal__close" id="winterRatingDateModalClose" aria-label="Закрыть">×</button>
+          <h3 class="winter-rating-date-modal__title" id="winterRatingDateModalTitle">Рейтинг на дату</h3>
+          <div class="winter-rating-date-modal__body" id="winterRatingDateModalBody"></div>
+        </div>
+      </div>
+
+      <div class="chat-user-modal" id="chatUserModal" aria-hidden="true" role="dialog" aria-labelledby="chatUserModalTitle" aria-label="Карточка пользователя">
+        <div class="chat-user-modal__backdrop"></div>
+        <div class="chat-user-modal__inner">
+          <button type="button" class="chat-user-modal__close" aria-label="Закрыть">×</button>
+          <div class="chat-user-modal__header">
+            <div class="chat-user-modal__avatar-wrap">
+              <img id="chatUserModalAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
+              <span id="chatUserModalAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true"></span>
+            </div>
+            <div class="chat-user-modal__title-block">
+              <div class="chat-user-modal__title-row">
+                <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
+                <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="chatUserModalVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+              </div>
+              <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
+              <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
+            </div>
+          </div>
+          <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
+          <div class="chat-user-modal__level">
+            <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
+            <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
+            <p class="chat-user-modal__respect">Уважение в чате <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
+          </div>
+          <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
+            <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Статус</h4>
+            <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
+              <span class="chat-user-modal__status-card">2</span>
+              <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
+              <span class="chat-user-modal__status-card">3</span>
+            </div>
+          </section>
+          <section class="chat-user-modal__section chat-user-modal__player-stats">
+            <h4 class="chat-user-modal__section-title">Статистика игрока:</h4>
+            <div class="chat-user-modal__player-stats-body" id="chatUserModalPlayerStats">Загрузка...</div>
+          </section>
+          <section class="chat-user-modal__personal-block chat-user-modal__personal-block--hidden" id="chatUserModalPersonalBlock">
+            <h4 class="chat-user-modal__section-title">Нотс про себя</h4>
+            <div class="chat-user-modal__personal" id="chatUserModalPersonal"></div>
+          </section>
+          <div class="chat-user-modal__actions">
+            <div class="chat-user-modal__respect-actions">
+              <p class="chat-user-modal__respect-hint" id="chatUserModalRespectHint" aria-live="polite" hidden></p>
+              <div class="chat-user-modal__respect-btn-row">
+                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectUp" data-rv-action="up">Поднять уважение</button>
+                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown" data-rv-action="down">Уменьшить уважение</button>
+              </div>
+            </div>
+            <div class="chat-user-modal__friend-row">
+              <div class="chat-user-modal__friend-buttons">
+                <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
+                <button type="button" class="chat-user-modal__edit-friend-name" id="chatUserModalEditFriendName" style="display: none;">Поменять имя</button>
+                <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
+              </div>
+              <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
+            </div>
+            <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
+          </div>
+        </div>
+      </div>
+      <div class="chat-dialog-preview-modal" id="chatDialogPreviewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="chatDialogPreviewTitle" aria-label="Превью диалога">
+        <div class="chat-dialog-preview-modal__backdrop" id="chatDialogPreviewBackdrop"></div>
+        <div class="chat-dialog-preview-modal__inner" role="document">
+          <button type="button" class="chat-dialog-preview-modal__close" id="chatDialogPreviewClose" aria-label="Закрыть">×</button>
+          <div class="chat-dialog-preview-modal__header">
+            <div class="chat-dialog-preview-modal__avatar-wrap">
+              <img id="chatDialogPreviewAvatar" class="chat-dialog-preview-modal__avatar" alt="" style="display: none;" />
+              <span id="chatDialogPreviewAvatarPlaceholder" class="chat-dialog-preview-modal__avatar chat-dialog-preview-modal__avatar--placeholder" aria-hidden="true"></span>
+            </div>
+            <div class="chat-dialog-preview-modal__titles">
+              <h3 class="chat-dialog-preview-modal__title" id="chatDialogPreviewTitle"></h3>
+              <p class="chat-dialog-preview-modal__sub" id="chatDialogPreviewSub"></p>
+            </div>
+          </div>
+          <div class="chat-dialog-preview-modal__messages-wrap">
+            <div class="chat-messages chat-dialog-preview-modal__messages" id="chatDialogPreviewMessages" role="log"></div>
+          </div>
+          <div class="chat-dialog-preview-modal__footer">
+            <div class="chat-dialog-preview-modal__footer-row">
+              <button type="button" class="chat-dialog-preview-modal__add-friend-btn" id="chatDialogPreviewAddFriendBtn" hidden>В друзья</button>
+              <button type="button" class="chat-dialog-preview-modal__open-btn" id="chatDialogPreviewOpenBtn">Открыть чат</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-templates-modal" id="chatTemplatesModal" aria-hidden="true" role="dialog" aria-label="Шаблоны сообщений">
+        <div class="chat-templates-modal__backdrop" id="chatTemplatesModalBackdrop"></div>
+        <div class="chat-templates-modal__inner" role="document">
+          <div class="chat-templates-modal__header">
+            <h3 class="chat-templates-modal__title">Шаблоны</h3>
+            <div class="chat-templates-modal__header-actions">
+              <button type="button" class="chat-templates-modal__icon-btn" id="chatTemplatesModalAddBtn" aria-label="Добавить шаблон">＋</button>
+              <button type="button" class="chat-templates-modal__icon-btn" id="chatTemplatesModalClose" aria-label="Закрыть">×</button>
+            </div>
+          </div>
+          <div class="chat-templates-modal__body">
+            <div class="chat-templates-modal__list" id="chatTemplatesModalList"></div>
+            <div class="chat-templates-modal__form chat-templates-modal__form--hidden" id="chatTemplatesModalForm">
+              <label class="chat-templates-modal__label">
+                Заголовок
+                <input type="text" class="chat-templates-modal__input" id="chatTemplatesModalTitleInput" maxlength="40" placeholder="Например: Приветствие" autocomplete="off" />
+              </label>
+              <label class="chat-templates-modal__label">
+                Текст
+                <textarea class="chat-templates-modal__textarea" id="chatTemplatesModalTextInput" rows="8" maxlength="4096" placeholder="Текст, который будет вставляться в чат..."></textarea>
+              </label>
+              <div class="chat-templates-modal__form-actions">
+                <button type="button" class="chat-templates-modal__btn chat-templates-modal__btn--ghost" id="chatTemplatesModalCancelBtn">Отмена</button>
+                <button type="button" class="chat-templates-modal__btn chat-templates-modal__btn--primary" id="chatTemplatesModalSaveBtn">Сохранить</button>
+              </div>
+              <p class="chat-templates-modal__hint" id="chatTemplatesModalHint" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="respect-voters-modal" id="respectVotersModal" aria-hidden="true" role="dialog" aria-label="Кто поставил уважение">
+        <div class="respect-voters-modal__backdrop"></div>
+        <div class="respect-voters-modal__inner">
+          <button type="button" class="respect-voters-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="respect-voters-modal__title">Уважение в чате</h3>
+          <p class="respect-voters-modal__vote-hint" id="respectVotersModalVoteHint" aria-live="polite" hidden></p>
+          <div class="respect-voters-modal__actions">
+            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--up" id="respectVotersModalBtnUp" data-rv-action="up">Поднять уважение</button>
+            <button type="button" class="respect-voters-modal__btn respect-voters-modal__btn--down" id="respectVotersModalBtnDown" data-rv-action="down">Уменьшить уважение</button>
+          </div>
+          <div class="respect-voters-modal__section">
+            <h4 class="respect-voters-modal__subtitle">Подняли уважение</h4>
+            <div class="respect-voters-modal__list" id="respectVotersModalUp"></div>
+          </div>
+          <div class="respect-voters-modal__section">
+            <h4 class="respect-voters-modal__subtitle">Уменьшили уважение</h4>
+            <div class="respect-voters-modal__list" id="respectVotersModalDown"></div>
+          </div>
+        </div>
+      </div>
+      <div class="friends-list-modal" id="friendsListModal" aria-hidden="true" role="dialog" aria-label="Список друзей">
+        <div class="friends-list-modal__backdrop"></div>
+        <div class="friends-list-modal__inner">
+          <button type="button" class="friends-list-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="friends-list-modal__title">Друзья</h3>
+          <div class="friends-list-modal__list" id="friendsListModalList"></div>
+        </div>
+      </div>
+      <div class="winter-rating-player-modal" id="winterRatingPlayerModal" aria-hidden="true" role="dialog" aria-labelledby="winterRatingPlayerModalTitle" aria-label="Сводка по игроку">
+        <div class="winter-rating-player-modal__inner">
+          <button type="button" class="winter-rating-player-modal__close" aria-label="Закрыть">×</button>
+          <button type="button" class="winter-rating-player-modal__back" id="winterRatingPlayerModalBack" aria-label="Назад">←</button>
+          <div class="winter-rating-player-modal__header-row">
+            <h3 class="winter-rating-player-modal__title" id="winterRatingPlayerModalTitle"></h3>
+            <div class="winter-rating-player-modal__share-wrap" id="winterRatingPlayerModalShareWrap">
+              <button type="button" class="winter-rating-player-modal__share-btn winter-rating__share-btn winter-rating__share-btn--copy-icon" id="winterRatingPlayerModalShareBtn" aria-label="Скопировать ссылку на игрока"><span class="winter-rating__share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+              <button type="button" class="winter-rating-player-modal__share-btn winter-rating__share-btn winter-rating-player-modal__share-telegram-btn" id="winterRatingPlayerModalShareTelegramBtn" aria-label="Поделиться сообщением с заносами">Поделиться</button>
+            </div>
+          </div>
+          <div class="winter-rating-player-modal__summary" id="winterRatingPlayerModalSummary" aria-live="polite"></div>
+          <p class="winter-rating-player-modal__table-label" id="winterRatingPlayerModalTableLabel">Посмотреть все турниры ↓</p>
+          <div class="winter-rating-player-modal__toolbar">
+            <div class="winter-rating-player-modal__filter">
+              <select id="winterRatingPlayerModalMonth" aria-label="Период">
+                <option value="all">Турниры за все время</option>
+                <option value="12.2025">Декабрь</option>
+                <option value="01.2026">Январь</option>
+                <option value="02.2026">Февраль</option>
+                <option value="03.2026">Март</option>
+                <option value="04.2026">Апрель</option>
+                <option value="05.2026">Май</option>
+              </select>
+            </div>
+            <div class="winter-rating-player-modal__filter winter-rating-player-modal__filter--league" id="winterRatingPlayerModalLeagueWrap" style="display: none;">
+              <select id="winterRatingPlayerModalLeague" aria-label="Лига">
+                <option value="all">Все лиги</option>
+                <option value="1">Лига 1</option>
+                <option value="2">Лига 2</option>
+              </select>
+            </div>
+            <div class="winter-rating-player-modal__sort">
+              <button type="button" id="winterRatingPlayerModalSortBy" aria-label="Сортировать">Сортировать: По дате</button>
+              <button type="button" id="winterRatingPlayerModalSortDir" class="winter-rating-player-modal__sort-dir" aria-label="Направление сортировки" title="По убыванию">↓</button>
+            </div>
+          </div>
+          <div class="winter-rating-player-modal__table-wrap"></div>
+        </div>
+      </div>
+      <div class="daily-prediction-modal" id="dailyPredictionModal" aria-hidden="true" role="dialog" aria-labelledby="dailyPredictionTitle" aria-label="Предсказание на день">
+        <div class="daily-prediction-modal__backdrop"></div>
+        <div class="daily-prediction-modal__inner">
+          <button type="button" class="daily-prediction-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="daily-prediction-modal__title" id="dailyPredictionTitle">Предсказание от клуба «Два туза»</h3>
+          <p class="daily-prediction-modal__text" id="dailyPredictionText"></p>
+          <div class="daily-prediction-modal__actions">
+            <span class="daily-prediction-modal__timer" id="dailyPredictionTimer"></span>
+            <button type="button" class="daily-prediction-modal__share-btn raffles-hero__share-btn" id="dailyPredictionShareBtn">Поделиться</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="spring-rating-2024-modal" id="springRating2024Modal" aria-hidden="true" role="dialog" aria-labelledby="springRating2024ModalTitle" aria-label="Весна 2024, Рыбнадзор">
+        <div class="spring-rating-2024-modal__backdrop"></div>
+        <div class="spring-rating-2024-modal__inner">
+          <button type="button" class="spring-rating-2024-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="spring-rating-2024-modal__title" id="springRating2024ModalTitle">Весна 2024</h3>
+          <p class="spring-rating-2024-modal__subtitle">Победитель — <strong>Рыбнадзор</strong></p>
+          <figure class="spring-rating-2024-modal__figure">
+            <img
+              class="spring-rating-2024-modal__photo"
+              src="./assets/hall-rating-spring-2024-rybnadzor-cup.png"
+              alt="Кубок турнирщика весны: Рыбнадзор, март–май 2024, клуб Два туза"
+              width="575"
+              height="660"
+              loading="lazy"
+            />
+            <figcaption class="spring-rating-2024-modal__figcaption">Гравировка: турнирщик весны (март, апрель, май) 2024</figcaption>
+          </figure>
+          <div class="spring-rating-2024-modal__prose">
+            <p>🏆 Заслуженный кубок турнирщика для братишки Кирилла Рыбнадзора</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="summer-rating-2024-modal" id="summerRating2024Modal" aria-hidden="true" role="dialog" aria-labelledby="summerRating2024ModalTitle" aria-label="Кубок лета 2024">
+        <div class="summer-rating-2024-modal__backdrop"></div>
+        <div class="summer-rating-2024-modal__inner">
+          <button type="button" class="summer-rating-2024-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="summer-rating-2024-modal__title" id="summerRating2024ModalTitle">Кубок лета 2024</h3>
+          <p class="summer-rating-2024-modal__subtitle">Победитель — <strong>Пряник</strong></p>
+          <figure class="summer-rating-2024-modal__figure">
+            <img
+              class="summer-rating-2024-modal__photo"
+              src="./assets/hall-fame-cup-summer-2024-pryanik.png"
+              alt="Кубок игрока лета 2024 — Пряник, гравировка на подставке, клуб Два туза"
+              width="720"
+              height="960"
+              loading="lazy"
+            />
+            <figcaption class="summer-rating-2024-modal__figcaption">Кубок с гравировкой: Пряник — игрок лета 2024</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="summer-rating-2025-modal" id="summerRating2025Modal" aria-hidden="true" role="dialog" aria-labelledby="summerRating2025ModalTitle" aria-label="Кубок лета 2025">
+        <div class="summer-rating-2025-modal__backdrop"></div>
+        <div class="summer-rating-2025-modal__inner">
+          <button type="button" class="summer-rating-2025-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="summer-rating-2025-modal__title" id="summerRating2025ModalTitle">Кубок лета 2025</h3>
+          <p class="summer-rating-2025-modal__subtitle">Победитель — <strong>Sarmat</strong></p>
+          <figure class="summer-rating-2025-modal__figure">
+            <img
+              class="summer-rating-2025-modal__photo"
+              src="./assets/hall-rating-summer-2025-sarmat-cup.png"
+              alt="Кубок чемпиона МТТ-рейтинга лета 2025, Sarmat, клуб Два туза"
+              width="758"
+              height="1024"
+              loading="lazy"
+            />
+            <figcaption class="summer-rating-2025-modal__figcaption">Кубок с гравировкой: чемпион МТТ-рейтинга лета 2025</figcaption>
+          </figure>
+          <div class="summer-rating-2025-modal__prose">
+            <p>Завершился кубок лета 2025 для игроков только нашего клуба: чтобы получить баллы, нужно было попасть в топ‑8 любого турнира с бай-ином от 500&nbsp;₽. Таких у нас набралось <strong>205</strong> человек ❗️ 205 человек, кто хотя бы раз дошёл до топ‑8, а тех, кто в целом участвовали в турнирах, я уже считать не буду 😀</p>
+            <p>❗️ Этот рейтинг из‑за недорогих турниров с бай-ином 500&nbsp;₽ получился не столько на количество призовых, сколько на дисциплину и частую регулярную игру на протяжении <strong>двух месяцев</strong> — что тоже входит в обязательный набор качеств плюсового игрока в покер. Выиграл тот, кто играл больше турниров и чаще проходил в призы!</p>
+            <p>⭐️ Рейтинг осени проведём немного в другом формате и добавим к призам ещё 50&nbsp;000&nbsp;₽ — значит, призовой фонд рейтинга осени будет <strong>150&nbsp;000&nbsp;₽</strong>. Сезон начинается, а значит пора включаться в игру и показать своё место в рейтинге!</p>
+            <p>А пока поздравляем победителей — на данный момент это актуальный рейтинг наших турнирщиков.</p>
+          </div>
+          <h4 class="summer-rating-2025-modal__totals-heading">Итого баллов</h4>
+          <div class="summer-rating-2025-modal__podium">
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--1">
+              <p class="summer-rating-2025-modal__place-line">🥇 <strong>Sarmat</strong> — 3&nbsp;569 баллов — 70&nbsp;000&nbsp;₽</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Кубок чемпиона с именной гравировкой</li>
+                <li>🌟 Уважение в чате от всех без исключений, неприкосновенность и авторитет</li>
+                <li>🌟 Звание в чате «Каталкин лета 2025»</li>
+                <li>🌟 Символические никому неинтересные 70&nbsp;000&nbsp;₽ на карту (можно даже не быть меркантильным и отказаться от этой шляпы)</li>
+              </ul>
+            </div>
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--2">
+              <p class="summer-rating-2025-modal__place-line">🥈 <strong>Малек</strong> — 2&nbsp;720 баллов</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Уважение в чате</li>
+                <li>🌟 Звание в чате «Вице-Каталкин лета 2025»</li>
+                <li>🌟 20&nbsp;000&nbsp;₽ на карту</li>
+              </ul>
+            </div>
+            <div class="summer-rating-2025-modal__place summer-rating-2025-modal__place--3">
+              <p class="summer-rating-2025-modal__place-line">🥉 <strong>Рыбнадзор</strong> — 2&nbsp;546 баллов</p>
+              <ul class="summer-rating-2025-modal__bullets">
+                <li>🌟 Клубный бокс до адреса</li>
+                <li>🌟 Уважение в чате</li>
+                <li>🌟 Звание в чате «Вице-Вице-Вице»</li>
+                <li>🌟 10&nbsp;000&nbsp;₽ на карту</li>
+              </ul>
+            </div>
+          </div>
+          <div class="summer-rating-2025-modal__rest-wrap">
+            <p class="summer-rating-2025-modal__rest-title">Топ‑10</p>
+            <ol class="summer-rating-2025-modal__rest-list" start="4">
+              <li><strong>Кряк</strong> — 2&nbsp;330</li>
+              <li><strong>Waaarr</strong> — 2&nbsp;198</li>
+              <li><strong>Эмиль</strong> — 2&nbsp;083</li>
+              <li><strong>FishKopcheny</strong> — 1&nbsp;542</li>
+              <li><strong>Пряник</strong> — 1&nbsp;460</li>
+              <li><strong>Фокс</strong> — 1&nbsp;306</li>
+              <li><strong>Гика</strong> — 1&nbsp;205</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="autumn-rating-2025-modal" id="autumnRating2025Modal" aria-hidden="true" role="dialog" aria-labelledby="autumnRating2025ModalTitle" aria-label="Рейтинг МТТ осени 2025">
+        <div class="autumn-rating-2025-modal__backdrop"></div>
+        <div class="autumn-rating-2025-modal__inner">
+          <button type="button" class="autumn-rating-2025-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="autumn-rating-2025-modal__title" id="autumnRating2025ModalTitle">Рейтинг МТТ осени 2025</h3>
+          <p class="autumn-rating-2025-modal__subtitle">Победитель — <strong>Эмиль</strong> (Em13)</p>
+          <figure class="autumn-rating-2025-modal__figure">
+            <img
+              class="autumn-rating-2025-modal__photo"
+              src="./assets/hall-rating-autumn-2025-emil-cup.png"
+              alt="Кубок чемпиона МТТ-рейтинга осени 2025, Em13, клуб Два туза"
+              width="768"
+              height="1024"
+              loading="lazy"
+            />
+            <figcaption class="autumn-rating-2025-modal__figcaption">Кубок на гравировке: чемпион МТТ-рейтинга осени 2025</figcaption>
+          </figure>
+          <div class="autumn-rating-2025-modal__prose">
+            <p>Эмиль захватил лидерство примерно к концу первого месяца и удерживал его весь лидерборд, выиграв под «лям» за это время, а то и больше, если посчитать турниры дешевле 800&nbsp;₽, которые не пошли в учёт рейтинга. Вычтем ребаи и аддоны — и получится чистыми вполне приличная сумма! И прибавка <strong>70&nbsp;000&nbsp;₽</strong> за этот лидерборд.</p>
+            <p>Никто случайно не оказался в топ‑10: сильный состав, и чем выше, тем сильнее 😂 Очень рад находиться в составе таких игроков и вообще рад, что мы сделали такую движуху, в которой шли бок о бок и из недели в неделю двигали друг друга в жёсткой плотной борьбе! Что мотивировало играть, думать, анализировать и развиваться.</p>
+            <p>Итого в рейтинг попало <strong>142</strong> человека — всем огромное спасибо за участие!</p>
+          </div>
+          <h4 class="autumn-rating-2025-modal__top-heading">Топ‑10 по итогам</h4>
+          <p class="autumn-rating-2025-modal__top-hint">Ник, выигрыш в турнирах, баллы, приз</p>
+          <div class="autumn-rating-2025-modal__table-wrap">
+            <table class="autumn-rating-2025-modal__table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Ник</th>
+                  <th scope="col">Выигрыш</th>
+                  <th scope="col">Баллы</th>
+                  <th scope="col">Приз</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Em13</td>
+                  <td>928&nbsp;132&nbsp;₽</td>
+                  <td>3&nbsp;732</td>
+                  <td>70&nbsp;000&nbsp;₽ + кубок</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>ПокерМанки</td>
+                  <td>756&nbsp;861&nbsp;₽</td>
+                  <td>3&nbsp;421</td>
+                  <td>40&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Андрюморф</td>
+                  <td>818&nbsp;498&nbsp;₽</td>
+                  <td>3&nbsp;023</td>
+                  <td>25&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Waaarr</td>
+                  <td>545&nbsp;419&nbsp;₽</td>
+                  <td>2&nbsp;936</td>
+                  <td>15&nbsp;000&nbsp;₽</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Cooler91</td>
+                  <td>567&nbsp;625&nbsp;₽</td>
+                  <td>2&nbsp;710</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Штукатур</td>
+                  <td>418&nbsp;048&nbsp;₽</td>
+                  <td>2&nbsp;461</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>Пупсик</td>
+                  <td>580&nbsp;157&nbsp;₽</td>
+                  <td>2&nbsp;307</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>Фишкапченый</td>
+                  <td>328&nbsp;034&nbsp;₽</td>
+                  <td>2&nbsp;055</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Сармат</td>
+                  <td>167&nbsp;675&nbsp;₽</td>
+                  <td>1&nbsp;469</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>Winifly</td>
+                  <td>441&nbsp;915&nbsp;₽</td>
+                  <td>1&nbsp;348</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="spring-rating-info-modal" id="springRatingInfoModal" aria-hidden="true" role="dialog" aria-labelledby="springRatingInfoModalTitle" aria-label="Рейтинг турнирщиков весны">
+        <div class="spring-rating-info-modal__backdrop"></div>
+        <div class="spring-rating-info-modal__inner">
+          <button type="button" class="spring-rating-info-modal__close" aria-label="Закрыть">×</button>
+          <h3 class="spring-rating-info-modal__title" id="springRatingInfoModalTitle">Рейтинг турнирщиков весны</h3>
+          <p class="spring-rating-info-modal__subtitle">Стартуем 1го марта</p>
+          <div class="spring-rating-info-modal__leagues">
+            <div class="spring-rating-info-modal__league-block">
+              <p class="spring-rating-info-modal__league-title"><strong>Лига 1 Призы 190 000₽</strong></p>
+              <p class="spring-rating-info-modal__league-sub"><strong>турниры от 500₽ и выше</strong></p>
+              <ul class="spring-rating-info-modal__league-prizes">
+                <li>1 место — 100 000₽</li>
+                <li>2 место — 50 000₽</li>
+                <li>3 место — 25 000₽</li>
+                <li>4 место — 10 000₽</li>
+                <li>5 место — 5 000₽</li>
+              </ul>
+            </div>
+            <div class="spring-rating-info-modal__league-block">
+              <p class="spring-rating-info-modal__league-title"><strong>Лига 2 Призы 60 000₽</strong></p>
+              <p class="spring-rating-info-modal__league-sub"><strong>турниры до 499₽</strong></p>
+              <ul class="spring-rating-info-modal__league-prizes">
+                <li>1 место — 30 000₽</li>
+                <li>2 место — 15 000₽</li>
+                <li>3 место — 7 500₽</li>
+                <li>4 место — 5 000₽</li>
+                <li>5 место — 2 500₽</li>
+              </ul>
+            </div>
+          </div>
+          <p class="spring-rating-info-modal__intro"><strong>Попадайте в ИТМ в турнирах и получайте очки</strong></p>
+          <ul class="spring-rating-info-modal__points">
+            <li>1 место — 135 очков</li>
+            <li>2 место — 110 очков</li>
+            <li>3 место — 90</li>
+            <li>4 место — 70</li>
+            <li>5 место — 60</li>
+            <li>6 место — 50</li>
+            <li>7 место — 40</li>
+            <li>8 место — 30</li>
+          </ul>
+          <p class="spring-rating-info-modal__note"><em>*Только если это место ИТМ с призами. Если в турнире было например 20 человек и ИТМ начинается с 3х, а за 6е место 0 призовых, то и баллы за 6е место вы не получаете.</em></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вне #app: таб-бар position:fixed — иначе в PWA/iOS при скролле html он «ездит» до resize (см. overflow:hidden у #app) -->
+    <!-- Вне #app: fixed-оверлей не режется overflow и кнопки всегда получают клики -->
+    <div class="winter-rating-lightbox" id="winterRatingLightbox" aria-hidden="true" role="dialog" aria-label="Увеличенный скрин">
+      <img class="winter-rating-lightbox__img" src="" alt="" />
+      <button type="button" class="winter-rating-lightbox__close" aria-label="Закрыть">×</button>
+      <button type="button" class="chat-back-btn winter-rating-lightbox__back" id="winterRatingLightboxBackBtn" aria-label="Закрыть просмотр">←</button>
+      <button type="button" class="winter-rating-lightbox__prev" aria-label="Предыдущий скрин">‹</button>
+      <button type="button" class="winter-rating-lightbox__next" aria-label="Следующий скрин">›</button>
+      <span class="winter-rating-lightbox__counter" aria-live="polite"></span>
+    </div>

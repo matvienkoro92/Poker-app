@@ -1,0 +1,47 @@
+<div class="view" data-view="streams">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <h1 class="title streams-title">Стримы</h1>
+            <p class="streams-intro">Трансляция экрана и голоса в реальном времени. Задержка 2 минуты потребует отдельного стрим-сервера — пока доступна только прямая трансляция.</p>
+            <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
+              <p class="streams-open-in-browser__text">Трансляция экрана не работает во встроенном браузере Telegram. Откройте приложение в Chrome или скопируйте ссылку:</p>
+              <div class="streams-link-row streams-open-in-browser__row">
+                <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для открытия в браузере" />
+                <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>
+                <button type="button" class="streams-copy-btn" id="streamsCopyBrowserLinkBtn">Копировать</button>
+              </div>
+            </div>
+            <div class="streams-actions">
+              <div class="streams-block streams-block--broadcast">
+                <h2 class="streams-block__title">Начать трансляцию</h2>
+                <p class="streams-block__hint">Экран и микрофон будут видны и слышны зрителям.</p>
+                <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
+                  <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
+                </div>
+                <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
+                <div class="streams-preview-wrap streams-preview-wrap--hidden" id="streamsPreviewWrap">
+                  <video id="streamsPreviewVideo" class="streams-preview-video" autoplay muted playsinline aria-label="Превью трансляции"></video>
+                  <p class="streams-link-label">Ссылка для зрителей:</p>
+                  <div class="streams-link-row">
+                    <input type="text" id="streamsShareLink" class="streams-link-input" readonly aria-label="Ссылка на трансляцию" />
+                    <button type="button" class="streams-copy-btn" id="streamsCopyLinkBtn">Копировать</button>
+                  </div>
+                  <button type="button" class="streams-btn streams-btn--stop" id="streamsStopBtn">Остановить</button>
+                  <p id="streamsBroadcastTimer" class="streams-broadcast-timer" aria-live="polite"></p>
+                  <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsPreviewFullscreenBtn">Во весь экран</button>
+                </div>
+              </div>
+              <div class="streams-block streams-block--watch">
+                <h2 class="streams-block__title">Смотреть трансляцию</h2>
+                <p class="streams-block__hint">Вставьте ссылку или код комнаты от ведущего.</p>
+                <div class="streams-watch-row">
+                  <input type="text" id="streamsRoomInput" class="streams-room-input" inputmode="numeric" placeholder="6 цифр или ссылка с streams_" aria-label="Код комнаты" maxlength="256" />
+                  <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Смотреть</button>
+                </div>
+                <div class="streams-remote-wrap streams-remote-wrap--hidden" id="streamsRemoteWrap">
+                  <video id="streamsRemoteVideo" class="streams-remote-video" autoplay playsinline muted="" aria-label="Трансляция"></video>
+                  <button type="button" class="streams-btn streams-btn--stop" id="streamsStopWatchBtn">Отключиться</button>
+                  <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsRemoteFullscreenBtn">Во весь экран</button>
+                </div>
+              </div>
+            </div>
+          </div>

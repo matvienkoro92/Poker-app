@@ -68,15 +68,18 @@ function pokerInitHomeTasks() {
     var startBtn = document.getElementById("pokerTasksStartBtn");
     var leaderboardBody = document.getElementById("pokerTasksLeaderboardBody");
     if (!startScreen || !startBtn) return;
-    startBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      if (typeof window.startMttChallenge === "function") {
-        window.startMttChallenge();
-      } else {
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Задачи ещё загружаются. Обновите страницу."); else alert("Задачи ещё загружаются. Обновите страницу.");
-      }
-    });
+    if (startBtn.dataset.pokerTasksStartBound !== "1") {
+      startBtn.dataset.pokerTasksStartBound = "1";
+      startBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (typeof window.startMttChallenge === "function") {
+          window.startMttChallenge();
+        } else {
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert("Задачи ещё загружаются. Обновите страницу."); else alert("Задачи ещё загружаются. Обновите страницу.");
+        }
+      });
+    }
     function renderMttLeaderboard() {
       if (!leaderboardBody) return;
       var list = (typeof MTT_LEADERBOARD !== "undefined" && Array.isArray(MTT_LEADERBOARD)) ? MTT_LEADERBOARD : [];
@@ -152,6 +155,8 @@ function pokerInitHomeTasks() {
     var playAgainBtn = document.getElementById("pokerStreakPlayAgainBtn");
     var resultStatsEl = document.getElementById("pokerStreakResultStats");
     if (!streakScreen || !timerEl || !optionsEl) return;
+    if (view && view.dataset.pokerTasksChallengeBound === "1") return;
+    if (view) view.dataset.pokerTasksChallengeBound = "1";
     var tasks = [];
     var taskIndex = 0;
     var sessionScore = 0;
@@ -453,6 +458,8 @@ function pokerInitHomeTasks() {
     updateRatingSubscribeFromStorage();
     if (ratingSubscribeBtns.length) {
       ratingSubscribeBtns.forEach(function (btn) {
+        if (btn.dataset.ratingSubscribeBound === "1") return;
+        btn.dataset.ratingSubscribeBound = "1";
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
           if (window.__touchWasScroll && window.__touchWasScroll()) return;

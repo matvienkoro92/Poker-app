@@ -1,0 +1,77 @@
+/* Late home rating promo overrides kept outside tournament overrides. */
+
+html[data-theme="gold"].app-view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified,
+[data-theme="gold"]
+  .app.app--view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified {
+  position: relative;
+  border: 1px solid rgba(255, 214, 128, 0.46);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 244, 191, 0.095), transparent 38%),
+    linear-gradient(180deg, rgba(255, 226, 156, 0.06), rgba(255, 226, 156, 0) 34%),
+    linear-gradient(145deg, rgba(8, 10, 15, 0.99) 0%, rgba(4, 6, 10, 0.99) 48%, rgba(9, 12, 18, 0.98) 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 246, 211, 0.38) inset,
+    0 -12px 22px rgba(0, 0, 0, 0.26) inset,
+    0 0 0 1px rgba(145, 92, 20, 0.3),
+    0 12px 0 rgba(8, 10, 15, 0.86),
+    0 18px 28px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(245, 158, 11, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+html[data-theme="gold"].app-view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified::before,
+[data-theme="gold"]
+  .app.app--view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto;
+  height: 46%;
+  border-radius: 20px 20px 12px 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.015));
+  pointer-events: none;
+}
+
+html[data-theme="gold"].app-view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified:hover,
+[data-theme="gold"]
+  .app.app--view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 246, 211, 0.46) inset,
+    0 -12px 22px rgba(0, 0, 0, 0.24) inset,
+    0 0 0 1px rgba(255, 214, 128, 0.42),
+    0 10px 0 rgba(8, 10, 15, 0.9),
+    0 16px 30px rgba(0, 0, 0, 0.46),
+    0 0 30px rgba(245, 158, 11, 0.14) !important;
+  transform: translateY(0);
+}
+
+html[data-theme="gold"].app-view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified__header.feature--rating-spring-promo,
+[data-theme="gold"]
+  .app.app--view-home
+  .home-welcome-outline
+  .features--home-rating-on-border
+  .spring-rating-home-promo-unified__header.feature--rating-spring-promo {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+}
