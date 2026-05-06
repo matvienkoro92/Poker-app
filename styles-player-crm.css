@@ -402,12 +402,18 @@ button.player-crm__stat:focus-visible,
   gap: 6px;
   min-height: 112px;
 }
+.player-crm__stat--visits {
+  display: grid;
+  gap: 8px;
+  min-height: 112px;
+}
 .player-crm__stat-mini-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 5px;
 }
-.player-crm__stat-mini-grid button {
+.player-crm__stat-mini-grid button,
+.player-crm__stat-mini-row {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

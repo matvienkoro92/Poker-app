@@ -37,6 +37,10 @@ function initPlayerCrmStatsRuntime(deps) {
     var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
     var registrationBothCount = registrationRowsByMethod("both").length;
     var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
+    var visitsSummary = summary && summary.visits && typeof summary.visits === "object" ? summary.visits : null;
+    var visitRows = summary ? players : periodPlayers;
+    var visitTotal = visitsSummary ? Number(visitsSummary.total) || 0 : visitRows.reduce(function (sum, p) { return sum + (Number(p && p.totals && p.totals.visits) || 0); }, 0);
+    var visitUnique = visitsSummary ? Number(visitsSummary.unique) || 0 : visitRows.length;
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
@@ -53,7 +57,7 @@ function initPlayerCrmStatsRuntime(deps) {
       return intFmt(row && row.total) + " / " + intFmt(row && row.period);
     }
     var stats = [
-      ["Игроков в базе", statPlayers, periodLabel()],
+      ["Посещений", visitTotal, periodLabel(), "visits"],
       ["Зарегано", statRegistrations, periodLabel(), "registrations"],
       ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
       ["Новые подписки на бот", statBotSubscribers, periodLabel(), "bot"],
@@ -71,6 +75,14 @@ function initPlayerCrmStatsRuntime(deps) {
     function statCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
       var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
+      if (it[3] === "visits") {
+        return "<div class=\"player-crm__stat player-crm__stat--visits" + toneCls + "\"><span class=\"player-crm__stat-label\">Посещений</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
+          "<span class=\"player-crm__stat-mini-grid\">" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></span>" +
+          "</span></div>";
+      }
       if (it[3] === "registrations") {
         return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
