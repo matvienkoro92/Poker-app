@@ -107,6 +107,80 @@ function initPlayerCrmChartsRuntime(deps) {
     if (guide) guide.setAttribute("hidden", "hidden");
   }
 
+  function renderChartAnalytics() {
+    var chart = state.chartAnalytics || {};
+    var labels = Array.isArray(chart.labels) ? chart.labels : [];
+    var series = Array.isArray(chart.series) ? chart.series : [];
+    if (!labels.length || !series.length) return "<div class=\"player-crm__timeline-item\">График появится после загрузки данных.</div>";
+    var enabledSeries = series.filter(function (s) {
+      return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
+    });
+    var width = 960;
+    var height = 340;
+    var padL = 72;
+    var padR = 18;
+    var padT = 20;
+    var padB = 58;
+    var plotW = width - padL - padR;
+    var plotH = height - padT - padB;
+    var max = enabledSeries.reduce(function (m, s) {
+      return Math.max(m, Math.max.apply(null, (s.values || []).map(function (v) { return Number(v) || 0; })));
+    }, 0);
+    max = Math.max(1, max);
+    function x(i) {
+      return padL + (labels.length <= 1 ? 0 : (i / (labels.length - 1)) * plotW);
+    }
+    function y(v) {
+      return padT + plotH - ((Number(v) || 0) / max) * plotH;
+    }
+    function points(values) {
+      return labels.map(function (_, idx) { return x(idx).toFixed(1) + "," + y(values[idx] || 0).toFixed(1); }).join(" ");
+    }
+    var grid = [0, 0.25, 0.5, 0.75, 1].map(function (part) {
+      var gy = padT + plotH - part * plotH;
+      var value = Math.round(max * part);
+      return "<line x1=\"" + padL + "\" y1=\"" + gy.toFixed(1) + "\" x2=\"" + (width - padR) + "\" y2=\"" + gy.toFixed(1) + "\" />" +
+        "<text x=\"12\" y=\"" + (gy + 5).toFixed(1) + "\">" + esc(intFmt(value)) + "</text>";
+    }).join("");
+    var step = Math.max(1, Math.ceil(labels.length / 6));
+    var ticks = labels.map(function (label, idx) {
+      if (idx !== 0 && idx !== labels.length - 1 && idx % step !== 0) return "";
+      return "<text x=\"" + x(idx).toFixed(1) + "\" y=\"" + (height - 18) + "\">" + esc(String(label).slice(5)) + "</text>";
+    }).join("");
+    var lines = enabledSeries.map(function (s) {
+      var color = chartColors[s.key] || "#e5e7eb";
+      return "<polyline points=\"" + points(s.values || []) + "\" style=\"--line-color:" + esc(color) + "\" />" +
+        "<circle cx=\"" + x(labels.length - 1).toFixed(1) + "\" cy=\"" + y((s.values || [0])[labels.length - 1] || 0).toFixed(1) + "\" r=\"4\" style=\"--line-color:" + esc(color) + "\" />";
+    }).join("");
+    var hoverBands = labels.map(function (_, idx) {
+      var left = idx === 0 ? padL : (x(idx - 0.5));
+      var right = idx === labels.length - 1 ? width - padR : x(idx + 0.5);
+      return "<rect data-crm-chart-point=\"" + idx + "\" x=\"" + left.toFixed(1) + "\" y=\"" + padT + "\" width=\"" + Math.max(8, right - left).toFixed(1) + "\" height=\"" + plotH + "\" />";
+    }).join("");
+    var legend = series.map(function (s) {
+      var hasDates = s.hasDates !== false;
+      var checked = hasDates && state.chartSeriesEnabled[s.key] !== false ? " checked" : "";
+      var disabled = hasDates ? "" : " disabled";
+      var cls = hasDates ? "player-crm__chart-toggle" : "player-crm__chart-toggle player-crm__chart-toggle--disabled";
+      var color = chartColors[s.key] || "#e5e7eb";
+      var hint = hasDates ? "" : " · нет даты";
+      return "<label class=\"" + cls + "\"><input type=\"checkbox\" data-crm-chart-series=\"" + esc(s.key) + "\"" + checked + disabled + " />" +
+        "<span class=\"player-crm__chart-swatch\" style=\"--line-color:" + esc(color) + "\"></span><span>" + esc((s.label || s.key) + hint) + "</span></label>";
+    }).join("");
+    return "<div class=\"player-crm__chart-card\">" +
+      "<div class=\"player-crm__chart-scroll\"><svg class=\"player-crm__chart\" viewBox=\"0 0 " + width + " " + height + "\" role=\"img\" aria-label=\"CRM график по дням\">" +
+        "<g class=\"player-crm__chart-grid\">" + grid + "</g>" +
+        "<g class=\"player-crm__chart-lines\">" + lines + "</g>" +
+        "<line class=\"player-crm__chart-guide\" id=\"playerCrmChartGuideLine\" x1=\"" + padL + "\" y1=\"" + padT + "\" x2=\"" + padL + "\" y2=\"" + (padT + plotH) + "\" hidden=\"hidden\" />" +
+        "<g class=\"player-crm__chart-hover\">" + hoverBands + "</g>" +
+        "<g class=\"player-crm__chart-ticks\">" + ticks + "</g>" +
+      "</svg></div>" +
+      "<div class=\"player-crm__chart-tooltip\" id=\"playerCrmChartTooltip\" hidden></div>" +
+      "<div class=\"player-crm__chart-toggles\">" + legend + "</div>" +
+      renderChartSummary(chart, series) +
+    "</div>";
+  }
+
 
   return {
     renderAnalytics: renderAnalytics,

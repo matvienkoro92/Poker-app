@@ -19,6 +19,7 @@
   };
 
   var GLOBAL_MODAL_DOMAIN_SELECTORS = [
+    { selector: "#hallFishRatingBtn", domains: ["hall"] },
     { selector: "#adminReportBtn,#adminBroadcastReportsBtn", domains: ["admin-reports"] },
     { selector: "#adminAuthDebugBtn", domains: ["auth-debug"] },
     { selector: "#adminShareStatsBtn", domains: ["share-stats"] },

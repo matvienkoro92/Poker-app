@@ -178,14 +178,54 @@ async function main() {
     if (initialHeavy.has("winter-rating-data.js")) throw new Error("winter rating data should be lazy before winter navigation");
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
 
-    const route = ["chat", "download", "cashout", "profile", "home", "bonus-game", "home", "raffles", "spring-rating"];
+    await page.locator("#hallFishRatingBtn").click();
+    await page.waitForFunction(() => {
+      const modal = document.getElementById("hallFishRatingModal");
+      return !!(modal && modal.hidden === false);
+    }, null, { timeout: 5000 });
+    const fishModalState = await page.evaluate(() => ({
+      modalOpen: !!(document.getElementById("hallFishRatingModal") && document.getElementById("hallFishRatingModal").hidden === false),
+      initFunction: typeof window.pokerInitHallFishRatingModal,
+      lazyScriptExecuted: Array.from(document.scripts || [])
+        .some((script) => /app-hall-fame\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "hall"),
+    }));
+    if (!fishModalState.modalOpen) throw new Error("home fish rating modal did not open on first click");
+    if (fishModalState.initFunction !== "function") throw new Error("hall fish modal init function did not load");
+    if (!fishModalState.lazyScriptExecuted) throw new Error("hall script was not lazy-loaded by fish button");
+    await page.evaluate(() => {
+      const close = document.querySelector("#hallFishRatingModal [data-hall-fish-close]");
+      if (close) close.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    });
+
+    const route = ["chat", "download", "cashout", "profile", "player-crm", "home", "bonus-game", "home", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
       const via = await clickVisibleOrSetView(page, target);
-      await page.waitForTimeout(target === "chat" ? 1200 : 350);
+      if (target === "player-crm") {
+        await page.waitForFunction((targetName) => document.body.getAttribute("data-view") === targetName, target, { timeout: 6000 });
+      } else {
+        await page.waitForTimeout(target === "chat" ? 1200 : 350);
+      }
       const view = await page.evaluate(() => document.body.getAttribute("data-view"));
       views.push({ target, via, view });
       if (view !== target) throw new Error(`Expected ${target}, got ${view}`);
+      if (target === "player-crm") {
+        await page.waitForFunction(() => typeof window.pokerInitPlayerCrm === "function", null, { timeout: 4000 });
+        const crmState = await page.evaluate(() => {
+          const root = document.getElementById("playerCrmView");
+          const section = root && root.querySelector(".player-crm");
+          const rect = section ? section.getBoundingClientRect() : null;
+          return {
+            bound: root && root.dataset.crmBound === "1",
+            visible: !!(section && rect && rect.width > 0 && rect.height > 0 && getComputedStyle(section).visibility !== "hidden"),
+            hasFeedback: !!(document.getElementById("playerCrmStats") && document.getElementById("playerCrmStats").textContent.trim()) ||
+              !!(document.getElementById("playerCrmAnalytics") && document.getElementById("playerCrmAnalytics").textContent.trim()),
+          };
+        });
+        if (!crmState.bound) throw new Error("player CRM runtime did not bind");
+        if (!crmState.visible) throw new Error("player CRM section is not visible on mobile viewport");
+        if (!crmState.hasFeedback) throw new Error("player CRM opened without feedback content");
+      }
     }
 
     await page.evaluate(() => {

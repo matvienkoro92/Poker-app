@@ -30,11 +30,11 @@ if (minor >= 1000) {
 const next = `${nextMajor}.${String(minor).padStart(3, "0")}`;
 let out = html.replace(re, `data-app-version="${next}"`);
 out = out.replace(
-  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js)))\?v=[^"#]+(")/g,
+  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js|json)))\?v=[^"#]+(")/g,
   `$1?v=${next}$2`
 );
 out = out.replace(
-  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js)))(")/g,
+  /\b((?:href|src)="\.\/(?:[^"#?]+\.(?:css|js|json)))(")/g,
   `$1?v=${next}$2`
 );
 fs.writeFileSync(indexPath, out, "utf8");
