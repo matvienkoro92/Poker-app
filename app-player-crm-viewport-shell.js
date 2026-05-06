@@ -56,14 +56,19 @@ function initPlayerCrmViewportShellRuntime() {
     root.style.setProperty("z-index", "2147483000", "important");
     root.style.setProperty("pointer-events", "auto", "important");
     root.style.setProperty("isolation", "isolate", "important");
+    root.style.setProperty("background", "linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%)", "important");
     if (section) {
       section.style.setProperty("display", "block", "important");
       section.style.setProperty("visibility", "visible", "important");
       section.style.setProperty("opacity", "1", "important");
       section.style.setProperty("flex", "1 1 auto", "important");
-      section.style.setProperty("position", "relative", "important");
+      section.style.setProperty("position", "absolute", "important");
+      section.style.setProperty("top", "max(74px, calc(env(safe-area-inset-top, 0px) + 62px))", "important");
+      section.style.setProperty("right", "max(12px, var(--screen-gutter-x, 12px))", "important");
+      section.style.setProperty("bottom", "0", "important");
+      section.style.setProperty("left", "max(12px, var(--screen-gutter-x, 12px))", "important");
       section.style.setProperty("z-index", "2", "important");
-      section.style.setProperty("width", "min(1120px, 100%)", "important");
+      section.style.setProperty("width", "auto", "important");
       section.style.setProperty("max-width", "100%", "important");
       section.style.setProperty("min-height", "0", "important");
       section.style.setProperty("height", "auto", "important");
@@ -73,10 +78,6 @@ function initPlayerCrmViewportShellRuntime() {
       section.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
       section.style.setProperty("box-sizing", "border-box", "important");
       section.style.setProperty("padding-bottom", "max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px))", "important");
-      section.style.removeProperty("top");
-      section.style.removeProperty("right");
-      section.style.removeProperty("bottom");
-      section.style.removeProperty("left");
       section.style.removeProperty("max-height");
     }
   }

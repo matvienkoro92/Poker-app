@@ -1216,14 +1216,22 @@ body[data-view="player-crm"] #playerCrmView.view--active {
   pointer-events: auto !important;
   isolation: isolate !important;
   overflow: hidden !important;
+  background:
+    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
+    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
 }
 
 body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   display: block !important;
   flex: 1 1 auto !important;
-  position: relative !important;
+  position: absolute !important;
+  top: max(74px, calc(env(safe-area-inset-top, 0px) + 62px)) !important;
+  right: max(12px, var(--screen-gutter-x, 12px)) !important;
+  bottom: 0 !important;
+  left: max(12px, var(--screen-gutter-x, 12px)) !important;
   z-index: 2 !important;
-  width: min(1120px, 100%) !important;
+  width: auto !important;
   max-width: 100% !important;
   min-height: 0 !important;
   height: auto !important;

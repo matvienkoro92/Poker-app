@@ -97,21 +97,23 @@ function pokerForcePlayerCrmVisible() {
   root.style.setProperty("z-index", "2147483000", "important");
   root.style.setProperty("pointer-events", "auto", "important");
   root.style.setProperty("isolation", "isolate", "important");
+  root.style.setProperty("background", "linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%)", "important");
   if (section) {
     section.style.setProperty("display", "block", "important");
     section.style.setProperty("visibility", "visible", "important");
     section.style.setProperty("opacity", "1", "important");
     section.style.setProperty("flex", "1 1 auto", "important");
-    section.style.setProperty("position", "relative", "important");
-    section.style.removeProperty("top");
-    section.style.removeProperty("right");
-    section.style.removeProperty("bottom");
-    section.style.removeProperty("left");
+    section.style.setProperty("position", "absolute", "important");
+    section.style.setProperty("top", "max(74px, calc(env(safe-area-inset-top, 0px) + 62px))", "important");
+    section.style.setProperty("right", "max(12px, var(--screen-gutter-x, 12px))", "important");
+    section.style.setProperty("bottom", "0", "important");
+    section.style.setProperty("left", "max(12px, var(--screen-gutter-x, 12px))", "important");
     section.style.setProperty("z-index", "2", "important");
-    section.style.setProperty("width", "min(1120px, 100%)", "important");
+    section.style.setProperty("width", "auto", "important");
     section.style.setProperty("max-width", "100%", "important");
     section.style.setProperty("min-height", "0", "important");
     section.style.setProperty("height", "auto", "important");
+    section.style.setProperty("max-height", "none", "important");
     section.style.removeProperty("max-height");
     section.style.setProperty("margin", "0 auto", "important");
     section.style.setProperty("overflow-x", "hidden", "important");
@@ -124,7 +126,7 @@ function pokerForcePlayerCrmVisible() {
 }
 
 function pokerSchedulePlayerCrmViewportSync() {
-  [0, 32, 90, 180, 360, 720, 1200, 2200].forEach(function (delay) {
+  [0, 32, 90, 180, 360, 720, 1200, 2200, 3600].forEach(function (delay) {
     setTimeout(function () {
       try {
         if (document.body && document.body.getAttribute("data-view") !== "player-crm") return;
@@ -136,6 +138,50 @@ function pokerSchedulePlayerCrmViewportSync() {
     }, delay);
   });
 }
+
+var playerCrmBlackScreenRescueBound = false;
+
+function pokerInstallPlayerCrmBlackScreenRescue() {
+  if (playerCrmBlackScreenRescueBound) return;
+  playerCrmBlackScreenRescueBound = true;
+  function applyRescue() {
+    try {
+      if (!document.body || document.body.getAttribute("data-view") !== "player-crm") return;
+      pokerForcePlayerCrmVisible();
+      var root = document.getElementById("playerCrmView");
+      var section = root && root.querySelector(".player-crm");
+      if (!root || !section || !section.getBoundingClientRect) return;
+      var rect = section.getBoundingClientRect();
+      var hidden =
+        rect.height < 120 ||
+        rect.bottom < 180 ||
+        rect.top > Math.max(180, (window.innerHeight || 0) - 220);
+      if (!hidden) return;
+      root.style.setProperty("min-height", "100vh", "important");
+      root.style.setProperty("height", "100vh", "important");
+      root.style.setProperty("max-height", "100vh", "important");
+      section.style.setProperty("position", "absolute", "important");
+      section.style.setProperty("top", "74px", "important");
+      section.style.setProperty("right", "12px", "important");
+      section.style.setProperty("bottom", "0", "important");
+      section.style.setProperty("left", "12px", "important");
+      section.style.setProperty("display", "block", "important");
+      section.style.setProperty("visibility", "visible", "important");
+      section.style.setProperty("opacity", "1", "important");
+      section.style.setProperty("overflow-y", "auto", "important");
+      section.style.setProperty("color", "#f4ead6", "important");
+    } catch (eCrmRescue) {}
+  }
+  try {
+    var observer = new MutationObserver(applyRescue);
+    if (document.body) observer.observe(document.body, { attributes: true, attributeFilter: ["data-view", "class"] });
+  } catch (eCrmObserver) {}
+  [0, 50, 150, 350, 700, 1400, 2600, 4200].forEach(function (delay) {
+    setTimeout(applyRescue, delay);
+  });
+}
+
+pokerInstallPlayerCrmBlackScreenRescue();
 
 function pokerPortalPlayerCrmRoot(root) {
   if (!root || !document.body || root.parentNode === document.body) return;
