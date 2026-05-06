@@ -1467,12 +1467,17 @@ add("Large domain entrypoints stay thin after runtime split", () =>
     "function pokerGetStablePlayerCrmViewportHeight",
     "function pokerSchedulePlayerCrmViewportSync",
     "function pokerInstallPlayerCrmBlackScreenRescue",
+    "function pokerFinalizePlayerCrmDirectOpen",
     "function pokerOpenPlayerCrmFromHome",
     "pokerWarmPlayerCrmScripts",
+    'setView("player-crm", { htmlReady: true, scriptsReady: true })',
     "pokerOpenPlayerCrmFromHome();",
+    '[data-crm-open="player-crm"]',
     'target === "player-crm"',
   ]) &&
+  !has("appViewRouter", "scriptsReady.then(activateCrmNow)") &&
   hasAll("html", [
+    'data-crm-open="player-crm"',
     "Загрузка CRM…",
     "График загрузится после открытия CRM.",
   ]) &&

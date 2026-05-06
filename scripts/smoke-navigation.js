@@ -104,8 +104,9 @@ async function clickVisibleOrSetView(page, target) {
       const rect = node.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0 && rect.top < window.innerHeight && rect.left < window.innerWidth;
     }
-    const els = Array.from(document.querySelectorAll("[data-view-target]"))
-      .filter((node) => node.getAttribute("data-view-target") === targetName);
+    const selector = targetName === "player-crm" ? '[data-crm-open="player-crm"], [data-view-target]' : "[data-view-target]";
+    const els = Array.from(document.querySelectorAll(selector))
+      .filter((node) => node.getAttribute("data-view-target") === targetName || node.getAttribute("data-crm-open") === targetName);
     const el = els.find(isActuallyVisible);
     if (!el) return false;
     el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
@@ -197,9 +198,18 @@ async function main() {
       if (close) close.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
     });
 
-    const route = ["chat", "download", "cashout", "profile", "player-crm", "home", "bonus-game", "home", "raffles", "spring-rating"];
+    const route = ["chat", "download", "cashout", "profile", "home", "player-crm", "home", "bonus-game", "home", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
+      if (target === "player-crm") {
+        await page.evaluate(() => {
+          const btn = document.querySelector('[data-crm-open="player-crm"]');
+          if (!btn) throw new Error("direct player CRM button is missing");
+          btn.hidden = false;
+          btn.disabled = false;
+          btn.removeAttribute("aria-hidden");
+        });
+      }
       const via = await clickVisibleOrSetView(page, target);
       if (target === "player-crm") {
         await page.waitForFunction((targetName) => document.body.getAttribute("data-view") === targetName, target, { timeout: 6000 });

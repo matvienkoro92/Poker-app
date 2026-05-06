@@ -1295,12 +1295,27 @@ function pokerWarmPlayerCrmScripts() {
 
 var playerCrmOpenInFlight = false;
 
+function pokerFinalizePlayerCrmDirectOpen() {
+  pokerForcePlayerCrmVisible();
+  pokerSchedulePlayerCrmViewportSync();
+  try {
+    if (typeof window.pokerInitPlayerCrm === "function") {
+      window.pokerInitPlayerCrm();
+    } else if (typeof window.pokerSyncPlayerCrmViewportShell === "function") {
+      window.pokerSyncPlayerCrmViewportShell();
+    }
+  } catch (eCrmFinalize) {}
+}
+
 function pokerOpenPlayerCrmFromHome() {
-  if (playerCrmOpenInFlight) return;
+  if (playerCrmOpenInFlight && document.body && document.body.getAttribute("data-view") === "player-crm") {
+    pokerFinalizePlayerCrmDirectOpen();
+    return;
+  }
   playerCrmOpenInFlight = true;
   setTimeout(function () {
     playerCrmOpenInFlight = false;
-  }, 1600);
+  }, 450);
 
   function activateCrmNow() {
     try {
@@ -1310,25 +1325,30 @@ function pokerOpenPlayerCrmFromHome() {
         setView("player-crm");
       } catch (eSetCrmFallback) {}
     }
-    pokerSchedulePlayerCrmViewportSync();
+    pokerFinalizePlayerCrmDirectOpen();
   }
 
+  activateCrmNow();
   var scriptsReady = pokerWarmPlayerCrmScripts();
   if (scriptsReady && typeof scriptsReady.then === "function") {
-    scriptsReady.then(activateCrmNow).catch(function (err) {
+    scriptsReady.then(function () {
+      [0, 40, 160, 420].forEach(function (delay) {
+        setTimeout(pokerFinalizePlayerCrmDirectOpen, delay);
+      });
+    }).catch(function (err) {
       playerCrmOpenInFlight = false;
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-        window.Telegram.WebApp.showAlert("Не удалось загрузить CRM. Попробуйте ещё раз.");
+      var stats = document.getElementById("playerCrmStats");
+      if (stats && !stats.textContent.trim()) {
+        stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">CRM открыта, данные догружаются. Обнови раздел через несколько секунд.</div>";
       }
       if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm open", err);
     });
     return;
   }
-  activateCrmNow();
 }
 
 (function bindPlayerCrmFastOpen() {
-  var btn = document.getElementById("adminCrmBtn");
+  var btn = document.querySelector('[data-crm-open="player-crm"]') || document.getElementById("adminCrmBtn");
   if (!btn || btn.__pokerPlayerCrmFastOpenBound) return;
   btn.__pokerPlayerCrmFastOpenBound = true;
   btn.addEventListener("pointerdown", function () {
