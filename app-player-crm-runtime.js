@@ -80,6 +80,7 @@
   var normalizeChartDateRange = playerCrmPeriodSegmentsRuntime.normalizeChartDateRange || function () {};
   var periodKey = playerCrmPeriodSegmentsRuntime.periodKey || function () { return "30"; };
   var periodLabel = playerCrmPeriodSegmentsRuntime.periodLabel || function () { return ""; };
+  var periodRangeLabel = playerCrmPeriodSegmentsRuntime.periodRangeLabel || function () { return ""; };
   var selectedPeriodRange = playerCrmPeriodSegmentsRuntime.selectedPeriodRange || function () { return null; };
   var dateInSelectedPeriod = playerCrmPeriodSegmentsRuntime.dateInSelectedPeriod || function () { return true; };
   var playersInSelectedPeriodByDate = playerCrmPeriodSegmentsRuntime.playersInSelectedPeriodByDate || function () { return []; };
@@ -1198,6 +1199,7 @@
     var period = document.getElementById("playerCrmPeriodSelect");
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
+    var periodRange = document.getElementById("playerCrmPeriodRange");
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     var chartFrom = document.getElementById("playerCrmChartDateFrom");
     var chartTo = document.getElementById("playerCrmChartDateTo");
@@ -1214,6 +1216,11 @@
     document.querySelectorAll(".player-crm__date-field").forEach(function (el) {
       el.classList.toggle("player-crm__date-field--visible", showDates);
     });
+    if (periodRange) {
+      var rangeLabel = periodRangeLabel();
+      periodRange.textContent = rangeLabel;
+      periodRange.hidden = !rangeLabel;
+    }
     if (chartPeriod) chartPeriod.value = state.chartPeriod || "30";
     if (chartFrom) {
       chartFrom.value = state.chartDateFrom || "";

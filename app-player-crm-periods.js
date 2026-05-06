@@ -60,6 +60,19 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     return state.period + " дней";
   }
 
+  function displayDate(iso) {
+    var parts = String(iso || "").split("-");
+    if (parts.length !== 3) return String(iso || "");
+    return parts[2] + "." + parts[1] + "." + parts[0];
+  }
+
+  function periodRangeLabel() {
+    if (state.period === "all") return "Весь период";
+    var range = selectedPeriodRange();
+    if (!range || !range.from || !range.to) return "";
+    return displayDate(range.from) + " — " + displayDate(range.to);
+  }
+
   function selectedPeriodRange() {
     if (state.period === "all") return null;
     if (state.period === "custom") {
@@ -221,6 +234,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     normalizeChartDateRange: normalizeChartDateRange,
     periodKey: periodKey,
     periodLabel: periodLabel,
+    periodRangeLabel: periodRangeLabel,
     selectedPeriodRange: selectedPeriodRange,
     dateInSelectedPeriod: dateInSelectedPeriod,
     playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
