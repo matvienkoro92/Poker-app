@@ -851,9 +851,7 @@
           state.chatStats = null;
           state.permissions = null;
           state.source = data && data.__status === 403 ? "forbidden" : "empty";
-          state.crmError = data && data.__status === 403
-            ? ((data.error || "CRM доступна только владельцам") + ". Если ты уже вошёл под нужной почтой, выйди и войди по email ещё раз.")
-            : ((data && data.error) || "CRM не загрузилась: API не вернул живые данные.");
+          state.crmError = formatCrmLoadError(data);
         }
       })
       .catch(function () {
@@ -876,6 +874,19 @@
         renderAll();
         return true;
       });
+  }
+
+  function formatCrmLoadError(data) {
+    data = data || {};
+    if (data.__status === 403) {
+      return ((data.error || "CRM доступна только владельцам") + ". Если ты уже вошёл под нужной почтой, выйди и войди по email ещё раз.");
+    }
+    var code = data.code ? " Код: " + String(data.code) + "." : "";
+    var detail = data.details ? " Деталь: " + String(data.details) + "." : "";
+    if (data.__status >= 500 || data.code) {
+      return "CRM не загрузилась: API упала при сборке данных." + code + detail;
+    }
+    return (data.error || "CRM не загрузилась: API не вернул живые данные.") + code + detail;
   }
 
   function runBroadcast(action) {

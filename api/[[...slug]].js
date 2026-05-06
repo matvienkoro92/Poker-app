@@ -84,6 +84,10 @@ module.exports = async function handler(req, res) {
     await handlerFn(req, res);
   } catch (e) {
     console.error(e);
+    if (segment === "player-crm") {
+      res.status(500).json({ ok: false, error: "CRM API error", code: "crm_unhandled" });
+      return;
+    }
     res.status(500).json({ ok: false, error: "Server error" });
   }
 };

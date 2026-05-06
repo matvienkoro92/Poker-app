@@ -1256,11 +1256,11 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
-  gap: 8px !important;
+  gap: 10px !important;
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  padding: 12px 12px 0 !important;
+  padding: max(46px, calc(env(safe-area-inset-top, 0px) + 34px)) 12px 0 !important;
   overflow: hidden !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -1277,7 +1277,7 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   inset: auto !important;
   flex: 0 0 auto !important;
   z-index: 3 !important;
-  margin: 0 0 8px !important;
+  margin: 0 0 14px !important;
 }
 
 #playerCrmView.player-crm-standalone .player-crm {
