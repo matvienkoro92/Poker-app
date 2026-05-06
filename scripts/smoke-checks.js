@@ -2108,6 +2108,33 @@ add("Selected heavy views use JavaScript lazy gates", () =>
   ])
 );
 
+add("Home fish rating button uses a lightweight eager icon", () => {
+  const assetPath = path.join(root, "assets/fish-king-home.png");
+  return fs.existsSync(assetPath) &&
+    fs.statSync(assetPath).size < 128 * 1024 &&
+    hasAll("html", [
+      '<link rel="preload" as="image" href="./assets/fish-king-home.png"',
+      'id="hallFishRatingBtn"',
+      'src="./assets/fish-king-home.png"',
+      'loading="eager"',
+      'fetchpriority="high"',
+    ]);
+});
+
+add("Home fish rating button captures taps before deferred scripts finish", () =>
+  hasAll("html", [
+    "__pokerEarlyFishBound",
+    "waitForFishLazyLoader",
+    'window.pokerEnsureScriptDomains',
+    'ensureScripts(["hall"])',
+    "__pokerLazyRedispatched",
+  ])
+);
+
+add("Home fish rating button bypasses global modal fragment hydration", () =>
+  !has("appHtmlFragments", "#hallFishRatingBtn")
+);
+
 add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>
   hasAll("appChatKeyboardDockFoundation", [
     "__pokerChatThreadDockBottomCssPx",
