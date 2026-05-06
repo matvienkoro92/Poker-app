@@ -214,16 +214,21 @@ async function main() {
         const crmState = await page.evaluate(() => {
           const root = document.getElementById("playerCrmView");
           const section = root && root.querySelector(".player-crm");
+          const rootRect = root ? root.getBoundingClientRect() : null;
           const rect = section ? section.getBoundingClientRect() : null;
           return {
             bound: root && root.dataset.crmBound === "1",
+            rootTall: !!(rootRect && rootRect.height >= Math.min(window.innerHeight || 0, 640)),
             visible: !!(section && rect && rect.width > 0 && rect.height > 0 && getComputedStyle(section).visibility !== "hidden"),
+            sectionInViewport: !!(rect && rect.bottom > 180 && rect.top < Math.max(360, (window.innerHeight || 0) - 120)),
             hasFeedback: !!(document.getElementById("playerCrmStats") && document.getElementById("playerCrmStats").textContent.trim()) ||
               !!(document.getElementById("playerCrmAnalytics") && document.getElementById("playerCrmAnalytics").textContent.trim()),
           };
         });
         if (!crmState.bound) throw new Error("player CRM runtime did not bind");
+        if (!crmState.rootTall) throw new Error("player CRM root collapsed on mobile viewport");
         if (!crmState.visible) throw new Error("player CRM section is not visible on mobile viewport");
+        if (!crmState.sectionInViewport) throw new Error("player CRM content is clipped below the back button");
         if (!crmState.hasFeedback) throw new Error("player CRM opened without feedback content");
       }
     }

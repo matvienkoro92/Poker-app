@@ -1,4 +1,31 @@
 function initPlayerCrmViewportShellRuntime() {
+  function stableViewportHeight() {
+    var globalStableHeight = window.pokerGetStablePlayerCrmViewportHeight;
+    if (typeof globalStableHeight === "function") {
+      return globalStableHeight();
+    }
+    var values = [];
+    function add(value) {
+      var n = Number(value) || 0;
+      if (n >= 320 && n < 2200) values.push(n);
+    }
+    try {
+      add(window.visualViewport && window.visualViewport.height);
+    } catch (eVvHeight) {}
+    try {
+      add(window.innerHeight);
+    } catch (eInnerHeight) {}
+    try {
+      add(document.documentElement && document.documentElement.clientHeight);
+    } catch (eDocHeight) {}
+    try {
+      add(window.screen && window.screen.availHeight);
+      add(window.screen && window.screen.height);
+    } catch (eScreenHeight) {}
+    if (!values.length) return 0;
+    return Math.round(Math.max.apply(Math, values));
+  }
+
   function syncCrmViewportShell() {
     var root = document.getElementById("playerCrmView");
     if (!root) return;
@@ -9,17 +36,8 @@ function initPlayerCrmViewportShellRuntime() {
       isCrmView = document.body && document.body.getAttribute("data-view") === "player-crm";
     } catch (eBodyView) {}
     if (!active && !isCrmView) return;
-    var h = 0;
-    try {
-      h = window.visualViewport && window.visualViewport.height ? Number(window.visualViewport.height) : 0;
-    } catch (eVv) {}
-    if (!h || h < 320) {
-      try {
-        h = window.innerHeight || document.documentElement.clientHeight || 0;
-      } catch (eWinH) {}
-    }
-    if (!h || h < 320) return;
-    var px = Math.round(h) + "px";
+    var h = stableViewportHeight();
+    var px = h >= 320 ? Math.round(h) + "px" : "100vh";
     root.style.setProperty("position", "fixed", "important");
     root.style.setProperty("top", "0", "important");
     root.style.setProperty("right", "0", "important");
@@ -35,6 +53,9 @@ function initPlayerCrmViewportShellRuntime() {
     root.style.setProperty("gap", "8px", "important");
     root.style.setProperty("visibility", "visible", "important");
     root.style.setProperty("opacity", "1", "important");
+    root.style.setProperty("z-index", "2147483000", "important");
+    root.style.setProperty("pointer-events", "auto", "important");
+    root.style.setProperty("isolation", "isolate", "important");
     if (section) {
       section.style.setProperty("display", "block", "important");
       section.style.setProperty("visibility", "visible", "important");

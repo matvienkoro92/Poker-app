@@ -1455,7 +1455,19 @@ add("Large domain entrypoints stay thin after runtime split", () =>
   ]) &&
   hasAll("appPlayerCrmViewportShell", [
     "function initPlayerCrmViewportShellRuntime",
+    "stableViewportHeight",
+    "window.pokerGetStablePlayerCrmViewportHeight",
+    "window.screen && window.screen.height",
     "syncCrmViewportShell",
+    'root.style.setProperty("z-index", "2147483000", "important")',
+  ]) &&
+  hasAll("appViewRouter", [
+    "function pokerGetStablePlayerCrmViewportHeight",
+    "function pokerSchedulePlayerCrmViewportSync",
+    "function pokerOpenPlayerCrmFromHome",
+    "pokerWarmPlayerCrmScripts",
+    "pokerOpenPlayerCrmFromHome();",
+    'target === "player-crm"',
   ]) &&
   hasAll("appPlayerCrmRuntime", [
     "function pokerInitPlayerCrm",

@@ -38,6 +38,31 @@ function pokerSyncInertForViewScreensOnly() {
   } catch (e) {}
 }
 
+function pokerGetStablePlayerCrmViewportHeight() {
+  var values = [];
+  function add(value) {
+    var n = Number(value) || 0;
+    if (n >= 320 && n < 2200) values.push(n);
+  }
+  try {
+    add(window.visualViewport && window.visualViewport.height);
+  } catch (eVvHeight) {}
+  try {
+    add(window.innerHeight);
+  } catch (eInnerHeight) {}
+  try {
+    add(document.documentElement && document.documentElement.clientHeight);
+  } catch (eDocHeight) {}
+  try {
+    add(window.screen && window.screen.availHeight);
+    add(window.screen && window.screen.height);
+  } catch (eScreenHeight) {}
+  if (!values.length) return 0;
+  return Math.round(Math.max.apply(Math, values));
+}
+
+window.pokerGetStablePlayerCrmViewportHeight = pokerGetStablePlayerCrmViewportHeight;
+
 function pokerForcePlayerCrmVisible() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
@@ -52,27 +77,17 @@ function pokerForcePlayerCrmVisible() {
     pokerResetPlayerCrmForcedVisibility();
     return;
   }
-  var h = 0;
-  try {
-    h = window.visualViewport && window.visualViewport.height ? Number(window.visualViewport.height) : 0;
-  } catch (eViewport) {}
-  if (!h || h < 320) {
-    try {
-      h = window.innerHeight || document.documentElement.clientHeight || 0;
-    } catch (eHeight) {}
-  }
-  if (h && h >= 320) {
-    var px = Math.round(h) + "px";
-    root.style.setProperty("position", "fixed", "important");
-    root.style.setProperty("top", "0", "important");
-    root.style.setProperty("right", "0", "important");
-    root.style.setProperty("bottom", "auto", "important");
-    root.style.setProperty("left", "0", "important");
-    root.style.setProperty("min-height", px, "important");
-    root.style.setProperty("height", px, "important");
-    root.style.setProperty("max-height", px, "important");
-    root.style.setProperty("overflow", "hidden", "important");
-  }
+  var h = pokerGetStablePlayerCrmViewportHeight();
+  var shellHeight = h >= 320 ? Math.round(h) + "px" : "100vh";
+  root.style.setProperty("position", "fixed", "important");
+  root.style.setProperty("top", "0", "important");
+  root.style.setProperty("right", "0", "important");
+  root.style.setProperty("bottom", "auto", "important");
+  root.style.setProperty("left", "0", "important");
+  root.style.setProperty("min-height", shellHeight, "important");
+  root.style.setProperty("height", shellHeight, "important");
+  root.style.setProperty("max-height", shellHeight, "important");
+  root.style.setProperty("overflow", "hidden", "important");
   root.style.setProperty("display", "flex", "important");
   root.style.setProperty("flex-direction", "column", "important");
   root.style.setProperty("align-items", "stretch", "important");
@@ -98,6 +113,7 @@ function pokerForcePlayerCrmVisible() {
     section.style.setProperty("min-height", "0", "important");
     section.style.setProperty("height", "auto", "important");
     section.style.removeProperty("max-height");
+    section.style.setProperty("margin", "0 auto", "important");
     section.style.setProperty("overflow-x", "hidden", "important");
     section.style.setProperty("overflow-y", "auto", "important");
     section.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
@@ -105,6 +121,20 @@ function pokerForcePlayerCrmVisible() {
     section.style.setProperty("padding-bottom", "max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px))", "important");
     section.style.setProperty("transform", "none", "important");
   }
+}
+
+function pokerSchedulePlayerCrmViewportSync() {
+  [0, 32, 90, 180, 360, 720, 1200, 2200].forEach(function (delay) {
+    setTimeout(function () {
+      try {
+        if (document.body && document.body.getAttribute("data-view") !== "player-crm") return;
+        pokerForcePlayerCrmVisible();
+        if (typeof window.pokerSyncPlayerCrmViewportShell === "function") {
+          window.pokerSyncPlayerCrmViewportShell();
+        }
+      } catch (eCrmSync) {}
+    }, delay);
+  });
 }
 
 function pokerPortalPlayerCrmRoot(root) {
@@ -167,6 +197,7 @@ function pokerResetPlayerCrmForcedVisibility() {
       "min-height",
       "height",
       "max-height",
+      "margin",
       "overflow-x",
       "overflow-y",
       "-webkit-overflow-scrolling",
@@ -997,6 +1028,7 @@ function setView(viewName, navOpts) {
   if (viewName === "player-crm") {
     try {
       pokerForcePlayerCrmVisible();
+      pokerSchedulePlayerCrmViewportSync();
       var rafCrm = window.requestAnimationFrame || function (fn) {
         setTimeout(fn, 16);
       };
@@ -1011,6 +1043,7 @@ function setView(viewName, navOpts) {
         else if (typeof window.pokerSyncPlayerCrmViewportShell === "function") window.pokerSyncPlayerCrmViewportShell();
       }, 260);
       setTimeout(pokerForcePlayerCrmVisible, 700);
+      setTimeout(pokerForcePlayerCrmVisible, 1400);
     } catch (eCrmViewInit) {}
   }
   try {
@@ -1100,6 +1133,12 @@ navItems.forEach(function (item) {
   item.addEventListener("click", function (e) {
     var target = item.dataset.viewTarget;
     if (target) {
+      if (target === "player-crm" && typeof pokerOpenPlayerCrmFromHome === "function") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        pokerOpenPlayerCrmFromHome();
+        return;
+      }
       setView(target);
       if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main");
     }
@@ -1197,6 +1236,72 @@ function pokerOpenChatFromTab() {
   } catch (eChatHtml) {}
   activateChatNow();
 }
+
+function pokerWarmPlayerCrmScripts() {
+  try {
+    return typeof window.pokerEnsureViewScripts === "function"
+      ? window.pokerEnsureViewScripts("player-crm")
+      : false;
+  } catch (eCrmWarm) {
+    return false;
+  }
+}
+
+var playerCrmOpenInFlight = false;
+
+function pokerOpenPlayerCrmFromHome() {
+  if (playerCrmOpenInFlight) return;
+  playerCrmOpenInFlight = true;
+  setTimeout(function () {
+    playerCrmOpenInFlight = false;
+  }, 1600);
+
+  function activateCrmNow() {
+    try {
+      setView("player-crm", { htmlReady: true, scriptsReady: true });
+    } catch (eSetCrmImmediate) {
+      try {
+        setView("player-crm");
+      } catch (eSetCrmFallback) {}
+    }
+    pokerSchedulePlayerCrmViewportSync();
+  }
+
+  var scriptsReady = pokerWarmPlayerCrmScripts();
+  if (scriptsReady && typeof scriptsReady.then === "function") {
+    scriptsReady.then(activateCrmNow).catch(function (err) {
+      playerCrmOpenInFlight = false;
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert("Не удалось загрузить CRM. Попробуйте ещё раз.");
+      }
+      if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm open", err);
+    });
+    return;
+  }
+  activateCrmNow();
+}
+
+(function bindPlayerCrmFastOpen() {
+  var btn = document.getElementById("adminCrmBtn");
+  if (!btn || btn.__pokerPlayerCrmFastOpenBound) return;
+  btn.__pokerPlayerCrmFastOpenBound = true;
+  btn.addEventListener("pointerdown", function () {
+    pokerWarmPlayerCrmScripts();
+  }, { passive: true });
+  btn.addEventListener("touchend", function (e) {
+    if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
+    if (window.__touchWasScroll && window.__touchWasScroll()) return;
+    e.preventDefault();
+    e.stopPropagation();
+    pokerOpenPlayerCrmFromHome();
+  }, { passive: false });
+  btn.addEventListener("click", function (e) {
+    if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
+    e.preventDefault();
+    e.stopPropagation();
+    pokerOpenPlayerCrmFromHome();
+  });
+})();
 
 (function bindChatTabFastOpen() {
   var btn = document.getElementById("chatNavBtn");

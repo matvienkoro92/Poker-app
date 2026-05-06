@@ -115,6 +115,16 @@
       ]
     },
     {
+      "name": "pokerGetStablePlayerCrmViewportHeight",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-viewport-shell.js"
+      ]
+    },
+    {
       "name": "pokerPlayerCrmEsc",
       "domain": "playerCrm",
       "exportedBy": [
