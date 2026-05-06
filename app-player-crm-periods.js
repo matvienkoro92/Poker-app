@@ -120,15 +120,15 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
 
   function periodOptionsHtml(current) {
     var options = [
-      ["7", "7 дней"],
-      ["30", "30 дней"],
-      ["90", "90 дней"],
-      ["current_week", "Текущая неделя"],
-      ["last_week", "Прошлая неделя"],
-      ["current_month", "Текущий месяц"],
-      ["last_month", "Прошлый месяц"],
       ["all", "За все время"],
       ["custom", "Даты"],
+      ["last_month", "Прошлый месяц"],
+      ["current_month", "Текущий месяц"],
+      ["last_week", "Прошлая неделя"],
+      ["current_week", "Текущая неделя"],
+      ["90", "90 дней"],
+      ["30", "30 дней"],
+      ["7", "7 дней"],
     ];
     return options.map(function (it) {
       return "<option value=\"" + esc(it[0]) + "\"" + (String(current || "30") === it[0] ? " selected" : "") + ">" + esc(it[1]) + "</option>";
