@@ -591,23 +591,13 @@
   color: var(--text-muted);
 }
 .admin-report-rakeback-discount {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  flex: 0 0 auto;
-  color: #f6d391;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-}
-.admin-report-rakeback-discount input {
-  width: 13px;
-  height: 13px;
+  width: 16px;
+  height: 16px;
   margin: 0;
   accent-color: #f6d391;
+  flex: 0 0 auto;
 }
-.admin-report-rakeback-discount input:disabled {
+.admin-report-rakeback-discount:disabled {
   opacity: 0.55;
 }
 .admin-report-rakeback-amount {
@@ -707,23 +697,23 @@
   }
   .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-table td:nth-child(3) {
-    width: 12%;
+    width: 13%;
   }
   .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-table td:nth-child(4) {
-    width: 15%;
+    width: 17%;
   }
   .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-table td:nth-child(5) {
-    width: 10%;
+    width: 8%;
   }
   .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-table td:nth-child(6) {
-    width: 12%;
+    width: 13%;
   }
   .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-table td:nth-child(7) {
-    width: 18%;
+    width: 17%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -733,12 +723,8 @@
     font-size: 12px;
   }
   .admin-report-rakeback-discount {
-    font-size: 9px;
-    gap: 1px;
-  }
-  .admin-report-rakeback-discount input {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
   }
   .admin-report-rakeback-amount {
     min-height: 32px;
