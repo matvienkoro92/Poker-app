@@ -748,35 +748,35 @@
     padding: 4px 3px;
   }
   .admin-report-rakeback-table th {
-    font-size: 11px;
+    font-size: 10px;
   }
   .admin-report-rakeback-table th:nth-child(1),
   .admin-report-rakeback-table td:nth-child(1) {
-    width: 15%;
+    width: 13%;
   }
   .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-table td:nth-child(2) {
-    width: 16%;
+    width: 15%;
   }
   .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-table td:nth-child(3) {
-    width: 13%;
+    width: 12%;
   }
   .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-table td:nth-child(4) {
-    width: 16%;
+    width: 15%;
   }
   .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-table td:nth-child(5) {
-    width: 8%;
+    width: 7%;
   }
   .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-table td:nth-child(6) {
-    width: 13%;
+    width: 10%;
   }
   .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-table td:nth-child(7) {
-    width: 23%;
+    width: 28%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -795,14 +795,14 @@
   }
   .admin-report-rakeback-actions {
     justify-content: flex-start;
-    gap: 3px;
+    gap: 2px;
   }
   .admin-report-rakeback-icon-btn {
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
     border-radius: 9px;
-    font-size: 19px;
+    font-size: 18px;
   }
 }
 .admin-report-submit-btn {
