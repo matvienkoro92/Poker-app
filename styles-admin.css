@@ -406,6 +406,13 @@
 }
 .share-stats-admin-modal__table--matrix .admin-report-input {
   max-width: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.share-stats-admin-modal__table--matrix .admin-report-input:focus {
+  outline: none;
+  background: rgba(246, 211, 145, 0.08);
 }
 .admin-report-input--full {
   max-width: none;
