@@ -575,10 +575,6 @@
 }
 .admin-report-rakeback-table th:nth-child(1),
 .admin-report-rakeback-table td:nth-child(1) {
-  width: 124px;
-}
-.admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(1),
-.admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(1) {
   display: none;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
