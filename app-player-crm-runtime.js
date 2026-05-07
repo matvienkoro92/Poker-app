@@ -800,12 +800,12 @@
     }
     state.chartAnalytics = data.chartAnalytics || null;
     state.chatStats = data.chatStats || null;
-    if (data.range && data.range.key === "custom" && !(state.period === "yesterday" && isLocalYesterdayRange(data.range)) && !isFixedPeriodRange(state.period, data.range)) {
+    if (data.range && data.range.key === "custom" && !(state.period === "today" && isLocalTodayRange(data.range)) && !(state.period === "yesterday" && isLocalYesterdayRange(data.range)) && !isFixedPeriodRange(state.period, data.range)) {
       state.period = "custom";
       state.dateFrom = data.range.from || state.dateFrom;
       state.dateTo = data.range.to || state.dateTo;
     }
-    if (data.chartRange && data.chartRange.key === "custom" && !(state.chartPeriod === "yesterday" && isLocalYesterdayRange(data.chartRange)) && !isFixedPeriodRange(state.chartPeriod, data.chartRange)) {
+    if (data.chartRange && data.chartRange.key === "custom" && !(state.chartPeriod === "today" && isLocalTodayRange(data.chartRange)) && !(state.chartPeriod === "yesterday" && isLocalYesterdayRange(data.chartRange)) && !isFixedPeriodRange(state.chartPeriod, data.chartRange)) {
       state.chartPeriod = "custom";
       state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
       state.chartDateTo = data.chartRange.to || state.chartDateTo;
@@ -1135,11 +1135,7 @@
     return el ? el.value || "" : "";
   }
 
-  function requestRange() {
-    if (state.period === "custom" && state.dateFrom && state.dateTo) return { from: state.dateFrom, to: state.dateTo };
-    if (state.period === "yesterday") return localYesterdayRange();
-    return null;
-  }
+  function requestRange() { return state.period === "custom" && state.dateFrom && state.dateTo ? { from: state.dateFrom, to: state.dateTo } : state.period === "today" ? localDayRange(0) : state.period === "yesterday" ? localDayRange(-1) : null; }
 
   function isFixedPeriodRange(key, range) {
     var fixed = fixedPeriodRange(key);
@@ -1153,17 +1149,18 @@
     return y + "-" + m + "-" + d;
   }
 
-  function localYesterdayRange() {
+  function localDayRange(offset) {
     var now = new Date();
-    var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-    var key = localDateKeyForQuery(yesterday);
+    var date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (Number(offset) || 0));
+    var key = localDateKeyForQuery(date);
     return { from: key, to: key };
   }
 
-  function isLocalYesterdayRange(range) {
-    var yesterday = localYesterdayRange();
-    return !!(range && range.from === yesterday.from && range.to === yesterday.to);
-  }
+  function isSameRange(range, expected) { return !!(range && expected && range.from === expected.from && range.to === expected.to); }
+
+  function isLocalYesterdayRange(range) { return isSameRange(range, localDayRange(-1)); }
+
+  function isLocalTodayRange(range) { return isSameRange(range, localDayRange(0)); }
 
   function crmQuery(extra) {
     var q = authQuerySafe();
@@ -1176,8 +1173,11 @@
     if (state.period === "custom") {
       setDefaultDates();
       q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);
+    } else if (state.period === "today") {
+      var today = localDayRange(0);
+      q += sep + "from=" + encodeURIComponent(today.from) + "&to=" + encodeURIComponent(today.to);
     } else if (state.period === "yesterday") {
-      var yesterday = localYesterdayRange();
+      var yesterday = localDayRange(-1);
       q += sep + "from=" + encodeURIComponent(yesterday.from) + "&to=" + encodeURIComponent(yesterday.to);
     } else if (state.period === "all") {
       q += sep + "period=all";
@@ -1188,8 +1188,11 @@
     if (state.chartPeriod === "custom") {
       setDefaultChartDates();
       q += sep + "chartFrom=" + encodeURIComponent(state.chartDateFrom) + "&chartTo=" + encodeURIComponent(state.chartDateTo);
+    } else if (state.chartPeriod === "today") {
+      var chartToday = localDayRange(0);
+      q += sep + "chartFrom=" + encodeURIComponent(chartToday.from) + "&chartTo=" + encodeURIComponent(chartToday.to);
     } else if (state.chartPeriod === "yesterday") {
-      var chartYesterday = localYesterdayRange();
+      var chartYesterday = localDayRange(-1);
       q += sep + "chartFrom=" + encodeURIComponent(chartYesterday.from) + "&chartTo=" + encodeURIComponent(chartYesterday.to);
     } else if (state.chartPeriod === "all") {
       q += sep + "chartPeriod=all";

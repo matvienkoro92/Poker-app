@@ -42,6 +42,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   }
 
   function periodText(key) {
+    if (key === "today") return "сегодня";
     if (key === "yesterday") return "вчера";
     if (key === "month_2026_02") return "февраль";
     if (key === "month_2026_03") return "март";
@@ -98,6 +99,9 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     if (fixed) return fixed;
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (state.period === "today") {
+      return { from: localDateKey(today), to: localDateKey(today) };
+    }
     if (state.period === "yesterday") {
       var yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
@@ -159,6 +163,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     var options = [
       ["all", "За все время"],
       ["custom", "Даты"],
+      ["today", "Сегодня"],
       ["yesterday", "Вчера"],
       ["month_2026_02", "Февраль"],
       ["month_2026_03", "Март"],
