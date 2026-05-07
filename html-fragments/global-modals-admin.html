@@ -288,7 +288,8 @@
                     <td class="admin-report-rakeback-discount-cell"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 title="Отнять 15%" aria-label="Отнять 15%" /></td>
                     <td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>
                     <td class="admin-report-rakeback-actions">
-                      <button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить доп. строку" aria-label="Добавить доп. строку">+</button>
+                      <button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>
+                      <button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>
                       <button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>
                     </td>
                   </tr>
@@ -299,6 +300,7 @@
               <span class="admin-report-rakeback-summary__label">Итого рейкбек</span>
               <span class="admin-report-rakeback-summary__value" id="adminReportRakebackTotal">0</span>
             </div>
+            <p class="admin-report-rakeback-status" id="adminReportRakebackStatus" hidden></p>
             <button type="button" class="admin-report-add-extra-btn admin-report-rakeback-add-row-btn" id="adminReportRakebackAddBtn" title="Добавить строку" aria-label="Добавить строку">+</button>
           </div>
           <div class="admin-report-panel" data-admin-report-panel="sent">

@@ -13,6 +13,7 @@ function initAdminReportModal() {
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
   var rakebackTotalEl = document.getElementById("adminReportRakebackTotal");
   var rakebackTotalInput = document.getElementById("adminReportRakeback");
+  var rakebackStatusEl = document.getElementById("adminReportRakebackStatus");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
@@ -137,14 +138,12 @@ function initAdminReportModal() {
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
-        '<button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить строку" aria-label="Добавить строку">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
     var rakeInput = tr.querySelector("[data-rakeback-rake]");
     var percentInput = tr.querySelector("[data-rakeback-percent]");
     var discountInput = tr.querySelector("[data-rakeback-discount15]");
-    var addBtn = tr.querySelector("[data-rakeback-add-related]");
     if (idInput) idInput.value = data.playerId != null ? String(data.playerId) : "";
     if (rakeInput) rakeInput.value = data.rake != null && data.rake !== "" ? String(data.rake) : "";
     if (percentInput) percentInput.value = data.percent != null && data.percent !== "" ? String(data.percent) : "";
@@ -153,9 +152,14 @@ function initAdminReportModal() {
       var roomSelect = tr.querySelector("[data-rakeback-room]");
       if (roomSelect) roomSelect.disabled = true;
       if (idInput) idInput.readOnly = true;
-      if (addBtn) addBtn.hidden = true;
     }
     return tr;
+  }
+
+  function showRakebackStatus(message) {
+    if (!rakebackStatusEl) return;
+    rakebackStatusEl.textContent = message || "";
+    rakebackStatusEl.hidden = !message;
   }
 
   function setRakebackRowSaved(row, saved) {
@@ -271,11 +275,13 @@ function initAdminReportModal() {
       var amountEl = row.querySelector("[data-rakeback-amount]");
       var amount = getRakebackRowAmount(row);
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
-      var addBtn = row.querySelector("[data-rakeback-add-related]");
       var saved = row.getAttribute("data-rakeback-saved") === "1";
-      if (addBtn) addBtn.disabled = kind === "addon" || (!saved && !isRakebackRowFilled(row));
+      var filled = isRakebackRowFilled(row);
       var saveBtn = row.querySelector("[data-rakeback-save]");
-      if (saveBtn) saveBtn.disabled = !isRakebackRowFilled(row);
+      if (saveBtn) {
+        saveBtn.disabled = !filled;
+        if (!saved) saveBtn.hidden = !filled;
+      }
     });
     var collected = collectRakebackRows(false);
     var total = collected.reduce(function (sum, row) {
@@ -283,6 +289,7 @@ function initAdminReportModal() {
     }, 0);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportNumber(total);
     if (rakebackTotalInput) rakebackTotalInput.value = formatReportInputNumber(total);
+    showRakebackStatus("");
     return total;
   }
 
@@ -316,29 +323,6 @@ function initAdminReportModal() {
     if (!rakebackBody) return;
     rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
     syncRakebackTable();
-  }
-
-  function addRakebackRelatedRow(baseRow) {
-    if (!rakebackBody || !baseRow || !isRakebackRowFilled(baseRow)) return;
-    var groupId = baseRow.getAttribute("data-rakeback-group") || nextRakebackGroupId();
-    baseRow.setAttribute("data-rakeback-group", groupId);
-    var roomSelect = baseRow.querySelector("[data-rakeback-room]");
-    var idInput = baseRow.querySelector("[data-rakeback-player-id]");
-    var related = createRakebackRow({
-      groupId: groupId,
-      kind: "addon",
-      room: normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : "P21"),
-      playerId: idInput && idInput.value ? idInput.value : "",
-    });
-    var insertAfter = baseRow;
-    Array.prototype.slice.call(rakebackBody.querySelectorAll('[data-rakeback-row][data-rakeback-group="' + groupId + '"]')).forEach(function (row) {
-      insertAfter = row;
-    });
-    if (insertAfter.nextSibling) rakebackBody.insertBefore(related, insertAfter.nextSibling);
-    else rakebackBody.appendChild(related);
-    syncRakebackTable();
-    var rakeInput = related.querySelector("[data-rakeback-rake]");
-    if (rakeInput) rakeInput.focus();
   }
 
   /** Суммирует доп. строки отчёта в map по названию (без дубля с extraFields + legacy). */
@@ -1023,24 +1007,19 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("input", syncRakebackTable);
     rakebackBody.addEventListener("change", syncRakebackTable);
     rakebackBody.addEventListener("click", function (e) {
-      var addRelated = e.target && e.target.closest ? e.target.closest("[data-rakeback-add-related]") : null;
-      if (addRelated) {
-        var baseRow = addRelated.closest("[data-rakeback-row]");
-        if (baseRow && baseRow.getAttribute("data-rakeback-saved") === "1") addRakebackBaseRow();
-        else addRakebackRelatedRow(baseRow);
-        return;
-      }
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
       if (saveBtn) {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
         if (!saveRow || !isRakebackRowFilled(saveRow)) return;
         syncRakebackTable();
         setRakebackRowSaved(saveRow, true);
+        showRakebackStatus("Запись добавлена");
         return;
       }
       var editBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-edit]") : null;
       if (editBtn) {
         setRakebackRowSaved(editBtn.closest("[data-rakeback-row]"), false);
+        showRakebackStatus("");
         return;
       }
       var removeBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-remove]") : null;
