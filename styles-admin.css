@@ -532,15 +532,11 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  margin: -9px 0 12px;
-  padding: 10px;
-  border: 2px solid rgba(246, 211, 145, 0.62);
-  border-top: 0;
-  border-radius: 0 0 12px 12px;
-  background: linear-gradient(180deg, rgba(246, 211, 145, 0.18), rgba(246, 211, 145, 0.08));
-  box-shadow:
-    inset 0 2px 0 rgba(246, 211, 145, 0.34),
-    0 0 0 1px rgba(0, 0, 0, 0.38);
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .admin-report-rakeback-room-tab {
   min-height: 38px;
@@ -557,7 +553,7 @@
   border-color: #f6d391;
   background: #f6d391;
   color: #11151c;
-  box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.22);
+  box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.28), inset 0 -3px 0 rgba(17, 21, 28, 0.18);
 }
 .admin-report-rakeback-wrap {
   max-height: min(52vh, 440px);
