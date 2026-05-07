@@ -832,13 +832,15 @@
   background: #16a34a;
   border-color: #22c55e;
 }
-.admin-report-rakeback-icon-btn--delete {
+.admin-report-rakeback-icon-btn--delete,
+.admin-report-rakeback-icon-btn[data-rakeback-remove] {
   border-color: #ef4444;
   background: #ef4444;
   color: #fff7f7;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
-.admin-report-rakeback-icon-btn--delete:hover {
+.admin-report-rakeback-icon-btn--delete:hover,
+.admin-report-rakeback-icon-btn[data-rakeback-remove]:hover {
   background: #dc2626;
   border-color: #ef4444;
 }
