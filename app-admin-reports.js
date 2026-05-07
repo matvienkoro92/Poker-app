@@ -178,10 +178,7 @@ function initAdminReportModal() {
     row.querySelectorAll("select").forEach(function (select) {
       select.disabled = !!saved || isAddon;
     });
-    var saveBtn = row.querySelector("[data-rakeback-save]");
-    var editBtn = row.querySelector("[data-rakeback-edit]");
-    if (saveBtn) saveBtn.hidden = !!saved;
-    if (editBtn) editBtn.hidden = !saved;
+    updateRakebackRowActions(row);
   }
 
   function ensureRakebackBaseRow() {
@@ -200,6 +197,36 @@ function initAdminReportModal() {
     var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
     var percent = parseReportNumber(percentInput ? percentInput.value : "");
     return !!id || rake !== 0 || percent !== 0;
+  }
+
+  function hasRakebackRakeValue(row) {
+    if (!row) return false;
+    var rakeInput = row.querySelector("[data-rakeback-rake]");
+    return parseReportNumber(rakeInput ? rakeInput.value : "") !== 0;
+  }
+
+  function canAddRakebackAddon(row) {
+    if (!row || row.getAttribute("data-rakeback-kind") === "addon") return false;
+    return row.getAttribute("data-rakeback-saved") === "1" && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
+  }
+
+  function updateRakebackRowActions(row) {
+    if (!row) return;
+    var saved = row.getAttribute("data-rakeback-saved") === "1";
+    var filled = isRakebackRowFilled(row);
+    var saveBtn = row.querySelector("[data-rakeback-save]");
+    var editBtn = row.querySelector("[data-rakeback-edit]");
+    var addBtn = row.querySelector("[data-rakeback-add-addon]");
+    if (saveBtn) {
+      saveBtn.disabled = !filled;
+      saveBtn.hidden = saved || !filled;
+    }
+    if (editBtn) editBtn.hidden = !saved;
+    if (addBtn) {
+      var canAdd = canAddRakebackAddon(row);
+      addBtn.disabled = !canAdd;
+      addBtn.hidden = !canAdd;
+    }
   }
 
   function getRakebackRowAmount(row) {
@@ -276,13 +303,7 @@ function initAdminReportModal() {
       var amountEl = row.querySelector("[data-rakeback-amount]");
       var amount = getRakebackRowAmount(row);
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
-      var saved = row.getAttribute("data-rakeback-saved") === "1";
-      var filled = isRakebackRowFilled(row);
-      var saveBtn = row.querySelector("[data-rakeback-save]");
-      if (saveBtn) {
-        saveBtn.disabled = !filled;
-        if (!saved) saveBtn.hidden = !filled;
-      }
+      updateRakebackRowActions(row);
     });
     var collected = collectRakebackRows(false);
     var total = collected.reduce(function (sum, row) {
@@ -1049,7 +1070,9 @@ function initAdminReportModal() {
       }
       var addAddonBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-add-addon]") : null;
       if (addAddonBtn) {
-        addRakebackAddonRow(addAddonBtn.closest("[data-rakeback-row]"));
+        var addonBaseRow = addAddonBtn.closest("[data-rakeback-row]");
+        if (!canAddRakebackAddon(addonBaseRow)) return;
+        addRakebackAddonRow(addonBaseRow);
         showRakebackStatus("Подзапись добавлена");
         return;
       }
