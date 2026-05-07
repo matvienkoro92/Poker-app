@@ -19,6 +19,8 @@ function initAdminReportModal() {
   var editingReport = null;
   var rakebackGroupSeq = 0;
   var activeRakebackRoom = "P21";
+  var rakebackDraftSaveTimer = null;
+  var loadingRakebackDraft = false;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -566,12 +568,20 @@ function initAdminReportModal() {
     }
   }
 
-  function saveRakebackDraftRows() {
-    if (editingReportId) return;
+  function getAdminReportApiBase() {
+    return typeof getApiBase === "function" ? getApiBase() : "";
+  }
+
+  function buildAuthBody(payload) {
+    return typeof pokerGuestOrAuthedPostBody === "function"
+      ? pokerGuestOrAuthedPostBody(payload)
+      : payload;
+  }
+
+  function saveLocalRakebackDraftRows(rows) {
     try {
       if (!window.localStorage) return;
-      var rows = collectRakebackRows(false);
-      if (rows.length) {
+      if (rows && rows.length) {
         window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({ rows: rows, savedAt: Date.now() }));
       } else {
         window.localStorage.removeItem(getRakebackDraftKey());
@@ -579,10 +589,61 @@ function initAdminReportModal() {
     } catch (e) {}
   }
 
+  function saveRakebackDraftRowsNow() {
+    if (editingReportId) return;
+    if (loadingRakebackDraft) return;
+    var rows = collectRakebackRows(false);
+    saveLocalRakebackDraftRows(rows);
+    var base = getAdminReportApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var info = getShiftReportDateInfo();
+    var payload = buildAuthBody({
+      action: "rakeback_draft_save",
+      date: info.date,
+      rakebackRows: rows,
+    });
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function () {});
+  }
+
+  function saveRakebackDraftRows() {
+    if (rakebackDraftSaveTimer) clearTimeout(rakebackDraftSaveTimer);
+    rakebackDraftSaveTimer = setTimeout(saveRakebackDraftRowsNow, 450);
+  }
+
   function clearRakebackDraftRows() {
     try {
       if (window.localStorage) window.localStorage.removeItem(getRakebackDraftKey());
     } catch (e) {}
+  }
+
+  function loadSharedRakebackDraftRows() {
+    var base = getAdminReportApiBase();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      fillRakebackTable(readRakebackDraftRows(), "");
+      return;
+    }
+    var info = getShiftReportDateInfo();
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=" + encodeURIComponent(info.date);
+    loadingRakebackDraft = true;
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var rows = data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)
+          ? data.rakebackDraft.rows
+          : readRakebackDraftRows();
+        fillRakebackTable(rows, "");
+      })
+      .catch(function () {
+        fillRakebackTable(readRakebackDraftRows(), "");
+      })
+      .then(function () {
+        loadingRakebackDraft = false;
+      });
   }
 
   function setActiveTab(name) {
@@ -1120,6 +1181,7 @@ function initAdminReportModal() {
     if (dateEl) dateEl.textContent = info.label;
     setActiveTab("form");
     fillReportForm(null);
+    loadSharedRakebackDraftRows();
     if (mayViewSent) loadSentReports();
   }
   btn.addEventListener("click", openModal);
@@ -1331,7 +1393,7 @@ function initAdminReportModal() {
       setFormVal("adminReportReturn", "");
       setFormVal("adminReportSergeyMarina", "");
       setFormVal("adminReportRakeback", "");
-      fillRakebackTable(readRakebackDraftRows(), "");
+      fillRakebackTable([], "");
       var tbody = document.getElementById("adminReportTableBody");
       if (tbody) {
         var extras = tbody.querySelectorAll(".admin-report-extra-row");
@@ -1418,8 +1480,8 @@ function initAdminReportModal() {
             editingReportId = null;
             editingReport = null;
             if (submitBtn) submitBtn.textContent = "Отправить отчёт";
-            clearRakebackDraftRows();
             fillReportForm(null);
+            loadSharedRakebackDraftRows();
             if (canViewSentReports()) {
               loadSentReports();
               setActiveTab("sent");
