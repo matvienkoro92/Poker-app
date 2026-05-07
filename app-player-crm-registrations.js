@@ -136,6 +136,24 @@ function initPlayerCrmVisitsRuntime(ctx) {
   var dateInSelectedPeriod = ctx.dateInSelectedPeriod;
   var periodLabel = ctx.periodLabel;
   var noOpenDialogModals = ctx.noOpenDialogModals;
+  var sectionLabels = {
+    home: "Главная",
+    chat: "Чат",
+    download: "Скачать",
+    cashout: "Кэшаут",
+    profile: "Профиль",
+    "spring-rating": "Весенний рейтинг",
+    "winter-rating": "Зимний рейтинг",
+    raffles: "Розыгрыши",
+    schedule: "Расписание",
+    streams: "Стримы",
+    "video-lessons": "Видео-уроки",
+    "learn-play-hub": "Научиться играть",
+    equilator: "Эквилятор",
+    "bonus-game": "Найти Пиханину",
+    "plasterer-game": "Переедь Штукатура",
+    "player-crm": "CRM",
+  };
 
   function visitUniqueRows() {
     var rows = Array.isArray(state.players) ? state.players.slice() : [];
@@ -147,6 +165,7 @@ function initPlayerCrmVisitsRuntime(ctx) {
   }
 
   function renderVisitsModalList() {
+    if (state.visitsModalMode === "sections") return renderVisitSectionsModalList();
     var rows = visitUniqueRows();
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">Уникальных пользователей за выбранный период пока нет.</div>";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visits-table\"><thead><tr>" +
@@ -163,6 +182,37 @@ function initPlayerCrmVisitsRuntime(ctx) {
       }).join("") + "</tbody></table></div></div>";
   }
 
+  function visitSectionRows() {
+    var summary = state.statsSummary && state.statsSummary.visits ? state.statsSummary.visits : {};
+    var rows = Array.isArray(summary.sections) ? summary.sections.slice() : [];
+    rows.sort(function (a, b) {
+      return (Number(b.count) || 0) - (Number(a.count) || 0) || String(a.section || "").localeCompare(String(b.section || ""), "ru");
+    });
+    return rows;
+  }
+
+  function sectionLabel(key) {
+    key = String(key || "").trim();
+    return sectionLabels[key] || key || "—";
+  }
+
+  function renderVisitSectionsModalList() {
+    var rows = visitSectionRows();
+    if (!rows.length) return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__timeline-item\">За выбранный период просмотров по разделам пока нет.</div></div>";
+    var total = rows.reduce(function (sum, row) { return sum + (Number(row.count) || 0); }, 0);
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visit-sections-table\"><thead><tr>" +
+      "<th>Раздел</th><th>Просмотров</th><th>Доля</th>" +
+      "</tr></thead><tbody>" + rows.map(function (row) {
+        var count = Number(row.count) || 0;
+        var pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return "<tr>" +
+          "<td>" + esc(sectionLabel(row.section)) + "</td>" +
+          "<td>" + esc(intFmt(count)) + "</td>" +
+          "<td>" + esc(pct) + "%</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div></div>";
+  }
+
   function renderVisitsModal() {
     var modal = document.getElementById("playerCrmVisitsModal");
     var subtitleEl = document.getElementById("playerCrmVisitsModalSubtitle");
@@ -173,8 +223,10 @@ function initPlayerCrmVisitsRuntime(ctx) {
       if (document.body && noOpenDialogModals()) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
-    var rows = visitUniqueRows();
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " пользователей";
+    var rows = state.visitsModalMode === "sections" ? visitSectionRows() : visitUniqueRows();
+    var titleEl = document.getElementById("playerCrmVisitsModalTitle");
+    if (titleEl) titleEl.textContent = state.visitsModalMode === "sections" ? "Посещения по разделам" : "Уникальные пользователи";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + (state.visitsModalMode === "sections" ? " разделов" : " пользователей");
     bodyEl.innerHTML = renderVisitsModalList();
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
@@ -182,6 +234,7 @@ function initPlayerCrmVisitsRuntime(ctx) {
 
   function closeVisitsModal() {
     state.visitsModalOpen = false;
+    state.visitsModalMode = "users";
     if (ctx.renderStats) ctx.renderStats();
     renderVisitsModal();
   }

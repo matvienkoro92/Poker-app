@@ -22,7 +22,7 @@
     pokerPlusModalOpen: false,
     generalMessagesModalOpen: false,
     showAllGeneralMessagesModal: false,
-    visitsModalOpen: false,
+    visitsModalOpen: false, visitsModalMode: "users",
     botModalOpen: false,
     pushModalOpen: false,
     registrationMethod: "all",
@@ -1382,12 +1382,8 @@
         renderGeneralMessagesModal();
         return;
       }
-      if (e.target.closest("[data-crm-visits-modal]")) {
-        state.visitsModalOpen = true;
-        renderStats();
-        renderVisitsModal();
-        return;
-      }
+      if (e.target.closest("[data-crm-visits-modal]")) { state.visitsModalOpen = true; state.visitsModalMode = "users"; renderStats(); renderVisitsModal(); return; }
+      if (e.target.closest("[data-crm-visits-sections-modal]")) { state.visitsModalOpen = true; state.visitsModalMode = "sections"; renderStats(); renderVisitsModal(); return; }
       if (e.target.closest("[data-crm-bot-modal]")) {
         state.botModalOpen = true;
         renderStats();

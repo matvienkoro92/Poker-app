@@ -1227,6 +1227,9 @@ button.player-crm__stat:focus-visible,
 .player-crm__visits-table {
   min-width: 920px;
 }
+.player-crm__visit-sections-table {
+  min-width: 520px;
+}
 .player-crm__table-link {
   display: inline;
   width: auto;

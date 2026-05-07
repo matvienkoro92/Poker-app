@@ -89,6 +89,7 @@ function initPlayerCrmStatsRuntime(deps) {
             "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
             "<button type=\"button\" data-crm-visits-modal><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
+            "<button type=\"button\" data-crm-visits-sections-modal><small>Разделы</small><strong>Открыть</strong></button>" +
           "</span></div>";
       }
       if (it[3] === "registrations") {
