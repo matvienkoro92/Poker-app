@@ -23,6 +23,7 @@ function initPlayerCrmChartsRuntime(deps) {
     bot: "#34d399",
     push: "#f472b6",
     deposits: "#f59e0b",
+    depositAmount: "#fb923c",
     crmMessages: "#a3e635",
     generalMessages: "#38bdf8",
   };

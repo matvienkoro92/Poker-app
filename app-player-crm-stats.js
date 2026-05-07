@@ -61,6 +61,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var statBotNet = summary && summary.botNet != null ? Number(summary.botNet) || 0 : statBotSubscribers - statBotUnsubscribers;
     var statPushNet = summary && summary.pushNet != null ? Number(summary.pushNet) || 0 : statPushSubscribers - statPushUnsubscribers;
     var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
+    var statDepositCount = summary && summary.depositCount != null ? Number(summary.depositCount) || 0 : pd.reduce(function (sum, x) { return sum + (Number(x.depositCount) || 0); }, 0);
     if (summaryRegistrationCounts) {
       registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
       registrationEmailOnlyCount = Number(summaryRegistrationCounts.email) || 0;
@@ -92,7 +93,7 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
       ["Новые подписки на бот", statBotSubscribers, periodLabel(), "bot"],
       ["Новые push-подписки", statPushSubscribers, periodLabel(), "push"],
-      ["Депозиты", money(statDeposits), periodLabel()],
+      ["Депозиты", money(statDeposits), periodLabel(), "deposits"],
     ];
     if (visitsUnavailableBeforeStart) stats = stats.filter(function (it) { return it[3] !== "visits"; });
     var chatStats = [
@@ -158,6 +159,14 @@ function initPlayerCrmStatsRuntime(deps) {
             "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statPushUnsubscribers)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statPushNet)) + "</strong></span>" +
           "</span></button>";
+      }
+      if (it[3] === "deposits") {
+        return "<div class=\"player-crm__stat" + toneCls + "\"><span class=\"player-crm__stat-label\">Депозиты</span>" +
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
+          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Сумма</small><strong>" + esc(money(statDeposits)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Количество</small><strong>" + esc(intFmt(statDepositCount)) + "</strong></span>" +
+          "</span></div>";
       }
       var tag = it[3] ? "button" : "div";
       var typeAttr = it[3] ? " type=\"button\"" : "";

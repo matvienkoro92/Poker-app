@@ -53,7 +53,7 @@
       poker21: true,
       bot: true,
       push: true,
-      deposits: true,
+      deposits: true, depositAmount: true,
       crmMessages: true,
       generalMessages: true,
     },

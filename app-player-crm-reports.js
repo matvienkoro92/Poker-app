@@ -62,6 +62,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var players = Array.isArray(state.players) ? state.players : [];
     var pd = players.map(periodData);
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
+    var depositCount = pd.reduce(function (sum, x) { return sum + (Number(x.depositCount) || 0); }, 0);
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
     var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var pokerPlusRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
@@ -78,7 +79,7 @@ function initPlayerCrmReportsRuntime(deps) {
       "Poker21 привязали: " + intFmt(pokerPlusRows.length),
       "Новые подписки на бот: " + intFmt(botSubscribers),
       "Новые push-подписки: " + intFmt(pushSubscribers),
-      "Депозиты: " + money(deposits),
+      "Депозиты: " + money(deposits) + " · " + intFmt(depositCount) + " шт.",
       "Сообщений в главном чате: " + intFmt(chat.generalMessages && chat.generalMessages.period),
     ].join("\n");
   }
@@ -139,7 +140,8 @@ function initPlayerCrmReportsRuntime(deps) {
       segments.filter(function (s) { return s.key !== "all"; }).map(function (seg) {
         var players = segmentPlayers(seg.key);
         var dep = players.reduce(function (sum, p) { return sum + periodData(p).deposits; }, 0);
-        return seg.label + ": " + intFmt(players.length) + " игроков · " + money(dep);
+        var depCount = players.reduce(function (sum, p) { return sum + (Number(periodData(p).depositCount) || 0); }, 0);
+        return seg.label + ": " + intFmt(players.length) + " игроков · " + money(dep) + " · " + intFmt(depCount) + " шт.";
       }).join("\n"),
     ].join("\n");
   }
