@@ -553,6 +553,10 @@ function initAdminReportModal() {
   }
 
   function getRakebackDraftKey() {
+    return "poker_admin_report_rakeback_draft:shared";
+  }
+
+  function getLegacyRakebackDraftKey() {
     var info = getShiftReportDateInfo();
     return "poker_admin_report_rakeback_draft:" + String(info.date || "today");
   }
@@ -560,6 +564,7 @@ function initAdminReportModal() {
   function readRakebackDraftRows() {
     try {
       var raw = window.localStorage ? window.localStorage.getItem(getRakebackDraftKey()) : "";
+      if (!raw && window.localStorage) raw = window.localStorage.getItem(getLegacyRakebackDraftKey());
       if (!raw) return [];
       var parsed = JSON.parse(raw);
       return parsed && Array.isArray(parsed.rows) ? parsed.rows : [];
@@ -596,10 +601,9 @@ function initAdminReportModal() {
     saveLocalRakebackDraftRows(rows);
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    var info = getShiftReportDateInfo();
     var payload = buildAuthBody({
       action: "rakeback_draft_save",
-      date: info.date,
+      date: "shared",
       rakebackRows: rows,
     });
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
@@ -626,16 +630,19 @@ function initAdminReportModal() {
       fillRakebackTable(readRakebackDraftRows(), "");
       return;
     }
-    var info = getShiftReportDateInfo();
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=" + encodeURIComponent(info.date);
+    q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
+    var shouldUploadLocalDraft = false;
     loadingRakebackDraft = true;
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        var rows = data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)
+        var serverRows = data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)
           ? data.rakebackDraft.rows
-          : readRakebackDraftRows();
+          : [];
+        var localRows = readRakebackDraftRows();
+        var rows = serverRows.length ? serverRows : localRows;
+        shouldUploadLocalDraft = !serverRows.length && !!localRows.length;
         fillRakebackTable(rows, "");
       })
       .catch(function () {
@@ -643,6 +650,7 @@ function initAdminReportModal() {
       })
       .then(function () {
         loadingRakebackDraft = false;
+        if (shouldUploadLocalDraft) saveRakebackDraftRowsNow();
       });
   }
 
