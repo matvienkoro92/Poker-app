@@ -291,6 +291,7 @@ function initAdminReportModal() {
         percent: percent,
         discount15: discount15,
         amount: Math.round(amount * 100) / 100,
+        saved: row.getAttribute("data-rakeback-saved") === "1",
       };
     }).filter(Boolean);
   }
@@ -359,7 +360,7 @@ function initAdminReportModal() {
       return;
     }
     list.forEach(function (row) {
-      rakebackBody.appendChild(createRakebackRow({
+      var tr = createRakebackRow({
         groupId: row.groupId || "",
         kind: row.kind === "addon" || row.isAddon ? "addon" : "base",
         room: normalizeRakebackRoom(row.room || "P21"),
@@ -367,7 +368,9 @@ function initAdminReportModal() {
         rake: row.rake != null ? row.rake : "",
         percent: row.percent != null ? row.percent : "",
         discount15: !!(row.discount15 || row.subtract15),
-      }));
+      });
+      rakebackBody.appendChild(tr);
+      if (row.saved) setRakebackRowSaved(tr, true);
     });
     syncRakebackTable();
   }
@@ -513,6 +516,41 @@ function initAdminReportModal() {
     var meta = formatRuWeekdayDateFromTs(effTs);
     var wdl = meta.weekday.toLowerCase();
     return { label: meta.weekday + ", " + meta.date, weekday: wdl, date: meta.date, iso: new Date(effTs).toISOString() };
+  }
+
+  function getRakebackDraftKey() {
+    var info = getShiftReportDateInfo();
+    return "poker_admin_report_rakeback_draft:" + String(info.date || "today");
+  }
+
+  function readRakebackDraftRows() {
+    try {
+      var raw = window.localStorage ? window.localStorage.getItem(getRakebackDraftKey()) : "";
+      if (!raw) return [];
+      var parsed = JSON.parse(raw);
+      return parsed && Array.isArray(parsed.rows) ? parsed.rows : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveRakebackDraftRows() {
+    if (editingReportId) return;
+    try {
+      if (!window.localStorage) return;
+      var rows = collectRakebackRows(false);
+      if (rows.length) {
+        window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({ rows: rows, savedAt: Date.now() }));
+      } else {
+        window.localStorage.removeItem(getRakebackDraftKey());
+      }
+    } catch (e) {}
+  }
+
+  function clearRakebackDraftRows() {
+    try {
+      if (window.localStorage) window.localStorage.removeItem(getRakebackDraftKey());
+    } catch (e) {}
   }
 
   function setActiveTab(name) {
@@ -1081,8 +1119,14 @@ function initAdminReportModal() {
     rakebackAddBtn.addEventListener("click", addRakebackBaseRow);
   }
   if (rakebackBody) {
-    rakebackBody.addEventListener("input", syncRakebackTable);
-    rakebackBody.addEventListener("change", syncRakebackTable);
+    rakebackBody.addEventListener("input", function () {
+      syncRakebackTable();
+      saveRakebackDraftRows();
+    });
+    rakebackBody.addEventListener("change", function () {
+      syncRakebackTable();
+      saveRakebackDraftRows();
+    });
     rakebackBody.addEventListener("click", function (e) {
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
       if (saveBtn) {
@@ -1090,12 +1134,14 @@ function initAdminReportModal() {
         if (!saveRow || !isRakebackRowFilled(saveRow)) return;
         syncRakebackTable();
         setRakebackRowSaved(saveRow, true);
+        saveRakebackDraftRows();
         showRakebackStatus("Запись добавлена");
         return;
       }
       var editBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-edit]") : null;
       if (editBtn) {
         setRakebackRowSaved(editBtn.closest("[data-rakeback-row]"), false);
+        saveRakebackDraftRows();
         showRakebackStatus("");
         return;
       }
@@ -1104,6 +1150,7 @@ function initAdminReportModal() {
         var addonBaseRow = addAddonBtn.closest("[data-rakeback-row]");
         if (!canAddRakebackAddon(addonBaseRow)) return;
         addRakebackAddonRow(addonBaseRow);
+        saveRakebackDraftRows();
         showRakebackStatus("Подзапись добавлена");
         return;
       }
@@ -1144,6 +1191,7 @@ function initAdminReportModal() {
         row.parentNode.removeChild(row);
       }
       syncRakebackTable();
+      saveRakebackDraftRows();
     });
   }
   if (modal) {
@@ -1244,7 +1292,7 @@ function initAdminReportModal() {
       setFormVal("adminReportReturn", "");
       setFormVal("adminReportSergeyMarina", "");
       setFormVal("adminReportRakeback", "");
-      fillRakebackTable([], "");
+      fillRakebackTable(readRakebackDraftRows(), "");
       var tbody = document.getElementById("adminReportTableBody");
       if (tbody) {
         var extras = tbody.querySelectorAll(".admin-report-extra-row");
@@ -1331,6 +1379,7 @@ function initAdminReportModal() {
             editingReportId = null;
             editingReport = null;
             if (submitBtn) submitBtn.textContent = "Отправить отчёт";
+            clearRakebackDraftRows();
             fillReportForm(null);
             if (canViewSentReports()) {
               loadSentReports();
