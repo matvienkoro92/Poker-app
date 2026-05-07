@@ -785,6 +785,17 @@
       state.pushConfigured = data.pushConfigured === true;
       state.source = data.source || "api";
       state.crmError = "";
+    } else {
+      state.players = data.players;
+      state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : state.registeredAccounts;
+      state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : state.pokerPlusAccounts;
+      state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : state.campaigns;
+      state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : state.sourceAnalytics;
+      state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : state.statsSummary;
+      state.permissions = data.permissions || state.permissions;
+      state.pushConfigured = data.pushConfigured === true || state.pushConfigured === true;
+      state.source = data.source || state.source;
+      state.crmError = "";
     }
     state.chartAnalytics = data.chartAnalytics || null;
     state.chatStats = data.chatStats || null;
