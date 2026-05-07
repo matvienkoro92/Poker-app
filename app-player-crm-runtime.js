@@ -151,7 +151,8 @@
         (active ? renderManagerConversation(row, key) : "") +
       "</div>";
     }).join("") : empty;
-    return renderModalPeriodControls() + "<div class=\"player-crm__manager-dialogs\" aria-label=\"" + esc(title) + "\">" + body + "</div>";
+    return "<div class=\"player-crm__modal-content player-crm__modal-content--manager-dialogs\">" + renderModalPeriodControls() +
+      "<div class=\"player-crm__manager-dialogs\" aria-label=\"" + esc(title) + "\">" + body + "</div></div>";
   }
 
   function renderManagerDialogModal() {
@@ -709,7 +710,8 @@
   var hideChartTooltip = playerCrmChartsRuntime.hideChartTooltip || function () {};
 
   function showChatModalLoading() {
-    var html = renderModalPeriodControls() + "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
+    var html = "<div class=\"player-crm__modal-content player-crm__modal-content--manager-dialogs\">" + renderModalPeriodControls() +
+      "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div></div>";
     var generalBody = document.getElementById("playerCrmGeneralMessagesModalBody");
     var managerBody = document.getElementById("playerCrmManagerDialogBody");
     if (state.generalMessagesModalOpen && generalBody) generalBody.innerHTML = html;

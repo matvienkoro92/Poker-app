@@ -663,6 +663,11 @@ button.player-crm__stat:focus-visible,
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+.player-crm__modal-content--manager-dialogs {
+  height: 100%;
+  padding-right: 2px;
+  touch-action: pan-y;
+}
 .player-crm__modal-content--player {
   display: grid;
   gap: 12px;
