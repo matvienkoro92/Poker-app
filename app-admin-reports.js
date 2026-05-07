@@ -229,34 +229,6 @@ function initAdminReportModal() {
     }, 0);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportNumber(total);
     if (rakebackTotalInput) rakebackTotalInput.value = formatReportInputNumber(total);
-    var groups = {};
-    collected.forEach(function (row) {
-      var key = row.groupId || "";
-      if (!key) return;
-      if (!groups[key]) groups[key] = { total: 0, room: row.room, playerId: row.playerId, last: null };
-      groups[key].total += parseReportNumber(row.amount);
-      groups[key].room = row.room || groups[key].room;
-      groups[key].playerId = row.playerId || groups[key].playerId;
-    });
-    rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
-    rows.forEach(function (row) {
-      var groupId = row.getAttribute("data-rakeback-group") || "";
-      if (groups[groupId]) groups[groupId].last = row;
-    });
-    Object.keys(groups).forEach(function (groupId) {
-      var group = groups[groupId];
-      if (!group || !group.last) return;
-      var totalRow = document.createElement("tr");
-      totalRow.className = "admin-report-rakeback-week-total-row";
-      totalRow.setAttribute("data-rakeback-total-row", "");
-      totalRow.innerHTML =
-        '<td colspan="4"><span class="admin-report-rakeback-week-total-row__label">Итого по неделе' +
-        (group.room || group.playerId ? ": " + escapeReportHtml([group.room, group.playerId].filter(Boolean).join(" · ")) : "") +
-        '</span></td><td><span class="admin-report-rakeback-week-total-row__value">' + escapeReportHtml(formatReportNumber(group.total)) +
-        '</span></td><td></td>';
-      if (group.last.nextSibling) rakebackBody.insertBefore(totalRow, group.last.nextSibling);
-      else rakebackBody.appendChild(totalRow);
-    });
     return total;
   }
 
