@@ -101,10 +101,21 @@ function initAdminReportModal() {
   }
 
   function getRakebackRoomOptions(selected) {
-    var rooms = ["Покер21", "Х", "Супрема", "PP"];
+    selected = normalizeRakebackRoom(selected);
+    var rooms = ["P21", "X", "Supr", "PP"];
     return rooms.map(function (room) {
       return '<option value="' + escapeReportHtml(room) + '"' + (room === selected ? " selected" : "") + ">" + escapeReportHtml(room) + "</option>";
     }).join("");
+  }
+
+  function normalizeRakebackRoom(room) {
+    var raw = String(room || "").trim();
+    var lower = raw.toLowerCase();
+    if (!raw || raw === "Покер21" || lower === "poker21" || lower === "покер21") return "P21";
+    if (raw === "Х" || lower === "x") return "X";
+    if (raw === "Супрема" || lower === "suprema" || lower === "supr") return "Supr";
+    if (lower === "pp") return "PP";
+    return raw;
   }
 
   function createRakebackRow(data) {
@@ -117,7 +128,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-kind", kind);
     tr.setAttribute("data-rakeback-group", groupId);
     tr.innerHTML =
-      '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "Покер21") + "</select></td>" +
+      '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /></td>' +
       '<td class="admin-report-rakeback-percent-cell"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /><label class="admin-report-rakeback-discount"><input type="checkbox" data-rakeback-discount15 /> <span>-15%</span></label></td>' +
@@ -204,7 +215,7 @@ function initAdminReportModal() {
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
       var discountInput = row.querySelector("[data-rakeback-discount15]");
-      var room = roomSelect && roomSelect.value ? String(roomSelect.value).trim() : "Покер21";
+      var room = normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : "P21");
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
@@ -279,7 +290,7 @@ function initAdminReportModal() {
     rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
-      list = [{ kind: "base", room: "Покер21", playerId: "", rake: legacyRakeback, percent: 100 }];
+      list = [{ kind: "base", room: "P21", playerId: "", rake: legacyRakeback, percent: 100 }];
     }
     if (!list.length) {
       rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
@@ -290,7 +301,7 @@ function initAdminReportModal() {
       rakebackBody.appendChild(createRakebackRow({
         groupId: row.groupId || "",
         kind: row.kind === "addon" || row.isAddon ? "addon" : "base",
-        room: row.room || "Покер21",
+        room: normalizeRakebackRoom(row.room || "P21"),
         playerId: row.playerId || row.id || "",
         rake: row.rake != null ? row.rake : "",
         percent: row.percent != null ? row.percent : "",
@@ -315,7 +326,7 @@ function initAdminReportModal() {
     var related = createRakebackRow({
       groupId: groupId,
       kind: "addon",
-      room: roomSelect && roomSelect.value ? roomSelect.value : "Покер21",
+      room: normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : "P21"),
       playerId: idInput && idInput.value ? idInput.value : "",
     });
     var insertAfter = baseRow;
@@ -1047,7 +1058,7 @@ function initAdminReportModal() {
       if (dataRows.length <= 1) {
         row.querySelectorAll("input").forEach(function (inp) { inp.value = ""; });
         var select = row.querySelector("select");
-        if (select) select.value = "Покер21";
+        if (select) select.value = "P21";
       } else {
         row.parentNode.removeChild(row);
       }
