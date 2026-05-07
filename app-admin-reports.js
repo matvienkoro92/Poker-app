@@ -233,12 +233,34 @@ function initAdminReportModal() {
     }
   }
 
-  function getRakebackRowAmount(row) {
+  function getRakebackPreviousRake(row) {
+    if (!rakebackBody || !row || row.getAttribute("data-rakeback-kind") !== "addon") return 0;
+    var groupId = row.getAttribute("data-rakeback-group") || "";
+    var previousRake = 0;
+    var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    for (var i = 0; i < rows.length; i++) {
+      var current = rows[i];
+      if (current === row) break;
+      if (current.getAttribute("data-rakeback-group") !== groupId) continue;
+      var rakeInput = current.querySelector("[data-rakeback-rake]");
+      previousRake = parseReportNumber(rakeInput ? rakeInput.value : "");
+    }
+    return previousRake;
+  }
+
+  function getRakebackRowCalculationBase(row) {
     if (!row) return 0;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
+    if (row.getAttribute("data-rakeback-kind") === "addon") return rake - getRakebackPreviousRake(row);
+    return rake;
+  }
+
+  function getRakebackRowAmount(row) {
+    if (!row) return 0;
     var percentInput = row.querySelector("[data-rakeback-percent]");
     var discountInput = row.querySelector("[data-rakeback-discount15]");
-    var amount = parseReportNumber(rakeInput ? rakeInput.value : "") * parseReportNumber(percentInput ? percentInput.value : "") / 100;
+    var amount = getRakebackRowCalculationBase(row) * parseReportNumber(percentInput ? percentInput.value : "") / 100;
     if (discountInput && discountInput.checked) amount *= 0.85;
     return amount;
   }
@@ -256,9 +278,8 @@ function initAdminReportModal() {
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
-      var amount = rake * percent / 100;
+      var amount = getRakebackRowAmount(row);
       var discount15 = !!(discountInput && discountInput.checked);
-      if (discount15) amount *= 0.85;
       var filled = !!playerId || rake !== 0 || percent !== 0 || amount !== 0;
       if (!includeEmpty && !filled) return null;
       return {
@@ -290,7 +311,6 @@ function initAdminReportModal() {
       }
       if (row.getAttribute("data-rakeback-kind") !== "addon" && !baseByGroup[groupId]) baseByGroup[groupId] = row;
     });
-    var previousRakeByGroup = {};
     rows.forEach(function (row) {
       var groupId = row.getAttribute("data-rakeback-group") || "";
       var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
@@ -309,10 +329,9 @@ function initAdminReportModal() {
       var restEl = row.querySelector("[data-rakeback-rest]");
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       if (restEl) {
-        var previousRake = previousRakeByGroup[groupId] != null ? previousRakeByGroup[groupId] : 0;
+        var previousRake = getRakebackPreviousRake(row);
         restEl.textContent = formatReportNumber(rake - previousRake);
       }
-      previousRakeByGroup[groupId] = rake;
       var amount = getRakebackRowAmount(row);
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       updateRakebackRowActions(row);
