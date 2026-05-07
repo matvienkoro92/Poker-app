@@ -431,13 +431,15 @@
   }
 
   function dateOnly(iso) {
-    return String(iso || "").slice(0, 10);
+    var ms = Date.parse(String(iso || ""));
+    return Number.isFinite(ms) ? localDateKey(new Date(ms)) : String(iso || "").slice(0, 10);
   }
 
   function dateTime(iso) {
     var d = iso ? new Date(iso) : null;
     if (!d || isNaN(d.getTime())) return "—";
     return d.toLocaleString("ru-RU", {
+      timeZone: "Europe/Moscow",
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

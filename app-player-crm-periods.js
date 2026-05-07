@@ -97,43 +97,39 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     }
     var fixed = fixedPeriodRange(state.period);
     if (fixed) return fixed;
-    var now = new Date();
-    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var today = localDateKey(new Date());
+    function addDays(key, days) {
+      return new Date(Date.parse(key + "T00:00:00.000Z") + (Number(days) || 0) * 86400000).toISOString().slice(0, 10);
+    }
     if (state.period === "today") {
-      return { from: localDateKey(today), to: localDateKey(today) };
+      return { from: today, to: today };
     }
     if (state.period === "yesterday") {
-      var yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-      return { from: localDateKey(yesterday), to: localDateKey(yesterday) };
+      var yesterday = addDays(today, -1);
+      return { from: yesterday, to: yesterday };
     }
     if (state.period === "current_week") {
-      var day = today.getDay() || 7;
-      var currentWeekFrom = new Date(today);
-      currentWeekFrom.setDate(today.getDate() - day + 1);
-      return { from: localDateKey(currentWeekFrom), to: localDateKey(today) };
+      var day = new Date(today + "T00:00:00.000Z").getUTCDay() || 7;
+      return { from: addDays(today, -day + 1), to: today };
     }
     if (state.period === "last_week") {
-      var lastDay = today.getDay() || 7;
-      var lastWeekTo = new Date(today);
-      lastWeekTo.setDate(today.getDate() - lastDay);
-      var lastWeekFrom = new Date(lastWeekTo);
-      lastWeekFrom.setDate(lastWeekTo.getDate() - 6);
-      return { from: localDateKey(lastWeekFrom), to: localDateKey(lastWeekTo) };
+      var lastDay = new Date(today + "T00:00:00.000Z").getUTCDay() || 7;
+      var lastWeekTo = addDays(today, -lastDay);
+      return { from: addDays(lastWeekTo, -6), to: lastWeekTo };
     }
     if (state.period === "current_month") {
-      return { from: localDateKey(new Date(today.getFullYear(), today.getMonth(), 1)), to: localDateKey(today) };
+      return { from: today.slice(0, 8) + "01", to: today };
     }
     if (state.period === "last_month") {
+      var y = Number(today.slice(0, 4));
+      var m = Number(today.slice(5, 7));
       return {
-        from: localDateKey(new Date(today.getFullYear(), today.getMonth() - 1, 1)),
-        to: localDateKey(new Date(today.getFullYear(), today.getMonth(), 0)),
+        from: new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 10),
+        to: new Date(Date.UTC(y, m - 1, 0)).toISOString().slice(0, 10),
       };
     }
     var days = Math.max(1, Number(state.period) || 30);
-    var from = new Date(today);
-    from.setDate(today.getDate() - days + 1);
-    return { from: localDateKey(from), to: localDateKey(today) };
+    return { from: addDays(today, -days + 1), to: today };
   }
 
   function dateInSelectedPeriod(iso) {
