@@ -50,7 +50,7 @@
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
     if (id === "2144406710" || id === "1897001087") return true;
     var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
-    if (username === "roman1_matvienko") return true;
+    if (username === "roman1787443" || username === "roman1_matvienko") return true;
     var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
     return email === "matvienkoro92@gmail.com";
   }
@@ -153,6 +153,15 @@
       renderHomeAdminIdentityStatus(true);
       if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
     }
+    function showReportUi() {
+      try {
+        var auth = window.__pokerTelegramAuth || {};
+        auth.adminReportAccess = true;
+        if (!auth.status) auth.status = "verified";
+        window.__pokerTelegramAuth = auth;
+      } catch (eReportAuth) {}
+      if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
+    }
     function showAdminUi() {
       try {
         var auth = window.__pokerTelegramAuth || {};
@@ -170,7 +179,7 @@
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
-      if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
+      showReportUi();
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
       if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
@@ -191,6 +200,19 @@
       }
       return false;
     }
+    function pokerIsKnownClientReportUser() {
+      try {
+        var authFlag = window.__pokerTelegramAuth;
+        if (authFlag && (authFlag.adminAccess === true || authFlag.adminReportAccess === true)) return true;
+        var recFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (recFlag && (recFlag.adminAccess === true || recFlag.adminReportAccess === true)) return true;
+      } catch (eFlag) {}
+      var users = collectAdminIdentityCandidates();
+      for (var i = 0; i < users.length; i++) {
+        if (isKnownAdminReportUser(users[i])) return true;
+      }
+      return false;
+    }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
     try {
@@ -204,6 +226,8 @@
     }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
+    } else if (pokerIsKnownClientReportUser()) {
+      showReportUi();
     } else if (reportBtn) {
       reportBtn.classList.add("header-admin-report--hidden");
     }

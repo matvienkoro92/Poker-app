@@ -26,9 +26,9 @@ function initAdminReportModal() {
   function canViewSentReports() {
     try {
       var auth = window.__pokerTelegramAuth;
-      if (auth && auth.adminAccess === true) return true;
+      if (auth && (auth.adminAccess === true || auth.adminReportAccess === true)) return true;
       var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-      if (rec && rec.adminAccess === true) return true;
+      if (rec && (rec.adminAccess === true || rec.adminReportAccess === true)) return true;
     } catch (eAuth) {}
     var users = [];
     try {
@@ -53,7 +53,7 @@ function initAdminReportModal() {
       var id = u.id != null ? String(u.id).replace(/^tg_/, "").trim() : "";
       if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
       var username = u.username != null ? String(u.username).replace(/^@+/, "").trim().toLowerCase() : "";
-      if (username === "roman1_matvienko") return true;
+      if (username === "roman1787443" || username === "roman1_matvienko") return true;
       var email = u.email != null ? String(u.email).trim().toLowerCase() : "";
       if (email === "matvienkoro92@gmail.com") return true;
     }
