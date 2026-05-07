@@ -547,14 +547,18 @@
 .admin-report-rakeback-table td:nth-child(2) {
   width: 128px;
 }
-.admin-report-rakeback-table th:nth-child(6),
-.admin-report-rakeback-table td:nth-child(6) {
+.admin-report-rakeback-table th:nth-child(5),
+.admin-report-rakeback-table td:nth-child(5) {
+  width: 58px;
+}
+.admin-report-rakeback-table th:nth-child(7),
+.admin-report-rakeback-table td:nth-child(7) {
   width: 100px;
 }
-.admin-report-rakeback-percent-cell {
+.admin-report-rakeback-discount-cell {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
 }
 .admin-report-rakeback-row--addon td:first-child {
   position: relative;
@@ -695,26 +699,30 @@
   }
   .admin-report-rakeback-table th:nth-child(1),
   .admin-report-rakeback-table td:nth-child(1) {
-    width: 21%;
+    width: 16%;
   }
   .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-table td:nth-child(2) {
-    width: 18%;
+    width: 17%;
   }
   .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-table td:nth-child(3) {
-    width: 13%;
+    width: 12%;
   }
   .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-table td:nth-child(4) {
-    width: 18%;
+    width: 15%;
   }
   .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-table td:nth-child(5) {
-    width: 12%;
+    width: 10%;
   }
   .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-table td:nth-child(6) {
+    width: 12%;
+  }
+  .admin-report-rakeback-table th:nth-child(7),
+  .admin-report-rakeback-table td:nth-child(7) {
     width: 18%;
   }
   .admin-report-rakeback-select,
@@ -723,9 +731,6 @@
     padding: 4px 5px;
     border-radius: 7px;
     font-size: 12px;
-  }
-  .admin-report-rakeback-percent-cell {
-    gap: 2px;
   }
   .admin-report-rakeback-discount {
     font-size: 9px;

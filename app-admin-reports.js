@@ -131,7 +131,8 @@ function initAdminReportModal() {
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /></td>' +
-      '<td class="admin-report-rakeback-percent-cell"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /><label class="admin-report-rakeback-discount"><input type="checkbox" data-rakeback-discount15 /> <span>-15%</span></label></td>' +
+      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /></td>' +
+      '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount"><input type="checkbox" data-rakeback-discount15 /> <span>-15%</span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>' +
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
