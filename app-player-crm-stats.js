@@ -69,11 +69,16 @@ function initPlayerCrmStatsRuntime(deps) {
     var chat = state.chatStats || {};
     var chatPeriodHint = periodLabel();
     var visitsIncomplete = visitsSummary && visitsSummary.incomplete;
+    var visitsUnavailableBeforeStart = visitsSummary && visitsSummary.unavailableBeforeStart;
     var firstVisitDate = visitsSummary && visitsSummary.firstTrackedDate ? String(visitsSummary.firstTrackedDate) : "";
-    var firstVisitDateLabel = firstVisitDate && firstVisitDate.length >= 10 ? firstVisitDate.slice(8, 10) + "." + firstVisitDate.slice(5, 7) : firstVisitDate;
+    var globalFirstVisitDate = visitsSummary && visitsSummary.globalFirstTrackedDate ? String(visitsSummary.globalFirstTrackedDate) : "";
+    var visibleFirstVisitDate = firstVisitDate || globalFirstVisitDate;
+    var firstVisitDateLabel = visibleFirstVisitDate && visibleFirstVisitDate.length >= 10 ? visibleFirstVisitDate.slice(8, 10) + "." + visibleFirstVisitDate.slice(5, 7) : visibleFirstVisitDate;
     var periodWarning = summary && summary.historicalDataIncomplete
       ? "<div class=\"player-crm__notice player-crm__notice--warning\">" +
-        (visitsIncomplete && firstVisitDate
+        (visitsUnavailableBeforeStart && firstVisitDateLabel
+          ? "Дневная статистика посещений начинается с " + esc(firstVisitDateLabel) + ", поэтому за " + esc(periodLabel()) + " дневные посещения не показываются. Общие данные за всё время остаются в периоде «За все время»."
+          : visitsIncomplete && firstVisitDateLabel
           ? "За " + esc(periodLabel()) + " дневная история посещений начинается с " + esc(firstVisitDateLabel) + ", поэтому показаны только учтённые дневные посещения, а не полный месяц."
           : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому CRM показывает нули только по датированным событиям этого периода.") +
         "</div>"
@@ -89,6 +94,7 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Новые push-подписки", statPushSubscribers, periodLabel(), "push"],
       ["Депозиты", money(statDeposits), periodLabel()],
     ];
+    if (visitsUnavailableBeforeStart) stats = stats.filter(function (it) { return it[3] !== "visits"; });
     var chatStats = [
       ["Сообщений в главном чате", periodOnly(chat.generalMessages), chatPeriodHint, "generalMessages"],
       ["Личных диалогов", periodOnly(chat.personalDialogs), chatPeriodHint],
