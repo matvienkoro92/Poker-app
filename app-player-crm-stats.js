@@ -31,6 +31,8 @@ function initPlayerCrmStatsRuntime(deps) {
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
     var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
+    var botUnsubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.botUnsubscribedAt); }).length;
+    var pushUnsubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.pushUnsubscribedAt); }).length;
     var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var pokerPlusPeriodRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
@@ -46,6 +48,10 @@ function initPlayerCrmStatsRuntime(deps) {
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
     var statPushSubscribers = summary ? Number(summary.push) || 0 : pushSubscribers;
+    var statBotUnsubscribers = summary ? Number(summary.botUnsub) || 0 : botUnsubscribers;
+    var statPushUnsubscribers = summary ? Number(summary.pushUnsub) || 0 : pushUnsubscribers;
+    var statBotNet = summary && summary.botNet != null ? Number(summary.botNet) || 0 : statBotSubscribers - statBotUnsubscribers;
+    var statPushNet = summary && summary.pushNet != null ? Number(summary.pushNet) || 0 : statPushSubscribers - statPushUnsubscribers;
     var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
     if (summaryRegistrationCounts) {
       registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
@@ -108,12 +114,20 @@ function initPlayerCrmStatsRuntime(deps) {
       if (it[3] === "bot") {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Новые подписки на бот</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
+          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Подписки</small><strong>+" + esc(intFmt(statBotSubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statBotUnsubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statBotNet)) + "</strong></span>" +
+          "</span></button>";
       }
       if (it[3] === "push") {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Новые push-подписки</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
+          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Подписки</small><strong>+" + esc(intFmt(statPushSubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statPushUnsubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statPushNet)) + "</strong></span>" +
+          "</span></button>";
       }
       var tag = it[3] ? "button" : "div";
       var typeAttr = it[3] ? " type=\"button\"" : "";

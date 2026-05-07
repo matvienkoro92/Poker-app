@@ -472,6 +472,13 @@ button.player-crm__stat:focus-visible,
   text-align: right;
   white-space: nowrap;
 }
+.player-crm__stat-mini-grid--flow {
+  margin-top: 6px;
+}
+.player-crm__stat-mini-row--minus small,
+.player-crm__stat-mini-row--minus strong {
+  color: #f87171;
+}
 .player-crm__manager-dialogs {
   display: grid;
   gap: 7px;
