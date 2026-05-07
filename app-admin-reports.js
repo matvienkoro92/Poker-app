@@ -550,10 +550,7 @@ function initAdminReportModal() {
           var toCompact = formatRuMonthDay(weekEndDateMs, true).replace(/\s+/g, "");
           return fromCompact + "-" + toCompact;
         }
-        /**
-         * Бизнес-неделя отчётов: Пн 18:00 МСК -> следующий Пн 18:00 МСК.
-         * До понедельника 18:00 отчёты относятся к прошлой неделе.
-         */
+        /** Календарная неделя отчётов: Пн 00:00 МСК -> Вс 23:59:59 МСК. */
         function weekStartMsForReport(ts) {
           var msk = mskDateFromTs(ts);
           var y = msk.getUTCFullYear();
@@ -562,10 +559,7 @@ function initAdminReportModal() {
           var wd = msk.getUTCDay(); // 0=Вс..6=Сб
           var daysFromMonday = (wd + 6) % 7;
           var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * DAY_MS;
-          var monday18MskMs = mondayStartMskMs + (18 * 60 * 60 * 1000);
-          var shiftedTs = ts + MSK_SHIFT_MS;
-          if (shiftedTs < monday18MskMs) monday18MskMs -= WEEK_MS;
-          return monday18MskMs - MSK_SHIFT_MS;
+          return mondayStartMskMs - MSK_SHIFT_MS;
         }
         function weekMetaFromStart(weekStartMs) {
           return {
@@ -749,17 +743,17 @@ function initAdminReportModal() {
         var archiveWeekStarts = weekStartsDesc.filter(function (ws) {
           return ws !== currentWeek.start;
         });
-        function buildWeekBlock(weekStartMs, list, idPrefixBase) {
+        function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(items, meta.start, meta.end);
           var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
           var totalDetailHtml = buildReportDetailHtml(totals);
           return {
             html:
-              '<details class="admin-report-sent-week">' +
+              '<details class="admin-report-sent-week"' + (isCurrent ? " open" : "") + ">" +
                 '<summary class="admin-report-sent-archive__summary">Неделя ' + escapeReportHtml(weekCompactLabelFromStartMs(meta.start)) + "</summary>" +
                 '<div class="admin-report-sent-week__inner">' +
-                  '<details class="admin-report-sent-week-subspoiler">' +
+                  '<details class="admin-report-sent-week-subspoiler"' + (isCurrent ? " open" : "") + ">" +
                     '<summary class="admin-report-sent-day-title">Итого по неделе' +
                       '<button type="button" class="admin-report-week-copy-btn" data-week-id="' + escapeReportHtml("ar-week-" + meta.key) + '" title="Скопировать итог за неделю">⧉</button>' +
                     "</summary>" +
@@ -779,7 +773,7 @@ function initAdminReportModal() {
           };
         }
 
-        var currentBlock = buildWeekBlock(currentWeek.start, currentItems, "ar-cur-");
+        var currentBlock = buildWeekBlock(currentWeek.start, currentItems, "ar-cur-", true);
         var html = [];
         html.push('<div class="admin-report-sent-current">');
         html.push(currentBlock.html);
@@ -793,7 +787,7 @@ function initAdminReportModal() {
               '<div class="admin-report-sent-archive__inner">' +
               (function () {
                 archiveWeekStarts.forEach(function (ws) {
-                  var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-");
+                  var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-", false);
                   archiveHtml.push(block.html);
                 });
                 return archiveHtml.join("");
