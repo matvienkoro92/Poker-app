@@ -65,6 +65,9 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     var chat = state.chatStats || {};
     var chatPeriodHint = periodLabel();
+    var periodWarning = summary && summary.historicalDataIncomplete
+      ? "<div class=\"player-crm__notice player-crm__notice--warning\">За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому CRM показывает нули только по датированным событиям этого периода.</div>"
+      : "";
     function periodOnly(row) {
       return intFmt(row && row.period);
     }
@@ -148,6 +151,7 @@ function initPlayerCrmStatsRuntime(deps) {
         "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
     }
     el.innerHTML =
+      periodWarning +
       "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
       "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
