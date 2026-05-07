@@ -93,10 +93,10 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,
 .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 300px) 74px;
+  grid-template-columns: minmax(0, 300px) 92px;
   gap: 10px;
   align-items: stretch;
-  width: min(92vw, 384px);
+  width: min(92vw, 402px);
   pointer-events: auto;
 }
 html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row .spring-rating-home-promo-wrap,
@@ -104,9 +104,12 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   max-width: none;
 }
 .home-fish-rating-btn {
-  width: 74px;
-  min-width: 74px;
-  min-height: 74px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  place-items: center;
+  width: 92px;
+  min-width: 92px;
+  min-height: 92px;
   border: 1px solid rgba(248, 217, 138, 0.62);
   border-radius: 18px;
   background:
@@ -118,13 +121,29 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
   cursor: pointer;
   overflow: hidden;
+  padding: 5px 5px 7px;
 }
 .home-fish-rating-btn img {
   display: block;
-  width: 100%;
-  height: 100%;
-  padding: 6px;
+  width: 64px;
+  height: 58px;
+  padding: 0;
   object-fit: contain;
+}
+.home-fish-rating-btn__status {
+  display: block;
+  max-width: 100%;
+  color: #f8d98a;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1.08;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.home-fish-rating-btn--linked .home-fish-rating-btn__status {
+  color: #86efac;
+  font-size: 10px;
 }
 .home-fish-rating-btn:hover,
 .home-fish-rating-btn:focus-visible {
@@ -525,15 +544,26 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 @media (max-width: 430px) {
   html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,
   .app.app--view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row {
-    grid-template-columns: minmax(0, 1fr) 64px;
-    width: min(92vw, 364px);
+    grid-template-columns: minmax(0, 1fr) 72px;
+    width: min(92vw, 372px);
     gap: 8px;
   }
   .home-fish-rating-btn {
-    width: 64px;
-    min-width: 64px;
-    min-height: 64px;
+    width: 72px;
+    min-width: 72px;
+    min-height: 82px;
     border-radius: 16px;
+    padding: 4px 4px 6px;
+  }
+  .home-fish-rating-btn img {
+    width: 50px;
+    height: 46px;
+  }
+  .home-fish-rating-btn__status {
+    font-size: 7px;
+  }
+  .home-fish-rating-btn--linked .home-fish-rating-btn__status {
+    font-size: 8px;
   }
 }
 /* Зазор «Рейтинг весны» от эмблемы — margin-top у .features--home-rating-on-border */
