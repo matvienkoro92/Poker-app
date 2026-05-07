@@ -212,13 +212,80 @@
     }
   })();
 
+  function findGlobalModalClickTarget(from) {
+    return from && from.closest
+      ? from.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
+      : null;
+  }
+
+  function prewarmGlobalModalTarget(target) {
+    if (!target) return Promise.resolve(false);
+    if (target.__pokerGlobalModalPrewarmPromise) return target.__pokerGlobalModalPrewarmPromise;
+    var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
+    var needsLazyScripts = false;
+    try {
+      needsLazyScripts = typeof window.pokerHasGlobalModalScriptsForTarget === "function" && window.pokerHasGlobalModalScriptsForTarget(target);
+    } catch (eModalScriptNeed) {}
+    if (!hasGlobalModalsHost && !needsLazyScripts) return Promise.resolve(true);
+    var htmlPromise = Promise.resolve(hasGlobalModalsHost ? window.pokerEnsureGlobalModalsHtml() : true);
+    var scriptPromise = Promise.resolve(true);
+    if (typeof window.pokerEnsureGlobalModalScriptsForTarget === "function") {
+      scriptPromise = Promise.resolve(window.pokerEnsureGlobalModalScriptsForTarget(target));
+    }
+    target.__pokerGlobalModalPrewarmPromise = Promise.all([htmlPromise, scriptPromise])
+      .then(function () { return true; })
+      .catch(function (err) {
+        try {
+          delete target.__pokerGlobalModalPrewarmPromise;
+        } catch (eDeletePrewarm) {
+          target.__pokerGlobalModalPrewarmPromise = null;
+        }
+        throw err;
+      });
+    return target.__pokerGlobalModalPrewarmPromise;
+  }
+
+  function maybePrewarmFromEvent(e) {
+    if (e && e.__pokerLazyRedispatched) return;
+    var target = e && e.target ? findGlobalModalClickTarget(e.target) : null;
+    if (!target) return;
+    prewarmGlobalModalTarget(target).catch(function () {});
+  }
+
+  ["pointerover", "focusin", "touchstart"].forEach(function (eventName) {
+    document.addEventListener(eventName, maybePrewarmFromEvent, { capture: true, passive: true });
+  });
+
+  (function prewarmDesktopAdminReport() {
+    function run() {
+      var btn = document.getElementById("adminReportBtn");
+      if (!btn) return;
+      var desktopish = false;
+      try {
+        desktopish = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+      } catch (eMq) {}
+      if (!desktopish && window.innerWidth < 768) return;
+      prewarmGlobalModalTarget(btn).catch(function () {});
+    }
+    function schedule() {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(run, { timeout: 1400 });
+      } else {
+        setTimeout(run, 450);
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", schedule, { once: true });
+    } else {
+      schedule();
+    }
+  })();
+
   document.addEventListener(
     "click",
     function (e) {
       if (e.__pokerLazyRedispatched) return;
-      var target = e.target && e.target.closest
-        ? e.target.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
-        : null;
+      var target = e.target ? findGlobalModalClickTarget(e.target) : null;
       if (!target) return;
       var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
       var needsLazyScripts = false;
@@ -229,12 +296,7 @@
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
-      Promise.resolve(hasGlobalModalsHost ? window.pokerEnsureGlobalModalsHtml() : true).then(function () {
-        if (typeof window.pokerEnsureGlobalModalScriptsForTarget === "function") {
-          return window.pokerEnsureGlobalModalScriptsForTarget(target);
-        }
-        return true;
-      }).then(function () {
+      prewarmGlobalModalTarget(target).then(function () {
         try {
           if (originalTarget && originalTarget.dispatchEvent) {
             var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });

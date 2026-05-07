@@ -222,13 +222,14 @@
       <!-- Модалка «Отчёт за смену» (только админ, заполняется вручную) -->
       <div class="share-stats-admin-modal" id="adminReportModal" role="dialog" aria-modal="true" aria-label="Отчёт за смену" aria-hidden="true">
         <div class="share-stats-admin-modal__backdrop" id="adminReportModalBackdrop"></div>
-        <div class="share-stats-admin-modal__box">
+        <div class="share-stats-admin-modal__box admin-report-modal__box">
           <button type="button" class="share-stats-admin-modal__close" id="adminReportModalClose" aria-label="Закрыть">×</button>
           <h2 class="share-stats-admin-modal__title">Отчёт за смену</h2>
           <p class="share-stats-admin-modal__hint">Заполните суммы по каждому полю. Отправленные отчёты появятся во вкладке «Отправленные».</p>
           <p class="admin-report-date" id="adminReportDate"></p>
           <div class="admin-report-tabs" role="tablist">
             <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form">Форма</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback">Рейкбек</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent">Отправленные</button>
           </div>
           <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
@@ -250,7 +251,7 @@
                   <tr><td>Бот эксчип деп</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBotExchipDep" placeholder="0" /></td><td>Бот эксчип вывод</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBotExchipCashout" placeholder="0" /></td></tr>
                   <tr><td>Бонусы</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportBonuses" placeholder="0" /></td><td>Переводы</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportTransfers" placeholder="0" /></td></tr>
                   <tr><td>Возврат</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportReturn" placeholder="0" /></td><td>Сергей/Марина</td><td><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportSergeyMarina" placeholder="0" /></td></tr>
-                  <tr id="adminReportRakeRow" class="admin-report-rake-row"><td colspan="2"><strong>Рейкбек</strong></td><td colspan="2"><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input" id="adminReportRakeback" placeholder="0" /></td></tr>
+                  <tr id="adminReportRakeRow" class="admin-report-rake-row"><td colspan="2"><strong>Рейкбек</strong></td><td colspan="2"><input type="number" inputmode="decimal" class="admin-report-input" id="adminReportRakeback" placeholder="0" readonly /></td></tr>
                   <tr class="admin-report-extra-row"><td><input type="text" class="admin-report-input admin-report-input--full admin-report-extra-name" enterkeyhint="next" placeholder="Доп. название" /></td><td colspan="3"><input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-input admin-report-extra-amount" placeholder="0" /></td></tr>
                 </tbody>
               </table>
@@ -258,6 +259,47 @@
             <button type="button" class="admin-report-add-extra-btn" id="adminReportAddExtraBtn" title="Добавить поле" aria-label="Добавить поле">+</button>
             <button type="button" class="admin-report-submit-btn primary-button" id="adminReportSubmitBtn">Отправить отчёт</button>
             </div>
+          </div>
+          <div class="admin-report-panel" data-admin-report-panel="rakeback">
+            <div class="admin-report-rakeback-summary">
+              <span class="admin-report-rakeback-summary__label">Итого рейкбек</span>
+              <span class="admin-report-rakeback-summary__value" id="adminReportRakebackTotal">0</span>
+            </div>
+            <div class="share-stats-admin-modal__table-wrap admin-report-rakeback-wrap">
+              <table class="admin-report-rakeback-table">
+                <thead>
+                  <tr>
+                    <th>Рум</th>
+                    <th>Айди</th>
+                    <th>Рейк</th>
+                    <th>Процент</th>
+                    <th>Рейкбек</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="adminReportRakebackTableBody">
+                  <tr class="admin-report-rakeback-row" data-rakeback-row data-rakeback-kind="base">
+                    <td>
+                      <select class="admin-report-rakeback-select" data-rakeback-room>
+                        <option value="Покер21">Покер21</option>
+                        <option value="Х">Х</option>
+                        <option value="Супрема">Супрема</option>
+                        <option value="PP">PP</option>
+                      </select>
+                    </td>
+                    <td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>
+                    <td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /></td>
+                    <td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /></td>
+                    <td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>
+                    <td class="admin-report-rakeback-actions">
+                      <button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить доп. строку" aria-label="Добавить доп. строку">+</button>
+                      <button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button type="button" class="admin-report-add-extra-btn admin-report-rakeback-add-row-btn" id="adminReportRakebackAddBtn" title="Добавить строку" aria-label="Добавить строку">+</button>
           </div>
           <div class="admin-report-panel" data-admin-report-panel="sent">
             <div class="share-stats-admin-modal__table-wrap admin-report-sent-wrap">
