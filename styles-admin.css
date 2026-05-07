@@ -629,6 +629,57 @@
 .admin-report-rakeback-add-row-btn {
   margin-top: 10px;
 }
+@media (max-width: 560px) {
+  .admin-report-rakeback-wrap {
+    overflow-x: hidden;
+  }
+  .admin-report-rakeback-table {
+    min-width: 0;
+    width: 100%;
+  }
+  .admin-report-rakeback-table th,
+  .admin-report-rakeback-table td {
+    padding: 6px 4px;
+  }
+  .admin-report-rakeback-table th {
+    font-size: 11px;
+  }
+  .admin-report-rakeback-table th:nth-child(1),
+  .admin-report-rakeback-table td:nth-child(1) {
+    width: 27%;
+  }
+  .admin-report-rakeback-table th:nth-child(2),
+  .admin-report-rakeback-table td:nth-child(2) {
+    width: 25%;
+  }
+  .admin-report-rakeback-table th:nth-child(3),
+  .admin-report-rakeback-table td:nth-child(3) {
+    width: 16%;
+  }
+  .admin-report-rakeback-table th:nth-child(4),
+  .admin-report-rakeback-table td:nth-child(4) {
+    width: 17%;
+  }
+  .admin-report-rakeback-table th:nth-child(5),
+  .admin-report-rakeback-table td:nth-child(5) {
+    width: 15%;
+  }
+  .admin-report-rakeback-table th:nth-child(6),
+  .admin-report-rakeback-table td:nth-child(6) {
+    display: none;
+  }
+  .admin-report-rakeback-select,
+  .admin-report-rakeback-input {
+    min-height: 32px;
+    padding: 4px 5px;
+    border-radius: 7px;
+    font-size: 12px;
+  }
+  .admin-report-rakeback-amount {
+    min-height: 32px;
+    font-size: 12px;
+  }
+}
 .admin-report-submit-btn {
   margin-top: 10px;
 }
