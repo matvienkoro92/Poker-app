@@ -4,6 +4,7 @@
     loaded: false,
     loading: false,
     heavyLoading: false,
+    heavyLoadingScope: "",
     loadingScope: "",
     tab: "overview",
     period: "30",
@@ -817,11 +818,13 @@
   function loadCrmHeavyData(scope) {
     if (state.heavyLoading) return Promise.resolve(false);
     state.heavyLoading = true;
+    state.heavyLoadingScope = scope || "heavy";
     renderStats();
     renderAnalytics();
     var base = getApiBaseSafe();
     if (!base) {
       state.heavyLoading = false;
+      state.heavyLoadingScope = "";
       return Promise.resolve(false);
     }
     return fetch(base + "/api/player-crm" + crmQuery({ mode: "heavy" }))
@@ -839,6 +842,7 @@
       .catch(function () {})
       .then(function () {
         state.heavyLoading = false;
+        state.heavyLoadingScope = "";
         renderAll();
         return true;
       });

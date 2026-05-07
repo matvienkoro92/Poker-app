@@ -7,8 +7,8 @@ function initPlayerCrmChartsRuntime(deps) {
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
     if (!el) return;
-    if ((state.loading && state.loadingScope !== "data") || (state.heavyLoading && !state.chartAnalytics)) {
-      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка графика…</div>";
+    if ((state.loading && state.loadingScope !== "data") || (state.heavyLoading && (state.heavyLoadingScope === "chart" || !state.chartAnalytics))) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
       return;
     }
     el.innerHTML = renderChartAnalytics();
