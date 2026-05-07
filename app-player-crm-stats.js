@@ -29,10 +29,13 @@ function initPlayerCrmStatsRuntime(deps) {
     var summary = state.statsSummary && typeof state.statsSummary === "object" ? state.statsSummary : null;
     var summaryRegistrationCounts = summary && summary.registrationCounts && typeof summary.registrationCounts === "object" ? summary.registrationCounts : null;
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
+    function hasPeriodDate(value) {
+      return !!value && dateInSelectedPeriod(value);
+    }
     var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
     var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
-    var botUnsubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.botUnsubscribedAt); }).length;
-    var pushUnsubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.pushUnsubscribedAt); }).length;
+    var botUnsubscribers = players.filter(function (p) { return !(p && p.channels && p.channels.bot) && hasPeriodDate(p && p.botUnsubscribedAt); }).length;
+    var pushUnsubscribers = players.filter(function (p) { return !(p && p.channels && p.channels.push) && hasPeriodDate(p && p.pushUnsubscribedAt); }).length;
     var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var pokerPlusPeriodRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
