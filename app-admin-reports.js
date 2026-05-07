@@ -138,6 +138,7 @@ function initAdminReportModal() {
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
+        (kind === "addon" ? "" : '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>') +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
@@ -323,6 +324,30 @@ function initAdminReportModal() {
     if (!rakebackBody) return;
     rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
     syncRakebackTable();
+  }
+
+  function addRakebackAddonRow(baseRow) {
+    if (!rakebackBody || !baseRow) return;
+    var groupId = baseRow.getAttribute("data-rakeback-group") || nextRakebackGroupId();
+    baseRow.setAttribute("data-rakeback-group", groupId);
+    var roomSelect = baseRow.querySelector("[data-rakeback-room]");
+    var idInput = baseRow.querySelector("[data-rakeback-player-id]");
+    var addon = createRakebackRow({
+      kind: "addon",
+      groupId: groupId,
+      room: roomSelect && roomSelect.value ? roomSelect.value : "P21",
+      playerId: idInput && idInput.value ? idInput.value : "",
+    });
+    var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var anchor = baseRow;
+    rows.forEach(function (candidate) {
+      if (candidate.getAttribute("data-rakeback-group") === groupId) anchor = candidate;
+    });
+    if (anchor.nextSibling) rakebackBody.insertBefore(addon, anchor.nextSibling);
+    else rakebackBody.appendChild(addon);
+    syncRakebackTable();
+    var rakeInput = addon.querySelector("[data-rakeback-rake]");
+    if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
   }
 
   /** Суммирует доп. строки отчёта в map по названию (без дубля с extraFields + legacy). */
@@ -1020,6 +1045,12 @@ function initAdminReportModal() {
       if (editBtn) {
         setRakebackRowSaved(editBtn.closest("[data-rakeback-row]"), false);
         showRakebackStatus("");
+        return;
+      }
+      var addAddonBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-add-addon]") : null;
+      if (addAddonBtn) {
+        addRakebackAddonRow(addAddonBtn.closest("[data-rakeback-row]"));
+        showRakebackStatus("Подзапись добавлена");
         return;
       }
       var removeBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-remove]") : null;
