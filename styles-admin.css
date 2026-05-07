@@ -703,6 +703,9 @@
   align-items: center;
   justify-content: center;
 }
+.admin-report-rakeback-icon-btn[hidden] {
+  display: none !important;
+}
 .admin-report-rakeback-icon-btn:hover {
   background: rgba(246, 211, 145, 0.2);
   border-color: rgba(246, 211, 145, 0.44);
