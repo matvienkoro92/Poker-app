@@ -131,7 +131,11 @@ function initAdminReportModal() {
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /></td>' +
+      '<td>' +
+        (kind === "addon"
+          ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток">0</span></div>'
+          : '<input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" />') +
+      '</td>' +
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /></td>' +
       '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%" /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>' +
@@ -286,6 +290,7 @@ function initAdminReportModal() {
       }
       if (row.getAttribute("data-rakeback-kind") !== "addon" && !baseByGroup[groupId]) baseByGroup[groupId] = row;
     });
+    var previousRakeByGroup = {};
     rows.forEach(function (row) {
       var groupId = row.getAttribute("data-rakeback-group") || "";
       var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
@@ -301,6 +306,13 @@ function initAdminReportModal() {
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
       var amountEl = row.querySelector("[data-rakeback-amount]");
+      var restEl = row.querySelector("[data-rakeback-rest]");
+      var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
+      if (restEl) {
+        var previousRake = previousRakeByGroup[groupId] != null ? previousRakeByGroup[groupId] : 0;
+        restEl.textContent = formatReportNumber(rake - previousRake);
+      }
+      previousRakeByGroup[groupId] = rake;
       var amount = getRakebackRowAmount(row);
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       updateRakebackRowActions(row);
