@@ -1212,6 +1212,24 @@ button.player-crm__stat:focus-visible,
 .player-crm__channel-table {
   min-width: 820px;
 }
+.player-crm__visits-table {
+  min-width: 920px;
+}
+.player-crm__table-link {
+  display: inline;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: rgba(199, 163, 106, 0.55);
+  text-underline-offset: 3px;
+}
 .player-crm__pokerplus-filters {
   margin-bottom: 12px;
 }

@@ -71,7 +71,7 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     var method = state.registrationModalMethod;
     if (method !== "email" && method !== "telegram" && method !== "both") {
       modal.hidden = true;
-      if (document.body && !state.chatDialogManager && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.botModalOpen && !state.pushModalOpen && !state.playerModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
+      if (document.body && !state.chatDialogManager && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.visitsModalOpen && !state.botModalOpen && !state.pushModalOpen && !state.playerModalOpen) document.body.classList.remove("player-crm-dialog-modal-open");
       return;
     }
     var rows = registrationRowsByMethod(method);
@@ -125,5 +125,70 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     hasRegistrationMethod: hasRegistrationMethod,
     registrationRowsByMethod: registrationRowsByMethod,
     renderRegistrationModal: renderRegistrationModal,
+  };
+}
+
+function initPlayerCrmVisitsRuntime(ctx) {
+  var state = ctx.state;
+  var esc = ctx.esc;
+  var intFmt = ctx.intFmt;
+  var dateTime = ctx.dateTime;
+  var dateInSelectedPeriod = ctx.dateInSelectedPeriod;
+  var periodLabel = ctx.periodLabel;
+  var noOpenDialogModals = ctx.noOpenDialogModals;
+
+  function visitUniqueRows() {
+    var rows = Array.isArray(state.players) ? state.players.slice() : [];
+    return rows.filter(function (p) {
+      return dateInSelectedPeriod((p && (p.firstSeenAt || p.registeredAt)) || "");
+    }).sort(function (a, b) {
+      return String(a.name || a.handle || a.accountId || a.id || "").localeCompare(String(b.name || b.handle || b.accountId || b.id || ""), "ru");
+    });
+  }
+
+  function renderVisitsModalList() {
+    var rows = visitUniqueRows();
+    if (!rows.length) return "<div class=\"player-crm__timeline-item\">Уникальных пользователей за выбранный период пока нет.</div>";
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visits-table\"><thead><tr>" +
+      "<th>Игрок</th><th>Telegram</th><th>ID</th><th>Посещений</th><th>Первый визит</th><th>Источник</th>" +
+      "</tr></thead><tbody>" + rows.map(function (p) {
+        return "<tr>" +
+          "<td><button type=\"button\" class=\"player-crm__table-link\" data-crm-open-player=\"" + esc(p.id || p.accountId || "") + "\">" + esc(p.name || "—") + "</button></td>" +
+          "<td>" + esc(p.handle || "—") + "</td>" +
+          "<td>" + esc(p.accountId || p.dtId || p.id || "—") + "</td>" +
+          "<td>" + esc(intFmt(p.totals && p.totals.visits)) + "</td>" +
+          "<td>" + esc(dateTime(p.firstSeenAt || p.registeredAt)) + "</td>" +
+          "<td>" + esc(p.source || "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div></div>";
+  }
+
+  function renderVisitsModal() {
+    var modal = document.getElementById("playerCrmVisitsModal");
+    var subtitleEl = document.getElementById("playerCrmVisitsModalSubtitle");
+    var bodyEl = document.getElementById("playerCrmVisitsModalBody");
+    if (!modal || !bodyEl) return;
+    if (!state.visitsModalOpen) {
+      modal.hidden = true;
+      if (document.body && noOpenDialogModals()) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    var rows = visitUniqueRows();
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " пользователей";
+    bodyEl.innerHTML = renderVisitsModalList();
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function closeVisitsModal() {
+    state.visitsModalOpen = false;
+    if (ctx.renderStats) ctx.renderStats();
+    renderVisitsModal();
+  }
+
+  return {
+    closeVisitsModal: closeVisitsModal,
+    renderVisitsModal: renderVisitsModal,
+    visitUniqueRows: visitUniqueRows,
   };
 }

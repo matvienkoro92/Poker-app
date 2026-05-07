@@ -81,7 +81,7 @@ function initPlayerCrmStatsRuntime(deps) {
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></span>" +
+            "<button type=\"button\" data-crm-visits-modal><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
           "</span></div>";
       }
