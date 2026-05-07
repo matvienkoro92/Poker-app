@@ -43,6 +43,35 @@
     return y + "-" + m + "-" + day;
   }
 
+  function pokerPlayerCrmSortDateValue(value) {
+    var ms = Date.parse(value || "");
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  function pokerPlayerCrmSortRows(rows, valueFn, dir, tieFn) {
+    var mul = dir === "asc" ? 1 : -1;
+    return (Array.isArray(rows) ? rows.slice() : []).sort(function (a, b) {
+      var av = valueFn(a);
+      var bv = valueFn(b);
+      if (av == null && bv == null) return tieFn ? tieFn(a, b) : 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (av < bv) return -1 * mul;
+      if (av > bv) return 1 * mul;
+      return tieFn ? tieFn(a, b) : 0;
+    });
+  }
+
+  function pokerPlayerCrmSortableTh(esc, scope, field, label, activeField, activeDir) {
+    var active = activeField === field;
+    var dir = activeDir === "asc" ? "asc" : "desc";
+    var mark = active ? (dir === "asc" ? "↑" : "↓") : "↕";
+    return "<th aria-sort=\"" + (active ? (dir === "asc" ? "ascending" : "descending") : "none") + "\">" +
+      "<button type=\"button\" class=\"player-crm__sort-btn" + (active ? " player-crm__sort-btn--active" : "") + "\" data-crm-sort-scope=\"" + esc(scope) + "\" data-crm-sort-field=\"" + esc(field) + "\" aria-label=\"" + esc("Сортировать по " + label) + "\">" +
+        "<span>" + esc(label) + "</span><span class=\"player-crm__sort-mark\" aria-hidden=\"true\">" + mark + "</span>" +
+      "</button></th>";
+  }
+
   function installFallback(scope) {
     scope.pokerPlayerCrmEsc = pokerPlayerCrmEsc;
     scope.pokerPlayerCrmMoney = pokerPlayerCrmMoney;
@@ -51,6 +80,9 @@
     scope.pokerPlayerCrmDaysLabel = pokerPlayerCrmDaysLabel;
     scope.pokerPlayerCrmIsoDate = pokerPlayerCrmIsoDate;
     scope.pokerPlayerCrmLocalDateKey = pokerPlayerCrmLocalDateKey;
+    scope.pokerPlayerCrmSortDateValue = pokerPlayerCrmSortDateValue;
+    scope.pokerPlayerCrmSortRows = pokerPlayerCrmSortRows;
+    scope.pokerPlayerCrmSortableTh = pokerPlayerCrmSortableTh;
     return {
       esc: pokerPlayerCrmEsc,
       money: pokerPlayerCrmMoney,
@@ -59,6 +91,9 @@
       daysLabel: pokerPlayerCrmDaysLabel,
       isoDate: pokerPlayerCrmIsoDate,
       localDateKey: pokerPlayerCrmLocalDateKey,
+      sortDateValue: pokerPlayerCrmSortDateValue,
+      sortRows: pokerPlayerCrmSortRows,
+      sortableTh: pokerPlayerCrmSortableTh,
     };
   }
 

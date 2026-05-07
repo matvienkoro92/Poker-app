@@ -32,6 +32,16 @@
     pokerPlusLevelMax: "",
     pokerPlusDateFrom: "",
     pokerPlusDateTo: "",
+    pokerPlusSortField: "level",
+    pokerPlusSortDir: "desc",
+    registrationModalSortField: "linkedAt",
+    registrationModalSortDir: "desc",
+    botModalSortField: "botSubscribedAt",
+    botModalSortDir: "desc",
+    pushModalSortField: "pushSubscribedAt",
+    pushModalSortDir: "desc",
+    visitsModalSortField: "firstSeenAt",
+    visitsModalSortDir: "desc",
     campaigns: [],
     sourceAnalytics: [],
     statsSummary: null,
@@ -435,101 +445,46 @@
     });
   }
 
-  function filteredPokerPlusAccounts() {
-    var rows = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
-    var min = parseInt(state.pokerPlusLevelMin, 10);
-    var max = parseInt(state.pokerPlusLevelMax, 10);
-    var from = state.pokerPlusDateFrom || "";
-    var to = state.pokerPlusDateTo || "";
-    return rows.filter(function (r) {
-      var level = Number(r.level) || 0;
-      var linked = dateOnly(r.linkedAt);
-      if (Number.isFinite(min) && level < min) return false;
-      if (Number.isFinite(max) && level > max) return false;
-      if (from && (!linked || linked < from)) return false;
-      if (to && (!linked || linked > to)) return false;
-      return true;
-    });
+  var crmTableSortKeys = {
+    pokerplus: ["pokerPlusSortField", "pokerPlusSortDir"],
+    "registration-modal": ["registrationModalSortField", "registrationModalSortDir"],
+    "bot-modal": ["botModalSortField", "botModalSortDir"],
+    "push-modal": ["pushModalSortField", "pushModalSortDir"],
+    "visits-modal": ["visitsModalSortField", "visitsModalSortDir"],
+  };
+  function setTableSort(scope, field) {
+    var keys = crmTableSortKeys[scope];
+    if (!keys || !field) return false;
+    if (state[keys[0]] === field) state[keys[1]] = state[keys[1]] === "asc" ? "desc" : "asc";
+    else { state[keys[0]] = field; state[keys[1]] = field === "name" ? "asc" : "desc"; }
+    return true;
   }
-
-  function renderPokerPlusAccounts() {
-    var el = document.getElementById("playerCrmPokerPlusAccounts");
-    if (!el) return;
-    var all = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
-    var rows = filteredPokerPlusAccounts();
-    if (!all.length) {
-      el.innerHTML = "<div class=\"player-crm__timeline-item\">Подтверждённых аккаунтов Poker21 пока нет.</div>";
-      return;
-    }
-    var avgLevel = rows.length ? Math.round(rows.reduce(function (sum, r) { return sum + (Number(r.level) || 0); }, 0) / rows.length) : 0;
-    var summary =
-      "<div class=\"player-crm__metrics player-crm__metrics--registrations\">" +
-        metric("Показано", intFmt(rows.length)) +
-        metric("Всего", intFmt(all.length)) +
-        metric("Средний уровень", avgLevel || "—") +
-      "</div>";
-    if (!rows.length) {
-      el.innerHTML = summary + "<div class=\"player-crm__timeline-item\">По этим фильтрам пусто.</div>";
-      return;
-    }
-    var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата и время привязки</th><th>Email</th>" +
-      "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr>" +
-          "<td>" + esc(r.accountId || "—") + "</td>" +
-          "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
-          "<td>" + esc(r.nickname || "—") + "</td>" +
-          "<td>" + esc(r.level || "—") + "</td>" +
-          "<td>" + esc(money(r.fee || 0)) + "</td>" +
-          "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
-          "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
-          "<td>" + esc(r.email || "—") + "</td>" +
-        "</tr>";
-      }).join("") + "</tbody></table></div>";
-    el.innerHTML = summary + table;
+  function renderSortScope(scope) {
+    if (scope === "pokerplus") { renderPokerPlusAccounts(); renderPokerPlusModal(); }
+    else if (scope === "registration-modal") renderRegistrationModal();
+    else if (scope === "bot-modal") renderBotModal();
+    else if (scope === "push-modal") renderPushModal();
+    else if (scope === "visits-modal") renderVisitsModal();
   }
-
-  function renderPokerPlusModalList() {
-    var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
-    if (!rows.length) return "<div class=\"player-crm__timeline-item\">Привязанных аккаунтов Poker21 пока нет.</div>";
-    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th><th>Уровень</th><th>Fee</th><th>Рук</th><th>Дата и время привязки</th><th>Email</th>" +
-      "</tr></thead><tbody>" + rows.map(function (r) {
-        return "<tr>" +
-          "<td>" + esc(r.accountId || "—") + "</td>" +
-          "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
-          "<td>" + esc(r.nickname || "—") + "</td>" +
-          "<td>" + esc(r.level || "—") + "</td>" +
-          "<td>" + esc(money(r.fee || 0)) + "</td>" +
-          "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
-          "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
-          "<td>" + esc(r.email || "—") + "</td>" +
-        "</tr>";
-      }).join("") + "</tbody></table></div></div>";
-  }
-
-  function renderPokerPlusModal() {
-    var modal = document.getElementById("playerCrmPokerPlusModal");
-    var subtitleEl = document.getElementById("playerCrmPokerPlusModalSubtitle");
-    var bodyEl = document.getElementById("playerCrmPokerPlusModalBody");
-    if (!modal || !bodyEl) return;
-    if (!state.pokerPlusModalOpen) {
-      modal.hidden = true;
-      if (document.body && noOpenDialogModals()) document.body.classList.remove("player-crm-dialog-modal-open");
-      return;
-    }
-    var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(rows.length) + " аккаунтов";
-    bodyEl.innerHTML = renderPokerPlusModalList();
-    modal.hidden = false;
-    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
-  }
-
-  function closePokerPlusModal() {
-    state.pokerPlusModalOpen = false;
-    renderStats();
-    renderPokerPlusModal();
-  }
+  var playerCrmPokerPlusRuntime = typeof initPlayerCrmPokerPlusRuntime === "function"
+    ? initPlayerCrmPokerPlusRuntime({
+      state: state,
+      esc: esc,
+      money: money,
+      intFmt: intFmt,
+      dateInSelectedPeriod: dateInSelectedPeriod,
+      periodLabel: periodLabel,
+      dateOnly: dateOnly,
+      dateTime: dateTime,
+      metric: metric,
+      noOpenDialogModals: noOpenDialogModals,
+      renderStats: function () { return renderStats(); }
+    })
+    : {};
+  var filteredPokerPlusAccounts = playerCrmPokerPlusRuntime.filteredPokerPlusAccounts || function () { return []; };
+  var renderPokerPlusAccounts = playerCrmPokerPlusRuntime.renderPokerPlusAccounts || function () {};
+  var renderPokerPlusModal = playerCrmPokerPlusRuntime.renderPokerPlusModal || function () {};
+  var closePokerPlusModal = playerCrmPokerPlusRuntime.closePokerPlusModal || function () {};
 
   function renderGeneralMessagesModalList() {
     var chat = state.chatStats || {};
@@ -576,26 +531,44 @@
   }
 
   function channelSubscribersRows(channel) {
-    return (Array.isArray(state.players) ? state.players.slice() : [])
+    var rows = (Array.isArray(state.players) ? state.players.slice() : [])
       .filter(function (p) {
         var field = channel === "push" ? "pushSubscribedAt" : "botSubscribedAt";
         return !!(p.channels && p.channels[channel]) && dateInSelectedPeriod(p[field]);
-      })
-      .sort(function (a, b) {
-        return String(a.name || a.handle || a.id || "").localeCompare(String(b.name || b.handle || b.id || ""), "ru");
       });
+    return sortChannelSubscribersRows(rows, channel);
+  }
+
+  function channelSortValue(row, field) {
+    if (field === "botSubscribedAt" || field === "pushSubscribedAt") return pokerPlayerCrmSortDateValue(row && row[field]);
+    return String((row && (row.name || row.handle || row.id)) || "").toLowerCase();
+  }
+
+  function sortChannelSubscribersRows(rows, channel) {
+    var fieldKey = channel === "push" ? "pushModalSortField" : "botModalSortField";
+    var dirKey = channel === "push" ? "pushModalSortDir" : "botModalSortDir";
+    var field = state[fieldKey] || (channel === "push" ? "pushSubscribedAt" : "botSubscribedAt");
+    return pokerPlayerCrmSortRows(rows, function (row) {
+      return channelSortValue(row, field);
+    }, state[dirKey] || "desc", function (a, b) {
+      return String(a.name || a.handle || a.id || "").localeCompare(String(b.name || b.handle || b.id || ""), "ru");
+    });
   }
 
   function renderChannelSubscribersTable(rows, emptyText, dateField, dateHeader) {
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">" + esc(emptyText) + "</div>";
+    var isPush = dateField === "pushSubscribedAt";
+    var scope = isPush ? "push-modal" : "bot-modal";
+    var sortField = state[isPush ? "pushModalSortField" : "botModalSortField"] || dateField;
+    var sortDir = state[isPush ? "pushModalSortDir" : "botModalSortDir"] || "desc";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__channel-table\"><thead><tr>" +
-      "<th>Игрок</th><th>Telegram</th><th>ID</th><th>" + esc(dateHeader) + "</th><th>Источник</th>" +
+      pokerPlayerCrmSortableTh(esc, scope, dateField, dateHeader, sortField, sortDir) + "<th>Игрок</th><th>Telegram</th><th>ID</th><th>Источник</th>" +
       "</tr></thead><tbody>" + rows.map(function (p) {
         return "<tr>" +
+          "<td>" + esc(dateTime(p[dateField])) + "</td>" +
           "<td>" + esc(p.name || "—") + "</td>" +
           "<td>" + esc(p.handle || "—") + "</td>" +
           "<td>" + esc(p.accountId || p.dtId || p.id || "—") + "</td>" +
-          "<td>" + esc(dateTime(p[dateField])) + "</td>" +
           "<td>" + esc(p.source || "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div></div>";
@@ -1302,6 +1275,14 @@
       var sendSection = e.target.closest("[data-crm-send-section]");
       if (sendSection) {
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
+        return;
+      }
+      var sortButton = e.target.closest("[data-crm-sort-field]");
+      if (sortButton) {
+        e.preventDefault();
+        if (setTableSort(sortButton.getAttribute("data-crm-sort-scope") || "", sortButton.getAttribute("data-crm-sort-field") || "")) {
+          renderSortScope(sortButton.getAttribute("data-crm-sort-scope") || "");
+        }
         return;
       }
       var filter = e.target.closest("[data-crm-filter]");

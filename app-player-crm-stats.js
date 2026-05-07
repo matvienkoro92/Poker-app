@@ -46,6 +46,8 @@ function initPlayerCrmStatsRuntime(deps) {
     var visitRepeat = visitsSummary && visitsSummary.repeat != null ? Number(visitsSummary.repeat) || 0 : Math.max(0, visitTotal - visitUnique);
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
+    var statPokerPlusUnlinked = summary ? Number(summary.pokerPlusUnlinked) || 0 : 0;
+    var statPokerPlusNet = statPokerPlus - statPokerPlusUnlinked;
     var statBotSubscribers = summary ? Number(summary.bot) || 0 : botSubscribers;
     var statPushSubscribers = summary ? Number(summary.push) || 0 : pushSubscribers;
     var statBotUnsubscribers = summary ? Number(summary.botUnsub) || 0 : botUnsubscribers;
@@ -104,8 +106,12 @@ function initPlayerCrmStatsRuntime(deps) {
       }
       if (it[3] === "pokerplus") {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
-          "<span class=\"player-crm__stat-hint\">привязали аккаунт</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
+          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
+          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Новые привязали</small><strong>+" + esc(intFmt(statPokerPlus)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отвязали</small><strong>−" + esc(intFmt(statPokerPlusUnlinked)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Итого за период</small><strong>" + esc(intFmt(statPokerPlusNet)) + "</strong></span>" +
+          "</span></button>";
       }
       if (it[3] === "generalMessages") {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
@@ -116,7 +122,7 @@ function initPlayerCrmStatsRuntime(deps) {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Новые подписки на бот</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Подписки</small><strong>+" + esc(intFmt(statBotSubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Подписки</small><strong>+" + esc(intFmt(statBotSubscribers)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statBotUnsubscribers)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statBotNet)) + "</strong></span>" +
           "</span></button>";
@@ -125,7 +131,7 @@ function initPlayerCrmStatsRuntime(deps) {
         return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Новые push-подписки</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Подписки</small><strong>+" + esc(intFmt(statPushSubscribers)) + "</strong></span>" +
+            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Подписки</small><strong>+" + esc(intFmt(statPushSubscribers)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statPushUnsubscribers)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statPushNet)) + "</strong></span>" +
           "</span></button>";

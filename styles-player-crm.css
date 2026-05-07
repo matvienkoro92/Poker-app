@@ -327,6 +327,12 @@
   background: rgba(248, 217, 138, 0.1);
   color: var(--text);
 }
+.player-crm__notice--warning {
+  margin-bottom: 10px;
+  border-color: rgba(248, 217, 138, 0.42);
+  background: rgba(248, 217, 138, 0.1);
+  color: var(--text);
+}
 .player-crm__stat,
 .player-crm__panel,
 .player-crm__segment-card,
@@ -412,6 +418,13 @@ button.player-crm__stat:focus-visible,
   gap: 6px;
   min-height: 112px;
 }
+.player-crm__stat--pokerplus,
+.player-crm__stat--bot,
+.player-crm__stat--push {
+  display: grid;
+  gap: 7px;
+  min-height: 140px;
+}
 .player-crm__stat--visits {
   display: grid;
   gap: 7px;
@@ -474,6 +487,17 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__stat-mini-grid--flow {
   margin-top: 6px;
+}
+.player-crm__stat-mini-row--plus small,
+.player-crm__stat-mini-row--plus strong {
+  color: #86efac;
+}
+.player-crm__stat-mini-row--plus {
+  border-color: rgba(74, 222, 128, 0.45);
+  background:
+    linear-gradient(180deg, rgba(34, 197, 94, 0.18), rgba(2, 6, 23, 0.24)),
+    rgba(22, 101, 52, 0.18);
+  box-shadow: inset 3px 0 0 rgba(74, 222, 128, 0.62);
 }
 .player-crm__stat-mini-row--minus small,
 .player-crm__stat-mini-row--minus strong {
@@ -1228,7 +1252,17 @@ button.player-crm__stat:focus-visible,
   min-width: 920px;
 }
 .player-crm__visit-sections-table {
-  min-width: 520px;
+  width: max-content;
+  min-width: 330px;
+  max-width: 100%;
+}
+.player-crm__visit-sections-table th:nth-child(2),
+.player-crm__visit-sections-table th:nth-child(3),
+.player-crm__visit-sections-table td:nth-child(2),
+.player-crm__visit-sections-table td:nth-child(3) {
+  width: 1%;
+  padding-left: 18px;
+  text-align: right;
 }
 .player-crm__table-link {
   display: inline;
@@ -1258,9 +1292,41 @@ button.player-crm__stat:focus-visible,
   text-align: left;
   white-space: nowrap;
 }
+.player-crm__source-table th:first-child,
+.player-crm__source-table td:first-child {
+  padding-left: 4px;
+}
 .player-crm__source-table th {
   color: var(--text-muted);
   font-weight: 800;
+}
+.player-crm__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: 0;
+}
+.player-crm__sort-btn:focus-visible {
+  outline: 2px solid rgba(248, 217, 138, 0.7);
+  outline-offset: 3px;
+}
+.player-crm__sort-mark {
+  min-width: 11px;
+  color: rgba(248, 217, 138, 0.58);
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+}
+.player-crm__sort-btn--active .player-crm__sort-mark {
+  color: var(--accent);
 }
 .footer-admin-visitors__btn--primary {
   border-color: rgba(56, 189, 248, 0.55);

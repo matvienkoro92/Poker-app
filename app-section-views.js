@@ -67,7 +67,6 @@
       if (typeof isLocalEnv === "function" && isLocalEnv() && !(document.getElementById("app") && document.getElementById("app").getAttribute("data-api-base"))) return;
     } catch (eL) {}
     try {
-      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
       var body =
         typeof pokerGuestOrAuthedPostBody === "function"
           ? pokerGuestOrAuthedPostBody({ section: section })
@@ -79,6 +78,14 @@
       }).catch(function () {});
     } catch (ePost) {}
   };
+  function recordCurrentViewOnce() {
+    var section = "";
+    try {
+      section = document.body && document.body.getAttribute ? document.body.getAttribute("data-view") || "" : "";
+    } catch (eBody) {}
+    if (!section) return;
+    window.pokerRecordSectionViewOpen(section);
+  }
   window.pokerInitAdminSectionViewsUi = function () {
     window.__pokerShowAdminSectionViews = true;
     ensureBars();
@@ -88,4 +95,9 @@
     });
     fetchCounts();
   };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { setTimeout(recordCurrentViewOnce, 600); });
+  } else {
+    setTimeout(recordCurrentViewOnce, 600);
+  }
 })();
