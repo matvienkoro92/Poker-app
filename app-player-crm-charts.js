@@ -15,6 +15,8 @@ function initPlayerCrmChartsRuntime(deps) {
   }
 
   var chartColors = {
+    visits: "#f8d98a",
+    users: "#60a5fa",
     players: "#f8d98a",
     registrations: "#60a5fa",
     poker21: "#c084fc",

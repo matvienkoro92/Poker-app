@@ -97,8 +97,8 @@ function initPlayerCrmStatsRuntime(deps) {
         return "<div class=\"player-crm__stat player-crm__stat--visits" + toneCls + "\"><span class=\"player-crm__stat-label\">Посещений</span>" +
           "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
           "<span class=\"player-crm__stat-mini-grid\">" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
-            "<button type=\"button\" data-crm-visits-modal><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
+            "<button type=\"button\" data-crm-visits-modal><small>Пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Из них новых</small><strong>" + esc(intFmt(visitNew)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
             "<button type=\"button\" data-crm-visits-sections-modal><small>Разделы</small><strong>Открыть</strong></button>" +
