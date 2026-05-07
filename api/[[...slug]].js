@@ -23,6 +23,7 @@ const handlers = {
   "pokerplus-competitions": () => require(path.join(handlersDir, "pokerplus-competitions.js")),
   "pokerplus-maintenance": () => require(path.join(handlersDir, "pokerplus-maintenance.js")),
   "player-crm": () => require(path.join(handlersDir, "player-crm.js")),
+  "player-crm-push-event": () => require(path.join(handlersDir, "player-crm-push-event.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
   "telegram-bot-webhook": () => require(path.join(handlersDir, "telegram-bot-webhook.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),

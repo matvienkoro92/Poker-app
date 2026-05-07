@@ -102,6 +102,9 @@ function pokerSwNotifyClientsChatPush(data) {
           tag: payload.tag || "poker-chat",
           title: payload.title || "Два туза",
           body: payload.body || "Новое сообщение в чате",
+          kind: payload.kind || "",
+          campaignId: payload.campaignId || "",
+          accountId: payload.accountId || "",
           at: Date.now(),
         });
       } catch (ePost) {}
@@ -125,6 +128,33 @@ function pokerSwNotifyClientsPushRepair(data) {
   });
 }
 
+function pokerSwNotificationData(data) {
+  var payload = data && typeof data === "object" ? data : {};
+  return {
+    openUrl: payload.openUrl || "./?startapp=club_chat",
+    tag: payload.tag || "poker-chat",
+    kind: payload.kind || "",
+    campaignId: payload.campaignId || "",
+    accountId: payload.accountId || "",
+  };
+}
+
+function pokerSwRecordCrmCampaignOpen(notificationData) {
+  var payload = notificationData && typeof notificationData === "object" ? notificationData : {};
+  if (payload.kind !== "crm_campaign" || !payload.campaignId) return Promise.resolve();
+  return fetch(self.location.origin + "/api/player-crm-push-event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "push_open",
+      campaignId: payload.campaignId || "",
+      accountId: payload.accountId || "",
+      tag: payload.tag || "",
+      openUrl: payload.openUrl || "",
+    }),
+  }).catch(function () {});
+}
+
 self.addEventListener("push", function (event) {
   var root = self.location.origin || "";
   var data = {
@@ -132,6 +162,9 @@ self.addEventListener("push", function (event) {
     body: "Новое сообщение в чате",
     openUrl: "./?startapp=club_chat",
     tag: "poker-chat",
+    kind: "",
+    campaignId: "",
+    accountId: "",
   };
   try {
     if (event.data) {
@@ -140,6 +173,9 @@ self.addEventListener("push", function (event) {
       if (j && j.body) data.body = j.body;
       if (j && j.openUrl) data.openUrl = j.openUrl;
       if (j && j.tag) data.tag = j.tag;
+      if (j && j.kind) data.kind = j.kind;
+      if (j && j.campaignId) data.campaignId = j.campaignId;
+      if (j && j.accountId) data.accountId = j.accountId;
     }
   } catch (e1) {}
   var iconUrl = root + "/assets/logo-two-aces.png";
@@ -151,7 +187,7 @@ self.addEventListener("push", function (event) {
     renotify: true,
     silent: false,
     vibrate: [180, 80, 120],
-    data: { openUrl: data.openUrl },
+    data: pokerSwNotificationData(data),
   };
   event.waitUntil(
     Promise.all([
@@ -167,7 +203,7 @@ self.addEventListener("push", function (event) {
             renotify: true,
             silent: false,
             vibrate: [180, 80, 120],
-            data: { openUrl: data.openUrl },
+            data: pokerSwNotificationData(data),
           });
         }),
       pokerSwNotifyClientsChatSound(),
@@ -178,7 +214,8 @@ self.addEventListener("push", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
-  var raw = (event.notification.data && event.notification.data.openUrl) || "./?startapp=club_chat";
+  var notificationData = event.notification.data || {};
+  var raw = notificationData.openUrl || "./?startapp=club_chat";
   var targetUrl;
   try {
     targetUrl = new URL(raw.replace(/^\.\//, "/"), self.location.origin).href;
@@ -233,28 +270,31 @@ self.addEventListener("notificationclick", function (event) {
     });
   }
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windowClients) {
-      var i;
-      var chosen = null;
-      for (i = 0; i < windowClients.length; i++) {
-        var c = windowClients[i];
-        if (c.url.indexOf(self.location.origin) === 0) {
-          if (!chosen) chosen = c;
-          if (c.visibilityState === "visible" || c.focused) {
-            chosen = c;
-            break;
+    Promise.all([
+      pokerSwRecordCrmCampaignOpen(notificationData),
+      clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windowClients) {
+        var i;
+        var chosen = null;
+        for (i = 0; i < windowClients.length; i++) {
+          var c = windowClients[i];
+          if (c.url.indexOf(self.location.origin) === 0) {
+            if (!chosen) chosen = c;
+            if (c.visibilityState === "visible" || c.focused) {
+              chosen = c;
+              break;
+            }
           }
         }
-      }
-      if (chosen) {
-        return chosen.focus().then(function () {
-          return notifyClientRobust(chosen);
-        }).catch(function () {
-          return reopenAndNotifyTarget();
-        });
-      }
-      return reopenAndNotifyTarget();
-    })
+        if (chosen) {
+          return chosen.focus().then(function () {
+            return notifyClientRobust(chosen);
+          }).catch(function () {
+            return reopenAndNotifyTarget();
+          });
+        }
+        return reopenAndNotifyTarget();
+      }),
+    ])
   );
 });
 

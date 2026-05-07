@@ -20,11 +20,12 @@ var CHAT_OPEN_BURST_MS = 1000;
 var CHAT_DIALOGS_IDLE_MS = 15000;
 var CHAT_DIALOGS_ACTIVE_IDLE_MS = 4000;
 var CHAT_DIALOGS_BURST_MS = 1000;
+var CHAT_PRESENCE_IDLE_MS = 45000;
 var CHAT_HIDDEN_IDLE_MS = 60000;
 var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
 var CHAT_LONG_POLL_TIMEOUT_MS = 18000;
 var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
-var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0 };
+var chatLastPollAt = { general: 0, personal: 0, contacts: 0, admins: 0, presence: 0 };
 var chatLongPollTimers = { general: 0, personal: 0, contacts: 0, updates: 0 };
 var chatLongPollTokens = { general: 0, personal: 0, contacts: 0, updates: 0 };
 
@@ -159,7 +160,7 @@ function pokerChatRunUpdatesLongPoll() {
   }
   if (pokerChatCanRunLongPoll("contacts")) {
     if (typeof window.__pokerContactsMetaPollRev === "string" && window.__pokerContactsMetaPollRev) {
-      qs += "&contactsRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
+      qs += "&contactsRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev) + "&skipPresence=1";
       hasRev = true;
     } else {
       loadContacts({ metaOnly: true });
@@ -187,6 +188,8 @@ function pokerChatRunUpdatesLongPoll() {
         pokerChatScheduleLongPoll("updates", 1200);
         return;
       }
+      var threadChanged = !!(data.changed && data.changed.thread);
+      var contactsChanged = !!(data.changed && data.changed.contacts);
       if (data.threadPollRev && typeof data.threadPollRev === "string") {
         if (threadScope === "general") window.__pokerGeneralPollRev = data.threadPollRev;
         else if (threadScope === "personal") window.__pokerPersonalPollRev = data.threadPollRev;
@@ -198,15 +201,16 @@ function pokerChatRunUpdatesLongPoll() {
         pokerChatRecordTrace("updates-wait", {
           rttMs: Math.max(0, Date.now() - Number(data.trace.serverNowMs || 0)),
           waited: !!data.waited,
-          threadChanged: !!(data.changed && data.changed.thread),
-          contactsChanged: !!(data.changed && data.changed.contacts),
+          threadChanged: threadChanged,
+          contactsChanged: contactsChanged,
         });
       }
-      if (data.changed && data.changed.thread) {
-        if (threadScope === "general") loadGeneral();
-        else if (threadScope === "personal") loadMessages();
+      if (threadChanged) {
+        /* updates already gave us the new rev; fetch the body without sinceRev to avoid an immediate notModified. */
+        if (threadScope === "general") loadGeneral({ skipPoll: true });
+        else if (threadScope === "personal") loadMessages({ skipPoll: true });
       }
-      if (data.changed && data.changed.contacts) loadContacts({ metaOnly: true });
+      if (contactsChanged) loadContacts({ metaOnly: true, skipPoll: true });
       pokerChatScheduleLongPoll("updates", 0);
     })
     .catch(function () {
@@ -230,6 +234,7 @@ function pokerChatRecordTrace(stage, data) {
       CHAT_DIALOGS_IDLE_MS: CHAT_DIALOGS_IDLE_MS,
       CHAT_DIALOGS_ACTIVE_IDLE_MS: CHAT_DIALOGS_ACTIVE_IDLE_MS,
       CHAT_DIALOGS_BURST_MS: CHAT_DIALOGS_BURST_MS,
+      CHAT_PRESENCE_IDLE_MS: CHAT_PRESENCE_IDLE_MS,
       CHAT_HIDDEN_IDLE_MS: CHAT_HIDDEN_IDLE_MS,
       CHAT_ACTIVITY_BURST_WINDOW_MS: CHAT_ACTIVITY_BURST_WINDOW_MS,
       CHAT_LONG_POLL_TIMEOUT_MS: CHAT_LONG_POLL_TIMEOUT_MS,

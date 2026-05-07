@@ -62,6 +62,29 @@ function initPlayerCrmStatsRuntime(deps) {
     var statPushNet = summary && summary.pushNet != null ? Number(summary.pushNet) || 0 : statPushSubscribers - statPushUnsubscribers;
     var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
     var statDepositCount = summary && summary.depositCount != null ? Number(summary.depositCount) || 0 : pd.reduce(function (sum, x) { return sum + (Number(x.depositCount) || 0); }, 0);
+    var current = summary && summary.current && typeof summary.current === "object" ? summary.current : null;
+    function activePlayerCount(days) {
+      var key = String(days);
+      return players.filter(function (p) {
+        if (!p) return false;
+        var periodDeposits = Number(p.deposits && p.deposits[key]) || 0;
+        var periodMessages = Number(p.messages && p.messages[key]) || 0;
+        var lastMessageDays = Number(p.lastMessageDays);
+        return periodDeposits > 0 || periodMessages > 0 || (isFinite(lastMessageDays) && lastMessageDays <= days);
+      }).length;
+    }
+    function currentValue(key, fallback) {
+      return current && current[key] != null ? Number(current[key]) || 0 : fallback;
+    }
+    var currentStats = [
+      ["В базе", currentValue("players", players.length), "сейчас", "base"],
+      ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
+      ["Poker21 всего", currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0), "сейчас", "pokerplus-total"],
+      ["Bot доступен", currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length), "сейчас", "bot-reach"],
+      ["Push доступен", currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length), "сейчас", "push-reach"],
+      ["Активны 7д", currentValue("active7", activePlayerCount(7)), "чат/депозиты", "active-7"],
+      ["Активны 30д", currentValue("active30", activePlayerCount(30)), "чат/депозиты", "active-30"],
+    ];
     if (summaryRegistrationCounts) {
       registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
       registrationEmailOnlyCount = Number(summaryRegistrationCounts.email) || 0;
@@ -176,8 +199,19 @@ function initPlayerCrmStatsRuntime(deps) {
         (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
         "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
     }
+    function currentCard(it) {
+      var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
+      var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
+      return "<div class=\"player-crm__stat player-crm__stat--current" + toneCls + "\"><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
+        "<span class=\"player-crm__stat-hint\">" + esc(it[2] || "сейчас") + "</span>" +
+        "<span class=\"player-crm__stat-value\">" + esc(intFmt(it[1])) + "</span></div>";
+    }
     el.innerHTML =
       periodWarning +
+      "<section class=\"player-crm__stats-section\" aria-label=\"Текущее состояние\">" +
+        "<div class=\"player-crm__stats-section-head\"><h3>Сейчас</h3><span>состояние базы</span></div>" +
+        "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\">" + currentStats.map(currentCard).join("") + "</div>" +
+      "</section>" +
       "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
       "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +

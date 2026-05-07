@@ -47,6 +47,7 @@ function initChatContactsLoader(opts) {
   var pokerHydrateOpenDmHeaderFromContacts = typeof opts.pokerHydrateOpenDmHeaderFromContacts === "function" ? opts.pokerHydrateOpenDmHeaderFromContacts : function () {};
   var getChatWithUserId = typeof opts.getChatWithUserId === "function" ? opts.getChatWithUserId : function () { return ""; };
   var CONTACTS_FETCH_TIMEOUT_MS = 32000;
+  var contactsFetchControllersByScope = {};
 
 function clearContactsLoadingSkeletonFallback(text) {
   var el = getContactsEl();
@@ -65,14 +66,15 @@ function buildContactsRequestUrl(opts) {
   opts = opts || {};
   var lastViewedParam = "";
   try {
-    var lv = Object.assign({}, getLastViewedPersonal() || {});
+    var lv = {};
     if (getLastViewedGeneral() != null) lv.general = getLastViewedGeneral();
-    lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
+    if (lv.general != null) lastViewedParam = "&lastViewed=" + encodeURIComponent(JSON.stringify(lv));
   } catch (eLvCt) {}
-  var extra = opts.metaOnly ? "&contactsMetaOnly=1" : "";
+  var extra = opts.presenceOnly ? "&contactsPresenceOnly=1" : (opts.metaOnly ? "&contactsMetaOnly=1" : "");
+  if (opts.metaOnly && !opts.includePresence) extra += "&skipPresence=1";
   if (opts.fastList) extra += "&contactsFast=1";
   if (opts.fastBare) extra += "&contactsBare=1";
-  if (opts.metaOnly && window.__pokerContactsMetaPollRev) {
+  if (opts.metaOnly && !opts.skipPoll && window.__pokerContactsMetaPollRev) {
     extra += "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerContactsMetaPollRev);
   }
   if (opts.metaOnly && opts.waitForChange && window.__pokerContactsMetaPollRev) {
@@ -87,9 +89,16 @@ function pokerFetchContactsJson(url, opts) {
   var controller = null;
   var timeoutId = null;
   var fetchOpts = { cache: "no-store" };
+  var scope = String(opts.scope || "default");
   try {
     if (typeof AbortController !== "undefined") {
+      if (!opts.noAbort && contactsFetchControllersByScope[scope]) {
+        try {
+          contactsFetchControllersByScope[scope].abort();
+        } catch (eAbortPrevContacts) {}
+      }
       controller = new AbortController();
+      contactsFetchControllersByScope[scope] = controller;
       fetchOpts.signal = controller.signal;
       timeoutId = setTimeout(function () {
         try {
@@ -103,6 +112,7 @@ function pokerFetchContactsJson(url, opts) {
       url: String(url || "").replace(/(initData|pwaSession|pwaVkSession)=([^&]*)/g, "$1=***"),
       startedAt: Date.now(),
       timeoutMs: timeoutMs,
+      scope: scope,
     };
   } catch (eTraceContactsStart) {}
   return fetch(url, fetchOpts)
@@ -119,8 +129,17 @@ function pokerFetchContactsJson(url, opts) {
       } catch (eTraceContactsDone) {}
       return data;
     })
+    .catch(function (err) {
+      if (err && err.name === "AbortError" && controller && contactsFetchControllersByScope[scope] !== controller) {
+        err.__pokerSuperseded = true;
+      }
+      throw err;
+    })
     .finally(function () {
       if (timeoutId) clearTimeout(timeoutId);
+      if (scope && contactsFetchControllersByScope[scope] === controller) {
+        delete contactsFetchControllersByScope[scope];
+      }
     });
 }
 
@@ -157,6 +176,33 @@ function mergeContactsMetaPayload(fullData, metaData) {
     contacts: nextContacts,
     contactsMetaOnly: false,
   });
+  return merged;
+}
+
+function mergeContactsPresencePayload(fullData, presenceData) {
+  if (!fullData || !fullData.ok || !Array.isArray(fullData.contacts)) return null;
+  if (!presenceData || !presenceData.ok || !presenceData.contactsPresenceOnly) return null;
+  var onlineById = presenceData.onlineById && typeof presenceData.onlineById === "object" ? presenceData.onlineById : {};
+  var nextContacts = fullData.contacts.map(function (row) {
+    if (!row || row.id == null) return row;
+    var key = String(row.id);
+    if (!Object.prototype.hasOwnProperty.call(onlineById, key)) return row;
+    return Object.assign({}, row, { online: !!onlineById[key] });
+  });
+  var nextOnlineCount = nextContacts.reduce(function (count, row) {
+    if (!row || row.isGroupChat) return count;
+    return count + (row.online ? 1 : 0);
+  }, 0);
+  var merged = Object.assign({}, fullData, presenceData, {
+    contacts: nextContacts,
+    contactsPresenceOnly: false,
+    onlineCount: nextOnlineCount,
+    participantsCount: fullData.participantsCount,
+  });
+  if (presenceData.generalChatOnlineCount == null) merged.generalChatOnlineCount = fullData.generalChatOnlineCount;
+  if (presenceData.generalChatParticipantsCount == null) {
+    merged.generalChatParticipantsCount = fullData.generalChatParticipantsCount;
+  }
   return merged;
 }
 
@@ -222,15 +268,16 @@ function loadContacts(opts) {
   try {
     pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
   } catch (eHydCt) {}
-  var isFullContactsLoad = !opts.metaOnly && !opts.waitForChange;
+  var presenceOnly = !!opts.presenceOnly;
+  var isFullContactsLoad = !opts.metaOnly && !opts.waitForChange && !presenceOnly;
   if (isFullContactsLoad && !opts.fastList && window.__pokerChatContactsFullLoadInFlight) {
     return;
   }
   var url = buildContactsRequestUrl(opts);
-  var contactsFetchGen = opts.fastList
+  var contactsFetchGen = (opts.fastList || presenceOnly)
     ? (window.__pokerContactsFetchGen || 0)
     : (window.__pokerContactsFetchGen || 0) + 1;
-  if (!opts.fastList) window.__pokerContactsFetchGen = contactsFetchGen;
+  if (!opts.fastList && !presenceOnly) window.__pokerContactsFetchGen = contactsFetchGen;
   if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = true;
   var contactsInstantFromCache = false;
   var metaOnly = !!opts.metaOnly;
@@ -454,10 +501,28 @@ function applyContactsApiResponse(data, opts) {
       } catch (eFastRichContactsStart) {}
     }, 80);
   }
-  pokerFetchContactsJson(url, { timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS })
+  var contactsFetchScope = presenceOnly
+    ? "presence"
+    : metaOnly
+      ? "meta"
+      : opts.fastList
+        ? (opts.fastBare ? "fast-bare" : "fast-rich")
+        : "full";
+  pokerFetchContactsJson(url, {
+    timeoutMs: opts.waitForChange ? CHAT_LONG_POLL_TIMEOUT_MS + 5000 : CONTACTS_FETCH_TIMEOUT_MS,
+    scope: contactsFetchScope,
+  })
     .then(function (data) {
       if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
+      if (data && data.ok && data.contactsPresenceOnly) {
+        var mergedPresenceData = mergeContactsPresencePayload(window.__pokerLastContactsApiData, data);
+        if (mergedPresenceData) {
+          applyContactsApiResponse(mergedPresenceData, { forceRerender: false });
+          fireContactsLoaded();
+        }
+        return;
+      }
       var contactsFetchDataState = pokerPrepareChatContactsFetchData(data, {
         metaOnly: metaOnly,
         waitForChange: opts.waitForChange,
@@ -483,6 +548,7 @@ function applyContactsApiResponse(data, opts) {
     })
     .catch(function (err) {
       if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = false;
+      if (err && err.name === "AbortError" && err.__pokerSuperseded) return;
       try {
         window.__pokerChatContactsLastError = {
           message: err && err.message ? String(err.message) : String(err || ""),

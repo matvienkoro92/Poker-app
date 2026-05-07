@@ -673,6 +673,7 @@
     if (el) el.textContent = players.length + " получателей";
     return players;
   }
+  var renderCampaigns = function () {};
 
   var playerCrmChartsRuntime = typeof initPlayerCrmChartsRuntime === "function"
     ? initPlayerCrmChartsRuntime({
@@ -718,6 +719,7 @@
     renderPokerPlusAccounts();
     renderSegments();
     renderBroadcastOptions();
+    renderCampaigns();
     renderAnalytics();
     syncPeriodInputs();
     syncTabs();
@@ -1265,6 +1267,7 @@
       periodLabel: periodLabel,
       chartPeriodLabel: chartPeriodLabel,
       periodData: periodData,
+      esc: esc,
       playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
       dateInSelectedPeriod: dateInSelectedPeriod,
       filteredPlayers: filteredPlayers,
@@ -1278,12 +1281,9 @@
       segments: segments
     })
     : {};
-  var channelLabel = playerCrmReportsRuntime.channelLabel || function (channel) {
-    if (channel === "push") return "push";
-    if (channel === "bot_push") return "бот + push";
-    return "бот";
-  };
+  var channelLabel = playerCrmReportsRuntime.channelLabel || function (channel) { return channel === "push" ? "push" : channel === "bot_push" ? "бот + push" : "бот"; };
   var sendCrmSectionData = playerCrmReportsRuntime.sendCrmSectionData || function () {};
+  renderCampaigns = playerCrmReportsRuntime.renderCampaigns || renderCampaigns;
 
   function bindOnce() {
     var root = document.getElementById("playerCrmView");

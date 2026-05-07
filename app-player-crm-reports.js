@@ -1,6 +1,7 @@
 function initPlayerCrmReportsRuntime(deps) {
   deps = deps || {};
   var state = deps.state || {};
+  var esc = deps.esc || function (value) { return String(value == null ? "" : value); };
   var money = deps.money || function (value) { return String(value == null ? "" : value); };
   var intFmt = deps.intFmt || function (value) { return String(Number(value) || 0); };
   var periodLabel = deps.periodLabel || function () { return ""; };
@@ -186,10 +187,47 @@ function initPlayerCrmReportsRuntime(deps) {
     });
   }
 
+  function campaignDateLabel(value) {
+    var ms = Date.parse(value || "");
+    if (!Number.isFinite(ms)) return "—";
+    try {
+      return new Date(ms).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return String(value || "").slice(0, 16).replace("T", " ");
+    }
+  }
+
+  function renderCampaigns() {
+    var el = document.getElementById("playerCrmCampaigns");
+    if (!el) return;
+    var rows = Array.isArray(state.campaigns) ? state.campaigns.slice(0, 12) : [];
+    if (!rows.length) {
+      el.innerHTML = "<div class=\"player-crm__notice\">Истории рассылок пока нет.</div>";
+      return;
+    }
+    el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__campaigns-table\"><thead><tr>" +
+      "<th>Дата</th><th>Канал</th><th>Аудитория</th><th>Бот отправлено</th><th>Push доставлено</th><th>Открыто</th><th>Клики</th><th>Уник.</th><th>Ошибки</th><th>ID</th>" +
+      "</tr></thead><tbody>" + rows.map(function (campaign) {
+        return "<tr>" +
+          "<td>" + esc(campaignDateLabel(campaign && campaign.createdAt)) + "</td>" +
+          "<td>" + esc(channelLabel(campaign && campaign.channel)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.audience)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.sentBot)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.sentPush)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.pushOpens)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.pushClicks)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.pushOpenUsers)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.failed)) + "</td>" +
+          "<td>" + esc(campaign && campaign.id ? campaign.id : "—") + "</td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
 
   return {
     channelLabel: channelLabel,
     buildCrmSectionReport: buildCrmSectionReport,
+    renderCampaigns: renderCampaigns,
     sendCrmSectionData: sendCrmSectionData
   };
 }

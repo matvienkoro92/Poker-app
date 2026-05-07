@@ -41,6 +41,7 @@ const PATTERNS = [
   "poker_app:avatar:*",
   "poker_app:pokerplus*",
   "poker_app:chat_push_*",
+  "poker_app:crm_*",
   "poker_app:gazette*",
   "poker_app:track_links:*",
   "poker_app:pikhanina_claimed_count",

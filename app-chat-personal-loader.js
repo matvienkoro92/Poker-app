@@ -71,6 +71,7 @@ function initChatPersonalLoader(opts) {
   var renderMessages = typeof opts.renderMessages === "function" ? opts.renderMessages : function () {};
   var fastPrependChatMessages = typeof opts.fastPrependChatMessages === "function" ? opts.fastPrependChatMessages : function () { return false; };
   var PERSONAL_FETCH_TIMEOUT_MS = 14000;
+  var personalFetchControllersByScope = {};
 
 function pokerFetchPersonalJson(url, opts) {
   opts = opts || {};
@@ -78,9 +79,16 @@ function pokerFetchPersonalJson(url, opts) {
   var controller = null;
   var timeoutId = null;
   var fetchOpts = { cache: "no-store" };
+  var scope = String(opts.scope || opts.peer || "default");
   try {
     if (typeof AbortController !== "undefined") {
+      if (!opts.noAbort && personalFetchControllersByScope[scope]) {
+        try {
+          personalFetchControllersByScope[scope].abort();
+        } catch (eAbortPrevPersonal) {}
+      }
       controller = new AbortController();
+      personalFetchControllersByScope[scope] = controller;
       fetchOpts.signal = controller.signal;
       timeoutId = setTimeout(function () {
         try {
@@ -95,6 +103,7 @@ function pokerFetchPersonalJson(url, opts) {
       url: String(url || "").replace(/(initData|pwaSession|pwaVkSession)=([^&]*)/g, "$1=***"),
       startedAt: Date.now(),
       timeoutMs: timeoutMs,
+      scope: scope,
     };
   } catch (eTracePersonalStart) {}
   return fetch(url, fetchOpts)
@@ -105,8 +114,17 @@ function pokerFetchPersonalJson(url, opts) {
         return data;
       });
     })
+    .catch(function (err) {
+      if (err && err.name === "AbortError" && controller && personalFetchControllersByScope[scope] !== controller) {
+        err.__pokerSuperseded = true;
+      }
+      throw err;
+    })
     .finally(function () {
       if (timeoutId) clearTimeout(timeoutId);
+      if (scope && personalFetchControllersByScope[scope] === controller) {
+        delete personalFetchControllersByScope[scope];
+      }
     });
 }
 
@@ -163,7 +181,7 @@ function loadMessages(opts) {
   var isGroupLoad = loadForPeer && String(loadForPeer).indexOf("group_") === 0;
   var loadPersonalSeq = (window.__pokerLoadPersonalSeq = (window.__pokerLoadPersonalSeq || 0) + 1);
   var pollQs = "";
-  if (typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
+  if (!opts.skipPoll && typeof window.__pokerPersonalPollRev === "string" && window.__pokerPersonalPollRev.length > 0) {
     pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerPersonalPollRev);
   }
   if (opts.waitForChange && pollQs) {
@@ -190,7 +208,7 @@ function loadMessages(opts) {
   var bareOpen = !opts.waitForChange && !usePersonalDiff && !opts.__fullOpen;
   var fastOpenQs = !opts.waitForChange && !usePersonalDiff ? "&fastOpen=1" : "";
   if (bareOpen) fastOpenQs += "&messagesBare=1";
-  var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + fastGroupQs + fastOpenQs + pollQs + diffQs;
+  var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(loadForPeer) + "&usersById=1" + fastGroupQs + fastOpenQs + pollQs + diffQs;
   if (bareOpen) {
     setTimeout(function () {
       try {
@@ -259,6 +277,9 @@ function loadMessages(opts) {
         ? String(prevPersonalMessages[prevPersonalMessages.length - 1].id || "") + "|" + String(prevPersonalMessages[prevPersonalMessages.length - 1].time || "")
         : "";
       var messages = data.messages || [];
+      if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+        messages = pokerHydrateChatMessagesFromUsersById(messages, data.usersById);
+      }
       if (data.partial === true && personalCacheBeforeReq.length) {
         messages = personalCacheBeforeReq.concat(messages || []);
       }
@@ -610,6 +631,7 @@ function loadMessages(opts) {
     }
   })
     .catch(function (err) {
+      if (err && err.name === "AbortError" && err.__pokerSuperseded) return;
       try {
         window.__pokerChatPersonalLastError = {
           peer: String(loadForPeer || ""),
@@ -658,6 +680,7 @@ window.__pokerLoadOlderPersonalMessages = function () {
       pokerApiAuthQuery("?") +
       "&with=" +
       encodeURIComponent(peerId) +
+      "&usersById=1" +
       "&beforeId=" +
       encodeURIComponent(String(oldest.id || "")) +
       "&beforeTime=" +
@@ -672,7 +695,11 @@ window.__pokerLoadOlderPersonalMessages = function () {
           return;
         }
         setPersonalHasMoreBefore(peerId, !!data.hasMoreBefore);
-        var merged = data.messages.concat(cache);
+        var olderMessages = data.messages;
+        if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+          olderMessages = pokerHydrateChatMessagesFromUsersById(olderMessages, data.usersById);
+        }
+        var merged = olderMessages.concat(cache);
         personalMessagesCache[peerId] = merged.slice();
         personalMessagesCacheMeta[peerId] = { ts: Date.now(), source: "live" };
         if (
@@ -682,7 +709,7 @@ window.__pokerLoadOlderPersonalMessages = function () {
         ) {
           var fastPrependedPersonal = fastPrependChatMessages(
             getMessagesEl(),
-            data.messages,
+            olderMessages,
             buildPersonalMessagesBodyHtml,
             getPersonalHasMoreBefore(peerId) ? "personal" : null,
             function () {

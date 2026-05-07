@@ -41,13 +41,13 @@ function initChatBootstrapPrefetchRuntime(opts) {
       window.__pokerChatBootstrapGen = genB;
       var lastVP = "";
       try {
-        var lvB = Object.assign({}, opts.lastViewedPersonal || {});
+        var lvB = {};
         if (opts.lastViewedGeneral != null) lvB.general = opts.lastViewedGeneral;
-        lastVP = "&lastViewed=" + encodeURIComponent(JSON.stringify(lvB));
+        if (lvB.general != null) lastVP = "&lastViewed=" + encodeURIComponent(JSON.stringify(lvB));
       } catch (eLvB) {}
       var qB = typeof opts.pokerApiAuthQuery === "function" ? opts.pokerApiAuthQuery("?") : "?";
       var urlContactsB = base + "/api/chat" + qB + "&mode=contacts" + lastVP;
-      var urlGeneralB = base + "/api/chat" + qB + "&mode=general&trackSeen=0";
+      var urlGeneralB = base + "/api/chat" + qB + "&mode=general&usersById=1&trackSeen=0";
       fetch(urlContactsB, { cache: "no-store" })
         .then(function (r) {
           return r.json();
@@ -78,6 +78,11 @@ function initChatBootstrapPrefetchRuntime(opts) {
         })
         .then(function (dg) {
           if (genB !== window.__pokerChatBootstrapGen) return;
+          if (dg && dg.ok && Array.isArray(dg.messages) && typeof pokerHydrateChatMessagesFromUsersById === "function") {
+            dg = Object.assign({}, dg, {
+              messages: pokerHydrateChatMessagesFromUsersById(dg.messages, dg.usersById),
+            });
+          }
           if (typeof opts.ingestBootstrapGeneralSnapshot === "function") opts.ingestBootstrapGeneralSnapshot(dg);
         })
         .catch(function () {});

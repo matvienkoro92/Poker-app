@@ -778,6 +778,24 @@ async function testChatCoreInvariants() {
     "thread preview compacts text",
   );
   assert.strictEqual(access.CLUB_CHAT_PENDING_KEY, "poker_app:club_chat_pending", "club pending key is stable");
+  const pendingCountCommands = [];
+  const previousClubChatRequireApplication = process.env.CLUB_CHAT_REQUIRE_APPLICATION;
+  process.env.CLUB_CHAT_REQUIRE_APPLICATION = "1";
+  let pendingReviewCount = 0;
+  try {
+    pendingReviewCount = await access.getClubChatPendingCount(async (commands) => {
+      pendingCountCommands.push(...commands);
+      return [{ result: ["tg_1001", "vk_2002", "mail_pending_3", "", "tg_1001"] }];
+    });
+  } finally {
+    process.env.CLUB_CHAT_REQUIRE_APPLICATION = previousClubChatRequireApplication;
+  }
+  assert.deepStrictEqual(
+    pendingCountCommands,
+    [["SMEMBERS", "poker_app:club_chat_pending"]],
+    "club pending count reads ids for filtering",
+  );
+  assert.strictEqual(pendingReviewCount, 2, "club pending badge ignores non-actionable ids");
   assert.strictEqual(unread.unreadHashKey("tg_1001"), "poker_app:chat_unread:tg_1001", "unread hash key is stable");
   assert.strictEqual(
     notifications.buildClubChatMiniAppLink("https://t.me/Poker_dvatuza_bot/DvaTuza)"),

@@ -22,6 +22,7 @@ function initChatClubAccessModal(opts) {
   var reloadContactsAfterClubAccessChange = typeof opts.reloadContactsAfterClubAccessChange === "function"
     ? opts.reloadContactsAfterClubAccessChange
     : function () {};
+  var ensureGlobalModalsHtml = typeof opts.ensureGlobalModalsHtml === "function" ? opts.ensureGlobalModalsHtml : null;
 
 function closeChatClubAccessModal() {
   var modal = document.getElementById("chatClubAccessModal");
@@ -29,6 +30,41 @@ function closeChatClubAccessModal() {
     modal.classList.add("chat-club-access-modal--hidden");
     modal.setAttribute("aria-hidden", "true");
   }
+}
+
+function bindChatClubAccessModalDelegation() {
+  var modal = document.getElementById("chatClubAccessModal");
+  if (!modal || modal.getAttribute("data-delegation-bound") === "1") return;
+  modal.setAttribute("data-delegation-bound", "1");
+  modal.addEventListener("click", function (e) {
+    var profBtn = e.target && e.target.closest ? e.target.closest("[data-club-profile]") : null;
+    if (profBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var puid = profBtn.getAttribute("data-club-uid");
+      var puname = profBtn.getAttribute("data-club-uname") || "";
+      if (puid && typeof window.openChatUserModalById === "function") {
+        window.openChatUserModalById(puid, puname);
+      }
+      return;
+    }
+    var closeTarget = e.target && e.target.closest ? e.target.closest("[data-chat-club-modal-close]") : null;
+    if (closeTarget && modal.contains(closeTarget)) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeChatClubAccessModal();
+      return;
+    }
+    var btn = e.target && e.target.closest ? e.target.closest("[data-club-act]") : null;
+    if (!btn || !modal.contains(btn)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var act = btn.getAttribute("data-club-act");
+    var uid = btn.getAttribute("data-club-uid");
+    if (act === "approve") clubAdminPatchAction("clubChatApprove", uid);
+    else if (act === "reject") clubAdminPatchAction("clubChatReject", uid);
+    else if (act === "revoke") clubAdminPatchAction("clubChatRevoke", uid);
+  });
 }
 
 function formatClubChatJoinedAt(iso) {
@@ -55,7 +91,22 @@ function openChatClubAccessModal() {
   var pendingSub = document.getElementById("chatClubAdminPendingSubtitle");
   var membersSub = document.getElementById("chatClubAdminMembersSubtitle");
   var hintEl = document.getElementById("chatClubAdminModalHint");
-  if (!modal || !pokerApiHasCredential()) return;
+  if (!pokerApiHasCredential()) return;
+  if (!modal) {
+    if (!openChatClubAccessModal._ensuringHtml && ensureGlobalModalsHtml) {
+      openChatClubAccessModal._ensuringHtml = true;
+      Promise.resolve(ensureGlobalModalsHtml())
+        .then(function () {
+          openChatClubAccessModal._ensuringHtml = false;
+          openChatClubAccessModal();
+        })
+        .catch(function () {
+          openChatClubAccessModal._ensuringHtml = false;
+        });
+    }
+    return;
+  }
+  bindChatClubAccessModalDelegation();
   if (pendingSub) pendingSub.textContent = "Заявки";
   if (membersSub) membersSub.textContent = "В чате";
   if (pendingEl) pendingEl.innerHTML = "<p class=\"chat-empty\">Загрузка…</p>";
@@ -179,35 +230,7 @@ function clubAdminPatchAction(action, userId) {
     });
 }
 
-(function initChatClubAccessModalDelegation() {
-  var modal = document.getElementById("chatClubAccessModal");
-  if (!modal || modal.getAttribute("data-delegation-bound") === "1") return;
-  modal.setAttribute("data-delegation-bound", "1");
-  modal.addEventListener("click", function (e) {
-    var profBtn = e.target && e.target.closest ? e.target.closest("[data-club-profile]") : null;
-    if (profBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      var puid = profBtn.getAttribute("data-club-uid");
-      var puname = profBtn.getAttribute("data-club-uname") || "";
-      if (puid && typeof window.openChatUserModalById === "function") {
-        window.openChatUserModalById(puid, puname);
-      }
-      return;
-    }
-    if (e.target && e.target.getAttribute && e.target.getAttribute("data-chat-club-modal-close")) {
-      closeChatClubAccessModal();
-      return;
-    }
-    var btn = e.target && e.target.closest ? e.target.closest("[data-club-act]") : null;
-    if (!btn) return;
-    var act = btn.getAttribute("data-club-act");
-    var uid = btn.getAttribute("data-club-uid");
-    if (act === "approve") clubAdminPatchAction("clubChatApprove", uid);
-    else if (act === "reject") clubAdminPatchAction("clubChatReject", uid);
-    else if (act === "revoke") clubAdminPatchAction("clubChatRevoke", uid);
-  });
-})();
+bindChatClubAccessModalDelegation();
 
   try {
     window.__pokerOpenChatClubAccessModal = openChatClubAccessModal;

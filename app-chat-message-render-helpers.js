@@ -90,6 +90,39 @@ function chatMessagesDomHasOptimisticNode(rootEl) {
     return false;
   }
 }
+function pokerHydrateChatMessagesFromUsersById(messages, usersById) {
+  var list = Array.isArray(messages) ? messages : [];
+  if (!usersById || typeof usersById !== "object" || !list.length) return list;
+  var fields = [
+    "fromName",
+    "fromDtId",
+    "fromAvatar",
+    "fromP21Id",
+    "fromPokerPlusVerified",
+    "fromRespect",
+    "fromStatusLevel",
+    "fromStatusValue",
+    "fromAdmin",
+  ];
+  return list.map(function (msg) {
+    if (!msg || msg.from == null) return msg;
+    var user = usersById[String(msg.from)];
+    if (!user || typeof user !== "object") return msg;
+    var next = msg;
+    for (var i = 0; i < fields.length; i++) {
+      var key = fields[i];
+      if (next[key] == null && user[key] != null) {
+        if (next === msg) next = Object.assign({}, msg);
+        next[key] = user[key];
+      }
+    }
+    if (next.fromName == null && user.name != null) {
+      if (next === msg) next = Object.assign({}, msg);
+      next.fromName = user.name;
+    }
+    return next;
+  });
+}
 function chatPokerPlusVerifiedBadgeHtml(isVerified) {
   return isVerified
     ? '<span class="chat-msg__verified" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>'

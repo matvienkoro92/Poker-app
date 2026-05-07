@@ -194,6 +194,7 @@ function initChatPollingLoop(opts) {
   var chatLastPollAt = state.chatLastPollAt || {};
   var CHAT_POLL_TICK_MS = constants.CHAT_POLL_TICK_MS || 1000;
   var CHAT_HIDDEN_IDLE_MS = constants.CHAT_HIDDEN_IDLE_MS || 60000;
+  var CHAT_PRESENCE_IDLE_MS = constants.CHAT_PRESENCE_IDLE_MS || 45000;
 
   if (currentInterval) clearInterval(currentInterval);
   var nextInterval = setInterval(function () {
@@ -224,6 +225,11 @@ function initChatPollingLoop(opts) {
     var generalView = getGeneralView();
     var convView = getConvView();
     var adminsView = getAdminsView();
+    var dialogsVisible = !!(
+      typeof document !== "undefined" &&
+      document.querySelector('[data-view="chat"].view--active') &&
+      document.querySelector(".chat-dialogs-view:not(.chat-dialogs-view--hidden)")
+    );
     if (
       activeTab === "general" &&
       generalView &&
@@ -237,6 +243,10 @@ function initChatPollingLoop(opts) {
     if (getChatWithUserId() && typeof loadMessages === "function" && !pokerChatCanRunLongPoll("personal") && pokerChatShouldRunPoll("personal", nowPoll)) loadMessages();
     if (credPoll && !guestPoll && typeof loadContacts === "function") {
       if (!pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) loadContacts({ metaOnly: true });
+      if (dialogsVisible && (!chatLastPollAt.presence || nowPoll - chatLastPollAt.presence >= CHAT_PRESENCE_IDLE_MS)) {
+        chatLastPollAt.presence = nowPoll;
+        loadContacts({ presenceOnly: true });
+      }
     } else if (
       activeTab === "admins" &&
       adminsView &&

@@ -102,6 +102,9 @@
 | `poker_app:crm_activity_events:<accountId>` | LIST JSON | `player-crm.js` | CRM-журнал событий игрока: депозит, игра, сообщение; используется для периодов 7/30/90 дней. |
 | `poker_app:crm_touches:<accountId>` | LIST JSON | `player-crm.js` | История CRM-касаний игрока: канал, сегмент, кампания, превью текста; используется антиспамом. |
 | `poker_app:crm_campaigns` | LIST JSON | `player-crm.js` | Последние черновики и отправленные CRM-кампании по бот/push-каналам. |
+| `poker_app:crm_campaign_metrics:<campaignId>` | HASH | `player-crm-push-event.js` | Счётчики push-кампании: открытия/клики, уникальные открывшие, последнее открытие. |
+| `poker_app:crm_campaign_events:<campaignId>` | LIST JSON | `player-crm-push-event.js` | Последние события открытия push-кампании из service worker. |
+| `poker_app:crm_campaign_open_users:<campaignId>` | SET | `player-crm-push-event.js` | Уникальные аккаунты, открывшие push-кампанию. |
 | `poker_app:crm_imports` | LIST JSON | `player-crm.js` | Метаданные последних импортов CRM-событий. |
 
 ## Legacy / Audit Notes

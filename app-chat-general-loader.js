@@ -58,6 +58,7 @@ function initChatGeneralLoader(opts) {
   var renderGeneralMessages = typeof opts.renderGeneralMessages === "function" ? opts.renderGeneralMessages : function () {};
   var fastPrependChatMessages = typeof opts.fastPrependChatMessages === "function" ? opts.fastPrependChatMessages : function () { return false; };
   var generalMessagesSignature = typeof opts.generalMessagesSignature === "function" ? opts.generalMessagesSignature : function () { return ""; };
+  var generalFetchController = null;
 
 function loadGeneral(opts) {
   opts = opts || {};
@@ -78,7 +79,7 @@ function loadGeneral(opts) {
     !getGeneralView().classList.contains("chat-general-view--hidden");
   var trackSeenQs = userActuallyViewingGeneral ? "" : "&trackSeen=0";
   var pollQs = "";
-  if (typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
+  if (!opts.skipPoll && typeof window.__pokerGeneralPollRev === "string" && window.__pokerGeneralPollRev.length > 0) {
     pollQs = "&poll=1&sinceRev=" + encodeURIComponent(window.__pokerGeneralPollRev);
   }
   if (opts.waitForChange && pollQs) {
@@ -99,9 +100,23 @@ function loadGeneral(opts) {
       diffQs += "&afterTime=" + encodeURIComponent(String(lastGeneralMsg.time));
     }
   }
-  var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general" + trackSeenQs + pollQs + diffQs;
+  var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&mode=general&usersById=1" + trackSeenQs + pollQs + diffQs;
   var loadGeneralSeq = (window.__pokerLoadGeneralSeq = (window.__pokerLoadGeneralSeq || 0) + 1);
-  fetch(url, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
+  var generalFetchOpts = { cache: "no-store" };
+  var controllerForGeneralReq = null;
+  try {
+    if (typeof AbortController !== "undefined") {
+      if (generalFetchController) {
+        try {
+          generalFetchController.abort();
+        } catch (eAbortPrevGeneral) {}
+      }
+      controllerForGeneralReq = new AbortController();
+      generalFetchController = controllerForGeneralReq;
+      generalFetchOpts.signal = controllerForGeneralReq.signal;
+    }
+  } catch (eGeneralAbortSetup) {}
+  fetch(url, generalFetchOpts).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); }).then(function (data) {
     if (loadGeneralSeq !== window.__pokerLoadGeneralSeq) return;
     if (data && data.notModified === true && data.pollRev) {
       if (data.trace && data.trace.serverNowMs) {
@@ -130,6 +145,9 @@ function loadGeneral(opts) {
       var noGeneralAccess =
         !chatIsAdmin && (access === "need_apply" || access === "pending" || access === "revoked");
       var messages = data.messages || [];
+      if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+        messages = pokerHydrateChatMessagesFromUsersById(messages, data.usersById);
+      }
       if (data.partial === true && generalCacheBeforeReq.length) {
         messages = generalCacheBeforeReq.concat(messages || []);
       }
@@ -306,7 +324,8 @@ function loadGeneral(opts) {
       updateGeneralInputLocked(false);
       if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
     }
-  }).catch(function () {
+  }).catch(function (err) {
+    if (err && err.name === "AbortError" && controllerForGeneralReq && generalFetchController !== controllerForGeneralReq) return;
     if (
       getChatActiveTab() === "general" &&
       getGeneralView() &&
@@ -319,6 +338,10 @@ function loadGeneral(opts) {
       updateGeneralInputLocked(false);
     }
     if (opts.waitForChange) pokerChatScheduleLongPoll("general", 1200);
+  }).finally(function () {
+    if (controllerForGeneralReq && generalFetchController === controllerForGeneralReq) {
+      generalFetchController = null;
+    }
   });
 }
 window.__pokerLoadOlderGeneralMessages = function () {
@@ -328,7 +351,7 @@ window.__pokerLoadOlderGeneralMessages = function () {
     var oldest = cache[0];
     var prevTop = getGeneralMessagesEl() ? getGeneralMessagesEl().scrollTop : 0;
     var prevHeight = getGeneralMessagesEl() ? getGeneralMessagesEl().scrollHeight : 0;
-    var q = "&mode=general&beforeId=" + encodeURIComponent(String(oldest.id || "")) + "&beforeTime=" + encodeURIComponent(String(oldest.time || ""));
+    var q = "&mode=general&usersById=1&beforeId=" + encodeURIComponent(String(oldest.id || "")) + "&beforeTime=" + encodeURIComponent(String(oldest.time || ""));
     fetch(base + "/api/chat" + pokerApiAuthQuery("?") + q, { cache: "no-store" })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; }); })
       .then(function (data) {
@@ -338,7 +361,11 @@ window.__pokerLoadOlderGeneralMessages = function () {
           return;
         }
         setGeneralHasMoreBefore(!!data.hasMoreBefore);
-        var merged = data.messages.concat(cache);
+        var olderMessages = data.messages;
+        if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+          olderMessages = pokerHydrateChatMessagesFromUsersById(olderMessages, data.usersById);
+        }
+        var merged = olderMessages.concat(cache);
         window._chatGeneralCache = Object.assign({}, window._chatGeneralCache || {}, { messages: merged });
         if (
           getGeneralMessagesEl() &&
@@ -347,7 +374,7 @@ window.__pokerLoadOlderGeneralMessages = function () {
         ) {
           var fastPrependedGeneral = fastPrependChatMessages(
             getGeneralMessagesEl(),
-            data.messages,
+            olderMessages,
             buildGeneralMessagesBodyHtml,
             getGeneralHasMoreBefore() ? "general" : null,
             function () {

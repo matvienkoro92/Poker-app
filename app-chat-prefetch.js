@@ -29,12 +29,16 @@ function prefetchPersonalMessages(userId) {
   if (shouldUsePersonalCache(userId)) return;
   personalPrefetchInFlight[userId] = true;
   var apiBase = typeof getApiBase === "function" ? getApiBase() : "";
-  var url = apiBase + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
+  var url = apiBase + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&usersById=1&trackSeen=0&fastOpen=1";
   fetch(url, { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.messages)) return;
-      personalMessagesCache[userId] = data.messages.slice();
+      var messages = data.messages;
+      if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+        messages = pokerHydrateChatMessagesFromUsersById(messages, data.usersById);
+      }
+      personalMessagesCache[userId] = messages.slice();
       personalMessagesCacheMeta[userId] = { ts: Date.now() };
       try {
         pokerWritePersonalPeerSnapshotToDisk(userId, personalMessagesCache[userId]);

@@ -643,7 +643,12 @@ function pokerApplyChatContactsMetaState(data, callbacks) {
   window.chatGeneralUnreadCount = genUnread;
   window.chatGeneralUnread = genUnread > 0;
   var total = data.participantsCount != null ? data.participantsCount : "—";
-  var online = data.onlineCount != null ? data.onlineCount : "—";
+  var prevOnline = "—";
+  try {
+    var prevStatsMatch = String(window.lastListStats || "").match(/·\s*([^ ]+)\s+онл/);
+    if (prevStatsMatch && prevStatsMatch[1]) prevOnline = prevStatsMatch[1];
+  } catch (ePrevListOnline) {}
+  var online = data.onlineCount != null ? data.onlineCount : prevOnline;
   window.lastListStats = total + " конт · " + online + " онл";
   if (typeof callbacks.updateHeaderStats === "function") callbacks.updateHeaderStats();
   if (data.generalChatParticipantsCount != null) {
@@ -651,7 +656,9 @@ function pokerApplyChatContactsMetaState(data, callbacks) {
       window._chatGeneralCache = { messages: [], generalMembers: [] };
     }
     window._chatGeneralCache.participantsCount = data.generalChatParticipantsCount;
-    window._chatGeneralCache.onlineCount = data.generalChatOnlineCount != null ? data.generalChatOnlineCount : 0;
+    if (data.generalChatOnlineCount != null) {
+      window._chatGeneralCache.onlineCount = data.generalChatOnlineCount;
+    }
     try {
       if (typeof callbacks.syncRoster === "function") callbacks.syncRoster();
     } catch (eRosterContacts) {}

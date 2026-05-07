@@ -1212,6 +1212,7 @@ function initChat() {
     reloadContactsAfterClubAccessChange: function () {
       loadContacts();
     },
+    ensureGlobalModalsHtml: typeof pokerEnsureGlobalModalsHtml === "function" ? pokerEnsureGlobalModalsHtml : null,
   });
 
   var showTemplatesMenu = initChatTemplatesModal({

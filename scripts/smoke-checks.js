@@ -823,6 +823,91 @@ add("Chat API supports fast/diff/poll responses", () =>
   ])
 );
 
+add("Chat updates fetch changed bodies without self-hit notModified", () =>
+  hasAll("client", [
+    "loadGeneral({ skipPoll: true })",
+    "loadMessages({ skipPoll: true })",
+    "loadContacts({ metaOnly: true, skipPoll: true })",
+    "\"&skipPresence=1\"",
+    "!opts.skipPoll && typeof window.__pokerGeneralPollRev",
+    "!opts.skipPoll && typeof window.__pokerPersonalPollRev",
+    "!opts.skipPoll && window.__pokerContactsMetaPollRev",
+  ]) &&
+  hasAll("chatHandlerRuntime", [
+    "Presence changes are intentionally excluded",
+    "online-only churn should not wake long-poll",
+  ])
+);
+
+add("Chat separates presence refresh from message/contact meta delivery", () =>
+  hasAll("client", [
+    "contactsPresenceOnly=1",
+    "loadContacts({ presenceOnly: true })",
+    "CHAT_PRESENCE_IDLE_MS",
+    "mergeContactsPresencePayload",
+    "opts.metaOnly && !opts.includePresence",
+  ]) &&
+  hasAll("chatHandlerRuntime", [
+    "const skipPresence",
+    "!skipPresence && idsForOnline.length > 0",
+    "if (!skipPresence) row.online",
+    "skipPresence ? {} : await buildGeneralChatStatsForContacts",
+  ]) &&
+  hasAll("chatRouteGetContacts", [
+    "contactsPresenceOnly",
+    "onlineById",
+    "contacts-presence",
+  ])
+);
+
+add("Chat updates use cheap Redis contact revisions", () =>
+  hasAll("chatHandlerRuntime", [
+    "CHAT_CONTACTS_UPDATE_REV_HASH",
+    "function contactsUpdateRevField",
+    "async function bumpContactsUpdateRev",
+    "async function getContactsUpdateRev",
+    "contacts-rev",
+  ]) &&
+  hasAll("chatRouteGetUpdates", [
+    "getContactsUpdateRev(myId)",
+    "const contactsPollRev = contactsSinceRev ?",
+  ]) &&
+  !has("chatRouteGetUpdates", "buildContactsMetaOnlyPayload") &&
+  !has("chatRouteGetUpdates", "computeContactsMetaPollRev") &&
+  hasAll("chatRouteGetContacts", [
+    "let contactsMetaPollRev = await getContactsUpdateRev(myId)",
+    "() => getContactsUpdateRev(myId)",
+    "buildContactsMetaOnlyPayload(myId, admin, req)",
+  ]) &&
+  hasAll("chatRoutePostSend", [
+    "await bumpContactsUpdateRev(gMetaPost.members)",
+    "await bumpContactsUpdateRev([myId, otherId])",
+  ]) &&
+  hasAll("chatRoutePostGroups", [
+    "await bumpContactsUpdateRev(allMembers)",
+    "await bumpContactsUpdateRev(metaAdd.members)",
+    "await bumpContactsUpdateRev(curMembersRm)",
+  ])
+);
+
+add("Chat message payload can use compact usersById metadata", () =>
+  hasAll("client", [
+    "usersById=1",
+    "pokerHydrateChatMessagesFromUsersById",
+    "data.usersById",
+  ]) &&
+  hasAll("chatRouteGetGeneral", [
+    "prepareChatMessagesUsersByIdResponse",
+    "usersById: preparedMessagesGen.usersById",
+    "stripChatMessageUserFields",
+  ]) &&
+  hasAll("chatRouteGetThread", [
+    "prepareChatMessagesUsersByIdResponse",
+    "usersById: preparedMessagesG.usersById",
+    "usersById: preparedMessagesDm.usersById",
+  ])
+);
+
 add("Chat API delegates GET and POST route handlers", () =>
   hasAll("chatHandler", [
     'module.exports = require("./chat-runtime")',

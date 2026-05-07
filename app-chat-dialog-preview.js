@@ -287,7 +287,7 @@ function initChatDialogPreviewRuntime(opts) {
     try {
       syncChatDialogPreviewAddFriendBtn();
     } catch (eSyncPrev0) {}
-    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&trackSeen=0&fastOpen=1";
+    var url = base + "/api/chat" + pokerApiAuthQuery("?") + "&with=" + encodeURIComponent(userId) + "&usersById=1&trackSeen=0&fastOpen=1";
     fetch(url, { cache: "no-store" })
       .then(function (r) {
         return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; });
@@ -313,7 +313,11 @@ function initChatDialogPreviewRuntime(opts) {
           avatarEl.style.display = "";
           avatarPh.style.display = "none";
         }
-        renderDialogPreviewMessagesInto(prevMsgEl, data.messages || []);
+        var previewMessages = data.messages || [];
+        if (typeof pokerHydrateChatMessagesFromUsersById === "function") {
+          previewMessages = pokerHydrateChatMessagesFromUsersById(previewMessages, data.usersById);
+        }
+        renderDialogPreviewMessagesInto(prevMsgEl, previewMessages);
         try {
           syncChatDialogPreviewAddFriendBtn();
         } catch (eSyncPrev1) {}
