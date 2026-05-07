@@ -138,7 +138,7 @@ function initAdminReportModal() {
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
-        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
     var rakeInput = tr.querySelector("[data-rakeback-rake]");
@@ -1026,6 +1026,22 @@ function initAdminReportModal() {
       if (!removeBtn) return;
       var row = removeBtn.closest("[data-rakeback-row]");
       if (!row) return;
+      var removeConfirmed = removeBtn.getAttribute("data-rakeback-remove-confirmed") === "1";
+      if (removeConfirmed) {
+        removeBtn.removeAttribute("data-rakeback-remove-confirmed");
+      } else if (typeof confirm === "function") {
+        removeConfirmed = confirm("Удалить эту запись?");
+      } else if (tg && tg.showConfirm) {
+        tg.showConfirm("Удалить эту запись?", function (ok) {
+          if (!ok) return;
+          removeBtn.setAttribute("data-rakeback-remove-confirmed", "1");
+          removeBtn.click();
+        });
+        return;
+      } else {
+        removeConfirmed = true;
+      }
+      if (!removeConfirmed) return;
       var dataRows = rakebackBody.querySelectorAll("[data-rakeback-row]");
       var groupId = row.getAttribute("data-rakeback-group") || "";
       if (row.getAttribute("data-rakeback-kind") === "base") {
