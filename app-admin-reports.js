@@ -11,12 +11,14 @@ function initAdminReportModal() {
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
+  var rakebackRoomTabs = modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : null;
   var rakebackTotalEl = document.getElementById("adminReportRakebackTotal");
   var rakebackTotalInput = document.getElementById("adminReportRakeback");
   var rakebackStatusEl = document.getElementById("adminReportRakebackStatus");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
+  var activeRakebackRoom = "P21";
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -112,10 +114,10 @@ function initAdminReportModal() {
   function normalizeRakebackRoom(room) {
     var raw = String(room || "").trim();
     var lower = raw.toLowerCase();
-    if (!raw || raw === "Покер21" || lower === "poker21" || lower === "покер21") return "P21";
-    if (raw === "Х" || lower === "x") return "X";
+    if (!raw || raw === "Покер21" || lower === "poker21" || lower === "покер21" || lower === "p21") return "P21";
+    if (raw === "Х" || lower === "x" || lower === "xpoker" || lower === "хпокер") return "X";
     if (raw === "Супрема" || lower === "suprema" || lower === "supr") return "Supr";
-    if (lower === "pp") return "PP";
+    if (lower === "pp" || lower === "pppoker") return "PP";
     return raw;
   }
 
@@ -161,6 +163,31 @@ function initAdminReportModal() {
     return tr;
   }
 
+  function getRakebackRowRoom(row) {
+    if (!row) return "P21";
+    var roomSelect = row.querySelector("[data-rakeback-room]");
+    return normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : row.getAttribute("data-rakeback-room") || "P21");
+  }
+
+  function setRakebackRoomTab(room) {
+    activeRakebackRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
+    if (rakebackRoomTabs && rakebackRoomTabs.length) {
+      rakebackRoomTabs.forEach(function (tab) {
+        var selected = normalizeRakebackRoom(tab.getAttribute("data-rakeback-room-tab")) === activeRakebackRoom;
+        tab.classList.toggle("admin-report-rakeback-room-tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+    }
+    syncRakebackTable();
+  }
+
+  function syncRakebackRoomVisibility() {
+    if (!rakebackBody) return;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      row.hidden = getRakebackRowRoom(row) !== activeRakebackRoom;
+    });
+  }
+
   function showRakebackStatus(message) {
     if (!rakebackStatusEl) return;
     rakebackStatusEl.textContent = message || "";
@@ -185,11 +212,15 @@ function initAdminReportModal() {
     updateRakebackRowActions(row);
   }
 
-  function ensureRakebackBaseRow() {
+  function ensureRakebackBaseRow(room) {
     if (!rakebackBody) return;
-    var rows = rakebackBody.querySelectorAll("[data-rakeback-row]");
-    if (rows.length > 0) return;
-    rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
+    var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
+    var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var hasRoomRow = rows.some(function (row) {
+      return getRakebackRowRoom(row) === targetRoom;
+    });
+    if (hasRoomRow) return;
+    rakebackBody.appendChild(createRakebackRow({ kind: "base", room: targetRoom }));
   }
 
   function isRakebackRowFilled(row) {
@@ -298,7 +329,7 @@ function initAdminReportModal() {
 
   function syncRakebackTable() {
     if (!rakebackBody) return 0;
-    ensureRakebackBaseRow();
+    ensureRakebackBaseRow(activeRakebackRoom);
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
       row.parentNode.removeChild(row);
     });
@@ -337,6 +368,7 @@ function initAdminReportModal() {
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       updateRakebackRowActions(row);
     });
+    syncRakebackRoomVisibility();
     var collected = collectRakebackRows(false);
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
@@ -377,7 +409,7 @@ function initAdminReportModal() {
 
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
-    rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
+    rakebackBody.appendChild(createRakebackRow({ kind: "base", room: activeRakebackRoom }));
     syncRakebackTable();
   }
 
@@ -1117,6 +1149,13 @@ function initAdminReportModal() {
   }
   if (rakebackAddBtn) {
     rakebackAddBtn.addEventListener("click", addRakebackBaseRow);
+  }
+  if (rakebackRoomTabs && rakebackRoomTabs.length) {
+    rakebackRoomTabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        setRakebackRoomTab(tab.getAttribute("data-rakeback-room-tab"));
+      });
+    });
   }
   if (rakebackBody) {
     rakebackBody.addEventListener("input", function () {
