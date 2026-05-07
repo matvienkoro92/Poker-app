@@ -144,7 +144,7 @@ function initAdminReportModal() {
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
-        (kind === "addon" ? "" : '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>') +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
@@ -241,7 +241,7 @@ function initAdminReportModal() {
   }
 
   function canAddRakebackAddon(row) {
-    if (!row || row.getAttribute("data-rakeback-kind") === "addon") return false;
+    if (!row) return false;
     return row.getAttribute("data-rakeback-saved") === "1" && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
   }
 
