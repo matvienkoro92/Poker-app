@@ -125,7 +125,7 @@ function initAdminReportModal() {
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
-        '<button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить доп. строку" aria-label="Добавить доп. строку">+</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить строку" aria-label="Добавить строку">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
@@ -241,7 +241,7 @@ function initAdminReportModal() {
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       var addBtn = row.querySelector("[data-rakeback-add-related]");
       var saved = row.getAttribute("data-rakeback-saved") === "1";
-      if (addBtn) addBtn.disabled = saved || kind === "addon" || !isRakebackRowFilled(row);
+      if (addBtn) addBtn.disabled = kind === "addon" || (!saved && !isRakebackRowFilled(row));
       var saveBtn = row.querySelector("[data-rakeback-save]");
       if (saveBtn) saveBtn.disabled = !isRakebackRowFilled(row);
     });
@@ -998,7 +998,8 @@ function initAdminReportModal() {
       var addRelated = e.target && e.target.closest ? e.target.closest("[data-rakeback-add-related]") : null;
       if (addRelated) {
         var baseRow = addRelated.closest("[data-rakeback-row]");
-        addRakebackRelatedRow(baseRow);
+        if (baseRow && baseRow.getAttribute("data-rakeback-saved") === "1") addRakebackBaseRow();
+        else addRakebackRelatedRow(baseRow);
         return;
       }
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
