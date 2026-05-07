@@ -68,8 +68,15 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     var chat = state.chatStats || {};
     var chatPeriodHint = periodLabel();
+    var visitsIncomplete = visitsSummary && visitsSummary.incomplete;
+    var firstVisitDate = visitsSummary && visitsSummary.firstTrackedDate ? String(visitsSummary.firstTrackedDate) : "";
+    var firstVisitDateLabel = firstVisitDate && firstVisitDate.length >= 10 ? firstVisitDate.slice(8, 10) + "." + firstVisitDate.slice(5, 7) : firstVisitDate;
     var periodWarning = summary && summary.historicalDataIncomplete
-      ? "<div class=\"player-crm__notice player-crm__notice--warning\">За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому CRM показывает нули только по датированным событиям этого периода.</div>"
+      ? "<div class=\"player-crm__notice player-crm__notice--warning\">" +
+        (visitsIncomplete && firstVisitDate
+          ? "За " + esc(periodLabel()) + " дневная история посещений начинается с " + esc(firstVisitDateLabel) + ", поэтому показаны только учтённые дневные посещения, а не полный месяц."
+          : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому CRM показывает нули только по датированным событиям этого периода.") +
+        "</div>"
       : "";
     function periodOnly(row) {
       return intFmt(row && row.period);
