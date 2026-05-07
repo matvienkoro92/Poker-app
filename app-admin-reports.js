@@ -120,7 +120,7 @@ function initAdminReportModal() {
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "Покер21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /></td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /></td>' +
+      '<td class="admin-report-rakeback-percent-cell"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /><label class="admin-report-rakeback-discount"><input type="checkbox" data-rakeback-discount15 /> <span>-15%</span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>' +
       '<td class="admin-report-rakeback-actions">' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
@@ -131,10 +131,12 @@ function initAdminReportModal() {
     var idInput = tr.querySelector("[data-rakeback-player-id]");
     var rakeInput = tr.querySelector("[data-rakeback-rake]");
     var percentInput = tr.querySelector("[data-rakeback-percent]");
+    var discountInput = tr.querySelector("[data-rakeback-discount15]");
     var addBtn = tr.querySelector("[data-rakeback-add-related]");
     if (idInput) idInput.value = data.playerId != null ? String(data.playerId) : "";
     if (rakeInput) rakeInput.value = data.rake != null && data.rake !== "" ? String(data.rake) : "";
     if (percentInput) percentInput.value = data.percent != null && data.percent !== "" ? String(data.percent) : "";
+    if (discountInput) discountInput.checked = !!(data.discount15 || data.subtract15);
     if (kind === "addon") {
       var roomSelect = tr.querySelector("[data-rakeback-room]");
       if (roomSelect) roomSelect.disabled = true;
@@ -150,6 +152,10 @@ function initAdminReportModal() {
     row.classList.toggle("admin-report-rakeback-row--saved", !!saved);
     row.setAttribute("data-rakeback-saved", saved ? "1" : "0");
     row.querySelectorAll("input").forEach(function (input) {
+      if (input.hasAttribute("data-rakeback-discount15")) {
+        input.disabled = !!saved;
+        return;
+      }
       input.readOnly = !!saved || (isAddon && input.hasAttribute("data-rakeback-player-id"));
     });
     row.querySelectorAll("select").forEach(function (select) {
@@ -179,6 +185,16 @@ function initAdminReportModal() {
     return !!id || rake !== 0 || percent !== 0;
   }
 
+  function getRakebackRowAmount(row) {
+    if (!row) return 0;
+    var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var percentInput = row.querySelector("[data-rakeback-percent]");
+    var discountInput = row.querySelector("[data-rakeback-discount15]");
+    var amount = parseReportNumber(rakeInput ? rakeInput.value : "") * parseReportNumber(percentInput ? percentInput.value : "") / 100;
+    if (discountInput && discountInput.checked) amount *= 0.85;
+    return amount;
+  }
+
   function collectRakebackRows(includeEmpty) {
     if (!rakebackBody) return [];
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
@@ -187,11 +203,14 @@ function initAdminReportModal() {
       var idInput = row.querySelector("[data-rakeback-player-id]");
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
+      var discountInput = row.querySelector("[data-rakeback-discount15]");
       var room = roomSelect && roomSelect.value ? String(roomSelect.value).trim() : "Покер21";
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
       var amount = rake * percent / 100;
+      var discount15 = !!(discountInput && discountInput.checked);
+      if (discount15) amount *= 0.85;
       var filled = !!playerId || rake !== 0 || percent !== 0 || amount !== 0;
       if (!includeEmpty && !filled) return null;
       return {
@@ -201,6 +220,7 @@ function initAdminReportModal() {
         playerId: playerId,
         rake: rake,
         percent: percent,
+        discount15: discount15,
         amount: Math.round(amount * 100) / 100,
       };
     }).filter(Boolean);
@@ -237,7 +257,7 @@ function initAdminReportModal() {
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
       var amountEl = row.querySelector("[data-rakeback-amount]");
-      var amount = parseReportNumber(rakeInput ? rakeInput.value : "") * parseReportNumber(percentInput ? percentInput.value : "") / 100;
+      var amount = getRakebackRowAmount(row);
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       var addBtn = row.querySelector("[data-rakeback-add-related]");
       var saved = row.getAttribute("data-rakeback-saved") === "1";
@@ -274,6 +294,7 @@ function initAdminReportModal() {
         playerId: row.playerId || row.id || "",
         rake: row.rake != null ? row.rake : "",
         percent: row.percent != null ? row.percent : "",
+        discount15: !!(row.discount15 || row.subtract15),
       }));
     });
     syncRakebackTable();
@@ -456,10 +477,11 @@ function initAdminReportModal() {
         var playerId = row.playerId != null ? String(row.playerId).trim() : "";
         if (!room && !playerId) return;
         var label = (row.weekTotal ? "Итого по неделе: " : "Рейкбек: ") + [room, playerId].filter(Boolean).join(" · ");
-        var amount = row.amount != null ? parseReportNumber(row.amount) : parseReportNumber(row.rake) * parseReportNumber(row.percent) / 100;
+        var baseAmount = parseReportNumber(row.rake) * parseReportNumber(row.percent) / 100;
+        var amount = row.amount != null ? parseReportNumber(row.amount) : (row.discount15 || row.subtract15 ? baseAmount * 0.85 : baseAmount);
         var value = row.weekTotal
           ? formatReportNumber(amount)
-          : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "% = " + formatReportNumber(amount);
+          : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(amount);
         parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(label) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(value) + "</span></div>");
       });
     }
