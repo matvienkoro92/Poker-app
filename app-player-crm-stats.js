@@ -46,6 +46,9 @@ function initPlayerCrmStatsRuntime(deps) {
     var visitRows = summary ? players : periodPlayers;
     var visitTotal = visitsSummary ? Number(visitsSummary.total) || 0 : visitRows.reduce(function (sum, p) { return sum + (Number(p && p.totals && p.totals.visits) || 0); }, 0);
     var visitUnique = visitsSummary ? Number(visitsSummary.unique) || 0 : visitRows.length;
+    var visitNew = visitsSummary && visitsSummary.new != null
+      ? Number(visitsSummary.new) || 0
+      : players.filter(function (p) { return dateInSelectedPeriod(p && p.firstSeenAt); }).length;
     var visitRepeat = visitsSummary && visitsSummary.repeat != null ? Number(visitsSummary.repeat) || 0 : Math.max(0, visitTotal - visitUnique);
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
@@ -96,6 +99,7 @@ function initPlayerCrmStatsRuntime(deps) {
           "<span class=\"player-crm__stat-mini-grid\">" +
             "<span class=\"player-crm__stat-mini-row\"><small>Всего посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
             "<button type=\"button\" data-crm-visits-modal><small>Уникальных пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
+            "<span class=\"player-crm__stat-mini-row\"><small>Из них новых</small><strong>" + esc(intFmt(visitNew)) + "</strong></span>" +
             "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
             "<button type=\"button\" data-crm-visits-sections-modal><small>Разделы</small><strong>Открыть</strong></button>" +
           "</span></div>";

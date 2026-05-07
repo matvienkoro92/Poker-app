@@ -428,7 +428,7 @@ button.player-crm__stat:focus-visible,
 .player-crm__stat--visits {
   display: grid;
   gap: 7px;
-  min-height: 140px;
+  min-height: 172px;
 }
 .player-crm__stat-mini-grid {
   display: grid;
