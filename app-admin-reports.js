@@ -123,6 +123,8 @@ function initAdminReportModal() {
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" placeholder="0" /></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount>0</span></td>' +
       '<td class="admin-report-rakeback-actions">' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-add-related title="Добавить доп. строку" aria-label="Добавить доп. строку">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--muted" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
@@ -140,6 +142,23 @@ function initAdminReportModal() {
       if (addBtn) addBtn.hidden = true;
     }
     return tr;
+  }
+
+  function setRakebackRowSaved(row, saved) {
+    if (!row) return;
+    var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
+    row.classList.toggle("admin-report-rakeback-row--saved", !!saved);
+    row.setAttribute("data-rakeback-saved", saved ? "1" : "0");
+    row.querySelectorAll("input").forEach(function (input) {
+      input.readOnly = !!saved || (isAddon && input.hasAttribute("data-rakeback-player-id"));
+    });
+    row.querySelectorAll("select").forEach(function (select) {
+      select.disabled = !!saved || isAddon;
+    });
+    var saveBtn = row.querySelector("[data-rakeback-save]");
+    var editBtn = row.querySelector("[data-rakeback-edit]");
+    if (saveBtn) saveBtn.hidden = !!saved;
+    if (editBtn) editBtn.hidden = !saved;
   }
 
   function ensureRakebackBaseRow() {
@@ -221,7 +240,10 @@ function initAdminReportModal() {
       var amount = parseReportNumber(rakeInput ? rakeInput.value : "") * parseReportNumber(percentInput ? percentInput.value : "") / 100;
       if (amountEl) amountEl.textContent = formatReportNumber(amount);
       var addBtn = row.querySelector("[data-rakeback-add-related]");
-      if (addBtn) addBtn.disabled = kind === "addon" || !isRakebackRowFilled(row);
+      var saved = row.getAttribute("data-rakeback-saved") === "1";
+      if (addBtn) addBtn.disabled = saved || kind === "addon" || !isRakebackRowFilled(row);
+      var saveBtn = row.querySelector("[data-rakeback-save]");
+      if (saveBtn) saveBtn.disabled = !isRakebackRowFilled(row);
     });
     var collected = collectRakebackRows(false);
     var total = collected.reduce(function (sum, row) {
@@ -977,6 +999,19 @@ function initAdminReportModal() {
       if (addRelated) {
         var baseRow = addRelated.closest("[data-rakeback-row]");
         addRakebackRelatedRow(baseRow);
+        return;
+      }
+      var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
+      if (saveBtn) {
+        var saveRow = saveBtn.closest("[data-rakeback-row]");
+        if (!saveRow || !isRakebackRowFilled(saveRow)) return;
+        syncRakebackTable();
+        setRakebackRowSaved(saveRow, true);
+        return;
+      }
+      var editBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-edit]") : null;
+      if (editBtn) {
+        setRakebackRowSaved(editBtn.closest("[data-rakeback-row]"), false);
         return;
       }
       var removeBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-remove]") : null;
