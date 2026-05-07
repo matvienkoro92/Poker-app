@@ -938,7 +938,11 @@
         state.loadingScope = "";
         state.loaded = true;
         renderAll();
-        if (shouldLoadHeavy) loadCrmHeavyData("heavy");
+        if (shouldLoadHeavy) {
+          setTimeout(function () {
+            loadCrmHeavyData("heavy");
+          }, 120);
+        }
         return true;
       });
   }
