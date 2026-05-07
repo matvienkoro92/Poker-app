@@ -531,29 +531,34 @@
 .admin-report-rakeback-room-tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 0;
   margin: 0 0 12px;
   padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid rgba(246, 211, 145, 0.42);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #11151c;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 .admin-report-rakeback-room-tab {
   min-height: 38px;
   padding: 6px 8px;
-  border: 2px solid rgba(246, 211, 145, 0.7);
-  border-radius: 8px;
-  background: #11151c;
+  border: 0;
+  border-right: 1px solid rgba(246, 211, 145, 0.42);
+  border-radius: 0;
+  background: transparent;
   color: #ffe7b0;
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
 }
+.admin-report-rakeback-room-tab:last-child {
+  border-right: 0;
+}
 .admin-report-rakeback-room-tab--active {
-  border-color: #f6d391;
   background: #f6d391;
   color: #11151c;
-  box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.28), inset 0 -3px 0 rgba(17, 21, 28, 0.18);
+  box-shadow: inset 0 -3px 0 rgba(17, 21, 28, 0.18);
 }
 .admin-report-rakeback-wrap {
   max-height: min(52vh, 440px);
