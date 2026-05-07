@@ -825,7 +825,7 @@
   }
   .admin-report-rakeback-table th:nth-child(1),
   .admin-report-rakeback-table td:nth-child(1) {
-    width: 11%;
+    width: 10%;
   }
   .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-table td:nth-child(2) {
@@ -833,19 +833,19 @@
   }
   .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-table td:nth-child(3) {
-    width: 17%;
+    width: 22%;
   }
   .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-table td:nth-child(4) {
-    width: 12%;
+    width: 10%;
   }
   .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-table td:nth-child(5) {
-    width: 7%;
+    width: 6%;
   }
   .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-table td:nth-child(6) {
-    width: 9%;
+    width: 8%;
   }
   .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-table td:nth-child(7) {
@@ -878,14 +878,19 @@
     font-size: 12px;
   }
   .admin-report-rakeback-rake-with-rest {
-    gap: 3px;
+    gap: 2px;
+  }
+  .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
+    padding-left: 3px;
+    padding-right: 3px;
+    font-size: 11px;
   }
   .admin-report-rakeback-rest {
-    min-width: 26px;
+    min-width: 25px;
     min-height: 24px;
-    padding: 0 3px;
+    padding: 0 2px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 9px;
   }
   .admin-report-rakeback-actions {
     justify-content: flex-start;
