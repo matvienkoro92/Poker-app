@@ -814,26 +814,26 @@
   }
   .admin-report-rakeback-table th,
   .admin-report-rakeback-table td {
-    padding: 4px 3px;
+    padding: 4px 2px;
   }
   .admin-report-rakeback-table th {
     font-size: 10px;
   }
   .admin-report-rakeback-table th:nth-child(1),
   .admin-report-rakeback-table td:nth-child(1) {
-    width: 12%;
+    width: 11%;
   }
   .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-table td:nth-child(2) {
-    width: 13%;
+    width: 17%;
   }
   .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-table td:nth-child(3) {
-    width: 18%;
+    width: 17%;
   }
   .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-table td:nth-child(4) {
-    width: 13%;
+    width: 12%;
   }
   .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-table td:nth-child(5) {
@@ -845,14 +845,17 @@
   }
   .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-table td:nth-child(7) {
-    width: 28%;
+    width: 27%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
     min-height: 32px;
-    padding: 4px 5px;
+    padding: 4px 4px;
     border-radius: 7px;
     font-size: 12px;
+  }
+  .admin-report-rakeback-input--id {
+    font-size: 11px;
   }
   .admin-report-rakeback-discount {
     width: 100%;
