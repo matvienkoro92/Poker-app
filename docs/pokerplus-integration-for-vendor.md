@@ -40,6 +40,7 @@ The current implementation has these important details:
 - `mail` is sent with the same letter casing that the user linked in our app. We keep a lowercase canonical email only for our own uniqueness checks, but PokerPlus receives the original linked email string.
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus without `mail`.
 - The initial bind request includes the Poker21 key, first as `ciphertext`.
+- A production bind on May 9, 2026 confirmed that Poker21 can require our stable `dtId` as `user_app_id`; Telegram numeric id was rejected for the same clean 6-character key.
 - The profile refresh request is email-based by default: it calls the same PokerPlus endpoint without `ciphertext` when the user has a linked email in our app.
 - If PokerPlus responds with `Binding failed` during email refresh, our backend still retries the common email case variants first, then retries with the saved encrypted `ciphertext` from the original key-based bind.
 - For linked players, refresh tries both the email saved at the original Poker21 bind time and the user's current linked email in our app.
@@ -188,6 +189,8 @@ For key-based bind, our backend sends the key-only request first. For compatibil
 For key-based bind, the current implementation omits `user_app_id` first because Poker21 treats the key as sufficient proof.
 
 If Poker21 rejects key-only binding, the backend tries numeric Telegram IDs linked to the same account and then the stable app account id (`dtId`). This covers Poker21 environments that bind the generated key to the Mini App's own account id rather than to the Telegram numeric id.
+
+Production note from May 9, 2026: account `ID400800` could not bind with Telegram numeric `user_app_id`; Poker21 returned `Binding failed`. The same normalized 6-character key succeeded after retrying `user_app_id = ID400800`. Keep this fallback in place.
 
 For email-based refresh and unbind, the implementation uses the numeric Telegram user ID when it was saved or available:
 

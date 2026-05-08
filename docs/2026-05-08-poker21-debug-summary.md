@@ -10,6 +10,8 @@ If a user has no Poker21 account linked in our app and enters a valid Poker21 ke
 
 Optional metadata (`mail`, `user_app_id`) can be retried only as compatibility fallbacks after the key-only request fails.
 
+Follow-up from May 9, 2026: a real production bind succeeded only after the backend retried `user_app_id` with the stable app account id (`dtId`, for example `ID400800`). Poker21 rejected the same clean 6-character key with the Telegram numeric `user_app_id` (`Binding failed`). Therefore `dtId` is a required bind fallback, especially for PWA/email profiles.
+
 ## Current binding algorithm
 
 Frontend sends the user-entered key to our backend as:
@@ -59,6 +61,7 @@ Backend then:
 - Added compatibility attempts for 6-character keys with `cipherText`, `key`, and `code` field names.
 - Extended those compatible key-field attempts to metadata fallbacks too, so a changed Poker21 payload shape like `key + user_app_id` is covered.
 - Added `dtId` as a key-bind `user_app_id` fallback after Telegram candidates, because Poker21's Mini App binding can reject a valid key when the external user id does not match the id used while generating the key.
+- Confirmed in production on May 9, 2026: the successful bind path for account `ID400800` used the `dtId` fallback; the key itself was clean (`length: 6`, ASCII/alphanumeric).
 - Kept `ciphertext` as the documented first field.
 - Stopped lowercasing or otherwise changing key letter casing.
 - Added whitespace, invisible-character cleanup, and Cyrillic lookalike normalization for manual copy/paste mistakes.
@@ -178,6 +181,7 @@ In that case, send Poker21 the safe attempt matrix from logs and ask which exact
 - First-time bind must not depend on Telegram ID match.
 - First-time bind must not depend on email match.
 - Email and Telegram ID are only fallbacks/metadata for compatibility.
+- `dtId` is the final `user_app_id` fallback and can be the required id for Poker21 Mini App key binding.
 - No linked Poker21 account means no Poker21 level.
 - Negative Poker21 stats should be visible.
 - Unbind should clear stale local data even when Poker21 says no remote binding exists.
