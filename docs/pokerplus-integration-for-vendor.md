@@ -132,7 +132,7 @@ Our backend then resolves:
 
 - `ciphertext` from the frontend request.
 - `mail` from the email linked to the user's account in our app, if available. The original letter casing is preserved for PokerPlus.
-- `user_app_id` from the user's numeric Telegram user ID. If the current session and the saved preferred account mapping have different Telegram IDs, our backend tries both numeric IDs.
+- `user_app_id` from the user's numeric Telegram user ID. If the current session and the saved account mappings have different Telegram IDs, our backend tries every numeric Telegram ID linked to the same internal account.
 - `token` from the PokerPlus `getToken` endpoint.
 
 `ciphertext` is sent and stored without changing letter casing. The frontend/backend only trim accidental whitespace around or inside a pasted key.
