@@ -439,7 +439,7 @@ function initProfilePokerPlus() {
     var refreshCiphertext = "";
     if (refresh) {
       body.refresh = "1";
-      refreshCiphertext = String(input && input.value ? input.value : "").trim().toUpperCase();
+      refreshCiphertext = String(input && input.value ? input.value : "").replace(/\s+/g, "").trim().slice(0, 64);
       if (refreshCiphertext) {
         input.value = refreshCiphertext;
         body.ciphertext = refreshCiphertext;
@@ -507,7 +507,7 @@ function initProfilePokerPlus() {
       setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
       return;
     }
-    var ciphertext = String(input.value || "").trim().toUpperCase();
+    var ciphertext = String(input.value || "").replace(/\s+/g, "").trim().slice(0, 64);
     var wasLinked = !!pokerPlusProfileLinked;
     input.value = ciphertext;
     if (!ciphertext) {
@@ -623,7 +623,7 @@ function initProfilePokerPlus() {
   if (input.dataset.bound !== "1") {
     input.dataset.bound = "1";
     input.addEventListener("input", function () {
-      input.value = String(input.value || "").replace(/\s+/g, "").toUpperCase().slice(0, 64);
+      input.value = String(input.value || "").replace(/\s+/g, "").slice(0, 64);
     });
   }
   renderPokerPlusStatsVisibilityToggle(false);

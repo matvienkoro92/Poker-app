@@ -135,6 +135,8 @@ Our backend then resolves:
 - `user_app_id` from the user's numeric Telegram user ID. If the current session and the saved preferred account mapping have different Telegram IDs, our backend tries both numeric IDs.
 - `token` from the PokerPlus `getToken` endpoint.
 
+`ciphertext` is sent and stored without changing letter casing. The frontend/backend only trim accidental whitespace around or inside a pasted key.
+
 Current `user_app_id` format:
 
 ```text
