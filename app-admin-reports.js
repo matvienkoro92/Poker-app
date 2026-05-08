@@ -107,6 +107,33 @@ function initAdminReportModal() {
     return "rb-" + Date.now().toString(36) + "-" + rakebackGroupSeq;
   }
 
+  function getCurrentRakebackOwnerId() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
+      if (authUser) users.push(authUser);
+    } catch (eAuthUser) {}
+    try {
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.user) users.push(rec.user);
+    } catch (eRec) {}
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i] || {};
+      var memberId = u.memberId != null ? String(u.memberId).trim() : "";
+      if (memberId) return memberId;
+      var rawId = u.id != null ? String(u.id).trim() : "";
+      if (!rawId) continue;
+      if (rawId.indexOf("tg_") === 0 || rawId.indexOf("vk_") === 0) return rawId;
+      if (u.is_vk || u.vk || u.vkId != null) return "vk_" + rawId.replace(/^vk_/, "");
+      return "tg_" + rawId.replace(/^tg_/, "");
+    }
+    return "";
+  }
+
   function getRakebackRoomOptions(selected) {
     selected = normalizeRakebackRoom(selected);
     var rooms = ["P21", "X", "Supr", "PP"];
@@ -134,7 +161,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
     tr.setAttribute("data-rakeback-group", groupId);
-    tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || "");
+    tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
@@ -301,7 +328,13 @@ function initAdminReportModal() {
     return amount;
   }
 
-  function collectRakebackRows(includeEmpty) {
+  function isCurrentRakebackOwner(ownerId) {
+    var currentOwnerId = getCurrentRakebackOwnerId();
+    ownerId = String(ownerId || "").trim();
+    return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
+  }
+
+  function collectRakebackRows(includeEmpty, currentOwnerOnly) {
     if (!rakebackBody) return [];
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     return rows.map(function (row) {
@@ -318,6 +351,8 @@ function initAdminReportModal() {
       var discount15 = !!(discountInput && discountInput.checked);
       var filled = !!playerId || rake !== 0 || percent !== 0 || amount !== 0;
       if (!includeEmpty && !filled) return null;
+      var ownerId = row.getAttribute("data-rakeback-owner") || "";
+      if (currentOwnerOnly && !isCurrentRakebackOwner(ownerId)) return null;
       return {
         groupId: row.getAttribute("data-rakeback-group") || "",
         kind: row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base",
@@ -328,7 +363,7 @@ function initAdminReportModal() {
         discount15: discount15,
         amount: Math.round(amount * 100) / 100,
         saved: row.getAttribute("data-rakeback-saved") === "1",
-        ownerId: row.getAttribute("data-rakeback-owner") || "",
+        ownerId: ownerId || getCurrentRakebackOwnerId(),
       };
     }).filter(Boolean);
   }
@@ -375,7 +410,7 @@ function initAdminReportModal() {
       updateRakebackRowActions(row);
     });
     syncRakebackRoomVisibility();
-    var collected = collectRakebackRows(false);
+    var collected = collectRakebackRows(false, true);
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
@@ -1370,7 +1405,7 @@ function initAdminReportModal() {
       return parseReportNumber(el.value);
     };
     var rakebackTotal = syncRakebackTable();
-    var rakebackRows = collectRakebackRows(false);
+    var rakebackRows = collectRakebackRows(false, true);
     var extraRows = modal.querySelectorAll(".admin-report-extra-row");
     var extraFields = [];
     var extraTotal = 0;
