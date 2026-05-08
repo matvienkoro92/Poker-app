@@ -556,9 +556,13 @@
   border-right: 0;
 }
 .admin-report-rakeback-room-tab--active {
-  background: #f6d391;
+  background: linear-gradient(180deg, #ffe7b0 0%, #d8a94f 100%);
   color: #11151c;
-  box-shadow: inset 0 -3px 0 rgba(17, 21, 28, 0.18);
+  text-shadow: none;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 245, 214, 0.42),
+    inset 0 -4px 0 rgba(17, 21, 28, 0.22),
+    0 0 18px rgba(246, 211, 145, 0.24);
 }
 .admin-report-rakeback-wrap {
   max-height: min(52vh, 440px);
