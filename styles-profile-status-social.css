@@ -125,6 +125,10 @@
 .profile-status--loading .profile-status__labels--cards {
   display: none;
 }
+.profile-status--unlinked .profile-status__progress-text,
+.profile-status--unlinked .profile-status__labels--cards {
+  display: none;
+}
 .profile-status__loading[hidden] {
   display: none !important;
 }

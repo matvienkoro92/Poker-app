@@ -589,6 +589,7 @@ function setProfileStatus(value) {
 }
 
 function setProfileStatusFromRake(value) {
+  var section = document.getElementById("profileStatusSection");
   var title = document.getElementById("profileStatusTitle");
   var progressText = document.getElementById("profileStatusProgressText");
   var input = document.getElementById("profileStatusInput");
@@ -598,11 +599,14 @@ function setProfileStatusFromRake(value) {
   if (!input || !visual) return;
   var status = pokerProfileStatusFromRake(value);
   POKER_PROFILE_CURRENT_STATUS_LEVEL = status.level;
+  if (section && section.classList) section.classList.remove("profile-status--unlinked");
   input.value = status.valuePercent;
   visual.style.setProperty("--status-value", String(status.valuePercent));
   if (title) {
+    title.hidden = false;
     title.textContent = "Ваш уровень " + status.level + " из 55";
   }
+  if (progressText) progressText.hidden = false;
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
   if (fish) {

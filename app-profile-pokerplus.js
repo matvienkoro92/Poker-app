@@ -100,8 +100,14 @@ function initProfilePokerPlus() {
   }
 
   function updateProfileStatusTextVisibility() {
+    var statusSection = document.getElementById("profileStatusSection");
+    if (statusSection && statusSection.classList) {
+      statusSection.classList.toggle("profile-status--unlinked", !pokerPlusProfileLinked);
+    }
     if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
+    if (!pokerPlusProfileLinked && profileStatusTitle) profileStatusTitle.textContent = "Статус Poker21";
     if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || !pokerPlusProfileLinked;
+    if (!pokerPlusProfileLinked && profileStatusProgressText) profileStatusProgressText.textContent = "";
     if (statusLinkHint) {
       var state = auth();
       statusLinkHint.hidden = !!pokerPlusProfileLoading || !!pokerPlusProfileLinked || !state.isVerified || !!state.isGuest;
