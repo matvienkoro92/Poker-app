@@ -1335,7 +1335,7 @@ function initAdminReportModal() {
         row.parentNode.removeChild(row);
       }
       syncRakebackTable();
-      saveRakebackDraftRows();
+      saveRakebackDraftRowsNow();
     });
   }
   if (modal) {
