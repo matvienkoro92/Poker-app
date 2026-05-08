@@ -530,6 +530,59 @@ async function testPokerPlusKeyBindFallbackMatrix(redis) {
   assert.strictEqual(redis.h("poker_app:pokerplus_user_ids").get("ID100001"), "P21-42", "bind stores PokerPlus user id");
 }
 
+async function testPokerPlusKeyBindFailurePrefersBindingFailed(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      let message = "Parameter error";
+      if (form.user_app_id && !form.mail) message = "Binding failed";
+      if (form.user_app_id && form.mail) message = "Player data not found";
+      return {
+        ok: true,
+        async json() { return { status: 0, message, data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  await assert.rejects(
+    () => bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "Player@Test.com"),
+    (err) => {
+      assert.strictEqual(err.message, "Binding failed", "bind failure keeps the real key rejection");
+      assert.ok(err.pokerPlusBindAttempts.length > 20, "bind failure keeps the full safe attempt matrix");
+      assert.strictEqual(err.pokerPlusBindAttemptsTotal, err.pokerPlusBindAttempts.length, "attempt total is recorded");
+      return true;
+    },
+  );
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -962,6 +1015,7 @@ async function main() {
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
+    ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

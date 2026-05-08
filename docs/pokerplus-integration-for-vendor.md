@@ -508,6 +508,8 @@ If the response has another status, or the HTTP request fails, our backend retur
 
 If the token appears to be expired or invalid, our backend requests a fresh token and retries the PokerPlus request once.
 
+For key-based bind, later email fallback attempts can return `Player data not found` even when an earlier key attempt returned `Binding failed`. In that case the frontend receives the key-focused Poker21 error, because the key rejection is the primary bind failure and the email error is only fallback noise.
+
 ## Current Implementation Summary
 
 Our integration matches the PokerPlus API documentation in:

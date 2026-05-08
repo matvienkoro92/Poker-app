@@ -62,7 +62,9 @@ Backend then:
 - Added whitespace, invisible-character cleanup, and Cyrillic lookalike normalization for manual copy/paste mistakes.
 - Made missing `POKERPLUS_STORAGE_SECRET` non-blocking: binding can succeed without it, but the key cannot be saved for future encrypted refresh.
 - Added safe server logs for failed bind attempts. Logs include attempted field names and whether optional metadata was present, but never include the actual key.
+- Server logs keep the full safe attempt matrix and include `attemptsTotal`, so the first key-only attempts are not lost when many email/Telegram fallbacks run.
 - Updated user-facing errors so we do not incorrectly claim that Telegram ID/email validation failed before a first-time key bind.
+- If any key-bind attempt returns `Binding failed`, the user-facing bind error prioritizes that key rejection over later email fallback errors such as `Player data not found`.
 
 ## Refresh behavior
 
@@ -134,7 +136,8 @@ Poker21 bind attempts failed
    - `keyField`: which field name was tried;
    - `userAppId`: `present` or `omitted`;
    - `mail`: `present` or `omitted`;
-   - `error`: Poker21's returned message.
+   - `error`: Poker21's returned message;
+   - `attemptsTotal`: total number of safe attempts made.
 
 The log does not print the user's Poker21 key.
 
