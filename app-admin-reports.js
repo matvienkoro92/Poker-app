@@ -20,6 +20,7 @@ function initAdminReportModal() {
   var rakebackGroupSeq = 0;
   var activeRakebackRoom = "P21";
   var rakebackDraftSaveTimer = null;
+  var rakebackDraftRefreshTimer = null;
   var loadingRakebackDraft = false;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
@@ -132,6 +133,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
     tr.setAttribute("data-rakeback-group", groupId);
+    tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || "");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
@@ -325,6 +327,7 @@ function initAdminReportModal() {
         discount15: discount15,
         amount: Math.round(amount * 100) / 100,
         saved: row.getAttribute("data-rakeback-saved") === "1",
+        ownerId: row.getAttribute("data-rakeback-owner") || "",
       };
     }).filter(Boolean);
   }
@@ -402,6 +405,7 @@ function initAdminReportModal() {
         rake: row.rake != null ? row.rake : "",
         percent: row.percent != null ? row.percent : "",
         discount15: !!(row.discount15 || row.subtract15),
+        ownerId: row.ownerId || row.authorId || "",
       });
       rakebackBody.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
@@ -610,7 +614,14 @@ function initAdminReportModal() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    }).catch(function () {});
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)) {
+          saveLocalRakebackDraftRows(data.rakebackDraft.rows);
+        }
+      })
+      .catch(function () {});
   }
 
   function saveRakebackDraftRows() {
@@ -625,6 +636,7 @@ function initAdminReportModal() {
   }
 
   function loadSharedRakebackDraftRows() {
+    if (rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement)) return;
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       fillRakebackTable(readRakebackDraftRows(), "");
@@ -643,6 +655,7 @@ function initAdminReportModal() {
         var localRows = readRakebackDraftRows();
         var rows = serverRows.length ? serverRows : localRows;
         shouldUploadLocalDraft = !serverRows.length && !!localRows.length;
+        saveLocalRakebackDraftRows(rows);
         fillRakebackTable(rows, "");
       })
       .catch(function () {
@@ -652,6 +665,25 @@ function initAdminReportModal() {
         loadingRakebackDraft = false;
         if (shouldUploadLocalDraft) saveRakebackDraftRowsNow();
       });
+  }
+
+  function isRakebackPanelActive() {
+    var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
+    return !!(panel && panel.classList.contains("admin-report-panel--active"));
+  }
+
+  function stopRakebackDraftRefresh() {
+    if (rakebackDraftRefreshTimer) clearInterval(rakebackDraftRefreshTimer);
+    rakebackDraftRefreshTimer = null;
+  }
+
+  function startRakebackDraftRefresh() {
+    stopRakebackDraftRefresh();
+    rakebackDraftRefreshTimer = setInterval(function () {
+      if (!modal || modal.getAttribute("aria-hidden") === "true") return;
+      if (!isRakebackPanelActive()) return;
+      loadSharedRakebackDraftRows();
+    }, 4000);
   }
 
   function setActiveTab(name) {
@@ -1176,6 +1208,7 @@ function initAdminReportModal() {
 
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
+    stopRakebackDraftRefresh();
     if (document.body) document.body.style.overflow = "";
   }
   function openModal() {
@@ -1190,6 +1223,7 @@ function initAdminReportModal() {
     setActiveTab("form");
     fillReportForm(null);
     loadSharedRakebackDraftRows();
+    startRakebackDraftRefresh();
     if (mayViewSent) loadSentReports();
   }
   btn.addEventListener("click", openModal);
@@ -1201,6 +1235,7 @@ function initAdminReportModal() {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
         if (name === "sent" && !canViewSentReports()) return;
         setActiveTab(name);
+        if (name === "rakeback") loadSharedRakebackDraftRows();
         if (name === "sent") loadSentReports();
       });
     });
