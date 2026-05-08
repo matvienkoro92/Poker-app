@@ -157,10 +157,13 @@
   var btn = document.getElementById("hallFishRatingBtn");
   var statusEl = document.getElementById("homeFishPoker21Status");
   if (!btn || !statusEl) return;
+  var loadedLinked = false;
   function applyStatus(data) {
     var linked = !!(data && data.ok && (data.pokerPlusVerified || data.p21Id));
+    if (!linked && loadedLinked) return;
     var level = data && data.level != null ? parseInt(data.level, 10) : NaN;
     var safeLevel = isFinite(level) && level > 0 ? level : 1;
+    loadedLinked = loadedLinked || linked;
     btn.classList.toggle("home-fish-rating-btn--linked", !!linked);
     statusEl.textContent = linked ? "Уровень " + safeLevel : "Привяжите Poker21";
   }
@@ -169,20 +172,33 @@
     if (typeof pokerRafflesApiQueryLeading === "function") return pokerRafflesApiQueryLeading();
     return "?initData=";
   }
-  var base = typeof getApiBase === "function" ? getApiBase() : "";
-  var q = authQuery();
-  if (!base || !q || q === "?initData=") {
-    applyStatus(null);
-    return;
+  function loadStatus(attempt) {
+    attempt = Number(attempt) || 0;
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    var q = authQuery();
+    if (!base || !hasCred || !q || q === "?initData=") {
+      if (attempt < 12) setTimeout(function () { loadStatus(attempt + 1); }, 500);
+      else applyStatus(null);
+      return;
+    }
+    try {
+      var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
+      if (cached) q += "&dtIdHint=" + encodeURIComponent(cached);
+    } catch (eHint) {}
+    fetch(base + "/api/users" + q, { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) { applyStatus(data); })
+      .catch(function () {
+        if (attempt < 12) setTimeout(function () { loadStatus(attempt + 1); }, 800);
+        else applyStatus(null);
+      });
   }
-  try {
-    var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
-    if (cached) q += "&dtIdHint=" + encodeURIComponent(cached);
-  } catch (eHint) {}
-  fetch(base + "/api/users" + q, { cache: "no-store" })
-    .then(function (r) { return r.json(); })
-    .then(function (data) { applyStatus(data); })
-    .catch(function () { applyStatus(null); });
+  loadStatus(0);
+  window.addEventListener("poker-telegram-auth", function () { loadStatus(0); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) loadStatus(0);
+  });
 })();
 
 // Логика кнопки "Начать игру"
