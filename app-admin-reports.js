@@ -128,6 +128,39 @@ function initAdminReportModal() {
     return String(rounded);
   }
 
+  function formatReportRubleNumber(n) {
+    var num = parseReportNumber(n);
+    if (!num) return "0";
+    return String(Math.round(num));
+  }
+
+  function copyReportText(text) {
+    var value = String(text != null ? text : "").trim();
+    if (!value) return Promise.reject(new Error("empty"));
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(value);
+    }
+    return new Promise(function (resolve, reject) {
+      var textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        if (document.execCommand("copy")) resolve();
+        else reject(new Error("copy"));
+      } catch (err) {
+        reject(err);
+      } finally {
+        textarea.parentNode.removeChild(textarea);
+      }
+    });
+  }
+
   function nextRakebackGroupId() {
     rakebackGroupSeq += 1;
     return "rb-" + Date.now().toString(36) + "-" + rakebackGroupSeq;
@@ -393,7 +426,7 @@ function initAdminReportModal() {
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
-      var amount = getRakebackRowAmount(row);
+      var amount = Math.round(getRakebackRowAmount(row));
       var discount15 = !!(discountInput && discountInput.checked);
       var filled = !!playerId || rake !== 0 || percent !== 0 || amount !== 0;
       if (!includeEmpty && !filled) return null;
@@ -407,7 +440,7 @@ function initAdminReportModal() {
         rake: rake,
         percent: percent,
         discount15: discount15,
-        amount: Math.round(amount * 100) / 100,
+        amount: amount,
         saved: row.getAttribute("data-rakeback-saved") === "1",
         ownerId: ownerId || getCurrentRakebackOwnerId(),
       };
@@ -452,7 +485,7 @@ function initAdminReportModal() {
         restEl.textContent = formatReportNumber(rake - previousRake);
       }
       var amount = getRakebackRowAmount(row);
-      if (amountEl) amountEl.textContent = formatReportNumber(amount);
+      if (amountEl) amountEl.textContent = formatReportRubleNumber(amount);
       updateRakebackRowActions(row);
     });
     syncRakebackRoomVisibility();
@@ -460,8 +493,8 @@ function initAdminReportModal() {
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
-    if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportNumber(total);
-    if (rakebackTotalInput) rakebackTotalInput.value = formatReportInputNumber(total);
+    if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportRubleNumber(total);
+    if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(total) || "");
     showRakebackStatus("");
     return total;
   }
@@ -1358,6 +1391,20 @@ function initAdminReportModal() {
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("click", function (e) {
+      var copyIdInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
+      if (copyIdInput) {
+        var copyRow = copyIdInput.closest("[data-rakeback-row]");
+        var copyId = copyIdInput.value ? String(copyIdInput.value).trim() : "";
+        if (copyRow && copyRow.getAttribute("data-rakeback-saved") === "1" && copyId) {
+          e.preventDefault();
+          copyReportText(copyId).then(function () {
+            showRakebackStatus("Скопировано");
+          }).catch(function () {
+            showRakebackAlert("Не удалось скопировать айди.");
+          });
+          return;
+        }
+      }
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
       if (saveBtn) {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
