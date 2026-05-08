@@ -516,7 +516,12 @@ async function testPokerPlusKeyBindFallbackMatrix(redis) {
     throw new Error("Unexpected fetch URL: " + u);
   };
 
-  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const { bindMiniAppPlayer, pokerPlusSafeKeyMeta } = require(path.join(root, "lib", "pokerplus"));
+  assert.deepStrictEqual(
+    pokerPlusSafeKeyMeta("A\u200BB\u0421123"),
+    { length: 6, ascii: true, alnum: true },
+    "safe key metadata normalizes without exposing the key",
+  );
   const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "A\u200BB\u0421123", "");
   assert.strictEqual(profile.pokerPlusUserId, "P21-42", "PokerPlus bind succeeds through key + user fallback");
   assert.deepStrictEqual(

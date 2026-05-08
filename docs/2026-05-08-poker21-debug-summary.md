@@ -137,7 +137,8 @@ Poker21 bind attempts failed
    - `userAppId`: `present` or `omitted`;
    - `mail`: `present` or `omitted`;
    - `error`: Poker21's returned message;
-   - `attemptsTotal`: total number of safe attempts made.
+   - `attemptsTotal`: total number of safe attempts made;
+   - `keyMeta`: safe key diagnostics (`length`, `ascii`, `alnum`) without the actual key.
 
 The log does not print the user's Poker21 key.
 
