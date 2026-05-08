@@ -23,6 +23,7 @@ function initAdminReportModal() {
   var activeRakebackRoom = "P21";
   var rakebackDraftSaveTimer = null;
   var rakebackDraftRefreshTimer = null;
+  var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var loadingRakebackDraft = false;
   if (!btn || !modal) return;
@@ -310,8 +311,20 @@ function initAdminReportModal() {
 
   function showRakebackStatus(message) {
     if (!rakebackStatusEl) return;
+    if (rakebackStatusClearTimer) {
+      clearTimeout(rakebackStatusClearTimer);
+      rakebackStatusClearTimer = null;
+    }
     rakebackStatusEl.textContent = message || "";
     rakebackStatusEl.hidden = !message;
+  }
+
+  function showRakebackStatusBriefly(message) {
+    showRakebackStatus(message);
+    rakebackStatusClearTimer = setTimeout(function () {
+      rakebackStatusClearTimer = null;
+      if (rakebackStatusEl && rakebackStatusEl.textContent === message) showRakebackStatus("");
+    }, 1000);
   }
 
   function showRakebackAlert(message) {
@@ -1445,7 +1458,7 @@ function initAdminReportModal() {
         if (copyRow && copyRow.getAttribute("data-rakeback-saved") === "1" && copyId) {
           e.preventDefault();
           copyReportText(copyId).then(function () {
-            showRakebackStatus("Скопировано");
+            showRakebackStatusBriefly("Скопировано");
           }).catch(function () {
             showRakebackAlert("Не удалось скопировать айди.");
           });
