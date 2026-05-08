@@ -33,6 +33,15 @@ function initAdminReportModal() {
   var VIKA_AUTHOR_ID = "tg_1897001087";
   var VIKA_TELEGRAM_NUM = 1897001087;
   var PP_RAKEBACK_TEMPLATE_IDS = ["552903", "435607", "590773", "563356", "635675", "347375"];
+  var SUPR_RAKEBACK_TEMPLATE_IDS = [
+    "1048441", "527634", "831611", "889188", "517643", "1682364", "1650900", "1165667",
+    "605232", "776949", "1550929", "543758", "1162188", "1408160", "1525558", "830328",
+    "859380", "1195602", "923422", "1375569", "1551750", "713977", "993270", "1023438",
+    "999691", "854809", "1262781", "1072049", "1375862", "764750", "973916", "1221334",
+    "1346459", "1190499", "1237899", "1069215", "712970", "1185486", "1050952", "865362",
+    "1053772", "1285806", "1611851", "630124", "1377722", "1575192", "1570839", "1102639",
+    "725076", "885558", "1073571", "1459747", "802380", "1509751", "1411436", "1308425"
+  ];
 
   function canViewSentReports() {
     try {
@@ -353,26 +362,31 @@ function initAdminReportModal() {
     updateRakebackRowActions(row);
   }
 
+  function ensureRakebackTemplateRows(room, playerIds) {
+    if (!rakebackBody || !Array.isArray(playerIds) || !playerIds.length) return false;
+    var normalizedRoom = normalizeRakebackRoom(room);
+    var existingIds = {};
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      if (getRakebackRowRoom(row) !== normalizedRoom) return;
+      var idInput = row.querySelector("[data-rakeback-player-id]");
+      var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
+      if (playerId) existingIds[playerId] = true;
+    });
+    var addedTemplates = false;
+    playerIds.forEach(function (playerId) {
+      if (existingIds[playerId]) return;
+      rakebackBody.appendChild(createRakebackRow({ kind: "base", room: normalizedRoom, playerId: playerId }));
+      existingIds[playerId] = true;
+      addedTemplates = true;
+    });
+    return addedTemplates;
+  }
+
   function ensureRakebackBaseRow(room) {
     if (!rakebackBody) return;
     var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
-    if (targetRoom === "PP") {
-      var existingPpIds = {};
-      Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
-        if (getRakebackRowRoom(row) !== "PP") return;
-        var idInput = row.querySelector("[data-rakeback-player-id]");
-        var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
-        if (playerId) existingPpIds[playerId] = true;
-      });
-      var addedTemplates = false;
-      PP_RAKEBACK_TEMPLATE_IDS.forEach(function (playerId) {
-        if (existingPpIds[playerId]) return;
-        rakebackBody.appendChild(createRakebackRow({ kind: "base", room: "PP", playerId: playerId }));
-        existingPpIds[playerId] = true;
-        addedTemplates = true;
-      });
-      if (addedTemplates) return;
-    }
+    if (targetRoom === "PP" && ensureRakebackTemplateRows("PP", PP_RAKEBACK_TEMPLATE_IDS)) return;
+    if (targetRoom === "Supr" && ensureRakebackTemplateRows("Supr", SUPR_RAKEBACK_TEMPLATE_IDS)) return;
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom;
