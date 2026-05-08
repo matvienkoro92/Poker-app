@@ -588,6 +588,63 @@ async function testPokerPlusKeyBindFailurePrefersBindingFailed(redis) {
   );
 }
 
+async function testPokerPlusKeyBindFallsBackToAccountId(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  const attempts = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      attempts.push(form);
+      if (form.ciphertext === "ABC123" && form.user_app_id === "ID100001" && !form.mail) {
+        return {
+          ok: true,
+          async json() { return { status: 1, message: "success", data: { Id: "P21-DTID" }, code: 0 }; },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: form.user_app_id ? "Binding failed" : "Parameter error", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "");
+  assert.strictEqual(profile.pokerPlusUserId, "P21-DTID", "bind can fall back to dtId as user_app_id");
+  assert.ok(
+    attempts.some((payload) => payload.user_app_id === "ID100001" && payload.ciphertext === "ABC123"),
+    "bind attempts account id after Telegram candidates",
+  );
+  assert.strictEqual(redis.h("poker_app:pokerplus_telegram_values").get("ID100001"), "ID100001", "successful dtId user_app_id is saved for refresh");
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1021,6 +1078,7 @@ async function main() {
     ["profile/user lookup", testProfileUserLookup],
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
+    ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

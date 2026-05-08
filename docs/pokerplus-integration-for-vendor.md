@@ -135,7 +135,7 @@ Our backend then resolves:
 
 - `ciphertext` from the frontend request.
 - `mail` from the email linked to the user's account in our app, if available. For key-based bind, the backend first omits `mail` because the key itself is sufficient proof, then retries email variants as compatibility fallbacks.
-- `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
+- `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account, then the stable app account id (`dtId`) as a final compatibility fallback.
 - `token` from the PokerPlus `getToken` endpoint.
 
 The key is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace, remove invisible zero-width copy/paste characters, and normalize Cyrillic lookalike characters that can appear during manual entry.
@@ -186,6 +186,8 @@ For key-based bind, our backend sends the key-only request first. For compatibil
 ## `user_app_id`
 
 For key-based bind, the current implementation omits `user_app_id` first because Poker21 treats the key as sufficient proof.
+
+If Poker21 rejects key-only binding, the backend tries numeric Telegram IDs linked to the same account and then the stable app account id (`dtId`). This covers Poker21 environments that bind the generated key to the Mini App's own account id rather than to the Telegram numeric id.
 
 For email-based refresh and unbind, the implementation uses the numeric Telegram user ID when it was saved or available:
 
@@ -518,7 +520,7 @@ Our integration matches the PokerPlus API documentation in:
 - HTTP method: `POST`.
 - Request body type: `form-data`.
 - Token flow via `getToken`.
-- Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; each fallback still tries the compatible key field names; `token` is always sent.
+- Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; `user_app_id` tries Telegram numeric IDs and then `dtId`; each fallback still tries the compatible key field names; `token` is always sent.
 - Unbind fields: `user_app_id`, `token`.
 - Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
 - Tables endpoint: `getPlayingTables`.

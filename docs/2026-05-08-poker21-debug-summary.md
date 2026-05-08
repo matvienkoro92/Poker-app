@@ -47,7 +47,8 @@ Backend then:
    - `code`
 7. Only after the key-only attempts fail, retries the same compatible key fields with optional metadata:
    - linked email variants in `mail`;
-   - numeric Telegram IDs in `user_app_id`.
+   - numeric Telegram IDs in `user_app_id`;
+   - the stable app account id (`dtId`) in `user_app_id` as a final compatibility fallback.
 8. On success, stores the returned Poker21 player ID in Redis and marks the app profile as Poker21 verified.
 
 ## What we changed
@@ -57,6 +58,7 @@ Backend then:
 - Changed the first bind attempt to omit both `mail` and `user_app_id`.
 - Added compatibility attempts for 6-character keys with `cipherText`, `key`, and `code` field names.
 - Extended those compatible key-field attempts to metadata fallbacks too, so a changed Poker21 payload shape like `key + user_app_id` is covered.
+- Added `dtId` as a key-bind `user_app_id` fallback after Telegram candidates, because Poker21's Mini App binding can reject a valid key when the external user id does not match the id used while generating the key.
 - Kept `ciphertext` as the documented first field.
 - Stopped lowercasing or otherwise changing key letter casing.
 - Added whitespace, invisible-character cleanup, and Cyrillic lookalike normalization for manual copy/paste mistakes.
