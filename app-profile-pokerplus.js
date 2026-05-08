@@ -70,6 +70,8 @@ function initProfilePokerPlus() {
   var pokerPlusStatsVisibleToOthers = false;
   var pokerPlusProfileLinked = false;
   var pokerPlusProfileLoading = false;
+  var pokerPlusAccountId = "";
+  var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
 
   function setFeedback(text, tone) {
     if (!feedback) return;
@@ -101,6 +103,39 @@ function initProfilePokerPlus() {
         return POKERPLUS_KEY_LOOKALIKE_MAP[ch] || ch;
       })
       .slice(0, 64);
+  }
+
+  function pokerPlusLocalCiphertextKey(accountId) {
+    var id = String(accountId || "").trim();
+    return id ? POKERPLUS_LOCAL_CIPHERTEXT_KEY + ":" + id : POKERPLUS_LOCAL_CIPHERTEXT_KEY;
+  }
+
+  function savePokerPlusLocalCiphertext(accountId, ciphertext) {
+    var normalized = normalizePokerPlusKeyInput(ciphertext || "");
+    if (!normalized) return;
+    try {
+      localStorage.setItem(POKERPLUS_LOCAL_CIPHERTEXT_KEY, normalized);
+      localStorage.setItem(pokerPlusLocalCiphertextKey(accountId), normalized);
+    } catch (eSaveLocalP21Key) {}
+  }
+
+  function readPokerPlusLocalCiphertext(accountId) {
+    try {
+      return normalizePokerPlusKeyInput(
+        localStorage.getItem(pokerPlusLocalCiphertextKey(accountId)) ||
+        localStorage.getItem(POKERPLUS_LOCAL_CIPHERTEXT_KEY) ||
+        ""
+      );
+    } catch (eReadLocalP21Key) {
+      return "";
+    }
+  }
+
+  function clearPokerPlusLocalCiphertext(accountId) {
+    try {
+      localStorage.removeItem(pokerPlusLocalCiphertextKey(accountId));
+      localStorage.removeItem(POKERPLUS_LOCAL_CIPHERTEXT_KEY);
+    } catch (eClearLocalP21Key) {}
   }
 
   function auth() {
@@ -474,9 +509,9 @@ function initProfilePokerPlus() {
     var refreshCiphertext = "";
     if (refresh) {
       body.refresh = "1";
-      refreshCiphertext = pokerPlusProfileLinked ? "" : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
+      refreshCiphertext = pokerPlusProfileLinked ? readPokerPlusLocalCiphertext(pokerPlusAccountId) : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
       if (refreshCiphertext) {
-        input.value = refreshCiphertext;
+        if (!pokerPlusProfileLinked) input.value = refreshCiphertext;
         body.ciphertext = refreshCiphertext;
       }
     }
@@ -494,6 +529,8 @@ function initProfilePokerPlus() {
           if (data && data.error) setFeedback(data.error, true);
           return;
         }
+        if (data && data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
+        if (refreshCiphertext && data && data.linked) savePokerPlusLocalCiphertext(pokerPlusAccountId, refreshCiphertext);
         try {
           renderProfile(data.profile, !!data.linked);
           notifyPokerPlusStatusChange(!!data.linked, data.profile);
@@ -565,6 +602,8 @@ function initProfilePokerPlus() {
           setFeedback((data && data.error) || "Не удалось привязать Poker21.", true);
           return;
         }
+        pokerPlusAccountId = data && data.accountId ? String(data.accountId || "").trim() : pokerPlusAccountId;
+        savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
         renderProfile(data.profile, true);
         notifyPokerPlusStatusChange(true, data.profile);
         setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
@@ -610,6 +649,8 @@ function initProfilePokerPlus() {
           setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
           return;
         }
+        clearPokerPlusLocalCiphertext(pokerPlusAccountId || (data && data.accountId));
+        pokerPlusAccountId = "";
         renderProfile(null, false);
         notifyPokerPlusStatusChange(false, null);
         input.value = "";

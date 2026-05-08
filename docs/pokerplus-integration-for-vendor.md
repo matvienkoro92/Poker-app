@@ -46,6 +46,7 @@ The current implementation has these important details:
 - The unlinked frontend does not show the old email-check button. Users bind Poker21 from the profile UI by entering the Poker21 key.
 - For linked players, refresh retries the saved Poker21 `user_app_id`, the current Telegram identity, the preferred Telegram identity linked to the same app account, and the stable `dtId` fallback.
 - Once the profile is linked, the frontend hides the Poker21 key field. The normal user refresh path is the `Refresh` button with the saved encrypted key; re-entering the key is not required unless the user explicitly unbinds and binds again.
+- After a successful key bind, the PWA also keeps the normalized key in local storage and sends it as `ciphertext` on linked refresh. This makes the refresh payload match first bind even if the server-side saved key is missing.
 - The backend still accepts a fresh `ciphertext` with a manual refresh request for compatibility. In that case it validates the key through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.

@@ -78,6 +78,7 @@ Opening the profile does not automatically make a live Poker21 request. It reads
 Pressing `Refresh` does a live refresh:
 
 - If the profile is already linked, the UI hides the key field. Pressing `Refresh` uses the encrypted Poker21 key saved during the original bind; the user should not have to paste the Poker21 key again.
+- The frontend also keeps the key entered during a successful bind in local PWA storage and sends it as `ciphertext` on linked refresh, matching the first-bind payload. This covers profiles where the server-side saved key is missing.
 - If the profile is not linked and a key is entered before pressing `Refresh`, the backend can still run the same key-only-first flow as initial binding and save the successful binding.
 - The unlinked profile UI no longer shows the old `Проверить по почте` button; first-time user binding is key-only from the interface.
 - Linked refresh does not use profile email as the primary lookup anymore. Email can still be stored as metadata from a successful key bind, but normal refresh is key-based.
