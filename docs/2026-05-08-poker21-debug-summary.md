@@ -110,6 +110,8 @@ The frontend displays these groups when they are present. We removed the rule th
 
 For every non-empty stats period, the frontend keeps a separate `Хендс` card visible. If Poker21 does not send `hands` for that period, the card shows `—` instead of disappearing.
 
+The backend accepts common Poker21 hands aliases when normalizing counters: `hands`, `hand`, `hands_count`, `hand_count`, `hands_cnt`, `hand_cnt`, `played_hands`, `playedHands`, `played_hands_count`, `hands_num`, and `hand_num`.
+
 Poker21 `balance`/`gold` can still be stored in the normalized profile, but the profile UI intentionally does not render the balance card for now.
 
 Known normalized stats fields:

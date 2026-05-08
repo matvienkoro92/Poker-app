@@ -711,6 +711,70 @@ async function testPokerPlusRefreshUsesSavedKey(redis) {
   );
 }
 
+async function testPokerPlusCounterHandsAliases(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      if (form.ciphertext === "ABC123" && form.user_app_id === "ID100001") {
+        return {
+          ok: true,
+          async json() {
+            return {
+              status: 1,
+              message: "success",
+              data: {
+                Id: "P21-HANDS",
+                today_counter: { fee: 10, hand_count: 77 },
+                week_counter: { fee: 20, hands_count: 177 },
+                total_counter: { fee: 30, played_hands: 277 },
+              },
+              code: 0,
+            };
+          },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: form.user_app_id ? "Binding failed" : "Parameter error", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "");
+  assert.strictEqual(profile.todayCounter.hands, 77, "today counter accepts hand_count as hands");
+  assert.strictEqual(profile.weekCounter.hands, 177, "week counter accepts hands_count as hands");
+  assert.strictEqual(profile.totalCounter.hands, 277, "total counter accepts played_hands as hands");
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1146,6 +1210,7 @@ async function main() {
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
     ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],
     ["pokerplus refresh saved key", testPokerPlusRefreshUsesSavedKey],
+    ["pokerplus counter hands aliases", testPokerPlusCounterHandsAliases],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

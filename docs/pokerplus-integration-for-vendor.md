@@ -323,6 +323,8 @@ Currently visible in the profile UI:
 
 For every non-empty statistics period, the frontend keeps a separate `Хендс` card visible. If Poker21 omits `hands` for that period, the card shows `—` instead of disappearing.
 
+The backend normalizes hands from `hands`, `hand`, `hands_count`, `hand_count`, `hands_cnt`, `hand_cnt`, `played_hands`, `playedHands`, `played_hands_count`, `hands_num`, and `hand_num`.
+
 `leagueId` and `groupId` are stored by the backend, but they are currently hidden in the profile UI.
 
 `balance` is stored when Poker21 returns it, but it is intentionally hidden in the profile UI for now.
