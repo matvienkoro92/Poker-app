@@ -38,11 +38,12 @@ The current implementation has these important details:
 - `mail` is sent with the same letter casing that the user linked in our app. We keep a lowercase canonical email only for our own uniqueness checks, but PokerPlus receives the original linked email string.
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
-- The profile refresh request is email-based: it calls the same PokerPlus endpoint without `ciphertext`, but only when the user has a linked email in our app.
+- The profile refresh request is email-based by default: it calls the same PokerPlus endpoint without `ciphertext` when the user has a linked email in our app.
+- If PokerPlus responds with `Binding failed` during email refresh, our backend retries with the saved encrypted `ciphertext` from the original key-based bind.
 - During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
-- If the user has no linked email, refresh does not call PokerPlus. The user should bind with the PokerPlus key instead.
+- If the user has no linked email but was already bound with a PokerPlus key, refresh uses the saved encrypted key and sends an empty `mail` value. If neither email nor saved key exists, refresh returns an error and does not call PokerPlus.
 - On normal profile opening, the frontend asks our backend for cached PokerPlus data only. A live PokerPlus refresh is made only when the user presses `Refresh`.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 - A successful local binding is also used as our Poker21 verification flag.
@@ -208,7 +209,7 @@ When we refresh a linked player profile, our backend uses:
 - `user_app_id`
 - `mail`, from the email linked in our app, preserving the user's original letter casing
 
-Then it calls the same PokerPlus bind endpoint again, but without `ciphertext`:
+Then it calls the same PokerPlus bind endpoint again, normally without `ciphertext`:
 
 ```text
 POST /service_v1/getBindMiniAppPlayer
@@ -234,11 +235,22 @@ Refresh example payload:
 
 The returned player data is normalized and cached in our app.
 
+If that email refresh returns `Binding failed`, our backend retries the same request with the encrypted `ciphertext` saved during the original key bind:
+
+```json
+{
+  "user_app_id": "388008256",
+  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
+  "mail": "User@example.com",
+  "token": "<token from getToken>"
+}
+```
+
 If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID and linked email. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
 
 For older local bindings, the saved PokerPlus player ID can exist while the saved Telegram value is still empty. In that case, refresh uses the numeric Telegram ID from the current verified Telegram session as a fallback `user_app_id`. After a successful refresh, this value is saved locally and future refreshes can use it directly.
 
-If the user has no linked email in our app, refresh returns an error and does not call PokerPlus. In that case the user can use the key-based bind flow instead.
+If the user has no linked email in our app but has a saved key from the original bind, refresh sends the saved `ciphertext` with `mail` as an empty string. If neither linked email nor saved key exists, refresh returns an error and does not call PokerPlus.
 
 If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
 
