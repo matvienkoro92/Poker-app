@@ -327,7 +327,6 @@ Currently visible in the profile UI:
 - linked PokerPlus player: nickname and player ID;
 - verification checkmark next to the linked player;
 - avatar;
-- balance;
 - registration date;
 - position;
 - country, if present;
@@ -339,6 +338,8 @@ Currently visible in the profile UI:
 For every non-empty statistics period, the frontend keeps a separate `Хендс` card visible. If Poker21 omits `hands` for that period, the card shows `—` instead of disappearing.
 
 `leagueId` and `groupId` are stored by the backend, but they are currently hidden in the profile UI.
+
+`balance` is stored when Poker21 returns it, but it is intentionally hidden in the profile UI for now.
 
 If `total_counter` is an empty array, we treat it as no statistics available and do not show a stats row. This does not break the profile display.
 

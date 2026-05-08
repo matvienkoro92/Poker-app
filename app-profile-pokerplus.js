@@ -40,7 +40,6 @@ function initProfilePokerPlus() {
   var profileStatusProgressText = document.getElementById("profileStatusProgressText");
   var profileStatusTitle = document.getElementById("profileStatusTitle");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
-  var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
   var POKERPLUS_KEY_INVISIBLE_RE = /[\u200B-\u200D\u2060\uFEFF]/g;
   var POKERPLUS_KEY_LOOKALIKE_MAP = {
     "\u0410": "A",
@@ -68,14 +67,9 @@ function initProfilePokerPlus() {
     "\u0443": "y",
     "\u0445": "x",
   };
-  var pokerPlusBalanceRaw = "";
-  var pokerPlusBalanceVisible = false;
   var pokerPlusStatsVisibleToOthers = false;
   var pokerPlusProfileLinked = false;
   var pokerPlusProfileLoading = false;
-  try {
-    pokerPlusBalanceVisible = localStorage.getItem(POKERPLUS_BALANCE_VISIBLE_KEY) === "1";
-  } catch (eReadPpBalanceVisible) {}
 
   function setFeedback(text, tone) {
     if (!feedback) return;
@@ -176,24 +170,13 @@ function initProfilePokerPlus() {
   }
 
   function renderPokerPlusBalance() {
-    var hasBalance = !!pokerPlusBalanceRaw;
-    if (balanceRow) balanceRow.hidden = !hasBalance;
-    if (balanceValue) balanceValue.textContent = hasBalance ? (pokerPlusBalanceVisible ? pokerPlusWholeNumber(pokerPlusBalanceRaw) + " ₽" : "••••") : "—";
+    if (balanceRow) balanceRow.hidden = true;
+    if (balanceValue) balanceValue.textContent = "—";
     if (balanceToggle) {
-      balanceToggle.hidden = !hasBalance;
-      balanceToggle.textContent = pokerPlusBalanceVisible ? "Скрыть" : "Показать";
-      balanceToggle.setAttribute("aria-pressed", pokerPlusBalanceVisible ? "true" : "false");
-      balanceToggle.setAttribute("aria-label", pokerPlusBalanceVisible ? "Скрыть баланс Poker21" : "Показать баланс Poker21");
+      balanceToggle.hidden = true;
+      balanceToggle.setAttribute("aria-pressed", "false");
+      balanceToggle.setAttribute("aria-label", "Баланс Poker21 скрыт");
     }
-  }
-
-  function setPokerPlusBalanceVisible(visible) {
-    pokerPlusBalanceVisible = !!visible;
-    try {
-      if (pokerPlusBalanceVisible) localStorage.setItem(POKERPLUS_BALANCE_VISIBLE_KEY, "1");
-      else localStorage.removeItem(POKERPLUS_BALANCE_VISIBLE_KEY);
-    } catch (eSavePpBalanceVisible) {}
-    renderPokerPlusBalance();
   }
 
   function renderPokerPlusStatsVisibilityToggle(saving) {
@@ -404,7 +387,6 @@ function initProfilePokerPlus() {
       if (linkedRow) linkedRow.hidden = true;
       if (linkedRow) linkedRow.removeAttribute("data-register-date");
       if (balanceRow) balanceRow.hidden = true;
-      pokerPlusBalanceRaw = "";
       renderPokerPlusBalance();
       if (avatarRow) avatarRow.hidden = true;
       if (registerRow) registerRow.hidden = true;
@@ -443,7 +425,6 @@ function initProfilePokerPlus() {
     }
     try { window.__pokerPlusUserId = pokerPlusText(p.pokerPlusUserId); } catch (eSetPpId) {}
     updateProfileHeroPokerPlusId(p.pokerPlusUserId);
-    pokerPlusBalanceRaw = pokerPlusText(p.balance);
     renderPokerPlusBalance();
     var avatarUrl = pokerPlusText(p.avatarUrl);
     if (avatarRow) avatarRow.hidden = false;
@@ -659,12 +640,6 @@ function initProfilePokerPlus() {
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";
     unbindBtn.addEventListener("click", unbindPokerPlus);
-  }
-  if (balanceToggle && balanceToggle.dataset.bound !== "1") {
-    balanceToggle.dataset.bound = "1";
-    balanceToggle.addEventListener("click", function () {
-      setPokerPlusBalanceVisible(!pokerPlusBalanceVisible);
-    });
   }
   if (statsVisibleYes && statsVisibleYes.dataset.bound !== "1") {
     statsVisibleYes.dataset.bound = "1";
