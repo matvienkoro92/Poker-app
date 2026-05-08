@@ -32,6 +32,7 @@ function initAdminReportModal() {
 
   var VIKA_AUTHOR_ID = "tg_1897001087";
   var VIKA_TELEGRAM_NUM = 1897001087;
+  var PP_RAKEBACK_TEMPLATE_IDS = ["552903", "435607", "590773", "563356", "635675", "347375"];
 
   function canViewSentReports() {
     try {
@@ -355,6 +356,23 @@ function initAdminReportModal() {
   function ensureRakebackBaseRow(room) {
     if (!rakebackBody) return;
     var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
+    if (targetRoom === "PP") {
+      var existingPpIds = {};
+      Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+        if (getRakebackRowRoom(row) !== "PP") return;
+        var idInput = row.querySelector("[data-rakeback-player-id]");
+        var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
+        if (playerId) existingPpIds[playerId] = true;
+      });
+      var addedTemplates = false;
+      PP_RAKEBACK_TEMPLATE_IDS.forEach(function (playerId) {
+        if (existingPpIds[playerId]) return;
+        rakebackBody.appendChild(createRakebackRow({ kind: "base", room: "PP", playerId: playerId }));
+        existingPpIds[playerId] = true;
+        addedTemplates = true;
+      });
+      if (addedTemplates) return;
+    }
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom;
