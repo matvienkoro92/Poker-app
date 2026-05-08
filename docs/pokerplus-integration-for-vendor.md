@@ -205,6 +205,8 @@ user_app_id = <numeric Telegram user ID>
 token       = <token returned by getToken>
 ```
 
+If PokerPlus/Poker21 responds that there is no binding information for the player, our backend treats that as an already-unbound state, clears the local saved binding, and returns success to the app.
+
 ## Player Refresh Flow
 
 When we refresh a linked player profile, our backend uses:

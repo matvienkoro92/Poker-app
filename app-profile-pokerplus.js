@@ -555,7 +555,7 @@ function initProfilePokerPlus() {
     bindBtn.disabled = true;
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
-    setFeedback("Отвязываем PokerPlus…", false);
+    setFeedback("Отвязываем Poker21...", false);
     fetch(base + "/api/pokerplus-unbind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -564,12 +564,12 @@ function initProfilePokerPlus() {
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok) {
-          setFeedback((data && data.error) || "Не удалось отвязать PokerPlus.", true);
+          setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
           return;
         }
         renderProfile(null, false);
         input.value = "";
-        setFeedback("PokerPlus отвязан.", false);
+        setFeedback("Poker21 отвязан.", false);
       })
       .catch(function () {
         setFeedback(POKER_NET_ERR, true);
