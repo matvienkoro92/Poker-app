@@ -125,8 +125,7 @@ function initProfilePokerPlus() {
 
   function setPokerPlusRefreshButtonText(linked) {
     if (!refreshBtn) return;
-    if (linked) refreshBtn.textContent = pokerPlusLocale() === "en" ? "Refresh" : "Обновить";
-    else refreshBtn.textContent = pokerPlusLocale() === "en" ? "Check by email" : "Проверить по почте";
+    refreshBtn.textContent = linked ? (pokerPlusLocale() === "en" ? "Refresh" : "Обновить") : "";
   }
 
   function setPokerPlusInitialLoading(loading) {
@@ -372,7 +371,7 @@ function initProfilePokerPlus() {
     input.placeholder = "Ключ из Poker21";
     input.setAttribute("aria-label", "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
-    refreshBtn.hidden = false;
+    refreshBtn.hidden = !linked;
     setPokerPlusRefreshButtonText(!!linked);
     unbindBtn.hidden = !linked;
   }

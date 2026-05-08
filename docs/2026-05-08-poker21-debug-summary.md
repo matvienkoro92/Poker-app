@@ -79,6 +79,7 @@ Pressing `Refresh` does a live refresh:
 
 - If the profile is already linked, the UI hides the key field. Pressing `Refresh` uses the encrypted Poker21 key saved during the original bind; the user should not have to paste the Poker21 key again.
 - If the profile is not linked and a key is entered before pressing `Refresh`, the backend can still run the same key-only-first flow as initial binding and save the successful binding.
+- The unlinked profile UI no longer shows the old `Проверить по почте` button; first-time user binding is key-only from the interface.
 - Linked refresh does not use profile email as the primary lookup anymore. Email can still be stored as metadata from a successful key bind, but normal refresh is key-based.
 - If Poker21 returns `Player data not found` for linked refresh, the app explains that Poker21 did not find the player by the saved key and suggests unbinding/rebinding if the error repeats.
 - If Poker21 returns `Binding failed` for an already-linked refresh, the app keeps showing saved data and suggests unbinding/rebinding only if the error repeats.

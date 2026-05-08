@@ -43,6 +43,7 @@ The current implementation has these important details:
 - A production bind on May 9, 2026 confirmed that Poker21 can require our stable `dtId` as `user_app_id`; Telegram numeric id was rejected for the same clean 6-character key.
 - The profile refresh request is key-based for already linked players: it reuses the encrypted `ciphertext` saved during the original key-based bind.
 - Linked refresh does not use email as the primary lookup. Email can still be saved as metadata from a successful key bind, but the normal `Refresh` button path reads Poker21 through the saved key.
+- The unlinked frontend does not show the old email-check button. Users bind Poker21 from the profile UI by entering the Poker21 key.
 - For linked players, refresh retries the saved Poker21 `user_app_id`, the current Telegram identity, the preferred Telegram identity linked to the same app account, and the stable `dtId` fallback.
 - Once the profile is linked, the frontend hides the Poker21 key field. The normal user refresh path is the `Refresh` button with the saved encrypted key; re-entering the key is not required unless the user explicitly unbinds and binds again.
 - The backend still accepts a fresh `ciphertext` with a manual refresh request for compatibility. In that case it validates the key through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
