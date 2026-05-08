@@ -132,7 +132,7 @@ or, in PWA mode:
 Our backend then resolves:
 
 - `ciphertext` from the frontend request.
-- `mail` from the email linked to the user's account in our app, if available. The original letter casing is preserved for PokerPlus.
+- `mail` from the email linked to the user's account in our app, if available. For key-based bind, the backend first omits `mail` because the key itself is sufficient proof, then retries email variants as compatibility fallbacks.
 - `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
 - `token` from the PokerPlus `getToken` endpoint.
 
@@ -156,11 +156,20 @@ Form-data fields:
 ```text
 user_app_id = <omitted first, numeric Telegram user ID only as fallback>
 ciphertext  = <secret key copied from PokerPlus>
-mail        = <email linked to the user's account in our app, preserving letter casing, or an empty string>
+mail        = <omitted first, linked email only as fallback>
 token       = <token returned by getToken>
 ```
 
 Example payload shape:
+
+```json
+{
+  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
+  "token": "<token from getToken>"
+}
+```
+
+Fallback payload with linked email:
 
 ```json
 {
@@ -170,17 +179,7 @@ Example payload shape:
 }
 ```
 
-If the user has no linked email in our app, the same request is sent with an empty `mail` value:
-
-```json
-{
-  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
-  "mail": "",
-  "token": "<token from getToken>"
-}
-```
-
-For key-based bind, our backend retries common email case variants and then retries with an empty `mail` value. This keeps the Poker21 key as the primary proof when Poker21 rejects optional profile metadata with `Binding failed`.
+For key-based bind, our backend sends the key-only request first, then retries common email case variants. This keeps the Poker21 key as the primary proof when Poker21 rejects optional profile metadata with `Binding failed`.
 
 ## `user_app_id`
 
