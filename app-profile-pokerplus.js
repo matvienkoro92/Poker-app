@@ -382,10 +382,11 @@ function initProfilePokerPlus() {
     pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     updateProfileStatusTextVisibility();
-    input.hidden = false;
+    input.hidden = !!linked;
+    if (linked) input.value = "";
     bindBtn.hidden = !!linked;
-    input.placeholder = linked ? "Ключ из Poker21 для обновления" : "Ключ из Poker21";
-    input.setAttribute("aria-label", linked ? "Ключ из Poker21 для обновления" : "Ключ из Poker21");
+    input.placeholder = "Ключ из Poker21";
+    input.setAttribute("aria-label", "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
     refreshBtn.hidden = false;
     setPokerPlusRefreshButtonText(!!linked);
@@ -492,7 +493,7 @@ function initProfilePokerPlus() {
     var refreshCiphertext = "";
     if (refresh) {
       body.refresh = "1";
-      refreshCiphertext = normalizePokerPlusKeyInput(input && input.value ? input.value : "");
+      refreshCiphertext = pokerPlusProfileLinked ? "" : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
       if (refreshCiphertext) {
         input.value = refreshCiphertext;
         body.ciphertext = refreshCiphertext;
@@ -529,7 +530,7 @@ function initProfilePokerPlus() {
         }
         if (data.syncError) {
           var syncError = String(data.syncError || "");
-          var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Вставьте ключ из Poker21 и нажмите «Обновить»." : "";
+          var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
           setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
         } else if (refresh && refreshCiphertext) {
           input.value = "";

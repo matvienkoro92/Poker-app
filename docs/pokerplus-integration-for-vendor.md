@@ -45,7 +45,8 @@ The current implementation has these important details:
 - If PokerPlus responds with `Binding failed` during email refresh, our backend still retries the common email case variants first, then retries with the saved encrypted `ciphertext` from the original key-based bind.
 - For linked players, refresh tries both the email saved at the original Poker21 bind time and the user's current linked email in our app.
 - Refresh also tries the saved Poker21 `user_app_id`, the current Telegram identity, and the preferred Telegram identity linked to the same app account.
-- The frontend can also send a fresh `ciphertext` with a manual refresh request. In that case the backend validates it through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
+- Once the profile is linked, the frontend hides the Poker21 key field. The normal user refresh path is the `Refresh` button with the saved binding; re-entering the key is not required unless the user explicitly unbinds and binds again.
+- The backend still accepts a fresh `ciphertext` with a manual refresh request for compatibility. In that case it validates the key through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
 - During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.

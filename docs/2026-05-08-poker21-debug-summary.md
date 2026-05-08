@@ -77,10 +77,10 @@ Opening the profile does not automatically make a live Poker21 request. It reads
 
 Pressing `Refresh` does a live refresh:
 
-- If the profile is already linked and no key is entered, the backend tries saved Poker21 data plus linked email / Telegram fallback.
-- If a key is entered before pressing `Refresh`, the backend runs the same key-only-first flow as initial binding and saves the successful binding.
+- If the profile is already linked, the UI hides the key field. Pressing `Refresh` runs the saved-binding refresh only; the user should not have to paste the Poker21 key again.
+- If the profile is not linked and a key is entered before pressing `Refresh`, the backend can still run the same key-only-first flow as initial binding and save the successful binding.
 - If Poker21 returns `Player data not found` for email refresh, the app explains that no player was found by profile email and asks the user to use the key.
-- If Poker21 returns `Binding failed`, the app asks the user to enter the Poker21 key, because email-only refresh was not accepted.
+- If Poker21 returns `Binding failed` for an already-linked refresh, the app keeps showing saved data and suggests unbinding/rebinding only if the error repeats.
 
 ## Unbind behavior
 

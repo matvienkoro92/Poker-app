@@ -451,12 +451,7 @@
   letter-spacing: 0;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
-  grid-column: 1 / -1;
-  order: 98;
-  display: grid;
-  grid-template-columns: 1fr;
-  margin: 2px 0 0;
-  gap: 8px;
+  display: none !important;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBindBtn {
   display: none !important;
