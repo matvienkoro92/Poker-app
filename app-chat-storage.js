@@ -1,5 +1,5 @@
-var POKER_CHAT_GENERAL_DISK_KEY = "poker_chat_general_snapshot_v1";
-var POKER_CHAT_PERSONAL_DISK_KEY = "poker_chat_personal_snapshot_v1";
+var POKER_CHAT_GENERAL_DISK_KEY = "poker_chat_general_snapshot_v2";
+var POKER_CHAT_PERSONAL_DISK_KEY = "poker_chat_personal_snapshot_v2";
 var POKER_CHAT_DISK_GENERAL_MAX_MSG = 130;
 var POKER_CHAT_DISK_GENERAL_MAX_MEMBERS = 120;
 var POKER_CHAT_DISK_PERSONAL_MAX_MSG = 260;

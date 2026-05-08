@@ -1,4 +1,4 @@
-var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v7";
+var POKER_CHAT_CONTACTS_CACHE_KEY = "poker_chat_contacts_v8";
 var POKER_CHAT_CONTACTS_LIST_FILTER_KEY = "poker_chat_contacts_list_filter";
 function pokerChatPeerMetaIdVariants(peerId) {
   var raw = peerId != null ? String(peerId).trim() : "";
@@ -33,19 +33,17 @@ function pokerChatPeerMetaFromContact(contact) {
   var contactName = pokerChatPeerMetaValue(contact.contactName);
   var avatar = pokerChatPeerMetaValue(contact.avatar);
   var p21Id = pokerChatPeerMetaValue(contact.p21Id);
-  var statusLevel = pokerChatPeerMetaValue(contact.statusLevel);
   if (name && name !== id) meta.name = name;
   if (contactName && contactName !== id) meta.contactName = contactName;
   if (avatar) meta.avatar = avatar;
   if (p21Id) meta.p21Id = p21Id;
-  if (statusLevel) meta.statusLevel = statusLevel;
   if (contact.pokerPlusVerified === true) meta.pokerPlusVerified = true;
   return meta;
 }
 function pokerRememberChatPeerMetaFromContact(contact) {
   var meta = pokerChatPeerMetaFromContact(contact);
   if (!meta) return false;
-  var hasUseful = !!(meta.name || meta.contactName || meta.avatar || meta.p21Id || meta.statusLevel || meta.pokerPlusVerified);
+  var hasUseful = !!(meta.name || meta.contactName || meta.avatar || meta.p21Id || meta.pokerPlusVerified);
   if (!hasUseful) return false;
   window.__pokerChatPeerMetaById = window.__pokerChatPeerMetaById || {};
   var variants = pokerChatPeerMetaIdVariants(meta.id);
@@ -93,7 +91,6 @@ function pokerApplyChatPeerMetaToContact(contact, meta) {
   if (needsText(contact.contactName) && meta.contactName) contact.contactName = meta.contactName;
   if ((contact.avatar == null || String(contact.avatar).trim() === "") && meta.avatar) contact.avatar = meta.avatar;
   if ((contact.p21Id == null || String(contact.p21Id).trim() === "") && meta.p21Id) contact.p21Id = meta.p21Id;
-  if ((contact.statusLevel == null || String(contact.statusLevel).trim() === "") && meta.statusLevel) contact.statusLevel = meta.statusLevel;
   if (contact.pokerPlusVerified !== true && meta.pokerPlusVerified === true) contact.pokerPlusVerified = true;
   return contact;
 }

@@ -82,6 +82,21 @@ function initProfilePokerPlus() {
     feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
   }
 
+  function notifyPokerPlusStatusChange(linked, profile) {
+    var detail = { linked: !!linked };
+    var p = profile && typeof profile === "object" ? profile : null;
+    if (p && p.pokerPlusUserId) detail.p21Id = String(p.pokerPlusUserId);
+    if (linked && p && typeof pokerProfileStatusFromRake === "function") {
+      var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : null);
+      var fee = total && total.fee != null ? total.fee : null;
+      var status = pokerProfileStatusFromRake(fee);
+      if (status && status.level != null) detail.level = status.level;
+    }
+    try {
+      window.dispatchEvent(new CustomEvent("poker-pokerplus-status-change", { detail: detail }));
+    } catch (eNotifyPpStatus) {}
+  }
+
   function normalizePokerPlusKeyInput(value) {
     return String(value || "")
       .replace(/\s+/g, "")
@@ -497,6 +512,7 @@ function initProfilePokerPlus() {
         }
         try {
           renderProfile(data.profile, !!data.linked);
+          notifyPokerPlusStatusChange(!!data.linked, data.profile);
         } catch (renderErr) {
           try { console.error("PokerPlus profile render failed", renderErr); } catch (eLogPpRender) {}
           setProfileStatusLoading(false);
@@ -566,6 +582,7 @@ function initProfilePokerPlus() {
           return;
         }
         renderProfile(data.profile, true);
+        notifyPokerPlusStatusChange(true, data.profile);
         setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
         input.value = "";
       })
@@ -610,6 +627,7 @@ function initProfilePokerPlus() {
           return;
         }
         renderProfile(null, false);
+        notifyPokerPlusStatusChange(false, null);
         input.value = "";
         setFeedback("Poker21 отвязан.", false);
       })

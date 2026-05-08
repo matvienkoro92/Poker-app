@@ -37,6 +37,10 @@ function pokerSanitizeContactsPayloadForUi(data) {
       var nextRow = Object.assign({}, row);
       if (nextRow.name != null) nextRow.name = pokerNormalizeLegacyAccountLabel(nextRow.name);
       if (nextRow.contactName != null) nextRow.contactName = pokerNormalizeLegacyAccountLabel(nextRow.contactName);
+      if (nextRow.pokerPlusVerified !== true && !nextRow.p21Id) {
+        nextRow.statusLevel = null;
+        nextRow.statusValue = null;
+      }
       return nextRow;
     });
   }

@@ -14,7 +14,7 @@ The user enters only the Poker21/PokerPlus secret key (`ciphertext`) in our app 
 2. Resolves the internal account.
 3. Reads the email linked to that account, if available.
 4. Requests a PokerPlus API token.
-5. Calls the PokerPlus bind endpoint with `user_app_id`, `ciphertext`, `mail`, and `token`.
+5. Calls the PokerPlus bind endpoint with the key and `token`, then retries optional `user_app_id` / `mail` metadata only as fallbacks.
 6. Stores the returned player ID locally and marks the user as Poker21 verified.
 
 ## Relevant Files
@@ -34,10 +34,10 @@ The user enters only the Poker21/PokerPlus secret key (`ciphertext`) in our app 
 
 The current implementation has these important details:
 
-- For key-based bind, `ciphertext` is treated as the primary proof. The backend first omits `user_app_id`, then retries numeric Telegram IDs only as a compatibility fallback.
+- For key-based bind, the Poker21 key is treated as the primary proof. The backend first sends the key without `user_app_id` and `mail`, then retries compatible key field names and only after that tries optional metadata fallbacks.
 - `mail` is sent with the same letter casing that the user linked in our app. We keep a lowercase canonical email only for our own uniqueness checks, but PokerPlus receives the original linked email string.
-- `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
-- The initial bind request includes `ciphertext`.
+- `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus without `mail`.
+- The initial bind request includes the Poker21 key, first as `ciphertext`.
 - The profile refresh request is email-based by default: it calls the same PokerPlus endpoint without `ciphertext` when the user has a linked email in our app.
 - If PokerPlus responds with `Binding failed` during email refresh, our backend still retries the common email case variants first, then retries with the saved encrypted `ciphertext` from the original key-based bind.
 - For linked players, refresh tries both the email saved at the original Poker21 bind time and the user's current linked email in our app.
@@ -46,7 +46,7 @@ The current implementation has these important details:
 - During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
-- If the user has no linked email but was already bound with a PokerPlus key, refresh uses the saved encrypted key and sends an empty `mail` value. If neither email nor saved key exists, refresh returns an error and does not call PokerPlus.
+- If the user has no linked email but was already bound with a PokerPlus key, refresh uses the saved encrypted key and omits `mail` first. If neither email nor saved key exists, refresh returns an error and does not call PokerPlus.
 - On normal profile opening, the frontend asks our backend for cached PokerPlus data only. A live PokerPlus refresh is made only when the user presses `Refresh`.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 - A successful local binding is also used as our Poker21 verification flag.
@@ -136,7 +136,7 @@ Our backend then resolves:
 - `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
 - `token` from the PokerPlus `getToken` endpoint.
 
-`ciphertext` is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace and normalize Cyrillic lookalike characters that can appear during manual entry.
+The key is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace and normalize Cyrillic lookalike characters that can appear during manual entry.
 
 Current `user_app_id` format:
 
@@ -179,11 +179,11 @@ Fallback payload with linked email:
 }
 ```
 
-For key-based bind, our backend sends the key-only request first, then retries common email case variants. This keeps the Poker21 key as the primary proof when Poker21 rejects optional profile metadata with `Binding failed`.
+For key-based bind, our backend sends the key-only request first. For compatibility with the current 6-character Poker21 key flow, it tries the key in the documented `ciphertext` field first, then `cipherText`, `key`, and `code`. Only after key-only attempts fail does it retry common email case variants and numeric Telegram IDs as metadata fallbacks. This keeps the Poker21 key as the primary proof when Poker21 rejects optional profile metadata with `Binding failed`.
 
 ## `user_app_id`
 
-For key-based bind, the current implementation omits `user_app_id` first because Poker21 treats `ciphertext` as sufficient proof.
+For key-based bind, the current implementation omits `user_app_id` first because Poker21 treats the key as sufficient proof.
 
 For email-based refresh and unbind, the implementation uses the numeric Telegram user ID when it was saved or available:
 
@@ -244,7 +244,7 @@ Refresh example payload:
 
 The returned player data is normalized and cached in our app.
 
-If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with `user_app_id`, `ciphertext`, `mail`, and `token`, tries the same Telegram ID and email fallbacks as the initial bind, saves the successful key bind, and returns the fresh profile data.
+If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with the same key-only-first sequence as the initial bind, saves the successful key bind, and returns the fresh profile data.
 
 If that email refresh returns `Binding failed`, our backend retries the same request with the encrypted `ciphertext` saved during the original key bind:
 
@@ -261,7 +261,7 @@ If our app has no local linked PokerPlus profile yet, a refresh request still ca
 
 For older local bindings, the saved PokerPlus player ID can exist while the saved Telegram value is still empty. In that case, refresh uses the numeric Telegram ID from the current verified Telegram session as a fallback `user_app_id`. After a successful refresh, this value is saved locally and future refreshes can use it directly.
 
-If the user has no linked email in our app but has a saved key from the original bind, refresh sends the saved `ciphertext` with `mail` as an empty string. If neither linked email nor saved key exists, refresh returns an error and does not call PokerPlus.
+If the user has no linked email in our app but has a saved key from the original bind, refresh sends the saved key without `mail` first. If neither linked email nor saved key exists, refresh returns an error and does not call PokerPlus.
 
 If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
 
@@ -514,7 +514,7 @@ Our integration matches the PokerPlus API documentation in:
 - HTTP method: `POST`.
 - Request body type: `form-data`.
 - Token flow via `getToken`.
-- Bind fields: `user_app_id`, `ciphertext`, `mail`, `token`.
+- Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; `token` is always sent.
 - Unbind fields: `user_app_id`, `token`.
 - Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
 - Tables endpoint: `getPlayingTables`.

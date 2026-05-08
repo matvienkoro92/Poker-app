@@ -159,11 +159,12 @@
   if (!btn || !statusEl) return;
   var loadedLinked = false;
   function applyStatus(data) {
-    var linked = !!(data && data.ok && (data.pokerPlusVerified || data.p21Id));
-    if (!linked && loadedLinked) return;
+    var hasAuthoritativeStatus = !!(data && data.ok);
+    var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
+    if (!hasAuthoritativeStatus && loadedLinked) return;
     var level = data && data.level != null ? parseInt(data.level, 10) : NaN;
     var safeLevel = isFinite(level) && level > 0 ? level : 1;
-    loadedLinked = loadedLinked || linked;
+    loadedLinked = linked;
     btn.classList.toggle("home-fish-rating-btn--linked", !!linked);
     statusEl.textContent = linked ? "Уровень " + safeLevel : "Привяжите Poker21";
   }
@@ -196,6 +197,15 @@
   }
   loadStatus(0);
   window.addEventListener("poker-telegram-auth", function () { loadStatus(0); });
+  window.addEventListener("poker-pokerplus-status-change", function (ev) {
+    var detail = ev && ev.detail ? ev.detail : {};
+    if (detail && detail.linked === true) {
+      applyStatus({ ok: true, pokerPlusVerified: true, p21Id: detail.p21Id || detail.pokerPlusUserId || "1", level: detail.level });
+    } else if (detail && detail.linked === false) {
+      applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "" });
+    }
+    loadStatus(0);
+  });
   document.addEventListener("visibilitychange", function () {
     if (!document.hidden) loadStatus(0);
   });
