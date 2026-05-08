@@ -34,7 +34,7 @@ The user enters only the Poker21/PokerPlus secret key (`ciphertext`) in our app 
 
 The current implementation has these important details:
 
-- For key-based bind, `ciphertext` is treated as the primary proof. The backend first sends an empty `user_app_id`, then retries numeric Telegram IDs only as a compatibility fallback.
+- For key-based bind, `ciphertext` is treated as the primary proof. The backend first omits `user_app_id`, then retries numeric Telegram IDs only as a compatibility fallback.
 - `mail` is sent with the same letter casing that the user linked in our app. We keep a lowercase canonical email only for our own uniqueness checks, but PokerPlus receives the original linked email string.
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus and sends `mail` as an empty string.
 - The initial bind request includes `ciphertext`.
@@ -133,7 +133,7 @@ Our backend then resolves:
 
 - `ciphertext` from the frontend request.
 - `mail` from the email linked to the user's account in our app, if available. The original letter casing is preserved for PokerPlus.
-- `user_app_id` as an empty string first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
+- `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
 - `token` from the PokerPlus `getToken` endpoint.
 
 `ciphertext` is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace and normalize Cyrillic lookalike characters that can appear during manual entry.
@@ -154,7 +154,7 @@ Content-Type: form-data
 Form-data fields:
 
 ```text
-user_app_id = <empty string first, numeric Telegram user ID only as fallback>
+user_app_id = <omitted first, numeric Telegram user ID only as fallback>
 ciphertext  = <secret key copied from PokerPlus>
 mail        = <email linked to the user's account in our app, preserving letter casing, or an empty string>
 token       = <token returned by getToken>
@@ -164,7 +164,6 @@ Example payload shape:
 
 ```json
 {
-  "user_app_id": "",
   "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
   "mail": "User@example.com",
   "token": "<token from getToken>"
@@ -175,7 +174,6 @@ If the user has no linked email in our app, the same request is sent with an emp
 
 ```json
 {
-  "user_app_id": "",
   "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
   "mail": "",
   "token": "<token from getToken>"
@@ -186,7 +184,7 @@ For key-based bind, our backend retries common email case variants and then retr
 
 ## `user_app_id`
 
-For key-based bind, the current implementation sends an empty `user_app_id` first because Poker21 treats `ciphertext` as sufficient proof.
+For key-based bind, the current implementation omits `user_app_id` first because Poker21 treats `ciphertext` as sufficient proof.
 
 For email-based refresh and unbind, the implementation uses the numeric Telegram user ID when it was saved or available:
 
