@@ -226,6 +226,13 @@ function initAdminReportModal() {
     rakebackStatusEl.hidden = !message;
   }
 
+  function showRakebackAlert(message) {
+    var text = message || "";
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && tg.showAlert) tg.showAlert(text);
+    showRakebackStatus(text);
+  }
+
   function setRakebackRowSaved(row, saved) {
     if (!row) return;
     var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
@@ -332,6 +339,18 @@ function initAdminReportModal() {
     var currentOwnerId = getCurrentRakebackOwnerId();
     ownerId = String(ownerId || "").trim();
     return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
+  }
+
+  function canRemoveRakebackRow(row) {
+    if (!row || !rakebackBody) return false;
+    if (!isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "")) return false;
+    if (row.getAttribute("data-rakeback-kind") !== "base") return true;
+    var groupId = row.getAttribute("data-rakeback-group") || "";
+    var groupRows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    return groupRows.every(function (candidate) {
+      if (candidate.getAttribute("data-rakeback-group") !== groupId) return true;
+      return isCurrentRakebackOwner(candidate.getAttribute("data-rakeback-owner") || "");
+    });
   }
 
   function collectRakebackRows(includeEmpty, currentOwnerOnly) {
@@ -1342,6 +1361,10 @@ function initAdminReportModal() {
       if (!removeBtn) return;
       var row = removeBtn.closest("[data-rakeback-row]");
       if (!row) return;
+      if (!canRemoveRakebackRow(row)) {
+        showRakebackAlert("Нельзя удалять чужие записи, только свои.");
+        return;
+      }
       var removeConfirmed = removeBtn.getAttribute("data-rakeback-remove-confirmed") === "1";
       if (removeConfirmed) {
         removeBtn.removeAttribute("data-rakeback-remove-confirmed");
