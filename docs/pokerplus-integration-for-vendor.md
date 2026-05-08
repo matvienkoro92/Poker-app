@@ -41,16 +41,14 @@ The current implementation has these important details:
 - `mail` is optional for the initial key-based bind on our side. If the user has no linked email in our app, bind still calls PokerPlus without `mail`.
 - The initial bind request includes the Poker21 key, first as `ciphertext`.
 - A production bind on May 9, 2026 confirmed that Poker21 can require our stable `dtId` as `user_app_id`; Telegram numeric id was rejected for the same clean 6-character key.
-- The profile refresh request is email-based by default: it calls the same PokerPlus endpoint without `ciphertext` when the user has a linked email in our app.
-- If PokerPlus responds with `Binding failed` during email refresh, our backend still retries the common email case variants first, then retries with the saved encrypted `ciphertext` from the original key-based bind.
-- For linked players, refresh tries both the email saved at the original Poker21 bind time and the user's current linked email in our app.
-- Refresh also tries the saved Poker21 `user_app_id`, the current Telegram identity, and the preferred Telegram identity linked to the same app account.
-- Once the profile is linked, the frontend hides the Poker21 key field. The normal user refresh path is the `Refresh` button with the saved binding; re-entering the key is not required unless the user explicitly unbinds and binds again.
+- The profile refresh request is key-based for already linked players: it reuses the encrypted `ciphertext` saved during the original key-based bind.
+- Linked refresh does not use email as the primary lookup. Email can still be saved as metadata from a successful key bind, but the normal `Refresh` button path reads Poker21 through the saved key.
+- For linked players, refresh retries the saved Poker21 `user_app_id`, the current Telegram identity, the preferred Telegram identity linked to the same app account, and the stable `dtId` fallback.
+- Once the profile is linked, the frontend hides the Poker21 key field. The normal user refresh path is the `Refresh` button with the saved encrypted key; re-entering the key is not required unless the user explicitly unbinds and binds again.
 - The backend still accepts a fresh `ciphertext` with a manual refresh request for compatibility. In that case it validates the key through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
-- During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
-- If the user has no linked email but was already bound with a PokerPlus key, refresh uses the saved encrypted key and omits `mail` first. If neither email nor saved key exists, refresh returns an error and does not call PokerPlus.
+- If the user was already bound but no encrypted key is saved locally, refresh returns an error and asks the user to unbind/rebind so the key can be saved again.
 - On normal profile opening, the frontend asks our backend for cached PokerPlus data only. A live PokerPlus refresh is made only when the user presses `Refresh`.
 - PokerPlus requests are sent from our backend only. The frontend never calls `sp.poker21pro.com` directly.
 - A successful local binding is also used as our Poker21 verification flag.
@@ -223,10 +221,10 @@ If PokerPlus/Poker21 responds that there is no binding information for the playe
 
 When we refresh a linked player profile, our backend uses:
 
-- `user_app_id`
-- `mail`, from the email linked in our app, preserving the user's original letter casing
+- the encrypted `ciphertext` saved during the original key-based bind;
+- the saved Poker21 `user_app_id`, current Telegram identity candidates, and `dtId` fallback as metadata only.
 
-Then it calls the same PokerPlus bind endpoint again, normally without `ciphertext`:
+Then it calls the same PokerPlus bind endpoint again with the saved key:
 
 ```text
 POST /service_v1/getBindMiniAppPlayer
@@ -235,8 +233,8 @@ POST /service_v1/getBindMiniAppPlayer
 Refresh form-data fields:
 
 ```text
-user_app_id = <numeric Telegram user ID>
-mail        = <email linked to the user's account in our app, preserving letter casing>
+ciphertext  = <encrypted key saved from the original bind, decrypted server-side>
+user_app_id = <saved Poker21 app id / Telegram candidate / dtId fallback, optional>
 token       = <token returned by getToken>
 ```
 
@@ -244,8 +242,8 @@ Refresh example payload:
 
 ```json
 {
-  "user_app_id": "388008256",
-  "mail": "User@example.com",
+  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
+  "user_app_id": "ID400800",
   "token": "<token from getToken>"
 }
 ```
@@ -254,26 +252,13 @@ The returned player data is normalized and cached in our app.
 
 If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with the same key-only-first sequence as the initial bind, saves the successful key bind, and returns the fresh profile data.
 
-If that email refresh returns `Binding failed`, our backend retries the same request with the encrypted `ciphertext` saved during the original key bind:
-
-```json
-{
-  "user_app_id": "388008256",
-  "ciphertext": "0K0GQ7E6D925UVGWV0805DK3H1R",
-  "mail": "User@example.com",
-  "token": "<token from getToken>"
-}
-```
-
 If our app has no local linked PokerPlus profile yet, a refresh request still calls PokerPlus by numeric Telegram user ID and linked email. If PokerPlus returns a successful player response, we save the returned player ID locally and mark the profile as linked.
 
 For older local bindings, the saved PokerPlus player ID can exist while the saved Telegram value is still empty. In that case, refresh uses the numeric Telegram ID from the current verified Telegram session as a fallback `user_app_id`. After a successful refresh, this value is saved locally and future refreshes can use it directly.
 
-If the user has no linked email in our app but has a saved key from the original bind, refresh sends the saved key without `mail` first. If neither linked email nor saved key exists, refresh returns an error and does not call PokerPlus.
+If the user has a saved key from the original bind, refresh sends the saved key without `mail` first. If no saved key exists for an already-linked profile, refresh returns an error and does not call PokerPlus.
 
-If PokerPlus returns `Player data not found` during refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the linked email and that the user can bind with the PokerPlus key instead.
-
-Note: email matching may be case-sensitive on the PokerPlus side. Because of that, our backend does not lowercase `mail` before sending it to PokerPlus, and refresh retries several common case variants when PokerPlus responds with `Player data not found`. A fully case-insensitive match still needs to be supported by PokerPlus, because only PokerPlus can compare against every stored email casing.
+If PokerPlus returns `Player data not found` during linked refresh, our backend returns a user-facing message explaining that no PokerPlus account was found for the saved key and that the user should unbind/rebind if the error repeats.
 
 ## Displayed Player Data
 
@@ -529,7 +514,7 @@ Our integration matches the PokerPlus API documentation in:
 - Token flow via `getToken`.
 - Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; `user_app_id` tries Telegram numeric IDs and then `dtId`; each fallback still tries the compatible key field names; `token` is always sent.
 - Unbind fields: `user_app_id`, `token`.
-- Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
+- Refresh fields for linked players: saved key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` metadata fallbacks; `token`.
 - Tables endpoint: `getPlayingTables`.
 - Competitions endpoint: `getTheUpcomingCompetitions`.
 - Maintenance endpoint: `getGameMaintainStatus`.

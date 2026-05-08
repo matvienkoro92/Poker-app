@@ -645,6 +645,72 @@ async function testPokerPlusKeyBindFallsBackToAccountId(redis) {
   assert.strictEqual(redis.h("poker_app:pokerplus_telegram_values").get("ID100001"), "ID100001", "successful dtId user_app_id is saved for refresh");
 }
 
+async function testPokerPlusRefreshUsesSavedKey(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  const attempts = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      attempts.push(form);
+      if (form.mail && !form.ciphertext && !form.cipherText && !form.key && !form.code) {
+        throw new Error("refresh must not use email-only Poker21 lookup");
+      }
+      if ((form.ciphertext === "ABC123" || form.key === "ABC123") && form.user_app_id === "ID100001" && !form.mail) {
+        return {
+          ok: true,
+          async json() { return { status: 1, message: "success", data: { Id: "P21-REFRESH", Nike: "Key Refresh" }, code: 0 }; },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: form.user_app_id ? "Binding failed" : "Parameter error", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer, refreshMiniAppPlayerBySavedKey } = require(path.join(root, "lib", "pokerplus"));
+  await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "Player@Test.com");
+  attempts.length = 0;
+  const profile = await refreshMiniAppPlayerBySavedKey("ID100001", ["tg_1001"], "Player@Test.com");
+  assert.strictEqual(profile.pokerPlusUserId, "P21-REFRESH", "refresh uses the saved key to read Poker21 data");
+  assert.ok(attempts.length > 0, "refresh makes Poker21 attempts");
+  assert.ok(
+    attempts.every((payload) => payload.ciphertext || payload.cipherText || payload.key || payload.code),
+    "refresh never performs email-only Poker21 lookup",
+  );
+  assert.ok(
+    attempts.some((payload) => payload.user_app_id === "ID100001" && payload.ciphertext === "ABC123" && !payload.mail),
+    "refresh retries saved key with account id and no email",
+  );
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1079,6 +1145,7 @@ async function main() {
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
     ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],
+    ["pokerplus refresh saved key", testPokerPlusRefreshUsesSavedKey],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],
