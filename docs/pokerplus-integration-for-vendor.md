@@ -4,6 +4,8 @@ This document describes how the Poker21 verification flow is implemented on our 
 
 Naming note: the user-facing UI says **Verification via Poker21**. The code and API route names still use `pokerplus` because the external API documentation and endpoints use PokerPlus / Poker21 Plus terminology.
 
+Debugging note: the May 8, 2026 investigation, fixes, and conclusions are summarized in [`2026-05-08-poker21-debug-summary.md`](./2026-05-08-poker21-debug-summary.md).
+
 ## Overview
 
 The PokerPlus/Poker21 API is called from our backend, not directly from the browser, PWA, or Telegram Mini App frontend.
