@@ -508,14 +508,26 @@
 }
 .admin-report-rakeback-summary {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 10px;
   padding: 10px 12px;
   border: 1px solid rgba(202, 161, 84, 0.28);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
+}
+.admin-report-rakeback-summary__row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-report-rakeback-summary__row--grand {
+  padding-top: 8px;
+  border-top: 1px solid rgba(202, 161, 84, 0.2);
 }
 .admin-report-rakeback-summary__label {
   font-size: 13px;

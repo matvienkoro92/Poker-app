@@ -13,6 +13,8 @@ function initAdminReportModal() {
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
   var rakebackRoomTabs = modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : null;
   var rakebackTotalEl = document.getElementById("adminReportRakebackTotal");
+  var rakebackRoomTotalLabelEl = document.getElementById("adminReportRakebackRoomTotalLabel");
+  var rakebackRoomTotalEl = document.getElementById("adminReportRakebackRoomTotal");
   var rakebackTotalInput = document.getElementById("adminReportRakeback");
   var rakebackStatusEl = document.getElementById("adminReportRakebackStatus");
   var editingReportId = null;
@@ -132,6 +134,25 @@ function initAdminReportModal() {
     var num = parseReportNumber(n);
     if (!num) return "0";
     return String(Math.round(num));
+  }
+
+  function getRakebackRoomLabel(room) {
+    var normalized = normalizeRakebackRoom(room);
+    if (normalized === "X") return "Хпокер";
+    if (normalized === "Supr") return "Супрема";
+    if (normalized === "PP") return "PPpoker";
+    return "Покер21";
+  }
+
+  function getRakebackReportAmount(room, displayAmount) {
+    var amount = Math.round(parseReportNumber(displayAmount));
+    return normalizeRakebackRoom(room) === "X" ? amount * 100 : amount;
+  }
+
+  function formatRakebackRoomTotal(room, displayAmount, reportAmount) {
+    if (normalizeRakebackRoom(room) !== "X") return formatReportRubleNumber(reportAmount);
+    var chips = Math.round(parseReportNumber(displayAmount));
+    return formatReportRubleNumber(chips) + " фишек × 100 = " + formatReportRubleNumber(reportAmount);
   }
 
   function copyReportText(text) {
@@ -426,9 +447,10 @@ function initAdminReportModal() {
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
-      var amount = Math.round(getRakebackRowAmount(row));
+      var roomAmount = Math.round(getRakebackRowAmount(row));
+      var amount = getRakebackReportAmount(room, roomAmount);
       var discount15 = !!(discountInput && discountInput.checked);
-      var filled = !!playerId || rake !== 0 || percent !== 0 || amount !== 0;
+      var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackOwner(ownerId)) return null;
@@ -440,6 +462,8 @@ function initAdminReportModal() {
         rake: rake,
         percent: percent,
         discount15: discount15,
+        roomAmount: roomAmount,
+        chipAmount: room === "X" ? roomAmount : null,
         amount: amount,
         saved: row.getAttribute("data-rakeback-saved") === "1",
         ownerId: ownerId || getCurrentRakebackOwnerId(),
@@ -490,9 +514,19 @@ function initAdminReportModal() {
     });
     syncRakebackRoomVisibility();
     var collected = collectRakebackRows(false, false);
+    var roomTotals = {};
+    collected.forEach(function (row) {
+      var room = normalizeRakebackRoom(row.room);
+      if (!roomTotals[room]) roomTotals[room] = { display: 0, report: 0 };
+      roomTotals[room].display += parseReportNumber(row.roomAmount != null ? row.roomAmount : row.amount);
+      roomTotals[room].report += parseReportNumber(row.amount);
+    });
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
+    var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0 };
+    if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = "Итого " + getRakebackRoomLabel(activeRakebackRoom);
+    if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = formatRakebackRoomTotal(activeRakebackRoom, activeTotal.display, activeTotal.report);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportRubleNumber(total);
     if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(total) || "");
     showRakebackStatus("");
@@ -840,11 +874,15 @@ function initAdminReportModal() {
         var playerId = row.playerId != null ? String(row.playerId).trim() : "";
         if (!room && !playerId) return;
         var label = (row.weekTotal ? "Итого по неделе: " : "Рейкбек: ") + [room, playerId].filter(Boolean).join(" · ");
+        var normalizedRoom = normalizeRakebackRoom(room);
         var baseAmount = parseReportNumber(row.rake) * parseReportNumber(row.percent) / 100;
         var amount = row.amount != null ? parseReportNumber(row.amount) : (row.discount15 || row.subtract15 ? baseAmount * 0.85 : baseAmount);
+        var roomAmount = row.roomAmount != null ? parseReportNumber(row.roomAmount) : (normalizedRoom === "X" ? amount / 100 : amount);
         var value = row.weekTotal
           ? formatReportNumber(amount)
-          : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(amount);
+          : normalizedRoom === "X"
+            ? formatReportNumber(row.rake) + " фишек × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(roomAmount) + " фишек × 100 = " + formatReportNumber(amount)
+            : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(amount);
         parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(label) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(value) + "</span></div>");
       });
     }
