@@ -41,6 +41,32 @@ function initProfilePokerPlus() {
   var profileStatusTitle = document.getElementById("profileStatusTitle");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
   var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
+  var POKERPLUS_KEY_LOOKALIKE_MAP = {
+    "\u0410": "A",
+    "\u0412": "B",
+    "\u0415": "E",
+    "\u041a": "K",
+    "\u041c": "M",
+    "\u041d": "H",
+    "\u041e": "O",
+    "\u0420": "P",
+    "\u0421": "C",
+    "\u0422": "T",
+    "\u0423": "Y",
+    "\u0425": "X",
+    "\u0430": "a",
+    "\u0432": "b",
+    "\u0435": "e",
+    "\u043a": "k",
+    "\u043c": "m",
+    "\u043d": "h",
+    "\u043e": "o",
+    "\u0440": "p",
+    "\u0441": "c",
+    "\u0442": "t",
+    "\u0443": "y",
+    "\u0445": "x",
+  };
   var pokerPlusBalanceRaw = "";
   var pokerPlusBalanceVisible = false;
   var pokerPlusStatsVisibleToOthers = false;
@@ -54,6 +80,16 @@ function initProfilePokerPlus() {
     if (!feedback) return;
     feedback.textContent = text || "";
     feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
+  }
+
+  function normalizePokerPlusKeyInput(value) {
+    return String(value || "")
+      .replace(/\s+/g, "")
+      .trim()
+      .replace(/[\u0410\u0412\u0415\u041A\u041C\u041D\u041E\u0420\u0421\u0422\u0423\u0425\u0430\u0432\u0435\u043A\u043C\u043D\u043E\u0440\u0441\u0442\u0443\u0445]/g, function (ch) {
+        return POKERPLUS_KEY_LOOKALIKE_MAP[ch] || ch;
+      })
+      .slice(0, 64);
   }
 
   function auth() {
@@ -439,7 +475,7 @@ function initProfilePokerPlus() {
     var refreshCiphertext = "";
     if (refresh) {
       body.refresh = "1";
-      refreshCiphertext = String(input && input.value ? input.value : "").replace(/\s+/g, "").trim().slice(0, 64);
+      refreshCiphertext = normalizePokerPlusKeyInput(input && input.value ? input.value : "");
       if (refreshCiphertext) {
         input.value = refreshCiphertext;
         body.ciphertext = refreshCiphertext;
@@ -507,7 +543,7 @@ function initProfilePokerPlus() {
       setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
       return;
     }
-    var ciphertext = String(input.value || "").replace(/\s+/g, "").trim().slice(0, 64);
+    var ciphertext = normalizePokerPlusKeyInput(input.value || "");
     var wasLinked = !!pokerPlusProfileLinked;
     input.value = ciphertext;
     if (!ciphertext) {
