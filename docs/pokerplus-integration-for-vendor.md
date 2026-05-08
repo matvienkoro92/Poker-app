@@ -138,7 +138,7 @@ Our backend then resolves:
 - `user_app_id` is omitted first for key-based bind. If PokerPlus rejects that, the backend retries numeric Telegram IDs linked to the same internal account.
 - `token` from the PokerPlus `getToken` endpoint.
 
-The key is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace and normalize Cyrillic lookalike characters that can appear during manual entry.
+The key is sent and stored without changing letter casing. The frontend/backend trim accidental whitespace, remove invisible zero-width copy/paste characters, and normalize Cyrillic lookalike characters that can appear during manual entry.
 
 Current `user_app_id` format:
 
@@ -181,7 +181,7 @@ Fallback payload with linked email:
 }
 ```
 
-For key-based bind, our backend sends the key-only request first. For compatibility with the current 6-character Poker21 key flow, it tries the key in the documented `ciphertext` field first, then `cipherText`, `key`, and `code`. Only after key-only attempts fail does it retry common email case variants and numeric Telegram IDs as metadata fallbacks. This keeps the Poker21 key as the primary proof when Poker21 rejects optional profile metadata with `Binding failed`.
+For key-based bind, our backend sends the key-only request first. For compatibility with the current 6-character Poker21 key flow, it tries the key in the documented `ciphertext` field first, then `cipherText`, `key`, and `code`. Only after key-only attempts fail does it retry common email case variants and numeric Telegram IDs as metadata fallbacks, using the same compatible key-field sequence for each fallback. This keeps the Poker21 key as the primary proof while still covering changed Poker21 payload shapes such as `key + user_app_id`.
 
 ## `user_app_id`
 
@@ -516,7 +516,7 @@ Our integration matches the PokerPlus API documentation in:
 - HTTP method: `POST`.
 - Request body type: `form-data`.
 - Token flow via `getToken`.
-- Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; `token` is always sent.
+- Bind fields: key as `ciphertext` first, then compatible key field fallbacks; `user_app_id` and `mail` are omitted first and used only as fallbacks; each fallback still tries the compatible key field names; `token` is always sent.
 - Unbind fields: `user_app_id`, `token`.
 - Refresh fields: `user_app_id`, `mail`, `token` without `ciphertext`.
 - Tables endpoint: `getPlayingTables`.

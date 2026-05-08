@@ -469,6 +469,67 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
 }
 
+async function testPokerPlusKeyBindFallbackMatrix(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  const attempts = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      attempts.push(form);
+      if (form.key === "ABC123" && form.user_app_id === "1001" && !form.mail) {
+        return {
+          ok: true,
+          async json() { return { status: 1, message: "success", data: { Id: "P21-42", Nike: "Bound Player" }, code: 0 }; },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: "Binding failed", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "A\u200BB\u0421123", "");
+  assert.strictEqual(profile.pokerPlusUserId, "P21-42", "PokerPlus bind succeeds through key + user fallback");
+  assert.deepStrictEqual(
+    attempts.slice(0, 7).map((payload) => ["ciphertext", "cipherText", "key", "code"].find((field) => payload[field] != null)),
+    ["ciphertext", "cipherText", "key", "code", "ciphertext", "cipherText", "key"],
+    "bind tries compatible key fields before and during metadata fallback",
+  );
+  assert.strictEqual(attempts[0].user_app_id, undefined, "first bind attempt omits user_app_id");
+  assert.strictEqual(attempts[0].mail, undefined, "first bind attempt omits mail");
+  assert.strictEqual(attempts[6].key, "ABC123", "bind removes invisible chars and Cyrillic lookalikes");
+  assert.strictEqual(redis.h("poker_app:pokerplus_user_ids").get("ID100001"), "P21-42", "bind stores PokerPlus user id");
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -900,6 +961,7 @@ async function main() {
     ["raffle join/leave", testRaffleJoinLeave],
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
+    ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

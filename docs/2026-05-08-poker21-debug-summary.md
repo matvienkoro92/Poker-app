@@ -28,6 +28,7 @@ Backend then:
 4. Normalizes only accidental input issues:
    - trims spaces;
    - removes whitespace inside the key;
+   - removes invisible zero-width characters that can appear during copy/paste;
    - replaces Cyrillic lookalike letters with Latin equivalents;
    - preserves letter casing.
 5. Calls `getBindMiniAppPlayer` with key-only payload first:
@@ -44,7 +45,7 @@ Backend then:
    - `cipherText`
    - `key`
    - `code`
-7. Only after the key-only attempts fail, retries with optional metadata:
+7. Only after the key-only attempts fail, retries the same compatible key fields with optional metadata:
    - linked email variants in `mail`;
    - numeric Telegram IDs in `user_app_id`.
 8. On success, stores the returned Poker21 player ID in Redis and marks the app profile as Poker21 verified.
@@ -55,9 +56,10 @@ Backend then:
 - Removed the first-request dependency on email.
 - Changed the first bind attempt to omit both `mail` and `user_app_id`.
 - Added compatibility attempts for 6-character keys with `cipherText`, `key`, and `code` field names.
+- Extended those compatible key-field attempts to metadata fallbacks too, so a changed Poker21 payload shape like `key + user_app_id` is covered.
 - Kept `ciphertext` as the documented first field.
 - Stopped lowercasing or otherwise changing key letter casing.
-- Added whitespace cleanup and Cyrillic lookalike normalization for manual copy/paste mistakes.
+- Added whitespace, invisible-character cleanup, and Cyrillic lookalike normalization for manual copy/paste mistakes.
 - Made missing `POKERPLUS_STORAGE_SECRET` non-blocking: binding can succeed without it, but the key cannot be saved for future encrypted refresh.
 - Added safe server logs for failed bind attempts. Logs include attempted field names and whether optional metadata was present, but never include the actual key.
 - Updated user-facing errors so we do not incorrectly claim that Telegram ID/email validation failed before a first-time key bind.

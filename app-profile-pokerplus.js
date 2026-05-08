@@ -41,6 +41,7 @@ function initProfilePokerPlus() {
   var profileStatusTitle = document.getElementById("profileStatusTitle");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
   var POKERPLUS_BALANCE_VISIBLE_KEY = "poker_profile_pokerplus_balance_visible";
+  var POKERPLUS_KEY_INVISIBLE_RE = /[\u200B-\u200D\u2060\uFEFF]/g;
   var POKERPLUS_KEY_LOOKALIKE_MAP = {
     "\u0410": "A",
     "\u0412": "B",
@@ -99,6 +100,7 @@ function initProfilePokerPlus() {
 
   function normalizePokerPlusKeyInput(value) {
     return String(value || "")
+      .replace(POKERPLUS_KEY_INVISIBLE_RE, "")
       .replace(/\s+/g, "")
       .trim()
       .replace(/[\u0410\u0412\u0415\u041A\u041C\u041D\u041E\u0420\u0421\u0422\u0423\u0425\u0430\u0432\u0435\u043A\u043C\u043D\u043E\u0440\u0441\u0442\u0443\u0445]/g, function (ch) {
