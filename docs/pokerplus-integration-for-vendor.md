@@ -132,7 +132,7 @@ Our backend then resolves:
 
 - `ciphertext` from the frontend request.
 - `mail` from the email linked to the user's account in our app, if available. The original letter casing is preserved for PokerPlus.
-- `user_app_id` from the user's numeric Telegram user ID.
+- `user_app_id` from the user's numeric Telegram user ID. If the current session and the saved preferred account mapping have different Telegram IDs, our backend tries both numeric IDs.
 - `token` from the PokerPlus `getToken` endpoint.
 
 Current `user_app_id` format:
@@ -178,6 +178,8 @@ If the user has no linked email in our app, the same request is sent with an emp
   "token": "<token from getToken>"
 }
 ```
+
+For key-based bind, our backend retries common email case variants and then retries with an empty `mail` value. This keeps the Poker21 key as the primary proof when Poker21 rejects the email value with `Binding failed`.
 
 ## `user_app_id`
 
@@ -240,7 +242,7 @@ Refresh example payload:
 
 The returned player data is normalized and cached in our app.
 
-If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with `user_app_id`, `ciphertext`, `mail`, and `token`, saves the successful key bind, and returns the fresh profile data.
+If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with `user_app_id`, `ciphertext`, `mail`, and `token`, tries the same Telegram ID and email fallbacks as the initial bind, saves the successful key bind, and returns the fresh profile data.
 
 If that email refresh returns `Binding failed`, our backend retries the same request with the encrypted `ciphertext` saved during the original key bind:
 

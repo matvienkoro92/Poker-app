@@ -325,8 +325,8 @@ function initProfilePokerPlus() {
     updateProfileStatusTextVisibility();
     input.hidden = false;
     bindBtn.hidden = !!linked;
-    input.placeholder = linked ? "Ключ из Poker21 для обновления" : "Ключ из PokerPlus";
-    input.setAttribute("aria-label", linked ? "Ключ из Poker21 для обновления" : "Ключ из PokerPlus");
+    input.placeholder = linked ? "Ключ из Poker21 для обновления" : "Ключ из Poker21";
+    input.setAttribute("aria-label", linked ? "Ключ из Poker21 для обновления" : "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
     refreshBtn.hidden = false;
     setPokerPlusRefreshButtonText(!!linked);
@@ -505,7 +505,7 @@ function initProfilePokerPlus() {
     var wasLinked = !!pokerPlusProfileLinked;
     input.value = ciphertext;
     if (!ciphertext) {
-      setFeedback("Вставьте ключ из PokerPlus.", true);
+      setFeedback("Вставьте ключ из Poker21.", true);
       return;
     }
     bindBtn.disabled = true;
@@ -520,7 +520,7 @@ function initProfilePokerPlus() {
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok) {
-          setFeedback((data && data.error) || "Не удалось привязать PokerPlus.", true);
+          setFeedback((data && data.error) || "Не удалось привязать Poker21.", true);
           return;
         }
         renderProfile(data.profile, true);
@@ -588,7 +588,7 @@ function initProfilePokerPlus() {
   if (refreshBtn.dataset.bound !== "1") {
     refreshBtn.dataset.bound = "1";
     refreshBtn.addEventListener("click", function () {
-      setFeedback("Обновляем данные PokerPlus…", false);
+      setFeedback("Обновляем данные Poker21...", false);
       loadProfile(true).finally(function () {});
     });
   }
