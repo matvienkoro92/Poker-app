@@ -21,6 +21,7 @@ function initAdminReportModal() {
   var activeRakebackRoom = "P21";
   var rakebackDraftSaveTimer = null;
   var rakebackDraftRefreshTimer = null;
+  var rakebackDraftMutationSeq = 0;
   var loadingRakebackDraft = false;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
@@ -598,9 +599,10 @@ function initAdminReportModal() {
     } catch (e) {}
   }
 
-  function saveRakebackDraftRowsNow() {
+  function saveRakebackDraftRowsNow(force) {
     if (editingReportId) return;
-    if (loadingRakebackDraft) return;
+    if (loadingRakebackDraft && !force) return;
+    rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     saveLocalRakebackDraftRows(rows);
     var base = getAdminReportApiBase();
@@ -645,10 +647,12 @@ function initAdminReportModal() {
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
     var shouldUploadLocalDraft = false;
+    var loadMutationSeq = rakebackDraftMutationSeq;
     loadingRakebackDraft = true;
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (loadMutationSeq !== rakebackDraftMutationSeq) return;
         var serverRows = data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)
           ? data.rakebackDraft.rows
           : [];
@@ -659,11 +663,12 @@ function initAdminReportModal() {
         fillRakebackTable(rows, "");
       })
       .catch(function () {
+        if (loadMutationSeq !== rakebackDraftMutationSeq) return;
         fillRakebackTable(readRakebackDraftRows(), "");
       })
       .then(function () {
         loadingRakebackDraft = false;
-        if (shouldUploadLocalDraft) saveRakebackDraftRowsNow();
+        if (shouldUploadLocalDraft) saveRakebackDraftRowsNow(true);
       });
   }
 
@@ -1335,7 +1340,7 @@ function initAdminReportModal() {
         row.parentNode.removeChild(row);
       }
       syncRakebackTable();
-      saveRakebackDraftRowsNow();
+      saveRakebackDraftRowsNow(true);
     });
   }
   if (modal) {
