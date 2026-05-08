@@ -68,7 +68,7 @@ The backend reads the following environment variables:
   - Used as `secretKey` in `getToken`.
 - `POKERPLUS_STORAGE_SECRET`
   - Used only on our side to encrypt the stored PokerPlus key.
-  - If missing, key-based bind still succeeds, but the key is not persisted for future automatic key-based refresh.
+  - If missing, key-based bind still succeeds and storage encryption falls back to `POKERPLUS_SECRET_KEY`, so future automatic key-based refresh still has a saved key.
 
 No PokerPlus secret values are exposed to the frontend.
 

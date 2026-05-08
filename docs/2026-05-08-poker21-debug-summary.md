@@ -65,7 +65,7 @@ Backend then:
 - Kept `ciphertext` as the documented first field.
 - Stopped lowercasing or otherwise changing key letter casing.
 - Added whitespace, invisible-character cleanup, and Cyrillic lookalike normalization for manual copy/paste mistakes.
-- Made missing `POKERPLUS_STORAGE_SECRET` non-blocking: binding can succeed without it, but the key cannot be saved for future encrypted refresh.
+- Made missing `POKERPLUS_STORAGE_SECRET` non-blocking: binding can succeed without it, and saved-key refresh can still work because storage encryption falls back to `POKERPLUS_SECRET_KEY`.
 - Added safe server logs for failed bind attempts. Logs include attempted field names and whether optional metadata was present, but never include the actual key.
 - Server logs keep the full safe attempt matrix and include `attemptsTotal`, so the first key-only attempts are not lost when many email/Telegram fallbacks run.
 - Updated user-facing errors so we do not incorrectly claim that Telegram ID/email validation failed before a first-time key bind.

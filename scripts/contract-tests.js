@@ -775,6 +775,61 @@ async function testPokerPlusCounterHandsAliases(redis) {
   assert.strictEqual(profile.totalCounter.hands, 277, "total counter accepts played_hands as hands");
 }
 
+async function testPokerPlusKeyPersistsWithoutStorageSecret(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  delete process.env.POKERPLUS_STORAGE_SECRET;
+  delete process.env.POKERPLUS_CIPHERTEXT_SECRET;
+  clearProjectRequireCache();
+
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      if (form.ciphertext === "ABC123" && form.user_app_id === "ID100001") {
+        return {
+          ok: true,
+          async json() { return { status: 1, message: "success", data: { Id: "P21-STORED" }, code: 0 }; },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: form.user_app_id ? "Binding failed" : "Parameter error", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer, readPokerPlusCiphertext } = require(path.join(root, "lib", "pokerplus"));
+  await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "");
+  assert.strictEqual(await readPokerPlusCiphertext("ID100001"), "ABC123", "saved key survives without a dedicated storage secret");
+  assert.ok(
+    String(redis.h("poker_app:pokerplus_ciphertexts").get("ID100001") || "").startsWith("enc:v1:"),
+    "saved key is still encrypted at rest",
+  );
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1211,6 +1266,7 @@ async function main() {
     ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],
     ["pokerplus refresh saved key", testPokerPlusRefreshUsesSavedKey],
     ["pokerplus counter hands aliases", testPokerPlusCounterHandsAliases],
+    ["pokerplus key persists without storage secret", testPokerPlusKeyPersistsWithoutStorageSecret],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],
