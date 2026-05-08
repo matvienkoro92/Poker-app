@@ -106,6 +106,8 @@ Poker21 can return dated/stat period counters:
 
 The frontend displays these groups when they are present. We removed the rule that hid negative values, so negative cash/MTT/SNG values are now visible instead of being filtered out.
 
+For every non-empty stats period, the frontend keeps a separate `Хендс` card visible. If Poker21 does not send `hands` for that period, the card shows `—` instead of disappearing.
+
 Known normalized stats fields:
 
 - `fee`

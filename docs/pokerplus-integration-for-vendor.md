@@ -336,6 +336,8 @@ Currently visible in the profile UI:
 - last login IP, if present;
 - statistics, when `today_counter`, `week_counter`, or `total_counter` contains an object with values.
 
+For every non-empty statistics period, the frontend keeps a separate `Хендс` card visible. If Poker21 omits `hands` for that period, the card shows `—` instead of disappearing.
+
 `leagueId` and `groupId` are stored by the backend, but they are currently hidden in the profile UI.
 
 If `total_counter` is an empty array, we treat it as no statistics available and do not show a stats row. This does not break the profile display.

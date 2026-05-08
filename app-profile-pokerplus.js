@@ -315,8 +315,9 @@ function initProfilePokerPlus() {
     var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
     var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
+    var hasAnyStat = pokerPlusCounterHasValue(total);
     if (includeEmptyCore || feeStat != null) metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
-    if (includeEmptyCore || handsStat != null) metrics.push(pokerPlusStatMetricHtml("Раздачи", handsStat, "", "♠"));
+    if (includeEmptyCore || hasAnyStat) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     if (includeEmptyCore || mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
     if (includeEmptyCore || sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
