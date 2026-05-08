@@ -323,8 +323,11 @@ function initProfilePokerPlus() {
     pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     updateProfileStatusTextVisibility();
-    input.hidden = !!linked;
+    input.hidden = false;
     bindBtn.hidden = !!linked;
+    input.placeholder = linked ? "Ключ из Poker21 для обновления" : "Ключ из PokerPlus";
+    input.setAttribute("aria-label", linked ? "Ключ из Poker21 для обновления" : "Ключ из PokerPlus");
+    bindBtn.textContent = "Привязать по ключу из Poker21";
     refreshBtn.hidden = false;
     setPokerPlusRefreshButtonText(!!linked);
     unbindBtn.hidden = !linked;
@@ -427,7 +430,15 @@ function initProfilePokerPlus() {
     }
     setProfileStatusLoading(true);
     var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
-    if (refresh) body.refresh = "1";
+    var refreshCiphertext = "";
+    if (refresh) {
+      body.refresh = "1";
+      refreshCiphertext = String(input && input.value ? input.value : "").trim().toUpperCase();
+      if (refreshCiphertext) {
+        input.value = refreshCiphertext;
+        body.ciphertext = refreshCiphertext;
+      }
+    }
     return fetch(base + "/api/pokerplus-player", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -457,7 +468,12 @@ function initProfilePokerPlus() {
           return;
         }
         if (data.syncError) {
-          setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + data.syncError, "warn");
+          var syncError = String(data.syncError || "");
+          var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Вставьте ключ из Poker21 и нажмите «Обновить»." : "";
+          setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
+        } else if (refresh && refreshCiphertext) {
+          input.value = "";
+          setFeedback("Данные Poker21 обновлены, ключ сохранён.", false);
         } else if (refresh) {
           setFeedback("Данные Poker21 обновлены.", false);
         } else {
@@ -486,6 +502,7 @@ function initProfilePokerPlus() {
       return;
     }
     var ciphertext = String(input.value || "").trim().toUpperCase();
+    var wasLinked = !!pokerPlusProfileLinked;
     input.value = ciphertext;
     if (!ciphertext) {
       setFeedback("Вставьте ключ из PokerPlus.", true);
@@ -494,7 +511,7 @@ function initProfilePokerPlus() {
     bindBtn.disabled = true;
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
-    setFeedback("Привязываем PokerPlus…", false);
+    setFeedback(wasLinked ? "Обновляем Poker21 по ключу…" : "Привязываем Poker21…", false);
     fetch(base + "/api/pokerplus-bind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -507,7 +524,7 @@ function initProfilePokerPlus() {
           return;
         }
         renderProfile(data.profile, true);
-        setFeedback("PokerPlus привязан.", false);
+        setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
         input.value = "";
       })
       .catch(function () {

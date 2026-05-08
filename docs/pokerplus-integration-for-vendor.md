@@ -40,6 +40,7 @@ The current implementation has these important details:
 - The initial bind request includes `ciphertext`.
 - The profile refresh request is email-based by default: it calls the same PokerPlus endpoint without `ciphertext` when the user has a linked email in our app.
 - If PokerPlus responds with `Binding failed` during email refresh, our backend retries with the saved encrypted `ciphertext` from the original key-based bind.
+- The frontend can also send a fresh `ciphertext` with a manual refresh request. In that case the backend validates it through PokerPlus, refreshes the player profile, and saves the key for future refreshes.
 - During refresh, if PokerPlus returns `Player data not found`, our backend retries common email case variants such as lowercase, first-letter uppercase, title-cased local part, and uppercase local part.
 - During refresh for older local bindings, if the saved PokerPlus Telegram value is missing, our backend uses the current Telegram session's numeric user ID as a fallback and saves it after a successful refresh.
 - Refresh can also create the local linked profile if PokerPlus returns player data and no local link was saved yet.
@@ -234,6 +235,8 @@ Refresh example payload:
 ```
 
 The returned player data is normalized and cached in our app.
+
+If the user enters a key before pressing Refresh, our frontend sends that key to our backend as `ciphertext`. The backend then calls PokerPlus with `user_app_id`, `ciphertext`, `mail`, and `token`, saves the successful key bind, and returns the fresh profile data.
 
 If that email refresh returns `Binding failed`, our backend retries the same request with the encrypted `ciphertext` saved during the original key bind:
 
