@@ -144,15 +144,23 @@ function initAdminReportModal() {
     return "Покер21";
   }
 
+  function getRakebackRoomMultiplier(room) {
+    var normalized = normalizeRakebackRoom(room);
+    if (normalized === "X") return 100;
+    if (normalized === "Supr" || normalized === "PP") return 115;
+    return 1;
+  }
+
   function getRakebackReportAmount(room, displayAmount) {
     var amount = Math.round(parseReportNumber(displayAmount));
-    return normalizeRakebackRoom(room) === "X" ? amount * 100 : amount;
+    return amount * getRakebackRoomMultiplier(room);
   }
 
   function formatRakebackRoomTotal(room, displayAmount, reportAmount) {
-    if (normalizeRakebackRoom(room) !== "X") return formatReportRubleNumber(reportAmount);
+    var multiplier = getRakebackRoomMultiplier(room);
+    if (multiplier === 1) return formatReportRubleNumber(reportAmount);
     var chips = Math.round(parseReportNumber(displayAmount));
-    return formatReportRubleNumber(chips) + " фишек × 100 = " + formatReportRubleNumber(reportAmount);
+    return formatReportRubleNumber(chips) + " фишек × " + multiplier + " = " + formatReportRubleNumber(reportAmount);
   }
 
   function copyReportText(text) {
@@ -875,13 +883,14 @@ function initAdminReportModal() {
         if (!room && !playerId) return;
         var label = (row.weekTotal ? "Итого по неделе: " : "Рейкбек: ") + [room, playerId].filter(Boolean).join(" · ");
         var normalizedRoom = normalizeRakebackRoom(room);
+        var multiplier = getRakebackRoomMultiplier(normalizedRoom);
         var baseAmount = parseReportNumber(row.rake) * parseReportNumber(row.percent) / 100;
         var amount = row.amount != null ? parseReportNumber(row.amount) : (row.discount15 || row.subtract15 ? baseAmount * 0.85 : baseAmount);
-        var roomAmount = row.roomAmount != null ? parseReportNumber(row.roomAmount) : (normalizedRoom === "X" ? amount / 100 : amount);
+        var roomAmount = row.roomAmount != null ? parseReportNumber(row.roomAmount) : (multiplier > 1 ? amount / multiplier : amount);
         var value = row.weekTotal
           ? formatReportNumber(amount)
-          : normalizedRoom === "X"
-            ? formatReportNumber(row.rake) + " фишек × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(roomAmount) + " фишек × 100 = " + formatReportNumber(amount)
+          : multiplier > 1
+            ? formatReportNumber(row.rake) + " фишек × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(roomAmount) + " фишек × " + multiplier + " = " + formatReportNumber(amount)
             : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(amount);
         parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(label) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(value) + "</span></div>");
       });
