@@ -429,7 +429,7 @@ function initAdminReportModal() {
       updateRakebackRowActions(row);
     });
     syncRakebackRoomVisibility();
-    var collected = collectRakebackRows(false, true);
+    var collected = collectRakebackRows(false, false);
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
