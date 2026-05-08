@@ -288,6 +288,8 @@ Normalized fields used by our app:
 - `data.Country` -> `country`
 - `data.Role` -> `role`
 - `data.total_counter` -> statistics, if it is an object
+- `data.today_counter` -> today's statistics, if it is an object
+- `data.week_counter` -> current week statistics, if it is an object
 
 Currently visible in the profile UI:
 
@@ -301,7 +303,7 @@ Currently visible in the profile UI:
 - role;
 - last login date, if present;
 - last login IP, if present;
-- statistics, when `total_counter` contains an object with values.
+- statistics, when `today_counter`, `week_counter`, or `total_counter` contains an object with values.
 
 `leagueId` and `groupId` are stored by the backend, but they are currently hidden in the profile UI.
 
