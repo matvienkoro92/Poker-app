@@ -67,6 +67,32 @@ function initAdminReportModal() {
     return false;
   }
 
+  function canManageAllRakebackRows() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
+      if (authUser) users.push(authUser);
+    } catch (eAuthUser) {}
+    try {
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.user) users.push(rec.user);
+    } catch (eRec) {}
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i] || {};
+      var rawId = u.id != null ? String(u.id).replace(/^tg_/, "").trim() : "";
+      if (rawId === "388008256" || rawId === "2144406710") return true;
+      var memberId = u.memberId != null ? String(u.memberId).replace(/^tg_/, "").trim() : "";
+      if (memberId === "388008256" || memberId === "2144406710") return true;
+      var username = u.username != null ? String(u.username).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1787443" || username === "roman1_matvienko") return true;
+    }
+    return false;
+  }
+
   function syncSentReportsAccess() {
     var allowed = canViewSentReports();
     if (tabs && tabs.length) {
@@ -336,6 +362,7 @@ function initAdminReportModal() {
   }
 
   function isCurrentRakebackOwner(ownerId) {
+    if (canManageAllRakebackRows()) return true;
     var currentOwnerId = getCurrentRakebackOwnerId();
     ownerId = String(ownerId || "").trim();
     return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
