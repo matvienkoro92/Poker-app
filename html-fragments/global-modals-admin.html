@@ -265,6 +265,10 @@
               <button type="button" class="admin-report-rakeback-room-tab" data-rakeback-room-tab="Supr" role="tab" aria-selected="false">Супрема</button>
               <button type="button" class="admin-report-rakeback-room-tab" data-rakeback-room-tab="PP" role="tab" aria-selected="false">PPpoker</button>
             </div>
+            <label class="admin-report-rakeback-search" for="adminReportRakebackSearch">
+              <span>Поиск по айди</span>
+              <input type="search" class="admin-report-rakeback-search__input" id="adminReportRakebackSearch" enterkeyhint="search" autocomplete="off" placeholder="ID игрока" />
+            </label>
             <div class="share-stats-admin-modal__table-wrap admin-report-rakeback-wrap admin-report-rakeback-wrap--by-room">
               <table class="admin-report-rakeback-table">
                 <thead>
@@ -302,12 +306,9 @@
                 </tbody>
               </table>
             </div>
-            <div class="admin-report-rakeback-footer">
-              <button type="button" class="admin-report-add-extra-btn admin-report-rakeback-add-row-btn" id="adminReportRakebackAddBtn" title="Добавить строку" aria-label="Добавить строку">+</button>
-              <p class="admin-report-rakeback-status" id="adminReportRakebackStatus" hidden></p>
-            </div>
             <div class="admin-report-rakeback-summary">
-              <div class="admin-report-rakeback-summary__row">
+              <div class="admin-report-rakeback-summary__row admin-report-rakeback-summary__row--room">
+                <button type="button" class="admin-report-add-extra-btn admin-report-rakeback-add-row-btn" id="adminReportRakebackAddBtn" title="Добавить строку" aria-label="Добавить строку">+</button>
                 <span class="admin-report-rakeback-summary__label" id="adminReportRakebackRoomTotalLabel">Итого Покер21</span>
                 <span class="admin-report-rakeback-summary__value" id="adminReportRakebackRoomTotal">0</span>
               </div>
@@ -316,6 +317,7 @@
                 <span class="admin-report-rakeback-summary__value" id="adminReportRakebackTotal">0</span>
               </div>
             </div>
+            <p class="admin-report-rakeback-status" id="adminReportRakebackStatus" hidden></p>
           </div>
           <div class="admin-report-panel" data-admin-report-panel="sent">
             <div class="share-stats-admin-modal__table-wrap admin-report-sent-wrap">

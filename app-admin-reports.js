@@ -11,6 +11,7 @@ function initAdminReportModal() {
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
+  var rakebackSearchInput = document.getElementById("adminReportRakebackSearch");
   var rakebackRoomTabs = modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : null;
   var rakebackTotalEl = document.getElementById("adminReportRakebackTotal");
   var rakebackRoomTotalLabelEl = document.getElementById("adminReportRakebackRoomTotalLabel");
@@ -343,6 +344,15 @@ function initAdminReportModal() {
     return normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : row.getAttribute("data-rakeback-room") || "P21");
   }
 
+  function getRakebackSearchQuery() {
+    return rakebackSearchInput && rakebackSearchInput.value ? String(rakebackSearchInput.value).trim().toLowerCase() : "";
+  }
+
+  function getRakebackRowPlayerId(row) {
+    var idInput = row ? row.querySelector("[data-rakeback-player-id]") : null;
+    return idInput && idInput.value ? String(idInput.value).trim().toLowerCase() : "";
+  }
+
   function setRakebackRoomTab(room) {
     activeRakebackRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
     if (rakebackRoomTabs && rakebackRoomTabs.length) {
@@ -357,8 +367,11 @@ function initAdminReportModal() {
 
   function syncRakebackRoomVisibility() {
     if (!rakebackBody) return;
+    var searchQuery = getRakebackSearchQuery();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
-      row.hidden = getRakebackRowRoom(row) !== activeRakebackRoom;
+      var matchesRoom = getRakebackRowRoom(row) === activeRakebackRoom;
+      var matchesSearch = !searchQuery || getRakebackRowPlayerId(row).indexOf(searchQuery) !== -1;
+      row.hidden = !matchesRoom || !matchesSearch;
     });
   }
 
@@ -1524,6 +1537,14 @@ function initAdminReportModal() {
       tab.addEventListener("click", function () {
         setRakebackRoomTab(tab.getAttribute("data-rakeback-room-tab"));
       });
+    });
+  }
+  if (rakebackSearchInput) {
+    rakebackSearchInput.addEventListener("input", syncRakebackRoomVisibility);
+    rakebackSearchInput.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      rakebackSearchInput.value = "";
+      syncRakebackRoomVisibility();
     });
   }
   if (rakebackBody) {

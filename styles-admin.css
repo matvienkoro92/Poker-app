@@ -568,6 +568,17 @@ body.admin-report-modal-open .bottom-nav {
   justify-content: space-between;
   gap: 12px;
 }
+.admin-report-rakeback-summary__row--room {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+}
+.admin-report-rakeback-summary__row--room .admin-report-rakeback-summary__label {
+  min-width: 0;
+}
+.admin-report-rakeback-summary__row--room .admin-report-rakeback-summary__value {
+  text-align: right;
+}
 .admin-report-rakeback-summary__row--grand {
   padding-top: 8px;
   border-top: 1px solid rgba(202, 161, 84, 0.2);
@@ -587,6 +598,8 @@ body.admin-report-modal-open .bottom-nav {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
+  flex: 0 0 auto;
+  min-height: 38px;
   margin: 0 0 12px;
   padding: 0;
   border: 1px solid rgba(246, 211, 145, 0.42);
@@ -623,6 +636,37 @@ body.admin-report-modal-open .bottom-nav {
   max-height: min(52vh, 440px);
   overflow: auto;
 }
+.admin-report-rakeback-search {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  margin: 10px 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.admin-report-rakeback-search__input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--input-bg, var(--card-bg));
+  color: var(--text);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.admin-report-rakeback-search__input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.78;
+}
+.admin-report-rakeback-search__input:focus {
+  border-color: rgba(246, 211, 145, 0.7);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.18);
+}
 #adminReportModal .admin-report-rakeback-wrap {
   flex: 1 1 auto;
   min-height: 0;
@@ -642,10 +686,15 @@ body.admin-report-modal-open .bottom-nav {
   vertical-align: middle;
 }
 .admin-report-rakeback-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   border-bottom: 1px solid var(--border-subtle);
+  background: #070a11;
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 700;
+  box-shadow: 0 1px 0 rgba(246, 211, 145, 0.22);
 }
 .admin-report-rakeback-table th:nth-child(1),
 .admin-report-rakeback-table td:nth-child(1) {
@@ -935,10 +984,11 @@ body.admin-report-modal-open .bottom-nav {
   border-color: #f6d391;
 }
 .admin-report-rakeback-status {
-  margin: 0;
+  margin: 8px 0 0;
   color: #86efac;
   font-size: 13px;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 .admin-report-rakeback-row--saved .admin-report-rakeback-select,
 .admin-report-rakeback-row--saved .admin-report-rakeback-input {
@@ -978,11 +1028,23 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-room-tabs {
     gap: 4px;
+    min-height: 32px;
   }
   .admin-report-rakeback-room-tab {
     min-height: 32px;
     padding: 5px 3px;
     font-size: 10px;
+  }
+  .admin-report-rakeback-search {
+    grid-template-columns: 1fr;
+    gap: 5px;
+    margin: 8px 0 6px;
+    font-size: 11px;
+  }
+  .admin-report-rakeback-search__input {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 12px;
   }
   .admin-report-rakeback-wrap {
     overflow-x: hidden;
@@ -1049,11 +1111,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 16%;
+    width: 24%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
-    width: 10%;
+    width: 9%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(5) {
@@ -1061,11 +1123,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(6) {
-    width: 17%;
+    width: 14%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 33%;
+    width: 29%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -1094,15 +1156,17 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 12px;
   }
   .admin-report-rakeback-rake-with-rest {
+    grid-template-columns: minmax(46px, 1fr) minmax(42px, auto);
     gap: 2px;
   }
   .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
+    min-width: 0;
     padding-left: 3px;
     padding-right: 3px;
     font-size: 11px;
   }
   .admin-report-rakeback-rest {
-    min-width: 25px;
+    min-width: 42px;
     min-height: 24px;
     padding: 0 2px;
     border-radius: 6px;
@@ -1132,11 +1196,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 16%;
+    width: 25%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
-    width: 10%;
+    width: 9%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(5) {
@@ -1144,11 +1208,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(6) {
-    width: 18%;
+    width: 14%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 33%;
+    width: 29%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -1156,6 +1220,20 @@ body.admin-report-modal-open .bottom-nav {
     padding-left: 3px;
     padding-right: 3px;
     font-size: 11px;
+  }
+  .admin-report-rakeback-rake-with-rest {
+    grid-template-columns: minmax(39px, 1fr) minmax(36px, auto);
+  }
+  .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
+    padding-left: 2px;
+    padding-right: 2px;
+    font-size: 10px;
+  }
+  .admin-report-rakeback-rest {
+    min-width: 36px;
+    padding-left: 2px;
+    padding-right: 2px;
+    font-size: 8px;
   }
   .admin-report-rakeback-amount {
     min-height: 30px;
