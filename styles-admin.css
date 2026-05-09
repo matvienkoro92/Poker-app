@@ -58,6 +58,12 @@
   align-items: stretch;
   justify-content: stretch;
   padding: 0;
+  z-index: 2147482500;
+  background: #05070d;
+  isolation: isolate;
+}
+#adminReportModal .share-stats-admin-modal__backdrop {
+  background: #05070d;
 }
 .share-stats-admin-modal__backdrop {
   position: absolute;
@@ -451,9 +457,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #05070d;
   padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 14px);
   border-radius: 0;
   box-sizing: border-box;
+  isolation: isolate;
 }
 #adminReportModal .share-stats-admin-modal__close {
   top: calc(env(safe-area-inset-top, 0px) + 10px);
@@ -518,6 +526,7 @@ body.admin-report-modal-open .bottom-nav {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  background: #05070d;
 }
 .admin-report-add-extra-btn {
   width: 36px;
@@ -671,12 +680,14 @@ body.admin-report-modal-open .bottom-nav {
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
+  background: #05070d;
 }
 .admin-report-rakeback-table {
   width: 100%;
   min-width: 650px;
   border-collapse: collapse;
   table-layout: fixed;
+  background: #05070d;
 }
 .admin-report-rakeback-table th,
 .admin-report-rakeback-table td {
@@ -695,6 +706,9 @@ body.admin-report-modal-open .bottom-nav {
   font-size: 12px;
   font-weight: 700;
   box-shadow: 0 1px 0 rgba(246, 211, 145, 0.22);
+}
+#adminReportModal .admin-report-rakeback-table td {
+  background: #05070d;
 }
 .admin-report-rakeback-table th:nth-child(1),
 .admin-report-rakeback-table td:nth-child(1) {
@@ -750,7 +764,10 @@ body.admin-report-modal-open .bottom-nav {
   cursor: pointer;
 }
 .admin-report-rakeback-row--addon td {
-  background: rgba(246, 211, 145, 0.05);
+  background: #101016;
+}
+#adminReportModal .admin-report-rakeback-row--addon td {
+  background: #101016;
 }
 .admin-report-rakeback-row--addon td:first-child {
   position: relative;
