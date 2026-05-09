@@ -54,6 +54,11 @@
   opacity: 1;
   visibility: visible;
 }
+#adminReportModal {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
 .share-stats-admin-modal__backdrop {
   position: absolute;
   inset: 0;
@@ -437,6 +442,28 @@
 .admin-report-modal__box {
   max-width: min(760px, calc(100vw - 24px));
 }
+#adminReportModal .admin-report-modal__box {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  border-radius: 0;
+  box-sizing: border-box;
+}
+#adminReportModal .share-stats-admin-modal__close {
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 14px;
+}
+#app:has(#adminReportModal[aria-hidden="false"]) ~ .bottom-nav,
+html.admin-report-modal-open .bottom-nav,
+body.admin-report-modal-open .bottom-nav {
+  display: none !important;
+}
 .admin-report-tabs {
   display: flex;
   gap: 8px;
@@ -484,6 +511,14 @@
 .admin-report-panel--active {
   display: block;
 }
+#adminReportModal .admin-report-panel--active {
+  min-height: 0;
+}
+#adminReportModal .admin-report-panel[data-admin-report-panel="rakeback"].admin-report-panel--active {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
 .admin-report-add-extra-btn {
   width: 36px;
   height: 36px;
@@ -512,11 +547,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 10px;
+  margin: 12px 0 0;
   padding: 10px 12px;
   border: 1px solid rgba(202, 161, 84, 0.28);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
+  flex: 0 0 auto;
+}
+.admin-report-rakeback-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex: 0 0 auto;
 }
 .admin-report-rakeback-summary__row {
   display: flex;
@@ -579,6 +622,11 @@
 .admin-report-rakeback-wrap {
   max-height: min(52vh, 440px);
   overflow: auto;
+}
+#adminReportModal .admin-report-rakeback-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
 }
 .admin-report-rakeback-table {
   width: 100%;
@@ -887,7 +935,7 @@
   border-color: #f6d391;
 }
 .admin-report-rakeback-status {
-  margin: 8px 0 0;
+  margin: 0;
   color: #86efac;
   font-size: 13px;
   font-weight: 700;
@@ -913,11 +961,15 @@
   font-variant-numeric: tabular-nums;
 }
 .admin-report-rakeback-add-row-btn {
-  margin-top: 10px;
+  margin: 0;
+  flex: 0 0 auto;
 }
 @media (max-width: 560px) {
   .share-stats-admin-modal {
     padding: 10px;
+  }
+  #adminReportModal {
+    padding: 0;
   }
   .admin-report-modal__box {
     max-width: calc(100vw - 20px);

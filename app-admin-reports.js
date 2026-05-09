@@ -1465,11 +1465,19 @@ function initAdminReportModal() {
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     stopRakebackDraftRefresh();
-    if (document.body) document.body.style.overflow = "";
+    if (document.documentElement) document.documentElement.classList.remove("admin-report-modal-open");
+    if (document.body) {
+      document.body.classList.remove("admin-report-modal-open");
+      document.body.style.overflow = "";
+    }
   }
   function openModal() {
     modal.setAttribute("aria-hidden", "false");
-    if (document.body) document.body.style.overflow = "hidden";
+    if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
+    if (document.body) {
+      document.body.classList.add("admin-report-modal-open");
+      document.body.style.overflow = "hidden";
+    }
     var mayViewSent = syncSentReportsAccess();
     editingReportId = null;
     editingReport = null;
