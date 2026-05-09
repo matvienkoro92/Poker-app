@@ -734,11 +734,11 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-  width: 17%;
+  width: 20%;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-  width: 16%;
+  width: 15%;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -754,7 +754,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-  width: 33%;
+  width: 31%;
 }
 .admin-report-rakeback-table th:nth-child(2),
 .admin-report-rakeback-table td:nth-child(2) {
@@ -792,6 +792,12 @@ body.admin-report-modal-open .bottom-nav {
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-row-number[hidden] {
+  display: none !important;
+}
+.admin-report-rakeback-row--addon .admin-report-rakeback-id-cell {
+  grid-template-columns: minmax(0, 1fr);
 }
 .admin-report-rakeback-discount-control {
   position: relative;
@@ -1249,11 +1255,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 20%;
+    width: 25%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 22%;
+    width: 21%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -1265,11 +1271,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(6) {
-    width: 14%;
+    width: 13%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 29%;
+    width: 27%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {

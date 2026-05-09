@@ -614,7 +614,11 @@ function initAdminReportModal() {
       var visible = matchesRoom && matchesSearch;
       row.hidden = !visible;
       var numberEl = row.querySelector("[data-rakeback-row-number]");
-      if (numberEl) numberEl.textContent = visible ? String(++visibleIndex) : "";
+      if (numberEl) {
+        var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
+        numberEl.hidden = isAddon;
+        numberEl.textContent = visible && !isAddon ? String(++visibleIndex) : "";
+      }
     });
   }
 
