@@ -1065,26 +1065,6 @@ function initAdminReportModal() {
         parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(labels[k]) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(v) + "</span></div>");
       }
     });
-    if (Array.isArray(it.rakebackRows) && it.rakebackRows.length) {
-      it.rakebackRows.forEach(function (row) {
-        if (!row) return;
-        var room = row.room != null ? String(row.room).trim() : "";
-        var playerId = row.playerId != null ? String(row.playerId).trim() : "";
-        if (!room && !playerId) return;
-        var label = (row.weekTotal ? "Итого по неделе: " : "Рейкбек: ") + [room, playerId].filter(Boolean).join(" · ");
-        var normalizedRoom = normalizeRakebackRoom(room);
-        var multiplier = getRakebackRoomMultiplier(normalizedRoom);
-        var baseAmount = parseReportNumber(row.rake) * parseReportNumber(row.percent) / 100;
-        var amount = row.amount != null ? parseReportNumber(row.amount) : (row.discount15 || row.subtract15 ? baseAmount * 0.85 : baseAmount);
-        var roomAmount = row.roomAmount != null ? parseReportNumber(row.roomAmount) : (multiplier > 1 ? amount / multiplier : amount);
-        var value = row.weekTotal
-          ? formatReportNumber(amount)
-          : multiplier > 1
-            ? formatReportNumber(row.rake) + " фишек × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(roomAmount) + " фишек × " + multiplier + " = " + formatReportNumber(amount)
-            : formatReportNumber(row.rake) + " × " + formatReportNumber(row.percent) + "%" + (row.discount15 || row.subtract15 ? " -15%" : "") + " = " + formatReportNumber(amount);
-        parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(label) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(value) + "</span></div>");
-      });
-    }
     if (it.extraFields && it.extraFields.length) {
       it.extraFields.forEach(function (f) {
         if (f.name || f.amount != null && f.amount !== "") {
@@ -1192,30 +1172,16 @@ function initAdminReportModal() {
         function sumReportsInWindow(allItems, fromMs, toMs) {
           var weekTotals = emptyWeekTotals();
           var extraMap = {};
-          var rakebackMap = {};
           allItems.forEach(function (r) {
             var t = reportEffectiveTimestampMs(r);
             if (!t || t < fromMs || t > toMs) return;
             addNumericToTotals(weekTotals, r);
             mergeReportExtrasIntoMap(extraMap, r);
-            mergeRakebackRowsIntoMap(rakebackMap, r);
           });
           weekTotals.extraFields = Object.keys(extraMap).sort().map(function (name) {
             return { name: name, amount: extraMap[name] };
           }).filter(function (f) {
             return f.amount !== 0 && !isNaN(f.amount);
-          });
-          weekTotals.rakebackRows = Object.keys(rakebackMap).sort().map(function (key) {
-            var row = rakebackMap[key];
-            return {
-              room: row.room,
-              playerId: row.playerId,
-              rake: Math.round(row.rake * 100) / 100,
-              amount: Math.round(row.amount * 100) / 100,
-              weekTotal: true,
-            };
-          }).filter(function (row) {
-            return row.amount !== 0 && !isNaN(row.amount);
           });
           return weekTotals;
         }
@@ -1452,14 +1418,6 @@ function initAdminReportModal() {
             var v = totals[k];
             if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + String(v));
           });
-          if (totals.rakebackRows && totals.rakebackRows.length) {
-            totals.rakebackRows.forEach(function (row) {
-              if (!row) return;
-              var label = [row.room, row.playerId].filter(Boolean).join(" · ");
-              if (!label) return;
-              lines.push("Итого по неделе рейкбек " + label + ": " + formatReportNumber(row.amount));
-            });
-          }
           if (totals.extraFields && totals.extraFields.length) {
             totals.extraFields.forEach(function (f) {
               if (!f) return;
