@@ -382,18 +382,48 @@ function initAdminReportModal() {
     return raw;
   }
 
+  function parseRakebackTimeValue(raw) {
+    if (raw == null || raw === "") return NaN;
+    if (typeof raw === "number") return Number.isFinite(raw) ? raw : NaN;
+    var text = String(raw).trim();
+    if (!text) return NaN;
+    if (/^\d+(?:\.\d+)?$/.test(text)) {
+      var numeric = Number(text);
+      return Number.isFinite(numeric) ? numeric : NaN;
+    }
+    var parsed = Date.parse(text);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
+  function getFirstRakebackTimeValue(values, fallback) {
+    for (var i = 0; i < values.length; i++) {
+      var parsed = parseRakebackTimeValue(values[i]);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return fallback;
+  }
+
   function createRakebackRow(data) {
     data = data || {};
     var tr = document.createElement("tr");
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
     var groupId = data.groupId || nextRakebackGroupId();
-    var createdAt = data.createdAt || data.addedAt || data.created || Date.now();
-    var standardAt = data.standardAt || data.orderAt || data.sortAt || createdAt;
+    var createdAt = getFirstRakebackTimeValue([data.createdAt, data.addedAt, data.created], Date.now());
+    var standardAt = getFirstRakebackTimeValue([data.standardAt, data.orderAt, data.sortAt], createdAt);
     var hasInitialEntryData = data.saved || data.accounted || data.reportedAt || data.reportId ||
       parseReportNumber(data.rake) !== 0 || parseReportNumber(data.roomAmount) !== 0 ||
       parseReportNumber(data.chipAmount) !== 0 || parseReportNumber(data.amount) !== 0;
-    var entryAddedAt = data.entryAddedAt || data.firstAddedAt || "";
-    if (!entryAddedAt && hasInitialEntryData) entryAddedAt = data.addedAt || data.createdAt || data.created || createdAt;
+    var entryAddedAt = getFirstRakebackTimeValue([data.entryAddedAt, data.firstAddedAt], NaN);
+    var reportedAt = parseRakebackTimeValue(data.reportedAt);
+    if (Number.isFinite(reportedAt) && (!Number.isFinite(entryAddedAt) || reportedAt < entryAddedAt)) {
+      entryAddedAt = reportedAt;
+    }
+    if (hasInitialEntryData && Number.isFinite(createdAt) && (!Number.isFinite(entryAddedAt) || createdAt < entryAddedAt)) {
+      entryAddedAt = createdAt;
+    }
+    if (!Number.isFinite(entryAddedAt) && hasInitialEntryData) {
+      entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.createdAt, data.created, data.reportedAt], createdAt);
+    }
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
@@ -401,7 +431,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
     tr.setAttribute("data-rakeback-standard-at", String(standardAt));
-    if (entryAddedAt) tr.setAttribute("data-rakeback-entry-added-at", String(entryAddedAt));
+    if (Number.isFinite(entryAddedAt)) tr.setAttribute("data-rakeback-entry-added-at", String(entryAddedAt));
     if (data.accounted || data.reportedAt || data.reportId) {
       tr.setAttribute("data-rakeback-accounted", "1");
       if (data.reportedAt) tr.setAttribute("data-rakeback-reported-at", String(data.reportedAt));
@@ -496,7 +526,7 @@ function initAdminReportModal() {
   }
 
   function getRakebackRowCreatedAt(row, fallbackIndex) {
-    var raw = row ? parseFloat(row.getAttribute("data-rakeback-created-at") || "") : NaN;
+    var raw = row ? parseRakebackTimeValue(row.getAttribute("data-rakeback-created-at") || "") : NaN;
     if (!Number.isFinite(raw)) {
       raw = Date.now() + (Number(fallbackIndex) || 0);
       if (row) row.setAttribute("data-rakeback-created-at", String(raw));
@@ -505,7 +535,7 @@ function initAdminReportModal() {
   }
 
   function getRakebackRowStandardAt(row, fallbackIndex) {
-    var raw = row ? parseFloat(row.getAttribute("data-rakeback-standard-at") || "") : NaN;
+    var raw = row ? parseRakebackTimeValue(row.getAttribute("data-rakeback-standard-at") || "") : NaN;
     if (!Number.isFinite(raw)) {
       raw = getRakebackRowCreatedAt(row, fallbackIndex);
       if (row) row.setAttribute("data-rakeback-standard-at", String(raw));
@@ -527,7 +557,7 @@ function initAdminReportModal() {
   }
 
   function getRakebackRowEntryAddedAtForSave(row) {
-    var raw = row ? parseFloat(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
+    var raw = row ? parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
     return Number.isFinite(raw) ? raw : "";
   }
 
@@ -543,14 +573,14 @@ function initAdminReportModal() {
   function setRakebackGroupEntryAddedAt(row, stamp) {
     if (!row || !Number.isFinite(stamp)) return;
     getRakebackGroupRows(row).forEach(function (groupRow) {
-      var existing = parseFloat(groupRow.getAttribute("data-rakeback-entry-added-at") || "");
+      var existing = parseRakebackTimeValue(groupRow.getAttribute("data-rakeback-entry-added-at") || "");
       if (!Number.isFinite(existing)) groupRow.setAttribute("data-rakeback-entry-added-at", String(stamp));
     });
   }
 
   function ensureRakebackEntryAddedAt(row, force) {
     if (!row) return "";
-    var raw = parseFloat(row.getAttribute("data-rakeback-entry-added-at") || "");
+    var raw = parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || "");
     if (Number.isFinite(raw)) return raw;
     if (!force && !hasRakebackRowEntryTimeData(row)) return "";
     var stamp = Date.now();
@@ -559,7 +589,7 @@ function initAdminReportModal() {
   }
 
   function getRakebackRowEntryAddedAt(row, fallbackIndex) {
-    var raw = row ? parseFloat(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
+    var raw = row ? parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
     if (Number.isFinite(raw)) return raw;
     if (hasRakebackRowEntryTimeData(row)) {
       raw = getRakebackRowCreatedAt(row, fallbackIndex);
@@ -580,10 +610,11 @@ function initAdminReportModal() {
     var key = getRakebackMoscowDayKey(ts);
     var todayKey = getRakebackMoscowDayKey(Date.now());
     var yesterdayKey = getRakebackMoscowDayKey(Date.now() - 24 * 60 * 60 * 1000);
-    if (key === todayKey) return "Сегодня";
-    if (key === yesterdayKey) return "Вчера";
     var parts = key.split("-");
-    return parts.length === 3 ? parts[2] + "." + parts[1] + "." + parts[0] : key;
+    var date = parts.length === 3 ? parts[2] + "." + parts[1] + "." + parts[0] : key;
+    if (key === todayKey) return "Сегодня · " + date;
+    if (key === yesterdayKey) return "Вчера · " + date;
+    return date;
   }
 
   function removeRakebackDateSeparators() {

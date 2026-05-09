@@ -842,22 +842,24 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-date-separator td {
   display: table-cell !important;
-  padding: 9px 6px 5px;
+  padding: 10px 6px 6px;
   background: #05070d !important;
   color: #ffe7b0;
+  text-align: center;
 }
 .admin-report-rakeback-date-separator span {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 3px 10px;
-  border: 1px solid rgba(246, 211, 145, 0.32);
-  border-radius: 999px;
-  background: rgba(246, 211, 145, 0.11);
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #ffe7b0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.2;
 }
 .admin-report-rakeback-drag-active,
 .admin-report-rakeback-drag-active * {
