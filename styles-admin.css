@@ -917,6 +917,8 @@ body.admin-report-modal-open .bottom-nav {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 4px;
+  width: 100%;
+  min-width: 0;
 }
 .admin-report-rakeback-rest {
   display: inline-flex;
@@ -1323,7 +1325,7 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 12px;
   }
   .admin-report-rakeback-rake-with-rest {
-    grid-template-columns: minmax(46px, 1fr) minmax(42px, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(38px, auto);
     gap: 2px;
   }
   .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
@@ -1333,7 +1335,7 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 11px;
   }
   .admin-report-rakeback-rest {
-    min-width: 42px;
+    min-width: 38px;
     min-height: 24px;
     padding: 0 2px;
     border-radius: 6px;
@@ -1404,7 +1406,8 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 11px;
   }
   .admin-report-rakeback-rake-with-rest {
-    grid-template-columns: minmax(39px, 1fr) minmax(36px, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(31px, auto);
+    gap: 1px;
   }
   .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
     padding-left: 2px;
@@ -1412,10 +1415,10 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 10px;
   }
   .admin-report-rakeback-rest {
-    min-width: 36px;
-    padding-left: 2px;
-    padding-right: 2px;
-    font-size: 8px;
+    min-width: 31px;
+    padding-left: 1px;
+    padding-right: 1px;
+    font-size: 9px;
   }
   .admin-report-rakeback-amount {
     min-height: 30px;
