@@ -12,6 +12,7 @@ function initAdminReportModal() {
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
   var rakebackSearchInput = document.getElementById("adminReportRakebackSearch");
+  var rakebackSortSelect = document.getElementById("adminReportRakebackSort");
   var rakebackRoomTabs = modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : null;
   var rakebackTotalEl = document.getElementById("adminReportRakebackTotal");
   var rakebackRoomTotalLabelEl = document.getElementById("adminReportRakebackRoomTotalLabel");
@@ -355,11 +356,13 @@ function initAdminReportModal() {
     var tr = document.createElement("tr");
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
     var groupId = data.groupId || nextRakebackGroupId();
+    var createdAt = data.createdAt || data.addedAt || data.created || Date.now();
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
     tr.setAttribute("data-rakeback-group", groupId);
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
+    tr.setAttribute("data-rakeback-created-at", String(createdAt));
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
@@ -409,6 +412,71 @@ function initAdminReportModal() {
   function getRakebackRowPlayerId(row) {
     var idInput = row ? row.querySelector("[data-rakeback-player-id]") : null;
     return idInput && idInput.value ? String(idInput.value).trim().toLowerCase() : "";
+  }
+
+  function getRakebackSortMode() {
+    return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "created";
+  }
+
+  function getRakebackRowCreatedAt(row, fallbackIndex) {
+    var raw = row ? parseFloat(row.getAttribute("data-rakeback-created-at") || "") : NaN;
+    if (!Number.isFinite(raw)) {
+      raw = Date.now() + (Number(fallbackIndex) || 0);
+      if (row) row.setAttribute("data-rakeback-created-at", String(raw));
+    }
+    return raw;
+  }
+
+  function getRakebackRowSortColor(row) {
+    var color = normalizeRakebackRowColor(row ? row.getAttribute("data-rakeback-row-color") || "" : "");
+    if (!color) return RAKEBACK_ROW_COLORS.length + 1;
+    for (var i = 0; i < RAKEBACK_ROW_COLORS.length; i++) {
+      if (RAKEBACK_ROW_COLORS[i].value === color) return i;
+    }
+    return RAKEBACK_ROW_COLORS.length + 1;
+  }
+
+  function sortRakebackRows(rows) {
+    if (!rakebackBody || !rows || rows.length < 2) return rows || [];
+    var mode = getRakebackSortMode();
+    var groupMap = {};
+    var groups = [];
+    rows.forEach(function (row, index) {
+      var groupId = row.getAttribute("data-rakeback-group") || ("__row_" + index);
+      if (!groupMap[groupId]) {
+        groupMap[groupId] = { rows: [], index: index, createdAt: getRakebackRowCreatedAt(row, index) };
+        groups.push(groupMap[groupId]);
+      }
+      groupMap[groupId].rows.push(row);
+      groupMap[groupId].createdAt = Math.min(groupMap[groupId].createdAt, getRakebackRowCreatedAt(row, index));
+    });
+    groups.forEach(function (group) {
+      group.keyRow = group.rows.find(function (row) { return row.getAttribute("data-rakeback-kind") !== "addon"; }) || group.rows[0];
+    });
+    groups.sort(function (a, b) {
+      var diff = 0;
+      if (mode === "color") {
+        diff = getRakebackRowSortColor(a.keyRow) - getRakebackRowSortColor(b.keyRow);
+        if (!diff) diff = a.createdAt - b.createdAt;
+      } else if (mode === "rake") {
+        diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-rake]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-rake]") || {}).value);
+        if (!diff) diff = a.createdAt - b.createdAt;
+      } else if (mode === "percent") {
+        diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-percent]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-percent]") || {}).value);
+        if (!diff) diff = a.createdAt - b.createdAt;
+      } else {
+        diff = a.createdAt - b.createdAt;
+      }
+      return diff || (a.index - b.index);
+    });
+    var sortedRows = [];
+    groups.forEach(function (group) {
+      group.rows.forEach(function (row) {
+        rakebackBody.appendChild(row);
+        sortedRows.push(row);
+      });
+    });
+    return sortedRows;
   }
 
   function setRakebackRoomTab(room) {
@@ -508,6 +576,7 @@ function initAdminReportModal() {
     if (targetRoom === "PP" && ensureRakebackTemplateRows("PP", PP_RAKEBACK_TEMPLATE_IDS)) return;
     if (targetRoom === "Supr" && ensureRakebackTemplateRows("Supr", SUPR_RAKEBACK_TEMPLATE_IDS)) return;
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    rows.forEach(function (row, index) { getRakebackRowCreatedAt(row, index); });
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom;
     });
@@ -641,6 +710,7 @@ function initAdminReportModal() {
         amount: amount,
         saved: row.getAttribute("data-rakeback-saved") === "1",
         color: color,
+        createdAt: getRakebackRowCreatedAt(row, 0),
         ownerId: ownerId || getCurrentRakebackOwnerId(),
       };
     }).filter(Boolean);
@@ -653,6 +723,7 @@ function initAdminReportModal() {
       row.parentNode.removeChild(row);
     });
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    rows.forEach(function (row, index) { getRakebackRowCreatedAt(row, index); });
     var baseByGroup = {};
     rows.forEach(function (row) {
       var groupId = row.getAttribute("data-rakeback-group");
@@ -687,6 +758,7 @@ function initAdminReportModal() {
       if (amountEl) amountEl.textContent = formatReportRubleNumber(amount);
       updateRakebackRowActions(row);
     });
+    rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
     var collected = collectRakebackRows(false, false);
     var roomTotals = {};
@@ -731,6 +803,7 @@ function initAdminReportModal() {
         discount15: !!(row.discount15 || row.subtract15),
         ownerId: row.ownerId || row.authorId || "",
         color: row.color || row.rowColor || row.highlightColor || "",
+        createdAt: row.createdAt || row.addedAt || row.created || "",
       });
       rakebackBody.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
@@ -1592,6 +1665,12 @@ function initAdminReportModal() {
       syncRakebackRoomVisibility();
     });
   }
+  if (rakebackSortSelect) {
+    rakebackSortSelect.addEventListener("change", function () {
+      syncRakebackTable();
+      saveRakebackDraftRows();
+    });
+  }
   if (rakebackBody) {
     rakebackBody.addEventListener("input", function () {
       syncRakebackTable();
@@ -1649,6 +1728,7 @@ function initAdminReportModal() {
         var colorRow = colorOption.closest("[data-rakeback-row]");
         applyRakebackRowColor(colorRow, colorOption.getAttribute("data-rakeback-color-value") || "");
         closeRakebackColorMenus();
+        syncRakebackTable();
         saveRakebackDraftRows();
         showRakebackStatusBriefly("Цвет выбран");
         return;

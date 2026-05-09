@@ -645,18 +645,27 @@ body.admin-report-modal-open .bottom-nav {
   max-height: min(52vh, 440px);
   overflow: auto;
 }
-.admin-report-rakeback-search {
+.admin-report-rakeback-toolbar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
   gap: 10px;
-  flex: 0 0 auto;
   margin: 10px 0 8px;
+}
+.admin-report-rakeback-search,
+.admin-report-rakeback-sort {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 5px;
+  flex: 0 0 auto;
+  margin: 0;
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 800;
 }
-.admin-report-rakeback-search__input {
+.admin-report-rakeback-search__input,
+.admin-report-rakeback-sort__select {
   width: 100%;
   min-height: 36px;
   padding: 6px 10px;
@@ -667,11 +676,20 @@ body.admin-report-modal-open .bottom-nav {
   font-size: 13px;
   box-sizing: border-box;
 }
+.admin-report-rakeback-sort__select {
+  appearance: none;
+  padding-right: 24px;
+  background-image: linear-gradient(45deg, transparent 50%, #f6d391 50%), linear-gradient(135deg, #f6d391 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 9px) 50%;
+  background-repeat: no-repeat;
+  background-size: 6px 6px, 6px 6px;
+}
 .admin-report-rakeback-search__input::placeholder {
   color: var(--text-muted);
   opacity: 0.78;
 }
-.admin-report-rakeback-search__input:focus {
+.admin-report-rakeback-search__input:focus,
+.admin-report-rakeback-sort__select:focus {
   border-color: rgba(246, 211, 145, 0.7);
   outline: none;
   box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.18);
@@ -1136,16 +1154,25 @@ body.admin-report-modal-open .bottom-nav {
     padding: 5px 3px;
     font-size: 10px;
   }
-  .admin-report-rakeback-search {
-    grid-template-columns: 1fr;
-    gap: 5px;
+  .admin-report-rakeback-toolbar {
     margin: 8px 0 6px;
+    gap: 6px;
+  }
+  .admin-report-rakeback-search,
+  .admin-report-rakeback-sort {
+    gap: 5px;
     font-size: 11px;
   }
-  .admin-report-rakeback-search__input {
+  .admin-report-rakeback-search__input,
+  .admin-report-rakeback-sort__select {
     min-height: 32px;
     padding: 5px 8px;
     font-size: 12px;
+  }
+  .admin-report-rakeback-sort__select {
+    padding-right: 20px;
+    background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%;
+    background-size: 5px 5px, 5px 5px;
   }
   .admin-report-rakeback-wrap {
     overflow-x: hidden;

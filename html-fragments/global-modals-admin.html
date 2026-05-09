@@ -265,10 +265,21 @@
               <button type="button" class="admin-report-rakeback-room-tab" data-rakeback-room-tab="Supr" role="tab" aria-selected="false">Супрема</button>
               <button type="button" class="admin-report-rakeback-room-tab" data-rakeback-room-tab="PP" role="tab" aria-selected="false">PPpoker</button>
             </div>
-            <label class="admin-report-rakeback-search" for="adminReportRakebackSearch">
-              <span>Поиск по айди</span>
-              <input type="search" class="admin-report-rakeback-search__input" id="adminReportRakebackSearch" enterkeyhint="search" autocomplete="off" placeholder="ID игрока" />
-            </label>
+            <div class="admin-report-rakeback-toolbar">
+              <label class="admin-report-rakeback-search" for="adminReportRakebackSearch">
+                <span>Поиск по айди</span>
+                <input type="search" class="admin-report-rakeback-search__input" id="adminReportRakebackSearch" enterkeyhint="search" autocomplete="off" placeholder="ID игрока" />
+              </label>
+              <label class="admin-report-rakeback-sort" for="adminReportRakebackSort">
+                <span>Сортировка</span>
+                <select class="admin-report-rakeback-sort__select" id="adminReportRakebackSort">
+                  <option value="created">По времени</option>
+                  <option value="color">По цветам</option>
+                  <option value="rake">По сумме рейка</option>
+                  <option value="percent">По проценту</option>
+                </select>
+              </label>
+            </div>
             <div class="share-stats-admin-modal__table-wrap admin-report-rakeback-wrap admin-report-rakeback-wrap--by-room">
               <table class="admin-report-rakeback-table">
                 <thead>
