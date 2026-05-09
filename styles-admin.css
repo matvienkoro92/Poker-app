@@ -834,6 +834,7 @@ body.admin-report-modal-open .bottom-nav {
   touch-action: none;
 }
 .admin-report-rakeback-date-separator td {
+  display: table-cell !important;
   padding: 9px 6px 5px;
   background: #05070d !important;
   color: #ffe7b0;

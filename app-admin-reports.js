@@ -566,7 +566,7 @@ function initAdminReportModal() {
       setRakebackGroupEntryAddedAt(row, raw);
       return raw;
     }
-    return 4102444800000 + getRakebackRowStandardAt(row, fallbackIndex);
+    return getRakebackRowCreatedAt(row, fallbackIndex);
   }
 
   function getRakebackMoscowDayKey(ts) {
@@ -611,13 +611,10 @@ function initAdminReportModal() {
     var lastKey = "";
     getRakebackVisibleGroups().forEach(function (group) {
       if (!group || !group.rows || !group.rows.length) return;
-      var hasTime = group.rows.some(function (row) { return hasRakebackRowEntryTimeData(row); });
-      if (!hasTime) return;
-      var stamp = group.rows.reduce(function (min, row, index) {
-        if (!hasRakebackRowEntryTimeData(row)) return min;
+      var stamp = group.rows.reduce(function (max, row, index) {
         var value = getRakebackRowEntryAddedAt(row, index);
-        return Number.isFinite(value) ? Math.min(min, value) : min;
-      }, Infinity);
+        return Number.isFinite(value) ? Math.max(max, value) : max;
+      }, -Infinity);
       if (!Number.isFinite(stamp)) return;
       var key = getRakebackMoscowDayKey(stamp);
       if (key === lastKey) return;
@@ -656,7 +653,7 @@ function initAdminReportModal() {
       groupMap[groupId].rows.push(row);
       groupMap[groupId].createdAt = Math.min(groupMap[groupId].createdAt, getRakebackRowCreatedAt(row, index));
       groupMap[groupId].standardAt = Math.min(groupMap[groupId].standardAt, getRakebackRowStandardAt(row, index));
-      groupMap[groupId].entryAddedAt = Math.min(groupMap[groupId].entryAddedAt, getRakebackRowEntryAddedAt(row, index));
+      groupMap[groupId].entryAddedAt = Math.max(groupMap[groupId].entryAddedAt, getRakebackRowEntryAddedAt(row, index));
       groupMap[groupId].hasEntryTime = groupMap[groupId].hasEntryTime || hasRakebackRowEntryTimeData(row);
     });
     groups.forEach(function (group) {
@@ -676,7 +673,6 @@ function initAdminReportModal() {
       } else if (mode === "standard") {
         diff = a.standardAt - b.standardAt;
       } else if (mode === "created") {
-        if (a.hasEntryTime !== b.hasEntryTime) return a.hasEntryTime ? -1 : 1;
         diff = b.entryAddedAt - a.entryAddedAt;
         if (!diff) diff = a.standardAt - b.standardAt;
       } else {
