@@ -362,7 +362,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
-      '<td><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
       '<td>' +
         (kind === "addon"
           ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" placeholder="0" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток">0</span></div>'
@@ -426,10 +426,14 @@ function initAdminReportModal() {
   function syncRakebackRoomVisibility() {
     if (!rakebackBody) return;
     var searchQuery = getRakebackSearchQuery();
+    var visibleIndex = 0;
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
       var matchesRoom = getRakebackRowRoom(row) === activeRakebackRoom;
       var matchesSearch = !searchQuery || getRakebackRowPlayerId(row).indexOf(searchQuery) !== -1;
-      row.hidden = !matchesRoom || !matchesSearch;
+      var visible = matchesRoom && matchesSearch;
+      row.hidden = !visible;
+      var numberEl = row.querySelector("[data-rakeback-row-number]");
+      if (numberEl) numberEl.textContent = visible ? String(++visibleIndex) : "";
     });
   }
 

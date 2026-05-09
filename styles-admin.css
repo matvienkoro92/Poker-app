@@ -754,6 +754,27 @@ body.admin-report-modal-open .bottom-nav {
   text-align: center;
   vertical-align: middle;
 }
+.admin-report-rakeback-id-cell {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+.admin-report-rakeback-row-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border: 1px solid rgba(246, 211, 145, 0.38);
+  border-radius: 999px;
+  background: rgba(246, 211, 145, 0.1);
+  color: #ffe7b0;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
 .admin-report-rakeback-discount-control {
   position: relative;
   display: inline-flex;
@@ -1187,15 +1208,15 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 17%;
+    width: 20%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 24%;
+    width: 22%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
-    width: 9%;
+    width: 8%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(5) {
@@ -1218,6 +1239,15 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-input--id {
     font-size: 11px;
+  }
+  .admin-report-rakeback-id-cell {
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 2px;
+  }
+  .admin-report-rakeback-row-number {
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
   }
   .admin-report-rakeback-discount {
     width: 100%;
@@ -1287,15 +1317,15 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 17%;
+    width: 20%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 25%;
+    width: 22%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
-    width: 9%;
+    width: 8%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(5),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(5) {
