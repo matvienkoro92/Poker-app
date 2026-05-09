@@ -358,12 +358,14 @@ function initAdminReportModal() {
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
     var groupId = data.groupId || nextRakebackGroupId();
     var createdAt = data.createdAt || data.addedAt || data.created || Date.now();
+    var standardAt = data.standardAt || data.orderAt || data.sortAt || createdAt;
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
     tr.setAttribute("data-rakeback-group", groupId);
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
+    tr.setAttribute("data-rakeback-standard-at", String(standardAt));
     if (data.accounted || data.reportedAt || data.reportId) {
       tr.setAttribute("data-rakeback-accounted", "1");
       if (data.reportedAt) tr.setAttribute("data-rakeback-reported-at", String(data.reportedAt));
@@ -424,28 +426,20 @@ function initAdminReportModal() {
     return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
   }
 
-  function getRakebackTemplateIds(room) {
-    var normalized = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
-    if (normalized === "X") return X_RAKEBACK_TEMPLATE_IDS;
-    if (normalized === "Supr") return SUPR_RAKEBACK_TEMPLATE_IDS;
-    if (normalized === "PP") return PP_RAKEBACK_TEMPLATE_IDS;
-    return P21_RAKEBACK_TEMPLATE_IDS;
-  }
-
-  function getRakebackStandardOrder(row) {
-    if (!row) return 1000000;
-    var ids = getRakebackTemplateIds(getRakebackRowRoom(row));
-    var playerId = getRakebackRowPlayerId(row);
-    if (!playerId) return 1000000;
-    var index = ids.indexOf(playerId);
-    return index >= 0 ? index : 1000000;
-  }
-
   function getRakebackRowCreatedAt(row, fallbackIndex) {
     var raw = row ? parseFloat(row.getAttribute("data-rakeback-created-at") || "") : NaN;
     if (!Number.isFinite(raw)) {
       raw = Date.now() + (Number(fallbackIndex) || 0);
       if (row) row.setAttribute("data-rakeback-created-at", String(raw));
+    }
+    return raw;
+  }
+
+  function getRakebackRowStandardAt(row, fallbackIndex) {
+    var raw = row ? parseFloat(row.getAttribute("data-rakeback-standard-at") || "") : NaN;
+    if (!Number.isFinite(raw)) {
+      raw = getRakebackRowCreatedAt(row, fallbackIndex);
+      if (row) row.setAttribute("data-rakeback-standard-at", String(raw));
     }
     return raw;
   }
@@ -467,11 +461,17 @@ function initAdminReportModal() {
     rows.forEach(function (row, index) {
       var groupId = row.getAttribute("data-rakeback-group") || ("__row_" + index);
       if (!groupMap[groupId]) {
-        groupMap[groupId] = { rows: [], index: index, createdAt: getRakebackRowCreatedAt(row, index) };
+        groupMap[groupId] = {
+          rows: [],
+          index: index,
+          createdAt: getRakebackRowCreatedAt(row, index),
+          standardAt: getRakebackRowStandardAt(row, index),
+        };
         groups.push(groupMap[groupId]);
       }
       groupMap[groupId].rows.push(row);
       groupMap[groupId].createdAt = Math.min(groupMap[groupId].createdAt, getRakebackRowCreatedAt(row, index));
+      groupMap[groupId].standardAt = Math.min(groupMap[groupId].standardAt, getRakebackRowStandardAt(row, index));
     });
     groups.forEach(function (group) {
       group.keyRow = group.rows.find(function (row) { return row.getAttribute("data-rakeback-kind") !== "addon"; }) || group.rows[0];
@@ -480,16 +480,15 @@ function initAdminReportModal() {
       var diff = 0;
       if (mode === "color") {
         diff = getRakebackRowSortColor(a.keyRow) - getRakebackRowSortColor(b.keyRow);
-        if (!diff) diff = a.createdAt - b.createdAt;
+        if (!diff) diff = a.standardAt - b.standardAt;
       } else if (mode === "rake") {
         diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-rake]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-rake]") || {}).value);
-        if (!diff) diff = a.createdAt - b.createdAt;
+        if (!diff) diff = a.standardAt - b.standardAt;
       } else if (mode === "percent") {
         diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-percent]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-percent]") || {}).value);
-        if (!diff) diff = a.createdAt - b.createdAt;
+        if (!diff) diff = a.standardAt - b.standardAt;
       } else if (mode === "standard") {
-        diff = getRakebackStandardOrder(a.keyRow) - getRakebackStandardOrder(b.keyRow);
-        if (!diff) diff = a.createdAt - b.createdAt;
+        diff = a.standardAt - b.standardAt;
       } else {
         diff = a.createdAt - b.createdAt;
       }
@@ -528,11 +527,11 @@ function initAdminReportModal() {
     return groups;
   }
 
-  function syncRakebackCreatedOrder() {
+  function syncRakebackStandardOrder() {
     if (!rakebackBody) return;
     var base = Date.now();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
-      row.setAttribute("data-rakeback-created-at", String(base + index));
+      row.setAttribute("data-rakeback-standard-at", String(base + index));
     });
   }
 
@@ -543,13 +542,13 @@ function initAdminReportModal() {
     sourceRows.forEach(function (row) { fragment.appendChild(row); });
     var anchor = afterTarget ? targetGroup.rows[targetGroup.rows.length - 1].nextSibling : targetGroup.rows[0];
     rakebackBody.insertBefore(fragment, anchor);
-    syncRakebackCreatedOrder();
+    syncRakebackStandardOrder();
     return true;
   }
 
   function beginRakebackRowDrag(row, pointerId, clientY) {
     if (!row || !rakebackBody || !canEditRakebackRow(row)) return;
-    if (rakebackSortSelect && rakebackSortSelect.value !== "created") rakebackSortSelect.value = "created";
+    if (rakebackSortSelect && rakebackSortSelect.value !== "standard") rakebackSortSelect.value = "standard";
     var groupRows = getRakebackGroupRows(row);
     rakebackDragState = {
       active: true,
@@ -718,7 +717,10 @@ function initAdminReportModal() {
     if (targetRoom === "PP" && ensureRakebackTemplateRows("PP", PP_RAKEBACK_TEMPLATE_IDS)) return;
     if (targetRoom === "Supr" && ensureRakebackTemplateRows("Supr", SUPR_RAKEBACK_TEMPLATE_IDS)) return;
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
-    rows.forEach(function (row, index) { getRakebackRowCreatedAt(row, index); });
+    rows.forEach(function (row, index) {
+      getRakebackRowCreatedAt(row, index);
+      getRakebackRowStandardAt(row, index);
+    });
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom;
     });
@@ -857,6 +859,7 @@ function initAdminReportModal() {
         saved: row.getAttribute("data-rakeback-saved") === "1",
         color: color,
         createdAt: getRakebackRowCreatedAt(row, 0),
+        standardAt: getRakebackRowStandardAt(row, 0),
         accounted: isRakebackRowAccounted(row),
         reportedAt: row.getAttribute("data-rakeback-reported-at") || "",
         reportId: row.getAttribute("data-rakeback-report-id") || "",
@@ -898,7 +901,10 @@ function initAdminReportModal() {
       row.parentNode.removeChild(row);
     });
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
-    rows.forEach(function (row, index) { getRakebackRowCreatedAt(row, index); });
+    rows.forEach(function (row, index) {
+      getRakebackRowCreatedAt(row, index);
+      getRakebackRowStandardAt(row, index);
+    });
     var baseByGroup = {};
     rows.forEach(function (row) {
       var groupId = row.getAttribute("data-rakeback-group");
@@ -980,6 +986,7 @@ function initAdminReportModal() {
         ownerId: row.ownerId || row.authorId || "",
         color: row.color || row.rowColor || row.highlightColor || "",
         createdAt: row.createdAt || row.addedAt || row.created || "",
+        standardAt: row.standardAt || row.orderAt || row.sortAt || "",
         accounted: row.accounted || row.reportedAt || row.reportId,
         reportedAt: row.reportedAt || "",
         reportId: row.reportId || "",
