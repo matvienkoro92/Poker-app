@@ -822,6 +822,10 @@ body.admin-report-modal-open .bottom-nav {
 #adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td {
   background: var(--rakeback-row-bg, #101016);
 }
+#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] .admin-report-rakeback-actions {
+  background: var(--rakeback-row-bg, #101016);
+  box-shadow: 0 0 0 8px var(--rakeback-row-bg, #101016);
+}
 .admin-report-rakeback-row--dragging > td {
   position: relative;
   z-index: 3;
