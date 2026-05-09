@@ -30,6 +30,7 @@ function initAdminReportModal() {
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDragState = null;
+  var rakebackLastSortMode = rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -433,6 +434,12 @@ function initAdminReportModal() {
     return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
   }
 
+  function setRakebackSortMode(mode) {
+    mode = mode || "standard";
+    if (rakebackSortSelect) rakebackSortSelect.value = mode;
+    rakebackLastSortMode = mode;
+  }
+
   function getRakebackRowCreatedAt(row, fallbackIndex) {
     var raw = row ? parseFloat(row.getAttribute("data-rakeback-created-at") || "") : NaN;
     if (!Number.isFinite(raw)) {
@@ -616,7 +623,7 @@ function initAdminReportModal() {
 
   function beginRakebackRowDrag(row, pointerId, clientY) {
     if (!row || !rakebackBody || !canEditRakebackRow(row)) return;
-    if (rakebackSortSelect && rakebackSortSelect.value !== "standard") rakebackSortSelect.value = "standard";
+    if (rakebackSortSelect && rakebackSortSelect.value !== "standard") setRakebackSortMode("standard");
     var groupRows = getRakebackGroupRows(row);
     rakebackDragState = {
       active: true,
@@ -1075,7 +1082,7 @@ function initAdminReportModal() {
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
     if (rakebackSearchInput && rakebackSearchInput.value) rakebackSearchInput.value = "";
-    if (rakebackSortSelect) rakebackSortSelect.value = "standard";
+    setRakebackSortMode("standard");
     rakebackDraftMutationSeq += 1;
     var now = Date.now();
     var row = createRakebackRow({
@@ -1949,6 +1956,9 @@ function initAdminReportModal() {
   }
   if (rakebackSortSelect) {
     rakebackSortSelect.addEventListener("change", function () {
+      var nextMode = getRakebackSortMode();
+      if (rakebackLastSortMode === "standard" && nextMode !== "standard") syncRakebackStandardOrder();
+      rakebackLastSortMode = nextMode;
       syncRakebackTable();
       saveRakebackDraftRows();
     });
