@@ -1501,6 +1501,18 @@ function initAdminReportModal() {
       });
   }
 
+  function runAdminReportAfterPaint(fn) {
+    if (typeof fn !== "function") return;
+    var raf = typeof window !== "undefined" ? window["requestAnimationFrame"] : null;
+    if (typeof raf === "function") {
+      raf(function () {
+        setTimeout(fn, 0);
+      });
+      return;
+    }
+    setTimeout(fn, 0);
+  }
+
   function isRakebackPanelActive() {
     var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
     return !!(panel && panel.classList.contains("admin-report-panel--active"));
@@ -2135,7 +2147,7 @@ function initAdminReportModal() {
       document.body.classList.add("admin-report-modal-open");
       document.body.style.overflow = "hidden";
     }
-    var mayViewSent = syncSentReportsAccess();
+    syncSentReportsAccess();
     editingReportId = null;
     editingReport = null;
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
@@ -2143,10 +2155,12 @@ function initAdminReportModal() {
     if (dateEl) dateEl.textContent = info.label;
     applySavedRakebackSortMode();
     setActiveTab("form");
-    fillReportForm(null);
-    loadSharedRakebackDraftRows();
-    startRakebackDraftRefresh();
-    if (mayViewSent) loadSentReports();
+    fillReportForm(null, { skipRakeback: true });
+    runAdminReportAfterPaint(function () {
+      if (!modal || modal.getAttribute("aria-hidden") === "true" || editingReportId) return;
+      loadSharedRakebackDraftRows();
+      startRakebackDraftRefresh();
+    });
   }
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
@@ -2462,7 +2476,8 @@ function initAdminReportModal() {
     el.value = val != null && val !== "" ? String(val) : "";
   }
 
-  function fillReportForm(report) {
+  function fillReportForm(report, options) {
+    options = options || {};
     if (!report) {
       setFormVal("adminReportDeposit", "");
       setFormVal("adminReportCashout", "");
@@ -2477,7 +2492,7 @@ function initAdminReportModal() {
       setFormVal("adminReportReturn", "");
       setFormVal("adminReportSergeyMarina", "");
       setFormVal("adminReportRakeback", "");
-      fillRakebackTable([], "");
+      if (!options.skipRakeback) fillRakebackTable([], "");
       var tbody = document.getElementById("adminReportTableBody");
       if (tbody) {
         var extras = tbody.querySelectorAll(".admin-report-extra-row");
