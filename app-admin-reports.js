@@ -540,6 +540,63 @@ function initAdminReportModal() {
     return 4102444800000 + getRakebackRowStandardAt(row, fallbackIndex);
   }
 
+  function getRakebackMoscowDayKey(ts) {
+    ts = Number(ts);
+    if (!Number.isFinite(ts)) ts = Date.now();
+    var shifted = new Date(ts - 7 * 60 * 60 * 1000);
+    return shifted.getUTCFullYear() + "-" + String(shifted.getUTCMonth() + 1).padStart(2, "0") + "-" + String(shifted.getUTCDate()).padStart(2, "0");
+  }
+
+  function getRakebackDateSeparatorLabel(ts) {
+    var key = getRakebackMoscowDayKey(ts);
+    var todayKey = getRakebackMoscowDayKey(Date.now());
+    var yesterdayKey = getRakebackMoscowDayKey(Date.now() - 24 * 60 * 60 * 1000);
+    if (key === todayKey) return "Сегодня";
+    if (key === yesterdayKey) return "Вчера";
+    var parts = key.split("-");
+    return parts.length === 3 ? parts[2] + "." + parts[1] + "." + parts[0] : key;
+  }
+
+  function removeRakebackDateSeparators() {
+    if (!rakebackBody) return;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator]")).forEach(function (row) {
+      row.parentNode.removeChild(row);
+    });
+  }
+
+  function createRakebackDateSeparator(label) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var span = document.createElement("span");
+    tr.className = "admin-report-rakeback-date-separator";
+    tr.setAttribute("data-rakeback-date-separator", "");
+    td.colSpan = 7;
+    span.textContent = label || "";
+    td.appendChild(span);
+    tr.appendChild(td);
+    return tr;
+  }
+
+  function insertRakebackDateSeparators() {
+    if (!rakebackBody || getRakebackSortMode() !== "created") return;
+    var lastKey = "";
+    getRakebackVisibleGroups().forEach(function (group) {
+      if (!group || !group.rows || !group.rows.length) return;
+      var hasTime = group.rows.some(function (row) { return hasRakebackRowEntryTimeData(row); });
+      if (!hasTime) return;
+      var stamp = group.rows.reduce(function (min, row, index) {
+        if (!hasRakebackRowEntryTimeData(row)) return min;
+        var value = getRakebackRowEntryAddedAt(row, index);
+        return Number.isFinite(value) ? Math.min(min, value) : min;
+      }, Infinity);
+      if (!Number.isFinite(stamp)) return;
+      var key = getRakebackMoscowDayKey(stamp);
+      if (key === lastKey) return;
+      lastKey = key;
+      rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp)), group.rows[0]);
+    });
+  }
+
   function getRakebackRowSortColor(row) {
     var color = normalizeRakebackRowColor(row ? row.getAttribute("data-rakeback-row-color") || "" : "");
     if (!color) return RAKEBACK_ROW_COLORS.length + 1;
@@ -563,6 +620,7 @@ function initAdminReportModal() {
           createdAt: getRakebackRowCreatedAt(row, index),
           standardAt: getRakebackRowStandardAt(row, index),
           entryAddedAt: getRakebackRowEntryAddedAt(row, index),
+          hasEntryTime: hasRakebackRowEntryTimeData(row),
         };
         groups.push(groupMap[groupId]);
       }
@@ -570,6 +628,7 @@ function initAdminReportModal() {
       groupMap[groupId].createdAt = Math.min(groupMap[groupId].createdAt, getRakebackRowCreatedAt(row, index));
       groupMap[groupId].standardAt = Math.min(groupMap[groupId].standardAt, getRakebackRowStandardAt(row, index));
       groupMap[groupId].entryAddedAt = Math.min(groupMap[groupId].entryAddedAt, getRakebackRowEntryAddedAt(row, index));
+      groupMap[groupId].hasEntryTime = groupMap[groupId].hasEntryTime || hasRakebackRowEntryTimeData(row);
     });
     groups.forEach(function (group) {
       group.keyRow = group.rows.find(function (row) { return row.getAttribute("data-rakeback-kind") !== "addon"; }) || group.rows[0];
@@ -588,7 +647,8 @@ function initAdminReportModal() {
       } else if (mode === "standard") {
         diff = a.standardAt - b.standardAt;
       } else if (mode === "created") {
-        diff = a.entryAddedAt - b.entryAddedAt;
+        if (a.hasEntryTime !== b.hasEntryTime) return a.hasEntryTime ? -1 : 1;
+        diff = b.entryAddedAt - a.entryAddedAt;
         if (!diff) diff = a.standardAt - b.standardAt;
       } else {
         diff = a.createdAt - b.createdAt;
@@ -1008,6 +1068,7 @@ function initAdminReportModal() {
     if (!rakebackBody) return 0;
     options = options || {};
     ensureRakebackBaseRow(activeRakebackRoom);
+    removeRakebackDateSeparators();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
       row.parentNode.removeChild(row);
     });
@@ -1052,6 +1113,7 @@ function initAdminReportModal() {
     });
     if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
+    insertRakebackDateSeparators();
     var collected = collectRakebackRows(false, false);
     var roomTotals = {};
     collected.forEach(function (row) {
