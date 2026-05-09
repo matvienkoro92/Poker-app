@@ -1047,7 +1047,7 @@ body.admin-report-modal-open .bottom-nav {
   padding: 0;
   border: 1px solid rgba(246, 211, 145, 0.34);
   border-radius: 8px;
-  background: var(--rakeback-swatch, transparent);
+  background: var(--rakeback-swatch, transparent) !important;
   color: #ffe7b0;
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(5, 7, 13, 0.48);
@@ -1059,7 +1059,7 @@ body.admin-report-modal-open .bottom-nav {
     0 0 0 2px rgba(246, 211, 145, 0.3);
 }
 .admin-report-rakeback-color-swatch--clear {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.06) !important;
   font-size: 18px;
   font-weight: 900;
   line-height: 1;
