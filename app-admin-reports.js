@@ -30,7 +30,6 @@ function initAdminReportModal() {
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDragState = null;
-  var rakebackLastSortMode = rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -431,13 +430,40 @@ function initAdminReportModal() {
   }
 
   function getRakebackSortMode() {
-    return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
+    return normalizeRakebackSortMode(rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard");
   }
 
-  function setRakebackSortMode(mode) {
-    mode = mode || "standard";
+  function normalizeRakebackSortMode(mode) {
+    mode = String(mode || "standard");
+    return /^(standard|created|color|rake|percent)$/.test(mode) ? mode : "standard";
+  }
+
+  function getRakebackSortStorageKey() {
+    return "poker_admin_report_rakeback_sort_mode:" + (getCurrentRakebackOwnerId() || "local");
+  }
+
+  function readSavedRakebackSortMode() {
+    try {
+      return window.localStorage ? normalizeRakebackSortMode(window.localStorage.getItem(getRakebackSortStorageKey())) : "standard";
+    } catch (e) {
+      return "standard";
+    }
+  }
+
+  function saveRakebackSortMode(mode) {
+    try {
+      if (window.localStorage) window.localStorage.setItem(getRakebackSortStorageKey(), normalizeRakebackSortMode(mode));
+    } catch (e) {}
+  }
+
+  function setRakebackSortMode(mode, saveLocal) {
+    mode = normalizeRakebackSortMode(mode);
     if (rakebackSortSelect) rakebackSortSelect.value = mode;
-    rakebackLastSortMode = mode;
+    if (saveLocal) saveRakebackSortMode(mode);
+  }
+
+  function applySavedRakebackSortMode() {
+    setRakebackSortMode(readSavedRakebackSortMode(), false);
   }
 
   function getRakebackRowCreatedAt(row, fallbackIndex) {
@@ -623,7 +649,7 @@ function initAdminReportModal() {
 
   function beginRakebackRowDrag(row, pointerId, clientY) {
     if (!row || !rakebackBody || !canEditRakebackRow(row)) return;
-    if (rakebackSortSelect && rakebackSortSelect.value !== "standard") setRakebackSortMode("standard");
+    if (rakebackSortSelect && rakebackSortSelect.value !== "standard") setRakebackSortMode("standard", true);
     var groupRows = getRakebackGroupRows(row);
     rakebackDragState = {
       active: true,
@@ -1082,7 +1108,7 @@ function initAdminReportModal() {
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
     if (rakebackSearchInput && rakebackSearchInput.value) rakebackSearchInput.value = "";
-    setRakebackSortMode("standard");
+    setRakebackSortMode("standard", true);
     rakebackDraftMutationSeq += 1;
     var now = Date.now();
     var row = createRakebackRow({
@@ -1904,6 +1930,7 @@ function initAdminReportModal() {
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
     var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = info.label;
+    applySavedRakebackSortMode();
     setActiveTab("form");
     fillReportForm(null);
     loadSharedRakebackDraftRows();
@@ -1919,7 +1946,10 @@ function initAdminReportModal() {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
         if (name === "sent" && !canViewSentReports()) return;
         setActiveTab(name);
-        if (name === "rakeback") loadSharedRakebackDraftRows();
+        if (name === "rakeback") {
+          applySavedRakebackSortMode();
+          loadSharedRakebackDraftRows();
+        }
         if (name === "sent") loadSentReports();
       });
     });
@@ -1957,10 +1987,8 @@ function initAdminReportModal() {
   if (rakebackSortSelect) {
     rakebackSortSelect.addEventListener("change", function () {
       var nextMode = getRakebackSortMode();
-      if (rakebackLastSortMode === "standard" && nextMode !== "standard") syncRakebackStandardOrder();
-      rakebackLastSortMode = nextMode;
+      setRakebackSortMode(nextMode, true);
       syncRakebackTable();
-      saveRakebackDraftRows();
     });
   }
   if (rakebackBody) {
