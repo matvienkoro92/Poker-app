@@ -1535,11 +1535,22 @@ function initAdminReportModal() {
 
   function buildReportDetailHtml(it) {
     var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
-    var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "sergeyMarina"];
-    var keys = ["bonuses", "transfers", "ret", "rakeback"];
+    var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "sergeyMarina"];
     var parts = [];
     function hasReportValue(value) {
       return value != null && value !== "" && (typeof value !== "number" || value !== 0);
+    }
+    function normalizeDetailName(name) {
+      return String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+    function buildDetailBlock(className, entries) {
+      if (!entries.length) return "";
+      return '<div class="admin-report-sent-detail__field-block ' + className + '">' + entries.map(function (entry) {
+        return '<div class="admin-report-sent-detail__field-block-row">' +
+          '<span class="admin-report-sent-detail__label">' + escapeReportHtml(entry.label) + "</span>" +
+          '<span class="admin-report-sent-detail__value">' + escapeReportHtml(entry.value) + "</span>" +
+        "</div>";
+      }).join("") + "</div>";
     }
     var childParts = [];
     var childTotal = 0;
@@ -1577,22 +1588,40 @@ function initAdminReportModal() {
         "</div>"
       );
     }
-    keys.forEach(function (k) {
-      var v = it[k];
-      if (hasReportValue(v)) {
-        var displayValue = k === "rakeback" ? formatReportRubleNumber(v) : v;
-        parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(labels[k]) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(displayValue) + "</span></div>");
-      }
-    });
+    var expenseEntries = [];
+    var otherEntries = [];
+    var extraRakebackEntries = [];
+    var anyaEntries = [];
+    function pushEntry(list, label, value, roundValue) {
+      if (!hasReportValue(value)) return;
+      list.push({ label: label, value: roundValue ? formatReportRubleNumber(value) : String(value) });
+    }
+    pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
+    pushEntry(expenseEntries, labels.rakeback, it.rakeback, true);
+    pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
+    pushEntry(otherEntries, labels.transfers, it.transfers, false);
+    pushEntry(otherEntries, labels.ret, it.ret, false);
     if (it.extraFields && it.extraFields.length) {
       it.extraFields.forEach(function (f) {
         if (f.name || f.amount != null && f.amount !== "") {
-          parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(f.name || "Доп") + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(f.amount != null ? f.amount : "") + "</span></div>");
+          var extraName = f.name || "Доп";
+          var normalizedName = normalizeDetailName(extraName);
+          var entry = { label: extraName, value: String(f.amount != null ? f.amount : "") };
+          if (normalizedName === "рейкбек") extraRakebackEntries.push(entry);
+          else if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
+          else otherEntries.push(entry);
         }
       });
     } else if (it.extraName || it.extraAmount != null) {
-      parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(it.extraName || "Доп") + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(it.extraAmount != null ? it.extraAmount : "") + "</span></div>");
+      var legacyExtraName = it.extraName || "Доп";
+      var normalizedLegacyName = normalizeDetailName(legacyExtraName);
+      var legacyEntry = { label: legacyExtraName, value: String(it.extraAmount != null ? it.extraAmount : "") };
+      if (normalizedLegacyName === "рейкбек") extraRakebackEntries.push(legacyEntry);
+      else if (normalizedLegacyName === "аня зп" || normalizedLegacyName === "аня зарплата") anyaEntries.push(legacyEntry);
+      else otherEntries.push(legacyEntry);
     }
+    parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(extraRakebackEntries, anyaEntries)));
+    parts.push(buildDetailBlock("admin-report-sent-detail__field-block--other", otherEntries));
     // Раньше здесь была строка с общим итогом по смене ("Итого, ₽").
     // По просьбе убираем её из детального вида отчёта.
     return parts.join("");
