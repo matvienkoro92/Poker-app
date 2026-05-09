@@ -364,6 +364,11 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-group", groupId);
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
+    if (data.accounted || data.reportedAt || data.reportId) {
+      tr.setAttribute("data-rakeback-accounted", "1");
+      if (data.reportedAt) tr.setAttribute("data-rakeback-reported-at", String(data.reportedAt));
+      if (data.reportId) tr.setAttribute("data-rakeback-report-id", String(data.reportId));
+    }
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
@@ -801,6 +806,10 @@ function initAdminReportModal() {
     return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
   }
 
+  function isRakebackRowAccounted(row) {
+    return !!(row && row.getAttribute("data-rakeback-accounted") === "1");
+  }
+
   function canRemoveRakebackRow(row) {
     if (!row || !rakebackBody) return false;
     if (!isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "")) return false;
@@ -848,9 +857,38 @@ function initAdminReportModal() {
         saved: row.getAttribute("data-rakeback-saved") === "1",
         color: color,
         createdAt: getRakebackRowCreatedAt(row, 0),
+        accounted: isRakebackRowAccounted(row),
+        reportedAt: row.getAttribute("data-rakeback-reported-at") || "",
+        reportId: row.getAttribute("data-rakeback-report-id") || "",
         ownerId: ownerId || getCurrentRakebackOwnerId(),
       };
     }).filter(Boolean);
+  }
+
+  function sumRakebackReportRows(rows) {
+    return (Array.isArray(rows) ? rows : []).reduce(function (sum, row) {
+      return sum + parseReportNumber(row && row.amount);
+    }, 0);
+  }
+
+  function getUnaccountedRakebackReportRows() {
+    return collectRakebackRows(false, true).filter(function (row) {
+      return !row.accounted;
+    });
+  }
+
+  function markUnaccountedRakebackRowsAccounted(reportId) {
+    if (!rakebackBody) return;
+    var reportedAt = new Date().toISOString();
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      if (isRakebackRowAccounted(row)) return;
+      var ownerId = row.getAttribute("data-rakeback-owner") || "";
+      if (!isCurrentRakebackOwner(ownerId)) return;
+      if (!isRakebackRowFilled(row)) return;
+      row.setAttribute("data-rakeback-accounted", "1");
+      row.setAttribute("data-rakeback-reported-at", reportedAt);
+      if (reportId) row.setAttribute("data-rakeback-report-id", String(reportId));
+    });
   }
 
   function syncRakebackTable() {
@@ -908,13 +946,14 @@ function initAdminReportModal() {
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
+    var reportRakebackTotal = sumRakebackReportRows(getUnaccountedRakebackReportRows());
     var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0 };
     if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = "Итого " + getRakebackRoomLabel(activeRakebackRoom);
     if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = formatRakebackRoomTotal(activeRakebackRoom, activeTotal.display, activeTotal.report);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportRubleNumber(total);
-    if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(total) || "");
+    if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
     showRakebackStatus("");
-    return total;
+    return reportRakebackTotal;
   }
 
   function fillRakebackTable(rows, legacyRakeback) {
@@ -941,6 +980,9 @@ function initAdminReportModal() {
         ownerId: row.ownerId || row.authorId || "",
         color: row.color || row.rowColor || row.highlightColor || "",
         createdAt: row.createdAt || row.addedAt || row.created || "",
+        accounted: row.accounted || row.reportedAt || row.reportId,
+        reportedAt: row.reportedAt || "",
+        reportId: row.reportId || "",
       });
       rakebackBody.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
@@ -2001,8 +2043,9 @@ function initAdminReportModal() {
       if (!el) return 0;
       return parseReportNumber(el.value);
     };
-    var rakebackTotal = syncRakebackTable();
-    var rakebackRows = collectRakebackRows(false, true);
+    syncRakebackTable();
+    var rakebackRows = getUnaccountedRakebackReportRows();
+    var rakebackTotal = sumRakebackReportRows(rakebackRows);
     var extraRows = modal.querySelectorAll(".admin-report-extra-row");
     var extraFields = [];
     var extraTotal = 0;
@@ -2157,11 +2200,23 @@ function initAdminReportModal() {
         .then(function (data) {
           submitBtn.disabled = false;
           if (data && data.ok) {
+            var accountedRakebackRows = null;
+            if (!editingReportId) {
+              markUnaccountedRakebackRowsAccounted(data.report && data.report.id);
+              syncRakebackTable();
+              accountedRakebackRows = collectRakebackRows(false, false);
+              saveLocalRakebackDraftRows(accountedRakebackRows);
+              saveRakebackDraftRowsNow(true);
+            }
             editingReportId = null;
             editingReport = null;
             if (submitBtn) submitBtn.textContent = "Отправить отчёт";
             fillReportForm(null);
-            loadSharedRakebackDraftRows();
+            if (accountedRakebackRows) {
+              fillRakebackTable(accountedRakebackRows, "");
+            } else {
+              loadSharedRakebackDraftRows();
+            }
             if (canViewSentReports()) {
               loadSentReports();
               setActiveTab("sent");
