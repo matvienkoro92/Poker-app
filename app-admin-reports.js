@@ -28,6 +28,7 @@ function initAdminReportModal() {
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var loadingRakebackDraft = false;
+  var savingRakebackDraft = false;
   var rakebackDragState = null;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
@@ -1189,11 +1190,16 @@ function initAdminReportModal() {
   function saveRakebackDraftRowsNow(force) {
     if (editingReportId) return;
     if (loadingRakebackDraft && !force) return;
+    if (rakebackDraftSaveTimer) {
+      clearTimeout(rakebackDraftSaveTimer);
+      rakebackDraftSaveTimer = null;
+    }
     rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     saveLocalRakebackDraftRows(rows);
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    savingRakebackDraft = true;
     var payload = buildAuthBody({
       action: "rakeback_draft_save",
       date: "shared",
@@ -1210,7 +1216,10 @@ function initAdminReportModal() {
           saveLocalRakebackDraftRows(data.rakebackDraft.rows);
         }
       })
-      .catch(function () {});
+      .catch(function () {})
+      .then(function () {
+        savingRakebackDraft = false;
+      });
   }
 
   function saveRakebackDraftRows() {
@@ -1244,6 +1253,7 @@ function initAdminReportModal() {
 
   function loadSharedRakebackDraftRows() {
     if (rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement)) return;
+    if (rakebackDraftSaveTimer || savingRakebackDraft) return;
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       fillRakebackTable(readRakebackDraftRows(), "");
@@ -1960,7 +1970,7 @@ function initAdminReportModal() {
         applyRakebackRowColor(colorRow, colorOption.getAttribute("data-rakeback-color-value") || "");
         closeRakebackColorMenus();
         syncRakebackTable();
-        saveRakebackDraftRows();
+        saveRakebackDraftRowsNow(true);
         showRakebackStatusBriefly("Цвет выбран");
         return;
       }
