@@ -520,12 +520,19 @@ body.admin-report-modal-open .bottom-nav {
   display: block;
 }
 #adminReportModal .admin-report-panel--active {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  -webkit-overflow-scrolling: touch;
 }
 #adminReportModal .admin-report-panel[data-admin-report-panel="rakeback"].admin-report-panel--active {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
   background: #05070d;
 }
 .admin-report-add-extra-btn {
@@ -1514,6 +1521,10 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-sent-wrap {
   max-height: 60vh;
   overflow-y: auto;
+}
+#adminReportModal .admin-report-sent-wrap {
+  max-height: none;
+  overflow: visible;
 }
 .admin-report-sent-current {
   margin-bottom: 4px;
