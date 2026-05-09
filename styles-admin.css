@@ -1743,6 +1743,21 @@ body.admin-report-modal-open .bottom-nav {
   font-weight: 800;
   text-align: right;
 }
+.admin-report-sent-detail__deposit-child--summary {
+  margin-top: 5px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(246, 211, 145, 0.24);
+}
+.admin-report-sent-detail__deposit-child--summary + .admin-report-sent-detail__deposit-child--summary {
+  margin-top: 0;
+  padding-top: 5px;
+  border-top: 0;
+}
+.admin-report-sent-detail__deposit-child--summary .admin-report-sent-detail__deposit-child-label,
+.admin-report-sent-detail__deposit-child--summary .admin-report-sent-detail__deposit-child-value {
+  color: #ffe7b0;
+  font-weight: 900;
+}
 .admin-report-sent-detail__label {
   color: var(--text-muted);
 }

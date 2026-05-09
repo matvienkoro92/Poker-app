@@ -1542,8 +1542,10 @@ function initAdminReportModal() {
       return value != null && value !== "" && (typeof value !== "number" || value !== 0);
     }
     var childParts = [];
+    var childTotal = 0;
     depositChildren.forEach(function (k) {
       if (!hasReportValue(it[k])) return;
+      childTotal += parseReportNumber(it[k]);
       childParts.push(
         '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--' + escapeReportHtml(k) + '">' +
           '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(labels[k]) + "</span>" +
@@ -1551,6 +1553,19 @@ function initAdminReportModal() {
         "</div>"
       );
     });
+    if (childParts.length) {
+      var depositValue = hasReportValue(it.deposit) ? parseReportNumber(it.deposit) : 0;
+      childParts.push(
+        '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--summary">' +
+          '<span class="admin-report-sent-detail__deposit-child-label">Итого</span>' +
+          '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(childTotal)) + "</span>" +
+        "</div>" +
+        '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--summary">' +
+          '<span class="admin-report-sent-detail__deposit-child-label">Разница с депозитом</span>' +
+          '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(depositValue - childTotal)) + "</span>" +
+        "</div>"
+      );
+    }
     if (hasReportValue(it.deposit) || childParts.length) {
       parts.push(
         '<div class="admin-report-sent-detail__deposit-group">' +
