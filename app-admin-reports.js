@@ -1001,8 +1001,9 @@ function initAdminReportModal() {
     });
   }
 
-  function syncRakebackTable() {
+  function syncRakebackTable(options) {
     if (!rakebackBody) return 0;
+    options = options || {};
     ensureRakebackBaseRow(activeRakebackRoom);
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
       row.parentNode.removeChild(row);
@@ -1046,7 +1047,7 @@ function initAdminReportModal() {
       if (amountEl) amountEl.textContent = formatReportRubleNumber(amount);
       updateRakebackRowActions(row);
     });
-    rows = sortRakebackRows(rows);
+    if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
     var collected = collectRakebackRows(false, false);
     var roomTotals = {};
@@ -2063,7 +2064,7 @@ function initAdminReportModal() {
     });
     rakebackBody.addEventListener("input", function (e) {
       ensureRakebackEntryAddedAt(e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null, false);
-      syncRakebackTable();
+      syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("change", function (e) {
