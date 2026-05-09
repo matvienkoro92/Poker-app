@@ -245,6 +245,11 @@
     return target.__pokerGlobalModalPrewarmPromise;
   }
 
+  window.pokerPrewarmGlobalModalTarget = prewarmGlobalModalTarget;
+  window.pokerPrewarmAdminReportModal = function () {
+    return prewarmGlobalModalTarget(document.getElementById("adminReportBtn"));
+  };
+
   function maybePrewarmFromEvent(e) {
     if (e && e.__pokerLazyRedispatched) return;
     var target = e && e.target ? findGlobalModalClickTarget(e.target) : null;
@@ -269,9 +274,9 @@
     }
     function schedule() {
       if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(run, { timeout: 1400 });
+        window.requestIdleCallback(run, { timeout: 450 });
       } else {
-        setTimeout(run, 450);
+        setTimeout(run, 120);
       }
     }
     if (document.readyState === "loading") {

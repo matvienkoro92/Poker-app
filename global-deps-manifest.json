@@ -32,6 +32,26 @@
       ]
     },
     {
+      "name": "pokerPrewarmGlobalModalTarget",
+      "domain": "htmlFragments",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerPrewarmAdminReportModal",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-visitors-admin.js"
+      ]
+    },
+    {
       "name": "resolveHallFameSectionFromStartParam",
       "domain": "hallDeepLinks",
       "exportedBy": [

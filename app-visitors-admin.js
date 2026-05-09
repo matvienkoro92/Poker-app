@@ -161,6 +161,14 @@
         window.__pokerTelegramAuth = auth;
       } catch (eReportAuth) {}
       if (reportBtn) reportBtn.classList.remove("header-admin-report--hidden");
+      var prewarmAdminReportModal = window.pokerPrewarmAdminReportModal;
+      if (typeof prewarmAdminReportModal === "function") {
+        setTimeout(function () {
+          try {
+            prewarmAdminReportModal();
+          } catch (ePrewarmReport) {}
+        }, 0);
+      }
     }
     function showAdminUi() {
       try {
