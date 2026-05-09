@@ -1663,6 +1663,66 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-sent-detail__row {
   display: contents;
 }
+.admin-report-sent-detail__deposit-group {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  padding: 8px 0 6px;
+}
+.admin-report-sent-detail__deposit-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(246, 211, 145, 0.24);
+  border-radius: 8px;
+  background: rgba(246, 211, 145, 0.08);
+}
+.admin-report-sent-detail__deposit-main .admin-report-sent-detail__label {
+  color: #ffe7b0;
+  font-weight: 800;
+}
+.admin-report-sent-detail__deposit-main .admin-report-sent-detail__value {
+  color: #fff2c9;
+  font-size: 14px;
+  font-weight: 900;
+}
+.admin-report-sent-detail__deposit-subcolumn {
+  display: grid;
+  gap: 5px;
+  margin-left: 14px;
+  padding-left: 10px;
+  border-left: 3px solid rgba(246, 211, 145, 0.52);
+}
+.admin-report-sent-detail__deposit-child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.admin-report-sent-detail__deposit-child--cashout { background: rgba(248, 113, 113, 0.14); }
+.admin-report-sent-detail__deposit-child--prodamus { background: rgba(56, 189, 248, 0.13); }
+.admin-report-sent-detail__deposit-child--robokassa { background: rgba(52, 211, 153, 0.13); }
+.admin-report-sent-detail__deposit-child--romaCrypto { background: rgba(168, 85, 247, 0.14); }
+.admin-report-sent-detail__deposit-child--botCryptoDep { background: rgba(251, 191, 36, 0.15); }
+.admin-report-sent-detail__deposit-child--botExchipDep,
+.admin-report-sent-detail__deposit-child--botExchipCashout { background: rgba(96, 165, 250, 0.14); }
+.admin-report-sent-detail__deposit-child--sergeyMarina { background: rgba(244, 114, 182, 0.13); }
+.admin-report-sent-detail__deposit-child-label {
+  color: rgba(255, 255, 255, 0.72);
+  min-width: 0;
+}
+.admin-report-sent-detail__deposit-child-value {
+  color: var(--text);
+  font-weight: 800;
+  text-align: right;
+}
 .admin-report-sent-detail__label {
   color: var(--text-muted);
 }

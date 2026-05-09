@@ -1443,12 +1443,37 @@ function initAdminReportModal() {
   }
 
   function buildReportDetailHtml(it) {
-    var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Бот крипта деп", botExchipDep: "Бот эксчип деп", botExchipCashout: "Бот эксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
-    var keys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "transfers", "ret", "sergeyMarina", "rakeback"];
+    var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
+    var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "sergeyMarina"];
+    var keys = ["bonuses", "transfers", "ret", "rakeback"];
     var parts = [];
+    function hasReportValue(value) {
+      return value != null && value !== "" && (typeof value !== "number" || value !== 0);
+    }
+    var childParts = [];
+    depositChildren.forEach(function (k) {
+      if (!hasReportValue(it[k])) return;
+      childParts.push(
+        '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--' + escapeReportHtml(k) + '">' +
+          '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(labels[k]) + "</span>" +
+          '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(it[k]) + "</span>" +
+        "</div>"
+      );
+    });
+    if (hasReportValue(it.deposit) || childParts.length) {
+      parts.push(
+        '<div class="admin-report-sent-detail__deposit-group">' +
+          '<div class="admin-report-sent-detail__deposit-main">' +
+            '<span class="admin-report-sent-detail__label">Депозит</span>' +
+            '<span class="admin-report-sent-detail__value">' + escapeReportHtml(hasReportValue(it.deposit) ? it.deposit : 0) + "</span>" +
+          "</div>" +
+          (childParts.length ? '<div class="admin-report-sent-detail__deposit-subcolumn">' + childParts.join("") + "</div>" : "") +
+        "</div>"
+      );
+    }
     keys.forEach(function (k) {
       var v = it[k];
-      if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) {
+      if (hasReportValue(v)) {
         var displayValue = k === "rakeback" ? formatReportRubleNumber(v) : v;
         parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(labels[k]) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(displayValue) + "</span></div>");
       }
