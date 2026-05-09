@@ -774,7 +774,6 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-id-cell {
   position: relative;
-  display: block;
 }
 .admin-report-rakeback-row-number {
   display: inline-flex;
@@ -798,9 +797,6 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-row-number[hidden] {
   display: none !important;
-}
-.admin-report-rakeback-row--addon .admin-report-rakeback-id-cell {
-  grid-template-columns: minmax(0, 1fr);
 }
 .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
   padding-left: 31px;
@@ -1297,7 +1293,7 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 11px;
   }
   .admin-report-rakeback-id-cell {
-    display: block;
+    position: relative;
   }
   .admin-report-rakeback-row-number {
     min-width: 16px;
