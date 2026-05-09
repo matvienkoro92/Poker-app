@@ -28,6 +28,7 @@ function initAdminReportModal() {
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var loadingRakebackDraft = false;
+  var rakebackDragState = null;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -477,6 +478,118 @@ function initAdminReportModal() {
       });
     });
     return sortedRows;
+  }
+
+  function getRakebackGroupRows(row) {
+    if (!rakebackBody || !row) return [];
+    var groupId = row.getAttribute("data-rakeback-group") || "";
+    if (!groupId) return [row];
+    return Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).filter(function (candidate) {
+      return candidate.getAttribute("data-rakeback-group") === groupId;
+    });
+  }
+
+  function getRakebackVisibleGroups() {
+    if (!rakebackBody) return [];
+    var groups = [];
+    var seen = {};
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      if (row.hidden) return;
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      if (!groupId || seen[groupId]) return;
+      seen[groupId] = true;
+      groups.push({ groupId: groupId, rows: getRakebackGroupRows(row) });
+    });
+    return groups;
+  }
+
+  function syncRakebackCreatedOrder() {
+    if (!rakebackBody) return;
+    var base = Date.now();
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
+      row.setAttribute("data-rakeback-created-at", String(base + index));
+    });
+  }
+
+  function moveRakebackGroupBefore(sourceRows, targetGroup, afterTarget) {
+    if (!rakebackBody || !sourceRows || !sourceRows.length || !targetGroup || !targetGroup.rows || !targetGroup.rows.length) return false;
+    if (sourceRows.indexOf(targetGroup.rows[0]) !== -1) return false;
+    var fragment = document.createDocumentFragment();
+    sourceRows.forEach(function (row) { fragment.appendChild(row); });
+    var anchor = afterTarget ? targetGroup.rows[targetGroup.rows.length - 1].nextSibling : targetGroup.rows[0];
+    rakebackBody.insertBefore(fragment, anchor);
+    syncRakebackCreatedOrder();
+    return true;
+  }
+
+  function beginRakebackRowDrag(row, pointerId, clientY) {
+    if (!row || !rakebackBody || !canEditRakebackRow(row)) return;
+    if (rakebackSortSelect && rakebackSortSelect.value !== "created") rakebackSortSelect.value = "created";
+    var groupRows = getRakebackGroupRows(row);
+    rakebackDragState = {
+      active: true,
+      pointerId: pointerId,
+      startY: clientY,
+      currentY: clientY,
+      groupRows: groupRows,
+      moved: false,
+    };
+    groupRows.forEach(function (groupRow) {
+      groupRow.classList.add("admin-report-rakeback-row--dragging");
+    });
+    document.body.classList.add("admin-report-rakeback-drag-active");
+    showRakebackStatus("Перенос строки");
+  }
+
+  function finishRakebackRowDrag(saveChanges) {
+    if (!rakebackDragState) return;
+    var moved = rakebackDragState.moved;
+    rakebackDragState.groupRows.forEach(function (row) {
+      row.classList.remove("admin-report-rakeback-row--dragging");
+    });
+    document.body.classList.remove("admin-report-rakeback-drag-active");
+    rakebackDragState = null;
+    syncRakebackTable();
+    if (saveChanges && moved) {
+      saveRakebackDraftRows();
+      showRakebackStatusBriefly("Строка перенесена");
+    } else {
+      showRakebackStatus("");
+    }
+  }
+
+  function updateRakebackRowDrag(clientY) {
+    if (!rakebackDragState || !rakebackDragState.groupRows.length) return;
+    rakebackDragState.currentY = clientY;
+    var groups = getRakebackVisibleGroups();
+    for (var i = 0; i < groups.length; i++) {
+      var group = groups[i];
+      if (rakebackDragState.groupRows.indexOf(group.rows[0]) !== -1) continue;
+      var firstRect = group.rows[0].getBoundingClientRect();
+      var lastRect = group.rows[group.rows.length - 1].getBoundingClientRect();
+      var top = firstRect.top;
+      var bottom = lastRect.bottom;
+      if (clientY < top || clientY > bottom) continue;
+      var after = clientY > (top + bottom) / 2;
+      if (moveRakebackGroupBefore(rakebackDragState.groupRows, group, after)) {
+        rakebackDragState.moved = true;
+        syncRakebackRoomVisibility();
+      }
+      break;
+    }
+  }
+
+  function cancelPendingRakebackDrag() {
+    if (!rakebackDragState || rakebackDragState.active) return;
+    if (rakebackDragState.timer) clearTimeout(rakebackDragState.timer);
+    rakebackDragState = null;
+  }
+
+  function shouldStartRakebackDragFrom(target) {
+    if (!target || !target.closest) return false;
+    if (target.closest("[data-rakeback-color-menu],[data-rakeback-color-toggle],[data-rakeback-save],[data-rakeback-edit],[data-rakeback-add-addon],[data-rakeback-remove]")) return false;
+    if (target.closest("select,textarea,input[type='checkbox']")) return false;
+    return !!target.closest("[data-rakeback-row]");
   }
 
   function setRakebackRoomTab(room) {
@@ -1672,6 +1785,50 @@ function initAdminReportModal() {
     });
   }
   if (rakebackBody) {
+    rakebackBody.addEventListener("pointerdown", function (e) {
+      if (!shouldStartRakebackDragFrom(e.target)) return;
+      var row = e.target.closest("[data-rakeback-row]");
+      if (!row || row.hidden || !canEditRakebackRow(row)) return;
+      cancelPendingRakebackDrag();
+      var startX = e.clientX;
+      var startY = e.clientY;
+      var pointerId = e.pointerId;
+      var timer = setTimeout(function () {
+        if (!rakebackDragState || rakebackDragState.pointerId !== pointerId || rakebackDragState.active) return;
+        beginRakebackRowDrag(row, pointerId, startY);
+      }, 420);
+      rakebackDragState = {
+        active: false,
+        pointerId: pointerId,
+        startX: startX,
+        startY: startY,
+        timer: timer,
+      };
+      if (row.setPointerCapture) {
+        try { row.setPointerCapture(pointerId); } catch (err) {}
+      }
+    });
+    rakebackBody.addEventListener("pointermove", function (e) {
+      if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
+      if (!rakebackDragState.active) {
+        var dx = Math.abs(e.clientX - rakebackDragState.startX);
+        var dy = Math.abs(e.clientY - rakebackDragState.startY);
+        if (dx > 8 || dy > 8) cancelPendingRakebackDrag();
+        return;
+      }
+      e.preventDefault();
+      updateRakebackRowDrag(e.clientY);
+    });
+    rakebackBody.addEventListener("pointerup", function (e) {
+      if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
+      if (rakebackDragState.active) finishRakebackRowDrag(true);
+      else cancelPendingRakebackDrag();
+    });
+    rakebackBody.addEventListener("pointercancel", function (e) {
+      if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
+      if (rakebackDragState.active) finishRakebackRowDrag(false);
+      else cancelPendingRakebackDrag();
+    });
     rakebackBody.addEventListener("input", function () {
       syncRakebackTable();
       saveRakebackDraftRows();
