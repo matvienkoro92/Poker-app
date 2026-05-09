@@ -86,6 +86,14 @@ function initAdminReportModal() {
     "1053772", "1285806", "1611851", "630124", "1377722", "1575192", "1570839", "1102639",
     "725076", "885558", "1073571", "1459747", "802380", "1509751", "1411436", "1308425"
   ];
+  var RAKEBACK_ROW_COLORS = [
+    { value: "#332411", label: "Золотой" },
+    { value: "#173520", label: "Зеленый" },
+    { value: "#152b46", label: "Синий" },
+    { value: "#331b24", label: "Красный" },
+    { value: "#2d2344", label: "Фиолетовый" },
+    { value: "#26313a", label: "Серый" },
+  ];
 
   function canViewSentReports() {
     try {
@@ -285,6 +293,53 @@ function initAdminReportModal() {
     }).join("");
   }
 
+  function normalizeRakebackRowColor(color) {
+    color = String(color || "").trim().toLowerCase();
+    for (var i = 0; i < RAKEBACK_ROW_COLORS.length; i++) {
+      if (RAKEBACK_ROW_COLORS[i].value.toLowerCase() === color) return RAKEBACK_ROW_COLORS[i].value;
+    }
+    return "";
+  }
+
+  function getRakebackRowColorButtons(selectedColor) {
+    selectedColor = normalizeRakebackRowColor(selectedColor);
+    var buttons = RAKEBACK_ROW_COLORS.map(function (color) {
+      var selected = color.value === selectedColor;
+      return '<button type="button" class="admin-report-rakeback-color-swatch" data-rakeback-color-value="' + escapeReportHtml(color.value) + '" title="' + escapeReportHtml(color.label) + '" aria-label="' + escapeReportHtml(color.label) + '"' + (selected ? ' data-rakeback-color-selected="1"' : "") + ' style="--rakeback-swatch:' + escapeReportHtml(color.value) + '"></button>';
+    });
+    buttons.push('<button type="button" class="admin-report-rakeback-color-swatch admin-report-rakeback-color-swatch--clear" data-rakeback-color-value="" title="Сбросить цвет" aria-label="Сбросить цвет">×</button>');
+    return buttons.join("");
+  }
+
+  function closeRakebackColorMenus(exceptRow) {
+    if (!rakebackBody) return;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-color-menu]")).forEach(function (menu) {
+      var row = menu.closest("[data-rakeback-row]");
+      if (exceptRow && row === exceptRow) return;
+      menu.hidden = true;
+    });
+  }
+
+  function applyRakebackRowColor(row, color) {
+    if (!row) return;
+    color = normalizeRakebackRowColor(color);
+    if (color) {
+      row.setAttribute("data-rakeback-row-color", color);
+      row.style.setProperty("--rakeback-row-bg", color);
+      row.style.setProperty("--rakeback-row-button-color", color);
+    } else {
+      row.removeAttribute("data-rakeback-row-color");
+      row.style.removeProperty("--rakeback-row-bg");
+      row.style.removeProperty("--rakeback-row-button-color");
+    }
+    var menu = row.querySelector("[data-rakeback-color-menu]");
+    if (menu) {
+      Array.prototype.slice.call(menu.querySelectorAll("[data-rakeback-color-value]")).forEach(function (btn) {
+        btn.toggleAttribute("data-rakeback-color-selected", normalizeRakebackRowColor(btn.getAttribute("data-rakeback-color-value")) === color);
+      });
+    }
+  }
+
   function normalizeRakebackRoom(room) {
     var raw = String(room || "").trim();
     var lower = raw.toLowerCase();
@@ -321,6 +376,8 @@ function initAdminReportModal() {
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--color" data-rakeback-color-toggle title="Выделить цветом" aria-label="Выделить цветом"><span class="admin-report-rakeback-color-dot" aria-hidden="true"></span></button>' +
+        '<div class="admin-report-rakeback-color-menu" data-rakeback-color-menu hidden>' + getRakebackRowColorButtons(data.color || data.rowColor || data.highlightColor || "") + "</div>" +
       "</td>";
     var idInput = tr.querySelector("[data-rakeback-player-id]");
     var rakeInput = tr.querySelector("[data-rakeback-rake]");
@@ -335,6 +392,7 @@ function initAdminReportModal() {
       if (roomSelect) roomSelect.disabled = true;
       if (idInput) idInput.readOnly = true;
     }
+    applyRakebackRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
     return tr;
   }
 
@@ -565,6 +623,7 @@ function initAdminReportModal() {
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackOwner(ownerId)) return null;
+      var color = normalizeRakebackRowColor(row.getAttribute("data-rakeback-row-color") || "");
       return {
         groupId: row.getAttribute("data-rakeback-group") || "",
         kind: row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base",
@@ -577,6 +636,7 @@ function initAdminReportModal() {
         chipAmount: room === "X" ? roomAmount : null,
         amount: amount,
         saved: row.getAttribute("data-rakeback-saved") === "1",
+        color: color,
         ownerId: ownerId || getCurrentRakebackOwnerId(),
       };
     }).filter(Boolean);
@@ -666,6 +726,7 @@ function initAdminReportModal() {
         percent: row.percent != null ? row.percent : "",
         discount15: !!(row.discount15 || row.subtract15),
         ownerId: row.ownerId || row.authorId || "",
+        color: row.color || row.rowColor || row.highlightColor || "",
       });
       rakebackBody.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
@@ -1557,6 +1618,8 @@ function initAdminReportModal() {
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("click", function (e) {
+      var colorControl = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
+      if (!colorControl) closeRakebackColorMenus();
       var copyIdInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
       if (copyIdInput) {
         var copyRow = copyIdInput.closest("[data-rakeback-row]");
@@ -1597,6 +1660,25 @@ function initAdminReportModal() {
         showRakebackStatus("Подзапись добавлена");
         return;
       }
+      var colorOption = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-value]") : null;
+      if (colorOption) {
+        var colorRow = colorOption.closest("[data-rakeback-row]");
+        applyRakebackRowColor(colorRow, colorOption.getAttribute("data-rakeback-color-value") || "");
+        closeRakebackColorMenus();
+        saveRakebackDraftRows();
+        showRakebackStatusBriefly("Цвет выбран");
+        return;
+      }
+      var colorToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-toggle]") : null;
+      if (colorToggle) {
+        var toggleRow = colorToggle.closest("[data-rakeback-row]");
+        var menu = toggleRow ? toggleRow.querySelector("[data-rakeback-color-menu]") : null;
+        if (!menu) return;
+        var willOpen = menu.hidden;
+        closeRakebackColorMenus(toggleRow);
+        menu.hidden = !willOpen;
+        return;
+      }
       var removeBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-remove]") : null;
       if (!removeBtn) return;
       var row = removeBtn.closest("[data-rakeback-row]");
@@ -1634,6 +1716,7 @@ function initAdminReportModal() {
         row.querySelectorAll("input").forEach(function (inp) { inp.value = ""; });
         var select = row.querySelector("select");
         if (select) select.value = "P21";
+        applyRakebackRowColor(row, "");
       } else {
         row.parentNode.removeChild(row);
       }
@@ -1641,6 +1724,11 @@ function initAdminReportModal() {
       saveRakebackDraftRowsNow(true);
     });
   }
+  document.addEventListener("click", function (e) {
+    if (!rakebackBody || !e.target || !e.target.closest) return;
+    if (e.target.closest("[data-rakeback-color-toggle]") || e.target.closest("[data-rakeback-color-menu]")) return;
+    closeRakebackColorMenus();
+  });
   if (modal) {
     modal.addEventListener("keydown", function (e) {
       if (e.key !== "Enter" || !e.target || !e.target.matches || !e.target.matches("input.admin-report-input,input.admin-report-rakeback-input")) return;

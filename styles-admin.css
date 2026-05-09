@@ -748,7 +748,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-rakeback-table th:nth-child(7),
 .admin-report-rakeback-table td:nth-child(7) {
-  width: 144px;
+  width: 192px;
 }
 .admin-report-rakeback-discount-cell {
   text-align: center;
@@ -768,6 +768,9 @@ body.admin-report-modal-open .bottom-nav {
 }
 #adminReportModal .admin-report-rakeback-row--addon td {
   background: #101016;
+}
+#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td {
+  background: var(--rakeback-row-bg, #101016);
 }
 .admin-report-rakeback-row--addon td:first-child {
   position: relative;
@@ -920,10 +923,12 @@ body.admin-report-modal-open .bottom-nav {
   font-variant-numeric: tabular-nums;
 }
 .admin-report-rakeback-actions {
+  position: relative;
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
+  overflow: visible;
 }
 .admin-report-rakeback-icon-btn {
   width: 42px;
@@ -979,6 +984,64 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-rakeback-icon-btn[data-rakeback-remove]:hover {
   background: #dc2626;
   border-color: #ef4444;
+}
+.admin-report-rakeback-icon-btn--color {
+  border-color: rgba(246, 211, 145, 0.56);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffe7b0;
+}
+.admin-report-rakeback-icon-btn--color:hover {
+  background: rgba(246, 211, 145, 0.2);
+  border-color: rgba(246, 211, 145, 0.8);
+}
+.admin-report-rakeback-color-dot {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 231, 176, 0.72);
+  border-radius: 50%;
+  background:
+    var(--rakeback-row-button-color, conic-gradient(from 90deg, #fbbf24, #22c55e, #38bdf8, #f43f5e, #fbbf24));
+  box-shadow: inset 0 0 0 1px rgba(5, 7, 13, 0.5);
+}
+.admin-report-rakeback-color-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 9;
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgba(246, 211, 145, 0.34);
+  border-radius: 10px;
+  background: #080b12;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+.admin-report-rakeback-color-menu[hidden] {
+  display: none !important;
+}
+.admin-report-rakeback-color-swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(246, 211, 145, 0.34);
+  border-radius: 8px;
+  background: var(--rakeback-swatch, transparent);
+  color: #ffe7b0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(5, 7, 13, 0.48);
+}
+.admin-report-rakeback-color-swatch[data-rakeback-color-selected] {
+  border-color: #ffe7b0;
+  box-shadow:
+    inset 0 0 0 2px rgba(5, 7, 13, 0.55),
+    0 0 0 2px rgba(246, 211, 145, 0.3);
+}
+.admin-report-rakeback-color-swatch--clear {
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
 }
 .admin-report-rakeback-icon-btn--add {
   border-color: #f6d391;
@@ -1194,11 +1257,26 @@ body.admin-report-modal-open .bottom-nav {
     gap: 2px;
   }
   .admin-report-rakeback-icon-btn {
-    width: 30px;
-    min-width: 30px;
-    height: 30px;
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
     border-radius: 9px;
-    font-size: 17px;
+    font-size: 15px;
+  }
+  .admin-report-rakeback-color-dot {
+    width: 13px;
+    height: 13px;
+    border-width: 1px;
+  }
+  .admin-report-rakeback-color-menu {
+    grid-template-columns: repeat(4, 24px);
+    gap: 5px;
+    padding: 6px;
+  }
+  .admin-report-rakeback-color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
   }
 }
 @media (max-width: 430px) {
@@ -1260,11 +1338,14 @@ body.admin-report-modal-open .bottom-nav {
     gap: 2px;
   }
   .admin-report-rakeback-icon-btn {
-    width: 28px !important;
-    min-width: 28px !important;
-    height: 28px !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
+  }
+  .admin-report-rakeback-color-menu {
+    right: -4px;
   }
 }
 .admin-report-submit-btn {
