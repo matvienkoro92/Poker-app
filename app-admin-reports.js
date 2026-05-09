@@ -813,6 +813,11 @@ function initAdminReportModal() {
     return !!(row && row.getAttribute("data-rakeback-accounted") === "1");
   }
 
+  function canEditRakebackRow(row) {
+    if (!row) return false;
+    return isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "");
+  }
+
   function canRemoveRakebackRow(row) {
     if (!row || !rakebackBody) return false;
     if (!isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "")) return false;
