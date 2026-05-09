@@ -416,7 +416,24 @@ function initAdminReportModal() {
   }
 
   function getRakebackSortMode() {
-    return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "created";
+    return rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard";
+  }
+
+  function getRakebackTemplateIds(room) {
+    var normalized = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
+    if (normalized === "X") return X_RAKEBACK_TEMPLATE_IDS;
+    if (normalized === "Supr") return SUPR_RAKEBACK_TEMPLATE_IDS;
+    if (normalized === "PP") return PP_RAKEBACK_TEMPLATE_IDS;
+    return P21_RAKEBACK_TEMPLATE_IDS;
+  }
+
+  function getRakebackStandardOrder(row) {
+    if (!row) return 1000000;
+    var ids = getRakebackTemplateIds(getRakebackRowRoom(row));
+    var playerId = getRakebackRowPlayerId(row);
+    if (!playerId) return 1000000;
+    var index = ids.indexOf(playerId);
+    return index >= 0 ? index : 1000000;
   }
 
   function getRakebackRowCreatedAt(row, fallbackIndex) {
@@ -464,6 +481,9 @@ function initAdminReportModal() {
         if (!diff) diff = a.createdAt - b.createdAt;
       } else if (mode === "percent") {
         diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-percent]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-percent]") || {}).value);
+        if (!diff) diff = a.createdAt - b.createdAt;
+      } else if (mode === "standard") {
+        diff = getRakebackStandardOrder(a.keyRow) - getRakebackStandardOrder(b.keyRow);
         if (!diff) diff = a.createdAt - b.createdAt;
       } else {
         diff = a.createdAt - b.createdAt;
