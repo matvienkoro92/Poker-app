@@ -90,13 +90,41 @@ function initAdminReportModal() {
     "725076", "885558", "1073571", "1459747", "802380", "1509751", "1411436", "1308425"
   ];
   var RAKEBACK_ROW_COLORS = [
-    { value: "#332411", label: "Золотой" },
-    { value: "#173520", label: "Зеленый" },
-    { value: "#152b46", label: "Синий" },
-    { value: "#331b24", label: "Красный" },
-    { value: "#2d2344", label: "Фиолетовый" },
-    { value: "#26313a", label: "Серый" },
+    { value: "#4a3205", label: "Золотой мягкий" },
+    { value: "#73510b", label: "Золотой средний" },
+    { value: "#9a6b10", label: "Золотой яркий" },
+    { value: "#63330e", label: "Оранжевый мягкий" },
+    { value: "#965019", label: "Оранжевый средний" },
+    { value: "#c96b20", label: "Оранжевый яркий" },
+    { value: "#064b2f", label: "Зеленый мягкий" },
+    { value: "#087a48", label: "Зеленый средний" },
+    { value: "#0a9f5c", label: "Зеленый яркий" },
+    { value: "#064b4b", label: "Бирюзовый мягкий" },
+    { value: "#087878", label: "Бирюзовый средний" },
+    { value: "#0f9f9a", label: "Бирюзовый яркий" },
+    { value: "#123a66", label: "Синий мягкий" },
+    { value: "#155996", label: "Синий средний" },
+    { value: "#1d75c7", label: "Синий яркий" },
+    { value: "#3a2466", label: "Фиолетовый мягкий" },
+    { value: "#5b35a0", label: "Фиолетовый средний" },
+    { value: "#7c4ddb", label: "Фиолетовый яркий" },
+    { value: "#5f1b45", label: "Розовый мягкий" },
+    { value: "#8f2869", label: "Розовый средний" },
+    { value: "#c23a8a", label: "Розовый яркий" },
+    { value: "#5f1d1d", label: "Красный мягкий" },
+    { value: "#8f2b2b", label: "Красный средний" },
+    { value: "#bd3a3a", label: "Красный яркий" },
+    { value: "#2c3440", label: "Серый мягкий" },
+    { value: "#46515f", label: "Серый яркий" },
   ];
+  var RAKEBACK_ROW_LEGACY_COLOR_MAP = {
+    "#332411": "#73510b",
+    "#173520": "#087a48",
+    "#152b46": "#155996",
+    "#331b24": "#8f2b2b",
+    "#2d2344": "#5b35a0",
+    "#26313a": "#46515f",
+  };
 
   function canViewSentReports() {
     try {
@@ -298,6 +326,7 @@ function initAdminReportModal() {
 
   function normalizeRakebackRowColor(color) {
     color = String(color || "").trim().toLowerCase();
+    if (RAKEBACK_ROW_LEGACY_COLOR_MAP[color]) return RAKEBACK_ROW_LEGACY_COLOR_MAP[color];
     for (var i = 0; i < RAKEBACK_ROW_COLORS.length; i++) {
       if (RAKEBACK_ROW_COLORS[i].value.toLowerCase() === color) return RAKEBACK_ROW_COLORS[i].value;
     }

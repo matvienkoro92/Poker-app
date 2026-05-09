@@ -1096,7 +1096,7 @@ body.admin-report-modal-open .bottom-nav {
   right: 0;
   z-index: 9;
   display: grid;
-  grid-template-columns: repeat(4, 28px);
+  grid-template-columns: repeat(6, 28px);
   gap: 6px;
   padding: 8px;
   border: 1px solid rgba(246, 211, 145, 0.34);
@@ -1116,13 +1116,16 @@ body.admin-report-modal-open .bottom-nav {
   background: var(--rakeback-swatch, transparent) !important;
   color: #ffe7b0;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(5, 7, 13, 0.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(5, 7, 13, 0.42),
+    0 0 10px rgba(246, 211, 145, 0.12);
 }
 .admin-report-rakeback-color-swatch[data-rakeback-color-selected] {
   border-color: #ffe7b0;
   box-shadow:
     inset 0 0 0 2px rgba(5, 7, 13, 0.55),
-    0 0 0 2px rgba(246, 211, 145, 0.3);
+    0 0 0 2px rgba(246, 211, 145, 0.3),
+    0 0 14px rgba(246, 211, 145, 0.22);
 }
 .admin-report-rakeback-color-swatch--clear {
   background: rgba(255, 255, 255, 0.06) !important;
@@ -1379,7 +1382,7 @@ body.admin-report-modal-open .bottom-nav {
     border-width: 1px;
   }
   .admin-report-rakeback-color-menu {
-    grid-template-columns: repeat(4, 24px);
+    grid-template-columns: repeat(6, 24px);
     gap: 5px;
     padding: 6px;
   }
