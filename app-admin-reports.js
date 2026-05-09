@@ -451,6 +451,19 @@ function initAdminReportModal() {
     return raw;
   }
 
+  function getRakebackTopStandardAt(room) {
+    if (!rakebackBody) return Date.now();
+    var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
+    var values = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).filter(function (row) {
+      return row.getAttribute("data-rakeback-kind") !== "addon" && getRakebackRowRoom(row) === targetRoom;
+    }).map(function (row, index) {
+      return getRakebackRowStandardAt(row, index);
+    }).filter(function (value) {
+      return Number.isFinite(value);
+    });
+    return values.length ? Math.min.apply(Math, values) - 1 : Date.now();
+  }
+
   function getRakebackRowEntryAddedAtForSave(row) {
     var raw = row ? parseFloat(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
     return Number.isFinite(raw) ? raw : "";
@@ -1062,9 +1075,19 @@ function initAdminReportModal() {
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
     if (rakebackSearchInput && rakebackSearchInput.value) rakebackSearchInput.value = "";
+    if (rakebackSortSelect) rakebackSortSelect.value = "standard";
     rakebackDraftMutationSeq += 1;
-    var row = createRakebackRow({ kind: "base", room: activeRakebackRoom, entryAddedAt: Date.now() });
-    rakebackBody.appendChild(row);
+    var now = Date.now();
+    var row = createRakebackRow({
+      kind: "base",
+      room: activeRakebackRoom,
+      createdAt: now,
+      standardAt: getRakebackTopStandardAt(activeRakebackRoom),
+      entryAddedAt: now,
+    });
+    var firstRow = rakebackBody.querySelector("[data-rakeback-row]");
+    if (firstRow) rakebackBody.insertBefore(row, firstRow);
+    else rakebackBody.appendChild(row);
     syncRakebackTable();
     focusRakebackRow(row);
   }
