@@ -1244,26 +1244,31 @@ function initAdminReportModal() {
   /** Суммирует доп. строки отчёта в map по названию (без дубля с extraFields + legacy). */
   function mergeReportExtrasIntoMap(map, r) {
     if (!r || !map) return;
+    function addExtra(name, raw) {
+      name = name != null ? String(name).trim() : "";
+      if (!name) name = "Доп.";
+      var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
+      if (isNaN(n)) n = 0;
+      if (isReportUsdtRateFieldName(name)) {
+        var prev = map[name] && map[name].__avg ? map[name] : { __avg: true, sum: 0, count: 0 };
+        if (n !== 0) {
+          prev.sum += n;
+          prev.count += 1;
+        }
+        map[name] = prev;
+        return;
+      }
+      map[name] = (map[name] || 0) + n;
+    }
     if (Array.isArray(r.extraFields) && r.extraFields.length > 0) {
       r.extraFields.forEach(function (f) {
         if (!f) return;
-        var name = f.name != null ? f.name : f.extraName;
-        name = name != null ? String(name).trim() : "";
-        if (!name) name = "Доп.";
-        var raw = f.amount != null ? f.amount : f.extraAmount;
-        var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
-        if (isNaN(n)) n = 0;
-        map[name] = (map[name] || 0) + n;
+        addExtra(f.name != null ? f.name : f.extraName, f.amount != null ? f.amount : f.extraAmount);
       });
       return;
     }
     if (r.extraName || r.extraAmount != null) {
-      var legName = r.extraName ? String(r.extraName).trim() : "";
-      if (!legName) legName = "Доп.";
-      var raw = r.extraAmount;
-      var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
-      if (isNaN(n)) n = 0;
-      map[legName] = (map[legName] || 0) + n;
+      addExtra(r.extraName, r.extraAmount);
     }
   }
 
@@ -1533,15 +1538,45 @@ function initAdminReportModal() {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  function normalizeReportDetailName(name) {
+    return String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
+
+  function isReportUsdtRateFieldName(name) {
+    var normalized = normalizeReportDetailName(name);
+    return normalized.indexOf("курс") !== -1 && (normalized.indexOf("usdt") !== -1 || normalized.indexOf("юсдт") !== -1);
+  }
+
+  function getReportExtraEntries(it) {
+    var entries = [];
+    if (!it) return entries;
+    if (Array.isArray(it.extraFields) && it.extraFields.length) {
+      it.extraFields.forEach(function (f) {
+        if (!f || !(f.name || f.amount != null && f.amount !== "")) return;
+        entries.push({ name: f.name || "Доп", value: f.amount != null ? f.amount : "" });
+      });
+    } else if (it.extraName || it.extraAmount != null) {
+      entries.push({ name: it.extraName || "Доп", value: it.extraAmount != null ? it.extraAmount : "" });
+    }
+    return entries;
+  }
+
+  function getReportUsdtRate(it) {
+    var entries = getReportExtraEntries(it);
+    for (var i = 0; i < entries.length; i++) {
+      if (!isReportUsdtRateFieldName(entries[i].name)) continue;
+      var rate = parseReportNumber(entries[i].value);
+      if (rate > 0) return rate;
+    }
+    return 0;
+  }
+
   function buildReportDetailHtml(it) {
     var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
     var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "sergeyMarina"];
     var parts = [];
     function hasReportValue(value) {
       return value != null && value !== "" && (typeof value !== "number" || value !== 0);
-    }
-    function normalizeDetailName(name) {
-      return String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
     }
     function buildDetailBlock(className, entries) {
       if (!entries.length) return "";
@@ -1590,36 +1625,50 @@ function initAdminReportModal() {
     }
     var expenseEntries = [];
     var otherEntries = [];
+    var calcEntries = [];
     var extraRakebackEntries = [];
     var anyaEntries = [];
     function pushEntry(list, label, value, roundValue) {
       if (!hasReportValue(value)) return;
       list.push({ label: label, value: roundValue ? formatReportRubleNumber(value) : String(value) });
     }
+    if (hasReportValue(it.botExchipDep) || hasReportValue(it.botExchipCashout)) {
+      var exchipDep = parseReportNumber(it.botExchipDep);
+      var exchipCashout = parseReportNumber(it.botExchipCashout);
+      calcEntries.push({
+        label: "Итого Эксчип",
+        value: formatReportRubleNumber(exchipDep) + " - " + formatReportRubleNumber(exchipCashout) + " = " + formatReportRubleNumber(exchipDep - exchipCashout),
+      });
+    }
+    if (hasReportValue(it.botCryptoDep)) {
+      var botCrypto = parseReportNumber(it.botCryptoDep);
+      var usdtRate = getReportUsdtRate(it);
+      if (usdtRate > 0) {
+        var botCryptoUsd = botCrypto / usdtRate;
+        calcEntries.push({
+          label: "Итого бот крипта в долларах",
+          value: formatReportRubleNumber(botCrypto) + " / " + formatReportNumber(usdtRate) + " = " + formatReportNumber(botCryptoUsd) + " - 4% = " + formatReportNumber(botCryptoUsd * 0.96),
+        });
+      } else {
+        calcEntries.push({
+          label: "Итого бот крипта в долларах",
+          value: formatReportRubleNumber(botCrypto) + " / курс USDT не указан",
+        });
+      }
+    }
     pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
     pushEntry(expenseEntries, labels.rakeback, it.rakeback, true);
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
     pushEntry(otherEntries, labels.transfers, it.transfers, false);
     pushEntry(otherEntries, labels.ret, it.ret, false);
-    if (it.extraFields && it.extraFields.length) {
-      it.extraFields.forEach(function (f) {
-        if (f.name || f.amount != null && f.amount !== "") {
-          var extraName = f.name || "Доп";
-          var normalizedName = normalizeDetailName(extraName);
-          var entry = { label: extraName, value: String(f.amount != null ? f.amount : "") };
-          if (normalizedName === "рейкбек") extraRakebackEntries.push(entry);
-          else if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
-          else otherEntries.push(entry);
-        }
-      });
-    } else if (it.extraName || it.extraAmount != null) {
-      var legacyExtraName = it.extraName || "Доп";
-      var normalizedLegacyName = normalizeDetailName(legacyExtraName);
-      var legacyEntry = { label: legacyExtraName, value: String(it.extraAmount != null ? it.extraAmount : "") };
-      if (normalizedLegacyName === "рейкбек") extraRakebackEntries.push(legacyEntry);
-      else if (normalizedLegacyName === "аня зп" || normalizedLegacyName === "аня зарплата") anyaEntries.push(legacyEntry);
-      else otherEntries.push(legacyEntry);
-    }
+    getReportExtraEntries(it).forEach(function (extra) {
+      var normalizedName = normalizeReportDetailName(extra.name);
+      var entry = { label: extra.name, value: String(extra.value) };
+      if (normalizedName === "рейкбек") extraRakebackEntries.push(entry);
+      else if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
+      else otherEntries.push(entry);
+    });
+    parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(extraRakebackEntries, anyaEntries)));
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--other", otherEntries));
     // Раньше здесь была строка с общим итогом по смене ("Итого, ₽").
@@ -1727,7 +1776,9 @@ function initAdminReportModal() {
             mergeReportExtrasIntoMap(extraMap, r);
           });
           weekTotals.extraFields = Object.keys(extraMap).sort().map(function (name) {
-            return { name: name, amount: extraMap[name] };
+            var value = extraMap[name];
+            if (value && value.__avg) value = value.count ? value.sum / value.count : 0;
+            return { name: name, amount: value };
           }).filter(function (f) {
             return f.amount !== 0 && !isNaN(f.amount);
           });
