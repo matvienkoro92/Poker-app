@@ -736,8 +736,12 @@ function initAdminReportModal() {
 
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
-    rakebackBody.appendChild(createRakebackRow({ kind: "base", room: activeRakebackRoom }));
+    if (rakebackSearchInput && rakebackSearchInput.value) rakebackSearchInput.value = "";
+    rakebackDraftMutationSeq += 1;
+    var row = createRakebackRow({ kind: "base", room: activeRakebackRoom });
+    rakebackBody.appendChild(row);
     syncRakebackTable();
+    focusRakebackRow(row);
   }
 
   function addRakebackAddonRow(baseRow) {
@@ -947,8 +951,26 @@ function initAdminReportModal() {
   }
 
   function saveRakebackDraftRows() {
+    rakebackDraftMutationSeq += 1;
     if (rakebackDraftSaveTimer) clearTimeout(rakebackDraftSaveTimer);
     rakebackDraftSaveTimer = setTimeout(saveRakebackDraftRowsNow, 450);
+  }
+
+  function focusRakebackRow(row) {
+    if (!row) return;
+    var focusTarget = row.querySelector("[data-rakeback-player-id]:not([readonly]),[data-rakeback-rake]:not([readonly]),[data-rakeback-percent]:not([readonly])");
+    setTimeout(function () {
+      try {
+        if (typeof row.scrollIntoView === "function") row.scrollIntoView({ block: "nearest", inline: "nearest" });
+      } catch (eScroll) {}
+      if (focusTarget && typeof focusTarget.focus === "function") {
+        try {
+          focusTarget.focus({ preventScroll: true });
+        } catch (eFocus) {
+          focusTarget.focus();
+        }
+      }
+    }, 0);
   }
 
   function clearRakebackDraftRows() {
