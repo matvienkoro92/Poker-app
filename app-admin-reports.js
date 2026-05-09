@@ -1248,7 +1248,8 @@ function initAdminReportModal() {
     keys.forEach(function (k) {
       var v = it[k];
       if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) {
-        parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(labels[k]) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(v) + "</span></div>");
+        var displayValue = k === "rakeback" ? formatReportRubleNumber(v) : v;
+        parts.push("<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">" + escapeReportHtml(labels[k]) + "</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(displayValue) + "</span></div>");
       }
     });
     if (it.extraFields && it.extraFields.length) {
@@ -1602,7 +1603,7 @@ function initAdminReportModal() {
           lines.push("Итого за неделю " + label);
           weekKeys.forEach(function (k) {
             var v = totals[k];
-            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + String(v));
+            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + (k === "rakeback" ? formatReportRubleNumber(v) : String(v)));
           });
           if (totals.extraFields && totals.extraFields.length) {
             totals.extraFields.forEach(function (f) {
