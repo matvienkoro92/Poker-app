@@ -650,6 +650,9 @@ function initAdminReportModal() {
   function beginRakebackRowDrag(row, pointerId, clientY) {
     if (!row || !rakebackBody || !canEditRakebackRow(row)) return;
     if (rakebackSortSelect && rakebackSortSelect.value !== "standard") setRakebackSortMode("standard", true);
+    if (document.activeElement && row.contains(document.activeElement) && typeof document.activeElement.blur === "function") {
+      try { document.activeElement.blur(); } catch (errBlur) {}
+    }
     var groupRows = getRakebackGroupRows(row);
     rakebackDragState = {
       active: true,
@@ -2028,13 +2031,15 @@ function initAdminReportModal() {
       var pointerId = e.pointerId;
       var timer = setTimeout(function () {
         if (!rakebackDragState || rakebackDragState.pointerId !== pointerId || rakebackDragState.active) return;
-        beginRakebackRowDrag(row, pointerId, startY);
+        beginRakebackRowDrag(row, pointerId, rakebackDragState.latestY || startY);
       }, 420);
       rakebackDragState = {
         active: false,
         pointerId: pointerId,
         startX: startX,
         startY: startY,
+        latestX: startX,
+        latestY: startY,
         timer: timer,
       };
       if (row.setPointerCapture) {
@@ -2044,9 +2049,11 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("pointermove", function (e) {
       if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
       if (!rakebackDragState.active) {
+        rakebackDragState.latestX = e.clientX;
+        rakebackDragState.latestY = e.clientY;
         var dx = Math.abs(e.clientX - rakebackDragState.startX);
         var dy = Math.abs(e.clientY - rakebackDragState.startY);
-        if (dx > 8 || dy > 8) cancelPendingRakebackDrag();
+        if (dx > 26 || dy > 26) cancelPendingRakebackDrag();
         return;
       }
       e.preventDefault();
@@ -2061,6 +2068,9 @@ function initAdminReportModal() {
       if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
       if (rakebackDragState.active) finishRakebackRowDrag(false);
       else cancelPendingRakebackDrag();
+    });
+    rakebackBody.addEventListener("contextmenu", function (e) {
+      if (rakebackDragState && e.target && e.target.closest && e.target.closest("[data-rakeback-row]")) e.preventDefault();
     });
     rakebackBody.addEventListener("input", function (e) {
       ensureRakebackEntryAddedAt(e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null, false);
