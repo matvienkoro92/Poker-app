@@ -24,6 +24,10 @@ function initAdminReportModal() {
   var rakebackTotalsList = document.getElementById("adminReportRakebackTotalsList");
   var rakebackTotalsClose = document.getElementById("adminReportRakebackTotalsClose");
   var rakebackTotalsBackdrop = document.getElementById("adminReportRakebackTotalsBackdrop");
+  var calculationsRoot = document.getElementById("adminReportCalculations");
+  var calculationsSaveBtn = document.getElementById("adminReportCalcSaveBtn");
+  var calculationsEditBtn = document.getElementById("adminReportCalcEditBtn");
+  var calculationsSaveStatusEl = document.getElementById("adminReportCalcSaveStatus");
   var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
@@ -63,6 +67,8 @@ function initAdminReportModal() {
   var calculationWeekTotals = {};
   var figuresRakeTotal = 0;
   var figuresPercentTotal = 0;
+  var calculationsSavedLocked = false;
+  var calculationsStatusTimer = null;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   if (!btn || !modal) return;
@@ -1678,6 +1684,11 @@ function initAdminReportModal() {
     };
   }
 
+  function getCalculationDraftKey() {
+    var week = getCalculationWeekMeta();
+    return "poker_admin_report_calculations_draft:" + String(week.start || "current");
+  }
+
   function getRakebackDraftKey() {
     return "poker_admin_report_rakeback_draft:shared";
   }
@@ -2030,6 +2041,7 @@ function initAdminReportModal() {
 
   function addFiguresExtraField() {
     if (!figuresExtrasEl) return;
+    if (calculationsSavedLocked) return;
     var template = figuresExtrasEl.querySelector(".admin-report-calculations__field--extra");
     if (!template) return;
     var clone = template.cloneNode(true);
@@ -2039,6 +2051,138 @@ function initAdminReportModal() {
     var nameInput = clone.querySelector("[data-admin-report-figures-extra-name]");
     if (nameInput && typeof nameInput.focus === "function") nameInput.focus();
     updateFiguresTotals();
+  }
+
+  function setCalculationsStatus(text) {
+    if (!calculationsSaveStatusEl) return;
+    calculationsSaveStatusEl.textContent = text || "";
+    if (calculationsStatusTimer) clearTimeout(calculationsStatusTimer);
+    if (text) {
+      calculationsStatusTimer = setTimeout(function () {
+        if (calculationsSaveStatusEl) calculationsSaveStatusEl.textContent = "";
+      }, 1800);
+    }
+  }
+
+  function setCalculationsLocked(locked) {
+    calculationsSavedLocked = !!locked;
+    if (calculationsRoot) calculationsRoot.classList.toggle("admin-report-calculations--locked", calculationsSavedLocked);
+    if (calculationsRoot) {
+      calculationsRoot.querySelectorAll("input").forEach(function (input) {
+        input.readOnly = calculationsSavedLocked;
+      });
+    }
+    if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = calculationsSavedLocked;
+    if (calculationsSaveBtn) calculationsSaveBtn.hidden = calculationsSavedLocked;
+    if (calculationsEditBtn) calculationsEditBtn.hidden = !calculationsSavedLocked;
+  }
+
+  function collectCalculationsDraft() {
+    function valuesFrom(list) {
+      return Array.prototype.slice.call(list || []).map(function (input) { return input ? input.value : ""; });
+    }
+    var extras = [];
+    if (figuresExtrasEl) {
+      figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra").forEach(function (row) {
+        var name = row.querySelector("[data-admin-report-figures-extra-name]");
+        var amount = row.querySelector("[data-admin-report-figures-extra-amount]");
+        extras.push({ name: name ? name.value : "", amount: amount ? amount.value : "" });
+      });
+    }
+    return {
+      cash: valuesFrom(calculationsCashInputs),
+      rake: valuesFrom(figuresRakeInputs),
+      romanPaid: figuresRomanPaidInput ? figuresRomanPaidInput.value : "",
+      winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
+      agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
+      extras: extras,
+    };
+  }
+
+  function ensureFiguresExtraRows(count) {
+    if (!figuresExtrasEl) return;
+    var rows = Array.prototype.slice.call(figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra"));
+    if (!rows.length) return;
+    var target = Math.max(1, count || 1);
+    while (rows.length < target) {
+      var clone = rows[0].cloneNode(true);
+      clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+      figuresExtrasEl.appendChild(clone);
+      rows.push(clone);
+      bindFiguresExtraInputs(clone);
+    }
+    while (rows.length > target) {
+      var row = rows.pop();
+      if (row && row.parentNode) row.parentNode.removeChild(row);
+    }
+  }
+
+  function applyCalculationsDraft(draft) {
+    if (!draft) return false;
+    var cash = Array.isArray(draft.cash) ? draft.cash : [];
+    if (calculationsCashInputs && calculationsCashInputs.length) {
+      calculationsCashInputs.forEach(function (input, index) {
+        if (input) input.value = cash[index] != null ? cash[index] : "";
+      });
+    }
+    var rake = Array.isArray(draft.rake) ? draft.rake : [];
+    if (figuresRakeInputs && figuresRakeInputs.length) {
+      figuresRakeInputs.forEach(function (input, index) {
+        if (input) input.value = rake[index] != null ? rake[index] : "";
+      });
+    }
+    if (figuresRomanPaidInput) figuresRomanPaidInput.value = draft.romanPaid != null ? draft.romanPaid : "";
+    if (figuresWinLossInput) figuresWinLossInput.value = draft.winLoss != null ? draft.winLoss : "";
+    if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
+    var extras = Array.isArray(draft.extras) ? draft.extras : [];
+    ensureFiguresExtraRows(extras.length || 1);
+    if (figuresExtrasEl) {
+      figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra").forEach(function (row, index) {
+        var extra = extras[index] || {};
+        var name = row.querySelector("[data-admin-report-figures-extra-name]");
+        var amount = row.querySelector("[data-admin-report-figures-extra-amount]");
+        if (name) name.value = extra.name != null ? extra.name : "";
+        if (amount) amount.value = extra.amount != null ? extra.amount : "";
+      });
+    }
+    updateCalculationCashTotal();
+    updateFiguresTotals();
+    setCalculationsLocked(true);
+    return true;
+  }
+
+  function loadCalculationsDraft() {
+    var raw = null;
+    try {
+      raw = window.localStorage ? window.localStorage.getItem(getCalculationDraftKey()) : null;
+    } catch (e) {}
+    if (!raw) {
+      setCalculationsLocked(false);
+      return false;
+    }
+    try {
+      return applyCalculationsDraft(JSON.parse(raw));
+    } catch (eParse) {
+      setCalculationsLocked(false);
+      return false;
+    }
+  }
+
+  function saveCalculationsDraft() {
+    try {
+      if (window.localStorage) {
+        window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(collectCalculationsDraft()));
+      }
+      setCalculationsLocked(true);
+      setCalculationsStatus("Сохранено");
+    } catch (e) {
+      setCalculationsStatus("Не удалось сохранить");
+    }
+  }
+
+  function editCalculationsDraft() {
+    setCalculationsLocked(false);
+    setCalculationsStatus("Редактирование");
   }
 
   function getReportExtraEntries(it) {
@@ -2631,6 +2775,7 @@ function initAdminReportModal() {
     var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = info.label;
     applySavedRakebackSortMode();
+    loadCalculationsDraft();
     updateCalculationCashTotal();
     updateFiguresTotals();
     setActiveTab("form");
@@ -2682,6 +2827,8 @@ function initAdminReportModal() {
   });
   bindFiguresExtraInputs(figuresExtrasEl);
   if (figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
+  if (calculationsSaveBtn) calculationsSaveBtn.addEventListener("click", saveCalculationsDraft);
+  if (calculationsEditBtn) calculationsEditBtn.addEventListener("click", editCalculationsDraft);
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
