@@ -33,6 +33,7 @@ function initAdminReportModal() {
   var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
   var calculationsAnyaSalaryEl = document.getElementById("adminReportCalcAnyaSalary");
+  var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
@@ -45,6 +46,8 @@ function initAdminReportModal() {
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDragState = null;
+  var calculationCashTotal = 0;
+  var calculationWeekTotals = {};
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   if (!btn || !modal) return;
@@ -1878,24 +1881,41 @@ function initAdminReportModal() {
   }
 
   function updateCalculationCashTotal() {
-    if (!calculationsCashTotalEl) return;
     var total = 0;
     if (calculationsCashInputs && calculationsCashInputs.length) {
       calculationsCashInputs.forEach(function (input) {
         total += parseReportNumber(input ? input.value : "");
       });
     }
-    calculationsCashTotalEl.textContent = formatReportRubleNumber(total);
+    calculationCashTotal = total;
+    if (calculationsCashTotalEl) calculationsCashTotalEl.textContent = formatReportRubleNumber(total);
+    updateCalculationGrandTotal();
+  }
+
+  function updateCalculationGrandTotal() {
+    if (!calculationsGrandTotalEl) return;
+    var totals = calculationWeekTotals || {};
+    var grand =
+      parseReportNumber(calculationCashTotal) +
+      parseReportNumber(totals.deposit) +
+      parseReportNumber(totals.bonuses) +
+      parseReportNumber(totals.rakeback) -
+      parseReportNumber(totals.cashout) -
+      parseReportNumber(totals.botExchipCashout) -
+      parseReportNumber(totals.anyaSalary);
+    calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
   function setCalculationTotalsText(totals) {
     totals = totals || {};
+    calculationWeekTotals = totals;
     if (calculationsDepositEl) calculationsDepositEl.textContent = formatReportRubleNumber(totals.deposit);
     if (calculationsBonusesEl) calculationsBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
     if (calculationsRakebackEl) calculationsRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
     if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportRubleNumber(totals.cashout);
     if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportRubleNumber(totals.botExchipCashout);
     if (calculationsAnyaSalaryEl) calculationsAnyaSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
+    updateCalculationGrandTotal();
   }
 
   function sumCalculationReports(items, week) {

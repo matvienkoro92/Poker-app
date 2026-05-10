@@ -347,57 +347,64 @@
           </div>
           <div class="admin-report-panel" data-admin-report-panel="calculations" hidden>
             <div class="admin-report-calculations" id="adminReportCalculations">
-              <section class="admin-report-calculations__column">
-                <h3 class="admin-report-calculations__title">Сколько должно получиться в кассе</h3>
-                <label class="admin-report-calculations__field">
-                  <span>Касса в Покер21</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
-                </label>
-                <label class="admin-report-calculations__field">
-                  <span>Касса в Хпокер</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
-                </label>
-                <label class="admin-report-calculations__field">
-                  <span>Касса в Супрема</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
-                </label>
-                <label class="admin-report-calculations__field">
-                  <span>Касса в PPpoker</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
-                </label>
-                <div class="admin-report-calculations__field admin-report-calculations__field--total">
-                  <span>Итого в кассе</span>
-                  <output id="adminReportCalcCashTotal">0</output>
+              <div class="admin-report-calculations__side admin-report-calculations__side--left">
+                <section class="admin-report-calculations__column">
+                  <h3 class="admin-report-calculations__title">Сколько должно получиться в кассе</h3>
+                  <label class="admin-report-calculations__field">
+                    <span>Касса в Покер21</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
+                  </label>
+                  <label class="admin-report-calculations__field">
+                    <span>Касса в Хпокер</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
+                  </label>
+                  <label class="admin-report-calculations__field">
+                    <span>Касса в Супрема</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
+                  </label>
+                  <label class="admin-report-calculations__field">
+                    <span>Касса в PPpoker</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
+                  </label>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--total">
+                    <span>Итого в кассе</span>
+                    <output id="adminReportCalcCashTotal">0</output>
+                  </div>
+                </section>
+                <section class="admin-report-calculations__column">
+                  <h3 class="admin-report-calculations__title">Текущая неделя</h3>
+                  <p class="admin-report-calculations__week" id="adminReportCalcWeekLabel"></p>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                    <span>Депозиты за неделю</span>
+                    <output id="adminReportCalcDeposit">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                    <span>Бонусы</span>
+                    <output id="adminReportCalcBonuses">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                    <span>Рейкбек</span>
+                    <output id="adminReportCalcRakeback">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                    <span>Выводов игроками</span>
+                    <output id="adminReportCalcCashout">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                    <span>Выводов Эксчип бот</span>
+                    <output id="adminReportCalcBotExchipCashout">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field">
+                    <span>Аня ЗП</span>
+                    <output id="adminReportCalcAnyaSalary">0</output>
+                  </div>
+                </section>
+                <div class="admin-report-calculations__field admin-report-calculations__field--grand">
+                  <span>Полное итого</span>
+                  <output id="adminReportCalcGrandTotal">0</output>
                 </div>
-              </section>
-              <section class="admin-report-calculations__column">
-                <h3 class="admin-report-calculations__title">Текущая неделя</h3>
-                <p class="admin-report-calculations__week" id="adminReportCalcWeekLabel"></p>
-                <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                  <span>Депозиты за неделю</span>
-                  <output id="adminReportCalcDeposit">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                  <span>Бонусы</span>
-                  <output id="adminReportCalcBonuses">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                  <span>Рейкбек</span>
-                  <output id="adminReportCalcRakeback">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                  <span>Выводов игроками</span>
-                  <output id="adminReportCalcCashout">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                  <span>Выводов Эксчип бот</span>
-                  <output id="adminReportCalcBotExchipCashout">0</output>
-                </div>
-                <div class="admin-report-calculations__field">
-                  <span>Аня ЗП</span>
-                  <output id="adminReportCalcAnyaSalary">0</output>
-                </div>
-              </section>
+              </div>
+              <div class="admin-report-calculations__side admin-report-calculations__side--right"></div>
             </div>
           </div>
         </div>
