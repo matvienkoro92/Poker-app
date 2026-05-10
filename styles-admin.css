@@ -537,48 +537,49 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 .admin-report-calculations__column {
   min-width: 0;
-  padding: 14px;
+  padding: 10px;
   border: 1px solid rgba(202, 161, 84, 0.24);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
 }
 .admin-report-calculations__title {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   color: #ffe7b0;
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1.2;
 }
 .admin-report-calculations__week {
-  min-height: 20px;
-  margin: -4px 0 10px;
+  min-height: 18px;
+  margin: -2px 0 8px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 .admin-report-calculations__field {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(112px, 0.45fr);
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 0.35fr);
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  margin-bottom: 8px;
-  padding: 8px 10px;
+  gap: 8px;
+  min-height: 36px;
+  margin-bottom: 6px;
+  padding: 6px 8px;
   border: 1px solid rgba(202, 161, 84, 0.18);
   border-radius: 8px;
   background: rgba(5, 7, 13, 0.62);
   color: var(--text);
+  font-size: 13px;
   font-weight: 800;
 }
 .admin-report-calculations__field:last-child {
   margin-bottom: 0;
 }
 .admin-report-calculations__field--total {
-  margin-top: 12px;
+  margin-top: 8px;
   border-color: rgba(246, 211, 145, 0.45);
   background: rgba(246, 211, 145, 0.1);
   color: #ffe7b0;
@@ -595,20 +596,20 @@ body.admin-report-modal-open .bottom-nav {
   min-width: 0;
   text-align: right;
   color: #ffe7b0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 900;
   overflow-wrap: anywhere;
 }
 .admin-report-calculations__input {
   width: 100%;
   min-width: 0;
-  height: 34px;
+  height: 30px;
   box-sizing: border-box;
   border: 1px solid rgba(202, 161, 84, 0.34);
   border-radius: 8px;
   background: #05070d;
   color: #ffe7b0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 900;
   text-align: right;
 }
@@ -623,19 +624,18 @@ body.admin-report-modal-open .bottom-nav {
   margin: 0;
 }
 @media (max-width: 420px) {
-  .admin-report-calculations {
-    grid-template-columns: 1fr;
-  }
   .admin-report-calculations__column {
-    padding: 10px;
+    padding: 8px;
   }
   .admin-report-calculations__field {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) minmax(82px, 0.32fr);
+    font-size: 12px;
   }
-  .admin-report-calculations__field output,
+  .admin-report-calculations__field output {
+    font-size: 15px;
+  }
   .admin-report-calculations__input {
-    text-align: left;
+    font-size: 14px;
   }
 }
 .admin-report-add-extra-btn {
