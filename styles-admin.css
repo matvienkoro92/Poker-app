@@ -1178,6 +1178,17 @@ button.admin-report-rakeback-summary__row:focus-visible {
 #adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td:nth-child(-n+5) {
   background: var(--rakeback-row-bg, #101016);
 }
+#adminReportModal .admin-report-rakeback-table td[data-rakeback-cell-selected],
+#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td[data-rakeback-cell-selected] {
+  position: relative;
+  background: rgba(246, 211, 145, 0.22);
+  box-shadow: inset 0 0 0 2px rgba(255, 231, 176, 0.78), inset 0 0 18px rgba(246, 211, 145, 0.12);
+}
+#adminReportModal .admin-report-rakeback-table td[data-rakeback-cell-copied],
+#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td[data-rakeback-cell-copied] {
+  background: rgba(66, 200, 132, 0.24);
+  box-shadow: inset 0 0 0 2px rgba(102, 255, 178, 0.82), inset 0 0 18px rgba(66, 200, 132, 0.14);
+}
 .admin-report-rakeback-row--dragging > td {
   position: relative;
   z-index: 3;

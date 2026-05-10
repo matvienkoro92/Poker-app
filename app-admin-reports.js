@@ -498,6 +498,18 @@ function initAdminReportModal() {
     });
   }
 
+  function markRakebackCell(cell, copied) {
+    if (!rakebackBody || !cell) return;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-cell-selected],[data-rakeback-cell-copied]")).forEach(function (td) {
+      if (td === cell) return;
+      td.removeAttribute("data-rakeback-cell-selected");
+      td.removeAttribute("data-rakeback-cell-copied");
+    });
+    cell.setAttribute("data-rakeback-cell-selected", "1");
+    if (copied) cell.setAttribute("data-rakeback-cell-copied", "1");
+    else cell.removeAttribute("data-rakeback-cell-copied");
+  }
+
   function applyRakebackRowColor(row, color) {
     if (!row) return;
     color = normalizeRakebackRowColor(color);
@@ -3173,16 +3185,24 @@ function initAdminReportModal() {
       syncRakebackTable();
       saveRakebackDraftRows();
     });
+    rakebackBody.addEventListener("focusin", function (e) {
+      var focusCell = e.target && e.target.closest ? e.target.closest("td") : null;
+      if (focusCell && focusCell.closest("[data-rakeback-row]")) markRakebackCell(focusCell, false);
+    });
     rakebackBody.addEventListener("click", function (e) {
       var colorControl = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
       if (!colorControl) closeRakebackColorMenus();
+      var clickedCell = e.target && e.target.closest ? e.target.closest("td") : null;
+      if (clickedCell && clickedCell.closest("[data-rakeback-row]") && !colorControl) markRakebackCell(clickedCell, false);
       var copyIdInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
       if (copyIdInput) {
         var copyRow = copyIdInput.closest("[data-rakeback-row]");
+        var copyCell = copyIdInput.closest("td");
         var copyId = copyIdInput.value ? String(copyIdInput.value).trim() : "";
         if (copyRow && copyRow.getAttribute("data-rakeback-saved") === "1" && copyId) {
           e.preventDefault();
           copyReportText(copyId).then(function () {
+            markRakebackCell(copyCell, true);
             showRakebackStatusBriefly("Скопировано");
           }).catch(function () {
             showRakebackAlert("Не удалось скопировать айди.");
