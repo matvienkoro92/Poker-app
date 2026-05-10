@@ -70,6 +70,7 @@ function initAdminReportModal() {
   var rakebackDraftMutationSeq = 0;
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
+  var rakebackDraftNeedsMigration = false;
   var rakebackDragState = null;
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
@@ -577,6 +578,12 @@ function initAdminReportModal() {
     return ids.indexOf(playerId) !== -1 ? RAKEBACK_TEMPLATE_CREATED_AT : NaN;
   }
 
+  function isRakebackTemplateEntryStamp(room, playerId, stamp) {
+    var templateStamp = getRakebackTemplateCreatedAt(room, playerId);
+    stamp = Number(stamp);
+    return Number.isFinite(templateStamp) && Number.isFinite(stamp) && Math.abs(stamp - templateStamp) < 1000;
+  }
+
   function getRakebackTemplateKey(room, playerId) {
     var normalizedRoom = normalizeRakebackRoom(room || "P21");
     var id = String(playerId || "").trim();
@@ -626,8 +633,10 @@ function initAdminReportModal() {
     var groupId = data.groupId || nextRakebackGroupId();
     var templateCreatedAt = getRakebackTemplateCreatedAt(data.room || "P21", data.playerId || data.id || "");
     var createdAt = getFirstRakebackTimeValue([data.createdAt, data.addedAt, data.created], Date.now());
+    var createdAtIsTemplate = isRakebackTemplateEntryStamp(data.room || "P21", data.playerId || data.id || "", createdAt);
     if (Number.isFinite(templateCreatedAt) && isRakebackTemplateLikeData(data)) {
       createdAt = Math.min(createdAt, templateCreatedAt);
+      createdAtIsTemplate = true;
     }
     var standardAt = getFirstRakebackTimeValue([data.standardAt, data.orderAt, data.sortAt], createdAt);
     var hasInitialEntryData = data.saved || data.accounted || data.reportedAt || data.reportId ||
@@ -638,14 +647,15 @@ function initAdminReportModal() {
     if (Number.isFinite(reportedAt) && (!Number.isFinite(entryAddedAt) || reportedAt < entryAddedAt)) {
       entryAddedAt = reportedAt;
     }
-    if (hasInitialEntryData && Number.isFinite(createdAt) && (!Number.isFinite(entryAddedAt) || createdAt < entryAddedAt)) {
+    if (hasInitialEntryData && !data.accounted && !data.reportedAt && !data.reportId && isRakebackTemplateEntryStamp(data.room || "P21", data.playerId || data.id || "", entryAddedAt)) {
+      entryAddedAt = Date.now();
+      rakebackDraftNeedsMigration = true;
+    }
+    if (hasInitialEntryData && !createdAtIsTemplate && Number.isFinite(createdAt) && (!Number.isFinite(entryAddedAt) || createdAt < entryAddedAt)) {
       entryAddedAt = createdAt;
     }
-    if (!Number.isFinite(entryAddedAt) && Number.isFinite(templateCreatedAt) && isRakebackTemplateLikeData(data)) {
-      entryAddedAt = templateCreatedAt;
-    }
     if (!Number.isFinite(entryAddedAt) && hasInitialEntryData) {
-      entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.createdAt, data.created, data.reportedAt], createdAt);
+      entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.reportedAt], createdAtIsTemplate ? Date.now() : createdAt);
     }
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
@@ -805,9 +815,21 @@ function initAdminReportModal() {
     });
   }
 
+  function replaceRakebackGroupEntryAddedAt(row, stamp) {
+    if (!row || !Number.isFinite(stamp)) return;
+    getRakebackGroupRows(row).forEach(function (groupRow) {
+      groupRow.setAttribute("data-rakeback-entry-added-at", String(stamp));
+    });
+  }
+
   function ensureRakebackEntryAddedAt(row, force) {
     if (!row) return "";
     var raw = parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || "");
+    if (Number.isFinite(raw) && hasRakebackRowEntryTimeData(row) && !isRakebackRowAccounted(row) && isRakebackTemplateEntryStamp(getRakebackRowRoom(row), getRakebackRowPlayerId(row), raw)) {
+      raw = Date.now();
+      replaceRakebackGroupEntryAddedAt(row, raw);
+      return raw;
+    }
     if (Number.isFinite(raw)) return raw;
     if (!force && !hasRakebackRowEntryTimeData(row)) return "";
     var stamp = Date.now();
@@ -844,7 +866,7 @@ function initAdminReportModal() {
   function getRakebackMoscowDayKey(ts) {
     ts = Number(ts);
     if (!Number.isFinite(ts)) ts = Date.now();
-    var shifted = new Date(ts - 16 * 60 * 60 * 1000);
+    var shifted = new Date(ts - 13 * 60 * 60 * 1000);
     return shifted.getUTCFullYear() + "-" + String(shifted.getUTCMonth() + 1).padStart(2, "0") + "-" + String(shifted.getUTCDate()).padStart(2, "0");
   }
 
@@ -1203,7 +1225,6 @@ function initAdminReportModal() {
         room: normalizedRoom,
         playerId: playerId,
         createdAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
-        entryAddedAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
       }));
       existingIds[playerId] = true;
       addedTemplates = true;
@@ -1509,6 +1530,7 @@ function initAdminReportModal() {
 
   function fillRakebackTable(rows, legacyRakeback) {
     if (!rakebackBody) return;
+    rakebackDraftNeedsMigration = false;
     rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
@@ -1541,6 +1563,7 @@ function initAdminReportModal() {
       if (row.saved) setRakebackRowSaved(tr, true);
     });
     syncRakebackTable();
+    if (rakebackDraftNeedsMigration && !editingReportId) saveRakebackDraftRowsNow(true);
   }
 
   function addRakebackBaseRow() {
