@@ -1263,6 +1263,12 @@ function initAdminReportModal() {
     return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
   }
 
+  function isCurrentRakebackReportOwner(ownerId) {
+    var currentOwnerId = getCurrentRakebackOwnerId();
+    ownerId = String(ownerId || "").trim();
+    return !ownerId || !currentOwnerId || ownerId === currentOwnerId;
+  }
+
   function isRakebackRowAccounted(row) {
     return !!(row && row.getAttribute("data-rakeback-accounted") === "1");
   }
@@ -1310,7 +1316,7 @@ function initAdminReportModal() {
       var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
-      if (currentOwnerOnly && !isCurrentRakebackOwner(ownerId)) return null;
+      if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
       var color = normalizeRakebackRowColor(row.getAttribute("data-rakeback-row-color") || "");
       return {
         groupId: row.getAttribute("data-rakeback-group") || "",
@@ -1363,7 +1369,7 @@ function initAdminReportModal() {
     var reportedAt = Number.isFinite(parsedReportedAt) ? new Date(parsedReportedAt).toISOString() : new Date().toISOString();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
-      if (!isCurrentRakebackOwner(ownerId)) return;
+      if (!isCurrentRakebackReportOwner(ownerId)) return;
       if (!isRakebackRowFilled(row)) return;
       if (isRakebackRowAccounted(row)) return;
       var room = getRakebackRowRoom(row);
@@ -1932,7 +1938,7 @@ function initAdminReportModal() {
       parseReportNumber(totals.cashout) -
       parseReportNumber(totals.botExchipCashout);
     if (calculationsWinLossTotalEl) calculationsWinLossTotalEl.textContent = formatReportRubleNumber(roomWinLossTotal);
-    if (calculationsRakeTotalEl) calculationsRakeTotalEl.textContent = formatReportRubleNumber(-figuresRakeTotal);
+    if (calculationsRakeTotalEl) calculationsRakeTotalEl.textContent = formatReportNegativeDisplay(figuresRakeTotal);
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
@@ -1943,6 +1949,12 @@ function initAdminReportModal() {
       total += parseReportNumber(input ? input.value : "");
     });
     return total;
+  }
+
+  function formatReportNegativeDisplay(value) {
+    var n = parseReportNumber(value);
+    if (!n) return formatReportRubleNumber(0);
+    return formatReportRubleNumber(-Math.abs(n));
   }
 
   function updateFiguresTotals() {
@@ -1963,10 +1975,10 @@ function initAdminReportModal() {
     if (figuresRakeTotalEl) figuresRakeTotalEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresRakeTotalMirrorEl) figuresRakeTotalMirrorEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
-    if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportRubleNumber(figuresPercentTotal);
-    if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
-    if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
-    if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
+    if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportNegativeDisplay(figuresPercentTotal);
+    if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
+    if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
+    if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
     if (figuresGrandTotalEl) {
       var grand =
         figuresRakeTotal +
@@ -1989,8 +2001,8 @@ function initAdminReportModal() {
     if (calculationsDepositEl) calculationsDepositEl.textContent = formatReportRubleNumber(totals.deposit);
     if (calculationsBonusesEl) calculationsBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
     if (calculationsRakebackEl) calculationsRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
-    if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportRubleNumber(totals.cashout);
-    if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportRubleNumber(totals.botExchipCashout);
+    if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportNegativeDisplay(totals.cashout);
+    if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportNegativeDisplay(totals.botExchipCashout);
     updateCalculationGrandTotal();
     updateFiguresTotals();
   }
@@ -2648,7 +2660,7 @@ function initAdminReportModal() {
         });
         function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
           var meta = weekMetaFromStart(weekStartMs);
-          var totals = sumReportsInWindow(items, meta.start, meta.end);
+          var totals = sumReportsInWindow(list || [], meta.start, meta.end);
           var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
           var totalDetailHtml = buildReportDetailHtml(totals);
           return {
@@ -2683,18 +2695,11 @@ function initAdminReportModal() {
         html.push("</div>");
 
         if (archiveWeekStarts.length > 0) {
-          var archiveHtml = [];
           html.push(
-            '<details class="admin-report-sent-archive">' +
+            '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
               '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
               '<div class="admin-report-sent-archive__inner">' +
-              (function () {
-                archiveWeekStarts.forEach(function (ws) {
-                  var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-", false);
-                  archiveHtml.push(block.html);
-                });
-                return archiveHtml.join("");
-              })() +
+              '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
               "</div></details>"
           );
         }
@@ -2706,13 +2711,6 @@ function initAdminReportModal() {
         items.forEach(function (r) { reportById[r.id] = r; });
         var weekTotalsById = {};
         weekTotalsById[currentBlock.weekId] = { totals: currentBlock.totals, label: currentBlock.label };
-        archiveWeekStarts.forEach(function (ws) {
-          var meta = weekMetaFromStart(ws);
-          weekTotalsById["ar-week-" + meta.key] = {
-            totals: sumReportsInWindow(items, meta.start, meta.end),
-            label: meta.label,
-          };
-        });
         var weekLabels = {
           deposit: "Депозит",
           cashout: "Выводы",
@@ -2769,89 +2767,125 @@ function initAdminReportModal() {
           return lines.join("\n");
         }
 
-        sentList.querySelectorAll(".admin-report-week-copy-btn").forEach(function (btn) {
-          btn.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var weekId = btn.getAttribute("data-week-id") || "";
-            var info = weekTotalsById[weekId];
-            if (!info || !info.totals) return;
-            var text = weekTotalsToText(info.totals, info.label);
-            copyTextToClipboard(text);
-            var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            if (tg && tg.showAlert) tg.showAlert("Скопировано");
+        function bindSentReportControls(scope) {
+          scope = scope || sentList;
+          if (!scope) return;
+          scope.querySelectorAll(".admin-report-week-copy-btn").forEach(function (btn) {
+            if (btn.getAttribute("data-admin-report-bound") === "1") return;
+            btn.setAttribute("data-admin-report-bound", "1");
+            btn.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var weekId = btn.getAttribute("data-week-id") || "";
+              var info = weekTotalsById[weekId];
+              if (!info || !info.totals) return;
+              var text = weekTotalsToText(info.totals, info.label);
+              copyTextToClipboard(text);
+              var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+              if (tg && tg.showAlert) tg.showAlert("Скопировано");
+            });
           });
-        });
 
-        sentList.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
-          head.addEventListener("click", function (e) {
-            if (e.target.closest(".admin-report-sent-edit-btn") || e.target.closest(".admin-report-sent-delete-btn")) return;
-            var item = head.closest(".admin-report-sent-item");
-            if (!item) return;
-            var detail = item.querySelector(".admin-report-sent-detail");
-            var toggle = head.querySelector(".admin-report-sent-item__toggle");
-            var isOpen = !detail.hidden;
-            detail.hidden = isOpen;
-            head.setAttribute("aria-expanded", !isOpen);
-            if (toggle) toggle.textContent = isOpen ? "▼" : "▲";
+          scope.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
+            if (head.getAttribute("data-admin-report-bound") === "1") return;
+            head.setAttribute("data-admin-report-bound", "1");
+            head.addEventListener("click", function (e) {
+              if (e.target.closest(".admin-report-sent-edit-btn") || e.target.closest(".admin-report-sent-delete-btn")) return;
+              var item = head.closest(".admin-report-sent-item");
+              if (!item) return;
+              var detail = item.querySelector(".admin-report-sent-detail");
+              var toggle = head.querySelector(".admin-report-sent-item__toggle");
+              var isOpen = !detail.hidden;
+              detail.hidden = isOpen;
+              head.setAttribute("aria-expanded", !isOpen);
+              if (toggle) toggle.textContent = isOpen ? "▼" : "▲";
+            });
           });
-        });
-        sentList.querySelectorAll(".admin-report-sent-edit-btn").forEach(function (editBtn) {
-          editBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var id = editBtn.getAttribute("data-report-id");
-            var report = reportById[id];
-            if (!report) return;
-            editingReportId = id;
-            editingReport = report;
-            fillReportForm(report);
-            if (submitBtn) submitBtn.textContent = "Сохранить";
-            setActiveTab("form");
-            if (dateEl) {
-              var effEd = reportEffectiveTimestampMs(report);
-              var metaEd = formatRuWeekdayDateFromTs(effEd);
-              dateEl.textContent = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
-            }
-          });
-        });
-        sentList.querySelectorAll(".admin-report-sent-delete-btn").forEach(function (delBtn) {
-          delBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var id = delBtn.getAttribute("data-report-id");
-            var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            function doDelete(reportId) {
-              var base = typeof getApiBase === "function" ? getApiBase() : "";
-              if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-                if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы удалить отчёт.");
-                return;
+
+          scope.querySelectorAll(".admin-report-sent-edit-btn").forEach(function (editBtn) {
+            if (editBtn.getAttribute("data-admin-report-bound") === "1") return;
+            editBtn.setAttribute("data-admin-report-bound", "1");
+            editBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var id = editBtn.getAttribute("data-report-id");
+              var report = reportById[id];
+              if (!report) return;
+              editingReportId = id;
+              editingReport = report;
+              fillReportForm(report);
+              if (submitBtn) submitBtn.textContent = "Сохранить";
+              setActiveTab("form");
+              if (dateEl) {
+                var effEd = reportEffectiveTimestampMs(report);
+                var metaEd = formatRuWeekdayDateFromTs(effEd);
+                dateEl.textContent = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
               }
-              var delBody =
-                typeof pokerGuestOrAuthedPostBody === "function"
-                  ? pokerGuestOrAuthedPostBody({ action: "delete", id: reportId })
-                  : { action: "delete", id: reportId };
-              fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(delBody)
-              })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                  if (data && data.ok) loadSentReports(true);
-                  else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
-                })
-                .catch(function () {
-                  if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-                });
-            }
-            if (typeof confirm === "function") {
-              if (confirm("Удалить этот отчёт?")) doDelete(id);
-            } else if (tg && tg.showConfirm) {
-              tg.showConfirm("Удалить этот отчёт?", function (ok) { if (ok) doDelete(id); });
-            }
+            });
           });
-        });
+
+          scope.querySelectorAll(".admin-report-sent-delete-btn").forEach(function (delBtn) {
+            if (delBtn.getAttribute("data-admin-report-bound") === "1") return;
+            delBtn.setAttribute("data-admin-report-bound", "1");
+            delBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var id = delBtn.getAttribute("data-report-id");
+              var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+              function doDelete(reportId) {
+                var base = typeof getApiBase === "function" ? getApiBase() : "";
+                if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+                  if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы удалить отчёт.");
+                  return;
+                }
+                var delBody =
+                  typeof pokerGuestOrAuthedPostBody === "function"
+                    ? pokerGuestOrAuthedPostBody({ action: "delete", id: reportId })
+                    : { action: "delete", id: reportId };
+                fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(delBody)
+                })
+                  .then(function (r) { return r.json(); })
+                  .then(function (data) {
+                    if (data && data.ok) loadSentReports(true);
+                    else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
+                  })
+                  .catch(function () {
+                    if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+                  });
+              }
+              if (typeof confirm === "function") {
+                if (confirm("Удалить этот отчёт?")) doDelete(id);
+              } else if (tg && tg.showConfirm) {
+                tg.showConfirm("Удалить этот отчёт?", function (ok) { if (ok) doDelete(id); });
+              }
+            });
+          });
+        }
+
+        bindSentReportControls(sentList);
+        var archiveEl = sentList.querySelector("[data-admin-report-sent-archive]");
+        if (archiveEl) {
+          archiveEl.addEventListener("toggle", function () {
+            if (!archiveEl.open || archiveEl.getAttribute("data-admin-report-archive-built") === "1") return;
+            archiveEl.setAttribute("data-admin-report-archive-built", "1");
+            var inner = archiveEl.querySelector(".admin-report-sent-archive__inner");
+            if (!inner) return;
+            inner.innerHTML = '<p class="admin-report-sent-period-hint">Загрузка прошлых недель…</p>';
+            setTimeout(function () {
+              var archiveHtml = [];
+              archiveWeekStarts.forEach(function (ws) {
+                var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-", false);
+                weekTotalsById[block.weekId] = { totals: block.totals, label: block.label };
+                archiveHtml.push(block.html);
+              });
+              inner.innerHTML = archiveHtml.join("");
+              bindSentReportControls(inner);
+            }, 0);
+          });
+        }
       })
       .catch(function () {
         sentReportsLoading = false;

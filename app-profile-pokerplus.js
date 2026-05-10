@@ -411,6 +411,15 @@ function initProfilePokerPlus() {
     unbindBtn.hidden = !linked;
   }
 
+  function setPokerPlusRefreshNeedsKeyMode() {
+    if (!pokerPlusProfileLinked) return;
+    input.hidden = false;
+    input.placeholder = "Ключ из Poker21 для обновления";
+    input.setAttribute("aria-label", "Ключ из Poker21 для обновления");
+    bindBtn.hidden = false;
+    bindBtn.textContent = "Обновить по ключу";
+  }
+
   function renderProfile(profile, linked) {
     var p = profile && typeof profile === "object" ? profile : null;
     setPokerPlusInitialLoading(false);
@@ -509,7 +518,9 @@ function initProfilePokerPlus() {
     var refreshCiphertext = "";
     if (refresh) {
       body.refresh = "1";
-      refreshCiphertext = pokerPlusProfileLinked ? readPokerPlusLocalCiphertext(pokerPlusAccountId) : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
+      refreshCiphertext = pokerPlusProfileLinked
+        ? (readPokerPlusLocalCiphertext(pokerPlusAccountId) || normalizePokerPlusKeyInput(input && input.value ? input.value : ""))
+        : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
       if (refreshCiphertext) {
         if (!pokerPlusProfileLinked) input.value = refreshCiphertext;
         body.ciphertext = refreshCiphertext;
@@ -548,6 +559,9 @@ function initProfilePokerPlus() {
         }
         if (data.syncError) {
           var syncError = String(data.syncError || "");
+          if (data.needsCiphertext || /сохран[её]нн(?:ый|ого)\s+ключ|saved\s+key|нужен\s+ключ/i.test(syncError)) {
+            setPokerPlusRefreshNeedsKeyMode();
+          }
           var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
           setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
         } else if (refresh && refreshCiphertext) {
