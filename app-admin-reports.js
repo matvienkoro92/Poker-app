@@ -1275,17 +1275,9 @@ function initAdminReportModal() {
   }
 
   function getUnaccountedRakebackReportRows() {
-    return collectRakebackRows(false, true).map(function (row) {
-      if (!row.accounted) return row;
-      var delta = Math.round((parseReportNumber(row.amount) - parseReportNumber(row.reportedAmount)) * 100) / 100;
-      if (delta <= 0) return null;
-      return Object.assign({}, row, {
-        amount: delta,
-        roomAmount: delta,
-        chipAmount: row.room === "X" ? delta : row.chipAmount,
-        accounted: false,
-      });
-    }).filter(Boolean);
+    return collectRakebackRows(false, true).filter(function (row) {
+      return row && !row.accounted;
+    });
   }
 
   function markUnaccountedRakebackRowsAccounted(reportId, reportedAtOverride) {
@@ -1296,9 +1288,9 @@ function initAdminReportModal() {
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (!isCurrentRakebackOwner(ownerId)) return;
       if (!isRakebackRowFilled(row)) return;
+      if (isRakebackRowAccounted(row)) return;
       var room = getRakebackRowRoom(row);
       var currentAmount = getRakebackReportAmount(room, Math.round(getRakebackRowAmount(row)));
-      if (isRakebackRowAccounted(row) && currentAmount <= getRakebackRowReportedAmount(row, currentAmount)) return;
       row.setAttribute("data-rakeback-accounted", "1");
       row.setAttribute("data-rakeback-reported-at", reportedAt);
       row.setAttribute("data-rakeback-reported-amount", String(Math.round(currentAmount * 100) / 100));
