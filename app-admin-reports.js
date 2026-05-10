@@ -30,6 +30,7 @@ function initAdminReportModal() {
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDragState = null;
+  var DEFAULT_RAKEBACK_SORT_MODE = "created";
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -522,12 +523,12 @@ function initAdminReportModal() {
   }
 
   function getRakebackSortMode() {
-    return normalizeRakebackSortMode(rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : "standard");
+    return normalizeRakebackSortMode(rakebackSortSelect && rakebackSortSelect.value ? String(rakebackSortSelect.value) : DEFAULT_RAKEBACK_SORT_MODE);
   }
 
   function normalizeRakebackSortMode(mode) {
-    mode = String(mode || "standard");
-    return /^(standard|created|color|rake|percent)$/.test(mode) ? mode : "standard";
+    mode = String(mode || DEFAULT_RAKEBACK_SORT_MODE);
+    return /^(standard|created|color|rake|percent)$/.test(mode) ? mode : DEFAULT_RAKEBACK_SORT_MODE;
   }
 
   function getRakebackSortStorageKey() {
@@ -536,9 +537,11 @@ function initAdminReportModal() {
 
   function readSavedRakebackSortMode() {
     try {
-      return window.localStorage ? normalizeRakebackSortMode(window.localStorage.getItem(getRakebackSortStorageKey())) : "standard";
+      if (!window.localStorage) return DEFAULT_RAKEBACK_SORT_MODE;
+      var savedMode = normalizeRakebackSortMode(window.localStorage.getItem(getRakebackSortStorageKey()));
+      return savedMode === "standard" ? DEFAULT_RAKEBACK_SORT_MODE : savedMode;
     } catch (e) {
-      return "standard";
+      return DEFAULT_RAKEBACK_SORT_MODE;
     }
   }
 
@@ -1296,7 +1299,6 @@ function initAdminReportModal() {
   function addRakebackBaseRow() {
     if (!rakebackBody) return;
     if (rakebackSearchInput && rakebackSearchInput.value) rakebackSearchInput.value = "";
-    setRakebackSortMode("standard", true);
     rakebackDraftMutationSeq += 1;
     var now = Date.now();
     var row = createRakebackRow({
