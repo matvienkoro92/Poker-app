@@ -951,7 +951,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-date-separator td {
   display: table-cell !important;
   padding: 10px 6px 6px;
-  background: #05070d !important;
+  background: rgba(39, 102, 76, 0.18) !important;
   color: #ffe7b0;
   text-align: center;
 }
