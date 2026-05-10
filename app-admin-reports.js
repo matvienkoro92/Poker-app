@@ -3301,7 +3301,7 @@ function initAdminReportModal() {
         var copyRow = copyIdInput.closest("[data-rakeback-row]");
         var copyCell = copyIdInput.closest("td");
         var copyId = copyIdInput.value ? String(copyIdInput.value).trim() : "";
-        if (copyRow && copyRow.getAttribute("data-rakeback-saved") === "1" && copyId) {
+        if (copyRow && copyId) {
           e.preventDefault();
           e.stopPropagation();
           copyReportText(copyId).then(function () {
