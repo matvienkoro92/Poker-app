@@ -1152,6 +1152,13 @@ function initAdminReportModal() {
     }, 0);
   }
 
+  function getReportStoredRakebackTotal(report) {
+    if (report && Array.isArray(report.rakebackRows) && report.rakebackRows.length) {
+      return sumRakebackReportRows(report.rakebackRows);
+    }
+    return parseReportNumber(report && report.rakeback);
+  }
+
   function getUnaccountedRakebackReportRows() {
     return collectRakebackRows(false, true).filter(function (row) {
       return !row.accounted;
@@ -1744,7 +1751,7 @@ function initAdminReportModal() {
       });
     }
     pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
-    pushEntry(expenseEntries, labels.rakeback, it.rakeback, true);
+    pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(it), true);
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
     pushEntry(otherEntries, labels.transfers, it.transfers, false);
     pushEntry(otherEntries, labels.ret, it.ret, false);
@@ -1846,7 +1853,7 @@ function initAdminReportModal() {
         function addNumericToTotals(totals, r) {
           Object.keys(totals).forEach(function (k) {
             if (k === "extraFields") return;
-            var v = r[k];
+            var v = k === "rakeback" ? getReportStoredRakebackTotal(r) : r[k];
             if (v == null || v === "") return;
             var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
             if (!isNaN(n)) totals[k] += n;
