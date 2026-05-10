@@ -36,7 +36,6 @@ function initAdminReportModal() {
   var calculationsRakebackEl = document.getElementById("adminReportCalcRakeback");
   var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
-  var calculationsAnyaSalaryEl = document.getElementById("adminReportCalcAnyaSalary");
   var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
   var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;
@@ -1930,8 +1929,7 @@ function initAdminReportModal() {
       parseReportNumber(totals.bonuses) +
       parseReportNumber(totals.rakeback) -
       parseReportNumber(totals.cashout) -
-      parseReportNumber(totals.botExchipCashout) -
-      parseReportNumber(totals.anyaSalary);
+      parseReportNumber(totals.botExchipCashout);
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
@@ -1987,7 +1985,6 @@ function initAdminReportModal() {
     if (calculationsRakebackEl) calculationsRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
     if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportRubleNumber(totals.cashout);
     if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportRubleNumber(totals.botExchipCashout);
-    if (calculationsAnyaSalaryEl) calculationsAnyaSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
     updateCalculationGrandTotal();
     updateFiguresTotals();
   }
