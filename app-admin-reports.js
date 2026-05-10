@@ -3276,8 +3276,6 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("click", function (e) {
       var colorControl = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
       if (!colorControl) closeRakebackColorMenus();
-      var clickedCell = e.target && e.target.closest ? e.target.closest("td") : null;
-      if (clickedCell && clickedCell.closest("[data-rakeback-row]") && !colorControl) markRakebackCell(clickedCell, false);
       var copyIdInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
       if (copyIdInput) {
         var copyRow = copyIdInput.closest("[data-rakeback-row]");
@@ -3285,6 +3283,7 @@ function initAdminReportModal() {
         var copyId = copyIdInput.value ? String(copyIdInput.value).trim() : "";
         if (copyRow && copyRow.getAttribute("data-rakeback-saved") === "1" && copyId) {
           e.preventDefault();
+          e.stopPropagation();
           copyReportText(copyId).then(function () {
             markRakebackCell(copyCell, true);
             showRakebackStatusBriefly("Скопировано");
@@ -3294,6 +3293,8 @@ function initAdminReportModal() {
           return;
         }
       }
+      var clickedCell = e.target && e.target.closest ? e.target.closest("td") : null;
+      if (clickedCell && clickedCell.closest("[data-rakeback-row]") && !colorControl) markRakebackCell(clickedCell, false);
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
       if (saveBtn) {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
