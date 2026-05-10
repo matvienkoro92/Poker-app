@@ -1155,6 +1155,7 @@ function initAdminReportModal() {
   }
 
   function getReportStoredRakebackTotal(report) {
+    if (report && report.rakeback === "") return 0;
     if (report && Array.isArray(report.rakebackRows) && report.rakebackRows.length) {
       return sumRakebackReportRows(report.rakebackRows);
     }
