@@ -6,6 +6,7 @@ function initProfilePokerPlus() {
   var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
   var unbindBtn = document.getElementById("profilePokerPlusUnbindBtn");
   var feedback = document.getElementById("profilePokerPlusFeedback");
+  var form = document.getElementById("profilePokerPlusForm");
   var emailRow = document.getElementById("profilePokerPlusEmailRow");
   var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
@@ -403,7 +404,9 @@ function initProfilePokerPlus() {
     updateProfileStatusTextVisibility();
     input.hidden = !!linked;
     if (linked) input.value = "";
+    if (form) form.style.removeProperty("display");
     bindBtn.hidden = !!linked;
+    bindBtn.style.removeProperty("display");
     input.placeholder = "Ключ из Poker21";
     input.setAttribute("aria-label", "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
@@ -416,9 +419,11 @@ function initProfilePokerPlus() {
     if (!pokerPlusProfileLinked) return;
     if (section && section.classList) section.classList.add("profile-pokerplus-card--needs-key");
     input.hidden = false;
+    if (form) form.style.setProperty("display", "flex", "important");
     input.placeholder = "Ключ из Poker21 для обновления";
     input.setAttribute("aria-label", "Ключ из Poker21 для обновления");
     bindBtn.hidden = false;
+    bindBtn.style.setProperty("display", "inline-flex", "important");
     bindBtn.textContent = "Обновить по ключу";
   }
 
