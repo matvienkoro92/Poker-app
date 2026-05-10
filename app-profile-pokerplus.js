@@ -596,7 +596,7 @@ function initProfilePokerPlus() {
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
       body: JSON.stringify(body),
-    }, refresh ? 25000 : 15000)
+    }, refresh ? 60000 : 20000)
       .then(function (data) {
         if (!data || !data.ok) {
           renderProfile(null, false);
@@ -676,7 +676,7 @@ function initProfilePokerPlus() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
-    }, 25000)
+    }, 60000)
       .then(function (data) {
         if (!data || !data.ok) {
           setFeedback((data && data.error) || "Не удалось привязать Poker21.", true);
