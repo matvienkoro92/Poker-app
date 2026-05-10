@@ -723,7 +723,7 @@ function initAdminReportModal() {
     var percentInput = tr.querySelector("[data-rakeback-percent]");
     var discountInput = tr.querySelector("[data-rakeback-discount15]");
     if (idInput) idInput.value = data.playerId != null ? String(data.playerId) : "";
-    if (rakeInput) rakeInput.value = data.rake != null && data.rake !== "" ? formatReportInputNumber(data.rake) : "";
+    if (rakeInput) rakeInput.value = data.rake != null && data.rake !== "" ? (explicitZeroRake && parseReportNumber(data.rake) === 0 ? "0" : formatReportInputNumber(data.rake)) : "";
     if (percentInput) percentInput.value = data.percent != null && data.percent !== "" ? formatReportInputNumber(data.percent) : "";
     if (discountInput) discountInput.checked = !!(data.discount15 || data.subtract15);
     if (kind === "addon") {
@@ -3277,7 +3277,7 @@ function initAdminReportModal() {
       markRakebackDraftLocalEdit();
       var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
       syncExplicitZeroRakeMarker(e.target);
-      if (e.target && e.target.matches && e.target.matches("[data-rakeback-rake],[data-rakeback-percent]") && parseReportNumber(e.target.value) === 0) {
+      if (e.target && e.target.matches && e.target.matches("[data-rakeback-percent]") && parseReportNumber(e.target.value) === 0) {
         e.target.value = "";
       }
       syncRakebackTable({ skipSort: true });
