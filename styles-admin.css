@@ -547,6 +547,10 @@ body.admin-report-modal-open .bottom-nav {
   gap: 6px;
   min-width: 0;
 }
+.admin-report-calculations__toolbar--inline {
+  grid-column: auto;
+  flex: 0 0 auto;
+}
 .admin-report-calculations__action {
   width: 30px;
   height: 30px;
@@ -600,6 +604,16 @@ body.admin-report-modal-open .bottom-nav {
   border: 1px solid rgba(202, 161, 84, 0.24);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
+}
+.admin-report-calculations__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.admin-report-calculations__section-head .admin-report-calculations__title {
+  margin-bottom: 0;
 }
 .admin-report-calculations__title {
   margin: 0 0 6px;

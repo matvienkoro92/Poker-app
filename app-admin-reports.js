@@ -38,6 +38,7 @@ function initAdminReportModal() {
   var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
   var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
+  var figuresRoot = document.getElementById("adminReportCalcFigures");
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
   var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;
   var figuresRakeTotalEl = document.getElementById("adminReportFiguresRakeTotal");
@@ -45,6 +46,9 @@ function initAdminReportModal() {
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
   var figuresSalaryEl = document.getElementById("adminReportFiguresSalary");
+  var figuresSaveBtn = document.getElementById("adminReportFiguresSaveBtn");
+  var figuresEditBtn = document.getElementById("adminReportFiguresEditBtn");
+  var figuresSaveStatusEl = document.getElementById("adminReportFiguresSaveStatus");
   var figuresRomanPaidInput = document.getElementById("adminReportFiguresRomanPaid");
   var figuresWinLossInput = document.getElementById("adminReportFiguresWinLoss");
   var figuresAgentsPaidInput = document.getElementById("adminReportFiguresAgentsPaid");
@@ -68,7 +72,9 @@ function initAdminReportModal() {
   var figuresRakeTotal = 0;
   var figuresPercentTotal = 0;
   var calculationsSavedLocked = false;
+  var figuresSavedLocked = false;
   var calculationsStatusTimer = null;
+  var figuresStatusTimer = null;
   var sentReportsLoadedAt = 0;
   var sentReportsLoading = false;
   var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -2042,7 +2048,7 @@ function initAdminReportModal() {
 
   function addFiguresExtraField() {
     if (!figuresExtrasEl) return;
-    if (calculationsSavedLocked) return;
+    if (figuresSavedLocked) return;
     var template = figuresExtrasEl.querySelector(".admin-report-calculations__field--extra");
     if (!template) return;
     var clone = template.cloneNode(true);
@@ -2065,17 +2071,39 @@ function initAdminReportModal() {
     }
   }
 
+  function setFiguresStatus(text) {
+    if (!figuresSaveStatusEl) return;
+    figuresSaveStatusEl.textContent = text || "";
+    if (figuresStatusTimer) clearTimeout(figuresStatusTimer);
+    if (text) {
+      figuresStatusTimer = setTimeout(function () {
+        if (figuresSaveStatusEl) figuresSaveStatusEl.textContent = "";
+      }, 1800);
+    }
+  }
+
   function setCalculationsLocked(locked) {
     calculationsSavedLocked = !!locked;
     if (calculationsRoot) calculationsRoot.classList.toggle("admin-report-calculations--locked", calculationsSavedLocked);
     if (calculationsRoot) {
-      calculationsRoot.querySelectorAll("input").forEach(function (input) {
+      calculationsRoot.querySelectorAll("[data-admin-report-calc-cash], [data-admin-report-calc-winloss]").forEach(function (input) {
         input.readOnly = calculationsSavedLocked;
       });
     }
-    if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = calculationsSavedLocked;
     if (calculationsSaveBtn) calculationsSaveBtn.hidden = calculationsSavedLocked;
     if (calculationsEditBtn) calculationsEditBtn.hidden = !calculationsSavedLocked;
+  }
+
+  function setFiguresLocked(locked) {
+    figuresSavedLocked = !!locked;
+    if (figuresRoot) {
+      figuresRoot.querySelectorAll("input").forEach(function (input) {
+        input.readOnly = figuresSavedLocked;
+      });
+    }
+    if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = figuresSavedLocked;
+    if (figuresSaveBtn) figuresSaveBtn.hidden = figuresSavedLocked;
+    if (figuresEditBtn) figuresEditBtn.hidden = !figuresSavedLocked;
   }
 
   function collectCalculationsDraft() {
@@ -2156,6 +2184,7 @@ function initAdminReportModal() {
     updateCalculationCashTotal();
     updateFiguresTotals();
     setCalculationsLocked(true);
+    setFiguresLocked(true);
     return true;
   }
 
@@ -2166,12 +2195,14 @@ function initAdminReportModal() {
     } catch (e) {}
     if (!raw) {
       setCalculationsLocked(false);
+      setFiguresLocked(false);
       return false;
     }
     try {
       return applyCalculationsDraft(JSON.parse(raw));
     } catch (eParse) {
       setCalculationsLocked(false);
+      setFiguresLocked(false);
       return false;
     }
   }
@@ -2191,6 +2222,23 @@ function initAdminReportModal() {
   function editCalculationsDraft() {
     setCalculationsLocked(false);
     setCalculationsStatus("Редактирование");
+  }
+
+  function saveFiguresDraft() {
+    try {
+      if (window.localStorage) {
+        window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(collectCalculationsDraft()));
+      }
+      setFiguresLocked(true);
+      setFiguresStatus("Сохранено");
+    } catch (e) {
+      setFiguresStatus("Не удалось сохранить");
+    }
+  }
+
+  function editFiguresDraft() {
+    setFiguresLocked(false);
+    setFiguresStatus("Редактирование");
   }
 
   function getReportExtraEntries(it) {
@@ -2844,6 +2892,8 @@ function initAdminReportModal() {
   if (figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
   if (calculationsSaveBtn) calculationsSaveBtn.addEventListener("click", saveCalculationsDraft);
   if (calculationsEditBtn) calculationsEditBtn.addEventListener("click", editCalculationsDraft);
+  if (figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
+  if (figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {

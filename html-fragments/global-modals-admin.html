@@ -432,7 +432,14 @@
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
-                <h3 class="admin-report-calculations__title">Цифры</h3>
+                <div class="admin-report-calculations__section-head">
+                  <h3 class="admin-report-calculations__title">Цифры</h3>
+                  <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
+                    <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить цифры" aria-label="Сохранить цифры">✓</button>
+                    <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" id="adminReportFiguresEditBtn" title="Редактировать цифры" aria-label="Редактировать цифры" hidden>✎</button>
+                    <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
+                  </div>
+                </div>
                 <label class="admin-report-calculations__field admin-report-calculations__field--triple">
                   <span>Рейк Покер21</span>
                   <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="8" placeholder="0" />
