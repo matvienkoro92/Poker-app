@@ -828,12 +828,8 @@ function initAdminReportModal() {
 
   function hasRakebackRowEntryTimeData(row) {
     if (!row) return false;
-    var rakeInput = row.querySelector("[data-rakeback-rake]");
     return row.getAttribute("data-rakeback-saved") === "1" ||
-      row.getAttribute("data-rakeback-explicit-zero-rake") === "1" ||
-      isRakebackRowAccounted(row) ||
-      parseReportNumber(rakeInput ? rakeInput.value : "") !== 0 ||
-      Math.round(getRakebackRowAmount(row)) !== 0;
+      isRakebackRowAccounted(row);
   }
 
   function setRakebackGroupEntryAddedAt(row, stamp) {
@@ -860,7 +856,7 @@ function initAdminReportModal() {
       return raw;
     }
     if (Number.isFinite(raw)) return raw;
-    if (!force && !hasRakebackRowEntryTimeData(row)) return "";
+    if (!force) return "";
     var stamp = Date.now();
     setRakebackGroupEntryAddedAt(row, stamp);
     return stamp;
@@ -3274,7 +3270,6 @@ function initAdminReportModal() {
       markRakebackDraftLocalEdit();
       syncExplicitZeroRakeMarker(e.target);
       var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
-      ensureRakebackEntryAddedAt(inputRow, false);
       syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
     });
@@ -3285,7 +3280,6 @@ function initAdminReportModal() {
       if (e.target && e.target.matches && e.target.matches("[data-rakeback-rake],[data-rakeback-percent]") && parseReportNumber(e.target.value) === 0) {
         e.target.value = "";
       }
-      ensureRakebackEntryAddedAt(changeRow, false);
       syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
     });
