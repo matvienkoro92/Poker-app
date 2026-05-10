@@ -422,7 +422,7 @@ function initAdminReportModal() {
 
   function isRakebackTemplateLikeData(data) {
     if (!data) return false;
-    return !data.saved && !data.accounted && !data.reportedAt && !data.reportId &&
+    return !data.accounted && !data.reportedAt && !data.reportId &&
       parseReportNumber(data.rake) === 0 &&
       parseReportNumber(data.roomAmount) === 0 &&
       parseReportNumber(data.chipAmount) === 0 &&
