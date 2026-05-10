@@ -228,6 +228,7 @@
           <div class="admin-report-tabs" role="tablist">
             <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form">Отчет</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback">Рейкбек</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="calculations" hidden>Расчеты</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent">Отправленные</button>
           </div>
           <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
@@ -343,6 +344,9 @@
             <div class="share-stats-admin-modal__table-wrap admin-report-sent-wrap">
               <div id="adminReportSentList"></div>
             </div>
+          </div>
+          <div class="admin-report-panel" data-admin-report-panel="calculations" hidden>
+            <div class="admin-report-calculations" id="adminReportCalculations"></div>
           </div>
         </div>
       </div>

@@ -172,6 +172,36 @@ function initAdminReportModal() {
     return false;
   }
 
+  function canViewCalculationsReports() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
+      if (authUser) users.push(authUser);
+    } catch (eAuthUser) {}
+    try {
+      var recUser = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (recUser && recUser.user) users.push(recUser.user);
+    } catch (eRecUser) {}
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i] || {};
+      var names = [u.username, u.telegramUsername, u.pwaUsername];
+      for (var j = 0; j < names.length; j++) {
+        var username = names[j] != null ? String(names[j]).replace(/^@+/, "").trim().toLowerCase() : "";
+        if (username === "roman1787443" || username === "roman1_matvienko") return true;
+      }
+    }
+    return false;
+  }
+
   function canManageAllRakebackRows() {
     var users = [];
     try {
@@ -200,18 +230,21 @@ function initAdminReportModal() {
 
   function syncSentReportsAccess() {
     var allowed = canViewSentReports();
+    var calculationsAllowed = canViewCalculationsReports();
     if (tabs && tabs.length) {
       tabs.forEach(function (tab) {
         if (tab.getAttribute("data-admin-report-tab") === "sent") tab.hidden = !allowed;
+        if (tab.getAttribute("data-admin-report-tab") === "calculations") tab.hidden = !calculationsAllowed;
       });
     }
     if (panels && panels.length) {
       panels.forEach(function (panel) {
         if (panel.getAttribute("data-admin-report-panel") === "sent") panel.hidden = !allowed;
+        if (panel.getAttribute("data-admin-report-panel") === "calculations") panel.hidden = !calculationsAllowed;
       });
     }
     if (!allowed && sentList) sentList.innerHTML = "";
-    return allowed;
+    return allowed || calculationsAllowed;
   }
 
   function parseReportNumber(raw) {
@@ -1752,6 +1785,7 @@ function initAdminReportModal() {
   function setActiveTab(name) {
     if (!tabs || !panels) return;
     if (name === "sent" && !canViewSentReports()) name = "form";
+    if (name === "calculations" && !canViewCalculationsReports()) name = "form";
     tabs.forEach(function (tab) {
       var isActive = tab.getAttribute("data-admin-report-tab") === name;
       tab.classList.toggle("admin-report-tab--active", isActive);
@@ -2401,6 +2435,7 @@ function initAdminReportModal() {
       tab.addEventListener("click", function () {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
         if (name === "sent" && !canViewSentReports()) return;
+        if (name === "calculations" && !canViewCalculationsReports()) return;
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
