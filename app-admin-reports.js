@@ -641,8 +641,10 @@ function initAdminReportModal() {
 
   function getRakebackGroupEntryAddedAt(group, fallbackIndex) {
     if (!group || !group.rows || !group.rows.length) return NaN;
-    var keyRow = group.keyRow || getRakebackGroupKeyRow(group.rows);
-    return getRakebackRowEntryAddedAt(keyRow, fallbackIndex);
+    return group.rows.reduce(function (max, row, index) {
+      var value = getRakebackRowEntryAddedAt(row, index + (Number(fallbackIndex) || 0));
+      return Number.isFinite(value) ? Math.max(max, value) : max;
+    }, -Infinity);
   }
 
   function getRakebackMoscowDayKey(ts) {
