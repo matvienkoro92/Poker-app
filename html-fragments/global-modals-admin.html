@@ -405,6 +405,72 @@
                 </div>
               </div>
               <div class="admin-report-calculations__side admin-report-calculations__side--right"></div>
+              <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
+                <h3 class="admin-report-calculations__title">Цифры</h3>
+                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                  <span>Рейк Покер21</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="8" placeholder="0" />
+                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                </label>
+                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                  <span>Рейк Х-покер</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="9" placeholder="0" />
+                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                </label>
+                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                  <span>Рейк Suprema</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="18" placeholder="0" />
+                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                </label>
+                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                  <span>Рейк PPpoker</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="15" placeholder="0" />
+                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                </label>
+                <div class="admin-report-calculations__field admin-report-calculations__field--total">
+                  <span>Итого рейк</span>
+                  <output id="adminReportFiguresRakeTotal">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Итого -%</span>
+                  <output id="adminReportFiguresPercentTotal">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Рейкбек из отчета текущей недели</span>
+                  <output id="adminReportFiguresRakeback">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Бонусы</span>
+                  <output id="adminReportFiguresBonuses">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>ЗП</span>
+                  <output id="adminReportFiguresSalary">0</output>
+                </div>
+                <label class="admin-report-calculations__field">
+                  <span>Роман выдал</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRomanPaid" placeholder="0" />
+                </label>
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                  <span>Выигрыш/проигрыш</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresWinLoss" placeholder="0" />
+                </label>
+                <label class="admin-report-calculations__field">
+                  <span>Выдано агентам</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresAgentsPaid" placeholder="0" />
+                </label>
+                <div class="admin-report-calculations__extras" id="adminReportFiguresExtras">
+                  <label class="admin-report-calculations__field admin-report-calculations__field--extra">
+                    <input type="text" class="admin-report-calculations__input admin-report-calculations__input--name" data-admin-report-figures-extra-name placeholder="Название поля" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-extra-amount placeholder="0" />
+                  </label>
+                </div>
+                <button type="button" class="admin-report-calculations__add" id="adminReportFiguresAddField">Добавить поле</button>
+                <div class="admin-report-calculations__field admin-report-calculations__field--grand">
+                  <span>Итого цифры</span>
+                  <output id="adminReportFiguresGrandTotal">0</output>
+                </div>
+              </section>
             </div>
           </div>
         </div>

@@ -34,6 +34,19 @@ function initAdminReportModal() {
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
   var calculationsAnyaSalaryEl = document.getElementById("adminReportCalcAnyaSalary");
   var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
+  var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
+  var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;
+  var figuresRakeTotalEl = document.getElementById("adminReportFiguresRakeTotal");
+  var figuresPercentTotalEl = document.getElementById("adminReportFiguresPercentTotal");
+  var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
+  var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
+  var figuresSalaryEl = document.getElementById("adminReportFiguresSalary");
+  var figuresRomanPaidInput = document.getElementById("adminReportFiguresRomanPaid");
+  var figuresWinLossInput = document.getElementById("adminReportFiguresWinLoss");
+  var figuresAgentsPaidInput = document.getElementById("adminReportFiguresAgentsPaid");
+  var figuresExtrasEl = document.getElementById("adminReportFiguresExtras");
+  var figuresAddFieldBtn = document.getElementById("adminReportFiguresAddField");
+  var figuresGrandTotalEl = document.getElementById("adminReportFiguresGrandTotal");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
@@ -48,6 +61,8 @@ function initAdminReportModal() {
   var rakebackDragState = null;
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
+  var figuresRakeTotal = 0;
+  var figuresPercentTotal = 0;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   if (!btn || !modal) return;
@@ -1906,6 +1921,50 @@ function initAdminReportModal() {
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
+  function getFiguresExtraAmountTotal() {
+    var total = 0;
+    if (!figuresExtrasEl) return total;
+    figuresExtrasEl.querySelectorAll("[data-admin-report-figures-extra-amount]").forEach(function (input) {
+      total += parseReportNumber(input ? input.value : "");
+    });
+    return total;
+  }
+
+  function updateFiguresTotals() {
+    figuresRakeTotal = 0;
+    figuresPercentTotal = 0;
+    if (figuresRakeInputs && figuresRakeInputs.length) {
+      figuresRakeInputs.forEach(function (input, index) {
+        var rake = parseReportNumber(input ? input.value : "");
+        var rate = parseReportNumber(input ? input.getAttribute("data-admin-report-figures-rate") : "");
+        var percent = -(rake * rate / 100);
+        figuresRakeTotal += rake;
+        figuresPercentTotal += percent;
+        var out = figuresPercentOutputs && figuresPercentOutputs[index] ? figuresPercentOutputs[index] : null;
+        if (out) out.textContent = formatReportRubleNumber(percent);
+      });
+    }
+    var totals = calculationWeekTotals || {};
+    if (figuresRakeTotalEl) figuresRakeTotalEl.textContent = formatReportRubleNumber(figuresRakeTotal);
+    if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
+    if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
+    if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
+    if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
+    if (figuresGrandTotalEl) {
+      var grand =
+        figuresRakeTotal +
+        figuresPercentTotal -
+        parseReportNumber(totals.rakeback) -
+        parseReportNumber(totals.bonuses) -
+        parseReportNumber(totals.anyaSalary) -
+        parseReportNumber(figuresRomanPaidInput ? figuresRomanPaidInput.value : "") +
+        parseReportNumber(figuresWinLossInput ? figuresWinLossInput.value : "") -
+        parseReportNumber(figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "") -
+        getFiguresExtraAmountTotal();
+      figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
+    }
+  }
+
   function setCalculationTotalsText(totals) {
     totals = totals || {};
     calculationWeekTotals = totals;
@@ -1916,6 +1975,7 @@ function initAdminReportModal() {
     if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportRubleNumber(totals.botExchipCashout);
     if (calculationsAnyaSalaryEl) calculationsAnyaSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
     updateCalculationGrandTotal();
+    updateFiguresTotals();
   }
 
   function sumCalculationReports(items, week) {
@@ -1958,6 +2018,27 @@ function initAdminReportModal() {
       .catch(function () {
         setCalculationTotalsText({});
       });
+  }
+
+  function bindFiguresExtraInputs(scope) {
+    if (!scope) return;
+    scope.querySelectorAll("[data-admin-report-figures-extra-amount]").forEach(function (input) {
+      input.addEventListener("input", updateFiguresTotals);
+      input.addEventListener("change", updateFiguresTotals);
+    });
+  }
+
+  function addFiguresExtraField() {
+    if (!figuresExtrasEl) return;
+    var template = figuresExtrasEl.querySelector(".admin-report-calculations__field--extra");
+    if (!template) return;
+    var clone = template.cloneNode(true);
+    clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+    figuresExtrasEl.appendChild(clone);
+    bindFiguresExtraInputs(clone);
+    var nameInput = clone.querySelector("[data-admin-report-figures-extra-name]");
+    if (nameInput && typeof nameInput.focus === "function") nameInput.focus();
+    updateFiguresTotals();
   }
 
   function getReportExtraEntries(it) {
@@ -2551,6 +2632,7 @@ function initAdminReportModal() {
     if (dateEl) dateEl.textContent = info.label;
     applySavedRakebackSortMode();
     updateCalculationCashTotal();
+    updateFiguresTotals();
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     runAdminReportAfterPaint(function () {
@@ -2587,6 +2669,19 @@ function initAdminReportModal() {
       input.addEventListener("change", updateCalculationCashTotal);
     });
   }
+  if (figuresRakeInputs && figuresRakeInputs.length) {
+    figuresRakeInputs.forEach(function (input) {
+      input.addEventListener("input", updateFiguresTotals);
+      input.addEventListener("change", updateFiguresTotals);
+    });
+  }
+  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput].forEach(function (input) {
+    if (!input) return;
+    input.addEventListener("input", updateFiguresTotals);
+    input.addEventListener("change", updateFiguresTotals);
+  });
+  bindFiguresExtraInputs(figuresExtrasEl);
+  if (figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
