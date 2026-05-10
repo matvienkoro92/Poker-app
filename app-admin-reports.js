@@ -24,6 +24,15 @@ function initAdminReportModal() {
   var rakebackTotalsList = document.getElementById("adminReportRakebackTotalsList");
   var rakebackTotalsClose = document.getElementById("adminReportRakebackTotalsClose");
   var rakebackTotalsBackdrop = document.getElementById("adminReportRakebackTotalsBackdrop");
+  var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
+  var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
+  var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
+  var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
+  var calculationsBonusesEl = document.getElementById("adminReportCalcBonuses");
+  var calculationsRakebackEl = document.getElementById("adminReportCalcRakeback");
+  var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
+  var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
+  var calculationsAnyaSalaryEl = document.getElementById("adminReportCalcAnyaSalary");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
@@ -1609,6 +1618,48 @@ function initAdminReportModal() {
     return { label: meta.weekday + ", " + meta.date, weekday: wdl, date: meta.date, iso: new Date(effTs).toISOString() };
   }
 
+  var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
+  var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
+  var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
+
+  function mskDateFromReportTs(ts) {
+    return new Date(ts + REPORT_MSK_SHIFT_MS);
+  }
+
+  /** Календарная неделя отчётов: Пн 00:00 МСК -> Вс 23:59:59 МСК. */
+  function weekStartMsForReport(ts) {
+    var msk = mskDateFromReportTs(ts);
+    var y = msk.getUTCFullYear();
+    var m = msk.getUTCMonth();
+    var d = msk.getUTCDate();
+    var wd = msk.getUTCDay();
+    var daysFromMonday = (wd + 6) % 7;
+    var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * REPORT_DAY_MS;
+    return mondayStartMskMs - REPORT_MSK_SHIFT_MS;
+  }
+
+  function formatReportWeekBoundary(ms) {
+    return new Intl.DateTimeFormat("ru-RU", {
+      timeZone: "Europe/Moscow",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date(ms));
+  }
+
+  function getCalculationWeekMeta() {
+    var info = getShiftReportDateInfo();
+    var baseTs = info && info.iso ? new Date(info.iso).getTime() : Date.now();
+    if (baseTs !== baseTs) baseTs = Date.now();
+    var start = weekStartMsForReport(baseTs);
+    var end = start + REPORT_WEEK_MS - 1;
+    return {
+      start: start,
+      end: end,
+      label: formatReportWeekBoundary(start) + " – " + formatReportWeekBoundary(end),
+    };
+  }
+
   function getRakebackDraftKey() {
     return "poker_admin_report_rakeback_draft:shared";
   }
@@ -1824,6 +1875,69 @@ function initAdminReportModal() {
       if (!extra || !isReportAnyaSalaryFieldName(extra.name)) return sum;
       return sum + parseReportNumber(extra.value);
     }, 0);
+  }
+
+  function updateCalculationCashTotal() {
+    if (!calculationsCashTotalEl) return;
+    var total = 0;
+    if (calculationsCashInputs && calculationsCashInputs.length) {
+      calculationsCashInputs.forEach(function (input) {
+        total += parseReportNumber(input ? input.value : "");
+      });
+    }
+    calculationsCashTotalEl.textContent = formatReportRubleNumber(total);
+  }
+
+  function setCalculationTotalsText(totals) {
+    totals = totals || {};
+    if (calculationsDepositEl) calculationsDepositEl.textContent = formatReportRubleNumber(totals.deposit);
+    if (calculationsBonusesEl) calculationsBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
+    if (calculationsRakebackEl) calculationsRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
+    if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportRubleNumber(totals.cashout);
+    if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportRubleNumber(totals.botExchipCashout);
+    if (calculationsAnyaSalaryEl) calculationsAnyaSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
+  }
+
+  function sumCalculationReports(items, week) {
+    var totals = {
+      deposit: 0,
+      bonuses: 0,
+      rakeback: 0,
+      cashout: 0,
+      botExchipCashout: 0,
+      anyaSalary: 0,
+    };
+    if (!Array.isArray(items) || !week) return totals;
+    items.forEach(function (report) {
+      var t = reportEffectiveTimestampMs(report);
+      if (!t || t < week.start || t > week.end) return;
+      totals.deposit += parseReportNumber(report && report.deposit);
+      totals.bonuses += parseReportNumber(report && report.bonuses);
+      totals.rakeback += getReportStoredRakebackTotal(report);
+      totals.cashout += parseReportNumber(report && report.cashout);
+      totals.botExchipCashout += parseReportNumber(report && report.botExchipCashout);
+      totals.anyaSalary += getReportAnyaSalaryTotal(report);
+    });
+    return totals;
+  }
+
+  function loadCalculationsReports() {
+    if (!canViewCalculationsReports()) return;
+    var week = getCalculationWeekMeta();
+    if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
+    setCalculationTotalsText({});
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var items = (data && data.ok && data.reports) ? data.reports : [];
+        setCalculationTotalsText(sumCalculationReports(items, week));
+      })
+      .catch(function () {
+        setCalculationTotalsText({});
+      });
   }
 
   function getReportExtraEntries(it) {
@@ -2416,6 +2530,7 @@ function initAdminReportModal() {
     var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = info.label;
     applySavedRakebackSortMode();
+    updateCalculationCashTotal();
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     runAdminReportAfterPaint(function () {
@@ -2442,7 +2557,14 @@ function initAdminReportModal() {
           loadSharedRakebackDraftRows();
         }
         if (name === "sent") loadSentReports();
+        if (name === "calculations") loadCalculationsReports();
       });
+    });
+  }
+  if (calculationsCashInputs && calculationsCashInputs.length) {
+    calculationsCashInputs.forEach(function (input) {
+      input.addEventListener("input", updateCalculationCashTotal);
+      input.addEventListener("change", updateCalculationCashTotal);
     });
   }
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
