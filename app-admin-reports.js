@@ -633,8 +633,7 @@ function initAdminReportModal() {
 
   function isRakebackTemplateLikeData(data) {
     if (!data) return false;
-    return !data.accounted && !data.reportedAt && !data.reportId &&
-      parseReportNumber(data.rake) === 0 &&
+    return parseReportNumber(data.rake) === 0 &&
       parseReportNumber(data.roomAmount) === 0 &&
       parseReportNumber(data.chipAmount) === 0 &&
       parseReportNumber(data.amount) === 0;
@@ -653,9 +652,11 @@ function initAdminReportModal() {
       createdAtIsTemplate = true;
     }
     var standardAt = getFirstRakebackTimeValue([data.standardAt, data.orderAt, data.sortAt], createdAt);
-    var hasInitialEntryData = data.saved || data.accounted || data.reportedAt || data.reportId ||
+    var templateLikeData = isRakebackTemplateLikeData(data);
+    var accountedData = !templateLikeData && (data.accounted || data.reportedAt || data.reportId);
+    var hasInitialEntryData = !templateLikeData && (data.saved || accountedData ||
       parseReportNumber(data.rake) !== 0 || parseReportNumber(data.roomAmount) !== 0 ||
-      parseReportNumber(data.chipAmount) !== 0 || parseReportNumber(data.amount) !== 0;
+      parseReportNumber(data.chipAmount) !== 0 || parseReportNumber(data.amount) !== 0);
     var entryAddedAt = getFirstRakebackTimeValue([data.entryAddedAt, data.firstAddedAt], NaN);
     var reportedAt = parseRakebackTimeValue(data.reportedAt);
     if (Number.isFinite(reportedAt) && (!Number.isFinite(entryAddedAt) || reportedAt < entryAddedAt)) {
@@ -671,6 +672,7 @@ function initAdminReportModal() {
     if (!Number.isFinite(entryAddedAt) && hasInitialEntryData) {
       entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.reportedAt], createdAtIsTemplate ? Date.now() : createdAt);
     }
+    if (templateLikeData) entryAddedAt = NaN;
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-kind", kind);
@@ -679,7 +681,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
     tr.setAttribute("data-rakeback-standard-at", String(standardAt));
     if (Number.isFinite(entryAddedAt)) tr.setAttribute("data-rakeback-entry-added-at", String(entryAddedAt));
-    if (data.accounted || data.reportedAt || data.reportId) {
+    if (accountedData) {
       tr.setAttribute("data-rakeback-accounted", "1");
       if (data.reportedAt) tr.setAttribute("data-rakeback-reported-at", String(data.reportedAt));
       if (data.reportId) tr.setAttribute("data-rakeback-report-id", String(data.reportId));
@@ -719,7 +721,7 @@ function initAdminReportModal() {
       if (idInput) idInput.readOnly = true;
     }
     applyRakebackRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
-    if (data.accounted || data.reportedAt || data.reportId) setRakebackRowSaved(tr, true);
+    if (accountedData || (data.saved && !templateLikeData)) setRakebackRowSaved(tr, true);
     return tr;
   }
 
@@ -850,18 +852,6 @@ function initAdminReportModal() {
     var stamp = Date.now();
     setRakebackGroupEntryAddedAt(row, stamp);
     return stamp;
-  }
-
-  function moveAccountedRakebackRowToCurrentDraft(row) {
-    if (!row || row.getAttribute("data-rakeback-accounted-editing") !== "1") return false;
-    if (!canManageAllRakebackRows()) return false;
-    row.removeAttribute("data-rakeback-accounted-editing");
-    row.removeAttribute("data-rakeback-accounted");
-    row.removeAttribute("data-rakeback-reported-at");
-    row.removeAttribute("data-rakeback-report-id");
-    row.removeAttribute("data-rakeback-reported-amount");
-    replaceRakebackGroupEntryAddedAt(row, Date.now());
-    return true;
   }
 
   function getRakebackRowEntryAddedAt(row, fallbackIndex) {
@@ -1329,7 +1319,7 @@ function initAdminReportModal() {
       saveBtn.disabled = !filled;
       saveBtn.hidden = saved || !filled;
     }
-    if (editBtn) editBtn.hidden = !saved || (accounted && !canManageAllRakebackRows());
+    if (editBtn) editBtn.hidden = !saved || accounted;
     if (addBtn) {
       var canAdd = canAddRakebackAddon(row);
       addBtn.disabled = !canAdd;
@@ -1394,7 +1384,7 @@ function initAdminReportModal() {
 
   function canEditRakebackRow(row) {
     if (!row) return false;
-    if (isRakebackRowAccounted(row) && !canManageAllRakebackRows()) return false;
+    if (isRakebackRowAccounted(row)) return false;
     return isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "");
   }
 
@@ -3254,7 +3244,6 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("input", function (e) {
       markRakebackDraftLocalEdit();
       var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
-      moveAccountedRakebackRowToCurrentDraft(inputRow);
       ensureRakebackEntryAddedAt(inputRow, false);
       syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
@@ -3262,7 +3251,6 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("change", function (e) {
       markRakebackDraftLocalEdit();
       var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
-      moveAccountedRakebackRowToCurrentDraft(changeRow);
       ensureRakebackEntryAddedAt(changeRow, false);
       syncRakebackTable();
       saveRakebackDraftRows();
@@ -3297,7 +3285,6 @@ function initAdminReportModal() {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
         if (!saveRow || !isRakebackRowFilled(saveRow)) return;
         markRakebackDraftLocalEdit();
-        moveAccountedRakebackRowToCurrentDraft(saveRow);
         ensureRakebackEntryAddedAt(saveRow, true);
         syncRakebackTable();
         setRakebackRowSaved(saveRow, true);
@@ -3309,9 +3296,6 @@ function initAdminReportModal() {
       if (editBtn) {
         var editRow = editBtn.closest("[data-rakeback-row]");
         markRakebackDraftLocalEdit();
-        if (isRakebackRowAccounted(editRow) && canManageAllRakebackRows()) {
-          editRow.setAttribute("data-rakeback-accounted-editing", "1");
-        }
         setRakebackRowSaved(editRow, false);
         saveRakebackDraftRows();
         showRakebackStatus("");
