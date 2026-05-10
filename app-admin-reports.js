@@ -470,6 +470,8 @@ function initAdminReportModal() {
       tr.setAttribute("data-rakeback-accounted", "1");
       if (data.reportedAt) tr.setAttribute("data-rakeback-reported-at", String(data.reportedAt));
       if (data.reportId) tr.setAttribute("data-rakeback-report-id", String(data.reportId));
+      var reportedAmount = parseReportNumber(data.reportedAmount != null ? data.reportedAmount : data.amount);
+      tr.setAttribute("data-rakeback-reported-amount", String(reportedAmount));
     }
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
@@ -1089,6 +1091,12 @@ function initAdminReportModal() {
     return !!(row && row.getAttribute("data-rakeback-accounted") === "1");
   }
 
+  function getRakebackRowReportedAmount(row, fallbackAmount) {
+    var raw = row ? row.getAttribute("data-rakeback-reported-amount") : "";
+    if (raw != null && raw !== "") return parseReportNumber(raw);
+    return isRakebackRowAccounted(row) ? parseReportNumber(fallbackAmount) : 0;
+  }
+
   function canEditRakebackRow(row) {
     if (!row) return false;
     return isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "");
@@ -1121,6 +1129,7 @@ function initAdminReportModal() {
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
       var roomAmount = Math.round(getRakebackRowAmount(row));
       var amount = getRakebackReportAmount(room, roomAmount);
+      var reportedAmount = getRakebackRowReportedAmount(row, amount);
       var discount15 = !!(discountInput && discountInput.checked);
       var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0;
       if (!includeEmpty && !filled) return null;
@@ -1138,6 +1147,7 @@ function initAdminReportModal() {
         roomAmount: roomAmount,
         chipAmount: room === "X" ? roomAmount : null,
         amount: amount,
+        reportedAmount: reportedAmount,
         saved: row.getAttribute("data-rakeback-saved") === "1",
         color: color,
         createdAt: getRakebackRowCreatedAt(row, 0),
@@ -1166,9 +1176,17 @@ function initAdminReportModal() {
   }
 
   function getUnaccountedRakebackReportRows() {
-    return collectRakebackRows(false, true).filter(function (row) {
-      return !row.accounted;
-    });
+    return collectRakebackRows(false, true).map(function (row) {
+      if (!row.accounted) return row;
+      var delta = Math.round((parseReportNumber(row.amount) - parseReportNumber(row.reportedAmount)) * 100) / 100;
+      if (delta <= 0) return null;
+      return Object.assign({}, row, {
+        amount: delta,
+        roomAmount: delta,
+        chipAmount: row.room === "X" ? delta : row.chipAmount,
+        accounted: false,
+      });
+    }).filter(Boolean);
   }
 
   function markUnaccountedRakebackRowsAccounted(reportId, reportedAtOverride) {
@@ -1176,12 +1194,15 @@ function initAdminReportModal() {
     var parsedReportedAt = parseRakebackTimeValue(reportedAtOverride);
     var reportedAt = Number.isFinite(parsedReportedAt) ? new Date(parsedReportedAt).toISOString() : new Date().toISOString();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
-      if (isRakebackRowAccounted(row)) return;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (!isCurrentRakebackOwner(ownerId)) return;
       if (!isRakebackRowFilled(row)) return;
+      var room = getRakebackRowRoom(row);
+      var currentAmount = getRakebackReportAmount(room, Math.round(getRakebackRowAmount(row)));
+      if (isRakebackRowAccounted(row) && currentAmount <= getRakebackRowReportedAmount(row, currentAmount)) return;
       row.setAttribute("data-rakeback-accounted", "1");
       row.setAttribute("data-rakeback-reported-at", reportedAt);
+      row.setAttribute("data-rakeback-reported-amount", String(Math.round(currentAmount * 100) / 100));
       if (!Number.isFinite(parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || ""))) {
         row.setAttribute("data-rakeback-entry-added-at", reportedAt);
       }
