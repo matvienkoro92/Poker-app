@@ -553,6 +553,24 @@ function initProfilePokerPlus() {
     return state;
   }
 
+  function pokerPlusFetchJsonWithTimeout(url, options, timeoutMs) {
+    options = options || {};
+    timeoutMs = timeoutMs || 20000;
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = null;
+    if (controller) {
+      options.signal = controller.signal;
+      timer = setTimeout(function () {
+        try { controller.abort(); } catch (eAbort) {}
+      }, timeoutMs);
+    }
+    return fetch(url, options)
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .finally(function () {
+        if (timer) clearTimeout(timer);
+      });
+  }
+
   function loadProfile(refresh) {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -573,13 +591,12 @@ function initProfilePokerPlus() {
         body.ciphertext = refreshCiphertext;
       }
     }
-    return fetch(base + "/api/pokerplus-player", {
+    return pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
       body: JSON.stringify(body),
-    })
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
+    }, refresh ? 25000 : 15000)
       .then(function (data) {
         if (!data || !data.ok) {
           renderProfile(null, false);
@@ -622,8 +639,9 @@ function initProfilePokerPlus() {
           setFeedback("", false);
         }
       })
-      .catch(function () {
-        setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
+      .catch(function (err) {
+        var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
+        setFeedback(refresh ? (aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже, старые данные оставили." : "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже.") : POKER_NET_ERR, true);
         renderPokerPlusStatsFallbackIfVisible();
       })
       .finally(function () {
@@ -654,12 +672,11 @@ function initProfilePokerPlus() {
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
     setFeedback(wasLinked ? "Обновляем Poker21 по ключу…" : "Привязываем Poker21…", false);
-    fetch(base + "/api/pokerplus-bind", {
+    pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-bind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
-    })
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
+    }, 25000)
       .then(function (data) {
         if (!data || !data.ok) {
           setFeedback((data && data.error) || "Не удалось привязать Poker21.", true);
@@ -673,8 +690,9 @@ function initProfilePokerPlus() {
         setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
         input.value = "";
       })
-      .catch(function () {
-        setFeedback(POKER_NET_ERR, true);
+      .catch(function (err) {
+        var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
+        setFeedback(aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже." : POKER_NET_ERR, true);
       })
       .finally(function () {
         bindBtn.disabled = false;
@@ -702,12 +720,11 @@ function initProfilePokerPlus() {
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
     setFeedback("Отвязываем Poker21...", false);
-    fetch(base + "/api/pokerplus-unbind", {
+    pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-unbind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({})),
-    })
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
+    }, 20000)
       .then(function (data) {
         if (!data || !data.ok) {
           setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
@@ -720,8 +737,9 @@ function initProfilePokerPlus() {
         input.value = "";
         setFeedback("Poker21 отвязан.", false);
       })
-      .catch(function () {
-        setFeedback(POKER_NET_ERR, true);
+      .catch(function (err) {
+        var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
+        setFeedback(aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже." : POKER_NET_ERR, true);
       })
       .finally(function () {
         bindBtn.disabled = false;
