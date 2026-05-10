@@ -705,6 +705,7 @@ function initAdminReportModal() {
       if (idInput) idInput.readOnly = true;
     }
     applyRakebackRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
+    if (data.accounted || data.reportedAt || data.reportId) setRakebackRowSaved(tr, true);
     return tr;
   }
 
@@ -1276,6 +1277,7 @@ function initAdminReportModal() {
   function updateRakebackRowActions(row) {
     if (!row) return;
     var saved = row.getAttribute("data-rakeback-saved") === "1";
+    var accounted = isRakebackRowAccounted(row);
     var filled = isRakebackRowFilled(row);
     var saveBtn = row.querySelector("[data-rakeback-save]");
     var editBtn = row.querySelector("[data-rakeback-edit]");
@@ -1284,7 +1286,7 @@ function initAdminReportModal() {
       saveBtn.disabled = !filled;
       saveBtn.hidden = saved || !filled;
     }
-    if (editBtn) editBtn.hidden = !saved;
+    if (editBtn) editBtn.hidden = !saved || accounted;
     if (addBtn) {
       var canAdd = canAddRakebackAddon(row);
       addBtn.disabled = !canAdd;
@@ -1349,11 +1351,13 @@ function initAdminReportModal() {
 
   function canEditRakebackRow(row) {
     if (!row) return false;
+    if (isRakebackRowAccounted(row)) return false;
     return isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "");
   }
 
   function canRemoveRakebackRow(row) {
     if (!row || !rakebackBody) return false;
+    if (isRakebackRowAccounted(row)) return false;
     if (!isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "")) return false;
     if (row.getAttribute("data-rakeback-kind") !== "base") return true;
     var groupId = row.getAttribute("data-rakeback-group") || "";
