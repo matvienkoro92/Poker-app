@@ -603,6 +603,12 @@ body.admin-report-modal-open .bottom-nav {
   font-size: 13px;
   line-height: 1.2;
 }
+.admin-report-calculations__subtitle {
+  margin: -2px 0 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
 .admin-report-calculations__week {
   min-height: 16px;
   margin: -2px 0 6px;
