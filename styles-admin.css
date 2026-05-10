@@ -589,6 +589,7 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-calculations__side--right {
   display: grid;
   align-content: start;
+  gap: 8px;
 }
 .admin-report-calculations__figures {
   grid-column: 1 / -1;

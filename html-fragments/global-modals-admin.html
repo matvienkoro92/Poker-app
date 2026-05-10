@@ -412,6 +412,37 @@
               </div>
               <div class="admin-report-calculations__side admin-report-calculations__side--right">
                 <section class="admin-report-calculations__column">
+                  <h3 class="admin-report-calculations__title">Рейк</h3>
+                  <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                    <span>Рейк Покер21</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="8" placeholder="0" />
+                    <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                  </label>
+                  <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                    <span>Рейк Х-покер</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="9" placeholder="0" />
+                    <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                  </label>
+                  <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                    <span>Рейк Suprema</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="18" placeholder="0" />
+                    <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                  </label>
+                  <label class="admin-report-calculations__field admin-report-calculations__field--triple">
+                    <span>Рейк PPpoker</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="15" placeholder="0" />
+                    <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
+                  </label>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--total">
+                    <span>Итого рейк</span>
+                    <output id="adminReportFiguresRakeTotal">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                    <span>Итого -%</span>
+                    <output id="adminReportFiguresPercentTotal">0</output>
+                  </div>
+                </section>
+                <section class="admin-report-calculations__column">
                   <h3 class="admin-report-calculations__title">Проиграно/выиграно</h3>
                   <label class="admin-report-calculations__field">
                     <span>Покер21</span>
@@ -429,6 +460,10 @@
                     <span>PPpoker</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-winloss placeholder="0" />
                   </label>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--total">
+                    <span>Итого проиграно/выиграно</span>
+                    <output id="adminReportCalcWinLossTotal">0</output>
+                  </div>
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
@@ -440,33 +475,9 @@
                     <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
                   </div>
                 </div>
-                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
-                  <span>Рейк Покер21</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="8" placeholder="0" />
-                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
-                </label>
-                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
-                  <span>Рейк Х-покер</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="9" placeholder="0" />
-                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
-                </label>
-                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
-                  <span>Рейк Suprema</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="18" placeholder="0" />
-                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
-                </label>
-                <label class="admin-report-calculations__field admin-report-calculations__field--triple">
-                  <span>Рейк PPpoker</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="15" placeholder="0" />
-                  <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
-                </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--total">
-                  <span>Итого рейк</span>
-                  <output id="adminReportFiguresRakeTotal">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                  <span>Итого -%</span>
-                  <output id="adminReportFiguresPercentTotal">0</output>
+                  <span>Итого рейк по всем румам</span>
+                  <output id="adminReportFiguresRakeTotalMirror">0</output>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Рейкбек из отчета текущей недели</span>

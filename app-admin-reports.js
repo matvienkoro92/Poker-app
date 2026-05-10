@@ -31,6 +31,7 @@ function initAdminReportModal() {
   var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
   var calculationsWinLossInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-winloss]") : null;
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
+  var calculationsWinLossTotalEl = document.getElementById("adminReportCalcWinLossTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
   var calculationsBonusesEl = document.getElementById("adminReportCalcBonuses");
@@ -42,6 +43,7 @@ function initAdminReportModal() {
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
   var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;
   var figuresRakeTotalEl = document.getElementById("adminReportFiguresRakeTotal");
+  var figuresRakeTotalMirrorEl = document.getElementById("adminReportFiguresRakeTotalMirror");
   var figuresPercentTotalEl = document.getElementById("adminReportFiguresPercentTotal");
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
@@ -1927,16 +1929,29 @@ function initAdminReportModal() {
     updateCalculationGrandTotal();
   }
 
+  function getCalculationRoomWinLossTotal() {
+    var total = 0;
+    if (calculationsWinLossInputs && calculationsWinLossInputs.length) {
+      calculationsWinLossInputs.forEach(function (input) {
+        total += parseReportNumber(input ? input.value : "");
+      });
+    }
+    return total;
+  }
+
   function updateCalculationGrandTotal() {
     if (!calculationsGrandTotalEl) return;
     var totals = calculationWeekTotals || {};
+    var roomWinLossTotal = getCalculationRoomWinLossTotal();
     var grand =
       parseReportNumber(calculationCashTotal) +
+      roomWinLossTotal +
       parseReportNumber(totals.deposit) +
       parseReportNumber(totals.bonuses) +
       parseReportNumber(totals.rakeback) -
       parseReportNumber(totals.cashout) -
       parseReportNumber(totals.botExchipCashout);
+    if (calculationsWinLossTotalEl) calculationsWinLossTotalEl.textContent = formatReportRubleNumber(roomWinLossTotal);
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
@@ -1965,6 +1980,7 @@ function initAdminReportModal() {
     }
     var totals = calculationWeekTotals || {};
     if (figuresRakeTotalEl) figuresRakeTotalEl.textContent = formatReportRubleNumber(figuresRakeTotal);
+    if (figuresRakeTotalMirrorEl) figuresRakeTotalMirrorEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
     if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
     if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
@@ -2096,6 +2112,11 @@ function initAdminReportModal() {
 
   function setFiguresLocked(locked) {
     figuresSavedLocked = !!locked;
+    if (figuresRakeInputs && figuresRakeInputs.length) {
+      figuresRakeInputs.forEach(function (input) {
+        if (input) input.readOnly = figuresSavedLocked;
+      });
+    }
     if (figuresRoot) {
       figuresRoot.querySelectorAll("input").forEach(function (input) {
         input.readOnly = figuresSavedLocked;
@@ -2875,6 +2896,12 @@ function initAdminReportModal() {
     calculationsCashInputs.forEach(function (input) {
       input.addEventListener("input", updateCalculationCashTotal);
       input.addEventListener("change", updateCalculationCashTotal);
+    });
+  }
+  if (calculationsWinLossInputs && calculationsWinLossInputs.length) {
+    calculationsWinLossInputs.forEach(function (input) {
+      input.addEventListener("input", updateCalculationGrandTotal);
+      input.addEventListener("change", updateCalculationGrandTotal);
     });
   }
   if (figuresRakeInputs && figuresRakeInputs.length) {
