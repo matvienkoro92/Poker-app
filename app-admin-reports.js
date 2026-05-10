@@ -29,6 +29,7 @@ function initAdminReportModal() {
   var calculationsEditBtn = document.getElementById("adminReportCalcEditBtn");
   var calculationsSaveStatusEl = document.getElementById("adminReportCalcSaveStatus");
   var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
+  var calculationsWinLossInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-winloss]") : null;
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
@@ -2091,6 +2092,7 @@ function initAdminReportModal() {
     }
     return {
       cash: valuesFrom(calculationsCashInputs),
+      roomWinLoss: valuesFrom(calculationsWinLossInputs),
       rake: valuesFrom(figuresRakeInputs),
       romanPaid: figuresRomanPaidInput ? figuresRomanPaidInput.value : "",
       winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
@@ -2123,6 +2125,12 @@ function initAdminReportModal() {
     if (calculationsCashInputs && calculationsCashInputs.length) {
       calculationsCashInputs.forEach(function (input, index) {
         if (input) input.value = cash[index] != null ? cash[index] : "";
+      });
+    }
+    var roomWinLoss = Array.isArray(draft.roomWinLoss) ? draft.roomWinLoss : [];
+    if (calculationsWinLossInputs && calculationsWinLossInputs.length) {
+      calculationsWinLossInputs.forEach(function (input, index) {
+        if (input) input.value = roomWinLoss[index] != null ? roomWinLoss[index] : "";
       });
     }
     var rake = Array.isArray(draft.rake) ? draft.rake : [];
