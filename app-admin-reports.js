@@ -36,6 +36,7 @@ function initAdminReportModal() {
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
   var calculationsBonusesEl = document.getElementById("adminReportCalcBonuses");
   var calculationsRakebackEl = document.getElementById("adminReportCalcRakeback");
+  var calculationsRakeTotalEl = document.getElementById("adminReportCalcRakeTotal");
   var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
   var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
@@ -45,6 +46,7 @@ function initAdminReportModal() {
   var figuresRakeTotalEl = document.getElementById("adminReportFiguresRakeTotal");
   var figuresRakeTotalMirrorEl = document.getElementById("adminReportFiguresRakeTotalMirror");
   var figuresPercentTotalEl = document.getElementById("adminReportFiguresPercentTotal");
+  var figuresPercentTotalMirrorEl = document.getElementById("adminReportFiguresPercentTotalMirror");
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
   var figuresSalaryEl = document.getElementById("adminReportFiguresSalary");
@@ -1949,9 +1951,11 @@ function initAdminReportModal() {
       parseReportNumber(totals.deposit) +
       parseReportNumber(totals.bonuses) +
       parseReportNumber(totals.rakeback) -
+      parseReportNumber(figuresRakeTotal) -
       parseReportNumber(totals.cashout) -
       parseReportNumber(totals.botExchipCashout);
     if (calculationsWinLossTotalEl) calculationsWinLossTotalEl.textContent = formatReportRubleNumber(roomWinLossTotal);
+    if (calculationsRakeTotalEl) calculationsRakeTotalEl.textContent = formatReportRubleNumber(-figuresRakeTotal);
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
   }
 
@@ -1982,13 +1986,12 @@ function initAdminReportModal() {
     if (figuresRakeTotalEl) figuresRakeTotalEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresRakeTotalMirrorEl) figuresRakeTotalMirrorEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
+    if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportRubleNumber(figuresPercentTotal);
     if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
     if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
     if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportRubleNumber(totals.anyaSalary);
     if (figuresGrandTotalEl) {
       var grand =
-        figuresRakeTotal +
-        figuresPercentTotal -
         parseReportNumber(totals.rakeback) -
         parseReportNumber(totals.bonuses) -
         parseReportNumber(totals.anyaSalary) -
@@ -1998,6 +2001,7 @@ function initAdminReportModal() {
         getFiguresExtraAmountTotal();
       figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
     }
+    updateCalculationGrandTotal();
   }
 
   function setCalculationTotalsText(totals) {
@@ -2102,7 +2106,7 @@ function initAdminReportModal() {
     calculationsSavedLocked = !!locked;
     if (calculationsRoot) calculationsRoot.classList.toggle("admin-report-calculations--locked", calculationsSavedLocked);
     if (calculationsRoot) {
-      calculationsRoot.querySelectorAll("[data-admin-report-calc-cash], [data-admin-report-calc-winloss]").forEach(function (input) {
+      calculationsRoot.querySelectorAll("[data-admin-report-calc-cash], [data-admin-report-calc-winloss], [data-admin-report-figures-rake]").forEach(function (input) {
         input.readOnly = calculationsSavedLocked;
       });
     }
@@ -2112,11 +2116,6 @@ function initAdminReportModal() {
 
   function setFiguresLocked(locked) {
     figuresSavedLocked = !!locked;
-    if (figuresRakeInputs && figuresRakeInputs.length) {
-      figuresRakeInputs.forEach(function (input) {
-        if (input) input.readOnly = figuresSavedLocked;
-      });
-    }
     if (figuresRoot) {
       figuresRoot.querySelectorAll("input").forEach(function (input) {
         input.readOnly = figuresSavedLocked;

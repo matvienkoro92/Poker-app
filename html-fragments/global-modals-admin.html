@@ -354,8 +354,7 @@
               </div>
               <div class="admin-report-calculations__side admin-report-calculations__side--left">
                 <section class="admin-report-calculations__column">
-                  <h3 class="admin-report-calculations__title">Сколько должно получиться в кассе</h3>
-                  <p class="admin-report-calculations__subtitle">Было в кассе</p>
+                  <h3 class="admin-report-calculations__title">Было в кассе</h3>
                   <label class="admin-report-calculations__field">
                     <span>Касса в Покер21</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
@@ -395,6 +394,10 @@
                   <div class="admin-report-calculations__field admin-report-calculations__field--positive">
                     <span>Рейкбек</span>
                     <output id="adminReportCalcRakeback">0</output>
+                  </div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                    <span>Итого рейк</span>
+                    <output id="adminReportCalcRakeTotal">0</output>
                   </div>
                   <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                     <span>Выводов игроками</span>
@@ -478,6 +481,10 @@
                 <div class="admin-report-calculations__field admin-report-calculations__field--total">
                   <span>Итого рейк по всем румам</span>
                   <output id="adminReportFiguresRakeTotalMirror">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Процент от рейка</span>
+                  <output id="adminReportFiguresPercentTotalMirror">0</output>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Рейкбек из отчета текущей недели</span>
