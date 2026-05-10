@@ -700,6 +700,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-totals-modal__row:first-child {
   border-top: 0;
 }
+.admin-report-rakeback-totals-modal__section-title {
+  margin: 14px 0 2px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(202, 161, 84, 0.24);
+  color: #ffe7b0;
+  font-size: 16px;
+  font-weight: 800;
+}
 .admin-report-rakeback-totals-modal__room {
   min-width: 0;
   color: var(--text);

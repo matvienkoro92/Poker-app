@@ -332,9 +332,31 @@ function initAdminReportModal() {
     }).join("");
   }
 
+  function getRakebackTotalsByDate() {
+    if (!rakebackBody) return [];
+    var dateMap = {};
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
+      var rowStamp = getRakebackRowEntryAddedAt(row, index);
+      if (!Number.isFinite(rowStamp)) return;
+      var room = getRakebackRowRoom(row);
+      var roomAmount = Math.round(getRakebackRowAmount(row));
+      var rakeback = getRakebackReportAmount(room, roomAmount);
+      if (rakeback === 0) return;
+      var key = getRakebackMoscowDayKey(rowStamp);
+      if (!dateMap[key]) dateMap[key] = { key: key, stamp: rowStamp, rakeback: 0 };
+      dateMap[key].stamp = Math.max(dateMap[key].stamp, rowStamp);
+      dateMap[key].rakeback += rakeback;
+    });
+    return Object.keys(dateMap).map(function (key) {
+      return dateMap[key];
+    }).sort(function (a, b) {
+      return b.stamp - a.stamp;
+    });
+  }
+
   function renderRakebackTotalsModal() {
     if (!rakebackTotalsList) return;
-    rakebackTotalsList.innerHTML = RAKEBACK_ROOMS.map(function (room) {
+    var roomHtml = RAKEBACK_ROOMS.map(function (room) {
       var total = rakebackRoomTotals[room] || { display: 0, report: 0 };
       var multiplier = getRakebackRoomMultiplier(room);
       var amount = formatReportRubleNumber(total.report);
@@ -348,6 +370,14 @@ function initAdminReportModal() {
         formula +
       "</div>";
     }).join("");
+    var dateRows = getRakebackTotalsByDate();
+    var dateHtml = dateRows.length ? '<div class="admin-report-rakeback-totals-modal__section-title">Итого по датам</div>' + dateRows.map(function (day) {
+      return '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--date">' +
+        '<span class="admin-report-rakeback-totals-modal__room">' + escapeReportHtml(getRakebackDateSeparatorLabel(day.stamp)) + "</span>" +
+        '<span class="admin-report-rakeback-totals-modal__amount">' + escapeReportHtml(formatReportRubleNumber(day.rakeback)) + "</span>" +
+      "</div>";
+    }).join("") : "";
+    rakebackTotalsList.innerHTML = roomHtml + dateHtml;
   }
 
   function openRakebackTotalsModal() {
