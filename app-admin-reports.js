@@ -1817,6 +1817,7 @@ function initAdminReportModal() {
           return;
         }
         var weekdayOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+        var weekdayOrderDesc = weekdayOrder.slice().reverse();
         var DAY_MS = 24 * 60 * 60 * 1000;
         var WEEK_MS = 7 * DAY_MS;
         var MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -1913,7 +1914,7 @@ function initAdminReportModal() {
             if (!byDay[d]) byDay[d] = [];
             byDay[d].push(r);
           });
-          var daysToRender = weekdayOrder.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
+          var daysToRender = weekdayOrderDesc.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
           Object.keys(byDay).forEach(function (d) {
             if (weekdayOrder.indexOf(d) === -1) daysToRender.push(d);
           });
@@ -1951,7 +1952,7 @@ function initAdminReportModal() {
             if (!byDay[d]) byDay[d] = [];
             byDay[d].push(r);
           });
-          var daysToRender = weekdayOrder.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
+          var daysToRender = weekdayOrderDesc.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
           Object.keys(byDay).forEach(function (d) {
             if (weekdayOrder.indexOf(d) === -1) daysToRender.push(d);
           });
