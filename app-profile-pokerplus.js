@@ -7,6 +7,7 @@ function initProfilePokerPlus() {
   var unbindBtn = document.getElementById("profilePokerPlusUnbindBtn");
   var feedback = document.getElementById("profilePokerPlusFeedback");
   var form = document.getElementById("profilePokerPlusForm");
+  var bottomActions = document.getElementById("profilePokerPlusBottomActions");
   var emailRow = document.getElementById("profilePokerPlusEmailRow");
   var emailValue = document.getElementById("profilePokerPlusEmailValue");
   var linkedRow = document.getElementById("profilePokerPlusLinkedRow");
@@ -401,6 +402,7 @@ function initProfilePokerPlus() {
     pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     if (section && section.classList && !linked) section.classList.remove("profile-pokerplus-card--needs-key");
+    if (!linked) removePokerPlusRefreshKeyInlineForm();
     updateProfileStatusTextVisibility();
     input.hidden = !!linked;
     if (linked) input.value = "";
@@ -415,11 +417,49 @@ function initProfilePokerPlus() {
     unbindBtn.hidden = !linked;
   }
 
+  function removePokerPlusRefreshKeyInlineForm() {
+    var wrap = document.getElementById("profilePokerPlusRefreshKeyInline");
+    if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+  }
+
+  function ensurePokerPlusRefreshKeyInlineForm() {
+    if (!bottomActions) return null;
+    var existing = document.getElementById("profilePokerPlusRefreshKeyInline");
+    if (existing) return existing.querySelector("[data-profile-pokerplus-refresh-key]");
+    var wrap = document.createElement("div");
+    wrap.id = "profilePokerPlusRefreshKeyInline";
+    wrap.className = "profile-pokerplus-refresh-key-inline";
+    wrap.style.cssText = "grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:10px;width:100%;";
+    var keyInput = document.createElement("input");
+    keyInput.type = "text";
+    keyInput.className = "profile-chat-name__input";
+    keyInput.placeholder = "Ключ из Poker21";
+    keyInput.setAttribute("aria-label", "Ключ из Poker21 для обновления");
+    keyInput.setAttribute("autocomplete", "off");
+    keyInput.setAttribute("autocapitalize", "none");
+    keyInput.setAttribute("autocorrect", "off");
+    keyInput.setAttribute("spellcheck", "false");
+    keyInput.setAttribute("data-profile-pokerplus-refresh-key", "1");
+    var keyBtn = document.createElement("button");
+    keyBtn.type = "button";
+    keyBtn.className = "profile-visible-to-others__p21-save";
+    keyBtn.textContent = "Обновить по ключу";
+    keyBtn.addEventListener("click", function () {
+      if (input) input.value = normalizePokerPlusKeyInput(keyInput.value || "");
+      bindPokerPlus();
+    });
+    wrap.appendChild(keyInput);
+    wrap.appendChild(keyBtn);
+    bottomActions.insertBefore(wrap, refreshBtn || unbindBtn || null);
+    return keyInput;
+  }
+
   function setPokerPlusRefreshNeedsKeyMode() {
     if (!pokerPlusProfileLinked) return;
     if (section && section.classList) section.classList.add("profile-pokerplus-card--needs-key");
     input.hidden = false;
     if (form) form.style.setProperty("display", "flex", "important");
+    ensurePokerPlusRefreshKeyInlineForm();
     input.placeholder = "Ключ из Poker21 для обновления";
     input.setAttribute("aria-label", "Ключ из Poker21 для обновления");
     bindBtn.hidden = false;
@@ -526,7 +566,7 @@ function initProfilePokerPlus() {
     if (refresh) {
       body.refresh = "1";
       refreshCiphertext = pokerPlusProfileLinked
-        ? (readPokerPlusLocalCiphertext(pokerPlusAccountId) || normalizePokerPlusKeyInput(input && input.value ? input.value : ""))
+        ? (readPokerPlusLocalCiphertext(pokerPlusAccountId) || normalizePokerPlusKeyInput(input && input.value ? input.value : "") || normalizePokerPlusKeyInput(document.querySelector("[data-profile-pokerplus-refresh-key]") && document.querySelector("[data-profile-pokerplus-refresh-key]").value ? document.querySelector("[data-profile-pokerplus-refresh-key]").value : ""))
         : normalizePokerPlusKeyInput(input && input.value ? input.value : "");
       if (refreshCiphertext) {
         if (!pokerPlusProfileLinked) input.value = refreshCiphertext;
@@ -573,6 +613,7 @@ function initProfilePokerPlus() {
           setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
         } else if (refresh && refreshCiphertext) {
           if (section && section.classList) section.classList.remove("profile-pokerplus-card--needs-key");
+          removePokerPlusRefreshKeyInlineForm();
           input.value = "";
           setFeedback("Данные Poker21 обновлены, ключ сохранён.", false);
         } else if (refresh) {
@@ -627,6 +668,7 @@ function initProfilePokerPlus() {
         pokerPlusAccountId = data && data.accountId ? String(data.accountId || "").trim() : pokerPlusAccountId;
         savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
         renderProfile(data.profile, true);
+        removePokerPlusRefreshKeyInlineForm();
         notifyPokerPlusStatusChange(true, data.profile);
         setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
         input.value = "";
