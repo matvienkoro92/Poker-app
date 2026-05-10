@@ -1739,22 +1739,6 @@ function initAdminReportModal() {
         value: formatReportRubleNumber(exchipDep) + " - " + formatReportRubleNumber(exchipCashout) + " = " + formatReportRubleNumber(exchipDep - exchipCashout),
       });
     }
-    if (hasReportValue(it.botCryptoDep)) {
-      var botCrypto = parseReportNumber(it.botCryptoDep);
-      var usdtRate = getReportUsdtRate(it);
-      if (usdtRate > 0) {
-        var botCryptoUsd = botCrypto / usdtRate;
-        calcEntries.push({
-          label: "Итого бот крипта в долларах",
-          value: formatReportRubleNumber(botCrypto) + " / " + formatReportNumber(usdtRate) + " = " + formatReportNumber(botCryptoUsd) + " - 4% = " + formatReportNumber(botCryptoUsd * 0.96),
-        });
-      } else {
-        calcEntries.push({
-          label: "Итого бот крипта в долларах",
-          value: formatReportRubleNumber(botCrypto) + " / курс USDT не указан",
-        });
-      }
-    }
     pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
     pushEntry(expenseEntries, labels.rakeback, it.rakeback, true);
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
