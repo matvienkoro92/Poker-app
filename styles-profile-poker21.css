@@ -471,18 +471,18 @@
 #profilePokerPlusSection .profile-pokerplus-refresh-key-inline .profile-visible-to-others__p21-save {
   align-items: center;
   justify-content: center;
-  min-height: 56px;
-  padding: 14px 20px;
+  min-height: 44px;
+  padding: 10px 16px;
   color: #1b1304;
   background:
     linear-gradient(180deg, rgba(255, 244, 214, 0.98), rgba(245, 177, 75, 0.96));
   border: 1px solid rgba(255, 224, 155, 0.88);
-  border-radius: 14px;
+  border-radius: 11px;
   box-shadow:
     0 12px 30px rgba(245, 158, 11, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  font-size: clamp(18px, 4.6vw, 22px);
-  font-weight: 950;
+  font-size: clamp(15px, 3.9vw, 18px);
+  font-weight: 850;
   line-height: 1.1;
   text-align: center;
 }
