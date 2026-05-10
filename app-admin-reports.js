@@ -1660,6 +1660,18 @@ function initAdminReportModal() {
     return normalizeReportDetailName(name) === "рейкбек";
   }
 
+  function isReportAnyaSalaryFieldName(name) {
+    var normalized = normalizeReportDetailName(name);
+    return normalized === "аня зп" || normalized === "аня зарплата";
+  }
+
+  function getReportAnyaSalaryTotal(it) {
+    return getReportExtraEntries(it).reduce(function (sum, extra) {
+      if (!extra || !isReportAnyaSalaryFieldName(extra.name)) return sum;
+      return sum + parseReportNumber(extra.value);
+    }, 0);
+  }
+
   function getReportExtraEntries(it) {
     var entries = [];
     if (!it) return entries;
@@ -1712,6 +1724,16 @@ function initAdminReportModal() {
         "</div>"
       );
     });
+    var anyaSalaryTotal = getReportAnyaSalaryTotal(it);
+    if (anyaSalaryTotal !== 0) {
+      childTotal += anyaSalaryTotal;
+      childParts.push(
+        '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--anya-salary">' +
+          '<span class="admin-report-sent-detail__deposit-child-label">Аня ЗП</span>' +
+          '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(anyaSalaryTotal)) + "</span>" +
+        "</div>"
+      );
+    }
     if (childParts.length) {
       var depositValue = hasReportValue(it.deposit) ? parseReportNumber(it.deposit) : 0;
       childParts.push(
@@ -1761,7 +1783,7 @@ function initAdminReportModal() {
       var normalizedName = normalizeReportDetailName(extra.name);
       if (isReportManualRakebackFieldName(extra.name)) return;
       var entry = { label: extra.name, value: String(extra.value) };
-      if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
+      if (isReportAnyaSalaryFieldName(normalizedName)) anyaEntries.push(entry);
       else otherEntries.push(entry);
     });
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
