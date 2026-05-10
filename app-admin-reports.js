@@ -641,6 +641,7 @@ function initAdminReportModal() {
 
   function isRakebackTemplateLikeData(data) {
     if (!data) return false;
+    if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return false;
     return parseReportNumber(data.rake) === 0 &&
       parseReportNumber(data.roomAmount) === 0 &&
       parseReportNumber(data.chipAmount) === 0 &&
@@ -652,6 +653,7 @@ function initAdminReportModal() {
     var tr = document.createElement("tr");
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
     var groupId = data.groupId || nextRakebackGroupId();
+    var explicitZeroRake = data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true;
     var templateCreatedAt = getRakebackTemplateCreatedAt(data.room || "P21", data.playerId || data.id || "");
     var createdAt = getFirstRakebackTimeValue([data.createdAt, data.addedAt, data.created], Date.now());
     var createdAtIsTemplate = isRakebackTemplateEntryStamp(data.room || "P21", data.playerId || data.id || "", createdAt);
@@ -688,6 +690,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || getCurrentRakebackOwnerId());
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
     tr.setAttribute("data-rakeback-standard-at", String(standardAt));
+    if (explicitZeroRake) tr.setAttribute("data-rakeback-explicit-zero-rake", "1");
     if (Number.isFinite(entryAddedAt)) tr.setAttribute("data-rakeback-entry-added-at", String(entryAddedAt));
     if (accountedData) {
       tr.setAttribute("data-rakeback-accounted", "1");
@@ -827,6 +830,7 @@ function initAdminReportModal() {
     if (!row) return false;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     return row.getAttribute("data-rakeback-saved") === "1" ||
+      row.getAttribute("data-rakeback-explicit-zero-rake") === "1" ||
       isRakebackRowAccounted(row) ||
       parseReportNumber(rakeInput ? rakeInput.value : "") !== 0 ||
       Math.round(getRakebackRowAmount(row)) !== 0;
@@ -871,6 +875,18 @@ function initAdminReportModal() {
       return raw;
     }
     return getRakebackRowCreatedAt(row, fallbackIndex);
+  }
+
+  function syncExplicitZeroRakeMarker(target) {
+    if (!target || !target.matches || !target.matches("[data-rakeback-rake]")) return;
+    var row = target.closest ? target.closest("[data-rakeback-row]") : null;
+    if (!row) return;
+    var raw = target.value != null ? String(target.value).trim() : "";
+    if (raw && parseReportNumber(raw) === 0) {
+      row.setAttribute("data-rakeback-explicit-zero-rake", "1");
+    } else if (!raw || parseReportNumber(raw) !== 0) {
+      row.removeAttribute("data-rakeback-explicit-zero-rake");
+    }
   }
 
   function getRakebackGroupKeyRow(rows) {
@@ -1304,7 +1320,7 @@ function initAdminReportModal() {
     var id = idInput && idInput.value ? String(idInput.value).trim() : "";
     var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
     var percent = parseReportNumber(percentInput ? percentInput.value : "");
-    return !!id || rake !== 0 || percent !== 0;
+    return !!id || rake !== 0 || percent !== 0 || row.getAttribute("data-rakeback-explicit-zero-rake") === "1";
   }
 
   function hasRakebackRakeValue(row) {
@@ -1429,7 +1445,8 @@ function initAdminReportModal() {
       var amount = getRakebackReportAmount(room, roomAmount);
       var reportedAmount = getRakebackRowReportedAmount(row, amount);
       var discount15 = !!(discountInput && discountInput.checked);
-      var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0;
+      var explicitZeroRake = row.getAttribute("data-rakeback-explicit-zero-rake") === "1";
+      var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
@@ -1440,6 +1457,7 @@ function initAdminReportModal() {
         room: room,
         playerId: playerId,
         rake: rake,
+        rakeZero: explicitZeroRake,
         percent: percent,
         discount15: discount15,
         roomAmount: roomAmount,
@@ -3254,6 +3272,7 @@ function initAdminReportModal() {
     });
     rakebackBody.addEventListener("input", function (e) {
       markRakebackDraftLocalEdit();
+      syncExplicitZeroRakeMarker(e.target);
       var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
       ensureRakebackEntryAddedAt(inputRow, false);
       syncRakebackTable({ skipSort: true });
@@ -3262,6 +3281,7 @@ function initAdminReportModal() {
     rakebackBody.addEventListener("change", function (e) {
       markRakebackDraftLocalEdit();
       var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
+      syncExplicitZeroRakeMarker(e.target);
       if (e.target && e.target.matches && e.target.matches("[data-rakeback-rake],[data-rakeback-percent]") && parseReportNumber(e.target.value) === 0) {
         e.target.value = "";
       }
