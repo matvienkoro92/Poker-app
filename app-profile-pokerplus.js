@@ -555,7 +555,7 @@ function initProfilePokerPlus() {
 
   function pokerPlusFetchJsonWithTimeout(url, options, timeoutMs) {
     options = options || {};
-    timeoutMs = timeoutMs || 20000;
+    timeoutMs = timeoutMs || 5000;
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = null;
     if (controller) {
@@ -596,7 +596,7 @@ function initProfilePokerPlus() {
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
       body: JSON.stringify(body),
-    }, refresh ? 60000 : 20000)
+    }, 5000)
       .then(function (data) {
         if (!data || !data.ok) {
           renderProfile(null, false);
@@ -676,7 +676,7 @@ function initProfilePokerPlus() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
-    }, 60000)
+    }, 5000)
       .then(function (data) {
         if (!data || !data.ok) {
           setFeedback((data && data.error) || "Не удалось привязать Poker21.", true);
@@ -724,7 +724,7 @@ function initProfilePokerPlus() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({})),
-    }, 20000)
+    }, 5000)
       .then(function (data) {
         if (!data || !data.ok) {
           setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
