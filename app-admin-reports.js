@@ -852,6 +852,18 @@ function initAdminReportModal() {
     return stamp;
   }
 
+  function moveAccountedRakebackRowToCurrentDraft(row) {
+    if (!row || row.getAttribute("data-rakeback-accounted-editing") !== "1") return false;
+    if (!canManageAllRakebackRows()) return false;
+    row.removeAttribute("data-rakeback-accounted-editing");
+    row.removeAttribute("data-rakeback-accounted");
+    row.removeAttribute("data-rakeback-reported-at");
+    row.removeAttribute("data-rakeback-report-id");
+    row.removeAttribute("data-rakeback-reported-amount");
+    replaceRakebackGroupEntryAddedAt(row, Date.now());
+    return true;
+  }
+
   function getRakebackRowEntryAddedAt(row, fallbackIndex) {
     var raw = row ? parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || "") : NaN;
     if (Number.isFinite(raw)) return raw;
@@ -3241,13 +3253,17 @@ function initAdminReportModal() {
     });
     rakebackBody.addEventListener("input", function (e) {
       markRakebackDraftLocalEdit();
-      ensureRakebackEntryAddedAt(e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null, false);
+      var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
+      moveAccountedRakebackRowToCurrentDraft(inputRow);
+      ensureRakebackEntryAddedAt(inputRow, false);
       syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("change", function (e) {
       markRakebackDraftLocalEdit();
-      ensureRakebackEntryAddedAt(e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null, false);
+      var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
+      moveAccountedRakebackRowToCurrentDraft(changeRow);
+      ensureRakebackEntryAddedAt(changeRow, false);
       syncRakebackTable();
       saveRakebackDraftRows();
     });
@@ -3281,6 +3297,7 @@ function initAdminReportModal() {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
         if (!saveRow || !isRakebackRowFilled(saveRow)) return;
         markRakebackDraftLocalEdit();
+        moveAccountedRakebackRowToCurrentDraft(saveRow);
         ensureRakebackEntryAddedAt(saveRow, true);
         syncRakebackTable();
         setRakebackRowSaved(saveRow, true);
@@ -3290,8 +3307,12 @@ function initAdminReportModal() {
       }
       var editBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-edit]") : null;
       if (editBtn) {
+        var editRow = editBtn.closest("[data-rakeback-row]");
         markRakebackDraftLocalEdit();
-        setRakebackRowSaved(editBtn.closest("[data-rakeback-row]"), false);
+        if (isRakebackRowAccounted(editRow) && canManageAllRakebackRows()) {
+          editRow.setAttribute("data-rakeback-accounted-editing", "1");
+        }
+        setRakebackRowSaved(editRow, false);
         saveRakebackDraftRows();
         showRakebackStatus("");
         return;
