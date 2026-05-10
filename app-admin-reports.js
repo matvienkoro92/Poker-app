@@ -1317,7 +1317,7 @@ function initAdminReportModal() {
       saveBtn.disabled = !filled;
       saveBtn.hidden = saved || !filled;
     }
-    if (editBtn) editBtn.hidden = !saved || accounted;
+    if (editBtn) editBtn.hidden = !saved || (accounted && !canManageAllRakebackRows());
     if (addBtn) {
       var canAdd = canAddRakebackAddon(row);
       addBtn.disabled = !canAdd;
@@ -1382,13 +1382,13 @@ function initAdminReportModal() {
 
   function canEditRakebackRow(row) {
     if (!row) return false;
-    if (isRakebackRowAccounted(row)) return false;
+    if (isRakebackRowAccounted(row) && !canManageAllRakebackRows()) return false;
     return isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "");
   }
 
   function canRemoveRakebackRow(row) {
     if (!row || !rakebackBody) return false;
-    if (isRakebackRowAccounted(row)) return false;
+    if (isRakebackRowAccounted(row) && !canManageAllRakebackRows()) return false;
     if (!isCurrentRakebackOwner(row.getAttribute("data-rakeback-owner") || "")) return false;
     if (row.getAttribute("data-rakeback-kind") !== "base") return true;
     var groupId = row.getAttribute("data-rakeback-group") || "";
@@ -1895,6 +1895,7 @@ function initAdminReportModal() {
       date: "shared",
       rakebackRows: rows,
       deletedTemplates: deletedTemplates,
+      allowAccountedRakebackOverwrite: canManageAllRakebackRows(),
     });
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
       method: "POST",
