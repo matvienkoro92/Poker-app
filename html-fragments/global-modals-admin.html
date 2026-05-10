@@ -325,9 +325,17 @@
                 <span class="admin-report-rakeback-summary__label" id="adminReportRakebackRoomTotalLabel">Итого Покер21</span>
                 <span class="admin-report-rakeback-summary__value" id="adminReportRakebackRoomTotal">0</span>
               </div>
-              <div class="admin-report-rakeback-summary__row admin-report-rakeback-summary__row--grand">
+              <button type="button" class="admin-report-rakeback-summary__row admin-report-rakeback-summary__row--grand" id="adminReportRakebackGrandTotalBtn" aria-haspopup="dialog" aria-controls="adminReportRakebackTotalsModal" aria-expanded="false">
                 <span class="admin-report-rakeback-summary__label">Итого по всем румам</span>
                 <span class="admin-report-rakeback-summary__value" id="adminReportRakebackTotal">0</span>
+              </button>
+            </div>
+            <div class="admin-report-rakeback-totals-modal" id="adminReportRakebackTotalsModal" role="dialog" aria-label="Итого по вкладкам рейкбека" hidden>
+              <div class="admin-report-rakeback-totals-modal__backdrop" id="adminReportRakebackTotalsBackdrop"></div>
+              <div class="admin-report-rakeback-totals-modal__box">
+                <button type="button" class="admin-report-rakeback-totals-modal__close" id="adminReportRakebackTotalsClose" aria-label="Закрыть">×</button>
+                <h3 class="admin-report-rakeback-totals-modal__title">Итого по вкладкам</h3>
+                <div class="admin-report-rakeback-totals-modal__list" id="adminReportRakebackTotalsList"></div>
               </div>
             </div>
           </div>

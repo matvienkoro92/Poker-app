@@ -584,6 +584,27 @@ body.admin-report-modal-open .bottom-nav {
   justify-content: space-between;
   gap: 12px;
 }
+button.admin-report-rakeback-summary__row {
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+button.admin-report-rakeback-summary__row:hover .admin-report-rakeback-summary__label,
+button.admin-report-rakeback-summary__row:focus-visible .admin-report-rakeback-summary__label {
+  color: var(--text);
+}
+button.admin-report-rakeback-summary__row:focus-visible {
+  outline: 2px solid rgba(255, 231, 176, 0.7);
+  outline-offset: 3px;
+}
 .admin-report-rakeback-summary__row--room {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -609,6 +630,93 @@ body.admin-report-modal-open .bottom-nav {
   font-weight: 800;
   color: #ffe7b0;
   font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-totals-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.admin-report-rakeback-totals-modal[hidden] {
+  display: none;
+}
+.admin-report-rakeback-totals-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+}
+.admin-report-rakeback-totals-modal__box {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: min(72vh, 520px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(202, 161, 84, 0.32);
+  border-radius: 10px;
+  background: #11141b;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.46);
+}
+.admin-report-rakeback-totals-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.admin-report-rakeback-totals-modal__close:hover,
+.admin-report-rakeback-totals-modal__close:focus-visible {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+.admin-report-rakeback-totals-modal__title {
+  margin: 0 40px 14px 0;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.2;
+}
+.admin-report-rakeback-totals-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-report-rakeback-totals-modal__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid rgba(202, 161, 84, 0.16);
+}
+.admin-report-rakeback-totals-modal__row:first-child {
+  border-top: 0;
+}
+.admin-report-rakeback-totals-modal__room {
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.admin-report-rakeback-totals-modal__amount {
+  color: #ffe7b0;
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-totals-modal__formula {
+  grid-column: 1 / -1;
+  margin-top: -4px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 .admin-report-rakeback-room-tabs {
   display: grid;

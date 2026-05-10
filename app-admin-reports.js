@@ -19,10 +19,16 @@ function initAdminReportModal() {
   var rakebackRoomTotalEl = document.getElementById("adminReportRakebackRoomTotal");
   var rakebackTotalInput = document.getElementById("adminReportRakeback");
   var rakebackStatusEl = document.getElementById("adminReportRakebackStatus");
+  var rakebackGrandTotalBtn = document.getElementById("adminReportRakebackGrandTotalBtn");
+  var rakebackTotalsModal = document.getElementById("adminReportRakebackTotalsModal");
+  var rakebackTotalsList = document.getElementById("adminReportRakebackTotalsList");
+  var rakebackTotalsClose = document.getElementById("adminReportRakebackTotalsClose");
+  var rakebackTotalsBackdrop = document.getElementById("adminReportRakebackTotalsBackdrop");
   var editingReportId = null;
   var editingReport = null;
   var rakebackGroupSeq = 0;
   var activeRakebackRoom = "P21";
+  var rakebackRoomTotals = {};
   var rakebackDraftSaveTimer = null;
   var rakebackDraftRefreshTimer = null;
   var rakebackStatusClearTimer = null;
@@ -31,6 +37,7 @@ function initAdminReportModal() {
   var savingRakebackDraft = false;
   var rakebackDragState = null;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
+  var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -320,10 +327,40 @@ function initAdminReportModal() {
 
   function getRakebackRoomOptions(selected) {
     selected = normalizeRakebackRoom(selected);
-    var rooms = ["P21", "X", "Supr", "PP"];
-    return rooms.map(function (room) {
+    return RAKEBACK_ROOMS.map(function (room) {
       return '<option value="' + escapeReportHtml(room) + '"' + (room === selected ? " selected" : "") + ">" + escapeReportHtml(room) + "</option>";
     }).join("");
+  }
+
+  function renderRakebackTotalsModal() {
+    if (!rakebackTotalsList) return;
+    rakebackTotalsList.innerHTML = RAKEBACK_ROOMS.map(function (room) {
+      var total = rakebackRoomTotals[room] || { display: 0, report: 0 };
+      var multiplier = getRakebackRoomMultiplier(room);
+      var amount = formatReportRubleNumber(total.report);
+      var formula = "";
+      if (multiplier !== 1 && parseReportNumber(total.display) !== 0) {
+        formula = '<span class="admin-report-rakeback-totals-modal__formula">' + escapeReportHtml(formatRakebackRoomTotal(room, total.display, total.report)) + "</span>";
+      }
+      return '<div class="admin-report-rakeback-totals-modal__row">' +
+        '<span class="admin-report-rakeback-totals-modal__room">' + escapeReportHtml(getRakebackRoomLabel(room)) + "</span>" +
+        '<span class="admin-report-rakeback-totals-modal__amount">' + escapeReportHtml(amount) + "</span>" +
+        formula +
+      "</div>";
+    }).join("");
+  }
+
+  function openRakebackTotalsModal() {
+    if (!rakebackTotalsModal) return;
+    renderRakebackTotalsModal();
+    rakebackTotalsModal.hidden = false;
+    if (rakebackGrandTotalBtn) rakebackGrandTotalBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeRakebackTotalsModal() {
+    if (!rakebackTotalsModal) return;
+    rakebackTotalsModal.hidden = true;
+    if (rakebackGrandTotalBtn) rakebackGrandTotalBtn.setAttribute("aria-expanded", "false");
   }
 
   function normalizeRakebackRowColor(color) {
@@ -1262,6 +1299,9 @@ function initAdminReportModal() {
     insertRakebackDateSeparators();
     var collected = collectRakebackRows(false, false);
     var roomTotals = {};
+    RAKEBACK_ROOMS.forEach(function (room) {
+      roomTotals[room] = { display: 0, report: 0 };
+    });
     collected.forEach(function (row) {
       var room = normalizeRakebackRoom(row.room);
       if (!roomTotals[room]) roomTotals[room] = { display: 0, report: 0 };
@@ -1273,10 +1313,12 @@ function initAdminReportModal() {
     }, 0);
     var reportRakebackTotal = sumRakebackReportRows(getUnaccountedRakebackReportRows());
     var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0 };
+    rakebackRoomTotals = roomTotals;
     if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = "Итого " + getRakebackRoomLabel(activeRakebackRoom);
     if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = formatRakebackRoomTotal(activeRakebackRoom, activeTotal.display, activeTotal.report);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportRubleNumber(total);
     if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
+    if (rakebackTotalsModal && !rakebackTotalsModal.hidden) renderRakebackTotalsModal();
     showRakebackStatus("");
     return reportRakebackTotal;
   }
@@ -2264,6 +2306,7 @@ function initAdminReportModal() {
 
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
+    closeRakebackTotalsModal();
     stopRakebackDraftRefresh();
     if (document.documentElement) document.documentElement.classList.remove("admin-report-modal-open");
     if (document.body) {
@@ -2296,6 +2339,9 @@ function initAdminReportModal() {
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
+  if (rakebackGrandTotalBtn) rakebackGrandTotalBtn.addEventListener("click", openRakebackTotalsModal);
+  if (rakebackTotalsClose) rakebackTotalsClose.addEventListener("click", closeRakebackTotalsModal);
+  if (rakebackTotalsBackdrop) rakebackTotalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
   if (tabs && tabs.length) {
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
