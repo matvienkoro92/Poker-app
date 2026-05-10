@@ -714,11 +714,13 @@ function initAdminReportModal() {
     });
   }
 
-  function getRakebackDateGroupTotals(groups) {
+  function getRakebackDateGroupTotals(groups, dayKey) {
     var totals = { rake: 0, rakeback: 0 };
     (groups || []).forEach(function (group) {
-      (group && group.rows ? group.rows : []).forEach(function (row) {
+      (group && group.rows ? group.rows : []).forEach(function (row, index) {
         if (!row || row.hidden) return;
+        var rowStamp = getRakebackRowEntryAddedAt(row, index);
+        if (!Number.isFinite(rowStamp) || getRakebackMoscowDayKey(rowStamp) !== dayKey) return;
         var room = getRakebackRowRoom(row);
         var roomAmount = Math.round(getRakebackRowAmount(row));
         totals.rake += getRakebackRowCalculationBase(row);
@@ -768,7 +770,7 @@ function initAdminReportModal() {
       var key = getRakebackMoscowDayKey(stamp);
       if (key === lastKey) return;
       lastKey = key;
-      rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp), getRakebackDateGroupTotals(dayGroups[key] ? dayGroups[key].groups : [])), group.rows[0]);
+      rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp), getRakebackDateGroupTotals(dayGroups[key] ? dayGroups[key].groups : [], key)), group.rows[0]);
     });
   }
 
