@@ -641,7 +641,7 @@ function initProfilePokerPlus() {
       })
       .catch(function (err) {
         var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
-        setFeedback(refresh ? (aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже, старые данные оставили." : "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже.") : POKER_NET_ERR, true);
+        setFeedback(refresh ? (aborted ? "Не успели получить ответ за 15 секунд. Попробуйте еще раз, старые данные оставили." : "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже.") : POKER_NET_ERR, true);
         renderPokerPlusStatsFallbackIfVisible();
       })
       .finally(function () {
@@ -692,7 +692,7 @@ function initProfilePokerPlus() {
       })
       .catch(function (err) {
         var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
-        setFeedback(aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже." : POKER_NET_ERR, true);
+        setFeedback(aborted ? "Не успели получить ответ за 15 секунд. Попробуйте еще раз." : POKER_NET_ERR, true);
       })
       .finally(function () {
         bindBtn.disabled = false;
@@ -739,7 +739,7 @@ function initProfilePokerPlus() {
       })
       .catch(function (err) {
         var aborted = err && (err.name === "AbortError" || /abort/i.test(String(err.message || "")));
-        setFeedback(aborted ? "Poker21 долго не отвечает. Попробуйте еще раз чуть позже." : POKER_NET_ERR, true);
+        setFeedback(aborted ? "Не успели получить ответ за 10 секунд. Попробуйте еще раз." : POKER_NET_ERR, true);
       })
       .finally(function () {
         bindBtn.disabled = false;
