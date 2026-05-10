@@ -969,6 +969,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 800;
   line-height: 1.2;
 }
+.admin-report-rakeback-date-separator small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
 .admin-report-rakeback-drag-active,
 .admin-report-rakeback-drag-active * {
   cursor: grabbing !important;

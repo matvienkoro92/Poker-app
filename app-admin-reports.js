@@ -714,15 +714,33 @@ function initAdminReportModal() {
     });
   }
 
-  function createRakebackDateSeparator(label) {
+  function getRakebackDateGroupTotals(groups) {
+    var totals = { rake: 0, rakeback: 0 };
+    (groups || []).forEach(function (group) {
+      (group && group.rows ? group.rows : []).forEach(function (row) {
+        if (!row || row.hidden) return;
+        var room = getRakebackRowRoom(row);
+        var roomAmount = Math.round(getRakebackRowAmount(row));
+        totals.rake += getRakebackRowCalculationBase(row);
+        totals.rakeback += getRakebackReportAmount(room, roomAmount);
+      });
+    });
+    return totals;
+  }
+
+  function createRakebackDateSeparator(label, totals) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
     var span = document.createElement("span");
+    var meta = document.createElement("small");
     tr.className = "admin-report-rakeback-date-separator";
     tr.setAttribute("data-rakeback-date-separator", "");
     td.colSpan = 7;
     span.textContent = label || "";
+    totals = totals || { rake: 0, rakeback: 0 };
+    meta.textContent = "Рейк " + formatReportRubleNumber(totals.rake) + " · РБ " + formatReportRubleNumber(totals.rakeback);
     td.appendChild(span);
+    td.appendChild(meta);
     tr.appendChild(td);
     return tr;
   }
@@ -730,15 +748,27 @@ function initAdminReportModal() {
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
     if (!rakebackBody || (mode !== "created" && mode !== "standard")) return;
+    var dayGroups = {};
+    var visibleGroups = getRakebackVisibleGroups();
+    visibleGroups.forEach(function (group, index) {
+      if (!group || !group.rows || !group.rows.length) return;
+      var stamp = getRakebackGroupEntryAddedAt(group, index);
+      if (!Number.isFinite(stamp)) return;
+      var key = getRakebackMoscowDayKey(stamp);
+      if (!dayGroups[key]) {
+        dayGroups[key] = { stamp: stamp, groups: [] };
+      }
+      dayGroups[key].groups.push(group);
+    });
     var lastKey = "";
-    getRakebackVisibleGroups().forEach(function (group, index) {
+    visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var key = getRakebackMoscowDayKey(stamp);
       if (key === lastKey) return;
       lastKey = key;
-      rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp)), group.rows[0]);
+      rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp), getRakebackDateGroupTotals(dayGroups[key] ? dayGroups[key].groups : [])), group.rows[0]);
     });
   }
 
