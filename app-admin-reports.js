@@ -599,6 +599,19 @@ function initAdminReportModal() {
     return getRakebackRowCreatedAt(row, fallbackIndex);
   }
 
+  function getRakebackGroupKeyRow(rows) {
+    rows = Array.isArray(rows) ? rows : [];
+    return rows.find(function (row) {
+      return row && row.getAttribute("data-rakeback-kind") !== "addon";
+    }) || rows[0] || null;
+  }
+
+  function getRakebackGroupEntryAddedAt(group, fallbackIndex) {
+    if (!group || !group.rows || !group.rows.length) return NaN;
+    var keyRow = group.keyRow || getRakebackGroupKeyRow(group.rows);
+    return getRakebackRowEntryAddedAt(keyRow, fallbackIndex);
+  }
+
   function getRakebackMoscowDayKey(ts) {
     ts = Number(ts);
     if (!Number.isFinite(ts)) ts = Date.now();
@@ -640,12 +653,9 @@ function initAdminReportModal() {
   function insertRakebackDateSeparators() {
     if (!rakebackBody || getRakebackSortMode() !== "created") return;
     var lastKey = "";
-    getRakebackVisibleGroups().forEach(function (group) {
+    getRakebackVisibleGroups().forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
-      var stamp = group.rows.reduce(function (max, row, index) {
-        var value = getRakebackRowEntryAddedAt(row, index);
-        return Number.isFinite(value) ? Math.max(max, value) : max;
-      }, -Infinity);
+      var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var key = getRakebackMoscowDayKey(stamp);
       if (key === lastKey) return;
@@ -687,8 +697,10 @@ function initAdminReportModal() {
       groupMap[groupId].entryAddedAt = Math.max(groupMap[groupId].entryAddedAt, getRakebackRowEntryAddedAt(row, index));
       groupMap[groupId].hasEntryTime = groupMap[groupId].hasEntryTime || hasRakebackRowEntryTimeData(row);
     });
-    groups.forEach(function (group) {
-      group.keyRow = group.rows.find(function (row) { return row.getAttribute("data-rakeback-kind") !== "addon"; }) || group.rows[0];
+    groups.forEach(function (group, index) {
+      group.keyRow = getRakebackGroupKeyRow(group.rows);
+      group.createdAt = getRakebackRowCreatedAt(group.keyRow, index);
+      group.entryAddedAt = getRakebackGroupEntryAddedAt(group, index);
     });
     groups.sort(function (a, b) {
       var diff = 0;
@@ -1106,9 +1118,10 @@ function initAdminReportModal() {
     });
   }
 
-  function markUnaccountedRakebackRowsAccounted(reportId) {
+  function markUnaccountedRakebackRowsAccounted(reportId, reportedAtOverride) {
     if (!rakebackBody) return;
-    var reportedAt = new Date().toISOString();
+    var parsedReportedAt = parseRakebackTimeValue(reportedAtOverride);
+    var reportedAt = Number.isFinite(parsedReportedAt) ? new Date(parsedReportedAt).toISOString() : new Date().toISOString();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
       if (isRakebackRowAccounted(row)) return;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
@@ -1116,6 +1129,9 @@ function initAdminReportModal() {
       if (!isRakebackRowFilled(row)) return;
       row.setAttribute("data-rakeback-accounted", "1");
       row.setAttribute("data-rakeback-reported-at", reportedAt);
+      if (!Number.isFinite(parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || ""))) {
+        row.setAttribute("data-rakeback-entry-added-at", reportedAt);
+      }
       if (reportId) row.setAttribute("data-rakeback-report-id", String(reportId));
     });
   }
@@ -2609,7 +2625,7 @@ function initAdminReportModal() {
           if (data && data.ok) {
             var accountedRakebackRows = null;
             if (!editingReportId) {
-              markUnaccountedRakebackRowsAccounted(data.report && data.report.id);
+              markUnaccountedRakebackRowsAccounted(data.report && data.report.id, data.report && data.report.createdAt);
               syncRakebackTable();
               accountedRakebackRows = collectRakebackRows(false, false);
               saveLocalRakebackDraftRows(accountedRakebackRows);
