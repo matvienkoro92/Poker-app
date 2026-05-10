@@ -89,6 +89,7 @@ function initAdminReportModal() {
     "1053772", "1285806", "1611851", "630124", "1377722", "1575192", "1570839", "1102639",
     "725076", "885558", "1073571", "1459747", "802380", "1509751", "1411436", "1308425"
   ];
+  var RAKEBACK_TEMPLATE_CREATED_AT = Date.parse("2026-05-08T22:20:00+03:00");
   var RAKEBACK_ROW_COLORS = [
     { value: "#4a3205", label: "Золотой мягкий" },
     { value: "#73510b", label: "Золотой средний" },
@@ -403,12 +404,41 @@ function initAdminReportModal() {
     return fallback;
   }
 
+  function getRakebackTemplateIdsForRoom(room) {
+    var normalizedRoom = normalizeRakebackRoom(room || "P21");
+    if (normalizedRoom === "P21") return P21_RAKEBACK_TEMPLATE_IDS;
+    if (normalizedRoom === "X") return X_RAKEBACK_TEMPLATE_IDS;
+    if (normalizedRoom === "PP") return PP_RAKEBACK_TEMPLATE_IDS;
+    if (normalizedRoom === "Supr") return SUPR_RAKEBACK_TEMPLATE_IDS;
+    return [];
+  }
+
+  function getRakebackTemplateCreatedAt(room, playerId) {
+    playerId = String(playerId || "").trim();
+    if (!playerId) return NaN;
+    var ids = getRakebackTemplateIdsForRoom(room);
+    return ids.indexOf(playerId) !== -1 ? RAKEBACK_TEMPLATE_CREATED_AT : NaN;
+  }
+
+  function isRakebackTemplateLikeData(data) {
+    if (!data) return false;
+    return !data.saved && !data.accounted && !data.reportedAt && !data.reportId &&
+      parseReportNumber(data.rake) === 0 &&
+      parseReportNumber(data.roomAmount) === 0 &&
+      parseReportNumber(data.chipAmount) === 0 &&
+      parseReportNumber(data.amount) === 0;
+  }
+
   function createRakebackRow(data) {
     data = data || {};
     var tr = document.createElement("tr");
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
     var groupId = data.groupId || nextRakebackGroupId();
+    var templateCreatedAt = getRakebackTemplateCreatedAt(data.room || "P21", data.playerId || data.id || "");
     var createdAt = getFirstRakebackTimeValue([data.createdAt, data.addedAt, data.created], Date.now());
+    if (Number.isFinite(templateCreatedAt) && isRakebackTemplateLikeData(data)) {
+      createdAt = Math.min(createdAt, templateCreatedAt);
+    }
     var standardAt = getFirstRakebackTimeValue([data.standardAt, data.orderAt, data.sortAt], createdAt);
     var hasInitialEntryData = data.saved || data.accounted || data.reportedAt || data.reportId ||
       parseReportNumber(data.rake) !== 0 || parseReportNumber(data.roomAmount) !== 0 ||
@@ -420,6 +450,9 @@ function initAdminReportModal() {
     }
     if (hasInitialEntryData && Number.isFinite(createdAt) && (!Number.isFinite(entryAddedAt) || createdAt < entryAddedAt)) {
       entryAddedAt = createdAt;
+    }
+    if (!Number.isFinite(entryAddedAt) && Number.isFinite(templateCreatedAt) && isRakebackTemplateLikeData(data)) {
+      entryAddedAt = templateCreatedAt;
     }
     if (!Number.isFinite(entryAddedAt) && hasInitialEntryData) {
       entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.createdAt, data.created, data.reportedAt], createdAt);
@@ -651,7 +684,8 @@ function initAdminReportModal() {
   }
 
   function insertRakebackDateSeparators() {
-    if (!rakebackBody || getRakebackSortMode() !== "created") return;
+    var mode = getRakebackSortMode();
+    if (!rakebackBody || (mode !== "created" && mode !== "standard")) return;
     var lastKey = "";
     getRakebackVisibleGroups().forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
@@ -934,7 +968,13 @@ function initAdminReportModal() {
     var addedTemplates = false;
     playerIds.forEach(function (playerId) {
       if (existingIds[playerId]) return;
-      rakebackBody.appendChild(createRakebackRow({ kind: "base", room: normalizedRoom, playerId: playerId }));
+      rakebackBody.appendChild(createRakebackRow({
+        kind: "base",
+        room: normalizedRoom,
+        playerId: playerId,
+        createdAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
+        entryAddedAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
+      }));
       existingIds[playerId] = true;
       addedTemplates = true;
     });
