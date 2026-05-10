@@ -69,6 +69,9 @@ function initAdminReportModal() {
   var figuresPercentTotal = 0;
   var calculationsSavedLocked = false;
   var calculationsStatusTimer = null;
+  var sentReportsLoadedAt = 0;
+  var sentReportsLoading = false;
+  var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   if (!btn || !modal) return;
@@ -2307,26 +2310,31 @@ function initAdminReportModal() {
     return parts.join("");
   }
 
-  function loadSentReports() {
+  function loadSentReports(forceRefresh) {
     if (!sentList) return;
     if (!canViewSentReports()) {
       sentList.innerHTML = "";
       return;
     }
+    if (!forceRefresh && sentReportsLoading) return;
+    if (!forceRefresh && sentReportsLoadedAt && sentList.innerHTML && Date.now() - sentReportsLoadedAt < SENT_REPORTS_CACHE_TTL_MS) return;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
       return;
     }
     sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
+    sentReportsLoading = true;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        sentReportsLoading = false;
         if (!sentList) return;
         var items = (data && data.ok && data.reports) ? data.reports : [];
         if (!Array.isArray(items) || items.length === 0) {
           sentList.innerHTML = '<p class="admin-report-sent-empty">Пока нет отправленных отчётов.</p>';
+          sentReportsLoadedAt = Date.now();
           return;
         }
         var weekdayOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
@@ -2594,6 +2602,7 @@ function initAdminReportModal() {
         }
 
         sentList.innerHTML = html.join("");
+        sentReportsLoadedAt = Date.now();
 
         var reportById = {};
         items.forEach(function (r) { reportById[r.id] = r; });
@@ -2731,7 +2740,7 @@ function initAdminReportModal() {
               })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                  if (data && data.ok) loadSentReports();
+                  if (data && data.ok) loadSentReports(true);
                   else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
                 })
                 .catch(function () {
@@ -2747,6 +2756,7 @@ function initAdminReportModal() {
         });
       })
       .catch(function () {
+        sentReportsLoading = false;
         if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
       });
   }
@@ -3244,7 +3254,7 @@ function initAdminReportModal() {
               loadSharedRakebackDraftRows();
             }
             if (canViewSentReports()) {
-              loadSentReports();
+              loadSentReports(true);
               setActiveTab("sent");
             } else if (tg && tg.showAlert) {
               tg.showAlert("Отчёт отправлен.");
