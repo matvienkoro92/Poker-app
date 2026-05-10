@@ -3266,7 +3266,7 @@ function initAdminReportModal() {
         e.target.value = "";
       }
       ensureRakebackEntryAddedAt(changeRow, false);
-      syncRakebackTable();
+      syncRakebackTable({ skipSort: true });
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("focusin", function (e) {
