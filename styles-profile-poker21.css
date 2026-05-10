@@ -467,6 +467,35 @@
 #profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusBindBtn {
   display: inline-flex !important;
 }
+#profilePokerPlusSection #profilePokerPlusBindBtn,
+#profilePokerPlusSection .profile-pokerplus-refresh-key-inline .profile-visible-to-others__p21-save {
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 14px 20px;
+  color: #1b1304;
+  background:
+    linear-gradient(180deg, rgba(255, 244, 214, 0.98), rgba(245, 177, 75, 0.96));
+  border: 1px solid rgba(255, 224, 155, 0.88);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 30px rgba(245, 158, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  font-size: clamp(18px, 4.6vw, 22px);
+  font-weight: 950;
+  line-height: 1.1;
+  text-align: center;
+}
+#profilePokerPlusSection #profilePokerPlusBindBtn:hover:not(:disabled),
+#profilePokerPlusSection .profile-pokerplus-refresh-key-inline .profile-visible-to-others__p21-save:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+#profilePokerPlusSection #profilePokerPlusBindBtn:active:not(:disabled),
+#profilePokerPlusSection .profile-pokerplus-refresh-key-inline .profile-visible-to-others__p21-save:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 8px rgba(92, 54, 5, 0.24);
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusForm .profile-email-auth__actions {
   display: grid;
   grid-template-columns: 1fr;
