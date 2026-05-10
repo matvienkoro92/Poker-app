@@ -86,6 +86,8 @@ function initAdminReportModal() {
   var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
+  var RAKEBACK_FULL_ACCESS_IDS = ["388008256", "2144406710", "1897001087"];
+  var RAKEBACK_FULL_ACCESS_USERNAMES = ["roman1787443", "roman1_matvienko"];
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
@@ -255,21 +257,32 @@ function initAdminReportModal() {
       if (resolved) users.push(resolved);
     } catch (eResolved) {}
     try {
-      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
-      if (authUser) users.push(authUser);
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var auth = window.__pokerTelegramAuth || null;
+      if (auth) users.push(auth);
+      if (auth && auth.user) users.push(auth.user);
     } catch (eAuthUser) {}
     try {
       var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec) users.push(rec);
       if (rec && rec.user) users.push(rec.user);
     } catch (eRec) {}
     for (var i = 0; i < users.length; i++) {
       var u = users[i] || {};
-      var rawId = u.id != null ? String(u.id).replace(/^tg_/, "").trim() : "";
-      if (rawId === "388008256" || rawId === "2144406710" || rawId === "1897001087") return true;
-      var memberId = u.memberId != null ? String(u.memberId).replace(/^tg_/, "").trim() : "";
-      if (memberId === "388008256" || memberId === "2144406710" || memberId === "1897001087") return true;
-      var username = u.username != null ? String(u.username).replace(/^@+/, "").trim().toLowerCase() : "";
-      if (username === "roman1787443" || username === "roman1_matvienko") return true;
+      var ids = [u.id, u.memberId, u.telegramId, u.telegram_id, u.uid, u.userId, u.user_id];
+      for (var j = 0; j < ids.length; j++) {
+        var rawId = ids[j] != null ? String(ids[j]).replace(/^tg_/, "").trim() : "";
+        if (RAKEBACK_FULL_ACCESS_IDS.indexOf(rawId) >= 0) return true;
+      }
+      var names = [u.username, u.telegramUsername, u.pwaUsername];
+      for (var k = 0; k < names.length; k++) {
+        var username = names[k] != null ? String(names[k]).replace(/^@+/, "").trim().toLowerCase() : "";
+        if (RAKEBACK_FULL_ACCESS_USERNAMES.indexOf(username) >= 0) return true;
+      }
     }
     return false;
   }
