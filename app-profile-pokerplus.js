@@ -74,6 +74,7 @@ function initProfilePokerPlus() {
   var pokerPlusProfileLoading = false;
   var pokerPlusAccountId = "";
   var pokerPlusPostTimeoutCheckSeq = 0;
+  var pokerPlusLastSyncedAt = 0;
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
 
   function setFeedback(text, tone) {
@@ -495,6 +496,8 @@ function initProfilePokerPlus() {
       return;
     }
     setPokerPlusLinkedMode(true);
+    var syncedAt = pokerPlusSyncedAtValue(p);
+    if (syncedAt) pokerPlusLastSyncedAt = Math.max(pokerPlusLastSyncedAt, syncedAt);
     if (title) title.textContent = pokerPlusLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
     if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
@@ -599,16 +602,28 @@ function initProfilePokerPlus() {
       });
   }
 
-  function schedulePokerPlusSavedProfileCheck(successText, pendingText, failText, ciphertext) {
+  function pokerPlusSyncedAtValue(profile) {
+    var p = profile && typeof profile === "object" ? profile : null;
+    var raw = p && p.syncedAt != null ? p.syncedAt : p && p.synced_at != null ? p.synced_at : null;
+    var n = Number(raw);
+    return isFinite(n) ? n : 0;
+  }
+
+  function pokerPlusSyncedAtFromProfile(data) {
+    return pokerPlusSyncedAtValue(data && data.profile);
+  }
+
+  function schedulePokerPlusSavedProfileCheck(successText, pendingText, failText, ciphertext, minSyncedAt) {
     var seq = ++pokerPlusPostTimeoutCheckSeq;
-    var delays = [1200, 3500, 8000, 14000];
+    var delays = [1200, 3500, 8000, 14000, 22000];
+    var freshAfter = Number(minSyncedAt) || 0;
     setFeedback(pendingText || "Проверяем, сохранилась ли привязка Poker21...", "warn");
     delays.forEach(function (delay, index) {
       setTimeout(function () {
         if (seq !== pokerPlusPostTimeoutCheckSeq) return;
         readPokerPlusCachedProfile().then(function (data) {
           if (seq !== pokerPlusPostTimeoutCheckSeq) return;
-          if (data && data.linked) {
+          if (data && data.linked && (!freshAfter || pokerPlusSyncedAtFromProfile(data) >= freshAfter)) {
             pokerPlusPostTimeoutCheckSeq += 1;
             if (ciphertext) savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
             removePokerPlusRefreshKeyInlineForm();
@@ -634,6 +649,7 @@ function initProfilePokerPlus() {
     setProfileStatusLoading(true);
     var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
     var refreshCiphertext = "";
+    var refreshPreviousSyncedAt = refresh ? pokerPlusLastSyncedAt : 0;
     if (refresh) {
       body.refresh = "1";
       refreshCiphertext = pokerPlusProfileLinked
@@ -694,8 +710,18 @@ function initProfilePokerPlus() {
       })
       .catch(function (err) {
         var aborted = isPokerPlusAbortError(err);
-        setFeedback(refresh ? (aborted ? "Не успели получить ответ за 15 секунд. Попробуйте еще раз, старые данные оставили." : "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже.") : POKER_NET_ERR, true);
-        renderPokerPlusStatsFallbackIfVisible();
+        if (refresh && aborted) {
+          schedulePokerPlusSavedProfileCheck(
+            refreshCiphertext ? "Данные Poker21 обновлены, ключ сохранён." : "Данные Poker21 обновлены.",
+            "Poker21 ответил поздно. Проверяем, сохранилось ли свежее обновление...",
+            "Пока не увидели свежее обновление Poker21. Старые данные оставили.",
+            refreshCiphertext,
+            refreshPreviousSyncedAt ? refreshPreviousSyncedAt + 1 : 0
+          );
+        } else {
+          setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
+          renderPokerPlusStatsFallbackIfVisible();
+        }
       })
       .finally(function () {
         setPokerPlusInitialLoading(false);
