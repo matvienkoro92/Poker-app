@@ -399,6 +399,7 @@ function initProfilePokerPlus() {
   function setPokerPlusLinkedMode(linked) {
     pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
+    if (section && section.classList && !linked) section.classList.remove("profile-pokerplus-card--needs-key");
     updateProfileStatusTextVisibility();
     input.hidden = !!linked;
     if (linked) input.value = "";
@@ -413,6 +414,7 @@ function initProfilePokerPlus() {
 
   function setPokerPlusRefreshNeedsKeyMode() {
     if (!pokerPlusProfileLinked) return;
+    if (section && section.classList) section.classList.add("profile-pokerplus-card--needs-key");
     input.hidden = false;
     input.placeholder = "Ключ из Poker21 для обновления";
     input.setAttribute("aria-label", "Ключ из Poker21 для обновления");
@@ -565,6 +567,7 @@ function initProfilePokerPlus() {
           var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
           setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
         } else if (refresh && refreshCiphertext) {
+          if (section && section.classList) section.classList.remove("profile-pokerplus-card--needs-key");
           input.value = "";
           setFeedback("Данные Poker21 обновлены, ключ сохранён.", false);
         } else if (refresh) {

@@ -459,6 +459,18 @@
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm .profile-email-auth__actions {
   display: none;
 }
+#profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusForm {
+  display: flex !important;
+  grid-column: 1 / -1;
+  order: 2;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusBindBtn {
+  display: inline-flex !important;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusForm .profile-email-auth__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusFeedback {
   grid-column: 1 / -1;
   margin: 0 0 2px;
