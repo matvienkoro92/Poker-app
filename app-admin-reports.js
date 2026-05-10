@@ -3312,6 +3312,7 @@ function initAdminReportModal() {
       var saveBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-save]") : null;
       if (saveBtn) {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
+        syncExplicitZeroRakeMarker(saveRow ? saveRow.querySelector("[data-rakeback-rake]") : null);
         if (!saveRow || !isRakebackRowFilled(saveRow)) return;
         markRakebackDraftLocalEdit();
         ensureRakebackEntryAddedAt(saveRow, true);
