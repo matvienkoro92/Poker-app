@@ -971,12 +971,15 @@ function initAdminReportModal() {
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var key = getRakebackMoscowDayKey(stamp);
+      var hasAddonRows = group.rows.some(function (row) {
+        return row && row.getAttribute("data-rakeback-kind") === "addon";
+      });
       group.rows.forEach(function (row, rowIndex) {
         var rowStamp = getRakebackRowEntryAddedAt(row, rowIndex);
         var rowKey = Number.isFinite(rowStamp) ? getRakebackMoscowDayKey(rowStamp) : "";
         if (rowKey) row.setAttribute("data-rakeback-row-day-key", rowKey);
         else row.removeAttribute("data-rakeback-row-day-key");
-        if (rowKey === key) row.setAttribute("data-rakeback-row-section-date", "1");
+        if (hasAddonRows && rowKey === key) row.setAttribute("data-rakeback-row-section-date", "1");
         else row.removeAttribute("data-rakeback-row-section-date");
       });
       if (key === lastKey) return;
