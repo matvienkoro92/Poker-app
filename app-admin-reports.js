@@ -1334,6 +1334,7 @@ function initAdminReportModal() {
     function addExtra(name, raw) {
       name = name != null ? String(name).trim() : "";
       if (!name) name = "Доп.";
+      if (isReportManualRakebackFieldName(name)) return;
       var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
       if (isNaN(n)) n = 0;
       if (isReportUsdtRateFieldName(name)) {
@@ -1646,6 +1647,10 @@ function initAdminReportModal() {
     return normalized.indexOf("курс") !== -1 && (normalized.indexOf("usdt") !== -1 || normalized.indexOf("юсдт") !== -1);
   }
 
+  function isReportManualRakebackFieldName(name) {
+    return normalizeReportDetailName(name) === "рейкбек";
+  }
+
   function getReportExtraEntries(it) {
     var entries = [];
     if (!it) return entries;
@@ -1725,7 +1730,6 @@ function initAdminReportModal() {
     var expenseEntries = [];
     var otherEntries = [];
     var calcEntries = [];
-    var extraRakebackEntries = [];
     var anyaEntries = [];
     function pushEntry(list, label, value, roundValue) {
       if (!hasReportValue(value)) return;
@@ -1746,13 +1750,13 @@ function initAdminReportModal() {
     pushEntry(otherEntries, labels.ret, it.ret, false);
     getReportExtraEntries(it).forEach(function (extra) {
       var normalizedName = normalizeReportDetailName(extra.name);
+      if (isReportManualRakebackFieldName(extra.name)) return;
       var entry = { label: extra.name, value: String(extra.value) };
-      if (normalizedName === "рейкбек") extraRakebackEntries.push(entry);
-      else if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
+      if (normalizedName === "аня зп" || normalizedName === "аня зарплата") anyaEntries.push(entry);
       else otherEntries.push(entry);
     });
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
-    parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(extraRakebackEntries, anyaEntries)));
+    parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(anyaEntries)));
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--other", otherEntries));
     // Раньше здесь была строка с общим итогом по смене ("Итого, ₽").
     // По просьбе убираем её из детального вида отчёта.
