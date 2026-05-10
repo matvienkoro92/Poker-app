@@ -1975,6 +1975,8 @@ function initAdminReportModal() {
 
   function loadSharedRakebackDraftRows() {
     var focusedInRakeback = rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement);
+    var focusedInRakebackControl = focusedInRakeback && document.activeElement && document.activeElement.matches && document.activeElement.matches("input,select,textarea");
+    if (focusedInRakebackControl) return;
     if (focusedInRakeback && Date.now() < rakebackDraftLocalEditUntil) return;
     if (rakebackDraftSaveTimer || savingRakebackDraft) return;
     var base = getAdminReportApiBase();
