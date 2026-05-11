@@ -69,7 +69,6 @@ function initAdminReportModal() {
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var rakebackDraftLocalEditUntil = 0;
-  var rakebackDraftServerUpdatedAt = "";
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDraftNeedsMigration = false;
@@ -1876,7 +1875,6 @@ function initAdminReportModal() {
       if (!window.localStorage) return;
       var normalizedDeleted = normalizeRakebackDeletedTemplates(deletedTemplates != null ? deletedTemplates : readRakebackDeletedTemplates());
       var normalizedUpdatedAt = updatedAt ? String(updatedAt) : "";
-      if (normalizedUpdatedAt) rakebackDraftServerUpdatedAt = normalizedUpdatedAt;
       if ((rows && rows.length) || normalizedDeleted.length) {
         window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({
           rows: rows || [],
@@ -1923,7 +1921,6 @@ function initAdminReportModal() {
     rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     var deletedTemplates = readRakebackDeletedTemplates();
-    rakebackDraftServerUpdatedAt = "";
     saveLocalRakebackDraftRows(rows, deletedTemplates);
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
@@ -1984,7 +1981,7 @@ function initAdminReportModal() {
     } catch (e) {}
   }
 
-  function loadSharedRakebackDraftRows(forceFull) {
+  function loadSharedRakebackDraftRows() {
     var focusedInRakeback = rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement);
     var focusedInRakebackControl = focusedInRakeback && document.activeElement && document.activeElement.matches && document.activeElement.matches("input,select,textarea");
     if (focusedInRakebackControl) return;
@@ -1996,10 +1993,8 @@ function initAdminReportModal() {
       return;
     }
     var localDraft = readRakebackDraftData();
-    var knownUpdatedAt = forceFull ? "" : (rakebackDraftServerUpdatedAt || localDraft.updatedAt || "");
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
-    if (knownUpdatedAt) q += "&knownUpdatedAt=" + encodeURIComponent(knownUpdatedAt);
     var shouldUploadLocalDraft = false;
     var loadMutationSeq = rakebackDraftMutationSeq;
     loadingRakebackDraft = true;
@@ -2008,12 +2003,6 @@ function initAdminReportModal() {
       .then(function (data) {
         if (loadMutationSeq !== rakebackDraftMutationSeq) return;
         var serverDraft = data && data.ok && data.rakebackDraft ? data.rakebackDraft : null;
-        if (serverDraft && serverDraft.notModified) {
-          if (serverDraft.updatedAt) rakebackDraftServerUpdatedAt = String(serverDraft.updatedAt);
-          fillRakebackTable(localDraft.rows || [], "");
-          rakebackDraftLocalEditUntil = 0;
-          return;
-        }
         var serverRows = serverDraft && Array.isArray(serverDraft.rows) ? serverDraft.rows : [];
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
         var localRows = localDraft.rows || [];
@@ -2061,7 +2050,7 @@ function initAdminReportModal() {
     rakebackDraftRefreshTimer = setInterval(function () {
       if (!modal || modal.getAttribute("aria-hidden") === "true") return;
       if (!isRakebackPanelActive()) return;
-      loadSharedRakebackDraftRows(false);
+      loadSharedRakebackDraftRows();
     }, 5 * 60 * 1000);
   }
 
@@ -3131,7 +3120,7 @@ function initAdminReportModal() {
     fillReportForm(null, { skipRakeback: true });
     runAdminReportAfterPaint(function () {
       if (!modal || modal.getAttribute("aria-hidden") === "true" || editingReportId) return;
-      loadSharedRakebackDraftRows(true);
+      loadSharedRakebackDraftRows();
       startRakebackDraftRefresh();
     });
   }
@@ -3150,7 +3139,7 @@ function initAdminReportModal() {
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
-          loadSharedRakebackDraftRows(true);
+          loadSharedRakebackDraftRows();
         }
         if (name === "sent") loadSentReports();
         if (name === "calculations") loadCalculationsReports();
@@ -3636,7 +3625,7 @@ function initAdminReportModal() {
             if (accountedRakebackRows) {
               fillRakebackTable(accountedRakebackRows, "");
             } else {
-              loadSharedRakebackDraftRows(true);
+              loadSharedRakebackDraftRows();
             }
             if (canViewSentReports()) {
               loadSentReports(true);
