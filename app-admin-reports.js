@@ -664,7 +664,7 @@ function initAdminReportModal() {
     var standardAt = getFirstRakebackTimeValue([data.standardAt, data.orderAt, data.sortAt], createdAt);
     var templateLikeData = isRakebackTemplateLikeData(data);
     var accountedData = !templateLikeData && (data.accounted || data.reportedAt || data.reportId);
-    var hasInitialEntryData = !templateLikeData && (data.saved || accountedData ||
+    var hasInitialEntryData = !templateLikeData && (data.saved || accountedData || explicitZeroRake ||
       parseReportNumber(data.rake) !== 0 || parseReportNumber(data.roomAmount) !== 0 ||
       parseReportNumber(data.chipAmount) !== 0 || parseReportNumber(data.amount) !== 0);
     var entryAddedAt = getFirstRakebackTimeValue([data.entryAddedAt, data.firstAddedAt], NaN);
@@ -1610,6 +1610,7 @@ function initAdminReportModal() {
         room: normalizeRakebackRoom(row.room || "P21"),
         playerId: row.playerId || row.id || "",
         rake: row.rake != null ? row.rake : "",
+        rakeZero: row.rakeZero === true || row.explicitZeroRake === true || row.zeroRake === true,
         percent: row.percent != null ? row.percent : "",
         discount15: !!(row.discount15 || row.subtract15),
         ownerId: row.ownerId || row.authorId || "",
