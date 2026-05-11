@@ -2051,7 +2051,7 @@ function initAdminReportModal() {
       if (!modal || modal.getAttribute("aria-hidden") === "true") return;
       if (!isRakebackPanelActive()) return;
       loadSharedRakebackDraftRows();
-    }, 5 * 60 * 1000);
+    }, 10 * 1000);
   }
 
   function setActiveTab(name) {
