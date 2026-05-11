@@ -69,6 +69,7 @@ function initAdminReportModal() {
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var rakebackDraftLocalEditUntil = 0;
+  var rakebackDraftServerUpdatedAt = "";
   var loadingRakebackDraft = false;
   var savingRakebackDraft = false;
   var rakebackDraftNeedsMigration = false;
@@ -1836,6 +1837,7 @@ function initAdminReportModal() {
       return {
         rows: parsed && Array.isArray(parsed.rows) ? parsed.rows : [],
         deletedTemplates: normalizeRakebackDeletedTemplates(parsed && parsed.deletedTemplates),
+        updatedAt: parsed && parsed.updatedAt ? String(parsed.updatedAt) : "",
       };
     } catch (e) {
       return { rows: [], deletedTemplates: [] };
@@ -1869,12 +1871,19 @@ function initAdminReportModal() {
       : payload;
   }
 
-  function saveLocalRakebackDraftRows(rows, deletedTemplates) {
+  function saveLocalRakebackDraftRows(rows, deletedTemplates, updatedAt) {
     try {
       if (!window.localStorage) return;
       var normalizedDeleted = normalizeRakebackDeletedTemplates(deletedTemplates != null ? deletedTemplates : readRakebackDeletedTemplates());
+      var normalizedUpdatedAt = updatedAt ? String(updatedAt) : "";
+      if (normalizedUpdatedAt) rakebackDraftServerUpdatedAt = normalizedUpdatedAt;
       if ((rows && rows.length) || normalizedDeleted.length) {
-        window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({ rows: rows || [], deletedTemplates: normalizedDeleted, savedAt: Date.now() }));
+        window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({
+          rows: rows || [],
+          deletedTemplates: normalizedDeleted,
+          updatedAt: normalizedUpdatedAt,
+          savedAt: Date.now()
+        }));
       } else {
         window.localStorage.removeItem(getRakebackDraftKey());
       }
@@ -1914,6 +1923,7 @@ function initAdminReportModal() {
     rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     var deletedTemplates = readRakebackDeletedTemplates();
+    rakebackDraftServerUpdatedAt = "";
     saveLocalRakebackDraftRows(rows, deletedTemplates);
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
@@ -1934,7 +1944,7 @@ function initAdminReportModal() {
       .then(function (data) {
         if (data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)) {
           rakebackDraftLocalEditUntil = 0;
-          saveLocalRakebackDraftRows(data.rakebackDraft.rows, data.rakebackDraft.deletedTemplates || deletedTemplates);
+          saveLocalRakebackDraftRows(data.rakebackDraft.rows, data.rakebackDraft.deletedTemplates || deletedTemplates, data.rakebackDraft.updatedAt);
         }
       })
       .catch(function () {
@@ -1985,8 +1995,11 @@ function initAdminReportModal() {
       fillRakebackTable(readRakebackDraftRows(), "");
       return;
     }
+    var localDraft = readRakebackDraftData();
+    var knownUpdatedAt = rakebackDraftServerUpdatedAt || localDraft.updatedAt || "";
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
+    if (knownUpdatedAt) q += "&knownUpdatedAt=" + encodeURIComponent(knownUpdatedAt);
     var shouldUploadLocalDraft = false;
     var loadMutationSeq = rakebackDraftMutationSeq;
     loadingRakebackDraft = true;
@@ -1995,14 +2008,17 @@ function initAdminReportModal() {
       .then(function (data) {
         if (loadMutationSeq !== rakebackDraftMutationSeq) return;
         var serverDraft = data && data.ok && data.rakebackDraft ? data.rakebackDraft : null;
+        if (serverDraft && serverDraft.notModified) {
+          if (serverDraft.updatedAt) rakebackDraftServerUpdatedAt = String(serverDraft.updatedAt);
+          return;
+        }
         var serverRows = serverDraft && Array.isArray(serverDraft.rows) ? serverDraft.rows : [];
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
-        var localDraft = readRakebackDraftData();
         var localRows = localDraft.rows || [];
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
         var rows = serverRows.length ? serverRows : localRows;
         shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length);
-        saveLocalRakebackDraftRows(rows, deletedTemplates);
+        saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
         fillRakebackTable(rows, "");
         rakebackDraftLocalEditUntil = 0;
       })
