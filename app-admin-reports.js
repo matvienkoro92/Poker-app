@@ -73,6 +73,7 @@ function initAdminReportModal() {
   var savingRakebackDraft = false;
   var rakebackDraftNeedsMigration = false;
   var rakebackDragState = null;
+  var rakebackWeekArchiveOpen = {};
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
   var figuresRakeTotal = 0;
@@ -843,6 +844,11 @@ function initAdminReportModal() {
       isRakebackRowAccounted(row);
   }
 
+  function getRakebackRowBoundEntryAddedAt(row, fallbackIndex) {
+    if (!hasRakebackRowEntryTimeData(row)) return NaN;
+    return getRakebackRowEntryAddedAt(row, fallbackIndex);
+  }
+
   function setRakebackGroupEntryAddedAt(row, stamp) {
     if (!row || !Number.isFinite(stamp)) return;
     getRakebackGroupRows(row).forEach(function (groupRow) {
@@ -906,9 +912,26 @@ function initAdminReportModal() {
   function getRakebackGroupEntryAddedAt(group, fallbackIndex) {
     if (!group || !group.rows || !group.rows.length) return NaN;
     return group.rows.reduce(function (max, row, index) {
-      var value = getRakebackRowEntryAddedAt(row, index + (Number(fallbackIndex) || 0));
+      var value = getRakebackRowBoundEntryAddedAt(row, index + (Number(fallbackIndex) || 0));
       return Number.isFinite(value) ? Math.max(max, value) : max;
     }, -Infinity);
+  }
+
+  function getRakebackWeekStart(ts) {
+    ts = Number(ts);
+    if (!Number.isFinite(ts)) return NaN;
+    return weekStartMsForReport(ts);
+  }
+
+  function getCurrentRakebackWeekStart() {
+    var week = getCalculationWeekMeta();
+    return week && Number.isFinite(week.start) ? week.start : getRakebackWeekStart(Date.now());
+  }
+
+  function formatRakebackWeekRange(weekStart) {
+    weekStart = Number(weekStart);
+    if (!Number.isFinite(weekStart)) return "";
+    return formatReportWeekBoundary(weekStart) + " - " + formatReportWeekBoundary(weekStart + REPORT_WEEK_MS - 1);
   }
 
   function getRakebackMoscowDayKey(ts) {
@@ -931,8 +954,11 @@ function initAdminReportModal() {
 
   function removeRakebackDateSeparators() {
     if (!rakebackBody) return;
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator]")).forEach(function (row) {
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator]")).forEach(function (row) {
       row.parentNode.removeChild(row);
+    });
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-week-hidden]")).forEach(function (row) {
+      row.removeAttribute("data-rakeback-week-hidden");
     });
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row-section-date]")).forEach(function (row) {
       row.removeAttribute("data-rakeback-row-section-date");
@@ -947,6 +973,21 @@ function initAdminReportModal() {
         if (!row || row.hidden) return;
         var rowStamp = getRakebackRowEntryAddedAt(row, index);
         if (!Number.isFinite(rowStamp) || getRakebackMoscowDayKey(rowStamp) !== dayKey) return;
+        var room = getRakebackRowRoom(row);
+        var roomAmount = Math.round(getRakebackRowAmount(row));
+        totals.rake += getRakebackRowCalculationBase(row);
+        totals.rakeback += getRakebackReportAmount(room, roomAmount);
+      });
+    });
+    return totals;
+  }
+
+  function getRakebackWeekGroupTotals(groups, weekStart) {
+    var totals = { rake: 0, rakeback: 0 };
+    (groups || []).forEach(function (group) {
+      (group && group.rows ? group.rows : []).forEach(function (row, index) {
+        var rowStamp = getRakebackRowBoundEntryAddedAt(row, index);
+        if (!Number.isFinite(rowStamp) || getRakebackWeekStart(rowStamp) !== weekStart) return;
         var room = getRakebackRowRoom(row);
         var roomAmount = Math.round(getRakebackRowAmount(row));
         totals.rake += getRakebackRowCalculationBase(row);
@@ -973,15 +1014,47 @@ function initAdminReportModal() {
     return tr;
   }
 
+  function createRakebackWeekSeparator(weekStart, totals, open) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var button = document.createElement("button");
+    var label = document.createElement("span");
+    var meta = document.createElement("small");
+    var key = String(weekStart);
+    tr.className = "admin-report-rakeback-week-separator";
+    tr.setAttribute("data-rakeback-week-separator", "");
+    td.colSpan = 7;
+    button.type = "button";
+    button.className = "admin-report-rakeback-week-separator__button";
+    button.setAttribute("data-rakeback-week-toggle", key);
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+    label.textContent = formatRakebackWeekRange(weekStart);
+    totals = totals || { rake: 0, rakeback: 0 };
+    meta.textContent = "Рейк " + formatReportRubleNumber(totals.rake) + " · РБ " + formatReportRubleNumber(totals.rakeback);
+    button.appendChild(label);
+    button.appendChild(meta);
+    td.appendChild(button);
+    tr.appendChild(td);
+    return tr;
+  }
+
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
     if (!rakebackBody || (mode !== "created" && mode !== "standard")) return;
     var dayGroups = {};
+    var weekGroups = {};
+    var currentWeekStart = getCurrentRakebackWeekStart();
     var visibleGroups = getRakebackVisibleGroups();
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
+      var weekStart = getRakebackWeekStart(stamp);
+      if (Number.isFinite(weekStart) && Number.isFinite(currentWeekStart) && weekStart < currentWeekStart) {
+        if (!weekGroups[String(weekStart)]) weekGroups[String(weekStart)] = { weekStart: weekStart, groups: [] };
+        weekGroups[String(weekStart)].groups.push(group);
+        return;
+      }
       var key = getRakebackMoscowDayKey(stamp);
       if (!dayGroups[key]) {
         dayGroups[key] = { stamp: stamp, groups: [] };
@@ -989,16 +1062,33 @@ function initAdminReportModal() {
       dayGroups[key].groups.push(group);
     });
     var lastKey = "";
+    var lastWeekKey = "";
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
+      var weekStart = getRakebackWeekStart(stamp);
+      if (Number.isFinite(weekStart) && Number.isFinite(currentWeekStart) && weekStart < currentWeekStart) {
+        var weekKey = String(weekStart);
+        var open = rakebackWeekArchiveOpen[weekKey] === true;
+        if (weekKey !== lastWeekKey) {
+          lastWeekKey = weekKey;
+          rakebackBody.insertBefore(createRakebackWeekSeparator(weekStart, getRakebackWeekGroupTotals(weekGroups[weekKey] ? weekGroups[weekKey].groups : [], weekStart), open), group.rows[0]);
+        }
+        group.rows.forEach(function (row) {
+          if (!open) {
+            row.hidden = true;
+            row.setAttribute("data-rakeback-week-hidden", "1");
+          }
+        });
+        return;
+      }
       var key = getRakebackMoscowDayKey(stamp);
       var hasAddonRows = group.rows.some(function (row) {
         return row && row.getAttribute("data-rakeback-kind") === "addon";
       });
       group.rows.forEach(function (row, rowIndex) {
-        var rowStamp = getRakebackRowEntryAddedAt(row, rowIndex);
+        var rowStamp = getRakebackRowBoundEntryAddedAt(row, rowIndex);
         var rowKey = Number.isFinite(rowStamp) ? getRakebackMoscowDayKey(rowStamp) : "";
         if (rowKey) row.setAttribute("data-rakeback-row-day-key", rowKey);
         else row.removeAttribute("data-rakeback-row-day-key");
@@ -1273,13 +1363,50 @@ function initAdminReportModal() {
     updateRakebackRowActions(row);
   }
 
+  function getRakebackTemplateIdsFromPreviousWeek(room) {
+    if (!rakebackBody) return [];
+    var normalizedRoom = normalizeRakebackRoom(room);
+    var currentWeekStart = getCurrentRakebackWeekStart();
+    var previousWeekStart = Number.isFinite(currentWeekStart) ? currentWeekStart - REPORT_WEEK_MS : NaN;
+    if (!Number.isFinite(previousWeekStart)) return [];
+    var seen = {};
+    var ids = [];
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
+      if (!row || row.getAttribute("data-rakeback-kind") === "addon") return;
+      if (getRakebackRowRoom(row) !== normalizedRoom) return;
+      var stamp = getRakebackRowBoundEntryAddedAt(row, index);
+      if (!Number.isFinite(stamp) || getRakebackWeekStart(stamp) !== previousWeekStart) return;
+      var playerId = getRakebackRowPlayerId(row);
+      if (!playerId || seen[playerId]) return;
+      seen[playerId] = true;
+      ids.push(playerId);
+    });
+    return ids;
+  }
+
+  function getRakebackTemplateIdsForCurrentWeek(room, fallbackIds) {
+    var previousWeekIds = getRakebackTemplateIdsFromPreviousWeek(room);
+    var ids = previousWeekIds.slice();
+    var seen = {};
+    ids.forEach(function (id) { seen[id] = true; });
+    (Array.isArray(fallbackIds) ? fallbackIds : []).forEach(function (id) {
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      ids.push(id);
+    });
+    return ids;
+  }
+
   function ensureRakebackTemplateRows(room, playerIds) {
     if (!rakebackBody || !Array.isArray(playerIds) || !playerIds.length) return false;
     var normalizedRoom = normalizeRakebackRoom(room);
     var deletedTemplates = getRakebackDeletedTemplateMap();
+    var currentWeekStart = getCurrentRakebackWeekStart();
     var existingIds = {};
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
       if (getRakebackRowRoom(row) !== normalizedRoom) return;
+      var stamp = getRakebackRowBoundEntryAddedAt(row, index);
+      if (Number.isFinite(stamp) && Number.isFinite(currentWeekStart) && getRakebackWeekStart(stamp) < currentWeekStart) return;
       var idInput = row.querySelector("[data-rakeback-player-id]");
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       if (playerId) existingIds[playerId] = true;
@@ -1303,10 +1430,10 @@ function initAdminReportModal() {
   function ensureRakebackBaseRow(room) {
     if (!rakebackBody) return;
     var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
-    if (targetRoom === "P21" && ensureRakebackTemplateRows("P21", P21_RAKEBACK_TEMPLATE_IDS)) return;
-    if (targetRoom === "X" && ensureRakebackTemplateRows("X", X_RAKEBACK_TEMPLATE_IDS)) return;
-    if (targetRoom === "PP" && ensureRakebackTemplateRows("PP", PP_RAKEBACK_TEMPLATE_IDS)) return;
-    if (targetRoom === "Supr" && ensureRakebackTemplateRows("Supr", SUPR_RAKEBACK_TEMPLATE_IDS)) return;
+    if (targetRoom === "P21" && ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS))) return;
+    if (targetRoom === "X" && ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS))) return;
+    if (targetRoom === "PP" && ensureRakebackTemplateRows("PP", getRakebackTemplateIdsForCurrentWeek("PP", PP_RAKEBACK_TEMPLATE_IDS))) return;
+    if (targetRoom === "Supr" && ensureRakebackTemplateRows("Supr", getRakebackTemplateIdsForCurrentWeek("Supr", SUPR_RAKEBACK_TEMPLATE_IDS))) return;
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
@@ -1321,13 +1448,15 @@ function initAdminReportModal() {
 
   function isRakebackRowFilled(row) {
     if (!row) return false;
-    var idInput = row.querySelector("[data-rakeback-player-id]");
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var percentInput = row.querySelector("[data-rakeback-percent]");
-    var id = idInput && idInput.value ? String(idInput.value).trim() : "";
     var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
     var percent = parseReportNumber(percentInput ? percentInput.value : "");
-    return !!id || rake !== 0 || percent !== 0 || row.getAttribute("data-rakeback-explicit-zero-rake") === "1";
+    return rake !== 0 ||
+      percent !== 0 ||
+      row.getAttribute("data-rakeback-explicit-zero-rake") === "1" ||
+      row.getAttribute("data-rakeback-saved") === "1" ||
+      isRakebackRowAccounted(row);
   }
 
   function hasRakebackRakeValue(row) {
@@ -3311,6 +3440,14 @@ function initAdminReportModal() {
       if (focusCell && focusCell.closest("[data-rakeback-row]")) markRakebackCell(focusCell, false);
     });
     rakebackBody.addEventListener("click", function (e) {
+      var weekToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-week-toggle]") : null;
+      if (weekToggle) {
+        e.preventDefault();
+        var weekKey = weekToggle.getAttribute("data-rakeback-week-toggle") || "";
+        if (weekKey) rakebackWeekArchiveOpen[weekKey] = !rakebackWeekArchiveOpen[weekKey];
+        syncRakebackTable({ skipSort: true });
+        return;
+      }
       var colorControl = e.target && e.target.closest ? e.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
       if (!colorControl) closeRakebackColorMenus();
       var copyIdInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
