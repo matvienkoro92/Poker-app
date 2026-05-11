@@ -648,6 +648,17 @@ function initAdminReportModal() {
       parseReportNumber(data.amount) === 0;
   }
 
+  function hasRakebackStoredEntryData(data) {
+    if (!data) return false;
+    if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return true;
+    if (data.saved || data.accounted || data.reportedAt || data.reportId) return true;
+    return parseReportNumber(data.rake) !== 0 ||
+      parseReportNumber(data.percent) !== 0 ||
+      parseReportNumber(data.roomAmount) !== 0 ||
+      parseReportNumber(data.chipAmount) !== 0 ||
+      parseReportNumber(data.amount) !== 0;
+  }
+
   function createRakebackRow(data) {
     data = data || {};
     var tr = document.createElement("tr");
@@ -1442,7 +1453,9 @@ function initAdminReportModal() {
       var reportedAmount = getRakebackRowReportedAmount(row, amount);
       var discount15 = !!(discountInput && discountInput.checked);
       var explicitZeroRake = row.getAttribute("data-rakeback-explicit-zero-rake") === "1";
-      var filled = !!playerId || rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake;
+      var saved = row.getAttribute("data-rakeback-saved") === "1";
+      var accounted = isRakebackRowAccounted(row);
+      var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || saved || accounted;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
@@ -1460,12 +1473,12 @@ function initAdminReportModal() {
         chipAmount: room === "X" ? roomAmount : null,
         amount: amount,
         reportedAmount: reportedAmount,
-        saved: row.getAttribute("data-rakeback-saved") === "1",
+        saved: saved,
         color: color,
         createdAt: getRakebackRowCreatedAt(row, 0),
         standardAt: getRakebackRowStandardAt(row, 0),
         entryAddedAt: getRakebackRowEntryAddedAtForSave(row),
-        accounted: isRakebackRowAccounted(row),
+        accounted: accounted,
         reportedAt: row.getAttribute("data-rakeback-reported-at") || "",
         reportId: row.getAttribute("data-rakeback-report-id") || "",
         ownerId: ownerId || getCurrentRakebackOwnerId(),
@@ -1834,7 +1847,7 @@ function initAdminReportModal() {
       if (!raw) return { rows: [], deletedTemplates: [] };
       var parsed = JSON.parse(raw);
       return {
-        rows: parsed && Array.isArray(parsed.rows) ? parsed.rows : [],
+        rows: parsed && Array.isArray(parsed.rows) ? parsed.rows.filter(hasRakebackStoredEntryData) : [],
         deletedTemplates: normalizeRakebackDeletedTemplates(parsed && parsed.deletedTemplates),
         updatedAt: parsed && parsed.updatedAt ? String(parsed.updatedAt) : "",
       };
