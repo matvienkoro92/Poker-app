@@ -2010,6 +2010,8 @@ function initAdminReportModal() {
         var serverDraft = data && data.ok && data.rakebackDraft ? data.rakebackDraft : null;
         if (serverDraft && serverDraft.notModified) {
           if (serverDraft.updatedAt) rakebackDraftServerUpdatedAt = String(serverDraft.updatedAt);
+          fillRakebackTable(localDraft.rows || [], "");
+          rakebackDraftLocalEditUntil = 0;
           return;
         }
         var serverRows = serverDraft && Array.isArray(serverDraft.rows) ? serverDraft.rows : [];
