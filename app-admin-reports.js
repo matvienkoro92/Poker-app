@@ -1984,7 +1984,7 @@ function initAdminReportModal() {
     } catch (e) {}
   }
 
-  function loadSharedRakebackDraftRows() {
+  function loadSharedRakebackDraftRows(forceFull) {
     var focusedInRakeback = rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement);
     var focusedInRakebackControl = focusedInRakeback && document.activeElement && document.activeElement.matches && document.activeElement.matches("input,select,textarea");
     if (focusedInRakebackControl) return;
@@ -1996,7 +1996,7 @@ function initAdminReportModal() {
       return;
     }
     var localDraft = readRakebackDraftData();
-    var knownUpdatedAt = rakebackDraftServerUpdatedAt || localDraft.updatedAt || "";
+    var knownUpdatedAt = forceFull ? "" : (rakebackDraftServerUpdatedAt || localDraft.updatedAt || "");
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
     if (knownUpdatedAt) q += "&knownUpdatedAt=" + encodeURIComponent(knownUpdatedAt);
@@ -2061,7 +2061,7 @@ function initAdminReportModal() {
     rakebackDraftRefreshTimer = setInterval(function () {
       if (!modal || modal.getAttribute("aria-hidden") === "true") return;
       if (!isRakebackPanelActive()) return;
-      loadSharedRakebackDraftRows();
+      loadSharedRakebackDraftRows(false);
     }, 5 * 60 * 1000);
   }
 
@@ -3131,7 +3131,7 @@ function initAdminReportModal() {
     fillReportForm(null, { skipRakeback: true });
     runAdminReportAfterPaint(function () {
       if (!modal || modal.getAttribute("aria-hidden") === "true" || editingReportId) return;
-      loadSharedRakebackDraftRows();
+      loadSharedRakebackDraftRows(true);
       startRakebackDraftRefresh();
     });
   }
@@ -3150,7 +3150,7 @@ function initAdminReportModal() {
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
-          loadSharedRakebackDraftRows();
+          loadSharedRakebackDraftRows(true);
         }
         if (name === "sent") loadSentReports();
         if (name === "calculations") loadCalculationsReports();
@@ -3636,7 +3636,7 @@ function initAdminReportModal() {
             if (accountedRakebackRows) {
               fillRakebackTable(accountedRakebackRows, "");
             } else {
-              loadSharedRakebackDraftRows();
+              loadSharedRakebackDraftRows(true);
             }
             if (canViewSentReports()) {
               loadSentReports(true);
