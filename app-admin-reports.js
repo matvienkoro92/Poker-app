@@ -25,6 +25,7 @@ function initAdminReportModal() {
   var rakebackTotalsList = document.getElementById("adminReportRakebackTotalsList");
   var rakebackTotalsClose = document.getElementById("adminReportRakebackTotalsClose");
   var rakebackTotalsBackdrop = document.getElementById("adminReportRakebackTotalsBackdrop");
+  var rakebackSummaryEl = modal ? modal.querySelector(".admin-report-rakeback-summary") : null;
   var calculationsRoot = document.getElementById("adminReportCalculations");
   var calculationGroupSaveBtns = modal ? modal.querySelectorAll("[data-admin-report-calc-save]") : null;
   var calculationGroupEditBtns = modal ? modal.querySelectorAll("[data-admin-report-calc-edit]") : null;
@@ -62,7 +63,12 @@ function initAdminReportModal() {
   var figuresExtrasEl = document.getElementById("adminReportFiguresExtras");
   var figuresAddFieldBtn = document.getElementById("adminReportFiguresAddField");
   var figuresApproxRakebackEnabledInput = document.getElementById("adminReportFiguresApproxRakebackEnabled");
+  var figuresApproxRomanRakeInput = document.getElementById("adminReportFiguresApproxRomanRake");
   var figuresApproxRakebackEl = document.getElementById("adminReportFiguresApproxRakeback");
+  var figuresApproxTotalRakeEl = document.getElementById("adminReportFiguresApproxTotalRake");
+  var figuresApproxAgentsRakeEl = document.getElementById("adminReportFiguresApproxAgentsRake");
+  var figuresApproxIssuedRakeEl = document.getElementById("adminReportFiguresApproxIssuedRake");
+  var figuresApproxFormulaEl = document.getElementById("adminReportFiguresApproxFormula");
   var figuresGrandTotalEl = document.getElementById("adminReportFiguresGrandTotal");
   var editingReportId = null;
   var editingReport = null;
@@ -369,11 +375,20 @@ function initAdminReportModal() {
     return amount * getRakebackRoomMultiplier(room);
   }
 
+  function getRakebackReportRake(row) {
+    var room = getRakebackRowRoom(row);
+    return getRakebackReportAmount(room, getRakebackRowCalculationBase(row));
+  }
+
   function formatRakebackRoomTotal(room, displayAmount, reportAmount) {
     var multiplier = getRakebackRoomMultiplier(room);
     if (multiplier === 1) return formatReportRubleNumber(reportAmount);
     var chips = Math.round(parseReportNumber(displayAmount));
     return formatReportRubleNumber(chips) + " фишек × " + multiplier + " = " + formatReportRubleNumber(reportAmount);
+  }
+
+  function formatRakebackSummaryPair(rake, rakeback) {
+    return formatReportRubleNumber(rake) + " / " + formatReportRubleNumber(rakeback);
   }
 
   function copyReportText(text) {
@@ -469,9 +484,9 @@ function initAdminReportModal() {
   function renderRakebackTotalsModal() {
     if (!rakebackTotalsList) return;
     var roomHtml = RAKEBACK_ROOMS.map(function (room) {
-      var total = rakebackRoomTotals[room] || { display: 0, report: 0 };
+      var total = rakebackRoomTotals[room] || { display: 0, report: 0, rake: 0 };
       var multiplier = getRakebackRoomMultiplier(room);
-      var amount = formatReportRubleNumber(total.report);
+      var amount = formatRakebackSummaryPair(total.rake, total.report);
       var formula = "";
       if (multiplier !== 1 && parseReportNumber(total.display) !== 0) {
         formula = '<span class="admin-report-rakeback-totals-modal__formula">' + escapeReportHtml(formatRakebackRoomTotal(room, total.display, total.report)) + "</span>";
@@ -1002,9 +1017,22 @@ function initAdminReportModal() {
         if (!Number.isFinite(rowStamp) || getRakebackMoscowDayKey(rowStamp) !== dayKey) return;
         var room = getRakebackRowRoom(row);
         var roomAmount = Math.round(getRakebackRowAmount(row));
-        totals.rake += getRakebackRowCalculationBase(row);
+        totals.rake += getRakebackReportRake(row);
         totals.rakeback += getRakebackReportAmount(room, roomAmount);
       });
+    });
+    return totals;
+  }
+
+  function getRakebackDateRowsTotals(rows, dayKey) {
+    var totals = { rake: 0, rakeback: 0 };
+    (rows || []).forEach(function (row, index) {
+      var rowStamp = getRakebackRowBoundEntryAddedAt(row, index);
+      if (!Number.isFinite(rowStamp) || getRakebackMoscowDayKey(rowStamp) !== dayKey) return;
+      var room = getRakebackRowRoom(row);
+      var roomAmount = Math.round(getRakebackRowAmount(row));
+      totals.rake += getRakebackReportRake(row);
+      totals.rakeback += getRakebackReportAmount(room, roomAmount);
     });
     return totals;
   }
@@ -1017,7 +1045,7 @@ function initAdminReportModal() {
         if (!Number.isFinite(rowStamp) || getRakebackWeekStart(rowStamp) !== weekStart) return;
         var room = getRakebackRowRoom(row);
         var roomAmount = Math.round(getRakebackRowAmount(row));
-        totals.rake += getRakebackRowCalculationBase(row);
+        totals.rake += getRakebackReportRake(row);
         totals.rakeback += getRakebackReportAmount(room, roomAmount);
       });
     });
@@ -1036,7 +1064,7 @@ function initAdminReportModal() {
         var room = normalizeRakebackRoom(getRakebackRowRoom(row));
         if (!totals[room]) totals[room] = { rake: 0, rakeback: 0, count: 0 };
         var roomAmount = Math.round(getRakebackRowAmount(row));
-        totals[room].rake += getRakebackRowCalculationBase(row);
+        totals[room].rake += getRakebackReportRake(row);
         totals[room].rakeback += getRakebackReportAmount(room, roomAmount);
         totals[room].count += 1;
       });
@@ -1117,6 +1145,27 @@ function initAdminReportModal() {
     return tr;
   }
 
+  function createRakebackWeekTotalRow(totals) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var row = document.createElement("div");
+    var label = document.createElement("span");
+    var value = document.createElement("span");
+    tr.className = "admin-report-rakeback-week-total";
+    tr.setAttribute("data-rakeback-week-room-tabs", "");
+    td.colSpan = 7;
+    row.className = "admin-report-rakeback-week-total__row";
+    label.className = "admin-report-rakeback-week-total__label";
+    value.className = "admin-report-rakeback-week-total__value";
+    label.textContent = "Итого по всем румам";
+    value.textContent = formatReportRubleNumber(totals && totals.rakeback);
+    row.appendChild(label);
+    row.appendChild(value);
+    td.appendChild(row);
+    tr.appendChild(td);
+    return tr;
+  }
+
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
     if (!rakebackBody || (!rakebackArchiveMode && mode !== "created" && mode !== "standard")) return;
@@ -1178,9 +1227,18 @@ function initAdminReportModal() {
           }
         }
         var fragment = document.createDocumentFragment();
+        var weekTotals = getRakebackWeekGroupTotals(weekGroupsList, weekStart);
         fragment.appendChild(createRakebackWeekRoomTabs(weekStart, getRakebackWeekRoomTotals(weekGroupsList, weekStart)));
+        fragment.appendChild(createRakebackWeekTotalRow(weekTotals));
         RAKEBACK_ROOMS.forEach(function (room) {
           var roomOpen = rakebackWeekRoomArchiveOpen[weekKey + "|" + room] !== false;
+          var roomRows = [];
+          weekGroupsList.forEach(function (weekGroup) {
+            var keyRow = getRakebackGroupKeyRow(weekGroup.rows || []);
+            if (normalizeRakebackRoom(getRakebackRowRoom(keyRow)) !== room) return;
+            roomRows = roomRows.concat(weekGroup.rows || []);
+          });
+          var lastRoomDayKey = "";
           weekGroupsList.forEach(function (weekGroup) {
             var keyRow = getRakebackGroupKeyRow(weekGroup.rows || []);
             if (normalizeRakebackRoom(getRakebackRowRoom(keyRow)) !== room) return;
@@ -1188,6 +1246,14 @@ function initAdminReportModal() {
               row.hidden = !roomOpen;
               if (!roomOpen) row.setAttribute("data-rakeback-week-hidden", "1");
               else row.removeAttribute("data-rakeback-week-hidden");
+              if (roomOpen) {
+                var rowStamp = getRakebackRowBoundEntryAddedAt(row, 0);
+                var roomDayKey = Number.isFinite(rowStamp) ? getRakebackMoscowDayKey(rowStamp) : "";
+                if (roomDayKey && roomDayKey !== lastRoomDayKey) {
+                  lastRoomDayKey = roomDayKey;
+                  fragment.appendChild(createRakebackDateSeparator(getRakebackDateSeparatorLabel(rowStamp), getRakebackDateRowsTotals(roomRows, roomDayKey)));
+                }
+              }
               fragment.appendChild(row);
             });
           });
@@ -1860,25 +1926,31 @@ function initAdminReportModal() {
     });
     var roomTotals = {};
     RAKEBACK_ROOMS.forEach(function (room) {
-      roomTotals[room] = { display: 0, report: 0 };
+      roomTotals[room] = { display: 0, report: 0, rake: 0 };
     });
     collected.forEach(function (row) {
       var room = normalizeRakebackRoom(row.room);
-      if (!roomTotals[room]) roomTotals[room] = { display: 0, report: 0 };
+      if (!roomTotals[room]) roomTotals[room] = { display: 0, report: 0, rake: 0 };
       roomTotals[room].display += parseReportNumber(row.roomAmount != null ? row.roomAmount : row.amount);
       roomTotals[room].report += parseReportNumber(row.amount);
+      roomTotals[room].rake += getRakebackReportAmount(room, parseReportNumber(row.rake));
     });
     var total = collected.reduce(function (sum, row) {
       return sum + parseReportNumber(row.amount);
     }, 0);
+    var rakeTotal = collected.reduce(function (sum, row) {
+      return sum + getRakebackReportAmount(row.room, parseReportNumber(row.rake));
+    }, 0);
     var reportRakebackTotal = sumRakebackReportRows(getUnaccountedRakebackReportRows());
-    var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0 };
+    var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0, rake: 0 };
     rakebackRoomTotals = roomTotals;
+    if (rakebackSummaryEl) rakebackSummaryEl.hidden = rakebackArchiveMode;
     if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = rakebackArchiveMode ? "Итого архив" : "Итого " + getRakebackRoomLabel(activeRakebackRoom);
-    if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = rakebackArchiveMode ? formatReportRubleNumber(total) : formatRakebackRoomTotal(activeRakebackRoom, activeTotal.display, activeTotal.report);
-    if (rakebackTotalEl) rakebackTotalEl.textContent = formatReportRubleNumber(total);
+    if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = rakebackArchiveMode ? formatRakebackSummaryPair(rakeTotal, total) : formatRakebackSummaryPair(activeTotal.rake, activeTotal.report);
+    if (rakebackTotalEl) rakebackTotalEl.textContent = formatRakebackSummaryPair(rakeTotal, total);
     if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
     if (rakebackTotalsModal && !rakebackTotalsModal.hidden) renderRakebackTotalsModal();
+    updateFiguresTotals();
     showRakebackStatus("");
     return reportRakebackTotal;
   }
@@ -2460,7 +2532,23 @@ function initAdminReportModal() {
   }
 
   function getApproxFiguresRakebackAmount() {
-    return -(Math.max(0, parseReportNumber(figuresRakeTotal) - getFiguresExtraRakeTotal()) * 30 / 100);
+    return -(getApproxFiguresRakebackBase() * 30 / 100);
+  }
+
+  function getIssuedRakebackReportRakeTotal() {
+    return getUnaccountedRakebackReportRows().reduce(function (sum, row) {
+      return sum + getRakebackReportAmount(row && row.room, parseReportNumber(row && row.rake));
+    }, 0);
+  }
+
+  function getApproxFiguresRakebackBase() {
+    return Math.max(
+      0,
+      parseReportNumber(figuresRakeTotal) -
+        parseReportNumber(figuresApproxRomanRakeInput ? figuresApproxRomanRakeInput.value : "") -
+        getFiguresExtraRakeTotal() -
+        getIssuedRakebackReportRakeTotal()
+    );
   }
 
   function syncFiguresExtraRow(row) {
@@ -2509,9 +2597,16 @@ function initAdminReportModal() {
     if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
     if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
     if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
+    var approxAgentsRake = getFiguresExtraRakeTotal();
+    var approxIssuedRake = getIssuedRakebackReportRakeTotal();
+    var approxBase = getApproxFiguresRakebackBase();
     var approxRakeback = getApproxFiguresRakebackAmount();
     var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
     if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
+    if (figuresApproxTotalRakeEl) figuresApproxTotalRakeEl.textContent = formatReportRubleNumber(figuresRakeTotal);
+    if (figuresApproxAgentsRakeEl) figuresApproxAgentsRakeEl.textContent = formatReportRubleNumber(approxAgentsRake);
+    if (figuresApproxIssuedRakeEl) figuresApproxIssuedRakeEl.textContent = formatReportRubleNumber(approxIssuedRake);
+    if (figuresApproxFormulaEl) figuresApproxFormulaEl.textContent = formatReportRubleNumber(approxBase) + " × 30% = " + formatReportRubleNumber(approxRakeback);
     if (figuresGrandTotalEl) {
       var grand =
         figuresRakeTotal +
@@ -2758,6 +2853,7 @@ function initAdminReportModal() {
       winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
       agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
       approxRakebackEnabled: !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked),
+      approxRomanRake: figuresApproxRomanRakeInput ? figuresApproxRomanRakeInput.value : "",
       extras: extras,
     };
   }
@@ -2804,6 +2900,7 @@ function initAdminReportModal() {
     if (figuresWinLossInput) figuresWinLossInput.value = draft.winLoss != null ? draft.winLoss : "";
     if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
     if (figuresApproxRakebackEnabledInput) figuresApproxRakebackEnabledInput.checked = draft.approxRakebackEnabled === true;
+    if (figuresApproxRomanRakeInput) figuresApproxRomanRakeInput.value = draft.approxRomanRake != null ? draft.approxRomanRake : "";
     var extras = Array.isArray(draft.extras) ? draft.extras : [];
     ensureFiguresExtraRows(extras.length || 1);
     if (figuresExtrasEl) {
@@ -3552,7 +3649,7 @@ function initAdminReportModal() {
       input.addEventListener("change", updateFiguresTotals);
     });
   }
-  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput].forEach(function (input) {
+  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput, figuresApproxRomanRakeInput].forEach(function (input) {
     if (!input) return;
     input.addEventListener("input", updateFiguresTotals);
     input.addEventListener("change", updateFiguresTotals);

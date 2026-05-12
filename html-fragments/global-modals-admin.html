@@ -351,7 +351,7 @@
               <div class="admin-report-calculations__side admin-report-calculations__side--left">
                 <section class="admin-report-calculations__column">
                   <div class="admin-report-calculations__section-head">
-                    <h3 class="admin-report-calculations__title">Было в кассе</h3>
+                    <h3 class="admin-report-calculations__title">В кассе на начало недели</h3>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" data-admin-report-calc-save="cash" title="Сохранить кассу" aria-label="Сохранить кассу">✓</button>
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" data-admin-report-calc-edit="cash" title="Редактировать кассу" aria-label="Редактировать кассу" hidden>✎</button>
@@ -359,23 +359,23 @@
                     </div>
                   </div>
                   <label class="admin-report-calculations__field">
-                    <span>Касса в Покер21</span>
+                    <span>Покер21</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
                   <label class="admin-report-calculations__field">
-                    <span>Касса в Хпокер</span>
+                    <span>Хпокер</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
                   <label class="admin-report-calculations__field">
-                    <span>Касса в Супрема</span>
+                    <span>Супрема</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
                   <label class="admin-report-calculations__field">
-                    <span>Касса в PPpoker</span>
+                    <span>PPpoker</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
                   <label class="admin-report-calculations__field">
-                    <span>В кассе на выводы</span>
+                    <span>На выводы</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
                   <div class="admin-report-calculations__field admin-report-calculations__field--total">
@@ -558,6 +558,28 @@
                   </span>
                   <output id="adminReportFiguresApproxRakeback">0</output>
                 </label>
+                <div class="admin-report-calculations__approx-detail">
+                  <div class="admin-report-calculations__approx-row">
+                    <span>Общий рейк</span>
+                    <output id="adminReportFiguresApproxTotalRake">0</output>
+                  </div>
+                  <label class="admin-report-calculations__approx-row admin-report-calculations__approx-row--input">
+                    <span>- Рейк Романа</span>
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresApproxRomanRake" placeholder="0" />
+                  </label>
+                  <div class="admin-report-calculations__approx-row">
+                    <span>- Рейк агентов</span>
+                    <output id="adminReportFiguresApproxAgentsRake">0</output>
+                  </div>
+                  <div class="admin-report-calculations__approx-row">
+                    <span>- Выданный рейк</span>
+                    <output id="adminReportFiguresApproxIssuedRake">0</output>
+                  </div>
+                  <div class="admin-report-calculations__approx-row admin-report-calculations__approx-row--total">
+                    <span>База × 30%</span>
+                    <output id="adminReportFiguresApproxFormula">0</output>
+                  </div>
+                </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--grand">
                   <span>Итого цифры</span>
                   <output id="adminReportFiguresGrandTotal">0</output>
