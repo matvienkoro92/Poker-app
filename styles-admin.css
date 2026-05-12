@@ -802,6 +802,14 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-calculations__field--visual-minus {
   grid-template-columns: minmax(0, 1fr) minmax(82px, 0.34fr);
 }
+.admin-report-calculations__field--visual-minus:not(.admin-report-calculations__field--extra) > span:first-child {
+  grid-column: 1;
+  grid-row: 1;
+}
+.admin-report-calculations__field--visual-minus:not(.admin-report-calculations__field--extra) .admin-report-calculations__input {
+  grid-column: 2;
+  grid-row: 1;
+}
 .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus {
   grid-template-columns: minmax(118px, 1fr) minmax(82px, 0.34fr) minmax(58px, 0.22fr) minmax(92px, 0.36fr);
 }
@@ -830,7 +838,7 @@ body.admin-report-modal-open .bottom-nav {
   grid-template-columns: minmax(0, 1fr);
 }
 .admin-report-calculations__field--checkbox-total {
-  grid-template-columns: minmax(0, 1fr) 28px minmax(82px, 0.34fr);
+  grid-template-columns: minmax(0, 1fr) 28px minmax(138px, 0.42fr) minmax(82px, 0.24fr);
 }
 .admin-report-calculations__checkbox-wrap {
   position: relative;
@@ -874,6 +882,42 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__field--checkbox-total output {
   color: #ffb3b3;
+}
+.admin-report-calculations__rate-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  min-width: 0;
+}
+.admin-report-calculations__rate-options label {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.admin-report-calculations__rate-options input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.admin-report-calculations__rate-options span {
+  display: grid;
+  place-items: center;
+  min-height: 24px;
+  border: 1px solid rgba(246, 211, 145, 0.28);
+  border-radius: 7px;
+  background: rgba(5, 7, 13, 0.52);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+.admin-report-calculations__rate-options input:checked + span {
+  border-color: rgba(246, 211, 145, 0.78);
+  background: rgba(246, 211, 145, 0.18);
+  color: #ffe7b0;
 }
 .admin-report-calculations__approx-detail {
   display: grid;

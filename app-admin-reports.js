@@ -63,6 +63,7 @@ function initAdminReportModal() {
   var figuresExtrasEl = document.getElementById("adminReportFiguresExtras");
   var figuresAddFieldBtn = document.getElementById("adminReportFiguresAddField");
   var figuresApproxRakebackEnabledInput = document.getElementById("adminReportFiguresApproxRakebackEnabled");
+  var figuresApproxRateInputs = modal ? modal.querySelectorAll("input[name='adminReportFiguresApproxRate']") : null;
   var figuresApproxRomanRakeInput = document.getElementById("adminReportFiguresApproxRomanRake");
   var figuresApproxRakebackEl = document.getElementById("adminReportFiguresApproxRakeback");
   var figuresApproxTotalRakeEl = document.getElementById("adminReportFiguresApproxTotalRake");
@@ -2532,11 +2533,23 @@ function initAdminReportModal() {
   }
 
   function getApproxFiguresRakebackAmount() {
-    return -(getApproxFiguresRakebackBase() * 30 / 100);
+    return -(getApproxFiguresRakebackBase() * getApproxFiguresRakebackRate() / 100);
+  }
+
+  function getApproxFiguresRakebackRate() {
+    var selected = null;
+    if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
+      figuresApproxRateInputs.forEach(function (input) {
+        if (input && input.checked) selected = input;
+      });
+    }
+    return parseReportNumber(selected ? selected.value : "30") || 30;
   }
 
   function getIssuedRakebackReportRakeTotal() {
-    return getUnaccountedRakebackReportRows().reduce(function (sum, row) {
+    return collectRakebackRows(false, false).filter(function (row) {
+      return row && !isRakebackCollectedRowArchived(row);
+    }).reduce(function (sum, row) {
       return sum + getRakebackReportAmount(row && row.room, parseReportNumber(row && row.rake));
     }, 0);
   }
@@ -2600,13 +2613,14 @@ function initAdminReportModal() {
     var approxAgentsRake = getFiguresExtraRakeTotal();
     var approxIssuedRake = getIssuedRakebackReportRakeTotal();
     var approxBase = getApproxFiguresRakebackBase();
+    var approxRate = getApproxFiguresRakebackRate();
     var approxRakeback = getApproxFiguresRakebackAmount();
     var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
     if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
     if (figuresApproxTotalRakeEl) figuresApproxTotalRakeEl.textContent = formatReportRubleNumber(figuresRakeTotal);
     if (figuresApproxAgentsRakeEl) figuresApproxAgentsRakeEl.textContent = formatReportRubleNumber(approxAgentsRake);
     if (figuresApproxIssuedRakeEl) figuresApproxIssuedRakeEl.textContent = formatReportRubleNumber(approxIssuedRake);
-    if (figuresApproxFormulaEl) figuresApproxFormulaEl.textContent = formatReportRubleNumber(approxBase) + " × 30% = " + formatReportRubleNumber(approxRakeback);
+    if (figuresApproxFormulaEl) figuresApproxFormulaEl.textContent = formatReportRubleNumber(approxBase) + " × " + formatReportInputNumber(approxRate) + "% = " + formatReportRubleNumber(approxRakeback);
     if (figuresGrandTotalEl) {
       var grand =
         figuresRakeTotal +
@@ -2818,12 +2832,20 @@ function initAdminReportModal() {
     figuresSavedLocked = !!locked;
     if (figuresRoot) {
       figuresRoot.querySelectorAll("input").forEach(function (input) {
-        input.readOnly = figuresSavedLocked;
+        input.readOnly = input === figuresApproxRomanRakeInput ? false : figuresSavedLocked;
       });
     }
     if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = figuresSavedLocked;
     if (figuresSaveBtn) figuresSaveBtn.hidden = figuresSavedLocked;
     if (figuresEditBtn) figuresEditBtn.hidden = !figuresSavedLocked;
+  }
+
+  function saveCalculationsDraftQuiet() {
+    try {
+      if (window.localStorage) {
+        window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(collectCalculationsDraft()));
+      }
+    } catch (e) {}
   }
 
   function collectCalculationsDraft() {
@@ -2853,6 +2875,7 @@ function initAdminReportModal() {
       winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
       agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
       approxRakebackEnabled: !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked),
+      approxRakebackRate: getApproxFiguresRakebackRate(),
       approxRomanRake: figuresApproxRomanRakeInput ? figuresApproxRomanRakeInput.value : "",
       extras: extras,
     };
@@ -2900,6 +2923,12 @@ function initAdminReportModal() {
     if (figuresWinLossInput) figuresWinLossInput.value = draft.winLoss != null ? draft.winLoss : "";
     if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
     if (figuresApproxRakebackEnabledInput) figuresApproxRakebackEnabledInput.checked = draft.approxRakebackEnabled === true;
+    if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
+      var draftRate = parseReportNumber(draft.approxRakebackRate != null ? draft.approxRakebackRate : "30") || 30;
+      figuresApproxRateInputs.forEach(function (input) {
+        if (input) input.checked = parseReportNumber(input.value) === draftRate;
+      });
+    }
     if (figuresApproxRomanRakeInput) figuresApproxRomanRakeInput.value = draft.approxRomanRake != null ? draft.approxRomanRake : "";
     var extras = Array.isArray(draft.extras) ? draft.extras : [];
     ensureFiguresExtraRows(extras.length || 1);
@@ -3654,6 +3683,18 @@ function initAdminReportModal() {
     input.addEventListener("input", updateFiguresTotals);
     input.addEventListener("change", updateFiguresTotals);
   });
+  if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
+    figuresApproxRateInputs.forEach(function (input) {
+      if (!input) return;
+      input.addEventListener("change", function () {
+        updateFiguresTotals();
+        saveCalculationsDraftQuiet();
+      });
+    });
+  }
+  if (figuresApproxRomanRakeInput) {
+    figuresApproxRomanRakeInput.addEventListener("change", saveCalculationsDraftQuiet);
+  }
   bindFiguresExtraInputs(figuresExtrasEl);
   if (figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
   if (calculationGroupSaveBtns && calculationGroupSaveBtns.length) {

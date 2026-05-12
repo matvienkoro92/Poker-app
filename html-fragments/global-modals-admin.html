@@ -556,6 +556,12 @@
                     <input type="checkbox" id="adminReportFiguresApproxRakebackEnabled" />
                     <span aria-hidden="true"></span>
                   </span>
+                  <span class="admin-report-calculations__rate-options" role="radiogroup" aria-label="Процент примерного рейкбека">
+                    <label><input type="radio" name="adminReportFiguresApproxRate" value="30" checked /><span>30%</span></label>
+                    <label><input type="radio" name="adminReportFiguresApproxRate" value="40" /><span>40%</span></label>
+                    <label><input type="radio" name="adminReportFiguresApproxRate" value="45" /><span>45%</span></label>
+                    <label><input type="radio" name="adminReportFiguresApproxRate" value="50" /><span>50%</span></label>
+                  </span>
                   <output id="adminReportFiguresApproxRakeback">0</output>
                 </label>
                 <div class="admin-report-calculations__approx-detail">
@@ -576,7 +582,7 @@
                     <output id="adminReportFiguresApproxIssuedRake">0</output>
                   </div>
                   <div class="admin-report-calculations__approx-row admin-report-calculations__approx-row--total">
-                    <span>База × 30%</span>
+                    <span></span>
                     <output id="adminReportFiguresApproxFormula">0</output>
                   </div>
                 </div>
