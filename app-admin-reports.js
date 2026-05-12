@@ -1223,7 +1223,7 @@ function initAdminReportModal() {
     var lastKey = "";
     var lastWeekKey = "";
     var handledWeekKeys = {};
-    var templateSeparatorInserted = false;
+    var templateGroups = [];
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group)) {
@@ -1231,10 +1231,7 @@ function initAdminReportModal() {
           row.removeAttribute("data-rakeback-row-section-date");
           row.removeAttribute("data-rakeback-row-day-key");
         });
-        if (!templateSeparatorInserted) {
-          templateSeparatorInserted = true;
-          rakebackBody.insertBefore(createRakebackTemplateSeparator(), group.rows[0]);
-        }
+        templateGroups.push(group);
         return;
       }
       var stamp = getRakebackGroupEntryAddedAt(group, index);
@@ -1320,6 +1317,16 @@ function initAdminReportModal() {
       lastKey = key;
       rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp), getRakebackDateGroupTotals(dayGroups[key] ? dayGroups[key].groups : [], key)), group.rows[0]);
     });
+    if (templateGroups.length) {
+      var templateFragment = document.createDocumentFragment();
+      templateFragment.appendChild(createRakebackTemplateSeparator());
+      templateGroups.forEach(function (group) {
+        (group.rows || []).forEach(function (row) {
+          templateFragment.appendChild(row);
+        });
+      });
+      rakebackBody.appendChild(templateFragment);
+    }
   }
 
   function getRakebackRowSortColor(row) {
