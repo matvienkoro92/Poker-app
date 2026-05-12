@@ -11,6 +11,7 @@ function initAdminReportModal() {
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
+  var rakebackRefreshBtn = document.getElementById("adminReportRakebackRefreshBtn");
   var rakebackSearchInput = document.getElementById("adminReportRakebackSearch");
   var rakebackSortSelect = document.getElementById("adminReportRakebackSort");
   var rakebackRoomTabs = modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : null;
@@ -77,7 +78,6 @@ function initAdminReportModal() {
   var rakebackArchiveMode = false;
   var rakebackRoomTotals = {};
   var rakebackDraftSaveTimer = null;
-  var rakebackDraftRefreshTimer = null;
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var rakebackDraftLocalEditUntil = 0;
@@ -679,7 +679,7 @@ function initAdminReportModal() {
     if (!data) return false;
     if (data.carryForward === true || data.templateCarryForward === true) return true;
     if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return true;
-    if (data.saved || data.accounted || data.reportedAt || data.reportId) return true;
+    if (data.accounted || data.reportedAt || data.reportId) return true;
     return parseReportNumber(data.rake) !== 0 ||
       parseReportNumber(data.percent) !== 0 ||
       parseReportNumber(data.roomAmount) !== 0 ||
@@ -772,7 +772,7 @@ function initAdminReportModal() {
       if (idInput) idInput.readOnly = true;
     }
     applyRakebackRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
-    if (accountedData || (data.saved && !templateLikeData)) setRakebackRowSaved(tr, true);
+    setRakebackRowSaved(tr, data.editing === true && !accountedData ? false : true);
     return tr;
   }
 
@@ -1671,7 +1671,6 @@ function initAdminReportModal() {
       percent !== 0 ||
       row.getAttribute("data-rakeback-carry-forward") === "1" ||
       row.getAttribute("data-rakeback-explicit-zero-rake") === "1" ||
-      row.getAttribute("data-rakeback-saved") === "1" ||
       isRakebackRowAccounted(row);
   }
 
@@ -1695,8 +1694,8 @@ function initAdminReportModal() {
     var editBtn = row.querySelector("[data-rakeback-edit]");
     var addBtn = row.querySelector("[data-rakeback-add-addon]");
     if (saveBtn) {
-      saveBtn.disabled = !filled;
-      saveBtn.hidden = saved || !filled;
+      saveBtn.disabled = false;
+      saveBtn.hidden = saved;
     }
     if (editBtn) editBtn.hidden = !saved || accounted;
     if (addBtn) {
@@ -1801,7 +1800,7 @@ function initAdminReportModal() {
       var carryForward = row.getAttribute("data-rakeback-carry-forward") === "1";
       var saved = row.getAttribute("data-rakeback-saved") === "1";
       var accounted = isRakebackRowAccounted(row);
-      var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || carryForward || saved || accounted;
+      var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || carryForward || accounted;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
@@ -1853,7 +1852,6 @@ function initAdminReportModal() {
       parseReportNumber(row.roomAmount) !== 0 ||
       parseReportNumber(row.amount) !== 0 ||
       row.rakeZero === true ||
-      row.saved === true ||
       row.accounted === true;
   }
 
@@ -2372,17 +2370,21 @@ function initAdminReportModal() {
     } catch (e) {}
   }
 
-  function loadSharedRakebackDraftRows() {
+  function loadSharedRakebackDraftRows(options) {
+    options = options || {};
     var focusedInRakeback = rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement);
     var focusedInRakebackControl = focusedInRakeback && document.activeElement && document.activeElement.matches && document.activeElement.matches("input,select,textarea");
-    if (focusedInRakebackControl) return;
-    if (focusedInRakeback && Date.now() < rakebackDraftLocalEditUntil) return;
+    if (!options.force && focusedInRakebackControl) return;
+    if (!options.force && focusedInRakeback && Date.now() < rakebackDraftLocalEditUntil) return;
     if (rakebackDraftSaveTimer || savingRakebackDraft) return;
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       fillRakebackTable(readRakebackDraftRows(), "");
+      if (options.showStatus) showRakebackStatusBriefly("Нет подключения для обновления");
       return;
     }
+    if (options.showStatus) showRakebackStatus("Обновляю…");
+    if (rakebackRefreshBtn) rakebackRefreshBtn.disabled = true;
     var localDraft = readRakebackDraftData();
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
@@ -2403,15 +2405,22 @@ function initAdminReportModal() {
         saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
         fillRakebackTable(rows, "");
         rakebackDraftLocalEditUntil = 0;
+        if (options.showStatus) showRakebackStatusBriefly("Обновлено");
       })
       .catch(function () {
         if (loadMutationSeq !== rakebackDraftMutationSeq) return;
         fillRakebackTable(readRakebackDraftRows(), "");
+        if (options.showStatus) showRakebackStatusBriefly("Не удалось обновить");
       })
       .then(function () {
         loadingRakebackDraft = false;
+        if (rakebackRefreshBtn) rakebackRefreshBtn.disabled = false;
         if (shouldUploadLocalDraft) saveRakebackDraftRowsNow(true);
       });
+  }
+
+  function loadLocalRakebackDraftRows() {
+    fillRakebackTable(readRakebackDraftRows(), "");
   }
 
   function runAdminReportAfterPaint(fn) {
@@ -2424,25 +2433,6 @@ function initAdminReportModal() {
       return;
     }
     setTimeout(fn, 0);
-  }
-
-  function isRakebackPanelActive() {
-    var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
-    return !!(panel && panel.classList.contains("admin-report-panel--active"));
-  }
-
-  function stopRakebackDraftRefresh() {
-    if (rakebackDraftRefreshTimer) clearInterval(rakebackDraftRefreshTimer);
-    rakebackDraftRefreshTimer = null;
-  }
-
-  function startRakebackDraftRefresh() {
-    stopRakebackDraftRefresh();
-    rakebackDraftRefreshTimer = setInterval(function () {
-      if (!modal || modal.getAttribute("aria-hidden") === "true") return;
-      if (!isRakebackPanelActive()) return;
-      loadSharedRakebackDraftRows();
-    }, 5 * 60 * 1000);
   }
 
   function setActiveTab(name) {
@@ -3700,7 +3690,6 @@ function initAdminReportModal() {
   function closeModal() {
     modal.setAttribute("aria-hidden", "true");
     closeRakebackTotalsModal();
-    stopRakebackDraftRefresh();
     if (document.documentElement) document.documentElement.classList.remove("admin-report-modal-open");
     if (document.body) {
       document.body.classList.remove("admin-report-modal-open");
@@ -3728,13 +3717,17 @@ function initAdminReportModal() {
     fillReportForm(null, { skipRakeback: true });
     runAdminReportAfterPaint(function () {
       if (!modal || modal.getAttribute("aria-hidden") === "true" || editingReportId) return;
-      loadSharedRakebackDraftRows();
-      startRakebackDraftRefresh();
+      loadLocalRakebackDraftRows();
     });
   }
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
+  if (rakebackRefreshBtn) {
+    rakebackRefreshBtn.addEventListener("click", function () {
+      loadSharedRakebackDraftRows({ force: true, showStatus: true });
+    });
+  }
   if (rakebackGrandTotalBtn) rakebackGrandTotalBtn.addEventListener("click", openRakebackTotalsModal);
   if (rakebackTotalsClose) rakebackTotalsClose.addEventListener("click", closeRakebackTotalsModal);
   if (rakebackTotalsBackdrop) rakebackTotalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
@@ -3747,7 +3740,7 @@ function initAdminReportModal() {
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
-          loadSharedRakebackDraftRows();
+          loadLocalRakebackDraftRows();
         }
         if (name === "sent") loadSentReports();
         if (name === "calculations") loadCalculationsReports();
@@ -3946,7 +3939,7 @@ function initAdminReportModal() {
         var copyRow = copyIdInput.closest("[data-rakeback-row]");
         var copyCell = copyIdInput.closest("td");
         var copyId = copyIdInput.value ? String(copyIdInput.value).trim() : "";
-        if (copyRow && copyId) {
+        if (copyRow && copyId && (copyRow.getAttribute("data-rakeback-saved") === "1" || copyIdInput.readOnly)) {
           e.preventDefault();
           e.stopPropagation();
           copyReportText(copyId).then(function () {
@@ -3964,13 +3957,13 @@ function initAdminReportModal() {
       if (saveBtn) {
         var saveRow = saveBtn.closest("[data-rakeback-row]");
         syncExplicitZeroRakeMarker(saveRow ? saveRow.querySelector("[data-rakeback-rake]") : null);
-        if (!saveRow || !isRakebackRowFilled(saveRow)) return;
+        if (!saveRow) return;
         markRakebackDraftLocalEdit();
         ensureRakebackEntryAddedAt(saveRow, true);
         syncRakebackTable();
         setRakebackRowSaved(saveRow, true);
         saveRakebackDraftRows();
-        showRakebackStatus("Запись добавлена");
+        showRakebackStatus("Редактирование завершено");
         return;
       }
       var editBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-edit]") : null;
@@ -3978,7 +3971,6 @@ function initAdminReportModal() {
         var editRow = editBtn.closest("[data-rakeback-row]");
         markRakebackDraftLocalEdit();
         setRakebackRowSaved(editRow, false);
-        saveRakebackDraftRows();
         showRakebackStatus("");
         return;
       }
@@ -4266,7 +4258,7 @@ function initAdminReportModal() {
             if (accountedRakebackRows) {
               fillRakebackTable(accountedRakebackRows, "");
             } else {
-              loadSharedRakebackDraftRows();
+              loadLocalRakebackDraftRows();
             }
             if (canViewSentReports()) {
               loadSentReports(true);
