@@ -684,7 +684,10 @@ body.admin-report-modal-open .bottom-nav {
   min-width: 0;
 }
 .admin-report-calculations__archive {
-  margin-top: 8px;
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  display: grid;
+  gap: 8px;
 }
 .admin-report-calculations__archive-details {
   border: 1px solid rgba(246, 211, 145, 0.24);
@@ -712,6 +715,72 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__archive-inner {
   padding: 0 8px 8px;
+  display: grid;
+  gap: 8px;
+}
+.admin-report-calculations__archive-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-report-calculations__archive-report {
+  border: 1px solid rgba(246, 211, 145, 0.16);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(5, 7, 13, 0.48);
+}
+.admin-report-calculations__archive-report h4 {
+  margin: 0 0 7px;
+  color: #ffe7b0;
+  font-size: 12px;
+  font-weight: 900;
+}
+.admin-report-calculations__archive-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.admin-report-calculations__archive-report-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(70px, auto);
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 850;
+  background: rgba(7, 10, 18, 0.66);
+}
+.admin-report-calculations__archive-row--positive {
+  border: 1px solid rgba(50, 182, 112, 0.32);
+}
+.admin-report-calculations__archive-row--negative {
+  border: 1px solid rgba(255, 103, 119, 0.34);
+}
+.admin-report-calculations__archive-row--neutral {
+  border: 1px solid rgba(246, 211, 145, 0.2);
+}
+.admin-report-calculations__archive-report-row output {
+  color: #ffe7b0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 950;
+}
+.admin-report-calculations__archive-comment {
+  margin-top: 7px;
+  padding: 7px;
+  border-radius: 7px;
+  background: rgba(246, 211, 145, 0.06);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+}
+.admin-report-calculations__archive-comment p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-weight: 750;
 }
 .admin-report-calculations__archive-empty {
   margin: 0;
@@ -1104,6 +1173,10 @@ body.admin-report-modal-open .bottom-nav {
   .admin-report-calculations__week-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 5px;
+  }
+  .admin-report-calculations__archive-totals,
+  .admin-report-calculations__archive-report-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 420px) {

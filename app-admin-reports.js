@@ -32,7 +32,6 @@ function initAdminReportModal() {
   var calculationGroupStatusEls = modal ? modal.querySelectorAll("[data-admin-report-calc-status]") : null;
   var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
   var calculationsWinLossInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-winloss]") : null;
-  var calculationsArchiveBtn = document.getElementById("adminReportCalcArchiveBtn");
   var calculationsArchiveEl = document.getElementById("adminReportCalcArchive");
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWinLossTotalEl = document.getElementById("adminReportCalcWinLossTotal");
@@ -90,7 +89,6 @@ function initAdminReportModal() {
   var rakebackWeekRoomArchiveOpen = {};
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
-  var calculationArchiveOpen = false;
   var calculationReportsCache = [];
   var figuresRakeTotal = 0;
   var figuresPercentTotal = 0;
@@ -669,6 +667,7 @@ function initAdminReportModal() {
 
   function isRakebackTemplateLikeData(data) {
     if (!data) return false;
+    if (data.carryForward === true || data.templateCarryForward === true) return false;
     if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return false;
     return parseReportNumber(data.rake) === 0 &&
       parseReportNumber(data.roomAmount) === 0 &&
@@ -678,6 +677,7 @@ function initAdminReportModal() {
 
   function hasRakebackStoredEntryData(data) {
     if (!data) return false;
+    if (data.carryForward === true || data.templateCarryForward === true) return true;
     if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return true;
     if (data.saved || data.accounted || data.reportedAt || data.reportId) return true;
     return parseReportNumber(data.rake) !== 0 ||
@@ -730,6 +730,7 @@ function initAdminReportModal() {
     tr.setAttribute("data-rakeback-created-at", String(createdAt));
     tr.setAttribute("data-rakeback-standard-at", String(standardAt));
     if (explicitZeroRake) tr.setAttribute("data-rakeback-explicit-zero-rake", "1");
+    if (data.carryForward === true || data.templateCarryForward === true) tr.setAttribute("data-rakeback-carry-forward", "1");
     if (Number.isFinite(entryAddedAt)) tr.setAttribute("data-rakeback-entry-added-at", String(entryAddedAt));
     if (accountedData) {
       tr.setAttribute("data-rakeback-accounted", "1");
@@ -1668,6 +1669,7 @@ function initAdminReportModal() {
     var percent = parseReportNumber(percentInput ? percentInput.value : "");
     return rake !== 0 ||
       percent !== 0 ||
+      row.getAttribute("data-rakeback-carry-forward") === "1" ||
       row.getAttribute("data-rakeback-explicit-zero-rake") === "1" ||
       row.getAttribute("data-rakeback-saved") === "1" ||
       isRakebackRowAccounted(row);
@@ -1796,9 +1798,10 @@ function initAdminReportModal() {
       var reportedAmount = getRakebackRowReportedAmount(row, amount);
       var discount15 = !!(discountInput && discountInput.checked);
       var explicitZeroRake = row.getAttribute("data-rakeback-explicit-zero-rake") === "1";
+      var carryForward = row.getAttribute("data-rakeback-carry-forward") === "1";
       var saved = row.getAttribute("data-rakeback-saved") === "1";
       var accounted = isRakebackRowAccounted(row);
-      var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || saved || accounted;
+      var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || carryForward || saved || accounted;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
@@ -1811,6 +1814,7 @@ function initAdminReportModal() {
         rake: rake,
         rakeZero: explicitZeroRake,
         percent: percent,
+        carryForward: carryForward,
         discount15: discount15,
         roomAmount: roomAmount,
         chipAmount: room === "X" ? roomAmount : null,
@@ -1843,9 +1847,19 @@ function initAdminReportModal() {
     return parseReportNumber(report && report.rakeback);
   }
 
+  function hasRakebackReportValue(row) {
+    if (!row) return false;
+    return parseReportNumber(row.rake) !== 0 ||
+      parseReportNumber(row.roomAmount) !== 0 ||
+      parseReportNumber(row.amount) !== 0 ||
+      row.rakeZero === true ||
+      row.saved === true ||
+      row.accounted === true;
+  }
+
   function getUnaccountedRakebackReportRows() {
     return collectRakebackRows(false, true).filter(function (row) {
-      return row && !row.accounted && !isRakebackCollectedRowArchived(row);
+      return row && !row.accounted && hasRakebackReportValue(row) && !isRakebackCollectedRowArchived(row);
     });
   }
 
@@ -1978,6 +1992,7 @@ function initAdminReportModal() {
         rake: row.rake != null ? row.rake : "",
         rakeZero: row.rakeZero === true || row.explicitZeroRake === true || row.zeroRake === true,
         percent: row.percent != null ? row.percent : "",
+        carryForward: row.carryForward === true || row.templateCarryForward === true,
         discount15: !!(row.discount15 || row.subtract15),
         ownerId: row.ownerId || row.authorId || "",
         color: row.color || row.rowColor || row.highlightColor || "",
@@ -2673,36 +2688,115 @@ function initAdminReportModal() {
     return totals;
   }
 
-  function renderCalculationArchive(items) {
-    if (!calculationsArchiveEl) return;
-    calculationsArchiveEl.hidden = !calculationArchiveOpen;
-    if (calculationsArchiveBtn) calculationsArchiveBtn.setAttribute("aria-pressed", calculationArchiveOpen ? "true" : "false");
-    if (!calculationArchiveOpen) return;
-    var currentWeek = getCalculationWeekMeta();
-    var previousWeek = getCalculationWeekMetaFromStart(currentWeek.start - REPORT_WEEK_MS);
-    var totals = sumCalculationReports(items || [], previousWeek);
-    var hasAny = Object.keys(totals).some(function (key) {
-      return parseReportNumber(totals[key]) !== 0;
+  function getCalculationArchiveReportRows(report) {
+    var rows = [];
+    function add(label, value, negative) {
+      var numeric = parseReportNumber(value);
+      rows.push({
+        label: label,
+        value: negative ? formatReportNegativeDisplay(numeric) : formatReportRubleNumber(numeric),
+        className: negative ? "admin-report-calculations__archive-row--negative" : "admin-report-calculations__archive-row--positive",
+      });
+    }
+    add("Депозит", report && report.deposit, false);
+    add("Продамус", report && report.prodamus, false);
+    add("Робокасса", report && report.robokassa, false);
+    add("Рома крипта", report && report.romaCrypto, false);
+    add("Бот крипта деп", report && report.botCryptoDep, false);
+    add("Бот Эксчип деп", report && report.botExchipDep, false);
+    add("Бонусы", report && report.bonuses, false);
+    add("Переводы", report && report.transfers, false);
+    add("Возврат", report && report.ret, false);
+    add("Сергей/Марина", report && report.sergeyMarina, false);
+    add("Рейкбек", getReportStoredRakebackTotal(report), false);
+    add("Выводы", report && report.cashout, true);
+    add("Бот Эксчип вывод", report && report.botExchipCashout, true);
+    var salaryTotal = getReportAnyaSalaryTotal(report);
+    if (salaryTotal !== 0) add("ЗП", salaryTotal, true);
+    getReportExtraEntries(report).forEach(function (extra) {
+      if (isReportManualRakebackFieldName(extra.name)) return;
+      var normalizedName = normalizeReportDetailName(extra.name);
+      if (isReportAnyaSalaryFieldName(normalizedName)) return;
+      rows.push({
+        label: extra.name || "Доп",
+        value: formatReportRubleNumber(extra.value),
+        className: "admin-report-calculations__archive-row--neutral",
+      });
     });
-    calculationsArchiveEl.innerHTML =
-      '<details class="admin-report-calculations__archive-details" open>' +
-        '<summary class="admin-report-calculations__archive-summary">Неделя ' + escapeReportHtml(previousWeek.label) + "</summary>" +
-        '<div class="admin-report-calculations__archive-inner">' +
-          (hasAny ? (
-            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Депозиты за неделю</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.deposit)) + "</output></div>" +
-            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Бонусы</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.bonuses)) + "</output></div>" +
-            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Рейкбек</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.rakeback)) + "</output></div>" +
-            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов игроками</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.cashout)) + "</output></div>" +
-            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов Эксчип бот</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.botExchipCashout)) + "</output></div>" +
-            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>ЗП</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.anyaSalary)) + "</output></div>"
-          ) : '<p class="admin-report-calculations__archive-empty">За прошлую неделю расчетов пока нет.</p>') +
-        "</div>" +
-      "</details>";
+    return rows;
   }
 
-  function setCalculationArchiveOpen(open) {
-    calculationArchiveOpen = !!open;
-    renderCalculationArchive(calculationReportsCache);
+  function renderCalculationArchiveReport(report, index) {
+    var effMs = reportEffectiveTimestampMs(report);
+    var dateMeta = formatRuWeekdayDateFromTs(effMs);
+    var title = (dateMeta.date || report && report.date || "Без даты") + (report && report.authorName ? " · " + report.authorName : "");
+    var rows = getCalculationArchiveReportRows(report).map(function (row) {
+      return '<div class="admin-report-calculations__archive-report-row ' + escapeReportHtml(row.className) + '">' +
+        '<span>' + escapeReportHtml(row.label) + "</span>" +
+        '<output>' + escapeReportHtml(row.value) + "</output>" +
+      "</div>";
+    }).join("");
+    var comment = report && report.comment ? (
+      '<div class="admin-report-calculations__archive-comment">' +
+        '<span>Комментарий</span><p>' + escapeReportHtml(report.comment) + "</p>" +
+      "</div>"
+    ) : "";
+    return '<article class="admin-report-calculations__archive-report">' +
+      '<h4>' + escapeReportHtml(String(index + 1) + ". " + title) + "</h4>" +
+      '<div class="admin-report-calculations__archive-report-grid">' + rows + "</div>" +
+      comment +
+    "</article>";
+  }
+
+  function renderCalculationArchiveWeek(items, weekStart) {
+    var week = getCalculationWeekMetaFromStart(weekStart);
+    var reports = (items || []).filter(function (report) {
+      var t = reportEffectiveTimestampMs(report);
+      return t && t >= week.start && t <= week.end;
+    }).sort(function (a, b) {
+      return (reportEffectiveTimestampMs(b) || 0) - (reportEffectiveTimestampMs(a) || 0);
+    });
+    var totals = sumCalculationReports(reports, week);
+    var totalHtml =
+      '<div class="admin-report-calculations__archive-totals">' +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Депозиты за неделю</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.deposit)) + "</output></div>" +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Бонусы</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.bonuses)) + "</output></div>" +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Рейкбек</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.rakeback)) + "</output></div>" +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов игроками</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.cashout)) + "</output></div>" +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов Эксчип бот</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.botExchipCashout)) + "</output></div>" +
+        '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>ЗП</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.anyaSalary)) + "</output></div>" +
+      "</div>";
+    var reportsHtml = reports.map(renderCalculationArchiveReport).join("");
+    return '<details class="admin-report-calculations__archive-details">' +
+      '<summary class="admin-report-calculations__archive-summary">Неделя ' + escapeReportHtml(week.label) + "</summary>" +
+      '<div class="admin-report-calculations__archive-inner">' +
+        totalHtml +
+        (reportsHtml || '<p class="admin-report-calculations__archive-empty">За эту неделю отчетов пока нет.</p>') +
+      "</div>" +
+    "</details>";
+  }
+
+  function renderCalculationArchive(items) {
+    if (!calculationsArchiveEl) return;
+    var currentWeek = getCalculationWeekMeta();
+    var source = Array.isArray(items) ? items : [];
+    var weekStarts = {};
+    source.forEach(function (report) {
+      var t = reportEffectiveTimestampMs(report);
+      if (!t || t >= currentWeek.start) return;
+      var weekStart = weekStartMsForReport(t);
+      if (!Number.isFinite(weekStart)) return;
+      weekStarts[String(weekStart)] = weekStart;
+    });
+    var sortedWeekStarts = Object.keys(weekStarts).map(function (key) {
+      return weekStarts[key];
+    }).sort(function (a, b) {
+      return b - a;
+    });
+    calculationsArchiveEl.hidden = sortedWeekStarts.length === 0;
+    calculationsArchiveEl.innerHTML = sortedWeekStarts.map(function (weekStart) {
+      return renderCalculationArchiveWeek(source, weekStart);
+    }).join("");
   }
 
   function loadCalculationsReports() {
@@ -3713,11 +3807,6 @@ function initAdminReportModal() {
   }
   if (figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
   if (figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
-  if (calculationsArchiveBtn) {
-    calculationsArchiveBtn.addEventListener("click", function () {
-      setCalculationArchiveOpen(!calculationArchiveOpen);
-    });
-  }
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
